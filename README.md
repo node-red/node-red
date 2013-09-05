@@ -4,7 +4,7 @@ A visual tool for wiring the Internet of Things.
 
 ## Quick Start
 
-Check out [INSTALL](INSTALL) for full instructions on getting started.
+Check out [INSTALL](INSTALL.md) for full instructions on getting started.
 
 1. download the zip and unzip, or git clone
 2. cd node-red
