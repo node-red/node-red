@@ -8,7 +8,7 @@ You can get the latest version from <http://nodejs.org/download/>.
 Or, you may want to use a version from your operating system's package manager:
  <https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager>
 
-### Get Node-RED
+## Get Node-RED
 
 Clone the repository from GitHub:
 
