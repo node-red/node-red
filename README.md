@@ -42,6 +42,8 @@ property license granted with any contribution. It is for your protection as a
 Contributor as well as the protection of IBM and its customers; it does not 
 change your rights to use your own Contributions for any other purpose.
 
+We'll add some information on how to do this in the next few days.
+
 ## Authors
 
 Node-RED is a creation of the IBM Emerging Technology Services team.
