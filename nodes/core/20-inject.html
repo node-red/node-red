@@ -1,0 +1,94 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="inject">
+    <div class="form-row">
+        <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
+        <input type="text" id="node-input-topic" placeholder="Topic">
+    </div>
+    <div class="form-row node-input-payload">
+        <label for="node-input-payload"><i class="icon-envelope"></i> Payload</label>
+        <input type="text" id="node-input-payload" placeholder="Payload">
+    </div>
+    <div class="form-row node-input-repeat">
+        <label for="node-input-repeat"><i class="icon-repeat"></i> Repeat (S)</label>
+        <input type="text" id="node-input-repeat" placeholder="0">
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-once" placeholder="once" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-once" style="width: 70%;">Fire once at start ?</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-tips">Tip: Injects Date.now() if no payload set.<br/>Repeat interval blank or 0 means no repeat.</div>
+</script>
+
+<script type="text/x-red" data-help-name="inject">
+	<p>Pressing the button on the left side of the node allows a message on a topic to be injected into the flow. This is mainly for test purposes.</p>
+	<p>If no payload is specified the payload is set to the current time in millisecs since 1970. This allows subsequent functions to perform time based actions.</p>
+	<p>The repeat function does what it says on the tin and continuously sends the payload every x seconds.</p>
+	<p>The Fire once at start option actually waits 50mS before firing to give other nodes a chance to instantiate properly.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('inject',{
+        category: 'input',
+        color:"#a6bbcf",
+        defaults: {
+            name: {value:""},
+            topic: {value:""},
+            payload: {value:""},
+            repeat: {value:""},
+            once: {value:false}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "inject.png",
+        label: function() {
+            return this.name||this.topic||this.payload;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        button: {
+            onclick: function() {
+                var label = this.name||this.payload;
+                d3.xhr("inject/"+this.id).post(function(err,resp) {
+                        if (err) {
+                            if (err.status == 404) {
+                                RED.notify("<strong>Error</strong>: inject node not deployed","error");
+                            } else {
+                                RED.notify("<strong>Error</strong>: "+err.response,"error");
+                            }
+                        } else if (resp.status == 200) {
+                            RED.notify("Successfully injected: "+label,"success");
+                        } else {
+                            if (resp) {
+                                RED.notify("<strong>Error</strong>: "+resp,"error");
+                            } else {
+                                RED.notify("<strong>Error</strong>: no response from server","error");
+                            }
+                            console.log(err,resp);
+                        }
+                });
+            }
+        }
+    });
+
+</script>

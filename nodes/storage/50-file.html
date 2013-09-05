@@ -1,0 +1,66 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="file">
+    <div class="form-row node-input-filename">
+         <label for="node-input-filename"><i class="icon-file"></i> Filename</label>
+         <input type="text" id="node-input-filename" placeholder="Filename">
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-appendNewline" placeholder="Name" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-appendNewline" style="width: 70%;">Append newline ?</label>
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-overwriteFile" placeholder="Name" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-overwriteFile" style="width: 70%;">Overwrite complete file ?</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="file">
+	<p>Writes the <b>msg.payload</b> to the file specified, e.g. to create a log.</p>
+	<p>A newline is added to every message. But this can be turned off if required, for example, to allow binary files to be written.</p>
+	<p>The default behaviour is to append to the file. This can be changed to overwrite the file each time, for example if you want to output a "static" web page or report.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('file',{
+        category: 'storage-output',
+        defaults: {
+            name: {value:""},
+            filename: {value:"",required:true},
+            appendNewline: {value:true},
+            overwriteFile: {value:false}
+        },
+        color:"BurlyWood",
+        inputs:1,
+        outputs:0,
+        icon: "file.png",
+        align: "right",
+        label: function() {
+            return this.name||this.filename;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+
+</script>

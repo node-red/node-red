@@ -1,0 +1,55 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="notify">
+    <div class="form-row">
+        <label for="node-input-title"><i class="icon-tag"></i> Title</label>
+        <input type="text" id="node-input-title" placeholder="Node-RED">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="notify">
+	<p>Uses Growl to provide a desktop popup containing the <b>msg.payload</b>. Only useful on the local machine.</p>
+	<p>Optionally uses <b>msg.topic</b> as the title.</p>
+	<p>Uses Growl so should work cross platform but will need pre-reqs installed... see <i><a href="https://npmjs.org/package/growl" target="_new">this link.</a></i></p>
+	<p>If installing on Windows you MUST read the install instructions ... especially the bit about adding growlnotify to your path... or it WON'T work.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('notify',{
+        category: 'output',
+        defaults: {
+            title: {value:""},
+            name: {value:""}
+        },
+        color:"#a7c9a0",
+        inputs:1,
+        outputs:0,
+        icon: "alert.png",
+        align: "right",
+        label: function() {
+            return this.name||this.title||"notify";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+
+</script>

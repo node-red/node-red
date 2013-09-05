@@ -1,0 +1,148 @@
+<!--
+  Copyright 2013 IBM Corp.
+ 
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+ 
+  http://www.apache.org/licenses/LICENSE-2.0
+ 
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<script type="text/x-red" data-template-name="arduino in">
+	<div class="form-row">
+        <label for="node-input-arduino"><i class="icon-tasks"></i> Arduino</label>
+        <input type="text" id="node-input-arduino">
+    </div>
+    <div class="form-row">
+        <label for="node-input-pin"><i class="icon-asterisk"></i> Pin</label>
+        <input type="text" id="node-input-pin" placeholder="2">
+    </div>
+    <div class="form-row">
+        <label for="node-input-state"><i class="icon-wrench"></i> Type</label>
+        <select type="text" id="node-input-state" style="width: 150px;">
+            <option value="INPUT">Digital pin</option>
+            <option value="ANALOG">Analogue pin</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="arduino in">
+	<p>Arduino input node. Connects to local Arduino and monitors the selected pin for changes. Uses <a href="http://firmata.org/" target="_new"><i>Firmata</i>.</a></p>
+	<p>You can select either Digital or Analogue input. Outputs the value read as <b>msg.payload</b> and the pin number as <b>msg.topic</b>.</p>
+	<p>It only outputs on a change of value - fine for digital inputs, but you can get a lot of data from analogue pins which you must then handle.</p>
+	<p>You can set the sample rate in ms from 20 to 65535.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('arduino in',{
+        category: 'advanced-input',
+        color:"#c6dbef",
+        defaults: {
+            name: {value:""},
+            pin: {value:"",required:true},
+            state: {value:"INPUT",required:true},
+            arduino: {type:"arduino-board",required:true}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "arduino.png",
+        label: function() {
+			var a = "";
+			if (this.state == "ANALOG") a = "A";
+            return this.name||"Pin: "+a+this.pin;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="arduino out">
+	<div class="form-row">
+        <label for="node-input-arduino"><i class="icon-tasks"></i> Arduino</label>
+        <input type="text" id="node-input-arduino">
+    </div>
+    <div class="form-row">
+        <label for="node-input-pin"><i class="icon-asterisk"></i> Pin</label>
+        <input type="text" id="node-input-pin" placeholder="13">
+    </div>
+    <div class="form-row">
+        <label for="node-input-state"><i class="icon-wrench"></i> Type</label>
+        <select type="text" id="node-input-state" style="width: 150px;">
+            <option value="OUTPUT">Digital (0/1)</option>
+            <option value="PWM">Analogue (0-255)</option>
+            <option value="SERVO">Servo (0-180)</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="arduino out">
+	<p>Arduino output node. Connects to local Arduino and writes to the selected digital pin. Uses <a href="http://firmata.org/" target="_new"><i>Firmata</i>.</a></p>
+	<p>You can select Digital, Analogue (PWM) or Servo type outputs. Expects a numeric value in <b>msg.payload</b>. The pin number is set in the properties panel.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('arduino out',{
+        category: 'advanced-output',
+        color:"#c6dbef",
+        defaults: {
+            name: {value:""},
+            pin: {value:""},
+            state: {value:"",required:true},
+            arduino: {type:"arduino-board",required:true}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "arduino.png",
+        align: "right",
+        label: function() {
+            return this.name||"Pin: "+this.pin;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+
+<script type="text/x-red" data-template-name="arduino-board">
+    <div class="form-row">
+        <label for="node-config-input-device"><i class="icon-bullhorn"></i> Arduino Port</label>
+        <input type="text" id="node-config-input-device" placeholder="ttyU" style="width:50%;">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-repeat"><i class="icon-repeat"></i> Sample (ms)</label>
+        <input type="text" id="node-config-input-repeat" placeholder="25">
+    </div>
+    <!-- <div class="form-row">
+        <label for="node-config-input-baud"><i class="icon-bullhorn"></i> Baudrate</label>
+        <input type="text" id="node-config-input-baud" placeholder="115200" style="width:50%;">
+    </div> -->
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('arduino-board',{
+        category: 'config',
+        defaults: {
+            //baud: {baud:"57600",required:true},
+            repeat: {value:"25",required:true,validate:RED.validators.number()},
+            device: {value:"",required:true}
+        },
+        label: function() {
+            return this.device||"arduino";
+        }
+    });
+</script>

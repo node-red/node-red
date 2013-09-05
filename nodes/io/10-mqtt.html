@@ -1,0 +1,121 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="mqtt in">
+    <div class="form-row">
+        <label for="node-input-broker"><i class="icon-tag"></i> Broker</label>
+        <input type="text" id="node-input-broker">
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
+        <input type="text" id="node-input-topic" placeholder="Topic">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="mqtt in">
+	<p>MQTT input node. Connects to the specified broker and subscribes to the specified topic. The topic may contain MQTT wildcards.</p>
+	<p>Outputs an object called <b>msg</b> containing <b>msg.topic, msg.payload, msg.qos</b> and <b>msg.retain</b>. <b>msg.payload</b> is a String.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('mqtt in',{
+        category: 'input',
+        defaults: {
+            name: {value:""},
+            topic: {value:"",required:true},
+            broker: {type:"mqtt-broker", required:true}
+        },
+        color:"#c6dbef",
+        inputs:0,
+        outputs:1,
+        icon: "bridge.png",
+        label: function() {
+            return this.name||this.topic;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="mqtt out">
+    <div class="form-row">
+        <label for="node-input-broker"><i class="icon-tag"></i> Broker</label>
+        <input type="text" id="node-input-broker">
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
+        <input type="text" id="node-input-topic" placeholder="Topic">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="mqtt out">
+	<p>Connects to a MQTT broker and publishes <b>msg.payload</b> either to the <b>msg.topic</b> OR to the topic specified in the edit window. The value in the edit window has precedence.</p>
+	<p><b>msg.qos</b> and <b>msg.retain</b> may also optionally have been set. If not set they are set to 0 and false respectively.</p>
+	<p>If <b>msg.payload</b> contains a buffer or an object it will be stringified before being sent.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('mqtt out',{
+        category: 'output',
+        defaults: {
+            name: {value:""},
+            topic: {value:""},
+            broker: {type:"mqtt-broker", required:true}
+        },
+        color:"#c6dbef",
+        inputs:1,
+        outputs:0,
+        icon: "bridge.png",
+        align: "right",
+        label: function() {
+            return this.name||this.topic;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="mqtt-broker">
+    <div class="form-row node-input-broker">
+        <label for="node-config-input-broker"><i class="icon-bookmark"></i> Broker</label>
+        <input class="input-append-left" type="text" id="node-config-input-broker" placeholder="Broker" style="width: 40%;" >
+        <label for="node-config-input-port" style="margin-left: 10px; width: 35px; "> Port</label>
+        <input type="text" id="node-config-input-port" placeholder="Port" style="width:45px">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('mqtt-broker',{
+        category: 'config',
+        defaults: {
+            broker: {value:"localhost",required:true},
+            port: {value:1883,required:true,validate:RED.validators.number()}
+        },
+        label: function() {
+            return this.broker+":"+this.port;
+        }
+    });
+</script>

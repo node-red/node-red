@@ -1,0 +1,91 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="template">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-template"><i class="icon-wrench"></i> Template</label>
+        <input type="hidden" id="node-input-template">
+        <div style="height: 250px;" class="node-text-editor" id="node-input-template-editor" ></div>
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="template">
+	<p>Creates new messages based on a template.</p>
+	<p>Very useful for creating boilerplate web pages, emails, tweets and so on.</p>
+	<p>Uses the <i><a href="http://mustache.github.io/mustache.5.html" target="_new">Mustache</a></i> format.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('template',{
+        color:"rgb(243, 181, 103)",
+        category: 'function',
+        defaults: {
+            name: {value:""},
+            template: {value:"This is the payload: {{payload}}!"},
+        },
+        inputs:1,
+        outputs:1,
+        icon: "template.png",
+        label: function() {
+            return this.name;
+        },
+        oneditprepare: function() {
+
+            function templateDialogResize(ev,ui) {
+                $("#node-input-template-editor").css("height",(ui.size.height-200)+"px");
+            };
+
+            $( "#dialog" ).on("dialogresize", templateDialogResize);
+            $( "#dialog" ).one("dialogopen", function(ev) {
+                var size = $( "#dialog" ).dialog('option','sizeCache-template');
+                if (size) {
+                    templateDialogResize(null,{size:size});
+                }
+            });
+            $( "#dialog" ).one("dialogclose", function(ev,ui) {
+                var height = $( "#dialog" ).dialog('option','height');
+                $( "#dialog" ).off("dialogresize",templateDialogResize);
+            });
+
+            var that = this;
+            require(["orion/editor/edit"], function(edit) {
+                that.editor = edit({
+                    parent:document.getElementById('node-input-template-editor'),
+                    lang:"html",
+                    contents: $("#node-input-template").val()
+                });
+                RED.library.create({
+                    url:"templates", // where to get the data from
+                    type:"template", // the type of object the library is for
+                    editor:that.editor, // the field name the main text body goes to
+                    fields:['name']
+                });
+
+            });
+        },
+        oneditsave: function() {
+            $("#node-input-template").val(this.editor.getText())
+            delete this.editor;
+        }
+    });
+
+</script>

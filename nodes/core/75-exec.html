@@ -1,0 +1,63 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="exec">
+    <div class="form-row">
+        <label for="node-input-command"><i class="icon-label"></i> Command</label>
+        <input type="text" id="node-input-command" placeholder="command">
+    </div>
+    <div class="form-row">
+        <label for="node-input-append"><i class="icon-label"></i> Append</label>
+        <input type="text" id="node-input-append" placeholder="extra input">
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-useSpawn" placeholder="spawn" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-useSpawn" style="width: 70%;">Use spawn() instead of exec() ?</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="exec">
+	<p>Call to a system command.<br/>This can be very dangerous...</p>
+	<p>Provides 3 outputs... stdout, stderr, and return code.</p>
+	<p>By default uses exec() which calls the command, waits for completion and then returns the complete result in one go. Along with any errors.</p>
+	<p>Optionally can use spawn() instead, which returns output from stdout and stderr as the command runs (ie one line at a time). On completion then returns a return code (on the 3rd output).</p>
+	<p>The optional append gets added to the command after the <b>msg.payload</b> (so you can do things like pipe etc.)</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('exec',{
+        category: 'advanced-function',
+        color:"darksalmon",
+        defaults: {
+            command: {value:"",required:true},
+            append: {value:""},
+            useSpawn: {value:""},
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:3,
+        icon: "arrow-in.png",
+        align: "right",
+        label: function() {
+            return this.name||this.command;
+        }
+    });
+</script>

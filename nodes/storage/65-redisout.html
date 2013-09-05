@@ -1,0 +1,105 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="redis out">
+    <div class="form-row node-input-hostname">
+        <label for="node-input-hostname"><i class="icon-bookmark"></i> Host</label>
+        <input class="input-append-left" type="text" id="node-input-hostname" placeholder="127.0.0.1" style="width: 40%;" ><button id="node-input-hostname-lookup" class="btn input-append-right"><span class="caret"></span></button>
+        <label for="node-input-port" style="margin-left: 10px; width: 35px; "> Port</label>
+        <input type="text" id="node-input-port" placeholder="6379" style="width:45px">
+    </div>
+    <div class="form-row">
+        <label for="node-input-key"><i class="icon-briefcase"></i> Key</label>
+        <input type="text" id="node-input-key" placeholder="Redis Key">
+    </div>
+    <div class="form-row">
+        <label for="node-input-type"><i class="icon-th"></i> Type</label>
+        <select type="text" id="node-input-structtype" style="width: 150px;">
+        <option value="string">String</option>
+        <option value="hash">Hash</option>
+        <option value="set">Set</option>
+        <option value="list">List</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-tips">
+        If key is blank, the topic will be used as the key.<br>
+        If type is hash, payload should be field=value.
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="redis out">
+	<p>A Redis output node. Options include Hash, Set, List and String.</p>
+	<p>To run this you need a local Redis server running. For details see <a href="http://redis.io/" target="_new">the Redis site</a>.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('redis out',{
+        category: 'storage-output',
+        color:"#ffaaaa",
+        defaults: {
+            hostname: { value:"127.0.0.1",required:true},
+            port: { value: 6379,required:true},
+            name: {value:""},
+            key: {value:""},
+            structtype: {value:"",required:true}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "redis.png",
+        align: "right",
+        label: function() {
+            return this.name||this.key+" ("+this.structtype+")";
+        },
+        oneditprepare: function() {
+            var availableServers = [];
+            var matchedServers = {};
+            RED.nodes.eachNode(function(node) {
+                if (node.type == "redis out" && node.hostname && node.port && !matchedServers[node.hostname+":"+node.port]) {
+                    var label = node.hostname+":"+node.port;
+                    matchedServers[label] = true;
+                    availableServers.push({
+                        label:label,
+                        value:node.hostname,
+                        port:node.port
+                    });
+                }
+            });
+            $( "#node-input-hostname" ).autocomplete({
+                minLength: 0,
+                source: availableServers,
+                select: function( event, ui ) {
+                    $("#node-input-port").val(ui.item.port);
+                }
+            });
+            var tt = this;
+            tt._acOpen = false;
+            $( "#node-input-hostname" ).on( "autocompleteclose", function( event, ui ) { tt._acOpen = false;} );
+            $( "#node-input-hostname-lookup" ).click(function(e) {
+                if (tt._acOpen) {
+                    $( "#node-input-hostname" ).autocomplete( "close");
+                } else {
+                    $( "#node-input-hostname" ).autocomplete( "search", "" );
+                }
+                tt._acOpen = !tt._acOpen;
+                e.preventDefault();
+            });
+        }
+    });
+</script>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<head>
+<title>Node-RED</title>
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="jquery/css/smoothness/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" media="screen">
+<link rel="stylesheet" type="text/css" href="orion/built-editor.css"/>
+<link rel="stylesheet" href="style.css">
+<head>
+<body spellcheck="false">
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container-fluid">
+            <a class="brand" href="#"><img src="node-red.png"> <span class="red">Node-RED</span> </a>
+            <div class="btn-group pull-right">
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-align-justify"></i> <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a id="btn-sidebar" tabindex="-1" href="#"><i class="icon-ok pull-right"></i><i class="icon-list-alt"></i> Sidebar</a></li>
+                    <li class="divider"></li>
+                    <li class="dropdown-submenu pull-left"><a tabindex="-1" href="#"><i class="icon-edit"></i> Import from...</a>
+                        <ul class="dropdown-menu">
+                            <li><a id="btn-import" tabindex="-1" href="#"><i class="icon-edit"></i> Clipboard...</a></li>
+                            <li id="flow-menu-parent" class="dropdown-submenu pull-left">
+                                <a tabindex="-1" href="#"><i class="icon-book"></i> Library</a>
+                                <ul class="dropdown-menu"></ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li id="li-menu-export" class="dropdown-submenu disabled pull-left"><a tabindex="-1" href="#"><i class="icon-share"></i> Export to...</a>
+                        <ul class="dropdown-menu">
+                            <li id="li-menu-export-clipboard" class="disabled"><a id="btn-export-clipboard" tabindex="-1" href="#"><i class="icon-share"></i> Clipboard...</a></li>
+                            <li id="li-menu-export-library" class="disabled"><a id="btn-export-library" tabindex="-1" href="#"><i class="icon-book"></i> Library...</a></li>
+                        </ul>
+                    </li>
+                    <li class="divider"></li>
+                    <li><a id="btn-keyboard-shortcuts" tabindex="-1" href="#"><i class="icon-question-sign"></i> Keyboard Shortcuts</a></li>
+                    <li><a id="btn-help" tabindex="-1" href="http://node-red.github.io/docs" target="_blank"><i class="icon-question-sign"></i> Help...</a></li>
+                </ul>
+            </div>
+            <div class="btn-group pull-right">
+                <a id="btn-deploy" class="btn action-deploy disabled" href="#"><i class="icon-upload"></i> Deploy</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="main-container" class="sidebar-closed">
+    <div id="palette">
+        <div class="palette-category">
+            <div class="palette-header"><i class="expanded icon-chevron-down"></i><span>inputs</span></div>
+            <div class="palette-content" id="palette-input"></div>
+        </div>
+        <div class="palette-category">
+            <div class="palette-header"><i class="expanded icon-chevron-down"></i><span>outputs</span></div>
+            <div class="palette-content" id="palette-output"></div>
+        </div>
+        <div class="palette-category">
+            <div class="palette-header"><i class="expanded icon-chevron-down"></i><span>functions</span></div>
+            <div class="palette-content" id="palette-function"></div>
+        </div>
+        <div class="palette-category">
+            <div class="palette-header"><i class="expanded icon-chevron-down"></i><span>social</span></div>
+            <div class="palette-content">
+                <div id="palette-social-input"></div>
+                <div id="palette-social-output"></div>
+                <div id="palette-social-function"></div>
+            </div>
+        </div>
+        <div class="palette-category">
+            <div class="palette-header"><i class="expanded icon-chevron-down"></i><span>storage</span></div>
+            <div class="palette-content">
+                <div id="palette-storage-input"></div>
+                <div id="palette-storage-output"></div>
+                <div id="palette-storage-function"></div>
+            </div>
+        </div>
+        <div class="palette-category">
+            <div class="palette-header"><i class="expanded icon-chevron-down"></i><span>analysis</span></div>
+            <div class="palette-content">
+                <div id="palette-analysis-input"></div>
+                <div id="palette-analysis-output"></div>
+                <div id="palette-analysis-function"></div>
+            </div>
+        </div>
+
+        <div class="palette-category">
+            <div class="palette-header"><i class="expanded icon-chevron-down"></i><span>advanced</span></div>
+            <div class="palette-content">
+                <div id="palette-advanced-input"></div>
+                <div id="palette-advanced-output"></div>
+                <div id="palette-advanced-function"></div>
+            </div>
+        </div>
+    </div><!-- /palette -->
+
+    <div id="chart"></div>
+
+    <div id="chart-zoom-controls">
+        <div class="btn-group">
+            <a class="btn btn-mini" id="btn-zoom-out" href="#"><i class="icon-zoom-out"></i></a>
+            <a class="btn btn-mini" id="btn-zoom-zero" href="#"><i class="icon-th"></i></a>
+            <a class="btn btn-mini" id="btn-zoom-in" href="#"><i class="icon-zoom-in"></i></a>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <ul id="sidebar-tabs">
+            <li><a href="#tab-info">info</a></li>
+        </ul>
+        <div id="sidebar-content">
+            <div id="tab-info" style="position: relative;"></div>
+        </div>
+    </div>
+
+    <div id="sidebar-separator"></div>
+
+</div>
+
+
+<div id="notifications"></div>
+
+<div id="dialog" class="hide"><form id="dialog-form" class="form-horizontal"></form></div>
+<div id="node-config-dialog" class="hide"><form id="dialog-config-form" class="form-horizontal"></form><div class="form-tips" id="node-config-dialog-user-count"></div></div>
+
+<div id="node-dialog-confirm-deploy" class="hide">
+    <form class="form-horizontal">
+        <div style="text-align: center; padding-top: 30px;">
+         Some of the nodes are not properly configured. Are you sure you want to deploy?
+        </div>
+    </form>
+</div>
+
+<div id="node-help" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="node-help-label" aria-hidden="true">
+  <div class="modal-header">
+    <h5 id="node-help-label">Keyboard Shortcuts <span style="float: right;"><a href="http://node-red.github.io/docs" target="_blank">Open help in new window &raquo;</a></span></h5>
+  </div>
+  <div class="modal-body">
+    <table>
+        <tr>
+          <td><span class="help-key">?</span></td><td>Help</td>
+          <td><span class="help-key">Ctrl</span> <span class="help-key">a</span></td><td>Select all nodes</td>
+        </tr>
+        <tr>
+          <td><span class="help-key">Ctrl</span> <span class="help-key">Space</span></td><td>Toggle sidebar</td>
+          <td><span class="help-key">Shift</span> <span class="help-key">Click</span></td><td>Select all connected nodes</td>
+        </tr>
+        <tr>
+          <td><span class="help-key">Ctrl</span> <span class="help-key">z</span></td><td>Undo</td>
+          <td><span class="help-key">Ctrl</span> <span class="help-key">Click</span></td><td>Add/remove node from selection</td>
+        </tr>
+        <tr>
+          <td></td><td></td>
+          <td><span class="help-key">Delete</span></td><td>Delete selected nodes or link</td>
+        </tr>
+        <tr>
+          <td colspan="2"></td>
+        </tr>
+        <tr>
+          <td><span class="help-key">Ctrl</span> <span class="help-key">c</span></td><td>Copy selected nodes</td>
+          <td><span class="help-key">Ctrl</span> <span class="help-key">v</span></td><td>Paste nodes</td>
+        </tr>
+        <tr>
+          <td><span class="help-key">Ctrl</span> <span class="help-key">i</span></td><td>Import nodes</td>
+          <td><span class="help-key">Ctrl</span> <span class="help-key">e</span></td><td>Export selected nodes</td>
+        </tr>
+        <tr>
+          <td colspan="2"></td>
+        </tr>
+        <tr>
+          <td><span class="help-key">Ctrl</span> <span class="help-key">+</span></td><td>Zoom in</td>
+          <td><span class="help-key">Ctrl</span> <span class="help-key">-</span></td><td>Zoom out</td>
+        </tr>
+    </table>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>
+
+
+<div id="node-dialog-library-save-confirm" class="hide">
+    <form class="form-horizontal">
+        <div style="text-align: center; padding-top: 30px;">
+         A <span id="node-dialog-library-save-type"></span> called <span id="node-dialog-library-save-name"></span> already exists. Overwrite?
+        </div>
+    </form>
+</div>
+
+<div id="node-dialog-library-save" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <label for="node-dialog-library-save-folder"><i class="icon-folder-open"></i> Folder</label>
+            <input type="text" id="node-dialog-library-save-folder" placeholder="Folder">
+        </div>
+        <div class="form-row">
+            <label for="node-dialog-library-save-filename"><i class="icon-file"></i> Filename</label>
+            <input type="text" id="node-dialog-library-save-filename" placeholder="Filename">
+        </div>
+    </form>
+</div>
+
+<div id="node-dialog-library-lookup" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <ul id="node-dialog-library-breadcrumbs" class="breadcrumb">
+                <li class="active"><a href="#">Library</a> <span class="divider">/</span></li>
+            </ul>
+        </div>
+        <div class="form-row">
+            <div style="vertical-align: top; display: inline-block; height: 100%; width: 30%; padding-right: 20px;">
+                <div id="node-select-library" style="border: 1px solid #999; width: 100%; height: 100%; overflow:scroll;"><ul></ul></div>
+            </div>
+            <div style="vertical-align: top; display: inline-block;width: 65%; height: 100%;">
+                <div style="height: 100%; width: 95%;" class="node-text-editor" id="node-select-library-text" ></div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/x-red" data-template-name="export-clipboard-dialog">
+    <div class="form-row">
+        <label for="node-input-export" style="display: block; width:100%;"><i class="icon-share"></i> Nodes:</label>
+        <textarea readonly style="font-family: monospace; font-size: 12px; background:rgb(226, 229, 255); padding-left: 0.5em;" class="input-block-level" id="node-input-export" rows="5"></textarea>
+    </div>
+    <div class="form-tips">
+        Select the text above and copy to the clipboard with Ctrl-A Ctrl-C.
+    </div>
+</script>
+<script type="text/x-red" data-template-name="export-library-dialog">
+    <div class="form-row">
+        <label for="node-input-filename" ><i class="icon-tag"></i> Filename:</label>
+        <input type="text" id="node-input-filename" placeholder="Filename">
+    </div>
+</script>
+<script type="text/x-red" data-template-name="import-dialog">
+    <div class="form-row">
+        <label for="node-input-export"><i class="icon-share"></i>Nodes:</label>
+        <textarea style="font-family: monospace; font-size: 12px; background:rgb(226, 229, 255); padding-left: 0.5em;" class="input-block-level" id="node-input-import" rows="5" placeholder="Paste nodes here, or lookup in the library"></textarea>
+    </div>
+</script>
+
+<script src="jquery/js/jquery-1.9.1.js"></script>
+<script src="bootstrap/js/bootstrap.min.js"></script>
+<script src="jquery/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script src="orion/built-editor.min.js"></script>
+<script src="d3.v3.min.js"></script>
+<script src="red/main.js"></script>
+<script src="red/ui/state.js"></script>
+<script src="red/nodes.js"></script>
+<script src="red/history.js"></script>
+<script src="red/validators.js"></script>
+<script src="red/ui/keyboard.js"></script>
+<script src="red/ui/view.js"></script>
+<script src="red/ui/sidebar.js"></script>
+<script src="red/ui/palette.js"></script>
+<script src="red/ui/editor.js"></script>
+<script src="red/ui/library.js"></script>
+<script src="red/ui/notifications.js"></script>
+</body>
+</html>

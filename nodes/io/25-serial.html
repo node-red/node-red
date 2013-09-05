@@ -1,0 +1,146 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="serial in">
+    <div class="form-row node-input-serial">
+        <label for="node-input-serial"><i class="icon-bullhorn"></i> Serial Port</label>
+        <input type="text" id="node-input-serial">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="serial in">
+	<p>Reads data from a local serial port.</p>
+	<p>Keeps reading from the serial port until it sees \n (default) or the character(s) requested. Only sets <b>msg.payload</b>.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('serial in',{
+        category: 'input',
+        defaults: {
+			name: {name:""},
+            serial: {type:"serial-port",required:true}
+        },
+        color:"BurlyWood",
+        inputs:0,
+        outputs:1,
+        icon: "serial.png",
+        label: function() {
+            return this.name||(this.serial)?RED.nodes.node(this.serial).label():"serial";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+
+<script type="text/x-red" data-template-name="serial out">
+    <div class="form-row node-input-serial">
+        <label for="node-input-serial"><i class="icon-bullhorn"></i> Serial Port</label>
+        <input type="text" id="node-input-serial">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="serial out">
+	<p>Provides a connection to an outbound serial port.</p>
+	<p>Only the <b>msg.payload</b> is sent.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('serial out',{
+        category: 'output',
+        defaults: {
+			name: {name:""},
+            serial: {type:"serial-port",required:true}
+        },
+        color:"BurlyWood",
+        inputs:1,
+        outputs:0,
+        icon: "serial.png",
+        align: "right",
+        label: function() {
+            return this.name||((this.serial)?RED.nodes.node(this.serial).label():"serial");
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+
+</script>
+
+
+<script type="text/x-red" data-template-name="serial-port">
+    <div class="form-row">
+        <label for="node-config-input-serialport"><i class="icon-bullhorn"></i> Serial Port</label>
+        <input type="text" id="node-config-input-serialport" placeholder="/dev/ttyUSB0" style="width:50%;">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-serialbaud"><i class="icon-wrench"></i> Baud Rate</label>
+        <select type="text" id="node-config-input-serialbaud" style="width: 150px;">
+            <option value="115200">115200</option>
+            <option value="57600">57600</option>
+            <option value="38400">38400</option>
+            <option value="19200">19200</option>
+            <option value="9600">9600</option>
+            <option value="4800">4800</option>
+            <option value="2400">2400</option>
+            <option value="1800">1800</option>
+            <option value="1200">1200</option>
+            <option value="600">600</option>
+            <option value="300">300</option>
+            <option value="200">200</option>
+            <option value="150">150</option>
+            <option value="134">134</option>
+            <option value="110">110</option>
+            <option value="75">75</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-newline"><i class="icon-text-width"></i> New line</label>
+        <input type="text" id="node-config-input-newline">
+    </div>
+<!--
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" placeholder="Name">
+    </div>
+-->
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('serial-port',{
+        category: 'config',
+        defaults: {
+            //name: {value:""},
+            serialport: {value:"",required:true},
+            serialbaud: {value:57600,required:true},
+            newline: {value:"\\n"}
+        },
+        label: function() {
+            //return this.name||this.serialport;
+            return this.serialport+":"+this.serialbaud;
+        }
+    });
+</script>

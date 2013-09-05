@@ -1,0 +1,192 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="twitter-credentials">
+    <div class="form-row" id="node-config-twitter-row"></div>
+    <input type="hidden" id="node-config-input-screen_name">
+</script>
+
+<script type="text/javascript">
+    var twitterConfigNodeId = null;
+    var twitterConfigNodeIntervalId = null;
+
+    function showTwitterAuthStart() {
+        var pathname = document.location.pathname;
+        if (pathname.slice(-1) != "/") {
+            pathname += "/";
+        }
+        var callback = encodeURIComponent(location.protocol+"//"+location.hostname+":"+location.port+pathname+"twitter/"+twitterConfigNodeId+"/auth/callback");
+        
+        $("#node-config-twitter-row").html('Click <a id="node-config-twitter-start" href="/twitter/'+twitterConfigNodeId+'/auth?callback='+callback+'" target="_blank">here</a> to authenticate with Twitter.');
+        $("#node-config-twitter-start").click(function() {
+            twitterConfigNodeIntervalId = window.setTimeout(pollTwitterCredentials,2000);
+        });
+    }
+    function updateTwitterScreenName(sn) {
+        $("#node-config-input-screen_name").val(sn);
+        $("#node-config-twitter-row").html('<label><i class="icon-user"></i> Twitter ID</label><span class="input-xlarge uneditable-input">'+sn+'</span>');
+    }
+    function pollTwitterCredentials(e) {
+        $.getJSON('twitter/'+twitterConfigNodeId,function(data) {
+            if (data.sn) {
+                updateTwitterScreenName(data.sn);
+                twitterConfigNodeIntervalId = null;
+            } else {
+                twitterConfigNodeIntervalId = window.setTimeout(pollTwitterCredentials,2000);
+            }
+        })
+    }
+    RED.nodes.registerType('twitter-credentials',{
+        category: 'config',
+        defaults: {
+            screen_name: {value:""},
+            access_token: {value: ""},
+            access_token_secret: {value:""}
+        },
+        label: function() {
+            return this.screen_name;
+        },
+        exportable: false,
+        oneditprepare: function() {
+            twitterConfigNodeId = this.id;
+            if (!this.screen_name || this.screen_name == "") {
+                showTwitterAuthStart();
+            } else {
+                $.getJSON('twitter/'+twitterConfigNodeId,function(data) {
+                    if (data.sn) {
+                        updateTwitterScreenName(data.sn);
+                    } else {
+                        showTwitterAuthStart();
+                    }
+                });
+            }
+        },
+        oneditsave: function() {
+            if (twitterConfigNodeIntervalId) {
+                window.clearTimeout(twitterConfigNodeIntervalId);
+            }
+        },
+        oneditcancel: function(adding) {
+            if (twitterConfigNodeIntervalId) {
+                window.clearTimeout(twitterConfigNodeIntervalId);
+            }
+            if (adding) {
+                $.ajax({
+                    url: 'twitter/'+this.id,
+                    type: 'DELETE',
+                    success: function(result) {}
+                });
+            }
+        },
+        ondelete: function() {
+            $.ajax({
+                url: 'twitter/'+this.id,
+                type: 'DELETE',
+                success: function(result) {}
+            });
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="twitter in">
+    <div class="form-row">
+        <label for="node-input-twitter"><i class="icon-user"></i> Twitter</label>
+        <input type="text" id="node-input-twitter">
+    </div>
+    <div class="form-row">
+        <label for="node-input-tags"><i class="icon-tag"></i> Tags</label>
+        <input type="text" id="node-input-tags" placeholder="comma-separated tags">
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-user" placeholder="Name" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-user" style="width: 70%;">Tick to use user stream<br/>(rather than status/filter)</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
+        <input type="text" id="node-input-topic" placeholder="Topic">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-tips">Tip: the Senders name gets appended to the topic heirarchy
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="twitter in">
+	<p>Twitter input node. Watches the public stream for tweets containing the configured search term.</p>
+	<p>Sets the <b>msg.topic</b> to the configured topic and then appends the senders screen name.</p>
+	<p>Sets <b>msg.location</b> to the tweeters location if known.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('twitter in',{
+        category: 'social-input',
+        color:"#C0DEED",
+        defaults: {
+            twitter: {type:"twitter-credentials",required:true},
+            tags: {value:"",required:true},
+            user: {value:false},
+            name: {value:""},
+            topic: {value:"tweets"}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "twitter.png",
+        label: function() {
+            return this.name||this.topic;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+
+
+<script type="text/x-red" data-template-name="twitter out">
+    <div class="form-row">
+        <label for="node-input-twitter"><i class="icon-user"></i> Twitter</label>
+        <input type="text" id="node-input-twitter">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="twitter out">
+	<p>Twitter out node. Tweets the <b>msg.payload</b>.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('twitter out',{
+        category: 'social-output',
+        color:"#C0DEED",
+        defaults: {
+            twitter: {type:"twitter-credentials",required:true},
+            name: {value:"Tweet"}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "twitter.png",
+        align: "right",
+        label: function() {
+            return this.name;
+        }
+    });
+</script>

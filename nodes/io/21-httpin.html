@@ -1,0 +1,85 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="http in">
+    <div class="form-row">
+        <label for="node-input-method"><i class="icon-tasks"></i> Method</label>
+        <select type="text" id="node-input-method" style="width: 150px;">
+        <option value="get">GET</option>
+        <option value="post">POST</option>
+        <option value="put">PUT</option>
+        <option value="delete">DELETE</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="icon-globe"></i> url</label>
+        <input type="text" id="node-input-url" placeholder="/url">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="http in">
+	<p>Provides an input node for http requests, allowing the creation of simple web services.</p>
+	<p>The resulting message has the following properties:
+	    <ul>
+	        <li>msg.req : <a href="http://expressjs.com/api.html#req">http request</a></li>
+	        <li>msg.res : <a href="http://expressjs.com/api.html#res">http response</a></li>
+	    </ul>
+	</p>
+	<p>For POST/PUT requests, the body is available under <code>msg.req.body</code>. This
+	   uses the <a href="http://expressjs.com/api.html#bodyParser">Express bodyParser middleware</a> to parse the content to a JSON object.
+    </p>
+	<p>
+	   By default, this expects the body of the request to be url encoded:
+	   <pre>foo=bar&amp;this=that</pre>
+    </p>
+	<p>
+	   To send JSON encoded data, the content-type header of the request must be set to
+	   <code>application/json</code>.
+	</p>
+	<p>
+	    <b>Note: </b>This node does not send any response to the http request. This must be done within
+	    a subsequent Function node. The <a href="http://expressjs.com/api.html#res">Express response documentation</a>
+	    describes how this should be done.
+	    <pre>msg.res.send(200, 'Thanks for the request ');<br/>return msg;</pre>
+    </p>
+
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('http in',{
+        category: 'input',
+        color:"rgb(231, 231, 174)",
+        defaults: {
+            name: {value:""},
+            url: {value:"",required:true},
+            method: {value:"get",required:true}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "white-globe.png",
+        label: function() {
+            return this.name||"["+this.method+"] "+this.url;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+
+</script>

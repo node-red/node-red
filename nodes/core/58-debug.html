@@ -1,0 +1,238 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="debug">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-complete" placeholder="Complete" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-complete" style="width: 70%;">Show complete msg object ?</label>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="debug">
+	<p>The Debug node can be connected to the output of any node. It will display the timestamp, <b>msg.topic</b> and <b>msg.payload</b> fields of any messages it receives under the Debug tab at the top of the sidebar.</p>
+	<p>The button to the right of the node will toggle it's output on and off so you can de-clutter the debug window.</p>
+	<p>If the payload is an object it will be stringified first for display and indicate that by saying "(Object) ".</p>
+	<p>If the payload is a buffer it will be stringified first for display and indicate that by saying "(Buffer) ".</p>
+	<p>Selecting any particular message will highlight (in red) the debug node that reported it. This is useful if you wire up multiple debug nodes.</p>
+	<p>Optionally can show the complete msg object - but the screen can get messy.</p>
+	<p>In addition any calls to node.warn or node.error will appear here.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('debug',{
+        category: 'output',
+        defaults: {
+            name: {value:""},
+            active: {value:true},
+            complete: {value:false}
+        },
+        label: function() {
+            return this.name||"debug";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        color:"#87a980",
+        inputs:1,
+        outputs:0,
+        icon: "debug.png",
+        align: "right",
+        button: {
+            color: function() {
+                 return (typeof this.active === 'undefined') ? ("#87a980" ) : (this.active ? "#87a980" : "#b9b9b9");
+            },
+            onclick: function() {
+                var label = this.name||"debug";
+                var node = this;
+                d3.xhr("debug/"+this.id).post(function(err,resp) {
+                        if (err) {
+                            if (err.status == 404) {
+                                RED.notify("<strong>Error</strong>: debug node not deployed","error");
+                            } else {
+                                RED.notify("<strong>Error</strong>: "+err.response,"error");
+                            }
+                        } else if (resp.status == 200) {
+                            RED.notify("Successfully activated: "+label,"success");
+                            node.active = true;
+                            node.dirty = true;
+                            RED.view.redraw();
+                        } else if (resp.status == 201) {
+                            RED.notify("Successfully deactivated: "+label,"success");
+                            node.active = false;
+                            node.dirty = true;
+                            RED.view.redraw();
+                        } else {
+                            if (resp) {
+                                RED.notify("<strong>Error</strong>: "+resp,"error");
+                            } else {
+                                RED.notify("<strong>Error</strong>: no response from server","error");
+                            }
+                            console.log(err,resp);
+                        }
+                });
+            }
+        }
+    });
+
+    var a = function() {
+        var content = document.createElement("div");
+        content.id = "tab-debug";
+
+        var toolbar = document.createElement("div");
+        toolbar.id = "debug-toolbar";
+        content.appendChild(toolbar);
+
+        toolbar.innerHTML = '<div class="btn-group pull-right"><a id="debug-tab-clear" title="clear log" class="btn btn-mini" href="#"><i class="icon-trash"></i></a></div> ';
+
+        var messages = document.createElement("div");
+        messages.id = "debug-content";
+        content.appendChild(messages);
+
+        RED.sidebar.addTab("debug",content);
+
+        function getTimestamp() {
+            var d = new Date();
+            return d.toUTCString().substring(5,25)+"."+d.getMilliseconds();
+        }
+
+        var sbc = document.getElementById("debug-content");
+
+        function debugConnect() {
+            //console.log("debug ws connecting");
+            var ws = new WebSocket("ws://"+location.hostname+":"+location.port+document.location.pathname+"/debug");
+            ws.onopen = function() {
+                //console.log("debug ws connected");
+            }
+            ws.onmessage = function(event) {
+                var o = JSON.parse(event.data);
+                //console.log(msg);
+                var msg = document.createElement("div");
+                msg.onmouseover = function() {
+                    msg.style.borderRightColor = "#999";
+                    RED.nodes.eachNode(function(node) {
+                        if( node.id == o.id) {
+                            node.highlighted = true;
+                            node.dirty = true;
+                        }
+                    });
+                    RED.view.redraw();
+                };
+                msg.onmouseout = function() {
+                    msg.style.borderRightColor = "";
+                    RED.nodes.eachNode(function(node) {
+                        if( node.id == o.id) {
+                            node.highlighted = false;
+                            node.dirty = true;
+                        }
+                    });
+                    RED.view.redraw();
+                };
+                var name = (o.name?o.name:o.id).toString().replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                var topic = (o.topic||"").toString().replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                var payload = (o.msg||"").toString().replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                msg.className = 'debug-message'+(o.level?(' debug-message-level-'+o.level):'')
+                msg.innerHTML = '<span class="debug-message-date">'+getTimestamp()+'</span>'+
+                                '<span class="debug-message-name">['+name+']</span>'+
+                                (o.topic?'<span class="debug-message-topic">'+topic+'</span>':'')+
+                                '<span class="debug-message-payload">'+payload+'</span>';
+                var atBottom = (sbc.scrollHeight-messages.offsetHeight-sbc.scrollTop) < 5;
+                $(messages).append(msg);
+                if (atBottom) {
+                    $(sbc).scrollTop(sbc.scrollHeight);
+                }
+            };
+            ws.onclose = function() {
+                //console.log("debug ws closed");
+                setTimeout(debugConnect,1000);
+            }
+        }
+        debugConnect();
+
+        $("#debug-tab-clear").click(function() {
+            $(".debug-message").remove();
+            RED.nodes.eachNode(function(node) {
+                node.highlighted = false;
+                node.dirty = true;
+            });
+            RED.view.redraw();
+        });
+
+    }();
+</script>
+
+<style>
+    #debug-content {
+        position: absolute;
+        top: 30px;
+        bottom: 0px;
+        left:0px;
+        right: 0px;
+        overflow-y: scroll;
+    }
+    #debug-toolbar {
+        padding: 3px 10px;
+        height: 24px;
+        background: #f3f3f3;
+    }
+    .debug-message {
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        border-left: 8px solid #eee;
+        border-right: 8px solid #eee;
+        padding: 2px;
+    }
+    .debug-message-date {
+        background: #fff;
+        font-size: 9px;
+        color: #aaa;
+        padding: 1px 5px 1px 1px;
+    }
+    .debug-message-topic {
+        display: block;
+        background: #fff;
+        padding: 1px 5px;
+        font-size: 9px;
+        color: #caa;
+    }
+    .debug-message-name {
+        background: #fff;
+        padding: 1px 5px;
+        font-size: 9px;
+        color: #aac;
+    }
+    .debug-message-payload {
+        display: block;
+        padding: 2px;
+        background: #fff;
+    }
+    .debug-message-level-log {
+        border-left-color: #eee;
+        border-right-color: #eee;
+    }
+    .debug-message-level-warn {
+        border-left-color: #ffdf9d;
+        border-right-color: #ffdf9d;
+    }
+    .debug-message-level-error {
+        border-left-color: #f99;
+        border-right-color: #f99;
+    }
+</style>

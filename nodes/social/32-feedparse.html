@@ -1,0 +1,57 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="feedparse">
+    <div class="form-row">
+        <label for="node-input-url"><i class="icon-globe"></i> Feed url</label>
+        <input type="text" id="node-input-url">
+    </div>
+    <div class="form-row">
+        <label for="node-input-interval"><i class="icon-repeat"></i> Repeat <span style="font-size: 0.9em;">(M)</span></label>
+        <input type="text" id="node-input-interval" placeholder="minutes">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <!-- <div class="form-tips"></div> -->
+</script>
+
+<script type="text/x-red" data-help-name="feedparse">
+	<p>Monitors an RSS/atom feed for new entries.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('feedparse',{
+        category: 'advanced-input',
+        color:"#C0DEED",
+        defaults: {
+            name: {value:""},
+            url: {value:"", required:true},
+            interval: { value:15, required: true,validate:RED.validators.number()}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "feed.png",
+        label: function() {
+            return this.name||this.url;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+
+</script>

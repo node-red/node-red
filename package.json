@@ -1,0 +1,20 @@
+{
+  "name": "node-red",
+  "version": "0.1.0",
+  "description" : "A visual tool for wiring the Internet of Things",
+  "scripts": {
+    "start": "node red.js"
+  },
+  "main": "lib/server.js",
+  "author": "Nicholas O'Leary",
+  "contributors": [ {"name": "Dave Conway-Jones"} ],
+  "keywords": ["editor", "messaging", "iot", "m2m", "pi", "arduino", "beaglebone", "ibm"],
+  "license": "Apache",
+  "dependencies": {
+    "express": "3.x",
+    "mqtt": "*",
+    "ws": "*",
+    "mustache": "*"
+  },
+  "engines": { "node": ">=0.8" }
+}
