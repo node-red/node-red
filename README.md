@@ -46,8 +46,8 @@ change your rights to use your own Contributions for any other purpose.
 
 Node-RED is a creation of the IBM Emerging Technology Services team.
 
-* Nick O'Leary [http://twitter.com/knolleary](@knolleary)
-* Dave Conway-Jones [http://twitter.com/ceejay](@ceejay)
+* Nick O'Leary [@knolleary](http://twitter.com/knolleary)
+* Dave Conway-Jones [@ceejay](http://twitter.com/ceejay)
 
 ## Copyright and license
 
