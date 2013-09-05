@@ -549,3 +549,8 @@ div.node-info {
     border-radius:5px;
     overflow: hidden;
 }
+
+/** Fix for unreachable dropdown menu **/
+div.pull-right > ul.dropdown-menu > li.dropdown-submenu > ul {
+    margin-left: 20px;
+}
