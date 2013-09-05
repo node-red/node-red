@@ -10,7 +10,7 @@ Check out [INSTALL](INSTALL) for full instructions on getting started.
 2. cd node-red
 3. npm install
 4. node red.js
-5. Open [http://localhost:1880]
+5. Open <http://localhost:1880>
 
 ## Browser Support
 
