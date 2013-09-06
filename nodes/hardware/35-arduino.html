@@ -45,7 +45,7 @@
 <script type="text/javascript">
     RED.nodes.registerType('arduino in',{
         category: 'advanced-input',
-        color:"#c6dbef",
+        color:"#3fadb5",
         defaults: {
             name: {value:""},
             pin: {value:"",required:true},
@@ -97,7 +97,7 @@
 <script type="text/javascript">
     RED.nodes.registerType('arduino out',{
         category: 'advanced-output',
-        color:"#c6dbef",
+        color:"#3fadb5",
         defaults: {
             name: {value:""},
             pin: {value:""},
@@ -121,7 +121,7 @@
 <script type="text/x-red" data-template-name="arduino-board">
     <div class="form-row">
         <label for="node-config-input-device"><i class="icon-bullhorn"></i> Arduino Port</label>
-        <input type="text" id="node-config-input-device" placeholder="ttyU" style="width:50%;">
+        <input type="text" id="node-config-input-device" placeholder="/dev/ttyUSB0" style="width:50%;">
     </div>
     <div class="form-row">
         <label for="node-config-input-repeat"><i class="icon-repeat"></i> Sample (ms)</label>
