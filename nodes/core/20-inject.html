@@ -74,13 +74,13 @@
                             if (err.status == 404) {
                                 RED.notify("<strong>Error</strong>: inject node not deployed","error");
                             } else {
-                                RED.notify("<strong>Error</strong>: "+err.response,"error");
+                                RED.notify("<strong>Error</strong>: no response from server","error");
                             }
                         } else if (resp.status == 200) {
                             RED.notify("Successfully injected: "+label,"success");
                         } else {
                             if (resp) {
-                                RED.notify("<strong>Error</strong>: "+resp,"error");
+                                RED.notify("<strong>Error</strong>: unexpected response:"+resp,"error");
                             } else {
                                 RED.notify("<strong>Error</strong>: no response from server","error");
                             }
