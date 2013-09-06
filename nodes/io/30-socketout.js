@@ -40,7 +40,8 @@ function SocketOut(n) {
 					node.error('tcp : '+err);
 				});
 				client.connect(this.port, this.host, function() {
-					client.end(msg.payload);
+					try { client.end(msg.payload); }
+					catch (e) { node.error(e); }
 				});
 			}
 			if (this.trans == "udp") {

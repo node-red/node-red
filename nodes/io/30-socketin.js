@@ -55,8 +55,13 @@ function SocketIn(n) {
 				node.send(msg);
 			});
 		});
+		server.on('error', function (e) {
+			if (e.code == 'EADDRINUSE') {
+				setTimeout(node.error('TCP port is already in use - please reconfigure socket.'),250);
+			}
+		});
 		server.listen(node.port);
-		node.log('tcp listener on port :'+node.port+'/');
+		node.log('tcp listener on port :'+node.port);
 
 		this._close = function() {
 			server.close();
@@ -130,5 +135,3 @@ RED.nodes.registerType("socket in",SocketIn);
 SocketIn.prototype.close = function() {
 	this._close();
 }
-
-

@@ -57,7 +57,7 @@
         icon: "bridge-dash.png",
         align: "right",
         label: function() {
-            return this.name||this.topic||(this.transport+":"+this.port);
+            return this.name||this.topic||("socket "+this.transport+":"+this.port);
         },
         labelStyle: function() {
             return (this.name||!this.topic)?"node_label_italic":"";
