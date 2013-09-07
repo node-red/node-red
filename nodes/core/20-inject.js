@@ -57,8 +57,14 @@ InjectNode.prototype.close = function() {
 RED.app.post("/inject/:id", function(req,res) {
         var node = RED.nodes.getNode(req.params.id);
         if (node != null) {
-            node.receive();
-            res.send(200);
+            try {
+                node.receive();
+                res.send(200);
+            } catch(err) {
+                res.send(500);
+                node.error("Inject failed:"+err);
+                console.log(err.stack);
+            }
         } else {
             res.send(404);
         }
