@@ -80,7 +80,7 @@
                             RED.notify("Successfully injected: "+label,"success");
                         } else {
                             if (resp) {
-                                RED.notify("<strong>Error</strong>: unexpected response:"+resp,"error");
+                                RED.notify("<strong>Error</strong>: unexpected response: RC "+resp.status+"<br/>See console log for details."error");
                             } else {
                                 RED.notify("<strong>Error</strong>: no response from server","error");
                             }
