@@ -17,7 +17,7 @@
 // Simple node to introduce a pause into a flow
 
 // Require main module
-var RED = require("../red/red");
+var RED = require("../../red/red");
 
 // main node definition
 function PauseNode(n) {
