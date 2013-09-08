@@ -24,17 +24,24 @@ function SocketIn(n) {
 	var node = this;
 	if (this.trans == "http") {
 		var http = require('http');
-		var serv = http.createServer(function (req, res) {
+		var server = http.createServer(function (req, res) {
 			//node.log("http "+req.url);
 			var msg = {topic:node.topic,payload:req.url.slice(1)};
 			node.send(msg);
 			res.writeHead(304, {'Content-Type': 'text/plain'});
 			res.end('\n');
 		}).listen(node.port);
+		server.on('error', function (e) {
+			if (e.code == 'EADDRINUSE') {
+				setTimeout(node.error('TCP port is already in use - please reconfigure socket.'),250);
+			}
+			else { console.log(e); }
+			server = null;
+		});
 		node.log('http listener at http://127.0.0.1:'+node.port+'/');
 
 		this._close = function() {
-			serv.close();
+			if (server) server.close();
 			node.log('http listener stopped');
 		}
 	}
@@ -44,11 +51,11 @@ function SocketIn(n) {
 		var server = net.createServer(function (socket) {
 			var buffer = null;
 			socket.on('data', function (chunk) {
-			    if (buffer == null) {
-			        buffer = chunk;
-			    } else {
-			        buffer = Buffer.concat([buffer,chunk]);
-			    }
+				if (buffer == null) {
+					buffer = chunk;
+				} else {
+					buffer = Buffer.concat([buffer,chunk]);
+				}
 			});
 			socket.on('end', function() {
 				var msg = {topic:node.topic, payload:buffer, fromip:socket.remoteAddress+':'+socket.remotePort};
@@ -59,12 +66,14 @@ function SocketIn(n) {
 			if (e.code == 'EADDRINUSE') {
 				setTimeout(node.error('TCP port is already in use - please reconfigure socket.'),250);
 			}
+			else { console.log(e); }
+			server = null;
 		});
 		server.listen(node.port);
 		node.log('tcp listener on port :'+node.port);
 
 		this._close = function() {
-			server.close();
+			if (server) server.close();
 			node.log('tcp listener stopped');
 		}
 	}
@@ -95,13 +104,14 @@ function SocketIn(n) {
 
 			client.on('error', function() {
 				node.log('tcpc socket error');
+				client = null;
 				to = setTimeout(setupTcpClient, 10000); //Try to reconnect
 			});
 		}
 		setupTcpClient();
 
 		this._close = function() {
-			client.end();
+			if (client) client.end();
 			//client.destroy();
 			clearTimeout(to);
 			node.log('tcpc stopped client');
@@ -120,10 +130,14 @@ function SocketIn(n) {
 			var msg = {topic:node.topic,payload:message,fromip:remote.address+':'+remote.port};
 			node.send(msg);
 		});
+		server.on('error', function (e) {
+			console.log(e);
+			server = null;
+		});
 		server.bind(node.port);
 
 		this._close = function() {
-			server.close();
+			if (server) server.close();
 			node.log('udp listener stopped');
 		}
 	}
