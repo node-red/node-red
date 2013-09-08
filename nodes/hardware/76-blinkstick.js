@@ -19,26 +19,21 @@ var blinkstick = require("blinkstick");
 
 function BlinkStick(n) {
 	RED.nodes.createNode(this,n);
-	var node = this;
 	var p1 = /^#.*/
 	var p2 = /[0-9]+,[0-9]+,[0-9]+/
 
-	var led = new blinkstick.findFirst();
+	this.led = new blinkstick.findFirst();
+	var node = this;
 
 	node.log("started");
 	this.on("input", function(msg) {
 		if (msg != null) {
-			if (led.length > 0) {
 				if ((p1.test(msg.payload))|(p2.test(msg.payload))) {
-					led.setColor(msg.payload);
+					node.led.setColor(msg.payload);
 				}
 				else {
 					node.error("Incorrect format: "+msg.payload);
 				}
-			}
-			else {
-				node.error("No BlinkStick found");
-			}
 		}
 	});
 
