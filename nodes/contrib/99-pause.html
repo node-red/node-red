@@ -40,13 +40,13 @@
         color:"#E6E0F8",
         defaults: {             // defines the editable properties of the node
             name: {value:""},   //  along with default values.
-            timeout: {value:"5", required:true}
+            timeout: {value:"5", required:true, validate:RED.validators.number()}
         },
         inputs:1,                // set the number of inputs - only 0 or 1
         outputs:1,               // set the number of outputs - 0 to n
         icon: "arrow-in.png",    // set the icon (held in public/icons)
         label: function() {      // sets the default label contents
-            return this.name||this.topic||"pause";
+            return this.name||this.topic||"pause "+this.timeout+" s";
         },
         labelStyle: function() { // sets the class to apply to the label
             return this.name?"node_label_italic":"";
