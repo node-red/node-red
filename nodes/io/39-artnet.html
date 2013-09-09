@@ -1,0 +1,89 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="artnet out">
+    <div class="form-row">
+        <label for="node-input-host"><i class="icon-bookmark"></i> Host</label>
+        <input type="text" id="node-input-host" placeholder="localhost" style="width: 40%;" >
+
+        <label for="node-input-port" style="margin-left: 10px; width: 35px;"> Port</label>
+        <input type="text" id="node-input-port" placeholder="6454" style="width: 45px">
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-usemsg" placeholder="UseMsg" style="display: inline-block; width: auto; vertical-align: top;" onchange="usemsgchange(this.checked)">
+        <label for="node-input-usemsg" style="width: 70%;">Use msg as data?</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-universe"><i class="icon-random"></i> Universe</label>
+        <input type="text" id="node-input-universe" placeholder="Universe">
+    </div>
+    <div class="form-row">
+        <label for="node-input-channel"><i class="icon-tag"></i> Channel</label>
+        <input type="text" id="node-input-channel" placeholder="Channel">
+    </div>
+    <div class="form-row">
+        <label for="node-input-data"><i class="icon-tag"></i> Data</label>
+        <input type="text" id="node-input-data" placeholder="Data">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="artnet out">
+	<p>Art-Net output node. If use msg is checked then the universe and data values come from the <b>msg</b> input (see below). 
+	If the box is not checked, you can specify a single channel value using the other fields.</p>
+	<p>The format for the msg object is as follows:</p>
+	<p><b>msg.topic</b> : Art-Net Universe</p>
+	<p><b>msg.payload</b> : Art-Net Data. Should be an array of 512 or less values between 0 and 255.</p>
+	<p>If <b>msg.payload</b> has n elements, where n is less than 512, it will be mapped to the first n channels of the universe.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('artnet out',{
+        category: 'output',
+        color:"Silver",
+        defaults: {
+            host: {value:"127.0.0.1",required:true},
+            port: {value:"6454",required:true},
+	    usemsg: {value:true},
+	    universe: {value:"0"},
+	    channel: {value:"0"},
+	    data: {value:"0"},
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "bridge-dash.png",
+        align: "right",
+        label: function() {
+            return this.name||this.topic||("socket "+this.transport+":"+this.port);
+        },
+        labelStyle: function() {
+            return (this.name||!this.topic)?"node_label_italic":"";
+        }
+    });
+</script>
+
+<script type="text/javascript">
+    function usemsgchange(_checked){
+	document.getElementById('node-input-universe').disabled=_checked?true:false;
+	document.getElementById('node-input-channel').disabled=_checked?true:false;
+	document.getElementById('node-input-data').disabled=_checked?true:false;
+    }
+</script>
