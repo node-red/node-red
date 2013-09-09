@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 var util = require("util");
-var events = require("events");
+var EventEmitter = require("events").EventEmitter;
 var fs = require("fs");
-
+var events = require("./events");
 
 function getCallerFilename(type) {
     //if (type == "summary") {
@@ -59,9 +59,11 @@ var registry = (function() {
                 return nodes[i];
             },
             clear: function() {
+                events.emit("nodes-stopping");
                 for (var n in nodes) {
                     nodes[n].close();
                 }
+                events.emit("nodes-stopped");
                 nodes = {};
             },
             
@@ -72,7 +74,7 @@ var registry = (function() {
         return obj;
 })();
 
-var ConsoleLogHandler = new events.EventEmitter();
+var ConsoleLogHandler = new EventEmitter();
 ConsoleLogHandler.on("log",function(msg) {
         util.log("["+msg.level+"] ["+msg.type+":"+(msg.name||msg.id)+"] "+msg.msg);
 });
@@ -128,7 +130,7 @@ function Node(n) {
     }
     this.wires = n.wires||[];
 }
-util.inherits(Node,events.EventEmitter);
+util.inherits(Node,EventEmitter);
 
 Node.prototype.close = function() {
     // called when a node is removed
@@ -253,6 +255,8 @@ module.exports.load = function() {
     }
     
     loadNodes("nodes");
+    
+    events.emit("nodes-loaded");
 }
 
 
@@ -261,7 +265,10 @@ module.exports.getNode = function(nid) {
     return registry.get(nid);
 }
 module.exports.parseConfig = function(conf) {
+    
     registry.clear();
+    
+    events.emit("nodes-starting");
     for (var i in conf) {
         var nn = null;
         var nt = node_type_registry.get(conf[i].type);
@@ -286,5 +293,7 @@ module.exports.parseConfig = function(conf) {
     if (deletedCredentials) {
         saveCredentialsFile();
     }
+    events.emit("nodes-started");
+
 }
 

@@ -14,22 +14,6 @@
  * limitations under the License.
  **/
 
-var events = require("./events"); 
-var server = require("./server");
-var nodes = require("./nodes");
-var library = require("./library");
-var settings = require("../settings");
+var events = require("events"); 
 
-
-var events = require("events");
-
-var RED = {
-    nodes: nodes,
-    app: server.app,
-    server: server.server,
-    settings: settings,
-    library: library,
-    events: events
-};
-
-module.exports = RED; 
+module.exports = new events.EventEmitter(); 
