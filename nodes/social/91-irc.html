@@ -43,7 +43,7 @@
         icon: "hash.png",
         label: function() {
             var ircNode = RED.nodes.node(this.ircserver);
-            return this.name||((ircNode?ircNode.label():"irc");
+            return this.name||(ircNode?ircNode.label():"irc");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
