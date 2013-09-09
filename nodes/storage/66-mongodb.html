@@ -86,7 +86,8 @@
         icon: "mongodb.png",
         align: "right",
         label: function() {
-            return this.name||((this.mongodb)?RED.nodes.node(this.mongodb).label()+"//"+this.collection:"mongodb");
+            var mongoNode = RED.nodes.node(this.mongodb);
+            return this.name||this.collection||(mongoNode?mongoNode.label():"mongodb");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -129,7 +130,8 @@
         outputs:1,
         icon: "mongodb.png",
         label: function() {
-            return this.name||((this.mongodb)?RED.nodes.node(this.mongodb).label()+"//"+this.collection:"mongodb");
+            var mongoNode = RED.nodes.node(this.mongodb);
+            return this.name||(mongoNode?mongoNode.label()+"//"+this.collection:"mongodb");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
