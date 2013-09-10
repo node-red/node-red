@@ -18,6 +18,7 @@
 
 // Require main module
 var RED = require("../../red/red");
+var idList = [];
 
 // main node definition
 function PauseNode(n) {
@@ -28,10 +29,20 @@ function PauseNode(n) {
    
    this.on("input", function(msg) {
        var node= this;
-       setTimeout(function(){node.send(msg);}, node.timeout);
+       var id;
+       id = setTimeout(function(){
+              idList.splice(idList.indexOf(id),1);
+              node.send(msg);
+            }, node.timeout);
+       idList.push(id);
    });
 }
 
 // register node
 RED.nodes.registerType("pause",PauseNode);
 
+PauseNode.prototype.close = function() {
+   for (var i=0; i<idList.length; i++ ) {
+       clearTimeout(idList[i]);
+   }
+}
