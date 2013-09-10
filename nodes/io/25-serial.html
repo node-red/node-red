@@ -42,7 +42,8 @@
         outputs:1,
         icon: "serial.png",
         label: function() {
-            return this.name||(this.serial)?RED.nodes.node(this.serial).label():"serial";
+            var serialNode = RED.nodes.node(this.serial);
+            return this.name||(serialNode?serialNode.label():"serial");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -80,7 +81,8 @@
         icon: "serial.png",
         align: "right",
         label: function() {
-            return this.name||((this.serial)?RED.nodes.node(this.serial).label():"serial");
+            var serialNode = RED.nodes.node(this.serial);
+            return this.name||(serialNode?serialNode.label():"serial");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";

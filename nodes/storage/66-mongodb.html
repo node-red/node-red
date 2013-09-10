@@ -27,10 +27,6 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="mongodb out">
-	<p>A MongoDB output node.</p>
-</script>
-
 <script type="text/javascript">
     RED.nodes.registerType('mongodb',{
         category: 'config',
@@ -47,11 +43,60 @@
 </script>
 
 
-
-
-
-
 <script type="text/x-red" data-template-name="mongodb out">
+    <div class="form-row">
+        <label for="node-input-mongodb"><i class="icon-tag"></i> Server</label>
+        <input type="text" id="node-input-mongodb">
+    </div>
+    <div class="form-row">
+        <label for="node-input-collection"><i class="icon-briefcase"></i> Collection</label>
+        <input type="text" id="node-input-collection" placeholder="collection">
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-payonly" placeholder="Only" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-payonly" style="width: 70%;">Only store msg.payload object ?</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="mongodb out">
+	<p>A simple MongoDB output node. Stores the <b>msg</b> object in a chosen collection.</p>
+	<p>By default MongoDB creates an <i>_id</i> property as the primary key - so repeated injections of the same <b>msg</b> will result in many database entries.</p>
+	<p>If this is NOT the desired behaviour - ie you want repeated entries to overwrite, then you must set the <b>msg._id</b> property to be a constant by the use of a previous function node.</p>
+	<p>This could be a unique constant or you could create one based on some other msg property.</p>
+	<p>Currently we do not limit or cap the collection size at all... this may well change.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('mongodb out',{
+        category: 'storage-output',
+        color:"rgb(218, 196, 180)",
+        defaults: {
+            mongodb: { type:"mongodb",required:true},
+            name: {value:""},
+            collection: {value:"",required:true},
+            payonly: {value:false}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "mongodb.png",
+        align: "right",
+        label: function() {
+            var mongoNode = RED.nodes.node(this.mongodb);
+            return this.name||this.collection||(mongoNode?mongoNode.label():"mongodb");
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+
+<script type="text/x-red" data-template-name="mongodb in">
     <div class="form-row">
         <label for="node-input-mongodb"><i class="icon-tag"></i> Server</label>
         <input type="text" id="node-input-mongodb">
@@ -64,16 +109,17 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-
 </script>
 
-<script type="text/x-red" data-help-name="mongodb out">
-	<p>A MongoDB output node.</p>
+<script type="text/x-red" data-help-name="mongodb in">
+	<p>Queries a MongoDB collection by using the <b>msg.payload</b> to be a MongoDB query statement as per the .find() function.</p>
+	<p>You may also (via a function) set a <b>msg.projection</b> object to constrain the returned fields, a <b>msg.sort</b> object and a <b>msg.limit</b> object.</p>
+	<p>All are optional - see the <a href="http://docs.mongodb.org/manual/reference/method/db.collection.find/" target="new"><i>MongoDB find docs</i></a> for examples.
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('mongodb out',{
-        category: 'storage-output',
+    RED.nodes.registerType('mongodb in',{
+        category: 'storage-input',
         color:"rgb(218, 196, 180)",
         defaults: {
             mongodb: { type:"mongodb",required:true},
@@ -81,11 +127,14 @@
             collection: {value:"",required:true},
         },
         inputs:1,
-        outputs:0,
+        outputs:1,
         icon: "mongodb.png",
-        align: "right",
         label: function() {
-            return this.name||this.collection||((this.mongodb)?RED.nodes.node(this.mongodb).label():"mongodb");
+            var mongoNode = RED.nodes.node(this.mongodb);
+            return this.name||(mongoNode?mongoNode.label()+"//"+this.collection:"mongodb");
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
         }
     });
 </script>

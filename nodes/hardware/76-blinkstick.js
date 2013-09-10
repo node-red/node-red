@@ -14,22 +14,29 @@
  * limitations under the License.
  **/
 
-var events = require("./events"); 
-var server = require("./server");
-var nodes = require("./nodes");
-var library = require("./library");
-var settings = require("../settings");
+var RED = require("../../red/red");
+var blinkstick = require("blinkstick");
 
+function BlinkStick(n) {
+	RED.nodes.createNode(this,n);
+	var p1 = /^#.*/
+	var p2 = /[0-9]+,[0-9]+,[0-9]+/
 
-var events = require("events");
+	this.led = new blinkstick.findFirst();
+	var node = this;
 
-var RED = {
-    nodes: nodes,
-    app: server.app,
-    server: server.server,
-    settings: settings,
-    library: library,
-    events: events
-};
+	node.log("started");
+	this.on("input", function(msg) {
+		if (msg != null) {
+				if ((p1.test(msg.payload))|(p2.test(msg.payload))) {
+					node.led.setColor(msg.payload);
+				}
+				else {
+					node.error("Incorrect format: "+msg.payload);
+				}
+		}
+	});
 
-module.exports = RED; 
+}
+
+RED.nodes.registerType("blinkstick",BlinkStick);

@@ -30,25 +30,26 @@ function MongoOutNode(n) {
     RED.nodes.createNode(this,n);
     this.collection = n.collection;
     this.mongodb = n.mongodb;
+    this.payonly = n.payonly || false;
     this.mongoConfig = RED.nodes.getNode(this.mongodb);
 
     if (this.mongoConfig) {
         var node = this;
-
         this.clientDb = new mongo.Db(node.mongoConfig.db, new mongo.Server(node.mongoConfig.hostname, node.mongoConfig.port, {}), {w: 1});
         this.clientDb.open(function(err,cli) {
-                if (err) { node.error(err); }
-                else {
-                    node.clientDb.collection(node.collection,function(err,coll) {
-                            if (err) { node.error(err); }
-                            else {
-                                node.on("input",function(msg) {
-                                        delete msg._topic;
-                                        coll.save(msg,function(err,item){if (err){node.error(err);}});
-                                });
-                            }
-                    });
-                }
+            if (err) { node.error(err); }
+            else {
+                node.clientDb.collection(node.collection,function(err,coll) {
+                        if (err) { node.error(err); }
+                        else {
+                            node.on("input",function(msg) {
+                                    delete msg._topic;
+                                    if (node.payonly) coll.save(msg.payload,function(err,item){if (err){node.error(err);}});
+                                    else coll.save(msg,function(err,item){if (err){node.error(err);}});
+                            });
+                        }
+                });
+            }
         });
     } else {
         this.error("missing mongodb configuration");
@@ -63,4 +64,45 @@ MongoOutNode.prototype.close = function() {
     }
 }
 
+function MongoInNode(n) {
+    RED.nodes.createNode(this,n);
+    this.collection = n.collection;
+    this.mongodb = n.mongodb;
+    this.mongoConfig = RED.nodes.getNode(this.mongodb);
 
+    if (this.mongoConfig) {
+        var node = this;
+        this.clientDb = new mongo.Db(node.mongoConfig.db, new mongo.Server(node.mongoConfig.hostname, node.mongoConfig.port, {}), {w: 1});
+        this.clientDb.open(function(err,cli) {
+            if (err) { node.error(err); }
+            else {
+                node.clientDb.collection(node.collection,function(err,coll) {
+                    if (err) { node.error(err); }
+                    else {
+                        node.on("input",function(msg) {
+                            msg.projection = msg.projection || {};
+                            coll.find(msg.payload,msg.projection).sort(msg.sort).limit(msg.limit).toArray(function(err, items) {
+                                if (err) { node.error(err); }
+                                msg.payload = items;
+                                delete msg.projection;
+                                delete msg.sort;
+                                delete msg.limit;
+                                node.send(msg);
+                            });
+                        });
+                    }
+                });
+            }
+        });
+    } else {
+        this.error("missing mongodb configuration");
+    }
+}
+
+RED.nodes.registerType("mongodb in",MongoInNode);
+
+MongoInNode.prototype.close = function() {
+    if (this.clientDb) {
+        this.clientDb.close();
+    }
+}
