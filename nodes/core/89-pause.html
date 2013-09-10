@@ -46,7 +46,7 @@
         outputs:1,               // set the number of outputs - 0 to n
         icon: "arrow-in.png",    // set the icon (held in public/icons)
         label: function() {      // sets the default label contents
-            return this.name||this.topic||"pause "+this.timeout+" s";
+            return this.name||"pause "+this.timeout+" s";
         },
         labelStyle: function() { // sets the class to apply to the label
             return this.name?"node_label_italic":"";
