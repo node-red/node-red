@@ -21,8 +21,14 @@ var app = express();
 
 function setupUI(settings) {
     
-    app.get(/^$/,function(req,res) {
-        res.redirect("/");
+    // Need to ensure the url ends with a '/' so the static serving works
+    // with relative paths
+    app.get("/",function(req,res) {
+            if (req.originalUrl.slice(-1) != "/") {
+                res.redirect(req.originalUrl+"/");
+            } else {
+                req.next();
+            }
     });
     
     app.use("/",express.static(__dirname + '/../public'));

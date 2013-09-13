@@ -17,33 +17,31 @@ var http = require('http');
 var https = require('https');
 var util = require("util");
 var express = require("express");
+var crypto = require("crypto");
 var settings = require("./settings");
-
-var redApp = null;
-
-if (settings.https) {
-    server = https.createServer(settings.https,function(req,res){redApp(req,res);});
-} else {
-    server = http.createServer(function(req,res){redApp(req,res);});
-}
-
-redApp = require('./red/server.js').init(server,settings);
 
 var server;
 var app = express();
 
-settings.httpRoot = settings.httpRoot||"";
-if (settings.httpRoot.slice(-1) == "/") {
-    settings.httpRoot = settings.httpRoot.slice(0,-1);
+var redApp = null;
+
+if (settings.https) {
+    server = https.createServer(settings.https,function(req,res){app(req,res);});
+} else {
+    server = http.createServer(function(req,res){app(req,res);});
 }
+
+redApp = require('./red/server.js').init(server,settings);
+
+settings.httpRoot = settings.httpRoot||"/";
+
 if (settings.httpRoot[0] != "/") {
     settings.httpRoot = "/"+settings.httpRoot;
 }
-if (settings.httpRoot == "/") {
-    settings.httpRoot = "";
+if (settings.httpRoot.slice(-1) != "/") {
+    settings.httpRoot = settings.httpRoot + "/";
 }
 settings.uiPort = settings.uiPort||1880;
-
 
 if (settings.httpAuth) {
     app.use(settings.httpRoot,
