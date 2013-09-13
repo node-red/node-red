@@ -29,7 +29,7 @@ function BlinkStick(n) {
 	RED.nodes.createNode(this,n);
 	var p1 = /^\#[A-Za-z0-9]{6}$/
 	var p2 = /[0-9]+,[0-9]+,[0-9]+/
-	this.led = blinkstick.findFirst(); // maybe try findAll() ?
+	this.led = blinkstick.findFirst(); // maybe try findAll() (one day)
 	var node = this;
 
 	node.log("started");
@@ -40,12 +40,16 @@ function BlinkStick(n) {
 					var rgb = msg.payload.split(",");
 					node.led.setColor(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
 				}
-				if ((p1.test(msg.payload))|(p2.test(msg.payload))) {
+				else if ((p1.test(msg.payload))|(p2.test(msg.payload))) {
 					node.led.setColor(msg.payload);
 				}
-				// TODO - need to handle colour strings...
 				else {
-					node.error("Incorrect format: "+msg.payload);
+					try {
+						node.led.setColor(msg.payload);
+					}
+					catch (err) {
+						node.error("Incorrect format: "+msg.payload);
+					}
 				}
 			}
 			else {
