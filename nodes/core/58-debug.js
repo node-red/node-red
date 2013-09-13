@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 var RED = require("../../red/red");
- 
+
 var util = require("util");
 var ws = require('ws');
 var events = require("events");
@@ -45,7 +45,14 @@ DebugNode.send = function(msg) {
 	if (msg.msg instanceof Error) {
 		msg.msg = msg.msg.toString();
 	} else if (typeof msg.msg === 'object') {
-		msg.msg = "(Object) "+JSON.stringify(msg.msg,null,1);
+		try {
+			msg.msg = "(Object) "+JSON.stringify(msg.msg,null,1);
+		}
+		catch (err) {
+			console.log(msg.msg);
+			console.log(err);
+			msg.msg = "[Error] Can't stringify object with circular reference - see console log.";
+		}
 	} else if (msg.msg == 0) msg.msg = "0";
 
 	for (var i in DebugNode.activeConnections) {
