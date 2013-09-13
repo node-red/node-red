@@ -17,23 +17,40 @@
 var RED = require("../../red/red");
 var blinkstick = require("blinkstick");
 
+Object.size = function(obj) {
+	var size = 0, key;
+	for (key in obj) {
+		if (obj.hasOwnProperty(key)) size++;
+	}
+	return size;
+};
+
 function BlinkStick(n) {
 	RED.nodes.createNode(this,n);
-	var p1 = /^#.*/
+	var p1 = /^\#[A-Za-z0-9]{6}$/
 	var p2 = /[0-9]+,[0-9]+,[0-9]+/
-
-	this.led = new blinkstick.findFirst();
+	this.led = blinkstick.findFirst(); // maybe try findAll() ?
 	var node = this;
 
 	node.log("started");
 	this.on("input", function(msg) {
 		if (msg != null) {
+			if (Object.size(blinkstick.findFirst()) !== 0) {
+				if (p2.test(msg.payload)) {
+					var rgb = msg.payload.split(",");
+					node.led.setColor(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
+				}
 				if ((p1.test(msg.payload))|(p2.test(msg.payload))) {
 					node.led.setColor(msg.payload);
 				}
+				// TODO - need to handle colour strings...
 				else {
 					node.error("Incorrect format: "+msg.payload);
 				}
+			}
+			else {
+				node.error("No BlinkStick found");
+			}
 		}
 	});
 
