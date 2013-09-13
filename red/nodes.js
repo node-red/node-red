@@ -66,7 +66,7 @@ var registry = (function() {
                 events.emit("nodes-stopped");
                 nodes = {};
             },
-            
+
             addLogHandler: function(handler) {
                 logHandlers.push(handler);
             }
@@ -87,7 +87,7 @@ var node_type_registry = (function() {
         var obj = {
             register: function(type,node) {
                 util.inherits(node, Node);
-                
+
                 var callerFilename = getCallerFilename(type);
                 if (callerFilename == null) {
                     util.log("["+type+"] unable to determine filename");
@@ -115,7 +115,7 @@ var node_type_registry = (function() {
                     result += node_configs[nt];
                 }
                 return result;
-                
+
             }
         }
         return obj;
@@ -253,9 +253,9 @@ module.exports.load = function() {
                 }
         });
     }
-    
+
     loadNodes("nodes");
-    
+
     events.emit("nodes-loaded");
 }
 
@@ -265,22 +265,27 @@ module.exports.getNode = function(nid) {
     return registry.get(nid);
 }
 module.exports.parseConfig = function(conf) {
-    
+
     registry.clear();
-    
+
     events.emit("nodes-starting");
     for (var i in conf) {
         var nn = null;
         var nt = node_type_registry.get(conf[i].type);
         if (nt) {
-            nn = new nt(conf[i]);
+			try {
+				nn = new nt(conf[i]);
+			}
+			catch (err) {
+				util.log("[red] "+conf[i].type+" : "+err);
+			}
         }
         // console.log(nn);
         if (nn == null) {
             util.log("[red] unknown type: "+conf[i].type);
         }
     }
-    
+
     // Clean up any orphaned credentials
     var deletedCredentials = false;
     for (var c in credentials) {
@@ -296,4 +301,3 @@ module.exports.parseConfig = function(conf) {
     events.emit("nodes-started");
 
 }
-
