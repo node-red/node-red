@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 var RED = require("../../red/red");
- 
+
 var util = require("util");
 var ws = require('ws');
 var events = require("events");
@@ -28,12 +28,12 @@ function DebugNode(n) {
 	this.on("input",function(msg) {
 		if (this.active) {
 			if (msg.payload instanceof Buffer) {
-			    msg.payload = "(Buffer) "+msg.payload.toString();
+				msg.payload = "(Buffer) "+msg.payload.toString();
 			}
 			if (this.complete) {
-			    DebugNode.send({id:this.id,name:this.name,topic:msg.topic,msg:msg,_path:msg._path});
+				DebugNode.send({id:this.id,name:this.name,topic:msg.topic,msg:msg,_path:msg._path});
 			} else {
-			    DebugNode.send({id:this.id,name:this.name,topic:msg.topic,msg:msg.payload,_path:msg._path});
+				DebugNode.send({id:this.id,name:this.name,topic:msg.topic,msg:msg.payload,_path:msg._path});
 			}
 		}
 	});
@@ -44,9 +44,19 @@ RED.nodes.registerType("debug",DebugNode);
 DebugNode.send = function(msg) {
 	if (msg.msg instanceof Error) {
 		msg.msg = msg.msg.toString();
-	} else if (typeof msg.msg === 'object') {
-		msg.msg = "(Object) "+JSON.stringify(msg.msg,null,1);
-	} else if (msg.msg == 0) msg.msg = "0";
+	}
+	else if (typeof msg.msg === 'object') {
+		try {
+			msg.msg = "(Object) "+JSON.stringify(msg.msg,null,1);
+		}
+		catch (err) {
+			console.log(msg.msg);
+			console.log(err);
+			msg.msg = "[Error] Can't stringify object with circular reference - see console log.";
+		}
+	}
+	else if (typeof msg.msg === "boolean") msg.msg = "(boolean) "+msg.msg.toString();
+	else if (msg.msg === 0) msg.msg = "0";
 
 	for (var i in DebugNode.activeConnections) {
 		var ws = DebugNode.activeConnections[i];
@@ -85,11 +95,11 @@ RED.app.post("/debug/:id", function(req,res) {
 	var node = RED.nodes.getNode(req.params.id);
 	if (node != null) {
 		if (node.active) {
-		    node.active = false;
-		    res.send(201);
+			node.active = false;
+			res.send(201);
 		} else {
-		    node.active = true;
-		    res.send(200);
+			node.active = true;
+			res.send(200);
 		}
 	} else {
 		res.send(404);
