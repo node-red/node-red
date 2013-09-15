@@ -19,9 +19,7 @@ var blinkstick = require("blinkstick");
 
 Object.size = function(obj) {
 	var size = 0, key;
-	for (key in obj) {
-		if (obj.hasOwnProperty(key)) size++;
-	}
+	for (key in obj) { if (obj.hasOwnProperty(key)) size++; }
 	return size;
 };
 
@@ -32,31 +30,30 @@ function BlinkStick(n) {
 	this.led = blinkstick.findFirst(); // maybe try findAll() (one day)
 	var node = this;
 
-	node.log("started");
 	this.on("input", function(msg) {
 		if (msg != null) {
-			if (Object.size(blinkstick.findFirst()) !== 0) {
+			if (Object.size(node.led) !== 0) {
 				if (p2.test(msg.payload)) {
 					var rgb = msg.payload.split(",");
-					node.led.setColor(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
-				}
-				else if ((p1.test(msg.payload))|(p2.test(msg.payload))) {
-					node.led.setColor(msg.payload);
+					node.led.setColor(parseInt(rgb[0])&255, parseInt(rgb[1])&255, parseInt(rgb[2])&255);
 				}
 				else {
 					try {
 						node.led.setColor(msg.payload);
 					}
 					catch (err) {
-						node.error("Incorrect format: "+msg.payload);
+						node.warn("Incorrect format: "+msg.payload);
 					}
 				}
 			}
 			else {
-				node.error("No BlinkStick found");
+				node.warn("No BlinkStick found");
 			}
 		}
 	});
+	if (Object.size(node.led) === 0) {
+		node.error("No BlinkStick found");
+	}
 
 }
 
