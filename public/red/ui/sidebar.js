@@ -75,6 +75,7 @@ RED.sidebar = function() {
             $("#main-container").removeClass("sidebar-closed");
         }
     }
+    toggleSidebar();
     
     function addTab(title,content) {
         var tab = document.createElement("li");
