@@ -113,10 +113,16 @@
 
         var sbc = document.getElementById("debug-content");
 
+        var errornotification = null;
+        
         function debugConnect() {
             //console.log("debug ws connecting");
             var ws = new WebSocket("ws://"+location.hostname+":"+location.port+document.location.pathname+"/debug");
             ws.onopen = function() {
+                if (errornotification) {
+                    errornotification.close();
+                    errornotification = null;
+                }
                 //console.log("debug ws connected");
             }
             ws.onmessage = function(event) {
@@ -158,7 +164,9 @@
                 }
             };
             ws.onclose = function() {
-                //console.log("debug ws closed");
+                if (errornotification == null) {
+                    errornotification = RED.notify("<b>Error</b>: Lost connection to server","error",true);
+                }
                 setTimeout(debugConnect,1000);
             }
         }
