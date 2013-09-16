@@ -19,6 +19,7 @@ var RED = require("../../red/red");
 var util = require("util");
 var ws = require('ws');
 var events = require("events");
+var debuglength = RED.settings.debugMaxLength||512;
 
 function DebugNode(n) {
 	RED.nodes.createNode(this,n);
@@ -50,13 +51,27 @@ DebugNode.send = function(msg) {
 			msg.msg = "(Object) "+JSON.stringify(msg.msg,null,1);
 		}
 		catch (err) {
-			console.log(msg.msg);
-			console.log(err);
-			msg.msg = "[Error] Can't stringify object with circular reference - see console log.";
+			// DCJ - either can just report the circularity...
+			//msg.msg = "[Error] Can't stringify object with circular reference - see console log.";
+			// or dump out bits we can... (but things like http are mahoosive objects)
+			var seen = [];
+			msg.msg = "(Circular Object) " + JSON.stringify(msg.msg, function(key, value) {
+				if (typeof value === 'object' && value !== null) {
+					if (seen.indexOf(value) !== -1) { return; }
+					seen.push(value);
+				}
+				return value;
+			});
+			seen = null;
 		}
 	}
+
 	else if (typeof msg.msg === "boolean") msg.msg = "(boolean) "+msg.msg.toString();
 	else if (msg.msg === 0) msg.msg = "0";
+
+	if (msg.msg.length > debuglength) {
+		msg.msg = msg.msg.substr(0,debuglength) +" ...(more)";
+	}
 
 	for (var i in DebugNode.activeConnections) {
 		var ws = DebugNode.activeConnections[i];
