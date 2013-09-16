@@ -23,7 +23,7 @@ function Blink1Node(n) {
 	var node = this;
 
 	try {
-		var p1 = /^\#[A-Za-z0-9]{6}$/
+		var p1 = /^\#[A-Fa-f0-9]{6}$/
 		var p2 = /[0-9]+,[0-9]+,[0-9]+/
 		this.on("input", function(msg) {
 			if (blink1) {
@@ -53,7 +53,7 @@ function Blink1Node(n) {
 		var blink1 = new Blink1.Blink1();
 	}
 	catch(e) {
-		node.error("no Blink1 found");
+		node.error("No Blink1 found");
 	}
 }
 

@@ -25,7 +25,7 @@ catch (err) { util.log("[77-ledborg.js] Error: PiBorg hardware : LedBorg not fou
 function LedBorgNode(n) {
 	RED.nodes.createNode(this,n);
 	var p1 = /[0-2][0-2][0-2]/
-	var p2 = /^\#[A-Za-z0-9]{6}$/
+	var p2 = /^\#[A-Fa-f0-9]{6}$/
 	var node = this;
 
 	this.on("input", function(msg) {
