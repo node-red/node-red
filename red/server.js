@@ -60,7 +60,7 @@ function createServer(_server,settings) {
                             if(err) {
                                 util.log(err);
                             } else {
-                                redNodes.parseConfig(JSON.parse(fullBody));
+                                redNodes.setConfig(JSON.parse(fullBody));
                             }
                     });
             });
@@ -79,13 +79,12 @@ function createServer(_server,settings) {
     util.log('or any other errors are resolved');
     util.log("------------------------------------------");
 
-    util.log("[red] Loading workspace flow : "+rulesfile);
-
     
     fs.exists(rulesfile, function (exists) {
             if (exists) {
+                util.log("[red] Loading workspace flow : "+rulesfile);
                 fs.readFile(rulesfile,'utf8',function(err,data) {
-                        redNodes.parseConfig(JSON.parse(data));
+                        redNodes.setConfig(JSON.parse(data));
                 });
             }
     });

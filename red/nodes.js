@@ -98,6 +98,7 @@ var node_type_registry = (function() {
                         if (! node_configs[configFilename]) {
                             node_configs[configFilename] = fs.readFileSync(configFilename,'utf8');
                         }
+                        events.emit("type-registered",type);
                     } else {
                         util.log("["+type+"] missing template file: "+configFilename);
                     }
@@ -105,9 +106,6 @@ var node_type_registry = (function() {
             },
             get: function(type) {
                 return node_types[type];
-            },
-            registerNodeConfig: function(type,config) {
-                node_configs[type] = config;
             },
             getNodeConfigs: function() {
                 var result = "";
@@ -256,33 +254,75 @@ module.exports.load = function() {
 
     loadNodes("nodes");
 
-    events.emit("nodes-loaded");
+    //events.emit("nodes-loaded");
 }
 
+
+
+var activeConfig = null;
+var missingTypes = [];
+
+events.on('type-registered',function(type) {
+        if (missingTypes.length > 0) {
+            var i = missingTypes.indexOf(type);
+            if (i != -1) {
+                missingTypes.splice(i,1);
+                util.log("[red] Missing type registered: "+type);
+            }
+            if (missingTypes.length == 0) {
+                parseConfig();
+            }
+        }
+});
 
 
 module.exports.getNode = function(nid) {
     return registry.get(nid);
 }
-module.exports.parseConfig = function(conf) {
-
+module.exports.setConfig = function(conf) {
+    if (activeConfig&&activeConfig.length > 0) {
+        util.log("[red] Stopping flows");
+    }
     registry.clear();
+    activeConfig = conf;
+    parseConfig();
+}
 
+var parseConfig = function() {
+
+    missingTypes = [];
+    for (var i in activeConfig) {
+        var type = activeConfig[i].type;
+        var nt = node_type_registry.get(type);
+        if (!nt && missingTypes.indexOf(type) == -1) {
+            missingTypes.push(type);
+        }
+    };
+    if (missingTypes.length > 0) {
+        util.log("[red] Waiting for missing types to be registered:");
+        for (var i in missingTypes) {
+            util.log("[red]  - "+missingTypes[i]);
+        }
+        
+        return;
+    }
+
+    util.log("[red] Starting flows");
     events.emit("nodes-starting");
-    for (var i in conf) {
+    for (var i in activeConfig) {
         var nn = null;
-        var nt = node_type_registry.get(conf[i].type);
+        var nt = node_type_registry.get(activeConfig[i].type);
         if (nt) {
 			try {
-				nn = new nt(conf[i]);
+				nn = new nt(activeConfig[i]);
 			}
 			catch (err) {
-				util.log("[red] "+conf[i].type+" : "+err);
+				util.log("[red] "+activeConfig[i].type+" : "+err);
 			}
         }
         // console.log(nn);
         if (nn == null) {
-            util.log("[red] unknown type: "+conf[i].type);
+            util.log("[red] unknown type: "+activeConfig[i].type);
         }
     }
 
