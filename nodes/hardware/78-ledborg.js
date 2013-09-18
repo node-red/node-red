@@ -18,9 +18,11 @@ var RED = require("../../red/red");
 var util =  require('util');
 var fs =  require('fs');
 
-// read from /dev/ledborg to see if it exists - if not then don't even show the node.
-try { var rc = fs.readFileSync("/dev/ledborg"); }
-catch (err) { util.log("[77-ledborg.js] Error: PiBorg hardware : LedBorg not found"); return; }
+// check if /dev/ledborg exists - if not then don't even show the node.
+if (!fs.existsSync("/dev/ledborg")) {
+	util.log("[78-ledborg.js] Error: PiBorg hardware : LedBorg not found");
+	return;
+}
 
 function LedBorgNode(n) {
 	RED.nodes.createNode(this,n);
