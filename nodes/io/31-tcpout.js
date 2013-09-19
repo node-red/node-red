@@ -15,7 +15,7 @@
  **/
 
 var RED = require("../../red/red");
-var reConnect = RED.settings.socketReconnectTime||10000;
+var reconnectTime = RED.settings.socketReconnectTime||10000;
 var net = require('net');
 
 function TcpOut(n) {
@@ -25,67 +25,93 @@ function TcpOut(n) {
 	this.base64 = n.base64;
 	this.beserver = n.beserver;
 	this.name = n.name;
+	this.closing = false;
 	var node = this;
 
-	if (!node.beserver) {
-		var client = new net.Socket();
-		var to;
-
+	if (!node.beserver||node.beserver=="client") {
+		var reconnectTimeout;
+		var client = null;
+		var connected = false;
+		
 		function setupTcpClient() {
-			client.connect(node.port, node.host, function() {
-				node.log("output connected to "+node.host+":"+node.port);
+			node.log("connecting to "+node.host+":"+node.port);
+			client = net.connect(node.port, node.host, function() {
+			        connected = true;
+			        node.log("connected to "+node.host+":"+node.port);
 			});
-
+			
 			client.on('error', function (err) {
-				node.error('error : '+err);
-				to = setTimeout(setupTcpClient, reConnect);
+			        node.log('error : '+err);
 			});
-
+			
 			client.on('end', function (err) {
-				node.log("output disconnected");
-				to = setTimeout(setupTcpClient, reConnect);
 			});
-
+			
 			client.on('close', function() {
-				client.destroy();
-				node.log('closed');
-				to = setTimeout(setupTcpClient, reConnect);
-			});
-
-			node.on("input", function(msg) {
-				if (msg.payload != null) {
-					if (node.base64) { client.write(new Buffer(msg.payload,'base64')); }
-					else { client.write(msg.payload);}
-				}
+			        node.log("connection lost to "+node.host+":"+node.port);
+			        connected = false;
+			        client.destroy();
+			        if (!node.closing) {
+			            reconnectTimeout = setTimeout(setupTcpClient,reconnectTime);
+			        }
 			});
 		}
 		setupTcpClient();
-
+		
+		
+		node.on("input", function(msg) {
+				if (connected && msg.payload != null) {
+				    if (Buffer.isBuffer(msg.payload)) {
+				        client.write(msg.payload);
+				    } else if (typeof msg.payload === "string" && node.base64) {
+				        client.write(new Buffer(msg.payload,'base64'));
+				    } else {
+				        client.write(new Buffer(""+msg.payload));
+				    }
+				}
+		});
+		
+		
 		this._close = function() {
+		    this.closing = true;
 			client.end();
-			clearTimeout(to);
-			node.log('output stopped');
+			clearTimeout(reconnectTimeout);
 		}
 	}
 
 	else {
+	    var connectedSockets = [];
 		var server = net.createServer(function (socket) {
-			socket.on("connect",function() {
-				node.log("Connection from "+socket.remoteAddress);
-			});
-			node.on("input", function(msg) {
-				if (msg.payload != null) {
-					if (node.base64) { socket.write(new Buffer(msg.payload,'base64')); }
-					else { socket.write(msg.payload);}
-				}
-			});
+				var remoteDetails = socket.remoteAddress+":"+socket.remotePort;
+				node.log("connection from "+remoteDetails);
+				connectedSockets.push(socket);
+				socket.on('close',function() {
+				        node.log("connection closed from "+remoteDetails);
+				        connectedSockets.splice(connectedSockets.indexOf(socket),1);
+				});
 		});
+		node.on("input", function(msg) {
+				if (msg.payload != null) {
+				    var buffer;
+				    if (Buffer.isBuffer(msg.payload)) {
+				        buffer = msg.payload;
+				    } else if (typeof msg.payload === "string" && node.base64) {
+				        buffer = new Buffer(msg.payload,'base64');
+				    } else {
+				        buffer = new Buffer(""+msg.payload);
+				    }
+				    for (var i = 0; i<connectedSockets.length;i+=1) {
+				        connectedSockets[i].write(buffer);
+				    }
+				}
+		});
+
 		server.listen(node.port);
-		node.log('socket output on port '+node.port);
+		node.log('listening on port '+node.port);
 
 		this._close = function() {
 			server.close();
-			node.log('output stopped');
+			node.log('stopped listening on port '+node.port);
 		}
 	}
 }
