@@ -16,18 +16,20 @@
 
 <script type="text/x-red" data-template-name="debug">
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-complete"><i class="icon-list"></i> Output</label>
+        <select type="text" id="node-input-complete" style="display: inline-block; width: auto; vertical-align: top;">
+            <option value=false>Payload only</option>
+            <option value=true>Complete msg object</option>
+        </select>
     </div>
     <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-complete" placeholder="Complete" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-complete" style="width: 70%;">Show complete msg object ?</label>
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="debug">
-	<p>The Debug node can be connected to the output of any node. It will display the timestamp, <b>msg.topic</b> and <b>msg.payload</b> fields of any messages it receives in the debug tab of the sidebar. 
+	<p>The Debug node can be connected to the output of any node. It will display the timestamp, <b>msg.topic</b> and <b>msg.payload</b> fields of any messages it receives in the debug tab of the sidebar.
 	<br/>The sidebar can be accessed under the options drop-down in the top right corner.</p>
 	<p>The button to the right of the node will toggle it's output on and off so you can de-clutter the debug window.</p>
 	<p>If the payload is an object it will be stringified first for display and indicate that by saying "(Object) ".</p>
@@ -113,10 +115,16 @@
 
         var sbc = document.getElementById("debug-content");
 
+        var errornotification = null;
+        
         function debugConnect() {
             //console.log("debug ws connecting");
             var ws = new WebSocket("ws://"+location.hostname+":"+location.port+document.location.pathname+"/debug");
             ws.onopen = function() {
+                if (errornotification) {
+                    errornotification.close();
+                    errornotification = null;
+                }
                 //console.log("debug ws connected");
             }
             ws.onmessage = function(event) {
@@ -158,7 +166,9 @@
                 }
             };
             ws.onclose = function() {
-                //console.log("debug ws closed");
+                if (errornotification == null) {
+                    errornotification = RED.notify("<b>Error</b>: Lost connection to server","error",true);
+                }
                 setTimeout(debugConnect,1000);
             }
         }

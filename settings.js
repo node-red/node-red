@@ -17,6 +17,7 @@ module.exports = {
     uiPort: 1880,
     mqttReconnectTime: 15000,
     serialReconnectTime: 15000,
+    debugMaxLength: 1000,
 
     // You can protect the user interface with a userid and password by using the following property
     // the password must be an md5 hash  eg.. 5f4dcc3b5aa765d61d8327deb882cf99 ('password')
@@ -33,7 +34,7 @@ module.exports = {
     //    key: fs.readFileSync('privatekey.pem'),
     //    cert: fs.readFileSync('certificate.pem')
     //},
-    
+
     // Anything in this hash is globally available to all functions.
     // It is accessed as context.global.
     // eg:

@@ -236,7 +236,10 @@ a.brand img {
 }
 
 .node_label_italic {
-  font-style:italic;
+  font-style: italic;
+}
+.node_label_white {
+  fill: #eee !important;
 }
 .node_label {
    stroke-width: 0;

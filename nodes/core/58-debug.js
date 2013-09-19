@@ -19,21 +19,25 @@ var RED = require("../../red/red");
 var util = require("util");
 var ws = require('ws');
 var events = require("events");
+var debuglength = RED.settings.debugMaxLength||1000;
 
 function DebugNode(n) {
 	RED.nodes.createNode(this,n);
 	this.name = n.name;
 	this.complete = n.complete;
 	this.active = (n.active == null)||n.active;
+
 	this.on("input",function(msg) {
 		if (this.active) {
 			if (msg.payload instanceof Buffer) {
 				msg.payload = "(Buffer) "+msg.payload.toString();
 			}
-			if (this.complete) {
+			if (this.complete == "true") {
 				DebugNode.send({id:this.id,name:this.name,topic:msg.topic,msg:msg,_path:msg._path});
 			} else {
-				DebugNode.send({id:this.id,name:this.name,topic:msg.topic,msg:msg.payload,_path:msg._path});
+				if (typeof msg.payload !== "undefined") {
+					DebugNode.send({id:this.id,name:this.name,topic:msg.topic,msg:msg.payload,_path:msg._path});
+				}
 			}
 		}
 	});
@@ -46,17 +50,22 @@ DebugNode.send = function(msg) {
 		msg.msg = msg.msg.toString();
 	}
 	else if (typeof msg.msg === 'object') {
-		try {
-			msg.msg = "(Object) "+JSON.stringify(msg.msg,null,1);
-		}
-		catch (err) {
-			console.log(msg.msg);
-			console.log(err);
-			msg.msg = "[Error] Can't stringify object with circular reference - see console log.";
-		}
+		var seen = [];
+		msg.msg = "(Object) " + JSON.stringify(msg.msg, function(key, value) {
+			if (typeof value === 'object' && value !== null) {
+				if (seen.indexOf(value) !== -1) { return "[circular]"; }
+				seen.push(value);
+			}
+			return value;
+		}," ");
+		seen = null;
 	}
 	else if (typeof msg.msg === "boolean") msg.msg = "(boolean) "+msg.msg.toString();
 	else if (msg.msg === 0) msg.msg = "0";
+
+	if (msg.msg.length > debuglength) {
+		msg.msg = msg.msg.substr(0,debuglength) +" ....";
+	}
 
 	for (var i in DebugNode.activeConnections) {
 		var ws = DebugNode.activeConnections[i];

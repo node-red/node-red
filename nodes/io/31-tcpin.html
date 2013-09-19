@@ -16,22 +16,36 @@
 
 <script type="text/x-red" data-template-name="tcp in">
     <div class="form-row">
-        <label for="node-input-host"><i class="icon-bookmark"></i> Host</label>
-        <input type="text" id="node-input-host" placeholder="localhost" style="width: 40%;" >
+        <label for="node-input-server"><i class="icon-resize-small"></i> Type</label>
+        <select id="node-input-server" style="width:120px; margin-right:5px;">
+            <option value="server">Listen on</option>
+            <option value="client">Connect to</option>
+        </select>
+        port <input type="text" id="node-input-port" style="width: 50px">
+    </div>
+    <div class="form-row hidden" id="node-input-host-row" style="padding-left: 110px;"> 
+        at host <input type="text" id="node-input-host" placeholder="localhost" style="width: 40%;">
+    </div>
 
-        <label for="node-input-port" style="margin-left: 10px; width: 35px;"> Port</label>
-        <input type="text" id="node-input-port" placeholder="Port" style="width: 45px">
-    </div>
     <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-server" placeholder="server" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-server" style="width: 70%;">Be a server socket ?</label>
+        <label><i class="icon-th"></i> Output</label>
+        a 
+        <select id="node-input-datamode" style="width:110px;">
+            <option value="stream">stream of</option>
+            <option value="single">single</option>
+        </select>
+        <select id="node-input-datatype" style="width:140px;">
+            <option value="buffer">Buffer</option>
+            <option value="utf8">String</option>
+            <option value="base64">Base64 String</option>
+        </select>
+        payload<span id="node-input-datamode-plural">s</span>
     </div>
-    <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-base64" placeholder="base64" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-base64" style="width: 70%;">Base64 encode payload ?</label>
+
+    <div id="node-row-newline" class="form-row hidden" style="padding-left: 110px;">
+        delimited by <input type="text" id="node-input-newline" style="width: 110px;">
     </div>
+    
     <div class="form-row">
         <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
         <input type="text" id="node-input-topic" placeholder="Topic">
@@ -40,15 +54,11 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-tips">Tip: sends the received data as a Buffer object (not a String).<br/>If you select server socket the host defaults to localhost.</div>
 </script>
 
 <script type="text/x-red" data-help-name="tcp in">
-	<p>Provides a choice of tcp input connections. Can either be a client - or provide a listening socket.</p>
-	<p>The TCP node produces a <i>BUFFER</i> object <b></b>msg.payload</b> and NOT a String. If you need a String then use <i>.toString()</i> on <b>msg.payload</b> in your next function block.</p>
-	<p>It also provides <b>msg.fromip</b> of the form ipaddress:port .</p>
-	<p>You can select Base64 encoding if you want to make it easy to preserve the complete message as a string.</p>
-	<p>In case of disconnection the client trys to reconnect every 10 secs. Topic is optional.</p>
+	<p>Provides a choice of tcp inputs. Can either connect to a remote tcp port, 
+	   or accept incoming connections.</p>
 </script>
 
 <script type="text/javascript">
@@ -56,24 +66,51 @@
         category: 'input',
         color:"Silver",
         defaults: {
-            host: {value:"127.0.0.1",required:true},
+            server: {value:"server",required:true},
+            host: {value:"",validate:function(v) { return (this.server == "server")||v.length > 0;} },
             port: {value:"",required:true,validate:RED.validators.number()},
-            base64: {value:false,required:true},
-            server: {value:false,required:true},
+            datamode:{value:"stream"},
+            datatype:{value:"buffer"},
+            newline:{value:""},
             topic: {value:""},
-            name: {value:""}
+            name: {value:""},
+            base64: {/*deprecated*/ value:false,required:true}
         },
         inputs:0,
         outputs:1,
         icon: "bridge-dash.png",
         label: function() {
-			if ((this.host!="") & (this.port!="")) {
-				return this.name||(this.host+":"+this.port);
-			}
-			else { return "tcp in"; }
+            return this.name || "tcp:"+(this.host?this.host+":":"")+this.port;
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            var updateOptions = function() {
+                var sockettype = $("#node-input-server option:selected").val();
+                if (sockettype == "client") {
+                    $("#node-input-host-row").show();
+                } else {
+                    $("#node-input-host-row").hide();
+                }
+                var datamode = $("#node-input-datamode option:selected").val();
+                var datatype = $("#node-input-datatype option:selected").val();
+                if (datamode == "stream") {
+                    $("#node-input-datamode-plural").show();
+                    if (datatype == "utf8") {
+                        $("#node-row-newline").show();
+                    } else {
+                        $("#node-row-newline").hide();
+                    }
+                } else {
+                    $("#node-input-datamode-plural").hide();
+                    $("#node-row-newline").hide();
+                }
+            };
+            updateOptions();
+            $("#node-input-server").change(updateOptions);
+            $("#node-input-datatype").change(updateOptions);
+            $("#node-input-datamode").change(updateOptions);
         }
     });
 </script>

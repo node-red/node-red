@@ -16,14 +16,22 @@
 RED.notify = function() {
     var currentNotifications = [];
     var c = 0;
-    return function(msg,type) {
-        while (currentNotifications.length > 4) {
-            var n = currentNotifications[0];
-            window.clearTimeout(n.id);
-            n.slideup();
+    return function(msg,type,fixed) {
+        if (currentNotifications.length > 4) {
+            var ll = currentNotifications.length;
+            for (var i = 0;ll > 4 && i<currentNotifications.length;i+=1) {
+                var n = currentNotifications[i];
+                if (!n.fixed) {
+                    window.clearTimeout(n.timeoutid);
+                    n.close();
+                    ll -= 1;
+                }
+            }
         }
         var n = document.createElement("div");
+        n.id="red-notification-"+c;
         n.className = "alert";
+        n.fixed = fixed;
         if (type) {
             n.className = "alert alert-"+type;
         }
@@ -31,18 +39,21 @@ RED.notify = function() {
         n.innerHTML = msg;
         $("#notifications").append(n);
         $(n).slideDown(300);
-        var slideup = function() {
+        n.close = function() {
             var nn = n;
             return function() {
-                currentNotifications.shift();
+                currentNotifications.splice(currentNotifications.indexOf(nn),1);
                 $(nn).slideUp(300, function() {
                         nn.parentNode.removeChild(nn);
                 });
             };
         }();
-        var id = window.setTimeout(slideup,3000);
-        currentNotifications.push({id:id,slideup:slideup,c:c});
+        if (!fixed) {
+            n.timeoutid = window.setTimeout(n.close,3000);
+        }
+        currentNotifications.push(n);
         c+=1;
+        return n;
     }
 }();
 

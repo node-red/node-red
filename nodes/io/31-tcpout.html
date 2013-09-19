@@ -16,34 +16,37 @@
 
 <script type="text/x-red" data-template-name="tcp out">
     <div class="form-row">
-        <label for="node-input-host"><i class="icon-bookmark"></i> Host</label>
-        <input type="text" id="node-input-host" placeholder="localhost" style="width: 40%;" >
+        <label for="node-input-beserver"><i class="icon-resize-small"></i> Type</label>
+        <select id="node-input-beserver" style="width:120px; margin-right:5px;">
+            <option value="server">Listen on</option>
+            <option value="client">Connect to</option>
+        </select>
+        port <input type="text" id="node-input-port" style="width: 50px">
+    </div>
+    
+    <div class="form-row hidden" id="node-input-host-row" style="padding-left: 110px;"> 
+        at host <input type="text" id="node-input-host" placeholder="localhost" style="width: 40%;">
+    </div>
 
-        <label for="node-input-port" style="margin-left: 10px; width: 35px;"> Port</label>
-        <input type="text" id="node-input-port" placeholder="Port" style="width: 45px">
-    </div>
-    <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-beserver" placeholder="server" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-beserver" style="width: 70%;">Be a server socket ?</label>
-    </div>
     <div class="form-row">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-base64" placeholder="base64" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-base64" style="width: 70%;">Decode Base64 message ?</label>
     </div>
+    
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-tips">Tip: If you select server socket the host defaults to localhost.</div>
-
 </script>
 
 <script type="text/x-red" data-help-name="tcp out">
-	<p>Provides a choice of tcp output connections. Can either connect out - or provide a socket connection.</p>
+	<p>Provides a choice of tcp outputs. Can either connect to a remote tcp port,
+	or accept incoming connections.</p>
 	<p>Only <b>msg.payload</b> is sent.</p>
-	<p>You can select Base64 decoding if you want to decode a message encoded by the input socket.</p>
+	<p>If <b>msg.payload</b> is a string containing a base64 encoding of binary
+	data, the Base64 decoding option will cause it to be converted back to binary
+	before being sent.</p>
 </script>
 
 <script type="text/javascript">
@@ -51,9 +54,9 @@
         category: 'output',
         color:"Silver",
         defaults: {
-            host: {value:"127.0.0.1",required:true},
+            host: {value:"",validate:function(v) { return (this.beserver == "server")||v.length > 0;} },
             port: {value:"",required:true},
-            beserver: {value:false,required:true},
+            beserver: {value:"client",required:true},
             base64: {value:false,required:true},
             name: {value:""}
         },
@@ -62,12 +65,22 @@
         icon: "bridge-dash.png",
         align: "right",
         label: function() {
-			var lab = this.host+":"+this.port;
-			if (this.server) lab = "tcp out:"+this.port;
-            return this.name||lab;
+            return this.name || "tcp:"+(this.host?this.host+":":"")+this.port;
         },
         labelStyle: function() {
             return (this.name)?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            var updateOptions = function() {
+                var sockettype = $("#node-input-beserver option:selected").val();
+                if (sockettype == "client") {
+                    $("#node-input-host-row").show();
+                } else {
+                    $("#node-input-host-row").hide();
+                }
+            };
+            updateOptions();
+            $("#node-input-beserver").change(updateOptions);
         }
     });
 </script>

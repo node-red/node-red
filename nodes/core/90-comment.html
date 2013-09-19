@@ -19,10 +19,16 @@
 		<label for="node-input-name"><i class="icon-tag"></i> Comment</label>
 		<input type="text" id="node-input-name" placeholder="Comment">
 	</div>
+	<div class="form-row">
+        <label for="node-input-info"><i class="icon-file"></i> More</label>
+        <input type="hidden" id="node-input-info">
+        <div style="height: 250px;" class="node-text-editor" id="node-input-info-editor" ></div>
+    </div>
+    <div class="form-tips">Tip: this isn't meant for War and Peace - but useful notes can be kept here.</div>
 </script>
 
 <script type="text/x-red" data-help-name="comment">
-	<p>Simple comment block. More of a label really...</p>
+	<p>Simple comment block.</p>
 </script>
 
 <script type="text/javascript">
@@ -30,7 +36,8 @@
         category: 'function',
         color:"#ffffff",
         defaults: {
-            name: {value:""}
+            name: {value:""},
+            info: {value:""}
         },
         inputs:0,
         outputs:0,
@@ -40,6 +47,39 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            $( "#node-input-outputs" ).spinner({
+                min:1
+            });
+            function functionDialogResize(ev,ui) {
+                $("#node-input-info-editor").css("height",(ui.size.height-235)+"px");
+            };
+            $( "#dialog" ).on("dialogresize", functionDialogResize);
+            $( "#dialog" ).one("dialogopen", function(ev) {
+                var size = $( "#dialog" ).dialog('option','sizeCache-function');
+                if (size) {
+                    functionDialogResize(null,{size:size});
+                }
+            });
+            $( "#dialog" ).one("dialogclose", function(ev,ui) {
+                var height = $( "#dialog" ).dialog('option','height');
+                $( "#dialog" ).off("dialogresize",functionDialogResize);
+            });
+            var that = this;
+            require(["orion/editor/edit"], function(edit) {
+                that.editor = edit({
+                    parent:document.getElementById('node-input-info-editor'),
+                    lang:"text",
+                    showLinesRuler:false,
+                    showFoldingRuler:false,
+                    contents: $("#node-input-info").val()
+                });
+            });
+        },
+        oneditsave: function() {
+            $("#node-input-info").val(this.editor.getText());
+            delete this.editor;
         }
     });
 </script>
