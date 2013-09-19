@@ -1,0 +1,126 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="rpi-gpio in">
+    <div class="form-row">
+        <label for="node-input-pin"><i class="icon-asterisk"></i> GPIO Pin</label>
+        <select type="text" id="node-input-pin" style="width: 150px;">
+            <option value="-">select pin</option>
+            <option value="7">7</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="15">15</option>
+            <option value="16">16</option>
+            <option value="18">18</option>
+            <option value="22">22</option>
+         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-intype"><i class=" icon-resize-full"></i> Resistor?</label>
+        <select type="text" id="node-input-intype" style="width: 150px;">
+        <option value="tri">none</option>
+        <option value="up">pullup</option>
+        <option value="down">pulldown</option>
+        <!--<option value="tri">tristate</option>-->
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-tips">Tip: Only Digital I/O is supported - input must be 0 or 1.</div>
+</script>
+
+<script type="text/x-red" data-help-name="rpi-gpio in">
+	<p>Raspberry Pi input node. Generates a <b>msg.payload</b> with either a 0 or 1 depending on the state of the input pin. Requires the gpio command to work.</p>
+	<p>You may also enable the input pullup resitor or the pulldown resistor.</p>
+	<p>The <b>msg.topic</b> is set to <i>pi/{the pin number}</i></p>
+	<p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
+	<p><b>Note:</b> This node currently polls the pin every 250mS. This is not ideal as it loads the cpu, and will be rewritten shortly to try to use interrupts.</p>
+
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('rpi-gpio in',{
+        category: 'advanced-input',
+        color:"#c6dbef",
+        defaults: {
+            name: { value:"" },
+            intype: { value: "in" },
+            pin: { value:"",required:true,validate:RED.validators.number() },
+        },
+        inputs:0,
+        outputs:1,
+        icon: "rpi.png",
+        label: function() {
+            return this.name||"Pin: "+this.pin ;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+
+<script type="text/x-red" data-template-name="rpi-gpio out">
+    <div class="form-row">
+        <label for="node-input-pin"><i class="icon-asterisk"></i> GPIO Pin</label>
+        <select type="text" id="node-input-pin" style="width: 150px;">
+            <option value="-">select pin</option>
+            <option value="7">7</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="15">15</option>
+            <option value="16">16</option>
+            <option value="18">18</option>
+            <option value="22">22</option>
+         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-tips">Tip: Only Digital I/O is supported - input must be 0 or 1.</div>
+</script>
+
+<script type="text/x-red" data-help-name="rpi-gpio out">
+	<p>Raspberry Pi output node. Expects a <b>msg.payload</b> with either a 0 or 1 (or true or false). Requires the gpio command to work.</p>
+	<p>Will set the selected physical pin high or low depending on the value passed in.</p>
+	<p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('rpi-gpio out',{
+        category: 'advanced-output',
+        color:"#c6dbef",
+        defaults: {
+            name: { value:"" },
+            pin: { value:"",required:true,validate:RED.validators.number() },
+        },
+        inputs:1,
+        outputs:0,
+        icon: "rpi.png",
+        align: "right",
+        label: function() {
+            return this.name||"Pin: "+this.pin;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
