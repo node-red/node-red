@@ -1,7 +1,8 @@
 {
   "name": "node-red",
   "version": "0.1.0",
-  "description" : "A visual tool for wiring the Internet of Things",
+  "description": "A visual tool for wiring the Internet of Things",
+  "homepage": "http://nodered.org",
   "scripts": {
     "start": "node red.js"
   },
