@@ -29,7 +29,12 @@ function createServer(_server,settings) {
     
     //TODO: relocated user dir
     var rulesfile = process.argv[2] || 'flows_'+host+'.json';
-        
+    fs.exists("lib/",function(exists) {
+            if (!exists) {
+                fs.mkdir("lib");
+            }
+    });
+    
     app.get("/nodes",function(req,res) {
             res.writeHead(200, {'Content-Type': 'text/plain'});
             res.write(redNodes.getNodeConfigs());
