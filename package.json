@@ -6,7 +6,7 @@
     "start": "node red.js"
   },
   "main": "lib/server.js",
-  "author": "Nicholas O'Leary",
+  "author": "Nick O'Leary",
   "contributors": [ {"name": "Dave Conway-Jones"} ],
   "keywords": ["editor", "messaging", "iot", "m2m", "pi", "arduino", "beaglebone", "ibm"],
   "license": "Apache",
@@ -17,5 +17,6 @@
     "mustache": "*",
     "cron":"*"
   },
-  "engines": { "node": ">=0.8" }
+  "engines": { "node": ">=0.8" },
+  "repository": {"type":"git","url":"https://github.com/node-red/node-red.git"}
 }
