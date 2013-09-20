@@ -19,6 +19,8 @@ var util = require('util');
 var createUI = require("./ui");
 var redNodes = require("./nodes");
 var host = require('os').hostname();
+//TODO: relocated user dir
+var rulesfile = process.argv[2] || 'flows_'+host+'.json';
 
 var app = null;
 var server = null;
@@ -28,7 +30,6 @@ function createServer(_server,settings) {
     app = createUI(settings);
     
     //TODO: relocated user dir
-    var rulesfile = process.argv[2] || 'flows_'+host+'.json';
     fs.exists("lib/",function(exists) {
             if (!exists) {
                 fs.mkdir("lib");
@@ -70,7 +71,8 @@ function createServer(_server,settings) {
                     });
             });
     });
-    
+}
+function start() {
     console.log("\nWelcome to Node-RED\n===================\n");
     util.log("[red] Loading palette nodes");
     util.log("------------------------------------------");
@@ -83,20 +85,23 @@ function createServer(_server,settings) {
     util.log('   npm install {the module name}');
     util.log('or any other errors are resolved');
     util.log("------------------------------------------");
-
+    
     
     fs.exists(rulesfile, function (exists) {
             if (exists) {
-                util.log("[red] Loading workspace flow : "+rulesfile);
+                util.log("[red] Loading flows : "+rulesfile);
                 fs.readFile(rulesfile,'utf8',function(err,data) {
                         redNodes.setConfig(JSON.parse(data));
                 });
+            } else {
+                util.log("[red] Flows file not found : "+rulesfile);
             }
     });
-    return app;
 }
+
 module.exports = { 
-    init: createServer
+    init: createServer,
+    start: start
 }
 
 module.exports.__defineGetter__("app", function() { return app });
