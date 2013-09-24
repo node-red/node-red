@@ -67,6 +67,7 @@ MongoOutNode.prototype.close = function() {
 function MongoInNode(n) {
     RED.nodes.createNode(this,n);
     this.collection = n.collection;
+    this.operation = n.operation;
     this.mongodb = n.mongodb;
     this.mongoConfig = RED.nodes.getNode(this.mongodb);
 
@@ -80,15 +81,25 @@ function MongoInNode(n) {
                     if (err) { node.error(err); }
                     else {
                         node.on("input",function(msg) {
-                            msg.projection = msg.projection || {};
-                            coll.find(msg.payload,msg.projection).sort(msg.sort).limit(msg.limit).toArray(function(err, items) {
-                                if (err) { node.error(err); }
-                                msg.payload = items;
-                                delete msg.projection;
-                                delete msg.sort;
-                                delete msg.limit;
-                                node.send(msg);
-                            });
+                            if (node.operation == "query") {
+                                msg.projection = msg.projection || {};
+                                coll.find(msg.payload,msg.projection).sort(msg.sort).limit(msg.limit).toArray(function(err, items) {
+                                    if (err) { node.error(err); }
+                                    msg.payload = items;
+                                    delete msg.projection;
+                                    delete msg.sort;
+                                    delete msg.limit;
+                                    node.send(msg);
+                                });
+                            }
+                            if (node.operation == "delete") {
+                                console.log(msg.payload);
+                                coll.remove(msg.payload, {w:1}, function(err, items) {
+                                    if (err) node.error(err);
+                                    msg.payload = items;
+                                    node.send(msg);
+                                });
+                            }
                         });
                     }
                 });

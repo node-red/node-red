@@ -106,6 +106,13 @@
         <input type="text" id="node-input-collection" placeholder="collection">
     </div>
     <div class="form-row">
+        <label for="node-input-operation"><i class="icon-wrench"></i> Operation</label>
+        <select type="text" id="node-input-operation" style="display: inline-block; width: auto; vertical-align: top;">
+            <option value=query>Query</option>
+            <option value=delete>Delete</option>
+        </select>
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
@@ -114,7 +121,9 @@
 <script type="text/x-red" data-help-name="mongodb in">
 	<p>Queries a MongoDB collection by using the <b>msg.payload</b> to be a MongoDB query statement as per the .find() function.</p>
 	<p>You may also (via a function) set a <b>msg.projection</b> object to constrain the returned fields, a <b>msg.sort</b> object and a <b>msg.limit</b> object.</p>
-	<p>All are optional - see the <a href="http://docs.mongodb.org/manual/reference/method/db.collection.find/" target="new"><i>MongoDB find docs</i></a> for examples.
+	<p>All are optional - see the <a href="http://docs.mongodb.org/manual/reference/method/db.collection.find/" target="new"><i>MongoDB find docs</i></a> for examples.</p>
+	<p>You can also choose to <b>remove</b> items. To do so the <b>msg.payload</b> <i>MUST</i> contain an object that will select the items(s) to remove.
+	A blank object will delete <i>all of the objects</i> in the collection. You have been warned...</p>
 </script>
 
 <script type="text/javascript">
@@ -125,6 +134,7 @@
             mongodb: { type:"mongodb",required:true},
             name: {value:""},
             collection: {value:"",required:true},
+            operation: {value:"query"}
         },
         inputs:1,
         outputs:1,
