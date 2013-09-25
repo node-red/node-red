@@ -46,15 +46,13 @@ function SerialOutNode(n) {
             return;
         }
 
-        node.port.on("ready",function() {
-            node.on("input",function(msg) {
+        node.on("input",function(msg) {
                 //console.log("{",msg,"}");
                 node.port.write(msg.payload,function(err,res) {
-                    if (err) {
-                        node.error(err);
-                    }
+                        if (err) {
+                            node.error(err);
+                        }
                 });
-            });
         });
     } else {
         this.error("missing serial config");
