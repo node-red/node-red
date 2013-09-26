@@ -242,7 +242,7 @@ module.exports.load = function() {
                 if (stats.isFile()) {
                     if (/\.js$/.test(fn)) {
                         try {
-                            require("../"+dir+"/"+fn);
+                            require(dir+"/"+fn);
                         } catch(err) {
                             util.log("["+fn+"] "+err);
                             //console.log(err.stack);
@@ -256,8 +256,7 @@ module.exports.load = function() {
                 }
         });
     }
-
-    loadNodes("nodes");
+    loadNodes(__dirname+"/../nodes");
 
     //events.emit("nodes-loaded");
 }

@@ -29,6 +29,7 @@ var RED = {
         settings = userSettings;
         server.init(httpServer,settings);
         library.init();
+        return server.app;
     },
     
     start: server.start,

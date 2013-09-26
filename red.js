@@ -49,8 +49,8 @@ if (settings.httpAuth) {
     );
 }
 
-RED.init(server,settings);
-app.use(settings.httpRoot,RED.app);
+var red = RED.init(server,settings);
+app.use(settings.httpRoot,red);
 
     
 server.listen(settings.uiPort);
