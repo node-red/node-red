@@ -12,6 +12,10 @@ Check out [INSTALL](INSTALL.md) for full instructions on getting started.
 4. node red.js
 5. Open <http://localhost:1880>
 
+## Documentation
+
+More documentation can be found [here](http://nodered.org/docs).
+
 ## Browser Support
 
 The Node-RED editor runs in the browser. We routinely develop and test using
@@ -31,8 +35,21 @@ been raised.
 ### Creating new nodes
 
 The plugin nature of Node-RED means anyone can create a new node to extend
-its capabilities. Eventually, the nodes will be npm-installable, but we're not
-there yet.
+its capabilities. 
+
+We want to avoid duplication as that can lead to confusion. Many of our existing
+nodes offer a starting point of functionality. If they are missing features,
+we would rather extend them than add separate 'advanced' versions. But the key
+to that approach is getting the UX right to not lose the simplicity.
+
+We are also going to be quite selective over what nodes are included in the main
+repository - enough to be useful, but not so many that new user is overwhelmed.
+
+To contribute a new node, please raise a pull-request against the 
+`node-red-nodes` repository.
+
+Eventually, the nodes will be npm-installable, but we're not there yet. We'll
+also have some sort of registry of nodes to help with discoverability.
 
 ### Pull-Requests
 
@@ -42,7 +59,11 @@ property license granted with any contribution. It is for your protection as a
 Contributor as well as the protection of IBM and its customers; it does not 
 change your rights to use your own Contributions for any other purpose.
 
-We'll add some information on how to do this in the next few days.
+Once you have created a pull-request, we'll provide a link to the appropriate
+CLA document.
+
+If you are an IBMer, please contact us directly as the contribution process is
+slightly different.
 
 ## Authors
 
