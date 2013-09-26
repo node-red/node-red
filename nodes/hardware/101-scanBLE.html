@@ -1,0 +1,62 @@
+<!--
+  Copyright 2013 IBM Corp.
+ 
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+ 
+  http://www.apache.org/licenses/LICENSE-2.0
+ 
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+--  
+  Created by Charalampos Doukas
+-->
+
+<script type="text/x-red" data-template-name="scanBLE">
+  <div class="form-row">
+     <label for="node-input-topic"><i class="icon-tasks"></i> BLE Device name</label>
+    <input type="text" id="node-input-ble_name" placeholder="XXX">
+  </div>
+
+  <div class="form-row">
+     <label for="node-input-topic"><i class="icon-tasks"></i> UUID</label>
+    <input type="text" id="node-input-ble_uuid" placeholder="UUID">
+  </div>
+ 
+  <div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+ 
+<!-- Next, some simple help text is provided for the node.                   -->
+<script type="text/x-red" data-help-name="scanBLE">
+    <p>Scans for a specific BLE Device</p>
+</script>
+ 
+<!-- Finally, the node type is registered along with all of its properties   -->
+<script type="text/javascript">
+    RED.nodes.registerType('scanBLE',{
+        category: 'advanced-input',      // the palette category
+        color:"#0076d6",
+        defaults: {             // defines the editable properties of the node
+            name: {value:""},   //  along with default values.
+            ble_name: {value:"", required:true},
+	    ble_uuid: {value: "", required:true}
+        },
+        inputs:1,                // set the number of inputs - only 0 or 1
+        outputs:1,               // set the number of outputs - 0 to n
+        icon: "arrow-in.png",    // set the icon (held in public/icons)
+        label: function() {      // sets the default label contents
+            return this.name||this.topic||"scanBLE";
+        },
+        labelStyle: function() { // sets the class to apply to the label
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
