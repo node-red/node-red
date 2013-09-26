@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node red.js"
   },
-  "main": "lib/server.js",
+  "main": "red/red.js",
   "author": "Nick O'Leary",
   "contributors": [ {"name": "Dave Conway-Jones"} ],
   "keywords": ["editor", "messaging", "iot", "m2m", "pi", "arduino", "beaglebone", "ibm"],
