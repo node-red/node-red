@@ -27,6 +27,9 @@ function LevelNode(n) {
 	});
 }
 RED.nodes.registerType("leveldbase",LevelNode);
+LevelNode.prototype.close = function() {
+    this.db.close();
+}
 
 function LevelDBNodeIn(n) {
 	RED.nodes.createNode(this,n);
