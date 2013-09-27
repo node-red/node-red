@@ -117,6 +117,9 @@
 
         var errornotification = null;
         
+        var messageCount = 0;
+        
+        
         function debugConnect() {
             //console.log("debug ws connecting");
             var ws = new WebSocket("ws://"+location.hostname+":"+location.port+document.location.pathname+"/debug");
@@ -160,7 +163,13 @@
                                 (o.topic?'<span class="debug-message-topic">'+topic+'</span>':'')+
                                 '<span class="debug-message-payload">'+payload+'</span>';
                 var atBottom = (sbc.scrollHeight-messages.offsetHeight-sbc.scrollTop) < 5;
+                messageCount++;
                 $(messages).append(msg);
+                
+                if (messageCount > 200) {
+                    $("#debug-content .debug-message:first").remove();
+                    messageCount--;
+                }
                 if (atBottom) {
                     $(sbc).scrollTop(sbc.scrollHeight);
                 }
@@ -176,6 +185,7 @@
 
         $("#debug-tab-clear").click(function() {
             $(".debug-message").remove();
+            messageCount = 0;
             RED.nodes.eachNode(function(node) {
                 node.highlighted = false;
                 node.dirty = true;

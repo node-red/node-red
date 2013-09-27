@@ -25,6 +25,10 @@
         <label for="node-config-input-db"><i class="icon-briefcase"></i> Database</label>
         <input type="text" id="node-config-input-db" placeholder="test">
     </div>
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" placeholder="Name">
+    </div>
 </script>
 
 <script type="text/javascript">
@@ -35,9 +39,10 @@
             hostname: { value:"127.0.0.1",required:true},
             port: { value: 27017,required:true},
             db: { value:"",required:true},
+            name: { value:"" }
         },
         label: function() {
-            return this.hostname+":"+this.port+"//"+this.db;
+            return this.name||this.hostname+":"+this.port+"//"+this.db;
         }
     });
 </script>
@@ -52,7 +57,14 @@
         <label for="node-input-collection"><i class="icon-briefcase"></i> Collection</label>
         <input type="text" id="node-input-collection" placeholder="collection">
     </div>
-    <div class="form-row">
+        <div class="form-row">
+        <label for="node-input-operation"><i class="icon-wrench"></i> Operation</label>
+        <select type="text" id="node-input-operation" style="display: inline-block; vertical-align: top;">
+            <option value=store>Store</option>
+            <option value=delete>Delete</option>
+        </select>
+    </div>
+    <div class="form-row node-input-payonly">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-payonly" placeholder="Only" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-payonly" style="width: 70%;">Only store msg.payload object ?</label>
@@ -61,6 +73,13 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <script>
+        $("#node-input-operation").change(function() {
+            var id = $("#node-input-operation option:selected").val();
+            if (id == "delete") $(".node-input-payonly").hide();
+            else $(".node-input-payonly").show();
+        });
+    </script>
 </script>
 
 <script type="text/x-red" data-help-name="mongodb out">
@@ -69,6 +88,8 @@
 	<p>If this is NOT the desired behaviour - ie you want repeated entries to overwrite, then you must set the <b>msg._id</b> property to be a constant by the use of a previous function node.</p>
 	<p>This could be a unique constant or you could create one based on some other msg property.</p>
 	<p>Currently we do not limit or cap the collection size at all... this may well change.</p>
+	<p>You can also choose to <b>remove</b> items. To do so the <b>msg.payload</b> <i>MUST</i> contain an object that will select the items(s) to remove.
+	A blank object will delete <i>all of the objects</i> in the collection. You have been warned...</p>
 </script>
 
 <script type="text/javascript">
@@ -79,7 +100,8 @@
             mongodb: { type:"mongodb",required:true},
             name: {value:""},
             collection: {value:"",required:true},
-            payonly: {value:false}
+            payonly: {value:false},
+            operation: {value:"store"}
         },
         inputs:1,
         outputs:0,
@@ -87,7 +109,7 @@
         align: "right",
         label: function() {
             var mongoNode = RED.nodes.node(this.mongodb);
-            return this.name||this.collection||(mongoNode?mongoNode.label():"mongodb");
+            return this.name||(mongoNode?mongoNode.label()+"//"+this.collection:"mongodb");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -114,7 +136,7 @@
 <script type="text/x-red" data-help-name="mongodb in">
 	<p>Queries a MongoDB collection by using the <b>msg.payload</b> to be a MongoDB query statement as per the .find() function.</p>
 	<p>You may also (via a function) set a <b>msg.projection</b> object to constrain the returned fields, a <b>msg.sort</b> object and a <b>msg.limit</b> object.</p>
-	<p>All are optional - see the <a href="http://docs.mongodb.org/manual/reference/method/db.collection.find/" target="new"><i>MongoDB find docs</i></a> for examples.
+	<p>All are optional - see the <a href="http://docs.mongodb.org/manual/reference/method/db.collection.find/" target="new"><i>MongoDB find docs</i></a> for examples.</p>
 </script>
 
 <script type="text/javascript">
@@ -124,7 +146,7 @@
         defaults: {
             mongodb: { type:"mongodb",required:true},
             name: {value:""},
-            collection: {value:"",required:true},
+            collection: {value:"",required:true}
         },
         inputs:1,
         outputs:1,

@@ -48,7 +48,7 @@ function BlinkStick(n) {
 				}
 			}
 			else {
-				node.warn("No BlinkStick found");
+				//node.warn("No BlinkStick found");
 				node.led = blinkstick.findFirst();
 			}
 		}

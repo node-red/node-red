@@ -19,19 +19,17 @@ var util = require("util");
 var express = require("express");
 var crypto = require("crypto");
 var settings = require("./settings");
+var RED = require("./red/red.js");
+
 
 var server;
 var app = express();
-
-var redApp = null;
 
 if (settings.https) {
     server = https.createServer(settings.https,function(req,res){app(req,res);});
 } else {
     server = http.createServer(function(req,res){app(req,res);});
 }
-
-redApp = require('./red/server.js').init(server,settings);
 
 settings.httpRoot = settings.httpRoot||"/";
 
@@ -51,9 +49,11 @@ if (settings.httpAuth) {
     );
 }
 
-app.use(settings.httpRoot,redApp);
+var red = RED.init(server,settings);
+app.use(settings.httpRoot,red);
 
     
 server.listen(settings.uiPort);
+RED.start();
 util.log('[red] Server now running at http'+(settings.https?'s':'')+'://127.0.0.1:'+settings.uiPort+settings.httpRoot);
 

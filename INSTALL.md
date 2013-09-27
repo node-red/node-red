@@ -30,7 +30,7 @@ From the top-level directory, run:
 
 You can then access Node-RED at <http://localhost:1880>.
 
-Online documentation is available at <http://node-red.github.io/docs>.
+Online documentation is available at <http://nodered.org/docs>.
 
 ## Installing individual node dependencies
 

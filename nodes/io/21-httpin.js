@@ -40,7 +40,6 @@ function HTTPIn(n) {
 RED.nodes.registerType("http in",HTTPIn);
 
 HTTPIn.prototype.close = function() {
-    console.log(RED.app.routes[this.method]);
 	var routes = RED.app.routes[this.method];
 	for (var i in routes) {
 		if (routes[i].path == this.url) {
@@ -48,6 +47,5 @@ HTTPIn.prototype.close = function() {
 			break;
 		}
 	}
-    console.log(RED.app.routes[this.method]);
 }
 

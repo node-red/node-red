@@ -46,15 +46,13 @@ function SerialOutNode(n) {
             return;
         }
 
-        node.port.on("ready",function() {
-            node.on("input",function(msg) {
+        node.on("input",function(msg) {
                 //console.log("{",msg,"}");
                 node.port.write(msg.payload,function(err,res) {
-                    if (err) {
-                        node.error(err);
-                    }
+                        if (err) {
+                            node.error(err);
+                        }
                 });
-            });
         });
     } else {
         this.error("missing serial config");
@@ -123,10 +121,18 @@ var serialPool = function() {
                     }
                     newline = newline.replace("\\n","\n").replace("\\r","\r");
                     var setupSerial = function() {
-                        obj.serial = new serialp.SerialPort(port,{
-                                baudrate: baud,
-                                parser: serialp.parsers.readline(newline)
-                        });
+						if (newline == "") {
+							obj.serial = new serialp.SerialPort(port,{
+									baudrate: baud,
+									parser: serialp.parsers.raw
+							});
+						}
+                        else {
+							obj.serial = new serialp.SerialPort(port,{
+									baudrate: baud,
+									parser: serialp.parsers.readline(newline)
+							});
+						}
                         obj.serial.on('error', function(err) {
                                 util.log("[serial] serial port "+port+" error "+err);
                                 obj.tout = setTimeout(function() {
@@ -147,7 +153,15 @@ var serialPool = function() {
                                 obj._emitter.emit('ready');
                         });
                         obj.serial.on('data',function(d) {
+							if (typeof d !== "string") {
+								d = d.toString();
+								for (i=0; i<d.length; i++) {
+									obj._emitter.emit('data',d.charAt(i));
+								}
+							}
+							else {
                                 obj._emitter.emit('data',d);
+							}
                         });
                     }
                     setupSerial();

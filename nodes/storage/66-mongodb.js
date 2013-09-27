@@ -22,6 +22,7 @@ function MongoNode(n) {
     this.hostname = n.hostname;
     this.port = n.port;
     this.db = n.db;
+    this.name = n.name;
 }
 RED.nodes.registerType("mongodb",MongoNode);
 
@@ -31,6 +32,7 @@ function MongoOutNode(n) {
     this.collection = n.collection;
     this.mongodb = n.mongodb;
     this.payonly = n.payonly || false;
+    this.operation = n.operation;
     this.mongoConfig = RED.nodes.getNode(this.mongodb);
 
     if (this.mongoConfig) {
@@ -43,9 +45,15 @@ function MongoOutNode(n) {
                         if (err) { node.error(err); }
                         else {
                             node.on("input",function(msg) {
+                                if (node.operation == "store") {
                                     delete msg._topic;
-                                    if (node.payonly) coll.save(msg.payload,function(err,item){if (err){node.error(err);}});
+                                    if (node.payonly) coll.save(msg.payload,function(err,item){ if (err){node.error(err);} });
                                     else coll.save(msg,function(err,item){if (err){node.error(err);}});
+                                }
+                                if (node.operation == "delete") {
+                                    console.log(msg.payload);
+                                    coll.remove(msg.payload, {w:1}, function(err, items){ if (err) node.error(err); });
+                                }
                             });
                         }
                 });

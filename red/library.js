@@ -16,78 +16,80 @@
 
 var fs = require("fs");
 var fspath = require("path");
-var redUI = require("./server");
+var redApp = null;
 
-// -------- Flow Library --------
-redUI.app.post(new RegExp("/library/flows\/(.*)"), function(req,res) {
-        var fullBody = '';
-        req.on('data', function(chunk) {
-                fullBody += chunk.toString();
-        });
-        req.on('end', function() {
-                var fn = "lib/flows/"+req.params[0]+".json";
-                var parts = fn.split("/");
-                for (var i = 3;i<parts.length;i+=1) {
-                    var dirname = parts.slice(0,i).join("/");
-                    if (!fs.existsSync(dirname)) {
-                        fs.mkdirSync(dirname);
+function init() {
+    redApp = require("./server").app;
+    // -------- Flow Library --------
+    redApp.post(new RegExp("/library/flows\/(.*)"), function(req,res) {
+            var fullBody = '';
+            req.on('data', function(chunk) {
+                    fullBody += chunk.toString();
+            });
+            req.on('end', function() {
+                    var fn = "lib/flows/"+req.params[0]+".json";
+                    var parts = fn.split("/");
+                    for (var i = 3;i<parts.length;i+=1) {
+                        var dirname = parts.slice(0,i).join("/");
+                        if (!fs.existsSync(dirname)) {
+                            fs.mkdirSync(dirname);
+                        }
                     }
+                    fs.writeFile(fn,fullBody,function(err) {
+                            res.writeHead(204, {'Content-Type': 'text/plain'});
+                            res.end();
+                    });
+                    
+            });
+    });
+    
+    function listFiles(dir) {
+        var dirs = {};
+        var files = [];
+        var dirCount = 0;
+        fs.readdirSync(dir).sort().filter(function(fn) {
+                var stats = fs.lstatSync(dir+"/"+fn);
+                if (stats.isDirectory()) {
+                    dirCount += 1;
+                    dirs[fn] = listFiles(dir+"/"+fn);
+                } else {
+                    files.push(fn.split(".")[0]);
                 }
-                fs.writeFile(fn,fullBody,function(err) {
-                        res.writeHead(204, {'Content-Type': 'text/plain'});
+        });
+        var result = {};
+        if (dirCount > 0) { result.d = dirs; }
+        if (files.length > 0) { result.f = files; }
+        return result;
+    }
+    
+    redApp.get("/library/flows",function(req,res) {
+            var flows = {};
+            if (fs.existsSync("lib/flows")) {
+                flows = listFiles("lib/flows");
+            } else {
+                fs.mkdirSync("lib/flows");
+            }
+            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.write(JSON.stringify(flows));
+            res.end();
+            
+    });
+    
+    redApp.get(new RegExp("/library/flows\/(.*)"), function(req,res) {
+            var fn = "lib/flows/"+req.params[0]+".json";
+            if (fs.existsSync(fn)) {
+                fs.readFile(fn,function(err,data) {
+                        res.writeHead(200, {'Content-Type': 'text/plain'});
+                        res.write(data);
                         res.end();
                 });
-                
-        });
-});
-
-function listFiles(dir) {
-    var dirs = {};
-    var files = [];
-    var dirCount = 0;
-    fs.readdirSync(dir).sort().filter(function(fn) {
-            var stats = fs.lstatSync(dir+"/"+fn);
-            if (stats.isDirectory()) {
-                dirCount += 1;
-                dirs[fn] = listFiles(dir+"/"+fn);
             } else {
-                files.push(fn.split(".")[0]);
+                res.send(404);
             }
     });
-    var result = {};
-    if (dirCount > 0) { result.d = dirs; }
-    if (files.length > 0) { result.f = files; }
-    return result;
-}
-
-redUI.app.get("/library/flows",function(req,res) {
-        var flows = {};
-        if (fs.existsSync("lib/flows")) {
-            flows = listFiles("lib/flows");
-        } else {
-            fs.mkdirSync("lib/flows");
-        }
-        res.writeHead(200, {'Content-Type': 'text/plain'});
-        res.write(JSON.stringify(flows));
-        res.end();
-        
-});
-
-redUI.app.get(new RegExp("/library/flows\/(.*)"), function(req,res) {
-        var fn = "lib/flows/"+req.params[0]+".json";
-        if (fs.existsSync(fn)) {
-            fs.readFile(fn,function(err,data) {
-                    res.writeHead(200, {'Content-Type': 'text/plain'});
-                    res.write(data);
-                    res.end();
-            });
-        } else {
-            res.send(404);
-        }
-});
-
-// ------------------------------
-
+    
+    // ------------------------------
+}    
 
 function createLibrary(type) {
     
@@ -96,11 +98,11 @@ function createLibrary(type) {
     var root = fspath.join("lib",type)+"/";
     
     fs.exists(root,function(exists) {
-       if (!exists) {
-           fs.mkdir(root);
-       }
+            if (!exists) {
+                fs.mkdir(root);
+            }
     });
-    redUI.app.get(new RegExp("/library/"+type+"($|\/(.*))"),function(req,res) {
+    redApp.get(new RegExp("/library/"+type+"($|\/(.*))"),function(req,res) {
             var path = req.params[1]||"";
             var rootPath = fspath.join(root,path);
             
@@ -141,7 +143,7 @@ function createLibrary(type) {
             });
     });
     
-    redUI.app.post(new RegExp("/library/"+type+"\/(.*)"),function(req,res) {
+    redApp.post(new RegExp("/library/"+type+"\/(.*)"),function(req,res) {
             var path = req.params[0];
             var fullBody = '';
             req.on('data', function(chunk) {
@@ -246,4 +248,5 @@ function getFileBody(root,path,res) {
     res.end();
 }
 
+module.exports.init = init;
 module.exports.register = createLibrary;

@@ -857,7 +857,11 @@ RED.view = function() {
                 var root_node = new_ms[0].n;
                 var dx = root_node.x;
                 var dy = root_node.y;
-
+                
+                if (mouse_position == null) {
+                    mouse_position = [0,0];
+                }
+                
                 for (var i in new_ms) {
                     new_ms[i].n.selected = true;
                     new_ms[i].n.x -= dx - mouse_position[0];

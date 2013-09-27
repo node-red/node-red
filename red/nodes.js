@@ -66,7 +66,11 @@ var registry = (function() {
                 events.emit("nodes-stopped");
                 nodes = {};
             },
-
+            each: function(cb) {
+                for (var n in nodes) {
+                    cb(nodes[n]);
+                }
+            },
             addLogHandler: function(handler) {
                 logHandlers.push(handler);
             }
@@ -132,6 +136,7 @@ util.inherits(Node,EventEmitter);
 
 Node.prototype.close = function() {
     // called when a node is removed
+    this.emit("close");
 }
 
 
@@ -237,7 +242,7 @@ module.exports.load = function() {
                 if (stats.isFile()) {
                     if (/\.js$/.test(fn)) {
                         try {
-                            require("../"+dir+"/"+fn);
+                            require(dir+"/"+fn);
                         } catch(err) {
                             util.log("["+fn+"] "+err);
                             //console.log(err.stack);
@@ -251,8 +256,7 @@ module.exports.load = function() {
                 }
         });
     }
-
-    loadNodes("nodes");
+    loadNodes(__dirname+"/../nodes");
 
     //events.emit("nodes-loaded");
 }
@@ -325,7 +329,7 @@ var parseConfig = function() {
             util.log("[red] unknown type: "+activeConfig[i].type);
         }
     }
-
+    
     // Clean up any orphaned credentials
     var deletedCredentials = false;
     for (var c in credentials) {

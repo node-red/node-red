@@ -117,15 +117,17 @@ function GPIOOutNode(n) {
 	}
 }
 
-exec("gpio reset",function(err,stdout,stderr) {
+exec("gpio mode 0 in",function(err,stdout,stderr) {
 	if (err) {
-		util.log('[36-rpi-gpio.js] Error: "gpio reset" command failed for some reason.');
+		util.log('[36-rpi-gpio.js] Error: "gpio" command failed for some reason.');
 	}
-	exec("gpio load spi",function(err,stdout,stderr) {
-		if (err) {
-			util.log('[36-rpi-gpio.js] Error: "gpio load spi" command failed for some reason.');
-		}
-
+	exec("gpio mode 1 in");
+	exec("gpio mode 2 in");
+	exec("gpio mode 3 in");
+	exec("gpio mode 4 in");
+	exec("gpio mode 5 in");
+	exec("gpio mode 6 in");
+	exec("gpio mode 7 in",function(err,stdout,stderr) {
 		RED.nodes.registerType("rpi-gpio in",GPIOInNode);
 		RED.nodes.registerType("rpi-gpio out",GPIOOutNode);
 

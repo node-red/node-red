@@ -47,7 +47,7 @@
         outputs:1,
         icon: "bridge.png",
         label: function() {
-            return this.name||this.topic;
+            return this.name||this.topic||"mqtt";
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -90,7 +90,7 @@
         icon: "bridge.png",
         align: "right",
         label: function() {
-            return this.name||this.topic;
+            return this.name||this.topic||"mqtt";
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
