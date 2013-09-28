@@ -154,14 +154,22 @@ RED.view = function() {
             var dx = mousePos[0]-(mousedown_node.x+sc*mousedown_node.w/2);
             var delta = Math.sqrt(dy*dy+dx*dx);
             var scale = lineCurveScale;
-
+            var scaleY = 0;
+            
             if (delta < node_width) {
                 scale = 0.75-0.75*((node_width-delta)/node_width);
             }
+            if (dx*sc < 0) {
+                scale += 3*(Math.min(5*node_width,Math.abs(dx))/(5*node_width));
+                if (Math.abs(dy) < 4*node_height) {
+                    scaleY = ((dy>0)?3:-3)*(((4*node_height)-Math.abs(dy))/(4*node_height))*(Math.min(node_width,Math.abs(dx))/(node_width)) ;
+                }
+            }
+            
             drag_line.attr("d",
                 "M "+(mousedown_node.x+sc*mousedown_node.w/2)+" "+(mousedown_node.y+y)+
-                " C "+(mousedown_node.x+sc*(mousedown_node.w/2+node_width*scale))+" "+(mousedown_node.y+y)+" "+
-                (mousePos[0]-sc*(scale)*node_width)+" "+mousePos[1]+" "+
+                " C "+(mousedown_node.x+sc*(mousedown_node.w/2+node_width*scale))+" "+(mousedown_node.y+y+scaleY*node_height)+" "+
+                (mousePos[0]-sc*(scale)*node_width)+" "+(mousePos[1]-scaleY*node_height)+" "+
                 mousePos[0]+" "+mousePos[1]
                 );
 
@@ -796,19 +804,26 @@ RED.view = function() {
                 var dx = (d.target.x-d.target.w/2)-(d.source.x+d.source.w/2);
                 var delta = Math.sqrt(dy*dy+dx*dx);
                 var scale = lineCurveScale;
-
+                var scaleY = 0;
                 if (delta < node_width) {
                     scale = 0.75-0.75*((node_width-delta)/node_width);
                 }
-
+                
+                if (dx < 0) {
+                    scale += 3*(Math.min(5*node_width,Math.abs(dx))/(5*node_width));
+                    if (Math.abs(dy) < 4*node_height) {
+                        scaleY = ((dy>0)?3:-3)*(((4*node_height)-Math.abs(dy))/(4*node_height))*(Math.min(node_width,Math.abs(dx))/(node_width)) ;
+                    }
+                }
+                
                 d.x1 = d.source.x+d.source.w/2;
                 d.y1 = d.source.y+y;
                 d.x2 = d.target.x-d.target.w/2;
                 d.y2 = d.target.y;
 
                 return "M "+(d.source.x+d.source.w/2)+" "+(d.source.y+y)+
-                    " C "+(d.source.x+d.source.w/2+scale*node_width)+" "+(d.source.y+y)+" "+
-                    (d.target.x-d.target.w/2-scale*node_width)+" "+d.target.y+" "+
+                    " C "+(d.source.x+d.source.w/2+scale*node_width)+" "+(d.source.y+y+scaleY*node_height)+" "+
+                    (d.target.x-d.target.w/2-scale*node_width)+" "+(d.target.y-scaleY*node_height)+" "+
                     (d.target.x-d.target.w/2)+" "+d.target.y;
         })
 
