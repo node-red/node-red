@@ -37,6 +37,9 @@ function RateLimitNode(n) {
    
    this.on("input", function(msg) {
        this.buffer.push(msg);
+       if (this.buffer.length > 1000) {
+         this.warn(this.name + " buffer exceeded 1000 messages");
+       }
    });
 }
 
