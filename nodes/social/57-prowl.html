@@ -32,8 +32,10 @@
 <script type="text/x-red" data-help-name="prowl">
 	<p>Uses Prowl to push the <b>msg.payload</b> to an Apple device that has the prowl app installed.</p>
 	<p>Optionally uses <b>msg.topic</b> to set the title. You can also set <b>msg.priority</b> to confgure the urgency from -2 (low), through 0 (normal) to 2 (urgent).</p>
-	<p>You MUST configure your prowl API key into the pushkey.js file in the directory above node-red.</p>
-	<p><pre>module.exports = { prowl:'My-API-KEY' }</pre></p>
+	<p>You MUST configure your prowl API key into either the settings.js file like this</p>
+	<p><pre>prowl: { prowlkey:'My-API-KEY' },</pre></p>
+	<p>Or into a pushkey.js file in the directory <b>above</b> node-red.</p>
+	<p><pre>module.exports = { prowlkey:'My-API-KEY' }</pre></p>
 	<p>Uses Prowl so see <i><a href="https://www.prowlapp.com" target="_new">this link</a></i> for more details.</p>
 </script>
 
