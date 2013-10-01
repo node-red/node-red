@@ -35,17 +35,33 @@ function HTTPIn(n) {
 	} else if (this.method == "delete") {
 		RED.app.delete(this.url,this.callback);
 	}
+	
+	this.on("close",function() {
+	        var routes = RED.app.routes[this.method];
+	        for (var i in routes) {
+	            if (routes[i].path == this.url) {
+	                routes.splice(i,1);
+	                break;
+	            }
+	        }
+	});
 }
 
 RED.nodes.registerType("http in",HTTPIn);
 
-HTTPIn.prototype.close = function() {
-	var routes = RED.app.routes[this.method];
-	for (var i in routes) {
-		if (routes[i].path == this.url) {
-			routes.splice(i,1);
-			break;
-		}
-	}
+
+function HTTPOut(n) {
+	RED.nodes.createNode(this,n);
+	
+	this.on("input",function(msg) {
+	        if (msg.res) {
+	            if (msg.headers) {
+	                res.set(msg.headers);
+	            }
+	            var rc = msg.rc || 200;
+	            msg.res.send(rc,msg.payload);
+	        }
+	});
 }
 
+RED.nodes.registerType("http response",HTTPOut);

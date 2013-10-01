@@ -142,7 +142,6 @@ a.brand img {
   background-color: #eee;
 }
 
-
 #sidebar {
     background: #fff;
 }
@@ -315,19 +314,16 @@ a.brand img {
 .node_invalid {
    stroke: #ff0000;
 }
-
 .node_selected {
    stroke: #ff7f0e;
 }
-
 .node_highlighted {
    stroke: #ff0000;
 }
-
-
 .node_hovered {
   dstroke: #ff7f0e;
 }
+
 .port_hovered {
   stroke: #ff7f0e;
   fill:  #ff7f0e;
@@ -368,15 +364,16 @@ a.brand img {
    text-align: center;
    display: none;
 }
+
 #dialog {
 }
+
 .container {
 }
 
 .notification {
     position: absolute;
 }
-
 #notifications {
     z-index: 10000;
     width: 500px;
@@ -389,6 +386,7 @@ a.brand img {
     box-shadow: 0 0 1px 1px;
     margin-bottom: 5px;
 }
+
 .form-row {
     clear: both;
     margin-bottom: 7px;
@@ -414,7 +412,6 @@ button.input-append-right {
     padding-left: 4px !important;
     padding-right: 4px !important;
 }
-
 
 .form-tips {
 	background: lightgoldenrodyellow;
@@ -472,16 +469,25 @@ div.node-info {
 .dropdown-menu * a.active > .icon-ok {
     display: inline-block;
 }
+.dropdown-menu>li.disabled>a:hover>[class^="icon-"] {
+    background-image: url("bootstrap/img/glyphicons-halflings.png") !important;
+}
+/** Fix for unreachable dropdown menu **/
+.dropdown-menu  {
+    width: 200px !important;
+}
+.dropdown-menu > li > a {
+     padding-left: 28px ;
+     text-indent: -8px ;
+     white-space: normal !important;
+}
+
 .navbar-fixed-top, .navbar-fixed-bottom {
     z-index: 1000;
 }
 
 .popover-title { display: none; }
 
-
-.dropdown-menu>li.disabled>a:hover>[class^="icon-"] {
-    background-image: url("bootstrap/img/glyphicons-halflings.png") !important;
-}
 .ui-autocomplete {
     max-height: 250px;
     overflow-x: hidden;
@@ -551,9 +557,4 @@ div.node-info {
     border:1px solid #ccc;
     border-radius:5px;
     overflow: hidden;
-}
-
-/** Fix for unreachable dropdown menu **/
-div.pull-right > ul.dropdown-menu > li.dropdown-submenu > ul {
-    margin-left: 20px;
 }
