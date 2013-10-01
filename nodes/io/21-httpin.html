@@ -76,7 +76,7 @@
         outputs:1,
         icon: "white-globe.png",
         label: function() {
-            return this.name||"["+this.method+"] "+this.url;
+            return this.name||(this.url?("["+this.method+"] "+this.url):"http");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -85,14 +85,19 @@
 </script>
 
 <script type="text/x-red" data-template-name="http response">
-    <div class="form-tips">The messages sent to this node must originate from an HTTP input node</div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-tips">The messages sent to this node <b>must</b> originate from an <i>http input</i> node</div>
 </script>
 
 <script type="text/x-red" data-help-name="http response">
-	<p>Provides an response node for http requests received from an http input node.</p>
+	<p>Sends responses back to http requests received from an HTTP Input node.</p>
+	<p>The response can be customised using the following message properties:</p>
 	<ul>
 	    <li><code>payload</code> is sent as the body of the reponse</li>
-	    <li><code>rc</code>, if set, is used as the response code (default: 200)</li>
+	    <li><code>statusCode</code>, if set, is used as the response status code (default: 200)</li>
 	    <li><code>headers</code>, if set, should be an object containing field/value
 	    pairs to be added as response headers.</li>
 	</ul>
@@ -102,17 +107,89 @@
     RED.nodes.registerType('http response',{
         category: 'output',
         color:"rgb(231, 231, 174)",
-        defaults: {},
+        defaults: {
+            name: {value:""}
+        },
         inputs:1,
         outputs:0,
         align: "right",
         icon: "white-globe.png",
         label: function() {
-            return "http"
+            return this.name||"http";
         },
         labelStyle: function() {
-            return "";
+            return this.name?"node_label_italic":"";
         }
     });
 </script>
+
+
+
+
+<script type="text/x-red" data-template-name="http request">
+    <div class="form-row">
+        <label for="node-input-method"><i class="icon-tasks"></i> Method</label>
+        <select type="text" id="node-input-method" style="width: 150px;">
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-url"><i class="icon-tasks"></i> URL</label>
+        <input type="text" id="node-input-url" placeholder="http://">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="http request">
+	<p>Provides a node for making http requests.</p>
+	<p>The URL and HTTP method can be configured in the node, but also
+	   overridden by the incoming message:
+	<ul>
+	    <li><code>url</code>, if set, is used as the url of the request</li>
+	    <li><code>method</code>, if set, is used as the HTTP method of the request. Must be one of <code>GET</code>, <code>PUT</code>, <code>POST</code> or <code>DELETE</code> (default: GET)</li>
+	    <li><code>headers</code>, if set, should be an object containing field/value
+	    pairs to be added as request headers</li>
+	    <li><code>payload</code> is sent as the body of the request</li>
+	</ul>
+	
+	The output message contains the following properties:
+	<ul>
+	    <li><code>payload</code> is the body of the response</li>
+	    <li><code>statusCode</code> is the status code of the response, or the error code if the request could not be completed</li>
+	    <li><code>headers</code> is an object containing the response headers</li>
+	</ul>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('http request',{
+        category: 'function',
+        color:"rgb(231, 231, 174)",
+        defaults: {
+            name: {value:""},
+            method:{value:"GET"},
+            url:{value:""}
+        },
+        inputs:1,
+        outputs:1,
+        align: "right",
+        icon: "white-globe.png",
+        label: function() {
+            return this.name||"http request";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+
+
+
+
 
