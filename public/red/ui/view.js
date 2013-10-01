@@ -160,9 +160,9 @@ RED.view = function() {
                 scale = 0.75-0.75*((node_width-delta)/node_width);
             }
             if (dx*sc < 0) {
-                scale += 3*(Math.min(5*node_width,Math.abs(dx))/(5*node_width));
-                if (Math.abs(dy) < 4*node_height) {
-                    scaleY = ((dy>0)?3:-3)*(((4*node_height)-Math.abs(dy))/(4*node_height))*(Math.min(node_width,Math.abs(dx))/(node_width)) ;
+                scale += 2*(Math.min(5*node_width,Math.abs(dx))/(5*node_width));
+                if (Math.abs(dy) < 3*node_height) {
+                    scaleY = ((dy>0)?0.5:-0.5)*(((3*node_height)-Math.abs(dy))/(3*node_height))*(Math.min(node_width,Math.abs(dx))/(node_width)) ;
                 }
             }
             
@@ -810,9 +810,9 @@ RED.view = function() {
                 }
                 
                 if (dx < 0) {
-                    scale += 3*(Math.min(5*node_width,Math.abs(dx))/(5*node_width));
-                    if (Math.abs(dy) < 4*node_height) {
-                        scaleY = ((dy>0)?3:-3)*(((4*node_height)-Math.abs(dy))/(4*node_height))*(Math.min(node_width,Math.abs(dx))/(node_width)) ;
+                    scale += 2*(Math.min(5*node_width,Math.abs(dx))/(5*node_width));
+                    if (Math.abs(dy) < 3*node_height) {
+                        scaleY = ((dy>0)?0.5:-0.5)*(((3*node_height)-Math.abs(dy))/(3*node_height))*(Math.min(node_width,Math.abs(dx))/(node_width)) ;
                     }
                 }
                 
