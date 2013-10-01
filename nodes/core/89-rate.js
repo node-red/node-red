@@ -18,31 +18,33 @@
 
 // Require main module
 var RED = require("../../red/red");
-var idList = [];
+
 
 // main node definition
-function PauseNode(n) {
+function RateLimitNode(n) {
    RED.nodes.createNode(this,n);
-   
-   this.timeout = n.timeout * 1000;
+   this.buffer = [];
+   this.timeout = 1000/n.rate;
    this.name = n.name
    
+   var node= this
+   
+   this.intervalID = setInterval(function() {
+      if (node.buffer.length > 0) {
+         node.send(node.buffer.shift());
+      }
+   },this.timeout);
+   
    this.on("input", function(msg) {
-       var node= this;
-       var id;
-       id = setTimeout(function(){
-              idList.splice(idList.indexOf(id),1);
-              node.send(msg);
-            }, node.timeout);
-       idList.push(id);
+       this.buffer.push(msg);
    });
 }
 
 // register node
-RED.nodes.registerType("pause",PauseNode);
+RED.nodes.registerType("rateLimit",RateLimitNode);
 
-PauseNode.prototype.close = function() {
-   for (var i=0; i<idList.length; i++ ) {
-       clearTimeout(idList[i]);
-   }
+RateLimitNode.prototype.close = function() {
+   clearInterval(this.intervalID);
+   this.buffer = [];
 }
+

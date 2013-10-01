@@ -18,31 +18,32 @@
 
 // Require main module
 var RED = require("../../red/red");
-var idList = [];
 
 // main node definition
 function DelayNode(n) {
    RED.nodes.createNode(this,n);
    
    this.timeout = n.timeout * 1000;
-   this.name = n.name
+   this.name = n.name;
+   this.idList = [];
    
    this.on("input", function(msg) {
        var node= this;
        var id;
        id = setTimeout(function(){
-              idList.splice(idList.indexOf(id),1);
+              node.idList.splice(node.idList.indexOf(id),1);
               node.send(msg);
             }, node.timeout);
-       idList.push(id);
+       this.idList.push(id);
    });
 }
 
 // register node
-RED.nodes.registerType("pause",DelayNode);
+RED.nodes.registerType("delay",DelayNode);
 
 DelayNode.prototype.close = function() {
-   for (var i=0; i<idList.length; i++ ) {
-       clearTimeout(idList[i]);
+   for (var i=0; i<this.idList.length; i++ ) {
+       clearTimeout(this.idList[i]);
    }
+   this.idList = [];
 }
