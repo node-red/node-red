@@ -16,21 +16,36 @@
 
 <!-- First, the content of the edit dialog is defined.                       -->
 <script type="text/x-red" data-template-name="delay">
+
     <div class="form-row">
-        <label for="node-input-topic"><i class="icon-tasks"></i> Delay</label>
+        <label for="node-input-pauseType"><i class="icon-tasks"></i> Type</label>
+        <select id="node-input-pauseType">
+          <option value="delay">Delay</option>
+          <option value="rate">Rate Limit</option>
+        </select>
+    </div>
+    <div id="delay-details" class="form-row">
+        <label for="node-input-timeout"><i class="icon-wrench"></i> Delay</label>
         <input type="text" id="node-input-timeout" placeholder="Time">
+    </div>
+    
+    <div id="rate-details" class="form-row">
+        <label for="node-input-rate"><i class="icon-wrench"></i> Rate</label>
+        <input type="text" id="node-input-rate" placeholder="msg/second">
     </div>
     
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    
+    <div class="form-tips">Delay value in seconds, Rate value in messages per second</div>
 </script>
 
 <!-- Next, some simple help text is provided for the node.                   -->
 <script type="text/x-red" data-help-name="delay">
-    <p>Introduces a delay into a flow</p>
-    <p>Default delay is 5 seconds but can be configured</p>
+    <p>Introduces a delay into a flow or rate limts messges</p>
+    <p>Default delay is 5 seconds and rate limit of 1 msg/second, but both can be configured</p>
 </script>
 
 <!-- Finally, the node type is registered along with all of its properties   -->
@@ -40,16 +55,42 @@
         color:"#E6E0F8",
         defaults: {             // defines the editable properties of the node
             name: {value:""},   //  along with default values.
-            timeout: {value:"5", required:true, validate:RED.validators.number()}
+            pauseType: {value:"delay", required:true},
+            timeout: {value:"5", required:true, validate:RED.validators.number()},
+            rate: {value:"1", required:true, validate:RED.validators.number()}
         },
         inputs:1,                // set the number of inputs - only 0 or 1
         outputs:1,               // set the number of outputs - 0 to n
         icon: "arrow-in.png",    // set the icon (held in public/icons)
         label: function() {      // sets the default label contents
-            return this.name||"delay "+this.timeout+" s";
+            if (this.pauseType == "delay") {
+              return this.name||"delay "+this.timeout+" s";
+            } else if (this.pauseType == "rate") {
+              return this.name||"limit "+this.rate+" msg/s";
+            }
+            return "foo";
         },
         labelStyle: function() { // sets the class to apply to the label
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+          if (this.pauseType == "delay") {
+            $("#delay-details").show();
+            $("#rate-details").hide();
+          } else if (this.pauseType == "rate") {
+            $("#delay-details").hide();
+            $("#rate-details").show();
+          }
+          
+          $("#node-input-pauseType").on("change",function() {
+            if (this.value == "delay") {
+              $("#delay-details").show();
+              $("#rate-details").hide();
+            } else if (this.value == "rate") {
+              $("#delay-details").hide();
+              $("#rate-details").show();
+          }
+          });
         }
     });
 </script>

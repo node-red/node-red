@@ -23,27 +23,53 @@ var RED = require("../../red/red");
 function DelayNode(n) {
    RED.nodes.createNode(this,n);
    
+   this.pauseType = n.pauseType;
    this.timeout = n.timeout * 1000;
+   this.rate = 1000/n.rate;
    this.name = n.name;
    this.idList = [];
+   this.buffer = [];
+   var node= this;
    
-   this.on("input", function(msg) {
-       var node= this;
-       var id;
-       id = setTimeout(function(){
-              node.idList.splice(node.idList.indexOf(id),1);
-              node.send(msg);
-            }, node.timeout);
-       this.idList.push(id);
-   });
+   if (this.pauseType == "delay") {
+      this.on("input", function(msg) {
+        var node= this;
+        var id;
+        id = setTimeout(function(){
+          node.idList.splice(node.idList.indexOf(id),1);
+          node.send(msg);
+        }, node.timeout);
+        this.idList.push(id);
+      });
+   } else if (this.pauseType == "rate") {
+   
+     this.intervalID = setInterval(function() {
+      if (node.buffer.length > 0) {
+        node.send(node.buffer.shift());
+      }
+     },this.rate);
+   
+     this.on("input", function(msg) {
+       this.buffer.push(msg);
+       if (this.buffer.length > 1000) {
+         this.warn(this.name + " buffer exceeded 1000 messages");
+       }
+     });
+   }
 }
 
 // register node
 RED.nodes.registerType("delay",DelayNode);
 
 DelayNode.prototype.close = function() {
-   for (var i=0; i<this.idList.length; i++ ) {
+
+   if (this.pauseType == "delay") {
+     for (var i=0; i<this.idList.length; i++ ) {
        clearTimeout(this.idList[i]);
+     }
+     this.idList = [];
+   } else if (this.pauseType == "rate") {
+     clearInterval(this.intervalID);
+     this.buffer = [];
    }
-   this.idList = [];
 }
