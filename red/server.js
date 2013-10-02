@@ -21,6 +21,8 @@ var redNodes = require("./nodes");
 var host = require('os').hostname();
 //TODO: relocated user dir
 var rulesfile = process.argv[2] || 'flows_'+host+'.json';
+var hook_method = require('./hook_method.js');
+
 
 var app = null;
 var server = null;
@@ -73,17 +75,43 @@ function createServer(_server,settings) {
     });
 }
 function start() {
+	//Log to let everyone know we are up and running
+	process.stdout.write('\u001B[2J\u001B[0;0f');
     console.log("\nWelcome to Node-RED\n===================\n");
     util.log("[red] Loading palette nodes");
     util.log("------------------------------------------");
+	
+	var stdout = process.stdout;
+	hook_method.makeHookObject(stdout);
+	var missingModules = [];
+	stdout.hook('write', function(string, encoding, fd, write) {
+		var matchStr = string.match(/odule '([\w-]+)'/)
+		if(matchStr != null){
+			missingModules.push(matchStr[1]);
+		}
+		write(string);
+	});
+    
     redNodes.load();
+	
+	stdout.unhook('write');
+	var missingModulesString = "";
+	for(var i=0; i< missingModules.length; i++){
+		missingModulesString += missingModules[i] + " ";
+	}
     util.log("");
-    util.log('You may ignore any errors above here if they are for');
-    util.log('nodes you are not using. The nodes indicated will not');
-    util.log('be available in the main palette until any missing');
-    util.log('modules are installed, typically by running:');
-    util.log('   npm install {the module name}');
-    util.log('or any other errors are resolved');
+    if(missingModulesString != ""){
+		util.log('You may ignore any errors above here if they are for');
+		util.log('nodes you are not using. The nodes indicated will not');
+		util.log('be available in the main palette until any missing');
+		util.log('modules are installed, typically by running:');
+		util.log('   npm install {the module name}');
+		util.log('or any other errors are resolved');
+		util.log('try running');
+		util.log('   npm install ' + missingModulesString)
+		util.log('Be aware that some modules may have dependencies that');
+		util.log('must be installed outside of npm')
+    }
     util.log("------------------------------------------");
     
     
