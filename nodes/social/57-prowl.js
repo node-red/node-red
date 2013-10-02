@@ -16,17 +16,23 @@
 
 var RED = require("../../red/red");
 var Prowl = require('node-prowl');
+var util = require('util');
 
-// pushkey.js just needs to be like (with the quotes)
-// module.exports = {prowl:'My-API-KEY'}
+// Either add a line like this to settings.js
+//    prowl: {prowlkey:'My-API-KEY'},
+// or create pushkey.js in dir ABOVE node-red, it just needs to be like
+//    module.exports = {prowlkey:'My-API-KEY'}
 
 try {
 	var pushkey = require("../../settings").prowl || require("../../../pushkey.js");
-} catch(err) {
-	throw new Error("Failed to load Prowl credentials");
+}
+catch(err) {
+	util.log("[57-prowl.js] Error: Failed to load Prowl credentials");
 }
 
-var prowl = new Prowl(pushkey.prowl);
+if (pushkey) {
+	var prowl = new Prowl(pushkey.prowlkey);
+}
 
 function ProwlNode(n) {
 	RED.nodes.createNode(this,n);
@@ -41,14 +47,19 @@ function ProwlNode(n) {
 		if (typeof(msg.payload) == 'object') {
 			msg.payload = JSON.stringify(msg.payload);
 		}
-		try {
-			prowl.push(msg.payload, titl, { priority: pri }, function( err, remaining ){
-				if ( err ) node.error(err);
-				node.log( remaining + ' calls to Prowl api during current hour.' );
-			});
+		if (pushkey) {
+			try {
+				prowl.push(msg.payload, titl, { priority: pri }, function(err, remaining) {
+					if (err) node.error(err);
+					node.log( remaining + ' calls to Prowl api during current hour.' );
+				});
+			}
+			catch (err) {
+				node.error(err);
+			}
 		}
-		catch (err) {
-			node.error(err);
+		else {
+			node.warn("Prowl credentials not set/found. See node info.");
 		}
 	});
 }

@@ -16,37 +16,47 @@
 
 var RED = require("../../red/red");
 var PushBullet = require('pushbullet');
+var util = require('util');
 
-// pushkey.js just needs to be like (with the quotes)
-// module.exports = {pushbullet:'My-API-KEY', deviceid:'12345'}
+// Either add a line like this to settings.js
+//    pushbullet: {pushbullet:'My-API-KEY', deviceid:'12345'},
+// or create pushkey.js in dir ABOVE node-red, it just needs to be like
+//    module.exports = {pushbullet:'My-API-KEY', deviceid:'12345'}
 
 try {
 	var pushkey = require("../../settings").pushbullet || require("../../../pushkey.js");
-} catch(err) {
-	throw new Error("Failed to load PushBullet credentials");
+}
+catch(err) {
+	util.log("[57-pushbullet.js] Error: Failed to load PushBullet credentials");
 }
 
-var pusher = new PushBullet(pushkey.pushbullet);
-var deviceId = pushkey.deviceid;
+if (pushkey) {
+	var pusher = new PushBullet(pushkey.pushbullet);
+	var deviceId = pushkey.deviceid;
+}
 
 function PushbulletNode(n) {
 	RED.nodes.createNode(this,n);
 	this.title = n.title;
-	this.device
 	var node = this;
 	this.on("input",function(msg) {
 		var titl = this.title||msg.topic||"Node-RED";
 		if (typeof(msg.payload) == 'object') {
 			msg.payload = JSON.stringify(msg.payload);
 		}
-		try {
-			pusher.note(deviceId, titl, msg.payload, function(err, response) {
-				if ( err ) node.error(err);
-				node.log( JSON.stringify(response) );
-			});
+		if (pushkey) {
+			try {
+				pusher.note(deviceId, titl, msg.payload, function(err, response) {
+					if (err) node.error(err);
+					console.log(response);
+				});
+			}
+			catch (err) {
+				node.error(err);
+			}
 		}
-		catch (err) {
-			node.error(err);
+		else {
+			node.warn("Pushbullet credentials not set/found. See node info.");
 		}
 	});
 }
