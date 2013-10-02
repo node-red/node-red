@@ -16,6 +16,7 @@
 
 var RED = require("../../red/red");
 var irc = require("irc");
+var util = require("util");
 
 // The Server Definition - this opens (and closes) the connection
 function IRCServerNode(n) {
@@ -26,13 +27,15 @@ function IRCServerNode(n) {
 	this.ircclient = new irc.Client(this.server, this.nickname, {
 		channels: [this.channel]
 	});
+	this.ircclient.addListener('error', function(message) {
+		util.log('[irc] '+ JSON.stringify(message));
+	});
 	this._close = function() {
 		this.ircclient.disconnect();
 	}
 }
 
 RED.nodes.registerType("irc-server",IRCServerNode);
-
 IRCServerNode.prototype.close = function() {
 	this._close();
 }
@@ -46,15 +49,10 @@ function IrcInNode(n) {
 	this.ircclient = this.serverConfig.ircclient;
 	var node = this;
 
-
 	this.ircclient.addListener('message', function (from, to, message) {
 		console.log(from + ' => ' + to + ': ' + message);
 		var msg = { "topic":from, "to":to, "payload":message };
 		node.send(msg);
-	});
-
-	this.ircclient.addListener('error', function(message) {
-		node.error(JSON.stringify(message));
 	});
 
 }
@@ -71,7 +69,7 @@ function IrcOutNode(n) {
 	var node = this;
 
 	this.on("input", function(msg) {
-		console.log(msg);
+		//console.log(msg,node.channel);
 		if (node.sendAll) {
 			node.ircclient.say(node.channel, JSON.stringify(msg));
 		}

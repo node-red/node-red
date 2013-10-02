@@ -65,12 +65,12 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-tips">Sending complete object will stringify the whole msg object before sending.</div>
+    <div class="form-tips">Sending the complete object will stringify the whole msg object before sending.</div>
 </script>
 
 <script type="text/x-red" data-help-name="irc out">
-	<p>Connects to a channel on an IRC server</p>
-	<p>If you send something with NO msg.topic it will go to the channel - otherwise it will go to the id in the <b>msg.topic</b> field.</p>
+	<p>Sends messages to a channel on an IRC server</p>
+	<p>If you send something with NO <b>msg.topic</b> it will go to the configured channel - otherwise it will go to the id in the <b>msg.topic</b> field.</p>
 	<p>You can either just send the <b>msg.payload</b>, or you can send the complete <b>msg</b> object.</p>
 </script>
 
@@ -103,7 +103,7 @@
     </div>
     <div class="form-row">
         <label for="node-config-input-channel"><i class="icon-tasks"></i> Channel</label>
-        <input type="text" id="node-config-input-channel" placeholder="#testing1234">
+        <input type="text" id="node-config-input-channel" placeholder="#node-red">
     </div>
     <div class="form-row">
         <label for="node-config-input-nickname"><i class="icon-tasks"></i> Nickname</label>
