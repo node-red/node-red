@@ -16,6 +16,10 @@
 
 var RED = require("../../red/red");
 var util = require("util");
+var http = require("http");
+var https = require("https");
+var urllib = require("url");
+var bodyParser = require("express").bodyParser();
 
 function HTTPIn(n) {
 	RED.nodes.createNode(this,n);
@@ -24,14 +28,15 @@ function HTTPIn(n) {
 
 	var node = this;
 	this.callback = function(req,res) {
+	    console.log(arguments.length);
 		node.send({req:req,res:res});
 	}
 	if (this.method == "get") {
 		RED.app.get(this.url,this.callback);
 	} else if (this.method == "post") {
-		RED.app.post(this.url,this.callback);
+		RED.app.post(this.url,bodyParser,this.callback);
 	} else if (this.method == "put") {
-		RED.app.put(this.url,this.callback);
+		RED.app.put(this.url,bodyParser,this.callback);
 	} else if (this.method == "delete") {
 		RED.app.delete(this.url,this.callback);
 	}
@@ -41,7 +46,7 @@ function HTTPIn(n) {
 	        for (var i in routes) {
 	            if (routes[i].path == this.url) {
 	                routes.splice(i,1);
-	                break;
+	                //break;
 	            }
 	        }
 	});
@@ -58,10 +63,59 @@ function HTTPOut(n) {
 	            if (msg.headers) {
 	                res.set(msg.headers);
 	            }
-	            var rc = msg.rc || 200;
-	            msg.res.send(rc,msg.payload);
+	            var statusCode = msg.statusCode || 200;
+	            msg.res.send(statusCode,msg.payload);
 	        }
 	});
 }
 
 RED.nodes.registerType("http response",HTTPOut);
+
+function HTTPRequest(n) {
+	RED.nodes.createNode(this,n);
+	var url = n.url;
+	var method = n.method || "GET";
+	var httplib = (/^https/.test(url))?https:http;
+	var node = this;
+	this.on("input",function(msg) {
+	        
+	        var opts = urllib.parse(msg.url||url);
+	        opts.method = msg.method||method;
+	        if (msg.headers) {
+	            opts.header = headers;
+	        }
+	        var req = httplib.request(opts,function(res) {
+	                res.setEncoding('utf8');
+	                var message = {
+	                    statusCode: res.statusCode,
+	                    headers: res.headers,
+	                    payload: ""
+	                };
+	                res.on('data',function(chunk) {
+	                        message.payload += chunk;
+	                });
+	                res.on('end',function() {
+	                        node.send(message);
+	                });
+	        });
+	        req.on('error',function(err) {
+	                msg.payload = err.toString();
+	                msg.statusCode = err.code;
+	                node.send(msg);
+	        });
+	        if (msg.payload) {
+	            if (typeof msg.payload === "string" || Buffer.isBuffer(msg.payload)) { 
+                    req.write(msg.payload);
+                } else if (typeof msg.payload == "number") {
+                    req.write(msg.payload+"");
+                } else {
+                    req.write(JSON.stringify(msg.payload));
+                }
+	        }
+	        req.end();
+	        
+	        
+	});
+}
+
+RED.nodes.registerType("http request",HTTPRequest);
