@@ -102,19 +102,17 @@
 </script>
 
 <script type="text/x-red" data-template-name="twitter in">
-    <div class="form-row">
+	<div class="form-row">
+		<label for="node-input-operation"><i class="icon-search"></i> Search</label>
+		<select type="text" id="node-input-operation" style="display: inline-block; vertical-align: top; width:60%;">
+			<option value="false">All public Tweets seen by</option>
+			<option value="true">People being followed by</option>
+		</select>
+	</div>
+	<div class="form-row">
         <label for="node-input-twitter"><i class="icon-user"></i> User</label>
         <input type="text" id="node-input-twitter">
     </div>
-
-	<div class="form-row">
-		<label for="node-input-operation"><i class="icon-search"></i> Search</label>
-		<select type="text" id="node-input-operation" style="display: inline-block; vertical-align: top;">
-			<option value="words">Tweets</option>
-			<option value="user">Users</option>
-			<!--<option value="site">Site</option> -->
-		</select>
-	</div>
     <div class="form-row">
         <label for="node-input-tags"><i class="icon-tags"></i> For</label>
         <input type="text" id="node-input-tags" placeholder="comma-separated words, @ids, #tags">
@@ -127,11 +125,12 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-tips">Tip: Use commas without spaces between multiple search terms. Comma = OR, Space = AND.</div>
+    <div class="form-tips">Tip: Use commas without spaces between multiple search terms. Comma = OR, Space = AND.
+    <br/>Note: the Twitter API WILL NOT deliver 100% of all tweets...</div>
 </script>
 
 <script type="text/x-red" data-help-name="twitter in">
-	<p>Twitter input node. Watches the public stream for tweets containing the configured search term.</p>
+	<p>Twitter input node. Watches either the public or the user's stream for tweets containing the configured search term.</p>
 	<p>Sets the <b>msg.topic</b> to <i>tweets/</i> and then appends the senders screen name.</p>
 	<p>Sets <b>msg.location</b> to the tweeters location if known.</p>
 </script>
@@ -143,7 +142,7 @@
         defaults: {
             twitter: {type:"twitter-credentials",required:true},
             tags: {value:"",required:true},
-            operation: {value:"words",required:true},
+            operation: {value:"false",required:true},
             name: {value:""},
             topic: {value:"tweets"}
         },

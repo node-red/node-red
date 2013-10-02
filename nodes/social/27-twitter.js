@@ -27,7 +27,7 @@ RED.nodes.registerType("twitter-credentials",TwitterNode);
 function TwitterInNode(n) {
     RED.nodes.createNode(this,n);
     this.active = true;
-    this.oper = n.operation;
+    this.user = n.user;
     this.tags = n.tags.replace(/ /g,'');
     this.twitter = n.twitter;
     this.topic = n.topic;
@@ -46,8 +46,7 @@ function TwitterInNode(n) {
         if (this.tags !== "") {
             try {
                 var thing = 'statuses/filter';
-                if (this.oper === "user") { thing = 'user'; }
-                if (this.oper === "site") { thing = 'site'; }
+                if (this.user == "true") { thing = 'user'; }
                 function setupStream() {
                     if (node.active) {
                         twit.stream(thing, { track: [node.tags] }, function(stream) {
