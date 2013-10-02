@@ -103,8 +103,8 @@
 
 <script type="text/x-red" data-template-name="twitter in">
 	<div class="form-row">
-		<label for="node-input-operation"><i class="icon-search"></i> Search</label>
-		<select type="text" id="node-input-operation" style="display: inline-block; vertical-align: top; width:60%;">
+		<label for="node-input-user"><i class="icon-search"></i> Search</label>
+		<select type="text" id="node-input-user" style="display: inline-block; vertical-align: top; width:60%;">
 			<option value="false">All public Tweets seen by</option>
 			<option value="true">People being followed by</option>
 		</select>
@@ -142,7 +142,7 @@
         defaults: {
             twitter: {type:"twitter-credentials",required:true},
             tags: {value:"",required:true},
-            operation: {value:"false",required:true},
+            user: {value:"false",required:true},
             name: {value:""},
             topic: {value:"tweets"}
         },
