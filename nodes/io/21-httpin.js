@@ -82,7 +82,7 @@ function HTTPRequest(n) {
 	        var opts = urllib.parse(msg.url||url);
 	        opts.method = msg.method||method;
 	        if (msg.headers) {
-	            opts.header = headers;
+	            opts.header = msg.headers;
 	        }
 	        var req = httplib.request(opts,function(res) {
 	                res.setEncoding('utf8');
