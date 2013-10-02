@@ -2,6 +2,8 @@
 
 A visual tool for wiring the Internet of Things.
 
+![Screenshot](http://nodered.org/images/node-red-screenshot.png "Node-RED: A visual tool for wiring the Internet of Things")
+
 ## Quick Start
 
 Check out [INSTALL](INSTALL.md) for full instructions on getting started.
