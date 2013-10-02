@@ -24,8 +24,34 @@ function DelayNode(n) {
    RED.nodes.createNode(this,n);
    
    this.pauseType = n.pauseType;
-   this.timeout = n.timeout * 1000;
-   this.rate = 1000/n.rate;
+   this.timeoutUnits = n.timeoutUnits;
+   this.rateUnits = n.rateUnits;
+   
+   if (n.timeoutUnits == "milliseconds") {
+     this.timeout = n.timout;
+   } else if (n.timeoutUnits == "seconds") {
+     this.timeout = n.timeout * 1000;
+   } else if (n.timeoutUnits == "minutes") {
+     this.timeout = n.timeout * (60 * 1000);
+   } else if (n.timeoutUnits == "hours") {
+     this.timeout = n.timeout * (60 * 60 * 1000);
+   } else if (n.timeoutUnits == "days") {
+     this.timeout = n.timeout * (24 * 60 * 60 * 1000);
+   }
+   
+   if (n.rateUnits == "second") {
+     this.rate = 1000/n.rate;
+   } else if (n.rateUnits == "minute") {
+     this.rate = (60 * 1000)/n.rate;
+   } else if (n.rateUnits == "hour") {
+     this.rate = (60 * 60 * 1000)/n.rate;
+   } else if (n.rateUnits == "day") {
+     this.rate = (24 * 60 * 60 * 1000)/n.rate;
+   }
+
+   console.log(this.timeoutUnits + " - " + n.timeout + " = " + this.timeout);   
+   console.log(this.rateUnits + " - " + n.rate + " = " + this.rate);
+   
    this.name = n.name;
    this.idList = [];
    this.buffer = [];

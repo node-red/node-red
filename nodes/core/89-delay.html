@@ -27,11 +27,26 @@
     <div id="delay-details" class="form-row">
         <label for="node-input-timeout"><i class="icon-wrench"></i> Delay</label>
         <input type="text" id="node-input-timeout" placeholder="Time">
+        <label for="node-input-timeoutUnits"> For </label>
+        <select id="node-input-timeoutUnits">
+          <option value="milliseconds">Milliseconds</option>
+          <option value="seconds">Seconds</option>
+          <option value="minutes">Minutes</option>
+          <option value="hours">Hours</option>
+          <option value="days">Days</option>
+        </select>
     </div>
     
     <div id="rate-details" class="form-row">
         <label for="node-input-rate"><i class="icon-wrench"></i> Rate</label>
         <input type="text" id="node-input-rate" placeholder="msg/second">
+        <label for="node-input-rateUnits"> Per </label>
+        <select id="node-input-rateUnits">
+          <option value="second">Second</option>
+          <option value="minute">Minute</option>
+          <option value="hour">Hour</option>
+          <option value="day">Day</option>
+        </select>
     </div>
     
     <div class="form-row">
@@ -57,16 +72,20 @@
             name: {value:""},   //  along with default values.
             pauseType: {value:"delay", required:true},
             timeout: {value:"5", required:true, validate:RED.validators.number()},
-            rate: {value:"1", required:true, validate:RED.validators.number()}
+            timeoutUnits: {value:"seconds"},
+            rate: {value:"1", required:true, validate:RED.validators.number()},
+            rateUnits: {value: "second"}
         },
         inputs:1,                // set the number of inputs - only 0 or 1
         outputs:1,               // set the number of outputs - 0 to n
         icon: "arrow-in.png",    // set the icon (held in public/icons)
         label: function() {      // sets the default label contents
             if (this.pauseType == "delay") {
-              return this.name||"delay "+this.timeout+" s";
+              var units = this.timeoutUnits ? this.timeoutUnits.charAt(0) : "s";
+              return this.name||"delay "+this.timeout+" " + units;
             } else if (this.pauseType == "rate") {
-              return this.name||"limit "+this.rate+" msg/s";
+              var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
+              return this.name||"limit "+this.rate+" msg/"+ units;
             }
             return "foo";
         },
@@ -80,6 +99,12 @@
           } else if (this.pauseType == "rate") {
             $("#delay-details").hide();
             $("#rate-details").show();
+          }
+          
+          if (!this.timeoutUnits) {
+            $("#node-input-timeoutUnits option").filter(function() {
+              return $(this).val() == 'seconds'; 
+            }).attr('selected', true);
           }
           
           $("#node-input-pauseType").on("change",function() {
