@@ -24,11 +24,10 @@ function TwitterNode(n) {
 }
 RED.nodes.registerType("twitter-credentials",TwitterNode);
 
-
 function TwitterInNode(n) {
     RED.nodes.createNode(this,n);
     this.active = true;
-    this.user = n.user;
+    this.oper = n.operation;
     this.tags = n.tags.replace(/ /g,'');
     this.twitter = n.twitter;
     this.topic = n.topic;
@@ -47,11 +46,13 @@ function TwitterInNode(n) {
         if (this.tags !== "") {
             try {
                 var thing = 'statuses/filter';
-                if (this.user) { thing = 'user'; }
+                if (this.oper === "user") { thing = 'user'; }
+                if (this.oper === "site") { thing = 'site'; }
                 function setupStream() {
                     if (node.active) {
                         twit.stream(thing, { track: [node.tags] }, function(stream) {
                                 //twit.stream('user', { track: [node.tags] }, function(stream) {
+                                //twit.stream('site', { track: [node.tags] }, function(stream) {
                                 //twit.stream('statuses/filter', { track: [node.tags] }, function(stream) {
                                 node.stream = stream;
                                 stream.on('data', function(tweet) {
@@ -100,8 +101,6 @@ TwitterInNode.prototype.close = function() {
 		this.stream.destroy();
 	}
 }
-
-
 
 function TwitterOutNode(n) {
 	RED.nodes.createNode(this,n);
