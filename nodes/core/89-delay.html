@@ -18,17 +18,16 @@
 <script type="text/x-red" data-template-name="delay">
 
     <div class="form-row">
-        <label for="node-input-pauseType"><i class="icon-tasks"></i> Type</label>
-        <select id="node-input-pauseType">
-          <option value="delay">Delay</option>
-          <option value="rate">Rate Limit</option>
+        <label for="node-input-pauseType"><i class="icon-tasks"></i> Action</label>
+        <select id="node-input-pauseType" style="width:270px !important">
+          <option value="delay">Delay message</option>
+          <option value="rate">Limit rate to</option>
         </select>
     </div>
     <div id="delay-details" class="form-row">
-        <label for="node-input-timeout"><i class="icon-wrench"></i> Delay</label>
-        <input type="text" id="node-input-timeout" placeholder="Time">
-        <label for="node-input-timeoutUnits"> For </label>
-        <select id="node-input-timeoutUnits">
+        <label for="node-input-timeout"><i class="icon-time"></i> For</label>
+        <input type="text" id="node-input-timeout" placeholder="Time" style="direction:rtl; width:50px !important">
+        <select id="node-input-timeoutUnits" style="width:200px !important">
           <option value="milliseconds">Milliseconds</option>
           <option value="seconds">Seconds</option>
           <option value="minutes">Minutes</option>
@@ -38,10 +37,10 @@
     </div>
     
     <div id="rate-details" class="form-row">
-        <label for="node-input-rate"><i class="icon-wrench"></i> Rate</label>
-        <input type="text" id="node-input-rate" placeholder="msg/second">
-        <label for="node-input-rateUnits"> Per </label>
-        <select id="node-input-rateUnits">
+        <label for="node-input-rate"><i class="icon-time"></i> To</label>
+        <input type="text" id="node-input-rate" placeholder="1" style="direction:rtl; width:50px !important">
+        <label for="node-input-reateUnits">message(s) per</label>
+        <select id="node-input-rateUnits" style="width:140px !important">
           <option value="second">Second</option>
           <option value="minute">Minute</option>
           <option value="hour">Hour</option>
@@ -54,7 +53,6 @@
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     
-    <div class="form-tips">Delay value in seconds, Rate value in messages per second</div>
 </script>
 
 <!-- Next, some simple help text is provided for the node.                   -->
@@ -93,6 +91,9 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+          $( "#node-input-timeout" ).spinner();
+          $( "#node-input-rate" ).spinner();
+        
           if (this.pauseType == "delay") {
             $("#delay-details").show();
             $("#rate-details").hide();
@@ -114,7 +115,7 @@
             } else if (this.value == "rate") {
               $("#delay-details").hide();
               $("#rate-details").show();
-          }
+            }
           });
         }
     });

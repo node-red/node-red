@@ -48,13 +48,11 @@ function DelayNode(n) {
    } else if (n.rateUnits == "day") {
      this.rate = (24 * 60 * 60 * 1000)/n.rate;
    }
-
-   console.log(this.timeoutUnits + " - " + n.timeout + " = " + this.timeout);   
-   console.log(this.rateUnits + " - " + n.rate + " = " + this.rate);
    
    this.name = n.name;
    this.idList = [];
    this.buffer = [];
+   this.intervalID = -1;
    var node= this;
    
    if (this.pauseType == "delay") {
@@ -69,20 +67,30 @@ function DelayNode(n) {
       });
    } else if (this.pauseType == "rate") {
    
-     this.intervalID = setInterval(function() {
-      if (node.buffer.length > 0) {
-        node.send(node.buffer.shift());
-      }
-     },this.rate);
-   
      this.on("input", function(msg) {
-       this.buffer.push(msg);
-       if (this.buffer.length > 1000) {
-         this.warn(this.name + " buffer exceeded 1000 messages");
+       if ( node.intervalID != -1) {
+         node.buffer.push(msg);
+         if (node.buffer.length > 1000) {
+           node.warn(this.name + " buffer exceeded 1000 messages");
+         }
+       } else {
+         node.send(msg);
+         node.intervalID = setInterval(function() {
+           if (node.buffer.length == 0) {
+             clearInterval(node.intervalID);
+             node.intervalID = -1;
+           }
+     
+           if (node.buffer.length > 0) {
+             node.send(node.buffer.shift());
+           }
+         },node.rate);
        }
      });
    }
 }
+
+
 
 // register node
 RED.nodes.registerType("delay",DelayNode);
