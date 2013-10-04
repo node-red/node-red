@@ -21,7 +21,6 @@ var crypto = require("crypto");
 var settings = require("./settings");
 var RED = require("./red/red.js");
 
-
 var server;
 var app = express();
 
@@ -52,8 +51,21 @@ if (settings.httpAuth) {
 var red = RED.init(server,settings);
 app.use(settings.httpRoot,red);
 
-    
-server.listen(settings.uiPort);
 RED.start();
-util.log('[red] Server now running at http'+(settings.https?'s':'')+'://127.0.0.1:'+settings.uiPort+settings.httpRoot);
+
+server.listen(settings.uiPort,function() {
+        util.log('[red] Server now running at http'+(settings.https?'s':'')+'://127.0.0.1:'+settings.uiPort+settings.httpRoot);
+});
+
+process.on('uncaughtException',function(err) {
+        if (err.errno === "EADDRINUSE") {
+            util.log('[red] Unable to listen on http'+(settings.https?'s':'')+'://127.0.0.1:'+settings.uiPort+settings.httpRoot);
+            util.log('[red] Error: port in use');
+        } else {
+            util.log('[red] Uncaught Exception:');
+            util.log(err.stack);
+        }
+        process.exit(1);
+});
+
 
