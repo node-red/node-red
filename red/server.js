@@ -18,9 +18,9 @@ var fs = require('fs');
 var util = require('util');
 var createUI = require("./ui");
 var redNodes = require("./nodes");
-var host = require('os').hostname();
 //TODO: relocated user dir
-var rulesfile = process.argv[2] || 'flows_'+host+'.json';
+
+var flowfile = '';
 
 var app = null;
 var server = null;
@@ -28,6 +28,8 @@ var server = null;
 function createServer(_server,settings) {
     server = _server;
     app = createUI(settings);
+    
+    flowfile = settings.flowfile || 'flows_'+require('os').hostname()+'.json';
     
     //TODO: relocated user dir
     fs.exists("lib/",function(exists) {
@@ -43,9 +45,9 @@ function createServer(_server,settings) {
     });
     
     app.get("/flows",function(req,res) {
-            fs.exists(rulesfile, function (exists) {
+            fs.exists(flowfile, function (exists) {
                     if (exists) {
-                        res.sendfile(rulesfile);
+                        res.sendfile(flowfile);
                     } else {
                         res.writeHead(200, {'Content-Type': 'text/plain'});
                         res.write("[]");
@@ -62,7 +64,7 @@ function createServer(_server,settings) {
             req.on('end', function() {
                     res.writeHead(204, {'Content-Type': 'text/plain'});
                     res.end();
-                    fs.writeFile(rulesfile, fullBody, function(err) {
+                    fs.writeFile(flowfile, fullBody, function(err) {
                             if(err) {
                                 util.log(err);
                             } else {
@@ -87,14 +89,14 @@ function start() {
     util.log("------------------------------------------");
     
     
-    fs.exists(rulesfile, function (exists) {
+    fs.exists(flowfile, function (exists) {
             if (exists) {
-                util.log("[red] Loading flows : "+rulesfile);
-                fs.readFile(rulesfile,'utf8',function(err,data) {
+                util.log("[red] Loading flows : "+flowfile);
+                fs.readFile(flowfile,'utf8',function(err,data) {
                         redNodes.setConfig(JSON.parse(data));
                 });
             } else {
-                util.log("[red] Flows file not found : "+rulesfile);
+                util.log("[red] Flows file not found : "+flowfile);
             }
     });
 }

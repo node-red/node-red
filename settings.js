@@ -19,6 +19,9 @@ module.exports = {
     serialReconnectTime: 15000,
     debugMaxLength: 1000,
 
+    // The file containing the flows. If not set, it defaults to flows_<hostname>.json
+    //flowfile: 'flows.json'
+    
     // You can protect the user interface with a userid and password by using the following property
     // the password must be an md5 hash  eg.. 5f4dcc3b5aa765d61d8327deb882cf99 ('password')
     //httpAuth: {user:"user",pass:"5f4dcc3b5aa765d61d8327deb882cf99"},
