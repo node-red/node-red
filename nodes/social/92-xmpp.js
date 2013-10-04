@@ -14,8 +14,17 @@
  * limitations under the License.
  **/
 
+var orig=console.warn;
+console.warn=(function() { // suppress warning from stringprep when not needed)
+	var orig=console.warn;
+	return function() {
+	//orig.apply(console, arguments);
+	};
+})();
+
 var RED = require("../../red/red");
 var xmpp = require('simple-xmpp');
+console.warn = orig;
 
 try {
 	var xmppkey = require("../../settings").xmpp || require("../../../xmppkeys.js");
@@ -97,17 +106,13 @@ function XmppNode(n) {
 		}
 	});
 
-	this._close = function() {
+	this.on("close", function() {
 		xmpp.setPresence('offline');
 		//xmpp.conn.end();
 		// TODO - DCJ NOTE... this is not good. It leaves the connection up over a restart - which will end up with bad things happening...
 		// (but requires the underlying xmpp lib to be fixed (which does have an open bug request on fixing the close method)).
 		this.warn("Due to an underlying bug in the xmpp library this does not disconnect old sessions. This is bad... A restart would be better.");
-	}
+	});
 }
 
 RED.nodes.registerType("xmpp",XmppNode);
-
-XmppNode.prototype.close = function() {
-	this._close();
-}
