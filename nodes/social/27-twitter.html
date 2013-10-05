@@ -103,30 +103,27 @@
 
 <script type="text/x-red" data-template-name="twitter in">
 	<div class="form-row">
-		<label for="node-input-user"><i class="icon-search"></i> Search</label>
-		<select type="text" id="node-input-user" style="display: inline-block; vertical-align: top; width:60%;">
-			<option value="false">All public Tweets seen by</option>
-			<option value="true">People being followed by</option>
-		</select>
-	</div>
-	<div class="form-row">
-        <label for="node-input-twitter"><i class="icon-user"></i> User</label>
+        <label for="node-input-twitter"><i class="icon-user"></i> Log in as</label>
         <input type="text" id="node-input-twitter">
     </div>
+	<div class="form-row">
+		<label for="node-input-user"><i class="icon-search"></i> Search</label>
+		<select type="text" id="node-input-user" style="display: inline-block; vertical-align: middle; width:60%;">
+			<option value="false">all public tweets</option>
+			<option value="true">the tweets of who you follow</option>
+		</select>
+	</div>
     <div class="form-row">
-        <label for="node-input-tags"><i class="icon-tags"></i> For</label>
+        <label for="node-input-tags"><i class="icon-tags"></i> for</label>
         <input type="text" id="node-input-tags" placeholder="comma-separated words, @ids, #tags">
     </div>
-    <!-- <div class="form-row">
-        <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
-        <input type="text" id="node-input-topic" placeholder="Topic">
-    </div> -->
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-tips">Tip: Use commas without spaces between multiple search terms. Comma = OR, Space = AND.
-    <br/>Note: the Twitter API WILL NOT deliver 100% of all tweets...</div>
+    <br/>The Twitter API WILL NOT deliver 100% of all tweets.
+    <br/>Tweets of who you follow will include their retweets and favourites.</div>
 </script>
 
 <script type="text/x-red" data-help-name="twitter in">
@@ -143,8 +140,7 @@
             twitter: {type:"twitter-credentials",required:true},
             tags: {value:"",required:true},
             user: {value:"false",required:true},
-            name: {value:""},
-            topic: {value:"tweets"}
+            name: {value:""}
         },
         inputs:0,
         outputs:1,
