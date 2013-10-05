@@ -29,7 +29,7 @@ function createServer(_server,settings) {
     server = _server;
     app = createUI(settings);
     
-    flowfile = settings.flowfile || 'flows_'+require('os').hostname()+'.json';
+    flowfile = settings.flowFile || 'flows_'+require('os').hostname()+'.json';
     
     //TODO: relocated user dir
     fs.exists("lib/",function(exists) {

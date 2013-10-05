@@ -48,7 +48,7 @@ if (settings.httpAuth) {
     );
 }
 
-settings.flowfile = process.argv[2] || settings.flowfile;
+settings.flowFile = process.argv[2] || settings.flowFile;
 
 var red = RED.init(server,settings);
 app.use(settings.httpRoot,red);
