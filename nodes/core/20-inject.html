@@ -202,7 +202,7 @@
         },
         oneditprepare: function() {
             var repeattype = "none";
-            if (parseInt(this.repeat) != 0) {
+            if (this.repeat != "") {
                 repeattype = "interval";
                 $("#inject-time-interval-units option").filter(function() {return $(this).val() == "s";}).attr('selected',true);
                 $("#inject-time-interval-count").val(this.repeat);
