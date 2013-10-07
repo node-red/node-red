@@ -26,45 +26,45 @@ function ArduinoNode(n) {
 	this.device = n.device;
 	this.repeat = n.repeat||25;
 	util.log("[firmata] Opening"+this.device);
+	var node = this;
 
-//	var tou = setInterval(function() {
-//		if (!arduinoReady) {
-//			clearInterval(tou);
-
-	arduinoReady = false;
-	if (thisboard == null) {
-		this.board = new firmata.Board(this.device, function(err) {
-			if (err) {
-				util.log("[firmata] "+err);
-				return;
+	node.toun = setInterval(function() {
+		if (!arduinoReady) {
+			arduinoReady = false;
+			if (thisboard == null) {
+				node.board = new firmata.Board(node.device, function(err) {
+					if (err) {
+						console.log("[firmata] error: ",err);
+						return;
+					}
+					arduinoReady = true;
+					thisboard = node.board;
+					clearInterval(node.toun);
+					util.log('[firmata] Arduino connected');
+				});
 			}
-			arduinoReady = true;
-			util.log('[firmata] Arduino connected');
-		});
-		thisboard = this.board;
-	}
-	else {
-		util.log("[firmata] Arduino already connected");
-		this.board = thisboard;
-		console.log(this.board._events);
-		this.board.removeAllListeners();
-		arduinoReady = true;
-	}
+			else {
+				util.log("[firmata] Arduino already connected");
+				node.board = thisboard;
+				console.log(node.board.sp);
+				node.board.removeAllListeners();
+				arduinoReady = true;
+				clearInterval(node.toun);
+			}
+		} else { util.log("[firmata] Waiting for Firmata"); }
+	}, 10000); // wait for firmata to connect to arduino
 
-//		} else { util.log("[firmata] Waiting for Firmata"); }
-//	}, 1000); // wait for firmata to disconnect from arduino
-
-	this._close = function() {
+	this.on('close', function() {
 		//this.board.sp.close(function() { console.log("[firmata] Serial port closed"); arduinoReady = false; });
+		if (node.toun) {
+			clearInterval(node.toun);
+			util.log("[arduino] arduino wait loop stopped");
+		}
 		util.log("[firmata] Stopped");
-	}
+	});
 }
-
 RED.nodes.registerType("arduino-board",ArduinoNode);
 
-ArduinoNode.prototype.close = function() {
-	this._close();
-}
 
 // The Input Node
 function DuinoNodeIn(n) {
@@ -78,10 +78,10 @@ function DuinoNodeIn(n) {
 	this.board = this.serverConfig.board;
 		this.repeat = this.serverConfig.repeat;
 		var node = this;
-	
-		var tout = setInterval(function() {
+
+		node.toui = setInterval(function() {
 			if (arduinoReady) {
-				clearInterval(tout);
+				clearInterval(node.toui);
 				console.log(node.state,node.pin,node.board.MODES[node.state]);
 				node.board.pinMode(node.pin, node.board.MODES[node.state]);
 				node.board.setSamplingInterval(node.repeat);
@@ -103,22 +103,20 @@ function DuinoNodeIn(n) {
 				}
 			}
 			else { node.log("Waiting for Arduino"); }
-		}, 2000); // loop to wait for firmata to connect to arduino
-	
-		this._close = function() {
-			clearInterval(this._interval);
-			util.log("[arduino] input eventlistener stopped");
-		}
+		}, 5000); // loop to wait for firmata to connect to arduino
+
+		this.on('close', function() {
+			if (node.toui) {
+				clearInterval(node.toui);
+				util.log("[arduino] input wait loop stopped");
+			}
+		});
 	}
 	else {
 		util.log("[arduino] Serial Port not Configured");
 	}
 }
 RED.nodes.registerType("arduino in",DuinoNodeIn);
-
-DuinoNodeIn.prototype.close = function() {
-	this._close();
-}
 
 
 // The Output Node
@@ -132,7 +130,7 @@ function DuinoNodeOut(n) {
 	if (typeof this.serverConfig === "object") {
 		this.board = this.serverConfig.board;
 		var node = this;
-	
+
 		this.on("input", function(msg) {
 			//console.log(msg);
 			if (arduinoReady) {
@@ -161,14 +159,21 @@ function DuinoNodeOut(n) {
 			}
 			//else { console.log("Arduino not ready"); }
 		});
-	
-		var touo = setInterval(function() {
+
+		node.touo = setInterval(function() {
 			if (arduinoReady) {
-				clearInterval(touo);
+				clearInterval(node.touo);
 				//console.log(node.state,node.pin,node.board.MODES[node.state]);
 				node.board.pinMode(node.pin, node.board.MODES[node.state]);
 			}
 		}, 5000); // loop to wait for firmata to connect to arduino
+
+		this.on('close', function() {
+			if (node.touo) {
+				clearInterval(node.touo);
+				util.log("[arduino] output wait loop stopped");
+			}
+		});
 	}
 	else {
 		util.log("[arduino] Serial Port not Configured");
