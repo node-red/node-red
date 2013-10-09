@@ -57,7 +57,7 @@ RED.nodes.registerType("http in",HTTPIn);
 
 function HTTPOut(n) {
 	RED.nodes.createNode(this,n);
-	
+	var node = this;
 	this.on("input",function(msg) {
 	        if (msg.res) {
 	            if (msg.headers) {
@@ -65,6 +65,8 @@ function HTTPOut(n) {
 	            }
 	            var statusCode = msg.statusCode || 200;
 	            msg.res.send(statusCode,msg.payload);
+	        } else {
+	            node.warn("No response object");
 	        }
 	});
 }
