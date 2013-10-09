@@ -30,7 +30,7 @@ function TwitterInNode(n) {
     this.user = n.user;
     this.tags = n.tags.replace(/ /g,'');
     this.twitter = n.twitter;
-    this.topic = n.topic;
+    this.topic = n.topic||"tweets";
     this.twitterConfig = RED.nodes.getNode(this.twitter);
     var credentials = RED.nodes.getCredentials(this.twitter);
 
