@@ -22,7 +22,7 @@
 
     <div class="form-row">
         <label for="node-input-template"><i class="icon-wrench"></i> Template</label>
-        <input type="hidden" id="node-input-template">
+        <input type="hidden" id="node-input-template" autofocus="autofocus">
         <div style="height: 250px;" class="node-text-editor" id="node-input-template-editor" ></div>
     </div>
 
@@ -79,7 +79,7 @@
                     editor:that.editor, // the field name the main text body goes to
                     fields:['name']
                 });
-
+                $("#node-input-name").focus();
             });
         },
         oneditsave: function() {

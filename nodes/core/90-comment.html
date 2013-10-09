@@ -21,7 +21,7 @@
 	</div>
 	<div class="form-row">
         <label for="node-input-info" style="width: 100% !important;"><i class="icon-file"></i> More</label>
-        <input type="hidden" id="node-input-info">
+        <input type="hidden" id="node-input-info" autofocus="autofocus">
         <div style="height: 250px;" class="node-text-editor" id="node-input-info-editor" ></div>
     </div>
     <div class="form-tips">Tip: this isn't meant for War and Peace - but useful notes can be kept here.</div>
@@ -75,6 +75,7 @@
                     showFoldingRuler:false,
                     contents: $("#node-input-info").val()
                 });
+                $("#node-input-name").focus();
             });
         },
         oneditsave: function() {

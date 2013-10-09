@@ -21,7 +21,7 @@
     </div>
     <div class="form-row">
         <label for="node-input-func"><i class="icon-wrench"></i> Function</label>
-        <input type="hidden" id="node-input-func">
+        <input type="hidden" id="node-input-func" autofocus="autofocus">
         <div style="height: 250px;" class="node-text-editor" id="node-input-func-editor" ></div>
     </div>
     <div class="form-row">
@@ -85,6 +85,7 @@
                     editor:that.editor, // the field name the main text body goes to
                     fields:['name','outputs']
                 });
+                $("#node-input-name").focus();
 
             });
         },
