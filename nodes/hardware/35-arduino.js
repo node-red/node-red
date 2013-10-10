@@ -25,12 +25,11 @@ function ArduinoNode(n) {
 	RED.nodes.createNode(this,n);
 	this.device = n.device;
 	this.repeat = n.repeat||25;
-	util.log("[firmata] Opening"+this.device);
+	util.log("[firmata] Opening "+this.device);
 	var node = this;
 
 	node.toun = setInterval(function() {
 		if (!arduinoReady) {
-			arduinoReady = false;
 			if (thisboard == null) {
 				node.board = new firmata.Board(node.device, function(err) {
 					if (err) {
@@ -44,21 +43,22 @@ function ArduinoNode(n) {
 				});
 			}
 			else {
-				util.log("[firmata] Arduino already connected");
 				node.board = thisboard;
-				console.log(node.board.sp);
 				node.board.removeAllListeners();
 				arduinoReady = true;
 				clearInterval(node.toun);
+				node.toun = false;
+				util.log("[firmata] Arduino already connected");
 			}
 		} else { util.log("[firmata] Waiting for Firmata"); }
 	}, 10000); // wait for firmata to connect to arduino
 
 	this.on('close', function() {
 		//this.board.sp.close(function() { console.log("[firmata] Serial port closed"); arduinoReady = false; });
+		arduinoReady = false;
 		if (node.toun) {
 			clearInterval(node.toun);
-			util.log("[arduino] arduino wait loop stopped");
+			util.log("[firmata] arduino wait loop stopped");
 		}
 		util.log("[firmata] Stopped");
 	});
@@ -80,9 +80,11 @@ function DuinoNodeIn(n) {
 		var node = this;
 
 		node.toui = setInterval(function() {
-			if (arduinoReady) {
+			if (thisboard != null) {
+				node.board = thisboard;
 				clearInterval(node.toui);
-				console.log(node.state,node.pin,node.board.MODES[node.state]);
+				node.toui = false;
+				//console.log(node.state,node.pin,node.board.MODES[node.state]);
 				node.board.pinMode(node.pin, node.board.MODES[node.state]);
 				node.board.setSamplingInterval(node.repeat);
 				var oldrdg = "";
@@ -108,12 +110,12 @@ function DuinoNodeIn(n) {
 		this.on('close', function() {
 			if (node.toui) {
 				clearInterval(node.toui);
-				util.log("[arduino] input wait loop stopped");
+				util.log("[firmata] input wait loop stopped");
 			}
 		});
 	}
 	else {
-		util.log("[arduino] Serial Port not Configured");
+		util.log("[firmata] Serial Port not Configured");
 	}
 }
 RED.nodes.registerType("arduino in",DuinoNodeIn);
@@ -133,7 +135,7 @@ function DuinoNodeOut(n) {
 
 		this.on("input", function(msg) {
 			//console.log(msg);
-			if (arduinoReady) {
+			if (thisboard != null) {
 				if (node.state == "OUTPUT") {
 					if ((msg.payload == true)||(msg.payload == 1)||(msg.payload.toString().toLowerCase() == "on")) {
 						node.board.digitalWrite(node.pin, node.board.HIGH);
@@ -161,22 +163,24 @@ function DuinoNodeOut(n) {
 		});
 
 		node.touo = setInterval(function() {
-			if (arduinoReady) {
+			if (thisboard != null) {
 				clearInterval(node.touo);
-				//console.log(node.state,node.pin,node.board.MODES[node.state]);
+				node.touo = false;
+				node.board = thisboard;
 				node.board.pinMode(node.pin, node.board.MODES[node.state]);
 			}
+			else { util.log("[firmata] waiting for arduino to connect"); }
 		}, 5000); // loop to wait for firmata to connect to arduino
 
 		this.on('close', function() {
 			if (node.touo) {
 				clearInterval(node.touo);
-				util.log("[arduino] output wait loop stopped");
+				util.log("[firmata] output wait loop stopped");
 			}
 		});
 	}
 	else {
-		util.log("[arduino] Serial Port not Configured");
+		util.log("[firmata] Serial Port not Configured");
 	}
 }
 RED.nodes.registerType("arduino out",DuinoNodeOut);
