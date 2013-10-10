@@ -82,7 +82,7 @@ function HTTPRequest(n) {
 	this.on("input",function(msg) {
 	        
 	        var opts = urllib.parse(msg.url||url);
-	        opts.method = msg.method||method;
+	        opts.method = (msg.method||method).toUpperCase();
 	        if (msg.headers) {
 	            opts.header = msg.headers;
 	        }
@@ -105,7 +105,7 @@ function HTTPRequest(n) {
 	                msg.statusCode = err.code;
 	                node.send(msg);
 	        });
-	        if (msg.payload) {
+	        if (msg.payload && (method == "PUSH" || method == "PUT") ) {
 	            if (typeof msg.payload === "string" || Buffer.isBuffer(msg.payload)) { 
                     req.write(msg.payload);
                 } else if (typeof msg.payload == "number") {
