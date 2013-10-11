@@ -1,0 +1,176 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!--  The Input Node  -->
+<script type="text/x-red" data-template-name="udp in">
+    <div class="form-row">
+        <label for="node-input-port"><i class="icon-inbox"></i> Listen</label>
+        on port <input type="text" id="node-input-port" placeholder="Port" style="width: 45px">
+        for <select id="node-input-multicast" style='width:40%'>
+          <option value="false">udp messages</option>
+          <option value="true">multicast messages</option>
+        </select>
+    </div>
+    <div class="form-row node-input-group">
+        <label for="node-input-group"><i class="icon-list"></i> Group</label>
+        <input type="text" id="node-input-group" placeholder="225.0.18.83">
+    </div>
+    <div class="form-row node-input-iface">
+        <label for="node-input-iface"><i class="icon-random"></i> Interface</label>
+        <input type="text" id="node-input-iface" placeholder="eth0">
+    </div>
+    <div class="form-row">
+        <label for="node-input-datatype"><i class="icon-file"></i> Output</label>
+        <select id="node-input-datatype" style="width: 70%;">
+            <option value="buffer">a Buffer</option>
+            <option value="utf8">a String</option>
+            <option value="base64">a Base64 encoded string</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-tips">Tip: Make sure your firewall will allow the data in.</div>
+    <script>
+        $("#node-input-multicast").change(function() {
+            var id = $("#node-input-multicast option:selected").val();
+            if (id == "false") {
+                $(".node-input-group").hide();
+                $(".node-input-iface").hide();
+            }
+            else {
+                $(".node-input-group").show();
+                $(".node-input-iface").show();
+            }
+        });
+    </script>
+</script>
+
+<script type="text/x-red" data-help-name="udp in">
+    <p>A udp input node, that produces a <b>msg.payload</b> containing a <i>BUFFER</i>, string, or base64 encoded string. Supports multicast.</p>
+    <p>It also provides <b>msg.fromip</b> in the form ipaddress:port .</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('udp in',{
+        category: 'input',
+        color:"Silver",
+        defaults: {
+            name: {value:""},
+            host: {value:""},
+            iface: {value:""},
+            port: {value:"",required:true,validate:RED.validators.number()},
+            datatype: {value:"buffer",required:true},
+            multicast: {value:"false"},
+            group: {value:"",validate:function(v) { return (this.multicast !== "true")||v.length > 0;} }
+        },
+        inputs:0,
+        outputs:1,
+        icon: "bridge-dash.png",
+        label: function() {
+            if (this.multicast=="false") {
+                return this.name||"udp "+this.port;
+            }
+            else return this.name||"udp "+(this.group+":"+this.port);
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+
+<!--  The Output Node  -->
+<script type="text/x-red" data-template-name="udp out">
+    <div class="form-row">
+        <label for="node-input-port"><i class="icon-envelope"></i> Send a</label>
+        <select id="node-input-multicast" style='width:40%'>
+          <option value="false">udp message</option>
+          <option value="broad">broadcast message</option>
+          <option value="multi">multicast message</option>
+        </select>
+        to port <input type="text" id="node-input-port" placeholder="Port" style="width: 45px">
+    </div>
+    <div class="form-row node-input-addr">
+        <label for="node-input-addr" id="node-input-addr-label"><i class="icon-list"></i> Address</label>
+        <input type="text" id="node-input-addr" placeholder="destination ip" style="width: 70%;">
+    </div>
+    <div class="form-row node-input-iface">
+        <label for="node-input-iface"><i class="icon-random"></i> Interface</label>
+        <input type="text" id="node-input-iface" placeholder="eth0">
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-base64" placeholder="base64" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-base64" style="width: 70%;">Decode Base64 encoded payload ?</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <script>
+        $("#node-input-multicast").change(function() {
+            var id = $("#node-input-multicast option:selected").val();
+            console.log(id,$("#node-input-addr")[0].placeholder);
+            if (id !== "multi") {
+                $(".node-input-iface").hide();
+                $("#node-input-addr-label").html('<i class="icon-list"></i> Address');
+                $("#node-input-addr")[0].placeholder = 'destination ip';
+            }
+            else {
+                $(".node-input-iface").show();
+                $("#node-input-addr-label").html('<i class="icon-list"></i> Group');
+                $("#node-input-addr")[0].placeholder = '225.0.18.83';
+            }
+            if (id === "broad") {
+                $("#node-input-addr")[0].placeholder = '255.255.255.255';
+            }
+        });
+    </script>
+</script>
+
+<script type="text/x-red" data-help-name="udp out">
+    <p>This node sends <b>msg.payload</b> to the designated udp host and port. Supports multicast.</p>
+    <p>If you select broadcast either set the address to the local broadcast ip address, or maybe try 255.255.255.255, which is the global broadcast address.</p>
+    <p>On some systems you may need to be root to use broadcast.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('udp out',{
+        category: 'output',
+        color:"Silver",
+        defaults: {
+            name: {value:""},
+            addr: {value:"",required:true},
+            //group: {value:""},
+            iface: {value:""},
+            port: {value:"",required:true,validate:RED.validators.number()},
+            base64: {value:false,required:true},
+            multicast: {value:"false"}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "bridge-dash.png",
+        align: "right",
+        label: function() {
+            return this.name||"udp "+(this.addr+":"+this.port);
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
