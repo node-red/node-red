@@ -143,8 +143,34 @@ RED.editor = function() {
                             var changes = {};
                             var changed = false;
                             var wasDirty = RED.view.dirty();
+                            
+                            
                             if (editing_node._def.oneditsave) {
+                                var oldValues = {};
+                                for (var d in editing_node._def.defaults) {
+                                    if (typeof editing_node[d] === "string" || typeof editing_node[d] === "number") {
+                                        oldValues[d] = editing_node[d];
+                                    } else {
+                                        oldValues[d] = $.extend(true,{},{v:editing_node[d]}).v;
+                                    }
+                                }
                                 editing_node._def.oneditsave.call(editing_node);
+                                
+                                for (var d in editing_node._def.defaults) {
+                                    if (oldValues[d] === null || typeof oldValues[d] === "string" || typeof oldValues[d] === "number") {
+                                        if (oldValues[d] !== editing_node[d]) {
+                                            changes[d] = oldValues[d];
+                                            changed = true;
+                                        }
+                                    } else {
+                                        if (JSON.stringify(oldValues[d]) !== JSON.stringify(editing_node[d])) {
+                                            changes[d] = oldValues[d];
+                                            changed = true;
+                                        }
+                                    }
+                                }
+                                
+                                
                             }
                             
                             if (editing_node._def.defaults) {
@@ -177,7 +203,6 @@ RED.editor = function() {
                                             changes[d] = editing_node[d];
                                             editing_node[d] = newValue;
                                             changed = true;
-                                            RED.view.dirty(true);
                                         }
                                     }
                                 }
@@ -185,6 +210,7 @@ RED.editor = function() {
                             
                             var removedLinks = updateNodeProperties(editing_node);
                             if (changed) {
+                                RED.view.dirty(true);
                                 RED.history.push({t:'edit',node:editing_node,changes:changes,links:removedLinks,dirty:wasDirty});
                             }
                             
