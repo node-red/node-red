@@ -56,7 +56,7 @@ app.use(settings.httpRoot,red);
 RED.start();
 
 server.listen(settings.uiPort,function() {
-        util.log('[red] Server now running at http'+(settings.https?'s':'')+'://127.0.0.1:'+settings.uiPort+settings.httpRoot);
+	util.log('[red] Server now running at http'+(settings.https?'s':'')+'://127.0.0.1:'+settings.uiPort+settings.httpRoot);
 });
 
 process.on('uncaughtException',function(err) {
@@ -70,4 +70,8 @@ process.on('uncaughtException',function(err) {
         process.exit(1);
 });
 
-
+process.on('SIGINT', function () {
+    RED.nodes.closedown();
+    console.log("Exiting Node-RED. Thank you.");
+    process.exit();
+});
