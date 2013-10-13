@@ -65,6 +65,13 @@ function DelayNode(n) {
         }, node.timeout);
         this.idList.push(id);
       });
+
+     this.on("close", function() {
+       for (var i=0; i<this.idList.length; i++ ) {
+         clearTimeout(this.idList[i]);
+       }
+       this.idList = [];
+     });
    } else if (this.pauseType == "rate") {
    
      this.on("input", function(msg) {
@@ -87,6 +94,11 @@ function DelayNode(n) {
          },node.rate);
        }
      });
+
+     this.on("close", function() {
+       clearInterval(this.intervalID);
+       this.buffer = [];
+     });
    }
 }
 
@@ -95,15 +107,3 @@ function DelayNode(n) {
 // register node
 RED.nodes.registerType("delay",DelayNode);
 
-DelayNode.prototype.close = function() {
-
-   if (this.pauseType == "delay") {
-     for (var i=0; i<this.idList.length; i++ ) {
-       clearTimeout(this.idList[i]);
-     }
-     this.idList = [];
-   } else if (this.pauseType == "rate") {
-     clearInterval(this.intervalID);
-     this.buffer = [];
-   }
-}
