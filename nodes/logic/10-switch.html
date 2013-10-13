@@ -1,0 +1,199 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="switch">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row" style="padding-top:10px;">
+        If msg.<input type="text" id="node-input-property" style="width: 200px;"/>
+    </div>
+    <div class="form-row">
+        <div id="node-input-rule-container-div" style="border-radius: 5px; height: 310px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
+        <ol id="node-input-rule-container" style=" list-style-type:none; margin: 0;">
+        </ol>
+        </div>
+        <a href="#" class="btn btn-mini" id="node-input-add-rule" style="margin-top: 4px;"><i class="icon-plus"></i> Add</a>
+    </div>
+    
+</script>
+
+<script type="text/x-red" data-help-name="switch">
+	<p>A simple function node to route messages based on its properties.</p>
+	<p>When a message arrives, the selected property is evaluated against each
+	of the defined rules. The message is then sent to the output of <i>all</i>
+	rules that pass.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('switch',{
+        color:"#E2D96E",
+        category: 'function',
+        defaults: {
+            name: {value:""},
+            property: {value: "payload",required:true},
+            rules:{value:[{t:"eq",v:""}]},
+            outputs:{value:1}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "switch.png",
+        label: function() {
+            return this.name;
+        },
+        oneditprepare: function() {
+        
+            var operators = [
+                {v:"eq",t:"=="},
+                {v:"neq",t:"!="},
+                {v:"lt",t:"<"},
+                {v:"lte",t:"<="},
+                {v:"gt",t:">"},
+                {v:"gte",t:">="},
+                {v:"btwn",t:"is between"},
+                {v:"cont",t:"contains"},
+                {v:"regex",t:"matches regex"},
+                {v:"true",t:"is true"},
+                {v:"false",t:"is false"},
+                {v:"null",t:"is null"},
+                {v:"nnull",t:"is not null"}
+            ];
+            
+            function generateRule(i,rule) {
+                var container = $('<li/>',{style:"margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"});
+                var row = $('<div/>').appendTo(container);
+                var row2 = $('<div/>',{style:"padding-top: 5px; text-align: right;"}).appendTo(container);
+                
+                var selectField = $('<select/>',{style:"width:120px; margin-left: 5px; text-align: center;"}).appendTo(row);
+                for (var d in operators) {
+                    selectField.append($("<option></option>").val(operators[d].v).text(operators[d].t));
+                }
+                
+                var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px; width: 145px;"}).appendTo(row);
+                
+                var btwnField = $('<span/>').appendTo(row);
+                var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px; width: 50px;"}).appendTo(btwnField);
+                btwnField.append(" and ");
+                var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"width: 50px;margin-left:2px;"}).appendTo(btwnField);
+                
+                 
+                var finalspan = $('<span/>',{style:"float: right; margin-top: 3px;margin-right: 10px;"}).appendTo(row);
+                finalspan.append(' send to <span class="node-input-rule-index">'+i+'</span> ');
+                
+                selectField.change(function() {
+                    var type = selectField.children("option:selected").val();
+                    if (type.length < 4) {
+                        selectField.css({"width":"60px"});
+                    } else if (type === "regex") {
+                        selectField.css({"width":"147px"});
+                    } else {
+                        selectField.css({"width":"120px"});
+                    }
+                    if (type === "btwn") {
+                        valueField.hide();
+                        btwnField.show();
+                    } else {
+                        btwnField.hide();
+                        if (type === "true" || type === "false" || type === "null" || type === "nnull") {
+                            valueField.hide();
+                        } else {
+                            valueField.show();
+                        }
+                    }
+                });
+                
+                var deleteButton = $('<a/>',{href:"#",class:"btn btn-mini", style:"margin-left: 5px;"}).appendTo(finalspan);
+                $('<i/>',{class:"icon-remove"}).appendTo(deleteButton);
+                
+                deleteButton.click(function() {
+                    container.css({"background":"#fee"});
+                    container.fadeOut(300, function() {
+                        $(this).remove();
+                        $("#node-input-rule-container").children().each(function(i) {
+                            $(this).find(".node-input-rule-index").html(i+1);
+                        });
+                    
+                    });
+                });
+                
+                $("#node-input-rule-container").append(container);
+                
+                selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
+                if (rule.t == "btwn") {
+                    btwnValueField.val(rule.v);
+                    btwnValue2Field.val(rule.v2);
+                } else if (rule.v) {
+                    valueField.val(rule.v);
+                }
+                selectField.change();
+                
+            }
+            
+            $("#node-input-add-rule").click(function() {
+                generateRule($("#node-input-rule-container").children().length+1,{t:"",v:"",v2:""});
+                $("#node-input-rule-container-div").scrollTop($("#node-input-rule-container-div").get(0).scrollHeight);
+                
+            });
+            
+            for (var i=0;i<this.rules.length;i++) {
+                var rule = this.rules[i];
+                generateRule(i+1,rule);
+            }
+            
+            function switchDialogResize(ev,ui) {
+                $("#node-input-rule-container-div").css("height",(ui.size.height-260)+"px");
+            };
+
+            $( "#dialog" ).on("dialogresize", switchDialogResize);
+            $( "#dialog" ).one("dialogopen", function(ev) {
+                var size = $( "#dialog" ).dialog('option','sizeCache-switch');
+                if (size) {
+                    switchDialogResize(null,{size:size});
+                }
+            });
+            $( "#dialog" ).one("dialogclose", function(ev,ui) {
+                $( "#dialog" ).off("dialogresize",switchDialogResize);
+            });
+        },
+        oneditsave: function() {
+            var rules = $("#node-input-rule-container").children();
+            var ruleset;
+            
+            var node = this;
+            node.rules= [];
+            
+            rules.each(function(i) {
+                var rule = $(this);
+                var type = rule.find("select option:selected").val();
+                var r = {t:type};
+                if (!(type === "true" || type === "false" || type === "null" || type === "nnull")) {
+                    if (type === "btwn") {
+                        r.v = rule.find(".node-input-rule-btwn-value").val();
+                        r.v2 = rule.find(".node-input-rule-btwn-value2").val();
+                    } else {
+                        r.v = rule.find(".node-input-rule-value").val();
+                    }
+                }
+                node.rules.push(r);
+                
+            });
+            
+            node.outputs = node.rules.length;
+        
+        }
+    });
+</script>
