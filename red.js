@@ -72,6 +72,7 @@ process.on('uncaughtException',function(err) {
 
 process.on('SIGINT', function () {
     RED.stop();
-    util.log('[red] Exiting Node-RED. Thank you.');
+    // TODO: need to allow nodes to close asynchronously before terminating the
+    // process - ie, promises 
     process.exit();
 });

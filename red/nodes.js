@@ -271,16 +271,17 @@ module.exports.getNode = function(nid) {
     return registry.get(nid);
 }
 
-module.exports.closedown = function() {
-    util.log("[red] Closing Down Nodes");
-    registry.clear();
-}
-
-module.exports.setConfig = function(conf) {
+function stopFlows() {
     if (activeConfig&&activeConfig.length > 0) {
         util.log("[red] Stopping flows");
     }
     registry.clear();
+}
+
+module.exports.stopFlows = stopFlows;
+
+module.exports.setConfig = function(conf) {
+    stopFlows();
     activeConfig = conf;
     parseConfig();
 }

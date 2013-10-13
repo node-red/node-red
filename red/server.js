@@ -101,9 +101,14 @@ function start() {
     });
 }
 
+function stop() {
+    redNodes.stopFlows();
+}
+
 module.exports = { 
     init: createServer,
-    start: start
+    start: start,
+    stop: stop
 }
 
 module.exports.__defineGetter__("app", function() { return app });

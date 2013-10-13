@@ -33,10 +33,10 @@ var RED = {
     },
 
     start: server.start,
+    stop: server.stop,
     nodes: nodes,
     library: library,
-    events: events,
-    stop: nodes.closedown,
+    events: events
 };
 
 RED.__defineGetter__("app", function() { return server.app });
