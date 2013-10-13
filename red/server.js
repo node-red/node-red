@@ -18,6 +18,7 @@ var fs = require('fs');
 var util = require('util');
 var createUI = require("./ui");
 var redNodes = require("./nodes");
+
 //TODO: relocated user dir
 
 var flowfile = '';
@@ -74,6 +75,7 @@ function createServer(_server,settings) {
             });
     });
 }
+
 function start() {
     console.log("\nWelcome to Node-RED\n===================\n");
     util.log("[red] Loading palette nodes");

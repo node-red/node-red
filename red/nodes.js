@@ -241,8 +241,10 @@ module.exports.load = function() {
                     }
                 } else if (stats.isDirectory()) {
                     // Ignore /.dirs/ and /lib/
-                    if (!/^(\..*|lib)$/.test(fn)) {
+                    if (!/^(\..*|lib|icons)$/.test(fn)) {
                         loadNodes(dir+"/"+fn);
+                    } else if (fn === "icons") {
+                        events.emit("node-icon-dir",dir+"/"+fn);
                     }
                 }
         });
