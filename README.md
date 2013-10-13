@@ -2,6 +2,8 @@
 
 A visual tool for wiring the Internet of Things.
 
+![Screenshot](http://nodered.org/images/node-red-screenshot.png "Node-RED: A visual tool for wiring the Internet of Things")
+
 ## Quick Start
 
 Check out [INSTALL](INSTALL.md) for full instructions on getting started.
@@ -16,6 +18,8 @@ Check out [INSTALL](INSTALL.md) for full instructions on getting started.
 
 More documentation can be found [here](http://nodered.org/docs).
 
+For further help, or general discussion, there is also a [mailing list](https://groups.google.com/forum/#!forum/node-red).
+
 ## Browser Support
 
 The Node-RED editor runs in the browser. We routinely develop and test using
@@ -28,9 +32,11 @@ list.
 
 ### Reporting issues
 
-Please raise any bug reports or feature requests on the project's issue 
-tracker. Be sure to search the list to see if your issue has already 
-been raised.
+Please raise any bug reports on the project's [issue tracker](https://github.com/node-red/node-red/issues?state=open).
+Be sure to search the list to see if your issue has already been raised.
+
+For feature requests, please raise them on the [mailing list](https://groups.google.com/forum/#!forum/node-red)
+first.
 
 ### Creating new nodes
 

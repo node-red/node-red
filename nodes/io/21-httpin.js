@@ -57,7 +57,7 @@ RED.nodes.registerType("http in",HTTPIn);
 
 function HTTPOut(n) {
 	RED.nodes.createNode(this,n);
-	
+	var node = this;
 	this.on("input",function(msg) {
 	        if (msg.res) {
 	            if (msg.headers) {
@@ -65,6 +65,8 @@ function HTTPOut(n) {
 	            }
 	            var statusCode = msg.statusCode || 200;
 	            msg.res.send(statusCode,msg.payload);
+	        } else {
+	            node.warn("No response object");
 	        }
 	});
 }
@@ -80,9 +82,9 @@ function HTTPRequest(n) {
 	this.on("input",function(msg) {
 	        
 	        var opts = urllib.parse(msg.url||url);
-	        opts.method = msg.method||method;
+	        opts.method = (msg.method||method).toUpperCase();
 	        if (msg.headers) {
-	            opts.header = headers;
+	            opts.header = msg.headers;
 	        }
 	        var req = httplib.request(opts,function(res) {
 	                res.setEncoding('utf8');
@@ -103,7 +105,7 @@ function HTTPRequest(n) {
 	                msg.statusCode = err.code;
 	                node.send(msg);
 	        });
-	        if (msg.payload) {
+	        if (msg.payload && (method == "PUSH" || method == "PUT") ) {
 	            if (typeof msg.payload === "string" || Buffer.isBuffer(msg.payload)) { 
                     req.write(msg.payload);
                 } else if (typeof msg.payload == "number") {

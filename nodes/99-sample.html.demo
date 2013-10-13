@@ -17,6 +17,8 @@
 <!-- Sample html file that corresponds to the 99-sample.js file              -->
 <!-- This creates and configures the onscreen elements of the node           -->
 
+<!-- If you use this as a template, replace IBM Corp. with your own name.    -->
+
 <!-- First, the content of the edit dialog is defined.                       -->
 
 <script type="text/x-red" data-template-name="sample">
@@ -24,7 +26,7 @@
 
    <!-- Each of the following divs creates a field in the edit dialog.       -->
    <!-- Generally, there should be an input for each property of the node.   -->
-   <!-- The for and id attributes identify the corresponding property        --> 
+   <!-- The for and id attributes identify the corresponding property        -->
    <!-- (with the 'node-input-' prefix).                                     -->
    <!-- The available icon classes are defined in Twitter Bootstrap          -->
     <div class="form-row">
@@ -38,7 +40,6 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-
 </script>
 
 

@@ -63,7 +63,10 @@ RED.palette = function() {
                     container:'body',
                     content: $(($("script[data-help-name|='"+nt+"']").html()||"<p>no information available</p>").trim())[0] 
             });
-            
+            $(d).click(function() {
+                    var help = '<div class="node-help">'+($("script[data-help-name|='"+d.type+"']").html()||"")+"</div>";
+                    $("#tab-info").html(help);
+            });
             $(d).draggable({
                 helper: 'clone',
                 appendTo: 'body',

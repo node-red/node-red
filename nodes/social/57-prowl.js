@@ -37,7 +37,7 @@ if (pushkey) {
 function ProwlNode(n) {
 	RED.nodes.createNode(this,n);
 	this.title = n.title;
-	this.priority = n.priority * 1;
+	this.priority = parseInt(n.priority);
 	if (this.priority > 2) this.priority = 2;
 	if (this.priority < -2) this.priority = -2;
 	var node = this;

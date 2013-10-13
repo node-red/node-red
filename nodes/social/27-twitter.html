@@ -29,8 +29,8 @@
             pathname += "/";
         }
         var callback = encodeURIComponent(location.protocol+"//"+location.hostname+":"+location.port+pathname+"twitter/"+twitterConfigNodeId+"/auth/callback");
-        
-        $("#node-config-twitter-row").html('Click <a id="node-config-twitter-start" href="/twitter/'+twitterConfigNodeId+'/auth?callback='+callback+'" target="_blank">here</a> to authenticate with Twitter.');
+
+        $("#node-config-twitter-row").html('Click <a id="node-config-twitter-start" href="/twitter/'+twitterConfigNodeId+'/auth?callback='+callback+'" target="_blank"><b>here</b></a> to authenticate with Twitter.');
         $("#node-config-twitter-start").click(function() {
             twitterConfigNodeIntervalId = window.setTimeout(pollTwitterCredentials,2000);
         });
@@ -102,34 +102,33 @@
 </script>
 
 <script type="text/x-red" data-template-name="twitter in">
-    <div class="form-row">
-        <label for="node-input-twitter"><i class="icon-user"></i> Twitter</label>
+	<div class="form-row">
+        <label for="node-input-twitter"><i class="icon-user"></i> Log in as</label>
         <input type="text" id="node-input-twitter">
     </div>
+	<div class="form-row">
+		<label for="node-input-user"><i class="icon-search"></i> Search</label>
+		<select type="text" id="node-input-user" style="display: inline-block; vertical-align: middle; width:60%;">
+			<option value="false">all public tweets</option>
+			<option value="true">the tweets of who you follow</option>
+		</select>
+	</div>
     <div class="form-row">
-        <label for="node-input-tags"><i class="icon-tag"></i> Tags</label>
-        <input type="text" id="node-input-tags" placeholder="comma-separated tags">
-    </div>
-    <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-user" placeholder="Name" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-user" style="width: 70%;">Tick to use user stream<br/>(rather than status/filter)</label>
-    </div>
-    <div class="form-row">
-        <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
-        <input type="text" id="node-input-topic" placeholder="Topic">
+        <label for="node-input-tags"><i class="icon-tags"></i> for</label>
+        <input type="text" id="node-input-tags" placeholder="comma-separated words, @ids, #tags">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-tips">Tip: the Senders name gets appended to the topic heirarchy
-    </div>
+    <div class="form-tips">Tip: Use commas without spaces between multiple search terms. Comma = OR, Space = AND.
+    <br/>The Twitter API WILL NOT deliver 100% of all tweets.
+    <br/>Tweets of who you follow will include their retweets and favourites.</div>
 </script>
 
 <script type="text/x-red" data-help-name="twitter in">
-	<p>Twitter input node. Watches the public stream for tweets containing the configured search term.</p>
-	<p>Sets the <b>msg.topic</b> to the configured topic and then appends the senders screen name.</p>
+	<p>Twitter input node. Watches either the public or the user's stream for tweets containing the configured search term.</p>
+	<p>Sets the <b>msg.topic</b> to <i>tweets/</i> and then appends the senders screen name.</p>
 	<p>Sets <b>msg.location</b> to the tweeters location if known.</p>
 </script>
 
@@ -140,7 +139,7 @@
         defaults: {
             twitter: {type:"twitter-credentials",required:true},
             tags: {value:"",required:true},
-            user: {value:false},
+            user: {value:"false",required:true},
             name: {value:""},
             topic: {value:"tweets"}
         },

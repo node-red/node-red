@@ -42,7 +42,6 @@ function getCallerFilename(type) {
     return stack[0].getFileName();
 }
 
-
 var registry = (function() {
         var nodes = {};
         var logHandlers = [];
@@ -91,7 +90,6 @@ var node_type_registry = (function() {
         var obj = {
             register: function(type,node) {
                 util.inherits(node, Node);
-
                 var callerFilename = getCallerFilename(type);
                 if (callerFilename == null) {
                     util.log("["+type+"] unable to determine filename");
@@ -117,7 +115,6 @@ var node_type_registry = (function() {
                     result += node_configs[nt];
                 }
                 return result;
-
             }
         }
         return obj;
@@ -176,7 +173,6 @@ Node.prototype.send = function(msg) {
 }
 module.exports.Node = Node;
 
-
 Node.prototype.receive = function(msg) {
     this.emit("input",msg);
 }
@@ -196,9 +192,6 @@ Node.prototype.error = function(msg) {
     if (this.name) o.name = this.name;
     this.emit("log",o);
 }
-
-
-
 
 var credentials = {};
 var credentialsFile = "credentials.json";
@@ -225,8 +218,6 @@ module.exports.deleteCredentials = function(id) {
     delete credentials[id];
     saveCredentialsFile();
 }
-
-
 module.exports.createNode = function(node,def) {
     Node.call(node,def);
 }
@@ -257,11 +248,8 @@ module.exports.load = function() {
         });
     }
     loadNodes(__dirname+"/../nodes");
-
     //events.emit("nodes-loaded");
 }
-
-
 
 var activeConfig = null;
 var missingTypes = [];
@@ -279,10 +267,15 @@ events.on('type-registered',function(type) {
         }
 });
 
-
 module.exports.getNode = function(nid) {
     return registry.get(nid);
 }
+
+module.exports.closedown = function() {
+    util.log("[red] Closing Down Nodes");
+    registry.clear();
+}
+
 module.exports.setConfig = function(conf) {
     if (activeConfig&&activeConfig.length > 0) {
         util.log("[red] Stopping flows");
@@ -293,7 +286,6 @@ module.exports.setConfig = function(conf) {
 }
 
 var parseConfig = function() {
-
     missingTypes = [];
     for (var i in activeConfig) {
         var type = activeConfig[i].type;
@@ -307,7 +299,6 @@ var parseConfig = function() {
         for (var i in missingTypes) {
             util.log("[red]  - "+missingTypes[i]);
         }
-        
         return;
     }
 
@@ -317,19 +308,18 @@ var parseConfig = function() {
         var nn = null;
         var nt = node_type_registry.get(activeConfig[i].type);
         if (nt) {
-			try {
-				nn = new nt(activeConfig[i]);
-			}
-			catch (err) {
-				util.log("[red] "+activeConfig[i].type+" : "+err);
-			}
+            try {
+                nn = new nt(activeConfig[i]);
+            }
+            catch (err) {
+                util.log("[red] "+activeConfig[i].type+" : "+err);
+            }
         }
         // console.log(nn);
         if (nn == null) {
             util.log("[red] unknown type: "+activeConfig[i].type);
         }
     }
-    
     // Clean up any orphaned credentials
     var deletedCredentials = false;
     for (var c in credentials) {
@@ -343,5 +333,4 @@ var parseConfig = function() {
         saveCredentialsFile();
     }
     events.emit("nodes-started");
-
 }

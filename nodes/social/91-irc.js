@@ -16,6 +16,7 @@
 
 var RED = require("../../red/red");
 var irc = require("irc");
+var util = require("util");
 
 // The Server Definition - this opens (and closes) the connection
 function IRCServerNode(n) {
@@ -23,38 +24,36 @@ function IRCServerNode(n) {
 	this.server = n.server;
 	this.channel = n.channel;
 	this.nickname = n.nickname;
-	this.ircclient = new irc.Client(this.server, this.nickname, {
-		channels: [this.channel]
+	this.ircclient = null;
+	this.on("close", function() {
+		if (this.ircclient != null) {
+			this.ircclient.disconnect();
+		}
 	});
-	this._close = function() {
-		this.ircclient.disconnect();
-	}
 }
 
 RED.nodes.registerType("irc-server",IRCServerNode);
-
-IRCServerNode.prototype.close = function() {
-	this._close();
-}
-
 
 // The Input Node
 function IrcInNode(n) {
 	RED.nodes.createNode(this,n);
 	this.ircserver = n.ircserver;
 	this.serverConfig = RED.nodes.getNode(this.ircserver);
+	if (this.serverConfig.ircclient == null) {
+		this.serverConfig.ircclient = new irc.Client(this.serverConfig.server, this.serverConfig.nickname, {
+			channels: [this.serverConfig.channel]
+		});
+		this.serverConfig.ircclient.addListener('error', function(message) {
+			util.log('[irc] '+ JSON.stringify(message));
+		});
+	}
 	this.ircclient = this.serverConfig.ircclient;
 	var node = this;
-
 
 	this.ircclient.addListener('message', function (from, to, message) {
 		console.log(from + ' => ' + to + ': ' + message);
 		var msg = { "topic":from, "to":to, "payload":message };
 		node.send(msg);
-	});
-
-	this.ircclient.addListener('error', function(message) {
-		node.error(JSON.stringify(message));
 	});
 
 }
@@ -66,12 +65,20 @@ function IrcOutNode(n) {
 	this.sendAll = n.sendObject;
 	this.ircserver = n.ircserver;
 	this.serverConfig = RED.nodes.getNode(this.ircserver);
-	this.ircclient = this.serverConfig.ircclient;
 	this.channel = this.serverConfig.channel;
+	if (this.serverConfig.ircclient == null) {
+		this.serverConfig.ircclient = new irc.Client(this.serverConfig.server, this.serverConfig.nickname, {
+			channels: [this.serverConfig.channel]
+		});
+		this.serverConfig.ircclient.addListener('error', function(message) {
+			util.log('[irc] '+ JSON.stringify(message));
+		});
+	}
+	this.ircclient = this.serverConfig.ircclient;
 	var node = this;
 
 	this.on("input", function(msg) {
-		console.log(msg);
+		//console.log(msg,node.channel);
 		if (node.sendAll) {
 			node.ircclient.say(node.channel, JSON.stringify(msg));
 		}

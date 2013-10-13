@@ -649,7 +649,13 @@ RED.view = function() {
                     //mainRect.on("touchend",nodeMouseUp);
 
                     if (d._def.icon) {
-                        var icon = node.append("image").attr("xlink:href","icons/"+d._def.icon).attr("class","node_icon").attr("x",0).attr("y",0).attr("width","15").attr("height",function(d){return Math.min(50,d.h);});
+                        var icon = node.append("image")
+                            .attr("xlink:href","icons/"+d._def.icon)
+                            .attr("class","node_icon")
+                            .attr("x",0).attr("y",function(d){return (d.h-Math.min(50,d.h))/2;})
+                            .attr("width","15")
+                            .attr("height", function(d){return Math.min(50,d.h);});
+                            
                         if (d._def.align) {
                             icon.attr('class','node_icon node_icon_'+d._def.align);
                         }
@@ -747,7 +753,7 @@ RED.view = function() {
                                 var port = d3.select(this);
                                 port.attr("y",function(d){return (d.h/2)-5;})
                         });
-                        thisNode.selectAll(".node_icon").attr("height",function(d){return Math.min(50,d.h);});
+                        thisNode.selectAll(".node_icon").attr("height",function(d){return Math.min(50,d.h);}).attr("y",function(d){return (d.h-Math.min(50,d.h))/2;});
 
                         thisNode.selectAll('.node_right_button_group').attr("transform",function(d){return "translate("+(d.w-100)+","+0+")";});
                         thisNode.selectAll('.node_right_button').attr("transform",function(d){return "translate("+(d.w-100)+","+0+")";}).attr("fill",function(d) {
