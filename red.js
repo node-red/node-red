@@ -71,7 +71,7 @@ process.on('uncaughtException',function(err) {
 });
 
 process.on('SIGINT', function () {
-    RED.nodes.closedown();
-    console.log("Exiting Node-RED. Thank you.");
+    RED.stop();
+    util.log('[red] Exiting Node-RED. Thank you.');
     process.exit();
 });
