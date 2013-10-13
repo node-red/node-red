@@ -39,12 +39,6 @@ function SwitchNode(n) {
 	this.rules = n.rules;
 	this.property = n.property;
 	
-	this.ruleFuncs = [];
-	
-	for (var i=0;i<this.rules.length;i+=1) {
-	    
-	    
-	}
 	var node = this;
 	
 	this.on('input',function(msg) {
@@ -52,7 +46,6 @@ function SwitchNode(n) {
 	      
 	      for (var i=0;i<node.rules.length;i+=1) {
 	          var rule = node.rules[i];
-	          console.log(rule);
 	          if (operators[rule.t](msg[node.property],rule.v,rule.v2)) {
 	              onward.push(msg);
 	          } else {
