@@ -20,6 +20,7 @@ var dgram = require('dgram');
 // The Input Node
 function MCastIn(n) {
 	RED.nodes.createNode(this,n);
+	this.warn("node type deprecated");
 	this.group = n.group;
 	this.port = n.port;
 	this.host = n.host || null;
@@ -71,6 +72,7 @@ RED.nodes.registerType("multicast in",MCastIn);
 // The Output Node
 function MCastOut(n) {
 	RED.nodes.createNode(this,n);
+	this.warn("node type deprecated");
 	this.group = n.group;
 	this.port = n.port;
 	this.host = n.host || null;

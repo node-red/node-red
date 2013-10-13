@@ -18,6 +18,7 @@ var RED = require("../../red/red");
 
 function SocketOut(n) {
 	RED.nodes.createNode(this,n);
+	this.warn("node type deprecated");
 	this.host = n.host;
 	this.port = n.port * 1;
 	this.name = n.name;

@@ -18,6 +18,7 @@ var RED = require("../../red/red");
 
 function SocketIn(n) {
 	RED.nodes.createNode(this,n);
+	this.warn("node type deprecated");
 	this.port = n.port;
 	this.topic = n.topic;
 	this.trans = (n.transport||n.trans||"").toLowerCase();
