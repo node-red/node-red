@@ -28,7 +28,6 @@ function HTTPIn(n) {
 
 	var node = this;
 	this.callback = function(req,res) {
-	    console.log(arguments.length);
 		node.send({req:req,res:res});
 	}
 	if (this.method == "get") {
