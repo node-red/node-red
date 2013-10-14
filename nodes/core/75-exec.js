@@ -34,7 +34,7 @@ function ExecNode(n) {
 				// then prepend with the msg.payload
 				var arg = node.append.split(",");
 				if (msg.payload != " ") { arg.unshift(msg.payload); }
-				console.log(arg);
+				//console.log(arg);
 				var ex = spawn(node.cmd,arg);
 				ex.stdout.on('data', function (data) {
 					//console.log('[exec] stdout: ' + data);
