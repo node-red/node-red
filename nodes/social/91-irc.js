@@ -51,7 +51,7 @@ function IrcInNode(n) {
 	var node = this;
 
 	this.ircclient.addListener('message', function (from, to, message) {
-		console.log(from + ' => ' + to + ': ' + message);
+		//util.log(from + ' => ' + to + ': ' + message);
 		var msg = { "topic":from, "to":to, "payload":message };
 		node.send(msg);
 	});

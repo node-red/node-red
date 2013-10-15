@@ -51,7 +51,6 @@ function MongoOutNode(n) {
                                     else coll.save(msg,function(err,item){if (err){node.error(err);}});
                                 }
                                 if (node.operation == "delete") {
-                                    console.log(msg.payload);
                                     coll.remove(msg.payload, {w:1}, function(err, items){ if (err) node.error(err); });
                                 }
                             });
@@ -62,15 +61,15 @@ function MongoOutNode(n) {
     } else {
         this.error("missing mongodb configuration");
     }
-}
 
+	this.on("close", function() {
+		if (this.clientDb) {
+		    this.clientDb.close();
+		}
+	});
+}
 RED.nodes.registerType("mongodb out",MongoOutNode);
 
-MongoOutNode.prototype.close = function() {
-    if (this.clientDb) {
-        this.clientDb.close();
-    }
-}
 
 function MongoInNode(n) {
     RED.nodes.createNode(this,n);
@@ -105,12 +104,11 @@ function MongoInNode(n) {
     } else {
         this.error("missing mongodb configuration");
     }
-}
 
+	this.on("close", function() {
+		if (this.clientDb) {
+		    this.clientDb.close();
+		}
+	});
+}
 RED.nodes.registerType("mongodb in",MongoInNode);
-
-MongoInNode.prototype.close = function() {
-    if (this.clientDb) {
-        this.clientDb.close();
-    }
-}
