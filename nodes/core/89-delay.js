@@ -13,20 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 // Simple node to introduce a pause into a flow
 
-// Require main module
 var RED = require("../../red/red");
 
-// main node definition
 function DelayNode(n) {
    RED.nodes.createNode(this,n);
-   
+
    this.pauseType = n.pauseType;
    this.timeoutUnits = n.timeoutUnits;
    this.rateUnits = n.rateUnits;
-   
+
    if (n.timeoutUnits == "milliseconds") {
      this.timeout = n.timout;
    } else if (n.timeoutUnits == "seconds") {
@@ -38,7 +36,7 @@ function DelayNode(n) {
    } else if (n.timeoutUnits == "days") {
      this.timeout = n.timeout * (24 * 60 * 60 * 1000);
    }
-   
+
    if (n.rateUnits == "second") {
      this.rate = 1000/n.rate;
    } else if (n.rateUnits == "minute") {
@@ -48,13 +46,13 @@ function DelayNode(n) {
    } else if (n.rateUnits == "day") {
      this.rate = (24 * 60 * 60 * 1000)/n.rate;
    }
-   
+
    this.name = n.name;
    this.idList = [];
    this.buffer = [];
    this.intervalID = -1;
    var node= this;
-   
+
    if (this.pauseType == "delay") {
       this.on("input", function(msg) {
         var node= this;
@@ -73,7 +71,7 @@ function DelayNode(n) {
        this.idList = [];
      });
    } else if (this.pauseType == "rate") {
-   
+
      this.on("input", function(msg) {
        if ( node.intervalID != -1) {
          node.buffer.push(msg);
@@ -87,7 +85,7 @@ function DelayNode(n) {
              clearInterval(node.intervalID);
              node.intervalID = -1;
            }
-     
+
            if (node.buffer.length > 0) {
              node.send(node.buffer.shift());
            }
@@ -101,9 +99,4 @@ function DelayNode(n) {
      });
    }
 }
-
-
-
-// register node
 RED.nodes.registerType("delay",DelayNode);
-
