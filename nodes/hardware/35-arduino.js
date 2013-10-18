@@ -19,7 +19,6 @@ var util = require("util");
 var firmata = require("firmata");
 var arduinoReady = false;
 var thisboard = null;
-var pins = [];
 
 // The Board Definition - this opens (and closes) the connection
 function ArduinoNode(n) {
@@ -75,10 +74,6 @@ function DuinoNodeIn(n) {
     this.state = n.state;
     this.arduino = n.arduino;
     this.serverConfig = RED.nodes.getNode(this.arduino);
-    if (pins.indexOf(this.pin) > -1) {
-        this.error("Arduino pin being used more than once");
-    }
-    else pins.push(this.pin);
     if (typeof this.serverConfig === "object") {
         this.board = this.serverConfig.board;
         this.repeat = this.serverConfig.repeat;
@@ -133,10 +128,6 @@ function DuinoNodeOut(n) {
     this.pin = n.pin;
     this.state = n.state;
     this.arduino = n.arduino;
-    if (pins.indexOf(this.pin) > -1) {
-        this.error("Arduino pin being used more than once");
-    }
-    else pins.push(this.pin);
     this.serverConfig = RED.nodes.getNode(this.arduino);
     if (typeof this.serverConfig === "object") {
         this.board = this.serverConfig.board;
