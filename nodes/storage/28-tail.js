@@ -42,6 +42,10 @@ function TailNode(n) {
 			node.send(msg);
 		}
 	});
+	
+	this.on("close",function() {
+        tail.kill();
+	});
 }
 
 RED.nodes.registerType("tail",TailNode);
