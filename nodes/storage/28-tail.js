@@ -19,33 +19,38 @@ var fs = require("fs");
 var spawn = require('child_process').spawn;
 
 function TailNode(n) {
-	RED.nodes.createNode(this,n);
+    RED.nodes.createNode(this,n);
 
-	this.filename = n.filename;
-	this.split = n.split;
-	var node = this;
+    this.filename = n.filename;
+    this.split = n.split;
+    var node = this;
 
-	var tail = spawn("tail", ["-f", this.filename]);
-	tail.stdout.on("data", function (data) {
-		var msg = {topic:node.filename};
-		if (node.split) {
-			var strings = data.toString().split("\n");
-			for (s in strings) {
-				if (strings[s] != "") {
-					msg.payload = strings[s];
-					node.send(msg);
-				}
-			}
-		}
-		else {
-			msg.payload = data.toString();
-			node.send(msg);
-		}
-	});
-	
-	this.on("close",function() {
-        tail.kill();
-	});
+    var err = "";
+    var tail = spawn("tail", ["-f", this.filename]);
+    tail.stdout.on("data", function (data) {
+        var msg = {topic:node.filename};
+        if (node.split) {
+            var strings = data.toString().split("\n");
+            for (s in strings) {
+                if (strings[s] != "") {
+                    msg.payload = strings[s];
+                    node.send(msg);
+                }
+            }
+        }
+        else {
+            msg.payload = data.toString();
+            node.send(msg);
+        }
+    });
+
+    tail.stderr.on("data", function(data) {
+        node.warn(data.toString());
+    });
+
+    this.on("close", function() {
+        if (tail) tail.kill();
+    });
 }
 
 RED.nodes.registerType("tail",TailNode);
