@@ -39,14 +39,18 @@ function SwitchNode(n) {
 	this.rules = n.rules;
 	this.property = n.property;
 	
+	var propertyParts = n.property.split(".");
+	
 	var node = this;
 	
 	this.on('input',function(msg) {
 	      var onward = [];
-	      
+	      var prop = propertyParts.reduce(function(obj,i) {
+	          return obj[i]
+	      },msg);
 	      for (var i=0;i<node.rules.length;i+=1) {
 	          var rule = node.rules[i];
-	          if (operators[rule.t](msg[node.property],rule.v,rule.v2)) {
+	          if (operators[rule.t](prop,rule.v,rule.v2)) {
 	              onward.push(msg);
 	          } else {
 	              onward.push(null);
