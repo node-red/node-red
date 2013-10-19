@@ -51,7 +51,9 @@ MQTTClient.prototype.connect = function(options) {
    self.options.clean = self.options.clean||true;
    self.options.protocolId = 'MQIsdp';
    self.options.protocolVersion = 3;
-   
+   self.options.username = options.username;
+   self.options.password = options.password;
+  
    self.client = mqtt.createConnection(this.port,this.host,function(err,client) {
          if (err) {
             self.emit('connectionlost',err);

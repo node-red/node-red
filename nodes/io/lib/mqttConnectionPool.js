@@ -25,12 +25,15 @@ function matchTopic(ts,t) {
 }
 
 module.exports = {
-    get: function(broker,port) {
-        var id = broker+":"+port;
+    get: function(broker,port,username,password) {
+        var prefix = "";
+        if (username !== undefined || password !== undefined)
+            prefix = (username||"") + ":" + (password||"") + "@";
+        var id = prefix+broker+":"+port;
         if (!connections[id]) {
             connections[id] = function() {
                 var client = mqtt.createClient(port,broker);
-                var options = {keepalive:15,clientId:'mqtt_' + (1+Math.random()*4294967295).toString(16)};
+                var options = {keepalive:15,clientId:'mqtt_' + (1+Math.random()*4294967295).toString(16),username:username,password:password};
                 var queue = [];
                 var subscriptions = [];
                 var connecting = false;

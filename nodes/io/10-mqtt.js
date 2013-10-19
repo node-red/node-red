@@ -30,9 +30,11 @@ function MQTTInNode(n) {
     RED.nodes.createNode(this,n);
     this.topic = n.topic;
     this.broker = n.broker;
+    this.username = n.username;
+    this.password = n.password;
     this.brokerConfig = RED.nodes.getNode(this.broker);
     if (this.brokerConfig) {
-        this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port);
+        this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.username,this.password);
         var node = this;
         this.client.subscribe(this.topic,2,function(topic,payload,qos,retain) {
                 var msg = {topic:topic,payload:payload,qos:qos,retain:retain};
@@ -61,11 +63,13 @@ function MQTTOutNode(n) {
 
     this.topic = n.topic;
     this.broker = n.broker;
+    this.username = n.username;
+    this.password = n.password;
 
     this.brokerConfig = RED.nodes.getNode(this.broker);
 
     if (this.brokerConfig) {
-        this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port);
+        this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.username,this.password);
         this.on("input",function(msg) {
             if (msg != null) {
                 if (this.topic) {

@@ -27,6 +27,14 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-row">
+        <label for="node-input-user"><i class="icon-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-lock"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="mqtt in">
@@ -40,7 +48,9 @@
         defaults: {
             name: {value:""},
             topic: {value:"",required:true},
-            broker: {type:"mqtt-broker", required:true}
+            broker: {type:"mqtt-broker", required:true},
+            username: {type:"mqtt-username", required:false},
+            password: {type:"mqtt-password", required:false}
         },
         color:"#c6dbef",
         inputs:0,
@@ -68,6 +78,14 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-row">
+        <label for="node-input-username"><i class="icon-user"></i> Username</label>
+        <input type="text" id="node-input-username" placeholder="Username">
+    </div>
+    <div class="form-row">
+        <label for="node-input-lock"><i class="icon-user"></i> Password</label>
+        <input type="text" id="node-input-password" placeholder="Password">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="mqtt out">
@@ -82,7 +100,9 @@
         defaults: {
             name: {value:""},
             topic: {value:""},
-            broker: {type:"mqtt-broker", required:true}
+            broker: {type:"mqtt-broker", required:true},
+            username: {value:""},
+            password: {value:""}
         },
         color:"#c6dbef",
         inputs:1,
