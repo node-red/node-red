@@ -23,27 +23,28 @@
 </script>
 
 <script type="text/x-red" data-help-name="blinkstick">
-	<p>BlinkStick output node. Expects a <b>msg.payload</b> with either a hex string #rrggbb triple or red,green,blue as three 0-255 values.</p>
-	<p><b>NOTE:</b> currently only works with a single BlinkStick. (As it uses the findFirst() function to attach).</p>
-	<p>For more info see the <i><a href="http://blinkstick.com/" target="_new">BlinkStick website</a></i> or the <i><a href="https://github.com/arvydas/blinkstick-node" target="_new">node module</a></i> documentation.</p>
+    <p>BlinkStick output node. Expects a <b>msg.payload</b> with either a hex string #rrggbb triple or red,green,blue as three 0-255 values.
+    It can also accept <i><a href="http://www.w3schools.com/html/html_colornames.asp" target="_new">standard HTML colour</a></i> names</p>
+    <p><b>NOTE:</b> currently only works with a single BlinkStick. (As it uses the findFirst() function to attach).</p>
+    <p>For more info see the <i><a href="http://blinkstick.com/" target="_new">BlinkStick website</a></i> or the <i><a href="https://github.com/arvydas/blinkstick-node" target="_new">node module</a></i> documentation.</p>
 </script>
 
 <script type="text/javascript">
-	RED.nodes.registerType('blinkstick',{
-		category: 'output',
-		color:"GoldenRod",
-		defaults: {
-			name: {value:""}
-		},
-		inputs:1,
-		outputs:0,
-		icon: "light.png",
-		align: "right",
-		label: function() {
-			return this.name||"blinkstick";
-		},
-		labelStyle: function() {
-			return this.name?"node_label_italic":"";
-		}
-	});
+    RED.nodes.registerType('blinkstick',{
+        category: 'output',
+        color:"GoldenRod",
+        defaults: {
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "light.png",
+        align: "right",
+        label: function() {
+            return this.name||"blinkstick";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
 </script>
