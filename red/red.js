@@ -20,6 +20,9 @@ var nodes = require("./nodes");
 var library = require("./library");
 var settings = null;
 
+var path = require('path');
+
+process.env.NODE_RED_HOME = process.env.NODE_RED_HOME || path.resolve(__dirname+"/..");
 
 var events = require("events");
 
