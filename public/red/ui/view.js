@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+ 
+
 RED.view = function() {
     var space_width = 5000,
         space_height = 5000,
@@ -21,6 +23,8 @@ RED.view = function() {
         node_width = 100,
         node_height = 30;
 
+    var activeWorkspace = 0;
+    
     var selected_link = null,
         mousedown_link = null,
         mousedown_node = null,
@@ -281,7 +285,7 @@ RED.view = function() {
                 mousePos[1] /= scaleFactor;
                 mousePos[0] /= scaleFactor;
 
-                var nn = { id:(1+Math.random()*4294967295).toString(16),x: mousePos[0],y:mousePos[1],w:node_width};
+                var nn = { id:(1+Math.random()*4294967295).toString(16),x: mousePos[0],y:mousePos[1],w:node_width,z:activeWorkspace};
 
                 nn.type = selected_tool;
                 nn._def = RED.nodes.getType(nn.type);
@@ -323,11 +327,13 @@ RED.view = function() {
 
     function selectAll() {
         RED.nodes.eachNode(function(n) {
+            if (n.z == activeWorkspace) {
                 if (!n.selected) {
                     n.selected = true;
                     n.dirty = true;
                     moving_set.push({n:n});
                 }
+            }
         });
         selected_link = null;
         updateSelection();
@@ -572,7 +578,7 @@ RED.view = function() {
         if (mouse_mode != RED.state.JOINING) {
             // Don't bother redrawing nodes if we're drawing links
 
-            var node = vis.selectAll(".nodegroup").data(RED.nodes.nodes,function(d){return d.id});
+            var node = vis.selectAll(".nodegroup").data(RED.nodes.nodes.filter(function(d) { return d.z == activeWorkspace }),function(d){return d.id});
             node.exit().remove();
 
             var nodeEnter = node.enter().insert("svg:g").attr("class", "node nodegroup");
@@ -777,7 +783,7 @@ RED.view = function() {
             });
         }
 
-        var link = vis.selectAll(".link").data(RED.nodes.links);
+        var link = vis.selectAll(".link").data(RED.nodes.links.filter(function(d) { return d.source.z == activeWorkspace && d.target.z == activeWorkspace }));
 
         link.enter().insert("svg:path",".node").attr("class","link")
            .on("mousedown",function(d) {
@@ -871,7 +877,7 @@ RED.view = function() {
             if (result) {
                 var new_nodes = result[0];
                 var new_links = result[1];
-                var new_ms = new_nodes.map(function(n) { return {n:n};});
+                var new_ms = new_nodes.map(function(n) { n.z = activeWorkspace; return {n:n};});
                 var new_node_ids = new_nodes.map(function(n){ return n.id; });
 
                 // TODO: pick a more sensible root node
@@ -955,6 +961,14 @@ RED.view = function() {
             } else {
                 mouse_mode = state;
             }
+        },
+        setWorkspace: function(z) {
+            activeWorkspace = z;
+            clearSelection();
+            RED.nodes.eachNode(function(n) {
+                n.dirty = true;
+            });
+            redraw();
         },
         redraw:redraw,
         dirty: function(d) {

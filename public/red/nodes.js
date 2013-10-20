@@ -120,7 +120,8 @@ RED.nodes = function() {
         if (n._def.category != "config") {
             node.x = n.x;
             node.y = n.y;
-
+            node.z = n.z;
+            
             node.wires = [];
             for(var i=0;i<n.outputs;i++) {
                 node.wires.push([]);
@@ -218,7 +219,10 @@ RED.nodes = function() {
                         RED.nodes.add(configNode);
                     }
                 } else {
-                    var node = {x:n.x,y:n.y,type:0,wires:n.wires};
+                    if (n.z == null) {
+                        n.z = 0;
+                    }
+                    var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires};
                     if (createNewIds) {
                         node.id = (1+Math.random()*4294967295).toString(16);
                     } else {
