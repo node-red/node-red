@@ -13,7 +13,7 @@
         "start": "node red.js"
     },
     "contributors": [ 
-        {"name": "Nick O'Leary"}
+        {"name": "Nick O'Leary"},
         {"name": "Dave Conway-Jones"}
     ],
     "keywords": [
