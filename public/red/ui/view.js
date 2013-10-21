@@ -218,7 +218,7 @@ RED.view = function() {
                 clearSelection();
             }
             RED.nodes.eachNode(function(n) {
-                if (!n.selected) {
+                if (n.z == activeWorkspace && !n.selected) {
                     n.selected = (n.x > x && n.x < x2 && n.y > y && n.y < y2);
                     if (n.selected) {
                         n.dirty = true;
