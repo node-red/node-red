@@ -20,57 +20,56 @@ var spawn = require('child_process').spawn;
 var exec = require('child_process').exec;
 
 function ExecNode(n) {
-	RED.nodes.createNode(this,n);
-	this.cmd = n.command;
-	this.append = n.append || "";
-	this.useSpawn = n.useSpawn;
+    RED.nodes.createNode(this,n);
+    this.cmd = n.command;
+    this.append = n.append || "";
+    this.useSpawn = n.useSpawn;
 
-	var node = this;
-	this.on("input", function(msg) {
-		if (msg != null) {
+    var node = this;
+    this.on("input", function(msg) {
+        if (msg != null) {
 
-			if (this.useSpawn == true) {
-				// make the extra args into an array
-				// then prepend with the msg.payload
-				var arg = node.append.split(",");
-				if (msg.payload != " ") { arg.unshift(msg.payload); }
-				//console.log(arg);
-				var ex = spawn(node.cmd,arg);
-				ex.stdout.on('data', function (data) {
-					//console.log('[exec] stdout: ' + data);
-					msg.payload = data;
-					node.send([msg,null,null]);
-				});
-				ex.stderr.on('data', function (data) {
-					//console.log('[exec] stderr: ' + data);
-					msg.payload = data;
-					node.send([null,msg,null]);
-				});
-				ex.on('close', function (code) {
-					//console.log('[exec] result: ' + code);
-					msg.payload = code;
-					node.send([null,null,msg]);
-				});
-			}
+            if (this.useSpawn == true) {
+                // make the extra args into an array
+                // then prepend with the msg.payload
+                var arg = node.append.split(",");
+                if (msg.payload != " ") { arg.unshift(msg.payload); }
+                //console.log(arg);
+                var ex = spawn(node.cmd,arg);
+                ex.stdout.on('data', function (data) {
+                    //console.log('[exec] stdout: ' + data);
+                    msg.payload = data;
+                    node.send([msg,null,null]);
+                });
+                ex.stderr.on('data', function (data) {
+                    //console.log('[exec] stderr: ' + data);
+                    msg.payload = data;
+                    node.send([null,msg,null]);
+                });
+                ex.on('close', function (code) {
+                    //console.log('[exec] result: ' + code);
+                    msg.payload = code;
+                    node.send([null,null,msg]);
+                });
+            }
 
-			else {
-				var cl = node.cmd+" "+msg.payload+" "+node.append;
-				node.log(cl);
-				var child = exec(cl, function (error, stdout, stderr) {
-					msg.payload = stdout;
-					var msg2 = {payload:stderr};
-					//console.log('[exec] stdout: ' + stdout);
-					//console.log('[exec] stderr: ' + stderr);
-					if (error !== null) {
-						var msg3 = {payload:error};
-						//console.log('[exec] error: ' + error);
-					}
-					node.send([msg,msg2,msg3]);
-				});
-			}
-		}
+            else {
+                var cl = node.cmd+" "+msg.payload+" "+node.append;
+                var child = exec(cl, function (error, stdout, stderr) {
+                    msg.payload = stdout;
+                    var msg2 = {payload:stderr};
+                    //console.log('[exec] stdout: ' + stdout);
+                    //console.log('[exec] stderr: ' + stderr);
+                    if (error !== null) {
+                        var msg3 = {payload:error};
+                        //console.log('[exec] error: ' + error);
+                    }
+                    node.send([msg,msg2,msg3]);
+                });
+            }
+        }
 
-	});
+    });
 }
 
 RED.nodes.registerType("exec",ExecNode);

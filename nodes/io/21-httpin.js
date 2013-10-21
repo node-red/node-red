@@ -83,7 +83,7 @@ function HTTPRequest(n) {
 	        var opts = urllib.parse(msg.url||url);
 	        opts.method = (msg.method||method).toUpperCase();
 	        if (msg.headers) {
-	            opts.header = msg.headers;
+	            opts.headers = msg.headers;
 	        }
 	        var req = httplib.request(opts,function(res) {
 	                res.setEncoding('utf8');
