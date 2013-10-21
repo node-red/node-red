@@ -13,11 +13,11 @@
         "start": "node red.js"
     },
     "contributors": [ 
-        {"name": "Nick O'Leary"}
+        {"name": "Nick O'Leary"},
         {"name": "Dave Conway-Jones"}
     ],
     "keywords": [
-        "editor", "messaging", "iot", "m2m", "pi", "arduino", "beaglebone", "ibm
+        "editor", "messaging", "iot", "m2m", "pi", "arduino", "beaglebone", "ibm", "flow"
     ],
     "dependencies": {
         "express": "3.x",
