@@ -17,7 +17,7 @@
         {"name": "Dave Conway-Jones"}
     ],
     "keywords": [
-        "editor", "messaging", "iot", "m2m", "pi", "arduino", "beaglebone", "ibm
+        "editor", "messaging", "iot", "m2m", "pi", "arduino", "beaglebone", "ibm", "flow"
     ],
     "dependencies": {
         "express": "3.x",
