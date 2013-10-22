@@ -19,27 +19,28 @@ var util = require("util");
 var parseString = require('xml2js').parseString;
 var gotEyes = false;
 try {
-	var eyes = require("eyes");
-	gotEyes = true;
+    var eyes = require("eyes");
+    gotEyes = true;
 } catch(e) {
-	util.log("[73-parsexml.js] Warning: Module 'eyes' not installed");
+    util.log("[73-parsexml.js] Note: Module 'eyes' not installed. (not needed, but useful)");
 }
 
 function Xml2jsNode(n) {
-	RED.nodes.createNode(this,n);
-	this.useEyes = n.useEyes;
-	var node = this;
-
-	this.on("input", function(msg) {
-		parseString(msg.payload, function (err, result) {
-			msg.payload = result;
-			node.send(msg);
-			if (node.useEyes == true) {
-				if (gotEyes == true) { eyes.inspect(msg); }
-				else { node.log(JSON.stringify(msg)); }
-			}
-		});
-	});
+    RED.nodes.createNode(this,n);
+    this.useEyes = n.useEyes;
+    var node = this;
+    this.on("input", function(msg) {
+        parseString(msg.payload, function (err, result) {
+            if (err) { node.error(err); }
+            else {
+                msg.payload = result;
+                node.send(msg);
+                if (node.useEyes == true) {
+                    if (gotEyes == true) { eyes.inspect(msg); }
+                    else { node.log(JSON.stringify(msg)); }
+                }
+            }
+        });
+    });
 }
-
 RED.nodes.registerType("xml2js",Xml2jsNode);

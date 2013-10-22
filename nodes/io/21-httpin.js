@@ -79,7 +79,9 @@ function HTTPRequest(n) {
 	var httplib = (/^https/.test(url))?https:http;
 	var node = this;
 	this.on("input",function(msg) {
-	        
+	        if (msg.url) {
+	            httplib = (/^https/.test(msg.url))?https:http;
+	        }
 	        var opts = urllib.parse(msg.url||url);
 	        opts.method = (msg.method||method).toUpperCase();
 	        if (msg.headers) {
