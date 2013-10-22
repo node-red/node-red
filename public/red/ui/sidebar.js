@@ -28,8 +28,8 @@ RED.sidebar = function() {
                 var winWidth = $(window).width();
                 sidebarSeparator.start = ui.position.left;
                 sidebarSeparator.width = $("#sidebar").width();
-                sidebarSeparator.chartWidth = $("#chart").width();
-                sidebarSeparator.chartRight = winWidth-$("#chart").width()-$("#chart").offset().left-2;
+                sidebarSeparator.chartWidth = $("#workspace").width();
+                sidebarSeparator.chartRight = winWidth-$("#workspace").width()-$("#workspace").offset().left-2;
                 sidebarSeparator.closing = false;
             },
             drag: function(event,ui) {
@@ -38,7 +38,7 @@ RED.sidebar = function() {
                 
                 if (newSidebarWidth > 180 && sidebarSeparator.chartWidth+d > 200) {
                     var newChartRight = sidebarSeparator.chartRight-d;
-                    $("#chart").css("right",newChartRight);
+                    $("#workspace").css("right",newChartRight);
                     $("#chart-zoom-controls").css("right",newChartRight+20);
                     $("#sidebar").width(newSidebarWidth);
                 }

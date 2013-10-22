@@ -67,6 +67,22 @@ RED.view = function() {
 
     var drag_line = vis.append("svg:path").attr("class", "drag_line");
 
+    var workspace_tabs = RED.tabs.create({
+        id: "workspace-tabs",
+        onadd: function() {
+            workspace_tabs.addTab({id:"tab-5",label:"Workspace 5"});
+        },
+        onchange: function(id) {
+            console.log(id);
+            RED.view.setWorkspace(id.split("-")[1]);
+        }
+    });
+    workspace_tabs.addTab({id:"tab-1",label:"Workspace 1"});
+    workspace_tabs.addTab({id:"tab-2",label:"Workspace 2"});
+    workspace_tabs.addTab({id:"tab-3",label:"Workspace 3"});
+    workspace_tabs.addTab({id:"tab-4",label:"Workspace 4"});
+    
+    
     //d3.select(window).on("keydown", keydown);
 
     function canvasMouseDown() {

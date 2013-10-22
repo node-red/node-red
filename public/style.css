@@ -40,10 +40,21 @@ a.brand img {
     padding-right: 10px;
 }
 
-#chart {
+#workspace {
    margin-left: 160px;
+   overflow: hidden;
+   background: #e3e3e3;
+}
+
+#chart {
    overflow: auto;
    background: #e3e3e3;
+   position: absolute;
+   border-top: 1px solid #999;
+   bottom:0px;
+   top: 30px;
+   left:0px;
+   right:0px;
 }
 #chart-zoom-controls {
     padding-top: 3px;
@@ -161,7 +172,7 @@ a.brand img {
     position: absolute;
     top: 5px; left:10px; bottom: 10px;
 }
-#chart {
+#workspace {
     position: absolute;
     margin: 0;
     top:5px; left:160px; bottom: 10px; right: 330px;
@@ -184,7 +195,7 @@ a.brand img {
 
 .sidebar-closed > #sidebar { display: none; }
 .sidebar-closed > #sidebar-separator { display: none; }
-.sidebar-closed > #chart { right: 10px !important; }
+.sidebar-closed > #workspace { right: 10px !important; }
 .sidebar-closed > #chart-zoom-controls { right: 30px !important; }
 
 /* ---------- end layout ---------- */
@@ -224,7 +235,7 @@ a.brand img {
     margin-left: 20px;
 }
 
-#chart, #palette, #sidebar {
+#workspace, #palette, #sidebar {
    border: 1px solid #000;
    border-radius: 3px;
 }
@@ -557,4 +568,65 @@ div.node-info {
     border:1px solid #ccc;
     border-radius:5px;
     overflow: hidden;
+}
+
+ul.red-ui-tabs {
+    list-style-type: none;
+    padding:5px 2px 0px 5px;
+    margin: 0;
+    display: block;
+    height: 26px;
+    overflow: hidden;
+    fdwidth: 2000px;
+    width: 100%;
+}
+
+ul.red-ui-tabs li {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    display: inline-block;
+    border-left: 1px solid  #999;
+    border-top: 1px solid   #999;
+    border-right: 1px solid #999;
+    border-bottom: 1px solid #999;
+    background: #e3e3e3;
+    margin: 0 5px 0 0;
+    height: 24px;
+    line-height: 18px;
+    max-width: 150px;
+    width: 14%;
+    overflow: hidden;
+}
+
+#workspace .red-ui-tabs {
+    position: absolute;
+}
+ul.red-ui-tabs li a {
+    display: block; 
+    padding: 3px 16px;
+    color: #666;
+}
+ul.red-ui-tabs li a:hover {
+    text-decoration: none;
+    background: #f0f0f0;
+}
+
+ul.red-ui-tabs li.active {
+    background: #fff;
+    height: 24px;
+    border-bottom: 1px solid #fff;
+}
+ul.red-ui-tabs li.active a {
+    color: #333;
+}
+ul.red-ui-tabs li.active a:hover {
+    background: #fff;
+}
+ul.red-ui-tabs li.red-ui-add-tab {
+    width: auto;
+    border-top-right-radius: 15px;
+    line-height: 22px;
+}
+ul.red-ui-tabs li.red-ui-add-tab a {
+    padding: 2px 4px;
 }
