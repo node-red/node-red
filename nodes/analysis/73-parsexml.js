@@ -31,7 +31,7 @@ function Xml2jsNode(n) {
     var node = this;
     this.on("input", function(msg) {
         parseString(msg.payload, function (err, result) {
-            if (err) { node.error(err; }
+            if (err) { node.error(err); }
             else {
                 msg.payload = result;
                 node.send(msg);
