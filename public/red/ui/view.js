@@ -69,18 +69,34 @@ RED.view = function() {
 
     var workspace_tabs = RED.tabs.create({
         id: "workspace-tabs",
-        onadd: function() {
-            workspace_tabs.addTab({id:"tab-5",label:"Workspace 5"});
-        },
         onchange: function(id) {
             console.log(id);
             RED.view.setWorkspace(id.split("-")[1]);
+        },
+        ondblclick: function(id) {
+            console.log("DC:",id);
+        },
+        onadd: function(tab) {
+            var menuli = $("<li/>");
+            var menuA = $("<a/>",{tabindex:"-1",href:"#"+tab.id}).appendTo(menuli);
+            menuA.html(tab.label);
+            menuA.on("click",function() {
+                workspace_tabs.activateTab(tab.id);
+            });
+            
+            $('#workspace-menu-list').append(menuli);
         }
     });
     workspace_tabs.addTab({id:"tab-1",label:"Workspace 1"});
     workspace_tabs.addTab({id:"tab-2",label:"Workspace 2"});
     workspace_tabs.addTab({id:"tab-3",label:"Workspace 3"});
     workspace_tabs.addTab({id:"tab-4",label:"Workspace 4"});
+    
+    $('#btn-workspace-add').on("click",function() {
+        var id = Math.floor(Math.random()*2000);
+        workspace_tabs.addTab({id:"tab-"+id,label:"Workspace "+id});
+        workspace_tabs.activateTab("tab-"+id);
+    });
     
     
     //d3.select(window).on("keydown", keydown);

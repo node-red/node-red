@@ -25,53 +25,55 @@ RED.tabs = function() {
         ul.children().first().addClass("active");
         ul.children().addClass("red-ui-tab");
         
-        if (options.onadd) {
-            var addItem = $('<li class="red-ui-add-tab"/>').appendTo(ul);
-            addItem.css({
-                    "position":"absolute",
-                    "right":"5px"
-            });
-            var addLink = $('<a href="#"><i class="icon icon-plus"></i></a>').appendTo(addItem);
-            
-            addLink.on("click", function() {
-                 options.onadd()
-            });
+        function onTabClick() {
+            activateTab($(this));
+            return false;
         }
         
-        function onTabClick() {
-            ul.children().removeClass("active");
-            $(this).parent().addClass("active");
-            if (options.onchange) {
-                options.onchange($(this).attr('href'));
+        function onTabDblClick() {
+            if (options.ondblclick) {
+                options.ondblclick($(this).attr('href'));
             }
-            return false;
+        }
+        
+        function activateTab(link) {
+            if (typeof link === "string") {
+                link = ul.find("a[href='#"+link+"']");
+            }
+            if (!link.parent().hasClass("active")) {
+                ul.children().removeClass("active");
+                link.parent().addClass("active");
+                if (options.onchange) {
+                    options.onchange(link.attr('href'));
+                }
+            }
+
         }
         function updateTabWidths() {
             var tabs = ul.find("li.red-ui-tab");
             var width = ul.width();
             var tabCount = tabs.size();
-            var tabWidth = (width-(options.onadd?37:0)-6-(tabCount*7))/tabCount;
+            var tabWidth = (width-6-(tabCount*7))/tabCount;
             var pct = 100*tabWidth/width;
             tabs.css({width:pct+"%"});
                 
         }
-        ul.find("li.red-ui-tab a").on("click",onTabClick);
+        ul.find("li.red-ui-tab a").on("click",onTabClick).on("dblclick",onTabDblClick);
         updateTabWidths();
         
         return {
             addTab: function(tab) {
-                var li = $("<li/>",{class:"red-ui-tab"});
-                
-                if (options.onadd) {
-                    ul.find(".red-ui-add-tab").before(li);
-                } else {
-                    li.appendTo(ul);
-                }
+                var li = $("<li/>",{class:"red-ui-tab"}).appendTo(ul);
                 var link = $("<a/>",{href:"#"+tab.id}).appendTo(li);
                 link.html(tab.label);
                 link.on("click",onTabClick);
+                link.on("dblclick",onTabDblClick);
                 updateTabWidths();
+                if (options.onadd) {
+                    options.onadd(tab);
+                }
             },
+            activateTab: activateTab,
             resize: updateTabWidths
         }
     }

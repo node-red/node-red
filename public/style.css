@@ -595,6 +595,7 @@ ul.red-ui-tabs li {
     max-width: 150px;
     width: 14%;
     overflow: hidden;
+    white-space: nowrap;
 }
 
 ul.red-ui-tabs li a {
