@@ -50,7 +50,6 @@ a.brand img {
    overflow: auto;
    background: #e3e3e3;
    position: absolute;
-   border-top: 1px solid #999;
    bottom:0px;
    top: 30px;
    left:0px;
@@ -575,10 +574,10 @@ ul.red-ui-tabs {
     padding:5px 2px 0px 5px;
     margin: 0;
     display: block;
-    height: 26px;
-    overflow: hidden;
-    fdwidth: 2000px;
+    height: 24px;
     width: 100%;
+    border-bottom: 1px solid #999;
+
 }
 
 ul.red-ui-tabs li {
@@ -591,16 +590,13 @@ ul.red-ui-tabs li {
     border-bottom: 1px solid #999;
     background: #e3e3e3;
     margin: 0 5px 0 0;
-    height: 24px;
-    line-height: 18px;
+    height: 23px;
+    line-height: 17px;
     max-width: 150px;
     width: 14%;
     overflow: hidden;
 }
 
-#workspace .red-ui-tabs {
-    position: absolute;
-}
 ul.red-ui-tabs li a {
     display: block; 
     padding: 3px 16px;
@@ -613,7 +609,6 @@ ul.red-ui-tabs li a:hover {
 
 ul.red-ui-tabs li.active {
     background: #fff;
-    height: 24px;
     border-bottom: 1px solid #fff;
 }
 ul.red-ui-tabs li.active a {
@@ -623,7 +618,7 @@ ul.red-ui-tabs li.active a:hover {
     background: #fff;
 }
 ul.red-ui-tabs li.red-ui-add-tab {
-    width: auto;
+    width: 25px;
     border-top-right-radius: 15px;
     line-height: 22px;
 }

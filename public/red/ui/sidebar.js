@@ -50,6 +50,7 @@ RED.sidebar = function() {
                     sidebarSeparator.closing = false;
                     $("#sidebar").removeClass("closing");
                 }
+                RED.view.resize();
                     
             },
             stop:function(event,ui) {

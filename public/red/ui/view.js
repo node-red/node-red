@@ -994,6 +994,9 @@ RED.view = function() {
                 setDirty(d);
             }
         },
-        importNodes: importNodes
+        importNodes: importNodes,
+        resize: function() {
+            workspace_tabs.resize();
+        }
     };
 }();

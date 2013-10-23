@@ -27,6 +27,10 @@ RED.tabs = function() {
         
         if (options.onadd) {
             var addItem = $('<li class="red-ui-add-tab"/>').appendTo(ul);
+            addItem.css({
+                    "position":"absolute",
+                    "right":"5px"
+            });
             var addLink = $('<a href="#"><i class="icon icon-plus"></i></a>').appendTo(addItem);
             
             addLink.on("click", function() {
@@ -44,7 +48,10 @@ RED.tabs = function() {
         }
         function updateTabWidths() {
             var tabs = ul.find("li.red-ui-tab");
-            var pct = (100/tabs.size())-2;
+            var width = ul.width();
+            var tabCount = tabs.size();
+            var tabWidth = (width-(options.onadd?37:0)-6-(tabCount*7))/tabCount;
+            var pct = 100*tabWidth/width;
             tabs.css({width:pct+"%"});
                 
         }
@@ -64,7 +71,8 @@ RED.tabs = function() {
                 link.html(tab.label);
                 link.on("click",onTabClick);
                 updateTabWidths();
-            }
+            },
+            resize: updateTabWidths
         }
     }
     
