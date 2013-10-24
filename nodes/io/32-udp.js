@@ -19,97 +19,101 @@ var dgram = require('dgram');
 
 // The Input Node
 function UDPin(n) {
-	RED.nodes.createNode(this,n);
-	this.group = n.group;
-	this.port = n.port;
-	this.host = n.host || null;
-	this.datatype = n.datatype;
-	this.iface = n.iface || null;
-	this.multicast = n.multicast;
-	var node = this;
+    RED.nodes.createNode(this,n);
+    this.group = n.group;
+    this.port = n.port;
+    this.host = n.host || null;
+    this.datatype = n.datatype;
+    this.iface = n.iface || null;
+    this.multicast = n.multicast;
+    var node = this;
 
-	var server = dgram.createSocket('udp4');
+    var server = dgram.createSocket('udp4');
 
-	server.on("error", function (err) {
-		console.log("udp listener error:\n" + err.stack);
-		server.close();
-	});
+    server.on("error", function (err) {
+        //console.log("udp listener error:\n" + err.stack);
+        if ((err.code == "EACCES") && (node.port < 1024)) { node.error("UDP access error, you may need root access for ports below 1024"); }
+        else { node.error("UDP error : "+err.code); }
+        server.close();
+    });
 
-	server.on('message', function (message, remote) {
-		var msg;
-		if (node.datatype =="base64") { msg = { payload:message.toString('base64'), fromip:remote.address+':'+remote.port }; }
-		else if (node.datatype =="utf8") { msg = { payload:message.toString('utf8'), fromip:remote.address+':'+remote.port }; }
-		else { msg = { payload:message, fromip:remote.address+':'+remote.port }; }
-		node.send(msg);
-	});
+    server.on('message', function (message, remote) {
+        var msg;
+        if (node.datatype =="base64") { msg = { payload:message.toString('base64'), fromip:remote.address+':'+remote.port }; }
+        else if (node.datatype =="utf8") { msg = { payload:message.toString('utf8'), fromip:remote.address+':'+remote.port }; }
+        else { msg = { payload:message, fromip:remote.address+':'+remote.port }; }
+        node.send(msg);
+    });
 
-	server.on('listening', function () {
-		var address = server.address();
-		node.log('udp listener at ' + address.address + ":" + address.port);
-		if (node.multicast == "true") {
-			server.setBroadcast(true)
-			server.setMulticastTTL(128);
-			server.addMembership(node.group,node.iface);
-			node.log("udp multicast group "+node.group);
-		}
-	});
+    server.on('listening', function () {
+        var address = server.address();
+        node.log('udp listener at ' + address.address + ":" + address.port);
+        if (node.multicast == "true") {
+            server.setBroadcast(true)
+            server.setMulticastTTL(128);
+            server.addMembership(node.group,node.iface);
+            node.log("udp multicast group "+node.group);
+        }
+    });
 
-	node.on("close", function() {
-		try {
-			server.close();
-			node.log('udp listener stopped');
-		}
-		catch (err) { console.log(err); }
-	});
+    node.on("close", function() {
+        try {
+            server.close();
+            node.log('udp listener stopped');
+        }
+        catch (err) { console.log(err); }
+    });
 
-	server.bind(node.port,node.host);
+    server.bind(node.port,node.host);
 }
 RED.nodes.registerType("udp in",UDPin);
 
 
 // The Output Node
 function UDPout(n) {
-	RED.nodes.createNode(this,n);
-	//this.group = n.group;
-	this.port = n.port;
-	this.base64 = n.base64;
-	this.addr = n.addr;
-	this.iface = n.iface || null;
-	this.multicast = n.multicast;
-	var node = this;
+    RED.nodes.createNode(this,n);
+    //this.group = n.group;
+    this.port = n.port;
+    this.base64 = n.base64;
+    this.addr = n.addr;
+    this.iface = n.iface || null;
+    this.multicast = n.multicast;
+    var node = this;
 
-	var sock = dgram.createSocket('udp4');  // only use ipv4 for now
-	sock.bind(node.port); 			// have to bind before you can enable broadcast...
-	if (this.multicast != "false") {
-		sock.setBroadcast(true);		// turn on broadcast
-		if (this.multicast == "multi") {
-			sock.setMulticastTTL(128);
-			sock.addMembership(node.addr,node.iface);	// Add to the multicast group
-			node.log('udp multicast ready : '+node.addr+":"+node.port);
-		}
-		else node.log('udp broadcast ready : '+node.addr+":"+node.port);
-	}
-	else node.log('udp ready : '+node.addr+":"+node.port);
+    var sock = dgram.createSocket('udp4');  // only use ipv4 for now
+    sock.bind(node.port);           // have to bind before you can enable broadcast...
+    if (this.multicast != "false") {
+        sock.setBroadcast(true);        // turn on broadcast
+        if (this.multicast == "multi") {
+            sock.setMulticastTTL(128);
+            sock.addMembership(node.addr,node.iface);   // Add to the multicast group
+            node.log('udp multicast ready : '+node.addr+":"+node.port);
+        }
+        else node.log('udp broadcast ready : '+node.addr+":"+node.port);
+    }
+    else node.log('udp ready : '+node.addr+":"+node.port);
 
-	node.on("input", function(msg) {
-		if (msg.payload != null) {
-			//console.log("UDP:",msg.payload);
-			var message;
-			if (node.base64) { message = new Buffer(b64string, 'base64'); }
-			else { message = new Buffer(""+msg.payload); }
-			console.log("UDP send :",node.addr,node.port);
-			sock.send(message, 0, message.length, node.port, node.addr, function(err, bytes) {
-				if (err) node.error("udp : "+err);
-			});
-		}
-	});
+    node.on("input", function(msg) {
+        if (msg.payload != null) {
+            //console.log("UDP:",msg.payload);
+            var add = msg.destip || node.addr;
+            var por = msg.port || node.addr;
+            var message;
+            if (node.base64) { message = new Buffer(b64string, 'base64'); }
+            else { message = new Buffer(""+msg.payload); }
+            //console.log("UDP send :",add,por);
+            sock.send(message, 0, message.length, por, add, function(err, bytes) {
+                if (err) node.error("udp : "+err);
+            });
+        }
+    });
 
-	node.on("close", function() {
-		try {
-			sock.close();
-			node.log('udp output stopped');
-		}
-		catch (err) { console.log(err); }
-	});
+    node.on("close", function() {
+        try {
+            sock.close();
+            node.log('udp output stopped');
+        }
+        catch (err) { console.log(err); }
+    });
 }
 RED.nodes.registerType("udp out",UDPout);
