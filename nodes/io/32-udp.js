@@ -41,7 +41,7 @@ function UDPin(n) {
         var msg;
         if (node.datatype =="base64") { msg = { payload:message.toString('base64'), fromip:remote.address+':'+remote.port }; }
         else if (node.datatype =="utf8") { msg = { payload:message.toString('utf8'), fromip:remote.address+':'+remote.port }; }
-        else { msg = { payload:message, fromip:remote.address+':'+remote.port }; }
+        else { msg = { payload:message, fromip:remote.address+':'+remote.port, ip:remote.address, port:remote.port }; }
         node.send(msg);
     });
 
@@ -95,16 +95,21 @@ function UDPout(n) {
 
     node.on("input", function(msg) {
         if (msg.payload != null) {
-            //console.log("UDP:",msg.payload);
-            var add = msg.destip || node.addr;
-            var por = msg.port || node.addr;
-            var message;
-            if (node.base64) { message = new Buffer(b64string, 'base64'); }
-            else { message = new Buffer(""+msg.payload); }
-            //console.log("UDP send :",add,por);
-            sock.send(message, 0, message.length, por, add, function(err, bytes) {
-                if (err) node.error("udp : "+err);
-            });
+            var add = node.addr || msg.ip || "";
+            var por = node.port || msg.port || 0;
+            if (add == "") { node.warn("udp: ip address not set"); }
+            else if (por == 0) { node.warn("udp: port not set"); }
+            else if (isNaN(por) || (por < 1) || (por > 65535))  { node.warn("udp: port number not valid"); }
+            else {
+                var message;
+                if (node.base64) { message = new Buffer(b64string, 'base64'); }
+                else if (msg.payload instanceof Buffer) { message = msg.payload; }
+                else { message = new Buffer(""+msg.payload); }
+                console.log("UDP send :",add,por,msg.payload.toString());
+                sock.send(message, 0, message.length, por, add, function(err, bytes) {
+                    if (err) node.error("udp : "+err);
+                });
+            }
         }
     });
 

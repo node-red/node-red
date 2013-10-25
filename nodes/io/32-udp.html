@@ -62,7 +62,7 @@
 
 <script type="text/x-red" data-help-name="udp in">
     <p>A udp input node, that produces a <b>msg.payload</b> containing a <i>BUFFER</i>, string, or base64 encoded string. Supports multicast.</p>
-    <p>It also provides <b>msg.fromip</b> in the form ipaddress:port .</p>
+    <p>It also provides <b>msg.ip</b> and <b>msg.port</b> to the ip address and port from which the message was received.</b>
     <p>On some systems you may need to be root to use ports below 1024 and/or broadcast.</p>
 </script>
 
@@ -123,6 +123,7 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-tips">Tip: leave address and port blank if you want to set using <b>msg.ip</b> and <b>msg.port</b>.</div>
     <script>
         $("#node-input-multicast").change(function() {
             var id = $("#node-input-multicast option:selected").val();
@@ -146,7 +147,7 @@
 
 <script type="text/x-red" data-help-name="udp out">
     <p>This node sends <b>msg.payload</b> to the designated udp host and port. Supports multicast.</p>
-    <p>You may also use <b>msg.destip</b> and <b>msg.port</b> to override the values manually configured.</p>
+    <p>You may also use <b>msg.ip</b> and <b>msg.port</b> to set the destination values.<br/><b>Note</b>: the statically configured values have precedence.</p>
     <p>If you select broadcast either set the address to the local broadcast ip address, or maybe try 255.255.255.255, which is the global broadcast address.</p>
     <p>On some systems you may need to be root to use ports below 1024 and/or broadcast.</p>
 </script>
@@ -157,10 +158,9 @@
         color:"Silver",
         defaults: {
             name: {value:""},
-            addr: {value:"",required:true},
-            //group: {value:""},
+            addr: {value:""},
             iface: {value:""},
-            port: {value:"",required:true,validate:RED.validators.number()},
+            port: {value:""},
             base64: {value:false,required:true},
             multicast: {value:"false"}
         },
