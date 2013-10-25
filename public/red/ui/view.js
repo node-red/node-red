@@ -70,8 +70,7 @@ RED.view = function() {
     var workspace_tabs = RED.tabs.create({
         id: "workspace-tabs",
         onchange: function(id) {
-            console.log(id);
-            RED.view.setWorkspace(id.split("-")[1]);
+            RED.view.setWorkspace(id.slice(1));
         },
         ondblclick: function(id) {
             console.log("DC:",id);
@@ -87,15 +86,13 @@ RED.view = function() {
             $('#workspace-menu-list').append(menuli);
         }
     });
-    workspace_tabs.addTab({id:"tab-1",label:"Workspace 1"});
-    workspace_tabs.addTab({id:"tab-2",label:"Workspace 2"});
-    workspace_tabs.addTab({id:"tab-3",label:"Workspace 3"});
-    workspace_tabs.addTab({id:"tab-4",label:"Workspace 4"});
     
     $('#btn-workspace-add').on("click",function() {
-        var id = Math.floor(Math.random()*2000);
-        workspace_tabs.addTab({id:"tab-"+id,label:"Workspace "+id});
-        workspace_tabs.activateTab("tab-"+id);
+        var tabId = RED.nodes.id();
+        var ws = {type:"workspace",id:tabId,label:"Workspace "+tabId};
+        RED.nodes.addWorkspace(ws);
+        workspace_tabs.addTab(ws);
+        workspace_tabs.activateTab(tabId);
     });
     
     
@@ -454,6 +451,7 @@ RED.view = function() {
 
         table += "<tr><td>Type</td><td>&nbsp;"+node.type+"</td></tr>";
         table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
+        table += "<tr><td>WS</td><td>&nbsp;"+node.z+"</td></tr>";
         table += '<tr class="blank"><td colspan="2">&nbsp;Properties</td></tr>';
         for (var n in node._def.defaults) {
             if ((n != "func")&&(n != "template")) {
@@ -993,6 +991,13 @@ RED.view = function() {
             } else {
                 mouse_mode = state;
             }
+        },
+        addWorkspace: function(ws) {
+            workspace_tabs.addTab(ws);
+            workspace_tabs.resize();
+        },
+        getWorkspace: function() {
+            return activeWorkspace;
         },
         setWorkspace: function(z) {
             activeWorkspace = z;

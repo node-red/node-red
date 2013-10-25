@@ -21,10 +21,18 @@ RED.nodes = function() {
     var configNodes = {};
     var links = [];
     
+    var defaultWorkspace;
+    var workspaces = {};
+    
+    
     function registerType(nt,def) {
         node_defs[nt] = def;
         // TODO: too tightly coupled into palette UI 
         RED.palette.add(nt,def);
+    }
+    
+    function getID() {
+        return (1+Math.random()*4294967295).toString(16);
     }
     
     function getType(type) {
@@ -85,6 +93,10 @@ RED.nodes = function() {
         for (var n in nodes) {
             RED.editor.validateNode(nodes[n]);
         }
+    }
+    
+    function addWorkspace(ws) {
+        workspaces[ws.id] = ws;
     }
     
     function getAllFlowNodes(node) {
@@ -167,6 +179,9 @@ RED.nodes = function() {
     //TODO: rename this (createCompleteNodeSet)
     function createCompleteNodeSet() {
         var nns = [];
+        for (var i in workspaces) {
+            nns.push(workspaces[i]);
+        }
         for (var i in configNodes) {
             nns.push(convertNode(configNodes[i]));
         }
@@ -194,11 +209,26 @@ RED.nodes = function() {
             }
             for (var i in newNodes) {
                 var n = newNodes[i];
-                if (!getType(n.type)) {
+                if (n.type != "workspace" && !getType(n.type)) {
                     // TODO: get this UI thing out of here! (see below as well)
                     RED.notify("<strong>Failed to import nodes</strong>: unrecognised type '"+n.type+"'","error");
                     return null;
                 }
+            }
+            for (var i in newNodes) {
+                var n = newNodes[i];
+                if (n.type === "workspace") {
+                    if (defaultWorkspace == null) {
+                        defaultWorkspace = n;
+                    }
+                    addWorkspace(n);
+                    RED.view.addWorkspace(n);
+                }
+            }
+            if (defaultWorkspace == null) {
+                defaultWorkspace = { type:"workspace", id:getID(), label:"default" };
+                addWorkspace(defaultWorkspace);
+                RED.view.addWorkspace(defaultWorkspace);
             }
             
             var node_map = {};
@@ -207,54 +237,57 @@ RED.nodes = function() {
             
             for (var i in newNodes) {
                 var n = newNodes[i];
-                var def = getType(n.type);
-                if (def && def.category == "config") {
-                    if (!RED.nodes.node(n.id)) {
-                        var configNode = {id:n.id,type:n.type,users:[]};
-                        for (var d in def.defaults) {
-                            configNode[d] = n[d];
+                if (n.type !== "workspace") {
+                    var def = getType(n.type);
+                    if (def && def.category == "config") {
+                        if (!RED.nodes.node(n.id)) {
+                            var configNode = {id:n.id,type:n.type,users:[]};
+                            for (var d in def.defaults) {
+                                configNode[d] = n[d];
+                            }
+                            configNode.label = def.label;
+                            configNode._def = def;
+                            RED.nodes.add(configNode);
                         }
-                        configNode.label = def.label;
-                        configNode._def = def;
-                        RED.nodes.add(configNode);
-                    }
-                } else {
-                    if (n.z == null) {
-                        n.z = 0;
-                    }
-                    var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires};
-                    if (createNewIds) {
-                        node.id = (1+Math.random()*4294967295).toString(16);
                     } else {
-                        node.id = n.id;
-                    }
-                    node.type = n.type;
-                    node._def = def;
-                    if (!node._def) {
-                        node._def = {
-                            color:"#fee",
-                            defaults: {},
-                            label: "unknown: "+n.type,
-                            labelStyle: "node_label_italic",
-                            outputs: n.outputs||n.wires.length
-                        }
-                    }
-                    node.outputs = n.outputs||node._def.outputs;
-                    
-                    for (var d in node._def.defaults) {
-                        node[d] = n[d];
-                        if (node._def.defaults[d].type) {
-                            var configNode = RED.nodes.node(n[d]);
-                            if (configNode) {
-                                configNode.users.push(node);
+                        var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires};
+                        if (createNewIds) {
+                            node.z = RED.view.getWorkspace();
+                            node.id = getID();
+                        } else {
+                            node.id = n.id;
+                            if (node.z == null || !workspaces[node.z]) {
+                                node.z = RED.view.getWorkspace();
                             }
                         }
+                        node.type = n.type;
+                        node._def = def;
+                        if (!node._def) {
+                            node._def = {
+                                color:"#fee",
+                                defaults: {},
+                                label: "unknown: "+n.type,
+                                labelStyle: "node_label_italic",
+                                outputs: n.outputs||n.wires.length
+                            }
+                        }
+                        node.outputs = n.outputs||node._def.outputs;
+                        
+                        for (var d in node._def.defaults) {
+                            node[d] = n[d];
+                            if (node._def.defaults[d].type) {
+                                var configNode = RED.nodes.node(n[d]);
+                                if (configNode) {
+                                    configNode.users.push(node);
+                                }
+                            }
+                        }
+                        
+                        addNode(node);
+                        RED.editor.validateNode(node);
+                        node_map[n.id] = node;
+                        new_nodes.push(node);
                     }
-                    
-                    addNode(node);
-                    RED.editor.validateNode(node);
-                    node_map[n.id] = node;
-                    new_nodes.push(node);
                 }
             }
             for (var i in new_nodes) {
@@ -288,6 +321,7 @@ RED.nodes = function() {
         addLink: addLink,
         remove: removeNode,
         removeLink: removeLink,
+        addWorkspace: addWorkspace,
         eachNode: function(cb) {
             for (var n in nodes) {
                 cb(nodes[n]);
@@ -309,6 +343,7 @@ RED.nodes = function() {
         getAllFlowNodes: getAllFlowNodes,
         createExportableNodeSet: createExportableNodeSet,
         createCompleteNodeSet: createCompleteNodeSet,
+        id: getID,
         nodes: nodes, // TODO: exposed for d3 vis
         links: links  // TODO: exposed for d3 vis
     };

@@ -72,6 +72,10 @@ RED.tabs = function() {
                 if (options.onadd) {
                     options.onadd(tab);
                 }
+                link.attr("title",tab.label);
+                if (ul.find("li.red-ui-tab").size() == 1) {
+                    activateTab(link);
+                }
             },
             activateTab: activateTab,
             resize: updateTabWidths
