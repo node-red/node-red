@@ -22,103 +22,99 @@ var urllib = require("url");
 var bodyParser = require("express").bodyParser();
 
 function HTTPIn(n) {
-	RED.nodes.createNode(this,n);
-	this.url = n.url;
-	this.method = n.method;
+    RED.nodes.createNode(this,n);
+    this.url = n.url;
+    this.method = n.method;
 
-	var node = this;
-	this.callback = function(req,res) {
-		node.send({req:req,res:res});
-	}
-	if (this.method == "get") {
-		RED.app.get(this.url,this.callback);
-	} else if (this.method == "post") {
-		RED.app.post(this.url,bodyParser,this.callback);
-	} else if (this.method == "put") {
-		RED.app.put(this.url,bodyParser,this.callback);
-	} else if (this.method == "delete") {
-		RED.app.delete(this.url,this.callback);
-	}
-	
-	this.on("close",function() {
-	        var routes = RED.app.routes[this.method];
-	        for (var i in routes) {
-	            if (routes[i].path == this.url) {
-	                routes.splice(i,1);
-	                //break;
-	            }
-	        }
-	});
+    var node = this;
+    this.callback = function(req,res) {
+        node.send({req:req,res:res});
+    }
+    if (this.method == "get") {
+        RED.app.get(this.url,this.callback);
+    } else if (this.method == "post") {
+        RED.app.post(this.url,bodyParser,this.callback);
+    } else if (this.method == "put") {
+        RED.app.put(this.url,bodyParser,this.callback);
+    } else if (this.method == "delete") {
+        RED.app.delete(this.url,this.callback);
+    }
+
+    this.on("close",function() {
+            var routes = RED.app.routes[this.method];
+            for (var i in routes) {
+                if (routes[i].path == this.url) {
+                    routes.splice(i,1);
+                    //break;
+                }
+            }
+    });
 }
 
 RED.nodes.registerType("http in",HTTPIn);
 
 
 function HTTPOut(n) {
-	RED.nodes.createNode(this,n);
-	var node = this;
-	this.on("input",function(msg) {
-	        if (msg.res) {
-	            if (msg.headers) {
-	                res.set(msg.headers);
-	            }
-	            var statusCode = msg.statusCode || 200;
-	            msg.res.send(statusCode,msg.payload);
-	        } else {
-	            node.warn("No response object");
-	        }
-	});
+    RED.nodes.createNode(this,n);
+    var node = this;
+    this.on("input",function(msg) {
+            if (msg.res) {
+                if (msg.headers) {
+                    res.set(msg.headers);
+                }
+                var statusCode = msg.statusCode || 200;
+                msg.res.send(statusCode,msg.payload);
+            } else {
+                node.warn("No response object");
+            }
+    });
 }
 
 RED.nodes.registerType("http response",HTTPOut);
 
 function HTTPRequest(n) {
-	RED.nodes.createNode(this,n);
-	var url = n.url;
-	var method = n.method || "GET";
-	var httplib = (/^https/.test(url))?https:http;
-	var node = this;
-	this.on("input",function(msg) {
-	        if (msg.url) {
-	            httplib = (/^https/.test(msg.url))?https:http;
-	        }
-	        var opts = urllib.parse(msg.url||url);
-	        opts.method = (msg.method||method).toUpperCase();
-	        if (msg.headers) {
-	            opts.headers = msg.headers;
-	        }
-	        var req = httplib.request(opts,function(res) {
-	                res.setEncoding('utf8');
-	                var message = {
-	                    statusCode: res.statusCode,
-	                    headers: res.headers,
-	                    payload: ""
-	                };
-	                res.on('data',function(chunk) {
-	                        message.payload += chunk;
-	                });
-	                res.on('end',function() {
-	                        node.send(message);
-	                });
-	        });
-	        req.on('error',function(err) {
-	                msg.payload = err.toString();
-	                msg.statusCode = err.code;
-	                node.send(msg);
-	        });
-	        if (msg.payload && (method == "POST" || method == "PUT") ) {
-	            if (typeof msg.payload === "string" || Buffer.isBuffer(msg.payload)) { 
+    RED.nodes.createNode(this,n);
+    var url = n.url;
+    var method = n.method || "GET";
+    var httplib = (/^https/.test(url))?https:http;
+    var node = this;
+    this.on("input",function(msg) {
+
+            var opts = urllib.parse(msg.url||url);
+            opts.method = (msg.method||method).toUpperCase();
+            if (msg.headers) {
+                opts.headers = msg.headers;
+            }
+            var req = httplib.request(opts,function(res) {
+                    res.setEncoding('utf8');
+                    msg.statusCode = res.statusCode;
+                    msg.headers = res.headers;
+                    msg.payload = "";
+                    res.on('data',function(chunk) {
+                            msg.payload += chunk;
+                    });
+                    res.on('end',function() {
+                            node.send(msg);
+                    });
+            });
+            req.on('error',function(err) {
+                    msg.payload = err.toString();
+                    msg.statusCode = err.code;
+                    node.send(msg);
+            });
+            if (msg.payload && (method == "PUSH" || method == "PUT") ) {
+                if (typeof msg.payload === "string" || Buffer.isBuffer(msg.payload)) {
                     req.write(msg.payload);
                 } else if (typeof msg.payload == "number") {
                     req.write(msg.payload+"");
                 } else {
                     req.write(JSON.stringify(msg.payload));
                 }
-	        }
-	        req.end();
-	        
-	        
-	});
+            }
+            req.end();
+
+
+    });
 }
 
 RED.nodes.registerType("http request",HTTPRequest);
