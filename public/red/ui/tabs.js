@@ -32,7 +32,7 @@ RED.tabs = function() {
         
         function onTabDblClick() {
             if (options.ondblclick) {
-                options.ondblclick($(this).attr('href'));
+                options.ondblclick($(this).attr('href').slice(1));
             }
         }
         
@@ -44,7 +44,7 @@ RED.tabs = function() {
                 ul.children().removeClass("active");
                 link.parent().addClass("active");
                 if (options.onchange) {
-                    options.onchange(link.attr('href'));
+                    options.onchange(link.attr('href').slice(1));
                 }
             }
 
@@ -76,6 +76,18 @@ RED.tabs = function() {
                 if (ul.find("li.red-ui-tab").size() == 1) {
                     activateTab(link);
                 }
+            },
+            removeTab: function(id) {
+                var li = ul.find("a[href='#"+id+"']").parent();
+                if (li.hasClass("active")) {
+                    var tab = li.prev();
+                    if (tab.size() == 0) {
+                        tab = li.next();
+                    }
+                    activateTab(tab.find("a"));
+                }
+                li.remove();
+                
             },
             activateTab: activateTab,
             resize: updateTabWidths

@@ -52,7 +52,7 @@
                     <li class="dropdown-submenu pull-left"><a tabindex="-1" href="#"><i class="icon-th-large"></i> Workspaces</a>
                         <ul class="dropdown-menu">
                             <li><a id="btn-workspace-add" tabindex="-1" href="#"><i class="icon-plus"></i> Add</a></li>
-                            <li><a id="btn-workspace-edit" tabindex="-1" href="#"><i class="icon-edit"></i> Edit</a></li>
+                            <li><a id="btn-workspace-edit" tabindex="-1" href="#"><i class="icon-edit"></i> Rename</a></li>
                             <li><a id="btn-workspace-delete" tabindex="-1" href="#"><i class="icon-minus"></i> Delete</a></li>
                             <li class="dropdown-submenu pull-left">
                                 <a tabindex="-1" href="#"><i class="icon-share-alt"></i> Switch to...</a>
@@ -243,6 +243,21 @@
             <div style="vertical-align: top; display: inline-block;width: 65%; height: 100%;">
                 <div style="height: 100%; width: 95%;" class="node-text-editor" id="node-select-library-text" ></div>
             </div>
+        </div>
+    </form>
+</div>
+<div id="node-dialog-rename-workspace" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <label for="node-input-workspace-name" ><i class="icon-tag"></i> Name:</label>
+            <input type="text" id="node-input-workspace-name">
+        </div>
+    </form>
+</div>
+<div id="node-dialog-delete-workspace" class="hide">
+    <form class="form-horizontal">
+        <div style="text-align: center; padding-top: 30px;">
+         Are you sure you want to delete '<span id="node-dialog-delete-workspace-name"></span>'?
         </div>
     </form>
 </div>

@@ -70,10 +70,10 @@ RED.view = function() {
     var workspace_tabs = RED.tabs.create({
         id: "workspace-tabs",
         onchange: function(id) {
-            RED.view.setWorkspace(id.slice(1));
+            RED.view.setWorkspace(id);
         },
         ondblclick: function(id) {
-            console.log("DC:",id);
+            showRenameWorkspaceDialog(id);
         },
         onadd: function(tab) {
             var menuli = $("<li/>");
@@ -87,14 +87,28 @@ RED.view = function() {
         }
     });
     
+    var workspaceIndex = 0;
     $('#btn-workspace-add').on("click",function() {
         var tabId = RED.nodes.id();
-        var ws = {type:"workspace",id:tabId,label:"Workspace "+tabId};
+        do {
+            workspaceIndex += 1;
+        } while($("#workspace-tabs a[title='Workspace "+workspaceIndex+"']").size() != 0);
+        
+        var ws = {type:"workspace",id:tabId,label:"Workspace "+workspaceIndex};
         RED.nodes.addWorkspace(ws);
         workspace_tabs.addTab(ws);
         workspace_tabs.activateTab(tabId);
     });
+    $('#btn-workspace-edit').on("click",function() {
+        showRenameWorkspaceDialog(activeWorkspace);
+    });
     
+    $('#btn-workspace-delete').on("click",function() {
+        var ws = RED.nodes.workspace(activeWorkspace);
+        $( "#node-dialog-delete-workspace" ).dialog('option','workspace',ws);
+        $( "#node-dialog-delete-workspace-name" ).text(ws.label);
+        $( "#node-dialog-delete-workspace" ).dialog('open');
+    });
     
     //d3.select(window).on("keydown", keydown);
 
@@ -451,7 +465,6 @@ RED.view = function() {
 
         table += "<tr><td>Type</td><td>&nbsp;"+node.type+"</td></tr>";
         table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
-        table += "<tr><td>WS</td><td>&nbsp;"+node.z+"</td></tr>";
         table += '<tr class="blank"><td colspan="2">&nbsp;Properties</td></tr>';
         for (var n in node._def.defaults) {
             if ((n != "func")&&(n != "template")) {
@@ -983,6 +996,71 @@ RED.view = function() {
         $("#node-input-import").val("");
         $( "#dialog" ).dialog("option","title","Import nodes").dialog( "open" );
     }
+    
+    function showRenameWorkspaceDialog(id) {
+        var ws = RED.nodes.workspace(id);
+        $( "#node-dialog-rename-workspace" ).dialog("option","workspace",ws);
+        $( "#node-input-workspace-name" ).val(ws.label);
+        $( "#node-dialog-rename-workspace" ).dialog("open");
+    }
+    
+    
+    $("#node-dialog-rename-workspace form" ).submit(function(e) { e.preventDefault();});
+    $( "#node-dialog-rename-workspace" ).dialog({
+        modal: true,
+        autoOpen: false,
+        width: 500,
+        title: "Rename workspace",
+        buttons: [
+            {
+                text: "Ok",
+                click: function() {
+                    var workspace = $(this).dialog('option','workspace');
+                    var label = $( "#node-input-workspace-name" ).val();
+                    if (workspace.label != label) {
+                        workspace.label = label;
+                        var link = $("#workspace-tabs a[href='#"+workspace.id+"']");
+                        link.attr("title",label);
+                        link.text(label);
+                        RED.view.dirty(true);
+                    }
+                    $( this ).dialog( "close" );
+                }
+            },
+            {
+                text: "Cancel",
+                click: function() {
+                    $( this ).dialog( "close" );
+                }
+            }
+        ]
+    });
+    $( "#node-dialog-delete-workspace" ).dialog({
+        modal: true,
+        autoOpen: false,
+        width: 500,
+        title: "Confirm delete",
+        buttons: [
+            {
+                text: "Ok",
+                click: function() {
+                    var workspace = $(this).dialog('option','workspace');
+                    workspace_tabs.removeTab(workspace.id);
+                    // TODO: make undoable
+                    RED.nodes.removeWorkspace(workspace.id);
+                    RED.view.dirty(true);
+                    $( this ).dialog( "close" );
+                }
+            },
+            {
+                text: "Cancel",
+                click: function() {
+                    $( this ).dialog( "close" );
+                }
+            }
+        ]
+    });
+
 
     return {
         state:function(state) {

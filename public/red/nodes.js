@@ -98,7 +98,25 @@ RED.nodes = function() {
     function addWorkspace(ws) {
         workspaces[ws.id] = ws;
     }
-    
+    function getWorkspace(id) {
+        return workspaces[id];
+    }
+    function removeWorkspace(id) {
+        delete workspaces[id];
+        var removedNodes = [];
+        var removedLinks = [];
+        for (var n in nodes) {
+            var node = nodes[n];
+            if (node.z == id) {
+                removedNodes.push(node);
+            }
+        }
+        for (var n in removedNodes) {
+            var rmlinks = removeNode(removedNodes[n].id);
+            removedLinks = removedLinks.concat(rmlinks);
+        }
+        return {nodes:removedNodes,links:removedLinks};
+    }
     function getAllFlowNodes(node) {
         var visited = {};
         visited[node.id] = true;
@@ -226,7 +244,7 @@ RED.nodes = function() {
                 }
             }
             if (defaultWorkspace == null) {
-                defaultWorkspace = { type:"workspace", id:getID(), label:"default" };
+                defaultWorkspace = { type:"workspace", id:getID(), label:"Workspace 1" };
                 addWorkspace(defaultWorkspace);
                 RED.view.addWorkspace(defaultWorkspace);
             }
@@ -322,6 +340,8 @@ RED.nodes = function() {
         remove: removeNode,
         removeLink: removeLink,
         addWorkspace: addWorkspace,
+        removeWorkspace: removeWorkspace,
+        workspace: getWorkspace,
         eachNode: function(cb) {
             for (var n in nodes) {
                 cb(nodes[n]);
