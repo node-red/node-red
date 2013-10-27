@@ -98,6 +98,9 @@ RED.view = function() {
         RED.nodes.addWorkspace(ws);
         workspace_tabs.addTab(ws);
         workspace_tabs.activateTab(tabId);
+        
+        RED.history.push({t:'add',workspaces:[ws],dirty:dirty});
+        RED.view.dirty(true);
     });
     $('#btn-workspace-edit').on("click",function() {
         showRenameWorkspaceDialog(activeWorkspace);
@@ -1047,7 +1050,11 @@ RED.view = function() {
                     var workspace = $(this).dialog('option','workspace');
                     workspace_tabs.removeTab(workspace.id);
                     // TODO: make undoable
-                    RED.nodes.removeWorkspace(workspace.id);
+                    var historyEvent = RED.nodes.removeWorkspace(workspace.id);
+                    historyEvent.t = 'delete';
+                    historyEvent.dirty = dirty;
+                    historyEvent.workspaces = [workspace];
+                    RED.history.push(historyEvent);
                     RED.view.dirty(true);
                     $( this ).dialog( "close" );
                 }
@@ -1073,6 +1080,9 @@ RED.view = function() {
         addWorkspace: function(ws) {
             workspace_tabs.addTab(ws);
             workspace_tabs.resize();
+        },
+        removeWorkspace: function(ws) {
+            workspace_tabs.removeTab(ws.id);
         },
         getWorkspace: function() {
             return activeWorkspace;
