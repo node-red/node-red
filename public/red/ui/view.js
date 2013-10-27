@@ -24,6 +24,7 @@ RED.view = function() {
         node_height = 30;
 
     var activeWorkspace = 0;
+    var workspaceScrollPositions = {};
     
     var selected_link = null,
         mousedown_link = null,
@@ -1088,7 +1089,18 @@ RED.view = function() {
             return activeWorkspace;
         },
         setWorkspace: function(z) {
+            var chart = $("#chart");
+            if (activeWorkspace != 0) {
+                workspaceScrollPositions[activeWorkspace] = {
+                    left:chart.scrollLeft(),
+                    top:chart.scrollTop()
+                };
+            }
             activeWorkspace = z;
+            if (workspaceScrollPositions[activeWorkspace]) {
+                chart.scrollLeft(workspaceScrollPositions[activeWorkspace].left);
+                chart.scrollTop(workspaceScrollPositions[activeWorkspace].top);
+            }
             clearSelection();
             RED.nodes.eachNode(function(n) {
                 n.dirty = true;
