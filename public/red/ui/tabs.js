@@ -90,7 +90,10 @@ RED.tabs = function() {
                 
             },
             activateTab: activateTab,
-            resize: updateTabWidths
+            resize: updateTabWidths,
+            count: function() {
+                return ul.find("li.red-ui-tab").size();
+            }
         }
     }
     

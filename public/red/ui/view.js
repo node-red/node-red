@@ -106,12 +106,15 @@ RED.view = function() {
     $('#btn-workspace-edit').on("click",function() {
         showRenameWorkspaceDialog(activeWorkspace);
     });
-    
     $('#btn-workspace-delete').on("click",function() {
         deleteWorkspace(activeWorkspace);
     });
     
+    
     function deleteWorkspace(id) {
+        if (workspace_tabs.count() == 1) {
+            return;
+        }
         var ws = RED.nodes.workspace(id);
         $( "#node-dialog-delete-workspace" ).dialog('option','workspace',ws);
         $( "#node-dialog-delete-workspace-name" ).text(ws.label);
@@ -1008,6 +1011,17 @@ RED.view = function() {
     function showRenameWorkspaceDialog(id) {
         var ws = RED.nodes.workspace(id);
         $( "#node-dialog-rename-workspace" ).dialog("option","workspace",ws);
+
+        if (workspace_tabs.count() == 1) {
+            $( "#node-dialog-rename-workspace").next().find(".leftButton")
+                .prop('disabled',true)
+                .addClass("ui-state-disabled");
+        } else {
+            $( "#node-dialog-rename-workspace").next().find(".leftButton")
+                .prop('disabled',false)
+                .removeClass("ui-state-disabled");
+        }
+        
         $( "#node-input-workspace-name" ).val(ws.label);
         $( "#node-dialog-rename-workspace" ).dialog("open");
     }
@@ -1093,10 +1107,20 @@ RED.view = function() {
         addWorkspace: function(ws) {
             workspace_tabs.addTab(ws);
             workspace_tabs.resize();
+            if (workspace_tabs.count() == 1) {
+                $('#btn-workspace-delete').parent().addClass("disabled");
+            } else {
+                $('#btn-workspace-delete').parent().removeClass("disabled");
+            }
         },
         removeWorkspace: function(ws) {
             workspace_tabs.removeTab(ws.id);
             $('#workspace-menu-list a[href="#'+ws.id+'"]').parent().remove();
+            if (workspace_tabs.count() == 1) {
+                $('#btn-workspace-delete').parent().addClass("disabled");
+            } else {
+                $('#btn-workspace-delete').parent().removeClass("disabled");
+            }
         },
         getWorkspace: function() {
             return activeWorkspace;
