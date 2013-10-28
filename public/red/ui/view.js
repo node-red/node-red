@@ -1136,11 +1136,24 @@ RED.view = function() {
                     top:chart.scrollTop()
                 };
             }
+            var scrollStartLeft = chart.scrollLeft();
+            var scrollStartTop = chart.scrollTop();
+            
             activeWorkspace = z;
             if (workspaceScrollPositions[activeWorkspace]) {
                 chart.scrollLeft(workspaceScrollPositions[activeWorkspace].left);
                 chart.scrollTop(workspaceScrollPositions[activeWorkspace].top);
+            } else {
+                chart.scrollLeft(0);
+                chart.scrollTop(0);
             }
+            var scrollDeltaLeft = chart.scrollLeft() - scrollStartLeft;
+            var scrollDeltaTop = chart.scrollTop() - scrollStartTop;
+            if (mouse_position != null) {
+                mouse_position[0] += scrollDeltaLeft;
+                mouse_position[1] += scrollDeltaTop;
+            }
+                
             clearSelection();
             RED.nodes.eachNode(function(n) {
                 n.dirty = true;
