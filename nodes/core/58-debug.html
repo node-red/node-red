@@ -59,16 +59,10 @@
         icon: "debug.png",
         align: "right",
         button: {
-            color: function() {
-                 return (typeof this.active === 'undefined') ? ("#87a980" ) : (this.active ? "#87a980" : "#b9b9b9");
-            },
-            wide: function() {
-                 return (typeof this.active === 'undefined') ? 100 : (this.active ? 100 : 110);
-            },
+            toggle: "active",
             onclick: function() {
                 var label = this.name||"debug";
-                var node = this;
-                d3.xhr("debug/"+this.id).post(function(err,resp) {
+                d3.xhr("debug/"+this.id+"/"+(this.active?"enable":"disable")).post(function(err,resp) {
                     if (err) {
                         if (err.status == 404) {
                             RED.notify("<strong>Error</strong>: debug node not deployed","error");
@@ -79,14 +73,8 @@
                         }
                     } else if (resp.status == 200) {
                         RED.notify("Successfully activated: "+label,"success");
-                        node.active = true;
-                        node.dirty = true;
-                        RED.view.redraw();
                     } else if (resp.status == 201) {
                         RED.notify("Successfully deactivated: "+label,"success");
-                        node.active = false;
-                        node.dirty = true;
-                        RED.view.redraw();
                     } else {
                         RED.notify("<strong>Error</strong>: unexpected response: ("+resp.status+") "+resp.response,"error");
                     }

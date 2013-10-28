@@ -561,7 +561,22 @@ RED.view = function() {
         redraw();
         d3.event.stopPropagation();
     }
-
+    
+    function nodeButtonClicked(d) {
+        if (d._def.button.toggle) {
+            d[d._def.button.toggle] = !d[d._def.button.toggle];
+            d.dirty = true;
+        }
+        if (d._def.button.onclick) {
+            d._def.button.onclick.call(d);
+        }
+        
+        if (d.dirty) {
+            redraw();
+        }
+        d3.event.preventDefault();
+    }
+    
     function redraw() {
         vis.attr("transform","scale("+scaleFactor+")");
         outer.attr("width", space_width*scaleFactor).attr("height", space_height*scaleFactor);
@@ -595,19 +610,18 @@ RED.view = function() {
                     }
 
                     if (d._def.button) {
-                        node.append('rect')
-                            .attr("class",function(d) { return (d._def.align == "right") ? "node_right_button_group" : "node_left_button_group"; })
-                            .attr("x",function(d) { return (d._def.align == "right") ? 94 : -25; })
-                            .attr("y",2)
+                        var nodeButtonGroup = node.append('svg:g')
+                            .attr("transform",function(d) { return "translate("+((d._def.align == "right") ? 94 : -25)+",2)"; })
+                            .attr("class",function(d) { return "node_button "+((d._def.align == "right") ? "node_right_button" : "node_left_button"); });
+                        nodeButtonGroup.append('rect')
                             .attr("rx",8)
                             .attr("ry",8)
                             .attr("width",32)
                             .attr("height",node_height-4)
                             .attr("fill","#eee");//function(d) { return d._def.color;})
-                        node.append('rect')
-                            .attr("class",function(d) { return (d._def.align == "right") ? "node_right_button" : "node_left_button"; })
-                            .attr("x",function(d) { return (d._def.align == "right") ? 104 : -20; })
-                            .attr("y",6)
+                        nodeButtonGroup.append('rect')
+                            .attr("x",function(d) { return d._def.align == "right"? 10:5})
+                            .attr("y",4)
                             .attr("rx",5)
                             .attr("ry",5)
                             .attr("width",16)
@@ -617,9 +631,15 @@ RED.view = function() {
                             .on("mousedown",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.2);d3.event.preventDefault(); d3.event.stopPropagation();}})
                             .on("mouseup",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.4);d3.event.preventDefault();d3.event.stopPropagation();}})
                             .on("mouseover",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.4);}})
-                            .on("mouseout",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",1);}})
-                            .on("click",function(d) { d._def.button.onclick.call(d); d3.event.preventDefault(); })
-                            .on("touchstart",function(d) { d._def.button.onclick.call(d); d3.event.preventDefault(); })
+                            .on("mouseout",function(d) {if (!lasso) { 
+                                var op = 1;
+                                if (d._def.button.toggle) {
+                                    op = d[d._def.button.toggle]?1:0.2;
+                                }
+                                d3.select(this).attr("fill-opacity",op);
+                            }})
+                            .on("click",nodeButtonClicked)
+                            .on("touchstart",nodeButtonClicked)
                     }
 
                     var mainRect = node.append("rect")
@@ -755,10 +775,24 @@ RED.view = function() {
                         });
                         thisNode.selectAll(".node_icon").attr("height",function(d){return Math.min(50,d.h);}).attr("y",function(d){return (d.h-Math.min(50,d.h))/2;});
 
-                        thisNode.selectAll('.node_right_button_group').attr("transform",function(d){return "translate("+(d.w - d._def.button.wide.call(d))+","+0+")";});
-                        thisNode.selectAll('.node_right_button').attr("transform",function(d){return "translate("+(d.w - d._def.button.wide.call(d))+","+0+")";}).attr("fill",function(d) {
-                                 return typeof d._def.button.color  === "function" ? d._def.button.color.call(d):(d._def.button.color != null ? d._def.button.color : d._def.color)
+                        thisNode.selectAll('.node_right_button').attr("transform",function(d){
+                                var x = d.w-6;
+                                if (d._def.button.toggle && !d[d._def.button.toggle]) {
+                                    x = x - 8;  
+                                }
+                                return "translate("+x+",2)";
                         });
+                        thisNode.selectAll('.node_right_button rect').attr("fill-opacity",function(d){
+                                if (d._def.button.toggle) {
+                                    return d[d._def.button.toggle]?1:0.2;
+                                }
+                                return 1;
+                        });
+                                
+                        
+                        //thisNode.selectAll('.node_right_button').attr("transform",function(d){return "translate("+(d.w - d._def.button.width.call(d))+","+0+")";}).attr("fill",function(d) {
+                        //         return typeof d._def.button.color  === "function" ? d._def.button.color.call(d):(d._def.button.color != null ? d._def.button.color : d._def.color)
+                        //});
 
                         thisNode.selectAll('.node_badge_group').attr("transform",function(d){return "translate("+(d.w-40)+","+(d.h+3)+")";});
                         thisNode.selectAll('text.node_badge_label').text(function(d,i) {
