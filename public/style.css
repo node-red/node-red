@@ -569,6 +569,28 @@ div.node-info {
     border-radius:5px;
     overflow: hidden;
 }
+#workspace-tabs {
+    margin-right: 28px;
+}
+#workspace-add-tab {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 29px;
+    width: 28px;
+    border-bottom: 1px solid #999;
+}
+#btn-workspace-add-tab {
+    display: inline-block;
+    width: 100%;
+    background: #e3e3e3;
+    height: 100%;
+    line-height: 28px;
+    text-align: center;
+}
+#btn-workspace-add-tab:hover {
+    background: #efefef;
+}
 
 ul.red-ui-tabs {
     list-style-type: none;

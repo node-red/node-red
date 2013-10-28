@@ -89,7 +89,8 @@ RED.view = function() {
     });
     
     var workspaceIndex = 0;
-    $('#btn-workspace-add').on("click",function() {
+    
+    function addWorkspace() {
         var tabId = RED.nodes.id();
         do {
             workspaceIndex += 1;
@@ -102,7 +103,9 @@ RED.view = function() {
         
         RED.history.push({t:'add',workspaces:[ws],dirty:dirty});
         RED.view.dirty(true);
-    });
+    }
+    $('#btn-workspace-add-tab').on("click",addWorkspace);
+    $('#btn-workspace-add').on("click",addWorkspace);
     $('#btn-workspace-edit').on("click",function() {
         showRenameWorkspaceDialog(activeWorkspace);
     });
