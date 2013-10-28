@@ -318,8 +318,9 @@ a.brand img {
    stroke: #ff7f0e;
 }
 .node_highlighted {
-   stroke: #a51616;
-   stroke-width: 4;
+   stroke: #dd1616;
+   stroke-width: 2;
+   stroke-dasharray: 10, 4;
 }
 .node_hovered {
   dstroke: #ff7f0e;
