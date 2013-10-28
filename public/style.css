@@ -43,7 +43,6 @@ a.brand img {
 #workspace {
    margin-left: 160px;
    overflow: hidden;
-   background: #e3e3e3;
 }
 
 #chart {
@@ -154,6 +153,7 @@ a.brand img {
 
 #sidebar {
     background: #fff;
+    box-sizing: border-box;
 }
 #sidebar.closing {
     background: #eee;
@@ -239,9 +239,10 @@ a.brand img {
    border-radius: 3px;
 }
 #sidebar-content {
+    font-size: 1.2em;
     overflow-y: auto;
     position: absolute;
-    top: 50px; left: 5px; right: 0; bottom: 1px;
+    top: 30px; left: 0px; right: 0; bottom: 1px;
 }
 
 .node_label_italic {
@@ -575,9 +576,8 @@ ul.red-ui-tabs {
     margin: 0;
     display: block;
     height: 24px;
-    width: 100%;
     border-bottom: 1px solid #999;
-
+    background: #e3e3e3;
 }
 
 ul.red-ui-tabs li {
