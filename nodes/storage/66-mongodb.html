@@ -60,8 +60,9 @@
         <div class="form-row">
         <label for="node-input-operation"><i class="icon-wrench"></i> Operation</label>
         <select type="text" id="node-input-operation" style="display: inline-block; vertical-align: top;">
-            <option value=store>Store</option>
-            <option value=delete>Delete</option>
+            <option value=store>save</option>
+            <option value=insert>insert</option>
+            <option value=delete>remove</option>
         </select>
     </div>
     <div class="form-row node-input-payonly">
@@ -83,13 +84,13 @@
 </script>
 
 <script type="text/x-red" data-help-name="mongodb out">
-	<p>A simple MongoDB output node. Stores the <b>msg</b> object in a chosen collection.</p>
-	<p>By default MongoDB creates an <i>_id</i> property as the primary key - so repeated injections of the same <b>msg</b> will result in many database entries.</p>
-	<p>If this is NOT the desired behaviour - ie you want repeated entries to overwrite, then you must set the <b>msg._id</b> property to be a constant by the use of a previous function node.</p>
-	<p>This could be a unique constant or you could create one based on some other msg property.</p>
-	<p>Currently we do not limit or cap the collection size at all... this may well change.</p>
-	<p>You can also choose to <b>remove</b> items. To do so the <b>msg.payload</b> <i>MUST</i> contain an object that will select the items(s) to remove.
-	A blank object will delete <i>all of the objects</i> in the collection. You have been warned...</p>
+    <p>A simple MongoDB output node. Stores the <b>msg</b> object in a chosen collection.</p>
+    <p>By default MongoDB creates an <i>_id</i> property as the primary key - so repeated injections of the same <b>msg</b> will result in many database entries.</p>
+    <p>If this is NOT the desired behaviour - ie you want repeated entries to overwrite, then you must set the <b>msg._id</b> property to be a constant by the use of a previous function node.</p>
+    <p>This could be a unique constant or you could create one based on some other msg property.</p>
+    <p>Currently we do not limit or cap the collection size at all... this may well change.</p>
+    <p>You can also choose to <b>remove</b> items. To do so the <b>msg.payload</b> <i>MUST</i> contain an object that will select the items(s) to remove.
+    A blank object will delete <i>all of the objects</i> in the collection. You have been warned...</p>
 </script>
 
 <script type="text/javascript">
@@ -134,9 +135,9 @@
 </script>
 
 <script type="text/x-red" data-help-name="mongodb in">
-	<p>Queries a MongoDB collection by using the <b>msg.payload</b> to be a MongoDB query statement as per the .find() function.</p>
-	<p>You may also (via a function) set a <b>msg.projection</b> object to constrain the returned fields, a <b>msg.sort</b> object and a <b>msg.limit</b> object.</p>
-	<p>All are optional - see the <a href="http://docs.mongodb.org/manual/reference/method/db.collection.find/" target="new"><i>MongoDB find docs</i></a> for examples.</p>
+    <p>Queries a MongoDB collection by using the <b>msg.payload</b> to be a MongoDB query statement as per the .find() function.</p>
+    <p>You may also (via a function) set a <b>msg.projection</b> object to constrain the returned fields, a <b>msg.sort</b> object and a <b>msg.limit</b> object.</p>
+    <p>All are optional - see the <a href="http://docs.mongodb.org/manual/reference/method/db.collection.find/" target="new"><i>MongoDB find docs</i></a> for examples.</p>
 </script>
 
 <script type="text/javascript">
