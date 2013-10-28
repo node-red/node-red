@@ -323,7 +323,6 @@ a.brand img {
    stroke-dasharray: 10, 4;
 }
 .node_hovered {
-  dstroke: #ff7f0e;
 }
 
 .port_hovered {
