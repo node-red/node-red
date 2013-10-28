@@ -1049,8 +1049,7 @@ RED.view = function() {
                 text: "Ok",
                 click: function() {
                     var workspace = $(this).dialog('option','workspace');
-                    workspace_tabs.removeTab(workspace.id);
-                    // TODO: make undoable
+                    RED.view.removeWorkspace(workspace);
                     var historyEvent = RED.nodes.removeWorkspace(workspace.id);
                     historyEvent.t = 'delete';
                     historyEvent.dirty = dirty;
@@ -1084,6 +1083,7 @@ RED.view = function() {
         },
         removeWorkspace: function(ws) {
             workspace_tabs.removeTab(ws.id);
+            $('#workspace-menu-list a[href="#'+ws.id+'"]').parent().remove();
         },
         getWorkspace: function() {
             return activeWorkspace;
