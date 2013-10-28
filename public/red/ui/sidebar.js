@@ -38,7 +38,6 @@ RED.sidebar = function() {
     content.style.paddingRight = "4px";
 
     addTab("info",content);
-    sidebar_tabs.activateTab("tab-info");
     
     $('#btn-sidebar').click(function() {toggleSidebar();});
     RED.keyboard.add(/* SPACE */ 32,{ctrl:true},function(){toggleSidebar();d3.event.preventDefault();});

@@ -108,11 +108,15 @@ RED.view = function() {
     });
     
     $('#btn-workspace-delete').on("click",function() {
-        var ws = RED.nodes.workspace(activeWorkspace);
+        deleteWorkspace(activeWorkspace);
+    });
+    
+    function deleteWorkspace(id) {
+        var ws = RED.nodes.workspace(id);
         $( "#node-dialog-delete-workspace" ).dialog('option','workspace',ws);
         $( "#node-dialog-delete-workspace-name" ).text(ws.label);
         $( "#node-dialog-delete-workspace" ).dialog('open');
-    });
+    }
     
     //d3.select(window).on("keydown", keydown);
 
@@ -1016,6 +1020,15 @@ RED.view = function() {
         width: 500,
         title: "Rename workspace",
         buttons: [
+            {
+                class: 'leftButton',
+                text: "Delete",
+                click: function() {
+                    var workspace = $(this).dialog('option','workspace');
+                    $( this ).dialog( "close" );
+                    deleteWorkspace(workspace.id);
+                }
+            },
             {
                 text: "Ok",
                 click: function() {
