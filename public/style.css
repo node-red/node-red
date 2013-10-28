@@ -318,7 +318,8 @@ a.brand img {
    stroke: #ff7f0e;
 }
 .node_highlighted {
-   stroke: #ff0000;
+   stroke: #a51616;
+   stroke-width: 4;
 }
 .node_hovered {
   dstroke: #ff7f0e;
@@ -414,11 +415,11 @@ button.input-append-right {
 }
 
 .form-tips {
-	background: lightgoldenrodyellow;
-	font-size: 12px;
-	padding: 8px;
-	border-radius: 5px;
-	border: 1px solid #999;
+    background: lightgoldenrodyellow;
+    font-size: 12px;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #999;
 }
 .form-tips code {
     border: none;
@@ -552,7 +553,6 @@ div.node-info {
 #node-select-library li.list-hover {
     background: #ffffd0;
 }
-
 .node-text-editor {
     border:1px solid #ccc;
     border-radius:5px;

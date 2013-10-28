@@ -29,14 +29,14 @@
 </script>
 
 <script type="text/x-red" data-help-name="debug">
-	<p>The Debug node can be connected to the output of any node. It will display the timestamp, <b>msg.topic</b> and <b>msg.payload</b> fields of any messages it receives in the debug tab of the sidebar.
-	<br/>The sidebar can be accessed under the options drop-down in the top right corner.</p>
-	<p>The button to the right of the node will toggle it's output on and off so you can de-clutter the debug window.</p>
-	<p>If the payload is an object it will be stringified first for display and indicate that by saying "(Object) ".</p>
-	<p>If the payload is a buffer it will be stringified first for display and indicate that by saying "(Buffer) ".</p>
-	<p>Selecting any particular message will highlight (in red) the debug node that reported it. This is useful if you wire up multiple debug nodes.</p>
-	<p>Optionally can show the complete msg object - but the screen can get messy.</p>
-	<p>In addition any calls to node.warn or node.error will appear here.</p>
+    <p>The Debug node can be connected to the output of any node. It will display the timestamp, <b>msg.topic</b> and <b>msg.payload</b> fields of any messages it receives in the debug tab of the sidebar.
+    <br/>The sidebar can be accessed under the options drop-down in the top right corner.</p>
+    <p>The button to the right of the node will toggle it's output on and off so you can de-clutter the debug window.</p>
+    <p>If the payload is an object it will be stringified first for display and indicate that by saying "(Object) ".</p>
+    <p>If the payload is a buffer it will be stringified first for display and indicate that by saying "(Buffer) ".</p>
+    <p>Selecting any particular message will highlight (in red) the debug node that reported it. This is useful if you wire up multiple debug nodes.</p>
+    <p>Optionally can show the complete msg object - but the screen can get messy.</p>
+    <p>In addition any calls to node.warn or node.error will appear here.</p>
 </script>
 
 <script type="text/javascript">
@@ -62,31 +62,34 @@
             color: function() {
                  return (typeof this.active === 'undefined') ? ("#87a980" ) : (this.active ? "#87a980" : "#b9b9b9");
             },
+            wide: function() {
+                 return (typeof this.active === 'undefined') ? 100 : (this.active ? 100 : 110);
+            },
             onclick: function() {
                 var label = this.name||"debug";
                 var node = this;
                 d3.xhr("debug/"+this.id).post(function(err,resp) {
-                        if (err) {
-                            if (err.status == 404) {
-                                RED.notify("<strong>Error</strong>: debug node not deployed","error");
-                            } else if (err.status == 0) {
-                                RED.notify("<strong>Error</strong>: no response from server","error");
-                            } else {
-                                RED.notify("<strong>Error</strong>: unexpected error: ("+err.status+")"+err.response,"error");
-                            }
-                        } else if (resp.status == 200) {
-                            RED.notify("Successfully activated: "+label,"success");
-                            node.active = true;
-                            node.dirty = true;
-                            RED.view.redraw();
-                        } else if (resp.status == 201) {
-                            RED.notify("Successfully deactivated: "+label,"success");
-                            node.active = false;
-                            node.dirty = true;
-                            RED.view.redraw();
+                    if (err) {
+                        if (err.status == 404) {
+                            RED.notify("<strong>Error</strong>: debug node not deployed","error");
+                        } else if (err.status == 0) {
+                            RED.notify("<strong>Error</strong>: no response from server","error");
                         } else {
-                            RED.notify("<strong>Error</strong>: unexpected response: ("+resp.status+") "+resp.response,"error");
+                            RED.notify("<strong>Error</strong>: unexpected error: ("+err.status+")"+err.response,"error");
                         }
+                    } else if (resp.status == 200) {
+                        RED.notify("Successfully activated: "+label,"success");
+                        node.active = true;
+                        node.dirty = true;
+                        RED.view.redraw();
+                    } else if (resp.status == 201) {
+                        RED.notify("Successfully deactivated: "+label,"success");
+                        node.active = false;
+                        node.dirty = true;
+                        RED.view.redraw();
+                    } else {
+                        RED.notify("<strong>Error</strong>: unexpected response: ("+resp.status+") "+resp.response,"error");
+                    }
                 });
             }
         }
@@ -116,10 +119,10 @@
         var sbc = document.getElementById("debug-content");
 
         var errornotification = null;
-        
+
         var messageCount = 0;
-        
-        
+
+
         function debugConnect() {
             //console.log("debug ws connecting");
             var ws = new WebSocket("ws://"+location.hostname+":"+location.port+document.location.pathname+"/debug");
@@ -165,7 +168,7 @@
                 var atBottom = (sbc.scrollHeight-messages.offsetHeight-sbc.scrollTop) < 5;
                 messageCount++;
                 $(messages).append(msg);
-                
+
                 if (messageCount > 200) {
                     $("#debug-content .debug-message:first").remove();
                     messageCount--;
