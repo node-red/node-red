@@ -160,7 +160,7 @@ RED.view = function() {
                 .attr("height",0)
                 .attr("class","lasso");
             d3.event.preventDefault();
-			}
+            }
         }
     }
 
@@ -216,7 +216,7 @@ RED.view = function() {
             var delta = Math.sqrt(dy*dy+dx*dx);
             var scale = lineCurveScale;
             var scaleY = 0;
-            
+
             if (delta < node_width) {
                 scale = 0.75-0.75*((node_width-delta)/node_width);
             }
@@ -226,7 +226,7 @@ RED.view = function() {
                     scaleY = ((dy>0)?0.5:-0.5)*(((3*node_height)-Math.abs(dy))/(3*node_height))*(Math.min(node_width,Math.abs(dx))/(node_width)) ;
                 }
             }
-            
+
             drag_line.attr("d",
                 "M "+(mousedown_node.x+sc*mousedown_node.w/2)+" "+(mousedown_node.y+y)+
                 " C "+(mousedown_node.x+sc*(mousedown_node.w/2+node_width*scale))+" "+(mousedown_node.y+y+scaleY*node_height)+" "+
@@ -624,7 +624,22 @@ RED.view = function() {
         redraw();
         d3.event.stopPropagation();
     }
-
+    
+    function nodeButtonClicked(d) {
+        if (d._def.button.toggle) {
+            d[d._def.button.toggle] = !d[d._def.button.toggle];
+            d.dirty = true;
+        }
+        if (d._def.button.onclick) {
+            d._def.button.onclick.call(d);
+        }
+        
+        if (d.dirty) {
+            redraw();
+        }
+        d3.event.preventDefault();
+    }
+    
     function redraw() {
         vis.attr("transform","scale("+scaleFactor+")");
         outer.attr("width", space_width*scaleFactor).attr("height", space_height*scaleFactor);
@@ -658,19 +673,18 @@ RED.view = function() {
                     }
 
                     if (d._def.button) {
-                        node.append('rect')
-                            .attr("class",function(d) { return (d._def.align == "right") ? "node_right_button_group" : "node_left_button_group"; })
-                            .attr("x",function(d) { return (d._def.align == "right") ? 94 : -25; })
-                            .attr("y",2)
+                        var nodeButtonGroup = node.append('svg:g')
+                            .attr("transform",function(d) { return "translate("+((d._def.align == "right") ? 94 : -25)+",2)"; })
+                            .attr("class",function(d) { return "node_button "+((d._def.align == "right") ? "node_right_button" : "node_left_button"); });
+                        nodeButtonGroup.append('rect')
                             .attr("rx",8)
                             .attr("ry",8)
                             .attr("width",32)
                             .attr("height",node_height-4)
                             .attr("fill","#eee");//function(d) { return d._def.color;})
-                        node.append('rect')
-                            .attr("class",function(d) { return (d._def.align == "right") ? "node_right_button" : "node_left_button"; })
-                            .attr("x",function(d) { return (d._def.align == "right") ? 104 : -20; })
-                            .attr("y",6)
+                        nodeButtonGroup.append('rect')
+                            .attr("x",function(d) { return d._def.align == "right"? 10:5})
+                            .attr("y",4)
                             .attr("rx",5)
                             .attr("ry",5)
                             .attr("width",16)
@@ -680,9 +694,15 @@ RED.view = function() {
                             .on("mousedown",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.2);d3.event.preventDefault(); d3.event.stopPropagation();}})
                             .on("mouseup",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.4);d3.event.preventDefault();d3.event.stopPropagation();}})
                             .on("mouseover",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.4);}})
-                            .on("mouseout",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",1);}})
-                            .on("click",function(d) { d._def.button.onclick.call(d); d3.event.preventDefault(); })
-                            .on("touchstart",function(d) { d._def.button.onclick.call(d); d3.event.preventDefault(); })
+                            .on("mouseout",function(d) {if (!lasso) { 
+                                var op = 1;
+                                if (d._def.button.toggle) {
+                                    op = d[d._def.button.toggle]?1:0.2;
+                                }
+                                d3.select(this).attr("fill-opacity",op);
+                            }})
+                            .on("click",nodeButtonClicked)
+                            .on("touchstart",nodeButtonClicked)
                     }
 
                     var mainRect = node.append("rect")
@@ -718,7 +738,7 @@ RED.view = function() {
                             .attr("x",0).attr("y",function(d){return (d.h-Math.min(50,d.h))/2;})
                             .attr("width","15")
                             .attr("height", function(d){return Math.min(50,d.h);});
-                            
+
                         if (d._def.align) {
                             icon.attr('class','node_icon node_icon_'+d._def.align);
                         }
@@ -818,10 +838,24 @@ RED.view = function() {
                         });
                         thisNode.selectAll(".node_icon").attr("height",function(d){return Math.min(50,d.h);}).attr("y",function(d){return (d.h-Math.min(50,d.h))/2;});
 
-                        thisNode.selectAll('.node_right_button_group').attr("transform",function(d){return "translate("+(d.w-100)+","+0+")";});
-                        thisNode.selectAll('.node_right_button').attr("transform",function(d){return "translate("+(d.w-100)+","+0+")";}).attr("fill",function(d) {
-                                 return typeof d._def.button.color  === "function" ? d._def.button.color.call(d):(d._def.button.color != null ? d._def.button.color : d._def.color)
+                        thisNode.selectAll('.node_right_button').attr("transform",function(d){
+                                var x = d.w-6;
+                                if (d._def.button.toggle && !d[d._def.button.toggle]) {
+                                    x = x - 8;  
+                                }
+                                return "translate("+x+",2)";
                         });
+                        thisNode.selectAll('.node_right_button rect').attr("fill-opacity",function(d){
+                                if (d._def.button.toggle) {
+                                    return d[d._def.button.toggle]?1:0.2;
+                                }
+                                return 1;
+                        });
+                                
+                        
+                        //thisNode.selectAll('.node_right_button').attr("transform",function(d){return "translate("+(d.w - d._def.button.width.call(d))+","+0+")";}).attr("fill",function(d) {
+                        //         return typeof d._def.button.color  === "function" ? d._def.button.color.call(d):(d._def.button.color != null ? d._def.button.color : d._def.color)
+                        //});
 
                         thisNode.selectAll('.node_badge_group').attr("transform",function(d){return "translate("+(d.w-40)+","+(d.h+3)+")";});
                         thisNode.selectAll('text.node_badge_label').text(function(d,i) {
@@ -877,14 +911,14 @@ RED.view = function() {
                 if (delta < node_width) {
                     scale = 0.75-0.75*((node_width-delta)/node_width);
                 }
-                
+
                 if (dx < 0) {
                     scale += 2*(Math.min(5*node_width,Math.abs(dx))/(5*node_width));
                     if (Math.abs(dy) < 3*node_height) {
                         scaleY = ((dy>0)?0.5:-0.5)*(((3*node_height)-Math.abs(dy))/(3*node_height))*(Math.min(node_width,Math.abs(dx))/(node_width)) ;
                     }
                 }
-                
+
                 d.x1 = d.source.x+d.source.w/2;
                 d.y1 = d.source.y+y;
                 d.x2 = d.target.x-d.target.w/2;
@@ -941,11 +975,11 @@ RED.view = function() {
                 var root_node = new_ms[0].n;
                 var dx = root_node.x;
                 var dy = root_node.y;
-                
+
                 if (mouse_position == null) {
                     mouse_position = [0,0];
                 }
-                
+
                 for (var i in new_ms) {
                     new_ms[i].n.selected = true;
                     new_ms[i].n.x -= dx - mouse_position[0];

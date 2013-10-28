@@ -42,19 +42,24 @@ function MongoOutNode(n) {
             if (err) { node.error(err); }
             else {
                 node.clientDb.collection(node.collection,function(err,coll) {
-                        if (err) { node.error(err); }
-                        else {
-                            node.on("input",function(msg) {
-                                if (node.operation == "store") {
-                                    delete msg._topic;
-                                    if (node.payonly) coll.save(msg.payload,function(err,item){ if (err){node.error(err);} });
-                                    else coll.save(msg,function(err,item){if (err){node.error(err);}});
-                                }
-                                if (node.operation == "delete") {
-                                    coll.remove(msg.payload, {w:1}, function(err, items){ if (err) node.error(err); });
-                                }
-                            });
-                        }
+                    if (err) { node.error(err); }
+                    else {
+                        node.on("input",function(msg) {
+                            if (node.operation == "store") {
+                                delete msg._topic;
+                                if (node.payonly) coll.save(msg.payload,function(err,item){ if (err){node.error(err);} });
+                                else coll.save(msg,function(err,item){if (err){node.error(err);}});
+                            }
+                            else if (node.operation == "insert") {
+                                delete msg._topic;
+                                if (node.payonly) coll.insert(msg.payload,function(err,item){ if (err){node.error(err);} });
+                                else coll.insert(msg,function(err,item){if (err){node.error(err);}});
+                            }
+                            if (node.operation == "delete") {
+                                coll.remove(msg.payload, {w:1}, function(err, items){ if (err) node.error(err); });
+                            }
+                        });
+                    }
                 });
             }
         });
@@ -62,11 +67,11 @@ function MongoOutNode(n) {
         this.error("missing mongodb configuration");
     }
 
-	this.on("close", function() {
-		if (this.clientDb) {
-		    this.clientDb.close();
-		}
-	});
+    this.on("close", function() {
+        if (this.clientDb) {
+            this.clientDb.close();
+        }
+    });
 }
 RED.nodes.registerType("mongodb out",MongoOutNode);
 
@@ -105,10 +110,10 @@ function MongoInNode(n) {
         this.error("missing mongodb configuration");
     }
 
-	this.on("close", function() {
-		if (this.clientDb) {
-		    this.clientDb.close();
-		}
-	});
+    this.on("close", function() {
+        if (this.clientDb) {
+            this.clientDb.close();
+        }
+    });
 }
 RED.nodes.registerType("mongodb in",MongoInNode);
