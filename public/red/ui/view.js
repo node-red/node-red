@@ -100,6 +100,7 @@ RED.view = function() {
         RED.nodes.addWorkspace(ws);
         workspace_tabs.addTab(ws);
         workspace_tabs.activateTab(tabId);
+        updateWorkspaceDeleteBtnState();
         
         RED.history.push({t:'add',workspaces:[ws],dirty:dirty});
         RED.view.dirty(true);
@@ -122,6 +123,14 @@ RED.view = function() {
         $( "#node-dialog-delete-workspace" ).dialog('option','workspace',ws);
         $( "#node-dialog-delete-workspace-name" ).text(ws.label);
         $( "#node-dialog-delete-workspace" ).dialog('open');
+    }
+
+    function updateWorkspaceDeleteBtnState() {
+        if (workspace_tabs.count() == 1) {
+            $('#btn-workspace-delete').parent().addClass("disabled");
+        } else {
+            $('#btn-workspace-delete').parent().removeClass("disabled");
+        }
     }
     
     //d3.select(window).on("keydown", keydown);
@@ -1144,11 +1153,7 @@ RED.view = function() {
         addWorkspace: function(ws) {
             workspace_tabs.addTab(ws);
             workspace_tabs.resize();
-            if (workspace_tabs.count() == 1) {
-                $('#btn-workspace-delete').parent().addClass("disabled");
-            } else {
-                $('#btn-workspace-delete').parent().removeClass("disabled");
-            }
+            updateWorkspaceDeleteBtnState();
         },
         removeWorkspace: function(ws) {
             workspace_tabs.removeTab(ws.id);
