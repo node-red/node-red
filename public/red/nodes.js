@@ -227,7 +227,8 @@ RED.nodes = function() {
             }
             for (var i in newNodes) {
                 var n = newNodes[i];
-                if (n.type != "workspace" && !getType(n.type)) {
+                // TODO: remove workspace in next release+1
+                if (n.type != "workspace" && n.type != "tab" && !getType(n.type)) {
                     // TODO: get this UI thing out of here! (see below as well)
                     RED.notify("<strong>Failed to import nodes</strong>: unrecognised type '"+n.type+"'","error");
                     return null;
@@ -235,7 +236,11 @@ RED.nodes = function() {
             }
             for (var i in newNodes) {
                 var n = newNodes[i];
-                if (n.type === "workspace") {
+                // TODO: remove workspace in next release+1
+                if (n.type === "workspace" || n.type === "tab") {
+                    if (n.type === "workspace") {
+                        n.type = "tab";
+                    }
                     if (defaultWorkspace == null) {
                         defaultWorkspace = n;
                     }
@@ -244,7 +249,7 @@ RED.nodes = function() {
                 }
             }
             if (defaultWorkspace == null) {
-                defaultWorkspace = { type:"workspace", id:getID(), label:"Sheet 1" };
+                defaultWorkspace = { type:"tab", id:getID(), label:"Sheet 1" };
                 addWorkspace(defaultWorkspace);
                 RED.view.addWorkspace(defaultWorkspace);
             }
@@ -255,7 +260,8 @@ RED.nodes = function() {
             
             for (var i in newNodes) {
                 var n = newNodes[i];
-                if (n.type !== "workspace") {
+                // TODO: remove workspace in next release+1
+                if (n.type !== "workspace" && n.type !== "tab") {
                     var def = getType(n.type);
                     if (def && def.category == "config") {
                         if (!RED.nodes.node(n.id)) {

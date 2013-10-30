@@ -109,7 +109,7 @@ RED.view = function() {
             workspaceIndex += 1;
         } while($("#workspace-tabs a[title='Sheet "+workspaceIndex+"']").size() != 0);
         
-        var ws = {type:"workspace",id:tabId,label:"Sheet "+workspaceIndex};
+        var ws = {type:"tab",id:tabId,label:"Sheet "+workspaceIndex};
         RED.nodes.addWorkspace(ws);
         workspace_tabs.addTab(ws);
         workspace_tabs.activateTab(tabId);
@@ -1081,7 +1081,7 @@ RED.view = function() {
         modal: true,
         autoOpen: false,
         width: 500,
-        title: "Rename workspace",
+        title: "Rename sheet",
         buttons: [
             {
                 class: 'leftButton',
