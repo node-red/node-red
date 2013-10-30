@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+ 
+
 RED.view = function() {
     var space_width = 5000,
         space_height = 5000,
@@ -21,6 +23,9 @@ RED.view = function() {
         node_width = 100,
         node_height = 30;
 
+    var activeWorkspace = 0;
+    var workspaceScrollPositions = {};
+    
     var selected_link = null,
         mousedown_link = null,
         mousedown_node = null,
@@ -63,6 +68,62 @@ RED.view = function() {
 
     var drag_line = vis.append("svg:path").attr("class", "drag_line");
 
+    var workspace_tabs = RED.tabs.create({
+        id: "workspace-tabs",
+        onchange: function(id) {
+            RED.view.setWorkspace(id);
+        },
+        ondblclick: function(id) {
+            showRenameWorkspaceDialog(id);
+        },
+        onadd: function(tab) {
+            var menuli = $("<li/>");
+            var menuA = $("<a/>",{tabindex:"-1",href:"#"+tab.id}).appendTo(menuli);
+            menuA.html(tab.label);
+            menuA.on("click",function() {
+                workspace_tabs.activateTab(tab.id);
+            });
+            
+            $('#workspace-menu-list').append(menuli);
+        }
+    });
+    
+    var workspaceIndex = 0;
+    
+    function addWorkspace() {
+        var tabId = RED.nodes.id();
+        do {
+            workspaceIndex += 1;
+        } while($("#workspace-tabs a[title='Workspace "+workspaceIndex+"']").size() != 0);
+        
+        var ws = {type:"workspace",id:tabId,label:"Workspace "+workspaceIndex};
+        RED.nodes.addWorkspace(ws);
+        workspace_tabs.addTab(ws);
+        workspace_tabs.activateTab(tabId);
+        
+        RED.history.push({t:'add',workspaces:[ws],dirty:dirty});
+        RED.view.dirty(true);
+    }
+    $('#btn-workspace-add-tab').on("click",addWorkspace);
+    $('#btn-workspace-add').on("click",addWorkspace);
+    $('#btn-workspace-edit').on("click",function() {
+        showRenameWorkspaceDialog(activeWorkspace);
+    });
+    $('#btn-workspace-delete').on("click",function() {
+        deleteWorkspace(activeWorkspace);
+    });
+    
+    
+    function deleteWorkspace(id) {
+        if (workspace_tabs.count() == 1) {
+            return;
+        }
+        var ws = RED.nodes.workspace(id);
+        $( "#node-dialog-delete-workspace" ).dialog('option','workspace',ws);
+        $( "#node-dialog-delete-workspace-name" ).text(ws.label);
+        $( "#node-dialog-delete-workspace" ).dialog('open');
+    }
+    
     //d3.select(window).on("keydown", keydown);
 
     function canvasMouseDown() {
@@ -214,7 +275,7 @@ RED.view = function() {
                 clearSelection();
             }
             RED.nodes.eachNode(function(n) {
-                if (!n.selected) {
+                if (n.z == activeWorkspace && !n.selected) {
                     n.selected = (n.x > x && n.x < x2 && n.y > y && n.y < y2);
                     if (n.selected) {
                         n.dirty = true;
@@ -281,7 +342,7 @@ RED.view = function() {
                 mousePos[1] /= scaleFactor;
                 mousePos[0] /= scaleFactor;
 
-                var nn = { id:(1+Math.random()*4294967295).toString(16),x: mousePos[0],y:mousePos[1],w:node_width};
+                var nn = { id:(1+Math.random()*4294967295).toString(16),x: mousePos[0],y:mousePos[1],w:node_width,z:activeWorkspace};
 
                 nn.type = selected_tool;
                 nn._def = RED.nodes.getType(nn.type);
@@ -323,11 +384,13 @@ RED.view = function() {
 
     function selectAll() {
         RED.nodes.eachNode(function(n) {
+            if (n.z == activeWorkspace) {
                 if (!n.selected) {
                     n.selected = true;
                     n.dirty = true;
                     moving_set.push({n:n});
                 }
+            }
         });
         selected_link = null;
         updateSelection();
@@ -587,7 +650,7 @@ RED.view = function() {
         if (mouse_mode != RED.state.JOINING) {
             // Don't bother redrawing nodes if we're drawing links
 
-            var node = vis.selectAll(".nodegroup").data(RED.nodes.nodes,function(d){return d.id});
+            var node = vis.selectAll(".nodegroup").data(RED.nodes.nodes.filter(function(d) { return d.z == activeWorkspace }),function(d){return d.id});
             node.exit().remove();
 
             var nodeEnter = node.enter().insert("svg:g").attr("class", "node nodegroup");
@@ -811,7 +874,7 @@ RED.view = function() {
             });
         }
 
-        var link = vis.selectAll(".link").data(RED.nodes.links);
+        var link = vis.selectAll(".link").data(RED.nodes.links.filter(function(d) { return d.source.z == activeWorkspace && d.target.z == activeWorkspace }));
 
         link.enter().insert("svg:path",".node").attr("class","link")
            .on("mousedown",function(d) {
@@ -905,7 +968,7 @@ RED.view = function() {
             if (result) {
                 var new_nodes = result[0];
                 var new_links = result[1];
-                var new_ms = new_nodes.map(function(n) { return {n:n};});
+                var new_ms = new_nodes.map(function(n) { n.z = activeWorkspace; return {n:n};});
                 var new_node_ids = new_nodes.map(function(n){ return n.id; });
 
                 // TODO: pick a more sensible root node
@@ -981,6 +1044,94 @@ RED.view = function() {
         $("#node-input-import").val("");
         $( "#dialog" ).dialog("option","title","Import nodes").dialog( "open" );
     }
+    
+    function showRenameWorkspaceDialog(id) {
+        var ws = RED.nodes.workspace(id);
+        $( "#node-dialog-rename-workspace" ).dialog("option","workspace",ws);
+
+        if (workspace_tabs.count() == 1) {
+            $( "#node-dialog-rename-workspace").next().find(".leftButton")
+                .prop('disabled',true)
+                .addClass("ui-state-disabled");
+        } else {
+            $( "#node-dialog-rename-workspace").next().find(".leftButton")
+                .prop('disabled',false)
+                .removeClass("ui-state-disabled");
+        }
+        
+        $( "#node-input-workspace-name" ).val(ws.label);
+        $( "#node-dialog-rename-workspace" ).dialog("open");
+    }
+    
+    
+    $("#node-dialog-rename-workspace form" ).submit(function(e) { e.preventDefault();});
+    $( "#node-dialog-rename-workspace" ).dialog({
+        modal: true,
+        autoOpen: false,
+        width: 500,
+        title: "Rename workspace",
+        buttons: [
+            {
+                class: 'leftButton',
+                text: "Delete",
+                click: function() {
+                    var workspace = $(this).dialog('option','workspace');
+                    $( this ).dialog( "close" );
+                    deleteWorkspace(workspace.id);
+                }
+            },
+            {
+                text: "Ok",
+                click: function() {
+                    var workspace = $(this).dialog('option','workspace');
+                    var label = $( "#node-input-workspace-name" ).val();
+                    if (workspace.label != label) {
+                        workspace.label = label;
+                        var link = $("#workspace-tabs a[href='#"+workspace.id+"']");
+                        link.attr("title",label);
+                        link.text(label);
+                        RED.view.dirty(true);
+                    }
+                    $( this ).dialog( "close" );
+                }
+            },
+            {
+                text: "Cancel",
+                click: function() {
+                    $( this ).dialog( "close" );
+                }
+            }
+        ]
+    });
+    $( "#node-dialog-delete-workspace" ).dialog({
+        modal: true,
+        autoOpen: false,
+        width: 500,
+        title: "Confirm delete",
+        buttons: [
+            {
+                text: "Ok",
+                click: function() {
+                    var workspace = $(this).dialog('option','workspace');
+                    RED.view.removeWorkspace(workspace);
+                    var historyEvent = RED.nodes.removeWorkspace(workspace.id);
+                    historyEvent.t = 'delete';
+                    historyEvent.dirty = dirty;
+                    historyEvent.workspaces = [workspace];
+                    RED.history.push(historyEvent);
+                    RED.view.dirty(true);
+                    $( this ).dialog( "close" );
+                }
+            },
+            {
+                text: "Cancel",
+                click: function() {
+                    $( this ).dialog( "close" );
+                }
+            }
+        ]
+    });
+
 
     return {
         state:function(state) {
@@ -990,6 +1141,59 @@ RED.view = function() {
                 mouse_mode = state;
             }
         },
+        addWorkspace: function(ws) {
+            workspace_tabs.addTab(ws);
+            workspace_tabs.resize();
+            if (workspace_tabs.count() == 1) {
+                $('#btn-workspace-delete').parent().addClass("disabled");
+            } else {
+                $('#btn-workspace-delete').parent().removeClass("disabled");
+            }
+        },
+        removeWorkspace: function(ws) {
+            workspace_tabs.removeTab(ws.id);
+            $('#workspace-menu-list a[href="#'+ws.id+'"]').parent().remove();
+            if (workspace_tabs.count() == 1) {
+                $('#btn-workspace-delete').parent().addClass("disabled");
+            } else {
+                $('#btn-workspace-delete').parent().removeClass("disabled");
+            }
+        },
+        getWorkspace: function() {
+            return activeWorkspace;
+        },
+        setWorkspace: function(z) {
+            var chart = $("#chart");
+            if (activeWorkspace != 0) {
+                workspaceScrollPositions[activeWorkspace] = {
+                    left:chart.scrollLeft(),
+                    top:chart.scrollTop()
+                };
+            }
+            var scrollStartLeft = chart.scrollLeft();
+            var scrollStartTop = chart.scrollTop();
+            
+            activeWorkspace = z;
+            if (workspaceScrollPositions[activeWorkspace]) {
+                chart.scrollLeft(workspaceScrollPositions[activeWorkspace].left);
+                chart.scrollTop(workspaceScrollPositions[activeWorkspace].top);
+            } else {
+                chart.scrollLeft(0);
+                chart.scrollTop(0);
+            }
+            var scrollDeltaLeft = chart.scrollLeft() - scrollStartLeft;
+            var scrollDeltaTop = chart.scrollTop() - scrollStartTop;
+            if (mouse_position != null) {
+                mouse_position[0] += scrollDeltaLeft;
+                mouse_position[1] += scrollDeltaTop;
+            }
+                
+            clearSelection();
+            RED.nodes.eachNode(function(n) {
+                n.dirty = true;
+            });
+            redraw();
+        },
         redraw:redraw,
         dirty: function(d) {
             if (d == null) {
@@ -998,6 +1202,9 @@ RED.view = function() {
                 setDirty(d);
             }
         },
-        importNodes: importNodes
+        importNodes: importNodes,
+        resize: function() {
+            workspace_tabs.resize();
+        }
     };
 }();
