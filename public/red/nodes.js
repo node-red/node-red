@@ -244,7 +244,7 @@ RED.nodes = function() {
                 }
             }
             if (defaultWorkspace == null) {
-                defaultWorkspace = { type:"workspace", id:getID(), label:"Workspace 1" };
+                defaultWorkspace = { type:"workspace", id:getID(), label:"Sheet 1" };
                 addWorkspace(defaultWorkspace);
                 RED.view.addWorkspace(defaultWorkspace);
             }

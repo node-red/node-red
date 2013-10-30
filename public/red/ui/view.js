@@ -107,9 +107,9 @@ RED.view = function() {
         var tabId = RED.nodes.id();
         do {
             workspaceIndex += 1;
-        } while($("#workspace-tabs a[title='Workspace "+workspaceIndex+"']").size() != 0);
+        } while($("#workspace-tabs a[title='Sheet "+workspaceIndex+"']").size() != 0);
         
-        var ws = {type:"workspace",id:tabId,label:"Workspace "+workspaceIndex};
+        var ws = {type:"workspace",id:tabId,label:"Sheet "+workspaceIndex};
         RED.nodes.addWorkspace(ws);
         workspace_tabs.addTab(ws);
         workspace_tabs.activateTab(tabId);
