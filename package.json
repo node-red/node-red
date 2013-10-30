@@ -24,7 +24,9 @@
         "mqtt": "~0.3.3",
         "ws": "~0.4.31",
         "mustache": "~0.7.2",
-        "cron":"1.x"
+        "cron":"1.x",
+        "ntwitter":"0.5.0",
+        "oauth":"~0.9.10"
     },
     "devDependencies": {
         "mocha": "~1.12.0",
