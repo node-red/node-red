@@ -49,6 +49,18 @@
                         </ul>
                     </li>
                     <li class="divider"></li>
+                    <li class="dropdown-submenu pull-left"><a tabindex="-1" href="#"><i class="icon-th-large"></i> Workspaces</a>
+                        <ul class="dropdown-menu">
+                            <li><a id="btn-workspace-add" tabindex="-1" href="#"><i class="icon-plus"></i> Add</a></li>
+                            <li><a id="btn-workspace-edit" tabindex="-1" href="#"><i class="icon-edit"></i> Rename</a></li>
+                            <li><a id="btn-workspace-delete" tabindex="-1" href="#"><i class="icon-minus"></i> Delete</a></li>
+                            <li class="dropdown-submenu pull-left">
+                                <a tabindex="-1" href="#"><i class="icon-share-alt"></i> Switch to...</a>
+                                <ul id="workspace-menu-list" class="dropdown-menu"></ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="divider"></li>
                     <li><a id="btn-keyboard-shortcuts" tabindex="-1" href="#"><i class="icon-question-sign"></i> Keyboard Shortcuts</a></li>
                     <li><a id="btn-help" tabindex="-1" href="http://node-red.github.io/docs" target="_blank"><i class="icon-question-sign"></i> Help...</a></li>
                 </ul>
@@ -108,7 +120,11 @@
         </div>
     </div><!-- /palette -->
 
-    <div id="chart"></div>
+    <div id="workspace">
+        <ul id="workspace-tabs"></ul>
+        <div id="workspace-add-tab"><a id="btn-workspace-add-tab" href="#"><i class="icon-plus"></i></a></div>
+        <div id="chart"></div>
+    </div>
 
     <div id="chart-zoom-controls">
         <div class="btn-group">
@@ -119,12 +135,8 @@
     </div>
 
     <div id="sidebar">
-        <ul id="sidebar-tabs">
-            <li><a href="#tab-info">info</a></li>
-        </ul>
-        <div id="sidebar-content">
-            <div id="tab-info" style="position: relative;"></div>
-        </div>
+        <ul id="sidebar-tabs"></ul>
+        <div id="sidebar-content"></div>
     </div>
 
     <div id="sidebar-separator"></div>
@@ -231,6 +243,21 @@
         </div>
     </form>
 </div>
+<div id="node-dialog-rename-workspace" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <label for="node-input-workspace-name" ><i class="icon-tag"></i> Name:</label>
+            <input type="text" id="node-input-workspace-name">
+        </div>
+    </form>
+</div>
+<div id="node-dialog-delete-workspace" class="hide">
+    <form class="form-horizontal">
+        <div style="text-align: center; padding-top: 30px;">
+         Are you sure you want to delete '<span id="node-dialog-delete-workspace-name"></span>'?
+        </div>
+    </form>
+</div>
 
 <script type="text/x-red" data-template-name="export-clipboard-dialog">
     <div class="form-row">
@@ -265,6 +292,7 @@
 <script src="red/history.js"></script>
 <script src="red/validators.js"></script>
 <script src="red/ui/keyboard.js"></script>
+<script src="red/ui/tabs.js"></script>
 <script src="red/ui/view.js"></script>
 <script src="red/ui/sidebar.js"></script>
 <script src="red/ui/palette.js"></script>

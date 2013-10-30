@@ -292,9 +292,11 @@ var parseConfig = function() {
     missingTypes = [];
     for (var i in activeConfig) {
         var type = activeConfig[i].type;
-        var nt = node_type_registry.get(type);
-        if (!nt && missingTypes.indexOf(type) == -1) {
-            missingTypes.push(type);
+        if (type != "workspace") {
+            var nt = node_type_registry.get(type);
+            if (!nt && missingTypes.indexOf(type) == -1) {
+                missingTypes.push(type);
+            }
         }
     };
     if (missingTypes.length > 0) {
@@ -309,18 +311,20 @@ var parseConfig = function() {
     events.emit("nodes-starting");
     for (var i in activeConfig) {
         var nn = null;
-        var nt = node_type_registry.get(activeConfig[i].type);
-        if (nt) {
-            try {
-                nn = new nt(activeConfig[i]);
+        if (activeConfig[i].type != "workspace") {
+            var nt = node_type_registry.get(activeConfig[i].type);
+            if (nt) {
+                try {
+                    nn = new nt(activeConfig[i]);
+                }
+                catch (err) {
+                    util.log("[red] "+activeConfig[i].type+" : "+err);
+                }
             }
-            catch (err) {
-                util.log("[red] "+activeConfig[i].type+" : "+err);
+            // console.log(nn);
+            if (nn == null) {
+                util.log("[red] unknown type: "+activeConfig[i].type);
             }
-        }
-        // console.log(nn);
-        if (nn == null) {
-            util.log("[red] unknown type: "+activeConfig[i].type);
         }
     }
     // Clean up any orphaned credentials

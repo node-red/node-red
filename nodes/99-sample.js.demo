@@ -19,7 +19,7 @@
 // Sample Node-RED node file
 
 // Require main module
-var RED = require("../../red/red");
+var RED = require(process.env.NODE_RED_HOME+"/red/red");
 
 // The main node definition - most things happen in here
 function SampleNode(n) {
@@ -41,10 +41,10 @@ function SampleNode(n) {
     this.send(msg);
 
     this.on("close", function() {
-		// Called when the node is shutdown - eg on redeploy.
-		// Allows ports to be closed, connections dropped etc.
-		// eg: this.client.disconnect();
-	});
+        // Called when the node is shutdown - eg on redeploy.
+        // Allows ports to be closed, connections dropped etc.
+        // eg: this.client.disconnect();
+    });
 }
 
 // Register the node by name. This must be called before overriding any of the
