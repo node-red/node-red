@@ -19,7 +19,7 @@ var gpio = require("pi-gpio");
 
 function GPIOInNode(n) {
     RED.nodes.createNode(this,n);
-    this.warn("node type deprecated - will be moved to node-red-nodes project at next point update");
+    this.warn("node type deprecated - will be removed in a future release");
     this.buttonState = -1;
     this.pin = n.pin;
     this.resistor = n.resistor;

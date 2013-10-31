@@ -20,7 +20,7 @@ var dgram = require('dgram');
 // The Input Node
 function MCastIn(n) {
     RED.nodes.createNode(this,n);
-    this.warn("node type deprecated - will be moved to node-red-nodes project at next point update");
+    this.warn("node type deprecated - will be removed in a future release");
     this.group = n.group;
     this.port = n.port;
     this.host = n.host || null;
