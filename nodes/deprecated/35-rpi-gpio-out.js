@@ -14,12 +14,12 @@
  * limitations under the License.
  **/
 
-var RED = require("../../red/red");
+var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var gpio = require("pi-gpio");
 
 function GPIOOutNode(n) {
     RED.nodes.createNode(this,n);
-
+    this.warn("node type deprecated - will be moved to node-red-nodes project at next point update");
     this.pin = n.pin;
 
     var node = this;
@@ -46,6 +46,3 @@ RED.nodes.registerType("rpi-gpio out",GPIOOutNode);
 GPIOOutNode.prototype.close = function() {
     gpio.close(this.pin);
 }
-
-
-
