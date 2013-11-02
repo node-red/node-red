@@ -26,8 +26,8 @@
 </script>
 
 <script type="text/x-red" data-help-name="irc in">
-	<p>Connects to a channel on an IRC server</p>
-	<p>Any messages on that channel will appear on the <b>msg.payload</b> at the output, while <b>msg.topic</b> will contain who it is from.</p>
+    <p>Connects to a channel on an IRC server</p>
+    <p>Any messages on that channel will appear on the <b>msg.payload</b> at the output, while <b>msg.topic</b> will contain who it is from.</p>
 </script>
 
 <script type="text/javascript">
@@ -57,9 +57,12 @@
         <input type="text" id="node-input-ircserver">
     </div>
     <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-sendObject" placeholder="" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-sendObject" style="width: 70%;">Send complete msg object ?</label>
+        <label for="node-input-sendObject"><i class="icon-check"></i> Action</label>
+        <select type="text" id="node-input-sendObject" style="display: inline-block; vertical-align: middle; width:70%;">
+            <option value="pay">Send msg.payload to channel</option>
+            <option value="true">Send msg.payload to id in msg.topic</option>
+            <option value="false">Send complete msg object to channel</option>
+        </select>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
@@ -69,9 +72,9 @@
 </script>
 
 <script type="text/x-red" data-help-name="irc out">
-	<p>Sends messages to a channel on an IRC server</p>
-	<p>If you send something with NO <b>msg.topic</b> it will go to the configured channel - otherwise it will go to the id in the <b>msg.topic</b> field.</p>
-	<p>You can either just send the <b>msg.payload</b>, or you can send the complete <b>msg</b> object.</p>
+    <p>Sends messages to a channel on an IRC server</p>
+    <p>You can send just the <b>msg.payload</b>, or the complete <b>msg</b> object to the selected channel,
+    or you can select to use <b>msg.topic</b> to send the <b>msg.payload</b> to a specific user in the channel (private conversation).</p>
 </script>
 
 <script type="text/javascript">
@@ -79,7 +82,7 @@
         category: 'social-output',
         defaults: {
             name: {value:""},
-            sendObject: {value:false},
+            sendObject: {value:"pay", required:true},
             ircserver: {type:"irc-server", required:true}
         },
         color:"Silver",
