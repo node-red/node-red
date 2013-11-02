@@ -27,7 +27,9 @@
         "cron":"1.x",
         "ntwitter":"0.5.0",
         "oauth":"~0.9.10",
-        "xml2js":"~0.2.8"
+        "xml2js":"~0.2.8",
+        "sentiment":"~0.2.1",
+        "irc":"~0.3.6"
     },
     "devDependencies": {
         "mocha": "~1.12.0",
