@@ -18,6 +18,7 @@ var fs = require('fs');
 var util = require('util');
 var createUI = require("./ui");
 var redNodes = require("./nodes");
+
 //TODO: relocated user dir
 
 var flowfile = '';
@@ -29,7 +30,7 @@ function createServer(_server,settings) {
     server = _server;
     app = createUI(settings);
     
-    flowfile = settings.flowfile || 'flows_'+require('os').hostname()+'.json';
+    flowfile = settings.flowFile || 'flows_'+require('os').hostname()+'.json';
     
     //TODO: relocated user dir
     fs.exists("lib/",function(exists) {
@@ -74,6 +75,7 @@ function createServer(_server,settings) {
             });
     });
 }
+
 function start() {
     console.log("\nWelcome to Node-RED\n===================\n");
     util.log("[red] Loading palette nodes");
@@ -101,9 +103,14 @@ function start() {
     });
 }
 
+function stop() {
+    redNodes.stopFlows();
+}
+
 module.exports = { 
     init: createServer,
-    start: start
+    start: start,
+    stop: stop
 }
 
 module.exports.__defineGetter__("app", function() { return app });

@@ -16,7 +16,7 @@
 
 var RED = require("../../red/red");
 var Imap = require('imap');
-var inspect = require('util').inspect;
+var util = require('util');
 var oldmail = {};
 
 try {
@@ -33,12 +33,8 @@ var imap = new Imap({
 	secure: true
 });
 
-function show(obj) {
-	return inspect(obj, false, Infinity);
-}
-
 function fail(err) {
-	console.log('[imap] : ' + err);
+	util.log('[imap] : ' + err);
 }
 
 function openInbox(cb) {
@@ -101,14 +97,12 @@ function ImapNode(n) {
 		});
 
 	});
+
+	this.on("close", function() {
+ 		if (this.interval_id != null) {
+        	clearInterval(this.interval_id);
+    	}
+	});
 }
 
 RED.nodes.registerType("imap",ImapNode);
-
-ImapNode.prototype.close = function() {
-    if (this.interval_id != null) {
-        clearInterval(this.interval_id);
-        this.log("inject: repeat stopped");
-    }
-}
-

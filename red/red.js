@@ -14,26 +14,29 @@
  * limitations under the License.
  **/
 
-var events = require("./events"); 
+var events = require("./events");
 var server = require("./server");
 var nodes = require("./nodes");
 var library = require("./library");
 var settings = null;
 
+var path = require('path');
+
+process.env.NODE_RED_HOME = process.env.NODE_RED_HOME || path.resolve(__dirname+"/..");
 
 var events = require("events");
 
 var RED = {
-    
+
     init: function(httpServer,userSettings) {
         settings = userSettings;
         server.init(httpServer,settings);
         library.init();
         return server.app;
     },
-    
+
     start: server.start,
-    
+    stop: server.stop,
     nodes: nodes,
     library: library,
     events: events
@@ -43,4 +46,4 @@ RED.__defineGetter__("app", function() { return server.app });
 RED.__defineGetter__("server", function() { return server.server });
 RED.__defineGetter__("settings", function() { return settings });
 
-module.exports = RED; 
+module.exports = RED;

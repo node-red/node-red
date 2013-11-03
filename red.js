@@ -48,7 +48,7 @@ if (settings.httpAuth) {
     );
 }
 
-settings.flowfile = process.argv[2] || settings.flowfile;
+settings.flowFile = process.argv[2] || settings.flowFile;
 
 var red = RED.init(server,settings);
 app.use(settings.httpRoot,red);
@@ -56,7 +56,7 @@ app.use(settings.httpRoot,red);
 RED.start();
 
 server.listen(settings.uiPort,function() {
-        util.log('[red] Server now running at http'+(settings.https?'s':'')+'://127.0.0.1:'+settings.uiPort+settings.httpRoot);
+	util.log('[red] Server now running at http'+(settings.https?'s':'')+'://127.0.0.1:'+settings.uiPort+settings.httpRoot);
 });
 
 process.on('uncaughtException',function(err) {
@@ -70,4 +70,9 @@ process.on('uncaughtException',function(err) {
         process.exit(1);
 });
 
-
+process.on('SIGINT', function () {
+    RED.stop();
+    // TODO: need to allow nodes to close asynchronously before terminating the
+    // process - ie, promises 
+    process.exit();
+});

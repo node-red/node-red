@@ -30,7 +30,7 @@ function TcpIn(n) {
 	this.server = (typeof n.server == 'boolean')?n.server:(n.server == "server");
 	this.closing = false;
 	var node = this;
-    
+
 	if (!node.server) {
         var buffer = null;
 		var client;
@@ -41,13 +41,13 @@ function TcpIn(n) {
 			        buffer = (node.datatype == 'buffer')? new Buffer(0):"";
 			        node.log("connected to "+node.host+":"+node.port);
 			});
-            
+
 			client.on('data', function (data) {
 			        if (node.datatype != 'buffer') {
 			            data = data.toString(node.datatype);
 			        }
 			        if (node.stream) {
-			            if ((typeof data) === "string" && node.newline != "") {
+			            if ((node.datatype) === "utf8" && node.newline != "") {
 			                buffer = buffer+data;
 			                var parts = buffer.split(node.newline);
 			                for (var i = 0;i<parts.length-1;i+=1) {
@@ -100,7 +100,7 @@ function TcpIn(n) {
 		                if (node.datatype != 'buffer') {
 		                    data = data.toString(node.datatype);
 		                }
-		                    
+
 		                if (node.stream) {
 		                    if ((typeof data) === "string" && node.newline != "") {
 		                        buffer = buffer+data;
@@ -128,21 +128,21 @@ function TcpIn(n) {
 		                    node.send(msg);
 		                    buffer = null;
 		                }
-		        });		   
+		        });
 		        socket.on('error',function(err) {
 		            node.log(err);
 		        });
 		});
 		server.listen(node.port);
 		node.log('listening on port '+node.port);
-		
+
 		this._close = function() {
 		    this.closing = true;
 			server.close();
 			node.log('stopped listening on port '+node.port);
 		}
 	}
-	
+
 }
 
 RED.nodes.registerType("tcp in",TcpIn);
@@ -150,4 +150,3 @@ RED.nodes.registerType("tcp in",TcpIn);
 TcpIn.prototype.close = function() {
 	this._close();
 }
-

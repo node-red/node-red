@@ -15,7 +15,29 @@
  **/
 RED.sidebar = function() {
 
-    $('#sidebar').tabs();
+    //$('#sidebar').tabs();
+    var sidebar_tabs = RED.tabs.create({
+        id:"sidebar-tabs",
+        onchange:function(id) {
+            $("#sidebar-content").children().hide();
+            $("#"+id).show();
+        }
+    });
+    function addTab(title,content) {
+        $("#sidebar-content").append(content);
+        $(content).hide();
+        sidebar_tabs.addTab({id:"tab-"+title,label:title});
+        //content.style.position = "absolute";
+        //$('#sidebar').tabs("refresh");
+    }
+    
+    var content = document.createElement("div");
+    content.id = "tab-info";
+    content.style.paddingTop = "4px";
+    content.style.paddingLeft = "4px";
+    content.style.paddingRight = "4px";
+
+    addTab("info",content);
     
     $('#btn-sidebar').click(function() {toggleSidebar();});
     RED.keyboard.add(/* SPACE */ 32,{ctrl:true},function(){toggleSidebar();d3.event.preventDefault();});
@@ -28,8 +50,8 @@ RED.sidebar = function() {
                 var winWidth = $(window).width();
                 sidebarSeparator.start = ui.position.left;
                 sidebarSeparator.width = $("#sidebar").width();
-                sidebarSeparator.chartWidth = $("#chart").width();
-                sidebarSeparator.chartRight = winWidth-$("#chart").width()-$("#chart").offset().left-2;
+                sidebarSeparator.chartWidth = $("#workspace").width();
+                sidebarSeparator.chartRight = winWidth-$("#workspace").width()-$("#workspace").offset().left-2;
                 sidebarSeparator.closing = false;
             },
             drag: function(event,ui) {
@@ -38,7 +60,7 @@ RED.sidebar = function() {
                 
                 if (newSidebarWidth > 180 && sidebarSeparator.chartWidth+d > 200) {
                     var newChartRight = sidebarSeparator.chartRight-d;
-                    $("#chart").css("right",newChartRight);
+                    $("#workspace").css("right",newChartRight);
                     $("#chart-zoom-controls").css("right",newChartRight+20);
                     $("#sidebar").width(newSidebarWidth);
                 }
@@ -50,6 +72,8 @@ RED.sidebar = function() {
                     sidebarSeparator.closing = false;
                     $("#sidebar").removeClass("closing");
                 }
+                sidebar_tabs.resize();
+                RED.view.resize();
                     
             },
             stop:function(event,ui) {
@@ -63,9 +87,9 @@ RED.sidebar = function() {
     });
     
     function toggleSidebar() {
-        if ($('#sidebar').tabs( "option", "active" ) === false) {
-            $('#sidebar').tabs( "option", "active",0);
-        }
+        //if ($('#sidebar').tabs( "option", "active" ) === false) {
+        //    $('#sidebar').tabs( "option", "active",0);
+        //}
         var btnSidebar = $("#btn-sidebar");
         btnSidebar.toggleClass("active");
         
@@ -77,15 +101,6 @@ RED.sidebar = function() {
     }
     toggleSidebar();
     
-    function addTab(title,content) {
-        var tab = document.createElement("li");
-        tab.innerHTML = '<a href="#tab-'+title+'">'+title+'</a>';
-        $("#sidebar-tabs").append(tab);
-        $("#sidebar-content").append(content);
-
-        $('#sidebar').tabs("refresh");
-
-    }
     
     return {
         addTab: addTab

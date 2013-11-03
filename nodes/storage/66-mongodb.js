@@ -42,35 +42,45 @@ function MongoOutNode(n) {
             if (err) { node.error(err); }
             else {
                 node.clientDb.collection(node.collection,function(err,coll) {
-                        if (err) { node.error(err); }
-                        else {
-                            node.on("input",function(msg) {
-                                if (node.operation == "store") {
-                                    delete msg._topic;
-                                    if (node.payonly) coll.save(msg.payload,function(err,item){ if (err){node.error(err);} });
-                                    else coll.save(msg,function(err,item){if (err){node.error(err);}});
+                    if (err) { node.error(err); }
+                    else {
+                        node.on("input",function(msg) {
+                            if (node.operation == "store") {
+                                delete msg._topic;
+                                if (node.payonly) {
+                                    if (typeof msg.payload !== "object") { msg.payload = {"payload":msg.payload}; }
+                                    coll.save(msg.payload,function(err,item){ if (err){node.error(err);} });
                                 }
-                                if (node.operation == "delete") {
-                                    console.log(msg.payload);
-                                    coll.remove(msg.payload, {w:1}, function(err, items){ if (err) node.error(err); });
+                                else coll.save(msg,function(err,item){if (err){node.error(err);}});
+                            }
+                            else if (node.operation == "insert") {
+                                delete msg._topic;
+                                if (node.payonly) {
+                                    if (typeof msg.payload !== "object") { msg.payload = {"payload":msg.payload}; }
+                                    coll.insert(msg.payload,function(err,item){ if (err){node.error(err);} });
                                 }
-                            });
-                        }
+                                else coll.insert(msg,function(err,item){if (err){node.error(err);}});
+                            }
+                            if (node.operation == "delete") {
+                                coll.remove(msg.payload, {w:1}, function(err, items){ if (err) node.error(err); });
+                            }
+                        });
+                    }
                 });
             }
         });
     } else {
         this.error("missing mongodb configuration");
     }
-}
 
+    this.on("close", function() {
+        if (this.clientDb) {
+            this.clientDb.close();
+        }
+    });
+}
 RED.nodes.registerType("mongodb out",MongoOutNode);
 
-MongoOutNode.prototype.close = function() {
-    if (this.clientDb) {
-        this.clientDb.close();
-    }
-}
 
 function MongoInNode(n) {
     RED.nodes.createNode(this,n);
@@ -105,12 +115,11 @@ function MongoInNode(n) {
     } else {
         this.error("missing mongodb configuration");
     }
-}
 
+    this.on("close", function() {
+        if (this.clientDb) {
+            this.clientDb.close();
+        }
+    });
+}
 RED.nodes.registerType("mongodb in",MongoInNode);
-
-MongoInNode.prototype.close = function() {
-    if (this.clientDb) {
-        this.clientDb.close();
-    }
-}

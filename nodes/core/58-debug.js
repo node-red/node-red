@@ -100,16 +100,19 @@ DebugNode.logHandler.on("log",function(msg) {
 });
 RED.nodes.addLogHandler(DebugNode.logHandler);
 
-RED.app.post("/debug/:id", function(req,res) {
+RED.app.post("/debug/:id/:state", function(req,res) {
 	var node = RED.nodes.getNode(req.params.id);
+	var state = req.params.state;
 	if (node != null) {
-		if (node.active) {
-			node.active = false;
+	    if (state === "enable") {
+	        node.active = true;
 			res.send(201);
-		} else {
-			node.active = true;
+	    } else if (state === "disable") {
+	        node.active = false;
 			res.send(200);
-		}
+	    } else {
+	        res.send(404);
+	    }
 	} else {
 		res.send(404);
 	}

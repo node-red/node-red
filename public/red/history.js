@@ -36,7 +36,15 @@ RED.history = function() {
                     for (var i in ev.links) {
                         RED.nodes.removeLink(ev.links[i]);
                     }
+                    for (var i in ev.workspaces) {
+                        RED.nodes.removeWorkspace(ev.workspaces[i].id);
+                        RED.view.removeWorkspace(ev.workspaces[i]);
+                    }
                 } else if (ev.t == "delete") {
+                    for (var i in ev.workspaces) {
+                        RED.nodes.addWorkspace(ev.workspaces[i]);
+                        RED.view.addWorkspace(ev.workspaces[i]);
+                    }
                     for (var i in ev.nodes) {
                         RED.nodes.add(ev.nodes[i]);
                     }

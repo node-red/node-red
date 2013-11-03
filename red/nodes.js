@@ -42,7 +42,6 @@ function getCallerFilename(type) {
     return stack[0].getFileName();
 }
 
-
 var registry = (function() {
         var nodes = {};
         var logHandlers = [];
@@ -91,7 +90,6 @@ var node_type_registry = (function() {
         var obj = {
             register: function(type,node) {
                 util.inherits(node, Node);
-
                 var callerFilename = getCallerFilename(type);
                 if (callerFilename == null) {
                     util.log("["+type+"] unable to determine filename");
@@ -117,7 +115,6 @@ var node_type_registry = (function() {
                     result += node_configs[nt];
                 }
                 return result;
-
             }
         }
         return obj;
@@ -176,7 +173,6 @@ Node.prototype.send = function(msg) {
 }
 module.exports.Node = Node;
 
-
 Node.prototype.receive = function(msg) {
     this.emit("input",msg);
 }
@@ -196,9 +192,6 @@ Node.prototype.error = function(msg) {
     if (this.name) o.name = this.name;
     this.emit("log",o);
 }
-
-
-
 
 var credentials = {};
 var credentialsFile = "credentials.json";
@@ -225,8 +218,6 @@ module.exports.deleteCredentials = function(id) {
     delete credentials[id];
     saveCredentialsFile();
 }
-
-
 module.exports.createNode = function(node,def) {
     Node.call(node,def);
 }
@@ -250,18 +241,17 @@ module.exports.load = function() {
                     }
                 } else if (stats.isDirectory()) {
                     // Ignore /.dirs/ and /lib/
-                    if (!/^(\..*|lib)$/.test(fn)) {
+                    if (!/^(\..*|lib|icons)$/.test(fn)) {
                         loadNodes(dir+"/"+fn);
+                    } else if (fn === "icons") {
+                        events.emit("node-icon-dir",dir+"/"+fn);
                     }
                 }
         });
     }
     loadNodes(__dirname+"/../nodes");
-
     //events.emit("nodes-loaded");
 }
-
-
 
 var activeConfig = null;
 var missingTypes = [];
@@ -279,27 +269,35 @@ events.on('type-registered',function(type) {
         }
 });
 
-
 module.exports.getNode = function(nid) {
     return registry.get(nid);
 }
-module.exports.setConfig = function(conf) {
+
+function stopFlows() {
     if (activeConfig&&activeConfig.length > 0) {
         util.log("[red] Stopping flows");
     }
     registry.clear();
+}
+
+module.exports.stopFlows = stopFlows;
+
+module.exports.setConfig = function(conf) {
+    stopFlows();
     activeConfig = conf;
     parseConfig();
 }
 
 var parseConfig = function() {
-
     missingTypes = [];
     for (var i in activeConfig) {
         var type = activeConfig[i].type;
-        var nt = node_type_registry.get(type);
-        if (!nt && missingTypes.indexOf(type) == -1) {
-            missingTypes.push(type);
+        // TODO: remove workspace in next release+1
+        if (type != "workspace" && type != "tab") {
+            var nt = node_type_registry.get(type);
+            if (!nt && missingTypes.indexOf(type) == -1) {
+                missingTypes.push(type);
+            }
         }
     };
     if (missingTypes.length > 0) {
@@ -307,7 +305,6 @@ var parseConfig = function() {
         for (var i in missingTypes) {
             util.log("[red]  - "+missingTypes[i]);
         }
-        
         return;
     }
 
@@ -315,21 +312,23 @@ var parseConfig = function() {
     events.emit("nodes-starting");
     for (var i in activeConfig) {
         var nn = null;
-        var nt = node_type_registry.get(activeConfig[i].type);
-        if (nt) {
-			try {
-				nn = new nt(activeConfig[i]);
-			}
-			catch (err) {
-				util.log("[red] "+activeConfig[i].type+" : "+err);
-			}
-        }
-        // console.log(nn);
-        if (nn == null) {
-            util.log("[red] unknown type: "+activeConfig[i].type);
+        // TODO: remove workspace in next release+1
+        if (activeConfig[i].type != "workspace" && activeConfig[i].type != "tab") {
+            var nt = node_type_registry.get(activeConfig[i].type);
+            if (nt) {
+                try {
+                    nn = new nt(activeConfig[i]);
+                }
+                catch (err) {
+                    util.log("[red] "+activeConfig[i].type+" : "+err);
+                }
+            }
+            // console.log(nn);
+            if (nn == null) {
+                util.log("[red] unknown type: "+activeConfig[i].type);
+            }
         }
     }
-    
     // Clean up any orphaned credentials
     var deletedCredentials = false;
     for (var c in credentials) {
@@ -343,5 +342,4 @@ var parseConfig = function() {
         saveCredentialsFile();
     }
     events.emit("nodes-started");
-
 }
