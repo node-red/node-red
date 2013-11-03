@@ -31,19 +31,19 @@ function Xml2jsNode(n) {
     var node = this;
     this.on("input", function(msg) {
         try {
-		    parseString(msg.payload, function (err, result) {
-		        if (err) { node.error(err); }
-		        else {
-		            msg.payload = result;
-		            node.send(msg);
-		            if (node.useEyes == true) {
-		                if (gotEyes == true) { eyes.inspect(msg); }
-		                else { node.log(JSON.stringify(msg)); }
-		            }
-		        }
-		    });
-		}
-		catch(e) { console.log(e); }
+            parseString(msg.payload, function (err, result) {
+                if (err) { node.error(err); }
+                else {
+                    msg.payload = result;
+                    node.send(msg);
+                    if (node.useEyes == true) {
+                        if (gotEyes == true) { eyes.inspect(msg); }
+                        else { node.log(JSON.stringify(msg)); }
+                    }
+                }
+            });
+        }
+        catch(e) { util.log("[73-parsexml.js] "+e); }
     });
 }
 RED.nodes.registerType("xml2js",Xml2jsNode);
