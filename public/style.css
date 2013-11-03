@@ -330,7 +330,7 @@ a.brand img {
 }
 .node_highlighted {
    stroke: #dd1616;
-   stroke-width: 2;
+   stroke-width: 3;
    stroke-dasharray: 10, 4;
 }
 .node_hovered {
