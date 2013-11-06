@@ -62,7 +62,7 @@ function HTTPOut(n) {
     this.on("input",function(msg) {
             if (msg.res) {
                 if (msg.headers) {
-                    res.set(msg.headers);
+                    msg.res.set(msg.headers);
                 }
                 var statusCode = msg.statusCode || 200;
                 msg.res.send(statusCode,msg.payload);
