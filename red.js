@@ -39,6 +39,7 @@ if (settings.httpRoot.slice(-1) != "/") {
     settings.httpRoot = settings.httpRoot + "/";
 }
 settings.uiPort = settings.uiPort||1880;
+settings.uiHost = settings.uiHost||"0.0.0.0";
 
 if (settings.httpAuth) {
     app.use(settings.httpRoot,
@@ -55,13 +56,17 @@ app.use(settings.httpRoot,red);
 
 RED.start();
 
-server.listen(settings.uiPort,function() {
-	util.log('[red] Server now running at http'+(settings.https?'s':'')+'://127.0.0.1:'+settings.uiPort+settings.httpRoot);
+var listenPath = 'http'+(settings.https?'s':'')+'://'+
+                 (settings.uiHost == '0.0.0.0'?'127.0.0.1':settings.uiHost)+
+                 ':'+settings.uiPort+settings.httpRoot;
+
+server.listen(settings.uiPort,settings.uiHost,function() {
+	util.log('[red] Server now running at '+listenPath);
 });
 
 process.on('uncaughtException',function(err) {
         if (err.errno === "EADDRINUSE") {
-            util.log('[red] Unable to listen on http'+(settings.https?'s':'')+'://127.0.0.1:'+settings.uiPort+settings.httpRoot);
+            util.log('[red] Unable to listen on '+listenPath);
             util.log('[red] Error: port in use');
         } else {
             util.log('[red] Uncaught Exception:');
