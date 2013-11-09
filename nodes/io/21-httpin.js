@@ -19,7 +19,9 @@ var util = require("util");
 var http = require("http");
 var https = require("https");
 var urllib = require("url");
-var bodyParser = require("express").bodyParser();
+var express = require("express");
+var jsonParser = express.json();
+var urlencParser = express.urlencoded();
 
 function HTTPIn(n) {
     RED.nodes.createNode(this,n);
@@ -33,9 +35,9 @@ function HTTPIn(n) {
     if (this.method == "get") {
         RED.app.get(this.url,this.callback);
     } else if (this.method == "post") {
-        RED.app.post(this.url,bodyParser,this.callback);
+        RED.app.post(this.url,jsonParser,urlencParser,this.callback);
     } else if (this.method == "put") {
-        RED.app.put(this.url,bodyParser,this.callback);
+        RED.app.put(this.url,jsonParser,urlencParser,this.callback);
     } else if (this.method == "delete") {
         RED.app.delete(this.url,this.callback);
     }
@@ -60,7 +62,7 @@ function HTTPOut(n) {
     this.on("input",function(msg) {
             if (msg.res) {
                 if (msg.headers) {
-                    res.set(msg.headers);
+                    msg.res.set(msg.headers);
                 }
                 var statusCode = msg.statusCode || 200;
                 msg.res.send(statusCode,msg.payload);

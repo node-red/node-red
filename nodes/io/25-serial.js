@@ -15,11 +15,10 @@
  **/
 
 var RED = require("../../red/red");
-
+var settings = RED.settings;
 var events = require("events");
 var util = require("util");
 var serialp = require("serialport");
-var settings = RED.settings;
 
 // TODO: 'serialPool' should be encapsulated in SerialPortNode
 
@@ -58,8 +57,8 @@ function SerialOutNode(n) {
         this.error("missing serial config");
     }
 }
-
 RED.nodes.registerType("serial out",SerialOutNode);
+
 
 SerialOutNode.prototype.close = function() {
     if (this.serialConfig) {
@@ -90,8 +89,8 @@ function SerialInNode(n) {
         this.error("missing serial config");
     }
 }
-
 RED.nodes.registerType("serial in",SerialInNode);
+
 
 SerialInNode.prototype.close = function() {
     if (this.serialConfig) {
@@ -121,48 +120,50 @@ var serialPool = function() {
                     }
                     newline = newline.replace("\\n","\n").replace("\\r","\r");
                     var setupSerial = function() {
-						if (newline == "") {
-							obj.serial = new serialp.SerialPort(port,{
-									baudrate: baud,
-									parser: serialp.parsers.raw
-							});
-						}
-                        else {
-							obj.serial = new serialp.SerialPort(port,{
-									baudrate: baud,
-									parser: serialp.parsers.readline(newline)
-							});
-						}
-                        obj.serial.on('error', function(err) {
-                                util.log("[serial] serial port "+port+" error "+err);
-                                obj.tout = setTimeout(function() {
-                                        setupSerial();
-                                },settings.serialReconnectTime);
-                        });
-                        obj.serial.on('close', function() {
-                                if (!obj._closing) {
-                                    util.log("[serial] serial port "+port+" closed unexpectedly");
+                        try {
+                            if (newline == "") {
+                                obj.serial = new serialp.SerialPort(port,{
+                                        baudrate: baud,
+                                        parser: serialp.parsers.raw
+                                });
+                            }
+                            else {
+                                obj.serial = new serialp.SerialPort(port,{
+                                        baudrate: baud,
+                                        parser: serialp.parsers.readline(newline)
+                                });
+                            }
+                            obj.serial.on('error', function(err) {
+                                    util.log("[serial] serial port "+port+" error "+err);
                                     obj.tout = setTimeout(function() {
                                             setupSerial();
                                     },settings.serialReconnectTime);
+                            });
+                            obj.serial.on('close', function() {
+                                    if (!obj._closing) {
+                                        util.log("[serial] serial port "+port+" closed unexpectedly");
+                                        obj.tout = setTimeout(function() {
+                                                setupSerial();
+                                        },settings.serialReconnectTime);
+                                    }
+                            });
+                            obj.serial.on('open',function() {
+                                    util.log("[serial] serial port "+port+" opened at "+baud+" baud");
+                                    obj.serial.flush();
+                                    obj._emitter.emit('ready');
+                            });
+                            obj.serial.on('data',function(d) {
+                                if (typeof d !== "string") {
+                                    d = d.toString();
+                                    for (i=0; i<d.length; i++) {
+                                        obj._emitter.emit('data',d.charAt(i));
+                                    }
                                 }
-                        });
-                        obj.serial.on('open',function() {
-                                util.log("[serial] serial port "+port+" opened at "+baud+" baud");
-                                obj.serial.flush();
-                                obj._emitter.emit('ready');
-                        });
-                        obj.serial.on('data',function(d) {
-							if (typeof d !== "string") {
-								d = d.toString();
-								for (i=0; i<d.length; i++) {
-									obj._emitter.emit('data',d.charAt(i));
-								}
-							}
-							else {
-                                obj._emitter.emit('data',d);
-							}
-                        });
+                                else {
+                                    obj._emitter.emit('data',d);
+                                }
+                            });
+                        } catch(err) { console.log("Booo!",err,"Booo!"); }
                     }
                     setupSerial();
                     return obj;
@@ -178,8 +179,7 @@ var serialPool = function() {
                     connections[port].close(function() {
                             util.log("[serial] serial port closed");
                     });
-                } catch(err) {
-                };
+                } catch(err) { };
             }
             delete connections[port];
         }

@@ -59,7 +59,6 @@ RED.palette = function() {
                     trigger: "hover",
                     delay: { show: 750, hide: 50 },
                     html: true,
-                    title: nt,
                     container:'body',
                     content: $(($("script[data-help-name|='"+nt+"']").html()||"<p>no information available</p>").trim())[0] 
             });

@@ -47,12 +47,18 @@ function MongoOutNode(n) {
                         node.on("input",function(msg) {
                             if (node.operation == "store") {
                                 delete msg._topic;
-                                if (node.payonly) coll.save(msg.payload,function(err,item){ if (err){node.error(err);} });
+                                if (node.payonly) {
+                                    if (typeof msg.payload !== "object") { msg.payload = {"payload":msg.payload}; }
+                                    coll.save(msg.payload,function(err,item){ if (err){node.error(err);} });
+                                }
                                 else coll.save(msg,function(err,item){if (err){node.error(err);}});
                             }
                             else if (node.operation == "insert") {
                                 delete msg._topic;
-                                if (node.payonly) coll.insert(msg.payload,function(err,item){ if (err){node.error(err);} });
+                                if (node.payonly) {
+                                    if (typeof msg.payload !== "object") { msg.payload = {"payload":msg.payload}; }
+                                    coll.insert(msg.payload,function(err,item){ if (err){node.error(err);} });
+                                }
                                 else coll.insert(msg,function(err,item){if (err){node.error(err);}});
                             }
                             if (node.operation == "delete") {

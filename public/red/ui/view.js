@@ -85,6 +85,19 @@ RED.view = function() {
             });
             
             $('#workspace-menu-list').append(menuli);
+        
+            if (workspace_tabs.count() == 1) {
+                $('#btn-workspace-delete').parent().addClass("disabled");
+            } else {
+                $('#btn-workspace-delete').parent().removeClass("disabled");
+            }
+        },
+        onremove: function(tab) {
+            if (workspace_tabs.count() == 1) {
+                $('#btn-workspace-delete').parent().addClass("disabled");
+            } else {
+                $('#btn-workspace-delete').parent().removeClass("disabled");
+            }
         }
     });
     
@@ -94,13 +107,12 @@ RED.view = function() {
         var tabId = RED.nodes.id();
         do {
             workspaceIndex += 1;
-        } while($("#workspace-tabs a[title='Workspace "+workspaceIndex+"']").size() != 0);
+        } while($("#workspace-tabs a[title='Sheet "+workspaceIndex+"']").size() != 0);
         
-        var ws = {type:"workspace",id:tabId,label:"Workspace "+workspaceIndex};
+        var ws = {type:"tab",id:tabId,label:"Sheet "+workspaceIndex};
         RED.nodes.addWorkspace(ws);
         workspace_tabs.addTab(ws);
         workspace_tabs.activateTab(tabId);
-        
         RED.history.push({t:'add',workspaces:[ws],dirty:dirty});
         RED.view.dirty(true);
     }
@@ -1069,7 +1081,7 @@ RED.view = function() {
         modal: true,
         autoOpen: false,
         width: 500,
-        title: "Rename workspace",
+        title: "Rename sheet",
         buttons: [
             {
                 class: 'leftButton',
@@ -1144,20 +1156,10 @@ RED.view = function() {
         addWorkspace: function(ws) {
             workspace_tabs.addTab(ws);
             workspace_tabs.resize();
-            if (workspace_tabs.count() == 1) {
-                $('#btn-workspace-delete').parent().addClass("disabled");
-            } else {
-                $('#btn-workspace-delete').parent().removeClass("disabled");
-            }
         },
         removeWorkspace: function(ws) {
             workspace_tabs.removeTab(ws.id);
             $('#workspace-menu-list a[href="#'+ws.id+'"]').parent().remove();
-            if (workspace_tabs.count() == 1) {
-                $('#btn-workspace-delete').parent().addClass("disabled");
-            } else {
-                $('#btn-workspace-delete').parent().removeClass("disabled");
-            }
         },
         getWorkspace: function() {
             return activeWorkspace;

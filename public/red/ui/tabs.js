@@ -87,6 +87,9 @@ RED.tabs = function() {
                     activateTab(tab.find("a"));
                 }
                 li.remove();
+                if (options.onremove) {
+                    options.onremove(id);
+                }
                 
             },
             activateTab: activateTab,

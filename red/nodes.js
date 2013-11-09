@@ -292,7 +292,8 @@ var parseConfig = function() {
     missingTypes = [];
     for (var i in activeConfig) {
         var type = activeConfig[i].type;
-        if (type != "workspace") {
+        // TODO: remove workspace in next release+1
+        if (type != "workspace" && type != "tab") {
             var nt = node_type_registry.get(type);
             if (!nt && missingTypes.indexOf(type) == -1) {
                 missingTypes.push(type);
@@ -311,7 +312,8 @@ var parseConfig = function() {
     events.emit("nodes-starting");
     for (var i in activeConfig) {
         var nn = null;
-        if (activeConfig[i].type != "workspace") {
+        // TODO: remove workspace in next release+1
+        if (activeConfig[i].type != "workspace" && activeConfig[i].type != "tab") {
             var nt = node_type_registry.get(activeConfig[i].type);
             if (nt) {
                 try {
