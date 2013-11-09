@@ -202,7 +202,7 @@
         },
         oneditprepare: function() {
             var repeattype = "none";
-            if (this.repeat != "") {
+            if (this.repeat != "" && this.repeat != 0) {
                 repeattype = "interval";
                 $("#inject-time-interval-units option").filter(function() {return $(this).val() == "s";}).attr('selected',true);
                 $("#inject-time-interval-count").val(this.repeat);
@@ -307,7 +307,7 @@
                 var timerange = "";
                 if (startTime == endTime) {
                     //TODO: invalid
-                    repeat = 0;
+                    repeat = "";
                     crontab = "";
                 } else if (endTime == 0) {
                     timerange = startTime+"-23";
@@ -330,13 +330,13 @@
                     }
                     timerange = startpart+","+endpart;
                 }
-                repeat = 0;
+                repeat = "";
                 crontab = "*/"+count+" "+timerange+" * * "+days;
             } else if (type == "time") {
                 var time = $("#inject-time-time").val();
                 var days = $("#inject-time-time-days option:selected").val();
                 var parts = time.split(":");
-                repeat = 0;
+                repeat = "";
                 crontab = parts[1]+" "+parts[0]+" * * "+days;
             }
 
