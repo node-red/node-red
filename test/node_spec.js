@@ -26,7 +26,7 @@ describe('Node', function() {
             n.should.have.property('id','123');
             n.should.have.property('type','abc');
             n.should.not.have.property('name');
-            n.wires.should.have.a.length(2);
+            n.wires.should.have.length(2);
         });
         
     });

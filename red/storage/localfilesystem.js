@@ -27,8 +27,6 @@ var userDir;
 var libDir;
 var libFlowsDir;
 
-// TODO: Make user data directory relocatable
-
 function listFiles(dir) {
     var dirs = {};
     var files = [];
@@ -93,7 +91,7 @@ function getFileBody(root,path) {
         var thisRead = fs.readSync(fd,buffer,0,length);
         read += thisRead;
         if (scanning) {
-            var data = remaining+buffer.toString();
+            var data = remaining+buffer.slice(0,thisRead).toString();
             var parts = data.split("\n");
             remaining = parts.splice(-1)[0];
             for (var i=0;i<parts.length;i+=1) {
@@ -151,7 +149,6 @@ var localfilesystem = {
             flowsFile = 'flows_'+require('os').hostname()+'.json';
             flowsFullPath = fspath.join(userDir,flowsFile);
         }
-
         credentialsFile = fspath.join(userDir,"credentials.json");
         
         libDir = fspath.join(userDir,"lib");
@@ -293,7 +290,6 @@ var localfilesystem = {
         
         fs.lstat(rootPath,function(err,stats) {
             if (err) {
-                console.log(err);
                 defer.reject(err);
             } else if (stats.isFile()) {
                 defer.resolve(getFileBody(root,path));
