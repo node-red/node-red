@@ -17,6 +17,7 @@ var util = require("util");
 var EventEmitter = require("events").EventEmitter;
 var fs = require("fs");
 var events = require("./events");
+var storage = null;
 
 function getCallerFilename(type) {
     //if (type == "summary") {
@@ -194,29 +195,17 @@ Node.prototype.error = function(msg) {
 }
 
 var credentials = {};
-var credentialsFile = "credentials.json";
-if (fs.existsSync(credentialsFile)) {
-    credentials = JSON.parse(fs.readFileSync(credentialsFile,'utf8'));
-}
-
-function saveCredentialsFile() {
-    fs.writeFile(credentialsFile, JSON.stringify(credentials), function(err) {
-            if(err) {
-                util.log(err);
-            }
-    });
-}
 
 module.exports.addCredentials = function(id,creds) {
     credentials[id] = creds;
-    saveCredentialsFile();
+    storage.saveCredentials(credentials);
 }
 module.exports.getCredentials = function(id) {
     return credentials[id];
 }
 module.exports.deleteCredentials = function(id) {
     delete credentials[id];
-    saveCredentialsFile();
+    storage.saveCredentials(credentials);
 }
 module.exports.createNode = function(node,def) {
     Node.call(node,def);
@@ -253,7 +242,7 @@ module.exports.load = function() {
     //events.emit("nodes-loaded");
 }
 
-var activeConfig = null;
+var activeConfig = [];
 var missingTypes = [];
 
 events.on('type-registered',function(type) {
@@ -285,7 +274,21 @@ module.exports.stopFlows = stopFlows;
 module.exports.setConfig = function(conf) {
     stopFlows();
     activeConfig = conf;
-    parseConfig();
+    
+    if (!storage) {
+        // Do this lazily to ensure the storage provider as been initialised
+        storage = require("./storage").storage;
+    }
+    storage.getCredentials().then(function(creds) {
+        credentials = creds;
+        parseConfig();
+    }).otherwise(function(err) {
+        util.log("[red] Error loading credentials : "+err);
+    });
+}
+
+module.exports.getConfig = function() {
+    return activeConfig;
 }
 
 var parseConfig = function() {
@@ -339,7 +342,7 @@ var parseConfig = function() {
         }
     }
     if (deletedCredentials) {
-        saveCredentialsFile();
+        storage.saveCredentials(credentials);
     }
     events.emit("nodes-started");
 }

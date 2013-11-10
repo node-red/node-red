@@ -21,6 +21,7 @@
     ],
     "dependencies": {
         "express": "3.x",
+        "when": "~2.6.0",
         "mqtt": "~0.3.3",
         "ws": "~0.4.31",
         "mustache": "~0.7.2",
