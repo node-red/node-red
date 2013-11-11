@@ -104,7 +104,7 @@ function HTTPRequest(n) {
                     msg.statusCode = err.code;
                     node.send(msg);
             });
-            if (msg.payload && (method == "PUSH" || method == "PUT") ) {
+            if (msg.payload && (method == "POST" || method == "PUT") ) {
                 if (typeof msg.payload === "string" || Buffer.isBuffer(msg.payload)) {
                     req.write(msg.payload);
                 } else if (typeof msg.payload == "number") {

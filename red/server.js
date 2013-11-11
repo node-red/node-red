@@ -14,30 +14,21 @@
  * limitations under the License.
  **/
 
-var fs = require('fs');
 var util = require('util');
 var createUI = require("./ui");
 var redNodes = require("./nodes");
-
-//TODO: relocated user dir
-
-var flowfile = '';
 
 var app = null;
 var server = null;
 
 function createServer(_server,settings) {
     server = _server;
+    
+    storage = require("./storage").init(settings);
+    
     app = createUI(settings);
     
     flowfile = settings.flowFile || 'flows_'+require('os').hostname()+'.json';
-    
-    //TODO: relocated user dir
-    fs.exists("lib/",function(exists) {
-            if (!exists) {
-                fs.mkdir("lib");
-            }
-    });
     
     app.get("/nodes",function(req,res) {
             res.writeHead(200, {'Content-Type': 'text/plain'});
@@ -46,15 +37,9 @@ function createServer(_server,settings) {
     });
     
     app.get("/flows",function(req,res) {
-            fs.exists(flowfile, function (exists) {
-                    if (exists) {
-                        res.sendfile(flowfile);
-                    } else {
-                        res.writeHead(200, {'Content-Type': 'text/plain'});
-                        res.write("[]");
-                        res.end();
-                    }
-            });
+            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.write(JSON.stringify(redNodes.getConfig()));
+            res.end();
     });
     
     app.post("/flows",function(req,res) {
@@ -65,12 +50,11 @@ function createServer(_server,settings) {
             req.on('end', function() {
                     res.writeHead(204, {'Content-Type': 'text/plain'});
                     res.end();
-                    fs.writeFile(flowfile, fullBody, function(err) {
-                            if(err) {
-                                util.log(err);
-                            } else {
-                                redNodes.setConfig(JSON.parse(fullBody));
-                            }
+                    var flows = JSON.parse(fullBody);
+                    storage.saveFlows(flows).then(function() {
+                        redNodes.setConfig(flows);
+                    }).otherwise(function(err) {
+                        util.log("[red] Error saving flows : "+err);
                     });
             });
     });
@@ -90,16 +74,12 @@ function start() {
     util.log('or any other errors are resolved');
     util.log("------------------------------------------");
     
-    
-    fs.exists(flowfile, function (exists) {
-            if (exists) {
-                util.log("[red] Loading flows : "+flowfile);
-                fs.readFile(flowfile,'utf8',function(err,data) {
-                        redNodes.setConfig(JSON.parse(data));
-                });
-            } else {
-                util.log("[red] Flows file not found : "+flowfile);
+    storage.getFlows().then(function(flows) {
+            if (flows.length > 0) {
+                redNodes.setConfig(flows);
             }
+    }).otherwise(function(err) {
+            util.log("[red] Error loading flows : "+err);
     });
 }
 
