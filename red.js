@@ -54,6 +54,10 @@ settings.flowFile = process.argv[2] || settings.flowFile;
 var red = RED.init(server,settings);
 app.use(settings.httpRoot,red);
 
+if (settings.httpStatic) {
+    app.use("/",express.static(settings.httpStatic));
+}
+
 RED.start();
 
 var listenPath = 'http'+(settings.https?'s':'')+'://'+

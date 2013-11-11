@@ -40,6 +40,11 @@ module.exports = {
     // The following property can be used to specifiy a different root path.
     //httpRoot: '/admin',
 
+    // When httpRoot is used to move the UI to a different root path, the 
+    // following property can be used to identify a directory of static content
+    // that should be served at http://localhost:1880/.
+    //httpStatic: '/home/nol/node-red-dashboard/',
+    
     // The following property can be used to enable HTTPS
     // See http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener
     // for details on its contents.
