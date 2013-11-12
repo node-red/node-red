@@ -15,19 +15,9 @@
  **/
  
  
-var settings;
-var storage;
+var settings = require('../red').settings;
 
-module.exports = {
-    init: function(_settings) {
-        settings = _settings;
-        
-        var storageType = settings.storageModule || "localfilesystem";
-        
-        storage = require("./"+storageType).init(settings);
-        return storage;
-    },
-};
+var storageType = settings.storageModule || "localfilesystem";
 
-module.exports.__defineGetter__("storage", function() { return storage; });
+module.exports = require("./"+storageType);
 

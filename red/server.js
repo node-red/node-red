@@ -20,12 +20,13 @@ var redNodes = require("./nodes");
 
 var app = null;
 var server = null;
+var settings = null;
+var storage = null;
 
-function createServer(_server,settings) {
+function createServer(_server,_settings) {
     server = _server;
-    
-    storage = require("./storage").init(settings);
-    
+    settings = _settings;
+    storage = require("./storage");
     app = createUI(settings);
     
     flowfile = settings.flowFile || 'flows_'+require('os').hostname()+'.json';
@@ -61,25 +62,27 @@ function createServer(_server,settings) {
 }
 
 function start() {
-    console.log("\nWelcome to Node-RED\n===================\n");
-    util.log("[red] Loading palette nodes");
-    util.log("------------------------------------------");
-    redNodes.load();
-    util.log("");
-    util.log('You may ignore any errors above here if they are for');
-    util.log('nodes you are not using. The nodes indicated will not');
-    util.log('be available in the main palette until any missing');
-    util.log('modules are installed, typically by running:');
-    util.log('   npm install {the module name}');
-    util.log('or any other errors are resolved');
-    util.log("------------------------------------------");
-    
-    storage.getFlows().then(function(flows) {
-            if (flows.length > 0) {
-                redNodes.setConfig(flows);
-            }
-    }).otherwise(function(err) {
-            util.log("[red] Error loading flows : "+err);
+    storage.init(settings).then(function() {
+        console.log("\nWelcome to Node-RED\n===================\n");
+        util.log("[red] Loading palette nodes");
+        util.log("------------------------------------------");
+        redNodes.load();
+        util.log("");
+        util.log('You may ignore any errors above here if they are for');
+        util.log('nodes you are not using. The nodes indicated will not');
+        util.log('be available in the main palette until any missing');
+        util.log('modules are installed, typically by running:');
+        util.log('   npm install {the module name}');
+        util.log('or any other errors are resolved');
+        util.log("------------------------------------------");
+        
+        storage.getFlows().then(function(flows) {
+                if (flows.length > 0) {
+                    redNodes.setConfig(flows);
+                }
+        }).otherwise(function(err) {
+                util.log("[red] Error loading flows : "+err);
+        });
     });
 }
 

@@ -277,7 +277,7 @@ module.exports.setConfig = function(conf) {
     
     if (!storage) {
         // Do this lazily to ensure the storage provider as been initialised
-        storage = require("./storage").storage;
+        storage = require("./storage");
     }
     storage.getCredentials().then(function(creds) {
         credentials = creds;

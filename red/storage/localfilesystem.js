@@ -160,7 +160,9 @@ var localfilesystem = {
         if (!fs.existsSync(libFlowsDir)) {
             fs.mkdirSync(libFlowsDir);
         }
-        return this;
+        var defer = when.defer();
+        defer.resolve();
+        return defer.promise;
     },
     getFlows: function() {
         var defer = when.defer();

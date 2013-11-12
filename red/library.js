@@ -19,7 +19,7 @@ var storage = null;
 
 function init() {
     redApp = require("./server").app;
-    storage = require("./storage").storage;
+    storage = require("./storage");
     
     // -------- Flow Library --------
     redApp.post(new RegExp("/library/flows\/(.*)"), function(req,res) {
