@@ -30,6 +30,7 @@ module.exports = {
         if (!connections[id]) {
             connections[id] = function() {
                 var client = mqtt.createClient(port,broker);
+                client.setMaxListeners(0);
                 var options = {keepalive:15,clientId:'mqtt_' + (1+Math.random()*4294967295).toString(16)};
                 var queue = [];
                 var subscriptions = [];
