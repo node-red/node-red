@@ -14,12 +14,15 @@
   limitations under the License.
 -->
 
+<!-- First, the content of the edit dialog is defined.                       -->
 <script type="text/x-red" data-template-name="delay">
+
     <div class="form-row">
         <label for="node-input-pauseType"><i class="icon-tasks"></i> Action</label>
         <select id="node-input-pauseType" style="width:270px !important">
           <option value="delay">Delay message</option>
-          <option value="rate">Limit message rate</option>
+          <option value="rate">Limit rate to</option>
+          <option value="random">Random delay</option>
         </select>
     </div>
     <div id="delay-details" class="form-row">
@@ -33,10 +36,11 @@
           <option value="days">Days</option>
         </select>
     </div>
+    
     <div id="rate-details" class="form-row">
         <label for="node-input-rate"><i class="icon-time"></i> To</label>
-        <input type="text" id="node-input-rate" placeholder="1" style="direction:rtl; width:40px !important">
-        <label for="node-input-rateUnits" style="width:120px !important">message(s) per</label>
+        <input type="text" id="node-input-rate" placeholder="1" style="direction:rtl; width:50px !important">
+        <label for="node-input-reateUnits">message(s) per</label>
         <select id="node-input-rateUnits" style="width:140px !important">
           <option value="second">Second</option>
           <option value="minute">Minute</option>
@@ -44,72 +48,114 @@
           <option value="day">Day</option>
         </select>
     </div>
+
+    <div id="random-details" class="form-row">
+        <label for="node-input-randomFirst"><i class="icon-time"></i> Between</label>
+        <input type="text" id="node-input-randomFirst" placeholder="" style="directon:rtl; width:30px !important">
+		<label for="node-input-randomLast" style="width:20px"> & </label>
+        <input type="text" id="node-input-randomLast" placeholder="" style="directon:rtl; width:30px !important">
+        <select id="node-input-randomUnits" style="width:140px !important">
+          <option value="milliseconds">Milliseconds</option>
+          <option value="seconds">Seconds</option>
+          <option value="minutes">Minutes</option>
+          <option value="hours">Hours</option>
+          <option value="days">Days</option>
+        </select>
+    </div>
+    
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    
 </script>
 
-
+<!-- Next, some simple help text is provided for the node.                   -->
 <script type="text/x-red" data-help-name="delay">
-    <p>Introduces a delay into a flow or rate limits messages</p>
-    <p>Default delay is 5 seconds or rate limit of 1 message/second, but both can be configured</p>
-    <p>The rate limiter will delay messages by buffering in a time released queue. A warning is generated if the buffer is larger than 1000 items.</p>
+    <p>Introduces a delay into a flow or rate limts messges</p>
+    <p>Default delay is 5 seconds and rate limit of 1 msg/second, but both can be configured</p>
 </script>
 
+<!-- Finally, the node type is registered along with all of its properties   -->
 <script type="text/javascript">
     RED.nodes.registerType('delay',{
-        category: 'function',
+        category: 'function',      // the palette category
         color:"#E6E0F8",
-        defaults: {
-            name: {value:""},
+        defaults: {             // defines the editable properties of the node
+            name: {value:""},   //  along with default values.
             pauseType: {value:"delay", required:true},
             timeout: {value:"5", required:true, validate:RED.validators.number()},
             timeoutUnits: {value:"seconds"},
             rate: {value:"1", required:true, validate:RED.validators.number()},
-            rateUnits: {value: "second"}
+            rateUnits: {value: "second"},
+            randomFirst: {value:"1", required:true, validate:RED.validators.number()},
+            randomLast: {value:"5", required:true, validate:RED.validators.number()},
+            randomUnits: {value: "seconds"}
         },
-        inputs:1,
-        outputs:1,
-        icon: "timer.png",
-        label: function() {
+        inputs:1,                // set the number of inputs - only 0 or 1
+        outputs:1,               // set the number of outputs - 0 to n
+        icon: "timer.png",    // set the icon (held in public/icons)
+        label: function() {      // sets the default label contents
             if (this.pauseType == "delay") {
               var units = this.timeoutUnits ? this.timeoutUnits.charAt(0) : "s";
               return this.name||"delay "+this.timeout+" " + units;
             } else if (this.pauseType == "rate") {
               var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
               return this.name||"limit "+this.rate+" msg/"+ units;
+            } else if (this.pauseType == "random") {
+              return "random";
             }
-            return "";
+            return "foo";
         },
-        labelStyle: function() {
+        labelStyle: function() { // sets the class to apply to the label
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
-          $( "#node-input-timeout" ).spinner({ min:1, max:60 });
-          $( "#node-input-rate" ).spinner({ min:1});
-
+          $( "#node-input-timeout" ).spinner({min:1,max:60});
+          $( "#node-input-rate" ).spinner({min:1});
+          
+          $( "#node-input-randomFirst" ).spinner({min:0});
+          $( "#node-input-randomLast" ).spinner({min:1});
+        
           if (this.pauseType == "delay") {
             $("#delay-details").show();
             $("#rate-details").hide();
+            $("#random-details").hide();
           } else if (this.pauseType == "rate") {
             $("#delay-details").hide();
             $("#rate-details").show();
+            $("#random-details").hide();
+          } else if (this.pauseType == "random") {
+        	$("#delay-details").hide();
+            $("#rate-details").hide();
+            $("#random-details").show();
           }
-
+          
           if (!this.timeoutUnits) {
             $("#node-input-timeoutUnits option").filter(function() {
-              return $(this).val() == 'seconds';
+              return $(this).val() == 'seconds'; 
             }).attr('selected', true);
           }
-
+          
+          if (!this.randomUnits) {
+        	$("#node-input-randomUnits option").filter(function() {
+               return $(this).val() == 'seconds'; 
+            }).attr('selected', true);
+          }
+          
           $("#node-input-pauseType").on("change",function() {
             if (this.value == "delay") {
               $("#delay-details").show();
               $("#rate-details").hide();
+              $("#random-details").hide();
             } else if (this.value == "rate") {
               $("#delay-details").hide();
               $("#rate-details").show();
+              $("#random-details").hide();
+            } else if (this.value == "random") {
+              $("#delay-details").hide();
+              $("#rate-details").hide();
+              $("#random-details").show();
             }
           });
         }
