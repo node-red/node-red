@@ -20,7 +20,7 @@ var util = require('util');
 var oldmail = {};
 
 try {
-	var emailkey = require("../../settings").email || require("../../../emailkeys.js");
+	var emailkey = RED.settings.email || require("../../../emailkeys.js");
 } catch(err) {
 	throw new Error("Failed to load Email credentials");
 }
