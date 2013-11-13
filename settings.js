@@ -40,7 +40,11 @@ module.exports = {
     // By default, all user data is stored in the Node-RED install directory. To
     // use a different location, the following property can be used
     //userDir: '/home/nol/.node-red/',
-    
+   
+    // Node-RED scans the `nodes` directory in the install directory to find nodes.
+    // The following property can be used to specify an additional directory to scan.
+    //nodesDir: '/home/nol/.node-red/nodes',
+ 
     // You can protect the user interface with a userid and password by using the following property
     // the password must be an md5 hash  eg.. 5f4dcc3b5aa765d61d8327deb882cf99 ('password')
     //httpAuth: {user:"user",pass:"5f4dcc3b5aa765d61d8327deb882cf99"},

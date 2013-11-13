@@ -66,7 +66,7 @@ function start() {
         console.log("\nWelcome to Node-RED\n===================\n");
         util.log("[red] Loading palette nodes");
         util.log("------------------------------------------");
-        redNodes.load();
+        redNodes.load(settings);
         util.log("");
         util.log('You may ignore any errors above here if they are for');
         util.log('nodes you are not using. The nodes indicated will not');

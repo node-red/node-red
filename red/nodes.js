@@ -16,6 +16,7 @@
 var util = require("util");
 var EventEmitter = require("events").EventEmitter;
 var fs = require("fs");
+var path = require("path");
 var events = require("./events");
 var storage = null;
 
@@ -215,14 +216,14 @@ module.exports.registerType = node_type_registry.register;
 module.exports.getNodeConfigs = node_type_registry.getNodeConfigs;
 module.exports.addLogHandler = registry.addLogHandler;
 
-module.exports.load = function() {
+module.exports.load = function(settings) {
     function loadNodes(dir) {
         fs.readdirSync(dir).sort().filter(function(fn){
-                var stats = fs.statSync(dir+"/"+fn);
+                var stats = fs.statSync(path.join(dir,fn));
                 if (stats.isFile()) {
                     if (/\.js$/.test(fn)) {
                         try {
-                            require(dir+"/"+fn);
+                            require(path.join(dir,fn));
                         } catch(err) {
                             util.log("["+fn+"] "+err);
                             //console.log(err.stack);
@@ -231,14 +232,17 @@ module.exports.load = function() {
                 } else if (stats.isDirectory()) {
                     // Ignore /.dirs/ and /lib/
                     if (!/^(\..*|lib|icons)$/.test(fn)) {
-                        loadNodes(dir+"/"+fn);
+                        loadNodes(path.join(dir,fn));
                     } else if (fn === "icons") {
-                        events.emit("node-icon-dir",dir+"/"+fn);
+                        events.emit("node-icon-dir",path.join(dir,fn));
                     }
                 }
         });
     }
     loadNodes(__dirname+"/../nodes");
+    if (settings.nodesDir) {
+        loadNodes(settings.nodesDir);
+    }
     //events.emit("nodes-loaded");
 }
 
