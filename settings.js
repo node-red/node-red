@@ -14,6 +14,7 @@
  * limitations under the License.
  **/
 module.exports = {
+    // the tcp port that the Node-RED web server is listening on
     uiPort: 1880,
     
     // By default, the Node-RED UI accepts connections on all IPv4 interfaces.
@@ -21,8 +22,16 @@ module.exports = {
     // example, the following would only allow connections from the local machine. 
     //uiHost: "127.0.0.1",
     
+    // Retry time in milliseconds for MQTT connections
     mqttReconnectTime: 15000,
+
+    // Retry time in milliseconds for Serial port connections
     serialReconnectTime: 15000,
+
+    // Retry time in milliseconds for TCP socket connections
+    //socketReconnectTime: 10000,
+
+    // Maximum number of lines in debug window before pruning
     debugMaxLength: 1000,
 
     // The file containing the flows. If not set, it defaults to flows_<hostname>.json
