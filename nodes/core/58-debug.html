@@ -114,7 +114,7 @@
         function debugConnect() {
             //console.log("debug ws connecting");
             var path = location.hostname+":"+location.port+document.location.pathname;
-            path = path+(path.slice(-1) == "/"?"":"/")+"debug";
+            path = path+(path.slice(-1) == "/"?"":"/")+"debug/ws";
             path = "ws"+(document.location.protocol=="https:"?"s":"")+"://"+path;
             var ws = new WebSocket(path);
             ws.onopen = function() {

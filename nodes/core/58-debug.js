@@ -79,7 +79,11 @@ DebugNode.send = function(msg) {
 }
 
 DebugNode.activeConnections = [];
-DebugNode.wsServer = new ws.Server({server:RED.server});
+
+var path = RED.settings.httpRoot || "/";
+path = path + (path.slice(-1) == "/" ? "":"/") + "debug/ws";
+
+DebugNode.wsServer = new ws.Server({server:RED.server,path:path});
 DebugNode.wsServer.on('connection',function(ws) {
 	DebugNode.activeConnections.push(ws);
 	ws.on('close',function() {
