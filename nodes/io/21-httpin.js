@@ -30,7 +30,9 @@ function HTTPIn(n) {
 
     var node = this;
     this.callback = function(req,res) {
-        node.send({req:req,res:res});
+        if (node.method == "post") { node.send({req:req,res:res,payload:req.body}); }
+        else if (node.method == "get") { node.send({req:req,res:res,payload:req.query}); }
+        else node.send({req:req,res:res});
     }
     if (this.method == "get") {
         RED.app.get(this.url,this.callback);
