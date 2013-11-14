@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 
-var RED = require("../../red/red");
+var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var nodemailer = require("nodemailer");
-var emailkey = require("../../../emailkeys.js");
+var emailkey = require(process.env.NODE_RED_HOME+"/../emailkeys.js");
 
 var smtpTransport = nodemailer.createTransport("SMTP",{
 	service: emailkey.service,

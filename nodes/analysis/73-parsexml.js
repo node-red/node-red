@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-var RED = require("../../red/red");
+var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var util = require("util");
 var parseString = require('xml2js').parseString;
 var gotEyes = false;

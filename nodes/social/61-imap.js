@@ -14,13 +14,13 @@
  * limitations under the License.
  **/
 
-var RED = require("../../red/red");
+var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var Imap = require('imap');
 var util = require('util');
 var oldmail = {};
 
 try {
-	var emailkey = RED.settings.email || require("../../../emailkeys.js");
+	var emailkey = RED.settings.email || require(process.env.NODE_RED_HOME+"/../emailkeys.js");
 } catch(err) {
 	throw new Error("Failed to load Email credentials");
 }

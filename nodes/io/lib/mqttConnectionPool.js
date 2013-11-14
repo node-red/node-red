@@ -15,7 +15,7 @@
  **/
 var util = require("util");
 var mqtt = require("./mqtt");
-var settings = require("../../../red/red").settings;
+var settings = require(process.env.NODE_RED_HOME+"/red/red").settings;
 
 var connections = {};
 
