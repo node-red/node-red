@@ -102,17 +102,17 @@
 </script>
 
 <script type="text/x-red" data-template-name="twitter in">
-	<div class="form-row">
+    <div class="form-row">
         <label for="node-input-twitter"><i class="icon-user"></i> Log in as</label>
         <input type="text" id="node-input-twitter">
     </div>
-	<div class="form-row">
-		<label for="node-input-user"><i class="icon-search"></i> Search</label>
-		<select type="text" id="node-input-user" style="display: inline-block; vertical-align: middle; width:60%;">
-			<option value="false">all public tweets</option>
-			<option value="true">the tweets of who you follow</option>
-		</select>
-	</div>
+    <div class="form-row">
+        <label for="node-input-user"><i class="icon-search"></i> Search</label>
+        <select type="text" id="node-input-user" style="display: inline-block; vertical-align: middle; width:60%;">
+            <option value="false">all public tweets</option>
+            <option value="true">the tweets of who you follow</option>
+        </select>
+    </div>
     <div class="form-row">
         <label for="node-input-tags"><i class="icon-tags"></i> for</label>
         <input type="text" id="node-input-tags" placeholder="comma-separated words, @ids, #tags">
@@ -127,10 +127,11 @@
 </script>
 
 <script type="text/x-red" data-help-name="twitter in">
-	<p>Twitter input node. Watches either the public or the user's stream for tweets containing the configured search term.</p>
-	<p>Sets the <b>msg.topic</b> to <i>tweets/</i> and then appends the senders screen name.</p>
-	<p>Sets <b>msg.location</b> to the tweeters location if known.</p>
-	<p>Sets <b>msg.tweet</b> to the full tweet object as documented by <a href="https://dev.twitter.com/docs/platform-objects/tweets">Twitter</a>.
+    <p>Twitter input node. Watches either the public or the user's stream for tweets containing the configured search term.</p>
+    <p>Use space for <i>and</i> and comma , for <i>or</i> when searching for multiple terms.</p>
+    <p>Sets the <b>msg.topic</b> to <i>tweets/</i> and then appends the senders screen name.</p>
+    <p>Sets <b>msg.location</b> to the tweeters location if known.</p>
+    <p>Sets <b>msg.tweet</b> to the full tweet object as documented by <a href="https://dev.twitter.com/docs/platform-objects/tweets">Twitter</a>.
 </script>
 
 <script type="text/javascript">
@@ -157,7 +158,6 @@
 </script>
 
 
-
 <script type="text/x-red" data-template-name="twitter out">
     <div class="form-row">
         <label for="node-input-twitter"><i class="icon-user"></i> Twitter</label>
@@ -170,7 +170,7 @@
 </script>
 
 <script type="text/x-red" data-help-name="twitter out">
-	<p>Twitter out node. Tweets the <b>msg.payload</b>.</p>
+    <p>Twitter out node. Tweets the <b>msg.payload</b>.</p>
 </script>
 
 <script type="text/javascript">
