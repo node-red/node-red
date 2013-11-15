@@ -782,7 +782,7 @@ RED.view = function() {
 
             node.each(function(d,i) {
                     if (d.dirty) {
-                        if (d.x < -50) deleteSelection();  // Delete nodes if dragged back to palette
+                        //if (d.x < -50) deleteSelection();  // Delete nodes if dragged back to palette
                         if (d.resize) {
                             var l = d._def.label;
                             l = (typeof l === "function" ? l.call(d) : l)||"";
