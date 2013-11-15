@@ -359,7 +359,7 @@ RED.view = function() {
                 nn.type = selected_tool;
                 nn._def = RED.nodes.getType(nn.type);
                 nn.outputs = nn._def.outputs;
-
+                nn.changed = true;
                 nn.h = Math.max(node_height,(nn.outputs||0) * 15);
 
                 for (var d in nn._def.defaults) {
@@ -778,6 +778,7 @@ RED.view = function() {
 
                     //node.append("path").attr("class","node_error").attr("d","M 3,-3 l 10,0 l -5,-8 z");
                     node.append("image").attr("class","node_error hidden").attr("xlink:href","icons/node-error.png").attr("x",0).attr("y",-6).attr("width",10).attr("height",9);
+                    //node.append("image").attr("class","node_changed hidden").attr("xlink:href","icons/node-error.png").attr("x",12).attr("y",-6).attr("width",10).attr("height",9);
             });
 
             node.each(function(d,i) {
@@ -844,6 +845,11 @@ RED.view = function() {
                         thisNode.selectAll(".node_error")
                             .attr("x",function(d){return d.w-5})
                             .classed("hidden",function(d) { return d.valid; });
+                            
+                        thisNode.selectAll(".node_changed")
+                            .attr("x",function(d){return d.w-15})
+                            .classed("hidden",function(d) { return !d.changed; });
+                            
                         thisNode.selectAll(".port_input").each(function(d,i) {
                                 var port = d3.select(this);
                                 port.attr("y",function(d){return (d.h/2)-5;})
@@ -994,6 +1000,8 @@ RED.view = function() {
 
                 for (var i in new_ms) {
                     new_ms[i].n.selected = true;
+                    new_ms[i].n.changed = true;
+                    
                     new_ms[i].n.x -= dx - mouse_position[0];
                     new_ms[i].n.y -= dy - mouse_position[1];
                     new_ms[i].dx = new_ms[i].n.x - mouse_position[0];

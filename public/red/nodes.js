@@ -274,7 +274,7 @@ RED.nodes = function() {
                             RED.nodes.add(configNode);
                         }
                     } else {
-                        var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires};
+                        var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires,changed:false};
                         if (createNewIds) {
                             node.z = RED.view.getWorkspace();
                             node.id = getID();

@@ -213,7 +213,7 @@ RED.editor = function() {
                                 RED.view.dirty(true);
                                 RED.history.push({t:'edit',node:editing_node,changes:changes,links:removedLinks,dirty:wasDirty});
                             }
-                            
+                            editing_node.changed = true;
                             editing_node.dirty = true;
                             validateNode(editing_node);
                             RED.view.redraw();

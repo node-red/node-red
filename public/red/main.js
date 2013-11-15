@@ -36,8 +36,15 @@ var RED = function() {
                     if (resp && resp.status == 204) {
                         RED.notify("Successfully deployed","success");
                         RED.view.dirty(false);
+                        RED.nodes.eachNode(function(node) {
+                            if (node.changed) {
+                                node.dirty = true;
+                                node.changed = false;
+                            }
+                        });
                         // Once deployed, cannot undo back to a clean state
                         RED.history.markAllDirty();
+                        RED.view.redraw();
                     } else {
                         if (resp) {
                             RED.notify("<strong>Error</strong>: "+resp,"error");
