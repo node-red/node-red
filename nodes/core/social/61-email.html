@@ -25,8 +25,9 @@
 	<p>Sends the <b>msg.payload</b> as an email, with a subject of <b>msg.topic</b>.</p>
 	<p>It sends the message to the configured recipient <i>only</i>.</p>
 	<p><b>msg.topic</b> is used to set the subject of the email, and <b>msg.payload</b> is the body text.</p>
-	<p>Uses the nodemailer module - you also need to pre-configure your email SMTP settings in ../../emailkeys.js - see INSTALL file for details.</p>
+	<p>Uses the nodemailer module - you also need to pre-configure your email SMTP settings in a file emailkeys.js like that below.</p>
 	<p><pre>module.exports = { service: "Gmail", user: "blahblah@gmail.com", pass: "password", server: "imap.gmail.com", port: "993" }</pre></p>
+	<p>This <b>must</b> be located in the diectory above node-red.</p>
 </script>
 
 <script type="text/javascript">
