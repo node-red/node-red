@@ -1,43 +1,61 @@
 {
-    "name"         : "node-red",
-    "version"      : "0.4.0",
-    "description"  : "A visual tool for wiring the Internet of Things",
-    "homepage"     : "http://nodered.org",
-    "license"      : "Apache",
-    "repository"   : {
-        "type":"git",
-        "url":"https://github.com/node-red/node-red.git"
-    },
-    "main"         : "red/red.js",
-    "scripts"      : {
-        "start": "node red.js"
-    },
-    "contributors": [ 
-        {"name": "Nick O'Leary"},
-        {"name": "Dave Conway-Jones"}
-    ],
-    "keywords": [
-        "editor", "messaging", "iot", "m2m", "pi", "arduino", "beaglebone", "ibm", "flow"
-    ],
-    "dependencies": {
-        "express": "3.x",
-        "when": "~2.6.0",
-        "mqtt": "~0.3.3",
-        "ws": "~0.4.31",
-        "fs-extra": "~0.8.1",
-        "mustache": "~0.7.2",
-        "cron":"1.x",
-        "ntwitter":"0.5.0",
-        "oauth":"~0.9.10",
-        "xml2js":"~0.2.8",
-        "sentiment":"~0.2.1",
-        "irc":"~0.3.6"
-    },
-    "devDependencies": {
-        "mocha": "~1.12.0",
-        "should": "~1.2.2"
-    },
-    "engines": {
-        "node": ">=0.8"
-    }
+	"name": "node-red",
+	"version": "0.4.0",
+	"description": "A visual tool for wiring the Internet of Things",
+	"homepage": "http://nodered.org",
+	"license": "Apache",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/node-red/node-red.git"
+	},
+	"main": "red/red.js",
+	"scripts": {
+		"start": "node red.js"
+	},
+	"contributors": [
+		{
+			"name": "Nick O'Leary"
+		},
+		{
+			"name": "Dave Conway-Jones"
+		}
+	],
+	"keywords": [
+		"editor",
+		"messaging",
+		"iot",
+		"m2m",
+		"pi",
+		"arduino",
+		"beaglebone",
+		"ibm",
+		"flow"
+	],
+	"dependencies": {
+		"express": "3.x",
+		"when": "~2.6.0",
+		"mqtt": "~0.3.3",
+		"ws": "~0.4.31",
+		"fs-extra": "~0.8.1",
+		"mustache": "~0.7.2",
+		"cron": "1.x",
+		"ntwitter": "0.5.0",
+		"oauth": "~0.9.10",
+		"xml2js": "~0.2.8",
+		"sentiment": "~0.2.1",
+		"irc": "~0.3.6"
+	},
+	"devDependencies": {
+		"mocha": "~1.12.0",
+		"should": "~1.2.2",
+		"matchdep": "~0.3.0",
+		"grunt": "~0.4.1",
+		"grunt-contrib-watch": "~0.5.3",
+		"grunt-express-server": "~0.4.5",
+		"grunt-mocha-test": "~0.7.0",
+		"grunt-contrib-jshint": "~0.7.2"
+	},
+	"engines": {
+		"node": ">=0.8"
+	}
 }
