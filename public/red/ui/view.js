@@ -778,7 +778,7 @@ RED.view = function() {
 
                     //node.append("path").attr("class","node_error").attr("d","M 3,-3 l 10,0 l -5,-8 z");
                     node.append("image").attr("class","node_error hidden").attr("xlink:href","icons/node-error.png").attr("x",0).attr("y",-6).attr("width",10).attr("height",9);
-                    node.append("image").attr("class","node_changed hidden").attr("xlink:href","icons/node-changed.png").attr("x",12).attr("y",-8).attr("width",12).attr("height",11);
+                    node.append("image").attr("class","node_changed hidden").attr("xlink:href","icons/node-changed.png").attr("x",12).attr("y",-6).attr("width",10).attr("height",10);
             });
 
             node.each(function(d,i) {
@@ -844,11 +844,11 @@ RED.view = function() {
                         thisNode.selectAll(".node_tools").attr("x",function(d){return d.w-35;}).attr("y",function(d){return d.h-20;});
                             
                         thisNode.selectAll(".node_changed")
-                            .attr("x",function(d){return d.w-6})
+                            .attr("x",function(d){return d.w-10})
                             .classed("hidden",function(d) { return !d.changed; });
 
                         thisNode.selectAll(".node_error")
-                            .attr("x",function(d){return d.w-5-(d.changed?13:0)})
+                            .attr("x",function(d){return d.w-10-(d.changed?13:0)})
                             .classed("hidden",function(d) { return d.valid; });
                             
                         thisNode.selectAll(".port_input").each(function(d,i) {
