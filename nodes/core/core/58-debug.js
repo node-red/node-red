@@ -110,10 +110,10 @@ RED.app.post("/debug/:id/:state", function(req,res) {
 	if (node != null) {
 	    if (state === "enable") {
 	        node.active = true;
-			res.send(201);
+			res.send(200);
 	    } else if (state === "disable") {
 	        node.active = false;
-			res.send(200);
+			res.send(201);
 	    } else {
 	        res.send(404);
 	    }
