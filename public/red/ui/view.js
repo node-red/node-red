@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 
 RED.view = function() {
     var space_width = 5000,
@@ -25,7 +25,7 @@ RED.view = function() {
 
     var activeWorkspace = 0;
     var workspaceScrollPositions = {};
-    
+
     var selected_link = null,
         mousedown_link = null,
         mousedown_node = null,
@@ -83,9 +83,9 @@ RED.view = function() {
             menuA.on("click",function() {
                 workspace_tabs.activateTab(tab.id);
             });
-            
+
             $('#workspace-menu-list').append(menuli);
-        
+
             if (workspace_tabs.count() == 1) {
                 $('#btn-workspace-delete').parent().addClass("disabled");
             } else {
@@ -100,15 +100,15 @@ RED.view = function() {
             }
         }
     });
-    
+
     var workspaceIndex = 0;
-    
+
     function addWorkspace() {
         var tabId = RED.nodes.id();
         do {
             workspaceIndex += 1;
         } while($("#workspace-tabs a[title='Sheet "+workspaceIndex+"']").size() != 0);
-        
+
         var ws = {type:"tab",id:tabId,label:"Sheet "+workspaceIndex};
         RED.nodes.addWorkspace(ws);
         workspace_tabs.addTab(ws);
@@ -124,8 +124,7 @@ RED.view = function() {
     $('#btn-workspace-delete').on("click",function() {
         deleteWorkspace(activeWorkspace);
     });
-    
-    
+
     function deleteWorkspace(id) {
         if (workspace_tabs.count() == 1) {
             return;
@@ -135,7 +134,7 @@ RED.view = function() {
         $( "#node-dialog-delete-workspace-name" ).text(ws.label);
         $( "#node-dialog-delete-workspace" ).dialog('open');
     }
-    
+
     //d3.select(window).on("keydown", keydown);
 
     function canvasMouseDown() {
@@ -369,6 +368,11 @@ RED.view = function() {
                 RED.nodes.add(nn);
                 RED.editor.validateNode(nn);
                 setDirty(true);
+                // auto select dropped node - so info shows (if visible)
+                clearSelection();
+                nn.selected = true;
+                moving_set.push({n:nn});
+                updateSelection();
                 redraw();
 
                 if (nn._def.autoedit) {
@@ -636,7 +640,7 @@ RED.view = function() {
         redraw();
         d3.event.stopPropagation();
     }
-    
+
     function nodeButtonClicked(d) {
         if (d._def.button.toggle) {
             d[d._def.button.toggle] = !d[d._def.button.toggle];
@@ -645,13 +649,12 @@ RED.view = function() {
         if (d._def.button.onclick) {
             d._def.button.onclick.call(d);
         }
-        
         if (d.dirty) {
             redraw();
         }
         d3.event.preventDefault();
     }
-    
+
     function redraw() {
         vis.attr("transform","scale("+scaleFactor+")");
         outer.attr("width", space_width*scaleFactor).attr("height", space_height*scaleFactor);
@@ -706,7 +709,7 @@ RED.view = function() {
                             .on("mousedown",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.2);d3.event.preventDefault(); d3.event.stopPropagation();}})
                             .on("mouseup",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.4);d3.event.preventDefault();d3.event.stopPropagation();}})
                             .on("mouseover",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.4);}})
-                            .on("mouseout",function(d) {if (!lasso) { 
+                            .on("mouseout",function(d) {if (!lasso) {
                                 var op = 1;
                                 if (d._def.button.toggle) {
                                     op = d[d._def.button.toggle]?1:0.2;
@@ -860,7 +863,7 @@ RED.view = function() {
                         thisNode.selectAll('.node_right_button').attr("transform",function(d){
                                 var x = d.w-6;
                                 if (d._def.button.toggle && !d[d._def.button.toggle]) {
-                                    x = x - 8;  
+                                    x = x - 8;
                                 }
                                 return "translate("+x+",2)";
                         });
@@ -870,8 +873,7 @@ RED.view = function() {
                                 }
                                 return 1;
                         });
-                                
-                        
+
                         //thisNode.selectAll('.node_right_button').attr("transform",function(d){return "translate("+(d.w - d._def.button.width.call(d))+","+0+")";}).attr("fill",function(d) {
                         //         return typeof d._def.button.color  === "function" ? d._def.button.color.call(d):(d._def.button.color != null ? d._def.button.color : d._def.color)
                         //});
@@ -971,7 +973,7 @@ RED.view = function() {
         if (dirty) {
             $("#btn-deploy").removeClass("disabled").addClass("btn-danger");
         } else {
-            $("#btn-deploy").addClass("disabled").removeClass("btn-danger");;
+            $("#btn-deploy").addClass("disabled").removeClass("btn-danger");
         }
     }
 
@@ -1002,7 +1004,6 @@ RED.view = function() {
                 for (var i in new_ms) {
                     new_ms[i].n.selected = true;
                     new_ms[i].n.changed = true;
-                    
                     new_ms[i].n.x -= dx - mouse_position[0];
                     new_ms[i].n.y -= dy - mouse_position[1];
                     new_ms[i].dx = new_ms[i].n.x - mouse_position[0];
@@ -1065,7 +1066,7 @@ RED.view = function() {
         $("#node-input-import").val("");
         $( "#dialog" ).dialog("option","title","Import nodes").dialog( "open" );
     }
-    
+
     function showRenameWorkspaceDialog(id) {
         var ws = RED.nodes.workspace(id);
         $( "#node-dialog-rename-workspace" ).dialog("option","workspace",ws);
@@ -1079,12 +1080,11 @@ RED.view = function() {
                 .prop('disabled',false)
                 .removeClass("ui-state-disabled");
         }
-        
+
         $( "#node-input-workspace-name" ).val(ws.label);
         $( "#node-dialog-rename-workspace" ).dialog("open");
     }
-    
-    
+
     $("#node-dialog-rename-workspace form" ).submit(function(e) { e.preventDefault();});
     $( "#node-dialog-rename-workspace" ).dialog({
         modal: true,
@@ -1153,7 +1153,6 @@ RED.view = function() {
         ]
     });
 
-
     return {
         state:function(state) {
             if (state == null) {
@@ -1183,7 +1182,7 @@ RED.view = function() {
             }
             var scrollStartLeft = chart.scrollLeft();
             var scrollStartTop = chart.scrollTop();
-            
+
             activeWorkspace = z;
             if (workspaceScrollPositions[activeWorkspace]) {
                 chart.scrollLeft(workspaceScrollPositions[activeWorkspace].left);
@@ -1198,7 +1197,7 @@ RED.view = function() {
                 mouse_position[0] += scrollDeltaLeft;
                 mouse_position[1] += scrollDeltaTop;
             }
-                
+
             clearSelection();
             RED.nodes.eachNode(function(n) {
                 n.dirty = true;
