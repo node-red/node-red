@@ -230,8 +230,8 @@ module.exports.load = function(settings) {
                         }
                     }
                 } else if (stats.isDirectory()) {
-                    // Ignore /.dirs/ and /lib/
-                    if (!/^(\..*|lib|icons)$/.test(fn)) {
+                    // Ignore /.dirs/, /lib/ /node_modules/ 
+                    if (!/^(\..*|lib|icons|node_modules)$/.test(fn)) {
                         loadNodes(path.join(dir,fn));
                     } else if (fn === "icons") {
                         events.emit("node-icon-dir",path.join(dir,fn));
