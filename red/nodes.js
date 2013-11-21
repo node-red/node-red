@@ -17,6 +17,7 @@ var util = require("util");
 var EventEmitter = require("events").EventEmitter;
 var fs = require("fs");
 var path = require("path");
+var clone = require("clone");
 var events = require("./events");
 var storage = null;
 
@@ -149,23 +150,30 @@ Node.prototype.send = function(msg) {
     for (var i in this.wires) {
         var wires = this.wires[i];
         if (i < msg.length) {
-            for (var j in wires) {
-                if (msg[i] != null) {
-                    var msgs = msg[i];
-                    if (!util.isArray(msg[i])) {
-                        msgs = [msg[i]];
-                    }
-                    for (var k in msgs) {
-                        var mm = msgs[k];
-                        var m = {};
-                        for (var p in mm) {
-                            if (mm.hasOwnProperty(p)) {
-                                m[p] = mm[p];
-                            }
+            if (msg[i] != null) {
+                var msgs = msg[i];
+                if (!util.isArray(msg[i])) {
+                    msgs = [msg[i]];
+                }
+                if (wires.length == 1) {
+                    // Single recipient, don't need to clone the message
+                    var node = registry.get(wires[0]);
+                    if (node) {
+                        for (var k in msgs) {
+                            var mm = msgs[k];
+                            node.receive(mm);
                         }
+                    }
+                } else {
+                    // Multiple recipients, must send message copies
+                    for (var j in wires) {
                         var node = registry.get(wires[j]);
                         if (node) {
-                            node.receive(m);
+                            for (var k in msgs) {
+                                var mm = msgs[k];
+                                var m = clone(mm);
+                                node.receive(m);
+                            }
                         }
                     }
                 }
