@@ -139,6 +139,7 @@ RED.editor = function() {
     $( "#dialog" ).dialog({
             modal: true,
             autoOpen: false,
+            closeOnEscape: false,
             width: 500,
             buttons: [
                 {
@@ -393,6 +394,7 @@ RED.editor = function() {
             modal: true,
             autoOpen: false,
             width: 500,
+            closeOnEscape: false,
             buttons: [
                 {
                     text: "Ok",
