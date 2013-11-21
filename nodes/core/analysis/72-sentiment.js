@@ -19,14 +19,13 @@ var sentiment = require('sentiment');
 
 function SentimentNode(n) {
     RED.nodes.createNode(this,n);
+    var node = this;
 
     this.on("input", function(msg) {
-            var node = this;
-            sentiment(msg.payload, function (err, result) {
-                msg.sentiment = result;
-                node.send(msg);
-            });
+        sentiment(msg.payload, function (err, result) {
+            msg.sentiment = result;
+            node.send(msg);
+        });
     });
 }
-
 RED.nodes.registerType("sentiment",SentimentNode);
