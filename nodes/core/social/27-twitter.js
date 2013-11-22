@@ -44,10 +44,55 @@ function TwitterInNode(n) {
         });
 
         var node = this;
-        if (this.tags !== "") {
+        if (this.user === "user") {
+            node.poll_ids = [];
+            node.since_ids = {};
+            var users = node.tags.split(",");
+            for (var i=0;i<users.length;i++) {
+                var user = users[i].replace(" ","");
+                twit.getUserTimeline({
+                        screen_name:user,
+                        trim_user:0,
+                        count:1
+                },function() { 
+                    var u = user+"";
+                    return function(err,cb) {
+                        if (cb[0]) {
+                            node.since_ids[u] = cb[0].id_str;
+                        } else {
+                            node.since_ids[u] = '0';
+                        }
+                        node.poll_ids.push(setInterval(function() {
+                            twit.getUserTimeline({
+                                    screen_name:u,
+                                    trim_user:0,
+                                    since_id:node.since_ids[u]
+                            },function(err,cb) {
+                                if (cb) {
+                                    for (var t=cb.length-1;t>=0;t-=1) {
+                                        var tweet = cb[t];
+                                        var where = tweet.user.location||"";
+                                        var la = tweet.lang || tweet.user.lang;
+                                        //console.log(tweet.user.location,"=>",tweet.user.screen_name,"=>",pay);
+                                        var msg = { topic:node.topic+"/"+tweet.user.screen_name, payload:tweet.text, location:where, lang:la, tweet:tweet };
+                                        node.send(msg);
+                                        if (t == 0) {
+                                            node.since_ids[u] = tweet.id_str;
+                                        }
+                                    }
+                                }
+                                if (err) {
+                                    node.error(err);
+                                }
+                            });
+                        },60000));
+                    }
+                }());
+            }
+        } else if (this.tags !== "") {
             try {
                 var thing = 'statuses/filter';
-                if (this.user == "true") { thing = 'user'; }
+                if (this.user === "true") { thing = 'user'; }
                 var st = { track: [node.tags] };
                 var bits = node.tags.split(",");
                 if ((bits.length > 0) && (bits.length % 4 == 0)) {
@@ -109,6 +154,11 @@ function TwitterInNode(n) {
         if (this.stream) {
             this.active = false;
             this.stream.destroy();
+        }
+        if (this.poll_ids) {
+            for (var i=0;i<this.poll_ids.length;i++) {
+                clearInterval(this.poll_ids[i]);
+            }
         }
     });
 }

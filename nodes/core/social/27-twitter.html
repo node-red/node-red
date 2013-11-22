@@ -111,10 +111,11 @@
         <select type="text" id="node-input-user" style="display: inline-block; vertical-align: middle; width:60%;">
             <option value="false">all public tweets</option>
             <option value="true">the tweets of who you follow</option>
+            <option value="user">the tweets of specific users</option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-tags"><i class="icon-tags"></i> for</label>
+        <label for="node-input-tags"><i class="icon-tags"></i> <span id="node-input-tags-label">for</span></label>
         <input type="text" id="node-input-tags" placeholder="comma-separated words, @ids, #tags">
     </div>
     <div class="form-row">
@@ -141,7 +142,7 @@
         defaults: {
             twitter: {type:"twitter-credentials",required:true},
             tags: {value:"",required:true},
-            user: {value:"false",required:true},
+            user: {value:"public",required:true},
             name: {value:""},
             topic: {value:"tweets"}
         },
@@ -153,6 +154,21 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            $("#node-input-user").change(function() {
+                var type = $("#node-input-user option:selected").val();
+                if (type == "user") {
+                    $("#node-input-tags-label").html("User");
+                    $("#node-input-tags").attr("placeholder","comma-separated @twitter handles");
+                } else {
+                    $("#node-input-tags-label").html("for");
+                    $("#node-input-tags").attr("placeholder","comma-separated words, @ids, #hashtags");
+                }                
+
+            });
+            $("#node-input-user").change();
+        
         }
     });
 </script>
