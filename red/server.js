@@ -49,14 +49,20 @@ function createServer(_server,_settings) {
                     fullBody += chunk.toString();
             });
             req.on('end', function() {
-                    res.writeHead(204, {'Content-Type': 'text/plain'});
-                    res.end();
-                    var flows = JSON.parse(fullBody);
-                    storage.saveFlows(flows).then(function() {
-                        redNodes.setConfig(flows);
-                    }).otherwise(function(err) {
+                    try { 
+                        var flows = JSON.parse(fullBody);
+                        storage.saveFlows(flows).then(function() {
+                                res.writeHead(204, {'Content-Type': 'text/plain'});
+                                res.end();
+                                redNodes.setConfig(flows);
+                        }).otherwise(function(err) {
+                            util.log("[red] Error saving flows : "+err);
+                            res.send(500, err.message);
+                        });
+                    } catch(err) {
                         util.log("[red] Error saving flows : "+err);
-                    });
+                        res.send(400, "Invalid flow");
+                    }
             });
     });
 }
