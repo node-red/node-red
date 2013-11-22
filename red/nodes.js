@@ -207,6 +207,10 @@ var credentials = {};
 
 module.exports.addCredentials = function(id,creds) {
     credentials[id] = creds;
+    if (!storage) {
+        // Do this lazily to ensure the storage provider as been initialised
+        storage = require("./storage");
+    }
     storage.saveCredentials(credentials);
 }
 module.exports.getCredentials = function(id) {
