@@ -14,51 +14,52 @@
  * limitations under the License.
  **/
 
-var RED = require(process.env.NODE_RED_HOME+"/red/red");
+var RED = require(process.env.NODE_RED_HOME + "/red/red");
 
 var operators = {
-    'eq':function(a,b) { return a == b; },
-    'neq':function(a,b) { return a != b; },
-    'lt':function(a,b) { return a < b; },
-    'lte':function(a,b) { return a <= b; },
-    'gt':function(a,b) { return a > b; },
-    'gte':function(a,b) { return a >= b; },
-    'btwn':function(a,b,c) { return a >= b && a <= c; },
-    'cont':function(a,b) { return (a+"").indexOf(b) != -1; },
-    'regex': function(a,b) { return (a+"").match(new RegExp(b)); },
+    'eq': function(a, b) { return a == b; },
+    'neq': function(a, b) { return a != b; },
+    'lt': function(a, b) { return a < b; },
+    'lte': function(a, b) { return a <= b; },
+    'gt': function(a, b) { return a > b; },
+    'gte': function(a, b) { return a >= b; },
+    'btwn': function(a, b, c) { return a >= b && a <= c; },
+    'cont': function(a, b) { return (a + "").indexOf(b) != -1; },
+    'regex': function(a, b) { return (a + "").match(new RegExp(b)); },
     'true': function(a) { return a === true; },
     'false': function(a) { return a === false; },
     'null': function(a) { return a === null; },
-    'nnull': function(a) { return a !== null; }
+    'nnull': function(a) { return a !== null; },
+    'else': function(a) { return a === true; }
 };
 
-
 function SwitchNode(n) {
-	RED.nodes.createNode(this,n);
-	
-	this.rules = n.rules;
-	this.property = n.property;
-	
-	var propertyParts = n.property.split(".");
-	
-	var node = this;
-	
-	this.on('input',function(msg) {
-	      var onward = [];
-	      var prop = propertyParts.reduce(function(obj,i) {
-	          return obj[i]
-	      },msg);
-	      for (var i=0;i<node.rules.length;i+=1) {
-	          var rule = node.rules[i];
-	          if (operators[rule.t](prop,rule.v,rule.v2)) {
-	              onward.push(msg);
-	          } else {
-	              onward.push(null);
-	          }
-	      }
-	      this.send(onward);
-	});
+    RED.nodes.createNode(this, n);
+    this.rules = n.rules;
+    this.property = n.property;
+    this.checkall = n.checkall || "true";
+    var propertyParts = n.property.split("."),
+        node = this;
+
+    this.on('input', function (msg) {
+        var onward = [];
+        var prop = propertyParts.reduce(function (obj, i) {
+            return obj[i]
+        }, msg);
+        var elseflag = true;
+        for (var i=0; i<node.rules.length; i+=1) {
+            var rule = node.rules[i];
+            var test = prop;
+            if (rule.t == "else") { test = elseflag; elseflag = true; }
+            if (operators[rule.t](test,rule.v, rule.v2)) {
+                onward.push(msg);
+                elseflag = false;
+                if (node.checkall == "false") { break; }
+            } else {
+                onward.push(null);
+            }
+        }
+        this.send(onward);
+    });
 }
-
-RED.nodes.registerType("switch",SwitchNode);
-
+RED.nodes.registerType("switch", SwitchNode);
