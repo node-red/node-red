@@ -57,6 +57,10 @@ function TwitterInNode(n) {
                 },function() { 
                     var u = user+"";
                     return function(err,cb) {
+                        if (err) {
+                            node.error(err);
+                            return;
+                        }
                         if (cb[0]) {
                             node.since_ids[u] = cb[0].id_str;
                         } else {
@@ -89,6 +93,48 @@ function TwitterInNode(n) {
                     }
                 }());
             }
+        } else if (this.user === "dm") {
+            node.poll_ids = [];
+            twit.getDirectMessages({
+                    screen_name:node.twitterConfig.screen_name,
+                    trim_user:0,
+                    count:1
+            },function(err,cb) {
+                if (err) {
+                    node.error(err);
+                    return;
+                }
+                if (cb[0]) {
+                    node.since_id = cb[0].id_str;
+                } else {
+                    node.since_id = '0';
+                }
+                node.poll_ids.push(setInterval(function() {
+                        twit.getDirectMessages({
+                                screen_name:node.twitterConfig.screen_name,
+                                trim_user:0,
+                                since_id:node.since_id
+                        },function(err,cb) {
+                            if (cb) {
+                                for (var t=cb.length-1;t>=0;t-=1) {
+                                    var tweet = cb[t];
+                                    var where = tweet.user.location||"";
+                                    var la = tweet.lang || tweet.user.lang;
+                                    //console.log(tweet.user.location,"=>",tweet.user.screen_name,"=>",pay);
+                                    var msg = { topic:node.topic+"/"+tweet.user.screen_name, payload:tweet.text, location:where, lang:la, tweet:tweet };
+                                    node.send(msg);
+                                    if (t == 0) {
+                                        node.since_id = tweet.id_str;
+                                    }
+                                }
+                            }
+                            if (err) {
+                                node.error(err);
+                            }
+                        });
+                },65000));
+            });
+            
         } else if (this.tags !== "") {
             try {
                 var thing = 'statuses/filter';

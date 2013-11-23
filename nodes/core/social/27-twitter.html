@@ -112,9 +112,10 @@
             <option value="false">all public tweets</option>
             <option value="true">the tweets of who you follow</option>
             <option value="user">the tweets of specific users</option>
+            <option value="dm">your direct messages</option>
         </select>
     </div>
-    <div class="form-row">
+    <div class="form-row" id="node-input-tags-row">
         <label for="node-input-tags"><i class="icon-tags"></i> <span id="node-input-tags-label">for</span></label>
         <input type="text" id="node-input-tags" placeholder="comma-separated words, @ids, #tags">
     </div>
@@ -159,9 +160,13 @@
             $("#node-input-user").change(function() {
                 var type = $("#node-input-user option:selected").val();
                 if (type == "user") {
+                    $("#node-input-tags-row").show();
                     $("#node-input-tags-label").html("User");
                     $("#node-input-tags").attr("placeholder","comma-separated @twitter handles");
+                } else if (type == "dm") {
+                    $("#node-input-tags-row").hide();
                 } else {
+                    $("#node-input-tags-row").show();
                     $("#node-input-tags-label").html("for");
                     $("#node-input-tags").attr("placeholder","comma-separated words, @ids, #hashtags");
                 }                
