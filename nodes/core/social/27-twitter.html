@@ -129,7 +129,11 @@
 </script>
 
 <script type="text/x-red" data-help-name="twitter in">
-    <p>Twitter input node. Watches either the public or the user's stream for tweets containing the configured search term.</p>
+    <p>Twitter input node. Can be used to search either:
+    <ul><li>the public or a user's stream for tweets containing the configured search term</li>
+        <li>all tweets by specific users</li>
+        <li>direct messages received by the authenticated user</li>
+    </ul></p>
     <p>Use space for <i>and</i> and comma , for <i>or</i> when searching for multiple terms.</p>
     <p>Sets the <b>msg.topic</b> to <i>tweets/</i> and then appends the senders screen name.</p>
     <p>Sets <b>msg.location</b> to the tweeters location if known.</p>
@@ -151,7 +155,16 @@
         outputs:1,
         icon: "twitter.png",
         label: function() {
-            return this.name||this.tags;
+            if (this.name) {
+                return this.name;
+            }
+            if (this.user == "dm") {
+                var user = RED.nodes.node(this.twitter);
+                return (user?user.label()+" ":"")+"DMs";
+            } else if (this.user == "user") {
+                return this.tags+" tweets";
+            }
+            return this.tags;
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";

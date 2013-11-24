@@ -43,6 +43,14 @@ function TwitterInNode(n) {
             access_token_secret: credentials.access_token_secret
         });
 
+        
+        //setInterval(function() {
+        //        twit.get("/application/rate_limit_status.json",null,function(err,cb) {
+        //                console.log("direct_messages:",cb["resources"]["direct_messages"]);
+        //        });
+        //        
+        //},10000);
+        
         var node = this;
         if (this.user === "user") {
             node.poll_ids = [];
@@ -132,7 +140,7 @@ function TwitterInNode(n) {
                                 node.error(err);
                             }
                         });
-                },65000));
+                },120000));
             });
             
         } else if (this.tags !== "") {
