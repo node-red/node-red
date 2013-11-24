@@ -126,10 +126,7 @@ function TwitterInNode(n) {
                             if (cb) {
                                 for (var t=cb.length-1;t>=0;t-=1) {
                                     var tweet = cb[t];
-                                    var where = tweet.user.location||"";
-                                    var la = tweet.lang || tweet.user.lang;
-                                    //console.log(tweet.user.location,"=>",tweet.user.screen_name,"=>",pay);
-                                    var msg = { topic:node.topic+"/"+tweet.user.screen_name, payload:tweet.text, location:where, lang:la, tweet:tweet };
+                                    var msg = { topic:node.topic+"/"+tweet.sender.screen_name, payload:tweet.text, tweet:tweet };
                                     node.send(msg);
                                     if (t == 0) {
                                         node.since_id = tweet.id_str;
