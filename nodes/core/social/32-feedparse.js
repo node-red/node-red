@@ -35,22 +35,18 @@ function FeedParseNode(n) {
                         node.error(error);
                 })
                 .on('meta', function (meta) {})
-                .on('article', function (article) {
-                        if (!(article.guid in node.seen) || ( node.seen[article.guid] != 0 && node.seen[article.guid] != article.date.getTime())) {
-                            node.seen[article.guid] = article.date?article.date.getTime():0;
-                            var msg = {
-                                topic:article.origlink||article.link,
-                                payload: article.description,
-                                article: {
-                                    summary:article.summary,
-                                    link:article.link,
-                                    date: article.date,
-                                    pubdate: article.pubdate,
-                                    author: article.author,
-                                    guid: article.guid,
-                                }
-                            };
-                            node.send(msg);
+                .on('readable', function () {
+                        var stream = this, article;
+                        while (article = stream.read()) {
+                            if (!(article.guid in node.seen) || ( node.seen[article.guid] != 0 && node.seen[article.guid] != article.date.getTime())) {
+                                node.seen[article.guid] = article.date?article.date.getTime():0;
+                                var msg = {
+                                    topic:article.origlink||article.link,
+                                    payload: article.description,
+                                    article: article
+                                };
+                                node.send(msg);
+                            }
                         }
                 })
                 .on('end', function () {
