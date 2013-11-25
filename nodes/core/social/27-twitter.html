@@ -146,7 +146,7 @@
         color:"#C0DEED",
         defaults: {
             twitter: {type:"twitter-credentials",required:true},
-            tags: {value:"",required:true},
+            tags: {value:"",validate:function(v) { return this.user == "dm" || v.length > 0;}},
             user: {value:"false",required:true},
             name: {value:""},
             topic: {value:"tweets"}
