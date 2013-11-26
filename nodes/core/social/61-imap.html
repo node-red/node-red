@@ -15,23 +15,24 @@
 -->
 
 <script type="text/x-red" data-template-name="imap">
-	<div class="form-row node-input-repeat">
-		<label for="node-input-repeat"><i class="icon-repeat"></i>Repeat (S)</label>
-		<input type="text" id="node-input-repeat" placeholder="300">
-	</div>
-	<div class="form-row">
-		<label for="node-input-name"><i class="icon-tag"></i> Name</label>
-		<input type="text" id="node-input-name" placeholder="Name">
-	</div>
+    <div class="form-row node-input-repeat">
+        <label for="node-input-repeat"><i class="icon-repeat"></i>Repeat (S)</label>
+        <input type="text" id="node-input-repeat" placeholder="300">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="imap">
-	<p>Repeatedly gets a <b>single email</b> from an IMAP server and forwards on as a msg if not already seen.</p>
-	<p>The subject is loaded into <b>msg.topic</b> and <b>msg.payload</b> is the body text. <b>msg.from</b> is also set if you need it.</p>
-	<p>Uses the imap module - you also need to pre-configure your email settings in a file emailkeys.js as per below.</p>
-	<p><pre>module.exports = { service: "Gmail", user: "blahblah@gmail.com", pass: "password", server: "imap.gmail.com", port: "993" }</pre></p>
-	<p>This <b>must</b> be located in the diectory above node-red.</p>
-	<p><b>Note:</b> this node <i>only</i> gets the most recent single email from the inbox, so set the repeat (polling) time appropriately.</p>
+    <p>Repeatedly gets a <b>single email</b> from an IMAP server and forwards on as a msg if not already seen.</p>
+    <p>The subject is loaded into <b>msg.topic</b> and <b>msg.payload</b> is the plain text body.
+       If there is text/html then that is returned in <b>msg.html</b>. <b>msg.from</b> and <b>msg.date</b> are also set if you need them.</p>
+    <p>Uses the imap module - you also need to pre-configure your email settings in a file emailkeys.js as per below.</p>
+    <p><pre>module.exports = { service: "Gmail", user: "blahblah@gmail.com", pass: "password", server: "imap.gmail.com", port: "993" }</pre></p>
+    <p>This <b>must</b> be located in the directory above node-red.</p>
+    <p><b>Note:</b> this node <i>only</i> gets the most recent single email from the inbox, so set the repeat (polling) time appropriately.</p>
 </script>
 
 <script type="text/javascript">
