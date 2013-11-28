@@ -171,7 +171,15 @@ Node.prototype.send = function(msg) {
                         if (node) {
                             for (var k in msgs) {
                                 var mm = msgs[k];
+                                // Temporary fix for #97
+                                // TODO: remove this http-node-specific fix somehow
+                                var req = mm.req;
+                                var res = mm.res;
+                                mm.req = null;
+                                mm.res = null;
                                 var m = clone(mm);
+                                m.req = req;
+                                m.res = res;
                                 node.receive(m);
                             }
                         }
