@@ -17,7 +17,6 @@
 var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var Imap = require('imap');
 var util = require('util');
-var oldmail = {};
 
 try {
     var emailkey = RED.settings.email || require(process.env.NODE_RED_HOME+"/../emailkeys.js");
@@ -45,6 +44,7 @@ function ImapNode(n) {
     this.repeat = n.repeat * 1000 || 300000;
     var node = this;
     this.interval_id = null;
+    var oldmail = {};
 
     if (!isNaN(this.repeat) && this.repeat > 0) {
         node.log("repeat = "+this.repeat);
@@ -97,9 +97,10 @@ function ImapNode(n) {
                     if (JSON.stringify(pay) !== oldmail) {
                         node.send(pay);
                         oldmail = JSON.stringify(pay);
+                        node.log('sent new message: '+pay.topic);
                     }
+                    else { node.log('duplicate not sent: '+pay.topic); }
                     imap.end();
-                    node.log('done fetching message');
                 });
             });
         });
@@ -110,18 +111,15 @@ function ImapNode(n) {
         util.log(err);
     });
 
-    imap.on('end', function() {
-        //util.log('Connection ended');
+    this.on("error", function(err) {
+        node.log("error: ",err);
     });
 
     this.on("close", function() {
         if (this.interval_id != null) {
             clearInterval(this.interval_id);
         }
-    });
-
-    this.on("error", function(err) {
-        node.log("error: ",err);
+        imap.destroy();
     });
 
     node.emit("input",{});
