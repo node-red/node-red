@@ -155,16 +155,16 @@ Node.prototype.send = function(msg) {
                 if (!util.isArray(msg[i])) {
                     msgs = [msg[i]];
                 }
-                if (wires.length == 1) {
-                    // Single recipient, don't need to clone the message
-                    var node = registry.get(wires[0]);
-                    if (node) {
-                        for (var k in msgs) {
-                            var mm = msgs[k];
-                            node.receive(mm);
-                        }
-                    }
-                } else {
+                //if (wires.length == 1) {
+                //    // Single recipient, don't need to clone the message
+                //    var node = registry.get(wires[0]);
+                //    if (node) {
+                //        for (var k in msgs) {
+                //            var mm = msgs[k];
+                //            node.receive(mm);
+                //        }
+                //    }
+                //} else {
                     // Multiple recipients, must send message copies
                     for (var j in wires) {
                         var node = registry.get(wires[j]);
@@ -184,7 +184,7 @@ Node.prototype.send = function(msg) {
                             }
                         }
                     }
-                }
+                //}
             }
         }
     }
