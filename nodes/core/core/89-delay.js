@@ -41,7 +41,7 @@ function DelayNode(n) {
 	this.rateUnits = n.rateUnits;
 
 	if (n.timeoutUnits === "milliseconds") {
-		this.timeout = n.timout;
+		this.timeout = n.timeout;
 	} else if (n.timeoutUnits === "seconds") {
 		this.timeout = n.timeout * 1000;
 	} else if (n.timeoutUnits === "minutes") {
