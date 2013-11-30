@@ -1,0 +1,111 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="change">
+    <div>
+        <select id="node-input-action" style="width:95%; margin-right:5px;">
+            <option value="change">Change the value of the property</option>
+            <!-- <option value="replace">Replace value of property</option> -->
+            <option value="replace">Add or replace property</option>
+            <option value="delete">Delete property</option>
+        </select>
+    </div>
+    <div class="form-row" style="padding-top:10px;" id="node-prop1-row">
+        <label id="node-input-todo">called</label>msg.<input type="text" id="node-input-property" style="width: 63%;"/>
+    </div>
+    <div class="form-row" id="node-from-row">
+        <label id="node-input-f">if it contains</label>
+        <input type="text" id="node-input-from" placeholder="this"/>
+    </div>
+    <div class="form-row" id="node-to-row">
+        <label id="node-input-t">replace with</label>
+        <input type="text" id="node-input-to" placeholder="that"/>
+    </div>
+    <br/>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-tips" id="node-tip"></div>
+</script>
+
+<script type="text/x-red" data-help-name="change">
+    <p>A simple function node to change, replace, add or delete properties of a message.</p>
+    <p>When a message arrives, the selected property is modified by the defined rules.
+    The message is then sent to the output.</p>
+    <p><b>Note:</b> Replace only operates on <b>strings</b>. Anything else will be passed straight through.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('change', {
+        color: "#E2D96E",
+        category: 'function',
+        defaults: {
+            action: {value:"change",required:true},
+            property: {value:"payload"},
+            from: {value:""},
+            to: {value:""},
+            name: {value:""}
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "swap.png",
+        label: function() {
+            return this.name || this.action || "change";
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function() {
+            $("#node-input-action").change( function() {
+                var a = $("#node-input-action").val();
+                if (a === "replace") {
+                    $("#node-input-todo").html("called");
+                    //$("#node-input-f").html("name");
+                    $("#node-input-t").html("with value");
+                    $("#node-from-row").hide();
+                    $("#node-to-row").show();
+                    $("#node-tip").html("Tip: expects a new property name and either a fixed value OR the full name of another msg.property eg: msg.sentiment.score");
+                }
+                if (a === "delete") {
+                    $("#node-input-todo").html("called");
+                    //$("#node-input-f").html("called");
+                    //$("#node-input-t").html("to");
+                    $("#node-from-row").hide();
+                    $("#node-to-row").hide();
+                    $("#node-tip").html("Tip: deletes the named property and all sub-properties");
+                }
+                if (a === "change") {
+                    $("#node-input-todo").html("called");
+                    $("#node-input-f").html("If it contains");
+                    $("#node-input-t").html("replace with");
+                    $("#node-from-row").show();
+                    $("#node-to-row").show();
+                    $("#node-tip").html("Tip: <i>if it contains</i> can be a regex, likewise <i>replace with</i> can accept regex results. Only works on strings.");
+                }
+                //if (a === "replace") {
+                 //   $("#node-input-todo").html("called");
+                 //   //$("#node-input-f").html("with");
+                 //   $("#node-input-t").html("with");
+                 //   $("#node-from-row").hide();
+                 //   $("#node-to-row").show();
+                 //   $("#node-tip").html("Tip: accepts either a fixed value OR the full name of another msg.property eg: msg.sentiment.score");
+                //}
+            });
+            $("#node-input-action").change();
+        }
+    });
+</script>

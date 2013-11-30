@@ -30,8 +30,9 @@
 </script>
 
 <script type="text/x-red" data-help-name="mqtt in">
-	<p>MQTT input node. Connects to the specified broker and subscribes to the specified topic. The topic may contain MQTT wildcards.</p>
-	<p>Outputs an object called <b>msg</b> containing <b>msg.topic, msg.payload, msg.qos</b> and <b>msg.retain</b>. <b>msg.payload</b> is a String.</p>
+	<p>MQTT input node. Connects to a broker and subscribes to the specified topic. The topic may contain MQTT wildcards.</p>
+	<p>Outputs an object called <b>msg</b> containing <b>msg.topic, msg.payload, msg.qos</b> and <b>msg.retain</b>.</p>
+	<p><b>msg.payload</b> is a String.</p>
 </script>
 
 <script type="text/javascript">
@@ -105,6 +106,18 @@
         <label for="node-config-input-port" style="margin-left: 10px; width: 35px; "> Port</label>
         <input type="text" id="node-config-input-port" placeholder="Port" style="width:45px">
     </div>
+    <div class="form-row">
+        <label for="node-config-input-clientid"><i class="icon-tag"></i> Client ID</label>
+        <input type="text" id="node-config-input-clientid" placeholder="Leave blank for auto generated">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-user"><i class="icon-user"></i> Username</label>
+        <input type="text" id="node-config-input-user">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-pass"><i class="icon-lock"></i> Password</label>
+        <input type="password" id="node-config-input-pass">
+    </div>
 </script>
 
 <script type="text/javascript">
@@ -112,10 +125,49 @@
         category: 'config',
         defaults: {
             broker: {value:"localhost",required:true},
-            port: {value:1883,required:true,validate:RED.validators.number()}
+            port: {value:1883,required:true,validate:RED.validators.number()},
+            clientid: { value:"" }
+            //user -> credentials
+            //pass -> credentials
+            
         },
         label: function() {
             return this.broker+":"+this.port;
+        },
+        oneditprepare: function() {
+            $.getJSON('mqtt-broker/'+this.id,function(data) {
+                if (data.user) {
+                    $('#node-config-input-user').val(data.user);
+                }
+                if (data.hasPassword) {
+                    $('#node-config-input-pass').val('__PWRD__');
+                } else {
+                    $('#node-config-input-pass').val('');
+                }
+                
+            });
+        },
+        oneditsave: function() {
+            var newUser = $('#node-config-input-user').val();
+            var newPass = $('#node-config-input-pass').val();
+            var credentials = {};
+            credentials.user = newUser;
+            if (newPass != '__PWRD__') {
+                credentials.password = newPass;
+            }
+            $.ajax({
+                url: 'mqtt-broker/'+this.id,
+                type: 'POST',
+                data: credentials,
+                success:function(result){}
+            });
+        },
+        ondelete: function() {
+            $.ajax({
+                url: 'mqtt-broker/'+this.id,
+                type: 'DELETE',
+                success: function(result) {}
+            });
         }
     });
 </script>

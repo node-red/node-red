@@ -155,28 +155,36 @@ Node.prototype.send = function(msg) {
                 if (!util.isArray(msg[i])) {
                     msgs = [msg[i]];
                 }
-                if (wires.length == 1) {
-                    // Single recipient, don't need to clone the message
-                    var node = registry.get(wires[0]);
-                    if (node) {
-                        for (var k in msgs) {
-                            var mm = msgs[k];
-                            node.receive(mm);
-                        }
-                    }
-                } else {
+                //if (wires.length == 1) {
+                //    // Single recipient, don't need to clone the message
+                //    var node = registry.get(wires[0]);
+                //    if (node) {
+                //        for (var k in msgs) {
+                //            var mm = msgs[k];
+                //            node.receive(mm);
+                //        }
+                //    }
+                //} else {
                     // Multiple recipients, must send message copies
                     for (var j in wires) {
                         var node = registry.get(wires[j]);
                         if (node) {
                             for (var k in msgs) {
                                 var mm = msgs[k];
+                                // Temporary fix for #97
+                                // TODO: remove this http-node-specific fix somehow
+                                var req = mm.req;
+                                var res = mm.res;
+                                mm.req = null;
+                                mm.res = null;
                                 var m = clone(mm);
+                                m.req = req;
+                                m.res = res;
                                 node.receive(m);
                             }
                         }
                     }
-                }
+                //}
             }
         }
     }

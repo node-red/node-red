@@ -18,11 +18,29 @@ var https = require('https');
 var util = require("util");
 var express = require("express");
 var crypto = require("crypto");
-var settings = require("./settings");
 var RED = require("./red/red.js");
 
 var server;
 var app = express();
+
+var settingsFile = "./settings";
+var flowFile;
+
+for (var argp = 2;argp < process.argv.length;argp+=1) {
+    var v = process.argv[argp];
+    if (v == "--settings" || v == "-s") {
+        if (argp+1 == process.argv.length) {
+            console.log("Missing argument to --settings");
+            return;
+        }
+        argp++;
+        settingsFile = process.argv[argp];
+    } else {
+        flowFile = v;
+    }
+}
+
+var settings = require(settingsFile);
 
 if (settings.https) {
     server = https.createServer(settings.https,function(req,res){app(req,res);});
@@ -49,7 +67,7 @@ if (settings.httpAuth) {
     );
 }
 
-settings.flowFile = process.argv[2] || settings.flowFile;
+settings.flowFile = flowFile || settings.flowFile;
 
 var red = RED.init(server,settings);
 app.use(settings.httpRoot,red);
