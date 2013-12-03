@@ -28,8 +28,8 @@ var operators = {
     'regex': function(a, b) { return (a + "").match(new RegExp(b)); },
     'true': function(a) { return a === true; },
     'false': function(a) { return a === false; },
-    'null': function(a) { return a === null; },
-    'nnull': function(a) { return a !== null; },
+    'null': function(a) { return typeof a == "undefined"; },
+    'nnull': function(a) { return typeof a != "undefined"; },
     'else': function(a) { return a === true; }
 };
 
