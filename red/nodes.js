@@ -175,11 +175,13 @@ Node.prototype.send = function(msg) {
                                 // TODO: remove this http-node-specific fix somehow
                                 var req = mm.req;
                                 var res = mm.res;
-                                mm.req = null;
-                                mm.res = null;
+                                delete mm.req;
+                                delete mm.res;
                                 var m = clone(mm);
                                 m.req = req;
                                 m.res = res;
+                                mm.req = req;
+                                mm.res = res;
                                 node.receive(m);
                             }
                         }
