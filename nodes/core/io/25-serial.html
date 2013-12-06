@@ -26,15 +26,15 @@
 </script>
 
 <script type="text/x-red" data-help-name="serial in">
-	<p>Reads data from a local serial port.</p>
-	<p>Keeps reading from the serial port until it sees \n (default) or the character(s) requested. Only sets <b>msg.payload</b>.</p>
+    <p>Reads data from a local serial port.</p>
+    <p>Keeps reading from the serial port until it sees \n (default) or the character(s) requested. Only sets <b>msg.payload</b>.</p>
 </script>
 
 <script type="text/javascript">
     RED.nodes.registerType('serial in',{
         category: 'input',
         defaults: {
-			name: {name:""},
+            name: {name:""},
             serial: {type:"serial-port",required:true}
         },
         color:"BurlyWood",
@@ -64,15 +64,16 @@
 </script>
 
 <script type="text/x-red" data-help-name="serial out">
-	<p>Provides a connection to an outbound serial port.</p>
-	<p>Only the <b>msg.payload</b> is sent.</p>
+    <p>Provides a connection to an outbound serial port.</p>
+    <p>Only the <b>msg.payload</b> is sent.</p>
+    <p>Optionally the new line character used to split the input can be appended to every message sent out to the serial port.</p>
 </script>
 
 <script type="text/javascript">
     RED.nodes.registerType('serial out',{
         category: 'output',
         defaults: {
-			name: {name:""},
+            name: {name:""},
             serial: {type:"serial-port",required:true}
         },
         color:"BurlyWood",
@@ -88,7 +89,6 @@
             return this.name?"node_label_italic":"";
         }
     });
-
 </script>
 
 
@@ -121,14 +121,16 @@
     </div>
     <div class="form-row">
         <label for="node-config-input-newline"><i class="icon-text-width"></i> New line</label>
-        <input type="text" id="node-config-input-newline">
+        <input type="text" id="node-config-input-newline"  style="width: 50px;">
     </div>
-<!--
     <div class="form-row">
-        <label for="node-config-input-name"><i class="icon-tag"></i> Name</label>
-        <input type="text" id="node-config-input-name" placeholder="Name">
+        <label for="node-config-input-addchar">&nbsp;</label>
+        <select type="text" id="node-config-input-addchar" style="width: 70%;">
+            <option value="false">Don't add 'New Line' to serial output</option>
+            <option value="true">Add 'New line' to serial output message</option>
+        </select>
     </div>
--->
+    <div class="form-tips">Tip: the new line character is used to split the input into separate messages. It can also be added to every message sent out to the serial port.</div>
 </script>
 
 <script type="text/javascript">
@@ -138,7 +140,8 @@
             //name: {value:""},
             serialport: {value:"",required:true},
             serialbaud: {value:57600,required:true},
-            newline: {value:"\\n"}
+            newline: {value:"\\n"},
+            addchar: {value:false}
         },
         label: function() {
             //return this.name||this.serialport;
