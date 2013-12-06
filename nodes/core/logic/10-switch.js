@@ -41,6 +41,14 @@ function SwitchNode(n) {
     var propertyParts = n.property.split("."),
         node = this;
 
+    for (var i=0; i<this.rules.length; i+=1) {
+        var rule = this.rules[i];
+        if (!isNaN(Number(rule.v))) {
+            rule.v = Number(rule.v);
+            rule.v2 = Number(rule.v2);
+        }
+    }
+        
     this.on('input', function (msg) {
         var onward = [];
         var prop = propertyParts.reduce(function (obj, i) {
