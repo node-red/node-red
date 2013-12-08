@@ -1,0 +1,49 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="unknown">
+    <div class="form-tips">This node is currently unknown to Node-RED. <i>DO NOT Deploy while in this state or the flow file may well be trashed...</i>. Usually this can be resolved by installing the npm module that this node relies on. To do this - stop Node-RED and restart. Look at the errors shown for one that matches this missing node. Stop Node-RED again and type <b>npm install {missing module name}</b>. Restart Node-RED, and hopefully this will have resolved it.</div>
+</script>
+
+<script type="text/x-red" data-help-name="unknown">
+    <p>This node is currently unknown to Node-RED.</p>
+    <p><i>DO NOT Deploy while in this state or the flow file may well be trashed...</i></p>
+    <p>Usually this can be resolved by installing the npm module that this node relies on. To do this, stop Node-RED and restart.</p>
+    <p>Look at the errors shown in the console for one that matches the name of this missing node.</p>
+    <p>Stop Node-RED again and type <b>npm install {missing module name}</b>. Restart Node-RED, and hopefully this will have resolved it.</p>
+    <p>If not then you will need to obtain that Node-RED module from somewhere... ask the author of the flow where they got it from.</p>
+    <p>(hopefully soon we will have a central repository where all nodes can be registered. work in progress.)</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('unknown',{
+            category: 'unknown',
+            color:"#C00000",
+            defaults: {
+            name: {value:""},
+            foo: {value:"",required:true}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "",
+        label: function() {
+            return this.name||"unknown";
+        },
+        labelStyle: function() {
+            return "node_label_white";
+        }
+    });
+</script>

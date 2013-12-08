@@ -14,31 +14,28 @@
  * limitations under the License.
  **/
 RED.nodes = function() {
-    
+
     var node_defs = {};
-    
     var nodes = [];
     var configNodes = {};
     var links = [];
-    
     var defaultWorkspace;
     var workspaces = {};
-    
-    
+
     function registerType(nt,def) {
         node_defs[nt] = def;
-        // TODO: too tightly coupled into palette UI 
+        // TODO: too tightly coupled into palette UI
         RED.palette.add(nt,def);
     }
-    
+
     function getID() {
         return (1+Math.random()*4294967295).toString(16);
     }
-    
+
     function getType(type) {
         return node_defs[type];
     }
-    
+
     function addNode(n) {
         if (n._def.category == "config") {
             configNodes[n.id] = n;
@@ -53,7 +50,7 @@ RED.nodes = function() {
     function addConfig(c) {
         configNodes[c.id] = c;
     }
-    
+
     function getNode(id) {
         if (id in configNodes) {
             return configNodes[id];
@@ -66,7 +63,7 @@ RED.nodes = function() {
         }
         return null;
     }
-    
+
     function removeNode(id) {
         var removedLinks = [];
         if (id in configNodes) {
@@ -81,20 +78,20 @@ RED.nodes = function() {
         }
         return removedLinks;
     }
-    
+
     function removeLink(l) {
         var index = links.indexOf(l);
         if (index != -1) {
             links.splice(index,1);
         }
     }
-    
+
     function refreshValidation() {
         for (var n in nodes) {
             RED.editor.validateNode(nodes[n]);
         }
     }
-    
+
     function addWorkspace(ws) {
         workspaces[ws.id] = ws;
     }
@@ -136,9 +133,9 @@ RED.nodes = function() {
         }
         return nns;
     }
-    
+
     /**
-     * Converts a node to an exportable JSON Object 
+     * Converts a node to an exportable JSON Object
      **/
     function convertNode(n) {
         var node = {};
@@ -151,7 +148,7 @@ RED.nodes = function() {
             node.x = n.x;
             node.y = n.y;
             node.z = n.z;
-            
+
             node.wires = [];
             for(var i=0;i<n.outputs;i++) {
                 node.wires.push([]);
@@ -164,7 +161,7 @@ RED.nodes = function() {
         }
         return node;
     }
-    
+
     /**
      * Converts the current node selection to an exportable JSON Object
      **/
@@ -193,7 +190,7 @@ RED.nodes = function() {
         }
         return nns;
     }
-    
+
     //TODO: rename this (createCompleteNodeSet)
     function createCompleteNodeSet() {
         var nns = [];
@@ -209,7 +206,7 @@ RED.nodes = function() {
         }
         return nns;
     }
-    
+
     function importNodes(newNodesObj,createNewIds) {
         try {
             var newNodes;
@@ -230,8 +227,10 @@ RED.nodes = function() {
                 // TODO: remove workspace in next release+1
                 if (n.type != "workspace" && n.type != "tab" && !getType(n.type)) {
                     // TODO: get this UI thing out of here! (see below as well)
-                    RED.notify("<strong>Failed to import nodes</strong>: unrecognised type '"+n.type+"'","error");
-                    return null;
+                    RED.notify("<strong>Failed to import node</strong>: unrecognised type '"+n.type+"'<br/>DO NOT DEPLOY while in this state.<br/>Either, add missing types to Node-RED, restart and then reload page,<br/>or delete unknown ( "+n.type+" ), rewire as required, and then deploy.","error","true");
+                    //return null;              //
+                    n.name = "( "+n.type+" )";  // DCJ - mod to make it load, but will lose all "self knowledge".
+                    n.type = "unknown";         //
                 }
             }
             for (var i in newNodes) {
@@ -253,11 +252,11 @@ RED.nodes = function() {
                 addWorkspace(defaultWorkspace);
                 RED.view.addWorkspace(defaultWorkspace);
             }
-            
+
             var node_map = {};
             var new_nodes = [];
             var new_links = [];
-            
+
             for (var i in newNodes) {
                 var n = newNodes[i];
                 // TODO: remove workspace in next release+1
@@ -296,7 +295,7 @@ RED.nodes = function() {
                             }
                         }
                         node.outputs = n.outputs||node._def.outputs;
-                        
+
                         for (var d in node._def.defaults) {
                             node[d] = n[d];
                             if (node._def.defaults[d].type) {
@@ -306,7 +305,7 @@ RED.nodes = function() {
                                 }
                             }
                         }
-                        
+
                         addNode(node);
                         RED.editor.validateNode(node);
                         node_map[n.id] = node;
@@ -336,7 +335,7 @@ RED.nodes = function() {
         }
 
     }
-    
+
     return {
         registerType: registerType,
         getType: getType,
@@ -373,5 +372,4 @@ RED.nodes = function() {
         nodes: nodes, // TODO: exposed for d3 vis
         links: links  // TODO: exposed for d3 vis
     };
-    
 }();
