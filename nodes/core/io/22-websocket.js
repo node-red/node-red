@@ -28,6 +28,8 @@ function WebSocketListenerNode(n) {
 
     // Store local copies of the node configuration (as defined in the .html)
     node.path = n.path;
+    node.wholemsg = (n.wholemsg === "true");
+    
     node._inputNodes = [];    // collection of nodes that want to receive events
 
     var path = RED.settings.httpRoot || "/";
@@ -89,8 +91,18 @@ WebSocketListenerNode.prototype.registerInputNode = function(/*Node*/handler){
 }
 
 WebSocketListenerNode.prototype.handleEvent = function(id,/*socket*/socket,/*String*/event,/*Object*/data,/*Object*/flags){
+    var msg;
+    if (this.wholemsg) {
+        msg = JSON.parse(data);
+    } else {
+        msg = {
+            payload:data
+        };
+    }
+    msg._session = {type:"websocket",id:id};
+    
     for (var i = 0; i < this._inputNodes.length; i++) {
-        this._inputNodes[i].send({session:{type:"websocket",id:id},payload:data});
+        this._inputNodes[i].send(msg);
     };
 }
 
@@ -129,16 +141,22 @@ function WebSocketOutNode(n) {
         this.error("Missing server configuration");
     }
     this.on("input", function(msg) {
-        var payload = msg.payload;
-        if (Buffer.isBuffer(payload)) {
-            payload = payload.toString();
-        } else if (typeof payload === "object") {
-            payload = JSON.stringify(payload);
-        } else if (typeof payload !== "string") {
-            payload = ""+payload;
+        var payload;
+        if (this.serverConfig.wholemsg) {
+            delete msg._session;
+            payload = JSON.stringify(msg);
+        } else {
+            payload = msg.payload;
+            if (Buffer.isBuffer(payload)) {
+                payload = payload.toString();
+            } else if (typeof payload === "object") {
+                payload = JSON.stringify(payload);
+            } else if (typeof payload !== "string") {
+                payload = ""+payload;
+            }
         }
-        if (msg.session && msg.session.type == "websocket") {
-            node.serverConfig.send(msg.session.id,payload);
+        if (msg._session && msg._session.type == "websocket") {
+            node.serverConfig.send(msg._session.id,payload);
         } else {
             node.serverConfig.broadcast(payload,function(error){
                 if(!!error){
