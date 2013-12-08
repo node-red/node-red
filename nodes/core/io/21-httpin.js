@@ -67,7 +67,11 @@ function HTTPOut(n) {
                     msg.res.set(msg.headers);
                 }
                 var statusCode = msg.statusCode || 200;
-                msg.res.send(statusCode,msg.payload);
+                if (typeof msg.payload == "object" && !Buffer.isBuffer(msg.payload)) {
+                    msg.res.jsonp(statusCode,msg.payload);
+                } else {
+                    msg.res.send(statusCode,msg.payload);
+                }
             } else {
                 node.warn("No response object");
             }
