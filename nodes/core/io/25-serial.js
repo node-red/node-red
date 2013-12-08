@@ -39,12 +39,7 @@ function SerialOutNode(n) {
 
     if (this.serialConfig) {
         var node = this;
-        try {
-            node.port = serialPool.get(this.serialConfig.serialport,this.serialConfig.serialbaud,this.serialConfig.newline);
-        } catch(err) {
-            this.error(err);
-            return;
-        }
+        node.port = serialPool.get(this.serialConfig.serialport,this.serialConfig.serialbaud,this.serialConfig.newline);
         node.addCh = "";
         if (node.serialConfig.addchar == "true") { node.addCh = this.serialConfig.newline.replace("\\n","\n").replace("\\r","\r"); }
         node.on("input",function(msg) {
@@ -52,7 +47,9 @@ function SerialOutNode(n) {
             if (typeof payload === "object") { payload = JSON.stringify(payload); }
             if (typeof payload !== "buffer") { payload = new String(payload) + node.addCh; }
             node.port.write(payload,function(err,res) {
-                if (err) { node.error(err); }
+                if (err) {
+                    node.error(err);
+                }
             });
         });
     } else {
@@ -75,13 +72,7 @@ function SerialInNode(n) {
 
     if (this.serialConfig) {
         var node = this;
-        try {
-            this.port = serialPool.get(this.serialConfig.serialport,this.serialConfig.serialbaud,this.serialConfig.newline);
-        } catch(err) {
-            this.error(err);
-            return;
-        }
-
+        this.port = serialPool.get(this.serialConfig.serialport,this.serialConfig.serialbaud,this.serialConfig.newline);
         this.port.on('data', function(msg) {
             node.send({ "payload": msg });
         });
@@ -115,55 +106,54 @@ var serialPool = function() {
                         _closing: false,
                         tout: null,
                         on: function(a,b) { this._emitter.on(a,b); },
-                        close: function(cb) { this.serial.close(cb)},
-                        write: function(m,cb) { this.serial.write(m,cb)},
+                        close: function(cb) { this.serial.close(cb); },
+                        write: function(m,cb) { this.serial.write(m,cb); },
                     }
                     newline = newline.replace("\\n","\n").replace("\\r","\r");
                     var setupSerial = function() {
-                        try {
-                            if (newline == "") {
-                                obj.serial = new serialp.SerialPort(port,{
-                                    baudrate: baud,
-                                    parser: serialp.parsers.raw
-                                });
-                            }
-                            else {
-                                obj.serial = new serialp.SerialPort(port,{
-                                    baudrate: baud,
-                                    parser: serialp.parsers.readline(newline)
-                                });
-                            }
-                            obj.serial.on('error', function(err) {
-                                util.log("[serial] serial port "+port+" error "+err);
+                        if (newline == "") {
+                            obj.serial = new serialp.SerialPort(port,{
+                                baudrate: baud,
+                                parser: serialp.parsers.raw
+                            },true, function(err, results) { if (err) obj.serial.emit('error',err); });
+                        }
+                        else {
+                            obj.serial = new serialp.SerialPort(port,{
+                                baudrate: baud,
+                                parser: serialp.parsers.readline(newline)
+                            },true, function(err, results) { if (err) obj.serial.emit('error',err); });
+                        }
+                        obj.serial.on('error', function(err) {
+                            util.log("[serial] serial port "+port+" error "+err);
+                            obj.tout = setTimeout(function() {
+                                setupSerial();
+                            }, settings.serialReconnectTime);
+                        });
+                        obj.serial.on('close', function() {
+                            if (!obj._closing) {
+                                util.log("[serial] serial port "+port+" closed unexpectedly");
                                 obj.tout = setTimeout(function() {
                                     setupSerial();
-                                },settings.serialReconnectTime);
-                            });
-                            obj.serial.on('close', function() {
-                                if (!obj._closing) {
-                                    util.log("[serial] serial port "+port+" closed unexpectedly");
-                                    obj.tout = setTimeout(function() {
-                                        setupSerial();
-                                    },settings.serialReconnectTime);
+                                }, settings.serialReconnectTime);
+                            }
+                        });
+                        obj.serial.on('open',function() {
+                            util.log("[serial] serial port "+port+" opened at "+baud+" baud");
+                            if (obj.tout) { clearTimeout(obj.tout); }
+                            obj.serial.flush();
+                            obj._emitter.emit('ready');
+                        });
+                        obj.serial.on('data',function(d) {
+                            if (typeof d !== "string") {
+                                d = d.toString();
+                                for (i=0; i<d.length; i++) {
+                                    obj._emitter.emit('data',d.charAt(i));
                                 }
-                            });
-                            obj.serial.on('open',function() {
-                                    util.log("[serial] serial port "+port+" opened at "+baud+" baud");
-                                    obj.serial.flush();
-                                    obj._emitter.emit('ready');
-                            });
-                            obj.serial.on('data',function(d) {
-                                if (typeof d !== "string") {
-                                    d = d.toString();
-                                    for (i=0; i<d.length; i++) {
-                                        obj._emitter.emit('data',d.charAt(i));
-                                    }
-                                }
-                                else {
-                                    obj._emitter.emit('data',d);
-                                }
-                            });
-                        } catch(err) { console.log("Booo!",err,"Booo!"); }
+                            }
+                            else {
+                                obj._emitter.emit('data',d);
+                            }
+                        });
                     }
                     setupSerial();
                     return obj;
