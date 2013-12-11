@@ -114,6 +114,7 @@ RED.nodes = function() {
         }
         return {nodes:removedNodes,links:removedLinks};
     }
+
     function getAllFlowNodes(node) {
         var visited = {};
         visited[node.id] = true;
@@ -148,7 +149,6 @@ RED.nodes = function() {
             node.x = n.x;
             node.y = n.y;
             node.z = n.z;
-
             node.wires = [];
             for(var i=0;i<n.outputs;i++) {
                 node.wires.push([]);
@@ -227,11 +227,14 @@ RED.nodes = function() {
                 // TODO: remove workspace in next release+1
                 if (n.type != "workspace" && n.type != "tab" && !getType(n.type)) {
                     // TODO: get this UI thing out of here! (see below as well)
-                    RED.notify("<strong>Failed to import node</strong>: unrecognised type '"+n.type+"'<br/>DO NOT DEPLOY while in this state.<br/>Either, add missing types to Node-RED, restart and then reload page,<br/>or delete unknown ( "+n.type+" ), rewire as required, and then deploy.","error","true");
                     //return null;              //
                     n.name = "( "+n.type+" )";  // DCJ - mod to make it load, but will lose all "self knowledge".
                     n.type = "unknown";         //
-                }
+                }                               //
+                if (n.type == "unknown") {      //
+                    RED.notify("<strong>Failed to import node</strong>: unrecognised type <b>'"+n.name+"'</b><br/>DO NOT DEPLOY while in this state.<br/>Either, add missing types to Node-RED, restart and then reload page,<br/>or delete unknown "+n.name+", rewire as required, and then deploy.","error");
+                }                               //
+
             }
             for (var i in newNodes) {
                 var n = newNodes[i];

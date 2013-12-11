@@ -19,11 +19,15 @@ var RED = function() {
 
     function save(force) {
         if (RED.view.dirty()) {
-            
+
             if (!force) {
                 var invalid = false;
                 RED.nodes.eachNode(function(node) {
                         invalid = invalid || !node.valid;
+                        if (node.type === "unknown") {
+                            RED.notify('Unknown node type <b>'+node.name+'</b> found',"error");
+                            invalid = true;
+                        }
                 });
                 if (invalid) {
                     $( "#node-dialog-confirm-deploy" ).dialog( "open" );
@@ -98,13 +102,13 @@ var RED = function() {
     }
 
     function showHelp() {
-        
+
         var dialog = $('#node-help');
-        
+
         //$("#node-help").draggable({
         //        handle: ".modal-header"
-        //}); 
-        
+        //});
+
         dialog.on('show',function() {
                 RED.keyboard.disable();
         });
@@ -114,8 +118,7 @@ var RED = function() {
 
         dialog.modal();
     }
-    
-    
+
     $(function() {
             RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
             loadNodes();
@@ -124,4 +127,3 @@ var RED = function() {
     return {
     };
 }();
-
