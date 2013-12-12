@@ -246,7 +246,11 @@ a.brand img {
 }
 
 .node_label_italic {
-  font-style: italic;
+    font-style: italic;
+}
+.node_label_unknown {
+    font-style: italic;
+    fill: #e00 !important;
 }
 .node_label_white {
   fill: #eee !important;
@@ -271,6 +275,10 @@ a.brand img {
   stroke: #999;
   cursor: move;
   stroke-width: 2;
+}
+.node_unknown {
+    stroke-dasharray:10,4;
+    stroke: #f33;
 }
 .tool_arrow {
    stroke-width: 1;
@@ -365,7 +373,11 @@ a.brand img {
 .link_selected {
   stroke: #ff7f0e;
 }
-
+.link_unknown {
+   stroke: #f00;
+   stroke-width: 2;
+   stroke-dasharray: 10, 4;
+}
 #shade {
    position: absolute;
    top:0;

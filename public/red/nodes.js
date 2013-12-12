@@ -222,20 +222,26 @@ RED.nodes = function() {
             if (!$.isArray(newNodes)) {
                 newNodes = [newNodes];
             }
+            var unknownTypes = [];
             for (var i in newNodes) {
                 var n = newNodes[i];
                 // TODO: remove workspace in next release+1
                 if (n.type != "workspace" && n.type != "tab" && !getType(n.type)) {
                     // TODO: get this UI thing out of here! (see below as well)
-                    //return null;              //
-                    n.name = "( "+n.type+" )";  // DCJ - mod to make it load, but will lose all "self knowledge".
-                    n.type = "unknown";         //
-                }                               //
-                if (n.type == "unknown") {      //
-                    RED.notify("<strong>Failed to import node</strong>: unrecognised type <b>'"+n.name+"'</b><br/>DO NOT DEPLOY while in this state.<br/>Either, add missing types to Node-RED, restart and then reload page,<br/>or delete unknown "+n.name+", rewire as required, and then deploy.","error");
-                }                               //
-
+                    n.name = n.type;
+                    n.type = "unknown";
+                    if (unknownTypes.indexOf(n.name)==-1) {
+                        unknownTypes.push(n.name);
+                    }
+                }
             }
+            if (unknownTypes.length > 0) {
+                var typeList = "<ul><li>"+unknownTypes.join("</li><li>")+"</li></ul>";
+                var type = "type"+(unknownTypes.length > 1?"s":"");
+                RED.notify("<strong>Imported unrecognised "+type+":</strong>"+typeList,"error",false,10000);
+                //"DO NOT DEPLOY while in this state.<br/>Either, add missing types to Node-RED, restart and then reload page,<br/>or delete unknown "+n.name+", rewire as required, and then deploy.","error");
+            }
+
             for (var i in newNodes) {
                 var n = newNodes[i];
                 // TODO: remove workspace in next release+1

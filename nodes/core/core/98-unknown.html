@@ -15,35 +15,35 @@
 -->
 
 <script type="text/x-red" data-template-name="unknown">
-    <div class="form-tips">This node is currently unknown to Node-RED. <i>DO NOT Deploy while in this state or the flow file may well be trashed...</i>. Usually this can be resolved by installing the npm module that this node relies on. To do this - stop Node-RED and restart. Look at the errors shown for one that matches this missing node. Stop Node-RED again and type <b>npm install {missing module name}</b>. Restart Node-RED, and hopefully this will have resolved it.</div>
+    <div class="form-tips"><p>This node is a type unknown to your installation of Node-RED.</p>
+    <p><i>If you deploy with the node in this state, it will lose all of its configuration.</i></p>
+    <p>See the Info side bar for more help</p></div>
 </script>
 
 <script type="text/x-red" data-help-name="unknown">
-    <p>This node is currently unknown to Node-RED.</p>
-    <p><i>DO NOT Deploy while in this state or the flow file may well be trashed...</i></p>
-    <p>Usually this can be resolved by installing the npm module that this node relies on. To do this, stop Node-RED and restart.</p>
-    <p>Look at the errors shown in the console for one that matches the name of this missing node.</p>
-    <p>Stop Node-RED again and type <b>npm install {missing module name}</b>. Restart Node-RED, and hopefully this will have resolved it.</p>
-    <p>If not then you will need to obtain that Node-RED module from somewhere... ask the author of the flow where they got it from.</p>
-    <p>(hopefully soon we will have a central repository where all nodes can be registered. work in progress.)</p>
+    <p>This node is a type unknown to your installation of Node-RED.</p>
+    <p><i>If you deploy with the node in this state, it will lose all of its configuration.</i></p>
+    <p>It is possible this node type is already installed, but is missing a dependency. Check the Node-RED start-up log for
+       any error messages associated with the missing node type. Use <b>npm install &lt;module&gt;</b> to install any missing modules
+       and restart Node-RED and reimport the nodes.</p>
+    <p>Otherwise, you should contact the author of the flow to obtain a copy of the missing node type.</p>
 </script>
 
 <script type="text/javascript">
     RED.nodes.registerType('unknown',{
-            category: 'unknown',
-            color:"#C00000",
-            defaults: {
-            name: {value:""},
-            foo: {value:"",required:true}
+        category: 'unknown',
+        color:"#fff0f0",
+        defaults: {
+            name: {value:""}
         },
         inputs:1,
         outputs:1,
         icon: "",
         label: function() {
-            return this.name||"unknown";
+            return "("+this.name+")"||"unknown";
         },
         labelStyle: function() {
-            return "node_label_white";
+            return "node_label_unknown";
         }
     });
 </script>

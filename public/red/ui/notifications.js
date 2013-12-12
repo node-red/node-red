@@ -16,7 +16,7 @@
 RED.notify = function() {
     var currentNotifications = [];
     var c = 0;
-    return function(msg,type,fixed) {
+    return function(msg,type,fixed,timeout) {
         if (currentNotifications.length > 4) {
             var ll = currentNotifications.length;
             for (var i = 0;ll > 4 && i<currentNotifications.length;i+=1) {
@@ -49,7 +49,7 @@ RED.notify = function() {
             };
         }();
         if (!fixed) {
-            n.timeoutid = window.setTimeout(n.close,3000);
+            n.timeoutid = window.setTimeout(n.close,timeout||3000);
         }
         currentNotifications.push(n);
         c+=1;

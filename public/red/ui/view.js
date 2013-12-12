@@ -722,6 +722,7 @@ RED.view = function() {
 
                     var mainRect = node.append("rect")
                         .attr("class", "node")
+                        .classed("node_unknown",function(d) { return d.type == "unknown"; }) 
                         .attr("rx", 6)
                         .attr("ry", 6)
                         .attr("fill",function(d) { return d._def.color;})
@@ -952,7 +953,8 @@ RED.view = function() {
         })
 
         link.classed("link_selected", function(d) { return d === selected_link || d.selected; });
-
+        link.classed("link_unknown",function(d) { return d.target.type == "unknown" || d.source.type == "unknown"});
+        
         if (d3.event) {
             d3.event.preventDefault();
         }
