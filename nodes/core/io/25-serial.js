@@ -41,11 +41,21 @@ function SerialOutNode(n) {
         var node = this;
         node.port = serialPool.get(this.serialConfig.serialport,this.serialConfig.serialbaud,this.serialConfig.newline);
         node.addCh = "";
-        if (node.serialConfig.addchar == "true") { node.addCh = this.serialConfig.newline.replace("\\n","\n").replace("\\r","\r"); }
+        if (node.serialConfig.addchar == "true") {
+            node.addCh = this.serialConfig.newline.replace("\\n","\n").replace("\\r","\r");
+        }
         node.on("input",function(msg) {
             var payload = msg.payload;
-            if (typeof payload === "object") { payload = JSON.stringify(payload); }
-            if (typeof payload !== "buffer") { payload = new String(payload) + node.addCh; }
+            if (!Buffer.isBuffer(payload)) {
+                if (typeof payload === "object") {
+                    payload = JSON.stringify(payload);
+                } else {
+                    payload = new String(payload);
+                }
+                payload += node.addCh;
+            } else if (node.addCh !== "") {
+                payload = Buffer.concat([payload,new Buffer(node.addCh)]);
+            }
             node.port.write(payload,function(err,res) {
                 if (err) {
                     node.error(err);
@@ -86,7 +96,6 @@ function SerialInNode(n) {
                 serialPool.close(this.serialConfig.serialport);
             } catch(err) {
             }
-            this.warn("Deploying with serial-port nodes is known to occasionally cause Node-RED to hang. This is due to an open issue with the underlying module.");
         }
     });
 }
