@@ -17,7 +17,18 @@
  
 var settings = require('../red').settings;
 
-var storageType = settings.storageModule || "localfilesystem";
+var mod;
 
-module.exports = require("./"+storageType);
+if (settings.storageModule) {
+    if (typeof settings.storageModule === "string") {
+        // TODO: allow storage modules to be specified by absolute path
+        mod = require("./"+settings.storageModule);
+    } else {
+        mod = settings.storageModule;
+    }
+} else {
+    mod = require("./localfilesystem");
+}
+
+module.exports = mod;
 
