@@ -68,6 +68,7 @@ RED.history = function() {
                     }
                     RED.editor.validateNode(ev.node);
                     ev.node.dirty = true;
+                    ev.node.changed = ev.changed;
                 }
                 RED.view.dirty(ev.dirty);
                 RED.view.redraw();

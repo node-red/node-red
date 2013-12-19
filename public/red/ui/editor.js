@@ -216,9 +216,10 @@ RED.editor = function() {
                             
                             var removedLinks = updateNodeProperties(editing_node);
                             if (changed) {
+                                var wasChanged = editing_node.changed;
                                 editing_node.changed = true;
                                 RED.view.dirty(true);
-                                RED.history.push({t:'edit',node:editing_node,changes:changes,links:removedLinks,dirty:wasDirty});
+                                RED.history.push({t:'edit',node:editing_node,changes:changes,links:removedLinks,dirty:wasDirty,changed:wasChanged});
                             }
                             editing_node.dirty = true;
                             validateNode(editing_node);
