@@ -16,8 +16,8 @@
 
 var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var util = require("util");
-var http = require("http");
-var https = require("https");
+var http = require("follow-redirects").http;
+var https = require("follow-redirects").https;
 var urllib = require("url");
 var express = require("express");
 var jsonParser = express.json();

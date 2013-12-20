@@ -32,7 +32,8 @@
         "oauth":"~0.9.10",
         "xml2js":"~0.2.8",
         "sentiment":"~0.2.1",
-        "irc":"~0.3.6"
+        "irc":"~0.3.6",
+        "follow-redirects":"~0.0.3"
     },
     "devDependencies": {
         "mocha": "~1.12.0",
