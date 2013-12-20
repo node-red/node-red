@@ -18,6 +18,8 @@ var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var util = require("util");
 var http = require("http");
 var https = require("https");
+var http_f = require('follow-redirects').http;
+var https_f = require('follow-redirects').https;
 var urllib = require("url");
 var express = require("express");
 var jsonParser = express.json();
@@ -84,7 +86,9 @@ function HTTPRequest(n) {
     RED.nodes.createNode(this,n);
     var url = n.url;
     var method = n.method || "GET";
-    var httplib = (/^https/.test(url))?https:http;
+    var httplibs = (/^https/.test(url))?{"follow":https_f,"not_follow":https}:{"follow":http_f,"not_follow":http};
+    var httplib = httplibs[redirection];
+    
     var node = this;
     this.on("input",function(msg) {
 
