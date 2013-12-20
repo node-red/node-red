@@ -157,6 +157,13 @@
         </select>
     </div>
     <div class="form-row">
+        <label for="node-input-redirection"><i class="icon-tasks"></i> Redirect</label>
+        <select type="text" id="node-input-redirection" style="width: 150px;">
+        <option value="follow">Follow</option>
+        <option value="not_follow">Not follow</option>
+        </select>
+    </div>
+    <div class="form-row">
         <label for="node-input-url"><i class="icon-tasks"></i> URL</label>
         <input type="text" id="node-input-url" placeholder="http://">
     </div>
@@ -193,7 +200,8 @@
         defaults: {
             name: {value:""},
             method:{value:"GET"},
-            url:{value:""}
+            url:{value:""},
+            redirection:{value:"follow"}
         },
         inputs:1,
         outputs:1,
