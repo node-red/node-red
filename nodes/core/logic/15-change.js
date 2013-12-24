@@ -35,9 +35,13 @@ function ChangeNode(n) {
 
     this.on('input', function (msg) {
         if (node.action == "change") {
-            node.re = new RegExp(this.from, "g");
-            if (typeof msg[node.property] === "string") {
-                msg[node.property] = (msg[node.property]).replace(node.re, node.to);
+			try {
+            	node.re = new RegExp(this.from, "g");
+            	if (typeof msg[node.property] === "string") {
+            		msg[node.property] = (msg[node.property]).replace(node.re, node.to);
+            	}
+            } catch(err) {
+                this.error(err.message);
             }
         }
         //else if (node.action == "replace") {
