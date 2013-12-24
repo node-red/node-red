@@ -96,7 +96,7 @@
                     $("#node-from-row").hide();
                     $("#node-to-row").show();
                     $("#node-reg-row").hide();
-                    $("#node-tip").html("Tip: expects a new property name and either a fixed value OR the full name of another msg.property eg: msg.sentiment.score");
+                    $("#node-tip").html("Tip: expects a new property name and either a fixed value OR the full name of another message property eg: msg.sentiment.score");
                 }
                 if (a === "delete") {
                     $("#node-input-todo").html("called");
@@ -114,7 +114,7 @@
                     $("#node-from-row").show();
                     $("#node-to-row").show();
                     $("#node-reg-row").show();
-                    $("#node-tip").html("Tip: If <i>contains</i> is a regex, you <b>must</b> escape any special characters. Likewise <i>replace with</i> can accept regex results. Only works on strings.");
+                    $("#node-tip").html("Tip: only works on string properties. If regular expressions are used, the <i>replace with</i> field can contain capture results, eg $1.");
                 }
                 //if (a === "replace") {
                  //   $("#node-input-todo").html("called");

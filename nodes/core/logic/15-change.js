@@ -24,7 +24,9 @@ function ChangeNode(n) {
     this.to = n.to || " ";
     this.reg = (n.reg === null || n.reg);
     var node = this;
-
+    if (node.reg === false) {
+        this.from = this.from.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+    }
     var makeNew = function( stem, path, value ) {
         var lastPart = (arguments.length === 3) ? path.pop() : false;
         for (var i = 0; i < path.length; i++) {
@@ -36,12 +38,8 @@ function ChangeNode(n) {
 
     this.on('input', function (msg) {
         if (node.action == "change") {
-            var from = node.from;
-            if (node.reg === false) {
-                from = from.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-            }
             try {
-                node.re = new RegExp(from, "g");
+                node.re = new RegExp(this.from, "g");
             } catch (e) {
                 node.error(e.message);
             }
