@@ -22,7 +22,7 @@ function ChangeNode(n) {
     this.property = n.property || "";
     this.from = n.from || " ";
     this.to = n.to || " ";
-    this.reg = n.reg;
+    this.reg = (n.reg === null || n.reg);
     var node = this;
 
     var makeNew = function( stem, path, value ) {
