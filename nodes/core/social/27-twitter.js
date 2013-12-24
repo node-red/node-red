@@ -283,10 +283,12 @@ RED.app.get('/twitter/:id/auth', function(req, res){
             oauth_callback: req.query.callback
     },function(error, oauth_token, oauth_token_secret, results){
         if (error) {
-            console.log(error);
-            res.send("yeah no. didn't work.")
-        }
-        else {
+            var resp = '<h2>Oh no!</h2>'+
+            '<p>Something went wrong with the authentication process. The following error was returned:<p>'+
+            '<p><b>'+error.statusCode+'</b>: '+error.data+'</p>'+
+            '<p>One known cause of this type of failure is if the clock is wrong on system running Node-RED.';
+            res.send(resp)
+        } else {
             credentials.oauth_token = oauth_token;
             credentials.oauth_token_secret = oauth_token_secret;
             res.redirect('https://twitter.com/oauth/authorize?oauth_token='+oauth_token)

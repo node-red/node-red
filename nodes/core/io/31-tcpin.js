@@ -16,11 +16,10 @@
 
 var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var reconnectTime = RED.settings.socketReconnectTime||10000;
+var socketTimeout = RED.settings.socketTimeout||null;
 var net = require('net');
 
 var connectionPool = {};
-
-
 
 function TcpIn(n) {
     RED.nodes.createNode(this,n);
@@ -43,55 +42,53 @@ function TcpIn(n) {
             node.log("connecting to "+node.host+":"+node.port);
             var id = (1+Math.random()*4294967295).toString(16);
             client = net.connect(node.port, node.host, function() {
-                    buffer = (node.datatype == 'buffer')? new Buffer(0):"";
-                    node.log("connected to "+node.host+":"+node.port);
+                buffer = (node.datatype == 'buffer')? new Buffer(0):"";
+                node.log("connected to "+node.host+":"+node.port);
             });
             connectionPool[id] = client;
-            
+
             client.on('data', function (data) {
-                    if (node.datatype != 'buffer') {
-                        data = data.toString(node.datatype);
-                    }
-                    if (node.stream) {
-                        if ((node.datatype) === "utf8" && node.newline != "") {
-                            buffer = buffer+data;
-                            var parts = buffer.split(node.newline);
-                            for (var i = 0;i<parts.length-1;i+=1) {
-                                var msg = {topic:node.topic, payload:parts[i]};
-                                msg._session = {type:"tcp",id:id};
-                                node.send(msg);
-                            }
-                            buffer = parts[parts.length-1];
-                        } else {
-                            var msg = {topic:node.topic, payload:data};
+                if (node.datatype != 'buffer') {
+                    data = data.toString(node.datatype);
+                }
+                if (node.stream) {
+                    if ((node.datatype) === "utf8" && node.newline != "") {
+                        buffer = buffer+data;
+                        var parts = buffer.split(node.newline);
+                        for (var i = 0;i<parts.length-1;i+=1) {
+                            var msg = {topic:node.topic, payload:parts[i]};
                             msg._session = {type:"tcp",id:id};
                             node.send(msg);
                         }
+                        buffer = parts[parts.length-1];
                     } else {
-                        if ((typeof data) === "string") {
-                            buffer = buffer+data;
-                        } else {
-                            buffer = Buffer.concat([buffer,data],buffer.length+data.length);
-                        }
-                    }
-            });
-            client.on('end', function() {
-                    if (!node.stream || (node.datatype == "utf8" && node.newline != "" && buffer.length > 0)) {
-                        var msg = {topic:node.topic,payload:buffer};
+                        var msg = {topic:node.topic, payload:data};
                         msg._session = {type:"tcp",id:id};
                         node.send(msg);
-                        buffer = null;
                     }
+                } else {
+                    if ((typeof data) === "string") {
+                        buffer = buffer+data;
+                    } else {
+                        buffer = Buffer.concat([buffer,data],buffer.length+data.length);
+                    }
+                }
             });
-
+            client.on('end', function() {
+                if (!node.stream || (node.datatype == "utf8" && node.newline != "" && buffer.length > 0)) {
+                    var msg = {topic:node.topic,payload:buffer};
+                    msg._session = {type:"tcp",id:id};
+                    node.send(msg);
+                    buffer = null;
+                }
+            });
             client.on('close', function() {
-                    delete connectionPool[id];
-                    node.log("connection lost to "+node.host+":"+node.port);
-                    if (!node.closing) {
-                        reconnectTimeout = setTimeout(setupTcpClient, reconnectTime);
-                    }
+                delete connectionPool[id];
+                node.log("connection lost to "+node.host+":"+node.port);
+                if (!node.closing) {
+                    reconnectTimeout = setTimeout(setupTcpClient, reconnectTime);
+                }
             });
-
             client.on('error', function(err) {
                     node.log(err);
             });
@@ -105,52 +102,57 @@ function TcpIn(n) {
         });
     } else {
         var server = net.createServer(function (socket) {
-                var id = (1+Math.random()*4294967295).toString(16);
-                connectionPool[id] = socket;
-                
-                var buffer = (node.datatype == 'buffer')? new Buffer(0):"";
-                socket.on('data', function (data) {
-                        if (node.datatype != 'buffer') {
-                            data = data.toString(node.datatype);
-                        }
+            if (socketTimeout !== null) { socket.setTimeout(socketTimeout); }
+            var id = (1+Math.random()*4294967295).toString(16);
+            connectionPool[id] = socket;
 
-                        if (node.stream) {
-                            if ((typeof data) === "string" && node.newline != "") {
-                                buffer = buffer+data;
-                                var parts = buffer.split(node.newline);
-                                for (var i = 0;i<parts.length-1;i+=1) {
-                                    var msg = {topic:node.topic, payload:parts[i],ip:socket.remoteAddress,port:socket.remotePort};
-                                    msg._session = {type:"tcp",id:id};
-                                    node.send(msg);
-                                }
-                                buffer = parts[parts.length-1];
-                            } else {
-                                var msg = {topic:node.topic, payload:data};
-                                msg._session = {type:"tcp",id:id};
-                                node.send(msg);
-                            }
-                        } else {
-                            if ((typeof data) === "string") {
-                                buffer = buffer+data;
-                            } else {
-                                buffer = Buffer.concat([buffer,data],buffer.length+data.length);
-                            }
-                        }
-                });
-                socket.on('end', function() {
-                        if (!node.stream || (node.datatype == "utf8" && node.newline != "" && buffer.length > 0)) {
-                            var msg = {topic:node.topic,payload:buffer};
+            var buffer = (node.datatype == 'buffer')? new Buffer(0):"";
+            socket.on('data', function (data) {
+                if (node.datatype != 'buffer') {
+                    data = data.toString(node.datatype);
+                }
+
+                if (node.stream) {
+                    if ((typeof data) === "string" && node.newline != "") {
+                        buffer = buffer+data;
+                        var parts = buffer.split(node.newline);
+                        for (var i = 0;i<parts.length-1;i+=1) {
+                            var msg = {topic:node.topic, payload:parts[i],ip:socket.remoteAddress,port:socket.remotePort};
                             msg._session = {type:"tcp",id:id};
                             node.send(msg);
-                            buffer = null;
                         }
-                });
-                socket.on('close', function() {
-                    delete connectionPool[id];
-                });
-                socket.on('error',function(err) {
-                    node.log(err);
-                });
+                        buffer = parts[parts.length-1];
+                    } else {
+                        var msg = {topic:node.topic, payload:data};
+                        msg._session = {type:"tcp",id:id};
+                        node.send(msg);
+                    }
+                } else {
+                    if ((typeof data) === "string") {
+                        buffer = buffer+data;
+                    } else {
+                        buffer = Buffer.concat([buffer,data],buffer.length+data.length);
+                    }
+                }
+            });
+            socket.on('end', function() {
+                if (!node.stream || (node.datatype == "utf8" && node.newline != "" && buffer.length > 0)) {
+                    var msg = {topic:node.topic,payload:buffer};
+                    msg._session = {type:"tcp",id:id};
+                    node.send(msg);
+                    buffer = null;
+                }
+            });
+            socket.on('timeout', function() {
+                node.log('timeout closed socket port '+node.port);
+                socket.end();
+            });
+            socket.on('close', function() {
+                delete connectionPool[id];
+            });
+            socket.on('error',function(err) {
+                node.log(err);
+            });
         });
         server.listen(node.port);
         node.log('listening on port '+node.port);
@@ -163,7 +165,6 @@ function TcpIn(n) {
     }
 
 }
-
 RED.nodes.registerType("tcp in",TcpIn);
 
 function TcpOut(n) {
@@ -180,51 +181,47 @@ function TcpOut(n) {
         var reconnectTimeout;
         var client = null;
         var connected = false;
-        
+
         function setupTcpClient() {
             node.log("connecting to "+node.host+":"+node.port);
             client = net.connect(node.port, node.host, function() {
-                    connected = true;
-                    node.log("connected to "+node.host+":"+node.port);
+                connected = true;
+                node.log("connected to "+node.host+":"+node.port);
             });
-            
             client.on('error', function (err) {
-                    node.log('error : '+err);
+                node.log('error : '+err);
             });
-            
             client.on('end', function (err) {
             });
-            
             client.on('close', function() {
-                    node.log("connection lost to "+node.host+":"+node.port);
-                    connected = false;
-                    client.destroy();
-                    if (!node.closing) {
-                        reconnectTimeout = setTimeout(setupTcpClient,reconnectTime);
-                    }
+                node.log("connection lost to "+node.host+":"+node.port);
+                connected = false;
+                client.destroy();
+                if (!node.closing) {
+                    reconnectTimeout = setTimeout(setupTcpClient,reconnectTime);
+                }
             });
         }
         setupTcpClient();
-        
-        
+
         node.on("input", function(msg) {
-                if (connected && msg.payload != null) {
-                    if (Buffer.isBuffer(msg.payload)) {
-                        client.write(msg.payload);
-                    } else if (typeof msg.payload === "string" && node.base64) {
-                        client.write(new Buffer(msg.payload,'base64'));
-                    } else {
-                        client.write(new Buffer(""+msg.payload));
-                    }
+            if (connected && msg.payload != null) {
+                if (Buffer.isBuffer(msg.payload)) {
+                    client.write(msg.payload);
+                } else if (typeof msg.payload === "string" && node.base64) {
+                    client.write(new Buffer(msg.payload,'base64'));
+                } else {
+                    client.write(new Buffer(""+msg.payload));
                 }
+            }
         });
-        
+
         node.on("close", function() {
             this.closing = true;
             client.end();
             clearTimeout(reconnectTimeout);
         });
-        
+
     } else if (node.beserver == "reply") {
         node.on("input",function(msg) {
             if (msg._session && msg._session.type == "tcp") {
@@ -243,33 +240,37 @@ function TcpOut(n) {
     } else {
         var connectedSockets = [];
         var server = net.createServer(function (socket) {
-                var remoteDetails = socket.remoteAddress+":"+socket.remotePort;
-                node.log("connection from "+remoteDetails);
-                connectedSockets.push(socket);
-                socket.on('close',function() {
-                        node.log("connection closed from "+remoteDetails);
-                        connectedSockets.splice(connectedSockets.indexOf(socket),1);
-                });
-                socket.on('error',function() {
-                        node.log("socket error from "+remoteDetails);
-                        connectedSockets.splice(connectedSockets.indexOf(socket),1);
-                });
-
+            if (socketTimeout !== null) { socket.setTimeout(socketTimeout); }
+            var remoteDetails = socket.remoteAddress+":"+socket.remotePort;
+            node.log("connection from "+remoteDetails);
+            connectedSockets.push(socket);
+            socket.on('timeout', function() {
+                node.log('timeout closed socket port '+node.port);
+                socket.end();
+            });
+            socket.on('close',function() {
+                node.log("connection closed from "+remoteDetails);
+                connectedSockets.splice(connectedSockets.indexOf(socket),1);
+            });
+            socket.on('error',function() {
+                node.log("socket error from "+remoteDetails);
+                connectedSockets.splice(connectedSockets.indexOf(socket),1);
+            });
         });
         node.on("input", function(msg) {
-                if (msg.payload != null) {
-                    var buffer;
-                    if (Buffer.isBuffer(msg.payload)) {
-                        buffer = msg.payload;
-                    } else if (typeof msg.payload === "string" && node.base64) {
-                        buffer = new Buffer(msg.payload,'base64');
-                    } else {
-                        buffer = new Buffer(""+msg.payload);
-                    }
-                    for (var i = 0; i<connectedSockets.length;i+=1) {
-                        connectedSockets[i].write(buffer);
-                    }
+            if (msg.payload != null) {
+                var buffer;
+                if (Buffer.isBuffer(msg.payload)) {
+                    buffer = msg.payload;
+                } else if (typeof msg.payload === "string" && node.base64) {
+                    buffer = new Buffer(msg.payload,'base64');
+                } else {
+                    buffer = new Buffer(""+msg.payload);
                 }
+                for (var i = 0; i<connectedSockets.length;i+=1) {
+                    connectedSockets[i].write(buffer);
+                }
+            }
         });
 
         server.listen(node.port);
@@ -283,5 +284,3 @@ function TcpOut(n) {
 }
 
 RED.nodes.registerType("tcp out",TcpOut);
-
-

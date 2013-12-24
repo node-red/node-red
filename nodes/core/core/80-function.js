@@ -25,7 +25,7 @@ function FunctionNode(n) {
     RED.nodes.createNode(this,n);
     this.name = n.name;
     this.func = n.func;
-    var functionText = "var results = (function(msg){"+this.func+"})(msg);";
+    var functionText = "var results = (function(msg){"+this.func+"\n})(msg);";
     this.topic = n.topic;
     this.context = {global:RED.settings.functionGlobalContext || {}};
     try {
