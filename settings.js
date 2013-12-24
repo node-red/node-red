@@ -16,12 +16,12 @@
 module.exports = {
     // the tcp port that the Node-RED web server is listening on
     uiPort: 1880,
-    
+
     // By default, the Node-RED UI accepts connections on all IPv4 interfaces.
     // The following property can be used to listen on a specific interface. For
-    // example, the following would only allow connections from the local machine. 
+    // example, the following would only allow connections from the local machine.
     //uiHost: "127.0.0.1",
-    
+
     // Retry time in milliseconds for MQTT connections
     mqttReconnectTime: 15000,
 
@@ -31,20 +31,24 @@ module.exports = {
     // Retry time in milliseconds for TCP socket connections
     //socketReconnectTime: 10000,
 
+    // Timeout in milliseconds for TCP server socket connections
+    //  defaults to no timeout
+    //socketTimeout: 120000,
+
     // Maximum number of lines in debug window before pruning
     debugMaxLength: 1000,
 
     // The file containing the flows. If not set, it defaults to flows_<hostname>.json
     //flowFile: 'flows.json',
-    
+
     // By default, all user data is stored in the Node-RED install directory. To
     // use a different location, the following property can be used
     //userDir: '/home/nol/.node-red/',
-   
+
     // Node-RED scans the `nodes` directory in the install directory to find nodes.
     // The following property can be used to specify an additional directory to scan.
     //nodesDir: '/home/nol/.node-red/nodes',
- 
+
     // You can protect the user interface with a userid and password by using the following property
     // the password must be an md5 hash  eg.. 5f4dcc3b5aa765d61d8327deb882cf99 ('password')
     //httpAuth: {user:"user",pass:"5f4dcc3b5aa765d61d8327deb882cf99"},
@@ -53,11 +57,11 @@ module.exports = {
     // The following property can be used to specifiy a different root path.
     //httpRoot: '/admin',
 
-    // When httpRoot is used to move the UI to a different root path, the 
+    // When httpRoot is used to move the UI to a different root path, the
     // following property can be used to identify a directory of static content
     // that should be served at http://localhost:1880/.
     //httpStatic: '/home/nol/node-red-dashboard/',
-    
+
     // The following property can be used to enable HTTPS
     // See http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener
     // for details on its contents.
