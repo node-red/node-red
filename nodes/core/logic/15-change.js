@@ -22,6 +22,7 @@ function ChangeNode(n) {
     this.property = n.property || "";
     this.from = n.from || " ";
     this.to = n.to || " ";
+    this.reg = (n.reg === null || n.reg);
     var node = this;
 
     var makeNew = function( stem, path, value ) {
@@ -35,13 +36,17 @@ function ChangeNode(n) {
 
     this.on('input', function (msg) {
         if (node.action == "change") {
-			try {
-            	node.re = new RegExp(this.from, "g");
-            	if (typeof msg[node.property] === "string") {
-            		msg[node.property] = (msg[node.property]).replace(node.re, node.to);
-            	}
-            } catch(err) {
-                this.error(err.message);
+            var from = node.from;
+            if (node.reg === false) {
+                from = from.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+            }
+            try {
+                node.re = new RegExp(from, "g");
+            } catch (e) {
+                node.error("Invalid regex: "+from);
+            }
+            if (typeof msg[node.property] === "string") {
+                msg[node.property] = (msg[node.property]).replace(node.re, node.to);
             }
         }
         //else if (node.action == "replace") {
