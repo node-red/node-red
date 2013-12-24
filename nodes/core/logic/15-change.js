@@ -22,7 +22,7 @@ function ChangeNode(n) {
     this.property = n.property || "";
     this.from = n.from || " ";
     this.to = n.to || " ";
-    this.reg = n.reg;
+    this.reg = n.reg || true;
     console.log("Type=",this.reg);
     var node = this;
 
