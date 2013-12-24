@@ -22,6 +22,8 @@ function ChangeNode(n) {
     this.property = n.property || "";
     this.from = n.from || " ";
     this.to = n.to || " ";
+    this.reg = n.reg;
+    console.log("Type=",this.reg);
     var node = this;
 
     var makeNew = function( stem, path, value ) {
@@ -35,7 +37,15 @@ function ChangeNode(n) {
 
     this.on('input', function (msg) {
         if (node.action == "change") {
-            node.re = new RegExp(this.from, "g");
+            if (node.reg === false) {
+                this.from = this.from.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+            }
+            //console.log("Regex is:",this.from);
+            try {
+                node.re = new RegExp(this.from, "g");
+            } catch (e) {
+                node.error("Invalid regex: "+this.from);
+            }
             if (typeof msg[node.property] === "string") {
                 msg[node.property] = (msg[node.property]).replace(node.re, node.to);
             }

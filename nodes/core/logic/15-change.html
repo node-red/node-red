@@ -34,6 +34,11 @@
         <label id="node-input-t">replace with</label>
         <input type="text" id="node-input-to" placeholder="that"/>
     </div>
+    <div class="form-row" id="node-reg-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-reg" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-reg" style="width: 70%;">Use regular expressions ?</label>
+    </div>
     <br/>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
@@ -58,6 +63,7 @@
             property: {value:"payload"},
             from: {value:""},
             to: {value:""},
+            reg: {value:false},
             name: {value:""}
         },
         inputs: 1,
@@ -78,6 +84,7 @@
                     $("#node-input-t").html("with value");
                     $("#node-from-row").hide();
                     $("#node-to-row").show();
+                    $("#node-reg-row").hide();
                     $("#node-tip").html("Tip: expects a new property name and either a fixed value OR the full name of another msg.property eg: msg.sentiment.score");
                 }
                 if (a === "delete") {
@@ -86,6 +93,7 @@
                     //$("#node-input-t").html("to");
                     $("#node-from-row").hide();
                     $("#node-to-row").hide();
+                    $("#node-reg-row").hide();
                     $("#node-tip").html("Tip: deletes the named property and all sub-properties");
                 }
                 if (a === "change") {
@@ -94,7 +102,8 @@
                     $("#node-input-t").html("replace with");
                     $("#node-from-row").show();
                     $("#node-to-row").show();
-                    $("#node-tip").html("Tip: <i>if it contains</i> can be a regex, likewise <i>replace with</i> can accept regex results. Only works on strings.");
+                    $("#node-reg-row").show();
+                    $("#node-tip").html("Tip: If <i>contains</i> is a regex, you <b>must</b> escape any special characters. Likewise <i>replace with</i> can accept regex results. Only works on strings.");
                 }
                 //if (a === "replace") {
                  //   $("#node-input-todo").html("called");
