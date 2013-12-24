@@ -43,7 +43,7 @@ function ChangeNode(n) {
             try {
                 node.re = new RegExp(from, "g");
             } catch (e) {
-                node.error("Invalid regex: "+from);
+                node.error(e.message);
             }
             if (typeof msg[node.property] === "string") {
                 msg[node.property] = (msg[node.property]).replace(node.re, node.to);
