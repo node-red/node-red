@@ -1124,7 +1124,13 @@ RED.view = function() {
                     $( this ).dialog( "close" );
                 }
             }
-        ]
+        ],
+        open: function(e) {
+            RED.keyboard.disable();
+        },
+        close: function(e) {
+            RED.keyboard.enable();
+        }
     });
     $( "#node-dialog-delete-workspace" ).dialog({
         modal: true,
@@ -1152,7 +1158,14 @@ RED.view = function() {
                     $( this ).dialog( "close" );
                 }
             }
-        ]
+        ],
+        open: function(e) {
+            RED.keyboard.disable();
+        },
+        close: function(e) {
+            RED.keyboard.enable();
+        }
+
     });
 
     return {
