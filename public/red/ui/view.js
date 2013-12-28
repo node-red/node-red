@@ -258,6 +258,8 @@ RED.view = function() {
                 mousePos[0] = 20*Math.floor(mousePos[0]/20);
                 mousePos[1] = 20*Math.floor(mousePos[1]/20);
             }
+            var minX = 0;
+            var minY = 0;
             for (var n in moving_set) {
                 var node = moving_set[n];
                 node.n.x = mousePos[0]+node.dx;
@@ -266,6 +268,13 @@ RED.view = function() {
                     node.n.x = 20*Math.floor(node.n.x/20);
                     node.n.y = 20*Math.floor(node.n.y/20);
                 }
+                minX = Math.min(node.n.x-node.n.w/2-5,minX);
+                minY = Math.min(node.n.y-node.n.h/2-5,minY);
+            }
+            for (var n in moving_set) {
+                var node = moving_set[n];
+                node.n.x -= minX;
+                node.n.y -= minY;
                 node.n.dirty = true;
             }
         }
@@ -1002,14 +1011,27 @@ RED.view = function() {
                 if (mouse_position == null) {
                     mouse_position = [0,0];
                 }
+                
+                var minX = 0;
+                var minY = 0;
 
                 for (var i in new_ms) {
-                    new_ms[i].n.selected = true;
-                    new_ms[i].n.changed = true;
-                    new_ms[i].n.x -= dx - mouse_position[0];
-                    new_ms[i].n.y -= dy - mouse_position[1];
-                    new_ms[i].dx = new_ms[i].n.x - mouse_position[0];
-                    new_ms[i].dy = new_ms[i].n.y - mouse_position[1];
+                    var node = new_ms[i];
+                    node.n.selected = true;
+                    node.n.changed = true;
+                    node.n.x -= dx - mouse_position[0];
+                    node.n.y -= dy - mouse_position[1];
+                    node.dx = node.n.x - mouse_position[0];
+                    node.dy = node.n.y - mouse_position[1];
+                    minX = Math.min(node.n.x-node_width/2-5,minX);
+                    minY = Math.min(node.n.y-node_height/2-5,minY);
+                }
+                for (var i in new_ms) {
+                    var node = new_ms[i];
+                    node.n.x -= minX;
+                    node.n.y -= minY;
+                    node.dx -= minX;
+                    node.dy -= minY;
                 }
                 mouse_mode = RED.state.IMPORT_DRAGGING;
 
