@@ -79,7 +79,7 @@ MQTTClient.prototype.connect = function(options) {
                         var now = (new Date()).getTime();
                         if (now - self.lastOutbound > self.options.keepalive*500 || now - self.lastInbound > self.options.keepalive*500) {
                            if (self.pingOutstanding) {
-                              // DO DISCONNECT
+                               self.client.disconnect();
                            } else {
                               self.lastOutbound = (new Date()).getTime();
                               self.lastInbound = (new Date()).getTime();
@@ -89,7 +89,9 @@ MQTTClient.prototype.connect = function(options) {
                         }
                         
                   },self.options.keepalive*500,self);
+                  self.pingOutstanding = false;
                   self.lastInbound = (new Date()).getTime()
+                  self.lastOutbound = (new Date()).getTime()
                   self.connected = true;
                   self.emit('connect');
                } else {
