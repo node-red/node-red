@@ -19,6 +19,23 @@ body {
   padding-top: 100px;
   background: url("pw_maze_white.png");
 }
+#dropTarget {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 0; right: 0;
+    background: rgba(100,100,100,0.5);
+    display:table;
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+#dropTarget div {
+    display: table-cell; 
+    vertical-align: middle;
+    text-align: center;
+    font-size: 40px;
+    color: #fff;
+}
 a.brand {
         line-height: 16px;
 }

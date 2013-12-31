@@ -16,7 +16,29 @@
 var RED = function() {
 
     $('#btn-keyboard-shortcuts').click(function(){showHelp();});
-
+    
+    
+    $('#chart').on("dragenter",function(event) {
+        if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
+            $("#dropTarget").css({display:'table'});
+        }
+    });
+    
+    $('#dropTarget').on("dragover",function(event) {
+        if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
+            event.preventDefault();
+        }
+    })
+    .on("dragleave",function(event) {
+        $("#dropTarget").hide();
+    })
+    .on("drop",function(event) {
+        var data = event.originalEvent.dataTransfer.getData("text/plain");
+        RED.view.importNodes(data);
+        $("#dropTarget").hide();
+    });
+    
+        
     function save(force) {
         if (RED.view.dirty()) {
 
