@@ -20,14 +20,20 @@
         <input type="text" id="node-input-ircserver">
     </div>
     <div class="form-row">
+        <label for="node-input-channel"><i class="icon-tasks"></i> Channel</label>
+        <input type="text" id="node-input-channel" placeholder="#nodered">
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-tips">The channel to join must start with a # (as per normal irc rules...)</div>
 </script>
 
 <script type="text/x-red" data-help-name="irc in">
     <p>Connects to a channel on an IRC server</p>
     <p>Any messages on that channel will appear on the <b>msg.payload</b> at the output, while <b>msg.topic</b> will contain who it is from.</p>
+    <p>The second output provides a <b>msg.payload</b> that has any status messages such as joins, parts, kicks etc.</p>
 </script>
 
 <script type="text/javascript">
@@ -35,11 +41,12 @@
         category: 'social-input',
         defaults: {
             name: {value:""},
-            ircserver: {type:"irc-server", required:true}
+            ircserver: {type:"irc-server", required:true},
+            channel: {value:"",required:true,validate:RED.validators.regex(/^#/)}
         },
         color:"Silver",
         inputs:0,
-        outputs:1,
+        outputs:2,
         icon: "hash.png",
         label: function() {
             var ircNode = RED.nodes.node(this.ircserver);
@@ -47,9 +54,18 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            if (this.ircserver !== undefined) {
+                this.channel = this.channel || RED.nodes.node(this.ircserver).channel;
+                $("#node-input-channel").val(this.channel);
+            }
+            else { this.channel = this.channel; }
+            $("#node-input-channel").val(this.channel);
         }
     });
 </script>
+
 
 <script type="text/x-red" data-template-name="irc out">
     <div class="form-row">
@@ -57,10 +73,14 @@
         <input type="text" id="node-input-ircserver">
     </div>
     <div class="form-row">
+        <label for="node-input-channel"><i class="icon-tasks"></i> Channel</label>
+        <input type="text" id="node-input-channel" placeholder="#nodered">
+    </div>
+    <div class="form-row">
         <label for="node-input-sendObject"><i class="icon-check"></i> Action</label>
         <select type="text" id="node-input-sendObject" style="display: inline-block; vertical-align: middle; width:70%;">
-            <option value="pay">Send msg.payload to channel</option>
-            <option value="true">Send msg.payload to id in msg.topic</option>
+            <option value="pay">Send to channel</option>
+            <option value="true">Send to userid in msg.topic as PRIVMSG</option>
             <option value="false">Send complete msg object to channel</option>
         </select>
     </div>
@@ -68,7 +88,8 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-tips">Sending the complete object will stringify the whole msg object before sending.</div>
+    <div class="form-tips">The channel to join must start with a # (as per normal irc rules...)<br/>
+    Sending the complete object will stringify the whole msg object before sending.</div>
 </script>
 
 <script type="text/x-red" data-help-name="irc out">
@@ -83,7 +104,8 @@
         defaults: {
             name: {value:""},
             sendObject: {value:"pay", required:true},
-            ircserver: {type:"irc-server", required:true}
+            ircserver: {type:"irc-server", required:true},
+            channel: {value:"",required:true,validate:RED.validators.regex(/^#/)}
         },
         color:"Silver",
         inputs:1,
@@ -95,36 +117,38 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            if (this.ircserver !== undefined) {
+                this.channel = this.channel || RED.nodes.node(this.ircserver).channel;
+                $("#node-input-channel").val(this.channel);
+            }
+            else { this.channel = this.channel; }
         }
     });
 </script>
 
+
 <script type="text/x-red" data-template-name="irc-server">
     <div class="form-row">
         <label for="node-config-input-server"><i class="icon-tasks"></i> IRC Server</label>
-        <input type="text" id="node-config-input-server" placeholder="irc.UK-IRC.net">
-    </div>
-    <div class="form-row">
-        <label for="node-config-input-channel"><i class="icon-tasks"></i> Channel</label>
-        <input type="text" id="node-config-input-channel" placeholder="#node-red">
+        <input type="text" id="node-config-input-server" placeholder="irc.freenode.net">
     </div>
     <div class="form-row">
         <label for="node-config-input-nickname"><i class="icon-tasks"></i> Nickname</label>
         <input type="text" id="node-config-input-nickname" placeholder="joe123">
     </div>
-    <div class="form-tips">The channel to join must start with a # (as per normal irc rules...)</div>
 </script>
 
 <script type="text/javascript">
     RED.nodes.registerType('irc-server',{
         category: 'config',
         defaults: {
-            channel: {value:"",required:true,validate:RED.validators.regex(/^#/)},
             server: {value:"",required:true},
             nickname: {value:"",required:true}
         },
         label: function() {
-            return this.server+":"+this.channel;
+            return this.server;
         }
     });
 </script>

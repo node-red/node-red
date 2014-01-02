@@ -31,17 +31,18 @@ function IRCServerNode(n) {
         }
     });
 }
-
 RED.nodes.registerType("irc-server",IRCServerNode);
+
 
 // The Input Node
 function IrcInNode(n) {
     RED.nodes.createNode(this,n);
     this.ircserver = n.ircserver;
     this.serverConfig = RED.nodes.getNode(this.ircserver);
+    this.channel = n.channel || this.serverConfig.channel;
     if (this.serverConfig.ircclient == null) {
         this.serverConfig.ircclient = new irc.Client(this.serverConfig.server, this.serverConfig.nickname, {
-            channels: [this.serverConfig.channel]
+            channels: [this.channel]
         });
         this.serverConfig.ircclient.addListener('error', function(message) {
             util.log('[irc] '+ JSON.stringify(message));
@@ -52,12 +53,37 @@ function IrcInNode(n) {
 
     this.ircclient.addListener('message', function (from, to, message) {
         //util.log(from + ' => ' + to + ': ' + message);
-        var msg = { "topic":from, "to":to, "payload":message };
-        node.send(msg);
+        var msg = { "topic":from, "from":from, "to":to, "payload":message };
+        node.send([msg,null]);
+    });
+    this.ircclient.addListener('pm', function(from, message) {
+        var msg = { "topic":from, "from":from, "to":"PRIV", "payload":message };
+        node.send([msg,null]);
+    });
+    this.ircclient.addListener('join', function(channel, who) {
+        var msg = { "payload": { "type":"join", "who":who, "channel":channel } };
+        node.send([null,msg]);
+        node.log(who+' has joined '+channel);
+    });
+    this.ircclient.addListener('part', function(channel, who, reason) {
+        var msg = { "payload": { "type":"part", "who":who, "channel":channel, "reason":reason } };
+        node.send([null,msg]);
+        node.log(who+'has left '+channel+': '+reason);
+    });
+    this.ircclient.addListener('quit', function(nick, reason, channels, message) {
+        var msg = { "payload": { "type":"quit", "who":nick, "channel":channels, "reason":reason } };
+        node.send([null,msg]);
+        node.log(nick+'has quit '+channels+': '+reason);
+    });
+    this.ircclient.addListener('kick', function(channel, who, by, reason) {
+        var msg = { "payload": { "type":"kick", "who":who, "channel":channel, "by":by, "reason":reason } };
+        node.send([null,msg]);
+        node.log(who+' was kicked from '+channel+' by '+by+': '+reason);
     });
 
 }
 RED.nodes.registerType("irc in",IrcInNode);
+
 
 // The Output Node
 function IrcOutNode(n) {
@@ -65,10 +91,10 @@ function IrcOutNode(n) {
     this.sendAll = n.sendObject;
     this.ircserver = n.ircserver;
     this.serverConfig = RED.nodes.getNode(this.ircserver);
-    this.channel = this.serverConfig.channel;
+    this.channel = n.channel || this.serverConfig.channel;
     if (this.serverConfig.ircclient == null) {
         this.serverConfig.ircclient = new irc.Client(this.serverConfig.server, this.serverConfig.nickname, {
-            channels: [this.serverConfig.channel]
+            channels: [this.channel]
         });
         this.serverConfig.ircclient.addListener('error', function(message) {
             util.log('[irc] '+ JSON.stringify(message));
@@ -78,19 +104,29 @@ function IrcOutNode(n) {
     var node = this;
 
     this.on("input", function(msg) {
-        //console.log(msg,node.channel);
-        if (msg._topic) { delete msg._topic; }
-        if (node.sendAll == "false") {
-            node.ircclient.say(node.channel, JSON.stringify(msg));
+        if (Object.prototype.toString.call( msg.raw ) === '[object Array]') {
+            var m = msg.raw;
+            for (var i = 0; i < 10; i++) {
+                if (typeof m[i] !== "string") { m[i] = ""; }
+                m[i] = m[i].replace(/"/g, "");
+            }
+            util.log("[irc] RAW command:"+m);
+            node.ircclient.send(m[0],m[1],m[2],m[3],m[4],m[5],m[6],m[7],m[8],m[9]);
         }
         else {
-            if (typeof msg.payload === "object") { msg.payload = JSON.stringify(msg.payload); }
-            if (node.sendAll == "pay") {
-                node.ircclient.say(node.channel, msg.payload);
+            if (msg._topic) { delete msg._topic; }
+            if (node.sendAll == "false") {
+                node.ircclient.say(node.channel, JSON.stringify(msg));
             }
             else {
-                var to = msg.topic || node.channel;
-                node.ircclient.say(to, msg.payload);
+                if (typeof msg.payload === "object") { msg.payload = JSON.stringify(msg.payload); }
+                if (node.sendAll == "pay") {
+                    node.ircclient.say(node.channel, msg.payload);
+                }
+                else {
+                    var to = msg.topic || node.channel;
+                    node.ircclient.say(to, msg.payload);
+                }
             }
         }
     });
