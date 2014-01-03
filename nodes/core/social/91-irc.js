@@ -60,10 +60,16 @@ function IrcInNode(n) {
         var msg = { "topic":from, "from":from, "to":"PRIV", "payload":message };
         node.send([msg,null]);
     });
+
     this.ircclient.addListener('join', function(channel, who) {
         var msg = { "payload": { "type":"join", "who":who, "channel":channel } };
         node.send([null,msg]);
         node.log(who+' has joined '+channel);
+    });
+    this.ircclient.addListener('invite', function(channel, from, message) {
+        var msg = { "payload": { "type":"invite", "who":from, "channel":channel, "message":message } };
+        node.send([null,msg]);
+        node.log(from+' sent invite to '+channel+': '+message);
     });
     this.ircclient.addListener('part', function(channel, who, reason) {
         var msg = { "payload": { "type":"part", "who":who, "channel":channel, "reason":reason } };
