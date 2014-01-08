@@ -30,9 +30,9 @@
 </script>
 
 <script type="text/x-red" data-help-name="mqtt in">
-	<p>MQTT input node. Connects to a broker and subscribes to the specified topic. The topic may contain MQTT wildcards.</p>
-	<p>Outputs an object called <b>msg</b> containing <b>msg.topic, msg.payload, msg.qos</b> and <b>msg.retain</b>.</p>
-	<p><b>msg.payload</b> is a String.</p>
+    <p>MQTT input node. Connects to a broker and subscribes to the specified topic. The topic may contain MQTT wildcards.</p>
+    <p>Outputs an object called <b>msg</b> containing <b>msg.topic, msg.payload, msg.qos</b> and <b>msg.retain</b>.</p>
+    <p><b>msg.payload</b> is a String.</p>
 </script>
 
 <script type="text/javascript">
@@ -43,7 +43,7 @@
             topic: {value:"",required:true},
             broker: {type:"mqtt-broker", required:true}
         },
-        color:"#c6dbef",
+        color:"#d8bfd8",
         inputs:0,
         outputs:1,
         icon: "bridge.png",
@@ -72,9 +72,9 @@
 </script>
 
 <script type="text/x-red" data-help-name="mqtt out">
-	<p>Connects to a MQTT broker and publishes <b>msg.payload</b> either to the <b>msg.topic</b> OR to the topic specified in the edit window. The value in the edit window has precedence.</p>
-	<p><b>msg.qos</b> and <b>msg.retain</b> may also optionally have been set. If not set they are set to 0 and false respectively.</p>
-	<p>If <b>msg.payload</b> contains a buffer or an object it will be stringified before being sent.</p>
+    <p>Connects to a MQTT broker and publishes <b>msg.payload</b> either to the <b>msg.topic</b> OR to the topic specified in the edit window. The value in the edit window has precedence.</p>
+    <p><b>msg.qos</b> and <b>msg.retain</b> may also optionally have been set. If not set they are set to 0 and false respectively.</p>
+    <p>If <b>msg.payload</b> contains a buffer or an object it will be stringified before being sent.</p>
 </script>
 
 <script type="text/javascript">
@@ -85,7 +85,7 @@
             topic: {value:""},
             broker: {type:"mqtt-broker", required:true}
         },
-        color:"#c6dbef",
+        color:"#d8bfd8",
         inputs:1,
         outputs:0,
         icon: "bridge.png",
@@ -129,7 +129,7 @@
             clientid: { value:"" }
             //user -> credentials
             //pass -> credentials
-            
+
         },
         label: function() {
             return this.broker+":"+this.port;
@@ -144,7 +144,7 @@
                 } else {
                     $('#node-config-input-pass').val('');
                 }
-                
+
             });
         },
         oneditsave: function() {
