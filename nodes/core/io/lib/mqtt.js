@@ -130,8 +130,10 @@ MQTTClient.prototype.connect = function(options) {
          client.on('pubrel',function(packet) {
                self.lastInbound = (new Date()).getTime()
                var p = self.inboundMessages[packet.messageId];
-               self.emit('message',p.topic,p.payload,p.qos,p.retain);
-               delete self.inboundMessages[packet.messageId];
+               if (p) {
+                   self.emit('message',p.topic,p.payload,p.qos,p.retain);
+                   delete self.inboundMessages[packet.messageId];
+               }
                self.lastOutbound = (new Date()).getTime()
                self.client.pubcomp(packet);
          });
