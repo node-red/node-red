@@ -84,21 +84,22 @@ module.exports = {
                     }
                 };
                 client.on('connect',function() {
-                        
-                        util.log('[mqtt] connected to broker tcp://'+broker+':'+port);
-
-                        connecting = false;
-                        for (var s in subscriptions) {
-                            var topic = subscriptions[s].topic;
-                            var qos = subscriptions[s].qos;
-                            var callback = subscriptions[s].callback;
-                            client.subscribe(topic,qos);
-                        }
-                        //console.log("connected - publishing",queue.length,"messages");
-                        while(queue.length) {
-                            var msg = queue.shift();
-                            //console.log(msg);
-                            client.publish(msg.topic,msg.payload,msg.qos,msg.retain);
+                        if (client) {
+                            util.log('[mqtt] connected to broker tcp://'+broker+':'+port);
+    
+                            connecting = false;
+                            for (var s in subscriptions) {
+                                var topic = subscriptions[s].topic;
+                                var qos = subscriptions[s].qos;
+                                var callback = subscriptions[s].callback;
+                                client.subscribe(topic,qos);
+                            }
+                            //console.log("connected - publishing",queue.length,"messages");
+                            while(queue.length) {
+                                var msg = queue.shift();
+                                //console.log(msg);
+                                client.publish(msg.topic,msg.payload,msg.qos,msg.retain);
+                            }
                         }
                 });
                 client.on('connectionlost', function(err) {
