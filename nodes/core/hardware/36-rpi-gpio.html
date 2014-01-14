@@ -18,24 +18,24 @@
     <div class="form-row">
         <label for="node-input-pin"><i class="icon-asterisk"></i> GPIO Pin</label>
         <select type="text" id="node-input-pin" style="width: 150px;">
-            <option value="-">select pin</option>
-            <option value="3">3 - SDA0</option>
-            <option value="5">5 - SCL0</option>
-            <option value="7">7</option>
-            <option value="8">8 - TxD</option>
-            <option value="10">10 - RxD</option>
-            <option value="11">11</option>
-            <option value="12">12</option>
-            <option value="13">13</option>
-            <option value="15">15</option>
-            <option value="16">16</option>
-            <option value="18">18</option>
-            <option value="19">19 - MOSI</option>
-            <option value="21">21 - MISO</option>
-            <option value="22">22</option>
-            <option value="23">23 - SCLK</option>
-            <option value="24">24 - CE0</option>
-            <option value="26">26 - CE1</option>
+            <option value="-">select pin </option>
+            <option value="3">3 - SDA0 </option>
+            <option value="5">5 - SCL0 </option>
+            <option value="7">7 </option>
+            <option value="8">8 - TxD </option>
+            <option value="10">10 - RxD </option>
+            <option value="11">11 </option>
+            <option value="12">12 </option>
+            <option value="13">13 </option>
+            <option value="15">15 </option>
+            <option value="16">16 </option>
+            <option value="18">18 </option>
+            <option value="19">19 - MOSI </option>
+            <option value="21">21 - MISO </option>
+            <option value="22">22 </option>
+            <option value="23">23 - SCLK </option>
+            <option value="24">24 - CE0 </option>
+            <option value="26">26 - CE1 </option>
          </select>
     </div>
     <div class="form-row">
@@ -55,11 +55,11 @@
 </script>
 
 <script type="text/x-red" data-help-name="rpi-gpio in">
-	<p>Raspberry Pi input node. Generates a <b>msg.payload</b> with either a 0 or 1 depending on the state of the input pin. Requires the gpio command to work.</p>
-	<p>You may also enable the input pullup resitor or the pulldown resistor.</p>
-	<p>The <b>msg.topic</b> is set to <i>pi/{the pin number}</i></p>
-	<p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
-	<p><b>Note:</b> This node currently polls the pin every 250mS. This is not ideal as it loads the cpu, and will be rewritten shortly to try to use interrupts.</p>
+    <p>Raspberry Pi input node. Generates a <b>msg.payload</b> with either a 0 or 1 depending on the state of the input pin. Requires the gpio command to work.</p>
+    <p>You may also enable the input pullup resitor or the pulldown resistor.</p>
+    <p>The <b>msg.topic</b> is set to <i>pi/{the pin number}</i></p>
+    <p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
+    <p><b>Note:</b> This node currently polls the pin every 250mS. This is not ideal as it loads the cpu, and will be rewritten shortly to try to use interrupts.</p>
 
 </script>
 
@@ -89,24 +89,24 @@
     <div class="form-row">
         <label for="node-input-pin"><i class="icon-asterisk"></i> GPIO Pin</label>
         <select type="text" id="node-input-pin" style="width: 150px;">
-            <option value="-">select pin</option>
-            <option value="3">3 - SDA0</option>
-            <option value="5">5 - SCL0</option>
-            <option value="7">7</option>
-            <option value="8">8 - TxD</option>
-            <option value="10">10 - RxD</option>
-            <option value="11">11</option>
-            <option value="12">12</option>
-            <option value="13">13</option>
-            <option value="15">15</option>
-            <option value="16">16</option>
-            <option value="18">18</option>
-            <option value="19">19 - MOSI</option>
-            <option value="21">21 - MISO</option>
-            <option value="22">22</option>
-            <option value="23">23 - SCLK</option>
-            <option value="24">24 - CE0</option>
-            <option value="26">26 - CE1</option>
+            <option value="-">select pin </option>
+            <option value="3">3 - SDA0 </option>
+            <option value="5">5 - SCL0 </option>
+            <option value="7">7 </option>
+            <option value="8">8 - TxD </option>
+            <option value="10">10 - RxD </option>
+            <option value="11">11 </option>
+            <option value="12">12 </option>
+            <option value="13">13 </option>
+            <option value="15">15 </option>
+            <option value="16">16 </option>
+            <option value="18">18 </option>
+            <option value="19">19 - MOSI </option>
+            <option value="21">21 - MISO </option>
+            <option value="22">22 </option>
+            <option value="23">23 - SCLK </option>
+            <option value="24">24 - CE0 </option>
+            <option value="26">26 - CE1 </option>
          </select>
     </div>
     <div class="form-row">
@@ -117,9 +117,9 @@
 </script>
 
 <script type="text/x-red" data-help-name="rpi-gpio out">
-	<p>Raspberry Pi output node. Expects a <b>msg.payload</b> with either a 0 or 1 (or true or false). Requires the gpio command to work.</p>
-	<p>Will set the selected physical pin high or low depending on the value passed in.</p>
-	<p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
+    <p>Raspberry Pi output node. Expects a <b>msg.payload</b> with either a 0 or 1 (or true or false). Requires the gpio command to work.</p>
+    <p>Will set the selected physical pin high or low depending on the value passed in.</p>
+    <p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
 </script>
 
 <script type="text/javascript">
