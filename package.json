@@ -10,7 +10,8 @@
     },
     "main"         : "red/red.js",
     "scripts"      : {
-        "start": "node red.js"
+        "start": "node red.js",
+        "test": "mocha test"
     },
     "contributors": [ 
         {"name": "Nick O'Leary"},
