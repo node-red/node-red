@@ -160,17 +160,9 @@ var localfilesystem = {
         fs.exists(flowsFullPath, function(exists) {
             if (exists) {
                 util.log("[red] Loading flows : "+flowsFile);
-                fs.readFile(flowsFullPath,'utf8',function(err,data) {
-                    if (err) {
-                        defer.reject(err);
-                    } else {
-                        try {
-                            defer.resolve(JSON.parse(data));
-                        } catch(err) {
-                            defer.reject(err);
-                        }
-                    }
-                });
+                defer.resolve(nodeFn.call(fs.readFile,flowsFullPath,'utf8').then(function(data) {
+                    return JSON.parse(data);
+                }));
             } else {
                 util.log("[red] Flows file not found : "+flowsFile   );
                 defer.resolve([]);
@@ -179,32 +171,16 @@ var localfilesystem = {
         return defer.promise;
     },
     saveFlows: function(flows) {
-        var defer = when.defer();
-        fs.writeFile(flowsFullPath, JSON.stringify(flows), function(err) {
-                if(err) {
-                    defer.reject(err);
-                } else {
-                    defer.resolve();
-                }
-        });
-        return defer.promise;
+        return nodeFn.call(fs.writeFile, flowsFullPath, JSON.stringify(flows));
     },
     
     getCredentials: function() {
         var defer = when.defer();
         fs.exists(credentialsFile, function(exists) {
             if (exists) {
-                fs.readFile(credentialsFile,'utf8',function(err,data) {
-                    if (err) {
-                        defer.reject(err);
-                    } else {
-                        try {
-                            defer.resolve(JSON.parse(data));
-                        } catch(err) {
-                            defer.reject(err);
-                        }
-                    }
-                });
+                defer.resolve(nodeFn.call(fs.readFile, credentialsFile, 'utf8').then(function(data) {
+                    return JSON.parse(data)
+                }));
             } else {
                 defer.resolve({});
             }
@@ -213,15 +189,7 @@ var localfilesystem = {
     },
     
     saveCredentials: function(credentials) {
-        var defer = when.defer();
-        fs.writeFile(credentialsFile, JSON.stringify(credentials), function(err) {
-                if(err) {
-                    defer.reject(err);
-                } else {
-                    defer.resolve();
-                }
-        });
-        return defer.promise;
+        return nodeFn.call(fs.writeFile, credentialsFile, JSON.stringify(credentials))
     },
     
     getAllFlows: function() {
@@ -234,13 +202,7 @@ var localfilesystem = {
         var file = fspath.join(libFlowsDir,fn+".json");
         fs.exists(file, function(exists) {
             if (exists) {
-                fs.readFile(file,'utf8',function(err,data) {
-                    if (err) {
-                        defer.reject(err);
-                    } else {
-                        defer.resolve(data);
-                    }
-                });
+                defer.resolve(nodeFn.call(fs.readFile,file,'utf8'));
             } else {
                 defer.reject();
             }
