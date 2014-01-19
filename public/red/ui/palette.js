@@ -16,7 +16,6 @@
 RED.palette = function() {
     
     function addNodeType(nt,def) {
-        console.log(nt,def.category);
         if (def.category != 'config') {
             var d = document.createElement("div");
             d.id = "pn_"+nt;
@@ -76,7 +75,7 @@ RED.palette = function() {
     }
     
     $(".palette-header").click(function(e) {
-        (this).next().slideToggle();
+        $(this).next().slideToggle();
         $(this).children("i").toggleClass("expanded");
     });
     
