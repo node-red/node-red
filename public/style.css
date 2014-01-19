@@ -78,16 +78,71 @@ a.brand img {
 }
 
 #palette {
-   overflow-y: auto;
    background: #f3f3f3;
-   width: 130px;
+   width: 140px;
    text-align: center;
-   padding: 5px;
    -webkit-user-select: none;
    -khtml-user-select: none;
    -moz-user-select: none;
    -ms-user-select: none;
    user-select: none;
+}
+.palette-scroll {
+    position: absolute;
+    top: 0;
+    left:0;
+    right: 0;
+    bottom: 35px;
+    padding: 5px;
+    overflow-y: auto;
+    box-sizing:border-box;
+}
+#palette-search {
+    position: absolute;
+    bottom: 0;
+    left:0;
+    right: 0;
+    overflow: hidden;
+    background: #f3f3f3;
+    text-align: center;
+    height: 35px;
+    padding: 3px;
+    border-top: 1px solid #999;
+    box-sizing:border-box;
+}
+#palette-search i.icon-search {
+    position: absolute;
+    pointer-events: none;
+    left: 3px;
+    top: 10px;
+}
+#palette-search i.icon-remove {
+    position: absolute;
+    right: 3px;
+    top: 10px;
+}
+
+#palette-search-clear {
+    display: none;
+}
+
+#palette-search input {
+    float: right;
+    border-radius: 0;
+    border: none;
+    width: 100%;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    padding: 3px 17px;
+    margin: 0px;
+    height: 30px;
+    box-sizing:border-box;
+    
+}
+#palette-search input:focus {
+    border: none;
+    box-shadow: none;
+    -webkit-box-shadow: none;
 }
 
 .palette-category {
