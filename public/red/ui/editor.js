@@ -267,11 +267,12 @@ RED.editor = function() {
                 RED.keyboard.enable();
 
                 if (RED.view.state() != RED.state.IMPORT_DRAGGING) {
-                    RED.view.state(0);
+                    RED.view.state(RED.state.DEFAULT);
                 }
                 $( this ).dialog('option','height','auto');
                 $( this ).dialog('option','width','500');
                 editing_node = null;
+                RED.configTab.refresh();
             }
     });
     
@@ -462,14 +463,22 @@ RED.editor = function() {
             resize: function(e,ui) {
             },
             open: function(e) {
+                if (RED.view.state() != RED.state.EDITING) {
+                    RED.keyboard.disable();
+                }
             },
             close: function(e) {
+                if (RED.view.state() != RED.state.EDITING) {
+                    RED.keyboard.enable();
+                }
+                RED.configTab.refresh();
             }
     });
     
     
     return {
         edit: showEditDialog,
+        editConfig: showEditConfigNodeDialog,
         validateNode: validateNode,
         updateNodeProperties: updateNodeProperties // TODO: only exposed for edit-undo
     }

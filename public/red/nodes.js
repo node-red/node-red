@@ -39,9 +39,27 @@ RED.nodes = function() {
     function addNode(n) {
         if (n._def.category == "config") {
             configNodes[n.id] = n;
+            RED.configTab.refresh();
         } else {
             n.dirty = true;
             nodes.push(n);
+            var updatedConfigNode = false;
+            for (var d in n._def.defaults) {
+                var property = n._def.defaults[d];
+                if (property.type) {
+                    var type = getType(property.type)
+                    if (type && type.category == "config") {
+                        var configNode = configNodes[n[d]];
+                        if (configNode) {
+                            updatedConfigNode = true;
+                            configNode.users.push(n);
+                        }
+                    }
+                }
+            }
+            if (updatedConfigNode) {
+                RED.configTab.refresh();
+            }
         }
     }
     function addLink(l) {
@@ -68,12 +86,31 @@ RED.nodes = function() {
         var removedLinks = [];
         if (id in configNodes) {
             delete configNodes[id];
+            RED.configTab.refresh();
         } else {
             var node = getNode(id);
             if (node) {
                 nodes.splice(nodes.indexOf(node),1);
                 removedLinks = links.filter(function(l) { return (l.source === node) || (l.target === node); });
                 removedLinks.map(function(l) {links.splice(links.indexOf(l), 1); });
+            }
+            var updatedConfigNode = false;
+            for (var d in node._def.defaults) {
+                var property = node._def.defaults[d];
+                if (property.type) {
+                    var type = getType(property.type)
+                    if (type && type.category == "config") {
+                        var configNode = configNodes[node[d]];
+                        if (configNode) {
+                            updatedConfigNode = true;
+                            var users = configNode.users;
+                            users.splice(users.indexOf(node),1);
+                        }
+                    }
+                }
+            }
+            if (updatedConfigNode) {
+                RED.configTab.refresh();
             }
         }
         return removedLinks;

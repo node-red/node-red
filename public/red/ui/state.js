@@ -14,6 +14,7 @@
  * limitations under the License.
  **/
 RED.state = {
+    DEFAULT: 0,
     MOVING: 1,
     JOINING: 2,
     MOVING_ACTIVE: 3,

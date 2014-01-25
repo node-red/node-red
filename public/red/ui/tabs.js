@@ -34,6 +34,7 @@ RED.tabs = function() {
             if (options.ondblclick) {
                 options.ondblclick($(this).attr('href').slice(1));
             }
+            return false;
         }
         
         function activateTab(link) {
@@ -61,13 +62,38 @@ RED.tabs = function() {
         ul.find("li.red-ui-tab a").on("click",onTabClick).on("dblclick",onTabDblClick);
         updateTabWidths();
         
+        
+        function removeTab(id) {
+            var li = ul.find("a[href='#"+id+"']").parent();
+            if (li.hasClass("active")) {
+                var tab = li.prev();
+                if (tab.size() == 0) {
+                    tab = li.next();
+                }
+                activateTab(tab.find("a"));
+            }
+            li.remove();
+            if (options.onremove) {
+                options.onremove(id);
+            }
+            updateTabWidths();
+        }
         return {
             addTab: function(tab) {
                 var li = $("<li/>",{class:"red-ui-tab"}).appendTo(ul);
-                var link = $("<a/>",{href:"#"+tab.id}).appendTo(li);
+                var link = $("<a/>",{href:"#"+tab.id, class:"red-ui-tab-label"}).appendTo(li);
                 link.html(tab.label);
+                
                 link.on("click",onTabClick);
                 link.on("dblclick",onTabDblClick);
+                if (tab.closeable) {
+                    var closeLink = $("<a/>",{href:"#",class:"red-ui-tab-close"}).appendTo(li);
+                    closeLink.html('<i class="icon-remove" />');
+                    
+                    closeLink.on("click",function(event) {
+                        removeTab(tab.id);
+                    });
+                }
                 updateTabWidths();
                 if (options.onadd) {
                     options.onadd(tab);
@@ -77,26 +103,16 @@ RED.tabs = function() {
                     activateTab(link);
                 }
             },
-            removeTab: function(id) {
-                var li = ul.find("a[href='#"+id+"']").parent();
-                if (li.hasClass("active")) {
-                    var tab = li.prev();
-                    if (tab.size() == 0) {
-                        tab = li.next();
-                    }
-                    activateTab(tab.find("a"));
-                }
-                li.remove();
-                if (options.onremove) {
-                    options.onremove(id);
-                }
-                
-            },
+            removeTab: removeTab,
             activateTab: activateTab,
             resize: updateTabWidths,
             count: function() {
                 return ul.find("li.red-ui-tab").size();
+            },
+            contains: function(id) {
+                return ul.find("a[href='#"+id+"']").length > 0;
             }
+
         }
     }
     

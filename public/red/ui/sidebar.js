@@ -21,12 +21,15 @@ RED.sidebar = function() {
         onchange:function(id) {
             $("#sidebar-content").children().hide();
             $("#"+id).show();
+        },
+        onremove: function(id) {
+            $("#"+id).remove();
         }
     });
-    function addTab(title,content) {
+    function addTab(title,content,closeable) {
         $("#sidebar-content").append(content);
         $(content).hide();
-        sidebar_tabs.addTab({id:"tab-"+title,label:title});
+        sidebar_tabs.addTab({id:"tab-"+title,label:title,closeable:closeable});
         //content.style.position = "absolute";
         //$('#sidebar').tabs("refresh");
     }
@@ -101,9 +104,21 @@ RED.sidebar = function() {
     }
     toggleSidebar();
     
+    function showSidebar(id) {
+        if (!$("#btn-sidebar").hasClass("active")) {
+            toggleSidebar();
+        }
+        sidebar_tabs.activateTab("tab-"+id);
+    }
+    
+    function containsTab(id) {
+        return sidebar_tabs.contains("tab-"+id);
+    }
     
     return {
-        addTab: addTab
+        addTab: addTab,
+        show: showSidebar,
+        containsTab: containsTab
     }
     
 }();

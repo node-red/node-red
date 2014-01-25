@@ -239,6 +239,39 @@ module.exports.getNodeConfigs = node_type_registry.getNodeConfigs;
 module.exports.addLogHandler = registry.addLogHandler;
 
 module.exports.load = function(settings) {
+    function scanForNodes(dir) {
+        var pm = path.join(dir,"node_modules");
+        if (fs.existsSync(pm)) {
+            fs.readdirSync(pm).filter(function(fn) {
+                var pkgfn = path.join(pm,fn,"package.json");
+                if (fs.existsSync(pkgfn)) {
+                    var pkg = require(pkgfn);
+                    if (pkg['node-red']) {
+                        console.log(pkg.name,pkg.version);
+                        var nr = pkg['node-red'];
+                        if (nr.nodes) {
+                            var nrn = nr.nodes;
+                            for (var i in nrn) {
+                                console.log("  ",i,":",nrn[i]);
+                                try {
+                                    require(path.join(pm,fn,nrn[i]));
+                                } catch(err) {
+                                    util.log("["+i+"] "+err);
+                                    //console.log(err.stack);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        var up = path.join(dir,"..");
+        if (up !== dir) {
+            scanForNodes(up);
+        }
+    }
+    
     function loadNodes(dir) {
         fs.readdirSync(dir).sort().filter(function(fn){
                 var stats = fs.statSync(path.join(dir,fn));
@@ -262,8 +295,10 @@ module.exports.load = function(settings) {
         });
     }
     loadNodes(__dirname+"/../nodes");
+    scanForNodes(__dirname+"/../nodes");
     if (settings.nodesDir) {
         loadNodes(settings.nodesDir);
+        scanForNodes(settings.nodesDir);
     }
     //events.emit("nodes-loaded");
 }
