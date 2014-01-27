@@ -96,12 +96,13 @@ a.brand img {
     padding: 5px;
     overflow-y: auto;
     box-sizing:border-box;
+    -moz-box-sizing: border-box;    
 }
 #palette-search {
     position: absolute;
     bottom: 0;
     left:0;
-    right: 0;
+    right:0;
     overflow: hidden;
     background: #f3f3f3;
     text-align: center;
@@ -109,6 +110,7 @@ a.brand img {
     padding: 3px;
     border-top: 1px solid #999;
     box-sizing:border-box;
+    -moz-box-sizing: border-box;    
 }
 #palette-search i.icon-search {
     position: absolute;
@@ -127,7 +129,6 @@ a.brand img {
 }
 
 #palette-search input {
-    float: right;
     border-radius: 0;
     border: none;
     width: 100%;
@@ -137,6 +138,7 @@ a.brand img {
     margin: 0px;
     height: 30px;
     box-sizing:border-box;
+    -moz-box-sizing: border-box;    
     
 }
 #palette-search input:focus {
@@ -208,6 +210,7 @@ a.brand img {
    top:8px;
    left: -5px;
    box-sizing: border-box;
+    -moz-box-sizing: border-box;    
    background:#d9d9d9;
    border-radius: 3px;
    width: 10px;
@@ -226,6 +229,7 @@ a.brand img {
 #sidebar {
     background: #fff;
     box-sizing: border-box;
+    -moz-box-sizing: border-box;    
 }
 #sidebar.closing {
     background: #eee;
