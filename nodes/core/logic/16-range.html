@@ -1,0 +1,78 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="range">
+    <div class="form-row">
+        Re-map input values between<br/>
+        <input type="text" id="node-input-minin" placeholder="0" style="width:35%;"/>
+        and
+        <input type="text" id="node-input-maxin" placeholder="256" style="width:35%;"/>
+    </div>
+    <div class="form-row">
+        to be between<br/>
+        <input type="text" id="node-input-minout" placeholder="0" style="width:35%;"/>
+        and
+        <input type="text" id="node-input-maxout" placeholder="100" style="width:35%;"/>
+    </div>
+    <div class="form-row">
+        and <select id="node-input-action" style="width:90%; margin-right:5px;">
+            <option value="scale">try to scale if outside this range</option>
+            <option value="clamp">clamp to max and min values of this range</option>
+            <option value="roll">perform modulus to keep within this range</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-round" style="width:200px;">Round to nearest integer ?</label>
+        <input type="checkbox" id="node-input-round" style="display: inline-block; width: auto; vertical-align: top;">
+    </div>
+    <br/>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-tips" id="node-tip">Tip: This node ONLY works with numbers.</div>
+</script>
+
+<script type="text/x-red" data-help-name="range">
+    <p>A simple function node to remap numeric input values to another scale.</p>
+    <p>Currently only does a linear scaling.</p>
+    <p><b>Note:</b> This only operates on <b>numbers</b>. Anything else will try to be made into a number and rejected if that fails.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('range', {
+        color: "#E2D96E",
+        category: 'function',
+        defaults: {
+            minin: {value:"",required:true,validate:RED.validators.number()},
+            maxin: {value:"",required:true,validate:RED.validators.number()},
+            minout: {value:"",required:true,validate:RED.validators.number()},
+            maxout: {value:"",required:true,validate:RED.validators.number()},
+            action: {value:"scale"},
+            round: {value:false},
+            name: {value:""}
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "range.png",
+        label: function() {
+            return this.name || "range";
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic" : "";
+        }
+    });
+</script>
