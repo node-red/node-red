@@ -149,7 +149,7 @@ var serialPool = function() {
                         obj.serial.on('open',function() {
                             util.log("[serial] serial port "+port+" opened at "+baud+" baud");
                             if (obj.tout) { clearTimeout(obj.tout); }
-                            obj.serial.flush();
+                            //obj.serial.flush();
                             obj._emitter.emit('ready');
                         });
                         obj.serial.on('data',function(d) {
