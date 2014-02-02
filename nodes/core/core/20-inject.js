@@ -25,6 +25,7 @@ function InjectNode(n) {
 	RED.nodes.createNode(this,n);
 	this.topic = n.topic;
 	this.payload = n.payload;
+	this.payloadType = n.payloadType;
 	this.repeat = n.repeat;
 	this.crontab = n.crontab;
 	this.once = n.once;
@@ -56,8 +57,16 @@ function InjectNode(n) {
 	}
 
 	this.on("input",function(msg) {
-		var msg = {topic:this.topic,payload:this.payload};
-		if (msg.payload == "") { msg.payload = Date.now(); }
+		var msg = {topic:this.topic};
+		console.log(this.payloadType);
+		console.log(this.payload);
+		if ( (this.payloadType == null && this.payload == "") || this.payloadType == "date") {
+		    msg.payload = Date.now();
+		} else if (this.payloadType == null || this.payloadType == "string") {
+		    msg.payload = this.payload;
+		} else {
+		    msg.payload = "";
+		}
 		this.send(msg);
 		msg = null;
 	});
