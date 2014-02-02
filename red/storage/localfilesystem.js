@@ -16,8 +16,13 @@
 
 var fs = require('fs');
 var when = require('when');
+var nodeFn = require('when/node/function');
+var keys = require('when/keys');
 var util = require('util');
 var fspath = require("path");
+var mkdirp = require("mkdirp");
+
+var promiseDir = nodeFn.lift(mkdirp);
 
 var settings;
 var flowsFile;
@@ -31,19 +36,21 @@ function listFiles(dir) {
     var dirs = {};
     var files = [];
     var dirCount = 0;
-    fs.readdirSync(dir).sort().filter(function(fn) {
+    return nodeFn.call(fs.readdir, dir).then(function (contents) {
+        contents.sort().forEach(function(fn) {
             var stats = fs.lstatSync(dir+"/"+fn);
             if (stats.isDirectory()) {
                 dirCount += 1;
-                dirs[fn] = listFiles(dir+"/"+fn);
+                dirs[fn] = listFiles(dir+"/"+fn)
             } else {
                 files.push(fn.split(".")[0]);
             }
-    });
-    var result = {};
-    if (dirCount > 0) { result.d = dirs; }
-    if (files.length > 0) { result.f = files; }
-    return result;
+        })
+        var result = {};
+        if (dirCount > 0) { result.d = keys.all(dirs); }
+        if (files.length > 0) { result.f = when.resolve(files); }
+        return keys.all(result);
+    })
 }
 
 function getFileMeta(root,path) {
@@ -116,24 +123,16 @@ function getFileBody(root,path) {
 
 function writeFile(root,path,meta,body,res) {
     var fn = fspath.join(root,path);
-    
-    var parts = path.split("/");
-    var dirname = root;
-    for (var i = 0;i<parts.length-1;i+=1) {
-        dirname = fspath.join(dirname,parts[i]);
-        if (!fs.existsSync(dirname)) {
-            fs.mkdirSync(dirname);
-        }
-    }
-    
     var headers = "";
     for (var i in meta) {
         headers += "// "+i+": "+meta[i]+"\n";
     }
-    fs.writeFile(fn,headers+body,function(err) {
-            //TODO: handle error
-            res.writeHead(204, {'Content-Type': 'text/plain'});
-            res.end();
+    mkdirp(fspath.dirname(fn), function (err) {
+        fs.writeFile(fn,headers+body,function(err) {
+                //TODO: handle error
+                res.writeHead(204, {'Content-Type': 'text/plain'});
+                res.end();
+        });
     });
 }
 
@@ -153,33 +152,17 @@ var localfilesystem = {
         
         libDir = fspath.join(userDir,"lib");
         libFlowsDir = fspath.join(libDir,"flows");
-        
-        if (!fs.existsSync(libDir)) {
-            fs.mkdirSync(libDir);
-        }
-        if (!fs.existsSync(libFlowsDir)) {
-            fs.mkdirSync(libFlowsDir);
-        }
-        var defer = when.defer();
-        defer.resolve();
-        return defer.promise;
+
+        return promiseDir(libFlowsDir);
     },
     getFlows: function() {
         var defer = when.defer();
         fs.exists(flowsFullPath, function(exists) {
             if (exists) {
                 util.log("[red] Loading flows : "+flowsFile);
-                fs.readFile(flowsFullPath,'utf8',function(err,data) {
-                    if (err) {
-                        defer.reject(err);
-                    } else {
-                        try {
-                            defer.resolve(JSON.parse(data));
-                        } catch(err) {
-                            defer.reject(err);
-                        }
-                    }
-                });
+                defer.resolve(nodeFn.call(fs.readFile,flowsFullPath,'utf8').then(function(data) {
+                    return JSON.parse(data);
+                }));
             } else {
                 util.log("[red] Flows file not found : "+flowsFile   );
                 defer.resolve([]);
@@ -188,32 +171,16 @@ var localfilesystem = {
         return defer.promise;
     },
     saveFlows: function(flows) {
-        var defer = when.defer();
-        fs.writeFile(flowsFullPath, JSON.stringify(flows), function(err) {
-                if(err) {
-                    defer.reject(err);
-                } else {
-                    defer.resolve();
-                }
-        });
-        return defer.promise;
+        return nodeFn.call(fs.writeFile, flowsFullPath, JSON.stringify(flows));
     },
     
     getCredentials: function() {
         var defer = when.defer();
         fs.exists(credentialsFile, function(exists) {
             if (exists) {
-                fs.readFile(credentialsFile,'utf8',function(err,data) {
-                    if (err) {
-                        defer.reject(err);
-                    } else {
-                        try {
-                            defer.resolve(JSON.parse(data));
-                        } catch(err) {
-                            defer.reject(err);
-                        }
-                    }
-                });
+                defer.resolve(nodeFn.call(fs.readFile, credentialsFile, 'utf8').then(function(data) {
+                    return JSON.parse(data)
+                }));
             } else {
                 defer.resolve({});
             }
@@ -222,21 +189,11 @@ var localfilesystem = {
     },
     
     saveCredentials: function(credentials) {
-        var defer = when.defer();
-        fs.writeFile(credentialsFile, JSON.stringify(credentials), function(err) {
-                if(err) {
-                    defer.reject(err);
-                } else {
-                    defer.resolve();
-                }
-        });
-        return defer.promise;
+        return nodeFn.call(fs.writeFile, credentialsFile, JSON.stringify(credentials))
     },
     
     getAllFlows: function() {
-        var defer = when.defer();
-        defer.resolve(listFiles(libFlowsDir));
-        return defer.promise;
+        return listFiles(libFlowsDir);
     },
     
     getFlow: function(fn) {
@@ -245,13 +202,7 @@ var localfilesystem = {
         var file = fspath.join(libFlowsDir,fn+".json");
         fs.exists(file, function(exists) {
             if (exists) {
-                fs.readFile(file,'utf8',function(err,data) {
-                    if (err) {
-                        defer.reject(err);
-                    } else {
-                        defer.resolve(data);
-                    }
-                });
+                defer.resolve(nodeFn.call(fs.readFile,file,'utf8'));
             } else {
                 defer.reject();
             }
@@ -261,45 +212,23 @@ var localfilesystem = {
     },
     
     saveFlow: function(fn,data) {
-        var defer = when.defer();
         var file = fspath.join(libFlowsDir,fn+".json");
-        var parts = file.split("/");
-        for (var i = 0;i<parts.length;i+=1) {
-            var dirname = parts.slice(0,i).join("/");
-            if (dirname != "" ){
-                if (!fs.existsSync(dirname)) {
-                    fs.mkdirSync(dirname);
-                }
-            }
-        }
-        fs.writeFile(file,data,function(err) {
-            if (err) {
-                defer.reject(err);
-            } else {
-                defer.resolve();
-            }
+        return promiseDir(fspath.dirname(file)).then(function () {
+            return nodeFn.call(fs.writeFile, file, data);
         });
-        return defer.promise;
     },
     
     getLibraryEntry: function(type,path) {
-        var defer = when.defer();
         var root = fspath.join(libDir,type);
-        if (!fs.existsSync(root)) {
-            fs.mkdirSync(root);
-        }
         var rootPath = fspath.join(libDir,type,path);
-        
-        fs.lstat(rootPath,function(err,stats) {
-            if (err) {
-                defer.reject(err);
-            } else if (stats.isFile()) {
-                defer.resolve(getFileBody(root,path));
-            } else {
+        return promiseDir(root).then(function () {
+            return nodeFn.call(fs.lstat, rootPath).then(function(stats) {
+                if (stats.isFile()) return getFileBody(root,path);
+
                 if (path.substr(-1) == '/') {
                     path = path.substr(0,path.length-1);
                 }
-                fs.readdir(rootPath,function(err,fns) {
+                return nodeFn.call(fs.readdir, rootPath).then(function(fns) {
                     var dirs = [];
                     var files = [];
                     fns.sort().filter(function(fn) {
@@ -317,41 +246,22 @@ var localfilesystem = {
                         }
                             
                     });
-                    defer.resolve(dirs.concat(files));
+                    return dirs.concat(files);
                 });
-            }
+            });
         });
-        return defer.promise;
     },
     saveLibraryEntry: function(type,path,meta,body) {
-        var defer = when.defer();
-        
-        var root = fspath.join(libDir,type);
-        if (!fs.existsSync(root)) {
-            fs.mkdirSync(root);
-        }
-        var fn = fspath.join(root,path);
-        var parts = path.split("/");
-        var dirname = root;
-        for (var i=0;i<parts.length-1;i+=1) {
-            dirname = fspath.join(dirname,parts[i]);
-            if (!fs.existsSync(dirname)) {
-                fs.mkdirSync(dirname);
-            }
-        }
-        
+        var fn = fspath.join(libDir, type, path);
+
         var headers = "";
         for (var i in meta) {
             headers += "// "+i+": "+meta[i]+"\n";
         }
-        fs.writeFile(fn,headers+body,function(err) {
-            if (err) {
-                defer.reject(err);
-            } else {
-                defer.resolve();
-            }
+
+        return promiseDir(fspath.dirname(fn)).then(function () {
+            nodeFn.call(fs.writeFile, fn, headers+body);
         });
-        return defer.promise;
     }
 };
 

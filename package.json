@@ -10,7 +10,8 @@
     },
     "main"         : "red/red.js",
     "scripts"      : {
-        "start": "node red.js"
+        "start": "node red.js",
+        "test": "mocha test"
     },
     "contributors": [ 
         {"name": "Nick O'Leary"},
@@ -33,7 +34,8 @@
         "xml2js":"~0.2.8",
         "sentiment":"~0.2.1",
         "irc":"~0.3.6",
-        "follow-redirects":"~0.0.3"
+        "follow-redirects":"~0.0.3",
+        "mkdirp":"~0.3.5"
     },
     "devDependencies": {
         "mocha": "~1.12.0",
