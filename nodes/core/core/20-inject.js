@@ -22,54 +22,52 @@ try {
 }
 
 function InjectNode(n) {
-	RED.nodes.createNode(this,n);
-	this.topic = n.topic;
-	this.payload = n.payload;
-	this.payloadType = n.payloadType;
-	this.repeat = n.repeat;
-	this.crontab = n.crontab;
-	this.once = n.once;
-	var node = this;
-	this.interval_id = null;
-	this.cronjob = null;
+    RED.nodes.createNode(this,n);
+    this.topic = n.topic;
+    this.payload = n.payload;
+    this.payloadType = n.payloadType;
+    this.repeat = n.repeat;
+    this.crontab = n.crontab;
+    this.once = n.once;
+    var node = this;
+    this.interval_id = null;
+    this.cronjob = null;
 
-	if (this.repeat && !isNaN(this.repeat) && this.repeat > 0) {
-		this.repeat = this.repeat * 1000;
-		this.log("repeat = "+this.repeat);
-		this.interval_id = setInterval( function() {
-			node.emit("input",{});
-		}, this.repeat );
-	} else if (this.crontab) {
-	    if (cron) {
-	        this.log("crontab = "+this.crontab);
-	        this.cronjob = new cron.CronJob(this.crontab,
-	            function() {
-	                node.emit("input",{});
-	            },
-	            null,true);
-	    } else {
-	        this.error("'cron' module not found");
-	    }
-	}
+    if (this.repeat && !isNaN(this.repeat) && this.repeat > 0) {
+        this.repeat = this.repeat * 1000;
+        this.log("repeat = "+this.repeat);
+        this.interval_id = setInterval( function() {
+            node.emit("input",{});
+        }, this.repeat );
+    } else if (this.crontab) {
+        if (cron) {
+            this.log("crontab = "+this.crontab);
+            this.cronjob = new cron.CronJob(this.crontab,
+                function() {
+                    node.emit("input",{});
+                },
+                null,true);
+        } else {
+            this.error("'cron' module not found");
+        }
+    }
 
-	if (this.once) {
-		setTimeout( function(){ node.emit("input",{}); }, 50);
-	}
+    if (this.once) {
+        setTimeout( function(){ node.emit("input",{}); }, 50);
+    }
 
-	this.on("input",function(msg) {
-		var msg = {topic:this.topic};
-		console.log(this.payloadType);
-		console.log(this.payload);
-		if ( (this.payloadType == null && this.payload == "") || this.payloadType == "date") {
-		    msg.payload = Date.now();
-		} else if (this.payloadType == null || this.payloadType == "string") {
-		    msg.payload = this.payload;
-		} else {
-		    msg.payload = "";
-		}
-		this.send(msg);
-		msg = null;
-	});
+    this.on("input",function(msg) {
+        var msg = {topic:this.topic};
+        if ( (this.payloadType == null && this.payload == "") || this.payloadType == "date") {
+            msg.payload = Date.now();
+        } else if (this.payloadType == null || this.payloadType == "string") {
+            msg.payload = this.payload;
+        } else {
+            msg.payload = "";
+        }
+        this.send(msg);
+        msg = null;
+    });
 }
 
 RED.nodes.registerType("inject",InjectNode);
