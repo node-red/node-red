@@ -16,6 +16,7 @@
 
 //Simple node to introduce a pause into a flow
 var RED = require(process.env.NODE_RED_HOME+"/red/red");
+var node;
 
 function random() {
     var wait = node.randomFirst + (node.diff * Math.random());
@@ -80,7 +81,7 @@ function DelayNode(n) {
     this.buffer = [];
     this.intervalID = -1;
     this.randomID = -1;
-    var node = this;
+    node = this;
 
     if (this.pauseType === "delay") {
         this.on("input", function(msg) {
