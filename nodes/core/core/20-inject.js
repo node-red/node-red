@@ -32,6 +32,9 @@ function InjectNode(n) {
     var node = this;
     this.interval_id = null;
     this.cronjob = null;
+    if (this.crontab) {
+        if (this.crontab.split(" ")[4] != "*") { this.once = false; }
+    }
 
     if (this.repeat && !isNaN(this.repeat) && this.repeat > 0) {
         this.repeat = this.repeat * 1000;

@@ -23,6 +23,7 @@
           <option value="string">string</option>
         </select>
     </div>
+
     <div class="form-row" id="node-input-row-payload">
         <label for="node-input-payload"></label>
         <input type="text" id="node-input-payload" placeholder="Payload">
@@ -33,9 +34,9 @@
         <input type="text" id="node-input-topic" placeholder="Topic">
     </div>
 
-    <div class="form-row">
+    <div class="form-row" id="node-once">
         <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-once" placeholder="once" style="display: inline-block; width: auto; vertical-align: top;">
+        <input type="checkbox" id="node-input-once" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-once" style="width: 70%;">Fire once at start ?</label>
     </div>
 
@@ -71,11 +72,15 @@
 
     <script>
     {
-
         $("#inject-time-type-select").change(function() {
+            $("#node-input-crontab").val('');
             var id = $("#inject-time-type-select option:selected").val();
             $(".inject-time-row").hide();
             $("#inject-time-row-"+id).show();
+            if ((id == "none") || (id == "interval")) {
+                $("#node-once").show();
+            }
+            else { $("#node-once").hide(); }
         });
 
         var days = [
@@ -90,6 +95,7 @@
             {v:"6",t:"Saturdays"},
             {v:"7",t:"Sundays"}
         ];
+
         $(".inject-time-days").each(function() {
             for (var d in days) {
                 $(this).append($("<option></option>").val(days[d].v).text(days[d].t));
@@ -102,6 +108,7 @@
                 $(this).append($("<option></option>").val(i).text(l));
             }
         });
+
         $(".inject-time-count").spinner({
             min:1,
             max:60
@@ -111,9 +118,7 @@
             var units = $("#inject-time-interval-units option:selected").val();
             $("#inject-time-interval-days").prop("disabled",(units == "s")?"disabled":false);
             $(".inject-time-count").spinner("option","max",(units == "h")?24:60);
-
         });
-
 
         $.widget( "ui.injecttimespinner", $.ui.spinner, {
             options: {
@@ -139,15 +144,12 @@
                 var d = new Date(value);
                 var h = d.getHours();
                 var m = d.getMinutes();
-
                 return ((h<10)?"0":"")+h+":"+((m<10)?"0":"")+m;
             }
         });
 
-
         $("#inject-time-time").injecttimespinner();
     };
-
 
     </script>
 </script>
@@ -176,8 +178,6 @@
     .inject-time-count {
         width: 30px !important;
     }
-    .
-
 </style>
 <script type="text/x-red" data-help-name="inject">
     <p>Pressing the button on the left side of the node allows a message on a topic to be injected into the flow. This is mainly for test purposes.</p>
@@ -307,6 +307,7 @@
             });
             $("#node-input-payloadType").val(this.payloadType);
             $("#node-input-payloadType").change();
+            $("#inject-time-type-select").change();
 
         },
         oneditsave: function() {
