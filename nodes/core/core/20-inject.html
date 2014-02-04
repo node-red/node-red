@@ -80,7 +80,10 @@
             if ((id == "none") || (id == "interval")) {
                 $("#node-once").show();
             }
-            else { $("#node-once").hide(); }
+            else {
+                $("#node-once").hide();
+                $("#node-input-once").prop('checked', false);
+            }
         });
 
         var days = [
