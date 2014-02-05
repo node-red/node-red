@@ -25,22 +25,28 @@ function FileNode(n) {
 	this.overwriteFile = n.overwriteFile;
 	var node = this;
 	this.on("input",function(msg) {
-		var data = msg.payload;
-		if (this.appendNewline) {
-			data += "\n";
-		}
-		if (this.overwriteFile) {
-			fs.writeFile(this.filename, data, function (err) {
-				if (err) node.warn('Failed to write to file : '+err);
-				//console.log('Message written to file',this.filename);
-			});
-		}
-		else {
-			fs.appendFile(this.filename, data, function (err) {
-				if (err) node.warn('Failed to append to file : '+err);
-				//console.log('Message appended to file',this.filename);
-			});
-		}
+	    var filename = msg.filename || this.filename;
+	    
+	    if (filename == "") {
+	        node.warn('No filename specified');
+	    } else {
+            var data = msg.payload;
+            if (this.appendNewline) {
+                data += "\n";
+            }
+            if (this.overwriteFile) {
+                fs.writeFile(filename, data, function (err) {
+                    if (err) node.warn('Failed to write to file : '+err);
+                    //console.log('Message written to file',this.filename);
+                });
+            }
+            else {
+                fs.appendFile(filename, data, function (err) {
+                    if (err) node.warn('Failed to append to file : '+err);
+                    //console.log('Message appended to file',this.filename);
+                });
+            }
+        }
 	});
 }
 
