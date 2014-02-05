@@ -15,7 +15,7 @@
  **/
 
 var RED = require(process.env.NODE_RED_HOME+"/red/red");
-var ntwitter = require('ntwitter');
+var ntwitter = require('twitter-ng');
 var OAuth= require('oauth').OAuth;
 
 function TwitterNode(n) {
