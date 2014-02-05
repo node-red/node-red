@@ -28,39 +28,45 @@ function FunctionNode(n) {
     var functionText = "var results = (function(msg){"+this.func+"\n})(msg);";
     this.topic = n.topic;
     this.context = {global:RED.settings.functionGlobalContext || {}};
+	var self = this;
     try {
         this.script = vm.createScript(functionText);
         this.on("input", function(msg) {
                 if (msg != null) {
-                    var sandbox = {msg:msg,console:console,util:util,Buffer:Buffer,context:this.context};
+                    var sandbox = {msg:msg,done: processResults, console:console,util:util,Buffer:Buffer,context:this.context};
                     try {
                         this.script.runInNewContext(sandbox);
                         var results = sandbox.results;
-
-                        if (results == null) {
-                            results = [];
-                        } else if (results.length == null) {
-                            results = [results];
-                        }
-                        if (msg._topic) {
-                            for (var m in results) {
-                                if (results[m]) {
-                                    if (util.isArray(results[m])) {
-                                        for (var n in results[m]) {
-                                            results[m][n]._topic = msg._topic;
-                                        }
-                                    } else {
-                                        results[m]._topic = msg._topic;
-                                    }
-                                }
-                            }
-                        }
-                        this.send(results);
-
+						if (typeof results != 'undefined')
+							processResults(results);
+						
                     } catch(err) {
                         this.error(err.message);
                     }
                 }
+				
+				function processResults(results)
+				{
+					if (results == null) {
+						results = [];
+					} else if (results.length == null) {
+						results = [results];
+					}
+					if (msg._topic) {
+						for (var m in results) {
+							if (results[m]) {
+								if (util.isArray(results[m])) {
+									for (var n in results[m]) {
+										results[m][n]._topic = msg._topic;
+									}
+								} else {
+									results[m]._topic = msg._topic;
+								}
+							}
+						}
+					}
+					self.send(results);
+				}
         });
     } catch(err) {
         this.error(err.message);
