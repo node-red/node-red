@@ -34,12 +34,6 @@
         <input type="text" id="node-input-topic" placeholder="Topic">
     </div>
 
-    <div class="form-row" id="node-once">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-once" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-once" style="width: 70%;">Fire once at start ?</label>
-    </div>
-
     <div class="form-row">
         <label for=""><i class="icon-repeat"></i> Repeat</label>
         <select id="inject-time-type-select"><option value="none">None</option><option value="interval">interval</option><option value="interval-time">interval between times</option><option value="time">at a specific time</option></select>
@@ -63,6 +57,12 @@
     <div class="form-row inject-time-row hidden" id="inject-time-row-time">
         at <input id="inject-time-time" value="12:00"></input><br/>
         on <select id="inject-time-time-days" class="inject-time-days"></select>
+    </div>
+
+    <div class="form-row" id="node-once">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-once" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-once" style="width: 70%;">Fire once at start ?</label>
     </div>
 
     <div class="form-row">
