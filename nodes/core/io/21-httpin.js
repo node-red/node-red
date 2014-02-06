@@ -82,18 +82,19 @@ RED.nodes.registerType("http response",HTTPOut);
 
 function HTTPRequest(n) {
     RED.nodes.createNode(this,n);
-    var url = n.url;
+    var nodeUrl = n.url;
     var method = n.method || "GET";
-    var httplib = (/^https/.test(url))?https:http;
     var node = this;
     this.on("input",function(msg) {
+            
+            var url = msg.url||nodeUrl;
 
-            var opts = urllib.parse(msg.url||url);
+            var opts = urllib.parse(url);
             opts.method = (msg.method||method).toUpperCase();
             if (msg.headers) {
                 opts.headers = msg.headers;
             }
-            var req = httplib.request(opts,function(res) {
+            var req = ((/^https/.test(url))?https:http).request(opts,function(res) {
                     res.setEncoding('utf8');
                     msg.statusCode = res.statusCode;
                     msg.headers = res.headers;
