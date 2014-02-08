@@ -30,7 +30,7 @@ list.
 
 ## Contributing
 
-Please see [CONTRIBUTING.md]
+Please see our [contributing guide](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md).
 
 ## Authors
 
