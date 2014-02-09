@@ -499,6 +499,23 @@ RED.view = function() {
         }
     }
 
+    function jsonFilter(key,value) {
+        if (key == "") {
+            return value;
+        }
+        var t = typeof value;
+        if ($.isArray(value)) {
+            return "[array:"+value.length+"]";
+        } else if (t === "object") {
+            return "[object]"
+        } else if (t === "string") {
+            if (value.length > 30) {
+                return value.substring(0,30)+" ...";
+            }
+        }
+        return value;
+    }
+                
     function buildInfo(node) {
         var table = '<table class="node-info"><tbody>';
 
@@ -506,13 +523,30 @@ RED.view = function() {
         table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
         table += '<tr class="blank"><td colspan="2">&nbsp;Properties</td></tr>';
         for (var n in node._def.defaults) {
-            if ((n != "func")&&(n != "template")) {
-                var safe = (node[n]||"").toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-                table += "<tr><td>&nbsp;"+n+"</td><td>"+safe+"</td></tr>";
+            var val = node[n]||"";
+            var type = typeof val;
+            if (type === "string") {
+                if (val.length > 30) { 
+                    val = val.substring(0,30)+" ...";
+                }
+            } else if (type === "number") {
+                val = val.toString();
+            } else if ($.isArray(val)) {
+                val = "[<br/>";
+                for (var i=0;i<Math.min(node[n].length,10);i++) {
+                    var vv = JSON.stringify(node[n][i],jsonFilter," ").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                    val += "&nbsp;"+i+": "+vv+"<br/>";
+                }
+                if (node[n].length > 10) {
+                    val += "&nbsp;... "+node[n].length+" items<br/>";
+                }
+                val += "]";
+            } else {
+                val = JSON.stringify(val,jsonFilter," ");
+                val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
             }
-            if ((n == "func")||(n == "template")) {
-                table += "<tr><td>&nbsp;"+n+"</td><td>(...)</td></tr>";
-            }
+            
+            table += "<tr><td>&nbsp;"+n+"</td><td>"+val+"</td></tr>";
         }
         table += "</tbody></table><br/>";
         table  += '<div class="node-help">'+($("script[data-help-name|='"+node.type+"']").html()||"")+"</div>";
