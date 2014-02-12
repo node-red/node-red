@@ -49,7 +49,7 @@ function UDPin(n) {
         var address = server.address();
         node.log('udp listener at ' + address.address + ":" + address.port);
         if (node.multicast == "true") {
-            server.setBroadcast(true)
+            server.setBroadcast(true);
             server.setMulticastTTL(128);
             server.addMembership(node.group,node.iface);
             node.log("udp multicast group "+node.group);
@@ -105,7 +105,7 @@ function UDPout(n) {
                 if (node.base64) { message = new Buffer(b64string, 'base64'); }
                 else if (msg.payload instanceof Buffer) { message = msg.payload; }
                 else { message = new Buffer(""+msg.payload); }
-                console.log("UDP send :",add,por,msg.payload.toString());
+                //console.log("UDP send :",add,por,msg.payload.toString());
                 sock.send(message, 0, message.length, por, add, function(err, bytes) {
                     if (err) node.error("udp : "+err);
                 });
