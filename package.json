@@ -29,6 +29,7 @@
         "clone": "~0.1.11",
         "mustache": "~0.7.2",
         "cron":"1.x",
+        "raw-body":"~1.1.2",
         "twitter-ng":"~0.6.2",
         "oauth":"~0.9.10",
         "xml2js":"~0.2.8",

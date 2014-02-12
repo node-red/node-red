@@ -20,8 +20,25 @@ var http = require("follow-redirects").http;
 var https = require("follow-redirects").https;
 var urllib = require("url");
 var express = require("express");
+var getBody = require('raw-body');
 var jsonParser = express.json();
 var urlencParser = express.urlencoded();
+
+function rawBodyParser(req, res, next) {
+    if (req._body) return next();
+    req.body = "";
+    req._body = true;
+    getBody(req, {
+            limit: '1mb',
+            length: req.headers['content-length'],
+            encoding: 'utf8'
+    }, function (err, buf) {
+        if (err) return next(err);
+        req.body = buf;
+        next();
+    });
+}
+
 
 function HTTPIn(n) {
     RED.nodes.createNode(this,n);
@@ -29,19 +46,25 @@ function HTTPIn(n) {
     this.method = n.method;
 
     var node = this;
+    
+    this.errorHandler = function(err,req,res,next) {
+        node.warn(err);
+        res.send(500);
+    };
+    
     this.callback = function(req,res) {
         if (node.method == "post") { node.send({req:req,res:res,payload:req.body}); }
         else if (node.method == "get") { node.send({req:req,res:res,payload:req.query}); }
         else node.send({req:req,res:res});
     }
     if (this.method == "get") {
-        RED.app.get(this.url,this.callback);
+        RED.app.get(this.url,this.callback,errorHandler);
     } else if (this.method == "post") {
-        RED.app.post(this.url,jsonParser,urlencParser,this.callback);
+        RED.app.post(this.url,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
     } else if (this.method == "put") {
-        RED.app.put(this.url,jsonParser,urlencParser,this.callback);
+        RED.app.put(this.url,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
     } else if (this.method == "delete") {
-        RED.app.delete(this.url,this.callback);
+        RED.app.delete(this.url,this.callback,errorHandler);
     }
 
     this.on("close",function() {
