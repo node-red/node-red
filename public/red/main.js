@@ -36,6 +36,7 @@ var RED = function() {
         var data = event.originalEvent.dataTransfer.getData("text/plain");
         RED.view.importNodes(data);
         $("#dropTarget").hide();
+        event.preventDefault();
     });
 
 
