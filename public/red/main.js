@@ -16,14 +16,14 @@
 var RED = function() {
 
     $('#btn-keyboard-shortcuts').click(function(){showHelp();});
-    
-    
+
+
     $('#chart').on("dragenter",function(event) {
         if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
             $("#dropTarget").css({display:'table'});
         }
     });
-    
+
     $('#dropTarget').on("dragover",function(event) {
         if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
             event.preventDefault();
@@ -37,8 +37,8 @@ var RED = function() {
         RED.view.importNodes(data);
         $("#dropTarget").hide();
     });
-    
-        
+
+
     function save(force) {
         if (RED.view.dirty()) {
 
@@ -70,7 +70,8 @@ var RED = function() {
             }
             var nns = RED.nodes.createCompleteNodeSet();
 
-            d3.xhr("flows").post(JSON.stringify(nns),function(err,resp) {
+            d3.xhr("flows").header("Content-type", "application/json")
+                           .post(JSON.stringify(nns),function(err,resp) {
                     if (resp && resp.status == 204) {
                         RED.notify("Successfully deployed","success");
                         RED.view.dirty(false);
