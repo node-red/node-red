@@ -58,7 +58,7 @@ function HTTPIn(n) {
         else node.send({req:req,res:res});
     }
     if (this.method == "get") {
-        RED.app.get(this.url,this.callback,errorHandler);
+        RED.app.get(this.url,this.callback,this.errorHandler);
     } else if (this.method == "post") {
         RED.app.post(this.url,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
     } else if (this.method == "put") {
