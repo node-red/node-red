@@ -58,17 +58,17 @@ function HTTPIn(n) {
         else node.send({req:req,res:res});
     }
     if (this.method == "get") {
-        RED.app.get(this.url,this.callback,this.errorHandler);
+        RED.httpNode.get(this.url,this.callback,this.errorHandler);
     } else if (this.method == "post") {
-        RED.app.post(this.url,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+        RED.httpNode.post(this.url,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
     } else if (this.method == "put") {
-        RED.app.put(this.url,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+        RED.httpNode.put(this.url,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
     } else if (this.method == "delete") {
-        RED.app.delete(this.url,this.callback,errorHandler);
+        RED.httpNode.delete(this.url,this.callback,errorHandler);
     }
 
     this.on("close",function() {
-            var routes = RED.app.routes[this.method];
+            var routes = RED.httpNode.routes[this.method];
             for (var i in routes) {
                 if (routes[i].path == this.url) {
                     routes.splice(i,1);

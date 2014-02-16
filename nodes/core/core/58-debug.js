@@ -80,7 +80,7 @@ DebugNode.send = function(msg) {
 
 DebugNode.activeConnections = [];
 
-var path = RED.settings.httpRoot || "/";
+var path = RED.settings.httpAdminRoot || "/";
 path = path + (path.slice(-1) == "/" ? "":"/") + "debug/ws";
 
 DebugNode.wsServer = new ws.Server({server:RED.server,path:path});
@@ -104,7 +104,7 @@ DebugNode.logHandler.on("log",function(msg) {
 });
 RED.nodes.addLogHandler(DebugNode.logHandler);
 
-RED.app.post("/debug/:id/:state", function(req,res) {
+RED.httpAdmin.post("/debug/:id/:state", function(req,res) {
 	var node = RED.nodes.getNode(req.params.id);
 	var state = req.params.state;
 	if (node != null) {

@@ -135,12 +135,12 @@
         inputs:0,
         outputs:0,
         label: function() {
-            var root = document.location.pathname.slice(0,-1);
+            var root = RED.settings.httpNodeRoot.slice(0,-1);
             root += this.path;
             return root;
         },
         oneditprepare: function() {
-            var root = document.location.pathname.slice(0,-1);
+            var root = RED.settings.httpNodeRoot.slice(0,-1);
             if (root == "") {
                 $("#node-config-ws-tip").hide();
             } else {

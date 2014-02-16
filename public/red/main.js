@@ -122,6 +122,12 @@ var RED = function() {
             ]
     });
 
+    function loadSettings() {
+        $.get('settings', function(data) {
+                RED.settings = data;
+                loadNodes();
+        });
+    }
     function loadNodes() {
         $.get('nodes', function(data) {
                 $("body").append(data);
@@ -157,7 +163,7 @@ var RED = function() {
 
     $(function() {
             RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
-            loadNodes();
+            loadSettings();
     });
 
     return {

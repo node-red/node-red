@@ -48,31 +48,57 @@ if (settings.https) {
     server = http.createServer(function(req,res){app(req,res);});
 }
 
+function formatRoot(root) {
+    if (root[0] != "/") {
+        root = "/" + root;
+    }
+    if (root.slice(-1) != "/") {
+        root = root + "/";
+    }
+    return root;
+}
+
 settings.httpRoot = settings.httpRoot||"/";
 
-if (settings.httpRoot[0] != "/") {
-    settings.httpRoot = "/"+settings.httpRoot;
-}
-if (settings.httpRoot.slice(-1) != "/") {
-    settings.httpRoot = settings.httpRoot + "/";
-}
+settings.httpAdminRoot = formatRoot(settings.httpAdminRoot || settings.httpRoot || "/");
+settings.httpAdminAuth = settings.httpAdminAuth || settings.httpAuth;
+
+settings.httpNodeRoot = formatRoot(settings.httpNodeRoot || settings.httpRoot || "/");
+settings.httpNodeAuth = settings.httpNodeAuth || settings.httpAuth;
+
 settings.uiPort = settings.uiPort||1880;
 settings.uiHost = settings.uiHost||"0.0.0.0";
 
-if (settings.httpAuth) {
-    app.use(settings.httpRoot,
+settings.flowFile = flowFile || settings.flowFile;
+
+RED.init(server,settings);
+
+if (settings.httpAdminAuth) {
+    app.use(settings.httpAdminRoot,
         express.basicAuth(function(user, pass) {
-            return user === settings.httpAuth.user && crypto.createHash('md5').update(pass,'utf8').digest('hex') === settings.httpAuth.pass;
+            return user === settings.httpAdminAuth.user && crypto.createHash('md5').update(pass,'utf8').digest('hex') === settings.httpAdminAuth.pass;
         })
     );
 }
-
-settings.flowFile = flowFile || settings.flowFile;
-
-var red = RED.init(server,settings);
-app.use(settings.httpRoot,red);
+if (settings.httpNodeAuth) {
+    app.use(settings.httpNodeRoot,
+        express.basicAuth(function(user, pass) {
+            return user === settings.httpNodeAuth.user && crypto.createHash('md5').update(pass,'utf8').digest('hex') === settings.httpNodeAuth.pass;
+        })
+    );
+}
+app.use(settings.httpAdminRoot,RED.httpAdmin);
+app.use(settings.httpNodeRoot,RED.httpNode);
 
 if (settings.httpStatic) {
+    settings.httpStaticAuth = settings.httpStaticAuth || settings.httpAuth;
+    if (settings.httpStaticAuth) {
+        app.use("/",
+            express.basicAuth(function(user, pass) {
+                return user === settings.httpStaticAuth.user && crypto.createHash('md5').update(pass,'utf8').digest('hex') === settings.httpStaticAuth.pass;
+            })
+        );
+    }
     app.use("/",express.static(settings.httpStatic));
 }
 
@@ -80,7 +106,7 @@ RED.start();
 
 var listenPath = 'http'+(settings.https?'s':'')+'://'+
                  (settings.uiHost == '0.0.0.0'?'127.0.0.1':settings.uiHost)+
-                 ':'+settings.uiPort+settings.httpRoot;
+                 ':'+settings.uiPort+settings.httpAdminRoot;
 
 server.listen(settings.uiPort,settings.uiHost,function() {
 	util.log('[red] Server now running at '+listenPath);

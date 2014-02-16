@@ -83,7 +83,7 @@ InjectNode.prototype.close = function() {
     }
 }
 
-RED.app.post("/inject/:id", function(req,res) {
+RED.httpAdmin.post("/inject/:id", function(req,res) {
         var node = RED.nodes.getNode(req.params.id);
         if (node != null) {
             try {

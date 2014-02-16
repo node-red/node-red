@@ -14,11 +14,13 @@
  * limitations under the License.
  **/
 
+var express = require('express');
 var util = require('util');
 var createUI = require("./ui");
 var redNodes = require("./nodes");
 
 var app = null;
+var nodeApp = null;
 var server = null;
 var settings = null;
 var storage = null;
@@ -28,6 +30,7 @@ function createServer(_server,_settings) {
     settings = _settings;
     storage = require("./storage");
     app = createUI(settings);
+    nodeApp = express();
     
     flowfile = settings.flowFile || 'flows_'+require('os').hostname()+'.json';
     
@@ -103,4 +106,5 @@ module.exports = {
 }
 
 module.exports.__defineGetter__("app", function() { return app });
+module.exports.__defineGetter__("nodeApp", function() { return nodeApp });
 module.exports.__defineGetter__("server", function() { return server });
