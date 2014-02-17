@@ -132,7 +132,7 @@
 
         },
         label: function() {
-            return this.broker+":"+this.port;
+            return (this.clientid?this.clientid+"@":"")+this.broker+":"+this.port;
         },
         oneditprepare: function() {
             $.getJSON('mqtt-broker/'+this.id,function(data) {
