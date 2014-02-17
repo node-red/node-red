@@ -21,6 +21,7 @@ var https = require("follow-redirects").https;
 var urllib = require("url");
 var express = require("express");
 var getBody = require('raw-body');
+var cors = require('cors');
 var jsonParser = express.json();
 var urlencParser = express.urlencoded();
 
@@ -53,28 +54,49 @@ function HTTPIn(n) {
     };
     
     this.callback = function(req,res) {
-        if (node.method == "post") { node.send({req:req,res:res,payload:req.body}); }
-        else if (node.method == "get") { node.send({req:req,res:res,payload:req.query}); }
-        else node.send({req:req,res:res});
+        if (node.method == "post") {
+            node.send({req:req,res:res,payload:req.body});
+        } else if (node.method == "get") {
+            node.send({req:req,res:res,payload:req.query});
+        } else {
+            node.send({req:req,res:res});
+        }
     }
+    
+    var corsHandler = function(req,res,next) { next(); }
+    
+    if (RED.settings.httpNodeCors) {
+        corsHandler = cors(RED.settings.httpNodeCors);
+        RED.httpNode.options(this.url,corsHandler);
+    }
+    
     if (this.method == "get") {
-        RED.httpNode.get(this.url,this.callback,this.errorHandler);
+        RED.httpNode.get(this.url,corsHandler,this.callback,this.errorHandler);
     } else if (this.method == "post") {
-        RED.httpNode.post(this.url,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+        RED.httpNode.post(this.url,corsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
     } else if (this.method == "put") {
-        RED.httpNode.put(this.url,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+        RED.httpNode.put(this.url,corsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
     } else if (this.method == "delete") {
-        RED.httpNode.delete(this.url,this.callback,errorHandler);
+        RED.httpNode.delete(this.url,corsHandler,this.callback,errorHandler);
     }
 
     this.on("close",function() {
-            var routes = RED.httpNode.routes[this.method];
-            for (var i in routes) {
+        var routes = RED.httpNode.routes[this.method];
+        for (var i = 0; i<routes.length; i++) {
+            if (routes[i].path == this.url) {
+                routes.splice(i,1);
+                //break;
+            }
+        }
+        if (RED.settings.httpNodeCors) {
+            var routes = RED.httpNode.routes['options'];
+            for (var i = 0; i<routes.length; i++) {
                 if (routes[i].path == this.url) {
                     routes.splice(i,1);
                     //break;
                 }
             }
+        }
     });
 }
 
