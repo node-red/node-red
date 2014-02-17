@@ -106,14 +106,14 @@ RED.nodes.registerType("http response",HTTPOut);
 function HTTPRequest(n) {
     RED.nodes.createNode(this,n);
     var nodeUrl = n.url;
-    var method = n.method || "GET";
+    var nodeMethod = n.method || "GET";
     var node = this;
     this.on("input",function(msg) {
             
             var url = msg.url||nodeUrl;
-
+            var method = (msg.method||nodeMethod).toUpperCase();
             var opts = urllib.parse(url);
-            opts.method = (msg.method||method).toUpperCase();
+            opts.method = method;
             if (msg.headers) {
                 opts.headers = msg.headers;
             }
