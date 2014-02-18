@@ -16,15 +16,14 @@
 
 //Simple node to introduce a pause into a flow
 var RED = require(process.env.NODE_RED_HOME+"/red/red");
-var node;
 
-function random() {
-    var wait = node.randomFirst + (node.diff * Math.random());
-    if (node.buffer.length > 0) {
-        node.send(node.buffer.pop());
-        node.randomID = setTimeout(random,wait);
+function random(n) {
+    var wait = n.randomFirst + (n.diff * Math.random());
+    if (n.buffer.length > 0) {
+        n.send(n.buffer.pop());
+        n.randomID = setTimeout(function() {random(n);},wait);
     } else {
-        node.randomID = -1;
+        n.randomID = -1;
     }
 }
 
@@ -81,11 +80,11 @@ function DelayNode(n) {
     this.buffer = [];
     this.intervalID = -1;
     this.randomID = -1;
-    node = this;
+    var node = this;
 
     if (this.pauseType === "delay") {
         this.on("input", function(msg) {
-            node = this;
+            //node = this;
             var id;
             id = setTimeout(function(){
                 node.idList.splice(node.idList.indexOf(id),1);
@@ -133,7 +132,7 @@ function DelayNode(n) {
             node.buffer.push(msg);
             if (node.randomID === -1) {
                 var wait = node.randomFirst + (node.diff * Math.random());
-                node.randomID = setTimeout(random,wait);
+                node.randomID = setTimeout(function() {random(node);},wait);
             }
         });
 
