@@ -84,7 +84,6 @@ function DelayNode(n) {
 
     if (this.pauseType === "delay") {
         this.on("input", function(msg) {
-            //node = this;
             var id;
             id = setTimeout(function(){
                 node.idList.splice(node.idList.indexOf(id),1);
