@@ -42,7 +42,9 @@ var RED = {
     events: events
 };
 
-RED.__defineGetter__("app", function() { return server.app });
+RED.__defineGetter__("app", function() { console.log("Deprecated use of RED.app - use RED.httpAdmin instead"); return server.app });
+RED.__defineGetter__("httpAdmin", function() { return server.app });
+RED.__defineGetter__("httpNode", function() { return server.nodeApp });
 RED.__defineGetter__("server", function() { return server.server });
 RED.__defineGetter__("settings", function() { return settings });
 

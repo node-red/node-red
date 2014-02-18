@@ -263,7 +263,7 @@ var oa = new OAuth(
 
 var credentials = {};
 
-RED.app.get('/twitter/:id', function(req,res) {
+RED.httpAdmin.get('/twitter/:id', function(req,res) {
     var credentials = RED.nodes.getCredentials(req.params.id);
     if (credentials) {
         res.send(JSON.stringify({sn:credentials.screen_name}));
@@ -272,12 +272,12 @@ RED.app.get('/twitter/:id', function(req,res) {
     }
 });
 
-RED.app.delete('/twitter/:id', function(req,res) {
+RED.httpAdmin.delete('/twitter/:id', function(req,res) {
     RED.nodes.deleteCredentials(req.params.id);
     res.send(200);
 });
 
-RED.app.get('/twitter/:id/auth', function(req, res){
+RED.httpAdmin.get('/twitter/:id/auth', function(req, res){
     var credentials = {};
     oa.getOAuthRequestToken({
             oauth_callback: req.query.callback
@@ -297,7 +297,7 @@ RED.app.get('/twitter/:id/auth', function(req, res){
     });
 });
 
-RED.app.get('/twitter/:id/auth/callback', function(req, res, next){
+RED.httpAdmin.get('/twitter/:id/auth/callback', function(req, res, next){
     var credentials = RED.nodes.getCredentials(req.params.id);
     credentials.oauth_verifier = req.query.oauth_verifier;
 

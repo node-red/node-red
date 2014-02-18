@@ -80,7 +80,7 @@
             if (this.name) {
                 return this.name;
             } else if (this.url) {
-                var root = document.location.pathname.slice(0,-1);
+                var root = RED.settings.httpNodeRoot.slice(0,-1);
                 root += this.url;
                 return "["+this.method+"] "+root;
             } else {

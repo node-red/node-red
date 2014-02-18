@@ -33,7 +33,7 @@ RED.nodes.registerType("mqtt-broker",MQTTBrokerNode);
 
 var querystring = require('querystring');
 
-RED.app.get('/mqtt-broker/:id',function(req,res) {
+RED.httpAdmin.get('/mqtt-broker/:id',function(req,res) {
     var credentials = RED.nodes.getCredentials(req.params.id);
     if (credentials) {
         res.send(JSON.stringify({user:credentials.user,hasPassword:(credentials.password&&credentials.password!="")}));
@@ -42,12 +42,12 @@ RED.app.get('/mqtt-broker/:id',function(req,res) {
     }
 });
 
-RED.app.delete('/mqtt-broker/:id',function(req,res) {
+RED.httpAdmin.delete('/mqtt-broker/:id',function(req,res) {
     RED.nodes.deleteCredentials(req.params.id);
     res.send(200);
 });
 
-RED.app.post('/mqtt-broker/:id',function(req,res) {
+RED.httpAdmin.post('/mqtt-broker/:id',function(req,res) {
     var body = "";
     req.on('data', function(chunk) {
         body+=chunk;

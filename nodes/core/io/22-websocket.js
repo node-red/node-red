@@ -32,7 +32,7 @@ function WebSocketListenerNode(n) {
     
     node._inputNodes = [];    // collection of nodes that want to receive events
 
-    var path = RED.settings.httpRoot || "/";
+    var path = RED.settings.httpNodeRoot || "/";
     path = path + (path.slice(-1) == "/" ? "":"/") + (node.path.charAt(0) == "/" ? node.path.substring(1) : node.path);
 
     // Workaround https://github.com/einaros/ws/pull/253

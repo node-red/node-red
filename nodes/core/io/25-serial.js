@@ -185,7 +185,7 @@ var serialPool = function() {
     }
 }();
 
-RED.app.get("/serialports",function(req,res) {
+RED.httpAdmin.get("/serialports",function(req,res) {
     serialp.list(function (err, ports) {
         res.writeHead(200, {'Content-Type': 'text/plain'});
         res.write(JSON.stringify(ports));
