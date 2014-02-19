@@ -17,10 +17,15 @@ var RED = function() {
 
     $('#btn-keyboard-shortcuts').click(function(){showHelp();});
 
+    function hideDropTarget() {
+        $("#dropTarget").hide();
+        RED.keyboard.remove(/* ESCAPE */ 27);
+    }
 
     $('#chart').on("dragenter",function(event) {
         if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
             $("#dropTarget").css({display:'table'});
+            RED.keyboard.add(/* ESCAPE */ 27,hideDropTarget);
         }
     });
 
@@ -30,12 +35,12 @@ var RED = function() {
         }
     })
     .on("dragleave",function(event) {
-        $("#dropTarget").hide();
+        hideDropTarget();
     })
     .on("drop",function(event) {
         var data = event.originalEvent.dataTransfer.getData("text/plain");
+        hideDropTarget();
         RED.view.importNodes(data);
-        $("#dropTarget").hide();
         event.preventDefault();
     });
 
