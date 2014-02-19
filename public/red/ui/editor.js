@@ -160,7 +160,10 @@ RED.editor = function() {
                                         oldValues[d] = $.extend(true,{},{v:editing_node[d]}).v;
                                     }
                                 }
-                                editing_node._def.oneditsave.call(editing_node);
+                                var rc = editing_node._def.oneditsave.call(editing_node);
+                                if (rc === true) {
+                                    changed = true;
+                                }
                                 
                                 for (var d in editing_node._def.defaults) {
                                     if (oldValues[d] === null || typeof oldValues[d] === "string" || typeof oldValues[d] === "number") {

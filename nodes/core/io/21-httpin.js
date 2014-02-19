@@ -130,6 +130,11 @@ function HTTPRequest(n) {
     var nodeUrl = n.url;
     var nodeMethod = n.method || "GET";
     var node = this;
+    var credentials = RED.nodes.getCredentials(n.id);
+    if (credentials) {
+        this.username = credentials.user;
+        this.password = credentials.password;
+    }
     this.on("input",function(msg) {
             
             var url = msg.url||nodeUrl;
@@ -138,6 +143,9 @@ function HTTPRequest(n) {
             opts.method = method;
             if (msg.headers) {
                 opts.headers = msg.headers;
+            }
+            if (credentials) {
+                opts.auth = credentials.user+":"+credentials.password;
             }
             var req = ((/^https/.test(url))?https:http).request(opts,function(res) {
                     res.setEncoding('utf8');
@@ -172,3 +180,44 @@ function HTTPRequest(n) {
 }
 
 RED.nodes.registerType("http request",HTTPRequest);
+
+var querystring = require('querystring');
+
+RED.httpAdmin.get('/http-request/:id',function(req,res) {
+    var credentials = RED.nodes.getCredentials(req.params.id);
+    if (credentials) {
+        res.send(JSON.stringify({user:credentials.user,hasPassword:(credentials.password&&credentials.password!="")}));
+    } else {
+        res.send(JSON.stringify({}));
+    }
+});
+
+RED.httpAdmin.delete('/http-request/:id',function(req,res) {
+    RED.nodes.deleteCredentials(req.params.id);
+    res.send(200);
+});
+
+RED.httpAdmin.post('/http-request/:id',function(req,res) {
+    var body = "";
+    req.on('data', function(chunk) {
+        body+=chunk;
+    });
+    req.on('end', function(){
+        var newCreds = querystring.parse(body);
+        var credentials = RED.nodes.getCredentials(req.params.id)||{};
+        if (newCreds.user == null || newCreds.user == "") {
+            delete credentials.user;
+        } else {
+            credentials.user = newCreds.user;
+        }
+        if (newCreds.password == "") {
+            delete credentials.password;
+        } else {
+            credentials.password = newCreds.password||credentials.password;
+        }
+        RED.nodes.addCredentials(req.params.id,credentials);
+        res.send(200);
+    });
+});
+
+
