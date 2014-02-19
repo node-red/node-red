@@ -29,6 +29,7 @@ module.exports = {
         var id = "["+(username||"")+":"+(password||"")+"]["+(clientid||"")+"]@"+broker+":"+port;
         if (!connections[id]) {
             connections[id] = function() {
+                var uid = (1+Math.random()*4294967295).toString(16);
                 var client = mqtt.createClient(port,broker);
                 client.setMaxListeners(0);
                 var options = {keepalive:15};
@@ -85,7 +86,7 @@ module.exports = {
                 };
                 client.on('connect',function() {
                         if (client) {
-                            util.log('[mqtt] connected to broker tcp://'+broker+':'+port);
+                            util.log('[mqtt] ['+uid+'] connected to broker tcp://'+broker+':'+port);
     
                             connecting = false;
                             for (var s in subscriptions) {
@@ -103,7 +104,7 @@ module.exports = {
                         }
                 });
                 client.on('connectionlost', function(err) {
-                        util.log('[mqtt] connection lost to broker tcp://'+broker+':'+port);
+                        util.log('[mqtt] ['+uid+'] connection lost to broker tcp://'+broker+':'+port);
                         setTimeout(function() {
                                 if (client) {
                                     client.connect(options);
@@ -111,7 +112,7 @@ module.exports = {
                         }, settings.mqttReconnectTime||5000);
                 });
                 client.on('disconnect', function() {
-                        util.log('[mqtt] disconnected from broker tcp://'+broker+':'+port);
+                        util.log('[mqtt] ['+uid+'] disconnected from broker tcp://'+broker+':'+port);
                 });
 
                 return obj
