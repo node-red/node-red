@@ -318,21 +318,7 @@ RED.view = function() {
         }
         if (mouse_mode == RED.state.IMPORT_DRAGGING) {
             RED.keyboard.remove(/* ESCAPE */ 27);
-            var mousePos = d3.touches(this)[0]||d3.mouse(this);
-            if (d3.event.shiftKey && moving_set.length > 1) {
-                mousePos[0] = 20*Math.floor(mousePos[0]/20);
-                mousePos[1] = 20*Math.floor(mousePos[1]/20);
-            }
-            for (var n in moving_set) {
-                var node = moving_set[n];
-                node.n.x = mousePos[0]+node.dx;
-                node.n.y = mousePos[1]+node.dy;
-                if (d3.event.shiftKey && moving_set.length == 1) {
-                    node.n.x = 20*Math.floor(node.n.x/20);
-                    node.n.y = 20*Math.floor(node.n.y/20);
-                }
-                node.n.dirty = true;
-            }
+            setDirty(true);
         }
         redraw();
         // clear mouse event vars
