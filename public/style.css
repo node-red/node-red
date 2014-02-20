@@ -815,3 +815,15 @@ div.tab-config-list-users {
     padding: 1px 5px;
 }
 
+i.spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+    vertical-align: text-top;
+    margin-top: 0px;
+    background: url(spin.gif) no-repeat 50% 50%;
+}
+    
+    
+

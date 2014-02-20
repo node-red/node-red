@@ -75,12 +75,17 @@ var RED = function() {
                 }
             }
             var nns = RED.nodes.createCompleteNodeSet();
-
+            
+            $("#btn-icn-deploy").removeClass('icon-upload');
+            $("#btn-icn-deploy").addClass('spinner');
+            RED.view.dirty(false);
+            
             d3.xhr("flows").header("Content-type", "application/json")
                            .post(JSON.stringify(nns),function(err,resp) {
+                    $("#btn-icn-deploy").removeClass('spinner');
+                    $("#btn-icn-deploy").addClass('icon-upload');
                     if (resp && resp.status == 204) {
                         RED.notify("Successfully deployed","success");
-                        RED.view.dirty(false);
                         RED.nodes.eachNode(function(node) {
                             if (node.changed) {
                                 node.dirty = true;
@@ -91,6 +96,7 @@ var RED = function() {
                         RED.history.markAllDirty();
                         RED.view.redraw();
                     } else {
+                        RED.view.dirty(true);
                         if (resp) {
                             RED.notify("<strong>Error</strong>: "+resp,"error");
                         } else {
