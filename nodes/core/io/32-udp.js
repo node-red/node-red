@@ -22,7 +22,6 @@ function UDPin(n) {
     RED.nodes.createNode(this,n);
     this.group = n.group;
     this.port = n.port;
-    this.host = n.host || null;
     this.datatype = n.datatype;
     this.iface = n.iface || null;
     this.multicast = n.multicast;
@@ -64,7 +63,7 @@ function UDPin(n) {
         catch (err) { console.log(err); }
     });
 
-    server.bind(node.port,node.host);
+    server.bind(node.port);
 }
 RED.nodes.registerType("udp in",UDPin);
 
@@ -81,16 +80,19 @@ function UDPout(n) {
     var node = this;
 
     var sock = dgram.createSocket('udp4');  // only use ipv4 for now
-    sock.bind(node.port);           // have to bind before you can enable broadcast...
+
     if (this.multicast != "false") {
-        sock.setBroadcast(true);        // turn on broadcast
-        if (this.multicast == "multi") {
-            sock.setMulticastTTL(128);
-            sock.addMembership(node.addr,node.iface);   // Add to the multicast group
-            node.log('udp multicast ready : '+node.addr+":"+node.port);
-        }
-        else node.log('udp broadcast ready : '+node.addr+":"+node.port);
+        sock.bind(node.port, function() {     // have to bind before you can enable broadcast...
+            sock.setBroadcast(true);        // turn on broadcast
+            if (this.multicast == "multi") {
+                sock.setMulticastTTL(128);
+                sock.addMembership(node.addr,node.iface);   // Add to the multicast group
+                node.log('udp multicast ready : '+node.addr+":"+node.port);
+            }
+            else node.log('udp broadcast ready : '+node.addr+":"+node.port);
+        });
     }
+
     else node.log('udp ready : '+node.addr+":"+node.port);
 
     node.on("input", function(msg) {
