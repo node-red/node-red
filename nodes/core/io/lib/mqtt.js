@@ -54,16 +54,20 @@ MQTTClient.prototype.connect = function(options) {
    
    self.client = mqtt.createConnection(this.port,this.host,function(err,client) {
          if (err) {
+            self.connected = false;
+            self.connectionError = true;
             self.emit('connectionlost',err);
             return;
          }
          client.on('close',function(e) {
                clearInterval(self.watchdog);
-               if (self.connected) {
-                  self.connected = false;
-                  self.emit('connectionlost',e);
-               } else {
-                  self.emit('disconnect');
+               if (!self.connectionError) {
+                   if (self.connected) {
+                      self.connected = false;
+                      self.emit('connectionlost',e);
+                   } else {
+                      self.emit('disconnect');
+                   }
                }
          });
          client.on('error',function(e) {
@@ -96,6 +100,7 @@ MQTTClient.prototype.connect = function(options) {
                   self.lastInbound = (new Date()).getTime()
                   self.lastOutbound = (new Date()).getTime()
                   self.connected = true;
+                  self.connectionError = false;
                   self.emit('connect');
                } else {
                   self.connected = false;
@@ -161,6 +166,7 @@ MQTTClient.prototype.connect = function(options) {
          });
          
          this.lastOutbound = (new Date()).getTime()
+         this.connectionError = false;
          client.connect(self.options);
    });
 }
