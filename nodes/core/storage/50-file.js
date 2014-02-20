@@ -18,36 +18,43 @@ var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var fs = require("fs");
 
 function FileNode(n) {
-	RED.nodes.createNode(this,n);
+    RED.nodes.createNode(this,n);
 
-	this.filename = n.filename;
-	this.appendNewline = n.appendNewline;
-	this.overwriteFile = n.overwriteFile;
-	var node = this;
-	this.on("input",function(msg) {
-	    var filename = msg.filename || this.filename;
-	    
-	    if (filename == "") {
-	        node.warn('No filename specified');
-	    } else {
+    this.filename = n.filename;
+    this.appendNewline = n.appendNewline;
+    this.overwriteFile = n.overwriteFile;
+    var node = this;
+    this.on("input",function(msg) {
+        var filename = msg.filename || this.filename;
+
+        if (filename == "") {
+            node.warn('No filename specified');
+        } else {
             var data = msg.payload;
             if (this.appendNewline) {
                 data += "\n";
             }
-            if (this.overwriteFile) {
-                fs.writeFile(filename, data, function (err) {
-                    if (err) node.warn('Failed to write to file : '+err);
-                    //console.log('Message written to file',this.filename);
+            if (msg.hasOwnProperty('delete')) {
+                fs.unlink(filename, function (err) {
+                    if (err) node.warn('Failed to delete file : '+err);
+                    //console.log('Deleted file",filename);
                 });
             }
             else {
-                fs.appendFile(filename, data, function (err) {
-                    if (err) node.warn('Failed to append to file : '+err);
-                    //console.log('Message appended to file',this.filename);
-                });
+                if (this.overwriteFile) {
+                    fs.writeFile(filename, data, function (err) {
+                        if (err) node.warn('Failed to write to file : '+err);
+                        //console.log('Message written to file',filename);
+                    });
+                }
+                else {
+                    fs.appendFile(filename, data, function (err) {
+                        if (err) node.warn('Failed to append to file : '+err);
+                        //console.log('Message appended to file',filename);
+                    });
+                }
             }
         }
-	});
+    });
 }
-
 RED.nodes.registerType("file",FileNode);

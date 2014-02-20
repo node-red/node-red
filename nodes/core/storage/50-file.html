@@ -36,11 +36,12 @@
 </script>
 
 <script type="text/x-red" data-help-name="file">
-	<p>Writes <b>msg.payload</b> to the file specified, e.g. to create a log.</p>
-	<p>The filename can be overridden by the <code>filename</code> property 
-	of the incoming message.</p> 
-	<p>A newline is added to every message. But this can be turned off if required, for example, to allow binary files to be written.</p>
-	<p>The default behaviour is to append to the file. This can be changed to overwrite the file each time, for example if you want to output a "static" web page or report.</p>
+    <p>Writes <b>msg.payload</b> to the file specified, e.g. to create a log.</p>
+    <p>The filename can be overridden by the <code>.filename</code> property
+    of the incoming message.</p>
+    <p>A newline is added to every message. But this can be turned off if required, for example, to allow binary files to be written.</p>
+    <p>The default behaviour is to append to the file. This can be changed to overwrite the file each time, for example if you want to output a "static" web page or report.</p>
+    <p>If a <code>.delete</code> property exists then the file will be deleted instead.</p>
 </script>
 
 <script type="text/javascript">
