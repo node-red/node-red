@@ -20,6 +20,8 @@ RED.tabs = function() {
     
     
     function createTabs(options) {
+        var tabs = {};
+        
         var ul = $("#"+options.id)
         ul.addClass("red-ui-tabs");
         ul.children().first().addClass("active");
@@ -32,7 +34,7 @@ RED.tabs = function() {
         
         function onTabDblClick() {
             if (options.ondblclick) {
-                options.ondblclick($(this).attr('href').slice(1));
+                options.ondblclick(tabs[$(this).attr('href').slice(1)]);
             }
             return false;
         }
@@ -45,11 +47,11 @@ RED.tabs = function() {
                 ul.children().removeClass("active");
                 link.parent().addClass("active");
                 if (options.onchange) {
-                    options.onchange(link.attr('href').slice(1));
+                    options.onchange(tabs[link.attr('href').slice(1)]);
                 }
             }
-
         }
+        
         function updateTabWidths() {
             var tabs = ul.find("li.red-ui-tab");
             var width = ul.width();
@@ -57,8 +59,8 @@ RED.tabs = function() {
             var tabWidth = (width-6-(tabCount*7))/tabCount;
             var pct = 100*tabWidth/width;
             tabs.css({width:pct+"%"});
-                
         }
+        
         ul.find("li.red-ui-tab a").on("click",onTabClick).on("dblclick",onTabDblClick);
         updateTabWidths();
         
@@ -74,12 +76,15 @@ RED.tabs = function() {
             }
             li.remove();
             if (options.onremove) {
-                options.onremove(id);
+                options.onremove(tabs[id]);
             }
+            delete tabs[id];
             updateTabWidths();
         }
+        
         return {
             addTab: function(tab) {
+                tabs[tab.id] = tab;
                 var li = $("<li/>",{class:"red-ui-tab"}).appendTo(ul);
                 var link = $("<a/>",{href:"#"+tab.id, class:"red-ui-tab-label"}).appendTo(li);
                 link.html(tab.label);

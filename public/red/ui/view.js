@@ -70,11 +70,17 @@ RED.view = function() {
 
     var workspace_tabs = RED.tabs.create({
         id: "workspace-tabs",
-        onchange: function(id) {
-            RED.view.setWorkspace(id);
+        onchange: function(tab) {
+            if (tab.type == "subflow") {
+                $("#workspace-toolbar").show();
+            } else {
+                $("#workspace-toolbar").hide();
+            }
+                
+            RED.view.setWorkspace(tab.id);
         },
-        ondblclick: function(id) {
-            showRenameWorkspaceDialog(id);
+        ondblclick: function(tab) {
+            showRenameWorkspaceDialog(tab.id);
         },
         onadd: function(tab) {
             var menuli = $("<li/>");
@@ -98,6 +104,8 @@ RED.view = function() {
             } else {
                 $('#btn-workspace-delete').parent().removeClass("disabled");
             }
+            $('#workspace-menu-list a[href="#'+tab.id+'"]').parent().remove();
+
         }
     });
 
@@ -1224,7 +1232,6 @@ RED.view = function() {
         },
         removeWorkspace: function(ws) {
             workspace_tabs.removeTab(ws.id);
-            $('#workspace-menu-list a[href="#'+ws.id+'"]').parent().remove();
         },
         getWorkspace: function() {
             return activeWorkspace;
@@ -1272,6 +1279,12 @@ RED.view = function() {
         importNodes: importNodes,
         resize: function() {
             workspace_tabs.resize();
+        },
+        
+        addFlow: function() {
+            var ws = {type:"subflow",id:RED.nodes.id(),label:"Flow 1", closeable: true};
+            RED.nodes.addWorkspace(ws);
+            workspace_tabs.addTab(ws);
         }
     };
 }();

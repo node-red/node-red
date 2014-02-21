@@ -36,6 +36,15 @@ body {
     font-size: 40px;
     color: #fff;
 }
+
+div.btn-group, a.btn {
+    -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+}
+
 a.brand {
         line-height: 16px;
 }
@@ -71,6 +80,17 @@ a.brand img {
    left:0px;
    right:0px;
 }
+
+#workspace-toolbar {
+    display: none;
+    position: absolute;
+    top: 30px;
+    left:0;
+    right: 18px;
+    padding: 5px;
+    background: #f3f3f3;
+}
+
 #chart-zoom-controls {
     padding-top: 3px;
     text-align: right;
@@ -691,6 +711,11 @@ ul.red-ui-tabs {
     height: 24px;
     border-bottom: 1px solid #999;
     background: #e3e3e3;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 ul.red-ui-tabs li {

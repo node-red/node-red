@@ -18,12 +18,12 @@ RED.sidebar = function() {
     //$('#sidebar').tabs();
     var sidebar_tabs = RED.tabs.create({
         id:"sidebar-tabs",
-        onchange:function(id) {
+        onchange:function(tab) {
             $("#sidebar-content").children().hide();
-            $("#"+id).show();
+            $("#"+tab.id).show();
         },
-        onremove: function(id) {
-            $("#"+id).remove();
+        onremove: function(tab) {
+            $("#"+tab.id).remove();
         }
     });
     function addTab(title,content,closeable) {
