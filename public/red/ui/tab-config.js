@@ -47,6 +47,7 @@ RED.configTab = function() {
             } else {
                 label = node._def.label;
             }
+            label = label || "&nbsp;";
             
             var entry = $('<div class="tab-config-list-entry"></div>').appendTo(li);
             entry.on('dblclick',function(e) {
