@@ -19,8 +19,11 @@ var settings = require(process.env.NODE_RED_HOME+"/red/red").settings;
 
 var connections = {};
 
-function matchTopic(ts,t) { 
-    var re = new RegExp("^"+ts.replace(/([\[\]\?\(\)\\\\$\^\*\.|])/g,"\\$1").replace(/\+/g,"[^/]+").replace(/#$/,".*")+"$");
+function matchTopic(ts,t) {
+    if (ts == "#") {
+        return true;
+    }
+    var re = new RegExp("^"+ts.replace(/([\[\]\?\(\)\\\\$\^\*\.|])/g,"\\$1").replace(/\+/g,"[^/]+").replace(/\/#$/,"(\/.*)?")+"$");
     return re.test(t);
 }
 
