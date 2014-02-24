@@ -76,8 +76,36 @@ RED.view = function() {
             } else {
                 $("#workspace-toolbar").hide();
             }
-                
-            RED.view.setWorkspace(tab.id);
+            var chart = $("#chart");
+            if (activeWorkspace != 0) {
+                workspaceScrollPositions[activeWorkspace] = {
+                    left:chart.scrollLeft(),
+                    top:chart.scrollTop()
+                };
+            }
+            var scrollStartLeft = chart.scrollLeft();
+            var scrollStartTop = chart.scrollTop();
+            
+            activeWorkspace = tab.id;
+            if (workspaceScrollPositions[activeWorkspace]) {
+                chart.scrollLeft(workspaceScrollPositions[activeWorkspace].left);
+                chart.scrollTop(workspaceScrollPositions[activeWorkspace].top);
+            } else {
+                chart.scrollLeft(0);
+                chart.scrollTop(0);
+            }
+            var scrollDeltaLeft = chart.scrollLeft() - scrollStartLeft;
+            var scrollDeltaTop = chart.scrollTop() - scrollStartTop;
+            if (mouse_position != null) {
+                mouse_position[0] += scrollDeltaLeft;
+                mouse_position[1] += scrollDeltaTop;
+            }
+            
+            clearSelection();
+            RED.nodes.eachNode(function(n) {
+                    n.dirty = true;
+            });
+            redraw();
         },
         ondblclick: function(tab) {
             showRenameWorkspaceDialog(tab.id);
@@ -1236,38 +1264,6 @@ RED.view = function() {
         getWorkspace: function() {
             return activeWorkspace;
         },
-        setWorkspace: function(z) {
-            var chart = $("#chart");
-            if (activeWorkspace != 0) {
-                workspaceScrollPositions[activeWorkspace] = {
-                    left:chart.scrollLeft(),
-                    top:chart.scrollTop()
-                };
-            }
-            var scrollStartLeft = chart.scrollLeft();
-            var scrollStartTop = chart.scrollTop();
-
-            activeWorkspace = z;
-            if (workspaceScrollPositions[activeWorkspace]) {
-                chart.scrollLeft(workspaceScrollPositions[activeWorkspace].left);
-                chart.scrollTop(workspaceScrollPositions[activeWorkspace].top);
-            } else {
-                chart.scrollLeft(0);
-                chart.scrollTop(0);
-            }
-            var scrollDeltaLeft = chart.scrollLeft() - scrollStartLeft;
-            var scrollDeltaTop = chart.scrollTop() - scrollStartTop;
-            if (mouse_position != null) {
-                mouse_position[0] += scrollDeltaLeft;
-                mouse_position[1] += scrollDeltaTop;
-            }
-
-            clearSelection();
-            RED.nodes.eachNode(function(n) {
-                n.dirty = true;
-            });
-            redraw();
-        },
         redraw:redraw,
         dirty: function(d) {
             if (d == null) {
@@ -1279,12 +1275,6 @@ RED.view = function() {
         importNodes: importNodes,
         resize: function() {
             workspace_tabs.resize();
-        },
-        
-        addFlow: function() {
-            var ws = {type:"subflow",id:RED.nodes.id(),label:"Flow 1", closeable: true};
-            RED.nodes.addWorkspace(ws);
-            workspace_tabs.addTab(ws);
         }
     };
 }();
