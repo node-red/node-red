@@ -36,14 +36,14 @@ RED.menu = (function() {
             
             if (opt.onselect) {
                 link.click(function() {
-                        if ($(this).parent().hasClass("disabled")) {
-                            return;
-                        }
-                        if (opt.toggle) {
-                            setSelected(opt.id,!isSelected(opt.id));
-                        } else {
-                            opt.onselect.call(opt);
-                        }
+                    if ($(this).parent().hasClass("disabled")) {
+                        return;
+                    }
+                    if (opt.toggle) {
+                        setSelected(opt.id,!isSelected(opt.id));
+                    } else {
+                        opt.onselect.call(opt);
+                    }
                 })
             } else if (opt.href) {
                 link.attr("target","_blank").attr("href",opt.href);
@@ -110,13 +110,28 @@ RED.menu = (function() {
         $("#"+id).parent().remove();
     }
     
+    function setAction(id,action) {
+        menuItems[id].onselect = action;
+        $("#"+id).click(function() {
+            if ($(this).parent().hasClass("disabled")) {
+                return;
+            }
+            if (menuItems[id].toggle) {
+                setSelected(id,!isSelected(id));
+            } else {
+                menuItems[id].onselect.call(menuItems[id]);
+            }
+        });
+    }
+    
     return {
         init: createMenu,
         setSelected: setSelected,
         isSelected: isSelected,
         setDisabled: setDisabled,
         addItem: addItem,
-        removeItem: removeItem
+        removeItem: removeItem,
+        setAction: setAction
         //TODO: add an api for replacing a submenu - see library.js:loadFlowLibrary
     }
 })();

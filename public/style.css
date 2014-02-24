@@ -74,6 +74,14 @@ span.logo span {
 span.logo img {
     height: 18px;
 }
+.button {
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+}
+
 #header .button {
     line-height: 22px;
     display: inline-block;
@@ -118,7 +126,26 @@ span.logo img {
     outline: none;
 }
 
-
+#workspace-toolbar .button {
+    line-height: 18px;
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 8px;
+    text-decoration: none;
+    border-radius: 3px;
+    color: #666;
+    background: #f6f6f6;
+    vertical-align: middle;
+    box-shadow: 0 0 2px #888;
+}
+#workspace-toolbar .button:hover {
+    background: #e6e6e6;
+    box-shadow: 0 0 2px #666;
+}
+#workspace-toolbar .button:active {
+    background: #e0e0e0;
+    box-shadow: 0 0 2px #444;
+}
 
 #workspace {
    margin-left: 160px;
@@ -140,8 +167,9 @@ span.logo img {
     position: absolute;
     top: 30px;
     left:0;
-    right: 18px;
-    padding: 5px;
+    right: 20px;
+    padding: 7px;
+    border-bottom-right-radius: 5px;
     background: #f3f3f3;
 }
 
@@ -263,9 +291,10 @@ span.logo img {
     clear: both;
 }
 .palette_label {
-   line-height: 25px;
-   text-align: center;
-
+    margin: 4px 0;
+    line-height: 20px;
+    text-align: center;
+    overflow: hidden;
 }
 .palette_node {
    cursor:move;
@@ -425,6 +454,22 @@ span.logo img {
    user-select: none;
 }
 
+.port_label {
+   stroke-width: 0;
+   fill: #888;
+   font-size: 16px;
+   alignment-baseline: middle;
+   text-anchor: middle;
+   pointer-events: none;
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+}
+
+
 .function_label {
    font-size: 12px;
 }
@@ -460,9 +505,21 @@ span.logo img {
 
 }
 .port {
+   stroke: #999;
+   stroke-width: 2;
    fill: #ddd;
    cursor: crosshair;
 }
+
+.port_highlight {
+   stroke: #6DA332;
+   stroke-width: 3;
+   fill: #fff;
+   pointer-events:none;
+   fill-opacity: 0.5;
+}
+
+
 .node_error {
     stroke: #ff0000;
     stroke-width: 2;
@@ -491,7 +548,7 @@ span.logo img {
    stroke: #ff0000;
 }
 .node_selected {
-   stroke: #ff7f0e;
+   stroke: #ff7f0e !important;
 }
 .node_highlighted {
    stroke: #dd1616;
@@ -504,6 +561,11 @@ span.logo img {
 .port_hovered {
   stroke: #ff7f0e;
   fill:  #ff7f0e;
+}
+.subflowport {
+    stroke-dasharray: 5,5;
+    fill: #eee;
+    stroke: #999;
 }
 
 .drag_line {
@@ -525,6 +587,12 @@ span.logo img {
   stroke-width: 4;
   fill: none;
   pointer-events: none;
+}
+
+.link_subflow {
+  stroke: #bbb;
+  stroke-dasharray: 10,5;
+  stroke-width: 3;
 }
 
 .link_outline {

@@ -47,37 +47,53 @@ RED.sidebar.info = (function() {
         table += "<tr><td>Type</td><td>&nbsp;"+node.type+"</td></tr>";
         table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
         table += '<tr class="blank"><td colspan="2">Properties</td></tr>';
-        for (var n in node._def.defaults) {
-            if (node._def.defaults.hasOwnProperty(n)) {
-                var val = node[n]||"";
-                var type = typeof val;
-                if (type === "string") {
-                    if (val.length > 30) { 
-                        val = val.substring(0,30)+" ...";
-                    }
-                    val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-                } else if (type === "number") {
-                    val = val.toString();
-                } else if ($.isArray(val)) {
-                    val = "[<br/>";
-                    for (var i=0;i<Math.min(node[n].length,10);i++) {
-                        var vv = JSON.stringify(node[n][i],jsonFilter," ").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-                        val += "&nbsp;"+i+": "+vv+"<br/>";
-                    }
-                    if (node[n].length > 10) {
-                        val += "&nbsp;... "+node[n].length+" items<br/>";
-                    }
-                    val += "]";
-                } else {
-                    val = JSON.stringify(val,jsonFilter," ");
-                    val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        if (node.type == "subflow") {
+            var userCount = 0;
+            var subflowType = "subflow:"+node.id;
+            RED.nodes.eachNode(function(n) {
+                if (n.type === subflowType) {
+                    userCount++;
                 }
-                
-                table += "<tr><td>&nbsp;"+n+"</td><td>"+val+"</td></tr>";
+            });
+            table += "<tr><td>name</td><td>"+node.name+"</td></tr>";
+            table += "<tr><td>inputs</td><td>"+node.in.length+"</td></tr>";
+            table += "<tr><td>outputs</td><td>"+node.out.length+"</td></tr>";
+            table += "<tr><td>instances</td><td>"+userCount+"</td></tr>";
+        }
+        if (node._def) {
+            for (var n in node._def.defaults) {
+                if (node._def.defaults.hasOwnProperty(n)) {
+                    var val = node[n]||"";
+                    var type = typeof val;
+                    if (type === "string") {
+                        if (val.length > 30) { 
+                            val = val.substring(0,30)+" ...";
+                        }
+                        val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                    } else if (type === "number") {
+                        val = val.toString();
+                    } else if ($.isArray(val)) {
+                        val = "[<br/>";
+                        for (var i=0;i<Math.min(node[n].length,10);i++) {
+                            var vv = JSON.stringify(node[n][i],jsonFilter," ").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                            val += "&nbsp;"+i+": "+vv+"<br/>";
+                        }
+                        if (node[n].length > 10) {
+                            val += "&nbsp;... "+node[n].length+" items<br/>";
+                        }
+                        val += "]";
+                    } else {
+                        val = JSON.stringify(val,jsonFilter," ");
+                        val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                    }
+                    
+                    table += "<tr><td>"+n+"</td><td>"+val+"</td></tr>";
+                }
             }
         }
         table += "</tbody></table><br/>";
-        table  += '<div class="node-help">'+($("script[data-help-name|='"+node.type+"']").html()||"")+"</div>";
+        var helpText = $("script[data-help-name|='"+node.type+"']").html()||"";
+        table  += '<div class="node-help">'+helpText+"</div>";
         $("#tab-info").html(table);
     }
     

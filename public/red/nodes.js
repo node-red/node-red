@@ -21,6 +21,7 @@ RED.nodes = (function() {
     var links = [];
     var defaultWorkspace;
     var workspaces = {};
+    var subflows = {};
     
     var registry = (function() {
         var nodeList = [];
@@ -98,12 +99,21 @@ RED.nodes = (function() {
             },
             registerNodeType: function(nt,def) {
                 nodeDefinitions[nt] = def;
-                nodeSets[typeToId[nt]].added = true;
-                // TODO: too tightly coupled into palette UI
+                if (def.category != "subflows") {
+                    nodeSets[typeToId[nt]].added = true;
+                    // TODO: too tightly coupled into palette UI
+                }
                 RED.palette.add(nt,def);
                 if (def.onpaletteadd && typeof def.onpaletteadd === "function") {
                     def.onpaletteadd.call(def);
                 }
+            },
+            removeNodeType: function(nt) {
+                if (nt.substring(0,8) != "subflow:") {
+                    throw new Error("this api is subflow only. called with:",nt);
+                }
+                delete nodeDefinitions[nt];
+                RED.palette.remove(nt);
             },
             getNodeType: function(nt) {
                 return nodeDefinitions[nt];
@@ -122,7 +132,6 @@ RED.nodes = (function() {
             RED.sidebar.config.refresh();
         } else {
             n.dirty = true;
-            nodes.push(n);
             var updatedConfigNode = false;
             for (var d in n._def.defaults) {
                 if (n._def.defaults.hasOwnProperty(d)) {
@@ -142,6 +151,14 @@ RED.nodes = (function() {
             if (updatedConfigNode) {
                 RED.sidebar.config.refresh();
             }
+            if (n._def.category == "subflows" && typeof n.i === "undefined") {
+                var nextId = 0;
+                RED.nodes.eachNode(function(node) {
+                    nextId = Math.max(nextId,node.i||0);
+                });
+                n.i = nextId+1;
+            }
+            nodes.push(n);
         }
     }
     function addLink(l) {
@@ -174,27 +191,27 @@ RED.nodes = (function() {
             if (node) {
                 nodes.splice(nodes.indexOf(node),1);
                 removedLinks = links.filter(function(l) { return (l.source === node) || (l.target === node); });
-                removedLinks.map(function(l) {links.splice(links.indexOf(l), 1); });
-            }
-            var updatedConfigNode = false;
-            for (var d in node._def.defaults) {
-                if (node._def.defaults.hasOwnProperty(d)) {
-                    var property = node._def.defaults[d];
-                    if (property.type) {
-                        var type = registry.getNodeType(property.type);
-                        if (type && type.category == "config") {
-                            var configNode = configNodes[node[d]];
-                            if (configNode) {
-                                updatedConfigNode = true;
-                                var users = configNode.users;
-                                users.splice(users.indexOf(node),1);
+                removedLinks.forEach(function(l) {links.splice(links.indexOf(l), 1); });
+                var updatedConfigNode = false;
+                for (var d in node._def.defaults) {
+                    if (node._def.defaults.hasOwnProperty(d)) {
+                        var property = node._def.defaults[d];
+                        if (property.type) {
+                            var type = registry.getNodeType(property.type);
+                            if (type && type.category == "config") {
+                                var configNode = configNodes[node[d]];
+                                if (configNode) {
+                                    updatedConfigNode = true;
+                                    var users = configNode.users;
+                                    users.splice(users.indexOf(node),1);
+                                }
                             }
                         }
                     }
                 }
-            }
-            if (updatedConfigNode) {
-                RED.sidebar.config.refresh();
+                if (updatedConfigNode) {
+                    RED.sidebar.config.refresh();
+                }
             }
         }
         return removedLinks;
@@ -237,6 +254,50 @@ RED.nodes = (function() {
         return {nodes:removedNodes,links:removedLinks};
     }
 
+    function addSubflow(sf) {
+        subflows[sf.id] = sf;
+        RED.nodes.registerType("subflow:"+sf.id, {
+            defaults:{name:{value:""}},
+            icon:"subflow.png",
+            category: "subflows",
+            inputs: sf.in.length,
+            outputs: sf.out.length,
+            color: "#da9",
+            label: function() { return this.name||RED.nodes.subflow(sf.id).name },
+            labelStyle: function() { return this.name?"node_label_italic":""; },
+            paletteLabel: function() { return RED.nodes.subflow(sf.id).name }
+        });
+        
+        
+    }
+    function getSubflow(id) {
+        return subflows[id];
+    }
+    function removeSubflow(sf) {
+        delete subflows[sf.id];
+        registry.removeNodeType("subflow:"+sf.id);
+    }
+    
+    function subflowContains(sfid,nodeid) {
+        for (var i=0;i<nodes.length;i++) {
+            var node = nodes[i];
+            if (node.z === sfid) {
+                var m = /^subflow:(.+)$/.exec(node.type);
+                if (m) {
+                    if (m[1] === nodeid) {
+                        return true;
+                    } else {
+                        var result = subflowContains(m[1],nodeid);
+                        if (result) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
     function getAllFlowNodes(node) {
         var visited = {};
         visited[node.id] = true;
@@ -247,8 +308,12 @@ RED.nodes = (function() {
             var childLinks = links.filter(function(d) { return (d.source === n) || (d.target === n);});
             for (var i=0;i<childLinks.length;i++) {
                 var child = (childLinks[i].source === n)?childLinks[i].target:childLinks[i].source;
-                if (!visited[child.id]) {
-                    visited[child.id] = true;
+                var id = child.id;
+                if (!id) {
+                    id = child.direction+":"+child.i;
+                }
+                if (!visited[id]) {
+                    visited[id] = true;
                     nns.push(child);
                     stack.push(child);
                 }
@@ -291,37 +356,94 @@ RED.nodes = (function() {
             var wires = links.filter(function(d){return d.source === n;});
             for (var j=0;j<wires.length;j++) {
                 var w = wires[j];
-                node.wires[w.sourcePort].push(w.target.id);
+                if (w.target.type != "subflow") {
+                    node.wires[w.sourcePort].push(w.target.id);
+                }
             }
         }
         return node;
     }
 
+    function convertSubflow(n) {
+        var node = {};
+        node.id = n.id;
+        node.type = n.type;
+        node.name = n.name;
+        node.in = [];
+        node.out = [];
+        
+        n.in.forEach(function(p) {
+            var nIn = {x:p.x,y:p.y,wires:[]};
+            var wires = links.filter(function(d) { return d.source === p });
+            for (var i=0;i<wires.length;i++) {
+                var w = wires[i];
+                if (w.target.id != p.id) {
+                    nIn.wires.push({id:w.target.id})
+                }
+            }
+            node.in.push(nIn);
+        });
+        n.out.forEach(function(p,c) {
+            var nOut = {x:p.x,y:p.y,wires:[]};
+            var wires = links.filter(function(d) { return d.target === p });
+            for (i=0;i<wires.length;i++) {
+                if (wires[i].source.type != "subflow") {
+                    nOut.wires.push({id:wires[i].source.id,port:wires[i].sourcePort})
+                } else {
+                    nOut.wires.push({id:n.id,port:0})
+                }
+            }
+            node.out.push(nOut);
+        });
+            
+                
+        return node;
+    }
     /**
      * Converts the current node selection to an exportable JSON Object
      **/
     function createExportableNodeSet(set) {
         var nns = [];
         var exportedConfigNodes = {};
+        var exportedSubflows = {};
         for (var n=0;n<set.length;n++) {
             var node = set[n].n;
-            var convertedNode = RED.nodes.convertNode(node);
-            for (var d in node._def.defaults) {
-                if (node._def.defaults[d].type && node[d] in configNodes) {
-                    var confNode = configNodes[node[d]];
-                    var exportable = registry.getNodeType(node._def.defaults[d].type).exportable;
-                    if ((exportable == null || exportable)) {
-                        if (!(node[d] in exportedConfigNodes)) {
-                            exportedConfigNodes[node[d]] = true;
-                            nns.unshift(RED.nodes.convertNode(confNode));
+            if (node.type.substring(0,8) == "subflow:") {
+                var subflowId = node.type.substring(8);
+                if (!exportedSubflows[subflowId]) {
+                    exportedSubflows[subflowId] = true;
+                    var subflow = getSubflow(subflowId);
+                    var subflowSet = [{n:subflow}];
+                    RED.nodes.eachNode(function(n) {
+                        if (n.z == subflowId) {
+                            subflowSet.push({n:n});
                         }
-                    } else {
-                        convertedNode[d] = "";
-                    }
+                    });
+                    var exportableSubflow = createExportableNodeSet(subflowSet);
+                    nns = exportableSubflow.concat(nns);
                 }
             }
-
-            nns.push(convertedNode);
+            if (node.type != "subflow") {
+                var convertedNode = RED.nodes.convertNode(node);
+                for (var d in node._def.defaults) {
+                    if (node._def.defaults[d].type && node[d] in configNodes) {
+                        var confNode = configNodes[node[d]];
+                        var exportable = registry.getNodeType(node._def.defaults[d].type).exportable;
+                        if ((exportable == null || exportable)) {
+                            if (!(node[d] in exportedConfigNodes)) {
+                                exportedConfigNodes[node[d]] = true;
+                                nns.unshift(RED.nodes.convertNode(confNode));
+                            }
+                        } else {
+                            convertedNode[d] = "";
+                        }
+                    }
+                }
+                nns.push(convertedNode);
+            } else {
+                var convertedSubflow = convertSubflow(node);
+                nns.push(convertedSubflow);
+            }
         }
         return nns;
     }
@@ -332,7 +454,14 @@ RED.nodes = (function() {
         var i;
         for (i in workspaces) {
             if (workspaces.hasOwnProperty(i)) {
-                nns.push(workspaces[i]);
+                if (workspaces[i].type == "tab") {
+                    nns.push(workspaces[i]);
+                }
+            }
+        }
+        for (i in subflows) {
+            if (subflows.hasOwnProperty(i)) {
+                nns.push(convertSubflow(subflows[i]));
             }
         }
         for (i in configNodes) {
@@ -368,7 +497,11 @@ RED.nodes = (function() {
             for (i=0;i<newNodes.length;i++) {
                 n = newNodes[i];
                 // TODO: remove workspace in next release+1
-                if (n.type != "workspace" && n.type != "tab" && !registry.getNodeType(n.type)) {
+                if (n.type != "workspace" && 
+                    n.type != "tab" && 
+                    n.type != "subflow" &&
+                    !registry.getNodeType(n.type) &&
+                    n.type.substring(0,8) != "subflow:") {
                     // TODO: get this UI thing out of here! (see below as well)
                     n.name = n.type;
                     n.type = "unknown";
@@ -389,9 +522,35 @@ RED.nodes = (function() {
                 //"DO NOT DEPLOY while in this state.<br/>Either, add missing types to Node-RED, restart and then reload page,<br/>or delete unknown "+n.name+", rewire as required, and then deploy.","error");
             }
 
+            var activeWorkspace = RED.view.getWorkspace();
+            var activeSubflow = getSubflow(activeWorkspace);
+            if (activeSubflow) {
+                for (i=0;i<newNodes.length;i++) {
+                    var m = /^subflow:(.+)$/.exec(newNodes[i].type);
+                    if (m) {
+                        var subflowId = m[1];
+                        var err;
+                        if (subflowId === activeSubflow.id) {
+                            err = new Error("Cannot add subflow to itself");
+                        }
+                        if (subflowContains(m[1],activeSubflow.id)) {
+                            err = new Error("Cannot add subflow - circular reference detected");
+                        }
+                        if (err) {
+                            // TODO: standardise error codes
+                            err.code = "NODE_RED";
+                            throw err;
+                        }
+                        
+                    }
+                }
+            }
+            
             var new_workspaces = [];
             var workspace_map = {};
-            
+            var new_subflows = [];
+            var subflow_map = {};
+            var nid;
             for (i=0;i<newNodes.length;i++) {
                 n = newNodes[i];
                 // TODO: remove workspace in next release+1
@@ -403,13 +562,34 @@ RED.nodes = (function() {
                         defaultWorkspace = n;
                     }
                     if (createNewIds) {
-                        var nid = getID();
+                        nid = getID();
                         workspace_map[n.id] = nid;
                         n.id = nid;
                     }
                     addWorkspace(n);
                     RED.view.addWorkspace(n);
                     new_workspaces.push(n);
+                } else if (n.type === "subflow") {
+                    subflow_map[n.id] = n;
+                    if (createNewIds) {
+                        nid = getID();
+                        n.id = nid;
+                    }
+                    // TODO: handle createNewIds - map old to new subflow ids
+                    n.in.forEach(function(input,i) {
+                        input.type = "subflow";
+                        input.direction = "in";
+                        input.z = n.id;
+                        input.i = i;
+                    });
+                    n.out.forEach(function(output,i) {
+                        output.type = "subflow";
+                        output.direction = "out";
+                        output.z = n.id;
+                        output.i = i;
+                    });
+                    new_subflows.push(n);
+                    addSubflow(n);
                 }
             }
             if (defaultWorkspace == null) {
@@ -426,7 +606,7 @@ RED.nodes = (function() {
             for (i=0;i<newNodes.length;i++) {
                 n = newNodes[i];
                 // TODO: remove workspace in next release+1
-                if (n.type !== "workspace" && n.type !== "tab") {
+                if (n.type !== "workspace" && n.type !== "tab" && n.type !== "subflow") {
                     var def = registry.getNodeType(n.type);
                     if (def && def.category == "config") {
                         if (!RED.nodes.node(n.id)) {
@@ -443,36 +623,53 @@ RED.nodes = (function() {
                     } else {
                         var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires,changed:false};
                         if (createNewIds) {
-                            node.z = workspace_map[node.z];
-                            if (!workspaces[node.z]) {
-                                node.z = RED.view.getWorkspace();
+                            if (subflow_map[node.z]) {
+                                node.z = subflow_map[node.z].id;
+                            } else {
+                                node.z = workspace_map[node.z];
+                                if (!workspaces[node.z]) {
+                                    node.z = activeWorkspace;
+                                }
                             }
                             node.id = getID();
                         } else {
                             node.id = n.id;
-                            if (node.z == null || !workspaces[node.z]) {
-                                node.z = RED.view.getWorkspace();
+                            if (node.z == null || (!workspaces[node.z] && !subflow_map[node.z])) {
+                                node.z = activeWorkspace;
                             }
                         }
                         node.type = n.type;
                         node._def = def;
-                        if (!node._def) {
-                            node._def = {
-                                color:"#fee",
-                                defaults: {},
-                                label: "unknown: "+n.type,
-                                labelStyle: "node_label_italic",
-                                outputs: n.outputs||n.wires.length
+                        if (n.type.substring(0,7) === "subflow") {
+                            var parentId = n.type.split(":")[1];
+                            var subflow = subflow_map[parentId]||getSubflow(parentId);
+                            if (createNewIds) {
+                                parentId = subflow.id;
+                                node.type = "subflow:"+parentId;
+                                node._def = registry.getNodeType(node.type);
+                                delete node.i;
+                            }
+                            node.outputs = subflow.out.length;
+                            node.inputs = subflow.in.length;
+                        } else {
+                            if (!node._def) {
+                                node._def = {
+                                    color:"#fee",
+                                    defaults: {},
+                                    label: "unknown: "+n.type,
+                                    labelStyle: "node_label_italic",
+                                    outputs: n.outputs||n.wires.length
+                                }
+                            }
+                            node.inputs = n.inputs||node._def.inputs;
+                            node.outputs = n.outputs||node._def.outputs;
+    
+                            for (var d2 in node._def.defaults) {
+                                if (node._def.defaults.hasOwnProperty(d2)) {
+                                    node[d2] = n[d2];
+                                }
                             }
                         }
-                        node.outputs = n.outputs||node._def.outputs;
-
-                        for (var d2 in node._def.defaults) {
-                            if (node._def.defaults.hasOwnProperty(d2)) {
-                                node[d2] = n[d2];
-                            }
-                        }
-
                         addNode(node);
                         RED.editor.validateNode(node);
                         node_map[n.id] = node;
@@ -494,10 +691,38 @@ RED.nodes = (function() {
                 }
                 delete n.wires;
             }
-            return [new_nodes,new_links,new_workspaces];
+            for (i=0;i<new_subflows.length;i++) {
+                n = new_subflows[i];
+                n.in.forEach(function(input) {
+                    input.wires.forEach(function(wire) {
+                        var link = {source:input, sourcePort:0, target:node_map[wire.id]};
+                        addLink(link);
+                        new_links.push(link);
+                    });
+                    delete input.wires;
+                });
+                n.out.forEach(function(output) {
+                    output.wires.forEach(function(wire) {
+                        var link;
+                        if (wire.id == n.id) {
+                            link = {source:n.in[wire.port], sourcePort:wire.port,target:output};
+                        } else {
+                            link = {source:node_map[wire.id], sourcePort:wire.port,target:output};
+                        }
+                        addLink(link);
+                        new_links.push(link);
+                    });
+                    delete output.wires;
+                });
+            }
+            return [new_nodes,new_links,new_workspaces,new_subflows];
         } catch(error) {
-            //TODO: get this UI thing out of here! (see above as well)
-            RED.notify("<strong>Error</strong>: "+error,"error");
+            if (error.code != "NODE_RED") {
+                console.log(error.stack);
+                RED.notify("<strong>Error</strong>: "+error,"error");
+            } else {
+                RED.notify("<strong>Error</strong>: "+error.message,"error");
+            }
             return null;
         }
 
@@ -516,13 +741,22 @@ RED.nodes = (function() {
         registerType: registry.registerNodeType,
         getType: registry.getNodeType,
         convertNode: convertNode,
+        
         add: addNode,
-        addLink: addLink,
         remove: removeNode,
+        
+        addLink: addLink,
         removeLink: removeLink,
+        
         addWorkspace: addWorkspace,
         removeWorkspace: removeWorkspace,
         workspace: getWorkspace,
+        
+        addSubflow: addSubflow,
+        removeSubflow: removeSubflow,
+        subflow: getSubflow,
+        subflowContains: subflowContains,
+        
         eachNode: function(cb) {
             for (var n=0;n<nodes.length;n++) {
                 cb(nodes[n]);
@@ -537,6 +771,13 @@ RED.nodes = (function() {
             for (var id in configNodes) {
                 if (configNodes.hasOwnProperty(id)) {
                     cb(configNodes[id]);
+                }
+            }
+        },
+        eachSubflow: function(cb) {
+            for (var id in subflows) {
+                if (subflows.hasOwnProperty(id)) {
+                    cb(subflows[id]);
                 }
             }
         },

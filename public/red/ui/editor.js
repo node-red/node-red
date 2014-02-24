@@ -95,22 +95,31 @@ RED.editor = (function() {
         node.resize = true;
         node.dirty = true;
         var removedLinks = [];
-        if (node.outputs < node.ports.length) {
-            while (node.outputs < node.ports.length) {
-                node.ports.pop();
+        if (node.ports) {
+            if (node.outputs < node.ports.length) {
+                while (node.outputs < node.ports.length) {
+                    node.ports.pop();
+                }
+                RED.nodes.eachLink(function(l) {
+                        if (l.source === node && l.sourcePort >= node.outputs) {
+                            removedLinks.push(l);
+                        }
+                });
+            } else if (node.outputs > node.ports.length) {
+                while (node.outputs > node.ports.length) {
+                    node.ports.push(node.ports.length);
+                }
             }
+        }
+        if (node.inputs === 0) {
             RED.nodes.eachLink(function(l) {
-                    if (l.source === node && l.sourcePort >= node.outputs) {
-                        removedLinks.push(l);
-                    }
+                if (l.target === node) {
+                    removedLinks.push(l);
+                }
             });
-            for (var l=0;l<removedLinks.length;l++) {
-                RED.nodes.removeLink(removedLinks[l]);
-            }
-        } else if (node.outputs > node.ports.length) {
-            while (node.outputs > node.ports.length) {
-                node.ports.push(node.ports.length);
-            }
+        }
+        for (var l=0;l<removedLinks.length;l++) {
+            RED.nodes.removeLink(removedLinks[l]);
         }
         return removedLinks;
     }
@@ -274,6 +283,11 @@ RED.editor = (function() {
                     RED.sidebar.info.refresh(editing_node);
                 }
                 RED.sidebar.config.refresh();
+                
+                var buttons = $( this ).dialog("option","buttons");
+                if (buttons.length == 3) {
+                    $( this ).dialog("option","buttons",buttons.splice(1));
+                }
                 editing_node = null;
             }
     });
@@ -459,10 +473,30 @@ RED.editor = (function() {
     function showEditDialog(node) {
         editing_node = node;
         RED.view.state(RED.state.EDITING);
-        $("#dialog-form").html($("script[data-template-name='"+node.type+"']").html());
+        var type = node.type;
+        if (node.type.substring(0,8) == "subflow:") {
+            type = "subflow";
+            var id = editing_node.type.substring(8);
+            var buttons = $( "#dialog" ).dialog("option","buttons");
+            buttons.unshift({
+                class: 'leftButton',
+                text: "Edit flow",
+                click: function() {
+                    RED.view.showSubflow(id);
+                    $("#node-dialog-ok").click();
+                }
+            });
+            $( "#dialog" ).dialog("option","buttons",buttons);
+        }
+        $("#dialog-form").html($("script[data-template-name='"+type+"']").html());
         $('<input type="text" style="display: none;" />').appendTo("#dialog-form");
         prepareEditDialog(node,node._def,"node-input");
-        $( "#dialog" ).dialog("option","title","Edit "+node.type+" node").dialog( "open" );
+        
+
+        
+        
+        
+        $( "#dialog" ).dialog("option","title","Edit "+type+" node").dialog( "open" );
     }
 
     function showEditConfigNodeDialog(name,type,id) {
@@ -655,10 +689,207 @@ RED.editor = (function() {
             }
     });
 
+    $( "#subflow-dialog" ).dialog({
+        modal: true,
+        autoOpen: false,
+        closeOnEscape: false,
+        width: 500,
+        buttons: [
+            {
+                class: 'leftButton',
+                text: "Delete",
+                click: function() {
+                    var removedNodes = [];
+                    var removedLinks = [];
+                    var startDirty = RED.view.dirty();
 
+                    RED.nodes.eachNode(function(n) {
+                        if (n.type == "subflow:"+editing_node.id) {
+                            removedNodes.push(n);
+                        }
+                        if (n.z == editing_node.id) {
+                            removedNodes.push(n);
+                        }
+                    });
+                    
+                    for (var i=0;i<removedNodes.length;i++) {
+                        var rmlinks = RED.nodes.remove(removedNodes[i].id);
+                        removedLinks = removedLinks.concat(rmlinks);
+                    }
+                    
+                    RED.nodes.removeSubflow(editing_node);
+                    
+                    RED.view.removeWorkspace(editing_node);
+                    
+                    RED.history.push({
+                        t:'delete',
+                        nodes:removedNodes,
+                        links:removedLinks,
+                        subflow: editing_node,
+                        dirty:startDirty
+                    });
+                    RED.view.dirty(true);
+                    RED.view.redraw();
+
+                    $( this ).dialog( "close" );
+                }
+            },
+            {
+                id: "subflow-dialog-ok",
+                text: "Ok",
+                click: function() {
+                    if (editing_node) {
+                        var i;
+                        var changes = {};
+                        var changed = false;
+                        var wasDirty = RED.view.dirty();
+                        
+                        var newName = $("#subflow-input-name").val();
+                        var newInCount = $("#subflow-input-inCount").val();
+                        var newOutCount = $("#subflow-input-outCount").val();
+                        
+                        var oldInCount = editing_node.in.length;
+                        var oldOutCount = editing_node.out.length;
+                        
+                        if (newName != editing_node.name) {
+                            changes['name'] = editing_node.name;
+                            editing_node.name = newName;
+                            changed = true;
+                            $("#btn-workspace-menu-"+editing_node.id.replace(".","-")).text("Subflow: "+newName);
+                        }
+                        
+                        var xpos = 40;
+                        var addedOutputs = [];
+                        var removedOutputs = [];
+                        var addedInputs = [];
+                        var removedInputs = [];
+                        var removedLinks = [];
+                        
+                        if (editing_node.in.length < newInCount) {
+                            var l = editing_node.in.length;
+                            for (i=l;i<newInCount;i++) {
+                                var newInput = {type:"subflow",direction:"in",z:editing_node.id,i:i,x:xpos,y:70};
+                                addedInputs.push(newInput);
+                                editing_node.in.push(newInput);
+                                xpos += 55;
+                            }
+                            changed = true;
+                        } else if (editing_node.in.length > newInCount) {
+                            removedInputs = editing_node.in.splice(newInCount);
+                            changed = true;
+                        }
+                        if (editing_node.out.length < newOutCount) {
+                            for (i=editing_node.out.length;i<newOutCount;i++) {
+                                var newOutput = {type:"subflow",direction:"out",z:editing_node.id,i:i,x:xpos,y:70};
+                                addedOutputs.push(newOutput);
+                                editing_node.out.push(newOutput);
+                                xpos += 55;
+                            }
+                            changed = true;
+                        } else if (editing_node.out.length > newOutCount) {
+                            removedOutputs = editing_node.out.splice(newOutCount);
+                            changed = true;
+                        }
+                        
+                        if (removedOutputs.length > 0 || removedInputs.length > 0) {
+                            RED.nodes.eachLink(function(l) {
+                                if (newInCount === 0 && l.source.type == "subflow" && l.source.z == editing_node.id) {
+                                    removedLinks.push(l);
+                                    return;
+                                }
+                                if (l.target.type == "subflow" && l.target.z == editing_node.id && l.target.i >= newOutCount) {
+                                    removedLinks.push(l);
+                                    return;
+                                }
+                            });
+                            removedLinks.forEach(function(l) { RED.nodes.removeLink(l)});
+                        }
+                        RED.palette.refresh();
+                        
+                        if (changed) {
+                            RED.nodes.eachNode(function(n) {
+                                if (n.type == "subflow:"+editing_node.id) {
+                                    n.changed = true;
+                                    n.inputs = editing_node.in.length;
+                                    n.outputs = editing_node.out.length;
+                                    removedLinks = removedLinks.concat(updateNodeProperties(n));
+                                }
+                            });
+                            var wasChanged = editing_node.changed;
+                            editing_node.changed = true;
+                            RED.view.dirty(true);
+                            var historyEvent = {
+                                t:'edit',
+                                node:editing_node,
+                                changes:changes,
+                                links:removedLinks,
+                                dirty:wasDirty,
+                                changed:wasChanged,
+                                subflow: {
+                                    outputCount: oldOutCount,
+                                    inputCount: oldInCount,
+                                    outputs: removedOutputs,
+                                    inputs: removedInputs
+                                }
+                            };
+                            
+                            RED.history.push(historyEvent);
+                        }
+                        editing_node.dirty = true;
+                        RED.view.redraw();
+                    }
+                    $( this ).dialog( "close" );
+                }
+            },
+            {
+                id: "subflow-dialog-cancel",
+                text: "Cancel",
+                click: function() {
+                    $( this ).dialog( "close" );
+                    editing_node = null;
+                }
+            }
+        ],
+        open: function(e) {
+            RED.keyboard.disable();
+        },
+        close: function(e) {
+            RED.keyboard.enable();
+
+            if (RED.view.state() != RED.state.IMPORT_DRAGGING) {
+                RED.view.state(RED.state.DEFAULT);
+            }
+            RED.sidebar.info.refresh(editing_node);
+            editing_node = null;
+        }
+    });
+    
+    function showEditSubflowDialog(subflow) {
+        editing_node = subflow;
+        RED.view.state(RED.state.EDITING);
+        $("#subflow-input-name").val(subflow.name);
+        $("#subflow-input-inCount").spinner({ min:0, max:1 }).val(subflow.in.length);
+        $("#subflow-input-outCount").spinner({ min:0 }).val(subflow.out.length);
+        var userCount = 0;
+        var subflowType = "subflow:"+editing_node.id;
+        
+        RED.nodes.eachNode(function(n) {
+            if (n.type === subflowType) {
+                userCount++;
+            }
+        });
+        
+        
+        $("#subflow-dialog-user-count").html("There "+(userCount==1?"is":"are")+" "+userCount+" instance"+(userCount==1?" ":"s")+" of this subflow").show();
+        $("#subflow-dialog").dialog("option","title","Edit flow "+subflow.name).dialog( "open" );
+    }
+
+    
+    
     return {
         edit: showEditDialog,
         editConfig: showEditConfigNodeDialog,
+        editSubflow: showEditSubflowDialog,
         validateNode: validateNode,
         updateNodeProperties: updateNodeProperties // TODO: only exposed for edit-undo
     }

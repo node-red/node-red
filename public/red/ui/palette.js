@@ -17,7 +17,7 @@
 RED.palette = (function() {
 
     var exclusion = ['config','unknown','deprecated'];
-    var core = ['input', 'output', 'function', 'social', 'storage', 'analysis', 'advanced'];
+    var core = ['input', 'output', 'function', 'subflows', 'social', 'storage', 'analysis', 'advanced'];
 
     function createCategoryContainer(category){
         var escapedCategory = category.replace(" ","_");
@@ -38,10 +38,66 @@ RED.palette = (function() {
 
     core.forEach(createCategoryContainer);
 
+    function setLabel(type, el,label) {
+        var nodeWidth = 80;
+        var nodeHeight = 25;
+        var lineHeight = 20;
+        var portHeight = 10;
+
+        var words = label.split(" ");
+        
+        var displayLines = [];
+        
+        var currentLine = words[0];
+        var currentLineWidth = RED.view.calculateTextWidth(currentLine, "palette_label", 0);
+        
+        for (var i=1;i<words.length;i++) {
+            var newWidth = RED.view.calculateTextWidth(currentLine+" "+words[i], "palette_label", 0);
+            if (newWidth < nodeWidth) {
+                currentLine += " "+words[i];
+                currentLineWidth = newWidth;
+            } else {
+                displayLines.push(currentLine);
+                currentLine = words[i];
+                currentLineWidth = RED.view.calculateTextWidth(currentLine, "palette_label", 0);
+            }
+        }
+        displayLines.push(currentLine);
+        
+        var lines = displayLines.join("<br/>");
+        var multiLineNodeHeight = 8+(lineHeight*displayLines.length);
+        el.css({height:multiLineNodeHeight+"px"});
+
+        var labelElement = el.find(".palette_label");
+        labelElement.html(lines);
+        
+        el.find(".palette_port").css({top:(multiLineNodeHeight/2-5)+"px"});
+        
+        var popOverContent;
+        try {
+            var l = "<p><b>"+label+"</b></p>";
+            if (label != type) {
+                l = "<p><b>"+label+"</b><br/><i>"+type+"</i></p>";
+            }
+            popOverContent = $(l+($("script[data-help-name|='"+type+"']").html()||"<p>no information available</p>").trim()).slice(0,2);
+        } catch(err) {
+            // Malformed HTML may cause errors. TODO: need to understand what can break
+            console.log("Error generating pop-over label for '"+type+"'.");
+            console.log(err.toString());
+            popOverContent = "<p><b>"+label+"</b></p><p>no information available</p>";
+        }
+
+        
+        el.data('popover').options.content = popOverContent;
+    }
+    
+    function escapeNodeType(nt) {
+        return nt.replace(" ","_").replace(".","_").replace(":","_");
+    }
+    
     function addNodeType(nt,def) {
-
-        var nodeTypeId = nt.replace(" ","_");
-
+        
+        var nodeTypeId = escapeNodeType(nt);
         if ($("#palette_node_"+nodeTypeId).length) {
             return;
         }
@@ -63,27 +119,12 @@ RED.palette = (function() {
                 label = (typeof def.paletteLabel === "function" ? def.paletteLabel.call(def) : def.paletteLabel)||"";
             }
 
-            var pixels = RED.view.calculateTextWidth(label, "palette_label", 0);
-            var nodeWidth = 90;
-            var numLines = Math.ceil(pixels / nodeWidth);
-            var multiLine = numLines > 1;
-
-            // styles matching with style.css
-            var nodeHeight = 25;
-            var lineHeight = 16;
-            var portHeight = 10;
-            var multiLineNodeHeight = lineHeight * numLines + (nodeHeight - lineHeight);
-
-            d.innerHTML = '<div class="palette_label"'+
-                (multiLine ? 'style="line-height: '+
-                    lineHeight + 'px; margin-top: 5px"' : '')+
-                '>'+label+"</div>";
+            d.innerHTML = '<div class="palette_label"></div>';
+            
             d.className="palette_node";
             if (def.icon) {
                 d.style.backgroundImage = "url(icons/"+def.icon+")";
-                if (multiLine) {
-                    d.style.backgroundSize = "18px 27px";
-                }
+                d.style.backgroundSize = "18px 27px";
                 if (def.align == "right") {
                     d.style.backgroundPosition = "95% 50%";
                 } else if (def.inputs > 0) {
@@ -92,23 +133,16 @@ RED.palette = (function() {
             }
 
             d.style.backgroundColor = def.color;
-            d.style.height = multiLineNodeHeight + "px";
 
             if (def.outputs > 0) {
                 var portOut = document.createElement("div");
                 portOut.className = "palette_port palette_port_output";
-                if (multiLine) {
-                    portOut.style.top = ((multiLineNodeHeight - portHeight) / 2) + "px";
-                }
                 d.appendChild(portOut);
             }
 
             if (def.inputs > 0) {
                 var portIn = document.createElement("div");
-                portIn.className = "palette_port";
-                if (multiLine) {
-                    portIn.style.top = ((multiLineNodeHeight - portHeight) / 2) + "px";
-                }
+                portIn.className = "palette_port palette_port_input";
                 d.appendChild(portIn);
             }
 
@@ -123,23 +157,13 @@ RED.palette = (function() {
             $("#palette-"+category).append(d);
             d.onmousedown = function(e) { e.preventDefault(); };
 
-            var popOverContent;
-            try {
-                popOverContent = $("<p><b>"+label+"</b></p>"+($("script[data-help-name|='"+nt+"']").html().trim()||"<p>no information available</p>")).slice(0,2);
-            } catch(err) {
-                // Malformed HTML may cause errors. TODO: need to understand what can break
-                console.log("Error generating pop-over label for '"+nt+"'.");
-                console.log(err.toString());
-                popOverContent = "<p><b>"+label+"</b></p><p>no information available</p>";
-            }
             $(d).popover({
                 title:d.type,
                 placement:"right",
                 trigger: "hover",
                 delay: { show: 750, hide: 50 },
                 html: true,
-                container:'body',
-                content: popOverContent
+                container:'body'
             });
             $(d).click(function() {
                 var help = '<div class="node-help">'+($("script[data-help-name|='"+d.type+"']").html()||"")+"</div>";
@@ -151,23 +175,50 @@ RED.palette = (function() {
                 revert: true,
                 revertDuration: 50
             });
+            
+            setLabel(nt,$(d),label);
         }
     }
 
     function removeNodeType(nt) {
-        var nodeTypeId = nt.replace(" ","_");
+        var nodeTypeId = escapeNodeType(nt);
         $("#palette_node_"+nodeTypeId).remove();
     }
     function hideNodeType(nt) {
-        var nodeTypeId = nt.replace(" ","_");
+        var nodeTypeId = escapeNodeType(nt);
         $("#palette_node_"+nodeTypeId).hide();
     }
 
     function showNodeType(nt) {
-        var nodeTypeId = nt.replace(" ","_");
+        var nodeTypeId = escapeNodeType(nt);
         $("#palette_node_"+nodeTypeId).show();
     }
-
+    
+    function refreshNodeTypes() {
+        RED.nodes.eachSubflow(function(sf) {
+            var paletteNode = $("#palette_node_subflow_"+sf.id.replace(".","_"));
+            var portInput = paletteNode.find(".palette_port_input");
+            var portOutput = paletteNode.find(".palette_port_output");
+            
+            if (portInput.length === 0 && sf.in.length > 0) {
+                var portIn = document.createElement("div");
+                portIn.className = "palette_port palette_port_input";
+                paletteNode.append(portIn);
+            } else if (portInput.length !== 0 && sf.in.length === 0) {
+                portInput.remove();
+            }
+            
+            if (portOutput === 0 && sf.out.length > 0) {
+                var portOut = document.createElement("div");
+                portOut.className = "palette_port palette_port_output";
+                paletteNode.append(portOut);
+            } else if (portOutput !== 0 && sf.out.length === 0) {
+                portOutput.remove();
+            } 
+            setLabel(sf.type+":"+sf.id,paletteNode,sf.name);
+        });
+    }
+    
     function filterChange() {
         var val = $("#palette-search-input").val();
         if (val === "") {
@@ -215,6 +266,7 @@ RED.palette = (function() {
         add:addNodeType,
         remove:removeNodeType,
         hide:hideNodeType,
-        show:showNodeType
+        show:showNodeType,
+        refresh:refreshNodeTypes
     };
 })();
