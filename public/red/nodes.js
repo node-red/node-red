@@ -39,7 +39,7 @@ RED.nodes = function() {
     function addNode(n) {
         if (n._def.category == "config") {
             configNodes[n.id] = n;
-            RED.configTab.refresh();
+            RED.sidebar.config.refresh();
         } else {
             n.dirty = true;
             nodes.push(n);
@@ -58,7 +58,7 @@ RED.nodes = function() {
                 }
             }
             if (updatedConfigNode) {
-                RED.configTab.refresh();
+                RED.sidebar.config.refresh();
             }
         }
     }

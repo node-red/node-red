@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-RED.configTab = function() {
+RED.sidebar.config = function() {
     
     var content = document.createElement("div");
     content.id = "tab-config";

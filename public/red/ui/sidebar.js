@@ -34,17 +34,8 @@ RED.sidebar = function() {
         //$('#sidebar').tabs("refresh");
     }
     
-    var content = document.createElement("div");
-    content.id = "tab-info";
-    content.style.paddingTop = "4px";
-    content.style.paddingLeft = "4px";
-    content.style.paddingRight = "4px";
-
-    addTab("info",content);
-    
     $('#btn-sidebar').click(function() {toggleSidebar();});
     RED.keyboard.add(/* SPACE */ 32,{ctrl:true},function(){toggleSidebar();d3.event.preventDefault();});
-
 
     var sidebarSeparator =  {};
     $("#sidebar-separator").draggable({

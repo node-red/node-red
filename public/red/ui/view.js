@@ -475,9 +475,9 @@ RED.view = function() {
         }
 
         if (moving_set.length == 1) {
-            buildInfo(moving_set[0].n);
+            RED.sidebar.info.refresh(moving_set[0].n);
         } else {
-            $("#tab-info").html("");
+            RED.sidebar.info.clear();
         }
     }
 
@@ -538,43 +538,6 @@ RED.view = function() {
         return value;
     }
                 
-    function buildInfo(node) {
-        var table = '<table class="node-info"><tbody>';
-
-        table += "<tr><td>Type</td><td>&nbsp;"+node.type+"</td></tr>";
-        table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
-        table += '<tr class="blank"><td colspan="2">&nbsp;Properties</td></tr>';
-        for (var n in node._def.defaults) {
-            var val = node[n]||"";
-            var type = typeof val;
-            if (type === "string") {
-                if (val.length > 30) { 
-                    val = val.substring(0,30)+" ...";
-                }
-            } else if (type === "number") {
-                val = val.toString();
-            } else if ($.isArray(val)) {
-                val = "[<br/>";
-                for (var i=0;i<Math.min(node[n].length,10);i++) {
-                    var vv = JSON.stringify(node[n][i],jsonFilter," ").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-                    val += "&nbsp;"+i+": "+vv+"<br/>";
-                }
-                if (node[n].length > 10) {
-                    val += "&nbsp;... "+node[n].length+" items<br/>";
-                }
-                val += "]";
-            } else {
-                val = JSON.stringify(val,jsonFilter," ");
-                val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-            }
-            
-            table += "<tr><td>&nbsp;"+n+"</td><td>"+val+"</td></tr>";
-        }
-        table += "</tbody></table><br/>";
-        table  += '<div class="node-help">'+($("script[data-help-name|='"+node.type+"']").html()||"")+"</div>";
-        $("#tab-info").html(table);
-    }
-
     function calculateTextWidth(str) {
         var sp = document.createElement("span");
         sp.className = "node_label";
