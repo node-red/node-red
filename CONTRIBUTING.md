@@ -15,6 +15,12 @@ Provide as much context as possible so we can try to recreate the issue.
 If possible, include the relevant part of your flow. To do this, select the
 relevant nodes, press Ctrl-E and copy the flow data from the Export dialog.
 
+At a minimum, please include:
+
+ - Version of Node-RED - either release number if you downloaded a zip, or the first few lines of `git log` if you are cloning the repository directly.
+ - Version of node.js - what does `node -v` say?
+
+
 ## New features
 
 For feature requests, please raise them on the [mailing list](https://groups.google.com/forum/#!forum/node-red).
