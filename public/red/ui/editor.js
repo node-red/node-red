@@ -274,7 +274,9 @@ RED.editor = function() {
                 }
                 $( this ).dialog('option','height','auto');
                 $( this ).dialog('option','width','500');
-                RED.sidebar.info.refresh(editing_node);
+                if (editing_node) {
+                    RED.sidebar.info.refresh(editing_node);
+                }
                 RED.sidebar.config.refresh();
                 editing_node = null;
             }
