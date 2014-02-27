@@ -521,23 +521,7 @@ RED.view = function() {
         }
     }
 
-    function jsonFilter(key,value) {
-        if (key == "") {
-            return value;
-        }
-        var t = typeof value;
-        if ($.isArray(value)) {
-            return "[array:"+value.length+"]";
-        } else if (t === "object") {
-            return "[object]"
-        } else if (t === "string") {
-            if (value.length > 30) {
-                return value.substring(0,30)+" ...";
-            }
-        }
-        return value;
-    }
-                
+
     function calculateTextWidth(str) {
         var sp = document.createElement("span");
         sp.className = "node_label";

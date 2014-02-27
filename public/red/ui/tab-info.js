@@ -23,6 +23,23 @@ RED.sidebar.info = function() {
 
     RED.sidebar.addTab("info",content);
     
+    function jsonFilter(key,value) {
+        if (key == "") {
+            return value;
+        }
+        var t = typeof value;
+        if ($.isArray(value)) {
+            return "[array:"+value.length+"]";
+        } else if (t === "object") {
+            return "[object]"
+        } else if (t === "string") {
+            if (value.length > 30) {
+                return value.substring(0,30)+" ...";
+            }
+        }
+        return value;
+    }
+    
     function refresh(node) {
         var table = '<table class="node-info"><tbody>';
 

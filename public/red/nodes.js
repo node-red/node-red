@@ -86,7 +86,7 @@ RED.nodes = function() {
         var removedLinks = [];
         if (id in configNodes) {
             delete configNodes[id];
-            RED.configTab.refresh();
+            RED.sidebar.config.refresh();
         } else {
             var node = getNode(id);
             if (node) {
@@ -110,7 +110,7 @@ RED.nodes = function() {
                 }
             }
             if (updatedConfigNode) {
-                RED.configTab.refresh();
+                RED.sidebar.config.refresh();
             }
         }
         return removedLinks;
