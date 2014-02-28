@@ -18,6 +18,12 @@ RED.editor = function() {
     
     // TODO: should IMPORT/EXPORT get their own dialogs?
     
+    function onInputLookupClick(select,name,type) {
+        return function(e) {
+            showEditConfigNodeDialog(name,type,select.find(":selected").val());
+            e.preventDefault();
+        }
+    }
     function showEditDialog(node) {
         editing_node = node;
         RED.view.state(RED.state.EDITING);
@@ -34,12 +40,7 @@ RED.editor = function() {
                     updateConfigNodeSelect(d,def.type,node[d]);
                     var select = $("#node-input-"+d);
                     select.after(' <a id="node-input-lookup-'+d+'" class="btn"><i class="icon icon-pencil"></i></a>');
-                    var name = d;
-                    var type = def.type;
-                    $('#node-input-lookup-'+d).click(function(e) {
-                            showEditConfigNodeDialog(name,type,select.find(":selected").val());
-                            e.preventDefault();
-                    });
+                    $('#node-input-lookup-'+d).click(onInputLookupClick(select,d,def.type));
                     var label = "";
                     var configNode = RED.nodes.node(node[d]);
                     if (configNode && node_def.label) {
