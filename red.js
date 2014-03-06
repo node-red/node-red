@@ -18,6 +18,8 @@ var https = require('https');
 var util = require("util");
 var express = require("express");
 var crypto = require("crypto");
+var nopt = require("nopt");
+var path = require("path");
 var RED = require("./red/red.js");
 
 var server;
@@ -26,21 +28,53 @@ var app = express();
 var settingsFile = "./settings";
 var flowFile;
 
-for (var argp = 2;argp < process.argv.length;argp+=1) {
-    var v = process.argv[argp];
-    if (v == "--settings" || v == "-s") {
-        if (argp+1 == process.argv.length) {
-            console.log("Missing argument to --settings");
-            return;
-        }
-        argp++;
-        settingsFile = process.argv[argp];
-    } else {
-        flowFile = v;
-    }
+var knownOpts = {
+    "settings":[path],
+    "v": Boolean,
+    "help": Boolean
+};
+var shortHands = {
+    "s":["--settings"],
+    "?":["--help"]
+};
+nopt.invalidHandler = function(k,v,t) {
+    // TODO: console.log(k,v,t);
 }
 
-var settings = require(settingsFile);
+var parsedArgs = nopt(knownOpts,shortHands,process.argv,2)
+
+if (parsedArgs.help) {
+    console.log("Usage: node red.js [-v] [-?] [--settings settings.js] [flows.json]");
+    console.log("");
+    console.log("Options:");
+    console.log("  -s, --settings FILE  use specified settings file");
+    console.log("  -v                   enable verbose output");
+    console.log("  -?, --help           show usage");
+    console.log("");
+    console.log("Documentation can be found at http://nodered.org");
+    process.exit();
+}
+if (parsedArgs.argv.remain.length > 0) {
+    flowFile = parsedArgs.argv.remain[0];
+}
+
+if (parsedArgs.settings) {
+    settingsFile = parsedArgs.settings;
+}
+try {
+    var settings = require(settingsFile);
+} catch(err) {
+    if (err.code == 'MODULE_NOT_FOUND') {
+        console.log("Unable to load settings file "+settingsFile);
+    } else {
+        console.log(err);
+    }
+    process.exit();
+}
+
+if (parsedArgs.v) {
+    settings.verbose = true;
+}
 
 if (settings.https) {
     server = https.createServer(settings.https,function(req,res){app(req,res);});
@@ -102,15 +136,16 @@ if (settings.httpStatic) {
     app.use("/",express.static(settings.httpStatic));
 }
 
-RED.start();
-
-var listenPath = 'http'+(settings.https?'s':'')+'://'+
-                 (settings.uiHost == '0.0.0.0'?'127.0.0.1':settings.uiHost)+
-                 ':'+settings.uiPort+settings.httpAdminRoot;
-
-server.listen(settings.uiPort,settings.uiHost,function() {
-	util.log('[red] Server now running at '+listenPath);
+RED.start().then(function() {
+    var listenPath = 'http'+(settings.https?'s':'')+'://'+
+                     (settings.uiHost == '0.0.0.0'?'127.0.0.1':settings.uiHost)+
+                     ':'+settings.uiPort+settings.httpAdminRoot;
+    
+    server.listen(settings.uiPort,settings.uiHost,function() {
+        util.log('[red] Server now running at '+listenPath);
+    });
 });
+
 
 process.on('uncaughtException',function(err) {
         if (err.errno === "EADDRINUSE") {

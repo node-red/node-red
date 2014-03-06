@@ -16,6 +16,8 @@
 
 var express = require('express');
 var util = require('util');
+var when = require('when');
+
 var createUI = require("./ui");
 var redNodes = require("./nodes");
 
@@ -71,20 +73,25 @@ function createServer(_server,_settings) {
 }
 
 function start() {
+    var defer = when.defer();
+    
     storage.init(settings).then(function() {
         console.log("\nWelcome to Node-RED\n===================\n");
         util.log("[red] Loading palette nodes");
-        util.log("------------------------------------------");
-        redNodes.load(settings);
-        util.log("");
-        util.log('You may ignore any errors above here if they are for');
-        util.log('nodes you are not using. The nodes indicated will not');
-        util.log('be available in the main palette until any missing');
-        util.log('modules are installed, typically by running:');
-        util.log('   npm install {the module name}');
-        util.log('or any other errors are resolved');
-        util.log("------------------------------------------");
-        
+        var nodeErrors = redNodes.load(settings);
+        if (nodeErrors.length > 0) {
+            util.log("------------------------------------------");
+            if (settings.verbose) {
+                for (var i=0;i<nodeErrors.length;i+=1) {
+                    util.log("["+nodeErrors[i].fn+"] "+nodeErrors[i].err);
+                }
+            } else {
+                util.log("[red] Failed to register "+nodeErrors.length+" node type"+(nodeErrors.length==1?"":"s"));
+                util.log("[red] Run with -v for details");
+            }
+            util.log("------------------------------------------");
+        }
+        defer.resolve();
         storage.getFlows().then(function(flows) {
                 if (flows.length > 0) {
                     redNodes.setConfig(flows);
@@ -93,6 +100,8 @@ function start() {
                 util.log("[red] Error loading flows : "+err);
         });
     });
+    
+    return defer.promise;
 }
 
 function stop() {

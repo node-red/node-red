@@ -273,6 +273,7 @@ module.exports.load = function(settings) {
     }
     
     function loadNodes(dir) {
+        var errors = [];
         fs.readdirSync(dir).sort().filter(function(fn){
                 var stats = fs.statSync(path.join(dir,fn));
                 if (stats.isFile()) {
@@ -280,26 +281,30 @@ module.exports.load = function(settings) {
                         try {
                             require(path.join(dir,fn));
                         } catch(err) {
-                            util.log("["+fn+"] "+err);
+                            errors.push({fn:fn, err:err});
+                            //util.log("["+fn+"] "+err);
                             //console.log(err.stack);
                         }
                     }
                 } else if (stats.isDirectory()) {
                     // Ignore /.dirs/, /lib/ /node_modules/ 
                     if (!/^(\..*|lib|icons|node_modules)$/.test(fn)) {
-                        loadNodes(path.join(dir,fn));
+                        errors = errors.concat(loadNodes(path.join(dir,fn)));
                     } else if (fn === "icons") {
                         events.emit("node-icon-dir",path.join(dir,fn));
                     }
                 }
         });
+        return errors;
     }
-    loadNodes(__dirname+"/../nodes");
+    var errors = loadNodes(__dirname+"/../nodes");
     scanForNodes(__dirname+"/../nodes");
     if (settings.nodesDir) {
-        loadNodes(settings.nodesDir);
+        errors = errors.concat(loadNodes(settings.nodesDir));
         scanForNodes(settings.nodesDir);
     }
+    //console.log(errors);
+    return errors;
     //events.emit("nodes-loaded");
 }
 
