@@ -191,7 +191,6 @@ Node.prototype.send = function(msg) {
         }
     }
 }
-module.exports.Node = Node;
 
 Node.prototype.receive = function(msg) {
     this.emit("input",msg);
@@ -215,7 +214,7 @@ Node.prototype.error = function(msg) {
 
 var credentials = {};
 
-module.exports.addCredentials = function(id,creds) {
+function addCredentials(id,creds) {
     credentials[id] = creds;
     if (!storage) {
         // Do this lazily to ensure the storage provider as been initialised
@@ -223,22 +222,18 @@ module.exports.addCredentials = function(id,creds) {
     }
     storage.saveCredentials(credentials);
 }
-module.exports.getCredentials = function(id) {
+function getCredentials(id) {
     return credentials[id];
 }
-module.exports.deleteCredentials = function(id) {
+function deleteCredentials(id) {
     delete credentials[id];
     storage.saveCredentials(credentials);
 }
-module.exports.createNode = function(node,def) {
+function createNode(node,def) {
     Node.call(node,def);
 }
 
-module.exports.registerType = node_type_registry.register;
-module.exports.getNodeConfigs = node_type_registry.getNodeConfigs;
-module.exports.addLogHandler = registry.addLogHandler;
-
-module.exports.load = function(settings) {
+function load(settings) {
     function scanForNodes(dir) {
         var pm = path.join(dir,"node_modules");
         if (fs.existsSync(pm)) {
@@ -324,7 +319,7 @@ events.on('type-registered',function(type) {
         }
 });
 
-module.exports.getNode = function(nid) {
+function getNode(nid) {
     return registry.get(nid);
 }
 
@@ -335,9 +330,7 @@ function stopFlows() {
     registry.clear();
 }
 
-module.exports.stopFlows = stopFlows;
-
-module.exports.setConfig = function(conf) {
+function setConfig(conf) {
     stopFlows();
     activeConfig = conf;
     
@@ -353,7 +346,7 @@ module.exports.setConfig = function(conf) {
     });
 }
 
-module.exports.getConfig = function() {
+function getConfig() {
     return activeConfig;
 }
 
@@ -412,3 +405,21 @@ var parseConfig = function() {
     }
     events.emit("nodes-started");
 }
+
+
+module.exports = {
+    Node:Node,
+    addCredentials: addCredentials,
+    getCredentials: getCredentials,
+    deleteCredentials: deleteCredentials,
+    createNode: createNode,
+    registerType: node_type_registry.register,
+    getNodeConfigs: node_type_registry.getNodeConfigs,
+    addLogHandler: registry.addLogHandler,
+    load: load,
+    getNode: getNode,
+    stopFlows: stopFlows,
+    setConfig: setConfig,
+    getConfig: getConfig
+}
+
