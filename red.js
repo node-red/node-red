@@ -104,10 +104,8 @@ if (settings.httpAdminRoot !== false) {
     settings.httpAdminAuth = settings.httpAdminAuth || settings.httpAuth;
 }
 
-console.log("1:"+settings.httpNodeRoot);
 if (settings.httpNodeRoot !== false) {
     settings.httpNodeRoot = formatRoot(settings.httpNodeRoot || settings.httpRoot || "/");
-console.log("2:"+settings.httpNodeRoot);
     settings.httpNodeAuth = settings.httpNodeAuth || settings.httpAuth;
 }
 
@@ -133,11 +131,9 @@ if (settings.httpNodeRoot !== false && settings.httpNodeAuth) {
     );
 }
 if (settings.httpAdminRoot !== false) {
-    console.log("Attaching admin root");
     app.use(settings.httpAdminRoot,RED.httpAdmin);
 }
 if (settings.httpNodeRoot !== false) {
-    console.log(settings.httpNodeRoot);
     app.use(settings.httpNodeRoot,RED.httpNode);
 }
 
