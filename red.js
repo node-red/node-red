@@ -149,22 +149,25 @@ if (settings.httpStatic) {
     app.use("/",express.static(settings.httpStatic));
 }
 
+function getListenPath() {
+    var listenPath = 'http'+(settings.https?'s':'')+'://'+
+                    (settings.uiHost == '0.0.0.0'?'127.0.0.1':settings.uiHost)+
+                    ':'+settings.uiPort;
+    if (settings.httpAdminRoot !== false) {
+        listenPath += settings.httpAdminRoot;
+    } else if (settings.httpStatic) {
+        listenPath += "/";
+    }
+    return listenPath;
+}
+
 RED.start().then(function() {
     if (settings.httpAdminRoot !== false || settings.httpNodeRoot !== false || settings.httpStatic) {
-        var listenPath = 'http'+(settings.https?'s':'')+'://'+
-                         (settings.uiHost == '0.0.0.0'?'127.0.0.1':settings.uiHost)+
-                         ':'+settings.uiPort;
-        if (settings.httpAdminRoot !== false) {
-            listenPath += settings.httpAdminRoot;
-        } else if (settings.httpStatic) {
-            listenPath += "/";
-        }
-        
         server.listen(settings.uiPort,settings.uiHost,function() {
             if (settings.httpAdminRoot === false) {
                 util.log('[red] Admin UI disabled');
             }
-            util.log('[red] Server now running at '+listenPath);
+            util.log('[red] Server now running at '+getListenPath());
         });
     } else {
         util.log('[red] Running in headless mode');
@@ -174,7 +177,7 @@ RED.start().then(function() {
 
 process.on('uncaughtException',function(err) {
         if (err.errno === "EADDRINUSE") {
-            util.log('[red] Unable to listen on '+listenPath);
+            util.log('[red] Unable to listen on '+getListenPath());
             util.log('[red] Error: port in use');
         } else {
             util.log('[red] Uncaught Exception:');
