@@ -108,6 +108,7 @@ a.brand img {
    user-select: none;
 }
 .palette-scroll {
+    display: none;
     position: absolute;
     top: 0;
     left:0;
@@ -118,8 +119,12 @@ a.brand img {
     box-sizing:border-box;
     -moz-box-sizing: border-box;    
 }
+.palette-spinner {
+    padding-top: 40px;
+}
 #palette-search {
     position: absolute;
+    display: none;
     bottom: 0;
     left:0;
     right:0;

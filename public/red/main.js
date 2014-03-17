@@ -142,6 +142,9 @@ var RED = function() {
     function loadNodes() {
         $.get('nodes', function(data) {
                 $("body").append(data);
+                $(".palette-spinner").hide();
+                $(".palette-scroll").show();
+                $("#palette-search").show();
                 loadFlows();
         });
     }
