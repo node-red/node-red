@@ -154,13 +154,23 @@ function TcpIn(n) {
                 node.log(err);
             });
         });
-        server.listen(node.port);
-        node.log('listening on port '+node.port);
-
-        this.on('close', function() {
-            this.closing = true;
-            server.close();
-            node.log('stopped listening on port '+node.port);
+        server.on('error', function(err) {
+            if (err) {
+                node.error('unable to listen on port '+node.port+' : '+err);
+            }
+        });
+        server.listen(node.port, function(err) {
+            if (err) {
+                node.error('unable to listen on port '+node.port+' : '+err);
+            } else {
+                node.log('listening on port '+node.port);
+    
+                node.on('close', function() {
+                    node.closing = true;
+                    server.close();
+                    node.log('stopped listening on port '+node.port);
+                });
+            }
         });
     }
 
@@ -272,13 +282,23 @@ function TcpOut(n) {
                 }
             }
         });
+        
+        server.on('error', function(err) {
+            if (err) {
+                node.error('unable to listen on port '+node.port+' : '+err);
+            }
+        });
 
-        server.listen(node.port);
-        node.log('listening on port '+node.port);
-
-        node.on('close', function() {
-            server.close();
-            node.log('stopped listening on port '+node.port);
+        server.listen(node.port, function(err) {
+            if (err) {
+                node.error('unable to listen on port '+node.port+' : '+err);
+            } else {
+                node.log('listening on port '+node.port);
+                node.on('close', function() {
+                    server.close();
+                    node.log('stopped listening on port '+node.port);
+                });
+            }
         });
     }
 }
