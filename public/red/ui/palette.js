@@ -111,6 +111,7 @@ RED.palette = function() {
         $("#palette-search-input").focus();
     });
     
+    $("#palette-search-input").val("");
     $("#palette-search-input").on("keyup",function() {
         filterChange();
     });
