@@ -20,6 +20,7 @@ var path = require("path");
 var clone = require("clone");
 var events = require("./events");
 var storage = null;
+var settings = null;
 
 function getCallerFilename(type) {
     //if (type == "summary") {
@@ -233,7 +234,9 @@ function createNode(node,def) {
     Node.call(node,def);
 }
 
-function load(settings) {
+function load(_settings) {
+    settings = _settings;
+    
     function scanForNodes(dir) {
         var pm = path.join(dir,"node_modules");
         if (fs.existsSync(pm)) {
@@ -269,27 +272,29 @@ function load(settings) {
     
     function loadNodes(dir) {
         var errors = [];
-        fs.readdirSync(dir).sort().filter(function(fn){
-                var stats = fs.statSync(path.join(dir,fn));
-                if (stats.isFile()) {
-                    if (/\.js$/.test(fn)) {
-                        try {
-                            require(path.join(dir,fn));
-                        } catch(err) {
-                            errors.push({fn:fn, err:err});
-                            //util.log("["+fn+"] "+err);
-                            //console.log(err.stack);
+        if (fs.existsSync(dir)) {
+            fs.readdirSync(dir).sort().filter(function(fn){
+                    var stats = fs.statSync(path.join(dir,fn));
+                    if (stats.isFile()) {
+                        if (/\.js$/.test(fn)) {
+                            try {
+                                require(path.join(dir,fn));
+                            } catch(err) {
+                                errors.push({fn:fn, err:err});
+                                //util.log("["+fn+"] "+err);
+                                //console.log(err.stack);
+                            }
+                        }
+                    } else if (stats.isDirectory()) {
+                        // Ignore /.dirs/, /lib/ /node_modules/ 
+                        if (!/^(\..*|lib|icons|node_modules)$/.test(fn)) {
+                            errors = errors.concat(loadNodes(path.join(dir,fn)));
+                        } else if (fn === "icons") {
+                            events.emit("node-icon-dir",path.join(dir,fn));
                         }
                     }
-                } else if (stats.isDirectory()) {
-                    // Ignore /.dirs/, /lib/ /node_modules/ 
-                    if (!/^(\..*|lib|icons|node_modules)$/.test(fn)) {
-                        errors = errors.concat(loadNodes(path.join(dir,fn)));
-                    } else if (fn === "icons") {
-                        events.emit("node-icon-dir",path.join(dir,fn));
-                    }
-                }
-        });
+            });
+        }
         return errors;
     }
     var errors = loadNodes(__dirname+"/../nodes");
