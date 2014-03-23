@@ -57,51 +57,56 @@ function ImapNode(n) {
         imap.once('ready', function() {
             var pay = {};
             openInbox(function(err, box) {
-                //if (err) throw err;
-                var f = imap.seq.fetch(box.messages.total + ':*', { bodies: ['HEADER.FIELDS (FROM SUBJECT DATE)','TEXT'] });
-                f.on('message', function(msg, seqno) {
-                    node.log('message: #'+ seqno);
-                    var prefix = '(#' + seqno + ') ';
-                    msg.on('body', function(stream, info) {
-                        var buffer = '';
-                        stream.on('data', function(chunk) {
-                            buffer += chunk.toString('utf8');
-                        });
-                        stream.on('end', function() {
-                            if (info.which !== 'TEXT') {
-                                pay.from = Imap.parseHeader(buffer).from[0];
-                                pay.topic = Imap.parseHeader(buffer).subject[0];
-                                pay.date = Imap.parseHeader(buffer).date[0];
-                            } else {
-                                var parts = buffer.split("Content-Type");
-                                for (var p in parts) {
-                                    if (parts[p].indexOf("text/plain") >= 0) {
-                                        pay.payload = parts[p].split("\n").slice(1,-2).join("\n").trim();
+                if (box.messages.total > 0) {
+                    var f = imap.seq.fetch(box.messages.total + ':*', { bodies: ['HEADER.FIELDS (FROM SUBJECT DATE)','TEXT'] });
+                    f.on('message', function(msg, seqno) {
+                        node.log('message: #'+ seqno);
+                        var prefix = '(#' + seqno + ') ';
+                        msg.on('body', function(stream, info) {
+                            var buffer = '';
+                            stream.on('data', function(chunk) {
+                                buffer += chunk.toString('utf8');
+                            });
+                            stream.on('end', function() {
+                                if (info.which !== 'TEXT') {
+                                    pay.from = Imap.parseHeader(buffer).from[0];
+                                    pay.topic = Imap.parseHeader(buffer).subject[0];
+                                    pay.date = Imap.parseHeader(buffer).date[0];
+                                } else {
+                                    var parts = buffer.split("Content-Type");
+                                    for (var p in parts) {
+                                        if (parts[p].indexOf("text/plain") >= 0) {
+                                            pay.payload = parts[p].split("\n").slice(1,-2).join("\n").trim();
+                                        }
+                                        if (parts[p].indexOf("text/html") >= 0) {
+                                            pay.html = parts[p].split("\n").slice(1,-2).join("\n").trim();
+                                        }
                                     }
-                                    if (parts[p].indexOf("text/html") >= 0) {
-                                        pay.html = parts[p].split("\n").slice(1,-2).join("\n").trim();
-                                    }
+                                    //pay.body = buffer;
                                 }
-                                //pay.body = buffer;
-                            }
+                            });
+                        });
+                        msg.on('end', function() {
+                            //node.log('Finished: '+prefix);
                         });
                     });
-                    msg.on('end', function() {
-                        //node.log('Finished: '+prefix);
+                    f.on('error', function(err) {
+                        node.warn('fetch error: ' + err);
                     });
-                });
-                f.on('error', function(err) {
-                    node.warn('fetch error: ' + err);
-                });
-                f.on('end', function() {
-                    if (JSON.stringify(pay) !== oldmail) {
-                        node.send(pay);
-                        oldmail = JSON.stringify(pay);
-                        node.log('sent new message: '+pay.topic);
-                    }
-                    else { node.log('duplicate not sent: '+pay.topic); }
+                    f.on('end', function() {
+                        if (JSON.stringify(pay) !== oldmail) {
+                            node.send(pay);
+                            oldmail = JSON.stringify(pay);
+                            node.log('sent new message: '+pay.topic);
+                        }
+                        else { node.log('duplicate not sent: '+pay.topic); }
+                        imap.end();
+                    });
+                }
+                else {
+                    // node.log("you have achieved inbox zero");
                     imap.end();
-                });
+                }
             });
         });
         imap.connect();
