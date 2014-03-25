@@ -66,8 +66,10 @@ property license granted with any contribution. It is for your protection as a
 Contributor as well as the protection of IBM and its customers; it does not 
 change your rights to use your own Contributions for any other purpose.
 
-Once you have created a pull-request, we'll provide a link to the appropriate
-CLA document.
+You can download the CLAs here:
+
+ - [individual](http://nodered.org/cla/node-red-cla-individual.pdf)
+ - [corporate](http://nodered.org/cla/node-red-cla-corporate.pdf)
 
 If you are an IBMer, please contact us directly as the contribution process is
 slightly different.
