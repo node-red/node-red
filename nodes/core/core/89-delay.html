@@ -103,7 +103,7 @@
               var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
               return this.name||"limit "+this.rate+" msg/"+ units;
             } else if (this.pauseType == "random") {
-              return "random";
+              return this.name || "random";
             }
             return "foo";
         },
