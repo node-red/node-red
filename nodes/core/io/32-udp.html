@@ -30,7 +30,7 @@
     </div>
     <div class="form-row node-input-iface">
         <label for="node-input-iface"><i class="icon-random"></i> Interface</label>
-        <input type="text" id="node-input-iface" placeholder="eth0">
+        <input type="text" id="node-input-iface" placeholder="(optional) ip address of eth0">
     </div>
     <div class="form-row">
         <label for="node-input-datatype"><i class="icon-file"></i> Output</label>
@@ -103,7 +103,7 @@
           <option value="broad">broadcast message</option>
           <option value="multi">multicast message</option>
         </select>
-        to port <input type="text" id="node-input-port" placeholder="Port" style="width: 45px">
+        to port <input type="text" id="node-input-port" placeholder="Port" style="width: 70px">
     </div>
     <div class="form-row node-input-addr">
         <label for="node-input-addr" id="node-input-addr-label"><i class="icon-list"></i> Address</label>
@@ -111,11 +111,15 @@
     </div>
     <div class="form-row node-input-iface">
         <label for="node-input-iface"><i class="icon-random"></i> Interface</label>
-        <input type="text" id="node-input-iface" placeholder="eth0">
+        <input type="text" id="node-input-iface" placeholder="(optional) ip address of eth0">
+    </div>
+    <div class="form-row">
+        <label for="node-input-outport"><i class="icon-random"></i> optional</label>
+        output port <input type="text" id="node-input-outport"  style="width: 70px;" placeholder="not fixed">
     </div>
     <div class="form-row">
         <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-base64" placeholder="base64" style="display: inline-block; width: auto; vertical-align: top;">
+        <input type="checkbox" id="node-input-base64" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-base64" style="width: 70%;">Decode Base64 encoded payload ?</label>
     </div>
     <div class="form-row">
@@ -160,6 +164,7 @@
             addr: {value:""},
             iface: {value:""},
             port: {value:""},
+            outport: {value:""},
             base64: {value:false,required:true},
             multicast: {value:"false"}
         },

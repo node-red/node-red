@@ -49,9 +49,15 @@ function UDPin(n) {
         node.log('udp listener at ' + address.address + ":" + address.port);
         if (node.multicast == "true") {
             server.setBroadcast(true);
-            server.setMulticastTTL(128);
-            server.addMembership(node.group,node.iface);
-            node.log("udp multicast group "+node.group);
+            try {
+                server.setMulticastTTL(128);
+                server.addMembership(node.group,node.iface);
+                node.log("udp multicast group "+node.group);
+            } catch (e) {
+                if (e.errno == "EINVAL") { node.error("Bad Multicast Address"); }
+                else if (e.errno == "ENODEV") { node.error("Must be ip address of the required interface"); }
+                else { node.error("Error :"+e.errno); }
+            }
         }
     });
 
@@ -63,7 +69,7 @@ function UDPin(n) {
         catch (err) { console.log(err); }
     });
 
-    server.bind(node.port);
+    server.bind(node.port,node.iface);
 }
 RED.nodes.registerType("udp in",UDPin);
 
@@ -73,6 +79,7 @@ function UDPout(n) {
     RED.nodes.createNode(this,n);
     //this.group = n.group;
     this.port = n.port;
+    this.outport = n.outport||"";
     this.base64 = n.base64;
     this.addr = n.addr;
     this.iface = n.iface || null;
@@ -81,18 +88,28 @@ function UDPout(n) {
 
     var sock = dgram.createSocket('udp4');  // only use ipv4 for now
 
-    if (this.multicast != "false") {
-        sock.bind(node.port, function() {     // have to bind before you can enable broadcast...
-            sock.setBroadcast(true);        // turn on broadcast
-            if (this.multicast == "multi") {
-                sock.setMulticastTTL(128);
-                sock.addMembership(node.addr,node.iface);   // Add to the multicast group
-                node.log('udp multicast ready : '+node.addr+":"+node.port);
+    if (node.multicast != "false") {
+        if (node.outport == "") { node.outport = node.port; }
+        sock.bind(node.outport, function() {    // have to bind before you can enable broadcast...
+            sock.setBroadcast(true);            // turn on broadcast
+            if (node.multicast == "multi") {
+                try {
+                    sock.setMulticastTTL(128);
+                    sock.addMembership(node.addr,node.iface);   // Add to the multicast group
+                    node.log('udp multicast ready : '+node.outport+' -> '+node.addr+":"+node.port);
+                } catch (e) {
+                    if (e.errno == "EINVAL") { node.error("Bad Multicast Address"); }
+                    else if (e.errno == "ENODEV") { node.error("Must be ip address of the required interface"); }
+                    else { node.error("Error :"+e.errno); }
+                }
             }
-            else node.log('udp broadcast ready : '+node.addr+":"+node.port);
+            else node.log('udp broadcast ready : '+node.outport+' -> '+node.addr+":"+node.port);
         });
     }
-
+    else if (node.outport != "") {
+        sock.bind(node.outport);
+        node.log('udp ready : '+node.outport+' -> '+node.addr+":"+node.port);
+    }
     else node.log('udp ready : '+node.addr+":"+node.port);
 
     node.on("input", function(msg) {
