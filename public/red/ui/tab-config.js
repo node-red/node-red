@@ -33,9 +33,7 @@ RED.sidebar.config = function() {
     
     function refresh() {
         list.empty();
-        var count = 0;
         RED.nodes.eachConfig(function(node) {
-            count += 1;
             var li = list.find("#tab-config-list-type-"+node.type);
             if (li.length == 0) {
                 li = $("<li>",{id:"tab-config-list-type-"+node.type}).appendTo(list);

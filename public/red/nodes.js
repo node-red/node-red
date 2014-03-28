@@ -344,12 +344,6 @@ RED.nodes = function() {
 
                         for (var d in node._def.defaults) {
                             node[d] = n[d];
-                            if (node._def.defaults[d].type) {
-                                var configNode = RED.nodes.node(n[d]);
-                                if (configNode) {
-                                    configNode.users.push(node);
-                                }
-                            }
                         }
 
                         addNode(node);
