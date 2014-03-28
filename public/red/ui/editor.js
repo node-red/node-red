@@ -55,7 +55,11 @@ RED.editor = function() {
                     if (input.attr('type') === "checkbox") {
                         input.prop('checked',node[d]);
                     } else {
-                        input.val(node[d]||"");
+                        var val = node[d];
+                        if (node[d] == null) {
+                            val = "";
+                        }
+                        input.val(val);
                     }
                 }
                 $("#node-input-"+d).change(function() {
