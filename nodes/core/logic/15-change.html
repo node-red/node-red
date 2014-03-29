@@ -17,21 +17,20 @@
 <script type="text/x-red" data-template-name="change">
     <div>
         <select id="node-input-action" style="width:95%; margin-right:5px;">
-            <option value="change">Change the value of the property</option>
-            <!-- <option value="replace">Replace value of property</option> -->
-            <option value="replace">Add or replace property</option>
-            <option value="delete">Delete property</option>
+            <option value="replace">Set the value of the message property</option>
+            <option value="change">Search/replace the value of the message property</option>
+            <option value="delete">Delete the message property</option>
         </select>
     </div>
     <div class="form-row" style="padding-top:10px;" id="node-prop1-row">
-        <label id="node-input-todo">called</label>msg.<input type="text" id="node-input-property" style="width: 63%;"/>
+        <label for="node-input-property">called</label> msg.<input type="text" id="node-input-property" style="width: 63%;"/>
     </div>
     <div class="form-row" id="node-from-row">
-        <label id="node-input-f">if it contains</label>
+        <label for="node-input-from" id="node-input-f"></label>
         <input type="text" id="node-input-from" placeholder="this"/>
     </div>
     <div class="form-row" id="node-to-row">
-        <label id="node-input-t">replace with</label>
+        <label for="node-input-to" id="node-input-t"></label>
         <input type="text" id="node-input-to" placeholder="that"/>
     </div>
     <div class="form-row" id="node-reg-row">
@@ -39,12 +38,12 @@
         <input type="checkbox" id="node-input-reg" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-reg" style="width: 70%;">Use regular expressions ?</label>
     </div>
+    <div class="form-tips" id="node-tip"></div>
     <br/>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-tips" id="node-tip"></div>
 </script>
 
 <script type="text/x-red" data-help-name="change">
@@ -59,7 +58,7 @@
         color: "#E2D96E",
         category: 'function',
         defaults: {
-            action: {value:"change",required:true},
+            action: {value:"replace",required:true},
             property: {value:"payload"},
             from: {value:"",validate: function(v) {
                 if (this.action == "change" && this.reg) {
@@ -92,10 +91,11 @@
                 if (a === "replace") {
                     $("#node-input-todo").html("called");
                     //$("#node-input-f").html("name");
-                    $("#node-input-t").html("with value");
+                    $("#node-input-t").html("to");
                     $("#node-from-row").hide();
                     $("#node-to-row").show();
                     $("#node-reg-row").hide();
+                    $("#node-tip").show();
                     $("#node-tip").html("Tip: expects a new property name and either a fixed value OR the full name of another message property eg: msg.sentiment.score");
                 }
                 if (a === "delete") {
@@ -105,15 +105,16 @@
                     $("#node-from-row").hide();
                     $("#node-to-row").hide();
                     $("#node-reg-row").hide();
-                    $("#node-tip").html("Tip: deletes the named property and all sub-properties");
+                    $("#node-tip").hide();
                 }
                 if (a === "change") {
                     $("#node-input-todo").html("called");
-                    $("#node-input-f").html("If it contains");
+                    $("#node-input-f").html("Search for");
                     $("#node-input-t").html("replace with");
                     $("#node-from-row").show();
                     $("#node-to-row").show();
                     $("#node-reg-row").show();
+                    $("#node-tip").show();
                     $("#node-tip").html("Tip: only works on string properties. If regular expressions are used, the <i>replace with</i> field can contain capture results, eg $1.");
                 }
                 //if (a === "replace") {
