@@ -16,27 +16,30 @@
 
 <script type="text/x-red" data-template-name="range">
     <div class="form-row">
-        Re-map input values between<br/>
-        <input type="text" id="node-input-minin" placeholder="0" style="width:35%;"/>
-        and
-        <input type="text" id="node-input-maxin" placeholder="99" style="width:35%;"/>
-    </div>
-    <div class="form-row">
-        to be between<br/>
-        <input type="text" id="node-input-minout" placeholder="0" style="width:35%;"/>
-        and
-        <input type="text" id="node-input-maxout" placeholder="255" style="width:35%;"/>
-    </div>
-    <div class="form-row">
-        and <select id="node-input-action" style="width:90%; margin-right:5px;">
-            <option value="scale">try to scale if outside this range</option>
-            <option value="clamp">clamp to max and min values of this range</option>
-            <option value="roll">perform modulus to keep within this range</option>
+        <select id="node-input-action" style="width:90%; margin-right:5px;">
+            <option value="scale">Scale msg.payload</option>
+            <option value="clamp">Scale and limit to the target range</option>
+            <option value="roll">Scale and wrap within the target range</option>
         </select>
     </div>
+    <br/>
     <div class="form-row">
-        <label for="node-input-round" style="width:200px;">Round to nearest integer ?</label>
-        <input type="checkbox" id="node-input-round" style="display: inline-block; width: auto; vertical-align: top;">
+        From the range:
+    </div>
+    <div class="form-row">
+        &nbsp;&nbsp;&nbsp;&nbsp;min: <input type="text" id="node-input-minin" placeholder="0" style="width:100px;"/>
+        &nbsp;&nbsp;max: <input type="text" id="node-input-maxin" placeholder="99" style="width:100px;"/>
+    </div>
+    <div class="form-row">
+        to the range:
+    </div>
+    <div class="form-row">
+        &nbsp;&nbsp;&nbsp;&nbsp;min: <input type="text" id="node-input-minout" placeholder="0" style="width:100px;"/>
+        &nbsp;&nbsp;max: <input type="text" id="node-input-maxout" placeholder="255" style="width:100px;"/>
+    </div>
+    <br/>
+    <div class="form-row">
+        <input type="checkbox" id="node-input-round" style="display: inline-block; width: auto; vertical-align: top;"> <label style="width: auto;" for="node-input-round">Round to nearest integer?</label></input>
     </div>
     <br/>
     <div class="form-row">
