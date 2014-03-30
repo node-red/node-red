@@ -103,7 +103,7 @@
           <option value="broad">broadcast message</option>
           <option value="multi">multicast message</option>
         </select>
-        to port <input type="text" id="node-input-port" placeholder="Port" style="width: 70px">
+        to port <input type="text" id="node-input-port" placeholder="port" style="width: 70px">
     </div>
     <div class="form-row node-input-addr">
         <label for="node-input-addr" id="node-input-addr-label"><i class="icon-list"></i> Address</label>
@@ -114,8 +114,12 @@
         <input type="text" id="node-input-iface" placeholder="(optional) ip address of eth0">
     </div>
     <div class="form-row">
-        <label for="node-input-outport"><i class="icon-random"></i> optional</label>
-        output port <input type="text" id="node-input-outport"  style="width: 70px;" placeholder="'leave blank for random">
+        <label for="node-input-outport-type">&nbsp;</label>
+        <select id="node-input-outport-type">
+          <option value="random">use random local port</option>
+          <option value="fixed">bind to local port</option>
+        </select>
+        <input type="text" id="node-input-outport"  style="width: 70px;" placeholder="port">
     </div>
     <div class="form-row">
         <label>&nbsp;</label>
@@ -130,7 +134,6 @@
     <script>
         $("#node-input-multicast").change(function() {
             var id = $("#node-input-multicast option:selected").val();
-            console.log(id,$("#node-input-addr")[0].placeholder);
             if (id !== "multi") {
                 $(".node-input-iface").hide();
                 $("#node-input-addr-label").html('<i class="icon-list"></i> Address');
@@ -177,6 +180,25 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            var type = this.outport==""?"random":"fixed";
+            $("#node-input-outport-type option").filter(function() {
+                return $(this).val() == type;
+            }).attr('selected',true);
+            
+            
+            $("#node-input-outport-type").change(function() {
+                var type = $(this).children("option:selected").val();
+                if (type == "random") {
+                    $("#node-input-outport").val("").hide();
+                } else {
+                    $("#node-input-outport").show();
+                }
+            });
+            
+            $("#node-input-outport-type").change();
+            
         }
     });
 </script>
