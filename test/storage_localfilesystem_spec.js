@@ -7,23 +7,20 @@ var localfilesystem = require("../red/storage/localfilesystem");
 describe('LocalFileSystem', function() {
     var userDir = path.join(__dirname,".testUserHome");
     var testFlow = [{"type":"tab","id":"d8be2a6d.2741d8","label":"Sheet 1"}];
-    beforeEach(function() {
-        console.log(userDir);
-        if (fs.existsSync(userDir)) {
-            console.log("deleting");
-            fs.removeSync(userDir)
-        }
-        console.log("making");
-        fs.mkdirSync(userDir);
+    beforeEach(function(done) {
+        fs.remove(userDir,function(err) {
+            fs.mkdir(userDir,done);
+        });
     });
-    afterEach(function() {
-        fs.removeSync(userDir);
+    afterEach(function(done) {
+        fs.remove(userDir,done);
     });
 
-    it('should initialise the user directory',function() {
+    it('should initialise the user directory',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             fs.existsSync(path.join(userDir,"lib")).should.be.true;
             fs.existsSync(path.join(userDir,"lib",'flows')).should.be.true;
+            done();
         });
     });
     
