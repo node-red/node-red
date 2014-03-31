@@ -26,6 +26,7 @@ var promiseDir = nodeFn.lift(mkdirp);
 
 var settings;
 var flowsFile;
+var flowsFullPath;
 var credentialsFile;
 
 var userDir;
