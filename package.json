@@ -41,6 +41,8 @@
         "mkdirp":"~0.3.5"
     },
     "devDependencies": {
+        "grunt": "~0.4.4",
+        "grunt-simple-mocha": "^0.4.0",
         "mocha": "~1.12.0",
         "should": "~1.2.2"
     },
