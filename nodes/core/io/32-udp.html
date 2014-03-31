@@ -116,7 +116,7 @@
     <div class="form-row">
         <label for="node-input-outport-type">&nbsp;</label>
         <select id="node-input-outport-type">
-          <option value="random">use random local port</option>
+          <option id="node-input-outport-type-random" value="random">use random local port</option>
           <option value="fixed">bind to local port</option>
         </select>
         <input type="text" id="node-input-outport"  style="width: 70px;" placeholder="port">
@@ -199,6 +199,15 @@
             
             $("#node-input-outport-type").change();
             
+            $("#node-input-multicast").change(function() {
+                var type = $(this).children("option:selected").val();
+                if (type == "false") {
+                    $("#node-input-outport-type-random").html("bind to random local port");
+                } else {
+                    $("#node-input-outport-type-random").html("bind to target port");
+                }
+            });
+            $("#node-input-multicast").change();
         }
     });
 </script>
