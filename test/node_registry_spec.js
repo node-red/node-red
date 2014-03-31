@@ -5,9 +5,13 @@ var RedNode = RedNodes.Node;
 
 describe('NodeRegistry', function() {
     it('automatically registers new nodes',function() {
-        should.not.exist(RedNodes.getNode('123'));
+        var testNode = RedNodes.getNode('123');
+        should.not.exist(n);
         var n = new RedNode({id:'123',type:'abc'});
-        should.strictEqual(n,RedNodes.getNode('123'));
+        
+        var newNode = RedNodes.getNode('123');
+        
+        should.strictEqual(n,newNode);
     });
 })
         
