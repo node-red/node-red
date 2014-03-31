@@ -8,9 +8,12 @@ describe('LocalFileSystem', function() {
     var userDir = path.join(__dirname,".testUserHome");
     var testFlow = [{"type":"tab","id":"d8be2a6d.2741d8","label":"Sheet 1"}];
     beforeEach(function() {
+        console.log(userDir);
         if (fs.existsSync(userDir)) {
+            console.log("deleting");
             fs.removeSync(userDir)
         }
+        console.log("making");
         fs.mkdirSync(userDir);
     });
     afterEach(function() {
