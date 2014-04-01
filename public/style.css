@@ -852,7 +852,8 @@ i.spinner {
     line-height: 14px;
     vertical-align: text-top;
     margin-top: 0px;
-    background: url(spin.gif) no-repeat 50% 50%;
+    background: url(spin.svg) no-repeat 50% 50%;
+    background-size: contain
 }
     
     
