@@ -94,6 +94,13 @@ DebugNode.wsServer.on('connection',function(ws) {
 			}
 		}
 	});
+	ws.on('error', function(err) {
+	    util.log("[debug] ws error : "+err);
+	});
+});
+
+DebugNode.wsServer.on('error', function(err) {
+    util.log("[debug] ws server error : "+err);
 });
 
 DebugNode.logHandler = new events.EventEmitter();

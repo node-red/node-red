@@ -66,6 +66,9 @@ function WebSocketListenerNode(n) {
         socket.on('message',function(data,flags){
             node.handleEvent(id,socket,'message',data,flags);
         });
+        socket.on('error', function(err) {
+            node.warn("An error occured on the ws connection: "+inspect(err));
+        });
     });
 
     node.on("close", function() {
