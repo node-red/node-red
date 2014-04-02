@@ -96,8 +96,8 @@ RED.view = function() {
     //            "stroke" : "#eee",
     //            "stroke-width" : "1px"
     //        });
-                                 
-                                 
+
+
     var drag_line = vis.append("svg:path").attr("class", "drag_line");
 
     var workspace_tabs = RED.tabs.create({
@@ -117,7 +117,7 @@ RED.view = function() {
             }
             var scrollStartLeft = chart.scrollLeft();
             var scrollStartTop = chart.scrollTop();
-            
+
             activeWorkspace = tab.id;
             if (workspaceScrollPositions[activeWorkspace]) {
                 chart.scrollLeft(workspaceScrollPositions[activeWorkspace].left);
@@ -132,7 +132,7 @@ RED.view = function() {
                 mouse_position[0] += scrollDeltaLeft;
                 mouse_position[1] += scrollDeltaTop;
             }
-            
+
             clearSelection();
             RED.nodes.eachNode(function(n) {
                     n.dirty = true;
@@ -336,7 +336,7 @@ RED.view = function() {
                 minX = Math.min(node.n.x-node.n.w/2-5,minX);
                 minY = Math.min(node.n.y-node.n.h/2-5,minY);
             }
-            if (minX != 0 || minY != 0) { 
+            if (minX != 0 || minY != 0) {
                 for (var n = 0; n<moving_set.length; n++) {
                     var node = moving_set[n];
                     node.n.x -= minX;
@@ -514,12 +514,13 @@ RED.view = function() {
             RED.keyboard.remove(/* backspace */ 8);
             RED.keyboard.remove(/* delete */ 46);
             RED.keyboard.remove(/* c */ 67);
+            RED.keyboard.remove(/* x */ 88);
         } else {
             RED.keyboard.add(/* backspace */ 8,function(){deleteSelection();d3.event.preventDefault();});
             RED.keyboard.add(/* delete */ 46,function(){deleteSelection();d3.event.preventDefault();});
             RED.keyboard.add(/* c */ 67,{ctrl:true},function(){copySelection();d3.event.preventDefault();});
+            RED.keyboard.add(/* x */ 88,{ctrl:true},function(){copySelection();deleteSelection();d3.event.preventDefault();});
         }
-
         if (moving_set.length == 1) {
             RED.sidebar.info.refresh(moving_set[0].n);
         } else {
@@ -777,7 +778,7 @@ RED.view = function() {
 
                     var mainRect = node.append("rect")
                         .attr("class", "node")
-                        .classed("node_unknown",function(d) { return d.type == "unknown"; }) 
+                        .classed("node_unknown",function(d) { return d.type == "unknown"; })
                         .attr("rx", 6)
                         .attr("ry", 6)
                         .attr("fill",function(d) { return d._def.color;})
@@ -823,7 +824,7 @@ RED.view = function() {
                         text.attr('class','node_label node_label_'+d._def.align);
                         text.attr('text-anchor','end');
                     }
-                    
+
                     //node.append("circle").attr({"class":"centerDot","cx":0,"cy":0,"r":5});
 
                     if (d._def.inputs > 0) {
@@ -904,7 +905,7 @@ RED.view = function() {
                                 (d._def.label?' '+(typeof d._def.labelStyle == "function" ? d._def.labelStyle.call(d):d._def.labelStyle):'') ;
                         });
                         thisNode.selectAll(".node_tools").attr("x",function(d){return d.w-35;}).attr("y",function(d){return d.h-20;});
-                            
+
                         thisNode.selectAll(".node_changed")
                             .attr("x",function(d){return d.w-10})
                             .classed("hidden",function(d) { return !d.changed; });
@@ -912,7 +913,7 @@ RED.view = function() {
                         thisNode.selectAll(".node_error")
                             .attr("x",function(d){return d.w-10-(d.changed?13:0)})
                             .classed("hidden",function(d) { return d.valid; });
-                            
+
                         thisNode.selectAll(".port_input").each(function(d,i) {
                                 var port = d3.select(this);
                                 port.attr("y",function(d){return (d.h/2)-5;})
@@ -1012,7 +1013,7 @@ RED.view = function() {
 
         link.classed("link_selected", function(d) { return d === selected_link || d.selected; });
         link.classed("link_unknown",function(d) { return d.target.type == "unknown" || d.source.type == "unknown"});
-        
+
         if (d3.event) {
             d3.event.preventDefault();
         }
@@ -1060,7 +1061,7 @@ RED.view = function() {
                 if (mouse_position == null) {
                     mouse_position = [0,0];
                 }
-                
+
                 var minX = 0;
                 var minY = 0;
 
