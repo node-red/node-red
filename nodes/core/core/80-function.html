@@ -28,13 +28,26 @@
         <label for="node-input-outputs"><i class="icon-random"></i> Outputs</label>
         <input id="node-input-outputs" style="width: 60px; height: 1.7em;" value="1">
     </div>
+    <div class="form-tips">See the Info tab for help writing functions.</div>
 </script>
 
 <script type="text/x-red" data-help-name="function">
-	<p>The generic function block where you can write code to do more interesting things.</p>
-	<p>You can have multiple outputs - in which case the function expects you to return an array of messages... <pre>return [msg,msg2,...];</pre></p>
-	<p>You may return null for any or all outputs if you want to.</p>
-	<p>You can save your functions to a library (button to right of name field) - and likewise pick from that library.</p>
+	<p>A function block where you can write code to do more interesting things.</p>
+	<p>The message is passed in as a JavaScript object called <code>msg</code>.</p>
+	<p>By convention it will have a <code>msg.payload</code> property containing
+	   the body of the message.</p>
+	<p>The function should return the messages it wants to pass on to the next nodes
+	in the flow. It can return:</p>
+	<ul>
+	  <li>a single message object - passed to nodes connected to the first output</li>
+	  <li>an array of message objects - passed to nodes connected to the corresponding outputs</li>
+    </ul>
+    <p>If any element of the array is itself an array of messages, multiple
+	      messages are sent to the corresponding output.</p>
+	<p>If null is returned, either by itself or as an element of the array, no
+	      message is passed on.</p>
+	<p>See the <a target="_new" href="http://nodered.org/docs/writing-functions.html">online documentation</a> for more help.</p>
+	      
 </script>
 
 <script type="text/javascript">
@@ -43,7 +56,7 @@
         category: 'function',
         defaults: {
             name: {value:""},
-            func: {value:"// The received message is stored in 'msg'\n// It will have at least a 'payload' property:\n//   console.log(msg.payload);\n// The 'context' object is available to store state\n// between invocations of the function\n//   context = {};\n\n\nreturn msg;"},
+            func: {value:"\nreturn msg;"},
             outputs: {value:1}
         },
         inputs:1,
@@ -58,7 +71,7 @@
             });
 
             function functionDialogResize(ev,ui) {
-                $("#node-input-func-editor").css("height",(ui.size.height-235)+"px");
+                $("#node-input-func-editor").css("height",(ui.size.height-275)+"px");
             };
 
             $( "#dialog" ).on("dialogresize", functionDialogResize);
