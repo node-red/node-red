@@ -73,12 +73,17 @@ RED.editor = function() {
                             }
                         };
                 }());
-                $("#node-input-"+d).change();
             }
         }
         if (node._def.oneditprepare) {
             node._def.oneditprepare.call(node);
         }
+        if (node._def.defaults) {
+            for (var d in node._def.defaults) {
+                $("#node-input-"+d).change();
+            }
+        }
+
         $( "#dialog" ).dialog("option","title","Edit "+node.type+" node").dialog( "open" );
     }
     
@@ -479,6 +484,7 @@ RED.editor = function() {
                 }
             },
             close: function(e) {
+                $("#dialog-config-form").html("");
                 if (RED.view.state() != RED.state.EDITING) {
                     RED.keyboard.enable();
                 }
