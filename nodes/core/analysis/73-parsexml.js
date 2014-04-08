@@ -17,17 +17,12 @@
 var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var util = require("util");
 var parseString = require('xml2js').parseString;
-var gotEyes = false;
-try {
-    var eyes = require("eyes");
-    gotEyes = true;
-} catch(e) {
-    util.log("[73-parsexml.js] Note: Module 'eyes' not installed. (not needed, but useful)");
-}
+var useColors = true;
+util.inspect.styles.boolean = "red";
 
 function Xml2jsNode(n) {
     RED.nodes.createNode(this,n);
-    this.useEyes = n.useEyes;
+    this.useEyes = n.useEyes||false;
     var node = this;
     this.on("input", function(msg) {
         try {
@@ -38,8 +33,7 @@ function Xml2jsNode(n) {
                     msg.payload = result;
                     node.send(msg);
                     if (node.useEyes == true) {
-                        if (gotEyes == true) { eyes.inspect(msg); }
-                        else { node.log(JSON.stringify(msg)); }
+                        node.log("\n"+util.inspect(msg, {colors:useColors, depth:10}));
                     }
                 }
             });

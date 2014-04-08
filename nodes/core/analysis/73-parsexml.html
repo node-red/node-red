@@ -15,16 +15,16 @@
 -->
 
 <script type="text/x-red" data-template-name="xml2js">
-    <div class="form-row">
+    <!-- <div class="form-row">
         <label>Use Console</label>
         <input type="checkbox" id="node-input-useEyes" placeholder="Name" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-useEyes" style="width: 70%;">Debug output in console ?</label>
-    </div>
+    </div> -->
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-tips">Uses xml2js to process xml into javascript object.</div>
+    <!-- <div class="form-tips">Uses xml2js to process xml into javascript object.</div> -->
 </script>
 
 <script type="text/x-red" data-help-name="xml2js">
@@ -37,8 +37,8 @@
         category: 'advanced-function',
         color:"#E6E0F8",
         defaults: {
-        useEyes: {value:false},
-        name: {value:""},
+        //useEyes: {value:false},
+        name: {value:""}
         },
         inputs:1,
         outputs:1,
