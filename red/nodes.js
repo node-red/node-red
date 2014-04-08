@@ -208,19 +208,25 @@ function load(_settings) {
     
     var RED = require("./red.js");
     
-    function loadNode(nodeFilename) {
-        var preCount = node_type_registry.count();
+    function loadNode(nodeDir, nodeFn) {
+        
+        if (settings.nodesExcludes) {
+            for (var i=0;i<settings.nodesExcludes.length;i++) {
+                if (settings.nodesExcludes[i] == nodeFn) {
+                    return;
+                }
+            }
+        }
+        var nodeFilename = path.join(nodeDir,nodeFn);
         var r = require(nodeFilename);
         if (typeof r === "function") {
             r(RED);
         }
-        if (preCount != node_type_registry.count()) {
-            var templateFilename = nodeFilename.replace(/\.js$/,".html");
-            if (fs.existsSync(templateFilename)) {
-                node_type_registry.registerConfig(fs.readFileSync(templateFilename,'utf8'));
-            } else {
-                util.log("["+type+"] missing template file: "+templateFilename);
-            }
+        var templateFilename = nodeFilename.replace(/\.js$/,".html");
+        if (fs.existsSync(templateFilename)) {
+            node_type_registry.registerConfig(fs.readFileSync(templateFilename,'utf8'));
+        } else {
+            util.log("["+type+"] missing template file: "+templateFilename);
         }
     }
     
@@ -239,8 +245,8 @@ function load(_settings) {
                             for (var i in nrn) {
                                 console.log("  ",i,":",nrn[i]);
                                 try {
-                                    var nodeFilename = path.join(pm,fn,nrn[i]);
-                                    loadNode(nodeFilename);
+                                    var nodeDir = path.join(pm,fn);
+                                    loadNode(nodeDir,nrn[i]);
                                 } catch(err) {
                                     util.log("["+i+"] "+err);
                                     //console.log(err.stack);
@@ -266,8 +272,7 @@ function load(_settings) {
                     if (stats.isFile()) {
                         if (/\.js$/.test(fn)) {
                             try {
-                                var nodeFilename = path.join(dir,fn);
-                                loadNode(nodeFilename);
+                                loadNode(dir,fn);
                             } catch(err) {
                                 errors.push({fn:fn, err:err});
                                 //util.log("["+fn+"] "+err);
