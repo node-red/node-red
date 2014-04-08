@@ -108,7 +108,7 @@ RED.editor = function() {
         if (valid && "validate" in node._def.defaults[property]) {
             valid = node._def.defaults[property].validate.call(node,value);
         }
-        if (valid && node._def.defaults[property].type && RED.nodes.getType(node._def.defaults[property].type)) {
+        if (valid && node._def.defaults[property].type && RED.nodes.getType(node._def.defaults[property].type) && !("validate" in node._def.defaults[property])) {
             if (!value || value == "_ADD_") {
                 valid = false;
             } else {
