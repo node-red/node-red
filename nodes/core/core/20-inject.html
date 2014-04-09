@@ -379,7 +379,7 @@
         },
         button: {
             onclick: function() {
-                var label = this.name||this.payload;
+                var label = (this.name||this.payload).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
                 d3.xhr("inject/"+this.id).post(function(err,resp) {
                         if (err) {
                             if (err.status == 404) {

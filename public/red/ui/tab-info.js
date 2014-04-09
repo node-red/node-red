@@ -53,6 +53,7 @@ RED.sidebar.info = function() {
                 if (val.length > 30) { 
                     val = val.substring(0,30)+" ...";
                 }
+                val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
             } else if (type === "number") {
                 val = val.toString();
             } else if ($.isArray(val)) {
