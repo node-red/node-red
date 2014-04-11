@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013 IBM Corp.
+  Copyright 2014 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -28,14 +28,15 @@
    <!-- Generally, there should be an input for each property of the node.   -->
    <!-- The for and id attributes identify the corresponding property        -->
    <!-- (with the 'node-input-' prefix).                                     -->
-   <!-- The available icon classes are defined in Twitter Bootstrap          -->
+   <!-- The available icon classes are defined Twitter Bootstrap glyphicons  -->
     <div class="form-row">
         <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
         <input type="text" id="node-input-topic" placeholder="Topic">
     </div>
 
+    <br/>
     <!-- By convention, most nodes have a 'name' property. The following div -->
-    <!-- provides the necessary field.                                       -->
+    <!-- provides the necessary field. Should always be the last option      -->
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -64,10 +65,11 @@
             name: {value:""},   //  along with default values.
             topic: {value:"", required:true}
         },
-        inputs:0,                // set the number of inputs - only 0 or 1
-        outputs:1,               // set the number of outputs - 0 to n
-        icon: "arrow-in.png",    // set the icon (held in public/icons)
-        label: function() {      // sets the default label contents
+        inputs:0,               // set the number of inputs - only 0 or 1
+        outputs:1,              // set the number of outputs - 0 to n
+        // set the icon (held in icons dir below where you save the node)
+        icon: "myicon.png",     // saved in  icons/myicon.png
+        label: function() {     // sets the default label contents
             return this.name||this.topic||"sample";
         },
         labelStyle: function() { // sets the class to apply to the label
