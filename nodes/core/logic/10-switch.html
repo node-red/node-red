@@ -142,7 +142,7 @@
                 if (rule.t == "btwn") {
                     btwnValueField.val(rule.v);
                     btwnValue2Field.val(rule.v2);
-                } else if (rule.v) {
+                } else if (typeof rule.v != "undefined") {
                     valueField.val(rule.v);
                 }
                 selectField.change();

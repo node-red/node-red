@@ -48,7 +48,7 @@ function SwitchNode(n) {
             rule.v2 = Number(rule.v2);
         }
     }
-        
+
     this.on('input', function (msg) {
         var onward = [];
         var prop = propertyParts.reduce(function (obj, i) {
