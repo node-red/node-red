@@ -18,7 +18,7 @@ var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var util = require("util");
 var parseString = require('xml2js').parseString;
 var useColors = true;
-util.inspect.styles.boolean = "red";
+//util.inspect.styles.boolean = "red";
 
 function Xml2jsNode(n) {
     RED.nodes.createNode(this,n);
