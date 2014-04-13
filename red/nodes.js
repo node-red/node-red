@@ -148,8 +148,12 @@ Node.prototype.send = function(msg) {
                                 delete mm.req;
                                 delete mm.res;
                                 var m = clone(mm);
-                                m.req = req;
-                                m.res = res;
+                                if (req) {
+                                    m.req = req;
+                                }
+                                if (res) {
+                                    m.res = res;
+                                }
                                 mm.req = req;
                                 mm.res = res;
                                 node.receive(m);
