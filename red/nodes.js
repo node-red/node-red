@@ -150,12 +150,12 @@ Node.prototype.send = function(msg) {
                                 var m = clone(mm);
                                 if (req) {
                                     m.req = req;
+                                    mm.req = req;
                                 }
                                 if (res) {
                                     m.res = res;
+                                    mm.res = res;
                                 }
-                                mm.req = req;
-                                mm.res = res;
                                 node.receive(m);
                             }
                         }
