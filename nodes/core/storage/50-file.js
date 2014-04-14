@@ -29,8 +29,10 @@ function FileNode(n) {
 
         if (filename == "") {
             node.warn('No filename specified');
-        } else {
+        } else if (typeof msg.payload != "undefined") {
             var data = msg.payload;
+            if (typeof data == "object") { data = JSON.stringify(data); }
+            if (typeof data == "boolean") { data = data.toString(); }
             if (this.appendNewline) {
                 data += "\n";
             }
