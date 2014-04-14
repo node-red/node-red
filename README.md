@@ -1,5 +1,7 @@
 # Node-RED
 
+http://nodered.org
+
 A visual tool for wiring the Internet of Things.
 
 ![Screenshot](http://nodered.org/images/node-red-screenshot.png "Node-RED: A visual tool for wiring the Internet of Things")
@@ -34,11 +36,13 @@ Please see our [contributing guide](https://github.com/node-red/node-red/blob/ma
 
 ## Authors
 
-Node-RED is a creation of the IBM Emerging Technology Services team.
+Node-RED is a creation of [IBM Emerging Technology](http://ibm.com/blogs/et).
 
 * Nick O'Leary [@knolleary](http://twitter.com/knolleary)
 * Dave Conway-Jones [@ceejay](http://twitter.com/ceejay)
 
+For more open-source projects from IBM, head over [here](http://ibm.github.io).
+
 ## Copyright and license
 
-Copyright 2013 IBM Corp. under [the Apache 2.0 license](LICENSE).
+Copyright 2013, 2014 IBM Corp. under [the Apache 2.0 license](LICENSE).
