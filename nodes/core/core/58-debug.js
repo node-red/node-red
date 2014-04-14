@@ -16,11 +16,10 @@
 
 var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var util = require("util");
-var ws = require('ws');
+var ws = require("ws");
 var events = require("events");
 var debuglength = RED.settings.debugMaxLength||1000;
 var useColors = false;
-
 // util.inspect.styles.boolean = "red";
 
 function DebugNode(n) {
@@ -49,7 +48,7 @@ function DebugNode(n) {
                 else if (typeof msg.payload === "object") { node.log("\n"+util.inspect(msg.payload, {colors:useColors, depth:10})); }
                 else { node.log(util.inspect(msg.payload, {colors:useColors})); }
             }
-            if (typeof msg.payload === "undefined") { msg.payload = "(undefined)"; }
+            if (typeof msg.payload == "undefined") { msg.payload = "(undefined)"; }
             if (msg.payload instanceof Buffer) { msg.payload = "(Buffer) "+msg.payload.toString('hex'); }
             if (this.active) {
                 DebugNode.send({id:this.id,name:this.name,topic:msg.topic,msg:msg.payload,_path:msg._path});
@@ -66,7 +65,9 @@ DebugNode.send = function(msg) {
     }
     else if (typeof msg.msg === 'object') {
         var seen = [];
-        msg.msg = "(Object) " + JSON.stringify(msg.msg, function(key, value) {
+        var ty = "(Object) ";
+        if (util.isArray(msg.msg)) { ty = "(Array) "; }
+        msg.msg = ty + JSON.stringify(msg.msg, function(key, value) {
             if (typeof value === 'object' && value !== null) {
                 if (seen.indexOf(value) !== -1) { return "[circular]"; }
                 seen.push(value);
