@@ -80,30 +80,35 @@ var RED = function() {
             $("#btn-icn-deploy").addClass('spinner');
             RED.view.dirty(false);
             
-            d3.xhr("flows").header("Content-type", "application/json")
-                           .post(JSON.stringify(nns),function(err,resp) {
-                    $("#btn-icn-deploy").removeClass('spinner');
-                    $("#btn-icn-deploy").addClass('icon-upload');
-                    if (resp && resp.status == 204) {
-                        RED.notify("Successfully deployed","success");
-                        RED.nodes.eachNode(function(node) {
-                            if (node.changed) {
-                                node.dirty = true;
-                                node.changed = false;
-                            }
-                        });
-                        // Once deployed, cannot undo back to a clean state
-                        RED.history.markAllDirty();
-                        RED.view.redraw();
-                    } else {
-                        RED.view.dirty(true);
-                        if (resp) {
-                            RED.notify("<strong>Error</strong>: "+resp,"error");
-                        } else {
-                            RED.notify("<strong>Error</strong>: no response from server","error");
-                        }
-                        console.log(err,resp);
+            $.ajax({
+                url:"flows",
+                type: "POST",
+                data: JSON.stringify(nns),
+                contentType: "application/json; charset=utf-8"
+            }).done(function(data,textStatus,xhr) {
+                RED.notify("Successfully deployed","success");
+                RED.nodes.eachNode(function(node) {
+                    if (node.changed) {
+                        node.dirty = true;
+                        node.changed = false;
                     }
+                });
+                // Once deployed, cannot undo back to a clean state
+                RED.history.markAllDirty();
+                RED.view.redraw();
+            }).fail(function(xhr,textStatus,err) {
+                RED.view.dirty(true);
+                console.log(xhr);
+                console.log(textStatus);
+                console.log(err);
+                if (xhr.responseText) {
+                    RED.notify("<strong>Error</strong>: "+xhr.responseText,"error");
+                } else {
+                    RED.notify("<strong>Error</strong>: no response from server","error");
+                }
+            }).always(function() {
+                $("#btn-icn-deploy").removeClass('spinner');
+                $("#btn-icn-deploy").addClass('icon-upload');
             });
         }
     }
@@ -150,7 +155,7 @@ var RED = function() {
     }
 
     function loadFlows() {
-        d3.json("flows",function(nodes) {
+        $.getJSON("flows",function(nodes) {
                 RED.nodes.import(nodes);
                 RED.view.dirty(false);
                 RED.view.redraw();

@@ -37,39 +37,29 @@ function createServer(_server,_settings) {
     flowfile = settings.flowFile || 'flows_'+require('os').hostname()+'.json';
     
     app.get("/nodes",function(req,res) {
-            res.writeHead(200, {'Content-Type': 'text/plain'});
-            res.write(redNodes.getNodeConfigs());
-            res.end();
+        res.json(redNodes.getNodeConfigs());
     });
     
     app.get("/flows",function(req,res) {
-            res.writeHead(200, {'Content-Type': 'text/plain'});
-            res.write(JSON.stringify(redNodes.getConfig()));
-            res.end();
+        res.json(redNodes.getConfig());
     });
     
-    app.post("/flows",function(req,res) {
-            var fullBody = '';
-            req.on('data', function(chunk) {
-                    fullBody += chunk.toString();
+    app.post("/flows",
+        express.json(),
+        function(req,res) {
+            var flows = req.body;
+            storage.saveFlows(flows).then(function() {
+                    res.json(204);
+                    redNodes.setConfig(flows);
+            }).otherwise(function(err) {
+                util.log("[red] Error saving flows : "+err);
+                res.send(500,err.message);
             });
-            req.on('end', function() {
-                    try { 
-                        var flows = JSON.parse(fullBody);
-                        storage.saveFlows(flows).then(function() {
-                                res.writeHead(204, {'Content-Type': 'text/plain'});
-                                res.end();
-                                redNodes.setConfig(flows);
-                        }).otherwise(function(err) {
-                            util.log("[red] Error saving flows : "+err);
-                            res.send(500, err.message);
-                        });
-                    } catch(err) {
-                        util.log("[red] Error saving flows : "+err);
-                        res.send(400, "Invalid flow");
-                    }
-            });
-    });
+        },
+        function(error,req,res,next) {
+            res.send(400,"Invalid Flow");
+        }
+    );
 }
 
 function start() {
