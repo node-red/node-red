@@ -64,46 +64,6 @@
 
 </script>
 
-<script type="text/javascript">
-    RED.nodes.registerType('http in',{
-        category: 'input',
-        color:"rgb(231, 231, 174)",
-        defaults: {
-            name: {value:""},
-            url: {value:"",required:true},
-            method: {value:"get",required:true}
-        },
-        inputs:0,
-        outputs:1,
-        icon: "white-globe.png",
-        label: function() {
-            if (this.name) {
-                return this.name;
-            } else if (this.url) {
-                var root = RED.settings.httpNodeRoot.slice(0,-1);
-                root += this.url;
-                return "["+this.method+"] "+root;
-            } else {
-                return "http";
-            }
-        },
-        labelStyle: function() {
-            return this.name?"node_label_italic":"";
-        },
-        oneditprepare: function() {
-            var root = RED.settings.httpNodeRoot.slice(0,-1);
-            if (root == "") {
-                $("#node-input-tip").hide();
-            } else {
-                $("#node-input-path").html(root);
-                $("#node-input-tip").show();
-            }
-            //document.getElementById("node-config-wsdocpath").innerHTML=
-        }
-
-    });
-</script>
-
 <script type="text/x-red" data-template-name="http response">
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
@@ -122,29 +82,6 @@
 	    pairs to be added as response headers.</li>
 	</ul>
 </script>
-
-<script type="text/javascript">
-    RED.nodes.registerType('http response',{
-        category: 'output',
-        color:"rgb(231, 231, 174)",
-        defaults: {
-            name: {value:""}
-        },
-        inputs:1,
-        outputs:0,
-        align: "right",
-        icon: "white-globe.png",
-        label: function() {
-            return this.name||"http";
-        },
-        labelStyle: function() {
-            return this.name?"node_label_italic":"";
-        }
-    });
-</script>
-
-
-
 
 <script type="text/x-red" data-template-name="http request">
     <div class="form-row">
@@ -190,7 +127,10 @@
 	    pairs to be added as request headers</li>
 	    <li><code>payload</code> is sent as the body of the request</li>
 	</ul>
-	
+	<p>When configured within the node, the URL property can contain <a href="http://mustache.github.io/mustache.5.html" target="_new">mustache-style</a> tags. These allow the
+	url to be constructed using values of the incoming message. For example, if the url is set to
+	<code>example.com/{{topic}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.</p>
+	<p>
 	The output message contains the following properties:
 	<ul>
 	    <li><code>payload</code> is the body of the response</li>
@@ -200,6 +140,62 @@
 </script>
 
 <script type="text/javascript">
+    RED.nodes.registerType('http in',{
+        category: 'input',
+        color:"rgb(231, 231, 174)",
+        defaults: {
+            name: {value:""},
+            url: {value:"",required:true},
+            method: {value:"get",required:true}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "white-globe.png",
+        label: function() {
+            if (this.name) {
+                return this.name;
+            } else if (this.url) {
+                var root = RED.settings.httpNodeRoot.slice(0,-1);
+                root += this.url;
+                return "["+this.method+"] "+root;
+            } else {
+                return "http";
+            }
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            var root = RED.settings.httpNodeRoot.slice(0,-1);
+            if (root == "") {
+                $("#node-input-tip").hide();
+            } else {
+                $("#node-input-path").html(root);
+                $("#node-input-tip").show();
+            }
+            //document.getElementById("node-config-wsdocpath").innerHTML=
+        }
+
+    });
+    
+    RED.nodes.registerType('http response',{
+        category: 'output',
+        color:"rgb(231, 231, 174)",
+        defaults: {
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:0,
+        align: "right",
+        icon: "white-globe.png",
+        label: function() {
+            return this.name||"http";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+    
     RED.nodes.registerType('http request',{
         category: 'function',
         color:"rgb(231, 231, 174)",

@@ -21,6 +21,8 @@ var https = require("follow-redirects").https;
 var urllib = require("url");
 var express = require("express");
 var getBody = require('raw-body');
+var mustache = require("mustache");
+
 var cors = require('cors');
 var jsonParser = express.json();
 var urlencParser = express.urlencoded();
@@ -131,10 +133,18 @@ RED.nodes.registerType("http response",HTTPOut);
 function HTTPRequest(n) {
     RED.nodes.createNode(this,n);
     var nodeUrl = n.url;
+    var isTemplatedUrl = (nodeUrl||"").indexOf("{{") != -1;
     var nodeMethod = n.method || "GET";
     var node = this;
     var credentials = RED.nodes.getCredentials(n.id);
     this.on("input",function(msg) {
+            if (msg.url) {
+                url = msg.url;
+            } else if (isTemplatedUrl) {
+                url = mustache.render(nodeUrl,msg);
+            } else {
+                url = nodeUrl;
+            }
             var url = msg.url||nodeUrl;
             var method = (msg.method||nodeMethod).toUpperCase();
             var opts = urllib.parse(url);
