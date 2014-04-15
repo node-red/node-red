@@ -436,11 +436,16 @@ RED.view = function() {
                 nn._def = RED.nodes.getType(nn.type);
                 nn.outputs = nn._def.outputs;
                 nn.changed = true;
-                nn.h = Math.max(node_height,(nn.outputs||0) * 15);
 
                 for (var d in nn._def.defaults) {
                     nn[d] = nn._def.defaults[d].value;
                 }
+                
+                if (nn._def.onadd) {
+                    nn._def.onadd.call(nn);
+                }
+                
+                nn.h = Math.max(node_height,(nn.outputs||0) * 15);
                 RED.history.push({t:'add',nodes:[nn.id],dirty:dirty});
                 RED.nodes.add(nn);
                 RED.editor.validateNode(nn);
