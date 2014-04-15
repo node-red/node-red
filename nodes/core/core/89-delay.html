@@ -39,14 +39,16 @@
     
     <div id="rate-details" class="form-row">
         <label for="node-input-rate"><i class="icon-time"></i> To</label>
-        <input type="text" id="node-input-rate" placeholder="1" style="direction:rtl; width:50px !important">
-        <label for="node-input-reateUnits">message(s) per</label>
+        <input type="text" id="node-input-rate" placeholder="1" style="direction:rtl; width:30px !important">
+        <label for="node-input-reateUnits">msg(s) per</label>
         <select id="node-input-rateUnits" style="width:140px !important">
           <option value="second">Second</option>
           <option value="minute">Minute</option>
           <option value="hour">Hour</option>
           <option value="day">Day</option>
         </select>
+        <br/>
+        <input style="margin: 20px 0 20px 100px; width: 30px;" type="checkbox" id="node-input-drop"><label style="width: 250px;" for="node-input-drop">drop intermediate messages</label>
     </div>
 
     <div id="random-details" class="form-row">
@@ -90,7 +92,8 @@
             rateUnits: {value: "second"},
             randomFirst: {value:"1", required:true, validate:RED.validators.number()},
             randomLast: {value:"5", required:true, validate:RED.validators.number()},
-            randomUnits: {value: "seconds"}
+            randomUnits: {value: "seconds"},
+            drop: {value:false}
         },
         inputs:1,                // set the number of inputs - only 0 or 1
         outputs:1,               // set the number of outputs - 0 to n

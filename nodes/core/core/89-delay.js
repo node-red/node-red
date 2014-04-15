@@ -80,6 +80,7 @@ function DelayNode(n) {
     this.buffer = [];
     this.intervalID = -1;
     this.randomID = -1;
+    this.lastSent = Date.now();
     var node = this;
 
     if (this.pauseType === "delay") {
@@ -101,23 +102,31 @@ function DelayNode(n) {
 
     } else if (this.pauseType === "rate") {
         this.on("input", function(msg) {
-            if ( node.intervalID !== -1) {
-                node.buffer.push(msg);
-                if (node.buffer.length > 1000) {
-                    node.warn(this.name + " buffer exceeded 1000 messages");
+            if (node.drop) {
+                if ( node.intervalID !== -1) {
+                    node.buffer.push(msg);
+                    if (node.buffer.length > 1000) {
+                        node.warn(this.name + " buffer exceeded 1000 messages");
+                    }
+                } else {
+                    node.send(msg);
+                    node.intervalID = setInterval(function() {
+                        if (node.buffer.length === 0) {
+                            clearInterval(node.intervalID);
+                            node.intervalID = -1;
+                        }
+    
+                        if (node.buffer.length > 0) {
+                            node.send(node.buffer.shift());
+                        }
+                    },node.rate);
                 }
             } else {
-                node.send(msg);
-                node.intervalID = setInterval(function() {
-                    if (node.buffer.length === 0) {
-                        clearInterval(node.intervalID);
-                        node.intervalID = -1;
-                    }
-
-                    if (node.buffer.length > 0) {
-                        node.send(node.buffer.shift());
-                    }
-                },node.rate);
+                var now = Date.now();
+                if (now-node.lastSent > node.rate) {
+                    node.lastSent = now;
+                    node.send(msg);
+                }
             }
         });
 
