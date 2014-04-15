@@ -98,9 +98,6 @@ var RED = function() {
                 RED.view.redraw();
             }).fail(function(xhr,textStatus,err) {
                 RED.view.dirty(true);
-                console.log(xhr);
-                console.log(textStatus);
-                console.log(err);
                 if (xhr.responseText) {
                     RED.notify("<strong>Error</strong>: "+xhr.responseText,"error");
                 } else {

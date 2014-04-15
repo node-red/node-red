@@ -49,8 +49,8 @@ function createServer(_server,_settings) {
         function(req,res) {
             var flows = req.body;
             storage.saveFlows(flows).then(function() {
-                    res.json(204);
-                    redNodes.setConfig(flows);
+                res.json(204);
+                redNodes.setConfig(flows);
             }).otherwise(function(err) {
                 util.log("[red] Error saving flows : "+err);
                 res.send(500,err.message);
