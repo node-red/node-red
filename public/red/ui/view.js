@@ -398,6 +398,12 @@ RED.view = function() {
                 RED.history.push({t:'move',nodes:ns,dirty:dirty});
             }
         }
+        if (mouse_mode == RED.state.MOVING || mouse_mode == RED.state.MOVING_ACTIVE) {
+            for (var i=0;i<moving_set.length;i++) {
+                delete moving_set[i].ox;
+                delete moving_set[i].oy;
+            }
+        }
         if (mouse_mode == RED.state.IMPORT_DRAGGING) {
             RED.keyboard.remove(/* ESCAPE */ 27);
             setDirty(true);
@@ -526,13 +532,59 @@ RED.view = function() {
             RED.keyboard.add(/* c */ 67,{ctrl:true},function(){copySelection();d3.event.preventDefault();});
             RED.keyboard.add(/* x */ 88,{ctrl:true},function(){copySelection();deleteSelection();d3.event.preventDefault();});
         }
+        if (moving_set.length == 0) {
+            RED.keyboard.remove(/* up   */ 38);
+            RED.keyboard.remove(/* down */ 40);
+            RED.keyboard.remove(/* left */ 37);
+            RED.keyboard.remove(/* right*/ 39);
+        } else {
+            RED.keyboard.add(/* up   */ 38, function() { d3.event.shiftKey?moveSelection(  0,-20):moveSelection( 0,-1);d3.event.preventDefault();},endKeyboardMove);
+            RED.keyboard.add(/* down */ 40, function() { d3.event.shiftKey?moveSelection(  0, 20):moveSelection( 0, 1);d3.event.preventDefault();},endKeyboardMove);
+            RED.keyboard.add(/* left */ 37, function() { d3.event.shiftKey?moveSelection(-20,  0):moveSelection(-1, 0);d3.event.preventDefault();},endKeyboardMove);
+            RED.keyboard.add(/* right*/ 39, function() { d3.event.shiftKey?moveSelection( 20,  0):moveSelection( 1, 0);d3.event.preventDefault();},endKeyboardMove);
+        }
         if (moving_set.length == 1) {
             RED.sidebar.info.refresh(moving_set[0].n);
         } else {
             RED.sidebar.info.clear();
         }
     }
-
+    function endKeyboardMove() {
+        var ns = [];
+        for (var i=0;i<moving_set.length;i++) {
+            ns.push({n:moving_set[i].n,ox:moving_set[i].ox,oy:moving_set[i].oy});
+            delete moving_set[i].ox;
+            delete moving_set[i].oy;
+        }
+        RED.history.push({t:'move',nodes:ns,dirty:dirty});
+    }
+    function moveSelection(dx,dy) {
+        var minX = 0;
+        var minY = 0;
+        
+        for (var i=0;i<moving_set.length;i++) {
+            var node = moving_set[i];
+            if (node.ox == null && node.oy == null) {
+                node.ox = node.n.x;
+                node.oy = node.n.y;
+            }
+            node.n.x += dx;
+            node.n.y += dy;
+            node.n.dirty = true;
+            minX = Math.min(node.n.x-node.n.w/2-5,minX);
+            minY = Math.min(node.n.y-node.n.h/2-5,minY);
+        }
+        
+        if (minX != 0 || minY != 0) {
+            for (var n = 0; n<moving_set.length; n++) {
+                var node = moving_set[n];
+                node.n.x -= minX;
+                node.n.y -= minY;
+            }
+        }
+        
+        redraw();
+    }
     function deleteSelection() {
         var removedNodes = [];
         var removedLinks = [];
@@ -1262,6 +1314,9 @@ RED.view = function() {
         },
         getWorkspace: function() {
             return activeWorkspace;
+        },
+        showWorkspace: function(id) {
+            workspace_tabs.activateTab(id);
         },
         redraw:redraw,
         dirty: function(d) {

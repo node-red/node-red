@@ -21,23 +21,36 @@ RED.keyboard = function() {
     d3.select(window).on("keydown",function() {
         if (!active) { return; }
         var handler = handlers[d3.event.keyCode];
-        if (handler) {
+        if (handler && handler.ondown) {
             if (!handler.modifiers ||
                 ((!handler.modifiers.shift || d3.event.shiftKey)&&
                     (!handler.modifiers.ctrl || d3.event.ctrlKey))) {
-                handler.callback();
+                handler.ondown();
             }
         }
     });
-    
-    function addHandler(key,modifiers,callback) {
+    d3.select(window).on("keyup",function() {
+        if (!active) { return; }
+        var handler = handlers[d3.event.keyCode];
+        if (handler && handler.onup) {
+            if (!handler.modifiers ||
+                ((!handler.modifiers.shift || d3.event.shiftKey)&&
+                    (!handler.modifiers.ctrl || d3.event.ctrlKey))) {
+                handler.onup();
+            }
+        }
+    });
+    function addHandler(key,modifiers,ondown,onup) {
         var mod = modifiers;
-        var cb = callback;
+        var cbdown = ondown;
+        var cbup = onup;
+        
         if (typeof modifiers == "function") {
             mod = {};
-            cb = modifiers;
+            cbdown = modifiers;
+            cbup = ondown;
         }
-        handlers[key] = {modifiers:mod, callback:cb};
+        handlers[key] = {modifiers:mod, ondown:cbdown, onup:cbup};
     }
     function removeHandler(key) {
         delete handlers[key];
