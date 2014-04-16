@@ -62,8 +62,7 @@ RED.nodes.registerType("debug",DebugNode);
 DebugNode.send = function(msg) {
     if (msg.msg instanceof Error) {
         msg.msg = msg.msg.toString();
-    }
-    else if (typeof msg.msg === 'object') {
+    } else if (typeof msg.msg === 'object') {
         var seen = [];
         var ty = "(Object) ";
         if (util.isArray(msg.msg)) { ty = "(Array) "; }
@@ -75,9 +74,13 @@ DebugNode.send = function(msg) {
             return value;
         }," ");
         seen = null;
+    } else if (typeof msg.msg === "boolean") {
+        msg.msg = "(boolean) "+msg.msg.toString();
+    } else if (msg.msg === 0) {
+        msg.msg = "0";
+    } else if (msg.msg == null) {
+        msg.msg = "[undefined]";
     }
-    else if (typeof msg.msg === "boolean") msg.msg = "(boolean) "+msg.msg.toString();
-    else if (msg.msg === 0) msg.msg = "0";
 
     if (msg.msg.length > debuglength) {
         msg.msg = msg.msg.substr(0,debuglength) +" ....";

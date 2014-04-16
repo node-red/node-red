@@ -58,12 +58,12 @@ function FunctionNode(n) {
                         this.send(results);
 
                     } catch(err) {
-                        this.error(err.message);
+                        this.error(err);
                     }
                 }
         });
     } catch(err) {
-        this.error(err.message);
+        this.error(err);
     }
 }
 
