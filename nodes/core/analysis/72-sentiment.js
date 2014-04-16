@@ -22,7 +22,7 @@ function SentimentNode(n) {
     var node = this;
 
     this.on("input", function(msg) {
-        sentiment(msg.payload, function (err, result) {
+        sentiment(msg.payload, msg.overrides || null, function (err, result) {
             msg.sentiment = result;
             node.send(msg);
         });
