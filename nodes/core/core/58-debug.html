@@ -138,23 +138,28 @@
                 var msg = document.createElement("div");
                 msg.onmouseover = function() {
                     msg.style.borderRightColor = "#999";
-                    RED.nodes.eachNode(function(node) {
-                        if( node.id == o.id) {
-                            node.highlighted = true;
-                            node.dirty = true;
-                        }
-                    });
+                    var n = RED.nodes.node(o.id);
+                    if (n) {
+                        n.highlighted = true;
+                        n.dirty = true;
+                    }
                     RED.view.redraw();
                 };
                 msg.onmouseout = function() {
                     msg.style.borderRightColor = "";
-                    RED.nodes.eachNode(function(node) {
-                        if( node.id == o.id) {
-                            node.highlighted = false;
-                            node.dirty = true;
-                        }
-                    });
+                    var n = RED.nodes.node(o.id);
+                    if (n) {
+                        n.highlighted = false;
+                        n.dirty = true;
+                    }
                     RED.view.redraw();
+                };
+                msg.onclick = function() {
+                    var node = RED.nodes.node(o.id);
+                    if (node) {
+                        RED.view.showWorkspace(node.z);
+                    }
+                    
                 };
                 var name = (o.name?o.name:o.id).toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
                 var topic = (o.topic||"").toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
