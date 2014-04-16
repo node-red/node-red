@@ -11,7 +11,7 @@
     "main"         : "red/red.js",
     "scripts"      : {
         "start": "node red.js",
-        "test": "grunt"
+        "test": "./node_modules/.bin/grunt"
     },
     "contributors": [ 
         {"name": "Nick O'Leary"},
@@ -42,6 +42,7 @@
     },
     "devDependencies": {
         "grunt": "0.4.4",
+        "grunt-cli": "0.1.13",
         "grunt-simple-mocha": "0.4.0",
         "mocha": "1.18.2",
         "should": "3.3.1"
