@@ -155,7 +155,7 @@ function TwitterInNode(n) {
                     }
                 }
 
-                function setupStream() {
+                var setupStream = function() {
                     if (node.active) {
                         twit.stream(thing, st, function(stream) {
                             //console.log(st);
