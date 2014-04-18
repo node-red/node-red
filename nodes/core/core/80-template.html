@@ -29,9 +29,18 @@
 </script>
 
 <script type="text/x-red" data-help-name="template">
-	<p>Creates new messages based on a template.</p>
-	<p>Very useful for creating boilerplate web pages, emails, tweets and so on.</p>
-	<p>Uses the <i><a href="http://mustache.github.io/mustache.5.html" target="_new">Mustache</a></i> format.</p>
+	<p>Creates a new payload based on the provided template.</p>
+	<p>This uses the <i><a href="http://mustache.github.io/mustache.5.html" target="_new">mustache</a></i> format.</p>
+	<p>For example, when a template of:
+	<pre>Hello {{name}}. Today is {{date}}</pre>
+	<p>receives a message containing:
+	<pre>{ 
+  name: "Fred",
+  date: "Monday"
+  payload: ...
+}</pre>
+	<p>The resulting payload will be:
+	<pre>Hello Fred. Today is Monday</pre>
 </script>
 
 <script type="text/javascript">
