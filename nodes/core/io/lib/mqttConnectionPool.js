@@ -34,6 +34,7 @@ module.exports = {
             connections[id] = function() {
                 var uid = (1+Math.random()*4294967295).toString(16);
                 var client = mqtt.createClient(port,broker);
+                client.uid = uid;
                 client.setMaxListeners(0);
                 var options = {keepalive:15};
                 options.clientId = clientid || 'mqtt_' + (1+Math.random()*4294967295).toString(16);
