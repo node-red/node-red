@@ -38,7 +38,7 @@ function TcpIn(n) {
         var buffer = null;
         var client;
         var reconnectTimeout;
-        function setupTcpClient() {
+        var setupTcpClient = function() {
             node.log("connecting to "+node.host+":"+node.port);
             var id = (1+Math.random()*4294967295).toString(16);
             client = net.connect(node.port, node.host, function() {
@@ -192,7 +192,7 @@ function TcpOut(n) {
         var client = null;
         var connected = false;
 
-        function setupTcpClient() {
+        var setupTcpClient = function() {
             node.log("connecting to "+node.host+":"+node.port);
             client = net.connect(node.port, node.host, function() {
                 connected = true;
