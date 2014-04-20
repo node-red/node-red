@@ -17,7 +17,7 @@ RED.library = function() {
     
     
     function loadFlowLibrary() {
-        d3.json("library/flows",function(data) {
+        $.getJSON("library/flows",function(data) {
                 //console.log(data);
 
                 var buildMenu = function(data,root) {
@@ -84,7 +84,7 @@ RED.library = function() {
                     li.onclick = function () {
                         var dirName = v;
                         return function(e) {
-                            var bcli = $('<li class="active"><a href="#">'+dirName+'</a> <span class="divider">/</span></li>');
+                            var bcli = $('<li class="active"><span class="divider">/</span> <a href="#">'+dirName+'</a></li>');
                             $("a",bcli).click(function(e) { 
                                     $(this).parent().nextAll().remove();
                                     $.getJSON("library/"+options.url+root+dirName,function(data) {
@@ -112,6 +112,7 @@ RED.library = function() {
                            $(".list-selected",ul).removeClass("list-selected");
                            $(this).addClass("list-selected");
                            $.get("library/"+options.url+root+item.fn, function(data) {
+                                   console.log(data);
                                    selectedLibraryItem = item;
                                    libraryEditor.setText(data);
                            });
@@ -239,12 +240,13 @@ RED.library = function() {
                 open: function(e) {
                     var form = $("form",this);
                     form.height(form.parent().height()-30);
-                    $(".form-row:last-child",form).height(form.height()-60);
+                    $("#node-select-library-text").height("100%");
+                    $(".form-row:last-child",form).children().height(form.height()-60);
                 },
                 resize: function(e) {
                     var form = $("form",this);
                     form.height(form.parent().height()-30);
-                    $(".form-row:last-child",form).height(form.height()-60);
+                    $(".form-row:last-child",form).children().height(form.height()-60);
                 }
         });
         
