@@ -138,6 +138,7 @@ function HTTPRequest(n) {
     var node = this;
     var credentials = RED.nodes.getCredentials(n.id);
     this.on("input",function(msg) {
+            var url;
             if (msg.url) {
                 url = msg.url;
             } else if (isTemplatedUrl) {
@@ -145,7 +146,6 @@ function HTTPRequest(n) {
             } else {
                 url = nodeUrl;
             }
-            var url = msg.url||nodeUrl;
             var method = (msg.method||nodeMethod).toUpperCase();
             var opts = urllib.parse(url);
             opts.method = method;
