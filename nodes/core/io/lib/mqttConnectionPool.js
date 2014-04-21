@@ -91,7 +91,6 @@ module.exports = {
                 client.on('connect',function() {
                         if (client) {
                             util.log('[mqtt] ['+uid+'] connected to broker tcp://'+broker+':'+port);
-    
                             connecting = false;
                             for (var s in subscriptions) {
                                 var topic = subscriptions[s].topic;
@@ -109,13 +108,13 @@ module.exports = {
                 });
                 client.on('connectionlost', function(err) {
                         util.log('[mqtt] ['+uid+'] connection lost to broker tcp://'+broker+':'+port);
+                        connecting = false;
                         setTimeout(function() {
-                                if (client) {
-                                    client.connect(options);
-                                }
+                            obj.connect();
                         }, settings.mqttReconnectTime||5000);
                 });
                 client.on('disconnect', function() {
+                        connecting = false;
                         util.log('[mqtt] ['+uid+'] disconnected from broker tcp://'+broker+':'+port);
                 });
 
