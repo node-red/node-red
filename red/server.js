@@ -63,10 +63,12 @@ function createServer(_server,_settings) {
 }
 
 function start() {
+    var RED = require("./red");
     var defer = when.defer();
     
     storage.init(settings).then(function() {
         console.log("\nWelcome to Node-RED\n===================\n");
+        util.log("[red] Version: "+RED.version());
         util.log("[red] Loading palette nodes");
         var nodeErrors = redNodes.load(settings);
         if (nodeErrors.length > 0) {

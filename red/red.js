@@ -18,6 +18,7 @@ var events = require("./events");
 var server = require("./server");
 var nodes = require("./nodes");
 var library = require("./library");
+var fs = require("fs");
 var settings = null;
 
 var path = require('path');
@@ -33,6 +34,15 @@ var RED = {
         server.init(httpServer,settings);
         library.init();
         return server.app;
+    },
+    
+    version: function() {
+        var p = require(path.join(process.env.NODE_RED_HOME,"package.json"));
+        if (fs.existsSync(path.join(process.env.NODE_RED_HOME,".git"))) {
+            return p.version+".git";
+        } else {
+            return p.version;
+        }
     },
 
     start: server.start,
