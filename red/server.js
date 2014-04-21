@@ -37,7 +37,7 @@ function createServer(_server,_settings) {
     flowfile = settings.flowFile || 'flows_'+require('os').hostname()+'.json';
     
     app.get("/nodes",function(req,res) {
-        res.json(redNodes.getNodeConfigs());
+        res.send(redNodes.getNodeConfigs());
     });
     
     app.get("/flows",function(req,res) {
