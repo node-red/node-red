@@ -74,7 +74,7 @@ module.exports = {
                         client.once(a,b);
                     },
                     connect: function() {
-                        if (!client.isConnected() && !connecting) {
+                        if (client && !client.isConnected() && !connecting) {
                             connecting = true;
                             client.connect(options);
                         }
