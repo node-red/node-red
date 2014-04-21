@@ -25,9 +25,29 @@ var serialp = require("serialport");
 function SerialPortNode(n) {
     RED.nodes.createNode(this,n);
     this.serialport = n.serialport;
-    this.serialbaud = n.serialbaud * 1;
     this.newline = n.newline;
     this.addchar = n.addchar || "false";
+
+    if (typeof n.serialbaud === 'undefined') {
+        this.serialbaud = 57600;
+    } else {
+        this.serialbaud = parseInt(n.serialbaud);
+    }
+    if (typeof n.databits === 'undefined') {
+        this.databits = 8;
+    } else {
+        this.databits = parseInt(n.databits);
+    }
+    if (typeof n.parity === 'undefined') {
+        this.parity = 'none';
+    } else {
+        this.parity = n.parity;
+    }
+    if (typeof n.stopbits == 'undefined') {
+        this.stopbits = 1;
+    } else {
+        this.stopbits = parseInt(n.stopbits);
+    }
 }
 RED.nodes.registerType("serial-port",SerialPortNode);
 
@@ -39,7 +59,12 @@ function SerialOutNode(n) {
 
     if (this.serialConfig) {
         var node = this;
-        node.port = serialPool.get(this.serialConfig.serialport,this.serialConfig.serialbaud,this.serialConfig.newline);
+        node.port = serialPool.get(this.serialConfig.serialport,
+            this.serialConfig.serialbaud,
+            this.serialConfig.databits,
+            this.serialConfig.parity,
+            this.serialConfig.stopbits,
+            this.serialConfig.newline);
         node.addCh = "";
         if (node.serialConfig.addchar == "true") {
             node.addCh = this.serialConfig.newline.replace("\\n","\n").replace("\\r","\r");
@@ -82,7 +107,12 @@ function SerialInNode(n) {
 
     if (this.serialConfig) {
         var node = this;
-        this.port = serialPool.get(this.serialConfig.serialport,this.serialConfig.serialbaud,this.serialConfig.newline);
+        node.port = serialPool.get(this.serialConfig.serialport,
+            this.serialConfig.serialbaud,
+            this.serialConfig.databits,
+            this.serialConfig.parity,
+            this.serialConfig.stopbits,
+            this.serialConfig.newline);
         this.port.on('data', function(msg) {
             node.send({ "payload": msg });
         });
@@ -105,7 +135,7 @@ RED.nodes.registerType("serial in",SerialInNode);
 var serialPool = function() {
     var connections = {};
     return {
-        get:function(port,baud,newline,callback) {
+        get:function(port,baud,databits,parity,stopbits,newline,callback) {
             var id = port;
             if (!connections[id]) {
                 connections[id] = function() {
@@ -123,12 +153,18 @@ var serialPool = function() {
                         if (newline == "") {
                             obj.serial = new serialp.SerialPort(port,{
                                 baudrate: baud,
+                                databits: databits,
+                                parity: parity,
+                                stopbits: stopbits,
                                 parser: serialp.parsers.raw
                             },true, function(err, results) { if (err) obj.serial.emit('error',err); });
                         }
                         else {
                             obj.serial = new serialp.SerialPort(port,{
                                 baudrate: baud,
+                                databits: databits,
+                                parity: parity,
+                                stopbits: stopbits,
                                 parser: serialp.parsers.readline(newline)
                             },true, function(err, results) { if (err) obj.serial.emit('error',err); });
                         }
@@ -147,7 +183,7 @@ var serialPool = function() {
                             }
                         });
                         obj.serial.on('open',function() {
-                            util.log("[serial] serial port "+port+" opened at "+baud+" baud");
+                            util.log("[serial] serial port "+port+" opened at "+baud+" baud "+databits+""+parity.charAt(0).toUpperCase()+stopbits);
                             if (obj.tout) { clearTimeout(obj.tout); }
                             //obj.serial.flush();
                             obj._emitter.emit('ready');

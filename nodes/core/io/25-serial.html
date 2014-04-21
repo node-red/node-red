@@ -95,7 +95,8 @@
 <script type="text/x-red" data-template-name="serial-port">
     <div class="form-row">
         <label for="node-config-input-serialport"><i class="icon-bullhorn"></i> Serial Port</label>
-        <input type="text" id="node-config-input-serialport" placeholder="/dev/ttyUSB0" style="width:50%;">
+        <select type="text" id="node-config-input-serialport" style="width:75%;">
+        </select>
     </div>
     <div class="form-row">
         <label for="node-config-input-serialbaud"><i class="icon-wrench"></i> Baud Rate</label>
@@ -120,13 +121,39 @@
         </select>
     </div>
     <div class="form-row">
+        <label for="node-config-input-databits"><i class="icon-wrench"></i> Data Bits</label>
+        <select type="text" id="node-config-input-databits" style="width: 100px;">
+            <option value="8">8</option>
+            <option value="7">7</option>
+            <option value="6">6</option>
+            <option value="5">5</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-parity"><i class="icon-wrench"></i> Parity</label>
+        <select type="text" id="node-config-input-parity" style="width: 100px;">
+            <option value="none">None</option>
+            <option value="even">Even</option>
+            <option value="mark">Mark</option>
+            <option value="odd">Odd</option>
+            <option value="space">Space</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-stopbits"><i class="icon-wrench"></i> Stop Bits</label>
+        <select type="text" id="node-config-input-stopbits" style="width: 100px;">
+            <option value="2">2</option>
+            <option value="1">1</option>
+        </select>
+    </div>
+    <div class="form-row">
         <label for="node-config-input-newline"><i class="icon-text-width"></i> New line</label>
         <input type="text" id="node-config-input-newline"  style="width: 50px;">
     </div>
     <div class="form-row">
         <label for="node-config-input-addchar">&nbsp;</label>
         <select type="text" id="node-config-input-addchar" style="width: 70%;">
-            <option value="false">Don't add 'New Line' to serial output</option>
+            <option value="false">Dont add 'New Line' to serial output</option>
             <option value="true">Add 'New line' to serial output message</option>
         </select>
     </div>
@@ -140,12 +167,36 @@
             //name: {value:""},
             serialport: {value:"",required:true},
             serialbaud: {value:57600,required:true},
+            databits: {value:8,required:true},
+            parity: {value:"none",required:true},
+            stopbits: {value:1,required:true},
             newline: {value:"\\n"},
             addchar: {value:false}
         },
-        label: function() {
-            //return this.name||this.serialport;
-            return this.serialport+":"+this.serialbaud;
+        label: function() {            
+            if (typeof this.serialbaud === 'undefined') {
+                this.serialbaud = 57600;
+            }
+            if (typeof this.databits === 'undefined') {
+                this.databits = 8;
+            }
+            if (typeof this.parity === 'undefined') {
+                this.parity = 'none';
+            }
+            if (typeof this.stopbits == 'undefined') {
+                this.stopbits = 1;
+            }
+            return this.serialport+":"+this.serialbaud+"-"+this.databits+this.parity.charAt(0).toUpperCase()+this.stopbits;
+        },
+        oneditprepare: function() {            
+            var p = this.serialport;
+            var s = $("#node-config-input-serialport");
+            $.getJSON('serialports',function(data) {
+                $.each(data, function(i, port){
+                    s.append($('<option>').text(port.comName).attr('value', port.comName));
+                });
+                s.val(p);
+            });
         }
     });
 </script>
