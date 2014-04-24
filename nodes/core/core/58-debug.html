@@ -134,6 +134,9 @@
             }
             ws.onmessage = function(event) {
                 var o = JSON.parse(event.data);
+                if (o.heartbeat) {
+                    return;
+                }
                 //console.log(msg);
                 var msg = document.createElement("div");
                 msg.onmouseover = function() {

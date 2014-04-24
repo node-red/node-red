@@ -57,6 +57,26 @@ function DebugNode(n) {
     });
 }
 
+var lastSentTime = (new Date()).getTime();
+
+setInterval(function() {
+    var now = (new Date()).getTime();
+    if (now-lastSentTime > 15000) {
+        lastSentTime = now;
+        for (var i in DebugNode.activeConnections) {
+            var ws = DebugNode.activeConnections[i];
+            try {
+                var p = JSON.stringify({heartbeat:lastSentTime});
+                ws.send(p);
+            } catch(err) {
+                util.log("[debug] ws heartbeat error : "+err);
+            }
+        }
+    }
+}, 15000);
+
+
+
 RED.nodes.registerType("debug",DebugNode);
 
 DebugNode.send = function(msg) {
@@ -85,7 +105,7 @@ DebugNode.send = function(msg) {
     if (msg.msg.length > debuglength) {
         msg.msg = msg.msg.substr(0,debuglength) +" ....";
     }
-
+    
     for (var i in DebugNode.activeConnections) {
         var ws = DebugNode.activeConnections[i];
         try {
@@ -95,6 +115,7 @@ DebugNode.send = function(msg) {
             util.log("[debug] ws error : "+err);
         }
     }
+    lastSentTime = (new Date()).getTime();
 }
 
 DebugNode.activeConnections = [];
