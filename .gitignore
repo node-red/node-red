@@ -3,3 +3,5 @@ credentials.json
 flows*.json
 nodes/node-red-nodes/
 .npm
+*.swp
+*.swo
