@@ -260,7 +260,7 @@ RED.nodes = function() {
                 newNodes = [newNodes];
             }
             var unknownTypes = [];
-            for (var i in newNodes) {
+            for (var i=0;i<newNodes.length;i++) {
                 var n = newNodes[i];
                 // TODO: remove workspace in next release+1
                 if (n.type != "workspace" && n.type != "tab" && !getType(n.type)) {
@@ -269,6 +269,11 @@ RED.nodes = function() {
                     n.type = "unknown";
                     if (unknownTypes.indexOf(n.name)==-1) {
                         unknownTypes.push(n.name);
+                    }
+                    if (n.x == null && n.y == null) {
+                        // config node - remove it
+                        newNodes.splice(i,1);
+                        i--;
                     }
                 }
             }
