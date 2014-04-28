@@ -59,14 +59,17 @@
     "nodemailer": "^0.6.3",
     "firmata": "^0.3.3",
     "mongodb": "^1.4.2",
-    "serialport": "^1.4.0"
+    "serialport": "^1.4.0",
+    "request": "^2.34.0"
   },
   "devDependencies": {
     "grunt": "0.4.4",
     "grunt-cli": "0.1.13",
     "grunt-simple-mocha": "0.4.0",
     "mocha": "1.18.2",
-    "should": "3.3.1"
+    "should": "3.3.1",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-contrib": "^0.10.2"
   },
   "engines": {
     "node": ">=0.8"

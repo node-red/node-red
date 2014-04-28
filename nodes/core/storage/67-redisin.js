@@ -54,7 +54,7 @@ var redisConnectionPool = function() {
 }();
 
 
-function RedisOutNode(n) {
+function RedisInNode(n) {
     RED.nodes.createNode(this,n);
     var node = this;
     this.port = n.port||"6379";
@@ -66,25 +66,13 @@ function RedisOutNode(n) {
 
     this.on("input", function(msg) {
             if (msg != null) {
-                var k = this.key || msg.topic;
+                var k = this.key || "topic";
                 if (k) {
-                    if (this.structtype == "string") {
-                        this.client.set(k,msg.payload,function(err,msg){
-                          
-                          node.send(msg);                       
-                        });
-                    } else if (this.structtype == "hash") {
-                        var r = hashFieldRE.exec(msg.payload);
-                        if (r) {
-                            this.client.hset(k,r[1],r[2]);
-                        } else {
-                            this.warn("Invalid payload for redis hash");
-                        }
-                    } else if (this.structtype == "set") {
-                        this.client.sadd(k,msg.payload);
-                    } else if (this.structtype == "list") {
-                        this.client.rpush(k,msg.payload);
-                    }
+                this.client.get(msg.payload[k].toString(), function(err, reply){
+                  
+                  msg.payload = reply;
+                  node.send(msg);
+                })
                 } else {
                     this.warn("No key or topic set");
                 }
@@ -92,9 +80,9 @@ function RedisOutNode(n) {
     });
 }
 
-RED.nodes.registerType("redis out",RedisOutNode);
+RED.nodes.registerType("redis in",RedisInNode);
 
-RedisOutNode.prototype.close = function() {
+RedisInNode.prototype.close = function() {
     redisConnectionPool.close(this.client);
 }
 
