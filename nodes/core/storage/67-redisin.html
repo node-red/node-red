@@ -22,25 +22,40 @@
         <input type="text" id="node-input-port" placeholder="6379" style="width:45px">
     </div>
     <div class="form-row">
+        <label for="node-input-keytype"><i class="icon-briefcase"></i>Key Type</label>
+        <select type="text" id="node-input-keytype" style="width: 200px;">
+          <option value="REDISKEY">REDIS Key Literal</option>
+          <option value="KEY_VARIABLE_NAME">Variable Name</option>
+        </select>
+    </div>
+    <div class="form-row">
         <label for="node-input-key"><i class="icon-briefcase"></i> Key</label>
         <input type="text" id="node-input-key" placeholder="Redis Key">
+        
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-tips">
-        If key is blank, the topic will be used as the key.<br>
-        If type is hash, payload should be field=value.
+        This node allows reading a value from a REDIS database.  <br>
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="redis in">
-	<p>A Redis query node. Options include Hash, Set, List and String.</p>
+	<p>A Redis query node.  Will query either by string literal key, or by a key provided as a named parameter specified in the 'key' field.</p>
 	<p>To run this you need a local Redis server running. For details see <a href="http://redis.io/" target="_new">the Redis site</a>.</p>
 </script>
 
+<style>
+  .spacer.caret{
+    margin-left:10px; 
+  }
+.dropdown-toggle p{float:left;padding:0px;margin:0px;}
+</style>
+
 <script type="text/javascript">
+
     RED.nodes.registerType('redis in',{
         category: 'storage-input',
         color:"#fffaaa",
@@ -49,7 +64,7 @@
             port: { value: 6379,required:true},
             name: {value:""},
             key: {value:""},
-            structtype: {value:"",required:true}
+            keytype:{value:"REDISKEY", required:true}
         },
         inputs:1,
         outputs:1,
@@ -91,6 +106,19 @@
                 tt._acOpen = !tt._acOpen;
                 e.preventDefault();
             });
+            
+            
+            
+            function toggleValue(){
+              if($("#node-input-keytype").val()=="REDISKEY"){
+                $(".redisin-value").show();
+              }else{
+                $(".redisin-value").hide();
+              }
+            }
+            toggleValue();
+            
+            $("#node-input-keytype").on("change", toggleValue);
         }
     });
 </script>

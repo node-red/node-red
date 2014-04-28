@@ -22,6 +22,13 @@
         <input type="text" id="node-input-port" placeholder="6379" style="width:45px">
     </div>
     <div class="form-row">
+        <label for="node-input-keytype"><i class="icon-briefcase"></i>Key Type</label>
+        <select type="text" id="node-input-keytype" style="width: 200px;">
+          <option value="REDISKEY">REDIS Key Literal</option>
+          <option value="KEY_VARIABLE_NAME">Variable Name</option>
+        </select>
+    </div>
+    <div class="form-row">
         <label for="node-input-key"><i class="icon-briefcase"></i> Key</label>
         <input type="text" id="node-input-key" placeholder="Redis Key">
     </div>
@@ -34,6 +41,10 @@
         <option value="list">List</option>
         </select>
     </div>
+    <div class="form-row redisin-value">
+        <label for="node-input-key"><i class="icon-briefcase"></i> Value</label>
+        <input type="text" id="node-input-value" placeholder="value">
+    </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -45,11 +56,16 @@
 </script>
 
 <script type="text/x-red" data-help-name="redis out">
-	<p>A Redis output node. Options include Hash, Set, List and String.</p>
+	<p>A Redis output node. Options include Hash, Set, List and String.
+     Either the key specified in the key field will be set to the value of the 'Value' variable 
+     (if 'REDIS Key Literal' is selected in the drop down), or the value of the key variable and the key itself 
+     will be written as a key/value pair to the database.
+  </p>
 	<p>To run this you need a local Redis server running. For details see <a href="http://redis.io/" target="_new">the Redis site</a>.</p>
 </script>
 
 <script type="text/javascript">
+
     RED.nodes.registerType('redis out',{
         category: 'storage-output',
         color:"#ffaaaa",
@@ -58,7 +74,9 @@
             port: { value: 6379,required:true},
             name: {value:""},
             key: {value:""},
-            structtype: {value:"",required:true}
+            structtype: {value:"",required:true},
+            keytype:{value:"REDISKEY", required:true},
+            value:{value:""}
         },
         inputs:1,
         outputs:0,
@@ -81,6 +99,18 @@
                     });
                 }
             });
+            
+            function toggleValue(){
+              if($("#node-input-keytype").val()=="REDISKEY"){
+                $(".redisin-value").show();
+              }else{
+                $(".redisin-value").hide();
+              }
+            }
+            toggleValue();
+            
+            $("#node-input-keytype").on("change", toggleValue);
+            
             $( "#node-input-hostname" ).autocomplete({
                 minLength: 0,
                 source: availableServers,

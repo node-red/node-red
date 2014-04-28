@@ -61,16 +61,20 @@ function RedisOutNode(n) {
     this.hostname = n.hostname||"127.0.0.1";
     this.key = n.key;
     this.structtype = n.structtype;
-
+    this.keytype = n.keytype;
+    
     this.client = redisConnectionPool.get(this.hostname,this.port);
 
     this.on("input", function(msg) {
             if (msg != null) {
-                var k = this.key || msg.topic;
-                if (k) {
+
+                var k = (n.keytype=="REDISKEY")?this.key:msg.payload[this.key].toString();
+                var v = (n.keytype=="REDISKEY")?msg.payload[this.value].toString():msg.payload[this.key].toString();
+
+                if (k&&v) {
                     if (this.structtype == "string") {
-                        this.client.set(k,msg.payload,function(err,msg){
-                          
+                        this.client.set(k, v, function(err, reply){
+                          msg.payload = reply;
                           node.send(msg);                       
                         });
                     } else if (this.structtype == "hash") {
@@ -86,7 +90,7 @@ function RedisOutNode(n) {
                         this.client.rpush(k,msg.payload);
                     }
                 } else {
-                    this.warn("No key or topic set");
+                    this.warn("No key and/or value set");
                 }
             }
     });

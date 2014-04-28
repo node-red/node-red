@@ -53,7 +53,6 @@ var redisConnectionPool = function() {
     return obj;
 }();
 
-
 function RedisInNode(n) {
     RED.nodes.createNode(this,n);
     var node = this;
@@ -61,17 +60,19 @@ function RedisInNode(n) {
     this.hostname = n.hostname||"127.0.0.1";
     this.key = n.key;
     this.structtype = n.structtype;
-
+    this.keytype = n.keytype;
+    
     this.client = redisConnectionPool.get(this.hostname,this.port);
 
     this.on("input", function(msg) {
+
             if (msg != null) {
-                var k = this.key || "topic";
+                var k = (n.keytype=="REDISKEY")?this.key:msg.payload[this.key].toString();
+                
                 if (k) {
-                this.client.get(msg.payload[k].toString(), function(err, reply){
-                  
+                this.client.get(k, function(err, reply){
                   msg.payload = reply;
-                  node.send(msg);
+                  node.send(msg); 
                 })
                 } else {
                     this.warn("No key or topic set");

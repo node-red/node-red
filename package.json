@@ -69,7 +69,8 @@
     "mocha": "1.18.2",
     "should": "3.3.1",
     "grunt-contrib-watch": "^0.6.1",
-    "grunt-contrib": "^0.10.2"
+    "grunt-contrib": "^0.10.2",
+    "gulp": "^3.6.2"
   },
   "engines": {
     "node": ">=0.8"
