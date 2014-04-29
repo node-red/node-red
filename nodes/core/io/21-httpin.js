@@ -49,7 +49,7 @@ function HTTPIn(n) {
 
         this.url = n.url;
         this.method = n.method;
-
+        
         var node = this;
 
         this.errorHandler = function(err,req,res,next) {

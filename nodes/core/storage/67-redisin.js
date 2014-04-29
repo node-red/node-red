@@ -12,13 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Copyright 2014 TJKoury
+ *     
+ * Same as above.
+ *
  **/
 
 var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var util = require("util");
 var redis = require("redis");
-
-var hashFieldRE = /^([^=]+)=(.*)$/;
 
 var redisConnectionPool = function() {
     var connections = {};
@@ -59,7 +62,6 @@ function RedisInNode(n) {
     this.port = n.port||"6379";
     this.hostname = n.hostname||"127.0.0.1";
     this.key = n.key;
-    this.structtype = n.structtype;
     this.keytype = n.keytype;
     
     this.client = redisConnectionPool.get(this.hostname,this.port);
@@ -67,15 +69,14 @@ function RedisInNode(n) {
     this.on("input", function(msg) {
 
             if (msg != null) {
-                var k = (n.keytype=="REDISKEY")?this.key:msg.payload[this.key].toString();
-                
+                var k = (n.keytype=="REDISKEY")?this.key:msg.payload[this.key].toString();                
                 if (k) {
                 this.client.get(k, function(err, reply){
                   msg.payload = reply;
                   node.send(msg); 
                 })
                 } else {
-                    this.warn("No key or topic set");
+                    this.warn("No key set");
                 }
             }
     });

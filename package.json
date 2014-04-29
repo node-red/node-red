@@ -60,7 +60,8 @@
     "firmata": "^0.3.3",
     "mongodb": "^1.4.2",
     "serialport": "^1.4.0",
-    "request": "^2.34.0"
+    "request": "^2.34.0",
+    "pm2": "^0.8.1"
   },
   "devDependencies": {
     "grunt": "0.4.4",
