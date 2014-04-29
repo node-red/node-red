@@ -53,7 +53,7 @@ function InjectNode(n) {
     }
 
     if (this.once) {
-        setTimeout( function(){ node.emit("input",{}); }, 50);
+        setTimeout( function(){ node.emit("input",{}); }, 100);
     }
 
     this.on("input",function(msg) {
