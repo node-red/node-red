@@ -19,30 +19,64 @@
         <label for="node-input-name"><i class="icon-envelope"></i> To</label>
         <input type="text" id="node-input-name" placeholder="email@address.com">
     </div>
+	<div class="form-row">
+        <label for="node-input-user"><i class="icon-envelope"></i> From</label>
+        <input type="text" id="node-input-user" placeholder="email@address.com">
+    </div>
+	</div>
+		<div class="form-row">
+        <label for="node-input-pass">Password</label>
+        <input type="password" id="node-input-pass" placeholder="">
+    </div>
+	<div class="form-row">
+        <label for="node-input-service">Service</label>
+        <select id="node-input-service">
+			<option>DynectEmail</option>
+			<option selected>Gmail</option>
+			<option>hot.ee</option>
+			<option>Hotmail</option>
+			<option>iCloud</option>
+			<option>mail.ee</option>
+			<option>Mail.Ru</option>
+			<option>Mailgun</option>
+			<option>Mailjet</option>
+			<option>Mandrill</option>
+			<option>Postmark</option>
+			<option>QQ</option>
+			<option>QQex</option>
+			<option>SendGrid</option>
+			<option>SendCloud</option>
+			<option>SES</option>
+			<option>Yahoo</option>
+			<option>yandex</option>
+			<option>Zoho</option>
+		</select>	
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="email">
 	<p>Sends the <b>msg.payload</b> as an email, with a subject of <b>msg.topic</b>.</p>
 	<p>It sends the message to the configured recipient <i>only</i>.</p>
 	<p><b>msg.topic</b> is used to set the subject of the email, and <b>msg.payload</b> is the body text.</p>
-	<p>Uses the nodemailer module - you also need to pre-configure your email SMTP settings in a file emailkeys.js like that below.</p>
-	<p><pre>module.exports = { service: "Gmail", user: "blahblah@gmail.com", pass: "password", server: "imap.gmail.com", port: "993" }</pre></p>
-	<p>This <b>must</b> be located in the diectory above node-red.</p>
+	<p>Services : DynectEmail, Gmail, hot.ee, Hotmail, iCloud, mail.ee, Mail.Ru, Mailgun, Mailjet, Mandrill, Postmark, QQ, QQex (Tencent Business Email), SendGrid, SendCloud, SES, Yahoo, yandex, Zoho</p>
 </script>
 
 <script type="text/javascript">
     RED.nodes.registerType('email',{
-        category: 'social-output',
+        category: 'ttb',
         color:"#c7e9c0",
         defaults: {
-            name: {value:"",required:true}
+            name: {value:"",required:true},
+			user: {value:"",required:true},
+			pass: {value:"",required:true},
+			service: {value:"",required:true},
         },
         inputs:1,
         outputs:0,
         icon: "envelope.png",
         align: "right",
         label: function() {
-            return this.name;
+            return this.name||"email";
         },
         labelStyle: function() {
             return (this.name||!this.topic)?"node_label_italic":"";
