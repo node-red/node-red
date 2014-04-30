@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013 IBM Corp.
+  Copyright 2013, 2014 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -37,11 +37,29 @@
 
 <script type="text/x-red" data-help-name="file">
     <p>Writes <b>msg.payload</b> to the file specified, e.g. to create a log.</p>
-    <p>The filename can be overridden by the <code>.filename</code> property
-    of the incoming message.</p>
+    <p>The filename can be overridden by the <code>filename</code> property of the incoming message.</p>
     <p>A newline is added to every message. But this can be turned off if required, for example, to allow binary files to be written.</p>
     <p>The default behaviour is to append to the file. This can be changed to overwrite the file each time, for example if you want to output a "static" web page or report.</p>
-    <p>If a <code>.delete</code> property exists then the file will be deleted instead.</p>
+    <p>If a <code>delete</code> property exists then the file will be deleted instead.</p>
+</script>
+
+<script type="text/x-red" data-template-name="file in">
+    <div class="form-row">
+         <label for="node-input-filename"><i class="icon-file"></i> Filename</label>
+         <input type="text" id="node-input-filename" placeholder="Filename">
+    </div>
+    <div class="form-row">
+        <label>Output as</label>
+        <select id="node-input-format">
+            <option value="utf8">a utf8 string</option>
+            <option value="">a Buffer</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="file in">
+    <p>Reads the specified file and sends the content as <b>msg.payload</b>.</p>
+    <p>The filename can be overridden by the <code>filename</code> property of the incoming message.</p>
 </script>
 
 <script type="text/javascript">
@@ -58,6 +76,25 @@
         outputs:0,
         icon: "file.png",
         align: "right",
+        label: function() {
+            return this.name||this.filename;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+    
+    RED.nodes.registerType('file in',{
+        category: 'storage-input',
+        defaults: {
+            name: {value:""},
+            filename: {value:""},
+            format: {value:"utf8"},
+        },
+        color:"BurlyWood",
+        inputs:1,
+        outputs:1,
+        icon: "file.png",
         label: function() {
             return this.name||this.filename;
         },

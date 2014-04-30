@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,3 +60,31 @@ function FileNode(n) {
     });
 }
 RED.nodes.registerType("file",FileNode);
+
+function FileInNode(n) {
+    RED.nodes.createNode(this,n);
+
+    this.filename = n.filename;
+    this.format = n.format;
+    var node = this;
+    var options = {};
+    if (this.format) {
+        options['encoding'] = this.format;
+    }
+    this.on("input",function(msg) {
+        var filename = msg.filename || this.filename;
+
+        if (filename == "") {
+            node.warn('No filename specified');
+        } else {
+            fs.readFile(filename,options,function(err,data) {
+                if (err) {
+                    node.warn(err);
+                } else {
+                    node.send({payload:data});
+                }
+            });
+        }
+    });
+}
+RED.nodes.registerType("file in",FileInNode);
