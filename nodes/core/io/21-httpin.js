@@ -22,6 +22,7 @@ var urllib = require("url");
 var express = require("express");
 var getBody = require('raw-body');
 var mustache = require("mustache");
+var querystring = require("querystring");
 
 var cors = require('cors');
 var jsonParser = express.json();
@@ -149,12 +150,38 @@ function HTTPRequest(n) {
             var method = (msg.method||nodeMethod).toUpperCase();
             var opts = urllib.parse(url);
             opts.method = method;
+            opts.headers = {};
             if (msg.headers) {
-                opts.headers = msg.headers;
+                for (var v in msg.headers) {
+                    opts.headers[v.toLowerCase()] = msg.headers[v];
+                }
             }
             if (credentials) {
                 opts.auth = credentials.user+":"+(credentials.password||"");
             }
+            
+            var payload = null;
+            
+            if (msg.payload && (method == "POST" || method == "PUT") ) {
+                if (typeof msg.payload === "string" || Buffer.isBuffer(msg.payload)) {
+                    payload = msg.payload;
+                } else if (typeof msg.payload == "number") {
+                    payload = msg.payload+"";
+                } else {
+                    if (opts.headers['content-type'] == 'application/x-www-form-urlencoded') {
+                        payload = querystring.stringify(msg.payload);
+                    } else {
+                        payload = JSON.stringify(msg.payload);
+                        if (opts.headers['content-type'] == null) {
+                            opts.headers['content-type'] = "application/json";
+                        }
+                    }
+                }
+                if (opts.headers['content-length'] == null) {
+                    opts.headers['content-length'] = Buffer.byteLength(payload);
+                }
+            }
+            
             var req = ((/^https/.test(url))?https:http).request(opts,function(res) {
                 res.setEncoding('utf8');
                 msg.statusCode = res.statusCode;
@@ -172,21 +199,13 @@ function HTTPRequest(n) {
                 msg.statusCode = err.code;
                 node.send(msg);
             });
-            if (msg.payload && (method == "POST" || method == "PUT") ) {
-                if (typeof msg.payload === "string" || Buffer.isBuffer(msg.payload)) {
-                    req.write(msg.payload);
-                } else if (typeof msg.payload == "number") {
-                    req.write(msg.payload+"");
-                } else {
-                    req.write(JSON.stringify(msg.payload));
-                }
+            if (payload) {
+                req.write(payload);
             }
             req.end();
     });
 }
 RED.nodes.registerType("http request",HTTPRequest);
-
-var querystring = require('querystring');
 
 RED.httpAdmin.get('/http-request/:id',function(req,res) {
     var credentials = RED.nodes.getCredentials(req.params.id);
