@@ -99,8 +99,15 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-config-input-serialbaud"><i class="icon-wrench"></i> Baud Rate</label>
-        <select type="text" id="node-config-input-serialbaud" style="width: 150px;">
+        <table><tr>
+            <td width = "102px"><i class="icon-wrench"></i> Settings</td>
+            <td width = "100px">Baud Rate</td>
+            <td width = "80px">Data Bits</td>
+            <td width = "80px">Parity</td>
+            <td width = "80px">Stop Bits</td>
+        </tr><tr><td>&nbsp;</td>
+        <td>
+        <select type="text" id="node-config-input-serialbaud" style="width: 100px;">
             <option value="115200">115200</option>
             <option value="57600">57600</option>
             <option value="38400">38400</option>
@@ -119,33 +126,28 @@
             <option value="75">75</option>
             <option value="50">50</option>
         </select>
-    </div>
-    <div class="form-row">
-        <label for="node-config-input-databits"><i class="icon-wrench"></i> Data Bits</label>
-        <select type="text" id="node-config-input-databits" style="width: 100px;">
+        </td><td>
+        <select type="text" id="node-config-input-databits" style="width: 80px;">
             <option value="8">8</option>
             <option value="7">7</option>
             <option value="6">6</option>
             <option value="5">5</option>
         </select>
-    </div>
-    <div class="form-row">
-        <label for="node-config-input-parity"><i class="icon-wrench"></i> Parity</label>
-        <select type="text" id="node-config-input-parity" style="width: 100px;">
+        </td><td>
+        <select type="text" id="node-config-input-parity" style="width: 80px;">
             <option value="none">None</option>
             <option value="even">Even</option>
             <option value="mark">Mark</option>
             <option value="odd">Odd</option>
             <option value="space">Space</option>
         </select>
-    </div>
-    <div class="form-row">
-        <label for="node-config-input-stopbits"><i class="icon-wrench"></i> Stop Bits</label>
-        <select type="text" id="node-config-input-stopbits" style="width: 100px;">
+        </td><td>
+        <select type="text" id="node-config-input-stopbits" style="width: 80px;">
             <option value="2">2</option>
             <option value="1">1</option>
         </select>
-    </div>
+    </td>
+    </tr></table>
     <div class="form-row">
         <label for="node-config-input-newline"><i class="icon-text-width"></i> New line</label>
         <input type="text" id="node-config-input-newline"  style="width: 50px;">
@@ -173,22 +175,14 @@
             newline: {value:"\\n"},
             addchar: {value:false}
         },
-        label: function() {            
-            if (typeof this.serialbaud === 'undefined') {
-                this.serialbaud = 57600;
-            }
-            if (typeof this.databits === 'undefined') {
-                this.databits = 8;
-            }
-            if (typeof this.parity === 'undefined') {
-                this.parity = 'none';
-            }
-            if (typeof this.stopbits == 'undefined') {
-                this.stopbits = 1;
-            }
+        label: function() {
+            this.serialbaud = this.serialbaud || 57600;
+            this.databits = this.databits || 8;
+            this.parity = this.parity || 'none';
+            this.stopbits = this.stopbits || 1;
             return this.serialport+":"+this.serialbaud+"-"+this.databits+this.parity.charAt(0).toUpperCase()+this.stopbits;
         },
-        oneditprepare: function() {            
+        oneditprepare: function() {
             var p = this.serialport;
             var s = $("#node-config-input-serialport");
             $.getJSON('serialports',function(data) {

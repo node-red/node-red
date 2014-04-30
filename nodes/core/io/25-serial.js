@@ -1,18 +1,18 @@
 /**
- * Copyright 2013 IBM Corp.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+* Copyright 2013 IBM Corp.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
 
 var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var settings = RED.settings;
@@ -28,29 +28,12 @@ function SerialPortNode(n) {
     this.newline = n.newline;
     this.addchar = n.addchar || "false";
 
-    if (typeof n.serialbaud === 'undefined') {
-        this.serialbaud = 57600;
-    } else {
-        this.serialbaud = parseInt(n.serialbaud);
-    }
-    if (typeof n.databits === 'undefined') {
-        this.databits = 8;
-    } else {
-        this.databits = parseInt(n.databits);
-    }
-    if (typeof n.parity === 'undefined') {
-        this.parity = 'none';
-    } else {
-        this.parity = n.parity;
-    }
-    if (typeof n.stopbits == 'undefined') {
-        this.stopbits = 1;
-    } else {
-        this.stopbits = parseInt(n.stopbits);
-    }
+    this.serialbaud = parseInt(n.serialbaud) || 57600;
+    this.databits = parseInt(n.databits) || 8;
+    this.parity = n.parity || "none";
+    this.stopbits = parseInt(n.stopbits) || 1;
 }
 RED.nodes.registerType("serial-port",SerialPortNode);
-
 
 function SerialOutNode(n) {
     RED.nodes.createNode(this,n);
@@ -98,7 +81,6 @@ function SerialOutNode(n) {
     });
 }
 RED.nodes.registerType("serial out",SerialOutNode);
-
 
 function SerialInNode(n) {
     RED.nodes.createNode(this,n);
