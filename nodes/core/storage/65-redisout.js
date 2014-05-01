@@ -88,7 +88,34 @@ function RedisOutNode(n) {
     });
 }
 
+function RedisInNode(n) {
+    RED.nodes.createNode(this,n);
+    var node = this;
+    this.port = n.port||"6379";
+    this.hostname = n.hostname||"127.0.0.1";
+    this.key = n.key;
+    this.keytype = n.keytype;
+    
+    this.client = redisConnectionPool.get(this.hostname,this.port);
+
+    this.on("input", function(msg) {
+
+            if (msg != null) {
+                var k = (n.keytype=="REDISKEY")?this.key:msg.payload[this.key].toString();                
+                if (k) {
+                this.client.get(k, function(err, reply){
+                  msg.payload = reply;
+                  node.send(msg); 
+                })
+                } else {
+                    this.warn("No key set");
+                }
+            }
+    });
+}
+
 RED.nodes.registerType("redis out",RedisOutNode);
+RED.nodes.registerType("redis in",RedisInNode);
 
 RedisOutNode.prototype.close = function() {
     redisConnectionPool.close(this.client);
