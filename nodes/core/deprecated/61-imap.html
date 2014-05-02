@@ -31,13 +31,13 @@
        If there is text/html then that is returned in <b>msg.html</b>. <b>msg.from</b> and <b>msg.date</b> are also set if you need them.</p>
     <p>Uses the imap module - you also need to pre-configure your email settings in a file emailkeys.js as per below.</p>
     <p><pre>module.exports = { service: "Gmail", user: "blahblah@gmail.com", pass: "password", server: "imap.gmail.com", port: "993" }</pre></p>
-    <p>This <b>must</b> be located in the directory above node-red.</p>
+    <p>This <b>must</b> be located in the directory <b>above</b> node-red.</p>
     <p><b>Note:</b> this node <i>only</i> gets the most recent single email from the inbox, so set the repeat (polling) time appropriately.</p>
 </script>
 
 <script type="text/javascript">
     RED.nodes.registerType('imap',{
-        category: 'social-input',
+        category: 'deprecated',
         color:"#c7e9c0",
         defaults: {
             repeat: {value:"300",required:true},

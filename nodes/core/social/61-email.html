@@ -14,38 +14,223 @@
   limitations under the License.
 -->
 
-<script type="text/x-red" data-template-name="email">
+<script type="text/x-red" data-template-name="e-mail">
     <div class="form-row">
         <label for="node-input-name"><i class="icon-envelope"></i> To</label>
         <input type="text" id="node-input-name" placeholder="email@address.com">
     </div>
+    <!-- <div class="form-row">
+        <label for="node-input-pin"><i class="icon-asterisk"></i> Service</label>
+        <select type="text" id="node-input-pin" style="width: 150px;">
+            <option value="-" disabled> </option>
+            <option value="DynectEmail">DynectEmail</option>
+            <option value="Gmail">Gmail</option>
+            <option value="hot.ee">hot.ee</option>
+            <option value="Hotmail">Hotmail</option>
+            <option value="iCloud">iCloud</option>
+            <option value="mail.ee">mail.ee</option>
+            <option value="Mail.Ru">Mail.Ru</option>
+            <option value="Mailgun">Mailgun</option>
+            <option value="Mailjet">Mailjet</option>
+            <option value="Mandrill">Mandrill</option>
+            <option value="Postmark">Postmark</option>
+            <option value="QQ">QQ</option>
+            <option value="QQex">QQex</option>
+            <option value="SendGrid">SendGrid</option>
+            <option value="SendCloud">SendCloud</option>
+            <option value="SES">SES</option>
+            <option value="Yahoo">Yahoo</option>
+            <option value="yandex">yandex</option>
+            <option value="Zoho">Zoho</option>
+         </select>
+    </div> -->
+    <div class="form-row">
+        <label for="node-input-server"><i class="icon-tag"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="smtp.gmail.com">
+    </div>
+    <div class="form-row">
+        <label for="node-input-port"><i class="icon-random"></i> Port</label>
+        <input type="text" id="node-input-port" placeholder="465">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-userid"><i class="icon-user"></i> Userid</label>
+        <input type="text" id="node-config-input-userid">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-password"><i class="icon-lock"></i> Password</label>
+        <input type="password" id="node-config-input-password">
+    </div>
+    <br/>
+    <div class="form-row">
+        <label for="node-input-dname"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-dname" placeholder="Name">
+    </div>
+    <div class="form-tips" id="node-tip"><b>Note:</b> Using credentials from global emailkeys.js file.</div>
 </script>
 
-<script type="text/x-red" data-help-name="email">
-	<p>Sends the <b>msg.payload</b> as an email, with a subject of <b>msg.topic</b>.</p>
-	<p>It sends the message to the configured recipient <i>only</i>.</p>
-	<p><b>msg.topic</b> is used to set the subject of the email, and <b>msg.payload</b> is the body text.</p>
-	<p>Uses the nodemailer module - you also need to pre-configure your email SMTP settings in a file emailkeys.js like that below.</p>
-	<p><pre>module.exports = { service: "Gmail", user: "blahblah@gmail.com", pass: "password", server: "imap.gmail.com", port: "993" }</pre></p>
-	<p>This <b>must</b> be located in the diectory above node-red.</p>
+<script type="text/x-red" data-help-name="e-mail">
+    <p>Sends the <b>msg.payload</b> as an email, with a subject of <b>msg.topic</b>.</p>
+    <p>It sends the message to the configured recipient <i>only</i>.</p>
+    <p><b>msg.topic</b> is used to set the subject of the email, and <b>msg.payload</b> is the body text.</p>
+    <p>Uses the nodemailer module.</p>
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('email',{
+(function() {
+    RED.nodes.registerType('e-mail',{
         category: 'social-output',
         color:"#c7e9c0",
         defaults: {
-            name: {value:"",required:true}
+            server: {value:"smtp.gmail.com",required:true},
+            port: {value:"465",required:true},
+            name: {value:"",required:true},
+            dname: {value:""}
         },
         inputs:1,
         outputs:0,
         icon: "envelope.png",
         align: "right",
         label: function() {
-            return this.name;
+            return this.dname||this.name||"email";
+        },
+        labelStyle: function() {
+            return (this.dname||!this.topic)?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            $.getJSON('email/'+this.id,function(data) {
+                if (data.userid) {
+                    $('#node-config-input-userid').val(data.userid);
+                }
+                if (data.hasPassword) {
+                    $('#node-config-input-password').val('__PWRD__');
+                } else {
+                    $('#node-config-input-password').val('');
+                }
+                if (data.global) $('#node-tip').show();
+                else $('#node-tip').hide();
+            });
+        },
+        oneditsave: function() {
+            var credentials = {};
+            var newUser = $('#node-config-input-userid').val();
+            var newPass = $('#node-config-input-password').val();
+            credentials.userid = newUser;
+            if (newPass != '__PWRD__') {
+                credentials.password = newPass;
+            }
+            $.ajax({
+                url: 'email/'+this.id,
+                type: 'POST',
+                data: credentials,
+                success: function(result){}
+            });
+        },
+        ondelete: function() {
+            $.ajax({
+                url: 'email/'+this.id,
+                type: 'DELETE',
+                success: function(result) {}
+            });
+        }
+    });
+})();
+</script>
+
+
+<script type="text/x-red" data-template-name="e-mail in">
+    <div class="form-row node-input-repeat">
+        <label for="node-input-repeat"><i class="icon-repeat"></i> Check Repeat (S)</label>
+        <input type="text" id="node-input-repeat" placeholder="300">
+    </div>
+    <div class="form-row">
+        <label for="node-input-server"><i class="icon-tag"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="imap.gmail.com">
+    </div>
+    <div class="form-row">
+        <label for="node-input-port"><i class="icon-random"></i> Port</label>
+        <input type="text" id="node-input-port" placeholder="993">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-userid"><i class="icon-user"></i> Userid</label>
+        <input type="text" id="node-config-input-userid">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-password"><i class="icon-lock"></i> Password</label>
+        <input type="password" id="node-config-input-password">
+    </div>
+    <br/>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-tips" id="node-tip"><b>Note:</b> Using credentials from global emailkeys.js file.</div>
+    <div id="node-input-tip" class="form-tips">Tip: <b>ONLY</b> retrieves the single most recent email.</div>
+</script>
+
+<script type="text/x-red" data-help-name="e-mail in">
+    <p>Repeatedly gets a <b>single email</b> from an IMAP server and forwards on as a msg if not already seen.</p>
+    <p>The subject is loaded into <b>msg.topic</b> and <b>msg.payload</b> is the plain text body.
+       If there is text/html then that is returned in <b>msg.html</b>. <b>msg.from</b> and <b>msg.date</b> are also set if you need them.</p>
+    <p>Uses the imap module.</p>
+    <p><b>Note:</b> this node <i>only</i> gets the most recent single email from the inbox, so set the repeat (polling) time appropriately.</p>
+</script>
+
+<script type="text/javascript">
+(function() {
+    RED.nodes.registerType('e-mail in',{
+        category: 'social-input',
+        color:"#c7e9c0",
+        defaults: {
+            repeat: {value:"300",required:true},
+            server: {value:"imap.gmail.com",required:true},
+            port: {value:"993",required:true},
+            name: {value:""}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "envelope.png",
+        label: function() {
+            return this.name||"email";
         },
         labelStyle: function() {
             return (this.name||!this.topic)?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            $.getJSON('email/'+this.id,function(data) {
+                if (data.userid) {
+                    $('#node-config-input-userid').val(data.userid);
+                }
+                if (data.hasPassword) {
+                    $('#node-config-input-password').val('__PWRD__');
+                } else {
+                    $('#node-config-input-password').val('');
+                }
+                if (data.global) $('#node-tip').show();
+                else $('#node-tip').hide();
+            });
+        },
+        oneditsave: function() {
+            var credentials = {};
+            var newUser = $('#node-config-input-userid').val();
+            var newPass = $('#node-config-input-password').val();
+            credentials.userid = newUser;
+            if (newPass != '__PWRD__') {
+                credentials.password = newPass;
+            }
+            $.ajax({
+                url: 'email/'+this.id,
+                type: 'POST',
+                data: credentials,
+                success: function(result){}
+            });
+        },
+        ondelete: function() {
+            $.ajax({
+                url: 'email/'+this.id,
+                type: 'DELETE',
+                success: function(result) {}
+            });
         }
     });
+})();
 </script>
