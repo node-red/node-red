@@ -17,7 +17,12 @@
 var RED = require(process.env.NODE_RED_HOME+"/red/red");
 var util = require('util');
 var nodemailer = require("nodemailer");
-var Imap = require('imap');
+var Imap = null;
+try {
+    Imap = require('imap');
+} catch (e) {
+    util.log("[61-email.js] - imap npm not installed - no inbound email available");
+}
 
 //console.log(nodemailer.Transport.transports.SMTP.wellKnownHosts);
 
@@ -84,7 +89,6 @@ function EmailNode(n) {
     });
 }
 RED.nodes.registerType("e-mail",EmailNode);
-
 
 function EmailInNode(n) {
     RED.nodes.createNode(this,n);
@@ -202,7 +206,9 @@ function EmailInNode(n) {
 
     node.emit("input",{});
 }
+if (Imap != null) {
 RED.nodes.registerType("e-mail in",EmailInNode);
+}
 
 var querystring = require('querystring');
 

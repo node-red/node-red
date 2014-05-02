@@ -21,7 +21,7 @@ var util = require('util');
 try {
     var emailkey = RED.settings.email || require(process.env.NODE_RED_HOME+"/../emailkeys.js");
 } catch (err) {
-    util.log("[61-imap.js] Advise : No Email credentials found.");
+    //util.log("[61-imap.js] Info : No Email credentials found.");
 }
 
 if (emailkey) {
