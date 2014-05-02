@@ -70,26 +70,27 @@ function start() {
         console.log("\nWelcome to Node-RED\n===================\n");
         util.log("[red] Version: "+RED.version());
         util.log("[red] Loading palette nodes");
-        var nodeErrors = redNodes.load(settings);
-        if (nodeErrors.length > 0) {
-            util.log("------------------------------------------");
-            if (settings.verbose) {
-                for (var i=0;i<nodeErrors.length;i+=1) {
-                    util.log("["+nodeErrors[i].fn+"] "+nodeErrors[i].err);
+        redNodes.load(settings).then(function(nodeErrors) {
+            if (nodeErrors.length > 0) {
+                util.log("------------------------------------------");
+                if (settings.verbose) {
+                    for (var i=0;i<nodeErrors.length;i+=1) {
+                        util.log("["+nodeErrors[i].fn+"] "+nodeErrors[i].err);
+                    }
+                } else {
+                    util.log("[red] Failed to register "+nodeErrors.length+" node type"+(nodeErrors.length==1?"":"s"));
+                    util.log("[red] Run with -v for details");
                 }
-            } else {
-                util.log("[red] Failed to register "+nodeErrors.length+" node type"+(nodeErrors.length==1?"":"s"));
-                util.log("[red] Run with -v for details");
+                util.log("------------------------------------------");
             }
-            util.log("------------------------------------------");
-        }
-        defer.resolve();
-        storage.getFlows().then(function(flows) {
-                if (flows.length > 0) {
-                    redNodes.setConfig(flows);
-                }
-        }).otherwise(function(err) {
-                util.log("[red] Error loading flows : "+err);
+            defer.resolve();
+            storage.getFlows().then(function(flows) {
+                    if (flows.length > 0) {
+                        redNodes.setConfig(flows);
+                    }
+            }).otherwise(function(err) {
+                    util.log("[red] Error loading flows : "+err);
+            });
         });
     });
     

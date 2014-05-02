@@ -18,6 +18,9 @@ var EventEmitter = require("events").EventEmitter;
 var fs = require("fs");
 var path = require("path");
 var clone = require("clone");
+var when = require("when");
+var whenNode = require('when/node');
+
 var events = require("./events");
 var storage = null;
 var settings = null;
@@ -208,109 +211,206 @@ function createNode(node,def) {
 }
 
 function load(_settings) {
-    settings = _settings;
-    
-    var RED = require("./red.js");
-    
-    function loadNode(nodeDir, nodeFn) {
+    return when.promise(function(resolve,reject) {
+        settings = _settings;
         
-        if (settings.nodesExcludes) {
-            for (var i=0;i<settings.nodesExcludes.length;i++) {
-                if (settings.nodesExcludes[i] == nodeFn) {
-                    return;
+        var RED = require("./red.js");
+        
+        function loadTemplate(templateFilename) {
+            return when.promise(function(resolve,reject) {
+                    
+                whenNode.call(fs.readFile,templateFilename,'utf8').done(function(content) {
+                    node_type_registry.registerConfig(content);
+                    resolve();
+                }, function(err) {
+                    reject("missing template file");
+                });
+                
+            });
+        }
+        
+        function loadNode(nodeDir, nodeFn) {
+            return when.promise(function(resolve,reject) {
+                if (settings.nodesExcludes) {
+                    for (var i=0;i<settings.nodesExcludes.length;i++) {
+                        if (settings.nodesExcludes[i] == nodeFn) {
+                            resolve();
+                            return;
+                        }
+                    }
                 }
+                var nodeFilename = path.join(nodeDir,nodeFn);
+                var templateFilename = nodeFilename.replace(/\.js$/,".html");
+                var r = require(nodeFilename);
+                if (typeof r === "function") {
+                    try {
+                        var promise = r(RED);
+                        if (promise != null && typeof promise.then === "function") {
+                            promise.then(function() {
+                                resolve(loadTemplate(templateFilename));
+                            },function(err) {
+                                reject(err);
+                            });
+                        } else {
+                            resolve(loadTemplate(templateFilename));
+                        }
+                    } catch(err) {
+                        reject(err);
+                    }
+                } else {
+                    resolve(loadTemplate(templateFilename));
+                }
+            });
+                
+        }
+        
+        function loadNodesFromModule(moduleDir,pkg) {
+            var nodes = pkg['node-red'].nodes||{};
+            var promises = [];
+            for (var n in nodes) {
+                promises.push(when.promise(function(resolve) {
+                    loadNode(moduleDir,nodes[n]).then(resolve, function(err) {
+                        resolve({'fn':pkg.name+":"+n,err:err});
+                    });
+                }));
             }
+            return when.promise(function(resolve,reject) {
+                var errors = [];
+                when.settle(promises).then(function(results) {
+                    var errors = [];
+                    results.forEach(function(result) {
+                        if (result.state == 'fulfilled' && result.value) {
+                            errors = errors.concat(result.value);
+                        }
+                    });
+                    resolve(errors); 
+                });
+            });
         }
-        var nodeFilename = path.join(nodeDir,nodeFn);
-        var r = require(nodeFilename);
-        if (typeof r === "function") {
-            r(RED);
-        }
-        var templateFilename = nodeFilename.replace(/\.js$/,".html");
-        if (fs.existsSync(templateFilename)) {
-            node_type_registry.registerConfig(fs.readFileSync(templateFilename,'utf8'));
-        } else {
-            util.log("["+type+"] missing template file: "+templateFilename);
-        }
-    }
-    
-    function scanForNodes(dir) {
-        var pm = path.join(dir,"node_modules");
-        if (fs.existsSync(pm)) {
-            fs.readdirSync(pm).filter(function(fn) {
-                var pkgfn = path.join(pm,fn,"package.json");
-                if (fs.existsSync(pkgfn)) {
-                    var pkg = require(pkgfn);
-                    if (pkg['node-red']) {
-                        console.log(pkg.name,pkg.version);
-                        var nr = pkg['node-red'];
-                        if (nr.nodes) {
-                            var nrn = nr.nodes;
-                            for (var i in nrn) {
-                                console.log("  ",i,":",nrn[i]);
-                                try {
-                                    var nodeDir = path.join(pm,fn);
-                                    loadNode(nodeDir,nrn[i]);
-                                } catch(err) {
-                                    util.log("["+i+"] "+err);
-                                    //console.log(err.stack);
+        
+        function scanForNodes(dir) {
+            return when.promise(function(resolve,reject) {
+                    
+                var pm = path.join(dir,"node_modules");
+                var promises = [];
+                promises.push(when.promise(function(resolve,reject) {
+                    whenNode.call(fs.readdir,pm).then(function(files) {
+                        var promises = [];
+                        files.forEach(function(fn) {
+                            var pkgfn = path.join(pm,fn,"package.json");
+                            try {
+                                var pkg = require(pkgfn);
+                                if (pkg['node-red']) {
+                                    var moduleDir = path.join(pm,fn);
+                                    promises.push(loadNodesFromModule(moduleDir,pkg));
+                                }
+                            } catch(err) {
+                                if (err.code != "MODULE_NOT_FOUND") {
+                                    // TODO: handle unexpected error
                                 }
                             }
-                        }
-                    }
+                        });
+                        when.settle(promises).then(function(results) {
+                            var errors = [];
+                            results.forEach(function(result) {
+                                if (result.state == 'fulfilled' && result.value) {
+                                    errors = errors.concat(result.value);
+                                }
+                            });
+                            resolve(errors);
+                        });
+                    },function(err) {
+                        resolve([]); 
+                    })
+                
+                }));
+                var up = path.resolve(path.join(dir,".."));
+                if (up !== dir) {
+                    promises.push(scanForNodes(up))
                 }
+                when.settle(promises).then(function(results) {
+                    var errors = [];
+                    results.forEach(function(result) {
+                        if (result.state == 'fulfilled' && result.value) {
+                            errors = errors.concat(result.value);
+                        }
+                    });
+                    resolve(errors);
+                });
+                
             });
         }
         
-        var up = path.join(dir,"..");
-        if (up !== dir) {
-            scanForNodes(up);
-        }
-    }
-    
-    function loadNodes(dir) {
-        var errors = [];
-        if (fs.existsSync(dir)) {
-            fs.readdirSync(dir).sort().filter(function(fn){
-                    var stats = fs.statSync(path.join(dir,fn));
-                    if (stats.isFile()) {
-                        if (/\.js$/.test(fn)) {
-                            try {
-                                loadNode(dir,fn);
-                            } catch(err) {
-                                errors.push({fn:fn, err:err});
-                                //util.log("["+fn+"] "+err);
-                                //console.log(err.stack);
+        function loadNodes(dir) {
+            return when.promise(function(resolve,reject) {
+                var promises = [];
+                
+                whenNode.call(fs.readdir,dir).done(function(files) {
+                    files = files.sort();
+                    files.forEach(function(fn) {
+                        var stats = fs.statSync(path.join(dir,fn));
+                        if (stats.isFile()) {
+                            if (/\.js$/.test(fn)) {
+                                promises.push(when.promise(function(resolve,reject) {
+                                    loadNode(dir,fn).then(resolve, function(err) {
+                                        resolve({'fn':fn,err:err});
+                                    });
+                                }));
+                            }
+                        } else if (stats.isDirectory()) {
+                            // Ignore /.dirs/, /lib/ /node_modules/ 
+                            if (!/^(\..*|lib|icons|node_modules|test)$/.test(fn)) {
+                                promises.push(when.promise(function(resolve,reject) {
+                                    loadNodes(path.join(dir,fn)).then(function(errs) {
+                                        resolve(errs);
+                                    });
+                                }));
+                                
+                            } else if (fn === "icons") {
+                                events.emit("node-icon-dir",path.join(dir,fn));
                             }
                         }
-                    } else if (stats.isDirectory()) {
-                        // Ignore /.dirs/, /lib/ /node_modules/ 
-                        if (!/^(\..*|lib|icons|node_modules|test)$/.test(fn)) {
-                            errors = errors.concat(loadNodes(path.join(dir,fn)));
-                        } else if (fn === "icons") {
-                            events.emit("node-icon-dir",path.join(dir,fn));
-                        }
-                    }
+                    });
+                    
+                    when.settle(promises).then(function(results) {
+                        var errors = [];
+                        results.forEach(function(result) {
+                            if (result.state == 'fulfilled' && result.value) {
+                                errors = errors.concat(result.value);
+                            }
+                        });
+                        resolve(errors);
+                    });
+                    
+                }, function(err) { 
+                    resolve([]);
+                    // non-existant dir 
+                });
             });
         }
-        return errors;
-    }
-    var errors = loadNodes(__dirname+"/../nodes");
-    scanForNodes(__dirname+"/../nodes");
-    if (settings.nodesDir) {
-        var dir = settings.nodesDir;
-        if (typeof settings.nodesDir == "string") {
-            dir = [dir];
-        }
         
-        for (var i=0;i<dir.length;i++) {
-            errors = errors.concat(loadNodes(dir[i]));
-            scanForNodes(dir[i]);
+        var promises = [];
+        promises.push(loadNodes(__dirname+"/../nodes"));
+        promises.push(scanForNodes(__dirname+"/../nodes"));
+        if (settings.nodesDir) {
+            var dir = settings.nodesDir;
+            if (typeof settings.nodesDir == "string") {
+                dir = [dir];
+            }
+            for (var i=0;i<dir.length;i++) {
+                promises.push(loadNodes(dir[i]));
+            }
         }
-    }
-    //console.log(errors);
-    return errors;
-    //events.emit("nodes-loaded");
+        when.settle(promises).then(function(results) {
+            var errors = [];
+            results.forEach(function(result) {
+                if (result.state == 'fulfilled' && result.value) {
+                    errors = errors.concat(result.value);
+                }
+            });
+            resolve(errors);
+        });
+    });
 }
 
 var activeConfig = [];
