@@ -1,5 +1,6 @@
 node_modules
 credentials.json
 flows*.json
+*_cred*
 nodes/node-red-nodes/
 .npm

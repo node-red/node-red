@@ -23,7 +23,7 @@ describe('LocalFileSystem', function() {
             done();
         });
     });
-    
+
     it('should handle missing flow file',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             var flowFile = 'flows_'+require('os').hostname()+'.json';
@@ -37,7 +37,7 @@ describe('LocalFileSystem', function() {
             });
         });
     });
-    
+
     it('should save flows to the default file',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             var flowFile = 'flows_'+require('os').hostname()+'.json';
@@ -56,7 +56,7 @@ describe('LocalFileSystem', function() {
             });
         });
     });
-    
+
     it('should save flows to the specified file',function(done) {
         var defaultFlowFile = 'flows_'+require('os').hostname()+'.json';
         var defaultFlowFilePath = path.join(userDir,defaultFlowFile);
@@ -66,7 +66,7 @@ describe('LocalFileSystem', function() {
         localfilesystem.init({userDir:userDir, flowFile:flowFilePath}).then(function() {
             fs.existsSync(defaultFlowFilePath).should.be.false;
             fs.existsSync(flowFilePath).should.be.false;
-            
+
             localfilesystem.saveFlows(testFlow).then(function() {
                 fs.existsSync(defaultFlowFilePath).should.be.false;
                 fs.existsSync(flowFilePath).should.be.true;
@@ -81,12 +81,14 @@ describe('LocalFileSystem', function() {
             });
         });
     });
-    
+
     it('should handle missing credentials', function(done) {
-        var credFile = path.join(userDir,"credentials.json");
-        localfilesystem.init({userDir:userDir}).then(function() {
+        var flowFile = 'test.json';
+        var flowFilePath = path.join(userDir,flowFile);
+        var credFile = path.join(userDir,"test_cred.json");
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}).then(function() {
             fs.existsSync(credFile).should.be.false;
-            
+
             localfilesystem.getCredentials().then(function(creds) {
                 creds.should.eql({});
                 done();
@@ -95,16 +97,16 @@ describe('LocalFileSystem', function() {
             });
         });
     });
-    
+
     it('should handle credentials', function(done) {
-        var credFile = path.join(userDir,"credentials.json");
+        var credFile = path.join(userDir,"test_cred.json");
 
         localfilesystem.init({userDir:userDir}).then(function() {
-            
+
             fs.existsSync(credFile).should.be.false;
-            
+
             var credentials = {"abc":{"type":"creds"}};
-            
+
             localfilesystem.saveCredentials(credentials).then(function() {
                 fs.existsSync(credFile).should.be.true;
                 localfilesystem.getCredentials().then(function(creds) {
@@ -118,7 +120,7 @@ describe('LocalFileSystem', function() {
             });
         });
     });
-    
+
     it('should return an empty list of library flows',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             localfilesystem.getAllFlows().then(function(flows) {
@@ -129,7 +131,7 @@ describe('LocalFileSystem', function() {
             });
         });
     });
-    
+
     it('should return a valid list of library flows',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             var flowLib = path.join(userDir,"lib","flows");
@@ -138,7 +140,7 @@ describe('LocalFileSystem', function() {
             fs.mkdirSync(path.join(flowLib,"C"));
             fs.closeSync(fs.openSync(path.join(flowLib,"C","D.json"),"w"));
             var testFlowsList = {"d":{"C":{"f":["D"]}},"f":["A","B"]};
-            
+
             localfilesystem.getAllFlows().then(function(flows) {
                 flows.should.eql(testFlowsList);
                 done();
@@ -147,7 +149,7 @@ describe('LocalFileSystem', function() {
             });
         });
     });
-    
+
     it('should fail a non-existent flow', function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             localfilesystem.getFlow("a/b/c.json").then(function(flow) {
@@ -158,7 +160,7 @@ describe('LocalFileSystem', function() {
             });
         });
     });
-    
+
     it('should return a flow',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             var testflowString = JSON.stringify(testFlow);
@@ -174,7 +176,7 @@ describe('LocalFileSystem', function() {
             });
         });
     });
-    
+
     it('should return an empty list of library objects',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             localfilesystem.getLibraryEntry('object','').then(function(flows) {
@@ -206,11 +208,11 @@ describe('LocalFileSystem', function() {
         fs.writeFileSync(path.join(objLib,"file1.js"),"// abc: def\n// not a metaline \n\n Hi",'utf8');
         fs.writeFileSync(path.join(objLib,"B","file2.js"),"// ghi: jkl\n// not a metaline \n\n Hi",'utf8');
     }
-    
+
     it('should return a directory listing of library objects',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             createObjectLibrary();
-            
+
             localfilesystem.getLibraryEntry('object','').then(function(flows) {
                 flows.should.eql([ 'A', 'B', { abc: 'def', fn: 'file1.js' } ]);
                 localfilesystem.getLibraryEntry('object','B').then(function(flows) {
@@ -229,7 +231,7 @@ describe('LocalFileSystem', function() {
             });
         });
     });
-            
+
     it('should return a library object',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             createObjectLibrary();
@@ -241,7 +243,7 @@ describe('LocalFileSystem', function() {
             });
         });
     });
-    
+
     it('should return a newly saved library object',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             createObjectLibrary();
@@ -267,5 +269,5 @@ describe('LocalFileSystem', function() {
             });
         });
     });
-    
+
 });
