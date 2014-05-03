@@ -99,9 +99,11 @@ describe('LocalFileSystem', function() {
     });
 
     it('should handle credentials', function(done) {
+        var flowFile = 'test.json';
+        var flowFilePath = path.join(userDir,flowFile);
         var credFile = path.join(userDir,"test_cred.json");
 
-        localfilesystem.init({userDir:userDir}).then(function() {
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}).then(function() {
 
             fs.existsSync(credFile).should.be.false;
 
