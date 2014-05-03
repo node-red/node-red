@@ -14,83 +14,84 @@
  * limitations under the License.
  **/
 
-var RED = require(process.env.NODE_RED_HOME+"/red/red");
-var util = require("util");
-var redis = require("redis");
-
-var hashFieldRE = /^([^=]+)=(.*)$/;
-
-var redisConnectionPool = function() {
-    var connections = {};
-    var obj = {
-        get: function(host,port) {
-            var id = host+":"+port;
-            if (!connections[id]) {
-                connections[id] = redis.createClient(port,host);
-                connections[id].on("error",function(err) {
-                        util.log("[redis] "+err);
-                });
-                connections[id].on("connect",function() {
-                        util.log("[redis] connected to "+host+":"+port);
-                });
-                connections[id]._id = id;
-                connections[id]._nodeCount = 0;
-            }
-            connections[id]._nodeCount += 1;
-            return connections[id];
-        },
-        close: function(connection) {
-            connection._nodeCount -= 1;
-            if (connection._nodeCount == 0) {
-                if (connection) {
-                    clearTimeout(connection.retry_timer);
-                    connection.end();
+module.exports = function(RED) {
+    var util = require("util");
+    var redis = require("redis");
+    
+    var hashFieldRE = /^([^=]+)=(.*)$/;
+    
+    var redisConnectionPool = function() {
+        var connections = {};
+        var obj = {
+            get: function(host,port) {
+                var id = host+":"+port;
+                if (!connections[id]) {
+                    connections[id] = redis.createClient(port,host);
+                    connections[id].on("error",function(err) {
+                            util.log("[redis] "+err);
+                    });
+                    connections[id].on("connect",function() {
+                            util.log("[redis] connected to "+host+":"+port);
+                    });
+                    connections[id]._id = id;
+                    connections[id]._nodeCount = 0;
                 }
-                delete connections[connection._id];
-            }
-        }
-    };
-    return obj;
-}();
-
-
-function RedisOutNode(n) {
-    RED.nodes.createNode(this,n);
-    this.port = n.port||"6379";
-    this.hostname = n.hostname||"127.0.0.1";
-    this.key = n.key;
-    this.structtype = n.structtype;
-
-    this.client = redisConnectionPool.get(this.hostname,this.port);
-
-    this.on("input", function(msg) {
-            if (msg != null) {
-                var k = this.key || msg.topic;
-                if (k) {
-                    if (this.structtype == "string") {
-                        this.client.set(k,msg.payload);
-                    } else if (this.structtype == "hash") {
-                        var r = hashFieldRE.exec(msg.payload);
-                        if (r) {
-                            this.client.hset(k,r[1],r[2]);
-                        } else {
-                            this.warn("Invalid payload for redis hash");
-                        }
-                    } else if (this.structtype == "set") {
-                        this.client.sadd(k,msg.payload);
-                    } else if (this.structtype == "list") {
-                        this.client.rpush(k,msg.payload);
+                connections[id]._nodeCount += 1;
+                return connections[id];
+            },
+            close: function(connection) {
+                connection._nodeCount -= 1;
+                if (connection._nodeCount == 0) {
+                    if (connection) {
+                        clearTimeout(connection.retry_timer);
+                        connection.end();
                     }
-                } else {
-                    this.warn("No key or topic set");
+                    delete connections[connection._id];
                 }
             }
-    });
-}
-
-RED.nodes.registerType("redis out",RedisOutNode);
-
-RedisOutNode.prototype.close = function() {
-    redisConnectionPool.close(this.client);
+        };
+        return obj;
+    }();
+    
+    
+    function RedisOutNode(n) {
+        RED.nodes.createNode(this,n);
+        this.port = n.port||"6379";
+        this.hostname = n.hostname||"127.0.0.1";
+        this.key = n.key;
+        this.structtype = n.structtype;
+    
+        this.client = redisConnectionPool.get(this.hostname,this.port);
+    
+        this.on("input", function(msg) {
+                if (msg != null) {
+                    var k = this.key || msg.topic;
+                    if (k) {
+                        if (this.structtype == "string") {
+                            this.client.set(k,msg.payload);
+                        } else if (this.structtype == "hash") {
+                            var r = hashFieldRE.exec(msg.payload);
+                            if (r) {
+                                this.client.hset(k,r[1],r[2]);
+                            } else {
+                                this.warn("Invalid payload for redis hash");
+                            }
+                        } else if (this.structtype == "set") {
+                            this.client.sadd(k,msg.payload);
+                        } else if (this.structtype == "list") {
+                            this.client.rpush(k,msg.payload);
+                        }
+                    } else {
+                        this.warn("No key or topic set");
+                    }
+                }
+        });
+    }
+    
+    RED.nodes.registerType("redis out",RedisOutNode);
+    
+    RedisOutNode.prototype.close = function() {
+        redisConnectionPool.close(this.client);
+    }
 }
 

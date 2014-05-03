@@ -54,7 +54,7 @@ function loadNode(nodeDir, nodeFn) {
         var r = require(nodeFilename);
         if (typeof r === "function") {
             try {
-                var promise = r(RED);
+                var promise = r(require('../red'));
                 if (promise != null && typeof promise.then === "function") {
                     promise.then(function() {
                         resolve(loadTemplate(templateFilename));

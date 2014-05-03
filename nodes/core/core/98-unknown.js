@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 
-var RED = require(process.env.NODE_RED_HOME+"/red/red");
-
-function UnknownNode(n) {
-    RED.nodes.createNode(this,n);
+module.exports = function(RED) {
+    function UnknownNode(n) {
+        RED.nodes.createNode(this,n);
+    }
+    RED.nodes.registerType("unknown",UnknownNode);
 }
-RED.nodes.registerType("unknown",UnknownNode);

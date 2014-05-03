@@ -14,31 +14,32 @@
  * limitations under the License.
  **/
 
-var RED = require(process.env.NODE_RED_HOME+"/red/red");
-var util = require("util");
-
-function JSONNode(n) {
-    RED.nodes.createNode(this,n);
-    var node = this;
-    this.on("input", function(msg) {
-        if (msg.hasOwnProperty("payload")) {
-            if (typeof msg.payload === "string") {
-                try {
-                    msg.payload = JSON.parse(msg.payload);
-                    node.send(msg);
-                }
-                catch(e) { node.log(e+ "\n"+msg.payload); }
-            }
-            else if (typeof msg.payload === "object") {
-                if (!Buffer.isBuffer(msg.payload) ) {
-                    if (!util.isArray(msg.payload)) {
-                        msg.payload = JSON.stringify(msg.payload);
+module.exports = function(RED) {
+    var util = require("util");
+    
+    function JSONNode(n) {
+        RED.nodes.createNode(this,n);
+        var node = this;
+        this.on("input", function(msg) {
+            if (msg.hasOwnProperty("payload")) {
+                if (typeof msg.payload === "string") {
+                    try {
+                        msg.payload = JSON.parse(msg.payload);
                         node.send(msg);
                     }
+                    catch(e) { node.log(e+ "\n"+msg.payload); }
                 }
+                else if (typeof msg.payload === "object") {
+                    if (!Buffer.isBuffer(msg.payload) ) {
+                        if (!util.isArray(msg.payload)) {
+                            msg.payload = JSON.stringify(msg.payload);
+                            node.send(msg);
+                        }
+                    }
+                }
+                else { node.log("dropped: "+msg.payload); }
             }
-            else { node.log("dropped: "+msg.payload); }
-        }
-    });
+        });
+    }
+    RED.nodes.registerType("json",JSONNode);
 }
-RED.nodes.registerType("json",JSONNode);

@@ -14,43 +14,44 @@
  * limitations under the License.
  **/
 
-var RED = require(process.env.NODE_RED_HOME+"/red/red");
-var fs = require("fs");
-var spawn = require('child_process').spawn;
-
-function TailNode(n) {
-    RED.nodes.createNode(this,n);
-
-    this.filename = n.filename;
-    this.split = n.split;
-    var node = this;
-
-    var err = "";
-    var tail = spawn("tail", ["-f", this.filename]);
-    tail.stdout.on("data", function (data) {
-        var msg = {topic:node.filename};
-        if (node.split) {
-            var strings = data.toString().split("\n");
-            for (s in strings) {
-                if (strings[s] != "") {
-                    msg.payload = strings[s];
-                    node.send(msg);
+module.exports = function(RED) {
+    var fs = require("fs");
+    var spawn = require('child_process').spawn;
+    
+    function TailNode(n) {
+        RED.nodes.createNode(this,n);
+    
+        this.filename = n.filename;
+        this.split = n.split;
+        var node = this;
+    
+        var err = "";
+        var tail = spawn("tail", ["-f", this.filename]);
+        tail.stdout.on("data", function (data) {
+            var msg = {topic:node.filename};
+            if (node.split) {
+                var strings = data.toString().split("\n");
+                for (s in strings) {
+                    if (strings[s] != "") {
+                        msg.payload = strings[s];
+                        node.send(msg);
+                    }
                 }
             }
-        }
-        else {
-            msg.payload = data.toString();
-            node.send(msg);
-        }
-    });
-
-    tail.stderr.on("data", function(data) {
-        node.warn(data.toString());
-    });
-
-    this.on("close", function() {
-        if (tail) tail.kill();
-    });
+            else {
+                msg.payload = data.toString();
+                node.send(msg);
+            }
+        });
+    
+        tail.stderr.on("data", function(data) {
+            node.warn(data.toString());
+        });
+    
+        this.on("close", function() {
+            if (tail) tail.kill();
+        });
+    }
+    
+    RED.nodes.registerType("tail",TailNode);
 }
-
-RED.nodes.registerType("tail",TailNode);

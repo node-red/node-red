@@ -14,37 +14,38 @@
  * limitations under the License.
  **/
 
-var RED = require(process.env.NODE_RED_HOME+"/red/red");
-var xml2js = require('xml2js');
-var parseString = xml2js.parseString;
-var builder = new xml2js.Builder({renderOpts:{pretty:false}});
-
-function XMLNode(n) {
-    RED.nodes.createNode(this,n);
-    var node = this;
-    this.on("input", function(msg) {
-        if (msg.hasOwnProperty("payload")) {
-            if (typeof msg.payload == "object") {
-                try {
-                    msg.payload = builder.buildObject(msg.payload);
-                    node.send(msg);
+module.exports = function(RED) {
+    var xml2js = require('xml2js');
+    var parseString = xml2js.parseString;
+    var builder = new xml2js.Builder({renderOpts:{pretty:false}});
+    
+    function XMLNode(n) {
+        RED.nodes.createNode(this,n);
+        var node = this;
+        this.on("input", function(msg) {
+            if (msg.hasOwnProperty("payload")) {
+                if (typeof msg.payload == "object") {
+                    try {
+                        msg.payload = builder.buildObject(msg.payload);
+                        node.send(msg);
+                    }
+                    catch(e) { node.log(e); }
                 }
-                catch(e) { node.log(e); }
-            }
-            else if (typeof msg.payload == "string") {
-                try {
-                    parseString(msg.payload, {strict:true,async:true}, function (err, result) {
-                        if (err) { node.error(err); }
-                        else {
-                            msg.payload = result;
-                            node.send(msg);
-                        }
-                    });
+                else if (typeof msg.payload == "string") {
+                    try {
+                        parseString(msg.payload, {strict:true,async:true}, function (err, result) {
+                            if (err) { node.error(err); }
+                            else {
+                                msg.payload = result;
+                                node.send(msg);
+                            }
+                        });
+                    }
+                    catch(e) { node.log(e); }
                 }
-                catch(e) { node.log(e); }
+                else { node.log("This node only handles xml strings or js objects."); }
             }
-            else { node.log("This node only handles xml strings or js objects."); }
-        }
-    });
+        });
+    }
+    RED.nodes.registerType("xml",XMLNode);
 }
-RED.nodes.registerType("xml",XMLNode);

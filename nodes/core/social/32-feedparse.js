@@ -14,58 +14,58 @@
  * limitations under the License.
  **/
 
-var RED = require(process.env.NODE_RED_HOME+"/red/red");
-var FeedParser = require("feedparser");
-var request = require("request");
-
-function FeedParseNode(n) {
-	RED.nodes.createNode(this,n);
-	this.url = n.url;
-	this.interval = (parseInt(n.interval)||15)*60000;
-	var node = this;
-	this.interval_id = null;
-	this.seen = {};
-	if (this.url !== "") {
-	    var getFeed = function() {
-            request(node.url,function(err) {
-                    if (err) node.error(err);
-            })
-                .pipe(new FeedParser({feedurl:node.url}))
-                .on('error', function(error) {
-                        node.error(error);
+module.exports = function(RED) {
+    var FeedParser = require("feedparser");
+    var request = require("request");
+    
+    function FeedParseNode(n) {
+        RED.nodes.createNode(this,n);
+        this.url = n.url;
+        this.interval = (parseInt(n.interval)||15)*60000;
+        var node = this;
+        this.interval_id = null;
+        this.seen = {};
+        if (this.url !== "") {
+            var getFeed = function() {
+                request(node.url,function(err) {
+                        if (err) node.error(err);
                 })
-                .on('meta', function (meta) {})
-                .on('readable', function () {
-                        var stream = this, article;
-                        while (article = stream.read()) {
-                            if (!(article.guid in node.seen) || ( node.seen[article.guid] != 0 && node.seen[article.guid] != article.date.getTime())) {
-                                node.seen[article.guid] = article.date?article.date.getTime():0;
-                                var msg = {
-                                    topic:article.origlink||article.link,
-                                    payload: article.description,
-                                    article: article
-                                };
-                                node.send(msg);
+                    .pipe(new FeedParser({feedurl:node.url}))
+                    .on('error', function(error) {
+                            node.error(error);
+                    })
+                    .on('meta', function (meta) {})
+                    .on('readable', function () {
+                            var stream = this, article;
+                            while (article = stream.read()) {
+                                if (!(article.guid in node.seen) || ( node.seen[article.guid] != 0 && node.seen[article.guid] != article.date.getTime())) {
+                                    node.seen[article.guid] = article.date?article.date.getTime():0;
+                                    var msg = {
+                                        topic:article.origlink||article.link,
+                                        payload: article.description,
+                                        article: article
+                                    };
+                                    node.send(msg);
+                                }
                             }
-                        }
-                })
-                .on('end', function () {
-                });
-        };
-	    this.interval_id = setInterval(getFeed,node.interval);
-	    getFeed();
-
-	} else {
-	    this.error("Invalid url");
-	}
-}
-
-RED.nodes.registerType("feedparse",FeedParseNode);
-
-FeedParseNode.prototype.close = function() {
-    if (this.interval_id != null) {
-        clearInterval(this.interval_id);
+                    })
+                    .on('end', function () {
+                    });
+            };
+            this.interval_id = setInterval(getFeed,node.interval);
+            getFeed();
+    
+        } else {
+            this.error("Invalid url");
+        }
     }
-}
-
+    
+    RED.nodes.registerType("feedparse",FeedParseNode);
+    
+    FeedParseNode.prototype.close = function() {
+        if (this.interval_id != null) {
+            clearInterval(this.interval_id);
+        }
+    }
+}    
 

@@ -14,31 +14,32 @@
  * limitations under the License.
  **/
 
-var RED = require(process.env.NODE_RED_HOME+"/red/red");
-var util = require("util");
-var parseString = require('xml2js').parseString;
-var useColors = true;
-//util.inspect.styles.boolean = "red";
-
-function Xml2jsNode(n) {
-    RED.nodes.createNode(this,n);
-    this.useEyes = n.useEyes||false;
-    var node = this;
-    this.on("input", function(msg) {
-        try {
-            parseString(msg.payload, {strict:true,async:true}, function (err, result) {
-            //parseString(msg.payload, {strict:false,async:true}, function (err, result) {
-                if (err) { node.error(err); }
-                else {
-                    msg.payload = result;
-                    node.send(msg);
-                    if (node.useEyes == true) {
-                        node.log("\n"+util.inspect(msg, {colors:useColors, depth:10}));
+module.exports = function(RED) {
+    var util = require("util");
+    var parseString = require('xml2js').parseString;
+    var useColors = true;
+    //util.inspect.styles.boolean = "red";
+    
+    function Xml2jsNode(n) {
+        RED.nodes.createNode(this,n);
+        this.useEyes = n.useEyes||false;
+        var node = this;
+        this.on("input", function(msg) {
+            try {
+                parseString(msg.payload, {strict:true,async:true}, function (err, result) {
+                //parseString(msg.payload, {strict:false,async:true}, function (err, result) {
+                    if (err) { node.error(err); }
+                    else {
+                        msg.payload = result;
+                        node.send(msg);
+                        if (node.useEyes == true) {
+                            node.log("\n"+util.inspect(msg, {colors:useColors, depth:10}));
+                        }
                     }
-                }
-            });
-        }
-        catch(e) { util.log("[73-parsexml.js] "+e); }
-    });
+                });
+            }
+            catch(e) { util.log("[73-parsexml.js] "+e); }
+        });
+    }
+    RED.nodes.registerType("xml2js",Xml2jsNode);
 }
-RED.nodes.registerType("xml2js",Xml2jsNode);

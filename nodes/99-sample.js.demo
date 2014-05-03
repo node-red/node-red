@@ -14,39 +14,41 @@
  * limitations under the License.
  **/
 
-// If you use this as a template, replace IBM Corp. with your own name.
+// If you use this as a template, update the copyright with your own name.
 
 // Sample Node-RED node file
 
-// Require main module
-var RED = require(process.env.NODE_RED_HOME+"/red/red");
 
-// The main node definition - most things happen in here
-function SampleNode(n) {
-    // Create a RED node
-    RED.nodes.createNode(this,n);
-
-    // Store local copies of the node configuration (as defined in the .html)
-    this.topic = n.topic;
-
-    // Do whatever you need to do in here - declare callbacks etc
-    // Note: this sample doesn't do anything much - it will only send
-    // this message once at startup...
-    // Look at other real nodes for some better ideas of what to do....
-    var msg = {};
-    msg.topic = this.topic;
-    msg.payload = "Hello world !"
-
-    // send out the message to the rest of the workspace.
-    this.send(msg);
-
-    this.on("close", function() {
-        // Called when the node is shutdown - eg on redeploy.
-        // Allows ports to be closed, connections dropped etc.
-        // eg: this.client.disconnect();
-    });
+module.export = function(RED) {
+    
+    // The main node definition - most things happen in here
+    function SampleNode(n) {
+        // Create a RED node
+        RED.nodes.createNode(this,n);
+    
+        // Store local copies of the node configuration (as defined in the .html)
+        this.topic = n.topic;
+    
+        // Do whatever you need to do in here - declare callbacks etc
+        // Note: this sample doesn't do anything much - it will only send
+        // this message once at startup...
+        // Look at other real nodes for some better ideas of what to do....
+        var msg = {};
+        msg.topic = this.topic;
+        msg.payload = "Hello world !"
+    
+        // send out the message to the rest of the workspace.
+        this.send(msg);
+    
+        this.on("close", function() {
+            // Called when the node is shutdown - eg on redeploy.
+            // Allows ports to be closed, connections dropped etc.
+            // eg: this.client.disconnect();
+        });
+    }
+    
+    // Register the node by name. This must be called before overriding any of the
+    // Node functions.
+    RED.nodes.registerType("sample",SampleNode);
+    
 }
-
-// Register the node by name. This must be called before overriding any of the
-// Node functions.
-RED.nodes.registerType("sample",SampleNode);

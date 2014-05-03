@@ -14,23 +14,24 @@
  * limitations under the License.
  **/
 
-var RED = require(process.env.NODE_RED_HOME+"/red/red");
-var js2xmlparser = require("js2xmlparser");
-
-function Js2XmlNode(n) {
-    RED.nodes.createNode(this,n);
-    this.root = n.root;
-    var node = this;
-
-    this.on("input", function(msg) {
-        try {
-            var root = node.root || typeof msg.payload;
-            if (typeof msg.payload !== "object") { msg.payload = '"'+msg.payload+'"'; }
-            console.log(root, typeof msg.payload,msg.payload);
-            msg.payload = js2xmlparser(root, msg.payload);
-            node.send(msg);
-        }
-        catch(e) { console.log(e); }
-    });
+module.exports = function(RED) {
+    var js2xmlparser = require("js2xmlparser");
+    
+    function Js2XmlNode(n) {
+        RED.nodes.createNode(this,n);
+        this.root = n.root;
+        var node = this;
+    
+        this.on("input", function(msg) {
+            try {
+                var root = node.root || typeof msg.payload;
+                if (typeof msg.payload !== "object") { msg.payload = '"'+msg.payload+'"'; }
+                console.log(root, typeof msg.payload,msg.payload);
+                msg.payload = js2xmlparser(root, msg.payload);
+                node.send(msg);
+            }
+            catch(e) { console.log(e); }
+        });
+    }
+    RED.nodes.registerType("json2xml",Js2XmlNode);
 }
-RED.nodes.registerType("json2xml",Js2XmlNode);

@@ -14,10 +14,10 @@
  * limitations under the License.
  **/
 
-var RED = require(process.env.NODE_RED_HOME+"/red/red");
-
-function CommentNode(n) {
-	RED.nodes.createNode(this,n);
+module.exports = function(RED) {
+    function CommentNode(n) {
+        RED.nodes.createNode(this,n);
+    }
+    
+    RED.nodes.registerType("comment",CommentNode);
 }
-
-RED.nodes.registerType("comment",CommentNode);
