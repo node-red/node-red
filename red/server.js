@@ -41,16 +41,15 @@ function createServer(_server,_settings) {
     });
     
     app.get("/flows",function(req,res) {
-        res.json(redNodes.getConfig());
+        res.json(redNodes.getFlows());
     });
     
     app.post("/flows",
         express.json(),
         function(req,res) {
             var flows = req.body;
-            storage.saveFlows(flows).then(function() {
+            redNodes.setFlows(flows).then(function() {
                 res.json(204);
-                redNodes.setConfig(flows);
             }).otherwise(function(err) {
                 util.log("[red] Error saving flows : "+err);
                 res.send(500,err.message);
@@ -70,7 +69,8 @@ function start() {
         console.log("\nWelcome to Node-RED\n===================\n");
         util.log("[red] Version: "+RED.version());
         util.log("[red] Loading palette nodes");
-        redNodes.load(settings).then(function(nodeErrors) {
+        redNodes.init(settings,storage);
+        redNodes.load().then(function(nodeErrors) {
             if (nodeErrors.length > 0) {
                 util.log("------------------------------------------");
                 if (settings.verbose) {
@@ -84,13 +84,8 @@ function start() {
                 util.log("------------------------------------------");
             }
             defer.resolve();
-            storage.getFlows().then(function(flows) {
-                    if (flows.length > 0) {
-                        redNodes.setConfig(flows);
-                    }
-            }).otherwise(function(err) {
-                    util.log("[red] Error loading flows : "+err);
-            });
+            
+            redNodes.loadFlows();
         });
     });
     

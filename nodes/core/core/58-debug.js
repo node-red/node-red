@@ -149,7 +149,7 @@ DebugNode.logHandler.on("log",function(msg) {
         DebugNode.send(msg);
     }
 });
-RED.nodes.addLogHandler(DebugNode.logHandler);
+RED.log.addHandler(DebugNode.logHandler);
 
 RED.httpAdmin.post("/debug/:id/:state", function(req,res) {
     var node = RED.nodes.getNode(req.params.id);
