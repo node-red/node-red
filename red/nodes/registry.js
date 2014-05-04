@@ -19,6 +19,9 @@ var when = require("when");
 var whenNode = require('when/node');
 var fs = require("fs");
 var path = require("path");
+var cheerio = require("cheerio");
+var UglifyJS = require("uglify-js");
+
 var events = require("../events");
 
 var Node;
@@ -26,11 +29,12 @@ var settings;
 
 var node_types = {};
 var node_configs = [];
+var node_scripts = [];
 
 function loadTemplate(templateFilename) {
     return when.promise(function(resolve,reject) {
         whenNode.call(fs.readFile,templateFilename,'utf8').done(function(content) {
-            typeRegistry.registerConfig(content);
+            registerConfig(content);
             resolve();
         }, function(err) {
             reject("missing template file");
@@ -232,6 +236,32 @@ function load() {
     });
 }
 
+
+function registerConfig(config) {
+    $ = cheerio.load(config);
+    var template = "";
+    $("*").each(function(i,el) {
+        if (el.type == "script" && el.attribs.type == "text/javascript") {
+            var content = el.children[0].data;
+            el.children[0].data = UglifyJS.minify(content, {fromString: true}).code;
+            node_scripts.push($(this).text());
+        } else if (el.name == "script" || el.name == "style") {
+            var openTag = "<"+el.name;
+            var closeTag = "</"+el.name+">";
+            if (el.attribs) {
+                for (var i in el.attribs) {
+                    openTag += " "+i+'="'+el.attribs[i]+'"';
+                }
+            }
+            openTag += ">";
+            
+            template += openTag+$(el).text()+closeTag;
+        }
+    });
+    node_configs.push(template);
+}
+
+
 var typeRegistry = module.exports = {
     init:init,
     load:load,
@@ -239,9 +269,6 @@ var typeRegistry = module.exports = {
         util.inherits(node,Node);
         node_types[type] = node;
         events.emit("type-registered",type);
-    },
-    registerConfig: function(config) {
-        node_configs.push(config);
     },
     get: function(type) {
         return node_types[type];
@@ -251,6 +278,11 @@ var typeRegistry = module.exports = {
         for (var i=0;i<node_configs.length;i++) {
             result += node_configs[i];
         }
+        result += '<script type="text/javascript">';
+        for (var i=0;i<node_scripts.length;i++) {
+            result += node_scripts[i];
+        }
+        result += '</script>';
         return result;
     }
 }
