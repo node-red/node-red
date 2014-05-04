@@ -36,6 +36,7 @@ function loadTemplate(templateFilename) {
         whenNode.call(fs.readFile,templateFilename,'utf8').done(function(content) {
             registerConfig(content);
             resolve();
+            //console.log(templateFilename);
         }, function(err) {
             reject("missing template file");
         });
@@ -43,36 +44,39 @@ function loadTemplate(templateFilename) {
     });
 }
 
-function loadNode(nodeDir, nodeFn) {
+// Return a promise that resolves to:
+//  success: {fn,path}
+//  failure: {fn.path,err}
+function loadNode(nodeDir, nodeFn, nodeLabel) {
     return when.promise(function(resolve,reject) {
         if (settings.nodesExcludes) {
             for (var i=0;i<settings.nodesExcludes.length;i++) {
                 if (settings.nodesExcludes[i] == nodeFn) {
+                    //resolve({fn:nodeFn,path:nodeFilename,err:"nodesExcludes"});
                     resolve();
                     return;
                 }
             }
         }
         var nodeFilename = path.join(nodeDir,nodeFn);
-        var templateFilename = nodeFilename.replace(/\.js$/,".html");
-        var r = require(nodeFilename);
-        if (typeof r === "function") {
-            try {
+        try {
+            var r = require(nodeFilename);
+            if (typeof r === "function") {
                 var promise = r(require('../red'));
                 if (promise != null && typeof promise.then === "function") {
                     promise.then(function() {
-                        resolve(loadTemplate(templateFilename));
+                        resolve({fn:nodeLabel||nodeFn,path:nodeFilename});
                     },function(err) {
-                        reject(err);
+                        resolve({fn:nodeLabel||nodeFn,path:nodeFilename,err:err});
                     });
                 } else {
-                    resolve(loadTemplate(templateFilename));
+                    resolve({fn:nodeLabel||nodeFn,path:nodeFilename});
                 }
-            } catch(err) {
-                reject(err);
+            } else {
+                resolve({fn:nodeLabel||nodeFn,path:nodeFilename});
             }
-        } else {
-            resolve(loadTemplate(templateFilename));
+        } catch(err) {
+            resolve({fn:nodeLabel||nodeFn,path:nodeFilename,err:err});
         }
     });
         
@@ -82,79 +86,65 @@ function loadNodesFromModule(moduleDir,pkg) {
     var nodes = pkg['node-red'].nodes||{};
     var promises = [];
     for (var n in nodes) {
-        promises.push(when.promise(function(resolve) {
-            loadNode(moduleDir,nodes[n]).then(resolve, function(err) {
-                resolve({'fn':pkg.name+":"+n,err:err});
-            });
-        }));
+        promises.push(loadNode(moduleDir,nodes[n],pkg.name+":"+n));
     }
-    return when.promise(function(resolve,reject) {
-        var errors = [];
-        when.settle(promises).then(function(results) {
-            var errors = [];
-            results.forEach(function(result) {
-                if (result.state == 'fulfilled' && result.value) {
-                    errors = errors.concat(result.value);
-                }
-            });
-            resolve(errors); 
-        });
-    });
+    return promises;
 }
 
 function scanForNodes(dir) {
+    var pm = path.join(dir,"node_modules");
     return when.promise(function(resolve,reject) {
-            
-        var pm = path.join(dir,"node_modules");
-        var promises = [];
-        promises.push(when.promise(function(resolve,reject) {
-            whenNode.call(fs.readdir,pm).then(function(files) {
-                var promises = [];
-                files.forEach(function(fn) {
-                    var pkgfn = path.join(pm,fn,"package.json");
-                    try {
-                        var pkg = require(pkgfn);
-                        if (pkg['node-red']) {
-                            var moduleDir = path.join(pm,fn);
-                            promises.push(loadNodesFromModule(moduleDir,pkg));
-                        }
-                    } catch(err) {
-                        if (err.code != "MODULE_NOT_FOUND") {
-                            // TODO: handle unexpected error
-                        }
+        whenNode.call(fs.readdir,pm).then(function(files) {
+            var promises = [];
+            files.forEach(function(fn) {
+                var pkgfn = path.join(pm,fn,"package.json");
+                try {
+                    var pkg = require(pkgfn);
+                    if (pkg['node-red']) {
+                        var moduleDir = path.join(pm,fn);
+                        promises = promises.concat(loadNodesFromModule(moduleDir,pkg));
                     }
-                });
-                when.settle(promises).then(function(results) {
-                    var errors = [];
-                    results.forEach(function(result) {
-                        if (result.state == 'fulfilled' && result.value) {
-                            errors = errors.concat(result.value);
-                        }
-                    });
-                    resolve(errors);
-                });
-            },function(err) {
-                resolve([]); 
-            })
-        
-        }));
-        var up = path.resolve(path.join(dir,".."));
-        if (up !== dir) {
-            promises.push(scanForNodes(up))
-        }
-        when.settle(promises).then(function(results) {
-            var errors = [];
-            results.forEach(function(result) {
-                if (result.state == 'fulfilled' && result.value) {
-                    errors = errors.concat(result.value);
+                } catch(err) {
+                    if (err.code != "MODULE_NOT_FOUND") {
+                        // TODO: handle unexpected error
+                    }
                 }
             });
-            resolve(errors);
+            when.settle(promises).then(function(results) {
+                var promises = [];
+                results.forEach(function(result) {
+                    promises = promises.concat(result.value);
+                });
+                resolve(promises);
+            });
+        },function(err) {
+            resolve([]);
         });
-        
     });
 }
 
+function scanTreeForNodes(dir) {
+    return when.promise(function(resolve) {
+        var promises = [];
+        var up = path.resolve(path.join(dir,".."));
+        while (up !== dir) {
+            promises.push(scanForNodes(dir));
+            dir = up;
+            up = path.resolve(path.join(dir,".."));
+        }
+        
+        when.settle(promises).then(function(results) {
+            var promises = [];
+            results.forEach(function(result) {
+                promises = promises.concat(result.value);
+            });
+            resolve(promises);
+        });
+    });
+}
+    
+
+// Returns a promise that resolves to an array of node results
 function loadNodes(dir) {
     return when.promise(function(resolve,reject) {
         var promises = [];
@@ -165,21 +155,12 @@ function loadNodes(dir) {
                 var stats = fs.statSync(path.join(dir,fn));
                 if (stats.isFile()) {
                     if (/\.js$/.test(fn)) {
-                        promises.push(when.promise(function(resolve,reject) {
-                            loadNode(dir,fn).then(resolve, function(err) {
-                                resolve({'fn':fn,err:err});
-                            });
-                        }));
+                        promises.push(loadNode(dir,fn));
                     }
                 } else if (stats.isDirectory()) {
                     // Ignore /.dirs/, /lib/ /node_modules/ 
                     if (!/^(\..*|lib|icons|node_modules|test)$/.test(fn)) {
-                        promises.push(when.promise(function(resolve,reject) {
-                            loadNodes(path.join(dir,fn)).then(function(errs) {
-                                resolve(errs);
-                            });
-                        }));
-                        
+                        promises.push(loadNodes(path.join(dir,fn)));
                     } else if (fn === "icons") {
                         events.emit("node-icon-dir",path.join(dir,fn));
                     }
@@ -212,9 +193,9 @@ function load() {
     return when.promise(function(resolve,reject) {
         var RED = require("../red.js");
         
-        loadNodes(__dirname+"/../../nodes").then(function(errors) {
+        loadNodes(__dirname+"/../../nodes").then(function(loadedNodes) {
             var promises = [];
-            promises.push(scanForNodes(__dirname+"/../../nodes"));
+            promises.push(scanTreeForNodes(__dirname+"/../../nodes"));
             if (settings.nodesDir) {
                 var dir = settings.nodesDir;
                 if (typeof settings.nodesDir == "string") {
@@ -227,10 +208,27 @@ function load() {
             when.settle(promises).then(function(results) {
                 results.forEach(function(result) {
                     if (result.state == 'fulfilled' && result.value) {
-                        errors = errors.concat(result.value);
+                        loadedNodes = loadedNodes.concat(result.value);
                     }
                 });
-                resolve(errors);
+                var promises = [];
+                loadedNodes.forEach(function(v) {
+                    if (v.err == null) {
+                        var templateFilename = v.path.replace(/\.js$/,".html");
+                        promises.push(loadTemplate(templateFilename));
+                    } else {
+                        promises.push(when());
+                    }
+                });
+                when.settle(promises).then(function(results) {
+                    for (var i=0;i<loadedNodes.length;i++) {
+                        if (results[i].state == "rejected") {
+                            loadedNodes[i].err = results[i].reason;
+                        }
+                    }
+                    var errors = loadedNodes.filter(function(v) { return v.err != null;});
+                    resolve(errors);
+                });
             });
         });
     });
