@@ -95,8 +95,8 @@
 <script type="text/x-red" data-template-name="serial-port">
     <div class="form-row">
         <label for="node-config-input-serialport"><i class="icon-bullhorn"></i> Serial Port</label>
-        <select type="text" id="node-config-input-serialport" style="width:75%;">
-        </select>
+        <!-- <select type="text" id="node-config-input-serialport" style="width:75%;"/> -->
+        <input type="text" id="node-config-input-serialport" placeholder="/dev/ttyUSB0"/>
     </div>
     <div class="form-row">
         <table><tr>
@@ -181,16 +181,16 @@
             this.parity = this.parity || 'none';
             this.stopbits = this.stopbits || 1;
             return this.serialport+":"+this.serialbaud+"-"+this.databits+this.parity.charAt(0).toUpperCase()+this.stopbits;
-        },
-        oneditprepare: function() {
-            var p = this.serialport;
-            var s = $("#node-config-input-serialport");
-            $.getJSON('serialports',function(data) {
-                $.each(data, function(i, port){
-                    s.append($('<option>').text(port.comName).attr('value', port.comName));
-                });
-                s.val(p);
-            });
-        }
+        }//,
+        //oneditprepare: function() {
+        //    var p = this.serialport;
+        //    var s = $("#node-config-input-serialport");
+        //    $.getJSON('serialports',function(data) {
+        //        $.each(data, function(i, port){
+        //            s.append($('<option>').text(port.comName).attr('value', port.comName));
+        //        });
+        //        s.val(p);
+        //    });
+        //}
     });
 </script>
