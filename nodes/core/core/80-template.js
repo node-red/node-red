@@ -18,24 +18,23 @@ module.exports = function(RED) {
     var mustache = require("mustache");
     var util = require("util");
     var fs = require('fs');
-    
+
     function TemplateNode(n) {
         RED.nodes.createNode(this,n);
         this.name = n.name;
         this.template = n.template;
         this.on("input", function(msg) {
-                if (msg != null) {
-                    try {
-                        msg.payload = mustache.render(this.template,msg)
-                        this.send(msg);
-                    } catch(err) {
-                        this.error(err.message);
-                    }
+            if (msg != null) {
+                try {
+                    msg.payload = mustache.render(this.template,msg)
+                    this.send(msg);
+                } catch(err) {
+                    this.error(err.message);
                 }
+            }
         });
     }
-    
+
     RED.nodes.registerType("template",TemplateNode);
-    
     RED.library.register("templates");
 }

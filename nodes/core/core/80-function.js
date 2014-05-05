@@ -19,7 +19,7 @@ module.exports = function(RED) {
     var vm = require("vm");
     var fs = require('fs');
     var fspath = require('path');
-    
+
     function FunctionNode(n) {
         RED.nodes.createNode(this,n);
         this.name = n.name;
@@ -30,42 +30,42 @@ module.exports = function(RED) {
         try {
             this.script = vm.createScript(functionText);
             this.on("input", function(msg) {
-                    if (msg != null) {
-                        var sandbox = {msg:msg,console:console,util:util,Buffer:Buffer,context:this.context};
-                        try {
-                            this.script.runInNewContext(sandbox);
-                            var results = sandbox.results;
-    
-                            if (results == null) {
-                                results = [];
-                            } else if (results.length == null) {
-                                results = [results];
-                            }
-                            if (msg._topic) {
-                                for (var m in results) {
-                                    if (results[m]) {
-                                        if (util.isArray(results[m])) {
-                                            for (var n in results[m]) {
-                                                results[m][n]._topic = msg._topic;
-                                            }
-                                        } else {
-                                            results[m]._topic = msg._topic;
+                if (msg != null) {
+                    var sandbox = {msg:msg,console:console,util:util,Buffer:Buffer,context:this.context};
+                    try {
+                        this.script.runInNewContext(sandbox);
+                        var results = sandbox.results;
+
+                        if (results == null) {
+                            results = [];
+                        } else if (results.length == null) {
+                            results = [results];
+                        }
+                        if (msg._topic) {
+                            for (var m in results) {
+                                if (results[m]) {
+                                    if (util.isArray(results[m])) {
+                                        for (var n in results[m]) {
+                                            results[m][n]._topic = msg._topic;
                                         }
+                                    } else {
+                                        results[m]._topic = msg._topic;
                                     }
                                 }
                             }
-                            this.send(results);
-    
-                        } catch(err) {
-                            this.error(err);
                         }
+                        this.send(results);
+
+                    } catch(err) {
+                        this.error(err);
                     }
+                }
             });
         } catch(err) {
             this.error(err);
         }
     }
-    
+
     RED.nodes.registerType("function",FunctionNode);
     RED.library.register("functions");
 }

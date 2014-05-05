@@ -18,6 +18,5 @@ module.exports = function(RED) {
     function CommentNode(n) {
         RED.nodes.createNode(this,n);
     }
-    
     RED.nodes.registerType("comment",CommentNode);
 }
