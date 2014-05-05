@@ -38,7 +38,9 @@ RED.view = function() {
         moving_set = [],
         dirty = false,
         lasso = null,
-        pressTimer = null;
+        pressTimer = null,
+        clickTime = 0,
+        clickElapsed = 0;
 
     var clipboard = "";
 
@@ -318,6 +320,7 @@ RED.view = function() {
             var d = (mouse_offset[0]-m[0])*(mouse_offset[0]-m[0]) + (mouse_offset[1]-m[1])*(mouse_offset[1]-m[1]);
             if (d > 2) {
                 mouse_mode = RED.state.MOVING_ACTIVE;
+                clickElapsed = 0;
                 clearTimeout(pressTimer);
             }
         } else if (mouse_mode == RED.state.MOVING_ACTIVE || mouse_mode == RED.state.IMPORT_DRAGGING) {
@@ -692,6 +695,10 @@ RED.view = function() {
     }
 
     function nodeMouseUp(d) {
+        if (clickElapsed > 0 && clickElapsed < 300) {
+            RED.editor.edit(d);
+            return;
+        }
         portMouseUp(d, d._def.inputs > 0 ? 1 : 0, 0);
     }
 
@@ -709,6 +716,10 @@ RED.view = function() {
             return;
         }
         mousedown_node = d;
+        var now = Date.now();
+        clickElapsed = now-clickTime;
+        clickTime = now;
+        
         if (d.selected && d3.event.ctrlKey) {
             d.selected = false;
             for (var i=0;i<moving_set.length;i+=1) {
@@ -841,7 +852,6 @@ RED.view = function() {
                         .attr("fill",function(d) { return d._def.color;})
                         .on("mousedown",nodeMouseDown)
                         .on("touchstart",nodeMouseDown)
-                        .on("dblclick",function(d) {RED.editor.edit(d);})
                         .on("mouseover",function(d) {
                                 if (mouse_mode == 0) {
                                     var node = d3.select(this);
