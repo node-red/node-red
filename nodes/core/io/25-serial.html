@@ -51,7 +51,6 @@
     });
 </script>
 
-
 <script type="text/x-red" data-template-name="serial out">
     <div class="form-row node-input-serial">
         <label for="node-input-serial"><i class="icon-bullhorn"></i> Serial Port</label>
@@ -96,7 +95,10 @@
     <div class="form-row">
         <label for="node-config-input-serialport"><i class="icon-bullhorn"></i> Serial Port</label>
         <!-- <select type="text" id="node-config-input-serialport" style="width:75%;"/> -->
-        <input type="text" id="node-config-input-serialport" placeholder="/dev/ttyUSB0"/>
+        <input type="text" id="node-config-input-serialport" style="width:60%;" placeholder="/dev/ttyUSB0"/>
+        <select type="text" id="node-config-select-serialport" style="width:60%;"/>
+        <input type="button" id="node-config-portlist-button" value="List" style="width:10%"/>
+
     </div>
     <div class="form-row">
         <table><tr>
@@ -160,6 +162,26 @@
         </select>
     </div>
     <div class="form-tips">Tip: the new line character is used to split the input into separate messages. It can also be added to every message sent out to the serial port.</div>
+    <script>
+    {
+        $("#node-config-portlist-button").click(function() {
+            $.getJSON('serialports',function(data) {
+                var s = $("#node-config-select-serialport").empty();
+                $.each(data, function(i, port){
+                    s.append($('<option>').text(port.comName).attr('value', port.comName));
+                });
+                $("#node-config-input-serialport").hide();
+                $("#node-config-select-serialport").show();
+            });
+        });
+        $("#node-config-select-serialport").click(function() {
+            var p = $("#node-config-select-serialport").val();
+            $("#node-config-input-serialport").val(p);
+            $("#node-config-select-serialport").hide();
+            $("#node-config-input-serialport").show();
+        });
+    }
+    </script>
 </script>
 
 <script type="text/javascript">
@@ -181,16 +203,9 @@
             this.parity = this.parity || 'none';
             this.stopbits = this.stopbits || 1;
             return this.serialport+":"+this.serialbaud+"-"+this.databits+this.parity.charAt(0).toUpperCase()+this.stopbits;
-        }//,
-        //oneditprepare: function() {
-        //    var p = this.serialport;
-        //    var s = $("#node-config-input-serialport");
-        //    $.getJSON('serialports',function(data) {
-        //        $.each(data, function(i, port){
-        //            s.append($('<option>').text(port.comName).attr('value', port.comName));
-        //        });
-        //        s.val(p);
-        //    });
-        //}
+        },
+        oneditprepare: function() {
+            $("#node-config-select-serialport").hide();
+        }
     });
 </script>
