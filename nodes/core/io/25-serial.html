@@ -94,11 +94,8 @@
 <script type="text/x-red" data-template-name="serial-port">
     <div class="form-row">
         <label for="node-config-input-serialport"><i class="icon-bullhorn"></i> Serial Port</label>
-        <!-- <select type="text" id="node-config-input-serialport" style="width:75%;"/> -->
         <input type="text" id="node-config-input-serialport" style="width:60%;" placeholder="/dev/ttyUSB0"/>
-        <select type="text" id="node-config-select-serialport" style="width:60%;"/>
-        <input type="button" id="node-config-portlist-button" value="List" style="width:10%"/>
-
+        <a id="node-config-lookup-serial" class="btn"><i id="node-config-lookup-serial-icon" class="icon icon-search"></i></a>
     </div>
     <div class="form-row">
         <table><tr>
@@ -164,6 +161,9 @@
     <div class="form-tips">Tip: the new line character is used to split the input into separate messages. It can also be added to every message sent out to the serial port.</div>
     <script>
     {
+        
+        
+        /*
         $("#node-config-portlist-button").click(function() {
             $.getJSON('serialports',function(data) {
                 var s = $("#node-config-select-serialport").empty();
@@ -180,6 +180,7 @@
             $("#node-config-select-serialport").hide();
             $("#node-config-input-serialport").show();
         });
+        */
     }
     </script>
 </script>
@@ -205,7 +206,34 @@
             return this.serialport+":"+this.serialbaud+"-"+this.databits+this.parity.charAt(0).toUpperCase()+this.stopbits;
         },
         oneditprepare: function() {
-            $("#node-config-select-serialport").hide();
+            try {
+                $("#node-config-input-serialport").autocomplete( "destroy" );
+            } catch(err) {
+            }
+            
+            $("#node-config-lookup-serial").click(function() {
+                $("#node-config-lookup-serial-icon").removeClass('icon-search');
+                $("#node-config-lookup-serial-icon").addClass('spinner');
+                $("#node-config-lookup-serial").addClass('disabled');
+    
+                $.getJSON('serialports',function(data) {
+                    $("#node-config-lookup-serial-icon").addClass('icon-search');
+                    $("#node-config-lookup-serial-icon").removeClass('spinner');
+                    $("#node-config-lookup-serial").removeClass('disabled');
+                    var ports = [];
+                    $.each(data, function(i, port){
+                        ports.push(port.comName);
+                    });
+                    $("#node-config-input-serialport").autocomplete({
+                        source:ports,
+                        minLength:0,
+                        close: function( event, ui ) {
+                            $("#node-config-input-serialport").autocomplete( "destroy" );
+                        },
+                        focus: function( event, ui ) {console.log(event);}
+                    }).autocomplete("search","");
+                });
+            });
         }
     });
 </script>
