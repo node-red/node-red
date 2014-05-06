@@ -48,7 +48,6 @@ module.exports = {
         var deletedCredentials = false;
         for (var c in credentials) {
             var n = getNode(c);
-            console.log(c,n)
             if (!n) {
                 deletedCredentials = true;
                 delete credentials[c];
