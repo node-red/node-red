@@ -57,7 +57,7 @@ module.exports = function(RED) {
                         this.send(results);
 
                     } catch(err) {
-                        this.error(err);
+                        this.error(err.toString());
                     }
                 }
             });
