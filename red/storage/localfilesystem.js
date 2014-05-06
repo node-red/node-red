@@ -27,6 +27,7 @@ var promiseDir = nodeFn.lift(mkdirp);
 var settings;
 var flowsFile;
 var flowsFullPath;
+var flowsPrev;
 var credentialsFile;
 var oldCredentialsFile;
 var userDir;
@@ -152,6 +153,7 @@ var localfilesystem = {
         var fsext = fspath.extname(flowsFile);
         credentialsFile = fspath.join(userDir,fspath.basename(flowsFile,fsext)+"_cred"+fsext);
         oldCredentialsFile = fspath.join(userDir,"credentials.json");
+        flowsPrev = fspath.join(userDir,"flow.backup");
 
         libDir = fspath.join(userDir,"lib");
         libFlowsDir = fspath.join(libDir,"flows");
@@ -176,6 +178,7 @@ var localfilesystem = {
     },
 
     saveFlows: function(flows) {
+        fs.rename(flowsFullPath,flowsPrev);
         return nodeFn.call(fs.writeFile, flowsFullPath, JSON.stringify(flows));
     },
 
