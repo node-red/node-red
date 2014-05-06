@@ -18,75 +18,6 @@ RED.editor = function() {
     
     // TODO: should IMPORT/EXPORT get their own dialogs?
     
-    function onInputLookupClick(select,name,type) {
-        return function(e) {
-            showEditConfigNodeDialog(name,type,select.find(":selected").val());
-            e.preventDefault();
-        }
-    }
-    function showEditDialog(node) {
-        editing_node = node;
-        RED.view.state(RED.state.EDITING);
-        $("#dialog-form").html($("script[data-template-name='"+node.type+"']").html());
-        if (node._def.defaults) {
-            for (var d in node._def.defaults) {
-                var def = node._def.defaults[d];
-                var input = $("#node-input-"+d);
-                
-                var node_def = RED.nodes.getType(def.type);
-                
-                if (node_def && node_def.category == "config") {
-                    input.replaceWith('<select style="width: 60%;" id="node-input-'+d+'"></select>');
-                    updateConfigNodeSelect(d,def.type,node[d]);
-                    var select = $("#node-input-"+d);
-                    select.after(' <a id="node-input-lookup-'+d+'" class="btn"><i class="icon icon-pencil"></i></a>');
-                    $('#node-input-lookup-'+d).click(onInputLookupClick(select,d,def.type));
-                    var label = "";
-                    var configNode = RED.nodes.node(node[d]);
-                    if (configNode && node_def.label) {
-                        if (typeof node_def.label == "function") {
-                            label = node_def.label.call(configNode);
-                        } else {
-                            label = node_def.label;
-                        }
-                    }
-                    input.val(label);
-                } else {
-                    if (input.attr('type') === "checkbox") {
-                        input.prop('checked',node[d]);
-                    } else {
-                        var val = node[d];
-                        if (node[d] == null) {
-                            val = "";
-                        }
-                        input.val(val);
-                    }
-                }
-                $("#node-input-"+d).change(function() {
-                        var n = node;
-                        var property = d;
-                        return function() {
-                            if (!validateNodeProperty(node, property,this.value)) {
-                                $(this).addClass("input-error");
-                            } else {
-                                $(this).removeClass("input-error");
-                            }
-                        };
-                }());
-            }
-        }
-        if (node._def.oneditprepare) {
-            node._def.oneditprepare.call(node);
-        }
-        if (node._def.defaults) {
-            for (var d in node._def.defaults) {
-                $("#node-input-"+d).change();
-            }
-        }
-
-        $( "#dialog" ).dialog("option","title","Edit "+node.type+" node").dialog( "open" );
-    }
-    
     function validateNode(node) {
         var oldValue = node.valid;
         node.valid = true;
@@ -226,6 +157,14 @@ RED.editor = function() {
                                     }
                                 }
                             }
+                            if (editing_node._def.credentials) {
+                                // TODO: credentials
+                                // 1. call $.ajax/POST 'credentials/'+editing_node.type+"/"+editing_node.id
+                                //    with the new values - only pass back password fields
+                                //    that do not equal '__PWRD__'
+                                //    See 10-mqtt.html:150 for example code
+                            }
+
                             
                             var removedLinks = updateNodeProperties(editing_node);
                             if (changed) {
@@ -292,38 +231,127 @@ RED.editor = function() {
             }
     });
     
+    /**
+     * Create a config-node select box for this property
+     * @param node - the node being edited
+     * @param property - the name of the field
+     * @param type - the type of the config-node
+     */
+    function prepareConfigNodeSelect(node,property,type) {
+        var input = $("#node-input-"+property);
+        var node_def = RED.nodes.getType(type);
+
+        input.replaceWith('<select style="width: 60%;" id="node-input-'+property+'"></select>');
+        updateConfigNodeSelect(property,type,node[property]);
+        var select = $("#node-input-"+property);
+        select.after(' <a id="node-input-lookup-'+property+'" class="btn"><i class="icon icon-pencil"></i></a>');
+        $('#node-input-lookup-'+property).click(function(e) {
+            showEditConfigNodeDialog(property,type,select.find(":selected").val());
+            e.preventDefault();
+        });
+        var label = "";
+        var configNode = RED.nodes.node(node[property]);
+        if (configNode && node_def.label) {
+            if (typeof node_def.label == "function") {
+                label = node_def.label.call(configNode);
+            } else {
+                label = node_def.label;
+            }
+        }
+        input.val(label);
+    }
+    
+    /**
+     * Populate the editor dialog input field for this property
+     * @param node - the node being edited
+     * @param property - the name of the field
+     * @param prefix - the prefix to use in the input element ids (node-input|node-config-input)
+     */
+    function preparePropertyEditor(node,property,prefix) {
+        var input = $("#"+prefix+"-"+property);
+        if (input.attr('type') === "checkbox") {
+            input.prop('checked',node[property]);
+        } else {
+            var val = node[property];
+            if (val == null) {
+                val = "";
+            }
+            input.val(val);
+        }
+    }
+    
+    /**
+     * Add an on-change handler to revalidate a node field
+     * @param node - the node being edited
+     * @param property - the name of the field
+     * @param prefix - the prefix to use in the input element ids (node-input|node-config-input)
+     */
+    function attachPropertyChangeHandler(node,property,prefix) {
+        $("#"+prefix+"-"+property).change(function() {
+            if (!validateNodeProperty(node, property,this.value)) {
+                $(this).addClass("input-error");
+            } else {
+                $(this).removeClass("input-error");
+            }
+        });
+    }
+    
+    /**
+     * Prepare all of the editor dialog fields
+     * @param node - the node being edited
+     * @param definition - the node definition
+     * @param prefix - the prefix to use in the input element ids (node-input|node-config-input)
+     */
+    function prepareEditDialog(node,definition,prefix) {
+        for (var d in definition.defaults) {
+            if (definition.defaults[d].type) {
+                prepareConfigNodeSelect(node,d,definition.defaults[d].type);
+            } else {
+                preparePropertyEditor(node,d,prefix);
+            }
+            attachPropertyChangeHandler(node,d,prefix);
+        }
+        if (definition.credentials) {
+            // TODO: credentials
+            // 1. call $.getJSON("credentials/"+node.type+"/"+node.id)
+            // 2. with the response, foreach definition.credentials:
+            //    1. if response.X exists, set prefix-X input field to response.X
+            //    2. if response.hasX exists, set prefix-X password field to '__PWRD__'
+        }
+        if (definition.oneditprepare) {
+            definition.oneditprepare.call(node);
+        }
+        for (var d in definition.defaults) {
+            $("#"+prefix+"-"+d).change();
+        }
+    }
+        
+    function showEditDialog(node) {
+        editing_node = node;
+        RED.view.state(RED.state.EDITING);
+        $("#dialog-form").html($("script[data-template-name='"+node.type+"']").html());
+        prepareEditDialog(node,node._def,"node-input");
+        $( "#dialog" ).dialog("option","title","Edit "+node.type+" node").dialog( "open" );
+    }
     
     function showEditConfigNodeDialog(name,type,id) {
         var adding = (id == "_ADD_");
-        $("#dialog-config-form").html($("script[data-template-name='"+type+"']").html());
         var node_def = RED.nodes.getType(type);
+        
         var configNode = RED.nodes.node(id);
-
-        for (var d in node_def.defaults) {
-            var input = $("#node-config-input-"+d);
-            if (id == "_ADD_") {
-                input.val(node_def.defaults[d].value);
-            } else {
-                input.val(configNode[d]);
+        if (configNode == null) {
+            configNode = {
+                id: (1+Math.random()*4294967295).toString(16),
+                _def: node_def,
+                type: type
             }
-            $("#node-config-input-"+d).change(function() {
-                    var n = configNode;
-                    if (adding) {
-                        n = {_def:node_def};
-                    }
-                    var property = d;
-                    return function() {
-                        if (!validateNodeProperty(n, property,this.value)) {
-                            $(this).addClass("input-error");
-                        } else {
-                            $(this).removeClass("input-error");
-                        }
-                    };
-            }());
-            $("#node-config-input-"+d).change();
         }
+
+        $("#dialog-config-form").html($("script[data-template-name='"+type+"']").html());
+        prepareEditDialog(configNode,node_def,"node-config-input");
+    
         var buttons = $( "#node-config-dialog" ).dialog("option","buttons");
-        if (id == "_ADD_") {
+        if (adding) {
             if (buttons.length == 3) {
                 buttons = buttons.splice(1);
             }
@@ -341,6 +369,10 @@ RED.editor = function() {
                             var configNode = RED.nodes.node(configId);
                             var configTypeDef = RED.nodes.getType(configType);
                             
+                            if (configTypeDef.credentials) {
+                                // CREDENTIAL TODO
+                                // 1. call $.ajax/DELETE "credentials/"+configType+"/"+configId
+                            }
                             if (configTypeDef.ondelete) {
                                 configTypeDef.ondelete.call(RED.nodes.node(configId));
                             }
@@ -366,23 +398,10 @@ RED.editor = function() {
         }
         $( "#node-config-dialog" ).dialog("option","buttons",buttons);
         
-        if (adding) {
-            id = (1+Math.random()*4294967295).toString(16);
-        }
-        if (node_def.oneditprepare) {
-            var cn = RED.nodes.node(id);
-            if (cn) {
-                node_def.oneditprepare.call(cn);
-            } else {
-                node_def.oneditprepare.call({id:id});
-            }
-        }
-        
-        
         $( "#node-config-dialog" )
             .dialog("option","node-adding",adding)
             .dialog("option","node-property",name)
-            .dialog("option","node-id",id)
+            .dialog("option","node-id",configNode.id)
             .dialog("option","node-type",type)
             .dialog("option","title",(adding?"Add new ":"Edit ")+type+" config node")
             .dialog( "open" );
@@ -432,7 +451,6 @@ RED.editor = function() {
                             }
                             configNode.label = configTypeDef.label;
                             configNode._def = configTypeDef;
-                            //console.log(nn.id,nn.label());
                             RED.nodes.add(configNode);
                             updateConfigNodeSelect(configProperty,configType,configNode.id);
                         } else {
@@ -443,7 +461,13 @@ RED.editor = function() {
                             }
                             updateConfigNodeSelect(configProperty,configType,configId);
                         }
-                        
+                        if (configTypeDef.credentials) {
+                            // TODO: credentials
+                            // 1. call $.ajax/POST 'credentials/'+configType+"/"+configId
+                            //    with the new values - only pass back password fields
+                            //    that do not equal '__PWRD__'
+                            //    See 10-mqtt.html:150 for example code
+                        }
                         if (configTypeDef.oneditsave) {
                             configTypeDef.oneditsave.call(RED.nodes.node(configId));
                         }
