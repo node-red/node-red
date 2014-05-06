@@ -153,7 +153,7 @@ var localfilesystem = {
         var fsext = fspath.extname(flowsFile);
         credentialsFile = fspath.join(userDir,fspath.basename(flowsFile,fsext)+"_cred"+fsext);
         oldCredentialsFile = fspath.join(userDir,"credentials.json");
-        flowsPrev = fspath.join(userDir,"flow.backup");
+        flowsPrev = fspath.join(userDir,"flows.backup");
 
         libDir = fspath.join(userDir,"lib");
         libFlowsDir = fspath.join(libDir,"flows");
@@ -178,7 +178,7 @@ var localfilesystem = {
     },
 
     saveFlows: function(flows) {
-        fs.rename(flowsFullPath,flowsPrev);
+        fs.renameSync(flowsFullPath,flowsPrev);
         return nodeFn.call(fs.writeFile, flowsFullPath, JSON.stringify(flows));
     },
 
