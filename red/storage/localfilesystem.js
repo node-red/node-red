@@ -178,7 +178,9 @@ var localfilesystem = {
     },
 
     saveFlows: function(flows) {
-        fs.renameSync(flowsFullPath,flowsPrev);
+        if (fs.existsSync(flowsFullPath)) {
+            fs.renameSync(flowsFullPath,flowsPrev);
+        }
         return nodeFn.call(fs.writeFile, flowsFullPath, JSON.stringify(flows));
     },
 

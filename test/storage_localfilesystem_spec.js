@@ -21,6 +21,8 @@ describe('LocalFileSystem', function() {
             fs.existsSync(path.join(userDir,"lib")).should.be.true;
             fs.existsSync(path.join(userDir,"lib",'flows')).should.be.true;
             done();
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
@@ -35,6 +37,8 @@ describe('LocalFileSystem', function() {
             }).otherwise(function(err) {
                 done(err);
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
@@ -42,9 +46,12 @@ describe('LocalFileSystem', function() {
         localfilesystem.init({userDir:userDir}).then(function() {
             var flowFile = 'flows_'+require('os').hostname()+'.json';
             var flowFilePath = path.join(userDir,flowFile);
+            var flowFileBackupPath = path.join(userDir,"flows.backup");
             fs.existsSync(flowFilePath).should.be.false;
+            fs.existsSync(flowFileBackupPath).should.be.false;
             localfilesystem.saveFlows(testFlow).then(function() {
                 fs.existsSync(flowFilePath).should.be.true;
+                fs.existsSync(flowFileBackupPath).should.be.false;
                 localfilesystem.getFlows().then(function(flows) {
                     flows.should.eql(testFlow);
                     done();
@@ -54,6 +61,8 @@ describe('LocalFileSystem', function() {
             }).otherwise(function(err) {
                 done(err);
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
@@ -79,9 +88,54 @@ describe('LocalFileSystem', function() {
             }).otherwise(function(err) {
                 done(err);
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
+    it('should backup the flows file', function(done) {
+        var defaultFlowFile = 'flows_'+require('os').hostname()+'.json';
+        var defaultFlowFilePath = path.join(userDir,defaultFlowFile);
+        var flowFile = 'test.json';
+        var flowFilePath = path.join(userDir,flowFile);
+        var flowFileBackupPath = path.join(userDir,"flows.backup");
+
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}).then(function() {
+            fs.existsSync(defaultFlowFilePath).should.be.false;
+            fs.existsSync(flowFilePath).should.be.false;
+            fs.existsSync(flowFileBackupPath).should.be.false;
+
+            localfilesystem.saveFlows(testFlow).then(function() {
+                fs.existsSync(flowFileBackupPath).should.be.false;
+                fs.existsSync(defaultFlowFilePath).should.be.false;
+                fs.existsSync(flowFilePath).should.be.true;
+                var content = fs.readFileSync(flowFilePath,'utf8');
+                var testFlow2 = [{"type":"tab","id":"bc5672ad.2741d8","label":"Sheet 2"}];
+                
+                localfilesystem.saveFlows(testFlow2).then(function() {
+                    fs.existsSync(flowFileBackupPath).should.be.true;
+                    fs.existsSync(defaultFlowFilePath).should.be.false;
+                    fs.existsSync(flowFilePath).should.be.true;
+                    var backupContent = fs.readFileSync(flowFileBackupPath,'utf8');
+                    content.should.equal(backupContent);
+                    var content2 = fs.readFileSync(flowFilePath,'utf8');
+                    content2.should.not.equal(backupContent);
+                    done();
+                    
+                }).otherwise(function(err) {
+                    done(err);
+                });
+                
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+            
+            
+    });
+    
     it('should handle missing credentials', function(done) {
         var flowFile = 'test.json';
         var flowFilePath = path.join(userDir,flowFile);
@@ -95,6 +149,8 @@ describe('LocalFileSystem', function() {
             }).otherwise(function(err) {
                 done(err);
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
@@ -120,6 +176,8 @@ describe('LocalFileSystem', function() {
             }).otherwise(function(err) {
                 done(err);
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
@@ -131,6 +189,8 @@ describe('LocalFileSystem', function() {
             }).otherwise(function(err) {
                 done(err);
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
@@ -149,6 +209,8 @@ describe('LocalFileSystem', function() {
             }).otherwise(function(err) {
                 done(err);
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
@@ -160,6 +222,8 @@ describe('LocalFileSystem', function() {
                 // err should be null, so this will pass
                 done(err);
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
@@ -176,6 +240,8 @@ describe('LocalFileSystem', function() {
             }).otherwise(function(err) {
                 done(err);
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
@@ -187,6 +253,8 @@ describe('LocalFileSystem', function() {
             }).otherwise(function(err) {
                 done(err);
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
@@ -198,6 +266,8 @@ describe('LocalFileSystem', function() {
                 should.exist(err);
                 done();
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
@@ -231,6 +301,8 @@ describe('LocalFileSystem', function() {
             }).otherwise(function(err) {
                 done(err);
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
@@ -243,6 +315,8 @@ describe('LocalFileSystem', function() {
             }).otherwise(function(err) {
                 done(err);
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
@@ -269,6 +343,8 @@ describe('LocalFileSystem', function() {
             }).otherwise(function(err) {
                 done(err);
             });
+        }).otherwise(function(err) {
+            done(err);
         });
     });
 
