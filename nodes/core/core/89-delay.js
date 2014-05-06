@@ -80,6 +80,7 @@ module.exports = function(RED) {
         this.intervalID = -1;
         this.randomID = -1;
         this.lastSent = Date.now();
+        this.drop = n.drop;
         var node = this;
     
         if (this.pauseType === "delay") {
@@ -101,7 +102,7 @@ module.exports = function(RED) {
     
         } else if (this.pauseType === "rate") {
             this.on("input", function(msg) {
-                if (node.drop) {
+                if (!node.drop) {
                     if ( node.intervalID !== -1) {
                         node.buffer.push(msg);
                         if (node.buffer.length > 1000) {
