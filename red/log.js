@@ -26,7 +26,7 @@ ConsoleLogHandler.on("log",function(msg) {
 
 var log = module.exports = {
     addHandler: function(func) {
-        
+        logHandlers.push(func);
     },
     
     log: function(msg) {
