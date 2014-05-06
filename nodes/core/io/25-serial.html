@@ -43,7 +43,7 @@
         icon: "serial.png",
         label: function() {
             var serialNode = RED.nodes.node(this.serial);
-            return this.name||(serialNode?serialNode.label():"serial");
+            return this.name||(serialNode?serialNode.label().split(":")[0]:"serial");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -82,7 +82,7 @@
         align: "right",
         label: function() {
             var serialNode = RED.nodes.node(this.serial);
-            return this.name||(serialNode?serialNode.label():"serial");
+            return this.name||(serialNode?serialNode.label().split(":")[0]:"serial");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -154,35 +154,11 @@
     <div class="form-row">
         <label for="node-config-input-addchar">&nbsp;</label>
         <select type="text" id="node-config-input-addchar" style="width: 70%;">
-            <option value="false">Don't add 'New Line' to serial output</option>
-            <option value="true">Add 'New line' to serial output message</option>
+            <option value="false">Don't add 'New Line' to any output messages</option>
+            <option value="true">Add 'New line' to output messages</option>
         </select>
     </div>
     <div class="form-tips">Tip: the new line character is used to split the input into separate messages. It can also be added to every message sent out to the serial port.</div>
-    <script>
-    {
-        
-        
-        /*
-        $("#node-config-portlist-button").click(function() {
-            $.getJSON('serialports',function(data) {
-                var s = $("#node-config-select-serialport").empty();
-                $.each(data, function(i, port){
-                    s.append($('<option>').text(port.comName).attr('value', port.comName));
-                });
-                $("#node-config-input-serialport").hide();
-                $("#node-config-select-serialport").show();
-            });
-        });
-        $("#node-config-select-serialport").click(function() {
-            var p = $("#node-config-select-serialport").val();
-            $("#node-config-input-serialport").val(p);
-            $("#node-config-select-serialport").hide();
-            $("#node-config-input-serialport").show();
-        });
-        */
-    }
-    </script>
 </script>
 
 <script type="text/javascript">
@@ -210,12 +186,11 @@
                 $("#node-config-input-serialport").autocomplete( "destroy" );
             } catch(err) {
             }
-            
             $("#node-config-lookup-serial").click(function() {
                 $("#node-config-lookup-serial-icon").removeClass('icon-search');
                 $("#node-config-lookup-serial-icon").addClass('spinner');
                 $("#node-config-lookup-serial").addClass('disabled');
-    
+
                 $.getJSON('serialports',function(data) {
                     $("#node-config-lookup-serial-icon").addClass('icon-search');
                     $("#node-config-lookup-serial-icon").removeClass('spinner');
