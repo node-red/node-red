@@ -18,6 +18,7 @@ var events = require("./events");
 var server = require("./server");
 var nodes = require("./nodes");
 var library = require("./library");
+var comms = require("./comms");
 var log = require("./log");
 var fs = require("fs");
 var settings = null;
@@ -50,6 +51,7 @@ var RED = {
     stop: server.stop,
     nodes: nodes,
     library: library,
+    comms: comms,
     events: events,
     log: log
 };

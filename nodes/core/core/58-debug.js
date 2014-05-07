@@ -51,35 +51,15 @@ module.exports = function(RED) {
                 if (typeof msg.payload == "undefined") { msg.payload = "(undefined)"; }
                 if (msg.payload instanceof Buffer) { msg.payload = "(Buffer) "+msg.payload.toString('hex'); }
                 if (this.active) {
-                    DebugNode.send({id:this.id,name:this.name,topic:msg.topic,msg:msg.payload,_path:msg._path});
+                    sendDebug({id:this.id,name:this.name,topic:msg.topic,msg:msg.payload,_path:msg._path});
                 }
             }
         });
     }
-    
-    var lastSentTime = (new Date()).getTime();
-    
-    setInterval(function() {
-        var now = (new Date()).getTime();
-        if (now-lastSentTime > 15000) {
-            lastSentTime = now;
-            for (var i in DebugNode.activeConnections) {
-                var ws = DebugNode.activeConnections[i];
-                try {
-                    var p = JSON.stringify({heartbeat:lastSentTime});
-                    ws.send(p);
-                } catch(err) {
-                    util.log("[debug] ws heartbeat error : "+err);
-                }
-            }
-        }
-    }, 15000);
-    
-    
-    
+   
     RED.nodes.registerType("debug",DebugNode);
     
-    DebugNode.send = function(msg) {
+    function sendDebug(msg) {
         if (msg.msg instanceof Error) {
             msg.msg = msg.msg.toString();
         } else if (typeof msg.msg === 'object') {
@@ -106,47 +86,13 @@ module.exports = function(RED) {
             msg.msg = msg.msg.substr(0,debuglength) +" ....";
         }
         
-        for (var i in DebugNode.activeConnections) {
-            var ws = DebugNode.activeConnections[i];
-            try {
-                var p = JSON.stringify(msg);
-                ws.send(p);
-            } catch(err) {
-                util.log("[debug] ws error : "+err);
-            }
-        }
-        lastSentTime = (new Date()).getTime();
+        RED.comms.publish("debug",msg);
     }
-    
-    DebugNode.activeConnections = [];
-    
-    var path = RED.settings.httpAdminRoot || "/";
-    path = path + (path.slice(-1) == "/" ? "":"/") + "debug/ws";
-    
-    DebugNode.wsServer = new ws.Server({server:RED.server,path:path});
-    DebugNode.wsServer.on('connection',function(ws) {
-        DebugNode.activeConnections.push(ws);
-        ws.on('close',function() {
-            for (var i in DebugNode.activeConnections) {
-                if (DebugNode.activeConnections[i] === ws) {
-                    DebugNode.activeConnections.splice(i,1);
-                    break;
-                }
-            }
-        });
-        ws.on('error', function(err) {
-            util.log("[debug] ws error : "+err);
-        });
-    });
-    
-    DebugNode.wsServer.on('error', function(err) {
-        util.log("[debug] ws server error : "+err);
-    });
     
     DebugNode.logHandler = new events.EventEmitter();
     DebugNode.logHandler.on("log",function(msg) {
         if (msg.level == "warn" || msg.level == "error") {
-            DebugNode.send(msg);
+            sendDebug(msg);
         }
     });
     RED.log.addHandler(DebugNode.logHandler);
