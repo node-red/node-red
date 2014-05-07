@@ -177,7 +177,11 @@ module.exports = function(RED) {
                                     node.log("tweet rate limit hit");
                                 });
                                 stream.on('error', function(tweet,rc) {
-                                    node.warn(tweet);
+                                    if (rc == 420) {
+                                        node.warn("Twitter rate limit hit");
+                                    } else {
+                                        node.warn("Stream error:"+tweet.toString()+" ("+rc+")");
+                                    }
                                     setTimeout(setupStream,10000);
                                 });
                                 stream.on('destroy', function (response) {
