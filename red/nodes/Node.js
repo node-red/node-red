@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 var util = require("util");
 var EventEmitter = require("events").EventEmitter;
 var clone = require("clone");
 
 var flows = require("./flows");
-
+var credentials = require('./credentials')
 var comms = require("../comms");
 
 function Node(n) {
@@ -120,5 +120,4 @@ Node.prototype.error = function(msg) {
 Node.prototype.status = function(status,retain) {
     comms.publish("status/"+this.id,status,retain);
 }
-
 module.exports = Node;
