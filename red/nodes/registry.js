@@ -34,9 +34,12 @@ var node_scripts = [];
 function loadTemplate(templateFilename) {
     return when.promise(function(resolve,reject) {
         whenNode.call(fs.readFile,templateFilename,'utf8').done(function(content) {
-            registerConfig(content);
+            try {
+                registerConfig(content);
+            } catch(err) {
+                reject("invalid template file: "+err.message);
+            }
             resolve();
-            //console.log(templateFilename);
         }, function(err) {
             reject("missing template file");
         });
