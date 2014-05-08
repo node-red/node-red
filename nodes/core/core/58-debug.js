@@ -37,7 +37,7 @@ module.exports = function(RED) {
                 }
                 if (msg.payload instanceof Buffer) { msg.payload = "(Buffer) "+msg.payload.toString('hex'); }
                 if (this.active) {
-                    DebugNode.send({id:this.id,name:this.name,topic:msg.topic,msg:msg,_path:msg._path});
+                    sendDebug({id:this.id,name:this.name,topic:msg.topic,msg:msg,_path:msg._path});
                 }
             } else { // debug just the msg.payload
                 if (this.console == "true") {
