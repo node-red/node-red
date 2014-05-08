@@ -214,13 +214,7 @@ RED.view = function() {
     //d3.select(window).on("keydown", keydown);
 
     function canvasMouseDown() {
-        // if (d3.event.shiftKey) {
-        // var point = d3.mouse(this),
-        // node = {x: point[0], y: point[1], w:node_width, h:node_height, type:Math.floor(Math.random()*3)},
-        // n = nodes.push(node);
-        // redraw();
-        // } else
-        //
+        
         if (!mousedown_node && !mousedown_link) {
             selected_link = null;
             updateSelection();
@@ -233,17 +227,17 @@ RED.view = function() {
             }
             var point = d3.touches(this)[0]||d3.mouse(this);
             if (d3.touches(this).length === 0) {
-            lasso = vis.append('rect')
-                .attr("ox",point[0])
-                .attr("oy",point[1])
-                .attr("rx",2)
-                .attr("ry",2)
-                .attr("x",point[0])
-                .attr("y",point[1])
-                .attr("width",0)
-                .attr("height",0)
-                .attr("class","lasso");
-            d3.event.preventDefault();
+                lasso = vis.append('rect')
+                    .attr("ox",point[0])
+                    .attr("oy",point[1])
+                    .attr("rx",2)
+                    .attr("ry",2)
+                    .attr("x",point[0])
+                    .attr("y",point[1])
+                    .attr("width",0)
+                    .attr("height",0)
+                    .attr("class","lasso");
+                d3.event.preventDefault();
             }
         }
     }
@@ -251,6 +245,11 @@ RED.view = function() {
     function canvasMouseMove() {
         clearTimeout(pressTimer);
         mouse_position = d3.touches(this)[0]||d3.mouse(this);
+
+        // Prevent touch scrolling... 
+        //if (d3.touches(this)[0]) {
+        //    d3.event.preventDefault();
+        //}
 
         // TODO: auto scroll the container
         //var point = d3.mouse(this);
@@ -394,6 +393,9 @@ RED.view = function() {
             updateSelection();
             lasso.remove();
             lasso = null;
+        } else if (mouse_mode == RED.state.DEFAULT) {
+            clearSelection();
+            updateSelection();
         }
         if (mouse_mode == RED.state.MOVING_ACTIVE) {
             if (moving_set.length > 0) {
