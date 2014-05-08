@@ -188,11 +188,11 @@ function loadNodes(dir) {
 }
 
 function init(_settings) {
+    Node = require("./Node");
     settings = _settings;
 }
 
 function load() {
-    Node = require("./Node");
     return when.promise(function(resolve,reject) {
         var RED = require("../red.js");
         
