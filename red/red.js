@@ -18,6 +18,7 @@ var events = require("./events");
 var server = require("./server");
 var nodes = require("./nodes");
 var library = require("./library");
+var comms = require("./comms");
 var log = require("./log");
 var fs = require("fs");
 var settings = null;
@@ -51,7 +52,8 @@ var RED = {
     nodes: nodes,
     library: library,
     events: events,
-    log: log
+    log: log,
+    comms:comms
 };
 
 RED.__defineGetter__("app", function() { console.log("Deprecated use of RED.app - use RED.httpAdmin instead"); return server.app });
