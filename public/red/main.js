@@ -52,13 +52,13 @@ var RED = function() {
                 var invalid = false;
                 var unknownNodes = [];
                 RED.nodes.eachNode(function(node) {
-                        invalid = invalid || !node.valid;
-                        if (node.type === "unknown") {
-                            if (unknownNodes.indexOf(node.name) == -1) {
-                                unknownNodes.push(node.name);
-                            }
-                            invalid = true;
+                    invalid = invalid || !node.valid;
+                    if (node.type === "unknown") {
+                        if (unknownNodes.indexOf(node.name) == -1) {
+                            unknownNodes.push(node.name);
                         }
+                        invalid = true;
+                    }
                 });
                 if (invalid) {
                     if (unknownNodes.length > 0) {
@@ -137,25 +137,34 @@ var RED = function() {
 
     function loadSettings() {
         $.get('settings', function(data) {
-                RED.settings = data;
-                loadNodes();
+            RED.settings = data;
+            loadNodes();
         });
     }
     function loadNodes() {
         $.get('nodes', function(data) {
-                $("body").append(data);
-                $(".palette-spinner").hide();
-                $(".palette-scroll").show();
-                $("#palette-search").show();
-                loadFlows();
+            $("body").append(data);
+            $(".palette-spinner").hide();
+            $(".palette-scroll").show();
+            $("#palette-search").show();
+            loadFlows();
         });
     }
 
     function loadFlows() {
         $.getJSON("flows",function(nodes) {
-                RED.nodes.import(nodes);
-                RED.view.dirty(false);
-                RED.view.redraw();
+            RED.nodes.import(nodes);
+            RED.view.dirty(false);
+            RED.view.redraw();
+            RED.comms.subscribe("status/#",function(topic,msg) {
+                var parts = topic.split("/");
+                var node = RED.nodes.node(parts[1]);
+                if (node) {
+                    node.status = msg;
+                    node.dirty = true;
+                    RED.view.redraw();
+                }
+            });
         });
     }
 
@@ -168,18 +177,19 @@ var RED = function() {
         //});
 
         dialog.on('show',function() {
-                RED.keyboard.disable();
+            RED.keyboard.disable();
         });
         dialog.on('hidden',function() {
-                RED.keyboard.enable();
+            RED.keyboard.enable();
         });
 
         dialog.modal();
     }
 
     $(function() {
-            RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
-            loadSettings();
+        RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
+        loadSettings();
+        RED.comms.connect();
     });
 
     return {

@@ -20,7 +20,7 @@ var clone = require("clone");
 
 var flows = require("./flows");
 
-
+var comms = require("../comms");
 
 function Node(n) {
     this.id = n.id;
@@ -114,6 +114,11 @@ Node.prototype.error = function(msg) {
     if (this.name) o.name = this.name;
     this.emit("log",o);
 }
-
+/**
+ * status: { fill:"red|green", shape:"dot|ring", text:"blah" }
+ */
+Node.prototype.status = function(status,retain) {
+    comms.publish("status/"+this.id,status,retain);
+}
 
 module.exports = Node;

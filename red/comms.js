@@ -23,6 +23,8 @@ var settings;
 var wsServer;
 var activeConnections = [];
 
+var retained = {};
+
 var heartbeatTimer;
 var lastSentTime;
 
@@ -47,6 +49,12 @@ function start() {
                 }
             }
         });
+        ws.on('message', function(data,flags) {
+            var msg = JSON.parse(data);
+            if (msg.subscribe) {
+                handleRemoteSubscription(ws,msg.subscribe);
+            }
+        });
         ws.on('error', function(err) {
             util.log("[red:comms] error : "+err.toString());
         });
@@ -67,15 +75,32 @@ function start() {
     }, 15000);
 }
 
-function publish(topic,data) {
-    var msg = JSON.stringify({topic:topic,data:data});
+function publish(topic,data,retain) {
+    if (retain) {
+        retained[topic] = data;
+    }
+    lastSentTime = Date.now();
     activeConnections.forEach(function(conn) {
-        try {
-            conn.send(msg);
-        } catch(err) {
-            util.log("[red:comms] send error : "+err.toString());
-        }
+        publishTo(conn,topic,data);
     });
+}
+
+function publishTo(ws,topic,data) {
+    var msg = JSON.stringify({topic:topic,data:data});
+    try {
+        ws.send(msg);
+    } catch(err) {
+        util.log("[red:comms] send error : "+err.toString());
+    }
+}
+
+function handleRemoteSubscription(ws,topic) {
+    var re = new RegExp("^"+topic.replace(/([\[\]\?\(\)\\\\$\^\*\.|])/g,"\\$1").replace(/\+/g,"[^/]+").replace(/\/#$/,"(\/.*)?")+"$");
+    for (var t in retained) {
+        if (re.test(t)) {
+            publishTo(ws,t,retained[t]);
+        }
+    }
 }
 
 

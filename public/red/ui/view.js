@@ -44,6 +44,12 @@ RED.view = function() {
 
     var clipboard = "";
 
+    
+    var status_colours = {
+        "red"  : "#00c",
+        "green": "#5a8"
+    }
+    
     var outer = d3.select("#chart")
         .append("svg:svg")
         .attr("width", space_width)
@@ -811,7 +817,7 @@ RED.view = function() {
                                 .on("click",function(d) { d._def.onbadgeclick.call(d);d3.event.preventDefault();});
                         }
                     }
-
+                    
                     if (d._def.button) {
                         var nodeButtonGroup = node.append('svg:g')
                             .attr("transform",function(d) { return "translate("+((d._def.align == "right") ? 94 : -25)+",2)"; })
@@ -893,6 +899,21 @@ RED.view = function() {
                         text.attr('text-anchor','end');
                     }
 
+                    var status = node.append("svg:g").attr("class","node_status_group").style("display","none");
+                    
+                    var statusRect = status.append("circle").attr("class","node_status")
+                                            .attr("cx",9).attr("cy",6).attr("r",5).attr("stroke-width","3");
+                    var statusLabel = status.append("svg:text")
+                        .attr("class","node_status_label")
+                        .attr('x',20).attr('y',10)
+                        .style({
+                                'stroke-width': 0,
+                                'fill': '#999',
+                                'font-size':'9pt',
+                                'stroke':'#000',
+                                'text-anchor':'start'
+                        });
+                        
                     //node.append("circle").attr({"class":"centerDot","cx":0,"cy":0,"r":5});
 
                     if (d._def.inputs > 0) {
@@ -1017,7 +1038,37 @@ RED.view = function() {
                             }
                             return "";
                         });
-
+                        if (!d.status) {
+                            thisNode.selectAll('.node_status_group').style("display","none");
+                        } else {
+                            thisNode.selectAll('.node_status_group').style("display","inline").attr("transform","translate(3,"+(d.h+3)+")");
+                            var fill = status_colours[d.status.fill]; // Only allow our colours for now
+                            if (d.status.shape == null && fill == null) {
+                                thisNode.selectAll('.node_status').style("display","none");
+                            } else {
+                                var style;
+                                if (d.status.shape == null || d.status.shape == "dot") {
+                                    style = {
+                                        display: "inline",
+                                        fill: fill,
+                                        stroke: fill
+                                    };
+                                } else if (d.status.shape == "ring" ){
+                                    style = {
+                                        display: "inline",
+                                        fill: '#fff',
+                                        stroke: fill
+                                    }
+                                }
+                                thisNode.selectAll('.node_status').style(style);
+                            }
+                            if (d.status.text) {
+                                thisNode.selectAll('.node_status_label').text(d.status.text);
+                            } else {
+                                thisNode.selectAll('.node_status_label').text("");
+                            }
+                        }
+                        
                         d.dirty = false;
                     }
             });
