@@ -81,7 +81,8 @@ module.exports = function(RED) {
                     if (err) {
                         node.warn(err);
                     } else {
-                        node.send({payload:data});
+                        msg.payload = data;
+                        node.send(msg);
                     }
                 });
             }
