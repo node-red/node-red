@@ -221,9 +221,6 @@ RED.view = function() {
         // redraw();
         // } else
         //
-        if (typeof d3.touches(this)[0] == "object") {
-            pressTimer = setTimeout(function() { RED.history.pop(); }, 1500);
-        }
         if (!mousedown_node && !mousedown_link) {
             selected_link = null;
             updateSelection();
