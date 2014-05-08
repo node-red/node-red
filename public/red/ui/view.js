@@ -46,7 +46,7 @@ RED.view = function() {
 
     
     var status_colours = {
-        "red"  : "#00c",
+        "red"  : "#c00",
         "green": "#5a8"
     }
     
@@ -898,14 +898,16 @@ RED.view = function() {
 
                     var status = node.append("svg:g").attr("class","node_status_group").style("display","none");
                     
-                    var statusRect = status.append("circle").attr("class","node_status")
-                                            .attr("cx",9).attr("cy",6).attr("r",5).attr("stroke-width","3");
+                    var statusRect = status.append("rect").attr("class","node_status")
+                                        .attr("x",6).attr("y",1).attr("width",9).attr("height",9)
+                                        .attr("rx",2).attr("ry",2).attr("stroke-width","3");
+                    
                     var statusLabel = status.append("svg:text")
                         .attr("class","node_status_label")
-                        .attr('x',20).attr('y',10)
+                        .attr('x',20).attr('y',9)
                         .style({
                                 'stroke-width': 0,
-                                'fill': '#999',
+                                'fill': '#888',
                                 'font-size':'9pt',
                                 'stroke':'#000',
                                 'text-anchor':'start'
