@@ -377,6 +377,11 @@ RED.editor = function() {
                 _def: node_def,
                 type: type
             }
+            for (var d in node_def.defaults) {
+                if (node_def.defaults[d].value) {
+                    configNode[d] = node_def.defaults[d].value;
+                }
+            }
         }
 
         $("#dialog-config-form").html($("script[data-template-name='"+type+"']").html());
