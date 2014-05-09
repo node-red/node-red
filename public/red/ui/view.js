@@ -668,10 +668,26 @@ RED.view = function() {
     function portMouseUp(d,portType,portIndex) {
         document.body.style.cursor = "";
         if (mouse_mode == RED.state.JOINING && mousedown_node) {
-            mouseup_node = d;
+            if (d3.event instanceof TouchEvent) {
+                RED.nodes.eachNode(function(n) {
+                        if (n.z == activeWorkspace) {
+                            var hw = n.w/2;
+                            var hh = n.h/2;
+                            if (n.x-hw<mouse_position[0] && n.x+hw> mouse_position[0] &&
+                                n.y-hh<mouse_position[1] && n.y+hh>mouse_position[1]) {
+                                    mouseup_node = n;
+                                    portType = mouseup_node._def.inputs>0?1:0;
+                                    portIndex = 0;
+                            }
+                        }
+                });
+            } else {
+                mouseup_node = d;
+            }
             if (portType == mousedown_port_type || mouseup_node === mousedown_node) {
                 drag_line.attr("class", "drag_line_hidden");
-                resetMouseVars(); return;
+                resetMouseVars();
+                return;
             }
             var src,dst,src_port;
             if (mousedown_port_type == 0) {
