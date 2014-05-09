@@ -32,8 +32,53 @@
 
 <script type="text/x-red" data-help-name="irc in">
     <p>Connects to a channel on an IRC server</p>
-    <p>Any messages on that channel will appear on the <b>msg.payload</b> at the output, while <b>msg.topic</b> will contain who it is from.</p>
-    <p>The second output provides a <b>msg.payload</b> that has any status messages such as joins, parts, kicks etc.</p>
+    <p>Any messages on that channel will appear on the <code>msg.payload</code> at the output, while <code>msg.topic</code> will contain who it is from.</p>
+    <p>The second output provides a <code>msg.payload</code> that has any status messages such as joins, parts, kicks etc.</p>
+    <p>The type of the status is set as <code>msg.payload.type</code>.</p>
+    <p>The possible status are: <br />
+    <table border="1" cellpadding="1" cellspacing="1">
+	<thead>
+		<tr>
+			<th scope="col">Type</th>
+			<th scope="col">Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>message</td>
+			<td>message is send into the channel</td>
+		</tr>
+		<tr>
+			<td>pm</td>
+			<td>private message to the bot</td>
+		</tr>
+		<tr>
+			<td>join</td>
+			<td>an user join the channel (also triggered when the bot join a channel)</td>
+		</tr>
+		<tr>
+			<td>invite</td>
+			<td>the bot is being invited to a channel</td>
+		</tr>
+		<tr>
+			<td>part</td>
+			<td>a user leave a channel</td>
+		</tr>
+		<tr>
+			<td>quit</td>
+			<td>a user quit a channel</td>
+		</tr>
+		<tr>
+			<td>kick</td>
+			<td>an user is kicked from a channel</td>
+		</tr>
+		<tr>
+			<td>names</td>
+			<td>retrieve the list of users when the bot join a channel</td>
+		</tr>
+	</tbody>
+</table>
+</p>
 </script>
 
 <script type="text/javascript">
@@ -94,8 +139,8 @@
 
 <script type="text/x-red" data-help-name="irc out">
     <p>Sends messages to a channel on an IRC server</p>
-    <p>You can send just the <b>msg.payload</b>, or the complete <b>msg</b> object to the selected channel,
-    or you can select to use <b>msg.topic</b> to send the <b>msg.payload</b> to a specific user in the channel (private conversation).</p>
+    <p>You can send just the <code>msg.payload</code>, or the complete <code>msg</code> object to the selected channel,
+    or you can select to use <code>msg.topic</code> to send the <code>msg.payload</code> to a specific user in the channel (private conversation).</p>
 </script>
 
 <script type="text/javascript">
