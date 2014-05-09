@@ -86,6 +86,10 @@ module.exports = function(RED) {
             node.send([null,msg]);
             node.log(who+' was kicked from '+channel+' by '+by+': '+reason);
         });
+        this.ircclient.addListener('names', function (channel, nicks) {
+            var msg = { "payload": { "type": "names", "channel": channel, "names": nicks} };
+            node.send([null, msg]);
+        });
     
     }
     RED.nodes.registerType("irc in",IrcInNode);
