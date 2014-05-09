@@ -393,7 +393,7 @@ RED.view = function() {
             updateSelection();
             lasso.remove();
             lasso = null;
-        } else if (mouse_mode == RED.state.DEFAULT) {
+        } else if (mouse_mode == RED.state.DEFAULT && mousedown_link == null) {
             clearSelection();
             updateSelection();
         }
