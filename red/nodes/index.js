@@ -36,6 +36,7 @@ module.exports = {
     addCredentials: credentials.add,
     getCredentials: credentials.get,
     deleteCredentials: credentials.delete,
+    registerCredentials: credentials.register,
     createNode: createNode,
     registerType: registry.registerType,
     getType: registry.get,
