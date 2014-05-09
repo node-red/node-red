@@ -38,7 +38,6 @@ RED.view = function() {
         moving_set = [],
         dirty = false,
         lasso = null,
-        pressTimer = null,
         clickTime = 0,
         clickElapsed = 0;
 
@@ -243,9 +242,8 @@ RED.view = function() {
     }
 
     function canvasMouseMove() {
-        clearTimeout(pressTimer);
         mouse_position = d3.touches(this)[0]||d3.mouse(this);
-
+        
         // Prevent touch scrolling... 
         //if (d3.touches(this)[0]) {
         //    d3.event.preventDefault();
@@ -316,14 +314,13 @@ RED.view = function() {
                 (mousePos[0]-sc*(scale)*node_width)+" "+(mousePos[1]-scaleY*node_height)+" "+
                 mousePos[0]+" "+mousePos[1]
                 );
-
+            
         } else if (mouse_mode == RED.state.MOVING) {
             var m = mouse_position;
             var d = (mouse_offset[0]-m[0])*(mouse_offset[0]-m[0]) + (mouse_offset[1]-m[1])*(mouse_offset[1]-m[1]);
             if (d > 2) {
                 mouse_mode = RED.state.MOVING_ACTIVE;
                 clickElapsed = 0;
-                clearTimeout(pressTimer);
             }
         } else if (mouse_mode == RED.state.MOVING_ACTIVE || mouse_mode == RED.state.IMPORT_DRAGGING) {
             var mousePos = mouse_position;
@@ -369,7 +366,6 @@ RED.view = function() {
     }
 
     function canvasMouseUp() {
-        clearTimeout(pressTimer);
         if (mousedown_node && mouse_mode == RED.state.JOINING) {
             drag_line.attr("class", "drag_line_hidden");
         }
@@ -725,9 +721,6 @@ RED.view = function() {
     }
 
     function nodeMouseDown(d) {
-        if (typeof d3.touches(this)[0] == "object") {
-            pressTimer = setTimeout(function() { RED.editor.edit(d); }, 1500);
-        }
         if (mouse_mode == RED.state.IMPORT_DRAGGING) {
             RED.keyboard.remove(/* ESCAPE */ 27);
             updateSelection();
@@ -889,7 +882,7 @@ RED.view = function() {
                    //node.append("rect").attr("class", "node-gradient-bottom").attr("rx", 6).attr("ry", 6).attr("height",30).attr("stroke","none").attr("fill","url(#gradient-bottom)").style("pointer-events","none");
 
                     mainRect.on("mouseup",nodeMouseUp);
-                    mainRect.on("touchend",function(){ clearTimeout(pressTimer); nodeMouseUp; });
+                    mainRect.on("touchend",nodeMouseUp);
                     //mainRect.on("touchend",nodeMouseUp);
 
                     if (d._def.icon) {
@@ -1109,9 +1102,7 @@ RED.view = function() {
                 updateSelection();
                 redraw();
                 d3.event.stopPropagation();
-                pressTimer = setTimeout(function() { deleteSelection(); }, 1500);
-            })
-            .on("touchend",function() { clearTimeout(pressTimer); });
+            });
 
         link.exit().remove();
 
