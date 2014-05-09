@@ -34,49 +34,49 @@
     <p>Connects to a channel on an IRC server</p>
     <p>Any messages on that channel will appear on the <code>msg.payload</code> at the output, while <code>msg.topic</code> will contain who it is from.</p>
     <p>The second output provides a <code>msg.payload</code> that has any status messages such as joins, parts, kicks etc.</p>
-    <p>The type of the status is set as <code>msg.payload.type</code>.</p>
-    <p>The possible status are: <br />
+    <p>The type of the status message is set as <code>msg.payload.type</code>.</p>
+    <p>The possible status types are: <br />
     <table border="1" cellpadding="1" cellspacing="1">
-	<thead>
-		<tr>
-			<th scope="col">Type</th>
-			<th scope="col">Description</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td>message</td>
-			<td>message is send into the channel</td>
-		</tr>
-		<tr>
-			<td>pm</td>
-			<td>private message to the bot</td>
-		</tr>
-		<tr>
-			<td>join</td>
-			<td>an user join the channel (also triggered when the bot join a channel)</td>
-		</tr>
-		<tr>
-			<td>invite</td>
-			<td>the bot is being invited to a channel</td>
-		</tr>
-		<tr>
-			<td>part</td>
-			<td>a user leave a channel</td>
-		</tr>
-		<tr>
-			<td>quit</td>
-			<td>a user quit a channel</td>
-		</tr>
-		<tr>
-			<td>kick</td>
-			<td>an user is kicked from a channel</td>
-		</tr>
-		<tr>
-			<td>names</td>
-			<td>retrieve the list of users when the bot join a channel</td>
-		</tr>
-	</tbody>
+    <thead>
+        <tr>
+            <th scope="col">Type</th>
+            <th scope="col">Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>message</td>
+            <td>message is sent into the channel</td>
+        </tr>
+        <tr>
+            <td>pm</td>
+            <td>private message to the bot</td>
+        </tr>
+        <tr>
+            <td>join</td>
+            <td>a user joined the channel (also triggered when the bot joins a channel)</td>
+        </tr>
+        <tr>
+            <td>invite</td>
+            <td>the bot is being invited to a channel</td>
+        </tr>
+        <tr>
+            <td>part</td>
+            <td>a user leaves a channel</td>
+        </tr>
+        <tr>
+            <td>quit</td>
+            <td>a user quits a channel</td>
+        </tr>
+        <tr>
+            <td>kick</td>
+            <td>a user is kicked from a channel</td>
+        </tr>
+        <tr>
+            <td>names</td>
+            <td>retrieves the list of users when the bot joins a channel</td>
+        </tr>
+    </tbody>
 </table>
 </p>
 </script>
