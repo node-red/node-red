@@ -161,13 +161,24 @@ var RED = function() {
                 var node = RED.nodes.node(parts[1]);
                 if (node) {
                     node.status = msg;
-                    node.dirty = true;
-                    RED.view.redraw();
+                    if (statusEnabled) {
+                        node.dirty = true;
+                        RED.view.redraw();
+                    }
                 }
             });
         });
     }
 
+    $('#btn-node-status').click(function() {toggleStatus();});
+
+    var statusEnabled = false;
+    function toggleStatus() {
+        var btnStatus = $("#btn-node-status");
+        statusEnabled = btnStatus.toggleClass("active").hasClass("active");
+        RED.view.status(statusEnabled);
+    }
+    
     function showHelp() {
 
         var dialog = $('#node-help');

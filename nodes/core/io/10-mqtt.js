@@ -77,7 +77,9 @@ module.exports = function(RED) {
         this.topic = n.topic;
         this.broker = n.broker;
         this.brokerConfig = RED.nodes.getNode(this.broker);
+        var node = this;
         if (this.brokerConfig) {
+            this.status({fill:"red",shape:"ring",text:"disconnected"},true);
             this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.brokerConfig.clientid,this.brokerConfig.username,this.brokerConfig.password);
             var node = this;
             this.client.subscribe(this.topic,2,function(topic,payload,qos,retain) {
@@ -86,6 +88,12 @@ module.exports = function(RED) {
                         msg._topic = topic;
                     }
                     node.send(msg);
+            });
+            this.client.on("connectionlost",function() {
+                node.status({fill:"red",shape:"ring",text:"disconnected"},true);
+            });
+            this.client.on("connect",function() {
+                node.status({fill:"green",shape:"dot",text:"connected"},true);
             });
             this.client.connect();
         } else {
@@ -109,8 +117,10 @@ module.exports = function(RED) {
         this.broker = n.broker;
     
         this.brokerConfig = RED.nodes.getNode(this.broker);
-    
+        var node = this;
+        
         if (this.brokerConfig) {
+            this.status({fill:"red",shape:"ring",text:"disconnected"},true);
             this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.brokerConfig.clientid,this.brokerConfig.username,this.brokerConfig.password);
             this.on("input",function(msg) {
                 if (msg != null) {
@@ -120,6 +130,13 @@ module.exports = function(RED) {
                     this.client.publish(msg);
                 }
             });
+            this.client.on("connectionlost",function() {
+                node.status({fill:"red",shape:"ring",text:"disconnected"},true);
+            });
+            this.client.on("connect",function() {
+                node.status({fill:"green",shape:"dot",text:"connected"},true);
+            });
+
             this.client.connect();
         } else {
             this.error("missing broker configuration");

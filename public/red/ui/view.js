@@ -38,6 +38,7 @@ RED.view = function() {
         moving_set = [],
         dirty = false,
         lasso = null,
+        showStatus = false,
         clickTime = 0,
         clickElapsed = 0;
 
@@ -45,8 +46,11 @@ RED.view = function() {
 
     
     var status_colours = {
-        "red"  : "#c00",
-        "green": "#5a8"
+        "red":    "#c00",
+        "green":  "#5a8",
+        "yellow": "#F9DF31",
+        "blue":   "#53A3F3",
+        "grey":   "#d3d3d3"
     }
     
     var outer = d3.select("#chart")
@@ -810,7 +814,7 @@ RED.view = function() {
             var nodeEnter = node.enter().insert("svg:g").attr("class", "node nodegroup");
             nodeEnter.each(function(d,i) {
                     var node = d3.select(this);
-
+                    node.attr("id",d.id);
                     var l = d._def.label;
                     l = (typeof l === "function" ? l.call(d) : l)||"";
                     d.w = Math.max(node_width,calculateTextWidth(l)+(d._def.inputs>0?7:0) );
@@ -1048,7 +1052,7 @@ RED.view = function() {
                             }
                             return "";
                         });
-                        if (!d.status) {
+                        if (!showStatus || !d.status) {
                             thisNode.selectAll('.node_status_group').style("display","none");
                         } else {
                             thisNode.selectAll('.node_status_group').style("display","inline").attr("transform","translate(3,"+(d.h+3)+")");
@@ -1399,6 +1403,12 @@ RED.view = function() {
         importNodes: importNodes,
         resize: function() {
             workspace_tabs.resize();
+        },
+        status: function(s) {
+            showStatus = s;
+            RED.nodes.eachNode(function(n) { n.dirty = true;});
+            //TODO: subscribe/unsubscribe here
+            redraw();
         }
     };
 }();
