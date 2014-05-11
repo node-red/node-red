@@ -656,7 +656,7 @@ RED.view = function() {
 
     function portMouseDown(d,portType,portIndex) {
         // disable zoom
-        vis.call(d3.behavior.zoom().on("zoom"), null);
+        //vis.call(d3.behavior.zoom().on("zoom"), null);
         mousedown_node = d;
         selected_link = null;
         mouse_mode = RED.state.JOINING;
