@@ -668,7 +668,7 @@ RED.view = function() {
     function portMouseUp(d,portType,portIndex) {
         document.body.style.cursor = "";
         if (mouse_mode == RED.state.JOINING && mousedown_node) {
-            if (d3.event instanceof TouchEvent) {
+            if (typeof TouchEvent != "undefined" && d3.event instanceof TouchEvent) {
                 RED.nodes.eachNode(function(n) {
                         if (n.z == activeWorkspace) {
                             var hw = n.w/2;
