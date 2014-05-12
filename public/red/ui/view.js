@@ -39,6 +39,7 @@ RED.view = function() {
         dirty = false,
         lasso = null,
         showStatus = false,
+        touchStartTime = 0,
         clickTime = 0,
         clickElapsed = 0,
         startTouchDistance = 0,
@@ -72,7 +73,14 @@ RED.view = function() {
         .on("mousemove", canvasMouseMove)
         .on("mousedown", canvasMouseDown)
         .on("mouseup", canvasMouseUp)
-        .on("touchend",canvasMouseUp)
+        .on("touchend", function() {
+            clearTimeout(touchStartTime);
+            touchStartTime = null;
+            if (lasso) {
+                outer_background.attr("fill","#fff");
+            }
+            canvasMouseUp.call(this);
+        })
         .on("touchcancel", canvasMouseUp)
         .on("touchstart", function(){
             if (d3.event.touches.length>1) {
@@ -94,12 +102,41 @@ RED.view = function() {
                 ]
                 startTouchDistance = Math.sqrt((a*a)+(b*b));
             } else {
+                var touch0 = d3.event.touches.item(0);
+                startTouchCenter = [touch0.pageX,touch0.pageY];
                 startTouchDistance = 0;
+                var point = d3.touches(this)[0];
+                touchStartTime = setTimeout(function() {
+                        lasso = vis.append('rect')
+                            .attr("ox",point[0])
+                            .attr("oy",point[1])
+                            .attr("rx",2)
+                            .attr("ry",2)
+                            .attr("x",point[0])
+                            .attr("y",point[1])
+                            .attr("width",0)
+                            .attr("height",0)
+                            .attr("class","lasso");
+                        touchStartTime = null;
+                        outer_background.attr("fill","#f3f3f3");
+                },1000);
                 canvasMouseDown();
             }
         })
         .on("touchmove", function(){
                 if (d3.event.touches.length<2) {
+                    if (touchStartTime) {
+                        var touch0 = d3.event.touches.item(0);
+                        var dx = (touch0.pageX-startTouchCenter[0]);
+                        var dy = (touch0.pageY-startTouchCenter[1]);
+                        var d = Math.sqrt(dx*dx+dy*dy);
+                        if (d > 7) {
+                            clearTimeout(touchStartTime);
+                            touchStartTime = null;
+                        }
+                    } else if (lasso) {
+                        d3.event.preventDefault();
+                    }
                     canvasMouseMove.call(this);
                 } else {
                     var touch0 = d3.event.touches.item(0);
