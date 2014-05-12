@@ -40,7 +40,12 @@ RED.view = function() {
         lasso = null,
         showStatus = false,
         clickTime = 0,
-        clickElapsed = 0;
+        clickElapsed = 0,
+        startTouchDistance = 0,
+        startTouchCenter = [],
+        moveTouchCenter = [],
+        touches = 0;
+
 
     var clipboard = "";
 
@@ -67,46 +72,65 @@ RED.view = function() {
         .on("mousemove", canvasMouseMove)
         .on("mousedown", canvasMouseDown)
         .on("mouseup", canvasMouseUp)
-        //.on("touchstart",canvasMouseDown)
         .on("touchend",canvasMouseUp)
         .on("touchcancel", canvasMouseUp)
-        //.on("touchmove",canvasMouseMove)
         .on("touchstart", function(){
-          if(d3.event.touches.length>1){
-            d3.event.preventDefault();  
-            var a = d3.event.touches.item(0)['pageY']-d3.event.touches.item(1)['pageY'];
-            var b = d3.event.touches.item(0)['pageX']-d3.event.touches.item(1)['pageX'];
-            startTouchDistance = Math.sqrt((a*a)+(b*b));
-            startTouchPoint = {
-				x:Math.abs((d3.event.touches.item(0)['pageX']-d3.event.touches.item(1)['pageX'])/2),
-				y:Math.abs((d3.event.touches.item(0)['pageY']-d3.event.touches.item(1)['pageY'])/2),
-				};
-					
-          }else{
-            
-            startTouchDistance = 0;
-            canvasMouseDown();
-          }
-          
+            if (d3.event.touches.length>1) {
+                d3.event.preventDefault();
+                var touch0 = d3.event.touches.item(0);
+                var touch1 = d3.event.touches.item(1);
+                var a = touch0['pageY']-touch1['pageY'];
+                var b = touch0['pageX']-touch1['pageX'];
+
+                var offset = $("#chart").offset();
+                var scrollPos = [$("#chart").scrollLeft(),$("#chart").scrollTop()];
+                startTouchCenter = [
+                    (touch1['pageX']+(b/2)-offset.left+scrollPos[0])/scaleFactor,
+                    (touch1['pageY']+(a/2)-offset.top+scrollPos[1])/scaleFactor
+                ];
+                moveTouchCenter = [
+                    touch1['pageX']+(b/2),
+                    touch1['pageY']+(a/2)
+                ]
+                startTouchDistance = Math.sqrt((a*a)+(b*b));
+            } else {
+                startTouchDistance = 0;
+                canvasMouseDown();
+            }
         })
         .on("touchmove", function(){
-            
-            if(d3.event.touches.length<2){
-              canvasMouseMove.call(this);
-         
-            }else{
-             
-              var a = d3.event.touches.item(0)['pageY']-d3.event.touches.item(1)['pageY'];
-              var b = d3.event.touches.item(0)['pageX']-d3.event.touches.item(1)['pageX'];
-              var moveTouchDistance = Math.sqrt((a*a)+(b*b));
-              if(!isNaN(moveTouchDistance)){
-                scaleFactor = Math.min(2, Math.max(0.3, scaleFactor + (Math.floor(((moveTouchDistance*100)-(startTouchDistance*100)))/6000)));
+                if (d3.event.touches.length<2) {
+                    canvasMouseMove.call(this);
+                } else {
+                    var touch0 = d3.event.touches.item(0);
+                    var touch1 = d3.event.touches.item(1);
+                    var a = touch0['pageY']-touch1['pageY'];
+                    var b = touch0['pageX']-touch1['pageX'];
+                    var offset = $("#chart").offset();
+                    var scrollPos = [$("#chart").scrollLeft(),$("#chart").scrollTop()];
+                    var moveTouchDistance = Math.sqrt((a*a)+(b*b));
+                    var touchCenter = [
+                        touch1['pageX']+(b/2),
+                        touch1['pageY']+(a/2)
+                    ];
 
-                startTouchDistance = moveTouchDistance;
-                
-                redraw();
-              }
-            }
+                    if (!isNaN(moveTouchDistance)) {
+                        oldScaleFactor = scaleFactor;
+                        scaleFactor = Math.min(2,Math.max(0.3, scaleFactor + (Math.floor(((moveTouchDistance*100)-(startTouchDistance*100)))/10000)));
+
+                        var deltaTouchCenter = [                             // Try to pan whilst zooming - not 100%
+                            startTouchCenter[0]*(scaleFactor-oldScaleFactor),//-(touchCenter[0]-moveTouchCenter[0]),
+                            startTouchCenter[1]*(scaleFactor-oldScaleFactor) //-(touchCenter[1]-moveTouchCenter[1])
+                        ];
+
+                        startTouchDistance = moveTouchDistance;
+                        moveTouchCenter = touchCenter;
+                        
+                        $("#chart").scrollLeft(scrollPos[0]+deltaTouchCenter[0]);
+                        $("#chart").scrollTop(scrollPos[1]+deltaTouchCenter[1]);
+                        redraw();
+                    }
+                }
         });
 
     var outer_background = vis.append('svg:rect')
