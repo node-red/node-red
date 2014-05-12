@@ -19,27 +19,27 @@ module.exports = function(RED) {
     var events = require("events");
     var util = require("util");
     var serialp = require("serialport");
-    
+
     // TODO: 'serialPool' should be encapsulated in SerialPortNode
-    
+
     function SerialPortNode(n) {
         RED.nodes.createNode(this,n);
         this.serialport = n.serialport;
         this.newline = n.newline;
         this.addchar = n.addchar || "false";
-    
+
         this.serialbaud = parseInt(n.serialbaud) || 57600;
         this.databits = parseInt(n.databits) || 8;
         this.parity = n.parity || "none";
         this.stopbits = parseInt(n.stopbits) || 1;
     }
     RED.nodes.registerType("serial-port",SerialPortNode);
-    
+
     function SerialOutNode(n) {
         RED.nodes.createNode(this,n);
         this.serial = n.serial;
         this.serialConfig = RED.nodes.getNode(this.serial);
-    
+
         if (this.serialConfig) {
             var node = this;
             node.port = serialPool.get(this.serialConfig.serialport,
@@ -70,10 +70,16 @@ module.exports = function(RED) {
                     }
                 });
             });
+            node.port.on('ready', function() {
+                node.status({fill:"green",shape:"dot",text:"connected"},true);
+            });
+            node.port.on('closed', function() {
+                node.status({fill:"red",shape:"ring",text:"not connected"},true);
+            });
         } else {
             this.error("missing serial config");
         }
-    
+
         this.on("close", function() {
             if (this.serialConfig) {
                 serialPool.close(this.serialConfig.serialport);
@@ -81,14 +87,15 @@ module.exports = function(RED) {
         });
     }
     RED.nodes.registerType("serial out",SerialOutNode);
-    
+
     function SerialInNode(n) {
         RED.nodes.createNode(this,n);
         this.serial = n.serial;
         this.serialConfig = RED.nodes.getNode(this.serial);
-    
+
         if (this.serialConfig) {
             var node = this;
+            node.status({fill:"grey",shape:"dot",text:"unknown"},true);
             node.port = serialPool.get(this.serialConfig.serialport,
                 this.serialConfig.serialbaud,
                 this.serialConfig.databits,
@@ -98,10 +105,16 @@ module.exports = function(RED) {
             this.port.on('data', function(msg) {
                 node.send({ "payload": msg });
             });
+            this.port.on('ready', function() {
+                node.status({fill:"green",shape:"dot",text:"connected"},true);
+            });
+            this.port.on('closed', function() {
+                node.status({fill:"red",shape:"ring",text:"not connected"},true);
+            });
         } else {
             this.error("missing serial config");
         }
-    
+
         this.on("close", function() {
             if (this.serialConfig) {
                 try {
@@ -112,8 +125,8 @@ module.exports = function(RED) {
         });
     }
     RED.nodes.registerType("serial in",SerialInNode);
-    
-    
+
+
     var serialPool = function() {
         var connections = {};
         return {
@@ -152,6 +165,7 @@ module.exports = function(RED) {
                             }
                             obj.serial.on('error', function(err) {
                                 util.log("[serial] serial port "+port+" error "+err);
+                                obj._emitter.emit('closed');
                                 obj.tout = setTimeout(function() {
                                     setupSerial();
                                 }, settings.serialReconnectTime);
@@ -159,6 +173,7 @@ module.exports = function(RED) {
                             obj.serial.on('close', function() {
                                 if (!obj._closing) {
                                     util.log("[serial] serial port "+port+" closed unexpectedly");
+                                    obj._emitter.emit('closed');
                                     obj.tout = setTimeout(function() {
                                         setupSerial();
                                     }, settings.serialReconnectTime);
@@ -202,7 +217,7 @@ module.exports = function(RED) {
             }
         }
     }();
-    
+
     RED.httpAdmin.get("/serialports",function(req,res) {
         serialp.list(function (err, ports) {
             res.writeHead(200, {'Content-Type': 'text/plain'});

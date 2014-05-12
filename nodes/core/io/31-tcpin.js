@@ -18,9 +18,9 @@ module.exports = function(RED) {
     var reconnectTime = RED.settings.socketReconnectTime||10000;
     var socketTimeout = RED.settings.socketTimeout||null;
     var net = require('net');
-    
+
     var connectionPool = {};
-    
+
     function TcpIn(n) {
         RED.nodes.createNode(this,n);
         this.host = n.host;
@@ -33,20 +33,22 @@ module.exports = function(RED) {
         this.server = (typeof n.server == 'boolean')?n.server:(n.server == "server");
         this.closing = false;
         var node = this;
-    
+
         if (!node.server) {
             var buffer = null;
             var client;
             var reconnectTimeout;
             function setupTcpClient() {
                 node.log("connecting to "+node.host+":"+node.port);
+                node.status({fill:"grey",shape:"dot",text:"connecting"},true);
                 var id = (1+Math.random()*4294967295).toString(16);
                 client = net.connect(node.port, node.host, function() {
                     buffer = (node.datatype == 'buffer')? new Buffer(0):"";
                     node.log("connected to "+node.host+":"+node.port);
+                    node.status({fill:"green",shape:"dot",text:"connected"},true);
                 });
                 connectionPool[id] = client;
-    
+
                 client.on('data', function (data) {
                     if (node.datatype != 'buffer') {
                         data = data.toString(node.datatype);
@@ -85,16 +87,17 @@ module.exports = function(RED) {
                 client.on('close', function() {
                     delete connectionPool[id];
                     node.log("connection lost to "+node.host+":"+node.port);
+                    node.status({fill:"red",shape:"ring",text:"disconnected"});
                     if (!node.closing) {
                         reconnectTimeout = setTimeout(setupTcpClient, reconnectTime);
                     }
                 });
                 client.on('error', function(err) {
-                        node.log(err);
+                    node.log(err);
                 });
             }
             setupTcpClient();
-    
+
             this.on('close', function() {
                 this.closing = true;
                 client.end();
@@ -105,13 +108,13 @@ module.exports = function(RED) {
                 if (socketTimeout !== null) { socket.setTimeout(socketTimeout); }
                 var id = (1+Math.random()*4294967295).toString(16);
                 connectionPool[id] = socket;
-    
+
                 var buffer = (node.datatype == 'buffer')? new Buffer(0):"";
                 socket.on('data', function (data) {
                     if (node.datatype != 'buffer') {
                         data = data.toString(node.datatype);
                     }
-    
+
                     if (node.stream) {
                         if ((typeof data) === "string" && node.newline != "") {
                             buffer = buffer+data;
@@ -164,7 +167,7 @@ module.exports = function(RED) {
                     node.error('unable to listen on port '+node.port+' : '+err);
                 } else {
                     node.log('listening on port '+node.port);
-        
+
                     node.on('close', function() {
                         node.closing = true;
                         server.close();
@@ -173,10 +176,10 @@ module.exports = function(RED) {
                 }
             });
         }
-    
+
     }
     RED.nodes.registerType("tcp in",TcpIn);
-    
+
     function TcpOut(n) {
         RED.nodes.createNode(this,n);
         this.host = n.host;
@@ -186,17 +189,19 @@ module.exports = function(RED) {
         this.name = n.name;
         this.closing = false;
         var node = this;
-    
+
         if (!node.beserver||node.beserver=="client") {
             var reconnectTimeout;
             var client = null;
             var connected = false;
-    
+
             function setupTcpClient() {
                 node.log("connecting to "+node.host+":"+node.port);
+                node.status({fill:"grey",shape:"dot",text:"connecting"},true);
                 client = net.connect(node.port, node.host, function() {
                     connected = true;
                     node.log("connected to "+node.host+":"+node.port);
+                    node.status({fill:"green",shape:"dot",text:"connected"},true);
                 });
                 client.on('error', function (err) {
                     node.log('error : '+err);
@@ -205,6 +210,7 @@ module.exports = function(RED) {
                 });
                 client.on('close', function() {
                     node.log("connection lost to "+node.host+":"+node.port);
+                    node.status({fill:"red",shape:"ring",text:"disconnected"},true);
                     connected = false;
                     client.destroy();
                     if (!node.closing) {
@@ -213,7 +219,7 @@ module.exports = function(RED) {
                 });
             }
             setupTcpClient();
-    
+
             node.on("input", function(msg) {
                 if (connected && msg.payload != null) {
                     if (Buffer.isBuffer(msg.payload)) {
@@ -225,13 +231,13 @@ module.exports = function(RED) {
                     }
                 }
             });
-    
+
             node.on("close", function() {
                 this.closing = true;
                 client.end();
                 clearTimeout(reconnectTimeout);
             });
-    
+
         } else if (node.beserver == "reply") {
             node.on("input",function(msg) {
                 if (msg._session && msg._session.type == "tcp") {
@@ -282,13 +288,13 @@ module.exports = function(RED) {
                     }
                 }
             });
-            
+
             server.on('error', function(err) {
                 if (err) {
                     node.error('unable to listen on port '+node.port+' : '+err);
                 }
             });
-    
+
             server.listen(node.port, function(err) {
                 if (err) {
                     node.error('unable to listen on port '+node.port+' : '+err);
@@ -302,6 +308,6 @@ module.exports = function(RED) {
             });
         }
     }
-    
+
     RED.nodes.registerType("tcp out",TcpOut);
 }
