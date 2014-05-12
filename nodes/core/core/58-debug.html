@@ -115,7 +115,14 @@
         var sbc = document.getElementById("debug-content");
 
         var messageCount = 0;
-
+        
+        RED._debug = function(msg) {
+            handleDebugMessage("",{
+                name:"debug",
+                msg:msg
+            });
+        }
+        
         var handleDebugMessage = function(t,o) {
             var msg = document.createElement("div");
             msg.onmouseover = function() {
