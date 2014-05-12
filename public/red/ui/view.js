@@ -60,16 +60,54 @@ RED.view = function() {
         .attr("pointer-events", "all")
         .style("cursor","crosshair");
 
-    var vis = outer
+     var vis = outer
         .append('svg:g')
         .on("dblclick.zoom", null)
         .append('svg:g')
         .on("mousemove", canvasMouseMove)
         .on("mousedown", canvasMouseDown)
         .on("mouseup", canvasMouseUp)
-        .on("touchstart",canvasMouseDown)
+        //.on("touchstart",canvasMouseDown)
         .on("touchend",canvasMouseUp)
-        .on("touchmove",canvasMouseMove);
+        .on("touchcancel", canvasMouseUp)
+        //.on("touchmove",canvasMouseMove)
+        .on("touchstart", function(){
+          if(d3.event.touches.length>1){
+            d3.event.preventDefault();  
+            var a = d3.event.touches.item(0)['pageY']-d3.event.touches.item(1)['pageY'];
+            var b = d3.event.touches.item(0)['pageX']-d3.event.touches.item(1)['pageX'];
+            startTouchDistance = Math.sqrt((a*a)+(b*b));
+            startTouchPoint = {
+				x:Math.abs((d3.event.touches.item(0)['pageX']-d3.event.touches.item(1)['pageX'])/2),
+				y:Math.abs((d3.event.touches.item(0)['pageY']-d3.event.touches.item(1)['pageY'])/2),
+				};
+					
+          }else{
+            
+            startTouchDistance = 0;
+            canvasMouseDown();
+          }
+          
+        })
+        .on("touchmove", function(){
+            
+            if(d3.event.touches.length<2){
+              canvasMouseMove.call(this);
+         
+            }else{
+             
+              var a = d3.event.touches.item(0)['pageY']-d3.event.touches.item(1)['pageY'];
+              var b = d3.event.touches.item(0)['pageX']-d3.event.touches.item(1)['pageX'];
+              var moveTouchDistance = Math.sqrt((a*a)+(b*b));
+              if(!isNaN(moveTouchDistance)){
+                scaleFactor = Math.min(2, Math.max(0.3, scaleFactor + (Math.floor(((moveTouchDistance*100)-(startTouchDistance*100)))/6000)));
+
+                startTouchDistance = moveTouchDistance;
+                
+                redraw();
+              }
+            }
+        });
 
     var outer_background = vis.append('svg:rect')
         .attr('width', space_width)
