@@ -41,50 +41,88 @@ RED.sidebar = function() {
     $("#sidebar-separator").draggable({
             axis: "x",
             start:function(event,ui) {
+                sidebarSeparator.closing = false;
+                sidebarSeparator.opening = false;
                 var winWidth = $(window).width();
                 sidebarSeparator.start = ui.position.left;
-                sidebarSeparator.width = $("#sidebar").width();
                 sidebarSeparator.chartWidth = $("#workspace").width();
                 sidebarSeparator.chartRight = winWidth-$("#workspace").width()-$("#workspace").offset().left-2;
-                sidebarSeparator.closing = false;
+
+
+                if (!btnSidebar.hasClass("active")) {
+                    sidebarSeparator.opening = true;
+                    var newChartRight = 15;
+                    $("#sidebar").addClass("closing");
+                    $("#workspace").css("right",newChartRight);
+                    $("#chart-zoom-controls").css("right",newChartRight+20);
+                    $("#sidebar").width(0);
+                    toggleSidebar();
+                    RED.view.resize();
+                }
+
+                
+                sidebarSeparator.width = $("#sidebar").width();
             },
             drag: function(event,ui) {
                 var d = ui.position.left-sidebarSeparator.start;
                 var newSidebarWidth = sidebarSeparator.width-d;
+                if (sidebarSeparator.opening) {
+                    newSidebarWidth -= 13;
+                }
                 
-                if (newSidebarWidth > 180 && sidebarSeparator.chartWidth+d > 200) {
-                    var newChartRight = sidebarSeparator.chartRight-d;
-                    $("#workspace").css("right",newChartRight);
-                    $("#chart-zoom-controls").css("right",newChartRight+20);
-                    $("#sidebar").width(newSidebarWidth);
+                if (newSidebarWidth > 150) {
+                    if (sidebarSeparator.chartWidth+d < 200) {
+                        ui.position.left = 200+sidebarSeparator.start-sidebarSeparator.chartWidth;
+                        d = ui.position.left-sidebarSeparator.start;
+                        newSidebarWidth = sidebarSeparator.width-d;
+                    }
                 }
-                if (newSidebarWidth < 150 && !sidebarSeparator.closing) {
-                    $("#sidebar").addClass("closing");
-                    sidebarSeparator.closing = true;
-                }
-                if (newSidebarWidth >= 150 && sidebarSeparator.closing) {
+                    
+                if (newSidebarWidth < 150) {
+                    if (!sidebarSeparator.closing) {
+                        $("#sidebar").addClass("closing");
+                        sidebarSeparator.closing = true;
+                    }
+                    if (!sidebarSeparator.opening) {
+                        newSidebarWidth = 150;
+                        ui.position.left = sidebarSeparator.width-(150 - sidebarSeparator.start);
+                        d = ui.position.left-sidebarSeparator.start;
+                    }
+                } else if (newSidebarWidth > 150 && (sidebarSeparator.closing || sidebarSeparator.opening)) {
                     sidebarSeparator.closing = false;
                     $("#sidebar").removeClass("closing");
                 }
+
+                var newChartRight = sidebarSeparator.chartRight-d;
+                $("#workspace").css("right",newChartRight);
+                $("#chart-zoom-controls").css("right",newChartRight+20);
+                $("#sidebar").width(newSidebarWidth);
+
                 sidebar_tabs.resize();
                 RED.view.resize();
                     
             },
             stop:function(event,ui) {
-                $("#sidebar-separator").css("left","auto");
-                $("#sidebar-separator").css("right",($("#sidebar").width()+15)+"px");
+                RED.view.resize();
                 if (sidebarSeparator.closing) {
                     $("#sidebar").removeClass("closing");
                     toggleSidebar();
+                    if ($("#sidebar").width() < 180) {
+                        $("#sidebar").width(180);
+                        $("#workspace").css("right",208);
+                        $("#chart-zoom-controls").css("right",228);
+                    }
                 }
+                $("#sidebar-separator").css("left","auto");
+                $("#sidebar-separator").css("right",($("#sidebar").width()+13)+"px");
             }
     });
     
+    var btnSidebar = $("#btn-sidebar");
     function toggleSidebar() {
         //if ($('#sidebar').tabs( "option", "active" ) === false) {
         //    $('#sidebar').tabs( "option", "active",0);
         //}
-        var btnSidebar = $("#btn-sidebar");
         btnSidebar.toggleClass("active");
         
         if (!btnSidebar.hasClass("active")) {

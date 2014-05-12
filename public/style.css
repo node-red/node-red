@@ -287,16 +287,17 @@ a.brand img {
     right: 10px; top: 5px; bottom:10px;
 }
 #sidebar-separator {
-    width: 10px;
+    width: 15px;
+    background: url(grip.png) no-repeat 50% 50%;
     position: absolute;
-    right: 320px; top: 5px; bottom:10px;
+    right: 316px; top: 5px; bottom:10px;
     cursor: col-resize;
 }
 
 .sidebar-closed > #sidebar { display: none; }
-.sidebar-closed > #sidebar-separator { display: none; }
-.sidebar-closed > #workspace { right: 10px !important; }
-.sidebar-closed > #chart-zoom-controls { right: 30px !important; }
+.sidebar-closed > #sidebar-separator { right: 0px !important; }
+.sidebar-closed > #workspace { right: 15px !important; }
+.sidebar-closed > #chart-zoom-controls { right: 35px !important; }
 
 /* ---------- end layout ---------- */
 
