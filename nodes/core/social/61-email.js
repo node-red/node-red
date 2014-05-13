@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013,2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,12 @@ module.exports = function(RED) {
     } catch (e) {
         util.log("[61-email.js] - imap npm not installed - no inbound email available");
     }
-    
+
     //console.log(nodemailer.Transport.transports.SMTP.wellKnownHosts);
-    
-    // module.exports = { service: "Gmail", user: "blahblah@gmail.com", pass: "password", server: "imap.gmail.com", port: "993" }
+
     try { var globalkeys = RED.settings.email || require(process.env.NODE_RED_HOME+"/../emailkeys.js"); }
     catch(err) { }
-    
+
     function EmailNode(n) {
         RED.nodes.createNode(this,n);
         this.topic = n.topic;
@@ -50,7 +49,7 @@ module.exports = function(RED) {
         }
         if (flag) { RED.nodes.addCredentials(n.id,{userid:this.userid, password:this.password, global:true}); }
         var node = this;
-    
+
         var smtpTransport = nodemailer.createTransport("SMTP",{
             //service: emailkey.service,
             // {
@@ -66,10 +65,10 @@ module.exports = function(RED) {
                 pass: node.password
             }
         });
-    
+
         this.on("input", function(msg) {
-            //node.log("email :",this.id,this.topic," received",msg.payload);
             if (msg != null) {
+                node.status({fill:"blue",shape:"dot",text:"sending"},true);
                 if (smtpTransport) {
                     smtpTransport.sendMail({
                         from: node.userid, // sender address
@@ -79,8 +78,10 @@ module.exports = function(RED) {
                     }, function(error, response) {
                         if (error) {
                             node.error(error);
+                            node.status({fill:"red",shape:"ring",text:"post error"},true);
                         } else {
                             node.log("Message sent: " + response.message);
+                            node.status({},true);
                         }
                     });
                 }
@@ -89,7 +90,7 @@ module.exports = function(RED) {
         });
     }
     RED.nodes.registerType("e-mail",EmailNode);
-    
+
     function EmailInNode(n) {
         RED.nodes.createNode(this,n);
         this.name = n.name;
@@ -112,7 +113,7 @@ module.exports = function(RED) {
         var node = this;
         this.interval_id = null;
         var oldmail = {};
-    
+
         var imap = new Imap({
             user: node.userid,
             password: node.password,
@@ -123,16 +124,17 @@ module.exports = function(RED) {
             connTimeout: node.repeat,
             authTimeout: node.repeat
         });
-    
+
         if (!isNaN(this.repeat) && this.repeat > 0) {
             node.log("repeat = "+this.repeat);
             this.interval_id = setInterval( function() {
                 node.emit("input",{});
             }, this.repeat );
         }
-    
+
         this.on("input", function(msg) {
             imap.once('ready', function() {
+                node.status({fill:"blue",shape:"dot",text:"fetching"},true);
                 var pay = {};
                 imap.openBox('INBOX', true, function(err, box) {
                     if (box.messages.total > 0) {
@@ -170,6 +172,7 @@ module.exports = function(RED) {
                         });
                         f.on('error', function(err) {
                             node.warn('fetch error: ' + err);
+                            node.status({fill:"red",shape:"ring",text:"fetch error"},true);
                         });
                         f.on('end', function() {
                             if (JSON.stringify(pay) !== oldmail) {
@@ -178,44 +181,51 @@ module.exports = function(RED) {
                                 node.log('received new email: '+pay.topic);
                             }
                             else { node.log('duplicate not sent: '+pay.topic); }
+                            //node.status({fill:"green",shape:"dot",text:"ok"},true);
+                            node.status({},true);
                             imap.end();
                         });
                     }
                     else {
                         node.log("you have achieved inbox zero");
+                        //node.status({fill:"green",shape:"dot",text:"ok"},true);
+                        node.status({},true);
                         imap.end();
                     }
                 });
             });
-            imap.on('error', function(err) {
-                node.log(err);
-            });
+            node.status({fill:"grey",shape:"dot",text:"connecting"},true);
             imap.connect();
         });
-    
+
+        imap.on('error', function(err) {
+            node.log(err);
+            node.status({fill:"red",shape:"ring",text:"connect error"},true);
+        });
+
         this.on("error", function(err) {
             node.log("error: ",err);
         });
-    
+
         this.on("close", function() {
             if (this.interval_id != null) {
                 clearInterval(this.interval_id);
             }
             if (imap) { imap.destroy(); }
         });
-    
+
         node.emit("input",{});
     }
     if (Imap != null) {
-    RED.nodes.registerType("e-mail in",EmailInNode);
+        RED.nodes.registerType("e-mail in",EmailInNode);
     }
-    
+
     var querystring = require('querystring');
-    
+
     RED.httpAdmin.get('/email/global',function(req,res) {
         res.send(JSON.stringify({hasToken:!(globalkeys && globalkeys.userid && globalkeys.password)}));
     });
-    
+
     RED.httpAdmin.get('/email/:id',function(req,res) {
         var credentials = RED.nodes.getCredentials(req.params.id);
         if (credentials) {
@@ -230,12 +240,12 @@ module.exports = function(RED) {
             res.send(JSON.stringify({}));
         }
     });
-    
+
     RED.httpAdmin.delete('/email/:id',function(req,res) {
         RED.nodes.deleteCredentials(req.params.id);
         res.send(200);
     });
-    
+
     RED.httpAdmin.post('/email/:id',function(req,res) {
         var body = "";
         req.on('data', function(chunk) {
