@@ -815,7 +815,7 @@ RED.view = function() {
     }
 
     function nodeMouseUp(d) {
-        if (mousedown_node == d && clickElapsed > 0 && clickElapsed < 300) {
+        if (mousedown_node == d && clickElapsed > 0 && clickElapsed < 750) {
             RED.editor.edit(d);
             clickElapsed = 0;
             return;
