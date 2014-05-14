@@ -1258,7 +1258,7 @@ RED.view = function() {
     RED.keyboard.add(/* i */ 73,{ctrl:true},function(){showImportNodesDialog();d3.event.preventDefault();});
 
     // TODO: 'dirty' should be a property of RED.nodes - with an event callback for ui hooks
-    function setDirty(d) {___
+    function setDirty(d) {
         dirty = d;
         if (dirty) {
             $("#btn-deploy").removeClass("disabled").addClass("btn-danger");
