@@ -15,13 +15,14 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var js2xmlparser = require("js2xmlparser");
-    
+
     function Js2XmlNode(n) {
         RED.nodes.createNode(this,n);
         this.root = n.root;
         var node = this;
-    
+
         this.on("input", function(msg) {
             try {
                 var root = node.root || typeof msg.payload;

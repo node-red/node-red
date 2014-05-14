@@ -15,11 +15,12 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var util = require("util");
     var parseString = require('xml2js').parseString;
     var useColors = true;
     //util.inspect.styles.boolean = "red";
-    
+
     function Xml2jsNode(n) {
         RED.nodes.createNode(this,n);
         this.useEyes = n.useEyes||false;
