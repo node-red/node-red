@@ -93,7 +93,7 @@ function stopFlows() {
     if (activeConfig&&activeConfig.length > 0) {
         util.log("[red] Stopping flows");
     }
-    flowNodes.clear();
+    return flowNodes.clear();
 }
 
 var flowNodes = module.exports = {
@@ -120,12 +120,21 @@ var flowNodes = module.exports = {
         return nodes[i];
     },
     clear: function() {
-        events.emit("nodes-stopping");
-        for (var n in nodes) {
-            nodes[n].close();
-        }
-        events.emit("nodes-stopped");
-        nodes = {};
+        return when.promise(function(resolve) {
+            events.emit("nodes-stopping");
+            var promises = [];
+            for (var n in nodes) {
+                var p = nodes[n].close();
+                if (p) {
+                    promises.push(p);
+                }
+            }
+            when.settle(promises).then(function() {
+                events.emit("nodes-stopped");
+                nodes = {};
+                resolve();
+            });
+        });
     },
     each: function(cb) {
         for (var n in nodes) {
@@ -141,9 +150,10 @@ var flowNodes = module.exports = {
     },
     setFlows: function(conf) {
         return storage.saveFlows(conf).then(function() {
-            stopFlows();
-            activeConfig = conf;
-            parseConfig();
+            return stopFlows().then(function() {
+                activeConfig = conf;
+                parseConfig();
+            });
         })
     },
     stopFlows: stopFlows

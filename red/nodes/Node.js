@@ -17,6 +17,7 @@
 var util = require("util");
 var EventEmitter = require("events").EventEmitter;
 var clone = require("clone");
+var when = require("when");
 
 var flows = require("./flows");
 var credentials = require('./credentials')
@@ -24,6 +25,7 @@ var comms = require("../comms");
 
 function Node(n) {
     this.id = n.id;
+    this._events = new EventEmitter();
     flows.add(this);
     this.type = n.type;
     if (n.name) {
@@ -31,13 +33,30 @@ function Node(n) {
     }
     this.wires = n.wires||[];
 }
-util.inherits(Node,EventEmitter);
 
-Node.prototype.close = function() {
-    // called when a node is removed
-    this.emit("close");
+Node.prototype.on = function(event,callback) {
+    if (event == "close") {
+        if (callback.length == 1) {
+            this.close = function() {
+                return when.promise(function(resolve) {
+                    callback(function() {
+                        resolve();
+                    });
+                });
+            }
+        } else {
+            this.close = callback;
+        }
+    }
+    this._events.on(event,callback);
 }
 
+Node.prototype.emit = function(event,args) {
+    this._events.emit(event,args);
+}
+
+Node.prototype.close = function() {
+}
 
 Node.prototype.send = function(msg) {
     // instanceof doesn't work for some reason here
