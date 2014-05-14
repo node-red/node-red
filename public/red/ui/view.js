@@ -47,10 +47,8 @@ RED.view = function() {
         moveTouchCenter = [],
         touches = 0;
 
-
     var clipboard = "";
 
-    
     var status_colours = {
         "red":    "#c00",
         "green":  "#5a8",
@@ -58,7 +56,7 @@ RED.view = function() {
         "blue":   "#53A3F3",
         "grey":   "#d3d3d3"
     }
-    
+
     var outer = d3.select("#chart")
         .append("svg:svg")
         .attr("width", space_width)
@@ -162,7 +160,7 @@ RED.view = function() {
 
                         startTouchDistance = moveTouchDistance;
                         moveTouchCenter = touchCenter;
-                        
+
                         $("#chart").scrollLeft(scrollPos[0]+deltaTouchCenter[0]);
                         $("#chart").scrollTop(scrollPos[1]+deltaTouchCenter[1]);
                         redraw();
@@ -316,7 +314,7 @@ RED.view = function() {
     //d3.select(window).on("keydown", keydown);
 
     function canvasMouseDown() {
-        
+
         if (!mousedown_node && !mousedown_link) {
             selected_link = null;
             updateSelection();
@@ -346,8 +344,8 @@ RED.view = function() {
 
     function canvasMouseMove() {
         mouse_position = d3.touches(this)[0]||d3.mouse(this);
-        
-        // Prevent touch scrolling... 
+
+        // Prevent touch scrolling...
         //if (d3.touches(this)[0]) {
         //    d3.event.preventDefault();
         //}
@@ -528,8 +526,8 @@ RED.view = function() {
                 evt.preventDefault();
                 evt.stopPropagation();
                 var move = evt.originalEvent.detail || evt.originalEvent.wheelDelta;
-                if (move <= 0) { zoomIn(); }
-                else { zoomOut(); }
+                if (move <= 0) { zoomOut(); }
+                else { zoomIn(); }
             }
     });
     $("#chart").droppable({
@@ -553,11 +551,11 @@ RED.view = function() {
                 for (var d in nn._def.defaults) {
                     nn[d] = nn._def.defaults[d].value;
                 }
-                
+
                 if (nn._def.onadd) {
                     nn._def.onadd.call(nn);
                 }
-                
+
                 nn.h = Math.max(node_height,(nn.outputs||0) * 15);
                 RED.history.push({t:'add',nodes:[nn.id],dirty:dirty});
                 RED.nodes.add(nn);
@@ -668,7 +666,7 @@ RED.view = function() {
     function moveSelection(dx,dy) {
         var minX = 0;
         var minY = 0;
-        
+
         for (var i=0;i<moving_set.length;i++) {
             var node = moving_set[i];
             if (node.ox == null && node.oy == null) {
@@ -681,7 +679,7 @@ RED.view = function() {
             minX = Math.min(node.n.x-node.n.w/2-5,minX);
             minY = Math.min(node.n.y-node.n.h/2-5,minY);
         }
-        
+
         if (minX != 0 || minY != 0) {
             for (var n = 0; n<moving_set.length; n++) {
                 var node = moving_set[n];
@@ -689,7 +687,7 @@ RED.view = function() {
                 node.n.y -= minY;
             }
         }
-        
+
         redraw();
     }
     function deleteSelection() {
@@ -838,7 +836,7 @@ RED.view = function() {
         var now = Date.now();
         clickElapsed = now-clickTime;
         clickTime = now;
-        
+
         if (d.selected && d3.event.ctrlKey) {
             d.selected = false;
             for (var i=0;i<moving_set.length;i+=1) {
@@ -929,7 +927,7 @@ RED.view = function() {
                                 .on("click",function(d) { d._def.onbadgeclick.call(d);d3.event.preventDefault();});
                         }
                     }
-                    
+
                     if (d._def.button) {
                         var nodeButtonGroup = node.append('svg:g')
                             .attr("transform",function(d) { return "translate("+((d._def.align == "right") ? 94 : -25)+",2)"; })
@@ -1012,11 +1010,11 @@ RED.view = function() {
                     }
 
                     var status = node.append("svg:g").attr("class","node_status_group").style("display","none");
-                    
+
                     var statusRect = status.append("rect").attr("class","node_status")
                                         .attr("x",6).attr("y",1).attr("width",9).attr("height",9)
                                         .attr("rx",2).attr("ry",2).attr("stroke-width","3");
-                    
+
                     var statusLabel = status.append("svg:text")
                         .attr("class","node_status_label")
                         .attr('x',20).attr('y',9)
@@ -1027,7 +1025,7 @@ RED.view = function() {
                                 'stroke':'#000',
                                 'text-anchor':'start'
                         });
-                        
+
                     //node.append("circle").attr({"class":"centerDot","cx":0,"cy":0,"r":5});
 
                     if (d._def.inputs > 0) {
@@ -1182,7 +1180,7 @@ RED.view = function() {
                                 thisNode.selectAll('.node_status_label').text("");
                             }
                         }
-                        
+
                         d.dirty = false;
                     }
             });
@@ -1260,7 +1258,7 @@ RED.view = function() {
     RED.keyboard.add(/* i */ 73,{ctrl:true},function(){showImportNodesDialog();d3.event.preventDefault();});
 
     // TODO: 'dirty' should be a property of RED.nodes - with an event callback for ui hooks
-    function setDirty(d) {
+    function setDirty(d) {___
         dirty = d;
         if (dirty) {
             $("#btn-deploy").removeClass("disabled").addClass("btn-danger");
