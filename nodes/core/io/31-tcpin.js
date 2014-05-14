@@ -15,6 +15,7 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var reconnectTime = RED.settings.socketReconnectTime||10000;
     var socketTimeout = RED.settings.socketTimeout||null;
     var net = require('net');
@@ -38,7 +39,7 @@ module.exports = function(RED) {
             var buffer = null;
             var client;
             var reconnectTimeout;
-            function setupTcpClient() {
+            var setupTcpClient = function() {
                 node.log("connecting to "+node.host+":"+node.port);
                 node.status({fill:"grey",shape:"dot",text:"connecting"},true);
                 var id = (1+Math.random()*4294967295).toString(16);
@@ -195,7 +196,7 @@ module.exports = function(RED) {
             var client = null;
             var connected = false;
 
-            function setupTcpClient() {
+            var setupTcpClient = function() {
                 node.log("connecting to "+node.host+":"+node.port);
                 node.status({fill:"grey",shape:"dot",text:"connecting"},true);
                 client = net.connect(node.port, node.host, function() {
