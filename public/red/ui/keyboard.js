@@ -14,17 +14,18 @@
  * limitations under the License.
  **/
 RED.keyboard = function() {
-    
+
     var active = true;
     var handlers = {};
-    
+
     d3.select(window).on("keydown",function() {
         if (!active) { return; }
         var handler = handlers[d3.event.keyCode];
         if (handler && handler.ondown) {
             if (!handler.modifiers ||
-                ((!handler.modifiers.shift || d3.event.shiftKey)&&
-                    (!handler.modifiers.ctrl || d3.event.ctrlKey))) {
+                ((!handler.modifiers.shift || d3.event.shiftKey) &&
+                 (!handler.modifiers.ctrl  || d3.event.ctrlKey ) &&
+                 (!handler.modifiers.alt   || d3.event.altKey  ) )) {
                 handler.ondown();
             }
         }
@@ -34,8 +35,9 @@ RED.keyboard = function() {
         var handler = handlers[d3.event.keyCode];
         if (handler && handler.onup) {
             if (!handler.modifiers ||
-                ((!handler.modifiers.shift || d3.event.shiftKey)&&
-                    (!handler.modifiers.ctrl || d3.event.ctrlKey))) {
+                ((!handler.modifiers.shift || d3.event.shiftKey) &&
+                 (!handler.modifiers.ctrl  || d3.event.ctrlKey ) &&
+                 (!handler.modifiers.alt   || d3.event.altKey  ) )) {
                 handler.onup();
             }
         }
@@ -44,7 +46,7 @@ RED.keyboard = function() {
         var mod = modifiers;
         var cbdown = ondown;
         var cbup = onup;
-        
+
         if (typeof modifiers == "function") {
             mod = {};
             cbdown = modifiers;
@@ -55,7 +57,7 @@ RED.keyboard = function() {
     function removeHandler(key) {
         delete handlers[key];
     }
-    
+
     return {
         add: addHandler,
         remove: removeHandler,
