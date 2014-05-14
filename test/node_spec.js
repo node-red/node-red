@@ -48,10 +48,28 @@ describe('Node', function() {
     describe('#close', function() {
         it('emits close event when closed',function(done) {
             var n = new RedNode({id:'123',type:'abc'});
-            n.on('close',done);
-            n.close();
+            n.on('close',function() {
+                done();
+            });
+            var p = n.close();
+            should.not.exist(p);
+        });
+        
+        it('returns a promise when provided a callback with a done parameter',function(testdone) {
+            var n = new RedNode({id:'123',type:'abc'});
+            n.on('close',function(done) {
+                setTimeout(function() {
+                    done();
+                },200);
+            });
+            var p = n.close();
+            should.exist(p);
+            p.then(function() {
+                testdone();
+            });
         });
     });
+    
     
     describe('#receive', function() {
         it('emits input event when called', function(done) {
