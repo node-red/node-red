@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -417,7 +417,7 @@ RED.view = function() {
                 (mousePos[0]-sc*(scale)*node_width)+" "+(mousePos[1]-scaleY*node_height)+" "+
                 mousePos[0]+" "+mousePos[1]
                 );
-            
+            d3.event.preventDefault();
         } else if (mouse_mode == RED.state.MOVING) {
             var m = mouse_position;
             var d = (mouse_offset[0]-m[0])*(mouse_offset[0]-m[0]) + (mouse_offset[1]-m[1])*(mouse_offset[1]-m[1]);
@@ -762,6 +762,7 @@ RED.view = function() {
         mousedown_port_type = portType;
         mousedown_port_index = portIndex || 0;
         document.body.style.cursor = "crosshair";
+        d3.event.preventDefault();
     };
 
     function portMouseUp(d,portType,portIndex) {
