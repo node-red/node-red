@@ -35,11 +35,12 @@ function Node(n) {
 }
 
 Node.prototype.on = function(event,callback) {
+    var node = this;
     if (event == "close") {
         if (callback.length == 1) {
             this.close = function() {
                 return when.promise(function(resolve) {
-                    callback(function() {
+                    callback.call(node,function() {
                         resolve();
                     });
                 });

@@ -80,9 +80,11 @@ module.exports = function(RED) {
             this.error("missing serial config");
         }
 
-        this.on("close", function() {
+        this.on("close", function(done) {
             if (this.serialConfig) {
-                serialPool.close(this.serialConfig.serialport);
+                serialPool.close(this.serialConfig.serialport,done);
+            } else {
+                done();
             }
         });
     }
@@ -115,12 +117,11 @@ module.exports = function(RED) {
             this.error("missing serial config");
         }
 
-        this.on("close", function() {
+        this.on("close", function(done) {
             if (this.serialConfig) {
-                try {
-                    serialPool.close(this.serialConfig.serialport);
-                } catch(err) {
-                }
+                serialPool.close(this.serialConfig.serialport,done);
+            } else {
+                done();
             }
         });
     }
@@ -203,23 +204,29 @@ module.exports = function(RED) {
                 }
                 return connections[id];
             },
-            close: function(port) {
+            close: function(port,done) {
                 if (connections[port]) {
-                    if (connections[port].tout != null) clearTimeout(connections[port].tout);
+                    if (connections[port].tout != null) {
+                        clearTimeout(connections[port].tout);
+                    }
                     connections[port]._closing = true;
                     try {
                         connections[port].close(function() {
                             util.log("[serial] serial port closed");
+                            done();
                         });
                     } catch(err) { };
+                    delete connections[port];
+                } else {
+                    done();
                 }
-                delete connections[port];
             }
         }
     }();
 
     RED.httpAdmin.get("/serialports",function(req,res) {
         serialp.list(function (err, ports) {
+                console.log(JSON.stringify(ports));
             res.writeHead(200, {'Content-Type': 'text/plain'});
             res.write(JSON.stringify(ports));
             res.end();
