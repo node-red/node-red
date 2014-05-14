@@ -522,13 +522,13 @@ RED.view = function() {
     $('#btn-zoom-zero').click(function() {zoomZero();});
     $('#btn-zoom-in').click(function() {zoomIn();});
     $("#chart").on('DOMMouseScroll mousewheel', function (evt) {
-            if ( evt.altKey ) {
-                evt.preventDefault();
-                evt.stopPropagation();
-                var move = evt.originalEvent.detail || evt.originalEvent.wheelDelta;
-                if (move <= 0) { zoomOut(); }
-                else { zoomIn(); }
-            }
+        if ( evt.altKey ) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            var move = -(evt.originalEvent.detail) || evt.originalEvent.wheelDelta;
+            if (move <= 0) { zoomOut(); }
+            else { zoomIn(); }
+        }
     });
     $("#chart").droppable({
             accept:".palette_node",
