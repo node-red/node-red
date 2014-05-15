@@ -87,6 +87,8 @@ RED.view = function() {
         .on("touchcancel", canvasMouseUp)
         .on("touchstart", function() {
             if (d3.event.touches.length>1) {
+                clearTimeout(touchStartTime);
+                touchStartTime = null;
                 d3.event.preventDefault();
                 var touch0 = d3.event.touches.item(0);
                 var touch1 = d3.event.touches.item(1);
