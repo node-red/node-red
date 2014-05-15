@@ -25,7 +25,6 @@ var comms = require("../comms");
 
 function Node(n) {
     this.id = n.id;
-    this._events = new EventEmitter();
     flows.add(this);
     this.type = n.type;
     if (n.name) {
@@ -33,6 +32,10 @@ function Node(n) {
     }
     this.wires = n.wires||[];
 }
+
+util.inherits(Node,EventEmitter);
+
+Node.prototype._on = Node.prototype.on;
 
 Node.prototype.on = function(event,callback) {
     var node = this;
@@ -48,12 +51,9 @@ Node.prototype.on = function(event,callback) {
         } else {
             this.close = callback;
         }
+    } else {
+        this._on(event,callback);
     }
-    this._events.on(event,callback);
-}
-
-Node.prototype.emit = function(event,args) {
-    this._events.emit(event,args);
 }
 
 Node.prototype.close = function() {
