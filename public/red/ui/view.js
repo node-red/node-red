@@ -1188,27 +1188,35 @@ RED.view = function() {
 
         var link = vis.selectAll(".link").data(RED.nodes.links.filter(function(d) { return d.source.z == activeWorkspace && d.target.z == activeWorkspace }));
 
-        link.enter().insert("svg:path",".node").attr("class","link")
-           .on("mousedown",function(d) {
-                mousedown_link = d;
-                clearSelection();
-                selected_link = mousedown_link;
-                updateSelection();
-                redraw();
-                d3.event.stopPropagation();
-            })
-            .on("touchstart",function(d) {
-                mousedown_link = d;
-                clearSelection();
-                selected_link = mousedown_link;
-                updateSelection();
-                redraw();
-                d3.event.stopPropagation();
-            });
+        var linkEnter = link.enter().insert("g",".node").attr("class","link");
+        
+        linkEnter.each(function(d,i) {
+            var l = d3.select(this);
+            l.append("svg:path").attr("class","link_background link_path")
+               .on("mousedown",function(d) {
+                    mousedown_link = d;
+                    clearSelection();
+                    selected_link = mousedown_link;
+                    updateSelection();
+                    redraw();
+                    d3.event.stopPropagation();
+                })
+                .on("touchstart",function(d) {
+                    mousedown_link = d;
+                    clearSelection();
+                    selected_link = mousedown_link;
+                    updateSelection();
+                    redraw();
+                    d3.event.stopPropagation();
+                });
+            l.append("svg:path").attr("class","link_outline link_path");
+            l.append("svg:path").attr("class","link_line link_path");
+        });
 
         link.exit().remove();
 
-        link.attr("d",function(d){
+        var links = vis.selectAll(".link_path")
+        links.attr("d",function(d){
                 var numOutputs = d.source.outputs || 1;
                 var sourcePort = d.sourcePort || 0;
                 var y = -((numOutputs-1)/2)*13 +13*sourcePort;

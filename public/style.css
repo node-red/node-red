@@ -465,21 +465,37 @@ a.brand img {
   fill: none;
 }
 
-.link {
+.link_line {
   stroke: #7f7f7f;
   stroke-width: 4;
+  fill: none;
+  pointer-events: none;
+}
+
+.link_outline {
+  stroke: #fff;
+  stroke-width: 6;
+  cursor: crosshair;
+  fill: none;
+  pointer-events: none;
+}
+.link_background {
+  stroke: #fff;
+  opacity: 0;
+  stroke-width: 25;
   cursor: crosshair;
   fill: none;
 }
 
-.link_selected {
+g.link_selected path.link_line {
   stroke: #ff7f0e;
 }
-.link_unknown {
+g.link_unknown path.link_line {
    stroke: #f00;
    stroke-width: 2;
    stroke-dasharray: 10, 4;
 }
+
 #shade {
    position: absolute;
    top:0;
