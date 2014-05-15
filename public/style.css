@@ -62,6 +62,10 @@ a.brand img {
     height: 16px;
 }
 
+.navbar-fixed-top {
+    position: absolute !important;
+    z-index: 100 !important;
+}
 .navbar-inner > .container-fluid {
     padding-right: 10px;
 }

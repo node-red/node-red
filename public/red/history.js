@@ -23,6 +23,9 @@ RED.history = function() {
                 undo_history[i].dirty = true;
             }
         },
+        depth: function() {
+            return undo_history.length;
+        },
         push: function(ev) {
             undo_history.push(ev);
         },

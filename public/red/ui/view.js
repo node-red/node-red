@@ -22,6 +22,13 @@ RED.view = function() {
         scaleFactor = 1,
         node_width = 100,
         node_height = 30;
+    
+    var touchLongPressTimeout = 1000,
+        startTouchDistance = 0,
+        startTouchCenter = [],
+        moveTouchCenter = [],
+        touchStartTime = 0;
+
 
     var activeWorkspace = 0;
     var workspaceScrollPositions = {};
@@ -39,13 +46,8 @@ RED.view = function() {
         dirty = false,
         lasso = null,
         showStatus = false,
-        touchStartTime = 0,
         clickTime = 0,
-        clickElapsed = 0,
-        startTouchDistance = 0,
-        startTouchCenter = [],
-        moveTouchCenter = [],
-        touches = 0;
+        clickElapsed = 0;
 
     var clipboard = "";
 
@@ -74,13 +76,16 @@ RED.view = function() {
         .on("touchend", function() {
             clearTimeout(touchStartTime);
             touchStartTime = null;
+            if  (RED.touch.radialMenu.active()) {
+                return;
+            }
             if (lasso) {
                 outer_background.attr("fill","#fff");
             }
             canvasMouseUp.call(this);
         })
         .on("touchcancel", canvasMouseUp)
-        .on("touchstart", function(){
+        .on("touchstart", function() {
             if (d3.event.touches.length>1) {
                 d3.event.preventDefault();
                 var touch0 = d3.event.touches.item(0);
@@ -100,35 +105,41 @@ RED.view = function() {
                 ]
                 startTouchDistance = Math.sqrt((a*a)+(b*b));
             } else {
+                var obj = d3.select(document.body);
                 var touch0 = d3.event.touches.item(0);
+                var pos = [touch0.pageX,touch0.pageY];
                 startTouchCenter = [touch0.pageX,touch0.pageY];
                 startTouchDistance = 0;
                 var point = d3.touches(this)[0];
                 touchStartTime = setTimeout(function() {
-                        lasso = vis.append('rect')
-                            .attr("ox",point[0])
-                            .attr("oy",point[1])
-                            .attr("rx",2)
-                            .attr("ry",2)
-                            .attr("x",point[0])
-                            .attr("y",point[1])
-                            .attr("width",0)
-                            .attr("height",0)
-                            .attr("class","lasso");
-                        touchStartTime = null;
-                        outer_background.attr("fill","#f3f3f3");
-                },1000);
-                canvasMouseDown();
+                    touchStartTime = null;
+                    showTouchMenu(obj,pos);
+                    //lasso = vis.append('rect')
+                    //    .attr("ox",point[0])
+                    //    .attr("oy",point[1])
+                    //    .attr("rx",2)
+                    //    .attr("ry",2)
+                    //    .attr("x",point[0])
+                    //    .attr("y",point[1])
+                    //    .attr("width",0)
+                    //    .attr("height",0)
+                    //    .attr("class","lasso");
+                    //outer_background.attr("fill","#e3e3f3");
+                },touchLongPressTimeout);
             }
         })
         .on("touchmove", function(){
+                if  (RED.touch.radialMenu.active()) {
+                    d3.event.preventDefault();
+                    return;
+                }
                 if (d3.event.touches.length<2) {
                     if (touchStartTime) {
                         var touch0 = d3.event.touches.item(0);
                         var dx = (touch0.pageX-startTouchCenter[0]);
                         var dy = (touch0.pageY-startTouchCenter[1]);
-                        var d = Math.sqrt(dx*dx+dy*dy);
-                        if (d > 7) {
+                        var d = Math.abs(dx*dx+dy*dy);
+                        if (d > 64) {
                             clearTimeout(touchStartTime);
                             touchStartTime = null;
                         }
@@ -311,22 +322,19 @@ RED.view = function() {
         $( "#node-dialog-delete-workspace" ).dialog('open');
     }
 
-    //d3.select(window).on("keydown", keydown);
-
     function canvasMouseDown() {
-
         if (!mousedown_node && !mousedown_link) {
             selected_link = null;
             updateSelection();
-            //vis.call(d3.behavior.zoom().on("zoom"), rescale);
         }
         if (mouse_mode == 0) {
             if (lasso) {
                 lasso.remove();
                 lasso = null;
             }
-            var point = d3.touches(this)[0]||d3.mouse(this);
-            if (d3.touches(this).length === 0) {
+            
+            if (!touchStartTime) {
+                var point = d3.mouse(this);
                 lasso = vis.append('rect')
                     .attr("ox",point[0])
                     .attr("oy",point[1])
@@ -823,6 +831,9 @@ RED.view = function() {
     }
 
     function nodeMouseDown(d) {
+        //var touch0 = d3.event;
+        //var pos = [touch0.pageX,touch0.pageY];
+        //RED.touch.radialMenu.show(d3.select(this),pos);
         if (mouse_mode == RED.state.IMPORT_DRAGGING) {
             RED.keyboard.remove(/* ESCAPE */ 27);
             updateSelection();
@@ -899,6 +910,20 @@ RED.view = function() {
         d3.event.preventDefault();
     }
 
+    function showTouchMenu(obj,pos) {
+        var mdn = mousedown_node;
+        var options = [];
+        options.push({name:"delete",disabled:(moving_set.length==0),onselect:function() {deleteSelection();}});
+        options.push({name:"cut",disabled:(moving_set.length==0),onselect:function() {copySelection();deleteSelection();}});
+        options.push({name:"copy",disabled:(moving_set.length==0),onselect:function() {copySelection();}});
+        options.push({name:"paste",disabled:(clipboard.length==0),onselect:function() {importNodes(clipboard,true);}});
+        options.push({name:"edit",disabled:(moving_set.length != 1),onselect:function() { RED.editor.edit(mdn);}});
+        options.push({name:"select",onselect:function() {selectAll();}});
+        options.push({name:"undo",disabled:(RED.history.depth() == 0),onselect:function() {RED.history.pop();}});
+        
+        RED.touch.radialMenu.show(obj,pos,options);
+        resetMouseVars();
+    }
     function redraw() {
         vis.attr("transform","scale("+scaleFactor+")");
         outer.attr("width", space_width*scaleFactor).attr("height", space_height*scaleFactor);
@@ -967,8 +992,28 @@ RED.view = function() {
                         .attr("rx", 6)
                         .attr("ry", 6)
                         .attr("fill",function(d) { return d._def.color;})
+                        .on("mouseup",nodeMouseUp)
                         .on("mousedown",nodeMouseDown)
-                        .on("touchstart",nodeMouseDown)
+                        .on("touchstart",function(d) {
+                            var obj = d3.select(this);
+                            var touch0 = d3.event.touches.item(0);
+                            var pos = [touch0.pageX,touch0.pageY];
+                            startTouchCenter = [touch0.pageX,touch0.pageY];
+                            startTouchDistance = 0;
+                            touchStartTime = setTimeout(function() {
+                                showTouchMenu(obj,pos);
+                            },touchLongPressTimeout);
+                            nodeMouseDown.call(this,d)       
+                        })
+                        .on("touchend", function(d) {
+                            clearTimeout(touchStartTime);
+                            touchStartTime = null;
+                            if  (RED.touch.radialMenu.active()) {
+                                d3.event.stopPropagation();
+                                return;
+                            }
+                            nodeMouseUp.call(this,d);
+                        })
                         .on("mouseover",function(d) {
                                 if (mouse_mode == 0) {
                                     var node = d3.select(this);
@@ -982,10 +1027,6 @@ RED.view = function() {
 
                    //node.append("rect").attr("class", "node-gradient-top").attr("rx", 6).attr("ry", 6).attr("height",30).attr("stroke","none").attr("fill","url(#gradient-top)").style("pointer-events","none");
                    //node.append("rect").attr("class", "node-gradient-bottom").attr("rx", 6).attr("ry", 6).attr("height",30).attr("stroke","none").attr("fill","url(#gradient-bottom)").style("pointer-events","none");
-
-                    mainRect.on("mouseup",nodeMouseUp);
-                    mainRect.on("touchend",nodeMouseUp);
-                    //mainRect.on("touchend",nodeMouseUp);
 
                     if (d._def.icon) {
                         var icon = node.append("image")
@@ -1281,7 +1322,7 @@ RED.view = function() {
      *  - all 'selected'
      *  - attached to mouse for placing - 'IMPORT_DRAGGING'
      */
-    function importNodes(newNodesStr) {
+    function importNodes(newNodesStr,touchImport) {
         try {
             var result = RED.nodes.import(newNodesStr,true);
             if (result) {
@@ -1320,7 +1361,9 @@ RED.view = function() {
                     node.dx -= minX;
                     node.dy -= minY;
                 }
-                mouse_mode = RED.state.IMPORT_DRAGGING;
+                if (!touchImport) {
+                    mouse_mode = RED.state.IMPORT_DRAGGING;
+                }
 
                 RED.keyboard.add(/* ESCAPE */ 27,function(){
                         RED.keyboard.remove(/* ESCAPE */ 27);
