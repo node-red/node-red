@@ -1229,7 +1229,7 @@ RED.view = function() {
             });
         }
 
-        var link = vis.selectAll(".link").data(RED.nodes.links.filter(function(d) { return d.source.z == activeWorkspace && d.target.z == activeWorkspace }));
+        var link = vis.selectAll(".link").data(RED.nodes.links.filter(function(d) { return d.source.z == activeWorkspace && d.target.z == activeWorkspace }),function(d) { return d.source.id+":"+d.sourcePort+":"+d.target.id;});
 
         var linkEnter = link.enter().insert("g",".node").attr("class","link");
         
