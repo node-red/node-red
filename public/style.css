@@ -84,6 +84,9 @@ a.brand img {
    left:0px;
    right:0px;
 }
+#chart svg {
+    -webkit-transform: translateZ(0);
+}
 
 #workspace-toolbar {
     display: none;
