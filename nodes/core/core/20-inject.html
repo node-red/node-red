@@ -151,7 +151,7 @@
                     }
                     var p = value.split(":");
 					
-					var offset = new Date().getTimezoneOffset();
+		    var offset = new Date().getTimezoneOffset();
                     return (((Number(p[0])+1)*60)+Number(p[1])+offset)*60*1000;
                 }
                 return value;
