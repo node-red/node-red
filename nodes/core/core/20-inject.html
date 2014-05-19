@@ -150,7 +150,8 @@
                         return Number( value );
                     }
                     var p = value.split(":");
-                    return ((Number(p[0])*60)+Number(p[1])+300)*60*1000;
+					var offset = new Date().getTimezoneOffset();
+                    return (((Number(p[0])+1)*60)+Number(p[1])+offset)*60*1000;
                 }
                 return value;
             },
