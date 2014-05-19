@@ -141,9 +141,7 @@
                 // seconds
                 step: 60 * 1000,
                 // hours
-                page: 60,
-                min:0,
-                max:(23*60+59)*60*1000
+                page: 60
             },
             _parse: function( value ) {
                 if ( typeof value === "string" ) {
@@ -152,7 +150,9 @@
                         return Number( value );
                     }
                     var p = value.split(":");
-                    return ((p[0]*60)+Number(p[1]))*60*1000;
+					
+		    var offset = new Date().getTimezoneOffset();
+                    return (((Number(p[0])+1)*60)+Number(p[1])+offset)*60*1000;
                 }
                 return value;
             },
