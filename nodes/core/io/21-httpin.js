@@ -120,9 +120,11 @@ module.exports = function(RED) {
                     msg.res.set(msg.headers);
                 }
                 var statusCode = msg.statusCode || 200;
+				msg.res.setHeader('content-length', Buffer.byteLength(msg.payload));
                 if (typeof msg.payload == "object" && !Buffer.isBuffer(msg.payload)) {
                     msg.res.jsonp(statusCode,msg.payload);
                 } else {
+					
                     msg.res.send(statusCode,msg.payload);
                 }
             } else {
