@@ -15,18 +15,24 @@
  **/
 RED.editor = function() {
     var editing_node = null;
-
     // TODO: should IMPORT/EXPORT get their own dialogs?
+    function validateNodeProperties(node, definition, properties) {
+        var isValid = true;
+        for (var prop in definition) {
+            if (!validateNodeProperty(node, definition, prop, properties[prop])) {
+                isValid = false;
+            }
+        }
+        return isValid;
+    }
 
     function validateNode(node) {
         var oldValue = node.valid;
-        node.valid = true;
-        for (var d in node._def.defaults) {
-            if (!validateNodeProperty(node,d,node[d])) {
-                node.valid = false;
-            }
+        node.valid = validateNodeProperties(node, node._def.defaults, node);
+        if (node._def._creds) {
+            node.valid = node.valid && validateNodeProperties(node, node._def.credentials, node._def._creds);
         }
-        if (node.valid != oldValue) {
+        if (oldValue != node.valid) {
             node.dirty = true;
         }
     }
@@ -35,6 +41,7 @@ RED.editor = function() {
         var dashedType = nodeType.replace(/\s+/g, '-');
         return  'credentials/' + dashedType + "/" + nodeID;
     }
+
     function sendCredentials(node,credDefinition,prefix) {
         var credentials = {};
         for (var cred in credDefinition) {
@@ -45,6 +52,7 @@ RED.editor = function() {
             }
             credentials[cred] = value;
         }
+        node._def._creds = credentials;
         $.ajax({
             url: getCredentialsURL(node.type, node.id),
             type: 'POST',
@@ -52,17 +60,18 @@ RED.editor = function() {
             success: function (result) {
             }
         });
+
     }
 
-    function validateNodeProperty(node,property,value) {
+    function validateNodeProperty(node,definition,property,value) {
         var valid = true;
-        if ("required" in node._def.defaults[property] && node._def.defaults[property].required) {
+        if ("required" in definition[property] && definition[property].required) {
             valid = value !== "";
         }
-        if (valid && "validate" in node._def.defaults[property]) {
-            valid = node._def.defaults[property].validate.call(node,value);
+        if (valid && "validate" in definition[property]) {
+            valid = definition[property].validate.call(node,value);
         }
-        if (valid && node._def.defaults[property].type && RED.nodes.getType(node._def.defaults[property].type) && !("validate" in node._def.defaults[property])) {
+        if (valid && definition[property].type && RED.nodes.getType(definition[property].type) && !("validate" in definition[property])) {
             if (!value || value == "_ADD_") {
                 valid = false;
             } else {
@@ -304,12 +313,13 @@ RED.editor = function() {
     /**
      * Add an on-change handler to revalidate a node field
      * @param node - the node being edited
+     * @param definition - the definition of the node
      * @param property - the name of the field
      * @param prefix - the prefix to use in the input element ids (node-input|node-config-input)
      */
-    function attachPropertyChangeHandler(node,property,prefix) {
+    function attachPropertyChangeHandler(node,definition,property,prefix) {
         $("#"+prefix+"-"+property).change(function() {
-            if (!validateNodeProperty(node, property,this.value)) {
+            if (!validateNodeProperty(node, definition, property,this.value)) {
                 $(this).addClass("input-error");
             } else {
                 $(this).removeClass("input-error");
@@ -330,10 +340,9 @@ RED.editor = function() {
             } else {
                 preparePropertyEditor(node,d,prefix);
             }
-            attachPropertyChangeHandler(node,d,prefix);
+            attachPropertyChangeHandler(node,definition.defaults,d,prefix);
         }
         if (definition.credentials) {
-            // TODO: Validate credentials fields
 
             $.getJSON(getCredentialsURL(node.type, node.id), function (data) {
                 for (var cred in definition.credentials) {
@@ -346,6 +355,10 @@ RED.editor = function() {
                         }
                     } else {
                         preparePropertyEditor(data, cred, prefix);
+                    }
+                    attachPropertyChangeHandler(node, definition.credentials, cred, prefix);
+                    for (var cred in definition.credentials) {
+                        $("#" + prefix + "-" + cred).change();
                     }
                 }
             });
@@ -509,9 +522,10 @@ RED.editor = function() {
                             configTypeDef.oneditsave.call(RED.nodes.node(configId));
                         }
                         validateNode(configNode);
-                        RED.view.dirty(true);
 
-                        $( this ).dialog( "close" );
+                        RED.view.dirty(true);
+                        $(this).dialog("close");
+
                     }
                 },
                 {
