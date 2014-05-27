@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,6 @@
 RED.editor = function() {
     var editing_node = null;
     // TODO: should IMPORT/EXPORT get their own dialogs?
-    function validateNodeProperties(node, definition, properties) {
-        var isValid = true;
-        for (var prop in definition) {
-            if (!validateNodeProperty(node, definition, prop, properties[prop])) {
-                isValid = false;
-            }
-        }
-        return isValid;
-    }
-
-    function validateNode(node) {
-        var oldValue = node.valid;
-        node.valid = validateNodeProperties(node, node._def.defaults, node);
-        if (node._def._creds) {
-            node.valid = node.valid && validateNodeProperties(node, node._def.credentials, node._def._creds);
-        }
-        if (oldValue != node.valid) {
-            node.dirty = true;
-        }
-    }
 
     function getCredentialsURL(nodeType, nodeID) {
         var dashedType = nodeType.replace(/\s+/g, '-');
@@ -63,6 +43,49 @@ RED.editor = function() {
 
     }
 
+    
+    
+    /**
+     * Validate a node 
+     * @param node - the node being validated
+     * @returns {boolean} whether the node is valid. Sets node.dirty if needed
+     */
+    function validateNode(node) {
+        var oldValue = node.valid;
+        node.valid = validateNodeProperties(node, node._def.defaults, node);
+        if (node._def._creds) {
+            node.valid = node.valid && validateNodeProperties(node, node._def.credentials, node._def._creds);
+        }
+        if (oldValue != node.valid) {
+            node.dirty = true;
+        }
+    }
+    
+    /**
+     * Validate a node's properties for the given set of property definitions
+     * @param node - the node being validated
+     * @param definition - the node property definitions (either def.defaults or def.creds)
+     * @param properties - the node property values to validate
+     * @returns {boolean} whether the node's properties are valid
+     */
+    function validateNodeProperties(node, definition, properties) {
+        var isValid = true;
+        for (var prop in definition) {
+            if (!validateNodeProperty(node, definition, prop, properties[prop])) {
+                isValid = false;
+            }
+        }
+        return isValid;
+    }
+
+    /**
+     * Validate a individual node property
+     * @param node - the node being validated
+     * @param definition - the node property definitions (either def.defaults or def.creds)
+     * @param property - the property name being validated
+     * @param value - the property value being validated
+     * @returns {boolean} whether the node proprty is valid
+     */
     function validateNodeProperty(node,definition,property,value) {
         var valid = true;
         if ("required" in definition[property] && definition[property].required) {
@@ -82,6 +105,13 @@ RED.editor = function() {
         return valid;
     }
 
+    /**
+     * Called when the node's properties have changed.
+     * Marks the node as dirty and needing a size check.
+     * Removes any links to non-existant outputs.
+     * @param node - the node that has been updated
+     * @returns {array} the links that were removed due to this update
+     */
     function updateNodeProperties(node) {
         node.resize = true;
         node.dirty = true;
