@@ -15,10 +15,10 @@
  **/
 
 module.exports = function(RED) {
-    
+    "use strict";
     var connectionPool = require("./lib/mqttConnectionPool");
     var util = require("util");
-    
+
     function MQTTBrokerNode(n) {
         RED.nodes.createNode(this,n);
         this.broker = n.broker;
@@ -28,12 +28,12 @@ module.exports = function(RED) {
         if (credentials) {
             this.username = credentials.user;
             this.password = credentials.password;
-        }  
+        }
     }
     RED.nodes.registerType("mqtt-broker",MQTTBrokerNode);
-    
+
     var querystring = require('querystring');
-    
+
     RED.httpAdmin.get('/mqtt-broker/:id',function(req,res) {
         var credentials = RED.nodes.getCredentials(req.params.id);
         if (credentials) {
@@ -42,12 +42,12 @@ module.exports = function(RED) {
             res.send(JSON.stringify({}));
         }
     });
-    
+
     RED.httpAdmin.delete('/mqtt-broker/:id',function(req,res) {
         RED.nodes.deleteCredentials(req.params.id);
         res.send(200);
     });
-    
+
     RED.httpAdmin.post('/mqtt-broker/:id',function(req,res) {
         var body = "";
         req.on('data', function(chunk) {
@@ -70,8 +70,8 @@ module.exports = function(RED) {
             res.send(200);
         });
     });
-    
-    
+
+
     function MQTTInNode(n) {
         RED.nodes.createNode(this,n);
         this.topic = n.topic;
@@ -100,25 +100,25 @@ module.exports = function(RED) {
             this.error("missing broker configuration");
         }
     }
-    
+
     RED.nodes.registerType("mqtt in",MQTTInNode);
-    
+
     MQTTInNode.prototype.close = function() {
         if (this.client) {
             this.client.disconnect();
         }
     }
-    
-    
+
+
     function MQTTOutNode(n) {
         RED.nodes.createNode(this,n);
-    
+
         this.topic = n.topic;
         this.broker = n.broker;
-    
+
         this.brokerConfig = RED.nodes.getNode(this.broker);
         var node = this;
-        
+
         if (this.brokerConfig) {
             this.status({fill:"red",shape:"ring",text:"disconnected"},true);
             this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.brokerConfig.clientid,this.brokerConfig.username,this.brokerConfig.password);
@@ -142,13 +142,12 @@ module.exports = function(RED) {
             this.error("missing broker configuration");
         }
     }
-    
+
     RED.nodes.registerType("mqtt out",MQTTOutNode);
-    
+
     MQTTOutNode.prototype.close = function() {
         if (this.client) {
             this.client.disconnect();
         }
     }
 }
-
