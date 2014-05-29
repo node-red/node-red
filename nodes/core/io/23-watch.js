@@ -15,13 +15,14 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var notify = require("fs.notify");
     var fs = require("fs");
     var sep = require("path").sep;
-    
+
     function WatchNode(n) {
         RED.nodes.createNode(this,n);
-    
+
         this.files = n.files.split(",");
         for (var f in this.files) {
             this.files[f] = this.files[f].trim();
@@ -34,7 +35,7 @@ module.exports = function(RED) {
             var msg = { payload: path, topic: node.p, file: file};
             node.send(msg);
         });
-    
+
         this.close = function() {
             notifications.close();
         }

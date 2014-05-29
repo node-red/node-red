@@ -15,8 +15,9 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var dgram = require('dgram');
-    
+
     // The Input Node
     function UDPin(n) {
         RED.nodes.createNode(this,n);
@@ -26,18 +27,18 @@ module.exports = function(RED) {
         this.iface = n.iface || null;
         this.multicast = n.multicast;
         var node = this;
-    
+
         var server = dgram.createSocket('udp4');
-    
+
         server.on("error", function (err) {
             if ((err.code == "EACCES") && (node.port < 1024)) {
                 node.error("UDP access error, you may need root access for ports below 1024");
-            } else { 
+            } else {
                 node.error("UDP error : "+err.code);
             }
             server.close();
         });
-    
+
         server.on('message', function (message, remote) {
             var msg;
             if (node.datatype =="base64") {
@@ -49,7 +50,7 @@ module.exports = function(RED) {
             }
             node.send(msg);
         });
-    
+
         server.on('listening', function () {
             var address = server.address();
             node.log('udp listener at ' + address.address + ":" + address.port);
@@ -60,7 +61,7 @@ module.exports = function(RED) {
                     server.addMembership(node.group,node.iface);
                     node.log("udp multicast group "+node.group);
                 } catch (e) {
-                    if (e.errno == "EINVAL") { 
+                    if (e.errno == "EINVAL") {
                         node.error("Bad Multicast Address");
                     } else if (e.errno == "ENODEV") {
                         node.error("Must be ip address of the required interface");
@@ -70,7 +71,7 @@ module.exports = function(RED) {
                 }
             }
         });
-    
+
         node.on("close", function() {
             try {
                 server.close();
@@ -79,12 +80,12 @@ module.exports = function(RED) {
                 node.error(err);
             }
         });
-    
+
         server.bind(node.port,node.iface);
     }
     RED.nodes.registerType("udp in",UDPin);
-    
-    
+
+
     // The Output Node
     function UDPout(n) {
         RED.nodes.createNode(this,n);
@@ -96,9 +97,9 @@ module.exports = function(RED) {
         this.iface = n.iface || null;
         this.multicast = n.multicast;
         var node = this;
-    
+
         var sock = dgram.createSocket('udp4');  // only use ipv4 for now
-    
+
         if (node.multicast != "false") {
             if (node.outport == "") { node.outport = node.port; }
             sock.bind(node.outport, function() {    // have to bind before you can enable broadcast...
@@ -127,7 +128,7 @@ module.exports = function(RED) {
         } else {
             node.log('udp ready : '+node.addr+":"+node.port);
         }
-    
+
         node.on("input", function(msg) {
             if (msg.payload != null) {
                 var add = node.addr || msg.ip || "";
@@ -155,7 +156,7 @@ module.exports = function(RED) {
                 }
             }
         });
-    
+
         node.on("close", function() {
             try {
                 sock.close();

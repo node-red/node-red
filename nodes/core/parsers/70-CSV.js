@@ -15,6 +15,7 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     function CSVNode(n) {
         RED.nodes.createNode(this,n);
         this.template = n.temp.split(",");

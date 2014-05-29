@@ -15,18 +15,19 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var fs = require("fs");
-    
+
     function FileNode(n) {
         RED.nodes.createNode(this,n);
-    
+
         this.filename = n.filename;
         this.appendNewline = n.appendNewline;
         this.overwriteFile = n.overwriteFile;
         var node = this;
         this.on("input",function(msg) {
             var filename = msg.filename || this.filename;
-    
+
             if (filename == "") {
                 node.warn('No filename specified');
             } else if (typeof msg.payload != "undefined") {
@@ -60,10 +61,10 @@ module.exports = function(RED) {
         });
     }
     RED.nodes.registerType("file",FileNode);
-    
+
     function FileInNode(n) {
         RED.nodes.createNode(this,n);
-    
+
         this.filename = n.filename;
         this.format = n.format;
         var node = this;
@@ -73,7 +74,7 @@ module.exports = function(RED) {
         }
         this.on("input",function(msg) {
             var filename = msg.filename || this.filename;
-    
+
             if (filename == "") {
                 node.warn('No filename specified');
             } else {

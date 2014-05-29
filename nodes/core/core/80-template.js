@@ -15,6 +15,7 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var mustache = require("mustache");
     var util = require("util");
     var fs = require('fs');

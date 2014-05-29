@@ -15,6 +15,7 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var util = require('util');
     var nodemailer = require("nodemailer");
     var Imap = null;

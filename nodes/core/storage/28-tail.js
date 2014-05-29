@@ -15,16 +15,17 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var fs = require("fs");
     var spawn = require('child_process').spawn;
-    
+
     function TailNode(n) {
         RED.nodes.createNode(this,n);
-    
+
         this.filename = n.filename;
         this.split = n.split;
         var node = this;
-    
+
         var err = "";
         var tail = spawn("tail", ["-f", this.filename]);
         tail.stdout.on("data", function (data) {
@@ -43,15 +44,15 @@ module.exports = function(RED) {
                 node.send(msg);
             }
         });
-    
+
         tail.stderr.on("data", function(data) {
             node.warn(data.toString());
         });
-    
+
         this.on("close", function() {
             if (tail) tail.kill();
         });
     }
-    
+
     RED.nodes.registerType("tail",TailNode);
 }

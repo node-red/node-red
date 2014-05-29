@@ -15,9 +15,10 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var mongo = require('mongodb');
     var MongoClient = mongo.MongoClient;
-    
+
     function MongoNode(n) {
         RED.nodes.createNode(this,n);
         this.hostname = n.hostname;
@@ -29,20 +30,20 @@ module.exports = function(RED) {
             this.username = credentials.user;
             this.password = credentials.password;
         }
-        
+
         var url = "mongodb://";
         if (this.username && this.password) {
             url += this.username+":"+this.password+"@";
         }
         url += this.hostname+":"+this.port+"/"+this.db;
-        
+
         this.url = url;
     }
-    
+
     RED.nodes.registerType("mongodb",MongoNode);
-    
+
     var querystring = require('querystring');
-    
+
     RED.httpAdmin.get('/mongodb/:id',function(req,res) {
         var credentials = RED.nodes.getCredentials(req.params.id);
         if (credentials) {
@@ -51,12 +52,12 @@ module.exports = function(RED) {
             res.send(JSON.stringify({}));
         }
     });
-    
+
     RED.httpAdmin.delete('/mongodb/:id',function(req,res) {
         RED.nodes.deleteCredentials(req.params.id);
         res.send(200);
     });
-    
+
     RED.httpAdmin.post('/mongodb/:id',function(req,res) {
         var body = "";
         req.on('data', function(chunk) {
@@ -79,8 +80,8 @@ module.exports = function(RED) {
             res.send(200);
         });
     });
-    
-    
+
+
     function MongoOutNode(n) {
         RED.nodes.createNode(this,n);
         this.collection = n.collection;
@@ -88,7 +89,7 @@ module.exports = function(RED) {
         this.payonly = n.payonly || false;
         this.operation = n.operation;
         this.mongoConfig = RED.nodes.getNode(this.mongodb);
-    
+
         if (this.mongoConfig) {
             var node = this;
             MongoClient.connect(this.mongoConfig.url, function(err,db) {
@@ -116,6 +117,15 @@ module.exports = function(RED) {
                                 coll.insert(msg,function(err,item){if (err){node.error(err);}});
                             }
                         }
+                        else if (node.operation == "update") {
+                            delete msg._topic;
+                            if (node.payonly) {
+                                if (typeof msg.payload !== "object") { msg.payload = {"payload":msg.payload}; }
+                                coll.update(msg.payload,function(err,item){ if (err){node.error(err);} });
+                            } else {
+                                coll.update(msg,function(err,item){if (err){node.error(err);}});
+                            }
+                        }
                         if (node.operation == "delete") {
                             coll.remove(msg.payload, {w:1}, function(err, items){ if (err) node.error(err); });
                         }
@@ -125,7 +135,7 @@ module.exports = function(RED) {
         } else {
             this.error("missing mongodb configuration");
         }
-    
+
         this.on("close", function() {
             if (this.clientDb) {
                 this.clientDb.close();
@@ -133,14 +143,14 @@ module.exports = function(RED) {
         });
     }
     RED.nodes.registerType("mongodb out",MongoOutNode);
-    
-    
+
+
     function MongoInNode(n) {
         RED.nodes.createNode(this,n);
         this.collection = n.collection;
         this.mongodb = n.mongodb;
         this.mongoConfig = RED.nodes.getNode(this.mongodb);
-    
+
         if (this.mongoConfig) {
             var node = this;
             MongoClient.connect(this.mongoConfig.url, function(err,db) {
@@ -168,7 +178,7 @@ module.exports = function(RED) {
         } else {
             this.error("missing mongodb configuration");
         }
-    
+
         this.on("close", function() {
             if (this.clientDb) {
                 this.clientDb.close();

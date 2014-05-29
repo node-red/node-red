@@ -15,8 +15,9 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var util = require("util");
-    
+
     function JSONNode(n) {
         RED.nodes.createNode(this,n);
         var node = this;
