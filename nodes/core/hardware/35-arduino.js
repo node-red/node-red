@@ -59,10 +59,10 @@ module.exports = function(RED) {
             this.board = this.serverConfig.board;
             //this.repeat = this.serverConfig.repeat;
             var node = this;
-            node.status({fill:"red",shape:"ring",text:"connecting"},true);
+            node.status({fill:"red",shape:"ring",text:"connecting"});
 
             node.board.on('connect', function() {
-                node.status({fill:"green",shape:"dot",text:"connected"},true);
+                node.status({fill:"green",shape:"dot",text:"connected"});
                 //console.log("i",node.state,node.pin);
                 if (node.state == "ANALOG") {
                     node.board.on('analogChange', function(e) {
@@ -102,10 +102,10 @@ module.exports = function(RED) {
         if (typeof this.serverConfig === "object") {
             this.board = this.serverConfig.board;
             var node = this;
-            node.status({fill:"red",shape:"ring",text:"connecting"},true);
+            node.status({fill:"red",shape:"ring",text:"connecting"});
 
             node.board.on('connect', function() {
-                node.status({fill:"green",shape:"dot",text:"connected"},true);
+                node.status({fill:"green",shape:"dot",text:"connected"});
                 //console.log("o",node.state,node.pin);
                 node.board.pinMode(node.pin, node.state);
                 node.on("input", function(msg) {

@@ -71,10 +71,10 @@ module.exports = function(RED) {
                 });
             });
             node.port.on('ready', function() {
-                node.status({fill:"green",shape:"dot",text:"connected"},true);
+                node.status({fill:"green",shape:"dot",text:"connected"});
             });
             node.port.on('closed', function() {
-                node.status({fill:"red",shape:"ring",text:"not connected"},true);
+                node.status({fill:"red",shape:"ring",text:"not connected"});
             });
         } else {
             this.error("missing serial config");
@@ -97,7 +97,7 @@ module.exports = function(RED) {
 
         if (this.serialConfig) {
             var node = this;
-            node.status({fill:"grey",shape:"dot",text:"unknown"},true);
+            node.status({fill:"grey",shape:"dot",text:"unknown"});
             node.port = serialPool.get(this.serialConfig.serialport,
                 this.serialConfig.serialbaud,
                 this.serialConfig.databits,
@@ -108,10 +108,10 @@ module.exports = function(RED) {
                 node.send({ "payload": msg });
             });
             this.port.on('ready', function() {
-                node.status({fill:"green",shape:"dot",text:"connected"},true);
+                node.status({fill:"green",shape:"dot",text:"connected"});
             });
             this.port.on('closed', function() {
-                node.status({fill:"red",shape:"ring",text:"not connected"},true);
+                node.status({fill:"red",shape:"ring",text:"not connected"});
             });
         } else {
             this.error("missing serial config");

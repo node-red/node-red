@@ -41,12 +41,12 @@ module.exports = function(RED) {
             var reconnectTimeout;
             var setupTcpClient = function() {
                 node.log("connecting to "+node.host+":"+node.port);
-                node.status({fill:"grey",shape:"dot",text:"connecting"},true);
+                node.status({fill:"grey",shape:"dot",text:"connecting"});
                 var id = (1+Math.random()*4294967295).toString(16);
                 client = net.connect(node.port, node.host, function() {
                     buffer = (node.datatype == 'buffer')? new Buffer(0):"";
                     node.log("connected to "+node.host+":"+node.port);
-                    node.status({fill:"green",shape:"dot",text:"connected"},true);
+                    node.status({fill:"green",shape:"dot",text:"connected"});
                 });
                 connectionPool[id] = client;
 
@@ -198,11 +198,11 @@ module.exports = function(RED) {
 
             var setupTcpClient = function() {
                 node.log("connecting to "+node.host+":"+node.port);
-                node.status({fill:"grey",shape:"dot",text:"connecting"},true);
+                node.status({fill:"grey",shape:"dot",text:"connecting"});
                 client = net.connect(node.port, node.host, function() {
                     connected = true;
                     node.log("connected to "+node.host+":"+node.port);
-                    node.status({fill:"green",shape:"dot",text:"connected"},true);
+                    node.status({fill:"green",shape:"dot",text:"connected"});
                 });
                 client.on('error', function (err) {
                     node.log('error : '+err);
@@ -211,7 +211,7 @@ module.exports = function(RED) {
                 });
                 client.on('close', function() {
                     node.log("connection lost to "+node.host+":"+node.port);
-                    node.status({fill:"red",shape:"ring",text:"disconnected"},true);
+                    node.status({fill:"red",shape:"ring",text:"disconnected"});
                     connected = false;
                     client.destroy();
                     if (!node.closing) {
