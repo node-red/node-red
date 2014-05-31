@@ -15,6 +15,7 @@
  **/
 
 var util = require("util");
+var when = require("when");
 
 var credentials = {};
 var storage = null;
@@ -30,38 +31,6 @@ function getCredDef(type) {
 
 function isRegistered(type) {
     return getCredDef(type) != undefined;
-}
-
-function restPOST(type) {
-    redApp.post('/credentials/' + type + '/:id', function (req, res) {
-        var body = "";
-        req.on('data', function (chunk) {
-            body += chunk;
-        });
-        req.on('end', function () {
-            var nodeType = type;
-            var nodeID = req.params.id;
-
-            var newCreds = querystring.parse(body);
-            var credentials = Credentials.get(nodeID) || {};
-            var definition = getCredDef(nodeType);
-
-            for (var cred in definition) {
-                if (newCreds[cred] == undefined) {
-                    continue;
-                }
-                if (definition[cred].type == "password" && newCreds[cred] == '__PWRD__') {
-                    continue;
-                }
-                if (newCreds[cred] == '') {
-                    delete credentials[cred];
-                }
-                credentials[cred] = newCreds[cred];
-            }
-            Credentials.add(nodeID, credentials);
-            res.send(200);
-        });
-    });
 }
 
 function restGET(type) {
@@ -87,14 +56,6 @@ function restGET(type) {
         }
         res.json(sendCredentials);
 
-    });
-}
-function restDELETE(type) {
-    redApp.delete('/credentials/' + type + '/:id', function (req, res) {
-        var nodeID = req.params.id;
-
-        Credentials.delete(nodeID);
-        res.send(200);
     });
 }
 
@@ -142,8 +103,48 @@ module.exports = {
     register: function (type, definition) {
         var dashedType = type.replace(/\s+/g, '-');
         credentialsDef[dashedType] = definition;
-        restDELETE(dashedType);
         restGET(dashedType);
-        restPOST(dashedType);
+    },
+    /**
+     * Merge the new credentials with the existings one and save them into the file
+     * @param credentialsNodes - Credentials to be merged. format: [{id: NODE_ID, type: NODE_TYPE, creds: {CREDENTIALS}}, ...]
+     * @returns {promise}
+     */
+    merge: function (credentialsNodes) {
+        return when.promise(function (resolve, reject) {
+            for (var key in credentialsNodes) {
+                var nodeID = credentialsNodes[key].id;
+                var newCreds = credentialsNodes[key].creds;
+                var savedCredentials = Credentials.get(nodeID) || {};
+
+                if (!isRegistered(credentialsNodes[key].type)) {
+                    reject('Credential Type ' + credentialsNodes[key].type + ' is not registered.');
+                    return;
+                }
+
+                var definition = getCredDef(credentialsNodes[key].type);
+                for (var cred in definition) {
+                    if (newCreds[cred] == undefined) {
+                        continue;
+                    }
+                    if (definition[cred].type == "password" && newCreds[cred] == '__PWRD__') {
+                        continue;
+                    }
+                    if (0 === newCreds[cred].length || /^\s*$/.test(newCreds[cred])) {
+                        delete savedCredentials[cred];
+                        continue;
+                    }
+                    savedCredentials[cred] = newCreds[cred];
+                }
+                credentials[nodeID] = savedCredentials;
+
+            }
+            storage.saveCredentials(credentials).then(function () {
+                resolve();
+            }).otherwise(function(err) {
+                reject(err);
+            });
+
+        });
     }
 }
