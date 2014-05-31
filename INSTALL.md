@@ -55,17 +55,30 @@ by Node-RED itself. They can subsequently be installed by running:
 
     $ npm install ntwitter oauth
 
-## Running Node-RED as a service on Windows and OSx
+## Running Node-RED as a service on Linux, Windows and OSx
 
-To install Node-RED as a service install the following npm modules, for Windows run the followin in the root of your Node-RED install:
+To install Node-RED as a service install the following npm modules, for Linux 
+run:
+
+   npm install node-linux
+
+for Windows run the following in the root of your Node-RED install:
 
    npm install -g node-windows
    npm link node-windows
+
+This is slightly different to the other 2 because node-windows works best if installed globally.
 
 for OSx:
 
    npm install node-mac
 
-And then run:
+And then on Linux run:
   
+   sudo node install-service.js install
+
+or on Windows and OSx:
+
    node install-service.js install
+
+

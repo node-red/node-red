@@ -2,6 +2,8 @@ if (process.platform === 'win32') {
   var Service = require('node-windows').Service;
 } else if (process.platform === 'darwin') {
   var Service = require('node-mac').Service;
+} else if (process.platform === 'linux'{
+  var Service = require('node-linux').Service;
 } else {
   console.log('Not Windows or OSx');
   process.exit(1);
