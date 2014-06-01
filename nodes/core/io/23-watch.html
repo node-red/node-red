@@ -27,12 +27,13 @@
 </script>
 
 <script type="text/x-red" data-help-name="watch">
-    <p>Watches a file or directory for any changes.</p>
-    <p>You can enter a list of comma separated files, or directories if you like. You will need to put " around any that have spaces in.</p>
+    <p>Watches a directory or file for any changes.</p>
+    <p>You can enter a list of comma separated directories or files if you like. You will need to put " around any that have spaces in.</p>
     <p>On Windows you must use double slashes \\ in any directory names.</p>
     <p>The full filename of the file that actually changed is put into <b>msg.payload</b>, while a stringified version of the watched criteria is returned in <b>msg.topic</b>.</p>
     <p>msg.file contains just the short filename of the file that changed.</p>
     <p>Of course in Linux, <i>everything</i> could be a file and thus watched...</p>
+    <p><b>Note: </b>The directory or file must exist in order to be watched. If the file or directory get deleted it will no longer be monitored even if it gets re-created.</p>
 </script>
 
 <script type="text/javascript">
