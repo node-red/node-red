@@ -80,8 +80,8 @@ module.exports = function(RED) {
                 fs.readFile(filename,options,function(err,data) {
                     if (err) {
                         node.warn(err);
-						msg.err = err;
-						node.send(msg);
+					    msg.err = err;
+					    node.send(msg);
                     } else {
                         msg.payload = data;
                         node.send(msg);
