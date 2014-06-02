@@ -51,7 +51,7 @@ module.exports = {
 
     // By default, the Node-RED UI is available at http://localhost:1880/
     // The following property can be used to specifiy a different root path.
-    //httpAdminRoot: '/admin',
+    httpAdminRoot: '/admin',
 
     // You can protect the user interface with a userid and password by using the following property.
     // The password must be an md5 hash  eg.. 5f4dcc3b5aa765d61d8327deb882cf99 ('password')
