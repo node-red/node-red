@@ -827,6 +827,7 @@ RED.view = function() {
         if (mousedown_node == d && clickElapsed > 0 && clickElapsed < 750) {
             RED.editor.edit(d);
             clickElapsed = 0;
+            d3.event.stopPropagation();
             return;
         }
         portMouseUp(d, d._def.inputs > 0 ? 1 : 0, 0);

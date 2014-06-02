@@ -15,26 +15,34 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var notify = require("fs.notify");
     var fs = require("fs");
     var sep = require("path").sep;
-    
+
     function WatchNode(n) {
         RED.nodes.createNode(this,n);
-    
+
         this.files = n.files.split(",");
         for (var f in this.files) {
             this.files[f] = this.files[f].trim();
         }
         this.p = (this.files.length == 1) ? this.files[0] : JSON.stringify(this.files);
         var node = this;
+
         var notifications = new notify(node.files);
         notifications.on('change', function (file, event, path) {
-            if (fs.statSync(path).isDirectory()) { path = path + sep + file; }
-            var msg = { payload: path, topic: node.p, file: file};
+            try {
+                if (fs.statSync(path).isDirectory()) { path = path + sep + file; }
+            } catch(e) { }
+            var msg = { payload: path, topic: node.p, file: file };
             node.send(msg);
         });
-    
+
+        notifications.on('error', function (error, path) {
+            node.warn(error);
+        });
+
         this.close = function() {
             notifications.close();
         }

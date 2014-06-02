@@ -22,6 +22,7 @@ var comms = require("./comms");
 var log = require("./log");
 var fs = require("fs");
 var settings = null;
+var credentials = require("./nodes/credentials");
 
 var path = require('path');
 
@@ -51,6 +52,7 @@ var RED = {
     stop: server.stop,
     nodes: nodes,
     library: library,
+    credentials: credentials,
     events: events,
     log: log,
     comms:comms

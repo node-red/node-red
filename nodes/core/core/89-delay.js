@@ -16,6 +16,7 @@
 
 //Simple node to introduce a pause into a flow
 module.exports = function(RED) {
+    "use strict";
     function random(n) {
         var wait = n.randomFirst + (n.diff * Math.random());
         if (n.buffer.length > 0) {
@@ -25,15 +26,15 @@ module.exports = function(RED) {
             n.randomID = -1;
         }
     }
-    
+
     function DelayNode(n) {
         RED.nodes.createNode(this,n);
-    
+
         this.pauseType = n.pauseType;
         this.timeoutUnits = n.timeoutUnits;
         this.randomUnits = n.randomUnits;
         this.rateUnits = n.rateUnits;
-    
+
         if (n.timeoutUnits === "milliseconds") {
             this.timeout = n.timeout;
         } else if (n.timeoutUnits === "seconds") {
@@ -45,7 +46,7 @@ module.exports = function(RED) {
         } else if (n.timeoutUnits === "days") {
             this.timeout = n.timeout * (24 * 60 * 60 * 1000);
         }
-    
+
         if (n.rateUnits === "second") {
             this.rate = 1000/n.rate;
         } else if (n.rateUnits === "minute") {
@@ -55,7 +56,7 @@ module.exports = function(RED) {
         } else if (n.rateUnits === "day") {
             this.rate = (24 * 60 * 60 * 1000)/n.rate;
         }
-    
+
         if (n.randomUnits === "milliseconds") {
             this.randomFirst = n.randomFirst;
             this.randomLast = n.randomLast;
@@ -72,7 +73,7 @@ module.exports = function(RED) {
             this.randomFirst = n.randomFirst * (24 * 60 * 60 * 1000);
             this.randomLast = n.randomLast * (24 * 60 * 60 * 1000);
         }
-    
+
         this.diff = this.randomLast - this.randomFirst;
         this.name = n.name;
         this.idList = [];
@@ -82,7 +83,7 @@ module.exports = function(RED) {
         this.lastSent = Date.now();
         this.drop = n.drop;
         var node = this;
-    
+
         if (this.pauseType === "delay") {
             this.on("input", function(msg) {
                 var id;
@@ -92,19 +93,22 @@ module.exports = function(RED) {
                 }, node.timeout);
                 this.idList.push(id);
             });
-    
+
             this.on("close", function() {
                 for (var i=0; i<this.idList.length; i++ ) {
                     clearTimeout(this.idList[i]);
                 }
                 this.idList = [];
             });
-    
+
         } else if (this.pauseType === "rate") {
             this.on("input", function(msg) {
                 if (!node.drop) {
                     if ( node.intervalID !== -1) {
                         node.buffer.push(msg);
+                        if (node.buffer.length > 0) {
+                            node.status({text:node.buffer.length});
+                        }
                         if (node.buffer.length > 1000) {
                             node.warn(this.name + " buffer exceeded 1000 messages");
                         }
@@ -114,10 +118,12 @@ module.exports = function(RED) {
                             if (node.buffer.length === 0) {
                                 clearInterval(node.intervalID);
                                 node.intervalID = -1;
+                                node.status({text:""});
                             }
-        
+
                             if (node.buffer.length > 0) {
                                 node.send(node.buffer.shift());
+                                node.status({text:node.buffer.length});
                             }
                         },node.rate);
                     }
@@ -129,12 +135,12 @@ module.exports = function(RED) {
                     }
                 }
             });
-    
+
             this.on("close", function() {
                 clearInterval(this.intervalID);
                 this.buffer = [];
             });
-    
+
         } else if (this.pauseType === "random") {
             this.on("input",function(msg){
                 node.buffer.push(msg);
@@ -143,7 +149,7 @@ module.exports = function(RED) {
                     node.randomID = setTimeout(function() {random(node);},wait);
                 }
             });
-    
+
             this.on("close", function (){
                 if (this.randomID !== -1) {
                     clearTimeout(this.randomID);

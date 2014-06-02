@@ -36,7 +36,7 @@
           <option value="days">Days</option>
         </select>
     </div>
-    
+
     <div id="rate-details" class="form-row">
         <label for="node-input-rate"><i class="icon-time"></i> To</label>
         <input type="text" id="node-input-rate" placeholder="1" style="direction:rtl; width:30px !important">
@@ -54,7 +54,7 @@
     <div id="random-details" class="form-row">
         <label for="node-input-randomFirst"><i class="icon-time"></i> Between</label>
         <input type="text" id="node-input-randomFirst" placeholder="" style="directon:rtl; width:30px !important">
-		<label for="node-input-randomLast" style="width:20px"> & </label>
+        <label for="node-input-randomLast" style="width:20px"> & </label>
         <input type="text" id="node-input-randomLast" placeholder="" style="directon:rtl; width:30px !important">
         <select id="node-input-randomUnits" style="width:140px !important">
           <option value="milliseconds">Milliseconds</option>
@@ -64,12 +64,12 @@
           <option value="days">Days</option>
         </select>
     </div>
-    
+
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    
+
 </script>
 
 <!-- Next, some simple help text is provided for the node.                   -->
@@ -101,6 +101,7 @@
         label: function() {      // sets the default label contents
             if (this.pauseType == "delay") {
               var units = this.timeoutUnits ? this.timeoutUnits.charAt(0) : "s";
+              if (this.timeoutUnits == "milliseconds") { units = "ms"; }
               return this.name||"delay "+this.timeout+" " + units;
             } else if (this.pauseType == "rate") {
               var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
@@ -116,10 +117,10 @@
         oneditprepare: function() {
           $( "#node-input-timeout" ).spinner({min:1,max:60});
           $( "#node-input-rate" ).spinner({min:1});
-          
+
           $( "#node-input-randomFirst" ).spinner({min:0});
           $( "#node-input-randomLast" ).spinner({min:1});
-        
+
           if (this.pauseType == "delay") {
             $("#delay-details").show();
             $("#rate-details").hide();
@@ -129,23 +130,23 @@
             $("#rate-details").show();
             $("#random-details").hide();
           } else if (this.pauseType == "random") {
-        	$("#delay-details").hide();
+            $("#delay-details").hide();
             $("#rate-details").hide();
             $("#random-details").show();
           }
-          
+
           if (!this.timeoutUnits) {
             $("#node-input-timeoutUnits option").filter(function() {
-              return $(this).val() == 'seconds'; 
+              return $(this).val() == 'seconds';
             }).attr('selected', true);
           }
-          
+
           if (!this.randomUnits) {
-        	$("#node-input-randomUnits option").filter(function() {
-               return $(this).val() == 'seconds'; 
+            $("#node-input-randomUnits option").filter(function() {
+               return $(this).val() == 'seconds';
             }).attr('selected', true);
           }
-          
+
           $("#node-input-pauseType").on("change",function() {
             if (this.value == "delay") {
               $("#delay-details").show();

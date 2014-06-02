@@ -15,6 +15,7 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var operators = {
         'eq': function(a, b) { return a == b; },
         'neq': function(a, b) { return a != b; },
@@ -31,7 +32,7 @@ module.exports = function(RED) {
         'nnull': function(a) { return typeof a != "undefined"; },
         'else': function(a) { return a === true; }
     };
-    
+
     function SwitchNode(n) {
         RED.nodes.createNode(this, n);
         this.rules = n.rules;
@@ -39,7 +40,7 @@ module.exports = function(RED) {
         this.checkall = n.checkall || "true";
         var propertyParts = n.property.split("."),
             node = this;
-    
+
         for (var i=0; i<this.rules.length; i+=1) {
             var rule = this.rules[i];
             if (!isNaN(Number(rule.v))) {
@@ -47,7 +48,7 @@ module.exports = function(RED) {
                 rule.v2 = Number(rule.v2);
             }
         }
-    
+
         this.on('input', function (msg) {
             var onward = [];
             var prop = propertyParts.reduce(function (obj, i) {

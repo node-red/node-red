@@ -102,7 +102,7 @@
 <script type="text/x-red" data-template-name="mqtt-broker">
     <div class="form-row node-input-broker">
         <label for="node-config-input-broker"><i class="icon-bookmark"></i> Broker</label>
-        <input class="input-append-left" type="text" id="node-config-input-broker" placeholder="Broker" style="width: 40%;" >
+        <input class="input-append-left" type="text" id="node-config-input-broker" placeholder="localhost" style="width: 40%;" >
         <label for="node-config-input-port" style="margin-left: 10px; width: 35px; "> Port</label>
         <input type="text" id="node-config-input-port" placeholder="Port" style="width:45px">
     </div>
@@ -124,7 +124,7 @@
     RED.nodes.registerType('mqtt-broker',{
         category: 'config',
         defaults: {
-            broker: {value:"localhost",required:true},
+            broker: {value:"",required:true},
             port: {value:1883,required:true,validate:RED.validators.number()},
             clientid: { value:"" }
             //user -> credentials
@@ -132,6 +132,7 @@
 
         },
         label: function() {
+            if (this.broker == "") { this.broker = "localhost"; }
             return (this.clientid?this.clientid+"@":"")+this.broker+":"+this.port;
         },
         oneditprepare: function() {
@@ -144,10 +145,10 @@
                 } else {
                     $('#node-config-input-pass').val('');
                 }
-
             });
         },
         oneditsave: function() {
+            if (this.broker == "") { this.broker = "localhost"; }
             var newUser = $('#node-config-input-user').val();
             var newPass = $('#node-config-input-pass').val();
             var credentials = {};

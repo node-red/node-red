@@ -15,6 +15,7 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var util = require("util");
     var exec = require('child_process').exec;
     var fs =  require('fs');

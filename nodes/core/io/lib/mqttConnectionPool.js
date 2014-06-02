@@ -28,7 +28,7 @@ function matchTopic(ts,t) {
 }
 
 module.exports = {
-    get: function(broker,port,clientid,username,password) {
+    get: function(broker,port,clientid,username,password,will) {
         var id = "["+(username||"")+":"+(password||"")+"]["+(clientid||"")+"]@"+broker+":"+port;
         if (!connections[id]) {
             connections[id] = function() {
@@ -40,6 +40,7 @@ module.exports = {
                 options.clientId = clientid || 'mqtt_' + (1+Math.random()*4294967295).toString(16);
                 options.username = username;
                 options.password = password;
+                options.will = will;
                 var queue = [];
                 var subscriptions = [];
                 var connecting = false;
@@ -125,4 +126,3 @@ module.exports = {
         return connections[id];
     }
 };
-

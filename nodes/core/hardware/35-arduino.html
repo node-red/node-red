@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013 IBM Corp.
+  Copyright 2013,2014 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@
 
 <script type="text/x-red" data-help-name="arduino in">
     <p>Arduino input node. Connects to local Arduino and monitors the selected pin for changes. Uses <a href="http://firmata.org/" target="_new"><i>Firmata</i>.</a></p>
+    <p>The Arduino must be loaded with the Standard Firmata sketch available in the Arduino examples.</p>
     <p>You can select either Digital or Analogue input. Outputs the value read as <b>msg.payload</b> and the pin number as <b>msg.topic</b>.</p>
     <p>It only outputs on a change of value - fine for digital inputs, but you can get a lot of data from analogue pins which you must then handle.</p>
     <p>You can set the sample rate in ms from 20 to 65535.</p>
@@ -51,7 +52,7 @@
             name: {value:""},
             pin: {value:"",required:true},
             state: {value:"INPUT",required:true},
-            arduino: {type:"arduino-board",required:true}
+            arduino: {type:"arduino-board"}
         },
         inputs:0,
         outputs:1,
@@ -78,7 +79,7 @@
     </div>
     <div class="form-row">
         <label for="node-input-state"><i class="icon-wrench"></i> Type</label>
-        <select type="text" id="node-input-state" style="width: 150px;">
+        <select type="text" id="node-input-state" style="width: 200px;">
             <option value="OUTPUT">Digital (0/1)</option>
             <option value="PWM">Analogue (0-255)</option>
             <option value="SERVO">Servo (0-180)</option>
@@ -93,6 +94,7 @@
 
 <script type="text/x-red" data-help-name="arduino out">
     <p>Arduino output node. Connects to local Arduino and writes to the selected digital pin. Uses <a href="http://firmata.org/" target="_new"><i>Firmata</i>.</a></p>
+    <p>The Arduino must be loaded with the Standard Firmata sketch available in the Arduino examples.</p>
     <p>You can select Digital, Analogue (PWM) or Servo type outputs. Expects a numeric value in <b>msg.payload</b>. The pin number is set in the properties panel.</p>
 </script>
 
@@ -102,9 +104,9 @@
         color:"#3fadb5",
         defaults: {
             name: {value:""},
-            pin: {value:""},
+            pin: {value:"",required:true},
             state: {value:"",required:true},
-            arduino: {type:"arduino-board",required:true}
+            arduino: {type:"arduino-board"}
         },
         inputs:1,
         outputs:0,
@@ -122,29 +124,48 @@
 
 <script type="text/x-red" data-template-name="arduino-board">
     <div class="form-row">
-        <label for="node-config-input-device"><i class="icon-bullhorn"></i> Arduino Port</label>
-        <input type="text" id="node-config-input-device" placeholder="/dev/ttyUSB0" style="width:50%;">
+        <label for="node-config-input-device"><i class="icon-random"></i> Port</label>
+        <input type="text" id="node-config-input-device" style="width:60%;" placeholder="/dev/ttyUSB0"/>
+        <a id="node-config-lookup-serial" class="btn"><i id="node-config-lookup-serial-icon" class="icon icon-search"></i></a>
     </div>
-    <div class="form-row">
-        <label for="node-config-input-repeat"><i class="icon-repeat"></i> Sample (ms)</label>
-        <input type="text" id="node-config-input-repeat" placeholder="25">
-    </div>
-    <!-- <div class="form-row">
-        <label for="node-config-input-baud"><i class="icon-bullhorn"></i> Baudrate</label>
-        <input type="text" id="node-config-input-baud" placeholder="115200" style="width:50%;">
-    </div> -->
+    <div class="form-tips"><b>Tip:</b> Leave blank for auto detect on first serial port.</div>
 </script>
 
 <script type="text/javascript">
     RED.nodes.registerType('arduino-board',{
         category: 'config',
         defaults: {
-            //baud: {baud:"57600",required:true},
-            repeat: {value:"50",required:true,validate:RED.validators.number()},
-            device: {value:"",required:true}
+            device: {value:""}
         },
         label: function() {
             return this.device||"arduino";
+        },
+        oneditprepare: function() {
+            try {
+                $("#node-config-input-device").autocomplete( "destroy" );
+            } catch(err) { }
+            $("#node-config-lookup-serial").click(function() {
+                $("#node-config-lookup-serial-icon").removeClass('icon-search');
+                $("#node-config-lookup-serial-icon").addClass('spinner');
+                $("#node-config-lookup-serial").addClass('disabled');
+
+                $.getJSON('arduinoports',function(data) {
+                    $("#node-config-lookup-serial-icon").addClass('icon-search');
+                    $("#node-config-lookup-serial-icon").removeClass('spinner');
+                    $("#node-config-lookup-serial").removeClass('disabled');
+                    var ports = [];
+                    $.each(data, function(i, port){
+                        ports.push(port);
+                    });
+                    $("#node-config-input-device").autocomplete({
+                        source:ports,
+                        minLength:0,
+                        close: function( event, ui ) {
+                            $("#node-config-input-device").autocomplete( "destroy" );
+                        }
+                    }).autocomplete("search","");
+                });
+            });
         }
     });
 </script>

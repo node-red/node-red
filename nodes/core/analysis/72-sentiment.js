@@ -15,12 +15,13 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var sentiment = require('sentiment');
-    
+
     function SentimentNode(n) {
         RED.nodes.createNode(this,n);
         var node = this;
-    
+
         this.on("input", function(msg) {
             sentiment(msg.payload, msg.overrides || null, function (err, result) {
                 msg.sentiment = result;

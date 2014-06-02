@@ -15,51 +15,51 @@
  **/
 
 module.exports = function(RED) {
-    
+    "use strict";
     var ws = require("ws"),
         inspect = require("sys").inspect;
-    
+
     // A node red node that sets up a local websocket server
     function WebSocketListenerNode(n) {
         // Create a RED node
         RED.nodes.createNode(this,n);
-    
+
         var node = this;
-    
+
         // Store local copies of the node configuration (as defined in the .html)
         node.path = n.path;
         node.wholemsg = (n.wholemsg === "true");
-        
+
         node._inputNodes = [];    // collection of nodes that want to receive events
-    
+
         var path = RED.settings.httpNodeRoot || "/";
         path = path + (path.slice(-1) == "/" ? "":"/") + (node.path.charAt(0) == "/" ? node.path.substring(1) : node.path);
-    
+
         // Workaround https://github.com/einaros/ws/pull/253
         // Listen for 'newListener' events from RED.server
         node._serverListeners = {};
-    
+
         var storeListener = function(/*String*/event,/*function*/listener){
             if(event == "error" || event == "upgrade" || event == "listening"){
                 node._serverListeners[event] = listener;
             }
         }
-    
+
         node._clients = {};
-        
+
         RED.server.addListener('newListener',storeListener);
-    
+
         // Create a WebSocket Server
         node.server = new ws.Server({server:RED.server,path:path});
-    
+
         // Workaround https://github.com/einaros/ws/pull/253
         // Stop listening for new listener events
         RED.server.removeListener('newListener',storeListener);
-    
+
         node.server.on('connection', function(socket){
             var id = (1+Math.random()*4294967295).toString(16);
             node._clients[id] = socket;
-            
+
             socket.on('close',function() {
                 delete node._clients[id];
             });
@@ -70,7 +70,7 @@ module.exports = function(RED) {
                 node.warn("An error occured on the ws connection: "+inspect(err));
             });
         });
-    
+
         node.on("close", function() {
             // Workaround https://github.com/einaros/ws/pull/253
             // Remove listeners from RED.server
@@ -82,17 +82,17 @@ module.exports = function(RED) {
                 }
             }
             node._serverListeners = {};
-    
+
             node.server.close();
             node._inputNodes = [];
         });
     }
     RED.nodes.registerType("websocket-listener",WebSocketListenerNode);
-    
+
     WebSocketListenerNode.prototype.registerInputNode = function(/*Node*/handler){
         this._inputNodes.push(handler);
     }
-    
+
     WebSocketListenerNode.prototype.handleEvent = function(id,/*socket*/socket,/*String*/event,/*Object*/data,/*Object*/flags){
         var msg;
         if (this.wholemsg) {
@@ -103,25 +103,25 @@ module.exports = function(RED) {
             };
         }
         msg._session = {type:"websocket",id:id};
-        
+
         for (var i = 0; i < this._inputNodes.length; i++) {
             this._inputNodes[i].send(msg);
         };
     }
-    
+
     WebSocketListenerNode.prototype.broadcast = function(data){
         for(var i in this.server.clients){
             this.server.clients[i].send(data);
         };
     }
-    
+
     WebSocketListenerNode.prototype.send = function(id,data){
         var session = this._clients[id];
         if (session) {
             session.send(data);
         }
     }
-    
+
     function WebSocketInNode(n) {
         RED.nodes.createNode(this,n);
         this.server = n.server;
@@ -134,7 +134,7 @@ module.exports = function(RED) {
         }
     }
     RED.nodes.registerType("websocket in",WebSocketInNode);
-    
+
     function WebSocketOutNode(n) {
         RED.nodes.createNode(this,n);
         var node = this;

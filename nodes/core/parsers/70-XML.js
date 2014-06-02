@@ -15,10 +15,11 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var xml2js = require('xml2js');
     var parseString = xml2js.parseString;
     var builder = new xml2js.Builder({renderOpts:{pretty:false}});
-    
+
     function XMLNode(n) {
         RED.nodes.createNode(this,n);
         var node = this;

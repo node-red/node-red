@@ -15,6 +15,7 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     function RangeNode(n) {
         RED.nodes.createNode(this, n);
         this.action = n.action;
@@ -24,7 +25,7 @@ module.exports = function(RED) {
         this.minout = Number(n.minout);
         this.maxout = Number(n.maxout);
         var node = this;
-    
+
         this.on('input', function (msg) {
             var n = Number(msg.payload);
             if (!isNaN(n)) {

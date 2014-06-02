@@ -15,9 +15,10 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var irc = require("irc");
     var util = require("util");
-    
+
     // The Server Definition - this opens (and closes) the connection
     function IRCServerNode(n) {
         RED.nodes.createNode(this,n);
@@ -32,8 +33,8 @@ module.exports = function(RED) {
         });
     }
     RED.nodes.registerType("irc-server",IRCServerNode);
-    
-    
+
+
     // The Input Node
     function IrcInNode(n) {
         RED.nodes.createNode(this,n);
@@ -50,7 +51,7 @@ module.exports = function(RED) {
         }
         this.ircclient = this.serverConfig.ircclient;
         var node = this;
-    
+
         this.ircclient.addListener('message', function (from, to, message) {
             //util.log(from + ' => ' + to + ': ' + message);
             var msg = { "topic":from, "from":from, "to":to, "payload":message };
@@ -60,7 +61,7 @@ module.exports = function(RED) {
             var msg = { "topic":from, "from":from, "to":"PRIV", "payload":message };
             node.send([msg,null]);
         });
-    
+
         this.ircclient.addListener('join', function(channel, who) {
             var msg = { "payload": { "type":"join", "who":who, "channel":channel } };
             node.send([null,msg]);
@@ -90,11 +91,11 @@ module.exports = function(RED) {
             var msg = { "payload": { "type": "names", "channel": channel, "names": nicks} };
             node.send([null, msg]);
         });
-    
+
     }
     RED.nodes.registerType("irc in",IrcInNode);
-    
-    
+
+
     // The Output Node
     function IrcOutNode(n) {
         RED.nodes.createNode(this,n);
@@ -112,7 +113,7 @@ module.exports = function(RED) {
         }
         this.ircclient = this.serverConfig.ircclient;
         var node = this;
-    
+
         this.on("input", function(msg) {
             if (Object.prototype.toString.call( msg.raw ) === '[object Array]') {
                 var m = msg.raw;

@@ -137,7 +137,7 @@ Node.prototype.error = function(msg) {
 /**
  * status: { fill:"red|green", shape:"dot|ring", text:"blah" }
  */
-Node.prototype.status = function(status,retain) {
-    comms.publish("status/"+this.id,status,retain);
+Node.prototype.status = function(status) {
+    comms.publish("status/"+this.id,status,true);
 }
 module.exports = Node;

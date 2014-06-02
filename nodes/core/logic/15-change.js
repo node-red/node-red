@@ -15,6 +15,7 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     function ChangeNode(n) {
         RED.nodes.createNode(this, n);
         this.action = n.action;
@@ -34,7 +35,7 @@ module.exports = function(RED) {
             if (lastPart) { stem = stem[lastPart] = value; }
             return stem;
         };
-    
+
         this.on('input', function (msg) {
             if (node.action == "change") {
                 try {

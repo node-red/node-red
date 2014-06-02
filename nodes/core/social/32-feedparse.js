@@ -15,9 +15,10 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var FeedParser = require("feedparser");
     var request = require("request");
-    
+
     function FeedParseNode(n) {
         RED.nodes.createNode(this,n);
         this.url = n.url;
@@ -54,18 +55,17 @@ module.exports = function(RED) {
             };
             this.interval_id = setInterval(getFeed,node.interval);
             getFeed();
-    
+
         } else {
             this.error("Invalid url");
         }
     }
-    
+
     RED.nodes.registerType("feedparse",FeedParseNode);
-    
+
     FeedParseNode.prototype.close = function() {
         if (this.interval_id != null) {
             clearInterval(this.interval_id);
         }
     }
-}    
-
+}
