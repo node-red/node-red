@@ -80,11 +80,12 @@ module.exports = function(RED) {
             } else {
                 fs.readFile(filename,options,function(err,data) {
                     if (err) {
+                        msg.payload = err;
                         node.warn(err);
                     } else {
                         msg.payload = data;
-                        node.send(msg);
                     }
+                    node.send(msg);
                 });
             }
         });
