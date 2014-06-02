@@ -1,5 +1,5 @@
 /**
-* Copyright 2013 IBM Corp.
+* Copyright 2014 IBM Corp.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ if (process.platform === 'win32') {
   var Service = require('node-windows').Service;
 } else if (process.platform === 'darwin') {
   var Service = require('node-mac').Service;
-} else if (process.platform === 'linux'{
+} else if (process.platform === 'linux') {
   var Service = require('node-linux').Service;
 } else {
-  console.log('Not Windows or OSx');
+  console.log('Not Linux, Windows or OSx');
   process.exit(1);
 }
  
@@ -47,5 +47,5 @@ if (process.argv.length == 3) {
     svc.uninstall();
   }
 } else {
-  concole.log('Run with the command line argument of either install or uninstall');
+  console.log('Run with the command line argument of either install or uninstall');
 }
