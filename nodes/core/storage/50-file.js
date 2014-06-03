@@ -79,7 +79,7 @@ module.exports = function(RED) {
     
             var send_error = function(m,e){
                 node.warn(e);
-                m.res.statusCode =  "404";
+                m.statusCode =  "404";
                 m.err = e;
                 node.send(m);
             }
@@ -88,14 +88,18 @@ module.exports = function(RED) {
                 node.warn('No filename specified');
             }else if(node.setContentType){
                 if(fs.existsSync(filename)){
-                    msg.res.sendfile(filename);
-                }else{
-                    if(node.listFiles){
-                     msg.res.send(JSON.stringify(fs.readdirSync(node.folderpath)));
+                    if((fs.lstatSync(filename)).isFile()){
+                        msg.res.sendfile(filename);
                     }else{
-                    send_error(msg,{});                    
+                        if(node.listFiles){
+                         msg.res.send(JSON.stringify(fs.readdirSync(filename)));
+                        }else{
+                        send_error(msg,{err:"File Not Found"});                    
+                        }
                     }
-                }	
+                }else{
+                    send_error(msg,{err:"File Not Found"});     
+                }
 			} else {
                 fs.readFile(filename,options,function(err,data) {
                     if (err) {
