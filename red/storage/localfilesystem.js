@@ -181,7 +181,7 @@ var localfilesystem = {
         if (fs.existsSync(flowsFullPath)) {
             fs.renameSync(flowsFullPath,flowsPrev);
         }
-        return nodeFn.call(fs.writeFile, flowsFullPath, JSON.stringify(flows, null, 4));
+        return nodeFn.call(fs.writeFile, flowsFullPath, JSON.stringify(flows, null, '\t'));
     },
 
     getCredentials: function() {
