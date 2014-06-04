@@ -64,9 +64,11 @@ module.exports = function(RED) {
 
     function FileInNode(n) {
         RED.nodes.createNode(this,n);
-
+    
         this.filename = n.filename;
         this.format = n.format;
+		this.setContentType = n.setContentType;
+		this.listFiles = n.listFiles;
         var node = this;
         var options = {};
         if (this.format) {
@@ -74,18 +76,38 @@ module.exports = function(RED) {
         }
         this.on("input",function(msg) {
             var filename = msg.filename || this.filename;
-
+    
+            var send_error = function(m,e){
+                node.warn(e);
+                m.statusCode =  "404";
+                m.err = e;
+                node.send(m);
+            }
+        
             if (filename == "") {
                 node.warn('No filename specified');
-            } else {
+            }else if(node.setContentType){
+                if(fs.existsSync(filename)){
+                    if((fs.lstatSync(filename)).isFile()){
+                        msg.res.sendfile(filename);
+                    }else{
+                        if(node.listFiles){
+                         msg.res.send(JSON.stringify(fs.readdirSync(filename)));
+                        }else{
+                        send_error(msg,{err:"File Not Found"});                    
+                        }
+                    }
+                }else{
+                    send_error(msg,{err:"File Not Found"});     
+                }
+			} else {
                 fs.readFile(filename,options,function(err,data) {
                     if (err) {
-                        node.warn(err);
-                        msg.error = err;
+                        send_error(msg, err);
                     } else {
                         msg.payload = data;
+                        node.send(msg);
                     }
-                    node.send(msg);
                 });
             }
         });

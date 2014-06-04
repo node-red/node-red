@@ -55,11 +55,23 @@
             <option value="">a Buffer</option>
         </select>
     </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-listFiles" placeholder="Name" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-listFiles" style="width: 70%;">List Directory Contents?</label>
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-setContentType" placeholder="Name" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-setContentType" style="width: 70%;">Set Content Type?</label>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="file in">
     <p>Reads the specified file and sends the content as <b>msg.payload</b>.</p>
     <p>The filename can be overridden by the <code>filename</code> property of the incoming message.</p>
+    <p>If <code>List Directory Contents</code> is checked, then passing a filepath without a name will result in a directory listing.</p>
+    <p>If <code>Set Content Type</code> is checked, the server will set the <code>Content-Type</code> header.</p>
 </script>
 
 <script type="text/javascript">
@@ -90,6 +102,8 @@
             name: {value:""},
             filename: {value:""},
             format: {value:"utf8"},
+            listFiles: {value:false},
+            setContentType: {value:false}
         },
         color:"BurlyWood",
         inputs:1,
