@@ -123,6 +123,9 @@ module.exports = function(RED) {
                 if (typeof msg.payload == "object" && !Buffer.isBuffer(msg.payload)) {
                     msg.res.jsonp(statusCode,msg.payload);
                 } else {
+                    if (msg.res.get('content-length') == null) {
+                        msg.res.set('content-length', Buffer.byteLength(msg.payload));
+                    }
                     msg.res.send(statusCode,msg.payload);
                 }
             } else {
