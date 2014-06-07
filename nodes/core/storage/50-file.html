@@ -58,7 +58,7 @@
 </script>
 
 <script type="text/x-red" data-help-name="file in">
-    <p>Reads the specified file and sends the content as <b>msg.payload</b>.</p>
+    <p>Reads the specified file and sends the content as <b>msg.payload</b>, and the filename as <b>msg.filename</b>.</p>
     <p>The filename can be overridden by the <code>filename</code> property of the incoming message.</p>
 </script>
 
@@ -83,7 +83,7 @@
             return this.name?"node_label_italic":"";
         }
     });
-    
+
     RED.nodes.registerType('file in',{
         category: 'storage-input',
         defaults: {

@@ -83,6 +83,7 @@ module.exports = function(RED) {
                         node.warn(err);
                         msg.error = err;
                     } else {
+                        msg.filename = filename;
                         msg.payload = data;
                     }
                     node.send(msg);
