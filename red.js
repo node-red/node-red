@@ -82,6 +82,7 @@ if (settings.https) {
 } else {
     server = http.createServer(function(req,res){app(req,res);});
 }
+server.setMaxListeners(0);
 
 function formatRoot(root) {
     if (root[0] != "/") {
