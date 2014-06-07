@@ -15,19 +15,20 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var spawn = require('child_process').spawn;
     var exec = require('child_process').exec;
-    
+
     function ExecNode(n) {
         RED.nodes.createNode(this,n);
         this.cmd = n.command.trim();
         this.append = n.append.trim() || "";
         this.useSpawn = n.useSpawn;
-    
+
         var node = this;
         this.on("input", function(msg) {
             if (msg != null) {
-    
+                node.status({fill:"blue",shape:"dot"});
                 if (this.useSpawn == true) {
                     // make the extra args into an array
                     // then prepend with the msg.payload
@@ -51,12 +52,13 @@ module.exports = function(RED) {
                         ex.on('close', function (code) {
                             //console.log('[exec] result: ' + code);
                             msg.payload = code;
+                            node.status({});
                             node.send([null,null,msg]);
                         });
                     }
                     else { node.error("Spawn command must be just the command - no spaces or extra parameters"); }
                 }
-    
+
                 else {
                     var cl = node.cmd+" "+msg.payload+" "+node.append;
                     node.log(cl);
@@ -69,13 +71,14 @@ module.exports = function(RED) {
                             var msg3 = {payload:error};
                             //console.log('[exec] error: ' + error);
                         }
+                        node.status({});
                         node.send([msg,msg2,msg3]);
                     });
                 }
             }
-    
+
         });
     }
-    
+
     RED.nodes.registerType("exec",ExecNode);
 }
