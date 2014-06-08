@@ -15,7 +15,7 @@
  **/
 
 module.exports = function(RED) {
-
+    "use strict";
     var util = require("util");
     var http = require("follow-redirects").http;
     var https = require("follow-redirects").https;
@@ -153,6 +153,7 @@ module.exports = function(RED) {
                 url = nodeUrl;
             }
             var method = (msg.method||nodeMethod).toUpperCase();
+            node.log(method+" : "+url);
             var opts = urllib.parse(url);
             opts.method = method;
             opts.headers = {};

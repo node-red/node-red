@@ -16,8 +16,8 @@
 
 <script type="text/x-red" data-template-name="http in">
     <div class="form-row">
-        <label for="node-input-method"><i class="icon-tasks"></i> Method</label>
-        <select type="text" id="node-input-method" style="width: 150px;">
+        <label for="node-input-method"><i class="fa fa-tasks"></i> Method</label>
+        <select type="text" id="node-input-method" style="width:72%;">
         <option value="get">GET</option>
         <option value="post">POST</option>
         <option value="put">PUT</option>
@@ -25,68 +25,68 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-topic"><i class="icon-globe"></i> url</label>
+        <label for="node-input-topic"><i class="fa fa-globe"></i> url</label>
         <input type="text" id="node-input-url" placeholder="/url">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div id="node-input-tip" class="form-tips">The url will be relative to <code><span id="node-input-path"></span></code>.</div>
 </script>
 
 <script type="text/x-red" data-help-name="http in">
-	<p>Provides an input node for http requests, allowing the creation of simple web services.</p>
-	<p>The resulting message has the following properties:
-	    <ul>
-	        <li>msg.req : <a href="http://expressjs.com/api.html#req">http request</a></li>
-	        <li>msg.res : <a href="http://expressjs.com/api.html#res">http response</a></li>
-	    </ul>
-	</p>
-	<p>For POST/PUT requests, the body is available under <code>msg.req.body</code>. This
-	   uses the <a href="http://expressjs.com/api.html#bodyParser">Express bodyParser middleware</a> to parse the content to a JSON object.
+    <p>Provides an input node for http requests, allowing the creation of simple web services.</p>
+    <p>The resulting message has the following properties:
+        <ul>
+            <li>msg.req : <a href="http://expressjs.com/api.html#req">http request</a></li>
+            <li>msg.res : <a href="http://expressjs.com/api.html#res">http response</a></li>
+        </ul>
     </p>
-	<p>
-	   By default, this expects the body of the request to be url encoded:
-	   <pre>foo=bar&amp;this=that</pre>
+    <p>For POST/PUT requests, the body is available under <code>msg.req.body</code>. This
+       uses the <a href="http://expressjs.com/api.html#bodyParser">Express bodyParser middleware</a> to parse the content to a JSON object.
     </p>
-	<p>
-	   To send JSON encoded data to the node, the content-type header of the request must be set to
-	   <code>application/json</code>.
-	</p>
-	<p>
-	   <b>Note: </b>This node does not send any response to the http request. This should be done with
-	   a subsequent HTTP Response node, or Function node.
-	   In the case of a Function node, the <a href="http://expressjs.com/api.html#res">Express response documentation</a>
-	   describes how this should be done. For example:
-	   <pre>msg.res.send(200, 'Thanks for the request ');<br/>return msg;</pre>
+    <p>
+       By default, this expects the body of the request to be url encoded:
+       <pre>foo=bar&amp;this=that</pre>
+    </p>
+    <p>
+       To send JSON encoded data to the node, the content-type header of the request must be set to
+       <code>application/json</code>.
+    </p>
+    <p>
+       <b>Note: </b>This node does not send any response to the http request. This should be done with
+       a subsequent HTTP Response node, or Function node.
+       In the case of a Function node, the <a href="http://expressjs.com/api.html#res">Express response documentation</a>
+       describes how this should be done. For example:
+       <pre>msg.res.send(200, 'Thanks for the request ');<br/>return msg;</pre>
     </p>
 
 </script>
 
 <script type="text/x-red" data-template-name="http response">
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-tips">The messages sent to this node <b>must</b> originate from an <i>http input</i> node</div>
 </script>
 
 <script type="text/x-red" data-help-name="http response">
-	<p>Sends responses back to http requests received from an HTTP Input node.</p>
-	<p>The response can be customised using the following message properties:</p>
-	<ul>
-	    <li><code>payload</code> is sent as the body of the reponse</li>
-	    <li><code>statusCode</code>, if set, is used as the response status code (default: 200)</li>
-	    <li><code>headers</code>, if set, should be an object containing field/value
-	    pairs to be added as response headers.</li>
-	</ul>
+    <p>Sends responses back to http requests received from an HTTP Input node.</p>
+    <p>The response can be customised using the following message properties:</p>
+    <ul>
+        <li><code>payload</code> is sent as the body of the reponse</li>
+        <li><code>statusCode</code>, if set, is used as the response status code (default: 200)</li>
+        <li><code>headers</code>, if set, should be an object containing field/value
+        pairs to be added as response headers.</li>
+    </ul>
 </script>
 
 <script type="text/x-red" data-template-name="http request">
     <div class="form-row">
-        <label for="node-input-method"><i class="icon-tasks"></i> Method</label>
-        <select type="text" id="node-input-method" style="width: 150px;">
+        <label for="node-input-method"><i class="fa fa-tasks"></i> Method</label>
+        <select type="text" id="node-input-method" style="width:72%;">
         <option value="GET">GET</option>
         <option value="POST">POST</option>
         <option value="PUT">PUT</option>
@@ -94,7 +94,7 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-url"><i class="icon-tasks"></i> URL</label>
+        <label for="node-input-url"><i class="fa fa-globe"></i> URL</label>
         <input type="text" id="node-input-url" placeholder="http://">
     </div>
     <div class="form-row">
@@ -103,40 +103,40 @@
         <label for="node-input-useAuth" style="width: 70%;">Use basic authentication?</label>
     </div>
     <div class="form-row node-input-useAuth-row">
-        <label for="node-config-input-user"><i class="icon-user"></i> Username</label>
+        <label for="node-config-input-user"><i class="fa fa-user"></i> Username</label>
         <input type="text" id="node-config-input-user">
     </div>
     <div class="form-row node-input-useAuth-row">
-        <label for="node-config-input-pass"><i class="icon-lock"></i> Password</label>
+        <label for="node-config-input-pass"><i class="fa fa-lock"></i> Password</label>
         <input type="password" id="node-config-input-pass">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="http request">
-	<p>Provides a node for making http requests.</p>
-	<p>The URL and HTTP method can be configured in the node, but also
-	   overridden by the incoming message:
-	<ul>
-	    <li><code>url</code>, if set, is used as the url of the request</li>
-	    <li><code>method</code>, if set, is used as the HTTP method of the request. Must be one of <code>GET</code>, <code>PUT</code>, <code>POST</code> or <code>DELETE</code> (default: GET)</li>
-	    <li><code>headers</code>, if set, should be an object containing field/value
-	    pairs to be added as request headers</li>
-	    <li><code>payload</code> is sent as the body of the request</li>
-	</ul>
-	<p>When configured within the node, the URL property can contain <a href="http://mustache.github.io/mustache.5.html" target="_new">mustache-style</a> tags. These allow the
-	url to be constructed using values of the incoming message. For example, if the url is set to
-	<code>example.com/{{topic}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.</p>
-	<p>
-	The output message contains the following properties:
-	<ul>
-	    <li><code>payload</code> is the body of the response</li>
-	    <li><code>statusCode</code> is the status code of the response, or the error code if the request could not be completed</li>
-	    <li><code>headers</code> is an object containing the response headers</li>
-	</ul>
+    <p>Provides a node for making http requests.</p>
+    <p>The URL and HTTP method can be configured in the node, but also
+       overridden by the incoming message:
+    <ul>
+        <li><code>url</code>, if set, is used as the url of the request</li>
+        <li><code>method</code>, if set, is used as the HTTP method of the request. Must be one of <code>GET</code>, <code>PUT</code>, <code>POST</code> or <code>DELETE</code> (default: GET)</li>
+        <li><code>headers</code>, if set, should be an object containing field/value
+        pairs to be added as request headers</li>
+        <li><code>payload</code> is sent as the body of the request</li>
+    </ul>
+    <p>When configured within the node, the URL property can contain <a href="http://mustache.github.io/mustache.5.html" target="_new">mustache-style</a> tags. These allow the
+    url to be constructed using values of the incoming message. For example, if the url is set to
+    <code>example.com/{{topic}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.</p>
+    <p>
+    The output message contains the following properties:
+    <ul>
+        <li><code>payload</code> is the body of the response</li>
+        <li><code>statusCode</code> is the status code of the response, or the error code if the request could not be completed</li>
+        <li><code>headers</code> is an object containing the response headers</li>
+    </ul>
 </script>
 
 <script type="text/javascript">
@@ -177,7 +177,7 @@
         }
 
     });
-    
+
     RED.nodes.registerType('http response',{
         category: 'output',
         color:"rgb(231, 231, 174)",
@@ -195,7 +195,7 @@
             return this.name?"node_label_italic":"";
         }
     });
-    
+
     RED.nodes.registerType('http request',{
         category: 'function',
         color:"rgb(231, 231, 174)",
@@ -239,7 +239,7 @@
                 }
 
             });
-            
+
             $("#node-input-useAuth").change(function() {
                 if ($(this).is(":checked")) {
                     $(".node-input-useAuth-row").show();
@@ -253,12 +253,12 @@
             var oldPass = $('#node-config-input-pass').data("v");
             var newUser = $('#node-config-input-user').val();
             var newPass = $('#node-config-input-pass').val();
-            
+
             if (!$("#node-input-useAuth").is(":checked")) {
                 newUser = "";
                 newPass = "";
             }
-            
+
             if (oldUser != newUser || oldPass != newPass) {
                 if (newUser == "" && newPass == "") {
                     $.ajax({
@@ -284,9 +284,3 @@
         }
     });
 </script>
-
-
-
-
-
-
