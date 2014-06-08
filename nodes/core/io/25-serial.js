@@ -118,7 +118,8 @@ module.exports = function(RED) {
             this.port.on('data', function(msg) {
                 // single char buffer
                 if ((node.serialConfig.newline == 0)||(node.serialConfig.newline == "")) {
-                    node.send({"payload": new Buffer([msg])});
+                    if (node.serialConfig.bin !== "bin") { node.send({"payload": String.fromCharCode(msg)}); }
+                    else { node.send({"payload": new Buffer([msg])}); }
                 }
                 else {
                     // do the timer thing
