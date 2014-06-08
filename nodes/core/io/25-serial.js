@@ -117,7 +117,7 @@ module.exports = function(RED) {
             var splitc = new Buffer(node.serialConfig.newline.replace("\\n","\n").replace("\\r","\r").replace("\\t","\t").replace("\\e","\e").replace("\\f","\f").replace("\\0","\0"));
             this.port.on('data', function(msg) {
                 // single char buffer
-                if (node.serialConfig.newline == 0) {
+                if ((node.serialConfig.newline == 0)||(node.serialConfig.newline == "")) {
                     node.send({"payload": new Buffer([msg])});
                 }
                 else {
