@@ -15,20 +15,20 @@
 -->
 
 <script type="text/x-red" data-template-name="comment">
-	<div class="form-row">
-		<label for="node-input-name"><i class="icon-tag"></i> Comment</label>
-		<input type="text" id="node-input-name" placeholder="Comment">
-	</div>
-	<div class="form-row">
-        <label for="node-input-info" style="width: 100% !important;"><i class="icon-file"></i> More</label>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-comment"></i> Comment</label>
+        <input type="text" id="node-input-name" placeholder="Comment">
+    </div>
+    <div class="form-row">
+        <label for="node-input-info" style="width: 100% !important;"><i class="fa fa-comments"></i> More</label>
         <input type="hidden" id="node-input-info" autofocus="autofocus">
         <div style="height: 250px;" class="node-text-editor" id="node-input-info-editor" ></div>
     </div>
-    <div class="form-tips">Tip: this isn't meant for War and Peace - but useful notes can be kept here.</div>
+    <div class="form-tips">Tip: this isn't meant for "War and Peace" - but useful notes can be kept here.</div>
 </script>
 
 <script type="text/x-red" data-help-name="comment">
-	<p>Simple comment block.</p>
+    <p>Simple comment block.</p>
 </script>
 
 <script type="text/javascript">
@@ -41,7 +41,7 @@
         },
         inputs:0,
         outputs:0,
-        icon: "file.png",
+        icon: "comment.png",
         label: function() {
             return this.name||"";
         },
