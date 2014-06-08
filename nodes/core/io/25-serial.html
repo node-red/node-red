@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013 IBM Corp.
+  Copyright 2013,2014 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 <script type="text/x-red" data-template-name="serial in">
     <div class="form-row node-input-serial">
-        <label for="node-input-serial"><i class="icon-bullhorn"></i> Serial Port</label>
+        <label for="node-input-serial"><i class="fa fa-random"></i> Serial Port</label>
         <input type="text" id="node-input-serial">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="serial in">
     <p>Reads data from a local serial port.</p>
-    <p>Keeps reading from the serial port until it sees \n (default) or the character(s) requested. Only sets <b>msg.payload</b>.</p>
+    <p>In ascii mode keeps reading from the serial port until it sees \n (default) or the character(s) requested. Outputs <b>msg.payload</b> as a <i>string</i>.</p>
+    <p>In binary mode can either output buffers of a fixed size, or wait for a timeout and then send whatever has accumlated. Outputs <b>msg.payload</b> as a <i>buffer</i>.</p>
 </script>
 
 <script type="text/javascript">
@@ -53,11 +54,11 @@
 
 <script type="text/x-red" data-template-name="serial out">
     <div class="form-row node-input-serial">
-        <label for="node-input-serial"><i class="icon-bullhorn"></i> Serial Port</label>
+        <label for="node-input-serial"><i class="fa fa-random"></i> Serial Port</label>
         <input type="text" id="node-input-serial">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
@@ -93,13 +94,13 @@
 
 <script type="text/x-red" data-template-name="serial-port">
     <div class="form-row">
-        <label for="node-config-input-serialport"><i class="icon-bullhorn"></i> Serial Port</label>
+        <label for="node-config-input-serialport"><i class="fa fa-random"></i> Serial Port</label>
         <input type="text" id="node-config-input-serialport" style="width:60%;" placeholder="/dev/ttyUSB0"/>
-        <a id="node-config-lookup-serial" class="btn"><i id="node-config-lookup-serial-icon" class="icon icon-search"></i></a>
+        <a id="node-config-lookup-serial" class="btn"><i id="node-config-lookup-serial-icon" class="fa fa-search"></i></a>
     </div>
     <div class="form-row">
         <table><tr>
-            <td width = "102px"><i class="icon-wrench"></i> Settings</td>
+            <td width = "102px"><i class="fa fa-wrench"></i> Settings</td>
             <td width = "100px">Baud Rate</td>
             <td width = "80px">Data Bits</td>
             <td width = "80px">Parity</td>
@@ -146,19 +147,66 @@
             <option value="1">1</option>
         </select>
     </td>
-    </tr></table>
+    </tr></table><br/>
+
     <div class="form-row">
-        <label for="node-config-input-newline"><i class="icon-text-width"></i> New line</label>
-        <input type="text" id="node-config-input-newline"  style="width: 50px;">
+        <label for="node-config-input-out"><i class="fa fa-cut"></i> Split input</label>
+        <select type="text" id="node-config-input-out" style="width:52%;">
+            <option value="char">when character received is</option>
+            <option value="time">after a fixed timeout of</option>
+            <option value="count">a fixed number of characters</option>
+        </select>
+        <input type="text" id="node-config-input-newline"  style="width:50px;">
+        <span id="node-units"></span>
     </div>
+
     <div class="form-row">
-        <label for="node-config-input-addchar">&nbsp;</label>
-        <select type="text" id="node-config-input-addchar" style="width: 70%;">
-            <option value="false">Don't add 'New Line' to any output messages</option>
-            <option value="true">Add 'New line' to output messages</option>
+        <label for="node-config-input-bin"><i class="fa fa-sign-in"></i> and deliver</label>
+        <select type="text" id="node-config-input-bin" style="width: 77%;">
+            <option value="false">ascii strings</option>
+            <option value="bin">binary buffers</option>
         </select>
     </div>
-    <div class="form-tips">Tip: the new line character is used to split the input into separate messages. It can also be added to every message sent out to the serial port.</div>
+    <br/>
+    <div class="form-row" id="node-config-addchar">
+        <label for="node-config-input-addchar"><i class="fa fa-sign-out"></i> On output</label>
+        <select type="text" id="node-config-input-addchar" style="width: 77%;">
+            <option value="false">don't add 'split' character to output messages</option>
+            <option value="true">add 'split' character to output messages</option>
+        </select>
+    </div>
+    <div class="form-tips" id="tip-split">Tip: the "Split on" character is used to split the input into separate messages. It can also be added to every message sent out to the serial port.</div>
+    <div class="form-tips" id="tip-bin" hidden>Tip: In timeout mode timeout starts from arrival of first character.</div>
+    <script>
+        var previous = null;
+        $("#node-config-input-out").on('focus', function () { previous = this.value; }).change(function() {
+            if (previous == null) { previous = $("#node-config-input-out").val(); }
+            if ($("#node-config-input-out").val() == "char") {
+                if (previous != "char") { $("#node-config-input-newline").val("\\n"); }
+                $("#node-units").text("");
+                $("#node-config-addchar").show();
+                $("#tip-split").show();
+                $("#tip-bin").hide();
+            }
+            else if ($("#node-config-input-out").val() == "time") {
+                if (previous != "time") { $("#node-config-input-newline").val("0"); }
+                $("#node-units").text("ms");
+                $("#node-config-addchar").hide();
+                $("#node-config-input-addchar").val("false");
+                $("#tip-split").hide();
+                $("#tip-bin").show();
+            }
+            else {
+                if (previous != "count") { $("#node-config-input-newline").val("12"); }
+                $("#node-units").text("chars");
+                $("#node-config-addchar").hide();
+                $("#node-config-input-addchar").val("false");
+                $("#tip-split").hide();
+                $("#tip-bin").hide();
+            }
+        });
+
+    </script>
 </script>
 
 <script type="text/javascript">
@@ -172,6 +220,8 @@
             parity: {value:"none",required:true},
             stopbits: {value:1,required:true},
             newline: {value:"\\n"},
+            bin: {value:""},
+            out: {value:""},
             addchar: {value:false}
         },
         label: function() {
@@ -187,13 +237,12 @@
             } catch(err) {
             }
             $("#node-config-lookup-serial").click(function() {
-                $("#node-config-lookup-serial-icon").removeClass('icon-search');
-                $("#node-config-lookup-serial-icon").addClass('spinner');
+                //$("#node-config-lookup-serial-icon").removeClass('fa fa-search');
+                //$("#node-config-lookup-serial-icon").addClass('fa fa-spinner');
                 $("#node-config-lookup-serial").addClass('disabled');
-
                 $.getJSON('serialports',function(data) {
-                    $("#node-config-lookup-serial-icon").addClass('icon-search');
-                    $("#node-config-lookup-serial-icon").removeClass('spinner');
+                    //$("#node-config-lookup-serial-icon").addClass('fa fa-search');
+                    //$("#node-config-lookup-serial-icon").removeClass('fa fa-spinner');
                     $("#node-config-lookup-serial").removeClass('disabled');
                     var ports = [];
                     $.each(data, function(i, port){
