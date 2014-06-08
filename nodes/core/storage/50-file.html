@@ -45,15 +45,19 @@
 
 <script type="text/x-red" data-template-name="file in">
     <div class="form-row">
-         <label for="node-input-filename"><i class="icon-file"></i> Filename</label>
+         <label for="node-input-filename"><i class="fa fa-file"></i> Filename</label>
          <input type="text" id="node-input-filename" placeholder="Filename">
     </div>
     <div class="form-row">
-        <label>Output as</label>
+        <label for="node-input-format"><i class="fa fa-sign-out"></i> Output as</label>
         <select id="node-input-format">
             <option value="utf8">a utf8 string</option>
             <option value="">a Buffer</option>
         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
 
