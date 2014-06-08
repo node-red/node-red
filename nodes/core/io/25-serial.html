@@ -27,8 +27,12 @@
 
 <script type="text/x-red" data-help-name="serial in">
     <p>Reads data from a local serial port.</p>
-    <p>In ascii mode keeps reading from the serial port until it sees \n (default) or the character(s) requested. Outputs <b>msg.payload</b> as a <i>string</i>.</p>
-    <p>In binary mode can either output buffers of a fixed size, or wait for a timeout and then send whatever has accumlated. Outputs <b>msg.payload</b> as a <i>buffer</i>.</p>
+    <p>Can either <ul><li>wait for a "split" character (default \n)</li>
+    <li>Wait for a timeout in milliseconds for the first character received</li>
+    <li>Wait to fill a fixed sized buffer</li>
+    </ul>
+    <p>It then outputs <b>msg.payload</b> as either a UTF8 ascii string or a binary Buffer object.</p>
+    <p>If no split character is specified, or a timeout or buffer size of 0, then a stream of single characters is sent - again either as ascii chars or size 1 binary buffers.</p>
 </script>
 
 <script type="text/javascript">
