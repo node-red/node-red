@@ -152,6 +152,7 @@ module.exports = function(RED) {
                         if (err) {
                             node.error("udp : "+err);
                         }
+                        message = null;
                     });
                 }
             }

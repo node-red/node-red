@@ -135,6 +135,7 @@ module.exports = function(RED) {
                                 buf.copy(m,0,0,i+1);
                                 if (node.serialConfig.bin !== "bin") { m = m.toString(); }
                                 node.send({"payload": m});
+                                m = null;
                             }, node.serialConfig.newline);
                             i = 0;
                             buf[0] = msg;
@@ -149,6 +150,7 @@ module.exports = function(RED) {
                             buf.copy(m,0,0,i-1);
                             if (node.serialConfig.bin !== "bin") { m = m.toString(); }
                             node.send({"payload":m});
+                            m = null;
                             i = 0;
                         }
                     }
@@ -161,6 +163,7 @@ module.exports = function(RED) {
                             buf.copy(m,0,0,i);
                             if (node.serialConfig.bin !== "bin") { m = m.toString(); }
                             node.send({"payload":m});
+                            m = null;
                             i = 0;
                         }
                     }
