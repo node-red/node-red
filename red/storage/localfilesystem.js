@@ -181,7 +181,16 @@ var localfilesystem = {
         if (fs.existsSync(flowsFullPath)) {
             fs.renameSync(flowsFullPath,flowsPrev);
         }
-        return nodeFn.call(fs.writeFile, flowsFullPath, JSON.stringify(flows));
+        
+        var flowData;
+        
+        if (settings.flowFilePretty) {
+            flowData = JSON.stringify(flows,null,4);
+        } else {
+            flowData = JSON.stringify(flows);
+        }
+        
+        return nodeFn.call(fs.writeFile, flowsFullPath, flowData);
     },
 
     getCredentials: function() {
@@ -207,7 +216,14 @@ var localfilesystem = {
     },
 
     saveCredentials: function(credentials) {
-        return nodeFn.call(fs.writeFile, credentialsFile, JSON.stringify(credentials))
+        var credentialData;
+        if (settings.flowFilePretty) {
+            credentialData = JSON.stringify(credentials,null,4);
+        } else {
+            credentialData = JSON.stringify(credentials);
+        }
+        
+        return nodeFn.call(fs.writeFile, credentialsFile, credentialData)
     },
 
     getAllFlows: function() {

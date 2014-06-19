@@ -15,7 +15,7 @@
  **/
 
 module.exports = function(RED) {
-
+    "use strict";
     var util = require("util");
     var http = require("follow-redirects").http;
     var https = require("follow-redirects").https;
@@ -123,6 +123,9 @@ module.exports = function(RED) {
                 if (typeof msg.payload == "object" && !Buffer.isBuffer(msg.payload)) {
                     msg.res.jsonp(statusCode,msg.payload);
                 } else {
+                    if (msg.res.get('content-length') == null) {
+                        msg.res.set('content-length', Buffer.byteLength(msg.payload));
+                    }
                     msg.res.send(statusCode,msg.payload);
                 }
             } else {
@@ -150,6 +153,7 @@ module.exports = function(RED) {
                 url = nodeUrl;
             }
             var method = (msg.method||nodeMethod).toUpperCase();
+            //node.log(method+" : "+url);
             var opts = urllib.parse(url);
             opts.method = method;
             opts.headers = {};

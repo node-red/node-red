@@ -69,7 +69,7 @@ module.exports = function(RED) {
 
         this.on("input", function(msg) {
             if (msg != null) {
-                node.status({fill:"blue",shape:"dot",text:"sending"},true);
+                node.status({fill:"blue",shape:"dot",text:"sending"});
                 if (smtpTransport) {
                     smtpTransport.sendMail({
                         from: node.userid, // sender address
@@ -79,10 +79,10 @@ module.exports = function(RED) {
                     }, function(error, response) {
                         if (error) {
                             node.error(error);
-                            node.status({fill:"red",shape:"ring",text:"post error"},true);
+                            node.status({fill:"red",shape:"ring",text:"post error"});
                         } else {
                             node.log("Message sent: " + response.message);
-                            node.status({},true);
+                            node.status({});
                         }
                     });
                 }
@@ -135,7 +135,7 @@ module.exports = function(RED) {
 
         this.on("input", function(msg) {
             imap.once('ready', function() {
-                node.status({fill:"blue",shape:"dot",text:"fetching"},true);
+                node.status({fill:"blue",shape:"dot",text:"fetching"});
                 var pay = {};
                 imap.openBox('INBOX', true, function(err, box) {
                     if (box.messages.total > 0) {
@@ -173,7 +173,7 @@ module.exports = function(RED) {
                         });
                         f.on('error', function(err) {
                             node.warn('fetch error: ' + err);
-                            node.status({fill:"red",shape:"ring",text:"fetch error"},true);
+                            node.status({fill:"red",shape:"ring",text:"fetch error"});
                         });
                         f.on('end', function() {
                             if (JSON.stringify(pay) !== oldmail) {
@@ -182,26 +182,26 @@ module.exports = function(RED) {
                                 node.log('received new email: '+pay.topic);
                             }
                             else { node.log('duplicate not sent: '+pay.topic); }
-                            //node.status({fill:"green",shape:"dot",text:"ok"},true);
-                            node.status({},true);
+                            //node.status({fill:"green",shape:"dot",text:"ok"});
+                            node.status({});
                             imap.end();
                         });
                     }
                     else {
                         node.log("you have achieved inbox zero");
-                        //node.status({fill:"green",shape:"dot",text:"ok"},true);
-                        node.status({},true);
+                        //node.status({fill:"green",shape:"dot",text:"ok"});
+                        node.status({});
                         imap.end();
                     }
                 });
             });
-            node.status({fill:"grey",shape:"dot",text:"connecting"},true);
+            node.status({fill:"grey",shape:"dot",text:"connecting"});
             imap.connect();
         });
 
         imap.on('error', function(err) {
             node.log(err);
-            node.status({fill:"red",shape:"ring",text:"connect error"},true);
+            node.status({fill:"red",shape:"ring",text:"connect error"});
         });
 
         this.on("error", function(err) {

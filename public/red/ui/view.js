@@ -750,7 +750,7 @@ RED.view = function() {
         document.body.appendChild(sp);
         var w = sp.offsetWidth;
         document.body.removeChild(sp);
-        return 35+w;
+        return 50+w;
     }
 
     function resetMouseVars() {
@@ -1032,22 +1032,68 @@ RED.view = function() {
                    //node.append("rect").attr("class", "node-gradient-bottom").attr("rx", 6).attr("ry", 6).attr("height",30).attr("stroke","none").attr("fill","url(#gradient-bottom)").style("pointer-events","none");
 
                     if (d._def.icon) {
-                        var icon = node.append("image")
+                        
+                        var icon_group = node.append("g")
+                            .attr("class","node_icon_group")
+                            .attr("x",0).attr("y",0);
+                        
+                        var icon_shade = icon_group.append("rect")
+                            .attr("x",0).attr("y",0)
+                            .attr("class","node_icon_shade")
+                            .attr("width","30")
+                            .attr("stroke","none")
+                            .attr("fill","#000")
+                            .attr("fill-opacity","0.05")
+                            .attr("height",function(d){return Math.min(50,d.h-4);});
+                            
+                        var icon = icon_group.append("image")
                             .attr("xlink:href","icons/"+d._def.icon)
                             .attr("class","node_icon")
-                            .attr("x",0).attr("y",function(d){return (d.h-Math.min(50,d.h))/2;})
-                            .attr("width","15")
-                            .attr("height", function(d){return Math.min(50,d.h);});
+                            .attr("x",0)
+                            .attr("width","30")
+                            .attr("height","30");
+                            
+                        var icon_shade_border = icon_group.append("path")
+                            .attr("d",function(d) { return "M 30 1 l 0 "+(d.h-2)})
+                            .attr("class","node_icon_shade_border")
+                            .attr("stroke-opacity","0.1")
+                            .attr("stroke","#000")
+                            .attr("stroke-width","2");
 
-                        if (d._def.align) {
-                            icon.attr('class','node_icon node_icon_'+d._def.align);
+                        if ("right" == d._def.align) {
+                            icon_group.attr('class','node_icon_group node_icon_group_'+d._def.align);
+                            icon_shade_border.attr("d",function(d) { return "M 0 1 l 0 "+(d.h-2)})
+                            //icon.attr('class','node_icon node_icon_'+d._def.align);
+                            //icon.attr('class','node_icon_shade node_icon_shade_'+d._def.align);
+                            //icon.attr('class','node_icon_shade_border node_icon_shade_border_'+d._def.align);
                         }
-                        if (d._def.inputs > 0) {
-                            icon.attr("x",8);
+                        
+                        //if (d._def.inputs > 0 && d._def.align == null) {
+                        //    icon_shade.attr("width",35);
+                        //    icon.attr("transform","translate(5,0)");
+                        //    icon_shade_border.attr("transform","translate(5,0)");
+                        //}
+                        //if (d._def.outputs > 0 && "right" == d._def.align) {
+                        //    icon_shade.attr("width",35); //icon.attr("x",5);
+                        //}
+                        
+                        var img = new Image();
+                        img.src = "icons/"+d._def.icon;
+                        img.onload = function() {
+                            icon.attr("width",Math.min(img.width,30));
+                            icon.attr("height",Math.min(img.height,30));
+                            icon.attr("x",15-Math.min(img.width,30)/2);
+                            //if ("right" == d._def.align) {
+                            //    icon.attr("x",function(d){return d.w-img.width-1-(d.outputs>0?5:0);});
+                            //    icon_shade.attr("x",function(d){return d.w-30});
+                            //    icon_shade_border.attr("d",function(d){return "M "+(d.w-30)+" 1 l 0 "+(d.h-2);});
+                            //}
                         }
-                        icon.style("pointer-events","none");
+                        
+                        //icon.style("pointer-events","none");
+                        icon_group.style("pointer-events","none");
                     }
-                    var text = node.append('svg:text').attr('class','node_label').attr('x', 23).attr('dy', '.35em').attr('text-anchor','start');
+                    var text = node.append('svg:text').attr('class','node_label').attr('x', 38).attr('dy', '.35em').attr('text-anchor','start');
                     if (d._def.align) {
                         text.attr('class','node_label node_label_'+d._def.align);
                         text.attr('text-anchor','end');
@@ -1073,7 +1119,7 @@ RED.view = function() {
                     //node.append("circle").attr({"class":"centerDot","cx":0,"cy":0,"r":5});
 
                     if (d._def.inputs > 0) {
-                        text.attr("x",30);
+                        text.attr("x",38);
                         node.append("rect").attr("class","port port_input").attr("rx",3).attr("ry",3).attr("x",-5).attr("width",10).attr("height",10)
                             .on("mousedown",function(d){portMouseDown(d,1,0);})
                             .on("touchstart",function(d){portMouseDown(d,1,0);})
@@ -1109,9 +1155,13 @@ RED.view = function() {
                         //thisNode.selectAll(".node-gradient-top").attr("width",function(d){return d.w});
                         //thisNode.selectAll(".node-gradient-bottom").attr("width",function(d){return d.w}).attr("y",function(d){return d.h-30});
 
-                        thisNode.selectAll(".node_label_right").attr('x', function(d){return d.w-23-(d.outputs>0?5:0);});
-                        thisNode.selectAll(".node_icon_right").attr("x",function(d){return d.w-16-(d.outputs>0?5:0);});
+                        thisNode.selectAll(".node_icon_group_right").attr('transform', function(d){return "translate("+(d.w-30)+",0)"});
+                        thisNode.selectAll(".node_label_right").attr('x', function(d){return d.w-38});
+                        //thisNode.selectAll(".node_icon_right").attr("x",function(d){return d.w-d3.select(this).attr("width")-1-(d.outputs>0?5:0);});
+                        //thisNode.selectAll(".node_icon_shade_right").attr("x",function(d){return d.w-30;});
+                        //thisNode.selectAll(".node_icon_shade_border_right").attr("d",function(d){return "M "+(d.w-30)+" 1 l 0 "+(d.h-2)});
 
+                        
                         var numOutputs = d.outputs;
                         var y = (d.h/2)-((numOutputs-1)/2)*13;
                         d.ports = d.ports || d3.range(numOutputs);
@@ -1163,8 +1213,12 @@ RED.view = function() {
                                 var port = d3.select(this);
                                 port.attr("y",function(d){return (d.h/2)-5;})
                         });
-                        thisNode.selectAll(".node_icon").attr("height",function(d){return Math.min(50,d.h);}).attr("y",function(d){return (d.h-Math.min(50,d.h))/2;});
 
+                        thisNode.selectAll(".node_icon").attr("y",function(d){return (d.h-d3.select(this).attr("height"))/2;});
+                        thisNode.selectAll(".node_icon_shade").attr("height",function(d){return d.h;});
+                        thisNode.selectAll(".node_icon_shade_border").attr("d",function(d){ return "M "+(("right" == d._def.align) ?0:30)+" 1 l 0 "+(d.h-2)});
+
+                        
                         thisNode.selectAll('.node_right_button').attr("transform",function(d){
                                 var x = d.w-6;
                                 if (d._def.button.toggle && !d[d._def.button.toggle]) {

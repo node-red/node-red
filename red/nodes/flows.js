@@ -124,9 +124,13 @@ var flowNodes = module.exports = {
             events.emit("nodes-stopping");
             var promises = [];
             for (var n in nodes) {
-                var p = nodes[n].close();
-                if (p) {
-                    promises.push(p);
+                try {
+                    var p = nodes[n].close();
+                    if (p) {
+                        promises.push(p);
+                    }
+                } catch(err) {
+                    nodes[n].error(err);
                 }
             }
             when.settle(promises).then(function() {

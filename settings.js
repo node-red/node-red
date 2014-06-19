@@ -41,6 +41,10 @@ module.exports = {
     // The file containing the flows. If not set, it defaults to flows_<hostname>.json
     //flowFile: 'flows.json',
 
+    // To enabled pretty-printing of the flow within the flow file, set the following
+    //  property to true:
+    //flowFilePretty: true,
+    
     // By default, all user data is stored in the Node-RED install directory. To
     // use a different location, the following property can be used
     //userDir: '/home/nol/.node-red/',
