@@ -78,6 +78,8 @@ function start() {
 function publish(topic,data,retain) {
     if (retain) {
         retained[topic] = data;
+    } else {
+        delete retained[topic];
     }
     lastSentTime = Date.now();
     activeConnections.forEach(function(conn) {
