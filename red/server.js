@@ -47,16 +47,25 @@ function createServer(_server,_settings) {
     app.post("/flows",
         express.json(),
         function(req,res) {
-            var flows = req.body;
-            redNodes.setFlows(flows).then(function() {
-                res.json(204);
-            }).otherwise(function(err) {
-                util.log("[red] Error saving flows : "+err);
-                res.send(500,err.message);
+            var flows = req.body.nodes;
+            var creds = req.body.creds;
+            redNodes.mergeCredentials(creds).then(function () {
+                redNodes.setFlows(flows).then(function () {
+                    res.json(204);
+                }).otherwise(function (err) {
+                    util.log("[red] Error saving flows : " + err);
+                    res.send(500, err.message);
+                });
+            }).otherwise(function (err) {
+                util.log("[red] Error saving credentials : " + err);
+                res.send(500, err.message);
             });
+
+
         },
         function(error,req,res,next) {
-            res.send(400,"Invalid Flow");
+            res.send(400,"Invalid Flow: "+ error);
+            console.error(error.stack);
         }
     );
 }

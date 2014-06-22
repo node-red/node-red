@@ -228,20 +228,42 @@ RED.nodes = function() {
         return nns;
     }
 
+    function convertNodeCreds(node) {
+        if (node._creds) {
+            if (jQuery.isEmptyObject(node._creds.send)) {
+                return null;
+            }
+            var credInfo = {'id': node.id, 'type': node.type, 'creds': node._creds.send};
+            return credInfo;
+        }
+        return null;
+    }
+
     //TODO: rename this (createCompleteNodeSet)
     function createCompleteNodeSet() {
+        var creds = [];
         var nns = [];
         for (var i in workspaces) {
             nns.push(workspaces[i]);
         }
         for (var i in configNodes) {
-            nns.push(convertNode(configNodes[i]));
+            var node = configNodes[i];
+            nns.push(convertNode(node));
+            var credInfo = convertNodeCreds(node);
+            if (credInfo != null) {
+                creds.push(credInfo);
+            }
+
         }
         for (var i in nodes) {
             var node = nodes[i];
             nns.push(convertNode(node));
+            var credInfo = convertNodeCreds(node);
+            if (credInfo != null) {
+                creds.push(credInfo);
+            }
         }
-        return nns;
+        return {'nodes': nns, 'creds': creds};
     }
 
     function importNodes(newNodesObj,createNewIds) {

@@ -92,6 +92,14 @@ var RED = function() {
                         node.dirty = true;
                         node.changed = false;
                     }
+                    if(node._creds) {
+                        delete node._creds;
+                    }
+                });
+                RED.nodes.eachConfig(function (confNode) {
+                    if (confNode._creds) {
+                        delete confNode._creds;
+                    }
                 });
                 // Once deployed, cannot undo back to a clean state
                 RED.history.markAllDirty();
