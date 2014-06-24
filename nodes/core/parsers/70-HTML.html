@@ -1,0 +1,73 @@
+<!--
+  Copyright 2014 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="html">
+    <div class="form-row">
+        <label for="node-input-tag"><i class="fa fa-filter"></i> Select</label>
+        <input type="text" id="node-input-tag" placeholder="h1">
+    </div>
+    <div class="form-row">
+        <label for="node-input-ret"><i class="fa fa-sign-out"></i> Output</label>
+        <select id="node-input-ret" style="width:73% !important">
+            <option value="html">the html content of the elements</option>
+            <option value="text">only the text content of the elements</option>
+            <!-- <option value="attr">an object of any attributes</option> -->
+            <!-- <option value="val">return the value from a form element</option> -->
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-as">&nbsp;</label>
+        <select id="node-input-as" style="width:73% !important">
+            <option value="single">as a single message containing an array</option>
+            <option value="multi">as multiple messages, one for each element</option>
+        </select>
+    </div>
+    <br/>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-tips">Tip: The <b>Select</b> value is a <a href="http://api.jquery.com/category/selectors/" target="_new"><i><u>jQuery</u></i></a> style selector.</div>
+</script>
+
+<script type="text/x-red" data-help-name="html">
+    <p>Extracts elements from an html document held in <b>msg.payload</b> using a selector.</p>
+    <p>The selector uses the <a href="http://api.jquery.com/category/selectors/" target="_new">jQuery syntax</a>.</p>
+    <p>The result is either a single message with a payload containing an array of the matched elements, or multiple
+       messages that each contain a matched element.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('html',{
+        category: 'function',
+        color:"#DEBD5C",
+        defaults: {
+            tag: {value:""},
+            ret: {value:"html"},
+            as: {value:"single"},
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "jq.png",
+        label: function() {
+            return this.name||this.tag||"html";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
