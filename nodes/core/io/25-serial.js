@@ -114,7 +114,13 @@ module.exports = function(RED) {
                 this.serialConfig.stopbits,
                 this.serialConfig.newline
             );
-            var splitc = new Buffer(node.serialConfig.newline.replace("\\n","\n").replace("\\r","\r").replace("\\t","\t").replace("\\e","\e").replace("\\f","\f").replace("\\0","\0"));
+
+            if (node.serialConfig.newline.substr(0,2) == "0x") {
+                var splitc = new Buffer([parseInt(node.serialConfig.newline)]);
+            } else {
+                var splitc = new Buffer(node.serialConfig.newline.replace("\\n","\n").replace("\\r","\r").replace("\\t","\t").replace("\\e","\e").replace("\\f","\f").replace("\\0","\0"));
+            }
+
             this.port.on('data', function(msg) {
                 // single char buffer
                 if ((node.serialConfig.newline == 0)||(node.serialConfig.newline == "")) {
@@ -145,9 +151,9 @@ module.exports = function(RED) {
                     else if (node.serialConfig.out === "count") {
                         buf[i] = msg;
                         i += 1;
-                        if ( i >= Number(node.serialConfig.newline)) {
+                        if ( i >= parseInt(node.serialConfig.newline)) {
                             var m = new Buffer(i);
-                            buf.copy(m,0,0,i-1);
+                            buf.copy(m,0,0,i);
                             if (node.serialConfig.bin !== "bin") { m = m.toString(); }
                             node.send({"payload":m});
                             m = null;
