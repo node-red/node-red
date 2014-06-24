@@ -22,25 +22,40 @@ RED.editor = function() {
         return  'credentials/' + dashedType + "/" + nodeID;
     }
 
-    function sendCredentials(node,credDefinition,prefix) {
-        var credentials = {};
+ /**
+     * Assign the credentials to the node
+     * @param node - the node containing the credentials
+     * @param credDefinition - definition of the credentials
+     * @param prefix - prefix of the input fields
+     */
+    function manageNodeCredentials(node, credDefinition, prefix) {
+        if(!node._creds) {
+             node._creds = {server: {}, send: {}, input: {}};
+        }
+
         for (var cred in credDefinition) {
             var input = $("#" + prefix + '-' + cred);
             var value = input.val();
-            if (credDefinition[cred].type == 'password' && value == '__PWRD__') {
-                continue;
+            if (credDefinition[cred].type == 'password') {
+                if(value != '') {
+                    node._creds.input['has' + cred] = true;
+                    if (value == '__PWRD__') {
+                        continue;
+                    }
+                } else {
+                    node._creds.input['has' + cred] = false;
+                }
             }
-            credentials[cred] = value;
-        }
-        node._def._creds = credentials;
-        $.ajax({
-            url: getCredentialsURL(node.type, node.id),
-            type: 'POST',
-            data: credentials,
-            success: function (result) {
+            if (node._creds.server[cred] != value) {
+                node._creds.send[cred] = value;
+            } else {
+                delete node._creds.send[cred];
             }
-        });
+            if (credDefinition[cred].type != 'password') {
+                node._creds.input[cred] = value;
+            }
 
+        }
     }
 
     
@@ -222,7 +237,7 @@ RED.editor = function() {
                             if (editing_node._def.credentials) {
                                 var prefix = 'node-input';
                                 var credDefinition = editing_node._def.credentials;
-                                sendCredentials(editing_node,credDefinition,prefix);
+                                manageNodeCredentials(editing_node,credDefinition,prefix);
                             }
 
 
@@ -358,6 +373,32 @@ RED.editor = function() {
     }
 
     /**
+     * Assign the value to each credential field
+     * @param node
+     * @param credDef
+     * @param credData
+     * @param prefix
+     */
+    function populateCredentialsInputs(node, credDef, credData, prefix) {
+        for (var cred in credDef) {
+            if (credDef[cred].type == 'password') {
+                if (credData['has' + cred]) {
+                    $('#' + prefix + '-' + cred).val('__PWRD__');
+                }
+                else {
+                    $('#' + prefix + '-' + cred).val('');
+                }
+            } else {
+                preparePropertyEditor(credData, cred, prefix);
+            }
+            attachPropertyChangeHandler(node, credDef, cred, prefix);
+            for (var cred in credDef) {
+                $("#" + prefix + "-" + cred).change();
+            }
+        }
+    }
+
+    /**
      * Prepare all of the editor dialog fields
      * @param node - the node being edited
      * @param definition - the node definition
@@ -373,25 +414,16 @@ RED.editor = function() {
             attachPropertyChangeHandler(node,definition.defaults,d,prefix);
         }
         if (definition.credentials) {
-
-            $.getJSON(getCredentialsURL(node.type, node.id), function (data) {
-                for (var cred in definition.credentials) {
-                    if (definition.credentials[cred].type == 'password') {
-                        if (data['has' + cred]) {
-                            $('#' + prefix + '-' + cred).val('__PWRD__');
-                        }
-                        else {
-                            $('#' + prefix + '-' + cred).val('');
-                        }
-                    } else {
-                        preparePropertyEditor(data, cred, prefix);
-                    }
-                    attachPropertyChangeHandler(node, definition.credentials, cred, prefix);
-                    for (var cred in definition.credentials) {
-                        $("#" + prefix + "-" + cred).change();
-                    }
-                }
-            });
+            if (node._creds) {
+                populateCredentialsInputs(node, definition.credentials, node._creds.input, prefix);
+            } else {
+                node._creds = {server: {}, send: {}, input: {}};
+                $.getJSON(getCredentialsURL(node.type, node.id), function (data) {
+                    node._creds.server = data;
+                    node._creds.input = jQuery.extend({}, data);
+                    populateCredentialsInputs(node, definition.credentials, node._creds.input, prefix);
+                });
+            }
         }
         if (definition.oneditprepare) {
             definition.oneditprepare.call(node);
@@ -449,14 +481,6 @@ RED.editor = function() {
                             var configNode = RED.nodes.node(configId);
                             var configTypeDef = RED.nodes.getType(configType);
 
-                            if (configTypeDef.credentials) {
-                                $.ajax({
-                                    url: getCredentialsURL(configType, configId),
-                                    type: 'DELETE',
-                                    success: function (result) {
-                                    }
-                                });
-                            }
                             if (configTypeDef.ondelete) {
                                 configTypeDef.ondelete.call(RED.nodes.node(configId));
                             }
@@ -546,7 +570,7 @@ RED.editor = function() {
                             updateConfigNodeSelect(configProperty,configType,configId);
                         }
                         if (configTypeDef.credentials) {
-                            sendCredentials(configNode,configTypeDef.credentials,"node-config-input");
+                            manageNodeCredentials(configNode,configTypeDef.credentials,"node-config-input");
                         }
                         if (configTypeDef.oneditsave) {
                             configTypeDef.oneditsave.call(RED.nodes.node(configId));
