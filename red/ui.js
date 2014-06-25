@@ -41,15 +41,24 @@ function setupUI(settings) {
         }
     });
     
+    var iconCache = {};
+    //TODO: create a default icon
+    var defaultIcon = path.resolve(__dirname + '/../public/icons/arrow-in.png');
+    
     app.get("/icons/:icon",function(req,res) {
-        for (var p in icon_paths) {
-            if (fs.existsSync(icon_paths[p]+'/'+req.params.icon)) {
-                res.sendfile(icon_paths[p]+'/'+req.params.icon);
-                return;
+        if (iconCache[req.params.icon]) {
+            res.sendfile(iconCache[req.params.icon]);
+        } else { 
+            for (var p in icon_paths) {
+                var iconPath = path.join(icon_paths[p],req.params.icon);
+                if (fs.existsSync(iconPath)) {
+                    res.sendfile(iconPath);
+                    iconCache[req.params.icon] = iconPath;
+                    return;
+                }
             }
+            res.sendfile(defaultIcon);
         }
-        //TODO: create a default icon
-        res.sendfile(path.resolve(__dirname + '/../public/icons/arrow-in.png'));
     });
     
     app.get("/settings", function(req,res) {

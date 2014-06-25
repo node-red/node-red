@@ -88,8 +88,16 @@ function loadNode(nodeDir, nodeFn, nodeLabel) {
 function loadNodesFromModule(moduleDir,pkg) {
     var nodes = pkg['node-red'].nodes||{};
     var promises = [];
+    var iconDirs = [];
     for (var n in nodes) {
         promises.push(loadNode(moduleDir,nodes[n],pkg.name+":"+n));
+        var iconDir = path.join(moduleDir,path.dirname(nodes[n]),"icons");
+        if (iconDirs.indexOf(iconDir) == -1) {
+            if (fs.existsSync(iconDir)) {
+                events.emit("node-icon-dir",iconDir);
+                iconDirs.push(iconDir);
+            };
+        }
     }
     return promises;
 }
