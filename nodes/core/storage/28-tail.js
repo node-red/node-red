@@ -32,7 +32,7 @@ module.exports = function(RED) {
             var msg = {topic:node.filename};
             if (node.split) {
                 var strings = data.toString().split("\n");
-                for (s in strings) {
+                for (var s in strings) {
                     if (strings[s] != "") {
                         msg.payload = strings[s];
                         node.send(msg);
