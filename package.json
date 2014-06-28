@@ -46,6 +46,7 @@
         "grunt": "0.4.4",
         "grunt-cli": "0.1.13",
         "grunt-simple-mocha": "0.4.0",
+        "grunt-contrib-jshint": "0.10.0",
         "mocha": "1.18.2",
         "should": "3.3.1",
         "sinon": "1.9.1"
