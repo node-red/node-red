@@ -20,12 +20,12 @@ RED.palette = function() {
     var core = ['input', 'output', 'function', 'social', 'storage', 'analysis', 'advanced'];
     
     function createCategoryContainer(category){
-        console.log(category);
+
         $("#palette-container").append('\
-               <div class="palette-category">\
-              <div id="header-'+category+'" class="palette-header"><i class="expanded icon-chevron-down"></i><span>'+category+'</span></div>\
-              <div class="palette-content" id="palette-base-category-'+category+'"></div>\
-              </div>');
+            <div class="palette-category">\
+            <div id="header-'+category+'" class="palette-header"><i class="expanded icon-chevron-down"></i><span>'+category+'</span></div>\
+            <div class="palette-content" id="palette-base-category-'+category+'"></div>\
+            </div>');
           
     }
     
