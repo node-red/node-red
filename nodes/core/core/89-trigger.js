@@ -28,9 +28,9 @@ module.exports = function(RED) {
         this.duration = n.duration || 250;
         if (this.duration <= 0) { this.duration = 0; }
         else {
-            if (this.units == "s") this.duration = this.duration * 1000;
-            if (this.units == "min") this.duration = this.duration * 1000 * 60;
-            if (this.units == "hr") this.duration = this.duration * 1000 *60 * 60;
+            if (this.units == "s") { this.duration = this.duration * 1000; }
+            if (this.units == "min") { this.duration = this.duration * 1000 * 60; }
+            if (this.units == "hr") { this.duration = this.duration * 1000 *60 * 60; }
         }
         this.op1Templated = this.op1.indexOf("{{") != -1;
         this.op2Templated = this.op2.indexOf("{{") != -1;
@@ -64,7 +64,7 @@ module.exports = function(RED) {
                     else if (node.op1Templated) { msg.payload = mustache.render(node.op1,msg); }
                     else { msg.payload = node.op1; }
                     if (node.op1type !== "nul") { node.send(msg); }
-                    if (node.duration == 0) { tout = "infinite"; }
+                    if (node.duration === 0) { tout = "infinite"; }
                     else {
                         tout = setTimeout(function() {
                             msg.payload = m2;

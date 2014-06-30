@@ -29,13 +29,13 @@ module.exports = function(RED) {
         this.on("input", function(msg) {
             if (msg != null) {
                 node.status({fill:"blue",shape:"dot"});
-                if (this.useSpawn == true) {
+                if (this.useSpawn === true) {
                     // make the extra args into an array
                     // then prepend with the msg.payload
                     if (typeof(msg.payload !== "string")) { msg.payload = msg.payload.toString(); }
                     var arg = [];
                     if (node.append.length > 0) { arg = node.append.split(","); }
-                    if (msg.payload.trim() != "") { arg.unshift(msg.payload); }
+                    if (msg.payload.trim() !== "") { arg.unshift(msg.payload); }
                     node.log(node.cmd+" ["+arg+"]");
                     if (node.cmd.indexOf(" ") == -1) {
                         var ex = spawn(node.cmd,arg);
@@ -65,10 +65,11 @@ module.exports = function(RED) {
                     var child = exec(cl, function (error, stdout, stderr) {
                         msg.payload = stdout;
                         var msg2 = {payload:stderr};
+                        var msg3 = null;
                         //console.log('[exec] stdout: ' + stdout);
                         //console.log('[exec] stderr: ' + stderr);
                         if (error !== null) {
-                            var msg3 = {payload:error};
+                            msg3 = {payload:error};
                             //console.log('[exec] error: ' + error);
                         }
                         node.status({});
