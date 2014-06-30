@@ -27,20 +27,20 @@ module.exports = function(RED) {
             if (msg.hasOwnProperty("payload")) {
                 if (typeof msg.payload == "object") { // convert to csv
                     try {
-                        var o = "";
-                        for (var i in node.template) {
-                            if (msg.payload.hasOwnProperty(node.template[i])) {
-                                if (msg.payload[node.template[i]].indexOf(node.sep) != -1) {
-                                    o += node.quo + msg.payload[node.template[i]] + node.quo + node.sep;
+                        var ou = "";
+                        for (var t in node.template) {
+                            if (msg.payload.hasOwnProperty(node.template[t])) {
+                                if (msg.payload[node.template[t]].indexOf(node.sep) != -1) {
+                                    ou += node.quo + msg.payload[node.template[t]] + node.quo + node.sep;
                                 }
-                                else if (msg.payload[node.template[i]].indexOf(node.quo) != -1) {
-                                    msg.payload[node.template[i]] = msg.payload[node.template[i]].replace(/"/g, '""');
-                                    o += node.quo + msg.payload[node.template[i]] + node.quo + node.sep;
+                                else if (msg.payload[node.template[t]].indexOf(node.quo) != -1) {
+                                    msg.payload[node.template[t]] = msg.payload[node.template[t]].replace(/"/g, '""');
+                                    ou += node.quo + msg.payload[node.template[t]] + node.quo + node.sep;
                                 }
-                                else { o += msg.payload[node.template[i]] + node.sep; }
+                                else { ou += msg.payload[node.template[t]] + node.sep; }
                             }
                         }
-                        msg.payload = o.slice(0,-1);
+                        msg.payload = ou.slice(0,-1);
                         node.send(msg);
                     }
                     catch(e) { node.log(e); }
@@ -57,7 +57,7 @@ module.exports = function(RED) {
                                 if (msg.payload[i-1] === node.quo) { k[j] += '\"'; }
                             }
                             else if ((msg.payload[i] === node.sep) && f) {
-                                if ( node.template[j] && (node.template[j] != "") ) { o[node.template[j]] = k[j]; }
+                                if ( node.template[j] && (node.template[j] !== "") ) { o[node.template[j]] = k[j]; }
                                 j += 1;
                                 k[j] = "";
                             }
@@ -65,7 +65,7 @@ module.exports = function(RED) {
                                 k[j] += msg.payload[i];
                             }
                         }
-                        if ( node.template[j] && (node.template[j] != "") ) { o[node.template[j]] = k[j]; }
+                        if ( node.template[j] && (node.template[j] !== "") ) { o[node.template[j]] = k[j]; }
                         msg.payload = o;
                         node.send(msg);
                     }

@@ -15,6 +15,7 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var cheerio = require('cheerio');
 
     function CheerioNode(n) {
@@ -46,7 +47,7 @@ module.exports = function(RED) {
                         //if (node.ret === "val")  { pay.push( $(this).val() ); }
                     }
                 });
-                if ((node.as === "single") && (pay.length != 0)) {
+                if ((node.as === "single") && (pay.length !== 0)) {
                     msg.payload = pay;
                     node.send(msg);
                 }
