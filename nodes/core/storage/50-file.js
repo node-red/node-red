@@ -28,7 +28,7 @@ module.exports = function(RED) {
         this.on("input",function(msg) {
             var filename = msg.filename || this.filename;
 
-            if (filename == "") {
+            if (filename === "") {
                 node.warn('No filename specified');
             } else if (typeof msg.payload != "undefined") {
                 var data = msg.payload;
@@ -39,20 +39,20 @@ module.exports = function(RED) {
                 }
                 if (msg.hasOwnProperty('delete')) {
                     fs.unlink(filename, function (err) {
-                        if (err) node.warn('Failed to delete file : '+err);
+                        if (err) { node.warn('Failed to delete file : '+err); }
                         //console.log('Deleted file",filename);
                     });
                 }
                 else {
                     if (this.overwriteFile) {
                         fs.writeFile(filename, data, function (err) {
-                            if (err) node.warn('Failed to write to file : '+err);
+                            if (err) { node.warn('Failed to write to file : '+err); }
                             //console.log('Message written to file',filename);
                         });
                     }
                     else {
                         fs.appendFile(filename, data, function (err) {
-                            if (err) node.warn('Failed to append to file : '+err);
+                            if (err) { node.warn('Failed to append to file : '+err); }
                             //console.log('Message appended to file',filename);
                         });
                     }
@@ -75,7 +75,7 @@ module.exports = function(RED) {
         this.on("input",function(msg) {
             var filename = msg.filename || this.filename;
 
-            if (filename == "") {
+            if (filename === "") {
                 node.warn('No filename specified');
             } else {
                 fs.readFile(filename,options,function(err,data) {

@@ -16,7 +16,7 @@
 
 module.exports = function(RED) {
     "use strict";
-    var notify = require("fs.notify");
+    var Notify = require("fs.notify");
     var fs = require("fs");
     var sep = require("path").sep;
 
@@ -30,7 +30,7 @@ module.exports = function(RED) {
         this.p = (this.files.length == 1) ? this.files[0] : JSON.stringify(this.files);
         var node = this;
 
-        var notifications = new notify(node.files);
+        var notifications = new Notify(node.files);
         notifications.on('change', function (file, event, path) {
             try {
                 if (fs.statSync(path).isDirectory()) { path = path + sep + file; }
