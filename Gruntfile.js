@@ -44,11 +44,31 @@ module.exports = function(grunt) {
                 },
                 all: [
                     'Gruntfile.js',
-                    'public/red/**/*.js',
                     'red.js',
                     'red/**/*.js',
                     'nodes/**/*.js',
+                    'public/red/**/*.js'
                 ],
+                
+                core: {
+                    files: {
+                        src: [
+                            'Gruntfile.js',
+                            'red.js',
+                            'red/**/*.js'
+                        ]
+                    }
+                },
+                nodes: {
+                    files: {
+                        src: [ 'nodes/**/*.js' ]
+                    }
+                },
+                editor: {
+                    files: {
+                        src: [ 'public/red/**/*.js' ]
+                    }
+                },
                 tests: {
                     files: {
                         src: ['test/*.js']
@@ -65,6 +85,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     
     grunt.registerTask('default', ['jshint:tests','simplemocha']);
-    grunt.registerTask('all', ['jshint:all','default']);
+    grunt.registerTask('all', ['jshint:core','jshint:nodes','jshint:editor','default']);
     
 };

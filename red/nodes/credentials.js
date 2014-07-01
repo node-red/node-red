@@ -29,7 +29,7 @@ function getCredDef(type) {
 }
 
 function isRegistered(type) {
-    return getCredDef(type) != undefined;
+    return getCredDef(type) !== undefined;
 }
 
 function restPOST(type) {
@@ -47,16 +47,18 @@ function restPOST(type) {
             var definition = getCredDef(nodeType);
 
             for (var cred in definition) {
-                if (newCreds[cred] == undefined) {
-                    continue;
+                if (definition.hasOwnProperty(cred)) {
+                    if (newCreds[cred] === undefined) {
+                        continue;
+                    }
+                    if (definition[cred].type == "password" && newCreds[cred] == '__PWRD__') {
+                        continue;
+                    }
+                    if (newCreds[cred] === '') {
+                        delete credentials[cred];
+                    }
+                    credentials[cred] = newCreds[cred];
                 }
-                if (definition[cred].type == "password" && newCreds[cred] == '__PWRD__') {
-                    continue;
-                }
-                if (newCreds[cred] == '') {
-                    delete credentials[cred];
-                }
-                credentials[cred] = newCreds[cred];
             }
             Credentials.add(nodeID, credentials);
             res.send(200);
@@ -70,7 +72,7 @@ function restGET(type) {
         var nodeID = req.params.id;
 
         var credentials = Credentials.get(nodeID);
-        if (credentials == undefined) {
+        if (credentials === undefined) {
             res.json({});
             return;
         }
@@ -78,12 +80,14 @@ function restGET(type) {
 
         var sendCredentials = {};
         for (var cred in definition) {
-            if (definition[cred].type == "password") {
-                var key = 'has' + cred;
-                sendCredentials[key] = credentials[cred] != null && credentials[cred] != '';
-                continue;
+            if (definition.hasOwnProperty(cred)) {
+                if (definition[cred].type == "password") {
+                    var key = 'has' + cred;
+                    sendCredentials[key] = credentials[cred] != null && credentials[cred] !== '';
+                    continue;
+                }
+                sendCredentials[cred] = credentials[cred] || '';
             }
-            sendCredentials[cred] = credentials[cred] || '';
         }
         res.json(sendCredentials);
 
@@ -128,10 +132,12 @@ module.exports = {
     clean: function (getNode) {
         var deletedCredentials = false;
         for (var c in credentials) {
-            var n = getNode(c);
-            if (!n) {
-                deletedCredentials = true;
-                delete credentials[c];
+            if (credentials.hasOwnProperty(c)) {
+                var n = getNode(c);
+                if (!n) {
+                    deletedCredentials = true;
+                    delete credentials[c];
+                }
             }
         }
         if (deletedCredentials) {

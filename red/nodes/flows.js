@@ -35,7 +35,7 @@ events.on('type-registered',function(type) {
                 missingTypes.splice(i,1);
                 util.log("[red] Missing type registered: "+type);
             }
-            if (missingTypes.length == 0) {
+            if (missingTypes.length === 0) {
                 parseConfig();
             }
         }
@@ -43,20 +43,22 @@ events.on('type-registered',function(type) {
 
 
 var parseConfig = function() {
+    var i;
+    var nt;
     missingTypes = [];
-    for (var i in activeConfig) {
+    for (i=0;i<activeConfig.length;i++) {
         var type = activeConfig[i].type;
         // TODO: remove workspace in next release+1
         if (type != "workspace" && type != "tab") {
-            var nt = typeRegistry.get(type);
+            nt = typeRegistry.get(type);
             if (!nt && missingTypes.indexOf(type) == -1) {
                 missingTypes.push(type);
             }
         }
-    };
+    }
     if (missingTypes.length > 0) {
         util.log("[red] Waiting for missing types to be registered:");
-        for (var i in missingTypes) {
+        for (i=0;i<missingType.length;i++) {
             util.log("[red]  - "+missingTypes[i]);
         }
         return;
@@ -64,11 +66,11 @@ var parseConfig = function() {
 
     util.log("[red] Starting flows");
     events.emit("nodes-starting");
-    for (var i in activeConfig) {
+    for (i=0;i<activeConfig.length;i++) {
         var nn = null;
         // TODO: remove workspace in next release+1
         if (activeConfig[i].type != "workspace" && activeConfig[i].type != "tab") {
-            var nt = typeRegistry.get(activeConfig[i].type);
+            nt = typeRegistry.get(activeConfig[i].type);
             if (nt) {
                 try {
                     nn = new nt(activeConfig[i]);
@@ -124,13 +126,15 @@ var flowNodes = module.exports = {
             events.emit("nodes-stopping");
             var promises = [];
             for (var n in nodes) {
-                try {
-                    var p = nodes[n].close();
-                    if (p) {
-                        promises.push(p);
+                if (nodes.hasOwnProperty(n)) {
+                    try {
+                        var p = nodes[n].close();
+                        if (p) {
+                            promises.push(p);
+                        }
+                    } catch(err) {
+                        nodes[n].error(err);
                     }
-                } catch(err) {
-                    nodes[n].error(err);
                 }
             }
             when.settle(promises).then(function() {
@@ -142,7 +146,9 @@ var flowNodes = module.exports = {
     },
     each: function(cb) {
         for (var n in nodes) {
-            cb(nodes[n]);
+            if (nodes.hasOwnProperty(n)) {
+                cb(nodes[n]);
+            }
         }
     },
     addLogHandler: function(handler) {

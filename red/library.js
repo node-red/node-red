@@ -90,7 +90,7 @@ function createLibrary(type) {
                     }).otherwise(function(err) {
                         util.log("[red] Error saving library entry '"+path+"' : "+err);
                         res.send(500);
-                    });;
+                    });
             });
     });
 }

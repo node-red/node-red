@@ -49,7 +49,7 @@ function setupUI(settings) {
         if (iconCache[req.params.icon]) {
             res.sendfile(iconCache[req.params.icon]);
         } else { 
-            for (var p in icon_paths) {
+            for (var p=0;p<icon_paths.length;p++) {
                 var iconPath = path.join(icon_paths[p],req.params.icon);
                 if (fs.existsSync(iconPath)) {
                     res.sendfile(iconPath);

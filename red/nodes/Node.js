@@ -66,7 +66,7 @@ Node.prototype.send = function(msg) {
     } else if (!util.isArray(msg)) {
         msg = [msg];
     }
-    for (var i in this.wires) {
+    for (var i=0;i<this.wires.length;i++) {
         var wires = this.wires[i];
         if (i < msg.length) {
             if (msg[i] != null) {
@@ -85,10 +85,10 @@ Node.prototype.send = function(msg) {
                 //    }
                 //} else {
                     // Multiple recipients, must send message copies
-                    for (var j in wires) {
+                    for (var j=0;j<wires.length;j++) {
                         var node = flows.get(wires[j]);
                         if (node) {
-                            for (var k in msgs) {
+                            for (var k=0;k<msgs.length;k++) {
                                 var mm = msgs[k];
                                 // Temporary fix for #97
                                 // TODO: remove this http-node-specific fix somehow
@@ -121,17 +121,23 @@ Node.prototype.receive = function(msg) {
 
 Node.prototype.log = function(msg) {
     var o = {level:'log',id:this.id, type:this.type, msg:msg};
-    if (this.name) o.name = this.name;
+    if (this.name) {
+        o.name = this.name;
+    }
     this.emit("log",o);
 }
 Node.prototype.warn = function(msg) {
     var o = {level:'warn',id:this.id, type:this.type, msg:msg};
-    if (this.name) o.name = this.name;
+    if (this.name) {
+        o.name = this.name;
+    }
     this.emit("log",o);
 }
 Node.prototype.error = function(msg) {
     var o = {level:'error',id:this.id, type:this.type, msg:msg};
-    if (this.name) o.name = this.name;
+    if (this.name) {
+        o.name = this.name;
+    }
     this.emit("log",o);
 }
 /**
