@@ -4,4 +4,7 @@ before_install:
 node_js:
   - "0.10"
   - "0.8"
-
+script:
+  - istanbul cover ./node_modules/.bin/grunt
+before_script:
+  - npm install -g istanbul
