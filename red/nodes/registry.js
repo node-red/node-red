@@ -262,7 +262,7 @@ function registerConfig(config) {
             if (el.attribs) {
                 for (var j in el.attribs) {
                     if (el.attribs.hasOwnProperty(j)) {
-                        openTag += " "+i+'="'+el.attribs[j]+'"';
+                        openTag += " "+j+'="'+el.attribs[j]+'"';
                     }
                 }
             }
