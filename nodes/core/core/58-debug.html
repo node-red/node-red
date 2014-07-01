@@ -109,7 +109,7 @@
 
         function getTimestamp() {
             var d = new Date();
-            return d.toUTCString().substring(5,25)+"."+d.getMilliseconds();
+            return d.toLocaleString();
         }
 
         var sbc = document.getElementById("debug-content");
