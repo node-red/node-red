@@ -30,8 +30,8 @@ var log = module.exports = {
     },
     
     log: function(msg) {
-        logHandlers.each(function() {
-            logHandlers[i].emit("log",msg);
+        logHandlers.forEach(function(handler) {
+            handler.emit("log",msg);
         });
     }
 }
