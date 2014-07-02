@@ -16,7 +16,7 @@
  
 RED.palette = function() {
 
-    var exclusion = ['config','unknown'];
+    var exclusion = ['config','unknown','deprecated'];
     var core = ['input', 'output', 'function', 'social', 'storage', 'analysis', 'advanced'];
     
     function createCategoryContainer(category){
