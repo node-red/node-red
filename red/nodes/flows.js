@@ -16,7 +16,7 @@
 
 var util = require("util");
 var when = require("when");
- 
+
 var typeRegistry = require("./registry");
 var credentials = require("./credentials");
 var log = require("../log");
@@ -58,7 +58,7 @@ var parseConfig = function() {
     }
     if (missingTypes.length > 0) {
         util.log("[red] Waiting for missing types to be registered:");
-        for (i=0;i<missingType.length;i++) {
+        for (i=0;i<missingTypes.length;i++) {
             util.log("[red]  - "+missingTypes[i]);
         }
         return;
@@ -154,7 +154,7 @@ var flowNodes = module.exports = {
     addLogHandler: function(handler) {
         logHandlers.push(handler);
     },
-    
+
     getFlows: function() {
         return activeConfig;
     },
