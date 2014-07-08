@@ -27,7 +27,7 @@ module.exports = function(RED) {
         var node = this;
 
         var err = "";
-        var tail = spawn("tail", ["-f", this.filename]);
+        var tail = spawn("tail", ["-F", this.filename]);
         tail.stdout.on("data", function (data) {
             var msg = {topic:node.filename};
             if (node.split) {
