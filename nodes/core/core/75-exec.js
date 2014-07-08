@@ -55,6 +55,9 @@ module.exports = function(RED) {
                             node.status({});
                             node.send([null,null,msg]);
                         });
+                        ex.on('error', function (code) {
+                            node.warn(code);
+                        });
                     }
                     else { node.error("Spawn command must be just the command - no spaces or extra parameters"); }
                 }
