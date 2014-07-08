@@ -23,13 +23,13 @@
         </select>
         port <input type="text" id="node-input-port" style="width: 50px">
     </div>
-    <div class="form-row hidden" id="node-input-host-row" style="padding-left: 110px;"> 
+    <div class="form-row hidden" id="node-input-host-row" style="padding-left: 110px;">
         at host <input type="text" id="node-input-host" placeholder="localhost" style="width: 40%;">
     </div>
 
     <div class="form-row">
         <label><i class="icon-th"></i> Output</label>
-        a 
+        a
         <select id="node-input-datamode" style="width:110px;">
             <option value="stream">stream of</option>
             <option value="single">single</option>
@@ -45,7 +45,7 @@
     <div id="node-row-newline" class="form-row hidden" style="padding-left: 110px;">
         delimited by <input type="text" id="node-input-newline" style="width: 110px;">
     </div>
-    
+
     <div class="form-row">
         <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
         <input type="text" id="node-input-topic" placeholder="Topic">
@@ -57,8 +57,8 @@
 </script>
 
 <script type="text/x-red" data-help-name="tcp in">
-	<p>Provides a choice of tcp inputs. Can either connect to a remote tcp port, 
-	   or accept incoming connections.</p>
+    <p>Provides a choice of tcp inputs. Can either connect to a remote tcp port,
+       or accept incoming connections.</p>
 </script>
 
 <script type="text/javascript">
@@ -115,6 +115,7 @@
     });
 </script>
 
+
 <script type="text/x-red" data-template-name="tcp out">
     <div class="form-row">
         <label for="node-input-beserver"><i class="icon-resize-small"></i> Type</label>
@@ -125,8 +126,8 @@
         </select>
         <span id="node-input-port-row">port <input type="text" id="node-input-port" style="width: 50px"></span>
     </div>
-    
-    <div class="form-row hidden" id="node-input-host-row" style="padding-left: 110px;"> 
+
+    <div class="form-row hidden" id="node-input-host-row" style="padding-left: 110px;">
         at host <input type="text" id="node-input-host" placeholder="localhost" style="width: 40%;">
     </div>
 
@@ -135,7 +136,7 @@
         <input type="checkbox" id="node-input-base64" placeholder="base64" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-base64" style="width: 70%;">Decode Base64 message ?</label>
     </div>
-    
+
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -143,12 +144,12 @@
 </script>
 
 <script type="text/x-red" data-help-name="tcp out">
-	<p>Provides a choice of tcp outputs. Can either connect to a remote tcp port,
+    <p>Provides a choice of tcp outputs. Can either connect to a remote tcp port,
     accept incoming connections, or reply to messages received from a TCP In node.</p>
-	<p>Only <b>msg.payload</b> is sent.</p>
-	<p>If <b>msg.payload</b> is a string containing a base64 encoding of binary
-	data, the Base64 decoding option will cause it to be converted back to binary
-	before being sent.</p>
+    <p>Only <b>msg.payload</b> is sent.</p>
+    <p>If <b>msg.payload</b> is a string containing a base64 encoding of binary
+    data, the Base64 decoding option will cause it to be converted back to binary
+    before being sent.</p>
 </script>
 
 <script type="text/javascript">
@@ -181,7 +182,7 @@
                 } else {
                     $("#node-input-port-row").show();
                 }
-                    
+
                 if (sockettype == "client") {
                     $("#node-input-host-row").show();
                 } else {
@@ -190,6 +191,78 @@
             };
             updateOptions();
             $("#node-input-beserver").change(updateOptions);
+        }
+    });
+</script>
+
+
+<script type="text/x-red" data-template-name="tcp request">
+    <div class="form-row">
+        <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
+        <input type="text" id="node-input-server" placeholder="ip.address" style="width:50%">
+        &nbsp;port <input type="text" id="node-input-port" style="width:50px">
+    </div>
+    <div class="form-row">
+        <label for="node-input-out"><i class="fa fa-sign-out"></i> Return</label>
+        <select type="text" id="node-input-out" style="width:52%;">
+            <option value="time">after a fixed timeout of</option>
+            <option value="char">when character received is</option>
+            <option value="count">a fixed number of characters</option>
+        </select>
+        <input type="text" id="node-input-splitc"  style="width:50px;">
+        <span id="node-units"></span>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-tips"><b>Tip:</b> outputs a binary <b>Buffer</b>, so you may want to .toString() it.</div>
+    <script>
+        var previous = null;
+        $("#node-input-out").on('focus', function () { previous = this.value; }).change(function() {
+            if (previous == null) { previous = $("#node-input-out").val(); }
+            if ($("#node-input-out").val() == "char") {
+                if (previous != "char") $("#node-input-splitc").val("\\n");
+                $("#node-units").text("");
+            }
+            else if ($("#node-input-out").val() == "time") {
+                if (previous != "time") $("#node-input-splitc").val("0");
+                $("#node-units").text("ms");
+            }
+            else {
+                if (previous != "count") $("#node-input-splitc").val("12");
+                $("#node-units").text("chars");
+            }
+        });
+</script>
+
+<script type="text/x-red" data-help-name="tcp request">
+    <p>A simple TCP request node - sends the <b>msg.payload</b> to a server tcp port and expects a response.</p>
+    <p>Connects, sends the "request", reads the "response" and disconnects. It can either count a number of
+    returned characters into a fixed buffer, match a specified character before returning,
+    or wait a fixed timeout from first reply and then return.</p>
+    <p>The response will be output in <b>msg.payload</b> as a buffer, so you may want to .toString() it.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('tcp request',{
+        category: 'function',
+        color:"Silver",
+        defaults: {
+            server: {value:"",required:true},
+            port: {value:"",required:true,validate:RED.validators.number()},
+            out: {value:"time",required:true},
+            splitc: {value:"0",required:true},
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "bridge-dash.png",
+        label: function() {
+            return this.name || "tcp:"+(this.server?this.server+":":"")+this.port;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
         }
     });
 </script>

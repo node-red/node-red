@@ -309,6 +309,116 @@ module.exports = function(RED) {
             });
         }
     }
-
     RED.nodes.registerType("tcp out",TcpOut);
+
+    function TcpGet(n) {
+        RED.nodes.createNode(this,n);
+        this.server = n.server;
+        this.port = Number(n.port);
+        this.out = n.out;
+        this.splitc = n.splitc;
+
+        if (this.out != "char") { this.splitc = Number(this.splitc); }
+        else { this.splitc.replace("\\n","\n").replace("\\r","\r").replace("\\t","\t").replace("\\e","\e").replace("\\f","\f").replace("\\0","\0"); }
+
+        var buf;
+        if (this.out == "count") { buf = new Buffer(this.splitc); }
+        else { buf = new Buffer(32768); } // set it to 32k... hopefully big enough for most.... but only hopefully
+
+        var node = this;
+        var client;
+
+        this.on("input", function(msg) {
+            var i = 0;
+            if (!(msg.payload instanceof Buffer)) {
+                msg.payload = msg.payload.toString();
+            }
+            client = net.Socket();
+            client.setTimeout(socketTimeout);
+            client.connect(node.port, node.server, function() {
+                //node.log('client connected');
+                client.write(msg.payload);
+            });
+            client.on('data', function(data) {
+                //node.log("data", data.length, data);
+
+                if (node.splitc === 0) {
+                    node.send({"payload": data});
+                }
+                else {
+                    for (var j = 0; j < data.length; j++ ) {
+                        if (node.out == "time")  {
+                            // do the timer thing
+                            if (node.tout) {
+                                i += 1;
+                                buf[i] = data[j];
+                            }
+                            else {
+                                node.tout = setTimeout(function () {
+                                    node.tout = null;
+                                    var m = new Buffer(i+1);
+                                    buf.copy(m,0,0,i+1);
+                                    node.send({"payload": m});
+                                    client.end();
+                                    m = null;
+                                }, node.splitc);
+                                i = 0;
+                                buf[0] = data[j];
+                            }
+                        }
+                        // count bytes into a buffer...
+                        else if (node.out == "count") {
+                            buf[i] = data[j];
+                            i += 1;
+                            if ( i >= node.serialConfig.count) {
+                                node.send({"payload": buf});
+                                client.end();
+                                i = 0;
+                            }
+                        }
+                        // look for a char
+                        else {
+                            buf[i] = data[j];
+                            i += 1;
+                            if (data[j] == node.splitc) {
+                                var m = new Buffer(i);
+                                buf.copy(m,0,0,i);
+                                node.send({"payload": m});
+                                client.end();
+                                m = null;
+                                i = 0;
+                            }
+                        }
+                    }
+                }
+
+            });
+            client.on('end', function() {
+                //node.log('client disconnected');
+            });
+            client.on('error', function() {
+                node.log('connect failed');
+                if (client) { client.end(); }
+            });
+            client.on('timeout',function() {
+                node.log('connect timeout');
+                if (client) {
+                    client.end();
+                    setTimeout(function() {
+                        client.connect(node.port, node.server, function() {
+                            //node.log('client connected');
+                            client.write(msg.payload);
+                        });
+                    },reconnectTime);
+                }
+
+            });
+        });
+
+        this.on("close", function() {
+            if (client) { buf = null; client.end(); }
+        });
+
+    }
+    RED.nodes.registerType("tcp request",TcpGet);
 }
