@@ -58,7 +58,7 @@ var parseConfig = function() {
     }
     if (missingTypes.length > 0) {
         util.log("[red] Waiting for missing types to be registered:");
-        for (i=0;i<missingType.length;i++) {
+        for (i=0;i<missingTypes.length;i++) {
             util.log("[red]  - "+missingTypes[i]);
         }
         return;
