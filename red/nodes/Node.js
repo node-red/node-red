@@ -62,7 +62,7 @@ Node.prototype.close = function() {
 Node.prototype.send = function(msg) {
     // instanceof doesn't work for some reason here
     if (msg == null) {
-        msg = [];
+        return;
     } else if (!util.isArray(msg)) {
         msg = [msg];
     }
