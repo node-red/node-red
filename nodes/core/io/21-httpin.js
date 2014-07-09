@@ -125,7 +125,7 @@ module.exports = function(RED) {
                 } else {
                     if (msg.res.get('content-length') == null) {
                         var len;
-                        if (msg.payload === null) {
+                        if (msg.payload == null) {
                             len = 0;
                         } else if (typeof msg.payload == "number") {
                             len = Buffer.byteLength(""+msg.payload);
