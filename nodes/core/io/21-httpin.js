@@ -130,7 +130,9 @@ console.log(err.stack);
                 } else {
                     if (msg.res.get('content-length') == null) {
                         var len;
-                        if (typeof msg.payload == "number") {
+                        if (msg.payload ==== null) {
+                            len = 0;
+                        } else if (typeof msg.payload == "number") {
                             len = Buffer.byteLength(""+msg.payload);
                         } else {
                             len = Buffer.byteLength(msg.payload);
