@@ -4,4 +4,8 @@ before_install:
 node_js:
   - "0.10"
   - "0.8"
-
+script:
+  - istanbul cover ./node_modules/.bin/grunt --report lcovonly && istanbul report text && cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf coverage
+before_script:
+  - npm install -g istanbul
+  - npm install coveralls
