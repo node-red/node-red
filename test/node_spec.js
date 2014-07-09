@@ -171,6 +171,21 @@ describe('Node', function() {
             n1.send(messages);
         });
 
+        it('emits no messages', function(done) {
+            var n1 = new RedNode({id:'n1',type:'abc',wires:[['n2']]});
+            var n2 = new RedNode({id:'n2',type:'abc'});
+
+            n2.on('input',function(msg) {
+                should.fail(null,null,"unexpected message");
+            });
+            
+            setTimeout(function() {
+                done();
+            }, 200);
+            
+            n1.send();
+        });
+
     });
 
     describe('#log', function() {
