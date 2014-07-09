@@ -60,6 +60,7 @@ module.exports = function(RED) {
             };
 
             this.callback = function(req,res) {
+try {
                 if (node.method == "post") {
                     node.send({req:req,res:res,payload:req.body});
                 } else if (node.method == "get") {
@@ -67,6 +68,10 @@ module.exports = function(RED) {
                 } else {
                     node.send({req:req,res:res});
                 }
+}catch(err) { 
+console.log(err);
+console.log(err.stack);
+}
             }
 
             var corsHandler = function(req,res,next) { next(); }
@@ -124,7 +129,13 @@ module.exports = function(RED) {
                     msg.res.jsonp(statusCode,msg.payload);
                 } else {
                     if (msg.res.get('content-length') == null) {
-                        msg.res.set('content-length', ""+Buffer.byteLength(msg.payload));
+                        var len;
+                        if (typeof msg.payload == "number") {
+                            len = Buffer.byteLength(""+msg.payload);
+                        } else {
+                            len = Buffer.byteLength(msg.payload);
+                        }
+                        msg.res.set('content-length', len);
                     }
                     msg.res.send(statusCode,msg.payload);
                 }
