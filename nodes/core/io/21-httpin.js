@@ -60,7 +60,6 @@ module.exports = function(RED) {
             };
 
             this.callback = function(req,res) {
-try {
                 if (node.method == "post") {
                     node.send({req:req,res:res,payload:req.body});
                 } else if (node.method == "get") {
@@ -68,10 +67,6 @@ try {
                 } else {
                     node.send({req:req,res:res});
                 }
-}catch(err) { 
-console.log(err);
-console.log(err.stack);
-}
             }
 
             var corsHandler = function(req,res,next) { next(); }
@@ -130,7 +125,7 @@ console.log(err.stack);
                 } else {
                     if (msg.res.get('content-length') == null) {
                         var len;
-                        if (msg.payload ==== null) {
+                        if (msg.payload === null) {
                             len = 0;
                         } else if (typeof msg.payload == "number") {
                             len = Buffer.byteLength(""+msg.payload);
