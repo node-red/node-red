@@ -170,6 +170,55 @@ describe('Node', function() {
             
             n1.send(messages);
         });
+
     });
-    
+
+    describe('#log', function() {
+        it('emits a log message', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            n.on('log',function(obj) {
+                should.deepEqual({level:"log", id:n.id,
+                                  type:n.type, msg:"a log message"}, obj);
+                done();
+            });
+            n.log("a log message");
+        });
+    });
+
+    describe('#log', function() {
+        it('emits a log message with a name', function(done) {
+            var n = new RedNode({id:'123', type:'abc', name:"barney"});
+            n.on('log',function(obj) {
+                should.deepEqual({level:"log", id:n.id, name: "barney",
+                                  type:n.type, msg:"a log message"}, obj);
+                done();
+            });
+            n.log("a log message");
+        });
+    });
+
+    describe('#warn', function() {
+        it('emits a warning', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            n.on('log',function(obj) {
+                should.deepEqual({level:"warn", id:n.id,
+                                  type:n.type, msg:"a warning"}, obj);
+                done();
+            });
+            n.warn("a warning");
+        });
+    });
+
+    describe('#error', function() {
+        it('emits an error message', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            n.on('log',function(obj) {
+                should.deepEqual({level:"error", id:n.id,
+                                  type:n.type, msg:"an error message"}, obj);
+                done();
+            });
+            n.error("an error message");
+        });
+    });
+
 });
