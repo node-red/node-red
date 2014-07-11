@@ -106,13 +106,13 @@ module.exports = function(RED) {
 
         for (var i = 0; i < this._inputNodes.length; i++) {
             this._inputNodes[i].send(msg);
-        };
+        }
     }
 
     WebSocketListenerNode.prototype.broadcast = function(data){
         for(var i in this.server.clients){
             this.server.clients[i].send(data);
-        };
+        }
     }
 
     WebSocketListenerNode.prototype.send = function(id,data){
