@@ -170,6 +170,70 @@ describe('Node', function() {
             
             n1.send(messages);
         });
+
+        it('emits no messages', function(done) {
+            var n1 = new RedNode({id:'n1',type:'abc',wires:[['n2']]});
+            var n2 = new RedNode({id:'n2',type:'abc'});
+
+            n2.on('input',function(msg) {
+                should.fail(null,null,"unexpected message");
+            });
+            
+            setTimeout(function() {
+                done();
+            }, 200);
+            
+            n1.send();
+        });
+
     });
-    
+
+    describe('#log', function() {
+        it('emits a log message', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            n.on('log',function(obj) {
+                should.deepEqual({level:"log", id:n.id,
+                                  type:n.type, msg:"a log message"}, obj);
+                done();
+            });
+            n.log("a log message");
+        });
+    });
+
+    describe('#log', function() {
+        it('emits a log message with a name', function(done) {
+            var n = new RedNode({id:'123', type:'abc', name:"barney"});
+            n.on('log',function(obj) {
+                should.deepEqual({level:"log", id:n.id, name: "barney",
+                                  type:n.type, msg:"a log message"}, obj);
+                done();
+            });
+            n.log("a log message");
+        });
+    });
+
+    describe('#warn', function() {
+        it('emits a warning', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            n.on('log',function(obj) {
+                should.deepEqual({level:"warn", id:n.id,
+                                  type:n.type, msg:"a warning"}, obj);
+                done();
+            });
+            n.warn("a warning");
+        });
+    });
+
+    describe('#error', function() {
+        it('emits an error message', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            n.on('log',function(obj) {
+                should.deepEqual({level:"error", id:n.id,
+                                  type:n.type, msg:"an error message"}, obj);
+                done();
+            });
+            n.error("an error message");
+        });
+    });
+
 });

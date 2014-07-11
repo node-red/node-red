@@ -62,7 +62,7 @@ Node.prototype.close = function() {
 Node.prototype.send = function(msg) {
     // instanceof doesn't work for some reason here
     if (msg == null) {
-        msg = [];
+        return;
     } else if (!util.isArray(msg)) {
         msg = [msg];
     }
@@ -119,27 +119,26 @@ Node.prototype.receive = function(msg) {
     this.emit("input",msg);
 }
 
+function log_helper(self, level, msg) {
+    var o = {level:level, id:self.id, type:self.type, msg:msg};
+    if (self.name) {
+        o.name = self.name;
+    }
+    self.emit("log",o);
+}
+
 Node.prototype.log = function(msg) {
-    var o = {level:'log',id:this.id, type:this.type, msg:msg};
-    if (this.name) {
-        o.name = this.name;
-    }
-    this.emit("log",o);
+    log_helper(this, 'log', msg);
 }
+
 Node.prototype.warn = function(msg) {
-    var o = {level:'warn',id:this.id, type:this.type, msg:msg};
-    if (this.name) {
-        o.name = this.name;
-    }
-    this.emit("log",o);
+    log_helper(this, 'warn', msg);
 }
+
 Node.prototype.error = function(msg) {
-    var o = {level:'error',id:this.id, type:this.type, msg:msg};
-    if (this.name) {
-        o.name = this.name;
-    }
-    this.emit("log",o);
+    log_helper(this, 'error', msg);
 }
+
 /**
  * status: { fill:"red|green", shape:"dot|ring", text:"blah" }
  */
