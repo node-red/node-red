@@ -96,7 +96,12 @@ module.exports = function(RED) {
     WebSocketListenerNode.prototype.handleEvent = function(id,/*socket*/socket,/*String*/event,/*Object*/data,/*Object*/flags){
         var msg;
         if (this.wholemsg) {
-            msg = JSON.parse(data);
+            try {
+                msg = JSON.parse(data);
+            }
+            catch(err) {
+                msg = { payload:data };
+            }
         } else {
             msg = {
                 payload:data
