@@ -151,9 +151,6 @@ var flowNodes = module.exports = {
             }
         }
     },
-    addLogHandler: function(handler) {
-        logHandlers.push(handler);
-    },
 
     getFlows: function() {
         return activeConfig;
