@@ -97,4 +97,22 @@ describe('flows', function() {
         });
     });
 
+    describe('#setFlows',function() {
+        it('should save and start an empty tab flow',function(done) {
+            var saved = 0;
+            var testFlows = [{"type":"tab","id":"tab1","label":"Sheet 1"}];
+            var storage = {
+                saveFlows: function(conf) {
+                    var defer = when.defer();
+                    defer.resolve();
+                    should.deepEqual(testFlows, conf);
+                    return defer.promise;
+                }
+            };
+            RED.init({}, storage);
+            flows.setFlows(testFlows);
+            events.once('nodes-started', function() { done(); });
+        });
+    });
+
 });
