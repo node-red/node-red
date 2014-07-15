@@ -80,7 +80,7 @@ var parseConfig = function() {
                 }
             }
             // console.log(nn);
-            if (nn == null) {
+            if (nn === null) {
                 util.log("[red] unknown type: "+activeConfig[i].type);
             }
         }
@@ -88,7 +88,7 @@ var parseConfig = function() {
     // Clean up any orphaned credentials
     credentials.clean(flowNodes.get);
     events.emit("nodes-started");
-}
+};
 
 
 function stopFlows() {
@@ -151,9 +151,6 @@ var flowNodes = module.exports = {
             }
         }
     },
-    addLogHandler: function(handler) {
-        logHandlers.push(handler);
-    },
 
     getFlows: function() {
         return activeConfig;
@@ -164,7 +161,7 @@ var flowNodes = module.exports = {
                 activeConfig = conf;
                 parseConfig();
             });
-        })
+        });
     },
     stopFlows: stopFlows
-}
+};
