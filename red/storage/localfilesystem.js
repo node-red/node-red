@@ -123,23 +123,6 @@ function getFileBody(root,path) {
     return body;
 }
 
-function writeFile(root,path,meta,body,res) {
-    var fn = fspath.join(root,path);
-    var headers = "";
-    for (var i in meta) {
-        if (meta.hasOwnProperty(i)) {
-            headers += "// "+i+": "+meta[i]+"\n";
-        }
-    }
-    mkdirp(fspath.dirname(fn), function (err) {
-        fs.writeFile(fn,headers+body,function(err) {
-            //TODO: handle error
-            res.writeHead(204, {'Content-Type': 'text/plain'});
-            res.end();
-        });
-    });
-}
-
 var localfilesystem = {
     init: function(_settings) {
         settings = _settings;
