@@ -77,7 +77,6 @@ module.exports = function(RED) {
         this.topic = n.topic;
         this.broker = n.broker;
         this.brokerConfig = RED.nodes.getNode(this.broker);
-        var node = this;
         if (this.brokerConfig) {
             this.status({fill:"red",shape:"ring",text:"disconnected"});
             this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.brokerConfig.clientid,this.brokerConfig.username,this.brokerConfig.password);
@@ -117,7 +116,6 @@ module.exports = function(RED) {
         this.broker = n.broker;
 
         this.brokerConfig = RED.nodes.getNode(this.broker);
-        var node = this;
 
         if (this.brokerConfig) {
             this.status({fill:"red",shape:"ring",text:"disconnected"},true);
@@ -130,6 +128,7 @@ module.exports = function(RED) {
                     this.client.publish(msg);
                 }
             });
+            var node = this;
             this.client.on("connectionlost",function() {
                 node.status({fill:"red",shape:"ring",text:"disconnected"});
             });
