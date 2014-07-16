@@ -90,6 +90,30 @@ describe('Credentials', function() {
             
     });
             
+    it('clean up from storage', function(done) {
+        var storage = {
+            getCredentials: function() {
+                return when.promise(function(resolve,reject) {
+                    resolve({"a":{"b":1,"c":2}});
+                });
+            },
+            saveCredentials: function(creds) {
+                return when(true);
+            }
+        };
+        sinon.spy(storage,"saveCredentials");
+        credentials.init(storage);
+        credentials.load().then(function() {
+            should.exist(credentials.get("a"));
+            credentials.clean(function() {
+                return false;
+            });
+            storage.saveCredentials.callCount.should.be.exactly(1);
+            should.not.exist(credentials.get("a"));
+            done();
+        });
+    });
+    
 })
         
 
