@@ -107,6 +107,9 @@ describe('flows', function() {
                     defer.resolve();
                     should.deepEqual(testFlows, conf);
                     return defer.promise;
+                },
+                saveCredentials: function (creds) {
+                    return when(true);
                 }
             };
             RED.init({}, storage);
