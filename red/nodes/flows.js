@@ -40,7 +40,26 @@ events.on('type-registered',function(type) {
             }
         }
 });
-
+var parseCredentials = function (config) {
+    return when.promise(function (resolve, defect) {
+        for (var i in config) {
+            if (config.hasOwnProperty(i)) {
+                var node = config[i];
+                if (!node._creds) {
+                    continue;
+                }
+                var type = node.type;
+                credentials.merge(node.id, type, node._creds);
+                delete node._creds;
+            }
+        }
+        credentials.save().then(function () {
+            resolve(config);
+        }).otherwise(function (err) {
+            defect(err);
+        });
+    });
+}
 
 var parseConfig = function() {
     var i;
@@ -155,13 +174,16 @@ var flowNodes = module.exports = {
     getFlows: function() {
         return activeConfig;
     },
-    setFlows: function(conf) {
-        return storage.saveFlows(conf).then(function() {
-            return stopFlows().then(function() {
-                activeConfig = conf;
-                parseConfig();
-            });
-        });
+    setFlows: function (conf) {
+        return parseCredentials(conf).then(function (confCredsRemoved) {
+            return storage.saveFlows(confCredsRemoved).then(function () {
+                return stopFlows().then(function () {
+                    activeConfig = confCredsRemoved;
+                    parseConfig();
+                });
+            })
+
+        })
     },
     stopFlows: stopFlows
 };

@@ -175,12 +175,16 @@ RED.nodes = function() {
     /**
      * Converts a node to an exportable JSON Object
      **/
-    function convertNode(n) {
+    function convertNode(n, exportCreds) {
+        exportCreds = exportCreds || false;
         var node = {};
         node.id = n.id;
         node.type = n.type;
         for (var d in n._def.defaults) {
             node[d] = n[d];
+        }
+        if(exportCreds && n._creds) {
+            node._creds = n._creds.send;
         }
         if (n._def.category != "config") {
             node.x = n.x;
@@ -235,11 +239,11 @@ RED.nodes = function() {
             nns.push(workspaces[i]);
         }
         for (var i in configNodes) {
-            nns.push(convertNode(configNodes[i]));
+            nns.push(convertNode(configNodes[i], true));
         }
         for (var i in nodes) {
             var node = nodes[i];
-            nns.push(convertNode(node));
+            nns.push(convertNode(node, true));
         }
         return nns;
     }

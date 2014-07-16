@@ -15,6 +15,7 @@
  **/
 
 var util = require("util");
+var when = require("when");
 
 var credentials = {};
 var storage = null;
@@ -30,40 +31,6 @@ function getCredDef(type) {
 
 function isRegistered(type) {
     return getCredDef(type) !== undefined;
-}
-
-function restPOST(type) {
-    redApp.post('/credentials/' + type + '/:id', function (req, res) {
-        var body = "";
-        req.on('data', function (chunk) {
-            body += chunk;
-        });
-        req.on('end', function () {
-            var nodeType = type;
-            var nodeID = req.params.id;
-
-            var newCreds = querystring.parse(body);
-            var credentials = Credentials.get(nodeID) || {};
-            var definition = getCredDef(nodeType);
-
-            for (var cred in definition) {
-                if (definition.hasOwnProperty(cred)) {
-                    if (newCreds[cred] === undefined) {
-                        continue;
-                    }
-                    if (definition[cred].type == "password" && newCreds[cred] == '__PWRD__') {
-                        continue;
-                    }
-                    if (newCreds[cred] === '') {
-                        delete credentials[cred];
-                    }
-                    credentials[cred] = newCreds[cred];
-                }
-            }
-            Credentials.add(nodeID, credentials);
-            res.send(200);
-        });
-    });
 }
 
 function restGET(type) {
@@ -91,14 +58,6 @@ function restGET(type) {
         }
         res.json(sendCredentials);
 
-    });
-}
-function restDELETE(type) {
-    redApp.delete('/credentials/' + type + '/:id', function (req, res) {
-        var nodeID = req.params.id;
-
-        Credentials.delete(nodeID);
-        res.send(200);
     });
 }
 
@@ -148,8 +107,41 @@ module.exports = {
     register: function (type, definition) {
         var dashedType = type.replace(/\s+/g, '-');
         credentialsDef[dashedType] = definition;
-        restDELETE(dashedType);
         restGET(dashedType);
-        restPOST(dashedType);
+    },
+    /**
+     * Merge the new credentials with the existings one
+     * @param nodeID
+     * @param nodeType
+     * @param newCreds
+     */
+    merge: function (nodeID, nodeType, newCreds) {
+        var savedCredentials = Credentials.get(nodeID) || {};
+
+        if (!isRegistered(nodeType)) {
+            util.log('Credential Type ' + nodeType + ' is not registered.');
+            return;
+        }
+
+        var definition = getCredDef(nodeType);
+        for (var cred in definition) {
+            if (definition.hasOwnProperty(cred)) {
+                if (newCreds[cred] === undefined) {
+                    continue;
+                }
+                if (definition[cred].type == "password" && newCreds[cred] == '__PWRD__') {
+                    continue;
+                }
+                if (0 === newCreds[cred].length || /^\s*$/.test(newCreds[cred])) {
+                    delete savedCredentials[cred];
+                    continue;
+                }
+                savedCredentials[cred] = newCreds[cred];
+            }
+        }
+        credentials[nodeID] = savedCredentials;
+    },
+    save: function () {
+        return storage.saveCredentials(credentials);
     }
 }
