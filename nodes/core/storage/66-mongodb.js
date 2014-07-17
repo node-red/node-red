@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013,2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ module.exports = function(RED) {
     RED.httpAdmin.get('/mongodb/:id',function(req,res) {
         var credentials = RED.nodes.getCredentials(req.params.id);
         if (credentials) {
-            res.send(JSON.stringify({user:credentials.user,hasPassword:(credentials.password&&credentials.password!="")}));
+            res.send(JSON.stringify({user:credentials.user,hasPassword:(credentials.password&&credentials.password!=="")}));
         } else {
             res.send(JSON.stringify({}));
         }
@@ -127,7 +127,7 @@ module.exports = function(RED) {
                             }
                         }
                         if (node.operation == "delete") {
-                            coll.remove(msg.payload, {w:1}, function(err, items){ if (err) node.error(err); });
+                            coll.remove(msg.payload, {w:1}, function(err, items){ if (err) { node.error(err); } });
                         }
                     });
                 }

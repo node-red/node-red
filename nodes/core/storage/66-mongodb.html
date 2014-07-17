@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013 IBM Corp.
+  Copyright 2013,2014 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -16,26 +16,26 @@
 
 <script type="text/x-red" data-template-name="mongodb">
     <div class="form-row">
-        <label for="node-config-input-hostname"><i class="icon-bookmark"></i> Host</label>
+        <label for="node-config-input-hostname"><i class="fa fa-bookmark"></i> Host</label>
         <input class="input-append-left" type="text" id="node-config-input-hostname" placeholder="localhost" style="width: 40%;" >
         <label for="node-config-input-port" style="margin-left: 10px; width: 35px; "> Port</label>
         <input type="text" id="node-config-input-port" placeholder="27017" style="width:45px">
     </div>
     <div class="form-row">
-        <label for="node-config-input-db"><i class="icon-briefcase"></i> Database</label>
+        <label for="node-config-input-db"><i class="fa fa-database"></i> Database</label>
         <input type="text" id="node-config-input-db" placeholder="test">
     </div>
     <div class="form-row">
-        <label for="node-config-input-name"><i class="icon-tag"></i> Name</label>
-        <input type="text" id="node-config-input-name" placeholder="Name">
-    </div>
-    <div class="form-row">
-        <label for="node-config-input-user"><i class="icon-user"></i> Username</label>
+        <label for="node-config-input-user"><i class="fa fa-user"></i> Username</label>
         <input type="text" id="node-config-input-user">
     </div>
     <div class="form-row">
-        <label for="node-config-input-pass"><i class="icon-lock"></i> Password</label>
+        <label for="node-config-input-pass"><i class="fa fa-lock"></i> Password</label>
         <input type="password" id="node-config-input-pass">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" placeholder="Name">
     </div>
 </script>
 
@@ -47,7 +47,7 @@
             hostname: { value:"127.0.0.1",required:true},
             port: { value: 27017,required:true},
             db: { value:"",required:true},
-            name: { value:"" },
+            name: { value:"" }
             //user -> credentials
             //pass -> credentials
         },
@@ -95,15 +95,15 @@
 
 <script type="text/x-red" data-template-name="mongodb out">
     <div class="form-row">
-        <label for="node-input-mongodb"><i class="icon-tag"></i> Server</label>
+        <label for="node-input-mongodb"><i class="fa fa-bookmark"></i> Server</label>
         <input type="text" id="node-input-mongodb">
     </div>
     <div class="form-row">
-        <label for="node-input-collection"><i class="icon-briefcase"></i> Collection</label>
+        <label for="node-input-collection"><i class="fa fa-briefcase"></i> Collection</label>
         <input type="text" id="node-input-collection" placeholder="collection">
     </div>
         <div class="form-row">
-        <label for="node-input-operation"><i class="icon-wrench"></i> Operation</label>
+        <label for="node-input-operation"><i class="fa fa-wrench"></i> Operation</label>
         <select type="text" id="node-input-operation" style="display: inline-block; vertical-align: top;">
             <option value="store">save</option>
             <option value="insert">insert</option>
@@ -167,15 +167,15 @@
 
 <script type="text/x-red" data-template-name="mongodb in">
     <div class="form-row">
-        <label for="node-input-mongodb"><i class="icon-tag"></i> Server</label>
+        <label for="node-input-mongodb"><i class="fa fa-bookmark"></i> Server</label>
         <input type="text" id="node-input-mongodb">
     </div>
     <div class="form-row">
-        <label for="node-input-collection"><i class="icon-briefcase"></i> Collection</label>
+        <label for="node-input-collection"><i class="fa fa-briefcase"></i> Collection</label>
         <input type="text" id="node-input-collection" placeholder="collection">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
