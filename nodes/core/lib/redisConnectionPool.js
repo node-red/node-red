@@ -21,8 +21,8 @@ module.exports = (function() {
 
     var connections = {};
     var obj = {
-        get: function(host,port) {
-            var id = host+":"+port;
+        get: function(host,port,type) {
+            var id = host+":"+port+"!"+(type || 'pub');
             if (!connections[id]) {
                 connections[id] = redis.createClient(port,host);
                 connections[id].on("error",function(err) {
@@ -33,8 +33,19 @@ module.exports = (function() {
                 });
                 connections[id]._id = id;
                 connections[id]._nodeCount = 0;
+                connections[id]._subscriptions = {};
+                connections[id]._topics = {};
             }
             connections[id]._nodeCount += 1;
+            connections[id].on('pmessage',function(pattern, channel, message) {
+                var connection = connections[this._id];
+                for (var i=0; i<connection._topics[pattern].length; i++) {
+                    var callback = connection._topics[pattern][i].callback;
+                    callback({ topic: channel,
+                               pattern: pattern,
+                               payload: message });
+                }
+            });
             return connections[id];
         },
         close: function(connection) {
@@ -46,7 +57,27 @@ module.exports = (function() {
                 }
                 delete connections[connection._id];
             }
+        },
+        subscribe: function(node, connection, pattern, callback) {
+            if (!connection._topics.hasOwnProperty(pattern)) {
+                connection.psubscribe(pattern);
+                connection._topics[pattern] = [];
+            }
+            connection._topics[pattern].push({node:node,callback:callback});
+        },
+        unsubscribe: function(node, connection, pattern) {
+            for (var i=0; i<connection._topics[pattern].length; i++) {
+                if (connection._topics[pattern][i].node === node) {
+                    connection._topics[pattern].splice(i,1);
+                    break;
+                }
+            }
+            if (connection._topics[pattern].length == 0) {
+                connection.punsubscribe(pattern);
+                connection._topics[pattern];
+            }
         }
+
     };
     return obj;
 })();

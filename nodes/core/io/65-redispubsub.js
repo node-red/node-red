@@ -66,4 +66,43 @@ module.exports = function(RED) {
         }
     }
     RED.nodes.registerType("redis pub", RedisPubNode);
+
+    function RedisSubNode(n) {
+
+        RED.nodes.createNode(this,n);
+        this.topic = n.topic;
+        this.server = n.server;
+        this.serverConfig = RED.nodes.getNode(this.server);
+        if (this.serverConfig) {
+            this.client = redisConnectionPool.get(this.serverConfig.host,
+                                                  this.serverConfig.port,
+                                                  'sub');
+
+            if (this.client.connected) {
+                this.status({fill:"green",shape:"dot",text:"connected"});
+            } else {
+                this.status({fill:"red",shape:"ring",text:"disconnected"},true);
+            }
+
+            var node = this;
+            this.client.on("end",function() {
+                node.status({fill:"red",shape:"ring",text:"disconnected"});
+            });
+            this.client.on("connect",function() {
+                node.status({fill:"green",shape:"dot",text:"connected"});
+            });
+
+            redisConnectionPool.subscribe(this, this.client, this.topic,
+                                          function (msg) {
+                                              node.send(msg);
+                                          });
+            this.on("close", function() {
+                redisConnectionPool.unsubscribe(node, node.client, node.topic);
+                redisConnectionPool.close(node.client);
+            });
+        } else {
+            this.error("missing redis server configuration");
+        }
+    }
+    RED.nodes.registerType("redis sub", RedisSubNode);
 };
