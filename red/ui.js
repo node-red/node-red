@@ -14,8 +14,6 @@
  * limitations under the License.
  **/
 var express = require('express');
-var util = require('util');
-var crypto = require('crypto');
 var fs = require("fs");
 var app = express();
 var events = require("./events");
