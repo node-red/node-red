@@ -15,11 +15,12 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var util = require("util");
     var redis = require("redis");
-    
+
     var hashFieldRE = /^([^=]+)=(.*)$/;
-    
+
     var redisConnectionPool = function() {
         var connections = {};
         var obj = {
@@ -41,7 +42,7 @@ module.exports = function(RED) {
             },
             close: function(connection) {
                 connection._nodeCount -= 1;
-                if (connection._nodeCount == 0) {
+                if (connection._nodeCount === 0) {
                     if (connection) {
                         clearTimeout(connection.retry_timer);
                         connection.end();
@@ -52,15 +53,15 @@ module.exports = function(RED) {
         };
         return obj;
     }();
-    
-    
+
+
     function RedisOutNode(n) {
         RED.nodes.createNode(this,n);
         this.port = n.port||"6379";
         this.hostname = n.hostname||"127.0.0.1";
         this.key = n.key;
         this.structtype = n.structtype;
-    
+
         this.client = redisConnectionPool.get(this.hostname,this.port);
 
         if (this.client.connected) {
@@ -100,12 +101,9 @@ module.exports = function(RED) {
                     }
                 }
         });
+        this.on("close", function() {
+            redisConnectionPool.close(node.client);
+        });
     }
-    
     RED.nodes.registerType("redis out",RedisOutNode);
-    
-    RedisOutNode.prototype.close = function() {
-        redisConnectionPool.close(this.client);
-    }
 }
-

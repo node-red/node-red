@@ -16,17 +16,17 @@
 
 <script type="text/x-red" data-template-name="redis out">
     <div class="form-row node-input-hostname">
-        <label for="node-input-hostname"><i class="icon-bookmark"></i> Host</label>
+        <label for="node-input-hostname"><i class="fa fa-bookmark"></i> Host</label>
         <input class="input-append-left" type="text" id="node-input-hostname" placeholder="127.0.0.1" style="width: 40%;" ><button id="node-input-hostname-lookup" class="btn input-append-right"><span class="caret"></span></button>
         <label for="node-input-port" style="margin-left: 10px; width: 35px; "> Port</label>
         <input type="text" id="node-input-port" placeholder="6379" style="width:45px">
     </div>
     <div class="form-row">
-        <label for="node-input-key"><i class="icon-briefcase"></i> Key</label>
+        <label for="node-input-key"><i class="fa fa-key"></i> Key</label>
         <input type="text" id="node-input-key" placeholder="Redis Key">
     </div>
     <div class="form-row">
-        <label for="node-input-type"><i class="icon-th"></i> Type</label>
+        <label for="node-input-type"><i class="fa fa-th"></i> Type</label>
         <select type="text" id="node-input-structtype" style="width: 150px;">
         <option value="string">String</option>
         <option value="hash">Hash</option>
@@ -35,7 +35,7 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-tips">
@@ -45,8 +45,8 @@
 </script>
 
 <script type="text/x-red" data-help-name="redis out">
-	<p>A Redis output node. Options include Hash, Set, List and String.</p>
-	<p>To run this you need a local Redis server running. For details see <a href="http://redis.io/" target="_new">the Redis site</a>.</p>
+    <p>A Redis output node. Options include Hash, Set, List and String.</p>
+    <p>To run this you need a local Redis server running. For details see <a href="http://redis.io/" target="_new">the Redis site</a>.</p>
 </script>
 
 <script type="text/javascript">
