@@ -15,9 +15,9 @@
  **/
 
 var should = require("should");
-var RedNodes = require("../red/nodes");
+var RedNodes = require("../../../red/nodes");
 
-var RedNode = require("../red/nodes/Node");
+var RedNode = require("../../../red/nodes/Node");
 
 describe('NodeRegistry', function() {
     it('automatically registers new nodes',function() {

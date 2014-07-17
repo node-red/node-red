@@ -16,10 +16,10 @@
  
 var should = require("should");
 var when = require("when");
-var flows = require("../red/nodes/flows");
-var RedNode = require("../red/nodes/Node");
-var RED = require("../red/nodes");
-var events = require("../red/events");
+var flows = require("../../../red/nodes/flows");
+var RedNode = require("../../../red/nodes/Node");
+var RED = require("../../../red/nodes");
+var events = require("../../../red/events");
 
 function loadFlows(testFlows, cb) {
     var storage = {

@@ -27,7 +27,7 @@ module.exports = function(grunt) {
                     ui: 'bdd',
                     reporter: 'tap'
                 },
-                all: { src: ['test/*.js'] }
+                all: { src: ['test/**/*.js'] }
             },
             jshint: {
                 options: {

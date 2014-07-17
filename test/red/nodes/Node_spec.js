@@ -15,7 +15,7 @@
  **/
  
 var should = require("should");
-var RedNode = require("../red/nodes/Node");
+var RedNode = require("../../../red/nodes/Node");
 
 describe('Node', function() {
     describe('#constructor',function() {
