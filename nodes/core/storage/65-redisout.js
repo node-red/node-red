@@ -16,44 +16,9 @@
 
 module.exports = function(RED) {
     "use strict";
-    var util = require("util");
-    var redis = require("redis");
+    var redisConnectionPool = require("../lib/redisConnectionPool");
 
     var hashFieldRE = /^([^=]+)=(.*)$/;
-
-    var redisConnectionPool = function() {
-        var connections = {};
-        var obj = {
-            get: function(host,port) {
-                var id = host+":"+port;
-                if (!connections[id]) {
-                    connections[id] = redis.createClient(port,host);
-                    connections[id].on("error",function(err) {
-                            util.log("[redis] "+err);
-                    });
-                    connections[id].on("connect",function() {
-                            util.log("[redis] connected to "+host+":"+port);
-                    });
-                    connections[id]._id = id;
-                    connections[id]._nodeCount = 0;
-                }
-                connections[id]._nodeCount += 1;
-                return connections[id];
-            },
-            close: function(connection) {
-                connection._nodeCount -= 1;
-                if (connection._nodeCount === 0) {
-                    if (connection) {
-                        clearTimeout(connection.retry_timer);
-                        connection.end();
-                    }
-                    delete connections[connection._id];
-                }
-            }
-        };
-        return obj;
-    }();
-
 
     function RedisOutNode(n) {
         RED.nodes.createNode(this,n);
