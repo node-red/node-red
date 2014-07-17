@@ -71,7 +71,7 @@ module.exports = function(grunt) {
                 },
                 tests: {
                     files: {
-                        src: ['test/*.js']
+                        src: ['test/**/*.js']
                     },
                     options: {
                         "expr": true
