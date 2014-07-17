@@ -62,7 +62,21 @@ module.exports = function(RED) {
         this.structtype = n.structtype;
     
         this.client = redisConnectionPool.get(this.hostname,this.port);
-    
+
+        if (this.client.connected) {
+            this.status({fill:"green",shape:"dot",text:"connected"});
+        } else {
+            this.status({fill:"red",shape:"ring",text:"disconnected"},true);
+        }
+
+        var node = this;
+        this.client.on("end", function() {
+            node.status({fill:"red",shape:"ring",text:"disconnected"});
+        });
+        this.client.on("connect", function() {
+            node.status({fill:"green",shape:"dot",text:"connected"});
+        });
+
         this.on("input", function(msg) {
                 if (msg != null) {
                     var k = this.key || msg.topic;
