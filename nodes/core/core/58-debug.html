@@ -150,9 +150,9 @@
                 }
                 
             };
-            var name = (o.name?o.name:o.id).toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-            var topic = (o.topic||"").toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-            var payload = (o.msg||"").toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+            var name = (o.name?o.name:o.id).toString().replace(/&/g,"&amp;amp;").replace(/</g,"&amp;lt;").replace(/>/g,"&amp;gt;");
+            var topic = (o.topic||"").toString().replace(/&/g,"&amp;amp;").replace(/</g,"&amp;lt;").replace(/>/g,"&amp;gt;");
+            var payload = (o.msg||"").toString().replace(/&/g,"&amp;amp;").replace(/</g,"&amp;lt;").replace(/>/g,"&amp;gt;");
             msg.className = 'debug-message'+(o.level?(' debug-message-level-'+o.level):'')
             msg.innerHTML = '<span class="debug-message-date">'+getTimestamp()+'</span>'+
                             '<span class="debug-message-name">['+name+']</span>'+
