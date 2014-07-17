@@ -18,7 +18,7 @@ var should = require("should");
 var sinon = require("sinon");
 var when = require("when");
 
-var credentials = require("../red/nodes/credentials");
+var credentials = require("../../../red/nodes/credentials");
 
 describe('Credentials', function() {
         
