@@ -67,7 +67,9 @@ function start() {
     
     storage.init(settings).then(function() {
         console.log("\nWelcome to Node-RED\n===================\n");
-        util.log("[red] Version: "+RED.version());
+        if (settings.version) {
+            util.log("[red] Version: "+settings.version);
+        }
         util.log("[red] Loading palette nodes");
         redNodes.init(settings,storage);
         redNodes.load().then(function(nodeErrors) {

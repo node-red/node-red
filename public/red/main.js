@@ -146,6 +146,7 @@ var RED = function() {
     function loadSettings() {
         $.get('settings', function(data) {
             RED.settings = data;
+            console.log("Node-RED: "+data.version);
             loadNodes();
         });
     }
