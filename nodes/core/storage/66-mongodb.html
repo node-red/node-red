@@ -30,8 +30,8 @@
         <input type="text" id="node-config-input-user">
     </div>
     <div class="form-row">
-        <label for="node-config-input-pass"><i class="fa fa-lock"></i> Password</label>
-        <input type="password" id="node-config-input-pass">
+        <label for="node-config-input-password"><i class="fa fa-lock"></i> Password</label>
+        <input type="password" id="node-config-input-password">
     </div>
     <div class="form-row">
         <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -48,46 +48,13 @@
             port: { value: 27017,required:true},
             db: { value:"",required:true},
             name: { value:"" }
-            //user -> credentials
-            //pass -> credentials
+        },
+        credentials: {
+            user: {type:"text"},
+            password: {type: "password"}
         },
         label: function() {
             return this.name||this.hostname+":"+this.port+"/"+this.db;
-        },
-        oneditprepare: function() {
-            $.getJSON('mongodb/'+this.id,function(data) {
-                if (data.user) {
-                    $('#node-config-input-user').val(data.user);
-                }
-                if (data.hasPassword) {
-                    $('#node-config-input-pass').val('__PWRD__');
-                } else {
-                    $('#node-config-input-pass').val('');
-                }
-
-            });
-        },
-        oneditsave: function() {
-            var newUser = $('#node-config-input-user').val();
-            var newPass = $('#node-config-input-pass').val();
-            var credentials = {};
-            credentials.user = newUser;
-            if (newPass != '__PWRD__') {
-                credentials.password = newPass;
-            }
-            $.ajax({
-                url: 'mongodb/'+this.id,
-                type: 'POST',
-                data: credentials,
-                success:function(result){}
-            });
-        },
-        ondelete: function() {
-            $.ajax({
-                url: 'mongodb/'+this.id,
-                type: 'DELETE',
-                success: function(result) {}
-            });
         }
     });
 </script>
