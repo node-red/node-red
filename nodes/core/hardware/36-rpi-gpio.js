@@ -47,7 +47,18 @@ module.exports = function(RED) {
             "21":"13",
             "23":"14",
              "8":"15",
-            "10":"16"
+            "10":"16",
+            "27":"30",
+            "28":"31",
+            "29":"21",
+            "31":"22",
+            "32":"26",
+            "33":"23",
+            "35":"24",
+            "36":"27",
+            "37":"25",
+            "38":"28",
+            "40":"29"
     }
     var tablepin = {
     // WiringPi : Physical
@@ -67,7 +78,18 @@ module.exports = function(RED) {
            "13":"21",
            "14":"23",
            "15":"8",
-           "16":"10"
+           "16":"10",
+           "30":"27",
+           "31":"28",
+           "21":"29",
+           "22":"31",
+           "26":"32",
+           "23":"33",
+           "24":"35",
+           "27":"36",
+           "25":"37",
+           "28":"38",
+           "29":"40"
     }
 
     function GPIOInNode(n) {
@@ -77,13 +99,13 @@ module.exports = function(RED) {
         this.intype = n.intype;
         var node = this;
 
-        if (node.pin) {
+        if (node.pin !== undefined) {
             exec("gpio mode "+node.pin+" "+node.intype, function(err,stdout,stderr) {
-                if (err) node.error(err);
+                if (err) { node.error(err); }
                 else {
                     node._interval = setInterval( function() {
                         exec("gpio read "+node.pin, function(err,stdout,stderr) {
-                            if (err) node.error(err);
+                            if (err) { node.error(err); }
                             else {
                                 if (node.buttonState !== Number(stdout)) {
                                     var previousState = node.buttonState;
@@ -113,21 +135,21 @@ module.exports = function(RED) {
         this.pin = pintable[n.pin];
         var node = this;
 
-        if (node.pin) {
+        if (node.pin !== undefined) {
             process.nextTick(function() {
                 exec("gpio mode "+node.pin+" out", function(err,stdout,stderr) {
-                    if (err) node.error(err);
+                    if (err) { node.error(err); }
                     else {
                         node.on("input", function(msg) {
-                            if (msg.payload === "true") msg.payload = true;
-                            if (msg.payload === "false") msg.payload = false;
+                            if (msg.payload === "true") { msg.payload = true; }
+                            if (msg.payload === "false") { msg.payload = false; }
                             var out = Number(msg.payload);
-                            if ((out == 0)|(out == 1)) {
+                            if ((out === 0)|(out === 1)) {
                                 exec("gpio write "+node.pin+" "+out, function(err,stdout,stderr) {
-                                    if (err) node.error(err);
+                                    if (err) { node.error(err); }
                                 });
                             }
-                            else node.warn("Invalid input - not 0 or 1");
+                            else { node.warn("Invalid input - not 0 or 1"); }
                         });
                     }
                 });
@@ -155,6 +177,22 @@ module.exports = function(RED) {
     //    exec("gpio mode 7 in");
     //});
 
+    var pitype = { type:"" };
+    exec("gpio -v | grep Type", function(err,stdout,stderr) {
+        if (err) {
+            util.log('[36-rpi-gpio.js] Error: "gpio -v" command failed for some reason.');
+        }
+        else {
+            pitype = { type:(stdout.split(","))[0].split(": ")[1], rev:(stdout.split(","))[1].split(": ")[1] };
+        }
+    });
+
     RED.nodes.registerType("rpi-gpio in",GPIOInNode);
     RED.nodes.registerType("rpi-gpio out",GPIOOutNode);
+
+    var querystring = require('querystring');
+    RED.httpAdmin.get('/rpi-gpio/:id',function(req,res) {
+        var credentials = RED.nodes.getCredentials(req.params.id);
+        res.send( JSON.stringify(pitype) );
+    });
 }
