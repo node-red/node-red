@@ -22,44 +22,6 @@ RED.editor = function() {
         return  'credentials/' + dashedType + "/" + nodeID;
     }
 
- /**
-     * Assign the credentials to the node
-     * @param node - the node containing the credentials
-     * @param credDefinition - definition of the credentials
-     * @param prefix - prefix of the input fields
-     */
-    function manageNodeCredentials(node, credDefinition, prefix) {
-        if(!node._creds) {
-             node._creds = {server: {}, send: {}, input: {}};
-        }
-
-        for (var cred in credDefinition) {
-            var input = $("#" + prefix + '-' + cred);
-            var value = input.val();
-            if (credDefinition[cred].type == 'password') {
-                if(value != '') {
-                    node._creds.input['has' + cred] = true;
-                    if (value == '__PWRD__') {
-                        continue;
-                    }
-                } else {
-                    node._creds.input['has' + cred] = false;
-                }
-            }
-            if (node._creds.server[cred] != value) {
-                node._creds.send[cred] = value;
-            } else {
-                delete node._creds.send[cred];
-            }
-            if (credDefinition[cred].type != 'password') {
-                node._creds.input[cred] = value;
-            }
-
-        }
-    }
-
-    
-    
     /**
      * Validate a node 
      * @param node - the node being validated
@@ -237,7 +199,8 @@ RED.editor = function() {
                             if (editing_node._def.credentials) {
                                 var prefix = 'node-input';
                                 var credDefinition = editing_node._def.credentials;
-                                manageNodeCredentials(editing_node,credDefinition,prefix);
+                                var credsChanged = updateNodeCredentials(editing_node,credDefinition,prefix);
+                                changed = changed || credsChanged;
                             }
 
 
@@ -381,21 +344,61 @@ RED.editor = function() {
      */
     function populateCredentialsInputs(node, credDef, credData, prefix) {
         for (var cred in credDef) {
-            if (credDef[cred].type == 'password') {
-                if (credData['has' + cred]) {
-                    $('#' + prefix + '-' + cred).val('__PWRD__');
+            if (credDef.hasOwnProperty(cred)) {
+                if (credDef[cred].type == 'password') {
+                    if (credData[cred]) {
+                        $('#' + prefix + '-' + cred).val(credData[cred]);
+                    } else if (credData['has' + cred]) {
+                        $('#' + prefix + '-' + cred).val('__PWRD__');
+                    }
+                    else {
+                        $('#' + prefix + '-' + cred).val('');
+                    }
+                } else {
+                    preparePropertyEditor(credData, cred, prefix);
                 }
-                else {
-                    $('#' + prefix + '-' + cred).val('');
-                }
-            } else {
-                preparePropertyEditor(credData, cred, prefix);
+                attachPropertyChangeHandler(node, credDef, cred, prefix);
             }
-            attachPropertyChangeHandler(node, credDef, cred, prefix);
-            for (var cred in credDef) {
+        }
+        for (var cred in credDef) {
+            if (credDef.hasOwnProperty(cred)) {
                 $("#" + prefix + "-" + cred).change();
             }
         }
+    }
+    
+    /**
+     * Update the node credentials from the edit form
+     * @param node - the node containing the credentials
+     * @param credDefinition - definition of the credentials
+     * @param prefix - prefix of the input fields
+     * @return {boolean} whether anything has changed
+     */
+    function updateNodeCredentials(node, credDefinition, prefix) {
+        var changed = false;
+        if(!node.credentials) {
+            node.credentials = {};
+        }
+
+        for (var cred in credDefinition) {
+            if (credDefinition.hasOwnProperty(cred)) {
+                var input = $("#" + prefix + '-' + cred);
+                var value = input.val();
+                if (credDefinition[cred].type == 'password') {
+                    node.credentials['has' + cred] = (value != "");
+                    if (value == '__PWRD__') {
+                        continue;
+                    }
+                    changed = true;
+                    
+                }
+                if (value != node.credentials._[cred]) {
+                    node.credentials[cred] = value;
+                    changed = true;
+                }
+            }
+        }
+        return changed;
     }
 
     /**
@@ -413,23 +416,29 @@ RED.editor = function() {
             }
             attachPropertyChangeHandler(node,definition.defaults,d,prefix);
         }
-        if (definition.credentials) {
-            if (node._creds) {
-                populateCredentialsInputs(node, definition.credentials, node._creds.input, prefix);
-            } else {
-                node._creds = {server: {}, send: {}, input: {}};
-                $.getJSON(getCredentialsURL(node.type, node.id), function (data) {
-                    node._creds.server = data;
-                    node._creds.input = jQuery.extend({}, data);
-                    populateCredentialsInputs(node, definition.credentials, node._creds.input, prefix);
-                });
+        var completePrepare = function() {
+            if (definition.oneditprepare) {
+                definition.oneditprepare.call(node);
+            }
+            for (var d in definition.defaults) {
+                $("#"+prefix+"-"+d).change();
             }
         }
-        if (definition.oneditprepare) {
-            definition.oneditprepare.call(node);
-        }
-        for (var d in definition.defaults) {
-            $("#"+prefix+"-"+d).change();
+        
+        if (definition.credentials) {
+            if (node.credentials) {
+                populateCredentialsInputs(node, definition.credentials, node.credentials, prefix);
+                completePrepare();
+            } else {
+                $.getJSON(getCredentialsURL(node.type, node.id), function (data) {
+                    node.credentials = data;
+                    node.credentials._ = $.extend(true,{},data);
+                    populateCredentialsInputs(node, definition.credentials, node.credentials, prefix);
+                    completePrepare();
+                });
+            }
+        } else {
+            completePrepare();
         }
     }
 
@@ -570,7 +579,7 @@ RED.editor = function() {
                             updateConfigNodeSelect(configProperty,configType,configId);
                         }
                         if (configTypeDef.credentials) {
-                            manageNodeCredentials(configNode,configTypeDef.credentials,"node-config-input");
+                            updateNodeCredentials(configNode,configTypeDef.credentials,"node-config-input");
                         }
                         if (configTypeDef.oneditsave) {
                             configTypeDef.oneditsave.call(RED.nodes.node(configId));

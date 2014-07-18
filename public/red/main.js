@@ -92,13 +92,13 @@ var RED = function() {
                         node.dirty = true;
                         node.changed = false;
                     }
-                    if(node._creds) {
-                        delete node._creds;
+                    if(node.credentials) {
+                        delete node.credentials;
                     }
                 });
                 RED.nodes.eachConfig(function (confNode) {
-                    if (confNode._creds) {
-                        delete confNode._creds;
+                    if (confNode.credentials) {
+                        delete confNode.credentials;
                     }
                 });
                 // Once deployed, cannot undo back to a clean state

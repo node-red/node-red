@@ -45,12 +45,11 @@ var parseCredentials = function (config) {
         for (var i in config) {
             if (config.hasOwnProperty(i)) {
                 var node = config[i];
-                if (!node._creds) {
-                    continue;
+                if (node.credentials) {
+                    var type = node.type;
+                    credentials.merge(node.id, type, node.credentials);
+                    delete node.credentials;
                 }
-                var type = node.type;
-                credentials.merge(node.id, type, node._creds);
-                delete node._creds;
             }
         }
         credentials.save().then(function () {

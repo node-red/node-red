@@ -183,8 +183,15 @@ RED.nodes = function() {
         for (var d in n._def.defaults) {
             node[d] = n[d];
         }
-        if(exportCreds && n._creds) {
-            node._creds = n._creds.send;
+        if(exportCreds && n.credentials) {
+            node.credentials = {};
+            for (var cred in n._def.credentials) {
+                if (n._def.credentials.hasOwnProperty(cred)) {
+                    if (n.credentials[cred] != null) {
+                        node.credentials[cred] = n.credentials[cred];
+                    }
+                }
+            }
         }
         if (n._def.category != "config") {
             node.x = n.x;
