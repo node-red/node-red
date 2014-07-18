@@ -18,6 +18,18 @@ var credentials = require("./credentials");
 var flows = require("./flows");
 var Node = require("./Node");
 
+/**
+ * Registers a node constructor
+ * @param type - the string type name
+ * @param constructor - the constructor function for this node type
+ * @param opts - optional additional options for the node
+ */
+function registerType(type,constructor,opts) {
+    if (opts && opts.credentials) {
+        credentials.register(type,opts.credentials);
+    }
+    registry.registerType(type,constructor);    
+}
 
 function createNode(node,def) {
     Node.call(node,def);
@@ -33,11 +45,10 @@ function init(_settings,storage) {
 module.exports = {
     init: init,
     load: registry.load,
-    addCredentials: credentials.add,
-    getCredentials: credentials.get,
-    deleteCredentials: credentials.delete,
+    
     createNode: createNode,
-    registerType: registry.registerType,
+    registerType: registerType,
+    
     getType: registry.get,
     getNodeConfigs: registry.getNodeConfigs,
     getNode: flows.get,
@@ -45,6 +56,11 @@ module.exports = {
     loadFlows: flows.load,
     stopFlows: flows.stopFlows,
     setFlows: flows.setFlows,
-    getFlows: flows.getFlows
+    getFlows: flows.getFlows,
+    
+    // TODO: remove these from api - see #93
+    addCredentials: credentials.add,
+    getCredentials: credentials.get,
+    deleteCredentials: credentials.delete
 }
 
