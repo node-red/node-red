@@ -56,7 +56,7 @@ module.exports = function(RED) {
                 //}
             //}
             else if (node.action == "replace") {
-                if (node.to.indexOf("msg.") == 0) {
+                if (node.to.indexOf("msg.") === 0) {
                     makeNew( msg, node.property.split("."), eval(node.to) );
                 }
                 else {
