@@ -24,53 +24,17 @@ module.exports = function(RED) {
         this.broker = n.broker;
         this.port = n.port;
         this.clientid = n.clientid;
-        var credentials = RED.nodes.getCredentials(n.id);
-        if (credentials) {
-            this.username = credentials.user;
-            this.password = credentials.password;
+        if (this.credentials) {
+            this.username = this.credentials.user;
+            this.password = this.credentials.password;
         }
     }
-    RED.nodes.registerType("mqtt-broker",MQTTBrokerNode);
-
-    var querystring = require('querystring');
-
-    RED.httpAdmin.get('/mqtt-broker/:id',function(req,res) {
-        var credentials = RED.nodes.getCredentials(req.params.id);
-        if (credentials) {
-            res.send(JSON.stringify({user:credentials.user,hasPassword:(credentials.password&&credentials.password!="")}));
-        } else {
-            res.send(JSON.stringify({}));
+    RED.nodes.registerType("mqtt-broker",MQTTBrokerNode,{
+        credentials: {
+            user: {type:"text"},
+            password: {type: "password"}
         }
     });
-
-    RED.httpAdmin.delete('/mqtt-broker/:id',function(req,res) {
-        RED.nodes.deleteCredentials(req.params.id);
-        res.send(200);
-    });
-
-    RED.httpAdmin.post('/mqtt-broker/:id',function(req,res) {
-        var body = "";
-        req.on('data', function(chunk) {
-            body+=chunk;
-        });
-        req.on('end', function(){
-            var newCreds = querystring.parse(body);
-            var credentials = RED.nodes.getCredentials(req.params.id)||{};
-            if (newCreds.user == null || newCreds.user == "") {
-                delete credentials.user;
-            } else {
-                credentials.user = newCreds.user;
-            }
-            if (newCreds.password == "") {
-                delete credentials.password;
-            } else {
-                credentials.password = newCreds.password||credentials.password;
-            }
-            RED.nodes.addCredentials(req.params.id,credentials);
-            res.send(200);
-        });
-    });
-
 
     function MQTTInNode(n) {
         RED.nodes.createNode(this,n);

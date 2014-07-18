@@ -115,8 +115,8 @@
         <input type="text" id="node-config-input-user">
     </div>
     <div class="form-row">
-        <label for="node-config-input-pass"><i class="icon-lock"></i> Password</label>
-        <input type="password" id="node-config-input-pass">
+        <label for="node-config-input-password"><i class="icon-lock"></i> Password</label>
+        <input type="password" id="node-config-input-password">
     </div>
 </script>
 
@@ -127,48 +127,14 @@
             broker: {value:"",required:true},
             port: {value:1883,required:true,validate:RED.validators.number()},
             clientid: { value:"" }
-            //user -> credentials
-            //pass -> credentials
-
+        },
+        credentials: {
+            user: {type:"text"},
+            password: {type: "password"}
         },
         label: function() {
             if (this.broker == "") { this.broker = "localhost"; }
             return (this.clientid?this.clientid+"@":"")+this.broker+":"+this.port;
-        },
-        oneditprepare: function() {
-            $.getJSON('mqtt-broker/'+this.id,function(data) {
-                if (data.user) {
-                    $('#node-config-input-user').val(data.user);
-                }
-                if (data.hasPassword) {
-                    $('#node-config-input-pass').val('__PWRD__');
-                } else {
-                    $('#node-config-input-pass').val('');
-                }
-            });
-        },
-        oneditsave: function() {
-            if (this.broker == "") { this.broker = "localhost"; }
-            var newUser = $('#node-config-input-user').val();
-            var newPass = $('#node-config-input-pass').val();
-            var credentials = {};
-            credentials.user = newUser;
-            if (newPass != '__PWRD__') {
-                credentials.password = newPass;
-            }
-            $.ajax({
-                url: 'mqtt-broker/'+this.id,
-                type: 'POST',
-                data: credentials,
-                success:function(result){}
-            });
-        },
-        ondelete: function() {
-            $.ajax({
-                url: 'mqtt-broker/'+this.id,
-                type: 'DELETE',
-                success: function(result) {}
-            });
         }
     });
 </script>
