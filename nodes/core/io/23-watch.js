@@ -24,7 +24,7 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
 
         this.files = n.files.split(",");
-        for (var f in this.files) {
+        for (var f =0; f < this.files.length; f++) {
             this.files[f] = this.files[f].trim();
         }
         this.p = (this.files.length == 1) ? this.files[0] : JSON.stringify(this.files);

@@ -30,7 +30,7 @@ module.exports = function(RED) {
     var urlencParser = express.urlencoded();
 
     function rawBodyParser(req, res, next) {
-        if (req._body) return next();
+        if (req._body) { return next(); }
         req.body = "";
         req._body = true;
         getBody(req, {
@@ -38,7 +38,7 @@ module.exports = function(RED) {
             length: req.headers['content-length'],
             encoding: 'utf8'
         }, function (err, buf) {
-            if (err) return next(err);
+            if (err) { return next(err); }
             req.body = buf;
             next();
         });
@@ -95,10 +95,10 @@ module.exports = function(RED) {
                     }
                 }
                 if (RED.settings.httpNodeCors) {
-                    var routes = RED.httpNode.routes['options'];
-                    for (var i = 0; i<routes.length; i++) {
-                        if (routes[i].path == this.url) {
-                            routes.splice(i,1);
+                    var route = RED.httpNode.route['options'];
+                    for (var j = 0; j<route.length; j++) {
+                        if (route[j].path == this.url) {
+                            route.splice(j,1);
                             //break;
                         }
                     }
@@ -166,7 +166,7 @@ module.exports = function(RED) {
             opts.method = method;
             opts.headers = {};
             if (msg.headers) {
-                for (var v in msg.headers) {
+                for (var v = 0; v < msg.headers.length; v++) {
                     opts.headers[v.toLowerCase()] = msg.headers[v];
                 }
             }
@@ -226,7 +226,7 @@ module.exports = function(RED) {
     RED.httpAdmin.get('/http-request/:id',function(req,res) {
         var credentials = RED.nodes.getCredentials(req.params.id);
         if (credentials) {
-            res.send(JSON.stringify({user:credentials.user,hasPassword:(credentials.password&&credentials.password!="")}));
+            res.send(JSON.stringify({user:credentials.user,hasPassword:(credentials.password&&credentials.password!=="")}));
         } else {
             res.send(JSON.stringify({}));
         }

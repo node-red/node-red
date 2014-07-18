@@ -75,7 +75,7 @@ module.exports = function(RED) {
             // Workaround https://github.com/einaros/ws/pull/253
             // Remove listeners from RED.server
             var listener = null;
-            for(var event in node._serverListeners){
+            for (var event = 0; event < node._serverListeners.length; event++) {
                 listener = node._serverListeners[event];
                 if(typeof listener === "function"){
                     RED.server.removeListener(event,listener);
@@ -115,15 +115,19 @@ module.exports = function(RED) {
     }
 
     WebSocketListenerNode.prototype.broadcast = function(data){
-        for(var i in this.server.clients){
+        for (var i = 0; i < this.server.clients.length; i++) {
             this.server.clients[i].send(data);
         }
     }
 
-    WebSocketListenerNode.prototype.send = function(id,data){
+    WebSocketListenerNode.prototype.send = function(id,data) {
         var session = this._clients[id];
         if (session) {
-            session.send(data);
+            try {
+                session.send(data);
+            }
+            catch(e) { // swallow any errors
+            }
         }
     }
 
@@ -167,7 +171,7 @@ module.exports = function(RED) {
                 node.serverConfig.send(msg._session.id,payload);
             } else {
                 node.serverConfig.broadcast(payload,function(error){
-                    if(!!error){
+                    if (!!error) {
                         node.warn("An error occurred while sending:" + inspect(error));
                     }
                 });
