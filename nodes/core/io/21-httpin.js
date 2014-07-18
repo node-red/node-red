@@ -149,7 +149,6 @@ module.exports = function(RED) {
         var isTemplatedUrl = (nodeUrl||"").indexOf("{{") != -1;
         var nodeMethod = n.method || "GET";
         var node = this;
-        var credentials = RED.nodes.getCredentials(n.id);
         this.on("input",function(msg) {
             node.status({fill:"blue",shape:"dot",text:"requesting"});
             var url;
@@ -170,10 +169,9 @@ module.exports = function(RED) {
                     opts.headers[v.toLowerCase()] = msg.headers[v];
                 }
             }
-            if (credentials) {
-                opts.auth = credentials.user+":"+(credentials.password||"");
+            if (this.credentials.user) {
+                opts.auth = this.credentials.user+":"+(this.credentials.password||"");
             }
-
             var payload = null;
 
             if (msg.payload && (method == "POST" || method == "PUT") ) {
@@ -221,42 +219,11 @@ module.exports = function(RED) {
             req.end();
         });
     }
-    RED.nodes.registerType("http request",HTTPRequest);
-
-    RED.httpAdmin.get('/http-request/:id',function(req,res) {
-        var credentials = RED.nodes.getCredentials(req.params.id);
-        if (credentials) {
-            res.send(JSON.stringify({user:credentials.user,hasPassword:(credentials.password&&credentials.password!=="")}));
-        } else {
-            res.send(JSON.stringify({}));
+    
+    RED.nodes.registerType("http request",HTTPRequest,{
+        credentials: {
+            user: {type:"text"},
+            password: {type: "password"}
         }
-    });
-
-    RED.httpAdmin.delete('/http-request/:id',function(req,res) {
-        RED.nodes.deleteCredentials(req.params.id);
-        res.send(200);
-    });
-
-    RED.httpAdmin.post('/http-request/:id',function(req,res) {
-        var body = "";
-        req.on('data', function(chunk) {
-            body+=chunk;
-        });
-        req.on('end', function(){
-            var newCreds = querystring.parse(body);
-            var credentials = RED.nodes.getCredentials(req.params.id)||{};
-            if (newCreds.user == null || newCreds.user == "") {
-                delete credentials.user;
-            } else {
-                credentials.user = newCreds.user;
-            }
-            if (newCreds.password == "") {
-                delete credentials.password;
-            } else {
-                credentials.password = newCreds.password||credentials.password;
-            }
-            RED.nodes.addCredentials(req.params.id,credentials);
-            res.send(200);
-        });
     });
 }

@@ -103,12 +103,12 @@
         <label for="node-input-useAuth" style="width: 70%;">Use basic authentication?</label>
     </div>
     <div class="form-row node-input-useAuth-row">
-        <label for="node-config-input-user"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-config-input-user">
+        <label for="node-input-user"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-input-user">
     </div>
     <div class="form-row node-input-useAuth-row">
-        <label for="node-config-input-pass"><i class="fa fa-lock"></i> Password</label>
-        <input type="password" id="node-config-input-pass">
+        <label for="node-input-password"><i class="fa fa-lock"></i> Password</label>
+        <input type="password" id="node-input-password">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -206,6 +206,10 @@
             //user -> credentials
             //pass -> credentials
         },
+        credentials: {
+            user: {type:"text"},
+            password: {type: "password"}
+        },
         inputs:1,
         outputs:1,
         align: "right",
@@ -217,70 +221,23 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
-            $.getJSON('http-request/'+this.id,function(data) {
-                if (data.user) {
-                    $('#node-input-useAuth').prop('checked', true);
-                    $(".node-input-useAuth-row").show();
-                    $('#node-config-input-user').data("v",data.user);
-                    $('#node-config-input-user').val(data.user);
-                } else {
-                    $('#node-input-useAuth').prop('checked', false);
-                    $(".node-input-useAuth-row").hide();
-                    $('#node-config-input-user').data("v",'');
-                }
-                if (data.hasPassword) {
-                    $('#node-input-useAuth').prop('checked', true);
-                    $(".node-input-useAuth-row").show();
-                    $('#node-config-input-pass').data("v",'__PWRD__');
-                    $('#node-config-input-pass').val('__PWRD__');
-                } else {
-                    $('#node-config-input-pass').data("v",'');
-                    $('#node-config-input-pass').val('');
-                }
-
-            });
+            if (this.credentials.user || this.credentials.haspassword) {
+                $('#node-input-useAuth').prop('checked', true);
+                $(".node-input-useAuth-row").show();
+            } else {
+                $('#node-input-useAuth').prop('checked', false);
+                $(".node-input-useAuth-row").hide();
+            }
 
             $("#node-input-useAuth").change(function() {
                 if ($(this).is(":checked")) {
                     $(".node-input-useAuth-row").show();
                 } else {
                     $(".node-input-useAuth-row").hide();
+                    $('#node-input-user').val('');
+                    $('#node-input-password').val('');
                 }
             });
         },
-        oneditsave: function() {
-            var oldUser = $('#node-config-input-user').data("v");
-            var oldPass = $('#node-config-input-pass').data("v");
-            var newUser = $('#node-config-input-user').val();
-            var newPass = $('#node-config-input-pass').val();
-
-            if (!$("#node-input-useAuth").is(":checked")) {
-                newUser = "";
-                newPass = "";
-            }
-
-            if (oldUser != newUser || oldPass != newPass) {
-                if (newUser == "" && newPass == "") {
-                    $.ajax({
-                        url: 'http-request/'+this.id,
-                        type: 'DELETE',
-                        success: function(result) {}
-                    });
-                } else {
-                    var credentials = {};
-                    credentials.user = newUser;
-                    if (newPass != '__PWRD__') {
-                        credentials.password = newPass;
-                    }
-                    $.ajax({
-                        url: 'http-request/'+this.id,
-                        type: 'POST',
-                        data: credentials,
-                        success:function(result){}
-                    });
-                }
-                return true;
-            }
-        }
     });
 </script>
