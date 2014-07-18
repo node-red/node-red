@@ -33,6 +33,10 @@ function registerType(type,constructor,opts) {
 
 function createNode(node,def) {
     Node.call(node,def);
+    var creds = credentials.get(node.id);
+    if (creds) {
+        node.credentials = creds;
+    }
 }
 
 function init(_settings,storage) {
