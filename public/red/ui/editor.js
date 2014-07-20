@@ -348,7 +348,7 @@ RED.editor = function() {
                 if (credDef[cred].type == 'password') {
                     if (credData[cred]) {
                         $('#' + prefix + '-' + cred).val(credData[cred]);
-                    } else if (credData['has' + cred]) {
+                    } else if (credData['has_' + cred]) {
                         $('#' + prefix + '-' + cred).val('__PWRD__');
                     }
                     else {
@@ -385,7 +385,7 @@ RED.editor = function() {
                 var input = $("#" + prefix + '-' + cred);
                 var value = input.val();
                 if (credDefinition[cred].type == 'password') {
-                    node.credentials['has' + cred] = (value != "");
+                    node.credentials['has_' + cred] = (value != "");
                     if (value == '__PWRD__') {
                         continue;
                     }

@@ -49,7 +49,7 @@ function restGET(type) {
         for (var cred in definition) {
             if (definition.hasOwnProperty(cred)) {
                 if (definition[cred].type == "password") {
-                    var key = 'has' + cred;
+                    var key = 'has_' + cred;
                     sendCredentials[key] = credentials[cred] != null && credentials[cred] !== '';
                     continue;
                 }
