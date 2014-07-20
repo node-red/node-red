@@ -377,7 +377,7 @@ RED.editor = function() {
     function updateNodeCredentials(node, credDefinition, prefix) {
         var changed = false;
         if(!node.credentials) {
-            node.credentials = {};
+            node.credentials = {_:{}};
         }
 
         for (var cred in credDefinition) {

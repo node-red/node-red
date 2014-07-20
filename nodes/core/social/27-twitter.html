@@ -20,6 +20,7 @@
 </script>
 
 <script type="text/javascript">
+(function() {
     var twitterConfigNodeId = null;
     var twitterConfigNodeIntervalId = null;
 
@@ -28,9 +29,9 @@
         if (pathname.slice(-1) != "/") {
             pathname += "/";
         }
-        var callback = encodeURIComponent(location.protocol+"//"+location.hostname+":"+location.port+pathname+"twitter/"+twitterConfigNodeId+"/auth/callback");
+        var callback = encodeURIComponent(location.protocol+"//"+location.hostname+":"+location.port+pathname+"twitter-credentials/"+twitterConfigNodeId+"/auth/callback");
 
-        $("#node-config-twitter-row").html('Click <a id="node-config-twitter-start" href="twitter/'+twitterConfigNodeId+'/auth?callback='+callback+'" target="_blank"><b>here</b></a> to authenticate with Twitter.');
+        $("#node-config-twitter-row").html('Click <a id="node-config-twitter-start" href="twitter-credentials/'+twitterConfigNodeId+'/auth?callback='+callback+'" target="_blank"><b>here</b></a> to authenticate with Twitter.');
         $("#node-config-twitter-start").click(function() {
             twitterConfigNodeIntervalId = window.setTimeout(pollTwitterCredentials,2000);
         });
@@ -40,9 +41,9 @@
         $("#node-config-twitter-row").html('<label><i class="icon-user"></i> Twitter ID</label><span class="input-xlarge uneditable-input">'+sn+'</span>');
     }
     function pollTwitterCredentials(e) {
-        $.getJSON('twitter/'+twitterConfigNodeId,function(data) {
-            if (data.sn) {
-                updateTwitterScreenName(data.sn);
+        $.getJSON('credentials/twitter-credentials/'+twitterConfigNodeId,function(data) {
+            if (data.screen_name) {
+                updateTwitterScreenName(data.screen_name);
                 twitterConfigNodeIntervalId = null;
             } else {
                 twitterConfigNodeIntervalId = window.setTimeout(pollTwitterCredentials,2000);
@@ -52,10 +53,14 @@
     RED.nodes.registerType('twitter-credentials',{
         category: 'config',
         defaults: {
-            screen_name: {value:""},
-            access_token: {value: ""},
-            access_token_secret: {value:""}
+            screen_name: {value:""}
         },
+        credentials: {
+            screen_name: {type:"text"},
+            access_token: {type: "password"},
+            access_token_secret: {type:"password"}
+        },
+            
         label: function() {
             return this.screen_name;
         },
@@ -65,13 +70,11 @@
             if (!this.screen_name || this.screen_name == "") {
                 showTwitterAuthStart();
             } else {
-                $.getJSON('twitter/'+twitterConfigNodeId,function(data) {
-                    if (data.sn) {
-                        updateTwitterScreenName(data.sn);
-                    } else {
-                        showTwitterAuthStart();
-                    }
-                });
+                if (this.credentials.screen_name) {
+                    updateTwitterScreenName(this.credentials.screen_name);
+                } else {
+                    showTwitterAuthStart();
+                }
             }
         },
         oneditsave: function() {
@@ -83,22 +86,9 @@
             if (twitterConfigNodeIntervalId) {
                 window.clearTimeout(twitterConfigNodeIntervalId);
             }
-            if (adding) {
-                $.ajax({
-                    url: 'twitter/'+this.id,
-                    type: 'DELETE',
-                    success: function(result) {}
-                });
-            }
-        },
-        ondelete: function() {
-            $.ajax({
-                url: 'twitter/'+this.id,
-                type: 'DELETE',
-                success: function(result) {}
-            });
         }
     });
+})();
 </script>
 
 <script type="text/x-red" data-template-name="twitter in">

@@ -23,7 +23,13 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         this.screen_name = n.screen_name;
     }
-    RED.nodes.registerType("twitter-credentials",TwitterNode);
+    RED.nodes.registerType("twitter-credentials",TwitterNode,{
+        credentials: {
+            screen_name: {type:"text"},
+            access_token: {type: "password"},
+            access_token_secret: {type:"password"}
+        }       
+    });
 
     function TwitterInNode(n) {
         RED.nodes.createNode(this,n);
@@ -266,23 +272,7 @@ module.exports = function(RED) {
         "HMAC-SHA1"
     );
 
-    var credentials = {};
-
-    RED.httpAdmin.get('/twitter/:id', function(req,res) {
-        var credentials = RED.nodes.getCredentials(req.params.id);
-        if (credentials) {
-            res.send(JSON.stringify({sn:credentials.screen_name}));
-        } else {
-            res.send(JSON.stringify({}));
-        }
-    });
-
-    RED.httpAdmin.delete('/twitter/:id', function(req,res) {
-        RED.nodes.deleteCredentials(req.params.id);
-        res.send(200);
-    });
-
-    RED.httpAdmin.get('/twitter/:id/auth', function(req, res){
+    RED.httpAdmin.get('/twitter-credentials/:id/auth', function(req, res){
         var credentials = {};
         oa.getOAuthRequestToken({
                 oauth_callback: req.query.callback
@@ -302,7 +292,7 @@ module.exports = function(RED) {
         });
     });
 
-    RED.httpAdmin.get('/twitter/:id/auth/callback', function(req, res, next){
+    RED.httpAdmin.get('/twitter-credentials/:id/auth/callback', function(req, res, next){
         var credentials = RED.nodes.getCredentials(req.params.id);
         credentials.oauth_verifier = req.query.oauth_verifier;
 
