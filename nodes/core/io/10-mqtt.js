@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013,2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 module.exports = function(RED) {
     "use strict";
     var connectionPool = require("./lib/mqttConnectionPool");
-    var util = require("util");
 
     function MQTTBrokerNode(n) {
         RED.nodes.createNode(this,n);
@@ -62,55 +61,48 @@ module.exports = function(RED) {
         } else {
             this.error("missing broker configuration");
         }
+        this.on('close', function() {
+            if (this.client) {
+                this.client.disconnect();
+            }
+        });
     }
-
     RED.nodes.registerType("mqtt in",MQTTInNode);
-
-    MQTTInNode.prototype.close = function() {
-        if (this.client) {
-            this.client.disconnect();
-        }
-    }
-
 
     function MQTTOutNode(n) {
         RED.nodes.createNode(this,n);
 
         this.topic = n.topic;
         this.broker = n.broker;
-
         this.brokerConfig = RED.nodes.getNode(this.broker);
 
         if (this.brokerConfig) {
             this.status({fill:"red",shape:"ring",text:"disconnected"},true);
             this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.brokerConfig.clientid,this.brokerConfig.username,this.brokerConfig.password);
+            var node = this;
             this.on("input",function(msg) {
                 if (msg != null) {
-                    if (this.topic) {
-                        msg.topic = this.topic;
+                    if (node.topic) {
+                        msg.topic = node.topic;
                     }
                     this.client.publish(msg);
                 }
             });
-            var node = this;
             this.client.on("connectionlost",function() {
                 node.status({fill:"red",shape:"ring",text:"disconnected"});
             });
             this.client.on("connect",function() {
                 node.status({fill:"green",shape:"dot",text:"connected"});
             });
-
             this.client.connect();
         } else {
             this.error("missing broker configuration");
         }
+        this.on('close', function() {
+            if (this.client) {
+                this.client.disconnect();
+            }
+        });
     }
-
     RED.nodes.registerType("mqtt out",MQTTOutNode);
-
-    MQTTOutNode.prototype.close = function() {
-        if (this.client) {
-            this.client.disconnect();
-        }
-    }
 }
