@@ -95,7 +95,7 @@ function parseConfig() {
     // Clean up any orphaned credentials
     credentials.clean(flowNodes.get);
     events.emit("nodes-started");
-};
+}
 
 /**
  * Stops the current activeConfig
