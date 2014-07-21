@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+var util = require("util");
+
 var redApp = null;
 var storage = null;
 
