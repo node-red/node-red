@@ -186,6 +186,24 @@ describe('Node', function() {
             n1.send();
         });
 
+        it('emits messages ignoring non-existent nodes', function(done) {
+            var n1 = new RedNode({id:'n1',type:'abc',wires:[['n9'],['n2']]});
+            var n2 = new RedNode({id:'n2',type:'abc'});
+
+            var messages = [
+                {payload:"hello world"},
+                {payload:"hello world again"}
+            ];
+
+            n2.on('input',function(msg) {
+                should.deepEqual(msg,messages[1]);
+                should.notStrictEqual(msg,messages[1]);
+                done();
+            });
+
+            n1.send(messages);
+        });
+
     });
 
     describe('#log', function() {
