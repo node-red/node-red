@@ -31,6 +31,12 @@ function registerType(type,constructor,opts) {
     registry.registerType(type,constructor);    
 }
 
+/**
+ * Called from a Node's constructor function, invokes the super-class
+ * constructor and attaches any credentials to the node.
+ * @param node the node object being created
+ * @param def the instance definition for the node 
+ */
 function createNode(node,def) {
     Node.call(node,def);
     var creds = credentials.get(node.id);
@@ -45,24 +51,27 @@ function init(_settings,storage) {
     registry.init(_settings);
 }
 
-
 module.exports = {
+    // Lifecycle
     init: init,
     load: registry.load,
     
+    // Node registry
     createNode: createNode,
-    registerType: registerType,
-    
-    getType: registry.get,
-    getNodeConfigs: registry.getNodeConfigs,
     getNode: flows.get,
     
+    // Node type registry
+    registerType: registerType,
+    getType: registry.get,
+    getNodeConfigs: registry.getNodeConfigs,
+    
+    // Flow handling
     loadFlows: flows.load,
     stopFlows: flows.stopFlows,
     setFlows: flows.setFlows,
     getFlows: flows.getFlows,
     
-    // TODO: remove these from api - see #93
+    // Credentials
     addCredentials: credentials.add,
     getCredentials: credentials.get,
     deleteCredentials: credentials.delete
