@@ -40,25 +40,6 @@ events.on('type-registered',function(type) {
             }
         }
 });
-var parseCredentials = function (config) {
-    return when.promise(function (resolve, defect) {
-        for (var i in config) {
-            if (config.hasOwnProperty(i)) {
-                var node = config[i];
-                if (node.credentials) {
-                    var type = node.type;
-                    credentials.merge(node.id, type, node.credentials);
-                    delete node.credentials;
-                }
-            }
-        }
-        credentials.save().then(function () {
-            resolve(config);
-        }).otherwise(function (err) {
-            defect(err);
-        });
-    });
-}
 
 var parseConfig = function() {
     var i;
@@ -173,16 +154,22 @@ var flowNodes = module.exports = {
     getFlows: function() {
         return activeConfig;
     },
-    setFlows: function (conf) {
-        return parseCredentials(conf).then(function (confCredsRemoved) {
-            return storage.saveFlows(confCredsRemoved).then(function () {
-                return stopFlows().then(function () {
-                    activeConfig = confCredsRemoved;
-                    parseConfig();
-                });
-            })
-
-        })
+    setFlows: function (config) {
+        // Extract any credential updates
+        for (var i=0; i<config.length; i++) {
+            var node = config[i];
+            if (node.credentials) {
+                credentials.extract(node);
+                delete node.credentials;
+            }
+        }
+        return credentials.save()
+            .then(function() { return storage.saveFlows(config);})
+            .then(function() { return stopFlows();})
+            .then(function () {
+                activeConfig = config;
+                parseConfig();
+            });
     },
     stopFlows: stopFlows
 };
