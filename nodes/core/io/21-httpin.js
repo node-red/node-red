@@ -169,7 +169,7 @@ module.exports = function(RED) {
                     opts.headers[v.toLowerCase()] = msg.headers[v];
                 }
             }
-            if (this.credentials.user) {
+            if (this.credentials && this.credentials.user) {
                 opts.auth = this.credentials.user+":"+(this.credentials.password||"");
             }
             var payload = null;
