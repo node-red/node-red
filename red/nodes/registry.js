@@ -204,7 +204,6 @@ function init(_settings) {
 
 function load() {
     return when.promise(function(resolve,reject) {
-        var RED = require("../red.js");
         
         loadNodes(__dirname+"/../../nodes").then(function(loadedNodes) {
             var promises = [];
