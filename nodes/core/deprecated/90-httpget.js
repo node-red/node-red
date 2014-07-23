@@ -17,36 +17,36 @@
 var RED = require(process.env.NODE_RED_HOME+"/red/red");
 
 function HttpGet(n) {
-	RED.nodes.createNode(this,n);
-	this.baseurl = n.baseurl || "";
-	this.append = n.append || "";
-	var node = this;
-	if (this.baseurl.substring(0,5) === "https") { var http = require("https"); }
-	else { var http = require("http"); }
-	this.on("input", function(msg) {
-		msg._payload = msg.payload;
-		//util.log("[httpget] "+this.baseurl+msg.payload+this.append);
-		http.get(this.baseurl+msg.payload+this.append, function(res) {
-			node.log("Http response: " + res.statusCode);
-			msg.rc = res.statusCode;
-			msg.payload = "";
-			if ((msg.rc != 200) && (msg.rc != 404)) {
-				node.send(msg);
-			}
-			res.setEncoding('utf8');
-			res.on('data', function(chunk) {
-				msg.payload += chunk;
-			});
-			res.on('end', function() {
-				node.send(msg);
-			});
-		}).on('error', function(e) {
-			//node.error(e);
-			msg.rc = 503;
-			msg.payload = e;
-			node.send(msg);
-		});
-	});
+    RED.nodes.createNode(this,n);
+    this.baseurl = n.baseurl || "";
+    this.append = n.append || "";
+    var node = this;
+    if (this.baseurl.substring(0,5) === "https") { var http = require("https"); }
+    else { var http = require("http"); }
+    this.on("input", function(msg) {
+        msg._payload = msg.payload;
+        //util.log("[httpget] "+this.baseurl+msg.payload+this.append);
+        http.get(this.baseurl+msg.payload+this.append, function(res) {
+            node.log("Http response: " + res.statusCode);
+            msg.rc = res.statusCode;
+            msg.payload = "";
+            if ((msg.rc != 200) && (msg.rc != 404)) {
+                node.send(msg);
+            }
+            res.setEncoding('utf8');
+            res.on('data', function(chunk) {
+                msg.payload += chunk;
+            });
+            res.on('end', function() {
+                node.send(msg);
+            });
+        }).on('error', function(e) {
+            //node.error(e);
+            msg.rc = 503;
+            msg.payload = e;
+            node.send(msg);
+        });
+    });
 }
 
 RED.nodes.registerType("httpget",HttpGet);
