@@ -13,22 +13,62 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
- 
-var settings = require('../red').settings;
 
-var mod;
+var when = require('when');
 
-if (settings.storageModule) {
-    if (typeof settings.storageModule === "string") {
-        // TODO: allow storage modules to be specified by absolute path
-        mod = require("./"+settings.storageModule);
+var storageModule;
+
+function moduleSelector(aSettings) {
+    var toReturn;
+    if (aSettings.storageModule) {
+        if (typeof aSettings.storageModule === "string") {
+            // TODO: allow storage modules to be specified by absolute path
+            toReturn = require("./"+aSettings.storageModule);
+        } else {
+            toReturn = aSettings.storageModule;
+        }
     } else {
-        mod = settings.storageModule;
+        toReturn = require("./localfilesystem");
     }
-} else {
-    mod = require("./localfilesystem");
+    return toReturn;
 }
 
-module.exports = mod;
+var storageModuleInterface = {
+        init : function(settings) {
+            try {
+                storageModule = moduleSelector(settings);
+            } catch (e) {
+                return when.reject(e);
+            }
+            return storageModule.init(settings);
+        },
+        getFlows : function() {
+            return storageModule.getFlows();
+        },
+        saveFlows : function(flows) {
+            return storageModule.saveFlows(flows);
+        },
+        getCredentials : function() {
+            return storageModule.getCredentials();
+        },
+        saveCredentials : function(credentials) {
+            return storageModule.saveCredentials(credentials);
+        },
+        getAllFlows : function() {
+            return storageModule.getAllFlows();
+        },
+        getFlow : function(fn) {
+            return storageModule.getFlow(fn);
+        },
+        saveFlow : function(fn, data) {
+            return storageModule.saveFlow(fn, data);
+        },
+        getLibraryEntry : function(type, path) {
+            return storageModule.getLibraryEntry(type, path);
+        },
+        saveLibraryEntry : function(type, path, meta, body) {
+            return storageModule.saveLibraryEntry(type, path, meta, body);
+        }
+}
 
+module.exports = storageModuleInterface;
