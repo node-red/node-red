@@ -62,7 +62,6 @@ function createServer(_server,_settings) {
 }
 
 function start() {
-    var RED = require("./red");
     var defer = when.defer();
     
     storage.init(settings).then(function() {
