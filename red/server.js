@@ -89,6 +89,8 @@ function start() {
             redNodes.loadFlows();
         });
         comms.start();
+    }).otherwise(function(err) {
+        defer.reject(err);
     });
     
     return defer.promise;
