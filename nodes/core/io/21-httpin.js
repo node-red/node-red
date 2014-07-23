@@ -169,8 +169,10 @@ module.exports = function(RED) {
             opts.method = method;
             opts.headers = {};
             if (msg.headers) {
-                for (var v = 0; v < msg.headers.length; v++) {
-                    opts.headers[v.toLowerCase()] = msg.headers[v];
+                for (var v in msg.headers) {
+                    if (msg.headers.hasOwnProperty(v)) {
+                        opts.headers[v.toLowerCase()] = msg.headers[v];
+                    }
                 }
             }
             if (this.credentials && this.credentials.user) {
