@@ -16,7 +16,6 @@
 
 module.exports = function(RED) {
     "use strict";
-    var util = require("util");
     var http = require("follow-redirects").http;
     var https = require("follow-redirects").https;
     var urllib = require("url");
@@ -159,6 +158,11 @@ module.exports = function(RED) {
             } else {
                 url = nodeUrl;
             }
+            // url must start http:// or https:// so assume http:// if not set
+            if (!((url.indexOf("http://")===0) || (url.indexOf("https://")===0))) {
+                url = "http://"+url;
+            }
+
             var method = (msg.method||nodeMethod).toUpperCase();
             //node.log(method+" : "+url);
             var opts = urllib.parse(url);
@@ -208,7 +212,7 @@ module.exports = function(RED) {
                 });
             });
             req.on('error',function(err) {
-                msg.payload = err.toString();
+                msg.payload = err.toString() + " : " + url;
                 msg.statusCode = err.code;
                 node.send(msg);
                 node.status({fill:"red",shape:"ring",text:err.code});
@@ -219,7 +223,7 @@ module.exports = function(RED) {
             req.end();
         });
     }
-    
+
     RED.nodes.registerType("http request",HTTPRequest,{
         credentials: {
             user: {type:"text"},
