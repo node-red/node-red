@@ -75,10 +75,12 @@ module.exports = function(RED) {
             // Workaround https://github.com/einaros/ws/pull/253
             // Remove listeners from RED.server
             var listener = null;
-            for (var event = 0; event < node._serverListeners.length; event++) {
-                listener = node._serverListeners[event];
-                if(typeof listener === "function"){
-                    RED.server.removeListener(event,listener);
+            for(var event in node._serverListeners) {
+                if (node._serverListeners.hasOwnProperty(event)) {
+                    listener = node._serverListeners[event];
+                    if(typeof listener === "function"){
+                        RED.server.removeListener(event,listener);
+                    }
                 }
             }
             node._serverListeners = {};
