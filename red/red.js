@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-var events = require("./events");
 var server = require("./server");
 var nodes = require("./nodes");
 var library = require("./library");
