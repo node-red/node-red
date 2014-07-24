@@ -50,7 +50,13 @@ function start() {
             }
         });
         ws.on('message', function(data,flags) {
-            var msg = JSON.parse(data);
+            var msg = null;
+            try {
+                msg = JSON.parse(data);
+            } catch(err) {
+                util.log("[red:comms] received malformed message : "+err.toString());
+                return;
+            }
             if (msg.subscribe) {
                 handleRemoteSubscription(ws,msg.subscribe);
             }
