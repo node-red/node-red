@@ -13,10 +13,153 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-var should = require("should");
+var request = require("supertest");
+var express = require("express");
 
-describe("red/ui", function() {
-    it('can be required without errors', function() {
-        require("../../red/ui");
+describe("red/ui icon handler", function() {
+    it('returns the default icon when getting an unknown icon', function(done) {
+        var app = require("../../red/ui")();
+        request(app)
+            .get("/icons/youwonthaveme.png")
+            .expect('Content-Type', /image\/png/)
+            .expect(200)
+            .end(function(err, res){
+                if (err){
+                    return done(err);
+                }
+                done();
+              });
+    });
+    
+    it('returns an icon from disk', function(done) {
+        var app = require("../../red/ui")();
+        request(app)
+            .get("/icons/arduino.png")
+            .expect('Content-Type', /image\/png/)
+            .expect(200)
+            .end(function(err, res){
+                if (err){
+                    return done(err);
+                }
+                done();
+              });
+    });
+});
+
+describe("icon cache handler", function() {
+    var fs = require("fs");
+    var events = require("../../red/events");
+    
+    var tempDir = "/tmp/";
+    var cachedFakePNG = tempDir + "cacheMe.png";
+    
+    beforeEach(function(done) {
+        fs.writeFileSync(cachedFakePNG, "Hello PNG\n");
+        done();
+    });
+    afterEach(function(done) {
+        fs.exists(cachedFakePNG, function(exists) {
+          if(exists) {
+              fs.unlinkSync(cachedFakePNG);
+              done();
+          } else {
+              done();
+          }
+        })
+    });
+    
+    /*
+     * This test case test that:
+     * 1) any directory can be added to the path lookup (such as /tmp) by
+     * calling the right event
+     * 2) that a file we know exists gets cached so that the lookup/verification
+     * of actual existence doesn't occur again when a subsequent request comes in
+     * 
+     * The second point verifies that the cache works. If the cache wouldn't work
+     * the default PNG would be served
+     */
+    it('returns an icon using icon cache', function(done) {        
+        var app = require("../../red/ui")();
+        events.emit("node-icon-dir", "/tmp/");
+        request(app)
+            .get("/icons/cacheMe.png")
+            .expect('Content-Type', /image\/png/)
+            .expect(200)
+            .end(function(err, res){
+                if (err){
+                    return done(err);
+                }
+                fs.unlink(cachedFakePNG, function(err) {
+                    if(err) {
+                        return done(err);
+                    }
+                    request(app)
+                    .get("/icons/cacheMe.png")
+                    .expect('Content-Type', /text\/html/)
+                    .expect(404)
+                    .end(function(err, res){
+                        if (err){
+                            return done(err);
+                        }
+                        done();
+                      });
+                });
+              });
+    });
+});
+
+describe("red/ui settings handler", function() {
+    it('returns the provided settings', function(done) {
+        var settings = {
+                httpNodeRoot: "testHttpNodeRoot",
+                version: "testVersion",
+        };
+        var app = require("../../red/ui")(settings);
+        
+        request(app)
+        .get("/settings")
+        .expect('Content-Type', /application\/json/)
+        .expect(200, "{\n  \"httpNodeRoot\": \"testHttpNodeRoot\",\n  \"version\": \"testVersion\"\n}")
+        .end(function(err, res){
+            if (err){
+                return done(err);
+            }
+            done();
+          });
+        
+    });
+});
+
+describe("red/ui root handler", function() {
+    it('server up the main page', function(done) {
+        var app = require("../../red/ui")();
+        
+        request(app)
+        .get("/")
+        .expect('Content-Type', /text\/html/)
+        .expect(200)
+        .end(function(err, res){
+            if (err){
+                return done(err);
+            }
+            done();
+          });
+        
+    });
+    
+    it('redirects to path ending with /', function(done) {
+        var app = express().use('/root', require("../../red/ui")());
+        
+        request(app)
+        .get("/root")
+        .expect('Content-Type', /text\/plain/)
+        .expect(302)
+        .end(function(err, res){
+            if (err){
+                return done(err);
+            }
+            done();
+          });
+        
     });
 });
