@@ -1,6 +1,9 @@
 # Node-RED
 
-http://nodered.org
+http://nodered.org
+
+[![Build Status](https://travis-ci.org/node-red/node-red.png)](https://travis-ci.org/node-red/node-red) [![Coverage Status](https://coveralls.io/repos/node-red/node-red/badge.png?branch=master)](https://coveralls.io/r/node-red/node-red?branch=master)
+
 
 A visual tool for wiring the Internet of Things.
 
