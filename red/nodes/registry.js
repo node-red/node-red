@@ -31,60 +31,122 @@ var node_types = {};
 var node_configs = [];
 var node_scripts = [];
 
-function loadTemplate(templateFilename) {
-    return when.promise(function(resolve,reject) {
-        whenNode.call(fs.readFile,templateFilename,'utf8').done(function(content) {
-            try {
-                registerConfig(content);
-            } catch(err) {
-                reject("invalid template file: "+err.message);
+/**
+ * Synchronously walks the directory looking for node files.
+ * Emits 'node-icon-dir' events for an icon dirs found
+ * @param dir the directory to search
+ * @return an array of fully-qualified paths to .js files
+ */
+function getNodeFiles(dir) {
+    var result = [];
+    var files = fs.readdirSync(dir);
+    files.sort();
+    files.forEach(function(fn) {
+        var stats = fs.statSync(path.join(dir,fn));
+        if (stats.isFile()) {
+            if (/\.js$/.test(fn)) {
+                result.push(path.join(dir,fn));
             }
-            resolve();
-        }, function(err) {
-            reject("missing template file");
-        });
-        
-    });
-}
-
-// Return a promise that resolves to:
-//  success: {fn,path}
-//  failure: {fn.path,err}
-function loadNode(nodeDir, nodeFn, nodeLabel) {
-    return when.promise(function(resolve,reject) {
-        if (settings.nodesExcludes) {
-            for (var i=0;i<settings.nodesExcludes.length;i++) {
-                if (settings.nodesExcludes[i] == nodeFn) {
-                    //resolve({fn:nodeFn,path:nodeFilename,err:"nodesExcludes"});
-                    resolve();
-                    return;
-                }
+        } else if (stats.isDirectory()) {
+            // Ignore /.dirs/, /lib/ /node_modules/ 
+            if (!/^(\..*|lib|icons|node_modules|test)$/.test(fn)) {
+                result = result.concat(getNodeFiles(path.join(dir,fn)));
+            } else if (fn === "icons") {
+                events.emit("node-icon-dir",path.join(dir,fn));
             }
         }
-        var nodeFilename = path.join(nodeDir,nodeFn);
+    });
+    return result;
+}
+
+/**
+ * Scans the node_modules path for nodes
+ * @return a list of node modules: {dir,package}
+ */
+function scanTreeForNodesModules() {
+    var dir = __dirname+"/../../nodes";
+    var results = [];
+    var up = path.resolve(path.join(dir,".."));
+    while (up !== dir) {
+        var pm = path.join(dir,"node_modules");
         try {
-            var r = require(nodeFilename);
-            if (typeof r === "function") {
-                var promise = r(require('../red'));
-                if (promise != null && typeof promise.then === "function") {
-                    promise.then(function() {
-                        resolve({fn:nodeLabel||nodeFn,path:nodeFilename});
-                    },function(err) {
-                        resolve({fn:nodeLabel||nodeFn,path:nodeFilename,err:err});
-                    });
-                } else {
-                    resolve({fn:nodeLabel||nodeFn,path:nodeFilename});
+            var files = fs.readdirSync(pm);
+            files.forEach(function(fn) {
+                var pkgfn = path.join(pm,fn,"package.json");
+                try {
+                    var pkg = require(pkgfn);
+                    if (pkg['node-red']) {
+                        var moduleDir = path.join(pm,fn);
+                        results.push({dir:moduleDir,package:pkg});
+                    }
+                } catch(err) {
+                    if (err.code != "MODULE_NOT_FOUND") {
+                        // TODO: handle unexpected error
+                    }
                 }
-            } else {
-                resolve({fn:nodeLabel||nodeFn,path:nodeFilename});
-            }
+            });
         } catch(err) {
-            resolve({fn:nodeLabel||nodeFn,path:nodeFilename,err:err});
         }
-    });
         
+        dir = up;
+        up = path.resolve(path.join(dir,".."));
+    }
+    return results;
 }
 
+/**
+ * Loads the specified node into the registry.
+ * @param nodeDir the directory containing the node
+ * @param nodeFn the node file
+ * @param nodeLabel the name of the node (npm nodes only)
+ * @return a promise that resolves to either {fn,path,err}
+ */
+function loadNode(nodeDir, nodeFn, nodeLabel) {
+    if (settings.nodesExcludes) {
+        for (var i=0;i<settings.nodesExcludes.length;i++) {
+            if (settings.nodesExcludes[i] == nodeFn) {
+                return when.resolve();
+            }
+        }
+    }
+    var nodeFilename = path.join(nodeDir,nodeFn);
+    try {
+        var loadPromise = null;
+        var r = require(nodeFilename);
+        if (typeof r === "function") {
+            var promise = r(require('../red'));
+            if (promise != null && typeof promise.then === "function") {
+                loadPromise = promise.then(function() {
+                    return when.resolve({fn:nodeLabel||nodeFn,path:nodeFilename});
+                }).otherwise(function(err) {
+                    return when.resolve({fn:nodeLabel||nodeFn,path:nodeFilename,err:err});
+                });
+            }
+        }
+        if (loadPromise == null) {
+            loadPromise = when.resolve({fn:nodeLabel||nodeFn,path:nodeFilename});
+        }
+        return loadPromise;
+    } catch(err) {
+        return when.resolve({fn:nodeLabel||nodeFn,path:nodeFilename,err:err});
+    }
+}
+
+/**
+ * Loads the html template file for a node
+ * @param templateFilanem
+ */
+function loadTemplate(templateFilename) {
+    var content = fs.readFileSync(templateFilename,'utf8');
+    registerConfig(content);
+}
+
+/**
+ * Loads the nodes provided in an npm package.
+ * @param moduleDir the root directory of the package
+ * @param pkg the module's package.json object
+ * @return an array of promises returned by loadNode
+ */
 function loadNodesFromModule(moduleDir,pkg) {
     var nodes = pkg['node-red'].nodes||{};
     var promises = [];
@@ -104,149 +166,66 @@ function loadNodesFromModule(moduleDir,pkg) {
     return promises;
 }
 
-function scanForNodes(dir) {
-    var pm = path.join(dir,"node_modules");
-    return when.promise(function(resolve,reject) {
-        whenNode.call(fs.readdir,pm).then(function(files) {
-            var promises = [];
-            files.forEach(function(fn) {
-                var pkgfn = path.join(pm,fn,"package.json");
-                try {
-                    var pkg = require(pkgfn);
-                    if (pkg['node-red']) {
-                        var moduleDir = path.join(pm,fn);
-                        promises = promises.concat(loadNodesFromModule(moduleDir,pkg));
-                    }
-                } catch(err) {
-                    if (err.code != "MODULE_NOT_FOUND") {
-                        // TODO: handle unexpected error
-                    }
-                }
-            });
-            when.settle(promises).then(function(results) {
-                var promises = [];
-                results.forEach(function(result) {
-                    promises = promises.concat(result.value);
-                });
-                resolve(promises);
-            });
-        },function(err) {
-            resolve([]);
-        });
-    });
-}
-
-function scanTreeForNodes(dir) {
-    return when.promise(function(resolve) {
-        var promises = [];
-        var up = path.resolve(path.join(dir,".."));
-        while (up !== dir) {
-            promises.push(scanForNodes(dir));
-            dir = up;
-            up = path.resolve(path.join(dir,".."));
-        }
-        
-        when.settle(promises).then(function(results) {
-            var promises = [];
-            results.forEach(function(result) {
-                promises = promises.concat(result.value);
-            });
-            resolve(promises);
-        });
-    });
-}
-    
-
-// Returns a promise that resolves to an array of node results
-function loadNodes(dir) {
-    return when.promise(function(resolve,reject) {
-        var promises = [];
-        
-        whenNode.call(fs.readdir,dir).done(function(files) {
-            files = files.sort();
-            files.forEach(function(fn) {
-                var stats = fs.statSync(path.join(dir,fn));
-                if (stats.isFile()) {
-                    if (/\.js$/.test(fn)) {
-                        promises.push(loadNode(dir,fn));
-                    }
-                } else if (stats.isDirectory()) {
-                    // Ignore /.dirs/, /lib/ /node_modules/ 
-                    if (!/^(\..*|lib|icons|node_modules|test)$/.test(fn)) {
-                        promises.push(loadNodes(path.join(dir,fn)));
-                    } else if (fn === "icons") {
-                        events.emit("node-icon-dir",path.join(dir,fn));
-                    }
-                }
-            });
-            
-            when.settle(promises).then(function(results) {
-                var errors = [];
-                results.forEach(function(result) {
-                    if (result.state == 'fulfilled' && result.value) {
-                        errors = errors.concat(result.value);
-                    }
-                });
-                resolve(errors);
-            });
-            
-        }, function(err) { 
-            resolve([]);
-            // non-existant dir 
-        });
-    });
-}
 
 function init(_settings) {
     Node = require("./Node");
     settings = _settings;
 }
 
+/**
+ * Loads all palette nodes
+ * @return a promise that resolves to a list of any errors encountered loading nodes
+ */
 function load() {
     return when.promise(function(resolve,reject) {
         
-        loadNodes(__dirname+"/../../nodes").then(function(loadedNodes) {
-            var promises = [];
-            promises.push(scanTreeForNodes(__dirname+"/../../nodes"));
-            if (settings.nodesDir) {
-                var dir = settings.nodesDir;
-                if (typeof settings.nodesDir == "string") {
-                    dir = [dir];
-                }
-                for (var i=0;i<dir.length;i++) {
-                    promises.push(loadNodes(dir[i]));
-                }
+        // Find all of the nodes to load
+        var nodeFiles = getNodeFiles(__dirname+"/../../nodes");
+        if (settings.nodesDir) {
+            var dir = settings.nodesDir;
+            if (typeof settings.nodesDir == "string") {
+                dir = [dir];
             }
-            when.settle(promises).then(function(results) {
-                results.forEach(function(result) {
-                    if (result.state == 'fulfilled' && result.value) {
-                        loadedNodes = loadedNodes.concat(result.value);
-                    }
-                });
-                var promises = [];
-                loadedNodes.forEach(function(v) {
-                    if (v.err == null) {
-                        var templateFilename = v.path.replace(/\.js$/,".html");
-                        promises.push(loadTemplate(templateFilename));
-                    } else {
-                        promises.push(when());
-                    }
-                });
-                when.settle(promises).then(function(results) {
-                    for (var i=0;i<loadedNodes.length;i++) {
-                        if (results[i].state == "rejected") {
-                            loadedNodes[i].err = results[i].reason;
-                        }
-                    }
-                    var errors = loadedNodes.filter(function(v) { return v.err != null;});
-                    resolve(errors);
-                });
+            for (var i=0;i<dir.length;i++) {
+                nodeFiles = nodeFiles.concat(getNodeFiles(dir[i]));
+            }
+        }
+        
+        // Find all of the modules containing nodes
+        var moduleFiles = scanTreeForNodesModules();
+        
+        // Load all of the nodes in the order they were discovered
+        var loadPromises = [];
+        nodeFiles.forEach(function(file) {
+            var dir = path.dirname(file);
+            var fn = path.basename(file);
+            loadPromises.push(loadNode(dir,fn));
+        });
+        
+        moduleFiles.forEach(function(file) {
+            loadPromises = loadPromises.concat(loadNodesFromModule(file.dir,file.package));
+        });
+        
+        when.settle(loadPromises).then(function(results) {
+            var errors = [];
+            results.forEach(function(result) {
+                if (result.value.err) {
+                    // Store the error to pass up
+                    errors.push(result.value);
+                } else {
+                    // Load the node template
+                    var templateFilename = result.value.path.replace(/\.js$/,".html");
+                    loadTemplate(templateFilename);
+                }
             });
+            resolve(errors);
         });
     });
 }
 
-
+/**
+ * Registers a node's html configuration.
+ */
 function registerConfig(config) {
     $ = cheerio.load(config);
     var template = "";
@@ -273,6 +252,23 @@ function registerConfig(config) {
     node_configs.push(template);
 }
 
+/**
+ * Gets all of the node template configs
+ * @return all of the node templates in a single string
+ */
+function getNodeConfigs() {
+    var result = "";
+    for (var i=0;i<node_configs.length;i++) {
+        result += node_configs[i];
+    }
+    result += '<script type="text/javascript">';
+    for (var j=0;j<node_scripts.length;j++) {
+        result += node_scripts[j];
+    }
+    result += '</script>';
+    return result;
+}
+
 
 var typeRegistry = module.exports = {
     init:init,
@@ -285,17 +281,6 @@ var typeRegistry = module.exports = {
     get: function(type) {
         return node_types[type];
     },
-    getNodeConfigs: function() {
-        var result = "";
-        for (var i=0;i<node_configs.length;i++) {
-            result += node_configs[i];
-        }
-        result += '<script type="text/javascript">';
-        for (var j=0;j<node_scripts.length;j++) {
-            result += node_scripts[j];
-        }
-        result += '</script>';
-        return result;
-    }
+    getNodeConfigs: getNodeConfigs
 }
 
