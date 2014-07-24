@@ -60,10 +60,8 @@ function getFileMeta(root,path) {
     var fd = fs.openSync(fn,"r");
     var size = fs.fstatSync(fd).size;
     var meta = {};
-    var scanning = true;
     var read = 0;
     var length = 10;
-    var offset = 0;
     var remaining = "";
     var buffer = Buffer(length);
     while(read < size) {
@@ -93,7 +91,6 @@ function getFileBody(root,path) {
     var scanning = true;
     var read = 0;
     var length = 50;
-    var offset = 0;
     var remaining = "";
     var buffer = Buffer(length);
     while(read < size) {

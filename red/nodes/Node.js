@@ -20,7 +20,6 @@ var clone = require("clone");
 var when = require("when");
 
 var flows = require("./flows");
-var credentials = require('./credentials')
 var comms = require("../comms");
 
 function Node(n) {
