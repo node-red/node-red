@@ -46,6 +46,8 @@ RED.view = function() {
         dirty = false,
         lasso = null,
         showStatus = false,
+        lastClickNode = null,
+        dblClickPrimed = null,
         clickTime = 0,
         clickElapsed = 0;
 
@@ -824,7 +826,7 @@ RED.view = function() {
     }
 
     function nodeMouseUp(d) {
-        if (mousedown_node == d && clickElapsed > 0 && clickElapsed < 750) {
+        if (dblClickPrimed && mousedown_node == d && clickElapsed > 0 && clickElapsed < 750) {
             RED.editor.edit(d);
             clickElapsed = 0;
             d3.event.stopPropagation();
@@ -851,6 +853,9 @@ RED.view = function() {
         clickElapsed = now-clickTime;
         clickTime = now;
 
+        dblClickPrimed = (lastClickNode == mousedown_node);
+        lastClickNode = mousedown_node;
+        
         if (d.selected && d3.event.ctrlKey) {
             d.selected = false;
             for (var i=0;i<moving_set.length;i+=1) {
