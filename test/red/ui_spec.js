@@ -47,24 +47,27 @@ describe("red/ui icon handler", function() {
 });
 
 describe("icon cache handler", function() {
-    var fs = require("fs");
+    var fs = require('fs-extra');
+    var path = require('path');
     var events = require("../../red/events");
     
-    var tempDir = "/tmp/";
+    var tempDir = path.join(__dirname,".tmp/");
     var cachedFakePNG = tempDir + "cacheMe.png";
     
+    
     beforeEach(function(done) {
-        fs.writeFileSync(cachedFakePNG, "Hello PNG\n");
-        done();
+        fs.remove(tempDir,function(err) {
+            fs.mkdirSync(tempDir);
+            fs.writeFileSync(cachedFakePNG, "Hello PNG\n");
+            done();
+        });     
     });
     afterEach(function(done) {
         fs.exists(cachedFakePNG, function(exists) {
           if(exists) {
               fs.unlinkSync(cachedFakePNG);
-              done();
-          } else {
-              done();
-          }
+          } 
+          fs.remove(tempDir,done);
         })
     });
     
@@ -80,7 +83,7 @@ describe("icon cache handler", function() {
      */
     it('returns an icon using icon cache', function(done) {        
         var app = require("../../red/ui")();
-        events.emit("node-icon-dir", "/tmp/");
+        events.emit("node-icon-dir", tempDir);
         request(app)
             .get("/icons/cacheMe.png")
             .expect('Content-Type', /image\/png/)
