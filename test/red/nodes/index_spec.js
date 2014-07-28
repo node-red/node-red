@@ -47,9 +47,6 @@ var storage = {
  };
 
 describe("red/nodes/index", function() {
-    it('can be required without errors', function() {
-        require("../../../red/nodes/index");
-    });
     
    it('nodes are initialised with credentials',function(done) {      
         
