@@ -29,7 +29,9 @@ var settings;
 
 var node_types = {};
 var node_configs = [];
-var node_scripts = [];
+
+//TODO: clear this cache whenever a node type is added/removed
+var node_config_cache = null;
 
 /**
  * Synchronously walks the directory looking for node files.
@@ -63,7 +65,7 @@ function getNodeFiles(dir) {
  * Scans the node_modules path for nodes
  * @return a list of node modules: {dir,package}
  */
-function scanTreeForNodesModules() {
+function scanTreeForNodesModules(moduleName) {
     var dir = __dirname+"/../../nodes";
     var results = [];
     var up = path.resolve(path.join(dir,".."));
@@ -72,16 +74,18 @@ function scanTreeForNodesModules() {
         try {
             var files = fs.readdirSync(pm);
             files.forEach(function(fn) {
-                var pkgfn = path.join(pm,fn,"package.json");
-                try {
-                    var pkg = require(pkgfn);
-                    if (pkg['node-red']) {
-                        var moduleDir = path.join(pm,fn);
-                        results.push({dir:moduleDir,package:pkg});
-                    }
-                } catch(err) {
-                    if (err.code != "MODULE_NOT_FOUND") {
-                        // TODO: handle unexpected error
+                if (!moduleName || fn == moduleName) {
+                    var pkgfn = path.join(pm,fn,"package.json");
+                    try {
+                        var pkg = require(pkgfn);
+                        if (pkg['node-red']) {
+                            var moduleDir = path.join(pm,fn);
+                            results.push({dir:moduleDir,package:pkg});
+                        }
+                    } catch(err) {
+                        if (err.code != "MODULE_NOT_FOUND") {
+                            // TODO: handle unexpected error
+                        }
                     }
                 }
             });
@@ -92,53 +96,6 @@ function scanTreeForNodesModules() {
         up = path.resolve(path.join(dir,".."));
     }
     return results;
-}
-
-/**
- * Loads the specified node into the registry.
- * @param nodeDir the directory containing the node
- * @param nodeFn the node file
- * @param nodeLabel the name of the node (npm nodes only)
- * @return a promise that resolves to either {fn,path,err}
- */
-function loadNode(nodeDir, nodeFn, nodeLabel) {
-    if (settings.nodesExcludes) {
-        for (var i=0;i<settings.nodesExcludes.length;i++) {
-            if (settings.nodesExcludes[i] == nodeFn) {
-                return when.resolve();
-            }
-        }
-    }
-    var nodeFilename = path.join(nodeDir,nodeFn);
-    try {
-        var loadPromise = null;
-        var r = require(nodeFilename);
-        if (typeof r === "function") {
-            var promise = r(require('../red'));
-            if (promise != null && typeof promise.then === "function") {
-                loadPromise = promise.then(function() {
-                    return when.resolve({fn:nodeLabel||nodeFn,path:nodeFilename});
-                }).otherwise(function(err) {
-                    return when.resolve({fn:nodeLabel||nodeFn,path:nodeFilename,err:err});
-                });
-            }
-        }
-        if (loadPromise == null) {
-            loadPromise = when.resolve({fn:nodeLabel||nodeFn,path:nodeFilename});
-        }
-        return loadPromise;
-    } catch(err) {
-        return when.resolve({fn:nodeLabel||nodeFn,path:nodeFilename,err:err});
-    }
-}
-
-/**
- * Loads the html template file for a node
- * @param templateFilanem
- */
-function loadTemplate(templateFilename) {
-    var content = fs.readFileSync(templateFilename,'utf8');
-    registerConfig(content);
 }
 
 /**
@@ -153,7 +110,7 @@ function loadNodesFromModule(moduleDir,pkg) {
     var iconDirs = [];
     for (var n in nodes) {
         if (nodes.hasOwnProperty(n)) {
-            promises.push(loadNode(moduleDir,nodes[n],pkg.name+":"+n));
+            promises.push(loadNode(path.join(moduleDir,nodes[n]),pkg.name,n));
             var iconDir = path.join(moduleDir,path.dirname(nodes[n]),"icons");
             if (iconDirs.indexOf(iconDir) == -1) {
                 if (fs.existsSync(iconDir)) {
@@ -166,6 +123,105 @@ function loadNodesFromModule(moduleDir,pkg) {
     return promises;
 }
 
+
+/**
+ * Loads the specified node into the registry.
+ * @param nodeFile the fully qualified path of the node's .js file
+ * @param nodeModule the name of the module (npm nodes only)
+ * @param nodeName the name of the node (npm nodes only)
+ * @return a promise that resolves to a node info object
+ *         {
+ *            name: the name of the node file, or label from the npm module
+ *            module: the name of the node npm module (npm nodes only)
+ *            path: the fully qualified path to the node's .js file
+ *            template: the fully qualified path to the node's .html file
+ *            config: the non-script parts of the node's .html file
+ *            script: the script part of the node's .html file
+ *            err: any error encountered whilst loading the node
+ *         }
+ * The node info object must be added to the node_config array by the caller.
+ * This allows nodes to be added in a defined order, regardless of how async
+ * their loading becomes.
+ */
+function loadNode(nodeFile, nodeModule, nodeName) {
+    var nodeDir = path.dirname(nodeFile);
+    var nodeFn = path.basename(nodeFile);
+
+    if (settings.nodesExcludes) {
+        for (var i=0;i<settings.nodesExcludes.length;i++) {
+            if (settings.nodesExcludes[i] == nodeFn) {
+                return when.resolve();
+            }
+        }
+    }
+    var nodeFilename = path.join(nodeDir,nodeFn);
+    var nodeInfo = {name:nodeFn, path:nodeFilename};
+    if (nodeModule) {
+        nodeInfo.name = nodeModule+":"+nodeName;
+        nodeInfo.module = nodeModule;
+    }
+    try {
+        var loadPromise = null;
+        var r = require(nodeFilename);
+        if (typeof r === "function") {
+            var promise = r(require('../red'));
+            if (promise != null && typeof promise.then === "function") {
+                loadPromise = promise.then(function() {
+                    nodeInfo = loadTemplate(nodeInfo);
+                    return when.resolve(nodeInfo);
+                }).otherwise(function(err) {
+                    nodeInfo.err = err;
+                    return when.resolve(nodeInfo);
+                });
+            }
+        }
+        if (loadPromise == null) {
+            nodeInfo = loadTemplate(nodeInfo);
+            loadPromise = when.resolve(nodeInfo);
+        }
+        return loadPromise;
+    } catch(err) {
+        nodeInfo.err = err;
+        return when.resolve(nodeInfo);
+    }
+}
+
+/**
+ * Loads the html template file for a node
+ * @param templateFilanem
+ */
+function loadTemplate(nodeInfo) {
+    
+    var templateFilename = nodeInfo.path.replace(/\.js$/,".html");
+
+    var content = fs.readFileSync(templateFilename,'utf8');
+    
+    $ = cheerio.load(content);
+    var template = "";
+    var script = "";
+    $("*").each(function(i,el) {
+        if (el.type == "script" && el.attribs.type == "text/javascript") {
+            script += el.children[0].data;
+        } else if (el.name == "script" || el.name == "style") {
+            var openTag = "<"+el.name;
+            var closeTag = "</"+el.name+">";
+            if (el.attribs) {
+                for (var j in el.attribs) {
+                    if (el.attribs.hasOwnProperty(j)) {
+                        openTag += " "+j+'="'+el.attribs[j]+'"';
+                    }
+                }
+            }
+            openTag += ">";
+            template += openTag+$(el).text()+closeTag;
+        }
+    });
+    
+    nodeInfo.template = templateFilename;
+    nodeInfo.config = template;
+    nodeInfo.script = script;
+    return nodeInfo;
+}
 
 function init(_settings) {
     Node = require("./Node");
@@ -197,9 +253,7 @@ function load() {
         // Load all of the nodes in the order they were discovered
         var loadPromises = [];
         nodeFiles.forEach(function(file) {
-            var dir = path.dirname(file);
-            var fn = path.basename(file);
-            loadPromises.push(loadNode(dir,fn));
+            loadPromises.push(loadNode(file));
         });
         
         moduleFiles.forEach(function(file) {
@@ -213,43 +267,15 @@ function load() {
                     // Store the error to pass up
                     errors.push(result.value);
                 } else {
-                    // Load the node template
-                    var templateFilename = result.value.path.replace(/\.js$/,".html");
-                    loadTemplate(templateFilename);
+                    node_configs.push(result.value);
                 }
             });
+            // Trigger a load of the configs to get it precached
+            getNodeConfigs();
+            
             resolve(errors);
         });
     });
-}
-
-/**
- * Registers a node's html configuration.
- */
-function registerConfig(config) {
-    $ = cheerio.load(config);
-    var template = "";
-    $("*").each(function(i,el) {
-        if (el.type == "script" && el.attribs.type == "text/javascript") {
-            var content = el.children[0].data;
-            el.children[0].data = UglifyJS.minify(content, {fromString: true}).code;
-            node_scripts.push($(this).text());
-        } else if (el.name == "script" || el.name == "style") {
-            var openTag = "<"+el.name;
-            var closeTag = "</"+el.name+">";
-            if (el.attribs) {
-                for (var j in el.attribs) {
-                    if (el.attribs.hasOwnProperty(j)) {
-                        openTag += " "+j+'="'+el.attribs[j]+'"';
-                    }
-                }
-            }
-            openTag += ">";
-            
-            template += openTag+$(el).text()+closeTag;
-        }
-    });
-    node_configs.push(template);
 }
 
 /**
@@ -257,20 +283,24 @@ function registerConfig(config) {
  * @return all of the node templates in a single string
  */
 function getNodeConfigs() {
-    var result = "";
-    for (var i=0;i<node_configs.length;i++) {
-        result += node_configs[i];
+    if (!node_config_cache) {
+        var result = "";
+        var script = "";
+        for (var i=0;i<node_configs.length;i++) {
+            var config = node_configs[i];
+            result += config.config||"";
+            script += config.script||"";
+        }
+        result += '<script type="text/javascript">';
+        result += UglifyJS.minify(script, {fromString: true}).code;
+        result += '</script>';
+        node_config_cache = result;
     }
-    result += '<script type="text/javascript">';
-    for (var j=0;j<node_scripts.length;j++) {
-        result += node_scripts[j];
-    }
-    result += '</script>';
-    return result;
+    return node_config_cache;
 }
 
 
-var typeRegistry = module.exports = {
+module.exports = {
     init:init,
     load:load,
     registerType: function(type,node) {
@@ -281,6 +311,13 @@ var typeRegistry = module.exports = {
     get: function(type) {
         return node_types[type];
     },
-    getNodeConfigs: getNodeConfigs
+    getNodeConfigs: getNodeConfigs,
+    
+    loadNode: function(filename) {
+        
+    },
+    removeNode: function(filename) {
+        
+    }
 }
 

@@ -76,7 +76,7 @@ function start() {
                 util.log("------------------------------------------");
                 if (settings.verbose) {
                     for (var i=0;i<nodeErrors.length;i+=1) {
-                        util.log("["+nodeErrors[i].fn+"] "+nodeErrors[i].err);
+                        util.log("["+nodeErrors[i].name+"] "+nodeErrors[i].err);
                     }
                 } else {
                     util.log("[red] Failed to register "+nodeErrors.length+" node type"+(nodeErrors.length==1?"":"s"));
