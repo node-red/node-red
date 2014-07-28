@@ -26,7 +26,6 @@ describe('Credentials', function() {
         
         var storage = {
             getCredentials: function() {
-                console.log("ONE");
                 return when.promise(function(resolve,reject) {
                     resolve({"a":{"b":1,"c":2}});
                 });
@@ -111,6 +110,34 @@ describe('Credentials', function() {
             storage.saveCredentials.callCount.should.be.exactly(1);
             should.not.exist(credentials.get("a"));
             done();
+        });
+    });
+    
+    it('handle error loading from storage', function(done) {
+        var util = require("util");
+        var storage = {
+            getCredentials: function() {
+                return when.promise(function(resolve,reject) {
+                    reject("test forcing failure");
+                });
+            },
+            saveCredentials: function(creds) {
+                return when(true);
+            }
+        };
+        var logmsg = 'no errors yet';
+        sinon.stub(util, 'log', function(msg) {
+            logmsg = msg;
+        });
+        
+        credentials.init(storage);
+        credentials.load().then(function() {
+            should.equal('[red] Error loading credentials : test forcing failure', logmsg);
+            util.log.restore();
+            done();
+        }).otherwise(function(err){
+            util.log.restore();
+            done(err);
         });
     });
     
