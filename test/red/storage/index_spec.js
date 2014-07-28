@@ -16,10 +16,6 @@
 var should = require("should");
 
 describe("red/storage/index", function() {
-    it('can be required without errors', function(done) {
-        var storage = require("../../../red/storage/index");
-        done();
-    });
     
     it('rejects the promise when settings suggest loading a bad module', function(done) {
         
