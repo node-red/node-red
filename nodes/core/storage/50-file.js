@@ -30,9 +30,13 @@ module.exports = function(RED) {
                 node.warn('No filename specified');
             } else if (typeof msg.payload != "undefined") {
                 var data = msg.payload;
-                if (typeof data == "object") { data = JSON.stringify(data); }
+                if (typeof data == "object") {
+                    if (!Buffer.isBuffer(data)) {
+                        data = JSON.stringify(data);
+                    }
+                }
                 if (typeof data == "boolean") { data = data.toString(); }
-                if (this.appendNewline) { data += "\n"; }
+                if ((this.appendNewline)&&(!Buffer.isBuffer(data))) { data += "\n"; }
                 if (msg.hasOwnProperty('delete')) {
                     fs.unlink(filename, function (err) {
                         if (err) { node.warn('Failed to delete file : '+err); }
