@@ -34,6 +34,10 @@ function init() {
                     res.send(204);
                 }).otherwise(function(err) {
                     util.log("[red] Error loading flow '"+req.params[0]+"' : "+err);
+                    if (err.message.indexOf('forbidden') === 0) {
+                        res.send(403);
+                        return;
+                    }
                     res.send(500);
                 });
             });
@@ -52,6 +56,10 @@ function init() {
             }).otherwise(function(err) {
                 if (err) {
                     util.log("[red] Error loading flow '"+req.params[0]+"' : "+err);
+                    if (err.message.indexOf('forbidden') === 0) {
+                        res.send(403);
+                        return;
+                    }
                 }
                 res.send(404);
             });
@@ -75,6 +83,10 @@ function createLibrary(type) {
             }).otherwise(function(err) {
                 if (err) {
                     util.log("[red] Error loading library entry '"+path+"' : "+err);
+                    if (err.message.indexOf('forbidden') === 0) {
+                        res.send(403);
+                        return;
+                    }
                 }
                 res.send(404);
             });
@@ -91,6 +103,10 @@ function createLibrary(type) {
                         res.send(204);
                     }).otherwise(function(err) {
                         util.log("[red] Error saving library entry '"+path+"' : "+err);
+                        if (err.message.indexOf('forbidden') === 0) {
+                            res.send(403);
+                            return;
+                        }
                         res.send(500);
                     });
             });

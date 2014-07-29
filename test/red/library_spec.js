@@ -120,6 +120,27 @@ describe("library", function() {
                         });
                 });
         });
+
+        it('returns 403 for malicious access attempt', function(done) {
+            // without the userDir override the malicious url would be
+            // http://127.0.0.1:1880/library/flows/../../package to
+            // obtain package.json from the node-red root.
+            request(RED.httpAdmin)
+                .get('/library/flows/../../../../../package')
+                .expect(403)
+                .end(done);
+        });
+
+        it('returns 403 for malicious access attempt', function(done) {
+            // without the userDir override the malicious url would be
+            // http://127.0.0.1:1880/library/flows/../../package to
+            // obtain package.json from the node-red root.
+            request(RED.httpAdmin)
+                .post('/library/flows/../../../../../package')
+                .expect(403)
+                .end(done);
+        });
+
     });
 
     describe("type", function() {
@@ -186,6 +207,30 @@ describe("library", function() {
                             done();
                         });
                 });
+        });
+
+
+        it('returns 403 for malicious access attempt', function(done) {
+            request(RED.httpAdmin)
+                .get('/library/test/../../../../../../../../../../etc/passwd')
+                .expect(403)
+                .end(done);
+        });
+
+        it('returns 403 for malicious access attempt', function(done) {
+            request(RED.httpAdmin)
+                .get('/library/test/..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\etc\\passwd')
+                .expect(403)
+                .end(done);
+        });
+
+        it('returns 403 for malicious access attempt', function(done) {
+            request(RED.httpAdmin)
+                .post('/library/test/../../../../../../../../../../etc/passwd')
+                .set('Content-Type', 'text/plain')
+                .send('root:x:0:0:root:/root:/usr/bin/tclsh')
+                .expect(403)
+                .end(done);
         });
 
     });

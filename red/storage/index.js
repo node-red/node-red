@@ -33,6 +33,10 @@ function moduleSelector(aSettings) {
     return toReturn;
 }
 
+function is_malicious(path) {
+    return path.indexOf('../') != -1 || path.indexOf('..\\') != -1;
+}
+
 var storageModuleInterface = {
         init : function(settings) {
             try {
@@ -58,15 +62,27 @@ var storageModuleInterface = {
             return storageModule.getAllFlows();
         },
         getFlow : function(fn) {
+            if (is_malicious(fn)) {
+                return when.reject(new Error('forbidden flow name'));
+            }
             return storageModule.getFlow(fn);
         },
         saveFlow : function(fn, data) {
+            if (is_malicious(fn)) {
+                return when.reject(new Error('forbidden flow name'));
+            }
             return storageModule.saveFlow(fn, data);
         },
         getLibraryEntry : function(type, path) {
+            if (is_malicious(path)) {
+                return when.reject(new Error('forbidden flow name'));
+            }
             return storageModule.getLibraryEntry(type, path);
         },
         saveLibraryEntry : function(type, path, meta, body) {
+            if (is_malicious(path)) {
+                return when.reject(new Error('forbidden flow name'));
+            }
             return storageModule.saveLibraryEntry(type, path, meta, body);
         }
 }
