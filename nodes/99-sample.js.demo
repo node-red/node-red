@@ -19,7 +19,7 @@
 // Sample Node-RED node file
 
 
-module.export = function(RED) {
+module.exports = function(RED) {
 	"use strict";
     
     // The main node definition - most things happen in here
