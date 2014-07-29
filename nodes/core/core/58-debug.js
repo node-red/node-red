@@ -35,7 +35,6 @@ module.exports = function(RED) {
                 if (this.console == "true") {
                     node.log("\n"+util.inspect(msg, {colors:useColors, depth:10}));
                 }
-                if (msg.payload instanceof Buffer) { msg.payload = "(Buffer) "+msg.payload.toString('hex'); }
                 if (this.active) {
                     sendDebug({id:this.id,name:this.name,topic:msg.topic,msg:msg,_path:msg._path});
                 }
@@ -48,8 +47,6 @@ module.exports = function(RED) {
                     else if (typeof msg.payload === "object") { node.log("\n"+util.inspect(msg.payload, {colors:useColors, depth:10})); }
                     else { node.log(util.inspect(msg.payload, {colors:useColors})); }
                 }
-                if (typeof msg.payload == "undefined") { msg.payload = "(undefined)"; }
-                if (msg.payload instanceof Buffer) { msg.payload = "(Buffer) "+msg.payload.toString('hex'); }
                 if (this.active) {
                     sendDebug({id:this.id,name:this.name,topic:msg.topic,msg:msg.payload,_path:msg._path});
                 }
@@ -62,6 +59,8 @@ module.exports = function(RED) {
     function sendDebug(msg) {
         if (msg.msg instanceof Error) {
             msg.msg = msg.msg.toString();
+        } else if (msg.msg instanceof Buffer) {
+            msg.msg = "(Buffer) "+msg.msg.toString('hex');
         } else if (typeof msg.msg === 'object') {
             var seen = [];
             var ty = "(Object) ";
@@ -79,7 +78,7 @@ module.exports = function(RED) {
         } else if (msg.msg === 0) {
             msg.msg = "0";
         } else if (msg.msg == null) {
-            msg.msg = "[undefined]";
+            msg.msg = "(undefined)";
         }
     
         if (msg.msg.length > debuglength) {
