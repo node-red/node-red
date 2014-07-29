@@ -195,5 +195,14 @@ module.exports = {
      */
     save: function () {
         return storage.saveCredentials(credentialCache);
+    },
+    
+    /**
+     * Gets the credential definition for the given node type
+     * @param type the node type
+     * @return the credential definition
+     */
+    getDefinition: function (type) {
+        return credentialsDef[type];
     }
 }
