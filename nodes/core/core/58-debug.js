@@ -41,8 +41,7 @@ module.exports = function(RED) {
             } else { // debug just the msg.payload
                 if (this.console == "true") {
                     if (typeof msg.payload === "string") {
-                        if (msg.payload.indexOf("\n") != -1) { msg.payload = "\n"+msg.payload; }
-                        node.log(msg.payload);
+                        node.log((msg.payload.indexOf("\n") != -1 ? "\n" : "") + msg.payload);
                     }
                     else if (typeof msg.payload === "object") { node.log("\n"+util.inspect(msg.payload, {colors:useColors, depth:10})); }
                     else { node.log(util.inspect(msg.payload, {colors:useColors})); }
