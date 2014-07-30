@@ -15,7 +15,9 @@
  **/
  
 var should = require("should");
+var sinon = require('sinon');
 var RedNode = require("../../../red/nodes/Node");
+var comms = require('../../../red/comms');
 
 describe('Node', function() {
     describe('#constructor',function() {
@@ -204,6 +206,26 @@ describe('Node', function() {
             n1.send(messages);
         });
 
+        it('emits messages without cloning req or res', function(done) {
+            var n1 = new RedNode({id:'n1',type:'abc',wires:[['n2']]});
+            var n2 = new RedNode({id:'n2',type:'abc'});
+
+            var req = {};
+            var res = {};
+            var cloned = {};
+            var message = {payload: "foo", cloned: cloned, req: req, res: res};
+
+            n2.on('input',function(msg) {
+                should.deepEqual(msg, message);
+                msg.cloned.should.not.be.exactly(message.cloned);
+                msg.req.should.be.exactly(message.req);
+                msg.res.should.be.exactly(message.res);
+                done();
+            });
+
+            n1.send(message);
+        });
+
     });
 
     describe('#log', function() {
@@ -251,6 +273,21 @@ describe('Node', function() {
                 done();
             });
             n.error("an error message");
+        });
+    });
+
+    describe('#status', function() {
+        it('publishes status', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            var status = {fill:"green",shape:"dot",text:"connected"};
+            sinon.stub(comms, 'publish', function(topic, message, retain) {
+                topic.should.equal('status/123');
+                message.should.equal(status);
+                retain.should.be.true;
+                done();
+            });
+
+            n.status(status);
         });
     });
 
