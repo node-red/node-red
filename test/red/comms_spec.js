@@ -123,4 +123,55 @@ describe("comms", function() {
             });
         });
     }
+
+    describe("keep alives", function() {
+        before(function(done) {
+            server = http.createServer(function(req,res){app(req,res)});
+            comms.init(server, {webSocketKeepAliveTime: 100});
+            server.listen(listenPort, address);
+            server.on('listening', function() {
+                port = server.address().port;
+                url = 'http://' + address + ':' + port + '/comms';
+                comms.start();
+                done();
+            });
+        });
+        it('are sent', function(done) {
+            var ws = new WebSocket(url);
+            var count = 0;
+            ws.on('message', function(data) {
+                var msg = JSON.parse(data);
+                msg.should.have.property('topic','hb');
+                msg.should.have.property('data').be.a.Number;
+                count++;
+                if (count == 3) {
+                    ws.close();
+                    done();
+                }
+            });
+        });
+        it('are not sent if other messages are sent', function(done) {
+            var ws = new WebSocket(url);
+            var count = 0;
+            var interval;
+            ws.on('open', function() {
+                ws.send('{"subscribe":"foo"}');
+                interval = setInterval(function() {
+                    comms.publish('foo', 'bar');
+                }, 50);
+            });
+            ws.on('message', function(data) {
+                var msg = JSON.parse(data);
+                msg.should.have.property('topic', 'foo');
+                msg.should.have.property('data', 'bar');
+                count++;
+                if (count == 5) {
+                    clearInterval(interval);
+                    ws.close();
+                    done();
+                }
+            });
+        });
+    });
+
 });
