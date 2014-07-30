@@ -15,7 +15,9 @@
  **/
  
 var should = require("should");
+var sinon = require('sinon');
 var RedNode = require("../../../red/nodes/Node");
+var comms = require('../../../red/comms');
 
 describe('Node', function() {
     describe('#constructor',function() {
@@ -271,6 +273,21 @@ describe('Node', function() {
                 done();
             });
             n.error("an error message");
+        });
+    });
+
+    describe('#status', function() {
+        it('publishes status', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            var status = {fill:"green",shape:"dot",text:"connected"};
+            sinon.stub(comms, 'publish', function(topic, message, retain) {
+                topic.should.equal('status/123');
+                message.should.equal(status);
+                retain.should.be.true;
+                done();
+            });
+
+            n.status(status);
         });
     });
 
