@@ -63,6 +63,7 @@ function getNodeFiles(dir) {
 
 /**
  * Scans the node_modules path for nodes
+ * @param moduleName the name of the module to be found
  * @return a list of node modules: {dir,package}
  */
 function scanTreeForNodesModules(moduleName) {
@@ -236,7 +237,13 @@ function load() {
     return when.promise(function(resolve,reject) {
         
         // Find all of the nodes to load
-        var nodeFiles = getNodeFiles(__dirname+"/../../nodes");
+        var nodeFiles;
+        if(settings.defaultNodesDir) {
+            nodeFiles = getNodeFiles(path.resolve(settings.defaultNodesDir));
+        } else {
+            nodeFiles = getNodeFiles(__dirname+"/../../nodes");
+        }
+        
         if (settings.nodesDir) {
             var dir = settings.nodesDir;
             if (typeof settings.nodesDir == "string") {
@@ -320,4 +327,3 @@ module.exports = {
         
     }
 }
-
