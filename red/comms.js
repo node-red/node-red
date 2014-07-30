@@ -77,7 +77,6 @@ function start() {
     heartbeatTimer = setInterval(function() {
         var now = Date.now();
         if (now-lastSentTime > webSocketKeepAliveTime) {
-            lastSentTime = now;
             publish("hb",lastSentTime);
         }
     }, webSocketKeepAliveTime);
