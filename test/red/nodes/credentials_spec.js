@@ -17,7 +17,9 @@
 var should = require("should");
 var sinon = require("sinon");
 var when = require("when");
+var util = require("util");
 
+var index = require("../../../red/nodes/index");
 var credentials = require("../../../red/nodes/credentials");
 
 describe('Credentials', function() {
@@ -141,6 +143,214 @@ describe('Credentials', function() {
         });
     });
     
-})
+    it('credential type is not registered when extract', function(done) {
+        var testFlows = [{"type":"test","id":"tab1","label":"Sheet 1"}];
+        var storage = {
+                getFlows: function() {
+                    var defer = when.defer();
+                    defer.resolve(testFlows);
+                    return defer.promise;
+                },
+                getCredentials: function() {
+                    return when.promise(function(resolve,reject) {
+                        resolve({"tab1":{"b":1,"c":2}});
+                    });
+                },
+                saveFlows: function(conf) {
+                    var defer = when.defer();
+                    defer.resolve();
+                    should.deepEqual(testFlows, conf);
+                    return defer.promise;
+                },
+                saveCredentials: function(creds) {
+                    return when(true);
+                }
+        };
+        function TestNode(n) {
+            index.createNode(this, n);
+            
+            this.id = 'tab1';
+            this.type = 'test';
+            this.name = 'barney';
+            var node = this;
+
+            this.on("log", function() {
+                // do nothing
+            });
+        }
+        var logmsg = 'nothing logged yet';
+        sinon.stub(util, 'log', function(msg) {
+            logmsg = msg;
+        });
         
+        index.init({}, storage);
+        index.registerType('test', TestNode);   
+        index.loadFlows().then(function() {
+            var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});   
+            credentials.extract(testnode);
+            should.equal(logmsg, 'Credential Type test is not registered.');
+            util.log.restore();
+            done();
+        }).otherwise(function(err){
+            util.log.restore();
+            done(err);
+        });
+    });
+    
+    describe('extract and store credential updates in the provided node', function() {
+        var path = require('path');
+        var fs = require('fs-extra');
+        var http = require('http');
+        var express = require('express');
+        var sinon = require('sinon');
+        var server = require("../../../red/server");
+        var localfilesystem = require("../../../red/storage/localfilesystem");
+        var app = express();
+        var RED = require("../../../red/red.js");
+        
+        var userDir = path.join(__dirname,".testUserHome");
+        before(function(done) {
+            fs.remove(userDir,function(err) {
+                fs.mkdir(userDir,function() {
+                    sinon.stub(index, 'load', function() {
+                        return when.promise(function(resolve,reject){
+                            resolve([]);
+                        });
+                    });
+                    sinon.stub(localfilesystem, 'getCredentials', function() {
+                         return when.promise(function(resolve,reject) {
+                                resolve({"tab1":{"foo": 2, "pswd":'sticks'}});
+                         });
+                    }) ;
+                    RED.init(http.createServer(function(req,res){app(req,res)}),
+                             {userDir: userDir});
+                    server.start().then(function () {
+                        done(); 
+                     });
+                });
+            });
+        });
+    
+        after(function(done) {
+            fs.remove(userDir,done);
+            server.stop();
+            index.load.restore();
+            localfilesystem.getCredentials.restore();
+        });
+    
+        function TestNode(n) {
+            index.createNode(this, n);
+            var node = this;
+            this.on("log", function() {
+                // do nothing
+            });
+        }
+        
+        it(': credential updated with good value', function(done) {
+            index.registerType('test', TestNode, {
+                credentials: {
+                    foo: {type:"test"}
+                }
+            });   
+            index.loadFlows().then(function() {
+                var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});   
+                credentials.extract(testnode);
+                should.exist(credentials.get('tab1'));
+                credentials.get('tab1').should.have.property('foo',2);
+                
+                // set credentials to be an updated value and checking this is extracted properly
+                testnode.credentials = {"foo": 3};
+                credentials.extract(testnode);
+                should.exist(credentials.get('tab1'));
+                credentials.get('tab1').should.not.have.property('foo',2);
+                credentials.get('tab1').should.have.property('foo',3);
+                done();                    
+            }).otherwise(function(err){
+                done(err);
+            });
+        });
+
+        it(': credential updated with empty value', function(done) {
+            index.registerType('test', TestNode, {
+                credentials: {
+                    foo: {type:"test"}
+                }
+            });   
+            index.loadFlows().then(function() {
+                var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});   
+                // setting value of "foo" credential to be empty removes foo as a property
+                testnode.credentials = {"foo": ''};
+                credentials.extract(testnode);
+                should.exist(credentials.get('tab1'));
+                credentials.get('tab1').should.not.have.property('foo',2);
+                credentials.get('tab1').should.not.have.property('foo');
+                done();                    
+            }).otherwise(function(err){
+                done(err);
+            });
+        });
+ 
+        it(': undefined credential updated', function(done) {
+            index.registerType('test', TestNode, {
+                credentials: {
+                    foo: {type:"test"}
+                }
+            });   
+            index.loadFlows().then(function() {
+                var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});   
+                // setting value of an undefined credential should not change anything
+                testnode.credentials = {"bar": 4};
+                credentials.extract(testnode);
+                should.exist(credentials.get('tab1'));
+                credentials.get('tab1').should.have.property('foo',2);
+                credentials.get('tab1').should.not.have.property('bar');
+                done();                    
+            }).otherwise(function(err){
+                done(err);
+            });
+        });
+        
+        it(': password credential updated', function(done) {
+            index.registerType('password', TestNode, {
+                credentials: {
+                    pswd: {type:"password"}
+                }
+            });   
+            index.loadFlows().then(function() {
+                var testnode = new TestNode({id:'tab1',type:'password',name:'barney'});   
+                // setting value of password credential should update password 
+                testnode.credentials = {"pswd": 'fiddle'};
+                credentials.extract(testnode);
+                should.exist(credentials.get('tab1'));
+                credentials.get('tab1').should.have.property('pswd','fiddle');
+                credentials.get('tab1').should.not.have.property('pswd','sticks');
+                done();                    
+            }).otherwise(function(err){
+                done(err);
+            });
+        });    
+
+        it(': password credential not updated', function(done) {
+            index.registerType('password', TestNode, {
+                credentials: {
+                    pswd: {type:"password"}
+                }
+            });   
+            index.loadFlows().then(function() {
+                var testnode = new TestNode({id:'tab1',type:'password',name:'barney'});   
+                // setting value of password credential should update password 
+                testnode.credentials = {"pswd": '__PWRD__'};
+                credentials.extract(testnode);
+                should.exist(credentials.get('tab1'));
+                credentials.get('tab1').should.have.property('pswd','sticks');
+                credentials.get('tab1').should.not.have.property('pswd','__PWRD__');
+                done();                    
+            }).otherwise(function(err){
+                done(err);
+            });
+        });    
+    
+    })
+    
+})     
 
