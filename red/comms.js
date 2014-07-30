@@ -35,6 +35,8 @@ function init(_server,_settings) {
 }
 
 function start() {
+
+    var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
     var path = settings.httpAdminRoot || "/";
     path = path + (path.slice(-1) == "/" ? "":"/") + "comms";
     wsServer = new ws.Server({server:server,path:path});
@@ -74,11 +76,10 @@ function start() {
     
     heartbeatTimer = setInterval(function() {
         var now = Date.now();
-        if (now-lastSentTime > 15000) {
-            lastSentTime = now;
+        if (now-lastSentTime > webSocketKeepAliveTime) {
             publish("hb",lastSentTime);
         }
-    }, 15000);
+    }, webSocketKeepAliveTime);
 }
 
 function publish(topic,data,retain) {
