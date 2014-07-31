@@ -83,19 +83,19 @@ describe("red/storage/index", function() {
                     calledFlagGetAllFlows = true;
                 },
                 getFlow : function(fn) {
-                    fn.should.be.true;
+                    fn.should.equal("name");
                 },
                 saveFlow : function(fn, data) {
-                    fn.should.be.true;
+                    fn.should.equal("name");
                     data.should.be.true;
                 },
                 getLibraryEntry : function(type, path) {
                     type.should.be.true;
-                    path.should.be.true;
+                    path.should.equal("name");
                 },
                 saveLibraryEntry : function(type, path, meta, body) {
                     type.should.be.true;
-                    path.should.be.true;
+                    path.should.equal("name");
                     meta.should.be.true;
                     body.should.be.true;
                 }
@@ -112,10 +112,10 @@ describe("red/storage/index", function() {
         storage.getCredentials(); 
         storage.saveCredentials(true);
         storage.getAllFlows();
-        storage.getFlow(true);
-        storage.saveFlow(true, true);
-        storage.getLibraryEntry(true, true);
-        storage.saveLibraryEntry(true, true, true, true);
+        storage.getFlow("name");
+        storage.saveFlow("name", true);
+        storage.getLibraryEntry(true, "name");
+        storage.saveLibraryEntry(true, "name", true, true);
         
         calledInit.should.be.true;
         calledFlagGetFlows.should.be.true;
