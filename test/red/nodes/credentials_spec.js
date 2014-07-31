@@ -116,7 +116,6 @@ describe('Credentials', function() {
     });
     
     it('handle error loading from storage', function(done) {
-        var util = require("util");
         var storage = {
             getCredentials: function() {
                 return when.promise(function(resolve,reject) {
