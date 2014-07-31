@@ -63,6 +63,7 @@ function getNodeFiles(dir) {
 
 /**
  * Scans the node_modules path for nodes
+ * @param moduleName the name of the module to be found
  * @return a list of node modules: {dir,package}
  */
 function scanTreeForNodesModules(moduleName) {
@@ -230,13 +231,21 @@ function init(_settings) {
 
 /**
  * Loads all palette nodes
+ * @param defaultNodesDir optional parameter, when set, it overrides the default location
+ * of nodeFiles
  * @return a promise that resolves to a list of any errors encountered loading nodes
  */
-function load() {
+function load(defaultNodesDir) {
     return when.promise(function(resolve,reject) {
         
         // Find all of the nodes to load
-        var nodeFiles = getNodeFiles(__dirname+"/../../nodes");
+        var nodeFiles;
+        if(defaultNodesDir) {
+            nodeFiles = getNodeFiles(path.resolve(defaultNodesDir));
+        } else {
+            nodeFiles = getNodeFiles(__dirname+"/../../nodes");
+        }
+        
         if (settings.nodesDir) {
             var dir = settings.nodesDir;
             if (typeof settings.nodesDir == "string") {
@@ -320,4 +329,3 @@ module.exports = {
         
     }
 }
-
