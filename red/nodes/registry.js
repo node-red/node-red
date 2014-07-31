@@ -197,7 +197,7 @@ function loadTemplate(nodeInfo) {
 
     var content = fs.readFileSync(templateFilename,'utf8');
     
-    $ = cheerio.load(content);
+    var $ = cheerio.load(content);
     var template = "";
     var script = "";
     $("*").each(function(i,el) {

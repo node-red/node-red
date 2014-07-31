@@ -84,6 +84,7 @@ describe("getNodeFiles", function() {
     
     var tempDir = path.join(__dirname,".tmp/");
     var fakeNodeJS = tempDir + "testNode.js"; //  when exported, this fake node creates a file we can assert on
+    var fakeNodeHTML = tempDir + "testNode.html"; // we assume it's going to be loaded by cheerio
     
     var nodeInjectedFileName = "testInjected";
     var nodeInjectedFilePath = path.join(tempDir, nodeInjectedFileName);
@@ -100,7 +101,26 @@ describe("getNodeFiles", function() {
                                     "module.exports = function(RED) {\n" +
                                     "        fs.writeFileSync(tempFile, \"Test passes if this file has been written.\");\n" +
                                     "}\n";
+            
+            var htmlContents =     "<script type=\"text/javascript\">\n" +
+                                    "   RED.nodes.registerType('testFileInjector',{\n" +
+                                    "     category: 'storage-input',\n" +
+                                    "     inputs:0,\n" +
+                                    "     outputs:1,\n" +
+                                    "     icon: \"file.png\"\n" +
+                                    "    });\n" +
+                                    "</script>\n" +
+                                    "<script type=\"text/x-red\" data-template-name=\"testFileInjector\">\n" +
+                                    "    <div class=\"form-row\">\n" +
+                                    "        <label for=\"node-input-name\"><i class=\"icon-tag\"></i> Name</label>\n" +
+                                    "        <input type=\"text\" id=\"node-input-name\" placeholder=\"Name\">\n" +
+                                    "    </div>\n" +
+                                    "</script>\n" +
+                                    "<script type=\"text/x-red\" data-help-name=\"node-type\">\n" +
+                                    "   <p>This node is pretty useless</p>\n" +
+                                    "</script>";
             fs.writeFileSync(fakeNodeJS, fileContents);
+            fs.writeFileSync(fakeNodeHTML, htmlContents);
             fs.remove(tempNoNodesContainedDir,function(err) {
                 fs.mkdirSync(tempNoNodesContainedDir);
                 done();
@@ -122,8 +142,14 @@ describe("getNodeFiles", function() {
           if(exists) {
               fs.unlinkSync(fakeNodeJS);
           } 
-          fs.remove(tempDir, done);
+          fs.remove(tempDir);
         });
+        fs.exists(fakeNodeHTML, function(exists) {
+            if(exists) {
+                fs.unlinkSync(fakeNodeHTML);
+            } 
+            fs.remove(tempDir, done);
+          });
     });
     
     it('loads additional node files from specified external nodesDir',function(done) {
@@ -135,6 +161,21 @@ describe("getNodeFiles", function() {
         typeRegistry.init(settings);
         
         typeRegistry.load(tempNoNodesContainedDir).then(function(){
+            var testConfig = typeRegistry.getNodeConfigs();
+            
+            try {
+                testConfig.should.equal(   "<script type=\"text/x-red\" data-template-name=\"testFileInjector\">\n" +
+                                            "    <div class=\"form-row\">\n" +
+                                            "        <label for=\"node-input-name\"><i class=\"icon-tag\"></i> Name</label>\n" +
+                                            "        <input type=\"text\" id=\"node-input-name\" placeholder=\"Name\">\n" +
+                                            "    </div>\n" +
+                                            "</script><script type=\"text/x-red\" data-help-name=\"node-type\">\n" +
+                                            "   <p>This node is pretty useless</p>\n" +
+                                            "</script><script type=\"text/javascript\">RED.nodes.registerType(\"testFileInjector\",{category:\"storage-input\",inputs:0,outputs:1,icon:\"file.png\"});</script>");
+            } catch(err) {
+                done(err);
+            }
+            
             fs.exists(nodeInjectedFilePath, function(exists) {
                if(exists) {
                    done();
