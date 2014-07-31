@@ -33,7 +33,7 @@ describe('JSON node', function() {
         });
     });
 
-    it('should convert a json string to a javascript object', function(done) {
+    it('should convert a valid json string to a javascript object', function(done) {
         var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
                     {id:"jn2", type:"helper"}];
         helper.load(jsonNode, flow, function() {
@@ -50,7 +50,7 @@ describe('JSON node', function() {
             jn1.receive({payload:jsonString,topic: "bar"});
         });
     });
-
+    
     it('should convert a javascript object to a json string', function(done) {
         var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
                     {id:"jn2", type:"helper"}];
@@ -66,5 +66,35 @@ describe('JSON node', function() {
             jn1.receive({payload:obj,topic: "bar"});
         });
     });
-   
+
+    it('should log an error if asked to parse an invalid json string', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn1.on("log", function(msg) {
+                msg.should.have.property('msg');
+                should.deepEqual("SyntaxError: Unexpected token o"+ "\nfoo", msg.msg);
+                done();
+            });
+            jn1.receive({payload:'foo',topic: "bar"});
+        });
+    });
+    
+    it('should log an error if asked to parse something thats not json or js', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn1.on("log", function(msg) {
+                msg.should.have.property('msg');
+                should.deepEqual("dropped: 1", msg.msg);
+                done();
+            });
+            jn1.receive({payload:1,topic: "bar"});
+        });
+    });
+    
 });
