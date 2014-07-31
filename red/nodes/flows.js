@@ -34,9 +34,9 @@ events.on('type-registered',function(type) {
             if (i != -1) {
                 missingTypes.splice(i,1);
                 util.log("[red] Missing type registered: "+type);
-            }
-            if (missingTypes.length === 0) {
-                parseConfig();
+                if (missingTypes.length === 0) {
+                    parseConfig();
+                }
             }
         }
 });
