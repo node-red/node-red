@@ -49,7 +49,7 @@ function createServer(_server,_settings) {
         function(req,res) {
             var flows = req.body;
             redNodes.setFlows(flows).then(function() {
-                res.json(204);
+                res.send(204);
             }).otherwise(function(err) {
                 util.log("[red] Error saving flows : "+err);
                 res.send(500,err.message);
