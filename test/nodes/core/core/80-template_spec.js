@@ -23,6 +23,11 @@ describe('template node', function() {
     before(function(done) {
         helper.startServer(done);
     });
+    
+    afterEach(function() {
+        helper.unload();
+    });
+
 
     it('should modify payload', function(done) {
         var flow = [{id:"n1", type:"template", field: "payload", template: "payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];

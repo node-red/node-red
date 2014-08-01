@@ -23,7 +23,11 @@ var index = require("../../../red/nodes/index");
 var credentials = require("../../../red/nodes/credentials");
 
 describe('Credentials', function() {
-        
+    
+    afterEach(function() {
+        index.clearRegistry();
+    });
+    
     it('loads from storage',function(done) {
         
         var storage = {

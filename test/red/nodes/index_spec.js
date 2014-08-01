@@ -23,7 +23,11 @@ var defer = when.defer();
 var index = require("../../../red/nodes/index");
 
 describe("red/nodes/index", function() {
-    
+        
+    afterEach(function() {
+        index.clearRegistry();
+    });
+
     var testFlows = [{"type":"test","id":"tab1","label":"Sheet 1"}];
     var storage = {
             getFlows: function() {

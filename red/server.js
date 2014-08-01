@@ -71,7 +71,9 @@ function start() {
         }
         util.log("[red] Loading palette nodes");
         redNodes.init(settings,storage);
-        redNodes.load().then(function(nodeErrors) {
+        redNodes.load().then(function() {
+            var nodes = redNodes.getNodeList();
+            var nodeErrors = nodes.filter(function(n) { return n.err!=null;});
             if (nodeErrors.length > 0) {
                 util.log("------------------------------------------");
                 if (settings.verbose) {

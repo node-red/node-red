@@ -23,6 +23,10 @@ describe('JSON node', function() {
     before(function(done) {
         helper.startServer(done);
     });
+    
+    afterEach(function() {
+        helper.unload();
+    });
 
     it('should be loaded', function(done) {
         var flow = [{id:"jsonNode1", type:"json", name: "jsonNode" }];

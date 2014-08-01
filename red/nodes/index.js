@@ -63,7 +63,10 @@ module.exports = {
     // Node type registry
     registerType: registerType,
     getType: registry.get,
+    getNodeList: registry.getNodeList,
     getNodeConfigs: registry.getNodeConfigs,
+    getNodeConfig: registry.getNodeConfig,
+    clearRegistry: registry.clear,
     
     // Flow handling
     loadFlows: flows.load,

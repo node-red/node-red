@@ -59,6 +59,10 @@ module.exports = {
             cb();
         });
     },
+    unload: function() {
+        // TODO: any other state to remove between tests?
+        redNodes.clearRegistry();
+    },
 
     getNode: function(id) {
         return flows.get(id);

@@ -42,7 +42,7 @@ describe('TailNode', function() {
     });
     
     afterEach(function(done) {
-        
+        helper.unload();
         fs.exists(fileToTail, function(exists) {
             if(exists) {
                 fs.unlinkSync(fileToTail);

@@ -23,6 +23,10 @@ describe('inject node', function() {
     before(function(done) {
         helper.startServer(done);
     });
+    
+    afterEach(function() {
+        helper.unload();
+    });
 
     it('should inject once', function(done) {
 

@@ -20,6 +20,10 @@ var helper = require("../../helper.js");
 
 describe('comment node', function() {
 
+    afterEach(function() {
+        helper.unload();
+    });
+
     it('should be loaded', function(done) {
         var flow = [{id:"n1", type:"comment", name: "comment" }];
         helper.load(commentNode, flow, function() {
