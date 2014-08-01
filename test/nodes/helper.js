@@ -31,6 +31,8 @@ var listenPort = 0; // use ephemeral port
 var port;
 var url;
 
+var server;
+
 function helperNode(n) {
     RED.nodes.createNode(this, n);
 }
@@ -71,7 +73,7 @@ module.exports = {
     },
 
     startServer: function(done) {
-        var server = http.createServer(function(req,res){app(req,res);});
+        server = http.createServer(function(req,res){app(req,res);});
         RED.init(server, {});
         server.listen(listenPort, address);
         server.on('listening', function() {
@@ -80,6 +82,12 @@ module.exports = {
             comms.start();
             done();
         });
+    },
+    //TODO consider saving TCP handshake/server reinit on start/stop/start sequences
+    stopServer : function(done) {
+        if(server) {
+            server.close(done);
+        }
     },
 
     url: function() { return url; },
