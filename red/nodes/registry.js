@@ -28,6 +28,19 @@ var events = require("../events");
 var Node;
 var settings;
 
+function filterNodeInfo(n) {
+    var r = {
+        id: n.id,
+        types: n.types,
+        name: n.name,
+        enabled: n.enabled
+    }
+    if (n.err) {
+        r.err = n.err.toString();
+    }
+    return r;
+}
+
 var registry = (function() {
     var nodeConfigCache = null;
     var nodeConfigs = {};
@@ -39,19 +52,13 @@ var registry = (function() {
             nodeConfigs[id] = set;
             nodeList.push(id);
         },
+        getNodeSet: function(id) {
+            return nodeConfigs[id];
+        },
         getNodeList: function() {
             return nodeList.map(function(id) {
                 var n = nodeConfigs[id];
-                var r = {
-                    id: n.id,
-                    types: n.types,
-                    name: n.name,
-                    enabled: n.enabled
-                }
-                if (n.err) {
-                    r.err = n.err.toString();
-                }
-                return r;
+                return filterNodeInfo(n);
             });
         },
         registerNodeConstructor: function(type,constructor) {
@@ -76,8 +83,8 @@ var registry = (function() {
                 for (var i=0;i<nodeList.length;i++) {
                     var config = nodeConfigs[nodeList[i]];
                     if (config.enabled) {
-                        result += config.config||"";
-                        script += config.script||"";
+                        result += config.config;
+                        script += config.script;
                     }
                 }
                 result += '<script type="text/javascript">';
@@ -91,8 +98,8 @@ var registry = (function() {
         getNodeConfig: function(id) {
             var config = nodeConfigs[id];
             if (config) {
-                var result = config.config||"";
-                result += '<script type="text/javascript">'+(config.script||"")+'</script>';
+                var result = config.config;
+                result += '<script type="text/javascript">'+config.script+'</script>';
                 return result;
             } else {
                 return null;
@@ -244,6 +251,10 @@ function loadNodesFromModule(moduleDir,pkg) {
 function loadNodeConfig(file,name) {
     var id = crypto.createHash('sha1').update(file).digest("hex");
 
+    if (registry.getNodeSet(id)) {
+        throw new Error(file+" already loaded");
+    }
+    
     var node = {
         id: id,
         file: file,
@@ -268,11 +279,9 @@ function loadNodeConfig(file,name) {
             }
             var openTag = "<"+el.name;
             var closeTag = "</"+el.name+">";
-            if (el.attribs) {
-                for (var j in el.attribs) {
-                    if (el.attribs.hasOwnProperty(j)) {
-                        openTag += " "+j+'="'+el.attribs[j]+'"';
-                    }
+            for (var j in el.attribs) {
+                if (el.attribs.hasOwnProperty(j)) {
+                    openTag += " "+j+'="'+el.attribs[j]+'"';
                 }
             }
             openTag += ">";
@@ -330,7 +339,7 @@ function load(defaultNodesDir) {
         }
         var promises = [];
         nodes.forEach(function(node) {
-            promises.push(loadNode(node));
+            promises.push(loadNodeModule(node));
         });
         
         //resolve([]);
@@ -351,7 +360,7 @@ function load(defaultNodesDir) {
  *            err: any error encountered whilst loading the node
  *            
  */
-function loadNode(node) {
+function loadNodeModule(node) {
     var nodeDir = path.dirname(node.file);
     var nodeFn = path.basename(node.file);
     try {
@@ -383,6 +392,19 @@ function loadNode(node) {
 }
 
 
+function loadNode(file) {
+    var info = null;
+    try {
+        info = loadNodeConfig(file);
+    } catch(err) {
+        return when.reject(err);
+    }
+    return loadNodeModule(info).then(function(info) {
+        return filterNodeInfo(info);
+    });
+}
+
+
 module.exports = {
     init:init,
     load:load,
@@ -392,4 +414,5 @@ module.exports = {
     getNodeList: registry.getNodeList,
     getNodeConfigs: registry.getAllNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
+    loadNode: loadNode
 }

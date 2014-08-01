@@ -277,4 +277,50 @@ describe('NodeRegistry', function() {
             done(e);
         });
     });
+    
+    it('allows nodes to be added', function(done) {
+        typeRegistry.init({});
+        typeRegistry.load("wontexist").then(function(){
+            var list = typeRegistry.getNodeList();
+            list.should.be.an.Array.and.be.empty;
+            
+            typeRegistry.loadNode(__dirname+"/resources/TestNode1/TestNode1.js").then(function(node) {
+                list = typeRegistry.getNodeList();
+                list[0].should.have.property("id");
+                list[0].should.have.property("name","TestNode1.js");
+                list[0].should.have.property("types",["test-node-1"]);
+                list[0].should.have.property("enabled",true);
+                list[0].should.not.have.property("err");
+                
+                node.should.eql(list[0]);
+                
+                done();
+            }).catch(function(e) {
+                done(e);
+            });
+            
+        }).catch(function(e) {
+            done(e);
+        });
+    });
+    
+    it('rejects adding duplicate nodes', function(done) {
+        typeRegistry.init({});
+        typeRegistry.load(__dirname+"/resources/TestNode1").then(function(){
+            var list = typeRegistry.getNodeList();
+            list.should.be.an.Array.and.have.lengthOf(1);
+            
+            typeRegistry.loadNode(__dirname+"/resources/TestNode1/TestNode1.js").then(function(node) {
+                done(new Error("duplicate node loaded"));
+            }).otherwise(function(e) {
+                var list = typeRegistry.getNodeList();
+                list.should.be.an.Array.and.have.lengthOf(1);
+                done();
+            });
+            
+        }).catch(function(e) {
+            done(e);
+        });
+    });
+    
 });
