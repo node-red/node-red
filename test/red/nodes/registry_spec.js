@@ -161,7 +161,6 @@ describe('NodeRegistry', function() {
             
             done();
         }).catch(function(e) {
-            console.log(eventEmitSpy);
             done(e);
         }).finally(function() {
             eventEmitSpy.restore();
