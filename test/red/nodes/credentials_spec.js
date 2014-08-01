@@ -64,6 +64,7 @@ describe('Credentials', function() {
             credentials.add('b',{"d":3});
             storage.saveCredentials.callCount.should.be.exactly(1);
             credentials.get("b").should.have.property('d',3);
+            storage.saveCredentials.restore();
             done();
         });
     });
@@ -86,6 +87,7 @@ describe('Credentials', function() {
             credentials.delete('a');
             storage.saveCredentials.callCount.should.be.exactly(1);
             should.not.exist(credentials.get("a"));
+            storage.saveCredentials.restore();
             done();
         });
             
@@ -111,6 +113,7 @@ describe('Credentials', function() {
             });
             storage.saveCredentials.callCount.should.be.exactly(1);
             should.not.exist(credentials.get("a"));
+            storage.saveCredentials.restore();
             done();
         });
     });
@@ -201,7 +204,6 @@ describe('Credentials', function() {
         var fs = require('fs-extra');
         var http = require('http');
         var express = require('express');
-        var sinon = require('sinon');
         var server = require("../../../red/server");
         var localfilesystem = require("../../../red/storage/localfilesystem");
         var app = express();
@@ -356,7 +358,6 @@ describe('Credentials', function() {
         var fs = require('fs-extra');
         var http = require('http');
         var express = require('express');
-        var sinon = require('sinon');
         var request = require('supertest');
         
         var server = require("../../../red/server");
