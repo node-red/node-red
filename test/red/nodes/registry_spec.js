@@ -151,7 +151,7 @@ describe('NodeRegistry', function() {
             list[0].should.have.property("enabled",true);
             list[0].should.not.have.property("err");
             
-            eventEmitSpy.calledTwice.should.be.true;
+            eventEmitSpy.callCount.should.equal(2);
             
             eventEmitSpy.firstCall.args[0].should.be.equal("node-icon-dir");
             eventEmitSpy.firstCall.args[1].should.be.equal(__dirname+"/resources/NestedDirectoryNode/NestedNode/icons");
@@ -161,6 +161,7 @@ describe('NodeRegistry', function() {
             
             done();
         }).catch(function(e) {
+            console.log(eventEmitSpy);
             done(e);
         }).finally(function() {
             eventEmitSpy.restore();
