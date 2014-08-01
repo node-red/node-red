@@ -98,6 +98,7 @@ function start() {
 
 function stop() {
     redNodes.stopFlows();
+    comms.stop();
 }
 
 module.exports = { 

@@ -277,6 +277,9 @@ describe('Node', function() {
     });
 
     describe('#status', function() {
+        after(function() {
+            comms.publish.restore();
+        });
         it('publishes status', function(done) {
             var n = new RedNode({id:'123',type:'abc'});
             var status = {fill:"green",shape:"dot",text:"connected"};

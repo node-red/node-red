@@ -82,6 +82,11 @@ function start() {
     }, webSocketKeepAliveTime);
 }
 
+function stop() {
+    clearInterval(heartbeatTimer);
+    wsServer.close();
+}
+
 function publish(topic,data,retain) {
     if (retain) {
         retained[topic] = data;
@@ -116,5 +121,6 @@ function handleRemoteSubscription(ws,topic) {
 module.exports = {
     init:init,
     start:start,
+    stop:stop,
     publish:publish,
 }
