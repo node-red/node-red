@@ -39,7 +39,7 @@ describe('NodeRegistry', function() {
     
     it('handles nodes that export a function', function(done) {
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/TestNode1").then(function() {
+        typeRegistry.load(__dirname+"/resources/TestNode1",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("id");
@@ -61,7 +61,7 @@ describe('NodeRegistry', function() {
     
     it('handles nodes that export a function returning a resolving promise', function(done) {
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/TestNode2").then(function() {
+        typeRegistry.load(__dirname+"/resources/TestNode2",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("id");
@@ -81,7 +81,7 @@ describe('NodeRegistry', function() {
     
     it('handles nodes that export a function returning a rejecting promise', function(done) {
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/TestNode3").then(function() {
+        typeRegistry.load(__dirname+"/resources/TestNode3",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("id");
@@ -103,7 +103,7 @@ describe('NodeRegistry', function() {
     
     it('handles files containing multiple nodes', function(done) {
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/MultipleNodes1").then(function() {
+        typeRegistry.load(__dirname+"/resources/MultipleNodes1",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("id");
@@ -126,7 +126,7 @@ describe('NodeRegistry', function() {
     
     it('handles nested directories', function(done) {
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/NestedDirectoryNode").then(function() {
+        typeRegistry.load(__dirname+"/resources/NestedDirectoryNode",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("id");
@@ -143,7 +143,7 @@ describe('NodeRegistry', function() {
     it('emits type-registered and node-icon-dir events', function(done) {
         var eventEmitSpy = sinon.spy(events,"emit");
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/NestedDirectoryNode").then(function() {
+        typeRegistry.load(__dirname+"/resources/NestedDirectoryNode",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("name","NestedNode.js");
@@ -171,7 +171,7 @@ describe('NodeRegistry', function() {
         typeRegistry.init({
             nodesDir:[__dirname+"/resources/TestNode1",__dirname+"/resources/DuplicateTestNode"]
         });
-        typeRegistry.load("wontexist").then(function() {
+        typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
             
             list.should.be.an.Array.and.have.lengthOf(2);
@@ -206,7 +206,7 @@ describe('NodeRegistry', function() {
         }
 
         typeRegistry.init(settings);
-        typeRegistry.load("wontexist").then(function(){
+        typeRegistry.load("wontexist",true).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("types",["test-node-1"]);
@@ -223,7 +223,7 @@ describe('NodeRegistry', function() {
         }
 
         typeRegistry.init(settings);
-        typeRegistry.load("wontexist").then(function(){
+        typeRegistry.load("wontexist",true).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
             done();
@@ -234,7 +234,7 @@ describe('NodeRegistry', function() {
     
     it('returns nothing for an unregistered type config', function() {
         typeRegistry.init({});
-        typeRegistry.load("wontexist").then(function(){
+        typeRegistry.load("wontexist",true).then(function(){
             var config = typeRegistry.getNodeConfig("imaginary-shark");
             (config === null).should.be.true;
         }).catch(function(e) {
@@ -247,7 +247,7 @@ describe('NodeRegistry', function() {
             nodesExcludes: [ "TestNode1.js" ],
             nodesDir:[__dirname+"/resources/TestNode1",__dirname+"/resources/TestNode2"]
         });
-        typeRegistry.load("wontexist").then(function() {
+        typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("types",["test-node-2"]);
@@ -261,7 +261,7 @@ describe('NodeRegistry', function() {
         typeRegistry.init({
             nodesDir:[__dirname+"/resources/TestNode1",__dirname+"/resources/TestNode2"]
         });
-        typeRegistry.load("wontexist").then(function() {
+        typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
             
             var nodeConfigs = typeRegistry.getNodeConfigs();
@@ -280,7 +280,7 @@ describe('NodeRegistry', function() {
     
     it('allows nodes to be added', function(done) {
         typeRegistry.init({});
-        typeRegistry.load("wontexist").then(function(){
+        typeRegistry.load("wontexist",true).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
             
@@ -306,7 +306,7 @@ describe('NodeRegistry', function() {
     
     it('rejects adding duplicate nodes', function(done) {
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/TestNode1").then(function(){
+        typeRegistry.load(__dirname+"/resources/TestNode1",true).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             
@@ -320,6 +320,66 @@ describe('NodeRegistry', function() {
             
         }).catch(function(e) {
             done(e);
+        });
+    });
+    
+    it('scans the node_modules path for node files', function(done) {
+        var fs = require("fs");
+        var path = require("path");
+        
+        var eventEmitSpy = sinon.spy(events,"emit");
+        var pathJoin = (function() {
+            var _join = path.join;
+            return sinon.stub(path,"join",function() {
+                if (arguments.length  == 3 && arguments[2] == "package.json") {
+                    return _join(__dirname,"/resources/TestNodeModule/node_modules/",arguments[1],arguments[2]);
+                }
+                if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
+                    return _join(__dirname,"/resources/TestNodeModule/node_modules/",arguments[1]);
+                }
+                return _join.apply(this,arguments);
+            });
+        })();
+        
+        var readdirSync = (function() {
+            var originalReaddirSync = fs.readdirSync;
+            var callCount = 0;
+            return sinon.stub(fs,"readdirSync",function(dir) {
+                var result = [];
+                if (callCount == 1) {
+                    result = originalReaddirSync(__dirname+"/resources/TestNodeModule/node_modules");
+                }
+                callCount++;
+                return result;
+            });
+        })();
+        
+        typeRegistry.init({});
+        typeRegistry.load("wontexist",false).then(function(){
+            var list = typeRegistry.getNodeList();
+            list.should.be.an.Array.and.have.lengthOf(1);
+            list[0].should.have.property("id");
+            list[0].should.have.property("name","TestNodeModule:TestNodeMod1");
+            list[0].should.have.property("types",["test-node-mod-1"]);
+            list[0].should.have.property("enabled",true);
+            list[0].should.not.have.property("err");
+            
+            
+            eventEmitSpy.callCount.should.equal(2);
+            
+            eventEmitSpy.firstCall.args[0].should.be.equal("node-icon-dir");
+            eventEmitSpy.firstCall.args[1].should.be.equal(__dirname+"/resources/TestNodeModule/node_modules/TestNodeModule/icons");
+
+            eventEmitSpy.secondCall.args[0].should.be.equal("type-registered");
+            eventEmitSpy.secondCall.args[1].should.be.equal("test-node-mod-1");
+            
+            done();
+        }).catch(function(e) {
+            done(e);
+        }).finally(function() {
+            readdirSync.restore();
+            pathJoin.restore();
+            eventEmitSpy.restore();
         });
     });
     

@@ -219,7 +219,8 @@ function loadNodesFromModule(moduleDir,pkg) {
     var iconDirs = [];
     for (var n in nodes) {
         if (nodes.hasOwnProperty(n)) {
-            results.push(loadNodeConfig(path.join(moduleDir,nodes[n]),pkg.name+":"+n));
+            var file = path.join(moduleDir,nodes[n]);
+            results.push(loadNodeConfig(file,pkg.name+":"+n));
             var iconDir = path.join(moduleDir,path.dirname(nodes[n]),"icons");
             if (iconDirs.indexOf(iconDir) == -1) {
                 if (fs.existsSync(iconDir)) {
@@ -302,7 +303,7 @@ function loadNodeConfig(file,name) {
  *                        location of nodeFiles - used by the tests
  * @return a promise that resolves on completion of loading
  */
-function load(defaultNodesDir) {
+function load(defaultNodesDir,disableNodePathScan) {
     return when.promise(function(resolve,reject) {
         // Find all of the nodes to load
         var nodeFiles;
@@ -330,7 +331,7 @@ function load(defaultNodesDir) {
         //       This indicates a test is being run - don't want to pick up
         //       unexpected nodes.
         //       Urgh.
-        if (!defaultNodesDir) {
+        if (!disableNodePathScan) {
             // Find all of the modules containing nodes
             var moduleFiles = scanTreeForNodesModules();
             moduleFiles.forEach(function(moduleFile) {
