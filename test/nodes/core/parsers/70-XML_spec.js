@@ -23,6 +23,10 @@ describe('XML node', function() {
     before(function(done) {
         helper.startServer(done);   
     });
+
+    afterEach(function() {
+        helper.unload();
+    });
     
     it('should be loaded', function(done) {
         var flow = [{id:"xmlNode1", type:"xml", name: "xmlNode" }];
