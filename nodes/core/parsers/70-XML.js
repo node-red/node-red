@@ -26,23 +26,17 @@ module.exports = function(RED) {
         this.on("input", function(msg) {
             if (msg.hasOwnProperty("payload")) {
                 if (typeof msg.payload == "object") {
-                    try {
-                        msg.payload = builder.buildObject(msg.payload);
-                        node.send(msg);
-                    }
-                    catch(e) { node.log(e); }
+                    msg.payload = builder.buildObject(msg.payload);
+                    node.send(msg);
                 }
                 else if (typeof msg.payload == "string") {
-                    try {
-                        parseString(msg.payload, {strict:true,async:true}, function (err, result) {
-                            if (err) { node.error(err); }
-                            else {
-                                msg.payload = result;
-                                node.send(msg);
-                            }
-                        });
-                    }
-                    catch(e) { node.log(e); }
+                    parseString(msg.payload, {strict:true,async:true}, function (err, result) {
+                        if (err) { node.error(err); }
+                        else {
+                            msg.payload = result;
+                            node.send(msg);
+                        }
+                    });
                 }
                 else { node.log("This node only handles xml strings or js objects."); }
             }
