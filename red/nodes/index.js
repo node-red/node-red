@@ -51,6 +51,26 @@ function init(_settings,storage) {
     registry.init(_settings);
 }
 
+
+function removeNode(info) {
+    var nodeInfo = registry.getNodeInfo(info);
+    var inUse = {};
+    flows.each(function(n) {
+        inUse[n.type] = (inUse[n.type]||0)+1;
+    });
+    var nodesInUse = [];
+    nodeInfo.types.forEach(function(t) {
+        if (inUse[t]) {
+            nodesInUse.push(t);
+        }
+    });
+    if (nodesInUse.length > 0) {
+        var msg = nodesInUse.join(", ");
+        throw Error("Type in use: "+msg);
+    }
+    return registry.removeNode(nodeInfo.id);
+}
+
 module.exports = {
     // Lifecycle
     init: init,
@@ -59,6 +79,9 @@ module.exports = {
     // Node registry
     createNode: createNode,
     getNode: flows.get,
+    
+    addNode: registry.addNode,
+    removeNode: removeNode,
     
     // Node type registry
     registerType: registerType,

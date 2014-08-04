@@ -18,7 +18,7 @@ var should = require("should");
 var fs = require('fs-extra');
 var path = require('path');
 var when = require("when");
-var defer = when.defer();
+var sinon = require('sinon');
 
 var index = require("../../../red/nodes/index");
 
@@ -31,20 +31,14 @@ describe("red/nodes/index", function() {
     var testFlows = [{"type":"test","id":"tab1","label":"Sheet 1"}];
     var storage = {
             getFlows: function() {
-                var defer = when.defer();
-                defer.resolve(testFlows);
-                return defer.promise;
+                return when(testFlows);
             },
             getCredentials: function() {
-                return when.promise(function(resolve,reject) {
-                    resolve({"tab1":{"b":1,"c":2}});
-                });
+                return when({"tab1":{"b":1,"c":2}});
             },
             saveFlows: function(conf) {
-                var defer = when.defer();
-                defer.resolve();
                 should.deepEqual(testFlows, conf);
-                return defer.promise;
+                return when();
             },
             saveCredentials: function(creds) {
                 return when(true);
@@ -75,29 +69,6 @@ describe("red/nodes/index", function() {
     });
    
    it('flows should be initialised',function(done) {      
-       var testFlows = [{"type":"test","id":"tab1","label":"Sheet 1"}];
-        var storage = {
-                getFlows: function() {
-                    var defer = when.defer();
-                    defer.resolve(testFlows);
-                    return defer.promise;
-                },
-                getCredentials: function() {
-                    return when.promise(function(resolve,reject) {
-                        resolve({"tab1":{"b":1,"c":2}});
-                    });
-                },
-                saveFlows: function(conf) {
-                    var defer = when.defer();
-                    defer.resolve();
-                    should.deepEqual(testFlows, conf);
-                    return defer.promise;
-                },
-                saveCredentials: function(creds) {
-                    return when(true);
-                }
-         };
-
         index.init({}, storage);
         index.loadFlows().then(function() {
             should.deepEqual(testFlows, index.getFlows());
@@ -111,7 +82,6 @@ describe("red/nodes/index", function() {
    describe("registerType should register credentials definition", function() {
        var http = require('http');
        var express = require('express');
-       var sinon = require('sinon');
        var app = express();
        var server = require("../../../red/server");
        var credentials = require("../../../red/nodes/credentials");
@@ -160,5 +130,59 @@ describe("red/nodes/index", function() {
        });
 
    });
+   
+   describe('allows nodes to be removed from the registry', function() {
+       var registry = require("../../../red/nodes/registry");
+       var randomNodeInfo = {id:"5678",types:["random"]};
+       
+       before(function() {
+           sinon.stub(registry,"getNodeInfo",function(id) {
+               if (id == "test") {
+                   return {id:"1234",types:["test"]};
+               } else {
+                   return randomNodeInfo;
+               }
+           });
+           sinon.stub(registry,"removeNode",function(id) {
+               return randomNodeInfo;
+           });
+       });
+       after(function() {
+           registry.getNodeInfo.restore();
+           registry.removeNode.restore();
+       });
+
+       it(': allows an unused node type to be removed',function(done) {      
+            index.init({}, storage);
+            index.registerType('test', TestNode);            
+            index.loadFlows().then(function() {
+                var info = index.removeNode("random");
+                registry.removeNode.calledOnce.should.be.true;
+                registry.removeNode.calledWith("5678").should.be.true;
+                info.should.eql(randomNodeInfo);
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+    
+        });
+
+       it(': prevents removing a node type that is in use',function(done) {      
+            index.init({}, storage);
+            index.registerType('test', TestNode);            
+            index.loadFlows().then(function() {
+                /*jshint immed: false */
+                (function() {
+                    index.removeNode("test");
+                }).should.throw();    
+                
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+    
+        });
+    });
+   
    
 });

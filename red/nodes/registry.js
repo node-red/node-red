@@ -46,14 +46,42 @@ var registry = (function() {
     var nodeConfigs = {};
     var nodeList = [];
     var nodeConstructors = {};
+    var nodeTypeToId = {};
     
     return {
         addNodeSet: function(id,set) {
+            if (!set.err) {
+                set.types.forEach(function(t) {
+                    nodeTypeToId[t] = id;
+                });
+            }
             nodeConfigs[id] = set;
             nodeList.push(id);
+            nodeConfigCache = null;
         },
-        getNodeSet: function(id) {
-            return nodeConfigs[id];
+        removeNode: function(id) {
+            var config = nodeConfigs[id];
+            if (config) {
+                delete nodeConfigs[id];
+                var i = nodeList.indexOf(id);
+                if (i > -1) {
+                    nodeList.splice(i,1);
+                }
+                config.types.forEach(function(t) {
+                    delete nodeConstructors[t];
+                    delete nodeTypeToId[t];
+                });
+                nodeConfigCache = null;
+            }
+            return filterNodeInfo(config);
+        },
+        getNodeInfo: function(typeOrId) {
+            if (nodeTypeToId[typeOrId]) {
+                return filterNodeInfo(nodeConfigs[nodeTypeToId[typeOrId]]);
+            } else if (nodeConfigs[typeOrId]) {
+                return filterNodeInfo(nodeConfigs[typeOrId]);
+            }
+            return null;
         },
         getNodeList: function() {
             return nodeList.map(function(id) {
@@ -65,9 +93,11 @@ var registry = (function() {
             if (nodeConstructors[type]) {
                 throw new Error(type+" already registered");
             }
+            //TODO: Ensure type is known - but doing so will break some tests
+            //      that don't have a way to register a node template ahead
+            //      of registering the constructor
             util.inherits(constructor,Node);
             nodeConstructors[type] = constructor;
-            
             events.emit("type-registered",type);
         },
         
@@ -87,9 +117,11 @@ var registry = (function() {
                         script += config.script;
                     }
                 }
-                result += '<script type="text/javascript">';
-                result += UglifyJS.minify(script, {fromString: true}).code;
-                result += '</script>';
+                if (script.length > 0) {
+                    result += '<script type="text/javascript">';
+                    result += UglifyJS.minify(script, {fromString: true}).code;
+                    result += '</script>';
+                }
                 nodeConfigCache = result;
             }
             return nodeConfigCache;
@@ -107,7 +139,11 @@ var registry = (function() {
         },
         
         getNodeConstructor: function(type) {
-            return nodeConstructors[type];
+            var config = nodeConfigs[nodeTypeToId[type]];
+            if (!config || config.enabled) {
+                return nodeConstructors[type];
+            }
+            return null;
         },
         
         clear: function() {
@@ -115,6 +151,31 @@ var registry = (function() {
             nodeConfigs = {};
             nodeList = [];
             nodeConstructors = {};
+            nodeTypeToId = {};
+        },
+        
+        getTypeId: function(type) {
+            return nodeTypeToId[type];
+        },
+        
+        enableNodeSet: function(id) {
+            var config = nodeConfigs[id];
+            if (config) {
+                if (config.err) {
+                    throw new Error("cannot enable node with error");
+                }
+                config.enabled = true;
+                nodeConfigCache = null;
+            }
+        },
+        
+        disableNodeSet: function(id) {
+            var config = nodeConfigs[id];
+            if (config) {
+                config.enabled = false;
+                nodeConfigCache = null;
+            }
+            
         }
     }
 })();
@@ -220,7 +281,7 @@ function loadNodesFromModule(moduleDir,pkg) {
     for (var n in nodes) {
         if (nodes.hasOwnProperty(n)) {
             var file = path.join(moduleDir,nodes[n]);
-            results.push(loadNodeConfig(file,pkg.name+":"+n));
+            results.push(loadNodeConfig(file,pkg.name,n));
             var iconDir = path.join(moduleDir,path.dirname(nodes[n]),"icons");
             if (iconDirs.indexOf(iconDir) == -1) {
                 if (fs.existsSync(iconDir)) {
@@ -249,20 +310,27 @@ function loadNodesFromModule(moduleDir,pkg) {
  *            types: an array of node type names in this file
  *         }
  */
-function loadNodeConfig(file,name) {
+function loadNodeConfig(file,module,name) {
     var id = crypto.createHash('sha1').update(file).digest("hex");
 
-    if (registry.getNodeSet(id)) {
+    if (registry.getNodeInfo(id)) {
         throw new Error(file+" already loaded");
     }
     
     var node = {
         id: id,
         file: file,
-        name: name||path.basename(file),
         template: file.replace(/\.js$/,".html"),
         enabled: true
     }
+    
+    if (module) {
+        node.name = module+":"+name;
+        node.module = module;
+    } else {
+        node.name = path.basename(file)
+    }
+
     
     var content = fs.readFileSync(node.template,'utf8');
     
@@ -293,6 +361,12 @@ function loadNodeConfig(file,name) {
     node.config = template;
     node.script = script;
     
+    for (var i=0;i<node.types.length;i++) {
+        if (registry.getTypeId(node.types[i])) {
+            node.err = node.types[i]+" already registered";
+            break;
+        }
+    }
     registry.addNodeSet(id,node);
     return node;
 }
@@ -324,7 +398,11 @@ function load(defaultNodesDir,disableNodePathScan) {
         }
         var nodes = [];
         nodeFiles.forEach(function(file) {
-            nodes.push(loadNodeConfig(file));
+            try {
+                nodes.push(loadNodeConfig(file));
+            } catch(err) {
+                // 
+            }
         });
         
         // TODO: disabling npm module loading if defaultNodesDir set
@@ -392,19 +470,31 @@ function loadNodeModule(node) {
     }
 }
 
-
-function loadNode(file) {
-    var info = null;
-    try {
-        info = loadNodeConfig(file);
-    } catch(err) {
-        return when.reject(err);
+function addNode(options) {
+    var nodes = [];
+    if (options.file) {
+        try { 
+            nodes.push(loadNodeConfig(options.file));
+        } catch(err) {
+            return when.reject(err);
+        }
+    } else if (options.module) {
+        var moduleFiles = scanTreeForNodesModules(options.module);
+        moduleFiles.forEach(function(moduleFile) {
+            nodes = nodes.concat(loadNodesFromModule(moduleFile.dir,moduleFile.package));
+        });
     }
-    return loadNodeModule(info).then(function(info) {
-        return filterNodeInfo(info);
+    var promises = [];
+    nodes.forEach(function(node) {
+        promises.push(loadNodeModule(node));
+    });
+    
+    return when.settle(promises).then(function(results) {
+        return results.map(function(r) {
+            return filterNodeInfo(r.value);
+        });
     });
 }
-
 
 module.exports = {
     init:init,
@@ -412,8 +502,12 @@ module.exports = {
     clear: registry.clear,
     registerType: registry.registerNodeConstructor,
     get: registry.getNodeConstructor,
+    getNodeInfo: registry.getNodeInfo,
     getNodeList: registry.getNodeList,
     getNodeConfigs: registry.getAllNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
-    loadNode: loadNode
+    addNode: addNode,
+    removeNode: registry.removeNode,
+    enableNode: registry.enableNodeSet,
+    disableNode: registry.disableNodeSet
 }
