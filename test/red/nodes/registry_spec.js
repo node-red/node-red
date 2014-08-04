@@ -16,6 +16,7 @@
 
 var should = require("should");
 var sinon = require("sinon");
+var path = require("path");
 
 var RedNodes = require("../../../red/nodes");
 var RedNode = require("../../../red/nodes/Node");
@@ -27,6 +28,9 @@ afterEach(function() {
 });
 
 describe('NodeRegistry', function() {
+    
+    var resourcesDir = __dirname+ path.sep + "resources" + path.sep;
+    
     it('automatically registers new nodes',function() {
         var testNode = RedNodes.getNode('123');
         should.not.exist(n);
@@ -39,7 +43,7 @@ describe('NodeRegistry', function() {
     
     it('handles nodes that export a function', function(done) {
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/TestNode1",true).then(function() {
+        typeRegistry.load(resourcesDir + "TestNode1",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("id");
@@ -61,7 +65,7 @@ describe('NodeRegistry', function() {
     
     it('handles nodes that export a function returning a resolving promise', function(done) {
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/TestNode2",true).then(function() {
+        typeRegistry.load(resourcesDir + "TestNode2",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("id");
@@ -81,7 +85,7 @@ describe('NodeRegistry', function() {
     
     it('handles nodes that export a function returning a rejecting promise', function(done) {
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/TestNode3",true).then(function() {
+        typeRegistry.load(resourcesDir + "TestNode3",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("id");
@@ -103,7 +107,7 @@ describe('NodeRegistry', function() {
     
     it('handles files containing multiple nodes', function(done) {
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/MultipleNodes1",true).then(function() {
+        typeRegistry.load(resourcesDir + "MultipleNodes1",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("id");
@@ -126,7 +130,7 @@ describe('NodeRegistry', function() {
     
     it('handles nested directories', function(done) {
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/NestedDirectoryNode",true).then(function() {
+        typeRegistry.load(resourcesDir + "NestedDirectoryNode",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("id");
@@ -143,7 +147,7 @@ describe('NodeRegistry', function() {
     it('emits type-registered and node-icon-dir events', function(done) {
         var eventEmitSpy = sinon.spy(events,"emit");
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/NestedDirectoryNode",true).then(function() {
+        typeRegistry.load(resourcesDir + "NestedDirectoryNode",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("name","NestedNode.js");
@@ -154,7 +158,8 @@ describe('NodeRegistry', function() {
             eventEmitSpy.callCount.should.equal(2);
             
             eventEmitSpy.firstCall.args[0].should.be.equal("node-icon-dir");
-            eventEmitSpy.firstCall.args[1].should.be.equal(__dirname+"/resources/NestedDirectoryNode/NestedNode/icons");
+            eventEmitSpy.firstCall.args[1].should.be.equal(
+                    resourcesDir + "NestedDirectoryNode" + path.sep + "NestedNode" + path.sep + "icons");
 
             eventEmitSpy.secondCall.args[0].should.be.equal("type-registered");
             eventEmitSpy.secondCall.args[1].should.be.equal("nested-node-1");
@@ -169,7 +174,7 @@ describe('NodeRegistry', function() {
     
     it('rejects a duplicate node type registration', function(done) {
         typeRegistry.init({
-            nodesDir:[__dirname+"/resources/TestNode1",__dirname+"/resources/DuplicateTestNode"]
+            nodesDir:[resourcesDir + "TestNode1",resourcesDir + "DuplicateTestNode"]
         });
         typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
@@ -202,7 +207,7 @@ describe('NodeRegistry', function() {
     
     it('handles nodesDir as a string', function(done) {
         var settings = {
-            nodesDir : __dirname+"/resources/TestNode1"
+            nodesDir :resourcesDir + "TestNode1"
         }
 
         typeRegistry.init(settings);
@@ -245,7 +250,7 @@ describe('NodeRegistry', function() {
     it('excludes node files listed in nodesExcludes',function(done) {
         typeRegistry.init({
             nodesExcludes: [ "TestNode1.js" ],
-            nodesDir:[__dirname+"/resources/TestNode1",__dirname+"/resources/TestNode2"]
+            nodesDir:[resourcesDir + "TestNode1",resourcesDir + "TestNode2"]
         });
         typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
@@ -259,7 +264,7 @@ describe('NodeRegistry', function() {
     
     it('returns the node configurations', function(done) {
         typeRegistry.init({
-            nodesDir:[__dirname+"/resources/TestNode1",__dirname+"/resources/TestNode2"]
+            nodesDir:[resourcesDir + "TestNode1",resourcesDir + "TestNode2"]
         });
         typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
@@ -284,7 +289,7 @@ describe('NodeRegistry', function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
             
-            typeRegistry.loadNode(__dirname+"/resources/TestNode1/TestNode1.js").then(function(node) {
+            typeRegistry.loadNode(resourcesDir + "TestNode1/TestNode1.js").then(function(node) {
                 list = typeRegistry.getNodeList();
                 list[0].should.have.property("id");
                 list[0].should.have.property("name","TestNode1.js");
@@ -306,11 +311,11 @@ describe('NodeRegistry', function() {
     
     it('rejects adding duplicate nodes', function(done) {
         typeRegistry.init({});
-        typeRegistry.load(__dirname+"/resources/TestNode1",true).then(function(){
+        typeRegistry.load(resourcesDir + "TestNode1",true).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             
-            typeRegistry.loadNode(__dirname+"/resources/TestNode1/TestNode1.js").then(function(node) {
+            typeRegistry.loadNode(resourcesDir + "TestNode1" + path.sep + "TestNode1.js").then(function(node) {
                 done(new Error("duplicate node loaded"));
             }).otherwise(function(e) {
                 var list = typeRegistry.getNodeList();
@@ -332,10 +337,10 @@ describe('NodeRegistry', function() {
             var _join = path.join;
             return sinon.stub(path,"join",function() {
                 if (arguments.length  == 3 && arguments[2] == "package.json") {
-                    return _join(__dirname,"/resources/TestNodeModule/node_modules/",arguments[1],arguments[2]);
+                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1],arguments[2]);
                 }
                 if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
-                    return _join(__dirname,"/resources/TestNodeModule/node_modules/",arguments[1]);
+                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1]);
                 }
                 return _join.apply(this,arguments);
             });
@@ -347,7 +352,7 @@ describe('NodeRegistry', function() {
             return sinon.stub(fs,"readdirSync",function(dir) {
                 var result = [];
                 if (callCount == 1) {
-                    result = originalReaddirSync(__dirname+"/resources/TestNodeModule/node_modules");
+                    result = originalReaddirSync(resourcesDir + "TestNodeModule" + path.sep + "node_modules");
                 }
                 callCount++;
                 return result;
@@ -368,7 +373,8 @@ describe('NodeRegistry', function() {
             eventEmitSpy.callCount.should.equal(2);
             
             eventEmitSpy.firstCall.args[0].should.be.equal("node-icon-dir");
-            eventEmitSpy.firstCall.args[1].should.be.equal(__dirname+"/resources/TestNodeModule/node_modules/TestNodeModule/icons");
+            eventEmitSpy.firstCall.args[1].should.be.equal(
+                    resourcesDir + "TestNodeModule" + path.sep+ "node_modules" + path.sep + "TestNodeModule" + path.sep + "icons");
 
             eventEmitSpy.secondCall.args[0].should.be.equal("type-registered");
             eventEmitSpy.secondCall.args[1].should.be.equal("test-node-mod-1");
