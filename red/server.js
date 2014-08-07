@@ -70,6 +70,10 @@ function createServer(_server,_settings) {
             }
             redNodes.addNode(node).then(function(info) {
                 comms.publish("node/added",info,false);
+                util.log("[red] Added node types:");
+                for (var i=0;i<info.types.length;i++) {
+                    util.log("[red] - "+info.types[i]);
+                }
                 res.json(info);
             }).otherwise(function(err) {
                 res.send(400,err.toString());
@@ -80,8 +84,28 @@ function createServer(_server,_settings) {
         }
     );
     
+    app.delete("/nodes/:id",
+        function(req,res) {
+            var id = req.params.id;
+            try {
+                var info = redNodes.removeNode(id);
+                comms.publish("node/removed",info,false);
+                util.log("[red] Removed node types:");
+                for (var i=0;i<info.types.length;i++) {
+                    util.log("[red] - "+info.types[i]);
+                }
+                res.json(info);
+            } catch(err) {
+                res.send(400,err.toString());
+            };
+        },
+        function(err,req,res,next) {
+            res.send(400,err);
+        }
+    );
+    
     app.get("/nodes/:id", function(req,res) {
-        var type = req.params.id;
+        var id = req.params.id;
         var config = redNodes.getNodeConfig(id);
         if (config) {
             res.send(config);

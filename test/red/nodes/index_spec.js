@@ -139,6 +139,8 @@ describe("red/nodes/index", function() {
            sinon.stub(registry,"getNodeInfo",function(id) {
                if (id == "test") {
                    return {id:"1234",types:["test"]};
+               } else if (id == "doesnotexist") {
+                   return null;
                } else {
                    return randomNodeInfo;
                }
@@ -164,8 +166,7 @@ describe("red/nodes/index", function() {
             }).otherwise(function(err) {
                 done(err);
             });
-    
-        });
+       });
 
        it(': prevents removing a node type that is in use',function(done) {      
             index.init({}, storage);
@@ -180,8 +181,23 @@ describe("red/nodes/index", function() {
             }).otherwise(function(err) {
                 done(err);
             });
-    
+       });
+       
+       it(': prevents removing a node type that is unknown',function(done) {      
+            index.init({}, storage);
+            index.registerType('test', TestNode);            
+            index.loadFlows().then(function() {
+                /*jshint immed: false */
+                (function() {
+                    index.removeNode("doesnotexist");
+                }).should.throw();    
+                
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
         });
+
     });
    
    

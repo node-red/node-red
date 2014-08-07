@@ -384,7 +384,24 @@ describe('NodeRegistry', function() {
         }).catch(function(e) {
             done(e);
         });
+    });
+    
+    it('rejects removing unknown nodes from the registry', function(done) {
+        typeRegistry.init({});
+        typeRegistry.load("wontexist",true).then(function() {
+            var list = typeRegistry.getNodeList();
+            list.should.be.an.Array.and.be.empty;
+
             
+            /*jshint immed: false */
+            (function() {
+                typeRegistry.removeNode("1234");
+            }).should.throw();
+
+            done();
+        }).catch(function(e) {
+            done(e);
+        });
     });
     
     it('scans the node_modules path for node files', function(done) {

@@ -54,6 +54,9 @@ function init(_settings,storage) {
 
 function removeNode(info) {
     var nodeInfo = registry.getNodeInfo(info);
+    if (!nodeInfo) {
+        throw new Error("Unrecognised type/id: "+info);
+    }
     var inUse = {};
     flows.each(function(n) {
         inUse[n.type] = (inUse[n.type]||0)+1;
@@ -66,7 +69,7 @@ function removeNode(info) {
     });
     if (nodesInUse.length > 0) {
         var msg = nodesInUse.join(", ");
-        throw Error("Type in use: "+msg);
+        throw new Error("Type in use: "+msg);
     }
     return registry.removeNode(nodeInfo.id);
 }

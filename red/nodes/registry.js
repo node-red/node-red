@@ -61,18 +61,19 @@ var registry = (function() {
         },
         removeNode: function(id) {
             var config = nodeConfigs[id];
-            if (config) {
-                delete nodeConfigs[id];
-                var i = nodeList.indexOf(id);
-                if (i > -1) {
-                    nodeList.splice(i,1);
-                }
-                config.types.forEach(function(t) {
-                    delete nodeConstructors[t];
-                    delete nodeTypeToId[t];
-                });
-                nodeConfigCache = null;
+            if (!config) {
+                throw new Error("Unrecognised id: "+id);
             }
+            delete nodeConfigs[id];
+            var i = nodeList.indexOf(id);
+            if (i > -1) {
+                nodeList.splice(i,1);
+            }
+            config.types.forEach(function(t) {
+                delete nodeConstructors[t];
+                delete nodeTypeToId[t];
+            });
+            nodeConfigCache = null;
             return filterNodeInfo(config);
         },
         getNodeInfo: function(typeOrId) {
