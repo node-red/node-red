@@ -17,40 +17,48 @@
 var should = require("should");
 var path = require('path');
 var fs = require('fs-extra');
+var mkdirp = require('mkdirp');
 
 var tailNode = require("../../../../nodes/core/storage/28-tail.js");
 var helper = require("../../helper.js");
 
 describe('TailNode', function() {
     
-    var tempDir = path.join(__dirname, ".tmp/");
+    var tempDir = path.join(__dirname, ".tmp");
     var fileToTail = path.join(tempDir, "tailMe.txt");
 
-    beforeEach(function(done) {
-        fs.exists(fileToTail, function(exists) {
-            if(exists) {
-                fs.unlinkSync(fileToTail);
-            } 
-        });
-        fs.exists(tempDir, function(exists) {
-            if(!exists) {
-                fs.mkdirSync(tempDir);
+    // function which writes to the file creating all missing directories
+    function writeFile(path, contents) {
+        mkdirp(tempDir, function(err) {
+            if(err) {
+                return err;
             }
-            fs.writeFileSync(fileToTail, "Tail message line1\nTail message line2\n");
-            helper.startServer(done);
+            try {
+                fs.writeFileSync(path, contents, 'utf8');                
+            } catch (error) {
+                console.log("Unexpected error writing file: " +error.message);
+                return error;
+            }
         });
+    }
+    
+    beforeEach(function(done) {
+        writeFile(fileToTail,  "Tail message line1\nTail message line2\n");
+        helper.startServer(done);
     });
     
     afterEach(function(done) {
         helper.unload();
-        fs.exists(fileToTail, function(exists) {
-            if(exists) {
-                fs.unlinkSync(fileToTail);
-            } 
-            // have to call stop server otherwise tail node litters test output
-            // with warnings when tailed file gets deleted
-            fs.remove(tempDir, helper.stopServer(done));
-          });
+        fs.remove(tempDir, function(err) {
+            if (err) {
+                console.log("error occurred removing " + tempDir + ": " +err);
+                return err;
+            }
+            fs.exists(tempDir, function(exists) {
+                exists.should.be.false;
+                helper.stopServer(done);
+            });
+        });
     });
 
     it('should be loaded', function(done) {

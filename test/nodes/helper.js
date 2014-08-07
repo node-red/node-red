@@ -62,6 +62,7 @@ module.exports = {
     unload: function() {
         // TODO: any other state to remove between tests?
         redNodes.clearRegistry();
+        flows.stopFlows();
     },
 
     getNode: function(id) {
