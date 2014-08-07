@@ -97,7 +97,7 @@ function createServer(_server,_settings) {
                 res.json(info);
             } catch(err) {
                 res.send(400,err.toString());
-            };
+            }
         },
         function(err,req,res,next) {
             res.send(400,err);
