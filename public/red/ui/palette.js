@@ -21,27 +21,31 @@ RED.palette = function() {
     
     function createCategoryContainer(category){
 
-        $("#palette-container").append('\
-            <div class="palette-category">\
-            <div id="header-'+category+'" class="palette-header"><i class="expanded icon-chevron-down"></i><span>'+category+'</span></div>\
-            <div class="palette-content" id="palette-base-category-'+category+'">\
-              <div id="palette-'+category+'-input"></div>\
-              <div id="palette-'+category+'-output"></div>\
-              <div id="palette-'+category+'-function"></div>\
-            </div>\
-            </div>');
+        $("#palette-container").append('<div class="palette-category">'+
+            '<div id="header-'+category+'" class="palette-header"><i class="expanded icon-chevron-down"></i><span>'+category+'</span></div>'+
+            '<div class="palette-content" id="palette-base-category-'+category+'">'+
+              '<div id="palette-'+category+'-input"></div>'+
+              '<div id="palette-'+category+'-output"></div>'+
+              '<div id="palette-'+category+'-function"></div>'+
+            '</div>'+
+            '</div>');
           
     }
     
     core.forEach(createCategoryContainer);
     
     function addNodeType(nt,def) {
+        
+        if ($("#palette_node_"+nt).length) {
+            return;
+        }
+        
         if (exclusion.indexOf(def.category)===-1) {
           
           var category = def.category.split("-");
           
           var d = document.createElement("div");
-          d.id = "pn_"+nt;
+          d.id = "palette_node_"+nt;
           d.type = nt;
           
           var label = /^(.*?)([ -]in|[ -]out)?$/.exec(nt)[1];
@@ -71,15 +75,14 @@ RED.palette = function() {
               d.appendChild(port);
           }
           
-          if($("#palette-base-category-"+category[0]).length == 0){
-            createCategoryContainer(category[0]);
+          if ($("#palette-base-category-"+category[0]).length == 0){
+              createCategoryContainer(category[0]);
           }
           
-          if($("#palette-"+def.category).length == 0){          
-            $("#palette-base-category-"+category[0]).append('\
-            <div id="palette-'+def.category+'"></div>');            
+          if ($("#palette-"+def.category).length == 0) {          
+              $("#palette-base-category-"+category[0]).append('<div id="palette-'+def.category+'"></div>');            
           }
-
+          
           $("#palette-"+def.category).append(d);
           d.onmousedown = function(e) { e.preventDefault(); }
           
@@ -109,6 +112,10 @@ RED.palette = function() {
           });
 
         }
+    }
+    
+    function removeNodeType(type) {
+        $("#palette_node_"+type).remove();
     }
     
     function filterChange() {
@@ -155,6 +162,7 @@ RED.palette = function() {
     });
     
     return {
-        add:addNodeType
+        add:addNodeType,
+        remove:removeNodeType
     };
 }();

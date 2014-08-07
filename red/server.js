@@ -59,6 +59,37 @@ function createServer(_server,_settings) {
             res.send(400,"Invalid Flow");
         }
     );
+    
+    app.post("/nodes",
+        express.json(),
+        function(req,res) {
+            var node = req.body;
+            if (!node.file && !node.module) {
+                res.send(400,"Invalid request");
+                return;
+            }
+            redNodes.addNode(node).then(function(info) {
+                comms.publish("node/added",info,false);
+                res.json(info);
+            }).otherwise(function(err) {
+                res.send(400,err.toString());
+            });
+        },
+        function(err,req,res,next) {
+            res.send(400,err);
+        }
+    );
+    
+    app.get("/nodes/:id", function(req,res) {
+        var type = req.params.id;
+        var config = redNodes.getNodeConfig(id);
+        if (config) {
+            res.send(config);
+        } else {
+            res.send(404);
+        }
+    });
+    
 }
 
 function start() {

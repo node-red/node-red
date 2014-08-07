@@ -176,6 +176,27 @@ var RED = function() {
                     }
                 }
             });
+            RED.comms.subscribe("node/#",function(topic,msg) {
+                if (topic == "node/added") {
+                    for (var i=0;i<msg.length;i++) {
+                        var m = msg[i];
+                        var id = m.id;
+                        $.get('nodes/'+id, function(data) {
+                            $("body").append(data);
+                            var typeList = "<ul><li>"+m.types.join("</li><li>")+"</li></ul>";
+                            RED.notify("Node"+(m.types.length!=1 ? "s":"")+" added to palette:"+typeList,"success");
+                        });
+                    }
+                } else if (topic == "node/removed") {
+                    if (msg.types) {
+                        for (var i=0;i<msg.types.length;i++) {
+                            RED.palette.remove(msg.types[i]);
+                        }
+                        var typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
+                        RED.notify("Node"+(msg.types.length!=1 ? "s":"")+" removed from palette:"+typeList,"success");
+                    }
+                }
+            });
         });
     }
 
