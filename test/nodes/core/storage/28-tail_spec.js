@@ -24,41 +24,16 @@ var helper = require("../../helper.js");
 
 describe('TailNode', function() {
     
-    var tempDir = path.join(__dirname, ".tmp");
-    var fileToTail = path.join(tempDir, "tailMe.txt");
-
-    // function which writes to the file creating all missing directories
-    function writeFile(path, contents) {
-        mkdirp(tempDir, function(err) {
-            if(err) {
-                return err;
-            }
-            try {
-                fs.writeFileSync(path, contents, 'utf8');                
-            } catch (error) {
-                console.log("Unexpected error writing file: " +error.message);
-                return error;
-            }
-        });
-    }
+    var resourcesDir = path.join(__dirname,"..","..","..","resources");
+    var fileToTail = path.join(resourcesDir,"28-tail-test-file.txt");
     
     beforeEach(function(done) {
-        writeFile(fileToTail,  "Tail message line1\nTail message line2\n");
         helper.startServer(done);
     });
     
     afterEach(function(done) {
         helper.unload();
-        fs.remove(tempDir, function(err) {
-            if (err) {
-                console.log("error occurred removing " + tempDir + ": " +err);
-                return err;
-            }
-            fs.exists(tempDir, function(exists) {
-                exists.should.be.false;
-                helper.stopServer(done);
-            });
-        });
+        helper.stopServer(done);
     });
 
     it('should be loaded', function(done) {
@@ -78,6 +53,7 @@ describe('TailNode', function() {
             var helperNode1 = helper.getNode("helperNode1");
             var inputCounter = 0;
             helperNode1.on("input", function(msg) {
+                console.log(msg);
                 msg.should.have.property('topic', fileToTail);
                 msg.payload.should.equal("Tail message line" + (++inputCounter));
                 if(inputCounter === 2) {

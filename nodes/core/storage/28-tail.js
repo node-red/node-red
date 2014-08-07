@@ -27,20 +27,27 @@ module.exports = function(RED) {
         var node = this;
 
         var err = "";
+        // TODO: rewrite to use node-tail
         var tail = spawn("tail", ["-F", this.filename]);
         tail.stdout.on("data", function (data) {
-            var msg = {topic:node.filename};
             if (node.split) {
+                // TODO: allow customisation of the line break - as we do elsewhere
                 var strings = data.toString().split("\n");
                 for (var s in strings) {
+                    //TODO: should we really filter blanks? Is that expected?
                     if (strings[s] !== "") {
-                        msg.payload = strings[s];
-                        node.send(msg);
+                        node.send({
+                            topic: node.filename,
+                            payload: strings[s]
+                        });
                     }
                 }
             }
             else {
-                msg.payload = data.toString();
+                var msg = {
+                    topic:node.filename,
+                    payload: data.toString()
+                };
                 node.send(msg);
             }
         });
