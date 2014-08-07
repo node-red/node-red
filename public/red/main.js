@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-var RED = function() {
+var RED = (function() {
 
     $('#btn-keyboard-shortcuts').click(function(){showHelp();});
 
@@ -177,8 +177,9 @@ var RED = function() {
                 }
             });
             RED.comms.subscribe("node/#",function(topic,msg) {
+                var i;
                 if (topic == "node/added") {
-                    for (var i=0;i<msg.length;i++) {
+                    for (i=0;i<msg.length;i++) {
                         var m = msg[i];
                         var id = m.id;
                         $.get('nodes/'+id, function(data) {
@@ -189,7 +190,7 @@ var RED = function() {
                     }
                 } else if (topic == "node/removed") {
                     if (msg.types) {
-                        for (var i=0;i<msg.types.length;i++) {
+                        for (i=0;i<msg.types.length;i++) {
                             RED.palette.remove(msg.types[i]);
                         }
                         var typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
@@ -235,4 +236,4 @@ var RED = function() {
 
     return {
     };
-}();
+})();

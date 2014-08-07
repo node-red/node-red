@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-RED.sidebar = function() {
+RED.sidebar = (function() {
 
     //$('#sidebar').tabs();
     var sidebar_tabs = RED.tabs.create({
@@ -150,4 +150,4 @@ RED.sidebar = function() {
         containsTab: containsTab
     }
     
-}();
+})();

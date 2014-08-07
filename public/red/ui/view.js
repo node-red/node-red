@@ -15,7 +15,7 @@
  **/
 
 
-RED.view = function() {
+RED.view = (function() {
     var space_width = 5000,
         space_height = 5000,
         lineCurveScale = 0.75,
@@ -88,11 +88,12 @@ RED.view = function() {
         })
         .on("touchcancel", canvasMouseUp)
         .on("touchstart", function() {
+            var touch0;
             if (d3.event.touches.length>1) {
                 clearTimeout(touchStartTime);
                 touchStartTime = null;
                 d3.event.preventDefault();
-                var touch0 = d3.event.touches.item(0);
+                touch0 = d3.event.touches.item(0);
                 var touch1 = d3.event.touches.item(1);
                 var a = touch0['pageY']-touch1['pageY'];
                 var b = touch0['pageX']-touch1['pageX'];
@@ -110,7 +111,7 @@ RED.view = function() {
                 startTouchDistance = Math.sqrt((a*a)+(b*b));
             } else {
                 var obj = d3.select(document.body);
-                var touch0 = d3.event.touches.item(0);
+                touch0 = d3.event.touches.item(0);
                 var pos = [touch0.pageX,touch0.pageY];
                 startTouchCenter = [touch0.pageX,touch0.pageY];
                 startTouchDistance = 0;
@@ -137,9 +138,10 @@ RED.view = function() {
                     d3.event.preventDefault();
                     return;
                 }
+                var touch0;
                 if (d3.event.touches.length<2) {
                     if (touchStartTime) {
-                        var touch0 = d3.event.touches.item(0);
+                        touch0 = d3.event.touches.item(0);
                         var dx = (touch0.pageX-startTouchCenter[0]);
                         var dy = (touch0.pageY-startTouchCenter[1]);
                         var d = Math.abs(dx*dx+dy*dy);
@@ -152,7 +154,7 @@ RED.view = function() {
                     }
                     canvasMouseMove.call(this);
                 } else {
-                    var touch0 = d3.event.touches.item(0);
+                    touch0 = d3.event.touches.item(0);
                     var touch1 = d3.event.touches.item(1);
                     var a = touch0['pageY']-touch1['pageY'];
                     var b = touch0['pageX']-touch1['pageX'];
@@ -232,7 +234,7 @@ RED.view = function() {
                 $("#workspace-toolbar").hide();
             }
             var chart = $("#chart");
-            if (activeWorkspace != 0) {
+            if (activeWorkspace !== 0) {
                 workspaceScrollPositions[activeWorkspace] = {
                     left:chart.scrollLeft(),
                     top:chart.scrollTop()
@@ -298,7 +300,7 @@ RED.view = function() {
         var tabId = RED.nodes.id();
         do {
             workspaceIndex += 1;
-        } while($("#workspace-tabs a[title='Sheet "+workspaceIndex+"']").size() != 0);
+        } while($("#workspace-tabs a[title='Sheet "+workspaceIndex+"']").size() !== 0);
 
         var ws = {type:"tab",id:tabId,label:"Sheet "+workspaceIndex};
         RED.nodes.addWorkspace(ws);
@@ -331,7 +333,7 @@ RED.view = function() {
             selected_link = null;
             updateSelection();
         }
-        if (mouse_mode == 0) {
+        if (mouse_mode === 0) {
             if (lasso) {
                 lasso.remove();
                 lasso = null;
@@ -372,6 +374,8 @@ RED.view = function() {
             var oy = parseInt(lasso.attr("oy"));
             var x = parseInt(lasso.attr("x"));
             var y = parseInt(lasso.attr("y"));
+            var w;
+            var h;
             if (mouse_position[0] < ox) {
                 x = mouse_position[0];
                 w = ox-x;
@@ -393,19 +397,22 @@ RED.view = function() {
             return;
         }
 
-        if (mouse_mode != RED.state.IMPORT_DRAGGING && !mousedown_node && selected_link == null) return;
+        if (mouse_mode != RED.state.IMPORT_DRAGGING && !mousedown_node && selected_link == null) {
+            return;
+        }
 
+        var mousePos;
         if (mouse_mode == RED.state.JOINING) {
             // update drag line
             drag_line.attr("class", "drag_line");
-            var mousePos = mouse_position;
-            var numOutputs = (mousedown_port_type == 0)?(mousedown_node.outputs || 1):1;
+            mousePos = mouse_position;
+            var numOutputs = (mousedown_port_type === 0)?(mousedown_node.outputs || 1):1;
             var sourcePort = mousedown_port_index;
-            var y = -((numOutputs-1)/2)*13 +13*sourcePort;
+            var portY = -((numOutputs-1)/2)*13 +13*sourcePort;
 
-            var sc = (mousedown_port_type == 0)?1:-1;
+            var sc = (mousedown_port_type === 0)?1:-1;
 
-            var dy = mousePos[1]-(mousedown_node.y+y);
+            var dy = mousePos[1]-(mousedown_node.y+portY);
             var dx = mousePos[0]-(mousedown_node.x+sc*mousedown_node.w/2);
             var delta = Math.sqrt(dy*dy+dx*dx);
             var scale = lineCurveScale;
@@ -422,25 +429,27 @@ RED.view = function() {
             }
 
             drag_line.attr("d",
-                "M "+(mousedown_node.x+sc*mousedown_node.w/2)+" "+(mousedown_node.y+y)+
-                " C "+(mousedown_node.x+sc*(mousedown_node.w/2+node_width*scale))+" "+(mousedown_node.y+y+scaleY*node_height)+" "+
+                "M "+(mousedown_node.x+sc*mousedown_node.w/2)+" "+(mousedown_node.y+portY)+
+                " C "+(mousedown_node.x+sc*(mousedown_node.w/2+node_width*scale))+" "+(mousedown_node.y+portY+scaleY*node_height)+" "+
                 (mousePos[0]-sc*(scale)*node_width)+" "+(mousePos[1]-scaleY*node_height)+" "+
                 mousePos[0]+" "+mousePos[1]
                 );
             d3.event.preventDefault();
         } else if (mouse_mode == RED.state.MOVING) {
-            var m = mouse_position;
-            var d = (mouse_offset[0]-m[0])*(mouse_offset[0]-m[0]) + (mouse_offset[1]-m[1])*(mouse_offset[1]-m[1]);
+            mousePos = mouse_position;
+            var d = (mouse_offset[0]-mousePos[0])*(mouse_offset[0]-mousePos[0]) + (mouse_offset[1]-mousePos[1])*(mouse_offset[1]-mousePos[1]);
             if (d > 2) {
                 mouse_mode = RED.state.MOVING_ACTIVE;
                 clickElapsed = 0;
             }
         } else if (mouse_mode == RED.state.MOVING_ACTIVE || mouse_mode == RED.state.IMPORT_DRAGGING) {
-            var mousePos = mouse_position;
+            mousePos = mouse_position;
+            var node;
+            var i;
             var minX = 0;
             var minY = 0;
             for (var n = 0; n<moving_set.length; n++) {
-                var node = moving_set[n];
+                node = moving_set[n];
                 if (d3.event.shiftKey) {
                     node.n.ox = node.n.x;
                     node.n.oy = node.n.y;
@@ -451,21 +460,21 @@ RED.view = function() {
                 minX = Math.min(node.n.x-node.n.w/2-5,minX);
                 minY = Math.min(node.n.y-node.n.h/2-5,minY);
             }
-            if (minX != 0 || minY != 0) {
-                for (var n = 0; n<moving_set.length; n++) {
-                    var node = moving_set[n];
+            if (minX !== 0 || minY !== 0) {
+                for (i = 0; i<moving_set.length; i++) {
+                    node = moving_set[i];
                     node.n.x -= minX;
                     node.n.y -= minY;
                 }
             }
             if (d3.event.shiftKey && moving_set.length > 0) {
                 var gridOffset =  [0,0];
-                var node = moving_set[0];
+                node = moving_set[0];
                 gridOffset[0] = node.n.x-(20*Math.floor((node.n.x-node.n.w/2)/20)+node.n.w/2);
                 gridOffset[1] = node.n.y-(20*Math.floor(node.n.y/20));
-                if (gridOffset[0] != 0 || gridOffset[1] != 0) {
-                    for (var n = 0; n<moving_set.length; n++) {
-                        var node = moving_set[n];
+                if (gridOffset[0] !== 0 || gridOffset[1] !== 0) {
+                    for (i = 0; i<moving_set.length; i++) {
+                        node = moving_set[i];
                         node.n.x -= gridOffset[0];
                         node.n.y -= gridOffset[1];
                         if (node.n.x == node.n.ox && node.n.y == node.n.oy) {
@@ -509,8 +518,8 @@ RED.view = function() {
         if (mouse_mode == RED.state.MOVING_ACTIVE) {
             if (moving_set.length > 0) {
                 var ns = [];
-                for (var i in moving_set) {
-                    ns.push({n:moving_set[i].n,ox:moving_set[i].ox,oy:moving_set[i].oy});
+                for (var j=0;j<moving_set.length;j++) {
+                    ns.push({n:moving_set[j].n,ox:moving_set[j].ox,oy:moving_set[j].oy});
                 }
                 RED.history.push({t:'move',nodes:ns,dirty:dirty});
             }
@@ -561,7 +570,9 @@ RED.view = function() {
                 nn.changed = true;
 
                 for (var d in nn._def.defaults) {
-                    nn[d] = nn._def.defaults[d].value;
+                    if (nn._def.defaults.hasOwnProperty(d)) {
+                        nn[d] = nn._def.defaults[d].value;
+                    }
                 }
 
                 if (nn._def.onadd) {
@@ -619,7 +630,7 @@ RED.view = function() {
     }
 
     function clearSelection() {
-        for (var i in moving_set) {
+        for (var i=0;i<moving_set.length;i++) {
             var n = moving_set[i];
             n.n.dirty = true;
             n.n.selected = false;
@@ -629,7 +640,7 @@ RED.view = function() {
     }
 
     function updateSelection() {
-        if (moving_set.length == 0) {
+        if (moving_set.length === 0) {
             $("#li-menu-export").addClass("disabled");
             $("#li-menu-export-clipboard").addClass("disabled");
             $("#li-menu-export-library").addClass("disabled");
@@ -638,7 +649,7 @@ RED.view = function() {
             $("#li-menu-export-clipboard").removeClass("disabled");
             $("#li-menu-export-library").removeClass("disabled");
         }
-        if (moving_set.length == 0 && selected_link == null) {
+        if (moving_set.length === 0 && selected_link == null) {
             RED.keyboard.remove(/* backspace */ 8);
             RED.keyboard.remove(/* delete */ 46);
             RED.keyboard.remove(/* c */ 67);
@@ -649,16 +660,16 @@ RED.view = function() {
             RED.keyboard.add(/* c */ 67,{ctrl:true},function(){copySelection();d3.event.preventDefault();});
             RED.keyboard.add(/* x */ 88,{ctrl:true},function(){copySelection();deleteSelection();d3.event.preventDefault();});
         }
-        if (moving_set.length == 0) {
+        if (moving_set.length === 0) {
             RED.keyboard.remove(/* up   */ 38);
             RED.keyboard.remove(/* down */ 40);
             RED.keyboard.remove(/* left */ 37);
             RED.keyboard.remove(/* right*/ 39);
         } else {
-            RED.keyboard.add(/* up   */ 38, function() { d3.event.shiftKey?moveSelection(  0,-20):moveSelection( 0,-1);d3.event.preventDefault();},endKeyboardMove);
-            RED.keyboard.add(/* down */ 40, function() { d3.event.shiftKey?moveSelection(  0, 20):moveSelection( 0, 1);d3.event.preventDefault();},endKeyboardMove);
-            RED.keyboard.add(/* left */ 37, function() { d3.event.shiftKey?moveSelection(-20,  0):moveSelection(-1, 0);d3.event.preventDefault();},endKeyboardMove);
-            RED.keyboard.add(/* right*/ 39, function() { d3.event.shiftKey?moveSelection( 20,  0):moveSelection( 1, 0);d3.event.preventDefault();},endKeyboardMove);
+            RED.keyboard.add(/* up   */ 38, function() { if(d3.event.shiftKey){moveSelection(  0,-20)}else{moveSelection( 0,-1);}d3.event.preventDefault();},endKeyboardMove);
+            RED.keyboard.add(/* down */ 40, function() { if(d3.event.shiftKey){moveSelection(  0, 20)}else{moveSelection( 0, 1);}d3.event.preventDefault();},endKeyboardMove);
+            RED.keyboard.add(/* left */ 37, function() { if(d3.event.shiftKey){moveSelection(-20,  0)}else{moveSelection(-1, 0);}d3.event.preventDefault();},endKeyboardMove);
+            RED.keyboard.add(/* right*/ 39, function() { if(d3.event.shiftKey){moveSelection( 20,  0)}else{moveSelection( 1, 0);}d3.event.preventDefault();},endKeyboardMove);
         }
         if (moving_set.length == 1) {
             RED.sidebar.info.refresh(moving_set[0].n);
@@ -678,9 +689,10 @@ RED.view = function() {
     function moveSelection(dx,dy) {
         var minX = 0;
         var minY = 0;
-
+        var node;
+        
         for (var i=0;i<moving_set.length;i++) {
-            var node = moving_set[i];
+            node = moving_set[i];
             if (node.ox == null && node.oy == null) {
                 node.ox = node.n.x;
                 node.oy = node.n.y;
@@ -692,9 +704,9 @@ RED.view = function() {
             minY = Math.min(node.n.y-node.n.h/2-5,minY);
         }
 
-        if (minX != 0 || minY != 0) {
+        if (minX !== 0 || minY !== 0) {
             for (var n = 0; n<moving_set.length; n++) {
-                var node = moving_set[n];
+                node = moving_set[n];
                 node.n.x -= minX;
                 node.n.y -= minY;
             }
@@ -707,10 +719,12 @@ RED.view = function() {
         var removedLinks = [];
         var startDirty = dirty;
         if (moving_set.length > 0) {
-            for (var i in moving_set) {
+            for (var i=0;i<moving_set.length;i++) {
                 var node = moving_set[i].n;
                 node.selected = false;
-                if (node.x < 0) {node.x = 25};
+                if (node.x < 0) {
+                    node.x = 25
+                }
                 var rmlinks = RED.nodes.remove(node.id);
                 removedNodes.push(node);
                 removedLinks = removedLinks.concat(rmlinks);
@@ -733,7 +747,7 @@ RED.view = function() {
     function copySelection() {
         if (moving_set.length > 0) {
             var nns = [];
-            for (var n in moving_set) {
+            for (var n=0;n<moving_set.length;n++) {
                 var node = moving_set[n].n;
                 nns.push(RED.nodes.convertNode(node));
             }
@@ -773,7 +787,7 @@ RED.view = function() {
         mousedown_port_index = portIndex || 0;
         document.body.style.cursor = "crosshair";
         d3.event.preventDefault();
-    };
+    }
 
     function portMouseUp(d,portType,portIndex) {
         document.body.style.cursor = "";
@@ -800,7 +814,7 @@ RED.view = function() {
                 return;
             }
             var src,dst,src_port;
-            if (mousedown_port_type == 0) {
+            if (mousedown_port_type === 0) {
                 src = mousedown_node;
                 src_port = mousedown_port_index;
                 dst = mouseup_node;
@@ -856,9 +870,11 @@ RED.view = function() {
         dblClickPrimed = (lastClickNode == mousedown_node);
         lastClickNode = mousedown_node;
         
+        var i;
+        
         if (d.selected && d3.event.ctrlKey) {
             d.selected = false;
-            for (var i=0;i<moving_set.length;i+=1) {
+            for (i=0;i<moving_set.length;i+=1) {
                 if (moving_set[i].n === d) {
                     moving_set.splice(i,1);
                     break;
@@ -868,10 +884,10 @@ RED.view = function() {
             if (d3.event.shiftKey) {
                 clearSelection();
                 var cnodes = RED.nodes.getAllFlowNodes(mousedown_node);
-                for (var i in cnodes) {
-                    cnodes[i].selected = true;
-                    cnodes[i].dirty = true;
-                    moving_set.push({n:cnodes[i]});
+                for (var n=0;n<cnodes.length;n++) {
+                    cnodes[n].selected = true;
+                    cnodes[n].dirty = true;
+                    moving_set.push({n:cnodes[n]});
                 }
             } else if (!d.selected) {
                 if (!d3.event.ctrlKey) {
@@ -886,7 +902,7 @@ RED.view = function() {
                 var mouse = d3.touches(this)[0]||d3.mouse(this);
                 mouse[0] += d.x-d.w/2;
                 mouse[1] += d.y-d.h/2;
-                for (var i in moving_set) {
+                for (i=0;i<moving_set.length;i++) {
                     moving_set[i].ox = moving_set[i].n.x;
                     moving_set[i].oy = moving_set[i].n.y;
                     moving_set[i].dx = moving_set[i].n.x-mouse[0];
@@ -921,13 +937,13 @@ RED.view = function() {
     function showTouchMenu(obj,pos) {
         var mdn = mousedown_node;
         var options = [];
-        options.push({name:"delete",disabled:(moving_set.length==0),onselect:function() {deleteSelection();}});
-        options.push({name:"cut",disabled:(moving_set.length==0),onselect:function() {copySelection();deleteSelection();}});
-        options.push({name:"copy",disabled:(moving_set.length==0),onselect:function() {copySelection();}});
-        options.push({name:"paste",disabled:(clipboard.length==0),onselect:function() {importNodes(clipboard,true);}});
+        options.push({name:"delete",disabled:(moving_set.length===0),onselect:function() {deleteSelection();}});
+        options.push({name:"cut",disabled:(moving_set.length===0),onselect:function() {copySelection();deleteSelection();}});
+        options.push({name:"copy",disabled:(moving_set.length===0),onselect:function() {copySelection();}});
+        options.push({name:"paste",disabled:(clipboard.length===0),onselect:function() {importNodes(clipboard,true);}});
         options.push({name:"edit",disabled:(moving_set.length != 1),onselect:function() { RED.editor.edit(mdn);}});
         options.push({name:"select",onselect:function() {selectAll();}});
-        options.push({name:"undo",disabled:(RED.history.depth() == 0),onselect:function() {RED.history.pop();}});
+        options.push({name:"undo",disabled:(RED.history.depth() === 0),onselect:function() {RED.history.pop();}});
         
         RED.touch.radialMenu.show(obj,pos,options);
         resetMouseVars();
@@ -1023,7 +1039,7 @@ RED.view = function() {
                             nodeMouseUp.call(this,d);
                         })
                         .on("mouseover",function(d) {
-                                if (mouse_mode == 0) {
+                                if (mouse_mode === 0) {
                                     var node = d3.select(this);
                                     node.classed("node_hovered",true);
                                 }
@@ -1172,16 +1188,16 @@ RED.view = function() {
                         d.ports = d.ports || d3.range(numOutputs);
                         d._ports = thisNode.selectAll(".port_output").data(d.ports);
                         d._ports.enter().append("rect").attr("class","port port_output").attr("rx",3).attr("ry",3).attr("width",10).attr("height",10)
-                            .on("mousedown",function(){var node = d; return function(d,i){portMouseDown(node,0,i);}}() )
-                            .on("touchstart",function(){var node = d; return function(d,i){portMouseDown(node,0,i);}}() )
-                            .on("mouseup",function(){var node = d; return function(d,i){portMouseUp(node,0,i);}}() )
-                            .on("touchend",function(){var node = d; return function(d,i){portMouseUp(node,0,i);}}() )
-                            .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || mousedown_port_type != 0 ));})
+                            .on("mousedown",(function(){var node = d; return function(d,i){portMouseDown(node,0,i);}})() )
+                            .on("touchstart",(function(){var node = d; return function(d,i){portMouseDown(node,0,i);}})() )
+                            .on("mouseup",(function(){var node = d; return function(d,i){portMouseUp(node,0,i);}})() )
+                            .on("touchend",(function(){var node = d; return function(d,i){portMouseUp(node,0,i);}})() )
+                            .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || mousedown_port_type !== 0 ));})
                             .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
                         d._ports.exit().remove();
                         if (d._ports) {
-                            var numOutputs = d.outputs || 1;
-                            var y = (d.h/2)-((numOutputs-1)/2)*13;
+                            numOutputs = d.outputs || 1;
+                            y = (d.h/2)-((numOutputs-1)/2)*13;
                             var x = d.w - 5;
                             d._ports.each(function(d,i) {
                                     var port = d3.select(this);
@@ -1404,9 +1420,11 @@ RED.view = function() {
 
                 var minX = 0;
                 var minY = 0;
-
-                for (var i in new_ms) {
-                    var node = new_ms[i];
+                var i;
+                var node;
+                
+                for (i=0;i<new_ms.length;i++) {
+                    node = new_ms[i];
                     node.n.selected = true;
                     node.n.changed = true;
                     node.n.x -= dx - mouse_position[0];
@@ -1416,8 +1434,8 @@ RED.view = function() {
                     minX = Math.min(node.n.x-node_width/2-5,minX);
                     minY = Math.min(node.n.y-node_height/2-5,minY);
                 }
-                for (var i in new_ms) {
-                    var node = new_ms[i];
+                for (i=0;i<new_ms.length;i++) {
+                    node = new_ms[i];
                     node.n.x -= minX;
                     node.n.y -= minY;
                     node.dx -= minX;
@@ -1622,4 +1640,4 @@ RED.view = function() {
             redraw();
         }
     };
-}();
+})();

@@ -16,7 +16,7 @@
  
 
 
-RED.tabs = function() {
+RED.tabs = (function() {
     
     
     function createTabs(options) {
@@ -69,7 +69,7 @@ RED.tabs = function() {
             var li = ul.find("a[href='#"+id+"']").parent();
             if (li.hasClass("active")) {
                 var tab = li.prev();
-                if (tab.size() == 0) {
+                if (tab.size() === 0) {
                     tab = li.next();
                 }
                 activateTab(tab.find("a"));
@@ -124,4 +124,4 @@ RED.tabs = function() {
     return {
         create: createTabs
     }
-}();
+})();

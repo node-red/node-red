@@ -86,7 +86,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-simple-mocha');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     
-    grunt.registerTask('default', ['jshint:core','jshint:tests','simplemocha:core','simplemocha:nodes']);
-    grunt.registerTask('all', ['jshint:core','jshint:nodes','jshint:editor','default']);
+    grunt.registerTask('default', ['jshint:core','jshint:tests','jshint:editor','simplemocha:core','simplemocha:nodes']);
     
 };

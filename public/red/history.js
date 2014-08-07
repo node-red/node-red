@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-RED.history = function() {
+RED.history = (function() {
     var undo_history = [];
     
     return {
         //TODO: this function is a placeholder until there is a 'save' event that can be listened to
         markAllDirty: function() {
-            for (var i in undo_history) {
+            for (var i=0;i<undo_history.length;i++) {
                 undo_history[i].dirty = true;
             }
         },
@@ -31,42 +31,45 @@ RED.history = function() {
         },
         pop: function() {
             var ev = undo_history.pop();
+            var i;
             if (ev) {
                 if (ev.t == 'add') {
-                    for (var i in ev.nodes) {
+                    for (i=0;i<ev.nodes.length;i++) {
                         RED.nodes.remove(ev.nodes[i]);
                     }
-                    for (var i in ev.links) {
+                    for (i=0;i<ev.links.length;i++) {
                         RED.nodes.removeLink(ev.links[i]);
                     }
-                    for (var i in ev.workspaces) {
+                    for (i=0;i<ev.workspaces.length;i++) {
                         RED.nodes.removeWorkspace(ev.workspaces[i].id);
                         RED.view.removeWorkspace(ev.workspaces[i]);
                     }
                 } else if (ev.t == "delete") {
-                    for (var i in ev.workspaces) {
+                    for (i=0;i<ev.workspaces.length;i++) {
                         RED.nodes.addWorkspace(ev.workspaces[i]);
                         RED.view.addWorkspace(ev.workspaces[i]);
                     }
-                    for (var i in ev.nodes) {
+                    for (i=0;i<ev.nodes.length;i++) {
                         RED.nodes.add(ev.nodes[i]);
                     }
-                    for (var i in ev.links) {
+                    for (i=0;i<ev.links.length;i++) {
                         RED.nodes.addLink(ev.links[i]);
                     }
                 } else if (ev.t == "move") {
-                    for (var i in ev.nodes) {
+                    for (i=0;i<ev.nodes.length;i++) {
                         var n = ev.nodes[i];
                         n.n.x = n.ox;
                         n.n.y = n.oy;
                         n.n.dirty = true;
                     }
                 } else if (ev.t == "edit") {
-                    for (var i in ev.changes) {
-                        ev.node[i] = ev.changes[i];
+                    for (i in ev.changes) {
+                        if (ev.changes.hasOwnProperty(i)) {
+                            ev.node[i] = ev.changes[i];
+                        }
                     }
                     RED.editor.updateNodeProperties(ev.node);
-                    for (var i in ev.links) {
+                    for (i=0;i<ev.links.length;i++) {
                         RED.nodes.addLink(ev.links[i]);
                     }
                     RED.editor.validateNode(ev.node);
@@ -79,4 +82,4 @@ RED.history = function() {
         }
     }
 
-}();
+})();

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-RED.keyboard = function() {
+RED.keyboard = (function() {
 
     var active = true;
     var handlers = {};
@@ -65,4 +65,4 @@ RED.keyboard = function() {
         enable: function(){ active = true; }
     }
 
-}();
+})();

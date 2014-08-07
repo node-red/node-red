@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-RED.notify = function() {
+RED.notify = (function() {
     var currentNotifications = [];
     var c = 0;
     return function(msg,type,fixed,timeout) {
         if (currentNotifications.length > 4) {
             var ll = currentNotifications.length;
             for (var i = 0;ll > 4 && i<currentNotifications.length;i+=1) {
-                var n = currentNotifications[i];
-                if (!n.fixed) {
-                    window.clearTimeout(n.timeoutid);
-                    n.close();
+                var notifiction = currentNotifications[i];
+                if (!notifiction.fixed) {
+                    window.clearTimeout(notifiction.timeoutid);
+                    notifiction.close();
                     ll -= 1;
                 }
             }
@@ -39,7 +39,7 @@ RED.notify = function() {
         n.innerHTML = msg;
         $("#notifications").append(n);
         $(n).slideDown(300);
-        n.close = function() {
+        n.close = (function() {
             var nn = n;
             return function() {
                 currentNotifications.splice(currentNotifications.indexOf(nn),1);
@@ -47,7 +47,7 @@ RED.notify = function() {
                         nn.parentNode.removeChild(nn);
                 });
             };
-        }();
+        })();
         if (!fixed) {
             n.timeoutid = window.setTimeout(n.close,timeout||3000);
         }
@@ -55,5 +55,5 @@ RED.notify = function() {
         c+=1;
         return n;
     }
-}();
+})();
 

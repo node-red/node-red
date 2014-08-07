@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
  
-RED.palette = function() {
+RED.palette = (function() {
 
     var exclusion = ['config','unknown','deprecated'];
     var core = ['input', 'output', 'function', 'social', 'storage', 'analysis', 'advanced'];
@@ -64,22 +64,22 @@ RED.palette = function() {
           d.style.backgroundColor = def.color;
           
           if (def.outputs > 0) {
-              var port = document.createElement("div");
-              port.className = "palette_port palette_port_output";
-              d.appendChild(port);
+              var portOut = document.createElement("div");
+              portOut.className = "palette_port palette_port_output";
+              d.appendChild(portOut);
           }
           
           if (def.inputs > 0) {
-              var port = document.createElement("div");
-              port.className = "palette_port";
-              d.appendChild(port);
+              var portIn = document.createElement("div");
+              portIn.className = "palette_port";
+              d.appendChild(portIn);
           }
           
-          if ($("#palette-base-category-"+category[0]).length == 0){
+          if ($("#palette-base-category-"+category[0]).length === 0){
               createCategoryContainer(category[0]);
           }
           
-          if ($("#palette-"+def.category).length == 0) {          
+          if ($("#palette-"+def.category).length === 0) {          
               $("#palette-base-category-"+category[0]).append('<div id="palette-'+def.category+'"></div>');            
           }
           
@@ -120,7 +120,7 @@ RED.palette = function() {
     
     function filterChange() {
         var val = $("#palette-search-input").val();
-        if (val == "") {
+        if (val === "") {
             $("#palette-search-clear").hide();
         } else {
             $("#palette-search-clear").show();
@@ -128,7 +128,7 @@ RED.palette = function() {
         
         var re = new RegExp(val);
         $(".palette_node").each(function(i,el) {
-            if (val == "" || re.test(el.id)) {
+            if (val === "" || re.test(el.id)) {
                 $(this).show();
             } else {
                 $(this).hide();
@@ -165,4 +165,4 @@ RED.palette = function() {
         add:addNodeType,
         remove:removeNodeType
     };
-}();
+})();

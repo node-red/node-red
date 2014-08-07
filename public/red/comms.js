@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
  
-RED.comms = function() {
+RED.comms = (function() {
     
     var errornotification = null;
     var subscriptions = {};
@@ -30,19 +30,23 @@ RED.comms = function() {
                 errornotification = null;
             }
             for (var t in subscriptions) {
-                ws.send(JSON.stringify({subscribe:t}));
+                if (subscriptions.hasOwnProperty(t)) {
+                    ws.send(JSON.stringify({subscribe:t}));
+                }
             }
         }
         ws.onmessage = function(event) {
             var msg = JSON.parse(event.data);
             if (msg.topic) {
                 for (var t in subscriptions) {
-                    var re = new RegExp("^"+t.replace(/([\[\]\?\(\)\\\\$\^\*\.|])/g,"\\$1").replace(/\+/g,"[^/]+").replace(/\/#$/,"(\/.*)?")+"$");
-                    if (re.test(msg.topic)) {
-                        var subscribers = subscriptions[t];
-                        if (subscribers) {
-                            for (var i=0;i<subscribers.length;i++) {
-                                subscribers[i](msg.topic,msg.data);
+                    if (subscriptions.hasOwnProperty(t)) {
+                        var re = new RegExp("^"+t.replace(/([\[\]\?\(\)\\\\$\^\*\.|])/g,"\\$1").replace(/\+/g,"[^/]+").replace(/\/#$/,"(\/.*)?")+"$");
+                        if (re.test(msg.topic)) {
+                            var subscribers = subscriptions[t];
+                            if (subscribers) {
+                                for (var i=0;i<subscribers.length;i++) {
+                                    subscribers[i](msg.topic,msg.data);
+                                }
                             }
                         }
                     }
@@ -72,4 +76,4 @@ RED.comms = function() {
         connect: connectWS,
         subscribe: subscribe
     }
-}();
+})();
