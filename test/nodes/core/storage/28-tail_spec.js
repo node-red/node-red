@@ -72,8 +72,10 @@ describe('TailNode', function() {
             helperNode1.on("input", function(msg) {
                 msg.should.have.property('topic', fileToTail);
                 msg.payload.should.equal("Tail message line" + (++inputCounter));
+                if(inputCounter === 2) {
+                    done();
+                }
             });
-            done();
         });
     });
     
@@ -86,8 +88,8 @@ describe('TailNode', function() {
             helperNode1.on("input", function(msg) {
                 msg.should.have.property('topic', fileToTail);
                 msg.payload.should.equal("Tail message line1\nTail message line2\n");
+                done();
             });
-            done();
         });
     });
 });
