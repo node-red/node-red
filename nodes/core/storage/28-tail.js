@@ -28,7 +28,7 @@ module.exports = function(RED) {
 
         var err = "";
         // TODO: rewrite to use node-tail
-        var tail = spawn("tail", ["-F", this.filename]);
+        var tail = spawn("tail", ["-F", "-n", "0", this.filename]);
         tail.stdout.on("data", function (data) {
             if (node.split) {
                 // TODO: allow customisation of the line break - as we do elsewhere
