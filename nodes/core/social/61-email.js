@@ -18,12 +18,7 @@ module.exports = function(RED) {
     "use strict";
     var util = require('util');
     var nodemailer = require("nodemailer");
-    var Imap = null;
-    try {
-        Imap = require('imap');
-    } catch (e) {
-        util.log("[61-email.js] - imap npm not installed - no inbound email available");
-    }
+    var Imap = require('imap');
 
     //console.log(nodemailer.Transport.transports.SMTP.wellKnownHosts);
 
@@ -51,16 +46,10 @@ module.exports = function(RED) {
         if (flag) { RED.nodes.addCredentials(n.id,{userid:this.userid, password:this.password, global:true}); }
         var node = this;
 
-        var smtpTransport = nodemailer.createTransport("SMTP",{
-            //service: emailkey.service,
-            // {
-            //transport: 'SMTP',
+        var smtpTransport = nodemailer.createTransport({
             host: node.outserver,
             port: node.outport,
-            requiresAuth: true,
-            secureConnection: true,
-            //domains: [ 'gmail.com', 'googlemail.com' ],
-            //},
+            secure: true,
             auth: {
                 user: node.userid,
                 pass: node.password
@@ -69,19 +58,28 @@ module.exports = function(RED) {
 
         this.on("input", function(msg) {
             if (msg != null) {
-                node.status({fill:"blue",shape:"dot",text:"sending"});
                 if (smtpTransport) {
+                    node.status({fill:"blue",shape:"dot",text:"sending"});
+                    var payload = msg.payload;
+                    if (Buffer.isBuffer(payload)) {
+                        payload = payload.toString();
+                    } else if (typeof payload === "object") {
+                        payload = JSON.stringify(payload);
+                    } else if (typeof payload !== "string") {
+                        payload = ""+payload;
+                    }
+                    
                     smtpTransport.sendMail({
                         from: node.userid, // sender address
                         to: node.name, // comma separated list of receivers
                         subject: msg.topic, // subject line
-                        text: msg.payload // plaintext body
-                    }, function(error, response) {
+                        text: payload // plaintext body
+                    }, function(error, info) {
                         if (error) {
                             node.error(error);
-                            node.status({fill:"red",shape:"ring",text:"post error"});
+                            node.status({fill:"red",shape:"ring",text:"send failed"});
                         } else {
-                            node.log("Message sent: " + response.message);
+                            node.log("Message sent: " + info.response);
                             node.status({});
                         }
                     });
@@ -217,9 +215,7 @@ module.exports = function(RED) {
 
         node.emit("input",{});
     }
-    if (Imap != null) {
-        RED.nodes.registerType("e-mail in",EmailInNode);
-    }
+    RED.nodes.registerType("e-mail in",EmailInNode);
 
     var querystring = require('querystring');
 
