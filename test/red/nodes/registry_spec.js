@@ -310,6 +310,22 @@ describe('NodeRegistry', function() {
         });
     });
     
+    it('fails to add non-existent filename', function(done) {
+        typeRegistry.init({});
+        typeRegistry.load("wontexist",true).then(function(){
+            var list = typeRegistry.getNodeList();
+            list.should.be.an.Array.and.be.empty;
+            typeRegistry.addNode({file: resourcesDir + "DoesNotExist/DoesNotExist.js"}).then(function(node) {
+                done(new Error("ENOENT not thrown"));
+            }).otherwise(function(e) {
+                e.code.should.eql("ENOENT");
+                done();
+            });
+            
+        }).catch(function(e) {
+            done(e);
+        });
+    });
     
     it('returns node info by type or id', function(done) {
         typeRegistry.init({});
@@ -501,7 +517,6 @@ describe('NodeRegistry', function() {
             });
         })();
             
-            
         typeRegistry.init({});
         typeRegistry.load("wontexist",true).then(function(){
             var list = typeRegistry.getNodeList();
@@ -534,6 +549,24 @@ describe('NodeRegistry', function() {
         }).finally(function() {
             readdirSync.restore();
             pathJoin.restore();
+        });
+    });
+    
+    it('fails to add non-existent module name', function(done) {
+        typeRegistry.init({});
+        typeRegistry.load("wontexist",true).then(function(){
+            var list = typeRegistry.getNodeList();
+            list.should.be.an.Array.and.be.empty;
+            
+            typeRegistry.addNode({module: "DoesNotExistModule"}).then(function(node) {
+                done(new Error("ENOENT not thrown"));
+            }).otherwise(function(e) {
+                e.code.should.eql("MODULE_NOT_FOUND");
+                done();
+            });
+            
+        }).catch(function(e) {
+            done(e);
         });
     });
     

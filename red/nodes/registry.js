@@ -466,6 +466,11 @@ function addNode(options) {
         }
     } else if (options.module) {
         var moduleFiles = scanTreeForNodesModules(options.module);
+        if (moduleFiles.length === 0) {
+            var err = new Error("Cannot find module '" + options.module + "'");
+            err.code = 'MODULE_NOT_FOUND';
+            return when.reject(err);
+        }
         moduleFiles.forEach(function(moduleFile) {
             nodes = nodes.concat(loadNodesFromModule(moduleFile.dir,moduleFile.package));
         });
