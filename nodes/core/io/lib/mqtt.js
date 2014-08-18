@@ -213,12 +213,12 @@ MQTTClient.prototype.publish = function(topic,payload,qos,retain) {
    var self = this;
    if (self.connected) {
    
-      if (Buffer.isBuffer(payload)) {
-         payload = payload.toString();
-      } else if (typeof payload === "object") {
-         payload = JSON.stringify(payload);
-      } else if (typeof payload !== "string") {
-         payload = ""+payload;
+      if (!Buffer.isBuffer(payload)) {
+         if (typeof payload === "object") {
+            payload = JSON.stringify(payload);
+         } else if (typeof payload !== "string") {
+            payload = ""+payload;
+         }
       }
       var options = {
          topic: topic,
