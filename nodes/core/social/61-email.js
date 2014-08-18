@@ -22,8 +22,10 @@ module.exports = function(RED) {
 
     //console.log(nodemailer.Transport.transports.SMTP.wellKnownHosts);
 
-    try { var globalkeys = RED.settings.email || require(process.env.NODE_RED_HOME+"/../emailkeys.js"); }
-    catch(err) { }
+    try {
+        var globalkeys = RED.settings.email || require(process.env.NODE_RED_HOME+"/../emailkeys.js");
+    } catch(err) {
+    }
 
     function EmailNode(n) {
         RED.nodes.createNode(this,n);
@@ -32,18 +34,29 @@ module.exports = function(RED) {
         this.outserver = n.server;
         this.outport = n.port;
         var flag = false;
-        var credentials = RED.nodes.getCredentials(n.id);
-        if ((credentials) && (credentials.hasOwnProperty("userid"))) { this.userid = credentials.userid; }
-        else {
-            if (globalkeys) { this.userid = globalkeys.user; flag = true; }
-            else { this.error("No e-mail userid set"); }
+        if (this.credentials && this.credentials.hasOwnProperty("userid")) {
+            this.userid = this.credentials.userid;
+        } else {
+            if (globalkeys) {
+                this.userid = globalkeys.user;
+                flag = true;
+            } else {
+                this.error("No e-mail userid set");
+            }
         }
-        if ((credentials) && (credentials.hasOwnProperty("password"))) { this.password = credentials.password; }
-        else {
-            if (globalkeys) { this.password = globalkeys.pass; flag = true; }
-            else { this.error("No e-mail password set"); }
+        if (this.credentials && this.credentials.hasOwnProperty("password")) {
+            this.password = this.credentials.password;
+        } else {
+            if (globalkeys) {
+                this.password = globalkeys.pass;
+                flag = true;
+            } else {
+                this.error("No e-mail password set");
+            }
         }
-        if (flag) { RED.nodes.addCredentials(n.id,{userid:this.userid, password:this.password, global:true}); }
+        if (flag) {
+            RED.nodes.addCredentials(n.id,{userid:this.userid, password:this.password, global:true});
+        }
         var node = this;
 
         var smtpTransport = nodemailer.createTransport({
@@ -88,7 +101,13 @@ module.exports = function(RED) {
             }
         });
     }
-    RED.nodes.registerType("e-mail",EmailNode);
+    RED.nodes.registerType("e-mail",EmailNode,{
+        credentials: {
+            userid: {type:"text"},
+            password: {type: "password"},
+            global: { type:"boolean"}
+        }       
+    });
 
     function EmailInNode(n) {
         RED.nodes.createNode(this,n);
@@ -97,18 +116,31 @@ module.exports = function(RED) {
         this.inserver = n.server || emailkey.server || "imap.gmail.com";
         this.inport = n.port || emailkey.port || "993";
         var flag = false;
-        var credentials = RED.nodes.getCredentials(n.id);
-        if ((credentials) && (credentials.hasOwnProperty("userid"))) { this.userid = credentials.userid; }
-        else {
-            if (globalkeys) { this.userid = globalkeys.user; flag = true; }
-            else { this.error("No e-mail userid set"); }
+        
+        if (this.credentials && this.credentials.hasOwnProperty("userid")) {
+            this.userid = this.credentials.userid;
+        } else {
+            if (globalkeys) {
+                this.userid = globalkeys.user;
+                flag = true;
+            } else {
+                this.error("No e-mail userid set");
+            }
         }
-        if ((credentials) && (credentials.hasOwnProperty("password"))) { this.password = credentials.password; }
-        else {
-            if (globalkeys) { this.password = globalkeys.pass; flag = true; }
-            else { this.error("No e-mail password set"); }
+        if (this.credentials && this.credentials.hasOwnProperty("password")) {
+            this.password = this.credentials.password;
+        } else {
+            if (globalkeys) {
+                this.password = globalkeys.pass;
+                flag = true;
+            } else {
+                this.error("No e-mail password set");
+            }
         }
-        if (flag) { RED.nodes.addCredentials(n.id,{userid:this.userid, password:this.password, global:true}); }
+        if (flag) {
+            RED.nodes.addCredentials(n.id,{userid:this.userid, password:this.password, global:true});
+        }
+
         var node = this;
         this.interval_id = null;
         var oldmail = {};
@@ -215,54 +247,11 @@ module.exports = function(RED) {
 
         node.emit("input",{});
     }
-    RED.nodes.registerType("e-mail in",EmailInNode);
-
-    var querystring = require('querystring');
-
-    RED.httpAdmin.get('/email/global',function(req,res) {
-        res.send(JSON.stringify({hasToken:!(globalkeys && globalkeys.userid && globalkeys.password)}));
-    });
-
-    RED.httpAdmin.get('/email/:id',function(req,res) {
-        var credentials = RED.nodes.getCredentials(req.params.id);
-        if (credentials) {
-            res.send(JSON.stringify({userid:credentials.userid,hasPassword:(credentials.password&&credentials.password!="")}));
-        }
-        else if (globalkeys && globalkeys.user && globalkeys.pass) {
-            RED.nodes.addCredentials(req.params.id,{userid:globalkeys.user, password:globalkeys.pass, global:true});
-            credentials = RED.nodes.getCredentials(req.params.id);
-            res.send(JSON.stringify({userid:credentials.userid,global:credentials.global,hasPassword:(credentials.password&&credentials.password!="")}));
-        }
-        else {
-            res.send(JSON.stringify({}));
-        }
-    });
-
-    RED.httpAdmin.delete('/email/:id',function(req,res) {
-        RED.nodes.deleteCredentials(req.params.id);
-        res.send(200);
-    });
-
-    RED.httpAdmin.post('/email/:id',function(req,res) {
-        var body = "";
-        req.on('data', function(chunk) {
-            body+=chunk;
-        });
-        req.on('end', function(){
-            var newCreds = querystring.parse(body);
-            var credentials = RED.nodes.getCredentials(req.params.id)||{};
-            if (newCreds.userid == null || newCreds.userid == "") {
-                delete credentials.userid;
-            } else {
-                credentials.userid = newCreds.userid;
-            }
-            if (newCreds.password == "") {
-                delete credentials.password;
-            } else {
-                credentials.password = newCreds.password||credentials.password;
-            }
-            RED.nodes.addCredentials(req.params.id,credentials);
-            res.send(200);
-        });
+    RED.nodes.registerType("e-mail in",EmailInNode,{
+        credentials: {
+            userid: {type:"text"},
+            password: {type: "password"},
+            global: { type:"boolean"}
+        }       
     });
 }
