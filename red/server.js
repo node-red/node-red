@@ -71,8 +71,10 @@ function createServer(_server,_settings) {
             redNodes.addNode(node).then(function(info) {
                 comms.publish("node/added",info,false);
                 util.log("[red] Added node types:");
-                for (var i=0;i<info.types.length;i++) {
-                    util.log("[red] - "+info.types[i]);
+                for (var j=0;j<info.length;j++) {
+                    for (var i=0;i<info[j].types.length;i++) {
+                        util.log("[red] - "+info[j].types[i]);
+                    }
                 }
                 res.json(info);
             }).otherwise(function(err) {
