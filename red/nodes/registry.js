@@ -20,7 +20,6 @@ var whenNode = require('when/node');
 var fs = require("fs");
 var path = require("path");
 var crypto = require("crypto"); 
-var cheerio = require("cheerio");
 var UglifyJS = require("uglify-js");
 
 var events = require("../events");
@@ -331,36 +330,22 @@ function loadNodeConfig(file,module,name) {
     } else {
         node.name = path.basename(file)
     }
-
     
     var content = fs.readFileSync(node.template,'utf8');
     
-    var $ = cheerio.load(content);
-    var template = "";
-    var script = "";
     var types = [];
     
-    $("*").each(function(i,el) {
-        if (el.type == "script" && el.attribs.type == "text/javascript") {
-            script += el.children[0].data;
-        } else if (el.name == "script" || el.name == "style") {
-            if (el.attribs.type == "text/x-red" && el.attribs['data-template-name']) {
-                types.push(el.attribs['data-template-name'])
-            }
-            var openTag = "<"+el.name;
-            var closeTag = "</"+el.name+">";
-            for (var j in el.attribs) {
-                if (el.attribs.hasOwnProperty(j)) {
-                    openTag += " "+j+'="'+el.attribs[j]+'"';
-                }
-            }
-            openTag += ">";
-            template += openTag+$(el).text()+closeTag;
-        }
-    });
+    var regExp = /<script ([^>]*)data-template-name=['"]([^'"]*)['"]/gi;
+    var match = null;
+    
+    while((match = regExp.exec(content)) !== null) {
+        types.push(match[2]);
+    }
     node.types = types;
-    node.config = template;
-    node.script = script;
+    node.config = content;
+    
+    // TODO: parse out the javascript portion of the template
+    node.script = "";
     
     for (var i=0;i<node.types.length;i++) {
         if (registry.getTypeId(node.types[i])) {

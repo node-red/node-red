@@ -272,11 +272,11 @@ describe('NodeRegistry', function() {
             var nodeConfigs = typeRegistry.getNodeConfigs();
             
             // TODO: this is brittle...
-            nodeConfigs.should.equal("<script type=\"text/x-red\" data-template-name=\"test-node-1\"></script><script type=\"text/x-red\" data-help-name=\"test-node-1\"></script><style></style><script type=\"text/x-red\" data-template-name=\"test-node-2\"></script><script type=\"text/x-red\" data-help-name=\"test-node-2\"></script><style></style><script type=\"text/javascript\">RED.nodes.registerType(\"test-node-1\",{}),RED.nodes.registerType(\"test-node-2\",{});</script>");
+            nodeConfigs.should.equal("<script type=\"text/x-red\" data-template-name=\"test-node-1\"></script>\n<script type=\"text/x-red\" data-help-name=\"test-node-1\"></script>\n<script type=\"text/javascript\">RED.nodes.registerType('test-node-1',{});</script>\n<style></style>\n<p>this should be filtered out</p>\n<script type=\"text/x-red\" data-template-name=\"test-node-2\"></script>\n<script type=\"text/x-red\" data-help-name=\"test-node-2\"></script>\n<script type=\"text/javascript\">RED.nodes.registerType('test-node-2',{});</script>\n<style></style>\n");
             
             var nodeId = list[0].id;
             var nodeConfig = typeRegistry.getNodeConfig(nodeId);
-            nodeConfig.should.equal("<script type=\"text/x-red\" data-template-name=\"test-node-1\"></script><script type=\"text/x-red\" data-help-name=\"test-node-1\"></script><style></style><script type=\"text/javascript\">RED.nodes.registerType('test-node-1',{});</script>");
+            nodeConfig.should.equal("<script type=\"text/x-red\" data-template-name=\"test-node-1\"></script>\n<script type=\"text/x-red\" data-help-name=\"test-node-1\"></script>\n<script type=\"text/javascript\">RED.nodes.registerType('test-node-1',{});</script>\n<style></style>\n<p>this should be filtered out</p>\n<script type=\"text/javascript\"></script>");
             done();
         }).catch(function(e) {
             done(e);
