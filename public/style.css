@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,20 +141,21 @@ a.brand img {
     box-sizing:border-box;
     -moz-box-sizing: border-box;    
 }
-#palette-search i.icon-search {
+#palette-search i.fa-search {
     position: absolute;
     pointer-events: none;
-    left: 3px;
+    left: 4px;
     top: 10px;
 }
-#palette-search i.icon-remove {
+#palette-search i.fa-times {
     position: absolute;
-    right: 3px;
+    right: 6px;
     top: 10px;
 }
 
 #palette-search-clear {
     display: none;
+    color: #000;
 }
 
 #palette-search input {
@@ -192,10 +193,10 @@ a.brand img {
     border-radius: 3px;
     cursor: pointer;
     text-align: left;
-    padding: 3px;
+    padding: 1px;
 }
 .palette-header i {
-    float: right;
+    margin: 3px 4px 3px 3px;
     -webkit-transition: all 0.2s ease-in-out;
     -moz-transition: all 0.2s ease-in-out;
     -o-transition: all 0.2s ease-in-out;
@@ -612,10 +613,12 @@ div.node-info {
     display: none;
 }
 
-.dropdown-menu * .icon-ok {
+.dropdown-menu * .fa-check {
     display: none;
+    margin-right: -15px;
+    margin-top: 3px;
 }
-.dropdown-menu * a.active > .icon-ok {
+.dropdown-menu * a.active > .fa-check {
     display: inline-block;
 }
 .dropdown-menu>li.disabled>a:hover>[class^="icon-"] {
@@ -625,8 +628,13 @@ div.node-info {
 .dropdown-menu  {
     width: 200px !important;
 }
+.dropdown-menu > li > a > i {
+    width: 10px;
+    text-align: center;
+    margin-left: -8px;
+}
 .dropdown-menu > li > a {
-     padding-left: 28px ;
+     padding-left: 38px ;
      text-indent: -8px ;
      white-space: normal !important;
 }
@@ -722,8 +730,9 @@ div.node-info {
     width: 100%;
     background: #e3e3e3;
     height: 100%;
-    line-height: 28px;
+    line-height: 30px;
     text-align: center;
+    color: #000;
 }
 #btn-workspace-add-tab:hover {
     background: #efefef;

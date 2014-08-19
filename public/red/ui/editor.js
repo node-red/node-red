@@ -287,7 +287,7 @@ RED.editor = (function() {
         input.replaceWith('<select style="width: 60%;" id="node-input-'+property+'"></select>');
         updateConfigNodeSelect(property,type,node[property]);
         var select = $("#node-input-"+property);
-        select.after(' <a id="node-input-lookup-'+property+'" class="btn"><i class="icon icon-pencil"></i></a>');
+        select.after(' <a id="node-input-lookup-'+property+'" class="btn"><i class="fa fa-pencil"></i></a>');
         $('#node-input-lookup-'+property).click(function(e) {
             showEditConfigNodeDialog(property,type,select.find(":selected").val());
             e.preventDefault();

@@ -76,7 +76,7 @@ var RED = (function() {
             }
             var nns = RED.nodes.createCompleteNodeSet();
             
-            $("#btn-icn-deploy").removeClass('icon-upload');
+            $("#btn-icn-deploy").removeClass('fa-download');
             $("#btn-icn-deploy").addClass('spinner');
             RED.view.dirty(false);
             
@@ -113,7 +113,7 @@ var RED = (function() {
                 }
             }).always(function() {
                 $("#btn-icn-deploy").removeClass('spinner');
-                $("#btn-icn-deploy").addClass('icon-upload');
+                $("#btn-icn-deploy").addClass('fa-download');
             });
         }
     }
