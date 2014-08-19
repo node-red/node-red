@@ -588,12 +588,15 @@ table.node-info tr.blank {
 }
 table.node-info tr.blank td {
     padding-top: 8px;
+    border: none;
+    font-weight: bold;
+    padding-left: 0px;
 }
 table.node-info td:first-child{
     color: #000;
     vertical-align: top;
     width: 90px;
-    padding: 0 3px;
+    padding: 3px;
     border-right: 1px solid #ddd;
 }
 table.node-info td:last-child{

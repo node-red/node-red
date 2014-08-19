@@ -43,9 +43,10 @@ RED.sidebar.info = (function() {
     function refresh(node) {
         var table = '<table class="node-info"><tbody>';
 
+        table += '<tr class="blank"><td colspan="2">Node</td></tr>';
         table += "<tr><td>Type</td><td>&nbsp;"+node.type+"</td></tr>";
         table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
-        table += '<tr class="blank"><td colspan="2">&nbsp;Properties</td></tr>';
+        table += '<tr class="blank"><td colspan="2">Properties</td></tr>';
         for (var n in node._def.defaults) {
             if (node._def.defaults.hasOwnProperty(n)) {
                 var val = node[n]||"";
