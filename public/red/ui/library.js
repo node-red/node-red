@@ -25,6 +25,7 @@ RED.library = (function() {
                 var li;
                 var a;
                 var ul = document.createElement("ul");
+                ul.id = "btn-import-library-submenu";
                 ul.className = "dropdown-menu";
                 if (data.d) {
                     for (i in data.d) {
@@ -61,7 +62,8 @@ RED.library = (function() {
                 return ul;
             };
             var menu = buildMenu(data,"");
-            $("#flow-menu-parent>ul").replaceWith(menu);
+            //TODO: need an api in RED.menu for this
+            $("#btn-import-library-submenu").replaceWith(menu);
         });
     }
     loadFlowLibrary();

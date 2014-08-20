@@ -268,29 +268,18 @@ RED.view = (function() {
             showRenameWorkspaceDialog(tab.id);
         },
         onadd: function(tab) {
-            var menuli = $("<li/>");
-            var menuA = $("<a/>",{tabindex:"-1",href:"#"+tab.id}).appendTo(menuli);
-            menuA.html(tab.label);
-            menuA.on("click",function() {
-                workspace_tabs.activateTab(tab.id);
+            RED.menu.addItem("btn-workspace-menu",{
+                id:"btn-workspace-menu-"+tab.id.replace(".","-"),
+                label:tab.label,
+                onselect:function() {
+                    workspace_tabs.activateTab(tab.id);
+                }
             });
-
-            $('#workspace-menu-list').append(menuli);
-
-            if (workspace_tabs.count() == 1) {
-                $('#btn-workspace-delete').parent().addClass("disabled");
-            } else {
-                $('#btn-workspace-delete').parent().removeClass("disabled");
-            }
+            RED.menu.setDisabled("btn-workspace-delete",workspace_tabs.count() == 1);
         },
         onremove: function(tab) {
-            if (workspace_tabs.count() == 1) {
-                $('#btn-workspace-delete').parent().addClass("disabled");
-            } else {
-                $('#btn-workspace-delete').parent().removeClass("disabled");
-            }
-            $('#workspace-menu-list a[href="#'+tab.id+'"]').parent().remove();
-
+            RED.menu.setDisabled("btn-workspace-delete",workspace_tabs.count() == 1);
+            RED.menu.removeItem("btn-workspace-menu-"+tab.id.replace(".","-"));
         }
     });
 
@@ -309,13 +298,15 @@ RED.view = (function() {
         RED.history.push({t:'add',workspaces:[ws],dirty:dirty});
         RED.view.dirty(true);
     }
-    $('#btn-workspace-add-tab').on("click",addWorkspace);
-    $('#btn-workspace-add').on("click",addWorkspace);
-    $('#btn-workspace-edit').on("click",function() {
-        showRenameWorkspaceDialog(activeWorkspace);
-    });
-    $('#btn-workspace-delete').on("click",function() {
-        deleteWorkspace(activeWorkspace);
+    $(function() {
+        $('#btn-workspace-add-tab').on("click",addWorkspace);
+        $('#btn-workspace-add').on("click",addWorkspace);
+        $('#btn-workspace-edit').on("click",function() {
+            showRenameWorkspaceDialog(activeWorkspace);
+        });
+        $('#btn-workspace-delete').on("click",function() {
+            deleteWorkspace(activeWorkspace);
+        });
     });
 
     function deleteWorkspace(id) {
@@ -641,13 +632,13 @@ RED.view = (function() {
 
     function updateSelection() {
         if (moving_set.length === 0) {
-            $("#li-menu-export").addClass("disabled");
-            $("#li-menu-export-clipboard").addClass("disabled");
-            $("#li-menu-export-library").addClass("disabled");
+            RED.menu.setDisabled("btn-export-menu",true);
+            RED.menu.setDisabled("btn-export-clipboard",true);
+            RED.menu.setDisabled("btn-export-library",true);
         } else {
-            $("#li-menu-export").removeClass("disabled");
-            $("#li-menu-export-clipboard").removeClass("disabled");
-            $("#li-menu-export-library").removeClass("disabled");
+            RED.menu.setDisabled("btn-export-menu",false);
+            RED.menu.setDisabled("btn-export-clipboard",false);
+            RED.menu.setDisabled("btn-export-library",false);
         }
         if (moving_set.length === 0 && selected_link == null) {
             RED.keyboard.remove(/* backspace */ 8);
@@ -1465,10 +1456,6 @@ RED.view = (function() {
         }
     }
 
-    $('#btn-import').click(function() {showImportNodesDialog();});
-    $('#btn-export-clipboard').click(function() {showExportNodesDialog();});
-    $('#btn-export-library').click(function() {showExportNodesLibraryDialog();});
-
     function showExportNodesDialog() {
         mouse_mode = RED.state.EXPORT;
         var nns = RED.nodes.createExportableNodeSet(moving_set);
@@ -1638,6 +1625,11 @@ RED.view = (function() {
             RED.nodes.eachNode(function(n) { n.dirty = true;});
             //TODO: subscribe/unsubscribe here
             redraw();
-        }
+        },
+        
+        //TODO: should these move to an import/export module?
+        showImportNodesDialog: showImportNodesDialog,
+        showExportNodesDialog: showExportNodesDialog,
+        showExportNodesLibraryDialog: showExportNodesLibraryDialog
     };
 })();

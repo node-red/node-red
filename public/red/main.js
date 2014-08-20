@@ -15,8 +15,6 @@
  **/
 var RED = (function() {
 
-    $('#btn-keyboard-shortcuts').click(function(){showHelp();});
-
     function hideDropTarget() {
         $("#dropTarget").hide();
         RED.keyboard.remove(/* ESCAPE */ 27);
@@ -201,12 +199,9 @@ var RED = (function() {
         });
     }
 
-    $('#btn-node-status').click(function() {toggleStatus();});
-
     var statusEnabled = false;
-    function toggleStatus() {
-        var btnStatus = $("#btn-node-status");
-        statusEnabled = btnStatus.toggleClass("active").hasClass("active");
+    function toggleStatus(state) {
+        statusEnabled = state;
         RED.view.status(statusEnabled);
     }
     
@@ -229,6 +224,36 @@ var RED = (function() {
     }
 
     $(function() {
+        RED.menu.init({id:"btn-sidemenu",
+            options: [
+                {id:"btn-sidebar",icon:"fa fa-columns",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar},
+                null,
+                {id:"btn-node-status",icon:"fa fa-info",label:"Node Status",toggle:true,onselect:toggleStatus},
+                null,
+                {id:"btn-import-menu",icon:"fa fa-sign-in",label:"Import...",options:[
+                    {id:"btn-import-clipboard",icon:"fa fa-clipboard",label:"Clipboard...",onselect:RED.view.showImportNodesDialog},
+                    {id:"btn-import-library",icon:"fa fa-book",label:"Library",options:[]}
+                ]},
+                {id:"btn-export-menu",icon:"fa fa-sign-out",label:"Export...",disabled:true,options:[
+                    {id:"btn-export-clipboard",icon:"fa fa-clipboard",label:"Clipboard...",disabled:true,onselect:RED.view.showExportNodesDialog},
+                    {id:"btn-export-library",icon:"fa fa-book",label:"Library...",disabled:true,onselect:RED.view.showExportNodesLibraryDialog}
+                ]},
+                null,
+                {id:"btn-config-nodes",icon:"fa fa-th-list",label:"Configuration nodes...",onselect:RED.sidebar.config.show},
+                null,
+                {id:"btn-workspace-menu",icon:"fa fa-th-large",label:"Workspaces",options:[
+                    {id:"btn-workspace-add",icon:"fa fa-plus",label:"Add"},
+                    {id:"btn-workspace-edit",icon:"fa fa-pencil",label:"Rename"},
+                    {id:"btn-workspace-delete",icon:"fa fa-minus",label:"Delete"},
+                    null
+                ]},
+                null,
+                {id:"btn-keyboard-shortcuts",icon:"fa fa-keyboard-o",label:"Keyboard Shortcuts",onselect:showHelp},
+                {id:"btn-help",icon:"fa fa-question",label:"Help...", href:"http://node-red.github.io/docs"}
+            ]
+        });
+        
+
         RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
         loadSettings();
         RED.comms.connect();

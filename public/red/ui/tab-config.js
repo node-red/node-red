@@ -23,13 +23,13 @@ RED.sidebar.config = (function() {
     
     var list = $("<ul>",{class:"tab-config-list"}).appendTo(content);
     
-    $("#btn-config-nodes").click(function(){
+    function show() {
         if (!RED.sidebar.containsTab("config")) {
             RED.sidebar.addTab("config",content,true);
         }
         refresh();
         RED.sidebar.show("config");
-    });
+    }
     
     function refresh() {
         list.empty();
@@ -78,6 +78,7 @@ RED.sidebar.config = (function() {
         });
     }
     return {
+        show:show,
         refresh:refresh
     }
 })();
