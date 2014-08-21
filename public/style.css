@@ -60,6 +60,8 @@ div.btn-group, a.btn {
 }
 
 a.logo {
+    float: left;
+    font-size: 30px;
     line-height: 30px;
     text-decoration: none;
     color: #999;
@@ -75,7 +77,7 @@ a.logo:hover {
     color: #bbb !important;
 }
 a.logo img {
-    height: 16px;
+    height: 18px;
 }
 
 .navbar-fixed-top {
@@ -811,6 +813,7 @@ ul.red-ui-tabs li a.red-ui-tab-close {
     text-align: center;
     padding: 0px;
     border-radius: 5px;
+    color: #666;
 }
 ul.red-ui-tabs li a.red-ui-tab-close:hover {
     background: #bbb !important;

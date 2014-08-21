@@ -121,7 +121,6 @@ RED.library = (function() {
                            $(".list-selected",ul).removeClass("list-selected");
                            $(this).addClass("list-selected");
                            $.get("library/"+options.url+root+item.fn, function(data) {
-                                   console.log(data);
                                    selectedLibraryItem = item;
                                    libraryEditor.setText(data);
                            });
@@ -134,7 +133,7 @@ RED.library = (function() {
         }
     
         $('#node-input-name').addClass('input-append-left').css("width","65%").after(
-            '<div class="btn-group" style="margin-left: -5px;">'+
+            '<div class="btn-group" style="margin-left: 0px;">'+
             '<button id="node-input-'+options.type+'-lookup" class="btn input-append-right" data-toggle="dropdown"><i class="fa fa-book"></i> <i class="fa fa-caret-down"></i></button>'+
             '<ul class="dropdown-menu pull-right" role="menu">'+
             '<li><a id="node-input-'+options.type+'-menu-open-library" tabindex="-1" href="#">Open Library...</a></li>'+

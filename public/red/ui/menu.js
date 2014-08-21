@@ -105,8 +105,6 @@ RED.menu = (function() {
     
     function addItem(id,opt) {
         createMenuItem(opt).appendTo("#"+id+"-submenu");
-                console.log(opt.id);
-
     }
     function removeItem(id) {
         $("#"+id).parent().remove();
