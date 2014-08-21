@@ -17,6 +17,10 @@
 //Simple node to introduce a pause into a flow
 module.exports = function(RED) {
     "use strict";
+    
+    var MILLIS_TO_NANOS = 1000000;
+    var SECONDS_TO_NANOS = 1000000000;
+    
     function random(n) {
         var wait = n.randomFirst + (n.diff * Math.random());
         if (n.buffer.length > 0) {
@@ -80,7 +84,7 @@ module.exports = function(RED) {
         this.buffer = [];
         this.intervalID = -1;
         this.randomID = -1;
-        this.lastSent = Date.now();
+        this.lastSent;
         this.drop = n.drop;
         var node = this;
 
@@ -128,8 +132,14 @@ module.exports = function(RED) {
                         },node.rate);
                     }
                 } else {
-                    var now = Date.now();
-                    if (now-node.lastSent > node.rate) {
+                    var now;
+                    if(node.lastSent) { // WARNING, node.lastSent/now has to be initialized by first message
+                        now = process.hrtime(node.lastSent);
+                    }
+                    if(!node.lastSent) { // ensuring that we always send the first message 
+                        node.lastSent = process.hrtime();
+                        node.send(msg);
+                    } else if ( ( (now[0] * SECONDS_TO_NANOS) + now[1] ) > (node.rate * MILLIS_TO_NANOS) ) { // WARNING, node.lastSent/now has to be initialized by first message
                         node.lastSent = now;
                         node.send(msg);
                     }
