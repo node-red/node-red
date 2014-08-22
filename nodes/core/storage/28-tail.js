@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,11 @@ module.exports = function(RED) {
     "use strict";
     var fs = require("fs");
     var spawn = require('child_process').spawn;
+    var plat = require('os').platform();
+
+    if (plat.match(/^win/)) {
+        throw "Info : Currently not supported on Windows.";
+    }
 
     function TailNode(n) {
         RED.nodes.createNode(this,n);
@@ -28,7 +33,7 @@ module.exports = function(RED) {
 
         var err = "";
         // TODO: rewrite to use node-tail
-        var tail = spawn("tail", ["-F", this.filename]);
+        var tail = spawn("tail", ["-F", "-n", "0", this.filename]);
         tail.stdout.on("data", function (data) {
             if (node.split) {
                 // TODO: allow customisation of the line break - as we do elsewhere
