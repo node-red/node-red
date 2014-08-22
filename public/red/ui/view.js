@@ -1379,9 +1379,9 @@ RED.view = (function() {
     function setDirty(d) {
         dirty = d;
         if (dirty) {
-            $("#btn-deploy").removeClass("disabled").addClass("btn-danger");
+            $("#btn-deploy").removeClass("disabled");
         } else {
-            $("#btn-deploy").addClass("disabled").removeClass("btn-danger");
+            $("#btn-deploy").addClass("disabled");
         }
     }
 

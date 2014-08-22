@@ -249,7 +249,7 @@ var RED = (function() {
                 ]},
                 null,
                 {id:"btn-keyboard-shortcuts",icon:"fa fa-keyboard-o",label:"Keyboard Shortcuts",onselect:showHelp},
-                {id:"btn-help",icon:"fa fa-question",label:"Help...", href:"http://node-red.github.io/docs"}
+                {id:"btn-help",icon:"fa fa-question",label:"Help...", href:"http://nodered.org/docs"}
             ]
         });
         
