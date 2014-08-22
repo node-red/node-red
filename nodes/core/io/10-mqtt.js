@@ -71,8 +71,9 @@ module.exports = function(RED) {
 
     function MQTTOutNode(n) {
         RED.nodes.createNode(this,n);
-
         this.topic = n.topic;
+        this.qos = n.qos || null;
+        this.retain = n.retain;
         this.broker = n.broker;
         this.brokerConfig = RED.nodes.getNode(this.broker);
 
@@ -82,6 +83,15 @@ module.exports = function(RED) {
             var node = this;
             this.on("input",function(msg) {
                 if (msg != null) {
+                    if (msg.qos) {
+                        msg.qos = parseInt(msg.qos);
+                        if ((msg.qos !== 0) && (msg.qos !== 1) && (msg.qos !== 2)) {
+                            msg.qos = null;
+                        }
+                    }
+                    msg.qos = Number(node.qos || msg.qos || 0);
+                    msg.retain = node.retain || msg.retain || false;
+                    msg.retain = ((msg.retain === true) || (msg.retain === "true")) || false;
                     if (node.topic) {
                         msg.topic = node.topic;
                     }
