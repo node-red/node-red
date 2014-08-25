@@ -51,9 +51,9 @@
         category: 'output',
         defaults: {
             name: {value:""},
-            active: {value:true},
-            console: {value:false},
-            complete: {value:false}
+            active: {value:"true"},
+            console: {value:"false"},
+            complete: {value:"false"}
         },
         label: function() {
             return this.name||"debug";
@@ -115,14 +115,14 @@
         var sbc = document.getElementById("debug-content");
 
         var messageCount = 0;
-        
+
         RED._debug = function(msg) {
             handleDebugMessage("",{
                 name:"debug",
                 msg:msg
             });
         }
-        
+
         var handleDebugMessage = function(t,o) {
             var msg = document.createElement("div");
             msg.onmouseover = function() {
@@ -148,7 +148,7 @@
                 if (node) {
                     RED.view.showWorkspace(node.z);
                 }
-                
+
             };
             var name = (o.name?o.name:o.id).toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
             var topic = (o.topic||"").toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
