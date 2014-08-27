@@ -83,90 +83,6 @@
     </div>
 
     <div class="form-tips"><b>Note:</b> "interval between times" and "at a specific time" will use cron.<br/>See info box for details.</div>
-    <script>
-    {
-        $("#inject-time-type-select").change(function() {
-            $("#node-input-crontab").val('');
-            var id = $("#inject-time-type-select option:selected").val();
-            $(".inject-time-row").hide();
-            $("#inject-time-row-"+id).show();
-            if ((id == "none") || (id == "interval")) {
-                $("#node-once").show();
-            }
-            else {
-                $("#node-once").hide();
-                $("#node-input-once").prop('checked', false);
-            }
-        });
-
-        var days = [
-            {v:"*",t:"every day"},
-            {v:"1-5",t:"Mondays to Fridays"},
-            {v:"0,6",t:"Saturdays and Sundays"},
-            {v:"1",t:"Mondays"},
-            {v:"2",t:"Tuesdays"},
-            {v:"3",t:"Wednesdays"},
-            {v:"4",t:"Thursdays"},
-            {v:"5",t:"Fridays"},
-            {v:"6",t:"Saturdays"},
-            {v:"0",t:"Sundays"}
-        ];
-
-        $(".inject-time-days").each(function() {
-            for (var d in days) {
-                $(this).append($("<option></option>").val(days[d].v).text(days[d].t));
-            }
-        });
-
-        $(".inject-time-times").each(function() {
-            for (var i=0;i<24;i++) {
-                var l = (i<10?"0":"")+i+":00";
-                $(this).append($("<option></option>").val(i).text(l));
-            }
-        });
-
-        $(".inject-time-count").spinner({
-            //max:60,
-            min:1
-        });
-
-        $("#inject-time-interval-units").change(function() {
-            var units = $("#inject-time-interval-units option:selected").val();
-            //$("#inject-time-interval-days").prop("disabled",(units == "s")?"disabled":false);
-            //$(".inject-time-count").spinner("option","max",(units == "h")?24:60);
-        });
-
-        $.widget( "ui.injecttimespinner", $.ui.spinner, {
-            options: {
-                // seconds
-                step: 60 * 1000,
-                // hours
-                page: 60
-            },
-            _parse: function( value ) {
-                if ( typeof value === "string" ) {
-                    // already a timestamp
-                    if ( Number( value ) == value ) {
-                        return Number( value );
-                    }
-                    var p = value.split(":");
-                    var offset = new Date().getTimezoneOffset();
-                    return (((Number(p[0])+1)*60)+Number(p[1])+offset)*60*1000;
-                }
-                return value;
-            },
-            _format: function( value ) {
-                var d = new Date(value);
-                var h = d.getHours();
-                var m = d.getMinutes();
-                return ((h<10)?"0":"")+h+":"+((m<10)?"0":"")+m;
-            }
-        });
-
-        $("#inject-time-time").injecttimespinner();
-    };
-
-    </script>
 </script>
 <style>
     .inject-time-row {
@@ -229,6 +145,88 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+            $("#inject-time-type-select").change(function() {
+                $("#node-input-crontab").val('');
+                var id = $("#inject-time-type-select option:selected").val();
+                $(".inject-time-row").hide();
+                $("#inject-time-row-"+id).show();
+                if ((id == "none") || (id == "interval")) {
+                    $("#node-once").show();
+                }
+                else {
+                    $("#node-once").hide();
+                    $("#node-input-once").prop('checked', false);
+                }
+            });
+          
+            var days = [
+                {v:"*",t:"every day"},
+                {v:"1-5",t:"Mondays to Fridays"},
+                {v:"0,6",t:"Saturdays and Sundays"},
+                {v:"1",t:"Mondays"},
+                {v:"2",t:"Tuesdays"},
+                {v:"3",t:"Wednesdays"},
+                {v:"4",t:"Thursdays"},
+                {v:"5",t:"Fridays"},
+                {v:"6",t:"Saturdays"},
+                {v:"0",t:"Sundays"}
+            ];
+            
+            $(".inject-time-days").each(function() {
+                for (var d in days) {
+                    $(this).append($("<option></option>").val(days[d].v).text(days[d].t));
+                }
+            });
+          
+            $(".inject-time-times").each(function() {
+                for (var i=0;i<24;i++) {
+                    var l = (i<10?"0":"")+i+":00";
+                    $(this).append($("<option></option>").val(i).text(l));
+                }
+            });
+    
+            $(".inject-time-count").spinner({
+                //max:60,
+                min:1
+            });
+          
+            $("#inject-time-interval-units").change(function() {
+                var units = $("#inject-time-interval-units option:selected").val();
+                //$("#inject-time-interval-days").prop("disabled",(units == "s")?"disabled":false);
+                //$(".inject-time-count").spinner("option","max",(units == "h")?24:60);
+            });
+            
+            $.widget( "ui.injecttimespinner", $.ui.spinner, {
+                options: {
+                    // seconds
+                    step: 60 * 1000,
+                    // hours
+                    page: 60
+                },
+                _parse: function( value ) {
+                    if ( typeof value === "string" ) {
+                        // already a timestamp
+                        if ( Number( value ) == value ) {
+                            return Number( value );
+                        }
+                        var p = value.split(":");
+                        var offset = new Date().getTimezoneOffset();
+                        return (((Number(p[0])+1)*60)+Number(p[1])+offset)*60*1000;
+                    }
+                    return value;
+                },
+                _format: function( value ) {
+                    var d = new Date(value);
+                    var h = d.getHours();
+                    var m = d.getMinutes();
+                    return ((h < 10)?"0":"")+h+":"+((m < 10)?"0":"")+m;
+                }
+            });
+          
+            $("#inject-time-time").injecttimespinner();
+        
+        
+        
             var repeattype = "none";
             if (this.repeat != "" && this.repeat != 0) {
                 repeattype = "interval";
