@@ -31,6 +31,15 @@ describe('NodeRegistry', function() {
     
     var resourcesDir = __dirname+ path.sep + "resources" + path.sep;
     
+    function stubSettings(s,available) {
+        s.available =  function() {return available;}
+        s.set = function(s,v) {},
+        s.get = function(s) { return null;}
+        return s
+    }
+    var settings = stubSettings({},false);
+    var settingsWithStorage = stubSettings({},true);
+    
     it('automatically registers new nodes',function() {
         var testNode = RedNodes.getNode('123');
         should.not.exist(n);
@@ -42,7 +51,7 @@ describe('NodeRegistry', function() {
     });
     
     it('handles nodes that export a function', function(done) {
-        typeRegistry.init({});
+        typeRegistry.init(settings);
         typeRegistry.load(resourcesDir + "TestNode1",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
@@ -64,7 +73,7 @@ describe('NodeRegistry', function() {
     
     
     it('handles nodes that export a function returning a resolving promise', function(done) {
-        typeRegistry.init({});
+        typeRegistry.init(settings);
         typeRegistry.load(resourcesDir + "TestNode2",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
@@ -84,15 +93,14 @@ describe('NodeRegistry', function() {
     });
     
     it('handles nodes that export a function returning a rejecting promise', function(done) {
-        typeRegistry.init({});
+        typeRegistry.init(settings);
         typeRegistry.load(resourcesDir + "TestNode3",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("id");
             list[0].should.have.property("name","TestNode3.js");
             list[0].should.have.property("types",["test-node-3"]);
-            list[0].should.have.property("enabled",false);
-
+            list[0].should.have.property("enabled",true);
             list[0].should.have.property("err","fail");
 
             var nodeConstructor = typeRegistry.get("test-node-3");
@@ -106,7 +114,7 @@ describe('NodeRegistry', function() {
     });
     
     it('handles files containing multiple nodes', function(done) {
-        typeRegistry.init({});
+        typeRegistry.init(settings);
         typeRegistry.load(resourcesDir + "MultipleNodes1",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
@@ -129,7 +137,7 @@ describe('NodeRegistry', function() {
     });
     
     it('handles nested directories', function(done) {
-        typeRegistry.init({});
+        typeRegistry.init(settings);
         typeRegistry.load(resourcesDir + "NestedDirectoryNode",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
@@ -146,7 +154,7 @@ describe('NodeRegistry', function() {
     
     it('emits type-registered and node-icon-dir events', function(done) {
         var eventEmitSpy = sinon.spy(events,"emit");
-        typeRegistry.init({});
+        typeRegistry.init(settings);
         typeRegistry.load(resourcesDir + "NestedDirectoryNode",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
@@ -173,9 +181,10 @@ describe('NodeRegistry', function() {
     });
     
     it('rejects a duplicate node type registration', function(done) {
-        typeRegistry.init({
+        
+        typeRegistry.init(stubSettings({
             nodesDir:[resourcesDir + "TestNode1",resourcesDir + "DuplicateTestNode"]
-        });
+        },false));
         typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
             
@@ -191,7 +200,7 @@ describe('NodeRegistry', function() {
             
             list[1].should.have.property("name","TestNode1.js");
             list[1].should.have.property("types",["test-node-1"]);
-            list[1].should.have.property("enabled",false);
+            list[1].should.have.property("enabled",true);
             list[1].should.have.property("err");
             /already registered/.test(list[1].err).should.be.true;
 
@@ -206,11 +215,10 @@ describe('NodeRegistry', function() {
     });
     
     it('handles nodesDir as a string', function(done) {
-        var settings = {
-            nodesDir :resourcesDir + "TestNode1"
-        }
 
-        typeRegistry.init(settings);
+        typeRegistry.init(stubSettings({
+            nodesDir :resourcesDir + "TestNode1"
+        },false));
         typeRegistry.load("wontexist",true).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
@@ -223,11 +231,10 @@ describe('NodeRegistry', function() {
     });
     
     it('handles invalid nodesDir',function(done) {
-        var settings = {
-            nodesDir : "wontexist"
-        }
 
-        typeRegistry.init(settings);
+        typeRegistry.init(stubSettings({
+            nodesDir : "wontexist"
+        },false));
         typeRegistry.load("wontexist",true).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
@@ -238,7 +245,7 @@ describe('NodeRegistry', function() {
     });
     
     it('returns nothing for an unregistered type config', function() {
-        typeRegistry.init({});
+        typeRegistry.init(settings);
         typeRegistry.load("wontexist",true).then(function(){
             var config = typeRegistry.getNodeConfig("imaginary-shark");
             (config === null).should.be.true;
@@ -248,10 +255,10 @@ describe('NodeRegistry', function() {
     });
     
     it('excludes node files listed in nodesExcludes',function(done) {
-        typeRegistry.init({
+        typeRegistry.init(stubSettings({
             nodesExcludes: [ "TestNode1.js" ],
             nodesDir:[resourcesDir + "TestNode1",resourcesDir + "TestNode2"]
-        });
+        },false));
         typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
@@ -263,9 +270,9 @@ describe('NodeRegistry', function() {
     });
     
     it('returns the node configurations', function(done) {
-        typeRegistry.init({
+        typeRegistry.init(stubSettings({
             nodesDir:[resourcesDir + "TestNode1",resourcesDir + "TestNode2"]
-        });
+        },false));
         typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
             
@@ -276,20 +283,59 @@ describe('NodeRegistry', function() {
             
             var nodeId = list[0].id;
             var nodeConfig = typeRegistry.getNodeConfig(nodeId);
-            nodeConfig.should.equal("<script type=\"text/x-red\" data-template-name=\"test-node-1\"></script>\n<script type=\"text/x-red\" data-help-name=\"test-node-1\"></script>\n<script type=\"text/javascript\">RED.nodes.registerType('test-node-1',{});</script>\n<style></style>\n<p>this should be filtered out</p>\n<script type=\"text/javascript\"></script>");
+            nodeConfig.should.equal("<script type=\"text/x-red\" data-template-name=\"test-node-1\"></script>\n<script type=\"text/x-red\" data-help-name=\"test-node-1\"></script>\n<script type=\"text/javascript\">RED.nodes.registerType('test-node-1',{});</script>\n<style></style>\n<p>this should be filtered out</p>\n");
             done();
         }).catch(function(e) {
             done(e);
         });
     });
     
+    it('stores the node list', function(done) {
+        var settings = {
+            nodesDir:[resourcesDir + "TestNode1",resourcesDir + "TestNode2",resourcesDir + "TestNode3"],
+            available: function() { return true; },
+            set: function(s,v) {},
+            get: function(s) { return null;}
+        }
+        var settingsSave = sinon.spy(settings,"set");
+        typeRegistry.init(settings);
+        typeRegistry.load("wontexist",true).then(function() {
+            var list = typeRegistry.getNodeList();
+            list.should.be.Array.and.have.length(3);
+            
+            settingsSave.callCount.should.equal(1);
+            settingsSave.firstCall.args[0].should.be.equal("nodes");
+            var savedList = settingsSave.firstCall.args[1];
+            
+            savedList[list[0].id].name == list[0].name;
+            savedList[list[1].id].name == list[1].name;
+            savedList[list[2].id].name == list[2].name;
+            
+            savedList[list[0].id].should.not.have.property("err");
+            savedList[list[1].id].should.not.have.property("err");
+            savedList[list[2].id].should.not.have.property("err");
+            
+            done();
+        }).catch(function(e) {
+            done(e);
+        }).finally(function() {
+            settingsSave.restore();
+        });
+            
+    });
+    
     it('allows nodes to be added by filename', function(done) {
-        typeRegistry.init({});
+        var settings = {
+            available: function() { return true; },
+            set: function(s,v) {},
+            get: function(s) { return null;}
+        }            
+        typeRegistry.init(settings);
         typeRegistry.load("wontexist",true).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
             
-            typeRegistry.addNode({file: resourcesDir + "TestNode1/TestNode1.js"}).then(function(node) {
+            typeRegistry.addNode(resourcesDir + "TestNode1/TestNode1.js").then(function(node) {
                 list = typeRegistry.getNodeList();
                 list[0].should.have.property("id");
                 list[0].should.have.property("name","TestNode1.js");
@@ -311,11 +357,11 @@ describe('NodeRegistry', function() {
     });
     
     it('fails to add non-existent filename', function(done) {
-        typeRegistry.init({});
+        typeRegistry.init(settingsWithStorage);
         typeRegistry.load("wontexist",true).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
-            typeRegistry.addNode({file: resourcesDir + "DoesNotExist/DoesNotExist.js"}).then(function(node) {
+            typeRegistry.addNode(resourcesDir + "DoesNotExist/DoesNotExist.js").then(function(node) {
                 done(new Error("ENOENT not thrown"));
             }).otherwise(function(e) {
                 e.code.should.eql("ENOENT");
@@ -328,7 +374,7 @@ describe('NodeRegistry', function() {
     });
     
     it('returns node info by type or id', function(done) {
-        typeRegistry.init({});
+        typeRegistry.init(settings);
         typeRegistry.load(resourcesDir + "TestNode1",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
@@ -357,7 +403,7 @@ describe('NodeRegistry', function() {
     
     
     it('rejects adding duplicate nodes', function(done) {
-        typeRegistry.init({});
+        typeRegistry.init(settingsWithStorage);
         typeRegistry.load(resourcesDir + "TestNode1",true).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
@@ -376,18 +422,23 @@ describe('NodeRegistry', function() {
     });
     
     it('removes nodes from the registry', function(done) {
-        typeRegistry.init({});
+        typeRegistry.init(settingsWithStorage);
         typeRegistry.load(resourcesDir + "TestNode1",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
             list[0].should.have.property("id");
             list[0].should.have.property("name","TestNode1.js");
             list[0].should.have.property("types",["test-node-1"]);
+            list[0].should.have.property("enabled",true);
+            list[0].should.have.property("loaded",true);
 
             typeRegistry.getNodeConfigs().length.should.be.greaterThan(0);
             
             var info = typeRegistry.removeNode(list[0].id);
-            info.should.eql(list[0]);
+            
+            info.should.have.property("id",list[0].id);
+            info.should.have.property("enabled",false);
+            info.should.have.property("loaded",false);
             
             typeRegistry.getNodeList().should.be.an.Array.and.be.empty;
             typeRegistry.getNodeConfigs().length.should.equal(0);
@@ -403,7 +454,7 @@ describe('NodeRegistry', function() {
     });
     
     it('rejects removing unknown nodes from the registry', function(done) {
-        typeRegistry.init({});
+        typeRegistry.init(settings);
         typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
@@ -451,7 +502,7 @@ describe('NodeRegistry', function() {
             });
         })();
         
-        typeRegistry.init({});
+        typeRegistry.init(settings);
         typeRegistry.load("wontexist",false).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(2);
@@ -464,7 +515,7 @@ describe('NodeRegistry', function() {
             list[1].should.have.property("id");
             list[1].should.have.property("name","TestNodeModule:TestNodeMod2");
             list[1].should.have.property("types",["test-node-mod-2"]);
-            list[1].should.have.property("enabled",false);
+            list[1].should.have.property("enabled",true);
             list[1].should.have.property("err");
             
             
@@ -516,13 +567,12 @@ describe('NodeRegistry', function() {
                 return result;
             });
         })();
-            
-        typeRegistry.init({});
+        typeRegistry.init(settingsWithStorage);
         typeRegistry.load("wontexist",true).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
             
-            typeRegistry.addNode({module: "TestNodeModule"}).then(function(node) {
+            typeRegistry.addModule("TestNodeModule").then(function(node) {
                 list = typeRegistry.getNodeList();
                 list.should.be.an.Array.and.have.lengthOf(2);
                 list[0].should.have.property("id");
@@ -534,7 +584,7 @@ describe('NodeRegistry', function() {
                 list[1].should.have.property("id");
                 list[1].should.have.property("name","TestNodeModule:TestNodeMod2");
                 list[1].should.have.property("types",["test-node-mod-2"]);
-                list[1].should.have.property("enabled",false);
+                list[1].should.have.property("enabled",true);
                 list[1].should.have.property("err");
                 
                 node.should.eql(list);
@@ -552,13 +602,62 @@ describe('NodeRegistry', function() {
         });
     });
     
+    
+    it('rejects adding duplicate node modules', function(done) {
+        var fs = require("fs");
+        var path = require("path");
+
+        var pathJoin = (function() {
+            var _join = path.join;
+            return sinon.stub(path,"join",function() {
+                if (arguments.length  == 3 && arguments[2] == "package.json") {
+                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1],arguments[2]);
+                }
+                if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
+                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1]);
+                }
+                return _join.apply(this,arguments);
+            });
+        })();
+        
+        var readdirSync = (function() {
+            var originalReaddirSync = fs.readdirSync;
+            var callCount = 0;
+            return sinon.stub(fs,"readdirSync",function(dir) {
+                var result = [];
+                if (callCount == 1) {
+                    result = originalReaddirSync(resourcesDir + "TestNodeModule" + path.sep + "node_modules");
+                }
+                callCount++;
+                return result;
+            });
+        })();
+
+        typeRegistry.init(settingsWithStorage);
+        typeRegistry.load('wontexist',false).then(function(){
+            var list = typeRegistry.getNodeList();
+            list.should.be.an.Array.and.have.lengthOf(2);
+            typeRegistry.addModule("TestNodeModule").then(function(node) {
+                done(new Error("addModule resolved"));
+            }).otherwise(function(err) {
+                done();
+            });
+        }).catch(function(e) {
+            done(e);
+        }).finally(function() {
+            readdirSync.restore();
+            pathJoin.restore();
+        });
+    });
+    
+    
     it('fails to add non-existent module name', function(done) {
-        typeRegistry.init({});
+        typeRegistry.init(settingsWithStorage);
         typeRegistry.load("wontexist",true).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
             
-            typeRegistry.addNode({module: "DoesNotExistModule"}).then(function(node) {
+            typeRegistry.addModule("DoesNotExistModule").then(function(node) {
                 done(new Error("ENOENT not thrown"));
             }).otherwise(function(e) {
                 e.code.should.eql("MODULE_NOT_FOUND");
@@ -570,9 +669,80 @@ describe('NodeRegistry', function() {
         });
     });
     
+    it('removes nodes from the registry by module', function(done) {
+        var fs = require("fs");
+        var path = require("path");
+
+        var pathJoin = (function() {
+            var _join = path.join;
+            return sinon.stub(path,"join",function() {
+                if (arguments.length  == 3 && arguments[2] == "package.json") {
+                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1],arguments[2]);
+                }
+                if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
+                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1]);
+                }
+                return _join.apply(this,arguments);
+            });
+        })();
+        
+        var readdirSync = (function() {
+            var originalReaddirSync = fs.readdirSync;
+            var callCount = 0;
+            return sinon.stub(fs,"readdirSync",function(dir) {
+                var result = [];
+                if (callCount == 1) {
+                    result = originalReaddirSync(resourcesDir + "TestNodeModule" + path.sep + "node_modules");
+                }
+                callCount++;
+                return result;
+            });
+        })();
+
+        typeRegistry.init(settingsWithStorage);
+        typeRegistry.load('wontexist',false).then(function(){
+            var list = typeRegistry.getNodeList();
+            list.should.be.an.Array.and.have.lengthOf(2);
+            var res = typeRegistry.removeModule("TestNodeModule");
+            
+            res.should.be.an.Array.and.have.lengthOf(2);
+            res[0].should.have.a.property("id",list[0].id);
+            res[1].should.have.a.property("id",list[1].id);
+            
+            list = typeRegistry.getNodeList();
+            list.should.be.an.Array.and.be.empty;
+            
+            done();
+        }).catch(function(e) {
+            done(e);
+        }).finally(function() {
+            readdirSync.restore();
+            pathJoin.restore();
+        });
+            
+    });
+    
+    it('fails to remove non-existent module name', function(done) {
+        typeRegistry.init(settings);
+        typeRegistry.load("wontexist",true).then(function(){
+            var list = typeRegistry.getNodeList();
+            list.should.be.an.Array.and.be.empty;
+            
+            /*jshint immed: false */
+            (function() {
+                typeRegistry.removeModule("DoesNotExistModule");
+            }).should.throw();
+            
+            done();
+            
+        }).catch(function(e) {
+            done(e);
+        });
+    });
+    
     
     it('allows nodes to be enabled and disabled', function(done) {
-        typeRegistry.init({});
+        typeRegistry.init(settingsWithStorage);
         typeRegistry.load(resourcesDir+path.sep+"TestNode1",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
@@ -583,7 +753,9 @@ describe('NodeRegistry', function() {
             var nodeConfig = typeRegistry.getNodeConfigs();
             nodeConfig.length.should.be.greaterThan(0);
             
-            typeRegistry.disableNode(list[0].id);
+            var info = typeRegistry.disableNode(list[0].id);
+            info.should.have.property("id",list[0].id);
+            info.should.have.property("enabled",false);
             
             var list2 = typeRegistry.getNodeList();
             list2.should.be.an.Array.and.have.lengthOf(1);
@@ -591,7 +763,9 @@ describe('NodeRegistry', function() {
             
             typeRegistry.getNodeConfigs().length.should.equal(0);
             
-            typeRegistry.enableNode(list[0].id);
+            var info2 = typeRegistry.enableNode(list[0].id);
+            info2.should.have.property("id",list[0].id);
+            info2.should.have.property("enabled",true);
             
             var list3 = typeRegistry.getNodeList();
             list3.should.be.an.Array.and.have.lengthOf(1);
@@ -606,27 +780,25 @@ describe('NodeRegistry', function() {
         });
     });
     
-    it('does not allow a node with error to be enabled', function(done) {
-        typeRegistry.init({});
-        typeRegistry.load(resourcesDir+path.sep+"TestNode3",true).then(function() {
+    it('fails to enable/disable non-existent nodes', function(done) {
+        typeRegistry.init(settings);
+        typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
-            list.should.be.an.Array.and.have.lengthOf(1);
-            list[0].should.have.property("id");
-            list[0].should.have.property("name","TestNode3.js");
-            list[0].should.have.property("enabled",false);
-            list[0].should.have.property("err");
+            list.should.be.an.Array.and.be.empty;
             
             /*jshint immed: false */
             (function() {
-                typeRegistry.enable(list[0].id);
+                    typeRegistry.disableNode("123");
             }).should.throw();
-
+            
+            /*jshint immed: false */
+            (function() {
+                typeRegistry.enableNode("123");
+            }).should.throw();
+            
             done();
         }).catch(function(e) {
             done(e);
         });
     });
-
-    
-    
 });

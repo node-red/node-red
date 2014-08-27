@@ -51,7 +51,11 @@ module.exports = {
                 return defer.promise;
             },
         };
-        redNodes.init({}, storage);
+        var settings = {
+            available: function() { return false; }
+        }
+        
+        redNodes.init(settings, storage);
         RED.nodes.registerType("helper", helperNode);
         testNode(RED);
         flows.load().then(function() {

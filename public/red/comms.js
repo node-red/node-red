@@ -71,9 +71,23 @@ RED.comms = (function() {
         }
     }
     
+    function unsubscribe(topic,callback) {
+        if (subscriptions.topic) {
+            for (var i=0;i<subscriptions.topic.length;i++) {
+                if (subscriptions.topic[i] === callback) {
+                    subscriptions.topic.splice(i,1);
+                    break;
+                }
+            }
+            if (subscriptions.topic.length === 0) {
+                delete subscriptions.topic;
+            }
+        }
+    }
     
     return {
         connect: connectWS,
-        subscribe: subscribe
+        subscribe: subscribe,
+        unsubscribe:unsubscribe
     }
 })();

@@ -33,6 +33,7 @@ var oldCredentialsFile;
 var userDir;
 var libDir;
 var libFlowsDir;
+var globalSettingsFile;
 
 function listFiles(dir) {
     var dirs = {};
@@ -140,6 +141,9 @@ var localfilesystem = {
         libDir = fspath.join(userDir,"lib");
         libFlowsDir = fspath.join(libDir,"flows");
 
+        
+        globalSettingsFile = fspath.join(userDir,".config.json");
+        
         return promiseDir(libFlowsDir);
     },
 
@@ -207,7 +211,20 @@ var localfilesystem = {
         
         return nodeFn.call(fs.writeFile, credentialsFile, credentialData)
     },
-
+    
+    getSettings: function() {
+        if (fs.existsSync(globalSettingsFile)) {
+            return nodeFn.call(fs.readFile,globalSettingsFile,'utf8').then(function(data) {
+                return JSON.parse(data);
+            });
+        }
+        return when.resolve({});
+    },
+    saveSettings: function(settings) {
+        return nodeFn.call(fs.writeFile,globalSettingsFile,JSON.stringify(settings),'utf8');
+    },
+    
+    
     getAllFlows: function() {
         return listFiles(libFlowsDir);
     },

@@ -21,19 +21,99 @@ RED.nodes = (function() {
     var links = [];
     var defaultWorkspace;
     var workspaces = {};
-
-    function registerType(nt,def) {
-        node_defs[nt] = def;
-        // TODO: too tightly coupled into palette UI
-        RED.palette.add(nt,def);
-    }
-
+    
+    var registry = (function() {
+        var nodeList = [];
+        var nodeSets = {};
+        var typeToId = {};
+        var nodeDefinitions = {};
+        
+        var exports = {
+            getNodeList: function() {
+                return nodeList;
+            },
+            setNodeList: function(list) {
+                nodeList = [];
+                for(var i=0;i<list.length;i++) {
+                    var ns = list[i];
+                    exports.addNodeSet(ns);
+                }
+            },
+            addNodeSet: function(ns) {
+                ns.added = false;
+                nodeSets[ns.id] = ns;
+                for (var j=0;j<ns.types.length;j++) {
+                    typeToId[ns.types[j]] = ns.id;
+                }
+                nodeList.push(ns);
+            },
+            removeNodeSet: function(id) {
+                var ns = nodeSets[id];
+                for (var j=0;j<ns.types.length;j++) {
+                    if (ns.added) {
+                        // TODO: too tightly coupled into palette UI
+                        RED.palette.remove(ns.types[j]);
+                        var def = nodeDefinitions[ns.types[j]];
+                        if (def.onpaletteremove && typeof def.onpaletteremove === "function") {
+                            def.onpaletteremove.call(def);
+                        }
+                    }
+                    delete typeToId[ns.types[j]];
+                }
+                delete nodeSets[id];
+                for (var i=0;i<nodeList.length;i++) {
+                    if (nodeList[i].id == id) {
+                        nodeList.splice(i,1);
+                        break;
+                    }
+                }
+                return ns;
+            },
+            getNodeSet: function(id) {
+                return nodeSets[id];
+            },
+            enableNodeSet: function(id) {
+                var ns = nodeSets[id];
+                ns.enabled = true;
+                for (var j=0;j<ns.types.length;j++) {
+                    // TODO: too tightly coupled into palette UI
+                    RED.palette.show(ns.types[j]);
+                    var def = nodeDefinitions[ns.types[j]];
+                    if (def.onpaletteadd && typeof def.onpaletteadd === "function") {
+                        def.onpaletteadd.call(def);
+                    }
+                }
+            },
+            disableNodeSet: function(id) {
+                var ns = nodeSets[id];
+                ns.enabled = false;
+                for (var j=0;j<ns.types.length;j++) {
+                    // TODO: too tightly coupled into palette UI
+                    RED.palette.hide(ns.types[j]);
+                    var def = nodeDefinitions[ns.types[j]];
+                    if (def.onpaletteremove && typeof def.onpaletteremove === "function") {
+                        def.onpaletteremove.call(def);
+                    }
+                }
+            },
+            registerNodeType: function(nt,def) {
+                nodeDefinitions[nt] = def;
+                nodeSets[typeToId[nt]].added = true;
+                // TODO: too tightly coupled into palette UI
+                RED.palette.add(nt,def);
+                if (def.onpaletteadd && typeof def.onpaletteadd === "function") {
+                    def.onpaletteadd.call(def);
+                }
+            },
+            getNodeType: function(nt) {
+                return nodeDefinitions[nt];
+            }
+        }
+        return exports;
+    })();
+    
     function getID() {
         return (1+Math.random()*4294967295).toString(16);
-    }
-
-    function getType(type) {
-        return node_defs[type];
     }
 
     function addNode(n) {
@@ -48,7 +128,7 @@ RED.nodes = (function() {
                 if (n._def.defaults.hasOwnProperty(d)) {
                     var property = n._def.defaults[d];
                     if (property.type) {
-                        var type = getType(property.type)
+                        var type = registry.getNodeType(property.type)
                         if (type && type.category == "config") {
                             var configNode = configNodes[n[d]];
                             if (configNode) {
@@ -101,7 +181,7 @@ RED.nodes = (function() {
                 if (node._def.defaults.hasOwnProperty(d)) {
                     var property = node._def.defaults[d];
                     if (property.type) {
-                        var type = getType(property.type)
+                        var type = registry.getNodeType(property.type)
                         if (type && type.category == "config") {
                             var configNode = configNodes[node[d]];
                             if (configNode) {
@@ -229,7 +309,7 @@ RED.nodes = (function() {
             for (var d in node._def.defaults) {
                 if (node._def.defaults[d].type && node[d] in configNodes) {
                     var confNode = configNodes[node[d]];
-                    var exportable = getType(node._def.defaults[d].type).exportable;
+                    var exportable = registry.getNodeType(node._def.defaults[d].type).exportable;
                     if ((exportable == null || exportable)) {
                         if (!(node[d] in exportedConfigNodes)) {
                             exportedConfigNodes[node[d]] = true;
@@ -288,7 +368,7 @@ RED.nodes = (function() {
             for (i=0;i<newNodes.length;i++) {
                 n = newNodes[i];
                 // TODO: remove workspace in next release+1
-                if (n.type != "workspace" && n.type != "tab" && !getType(n.type)) {
+                if (n.type != "workspace" && n.type != "tab" && !registry.getNodeType(n.type)) {
                     // TODO: get this UI thing out of here! (see below as well)
                     n.name = n.type;
                     n.type = "unknown";
@@ -347,7 +427,7 @@ RED.nodes = (function() {
                 n = newNodes[i];
                 // TODO: remove workspace in next release+1
                 if (n.type !== "workspace" && n.type !== "tab") {
-                    var def = getType(n.type);
+                    var def = registry.getNodeType(n.type);
                     if (def && def.category == "config") {
                         if (!RED.nodes.node(n.id)) {
                             var configNode = {id:n.id,type:n.type,users:[]};
@@ -424,8 +504,17 @@ RED.nodes = (function() {
     }
 
     return {
-        registerType: registerType,
-        getType: getType,
+        registry:registry,
+        setNodeList: registry.setNodeList,
+        
+        getNodeSet: registry.getNodeSet,
+        addNodeSet: registry.addNodeSet,
+        removeNodeSet: registry.removeNodeSet,
+        enableNodeSet: registry.enableNodeSet,
+        disableNodeSet: registry.disableNodeSet,
+        
+        registerType: registry.registerNodeType,
+        getType: registry.getNodeType,
         convertNode: convertNode,
         add: addNode,
         addLink: addLink,

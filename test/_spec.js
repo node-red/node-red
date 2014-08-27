@@ -51,36 +51,36 @@ var walkDirectory = function(dir, topdir, done) {
                     errReturned = true;
                     return done(error);
                 }
-            }
-
-            file = path.resolve(dir, file);
-            fs.stat(file, function(err, stat) {
-                if (stat && stat.isDirectory()) {
-                    walkDirectory(file, false, function(err) {
-                        if (!error) {
-                            error = err;
+            } else {
+                file = path.resolve(dir, file);
+                fs.stat(file, function(err, stat) {
+                    if (stat && stat.isDirectory()) {
+                        walkDirectory(file, false, function(err) {
+                            if (!error) {
+                                error = err;
+                            }
+                            next();
+                        });
+                    } else {
+                        if (path.extname(file) === ".js") {
+                            var testFile = file.replace(jsdir, testdir).replace(".js", "_spec.js");
+                            fs.exists(testFile, function (exists) {
+                                try {
+                                    exists.should.equal(true, testFile + " does not exist");
+                                } catch (err) {
+                                    if (!topdir) {
+                                        return done(err);
+                                    } else {
+                                        error = err;
+                                        return;
+                                    }
+                                }
+                            });
                         }
                         next();
-                    });
-                } else {
-                    if (path.extname(file) === ".js") {
-                        var testFile = file.replace(jsdir, testdir).replace(".js", "_spec.js");
-                        fs.exists(testFile, function (exists) {
-                            try {
-                                exists.should.equal(true, testFile + " does not exist");
-                            } catch (err) {
-                                if (!topdir) {
-                                    return done(err);
-                                } else {
-                                    error = err;
-                                    return;
-                                }
-                            }
-                        });
                     }
-                    next();
-                }
-            });
+                });
+            }
         })();
     });
 };

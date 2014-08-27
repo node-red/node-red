@@ -15,26 +15,29 @@
  **/
  
 var should = require("should");
+var sinon = require("sinon");
 var when = require("when");
 var flows = require("../../../red/nodes/flows");
 var RedNode = require("../../../red/nodes/Node");
 var RED = require("../../../red/nodes");
 var events = require("../../../red/events");
+var typeRegistry = require("../../../red/nodes/registry");
+
+
+var settings = {
+    available: function() { return false; }
+}
 
 function loadFlows(testFlows, cb) {
     var storage = {
         getFlows: function() {
-            var defer = when.defer();
-            defer.resolve(testFlows);
-            return defer.promise;
+            return when.resolve(testFlows);
         },
         getCredentials: function() {
-            var defer = when.defer();
-            defer.resolve({});
-            return defer.promise;
-        },
+            return when.resolve({});
+        }
     };
-    RED.init({}, storage);
+    RED.init(settings, storage);
     flows.load().then(function() {
         should.deepEqual(testFlows, flows.getFlows());
         cb();
@@ -76,24 +79,34 @@ describe('flows', function() {
         });
 
         it('should load and start an empty tab flow',function(done) {
-            loadFlows([{"type":"tab","id":"tab1","label":"Sheet 1"}],
-                      function() {});
+            loadFlows([{"type":"tab","id":"tab1","label":"Sheet 1"}], function() {});
             events.once('nodes-started', function() { done(); });
         });
 
         it('should load and start a registered node type', function(done) {
             RED.registerType('debug', function() {});
+            var typeRegistryGet = sinon.stub(typeRegistry,"get",function(nt) {
+                return function() {};
+            });
             loadFlows([{"id":"n1","type":"debug"}], function() { });
-            events.once('nodes-started', function() { done(); });
+            events.once('nodes-started', function() {
+                typeRegistryGet.restore();
+                done();
+            });
         });
 
-        it('should load and start when node type is registered',
-           function(done) {
-               loadFlows([{"id":"n2","type":"inject"}],
-                         function() {
-                             RED.registerType('inject', function() { });
-                         });
-            events.once('nodes-started', function() { done(); });
+        it('should load and start when node type is registered', function(done) {
+            var typeRegistryGet = sinon.stub(typeRegistry,"get");
+            typeRegistryGet.onCall(0).returns(null);
+            typeRegistryGet.returns(function(){});
+            
+            loadFlows([{"id":"n2","type":"inject"}], function() {
+                events.emit('type-registered','inject');
+            });
+            events.once('nodes-started', function() {
+                typeRegistryGet.restore();
+                done();
+            });
         });
     });
 
@@ -112,7 +125,7 @@ describe('flows', function() {
                     return when(true);
                 }
             };
-            RED.init({}, storage);
+            RED.init(settings, storage);
             flows.setFlows(testFlows);
             events.once('nodes-started', function() { done(); });
         });

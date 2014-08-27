@@ -34,6 +34,10 @@ RED.sidebar = (function() {
         //$('#sidebar').tabs("refresh");
     }
 
+    function removeTab(title) {
+        sidebar_tabs.removeTab("tab-"+title);
+    }
+    
     var sidebarSeparator =  {};
     $("#sidebar-separator").draggable({
             axis: "x",
@@ -141,6 +145,7 @@ RED.sidebar = (function() {
     
     return {
         addTab: addTab,
+        removeTab: removeTab,
         show: showSidebar,
         containsTab: containsTab,
         toggleSidebar: toggleSidebar

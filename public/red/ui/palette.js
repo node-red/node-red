@@ -29,14 +29,21 @@ RED.palette = (function() {
             '<div id="palette-'+category+'-function"></div>'+
             '</div>'+
             '</div>');
-          
+        
+        $("#header-"+category).on('click', function(e) {
+            $(this).next().slideToggle();
+            $(this).children("i").toggleClass("expanded");
+        });
+
     }
     
     core.forEach(createCategoryContainer);
     
     function addNodeType(nt,def) {
         
-        if ($("#palette_node_"+nt).length) {
+        var nodeTypeId = nt.replace(" ","_");
+        
+        if ($("#palette_node_"+nodeTypeId).length) {
             return;
         }
         
@@ -46,7 +53,7 @@ RED.palette = (function() {
             var rootCategory = category.split("-")[0];
             
             var d = document.createElement("div");
-            d.id = "palette_node_"+nt;
+            d.id = "palette_node_"+nodeTypeId;
             d.type = nt;
             
             var label = /^(.*?)([ -]in|[ -]out)?$/.exec(nt)[1];
@@ -106,17 +113,21 @@ RED.palette = (function() {
                 revert: true,
                 revertDuration: 50
             });
-            
-            $("#header-"+category[0]).off('click').on('click', function(e) {
-                $(this).next().slideToggle();
-                $(this).children("i").toggleClass("expanded");
-            });
-            
         }
     }
     
-    function removeNodeType(type) {
-        $("#palette_node_"+type).remove();
+    function removeNodeType(nt) {
+        var nodeTypeId = nt.replace(" ","_");
+        $("#palette_node_"+nodeTypeId).remove();
+    }
+    function hideNodeType(nt) {
+        var nodeTypeId = nt.replace(" ","_");
+        $("#palette_node_"+nodeTypeId).hide();
+    }
+    
+    function showNodeType(nt) {
+        var nodeTypeId = nt.replace(" ","_");
+        $("#palette_node_"+nodeTypeId).show();
     }
     
     function filterChange() {
@@ -164,6 +175,8 @@ RED.palette = (function() {
     
     return {
         add:addNodeType,
-        remove:removeNodeType
+        remove:removeNodeType,
+        hide:hideNodeType,
+        show:showNodeType
     };
 })();

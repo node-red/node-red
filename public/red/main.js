@@ -145,17 +145,35 @@ var RED = (function() {
         $.get('settings', function(data) {
             RED.settings = data;
             console.log("Node-RED: "+data.version);
-            loadNodes();
+            loadNodeList();
+        });
+    }
+    function loadNodeList() {
+        $.ajax({
+            headers: {
+                "Accept":"application/json"
+            },
+            url: 'nodes',
+            success: function(data) {
+                RED.nodes.setNodeList(data);
+                loadNodes();
+            }
         });
     }
 
     function loadNodes() {
-        $.get('nodes', function(data) {
-            $("body").append(data);
-            $(".palette-spinner").hide();
-            $(".palette-scroll").show();
-            $("#palette-search").show();
-            loadFlows();
+        $.ajax({
+            headers: {
+                "Accept":"text/html"
+            },
+            url: 'nodes',
+            success: function(data) {
+                $("body").append(data);
+                $(".palette-spinner").hide();
+                $(".palette-scroll").show();
+                $("#palette-search").show();
+                loadFlows();
+            }
         });
     }
 
@@ -176,24 +194,56 @@ var RED = (function() {
                 }
             });
             RED.comms.subscribe("node/#",function(topic,msg) {
-                var i;
+                var i,m;
+                var typeList;
+                var info;
+                
                 if (topic == "node/added") {
+                    var addedTypes = [];
                     for (i=0;i<msg.length;i++) {
-                        var m = msg[i];
+                        m = msg[i];
                         var id = m.id;
-                        $.get('nodes/'+id, function(data) {
-                            $("body").append(data);
-                            var typeList = "<ul><li>"+m.types.join("</li><li>")+"</li></ul>";
-                            RED.notify("Node"+(m.types.length!=1 ? "s":"")+" added to palette:"+typeList,"success");
-                        });
+                        RED.nodes.addNodeSet(m);
+                        if (m.loaded) {
+                            addedTypes = addedTypes.concat(m.types);
+                            $.get('nodes/'+id, function(data) {
+                                $("body").append(data);
+                            });
+                        }
+                    }
+                    if (addedTypes.length) {
+                        typeList = "<ul><li>"+addedTypes.join("</li><li>")+"</li></ul>";
+                        RED.notify("Node"+(addedTypes.length!=1 ? "s":"")+" added to palette:"+typeList,"success");
                     }
                 } else if (topic == "node/removed") {
-                    if (msg.types) {
-                        for (i=0;i<msg.types.length;i++) {
-                            RED.palette.remove(msg.types[i]);
+                    for (i=0;i<msg.length;i++) {
+                        m = msg[i];
+                        info = RED.nodes.removeNodeSet(m.id);
+                        if (info.added) {
+                            typeList = "<ul><li>"+m.types.join("</li><li>")+"</li></ul>";
+                            RED.notify("Node"+(m.types.length!=1 ? "s":"")+" removed from palette:"+typeList,"success");
                         }
-                        var typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
-                        RED.notify("Node"+(msg.types.length!=1 ? "s":"")+" removed from palette:"+typeList,"success");
+                    }
+                } else if (topic == "node/enabled") {
+                    if (msg.types) {
+                        info = RED.nodes.getNodeSet(msg.id);
+                        if (info.added) {
+                            RED.nodes.enableNodeSet(msg.id);
+                            typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
+                            RED.notify("Node"+(msg.types.length!=1 ? "s":"")+" enabled:"+typeList,"success");
+                        } else {
+                            $.get('nodes/'+msg.id, function(data) {
+                                $("body").append(data);
+                                typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
+                                RED.notify("Node"+(msg.types.length!=1 ? "s":"")+" added to palette:"+typeList,"success");
+                            });
+                        } 
+                    }
+                } else if (topic == "node/disabled") {
+                    if (msg.types) {
+                        RED.nodes.disableNodeSet(msg.id);
+                        typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
+                        RED.notify("Node"+(msg.types.length!=1 ? "s":"")+" disabled:"+typeList,"success");
                     }
                 }
             });

@@ -51,11 +51,10 @@ function init(_settings,storage) {
     registry.init(_settings);
 }
 
-
-function removeNode(info) {
-    var nodeInfo = registry.getNodeInfo(info);
+function checkTypeInUse(id) {
+    var nodeInfo = registry.getNodeInfo(id);
     if (!nodeInfo) {
-        throw new Error("Unrecognised type/id: "+info);
+        throw new Error("Unrecognised id: "+info);
     }
     var inUse = {};
     flows.each(function(n) {
@@ -71,7 +70,25 @@ function removeNode(info) {
         var msg = nodesInUse.join(", ");
         throw new Error("Type in use: "+msg);
     }
-    return registry.removeNode(nodeInfo.id);
+}
+
+function removeNode(id) {
+    checkTypeInUse(id);
+    return registry.removeNode(id);
+}
+
+function removeModule(module) {
+    var info = registry.getNodeModuleInfo(module);
+    for (var i=0;i<info.nodes.length;i++) {
+        checkTypeInUse(info.nodes[i]);
+    }
+    return registry.removeModule(module);
+}
+
+
+function disableNode(id) {
+    checkTypeInUse(id);
+    return registry.disableNode(id);
 }
 
 module.exports = {
@@ -86,9 +103,17 @@ module.exports = {
     addNode: registry.addNode,
     removeNode: removeNode,
     
+    addModule: registry.addModule,
+    removeModule: removeModule,
+    
+    enableNode: registry.enableNode,
+    disableNode: disableNode,
+    
     // Node type registry
     registerType: registerType,
     getType: registry.get,
+    getNodeInfo: registry.getNodeInfo,
+    getNodeModuleInfo: registry.getNodeModuleInfo,
     getNodeList: registry.getNodeList,
     getNodeConfigs: registry.getNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
