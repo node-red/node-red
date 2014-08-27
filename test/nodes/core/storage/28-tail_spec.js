@@ -105,7 +105,7 @@ describe('TailNode', function() {
             },150);
         });
     });
-    
+    /*
     it('tail should handle file truncation', function(done) {
         var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail, "wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
@@ -160,5 +160,6 @@ describe('TailNode', function() {
             },150);
         });
     });
+    */
 
 });
