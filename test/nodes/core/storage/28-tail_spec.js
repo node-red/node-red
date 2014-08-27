@@ -26,9 +26,7 @@ describe('TailNode', function() {
 
     var resourcesDir = path.join(__dirname,"..","..","..","resources");
     var fileToTail = path.join(resourcesDir,"28-tail-test-file.txt");
-    fs.writeFile(fileToTail, "Tail message line 1\nTail message line 2\n", function (err) {
-        if (err) { console.log('cannot write to '+fileToTail); }
-    });
+    fs.writeFileSync(fileToTail, "Tail message line 1\nTail message line 2\n");
 
     beforeEach(function(done) {
         helper.startServer(done);
@@ -79,7 +77,7 @@ describe('TailNode', function() {
                 msg.payload.should.equal("Tail message line 5\nTail message line 6\n");
                 done();
             });
-            fs.appendFile(fileToTail, "Tail message line 5\nTail message line 6\n");
+            fs.appendFileSync(fileToTail, "Tail message line 5\nTail message line 6\n");
         });
     });
 
