@@ -398,8 +398,8 @@ RED.editor = (function() {
                     changed = true;
                     
                 }
+                node.credentials[cred] = value;
                 if (value != node.credentials._[cred]) {
-                    node.credentials[cred] = value;
                     changed = true;
                 }
             }
