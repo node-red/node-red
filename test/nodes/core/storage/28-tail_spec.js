@@ -26,15 +26,17 @@ describe('TailNode', function() {
 
     var resourcesDir = path.join(__dirname,"..","..","..","resources");
     var fileToTail = path.join(resourcesDir,"28-tail-test-file.txt");
-    fs.writeFileSync(fileToTail, "Tail message line 1\nTail message line 2\n");
 
     beforeEach(function(done) {
+        fs.writeFileSync(fileToTail, "Tail message line 1\nTail message line 2\n");
         helper.startServer(done);
     });
 
     afterEach(function(done) {
-        helper.unload();
-        helper.stopServer(done);
+        helper.unload().then(function() {
+            fs.unlinkSync(fileToTail);
+            helper.stopServer(done);
+        });
     });
 
     it('should be loaded', function(done) {
@@ -86,6 +88,24 @@ describe('TailNode', function() {
         });
     });
 
+    it('tail should handle a non-existent file', function(done) {
+        fs.unlinkSync(fileToTail);
+        var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail, "wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(tailNode, flow, function() {
+            var tailNode1 = helper.getNode("tailNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            helperNode1.on("input", function(msg) {
+                msg.should.have.property('topic', fileToTail);
+                msg.payload.should.equal("Tail message line");
+                done();
+            });
+            setTimeout( function() {
+                fs.writeFileSync(fileToTail, "Tail message line\n");
+            },150);
+        });
+    });
+    
     it('tail should handle file truncation', function(done) {
         var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail, "wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
@@ -99,15 +119,30 @@ describe('TailNode', function() {
             });
             helperNode1.on("input", function(msg) {
                 msg.should.have.property('topic', fileToTail);
-                msg.payload.should.equal("Tail message line A");
-                if ((++inputCounter === 3) && (warned === true)) { done(); }
+                inputCounter++;
+                if (inputCounter === 1) {
+                    warned.should.be.false;
+                    msg.payload.should.equal("Tail message line append");
+                } else if (inputCounter === 2) {
+                    msg.payload.should.equal("Tail message line truncate");
+                } else {
+                    msg.payload.should.equal("Tail message line append "+inputCounter);
+                }
+                
+                if (inputCounter === 5) {
+                    setTimeout(function() {
+                        warned.should.be.true;
+                        done();
+                    },100);
+                }
             });
             setTimeout( function() {
-                fs.writeFileSync(fileToTail, "Tail message line A\n");
-                fs.appendFileSync(fileToTail, "Tail message line A\n");
-                fs.appendFileSync(fileToTail, "Tail message line A\n");
-                fs.appendFileSync(fileToTail, "Tail message line A\n");
-            },200);
+                fs.appendFileSync(fileToTail, "Tail message line append\n");
+                fs.writeFileSync(fileToTail, "Tail message line truncate\n");
+                fs.appendFileSync(fileToTail, "Tail message line append 3\n");
+                fs.appendFileSync(fileToTail, "Tail message line append 4\n");
+                fs.appendFileSync(fileToTail, "Tail message line append 5\n");
+            },150);
         });
     });
 

@@ -62,7 +62,7 @@ module.exports = {
     unload: function() {
         // TODO: any other state to remove between tests?
         redNodes.clearRegistry();
-        flows.stopFlows();
+        return flows.stopFlows();
     },
 
     getNode: function(id) {
@@ -89,7 +89,7 @@ module.exports = {
         });
     },
     //TODO consider saving TCP handshake/server reinit on start/stop/start sequences
-    stopServer : function(done) {
+    stopServer: function(done) {
         if(server) {
             server.close(done);
         }
