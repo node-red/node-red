@@ -61,7 +61,10 @@ describe('TailNode', function() {
                     done();
                 }
             });
-            fs.appendFileSync(fileToTail, "Tail message line 3\nTail message line 4\n");
+            setTimeout( function() {
+                fs.appendFileSync(fileToTail, "Tail message line 3\n");
+                fs.appendFileSync(fileToTail, "Tail message line 4\n");
+            },150);
         });
     });
 
@@ -77,7 +80,9 @@ describe('TailNode', function() {
                 msg.payload.should.equal("Tail message line 5\nTail message line 6\n");
                 done();
             });
-            fs.appendFileSync(fileToTail, "Tail message line 5\nTail message line 6\n");
+            setTimeout( function() {
+                fs.appendFileSync(fileToTail, "Tail message line 5\nTail message line 6\n");
+            },150);
         });
     });
 
@@ -103,7 +108,7 @@ describe('TailNode', function() {
             setTimeout( function() {
                 fs.appendFileSync(fileToTail, "Tail message line A\n");
                 fs.appendFileSync(fileToTail, "Tail message line A\n");
-            },250);
+            },150);
         });
     });
 
