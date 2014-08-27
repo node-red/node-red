@@ -192,7 +192,7 @@ RED.start().then(function() {
 
 process.on('uncaughtException',function(err) {
     util.log('[red] Uncaught Exception:');
-    util.log(err.stack);
+    util.log(err && err.stack || err || "<undefined>");
     process.exit(1);
 });
 
