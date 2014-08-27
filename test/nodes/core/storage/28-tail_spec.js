@@ -118,6 +118,8 @@ describe('TailNode', function() {
                 if (msg.level == "warn") { warned = true; }
             });
             helperNode1.on("input", function(msg) {
+                console.log("inputCounter =",inputCounter);
+                console.log(msg);
                 msg.should.have.property('topic', fileToTail);
                 inputCounter++;
                 if (inputCounter === 1) {
@@ -136,12 +138,25 @@ describe('TailNode', function() {
                     },100);
                 }
             });
+            var actions = [
+                function() { fs.appendFileSync(fileToTail, "Tail message line append\n");},
+                function() { fs.writeFileSync(fileToTail, "Tail message line truncate\n");},
+                function() { fs.appendFileSync(fileToTail, "Tail message line append 3\n");},
+                function() { fs.appendFileSync(fileToTail, "Tail message line append 4\n");},
+                function() { fs.appendFileSync(fileToTail, "Tail message line append 5\n");}
+            ];
+            
+            function processAction() {
+                var action = actions.shift();
+                action();
+                if (actions.length > 0) {
+                    setTimeout(function() {
+                        processAction();
+                    },250);
+                }
+            }
             setTimeout( function() {
-                fs.appendFileSync(fileToTail, "Tail message line append\n");
-                fs.writeFileSync(fileToTail, "Tail message line truncate\n");
-                fs.appendFileSync(fileToTail, "Tail message line append 3\n");
-                fs.appendFileSync(fileToTail, "Tail message line append 4\n");
-                fs.appendFileSync(fileToTail, "Tail message line append 5\n");
+                processAction();
             },150);
         });
     });
