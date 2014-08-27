@@ -64,7 +64,7 @@ describe('TailNode', function() {
             setTimeout( function() {
                 fs.appendFileSync(fileToTail, "Tail message line 3\n");
                 fs.appendFileSync(fileToTail, "Tail message line 4\n");
-            },150);
+            },100);
         });
     });
 
@@ -86,7 +86,7 @@ describe('TailNode', function() {
         });
     });
 
-    it('tail should handle file going away and coming back', function(done) {
+    it('tail should handle file truncation', function(done) {
         var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail, "wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(tailNode, flow, function() {
@@ -96,19 +96,18 @@ describe('TailNode', function() {
             var warned = false;
             tailNode1.on("log", function(msg) {
                 if (msg.level == "warn") { warned = true; }
-                if ((inputCounter === 3)&&(warned === true)) { done(); }
             });
             helperNode1.on("input", function(msg) {
                 msg.should.have.property('topic', fileToTail);
                 msg.payload.should.equal("Tail message line A");
-                inputCounter += 1;
-                if ((inputCounter === 3)&&(warned === true)) { done(); }
+                if ((++inputCounter === 3) && (warned === true)) { done(); }
             });
-            fs.writeFileSync(fileToTail, "Tail message line A\n");
             setTimeout( function() {
+                fs.writeFileSync(fileToTail, "Tail message line A\n");
                 fs.appendFileSync(fileToTail, "Tail message line A\n");
                 fs.appendFileSync(fileToTail, "Tail message line A\n");
-            },150);
+                fs.appendFileSync(fileToTail, "Tail message line A\n");
+            },200);
         });
     });
 
