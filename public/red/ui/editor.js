@@ -455,7 +455,8 @@ RED.editor = (function() {
     function showEditDialog(node) {
         editing_node = node;
         RED.view.state(RED.state.EDITING);
-        $("#dialog-form").html($("script[data-template-name='"+node.type+"']").html()+'<input type="text" style="display: none;" />');
+        $("#dialog-form").html($("script[data-template-name='"+node.type+"']").html());
+        $('<input type="text" style="display: none;" />').appendTo("#dialog-form");
         prepareEditDialog(node,node._def,"node-input");
         $( "#dialog" ).dialog("option","title","Edit "+node.type+" node").dialog( "open" );
     }
