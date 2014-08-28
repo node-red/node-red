@@ -75,12 +75,12 @@ module.exports = function(RED) {
         this.ircclient.addListener('part', function(channel, who, reason) {
             var msg = { "payload": { "type":"part", "who":who, "channel":channel, "reason":reason } };
             node.send([null,msg]);
-            node.log(who+'has left '+channel+': '+reason);
+            node.log(who+' has left '+channel+': '+reason);
         });
         this.ircclient.addListener('quit', function(nick, reason, channels, message) {
             var msg = { "payload": { "type":"quit", "who":nick, "channel":channels, "reason":reason } };
             node.send([null,msg]);
-            node.log(nick+'has quit '+channels+': '+reason);
+            node.log(nick+' has quit '+channels+': '+reason);
         });
         this.ircclient.addListener('kick', function(channel, who, by, reason) {
             var msg = { "payload": { "type":"kick", "who":who, "channel":channel, "by":by, "reason":reason } };
