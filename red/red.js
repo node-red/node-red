@@ -19,6 +19,7 @@ var nodes = require("./nodes");
 var library = require("./library");
 var comms = require("./comms");
 var log = require("./log");
+var utils = require("./utils");
 var fs = require("fs");
 var settings = null;
 var credentials = require("./nodes/credentials");
@@ -48,6 +49,7 @@ var RED = {
     events: events,
     log: log,
     comms: comms,
+    utils: utils,
     version: function () {
         var p = require(path.join(process.env.NODE_RED_HOME,"package.json"));
         if (fs.existsSync(path.join(process.env.NODE_RED_HOME,".git"))) {

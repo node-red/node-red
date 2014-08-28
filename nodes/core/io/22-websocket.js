@@ -160,14 +160,7 @@ module.exports = function(RED) {
                 delete msg._session;
                 payload = JSON.stringify(msg);
             } else {
-                payload = msg.payload;
-                if (Buffer.isBuffer(payload)) {
-                    payload = payload.toString();
-                } else if (typeof payload === "object") {
-                    payload = JSON.stringify(payload);
-                } else if (typeof payload !== "string") {
-                    payload = ""+payload;
-                }
+                payload = RED.utils.ensureString(msg.payload);
             }
             if (msg._session && msg._session.type == "websocket") {
                 node.serverConfig.send(msg._session.id,payload);
