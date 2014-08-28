@@ -73,14 +73,7 @@ module.exports = function(RED) {
             if (msg != null) {
                 if (smtpTransport) {
                     node.status({fill:"blue",shape:"dot",text:"sending"});
-                    var payload = msg.payload;
-                    if (Buffer.isBuffer(payload)) {
-                        payload = payload.toString();
-                    } else if (typeof payload === "object") {
-                        payload = JSON.stringify(payload);
-                    } else if (typeof payload !== "string") {
-                        payload = ""+payload;
-                    }
+                    var payload = RED.utils.ensureString(msg.payload);
                     
                     smtpTransport.sendMail({
                         from: node.userid, // sender address
