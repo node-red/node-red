@@ -27,12 +27,16 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-tips">The channel to join must start with a # (as per normal irc rules...)</div>
+    <div class="form-tips">The channel to join must start with a # (as per normal irc rules...)<br/>
+    You may join multiple channels by comma separating a list - #chan1,#chan2,etc.</div>
 </script>
 
 <script type="text/x-red" data-help-name="irc in">
-    <p>Connects to a channel on an IRC server</p>
-    <p>Any messages on that channel will appear on the <code>msg.payload</code> at the output, while <code>msg.topic</code> will contain who it is from.</p>
+    <p>Connects to a channel on an IRC server.</p>
+    <p>You may join multiple channels by comma separating a list - #chan1,#chan2,#etc.</p>
+    <p>Any messages on that channel will appear on the <code>msg.payload</code> at the output,
+    while <code>msg.topic</code> will contain who it is from.
+    <code>msg.to</code> contains either the name of the channel or PRIV in the case of a pm.</p>
     <p>The second output provides a <code>msg.payload</code> that has any status messages such as joins, parts, kicks etc.</p>
     <p>The type of the status message is set as <code>msg.payload.type</code>.</p>
     <p>The possible status types are: <br />
