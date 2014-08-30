@@ -28,7 +28,7 @@ module.exports = function(RED) {
             screen_name: {type:"text"},
             access_token: {type: "password"},
             access_token_secret: {type:"password"}
-        }       
+        }
     });
 
     function TwitterInNode(n) {
@@ -158,7 +158,7 @@ module.exports = function(RED) {
                             st = { locations: node.tags };
                         }
                         else {
-                            node.warn("twitter: possible bad geo area format. Should be lower-left lon,lat, upper-right lon,lat");
+                            node.log("possible bad geo area format. Should be lower-left lon, lat, upper-right lon, lat");
                         }
                     }
 
