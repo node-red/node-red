@@ -49,6 +49,7 @@ module.exports = function(RED) {
                 node.log(JSON.stringify(message));
             });
         }
+        else { node.status({text:""}); }
         node.ircclient = node.serverConfig.ircclient;
 
 
@@ -123,6 +124,7 @@ module.exports = function(RED) {
                 node.log(JSON.stringify(message));
             });
         }
+        else { node.status({text:""}); }
         node.ircclient = node.serverConfig.ircclient;
 
         node.ircclient.addListener('registered', function(message) {
