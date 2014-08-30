@@ -23,6 +23,15 @@ module.exports = function(RED) {
         this.sep = this.sep.replace("\\n","\n").replace("\\r","\r").replace("\\t","\t");
         this.quo = '"';
         var node = this;
+
+        for (var t = 0; t < node.template.length; t++) {
+            node.template[t] = node.template[t].trim(); // remove leading and trailing whitespace
+            if (node.template[t].charAt(0) === '"' && node.template[t].charAt(node.template[t].length -1) === '"') {
+                // remove leading and trialing quotes (if they exist) - and remove whitepace again.
+                node.template[t] = node.template[t].substr(1,node.template[t].length -2).trim();
+            }
+        }
+
         this.on("input", function(msg) {
             if (msg.hasOwnProperty("payload")) {
                 if (typeof msg.payload == "object") { // convert to csv
