@@ -128,9 +128,9 @@
     <div class="form-row">
         <label for="node-input-sendObject"><i class="fa fa-arrows"></i> Action</label>
         <select type="text" id="node-input-sendObject" style="display: inline-block; vertical-align: middle; width:70%;">
-            <option value="pay">Send to channel</option>
-            <option value="true">Send to userid in msg.topic as PRIVMSG</option>
-            <option value="false">Send complete msg object to channel</option>
+            <option value="pay">Send payload to channel(s)</option>
+            <option value="true">Use msg.topic to set nickname or channel(s)</option>
+            <option value="false">Send complete msg object to channel(s)</option>
         </select>
     </div>
     <div class="form-row">
@@ -144,7 +144,9 @@
 <script type="text/x-red" data-help-name="irc out">
     <p>Sends messages to a channel on an IRC server</p>
     <p>You can send just the <code>msg.payload</code>, or the complete <code>msg</code> object to the selected channel,
-    or you can select to use <code>msg.topic</code> to send the <code>msg.payload</code> to a specific user in the channel (private conversation).</p>
+    or you can select to use <code>msg.topic</code> to send the <code>msg.payload</code> to a specific user (private message) or channel.</p>
+    <p>If multiple output channels are listed (eg. #chan1,#chan2), then the message will be sent to all of them.</p>
+    <p><b>Note:</b> you can only send to channels you have previously joined so they MUST be specified in the node - even if you then decide to use a subset in msg.topic</p>
 </script>
 
 <script type="text/javascript">

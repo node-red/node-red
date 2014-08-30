@@ -43,6 +43,7 @@ module.exports = function(RED) {
         var node = this;
         if (node.serverConfig.ircclient == null) {
             node.log("Connecting to "+node.serverConfig.server);
+            node.status({fill:"grey",shape:"dot",text:"connecting"});
             node.serverConfig.ircclient = new irc.Client(node.serverConfig.server, node.serverConfig.nickname);
             node.serverConfig.ircclient.addListener('error', function(message) {
                 node.log(JSON.stringify(message));
@@ -53,16 +54,19 @@ module.exports = function(RED) {
 
         node.ircclient.addListener('registered', function(message) {
             node.log(node.ircclient.nick+" ONLINE");
+            node.status({fill:"yellow",shape:"dot",text:"connected"});
             node.ircclient.join( node.channel, function(data) {
                 // node.log(data+" JOINED "+node.channel);
+                node.status({fill:"green",shape:"dot",text:"joined"});
             });
         });
         node.ircclient.addListener('message', function (from, to, message) {
             //node.log(from + ' => ' + to + ' : ' + message);
-            if (node.channel.indexOf(to) > -1) {
+            if (~node.channel.toLowerCase().indexOf(to.toLowerCase())) {
                 var msg = { "topic":from, "from":from, "to":to, "payload":message };
                 node.send([msg,null]);
             }
+            else { console.log(node.channel,to); }
         });
         node.ircclient.addListener('pm', function(from, message) {
             //node.log("PM => "+from + ': ' + message);
@@ -106,13 +110,14 @@ module.exports = function(RED) {
     // The Output Node
     function IrcOutNode(n) {
         RED.nodes.createNode(this,n);
-        this.sendAll = n.sendObject;
+        this.sendFlag = n.sendObject;
         this.ircserver = n.ircserver;
         this.serverConfig = RED.nodes.getNode(this.ircserver);
         this.channel = n.channel || this.serverConfig.channel;
         var node = this;
         if (node.serverConfig.ircclient == null) {
             node.log("Connecting to "+node.serverConfig.server);
+            node.status({fill:"grey",shape:"dot",text:"connecting"});
             node.serverConfig.ircclient = new irc.Client(node.serverConfig.server, node.serverConfig.nickname);
             node.serverConfig.ircclient.addListener('error', function(message) {
                 node.log(JSON.stringify(message));
@@ -122,8 +127,10 @@ module.exports = function(RED) {
 
         node.ircclient.addListener('registered', function(message) {
             node.log(node.ircclient.nick+" ONLINE");
+            node.status({fill:"yellow",shape:"dot",text:"connected"});
             node.ircclient.join( node.channel, function(data) {
                 //node.log(data+" JOINED "+node.channel);
+                node.status({fill:"green",shape:"dot",text:"joined"});
             });
         });
 
@@ -139,20 +146,20 @@ module.exports = function(RED) {
             }
             else {
                 if (msg._topic) { delete msg._topic; }
-                var ch = node.channel.split(",");
-                for (var c=0; c<ch.length; c++) {
-                    if (node.sendAll == "false") {
+                var ch = node.channel.split(","); // split on , so we can send to multiple
+                if (node.sendFlag == "true") { // override channels with msg.topic
+                    if ((msg.hasOwnProperty('topic'))&&(typeof msg.topic === "string")) {
+                        ch = msg.topic.split(","); // split on , so we can send to multiple
+                    }
+                    else { node.warn("msg.topic not set"); }
+                }
+                for (var c = 0; c < ch.length; c++) {
+                    if (node.sendFlag == "false") { // send whole message object to each channel
                         node.ircclient.say(ch[c], JSON.stringify(msg));
                     }
-                    else {
+                    else { // send just the payload to each channel
                         if (typeof msg.payload === "object") { msg.payload = JSON.stringify(msg.payload); }
-                        if (node.sendAll == "pay") {
-                            node.ircclient.say(ch[c], msg.payload);
-                        }
-                        else {
-                            var to = msg.topic || ch[c];
-                            node.ircclient.say(to, msg.payload);
-                        }
+                        node.ircclient.say(ch[c], msg.payload);
                     }
                 }
             }
