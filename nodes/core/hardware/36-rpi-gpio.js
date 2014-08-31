@@ -100,11 +100,11 @@ module.exports = function(RED) {
         var node = this;
 
         if (node.pin !== undefined) {
-            exec("gpio mode "+node.pin+" "+node.intype, function(err,stdout,stderr) {
+            exec("/usr/local/bin/gpio mode "+node.pin+" "+node.intype, function(err,stdout,stderr) {
                 if (err) { node.error(err); }
                 else {
                     node._interval = setInterval( function() {
-                        exec("gpio read "+node.pin, function(err,stdout,stderr) {
+                        exec("/usr/local/bin/gpio read "+node.pin, function(err,stdout,stderr) {
                             if (err) { node.error(err); }
                             else {
                                 if (node.buttonState !== Number(stdout)) {
@@ -137,7 +137,7 @@ module.exports = function(RED) {
 
         if (node.pin !== undefined) {
             process.nextTick(function() {
-                exec("gpio mode "+node.pin+" out", function(err,stdout,stderr) {
+                exec("/usr/local/bin/gpio mode "+node.pin+" out", function(err,stdout,stderr) {
                     if (err) { node.error(err); }
                     else {
                         node.on("input", function(msg) {
@@ -145,7 +145,7 @@ module.exports = function(RED) {
                             if (msg.payload === "false") { msg.payload = false; }
                             var out = Number(msg.payload);
                             if ((out === 0)|(out === 1)) {
-                                exec("gpio write "+node.pin+" "+out, function(err,stdout,stderr) {
+                                exec("/usr/local/bin/gpio write "+node.pin+" "+out, function(err,stdout,stderr) {
                                     if (err) { node.error(err); }
                                 });
                             }
@@ -160,7 +160,7 @@ module.exports = function(RED) {
         }
 
         node.on("close", function() {
-            exec("gpio mode "+node.pin+" in");
+            exec("/usr/local/bin/gpio mode "+node.pin+" in");
         });
     }
 
@@ -178,7 +178,7 @@ module.exports = function(RED) {
     //});
 
     var pitype = { type:"" };
-    exec("gpio -v | grep Type", function(err,stdout,stderr) {
+    exec("/usr/local/bin/gpio -v | grep Type", function(err,stdout,stderr) {
         if (err) {
             util.log('[36-rpi-gpio.js] Error: "gpio -v" command failed for some reason.');
         }
