@@ -138,13 +138,15 @@ module.exports = function(RED) {
 
         node.on("input", function(msg) {
             if (Object.prototype.toString.call( msg.raw ) === '[object Array]') {
-                var m = msg.raw;
-                for (var i = 0; i < 10; i++) {
-                    if (typeof m[i] !== "string") { m[i] = ""; }
-                    m[i] = m[i].replace(/"/g, "");
-                }
-                node.log("RAW command:"+m);
-                node.ircclient.send(m[0],m[1],m[2],m[3],m[4],m[5],m[6],m[7],m[8],m[9]);
+                node.log("RAW command:"+msg.raw);
+                node.ircclient.send.apply(node.ircclient,msg.raw);
+                //var m = msg.raw;
+                //for (var i = 0; i < 10; i++) {
+                    //if (typeof m[i] !== "string") { m[i] = ""; }
+                    //m[i] = m[i].replace(/"/g, "");
+                //}
+                //node.log("RAW command:"+m);
+                //node.ircclient.send(m[0],m[1],m[2],m[3],m[4],m[5],m[6],m[7],m[8],m[9]);
             }
             else {
                 if (msg._topic) { delete msg._topic; }
