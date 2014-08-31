@@ -80,7 +80,7 @@ module.exports = function(RED) {
         this.buffer = [];
         this.intervalID = -1;
         this.randomID = -1;
-        this.lastSent = Date.now();
+        this.lastSent = 0;
         this.drop = n.drop;
         var node = this;
 
