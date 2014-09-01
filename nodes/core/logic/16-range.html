@@ -24,18 +24,18 @@
     </div>
     <br/>
     <div class="form-row">
-        From the range:
+        Map from the range:
     </div>
     <div class="form-row">
-        &nbsp;&nbsp;&nbsp;&nbsp;min: <input type="text" id="node-input-minin" placeholder="0" style="width:100px;"/>
-        &nbsp;&nbsp;max: <input type="text" id="node-input-maxin" placeholder="99" style="width:100px;"/>
+        &nbsp;&nbsp;&nbsp;&nbsp;from: <input type="text" id="node-input-minin" placeholder="e.g. 0" style="width:100px;"/>
+        &nbsp;&nbsp;to: <input type="text" id="node-input-maxin" placeholder="e.g. 99" style="width:100px;"/>
     </div>
     <div class="form-row">
-        to the range:
+        to the result range:
     </div>
     <div class="form-row">
-        &nbsp;&nbsp;&nbsp;&nbsp;min: <input type="text" id="node-input-minout" placeholder="0" style="width:100px;"/>
-        &nbsp;&nbsp;max: <input type="text" id="node-input-maxout" placeholder="255" style="width:100px;"/>
+        &nbsp;&nbsp;&nbsp;&nbsp;from: <input type="text" id="node-input-minout" placeholder="e.g. 0" style="width:100px;"/>
+        &nbsp;&nbsp;to: <input type="text" id="node-input-maxout" placeholder="e.g. 255" style="width:100px;"/>
     </div>
     <br/>
     <div class="form-row">
@@ -53,6 +53,8 @@
     <p>A simple function node to remap numeric input values to another scale.</p>
     <p>Currently only does a linear scaling.</p>
     <p><b>Note:</b> This only operates on <b>numbers</b>. Anything else will try to be made into a number and rejected if that fails.</p>
+    <p><i>Scale and limit to target range</i> means that the result will never be outside the range specified within the result range.</p>
+    <p><i>Scale and wrap within the target range</i> means that the result will essentially be a "modulo-style" wrap-around within the result range.</p>
 </script>
 
 <script type="text/javascript">
