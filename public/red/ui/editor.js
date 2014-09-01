@@ -587,7 +587,12 @@ RED.editor = (function() {
                             configNode = RED.nodes.node(configId);
                             for (d in configTypeDef.defaults) {
                                 if (configTypeDef.defaults.hasOwnProperty(d)) {
-                                    configNode[d] = $("#node-config-input-"+d).val();
+                                    var input = $("#node-config-input-"+d);
+                                    if (input.attr('type') === "checkbox") {
+                                      configNode[d] = input.prop('checked');
+                                    } else {
+                                      configNode[d] = input.val();
+                                    }
                                 }
                             }
                             updateConfigNodeSelect(configProperty,configType,configId);
