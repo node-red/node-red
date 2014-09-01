@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,10 @@
 //Simple node to introduce a pause into a flow
 module.exports = function(RED) {
     "use strict";
+    
+    var MILLIS_TO_NANOS = 1000000;
+    var SECONDS_TO_NANOS = 1000000000;
+    
     function random(n) {
         var wait = n.randomFirst + (n.diff * Math.random());
         if (n.buffer.length > 0) {
@@ -80,7 +84,7 @@ module.exports = function(RED) {
         this.buffer = [];
         this.intervalID = -1;
         this.randomID = -1;
-        this.lastSent = 0;
+        this.lastSent;
         this.drop = n.drop;
         var node = this;
 
@@ -128,8 +132,14 @@ module.exports = function(RED) {
                         },node.rate);
                     }
                 } else {
-                    var now = Date.now();
-                    if (now-node.lastSent > node.rate) {
+                    var now;
+                    if(node.lastSent) {
+                        now = process.hrtime(node.lastSent);
+                    }
+                    if(!node.lastSent) { // ensuring that we always send the first message 
+                        node.lastSent = process.hrtime();
+                        node.send(msg);
+                    } else if ( ( (now[0] * SECONDS_TO_NANOS) + now[1] ) > (node.rate * MILLIS_TO_NANOS) ) {
                         node.lastSent = now;
                         node.send(msg);
                     }
