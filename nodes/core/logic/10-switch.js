@@ -25,7 +25,7 @@ module.exports = function(RED) {
         'gte': function(a, b) { return a >= b; },
         'btwn': function(a, b, c) { return a >= b && a <= c; },
         'cont': function(a, b) { return (a + "").indexOf(b) != -1; },
-        'regex': function(a, b) { return (a + "").match(new RegExp(b)); },
+        'regex': function(a, b, c) { return (a + "").match(new RegExp(b, c)); },
         'true': function(a) { return a === true; },
         'false': function(a) { return a === false; },
         'null': function(a) { return typeof a == "undefined"; },
