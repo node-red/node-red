@@ -23,7 +23,7 @@ RED.editor = (function() {
     }
 
     /**
-     * Validate a node 
+     * Validate a node
      * @param node - the node being validated
      * @returns {boolean} whether the node is valid. Sets node.dirty if needed
      */
@@ -37,7 +37,7 @@ RED.editor = (function() {
             node.dirty = true;
         }
     }
-    
+
     /**
      * Validate a node's properties for the given set of property definitions
      * @param node - the node being validated
@@ -192,7 +192,7 @@ RED.editor = (function() {
                                                         configNode.users.push(editing_node);
                                                     }
                                                 }
-    
+
                                                 changes[d] = editing_node[d];
                                                 editing_node[d] = newValue;
                                                 changed = true;
@@ -372,7 +372,7 @@ RED.editor = (function() {
             }
         }
     }
-    
+
     /**
      * Update the node credentials from the edit form
      * @param node - the node containing the credentials
@@ -396,7 +396,7 @@ RED.editor = (function() {
                         continue;
                     }
                     changed = true;
-                    
+
                 }
                 node.credentials[cred] = value;
                 if (value != node.credentials._[cred]) {
@@ -434,7 +434,7 @@ RED.editor = (function() {
                 }
             }
         }
-        
+
         if (definition.credentials) {
             if (node.credentials) {
                 populateCredentialsInputs(node, definition.credentials, node.credentials, prefix);
@@ -571,7 +571,7 @@ RED.editor = (function() {
                         var configTypeDef = RED.nodes.getType(configType);
                         var configNode;
                         var d;
-                        
+
                         if (configAdding) {
                             configNode = {type:configType,id:configId,users:[]};
                             for (d in configTypeDef.defaults) {
@@ -587,7 +587,12 @@ RED.editor = (function() {
                             configNode = RED.nodes.node(configId);
                             for (d in configTypeDef.defaults) {
                                 if (configTypeDef.defaults.hasOwnProperty(d)) {
-                                    configNode[d] = $("#node-config-input-"+d).val();
+                                    var input = $("#node-config-input-"+d);
+                                    if (input.attr('type') === "checkbox") {
+                                      configNode[d] = input.prop('checked');
+                                    } else {
+                                      configNode[d] = input.val();
+                                    }
                                 }
                             }
                             updateConfigNodeSelect(configProperty,configType,configId);
