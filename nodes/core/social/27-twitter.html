@@ -199,6 +199,8 @@
 
 <script type="text/x-red" data-help-name="twitter out">
     <p>Twitter out node. Tweets the <b>msg.payload</b>.</p>
+    <p>If <b>msg.media</b> exists and is a Buffer object, this node will treat it
+       as an image and attach it to the tweet.</p>
 </script>
 
 <script type="text/javascript">

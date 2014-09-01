@@ -42,7 +42,8 @@
         "cheerio":"0.15.0",
         "uglify-js":"2.4.13",
         "nodemailer":"1.2.0",
-        "imap":"0.8.13"
+        "imap":"0.8.13",
+        "request":"~2.40.0"
     },
     "devDependencies": {
         "grunt": "0.4.4",
