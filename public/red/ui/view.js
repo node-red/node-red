@@ -502,7 +502,7 @@ RED.view = (function() {
             updateSelection();
             lasso.remove();
             lasso = null;
-        } else if (mouse_mode == RED.state.DEFAULT && mousedown_link == null) {
+        } else if (mouse_mode == RED.state.DEFAULT && mousedown_link == null && !d3.event.ctrlKey ) {
             clearSelection();
             updateSelection();
         }
