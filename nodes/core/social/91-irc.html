@@ -147,6 +147,7 @@
     or you can select to use <code>msg.topic</code> to send the <code>msg.payload</code> to a specific user (private message) or channel.</p>
     <p>If multiple output channels are listed (eg. #chan1,#chan2), then the message will be sent to all of them.</p>
     <p><b>Note:</b> you can only send to channels you have previously joined so they MUST be specified in the node - even if you then decide to use a subset in msg.topic</p>
+    <p>You may send RAW commands using <code>msg.raw</code> - This must contain an array of parameters - eg. <pre>["privmsg","#nodered","Hello world"]</pre></p>
 </script>
 
 <script type="text/javascript">
