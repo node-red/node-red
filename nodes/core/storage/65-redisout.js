@@ -83,7 +83,7 @@ module.exports = function(RED) {
                     var k = this.key || msg.topic;
                     if (k) {
                         if (this.structtype == "string") {
-                            this.client.set(k,RED.utils.ensureString(msg.payload));
+                            this.client.set(k,RED.util.ensureString(msg.payload));
                         } else if (this.structtype == "hash") {
                             var r = hashFieldRE.exec(msg.payload);
                             if (r) {

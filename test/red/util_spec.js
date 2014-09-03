@@ -14,25 +14,25 @@
  * limitations under the License.
  **/
 var should = require("should");
-var utils = require("../../red/utils");
+var util = require("../../red/util");
 
-describe("red/utils", function() {
+describe("red/util", function() {
     describe('ensureString', function() {
         it('strings are preserved', function() {
-            utils.ensureString('string').should.equal('string');
+            util.ensureString('string').should.equal('string');
         });
         it('Buffer is converted', function() {
-            var s = utils.ensureString(new Buffer('foo'));
+            var s = util.ensureString(new Buffer('foo'));
             s.should.equal('foo');
             (typeof s).should.equal('string');
         });
         it('Object is converted to JSON', function() {
-            var s = utils.ensureString({foo: "bar"});
+            var s = util.ensureString({foo: "bar"});
             (typeof s).should.equal('string');
             should.deepEqual(JSON.parse(s), {foo:"bar"});
         });
         it('stringifies other things', function() {
-            var s = utils.ensureString(123);
+            var s = util.ensureString(123);
             (typeof s).should.equal('string');
             s.should.equal('123');
         });
