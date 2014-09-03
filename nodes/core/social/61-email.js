@@ -73,11 +73,10 @@ module.exports = function(RED) {
             if (msg != null) {
                 if (smtpTransport) {
                     node.status({fill:"blue",shape:"dot",text:"sending"});
-                    var payload = RED.util.ensureString(msg.payload);
-                    
+					var payload = RED.util.ensureString(msg.payload);
                     smtpTransport.sendMail({
                         from: node.userid, // sender address
-                        to: node.name, // comma separated list of receivers
+                        to: msg.to || node.name, // comma separated list of addressees
                         subject: msg.topic, // subject line
                         text: payload // plaintext body
                     }, function(error, info) {
@@ -99,7 +98,7 @@ module.exports = function(RED) {
             userid: {type:"text"},
             password: {type: "password"},
             global: { type:"boolean"}
-        }       
+        }
     });
 
     function EmailInNode(n) {
@@ -109,7 +108,7 @@ module.exports = function(RED) {
         this.inserver = n.server || emailkey.server || "imap.gmail.com";
         this.inport = n.port || emailkey.port || "993";
         var flag = false;
-        
+
         if (this.credentials && this.credentials.hasOwnProperty("userid")) {
             this.userid = this.credentials.userid;
         } else {
@@ -178,7 +177,7 @@ module.exports = function(RED) {
                                         pay.date = Imap.parseHeader(buffer).date[0];
                                     } else {
                                         var parts = buffer.split("Content-Type");
-                                        for (var p in parts) {
+                                        for (var p = 0; p < parts.length; p++) {
                                             if (parts[p].indexOf("text/plain") >= 0) {
                                                 pay.payload = parts[p].split("\n").slice(1,-2).join("\n").trim();
                                             }
@@ -245,6 +244,6 @@ module.exports = function(RED) {
             userid: {type:"text"},
             password: {type: "password"},
             global: { type:"boolean"}
-        }       
+        }
     });
 }
