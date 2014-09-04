@@ -16,7 +16,7 @@
 
 <script type="text/x-red" data-template-name="e-mail">
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-envelope"></i> To</label>
+        <label for="node-input-name"><i class="fa fa-envelope"></i> To</label>
         <input type="text" id="node-input-name" placeholder="email@address.com">
     </div>
     <!-- <div class="form-row">
@@ -45,24 +45,24 @@
          </select>
     </div> -->
     <div class="form-row">
-        <label for="node-input-server"><i class="icon-tag"></i> Server</label>
+        <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
         <input type="text" id="node-input-server" placeholder="smtp.gmail.com">
     </div>
     <div class="form-row">
-        <label for="node-input-port"><i class="icon-random"></i> Port</label>
+        <label for="node-input-port"><i class="fa fa-random"></i> Port</label>
         <input type="text" id="node-input-port" placeholder="465">
     </div>
     <div class="form-row">
-        <label for="node-input-userid"><i class="icon-user"></i> Userid</label>
+        <label for="node-input-userid"><i class="fa fa-user"></i> Userid</label>
         <input type="text" id="node-input-userid">
     </div>
     <div class="form-row">
-        <label for="node-input-password"><i class="icon-lock"></i> Password</label>
+        <label for="node-input-password"><i class="fa fa-lock"></i> Password</label>
         <input type="password" id="node-input-password">
     </div>
     <br/>
     <div class="form-row">
-        <label for="node-input-dname"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-dname"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-dname" placeholder="Name">
     </div>
     <div class="form-tips" id="node-tip"><b>Note:</b> Copied credentials from global emailkeys.js file.</div>
@@ -70,8 +70,9 @@
 
 <script type="text/x-red" data-help-name="e-mail">
     <p>Sends the <b>msg.payload</b> as an email, with a subject of <b>msg.topic</b>.</p>
-    <p>It sends the message to the configured recipient <i>only</i>.</p>
-    <p><b>msg.topic</b> is used to set the subject of the email, and <b>msg.payload</b> is the body text.</p>
+    <!-- <p>It sends the message to the configured recipient <i>only</i>.</p> -->
+    <p>You may dynamically overide the default recipient by setting a <b>msg.to</b> property.</p>
+    <!-- <p><b>msg.topic</b> is used to set the subject of the email, and <b>msg.payload</b> is the body text.</p> -->
 </script>
 
 <script type="text/javascript">
@@ -89,8 +90,8 @@
             userid: {type:"text"},
             password: {type: "password"},
             global: { type:"boolean"}
-        },  
-        
+        },
+
         inputs:1,
         outputs:0,
         icon: "envelope.png",
@@ -115,28 +116,28 @@
 
 <script type="text/x-red" data-template-name="e-mail in">
     <div class="form-row node-input-repeat">
-        <label for="node-input-repeat"><i class="icon-repeat"></i> Check Repeat (S)</label>
+        <label for="node-input-repeat"><i class="fa fa-repeat"></i> Check Repeat (S)</label>
         <input type="text" id="node-input-repeat" placeholder="300">
     </div>
     <div class="form-row">
-        <label for="node-input-server"><i class="icon-tag"></i> Server</label>
+        <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
         <input type="text" id="node-input-server" placeholder="imap.gmail.com">
     </div>
     <div class="form-row">
-        <label for="node-input-port"><i class="icon-random"></i> Port</label>
+        <label for="node-input-port"><i class="fa fa-random"></i> Port</label>
         <input type="text" id="node-input-port" placeholder="993">
     </div>
     <div class="form-row">
-        <label for="node-input-userid"><i class="icon-user"></i> Userid</label>
+        <label for="node-input-userid"><i class="fa fa-user"></i> Userid</label>
         <input type="text" id="node-input-userid">
     </div>
     <div class="form-row">
-        <label for="node-config-input-password"><i class="icon-lock"></i> Password</label>
+        <label for="node-config-input-password"><i class="fa fa-lock"></i> Password</label>
         <input type="password" id="node-input-password">
     </div>
     <br/>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-tips" id="node-tip"><b>Note:</b> Copied credentials from global emailkeys.js file.</div>
