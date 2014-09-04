@@ -42,9 +42,9 @@ var RED = (function() {
         event.preventDefault();
     });
 
-
     function save(force) {
         if (RED.view.dirty()) {
+            //$("#debug-tab-clear").click();  // uncomment this to auto clear debug on deploy
 
             if (!force) {
                 var invalid = false;
@@ -73,11 +73,11 @@ var RED = (function() {
                 }
             }
             var nns = RED.nodes.createCompleteNodeSet();
-            
+
             $("#btn-icn-deploy").removeClass('fa-download');
             $("#btn-icn-deploy").addClass('spinner');
             RED.view.dirty(false);
-            
+
             $.ajax({
                 url:"flows",
                 type: "POST",
@@ -148,6 +148,7 @@ var RED = (function() {
             loadNodes();
         });
     }
+
     function loadNodes() {
         $.get('nodes', function(data) {
             $("body").append(data);
@@ -204,7 +205,7 @@ var RED = (function() {
         statusEnabled = state;
         RED.view.status(statusEnabled);
     }
-    
+
     function showHelp() {
 
         var dialog = $('#node-help');
@@ -252,7 +253,6 @@ var RED = (function() {
                 {id:"btn-help",icon:"fa fa-question",label:"Help...", href:"http://nodered.org/docs"}
             ]
         });
-        
 
         RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
         loadSettings();
