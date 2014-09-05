@@ -127,7 +127,8 @@ var localfilesystem = {
 
         if (settings.flowFile) {
             flowsFile = settings.flowFile;
-            flowsFullPath = flowsFile;
+            //flowsFullPath = flowsFile; <-- in case of custom flow file, the userDir was ignored
+            flowsFullPath = fspath.join(userDir,flowsFile);
         } else {
             flowsFile = 'flows_'+require('os').hostname()+'.json';
             flowsFullPath = fspath.join(userDir,flowsFile);
