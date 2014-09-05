@@ -18,6 +18,8 @@ module.exports = function(RED) {
     "use strict";
     var util = require("util");
     var ArduinoFirmata = require('arduino-firmata');
+    var fs = require('fs');
+    var plat = require('os').platform();
 
     // The Board Definition - this opens (and closes) the connection
     function ArduinoNode(n) {
@@ -26,13 +28,19 @@ module.exports = function(RED) {
         this.repeat = n.repeat||25;
         //node.log("opening connection "+this.device);
         var node = this;
+        var pre = "\\\\.\\";
+        if (!plat.match(/^win/)) { pre = ""; }
 
         node.board = new ArduinoFirmata();
-        node.board.connect(node.device);
-
-        node.board.on('connect', function(){
-            node.log("version "+node.board.boardVersion);
-        })
+        if (!fs.existsSync(pre+node.device)) {
+            node.warn("Device "+node.device+" not found");
+        }
+        else {
+            node.board.connect(node.device);
+            node.board.on('connect', function(){
+                node.log("version "+node.board.boardVersion);
+            });
+        }
 
         node.on('close', function() {
             if (node.board) {

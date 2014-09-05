@@ -15,22 +15,22 @@
 -->
 <script type="text/x-red" data-template-name="arduino in">
     <div class="form-row">
-        <label for="node-input-arduino"><i class="icon-tasks"></i> Arduino</label>
+        <label for="node-input-arduino"><i class="fa fa-tasks"></i> Arduino</label>
         <input type="text" id="node-input-arduino">
     </div>
     <div class="form-row">
-        <label for="node-input-pin"><i class="icon-asterisk"></i> Pin</label>
+        <label for="node-input-pin"><i class="fa fa-circle"></i> Pin</label>
         <input type="text" id="node-input-pin" placeholder="2">
     </div>
     <div class="form-row">
-        <label for="node-input-state"><i class="icon-wrench"></i> Type</label>
+        <label for="node-input-state"><i class="fa fa-wrench"></i> Type</label>
         <select type="text" id="node-input-state" style="width: 150px;">
             <option value="INPUT">Digital pin</option>
             <option value="ANALOG">Analogue pin</option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-tips"><b>Note:</b> You cannot use the same pin for both output and input.</div>
@@ -46,7 +46,7 @@
 
 <script type="text/javascript">
     RED.nodes.registerType('arduino in',{
-        category: 'advanced-input',
+        category: 'Arduino',
         color:"#3fadb5",
         defaults: {
             name: {value:""},
@@ -70,15 +70,15 @@
 
 <script type="text/x-red" data-template-name="arduino out">
     <div class="form-row">
-        <label for="node-input-arduino"><i class="icon-tasks"></i> Arduino</label>
+        <label for="node-input-arduino"><i class="fa fa-tasks"></i> Arduino</label>
         <input type="text" id="node-input-arduino">
     </div>
     <div class="form-row">
-        <label for="node-input-pin"><i class="icon-asterisk"></i> Pin</label>
+        <label for="node-input-pin"><i class="fa fa-circle"></i> Pin</label>
         <input type="text" id="node-input-pin" placeholder="13">
     </div>
     <div class="form-row">
-        <label for="node-input-state"><i class="icon-wrench"></i> Type</label>
+        <label for="node-input-state"><i class="fa fa-wrench"></i> Type</label>
         <select type="text" id="node-input-state" style="width: 200px;">
             <option value="OUTPUT">Digital (0/1)</option>
             <option value="PWM">Analogue (0-255)</option>
@@ -86,7 +86,7 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-tips"><b>Note:</b> You cannot use the same pin for both output and input.</div>
@@ -100,7 +100,7 @@
 
 <script type="text/javascript">
     RED.nodes.registerType('arduino out',{
-        category: 'advanced-output',
+        category: 'Arduino',
         color:"#3fadb5",
         defaults: {
             name: {value:""},
@@ -124,18 +124,18 @@
 
 <script type="text/x-red" data-template-name="arduino-board">
     <div class="form-row">
-        <label for="node-config-input-device"><i class="icon-random"></i> Port</label>
+        <label for="node-config-input-device"><i class="fa fa-random"></i> Port</label>
         <input type="text" id="node-config-input-device" style="width:60%;" placeholder="/dev/ttyUSB0"/>
-        <a id="node-config-lookup-serial" class="btn"><i id="node-config-lookup-serial-icon" class="icon icon-search"></i></a>
+        <a id="node-config-lookup-serial" class="btn"><i id="node-config-lookup-serial-icon" class="fa fa-search"></i></a>
     </div>
-    <div class="form-tips"><b>Tip:</b> Leave blank for auto detect on first serial port.</div>
+    <div class="form-tips"><b>Tip:</b> Use search to try to auto-detect serial port.</div>
 </script>
 
 <script type="text/javascript">
     RED.nodes.registerType('arduino-board',{
         category: 'config',
         defaults: {
-            device: {value:""}
+            device: {value:"",required:true}
         },
         label: function() {
             return this.device||"arduino";
