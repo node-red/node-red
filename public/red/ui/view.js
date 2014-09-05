@@ -1209,7 +1209,7 @@ RED.view = (function() {
                             .attr('class',function(d){
                                 return 'node_label'+
                                 (d._def.align?' node_label_'+d._def.align:'')+
-                                (d._def.label?' '+(typeof d._def.labelStyle == "function" ? d._def.labelStyle.call(d):d._def.labelStyle):'') ;
+                                (d._def.labelStyle?' '+(typeof d._def.labelStyle == "function" ? d._def.labelStyle.call(d):d._def.labelStyle):'') ;
                         });
                         thisNode.selectAll(".node_tools").attr("x",function(d){return d.w-35;}).attr("y",function(d){return d.h-20;});
 
