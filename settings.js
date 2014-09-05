@@ -44,14 +44,14 @@ module.exports = {
     // To enabled pretty-printing of the flow within the flow file, set the following
     //  property to true:
     //flowFilePretty: true,
-
+    
     // By default, all user data is stored in the Node-RED install directory. To
     // use a different location, the following property can be used
-    //userDir: '/home/nol/.node-red/',		
-    
+    //userDir: '/home/nol/.node-red/',
+
     // Node-RED scans the `nodes` directory in the install directory to find nodes.
     // The following property can be used to specify an additional directory to scan.
-    //userDir: '/home/nol/.node-red/nodes/',		
+    //userDir: '/home/nol/.node-red/nodes/',
 
     // By default, the Node-RED UI is available at http://localhost:1880/
     // The following property can be used to specifiy a different root path.
