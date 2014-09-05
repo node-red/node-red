@@ -25,18 +25,26 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         this.name = n.name;
         this.func = n.func;
-        var functionText = "var results = (function(msg){"+this.func+"\n})(msg);";
+        var functionText = "var results = null; results = (function(msg){"+this.func+"\n})(msg);";
         this.topic = n.topic;
-        this.context = {global:RED.settings.functionGlobalContext || {}};
+        var sandbox = {
+            console:console,
+            util:util,
+            Buffer:Buffer,
+            context: {
+                global:RED.settings.functionGlobalContext || {}
+            }
+        };
+        var context = vm.createContext(sandbox);
         try {
             this.script = vm.createScript(functionText);
             this.on("input", function(msg) {
                 if (msg != null) {
-                    var sandbox = {msg:msg,console:console,util:util,Buffer:Buffer,context:this.context};
                     try {
-                        this.script.runInNewContext(sandbox);
-                        var results = sandbox.results;
-
+                        var start = process.hrtime();
+                        context.msg = msg;
+                        this.script.runInContext(context);
+                        var results = context.results;
                         if (results == null) {
                             results = [];
                         } else if (results.length == null) {
@@ -56,7 +64,10 @@ module.exports = function(RED) {
                             }
                         }
                         this.send(results);
-
+                        var duration = process.hrtime(start);
+                        if (process.env.NODE_RED_FUNCTION_TIME) {
+                            this.status({fill:"yellow",shape:"dot",text:""+Math.floor((duration[0]* 1e9 +  duration[1])/10000)/100});
+                        }
                     } catch(err) {
                         this.error(err.toString());
                     }
