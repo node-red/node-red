@@ -218,15 +218,18 @@ describe('delayNode', function() {
     });
     
     it('limits the message rate to 2 per second, 2 seconds', function(done) {
+        this.timeout(6000);
         genericRateLimitSECONDSTest(2, false, 2100, done);
     });
     
     it('limits the message rate to 1 per second, 2 seconds, with drop', function(done) {
+        this.timeout(6000);
         genericRateLimitSECONDSTest(1, true, 2300, done);
     });
     
-    it('limits the message rate to 2 per second, 2 seconds, with drop', function(done) {
-        genericRateLimitSECONDSTest(2, true, 2300, done);
+    it('limits the message rate to 2 per second, 5 seconds, with drop', function(done) {
+        this.timeout(6000);
+        genericRateLimitSECONDSTest(2, true, 5000, done);
     });
     
     /**
@@ -327,6 +330,8 @@ describe('delayNode', function() {
     });
     
     it('handles bursts using a buffer', function(done) {
+        this.timeout(6000);
+
         var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":5,"timeoutUnits":"seconds","rate":1000,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(delayNode, flow, function() {

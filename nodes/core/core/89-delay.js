@@ -132,15 +132,15 @@ module.exports = function(RED) {
                         },node.rate);
                     }
                 } else {
-                    var now;
-                    if(node.lastSent) {
-                        now = process.hrtime(node.lastSent);
+                    var timeSinceLast;
+                    if (node.lastSent) {
+                        timeSinceLast = process.hrtime(node.lastSent);
                     }
-                    if(!node.lastSent) { // ensuring that we always send the first message 
+                    if (!node.lastSent) { // ensuring that we always send the first message 
                         node.lastSent = process.hrtime();
                         node.send(msg);
-                    } else if ( ( (now[0] * SECONDS_TO_NANOS) + now[1] ) > (node.rate * MILLIS_TO_NANOS) ) {
-                        node.lastSent = now;
+                    } else if ( ( (timeSinceLast[0] * SECONDS_TO_NANOS) + timeSinceLast[1] ) > (node.rate * MILLIS_TO_NANOS) ) {
+                        node.lastSent = process.hrtime();
                         node.send(msg);
                     }
                 }
