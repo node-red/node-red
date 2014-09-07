@@ -25,7 +25,7 @@
     </div>
     <div class="form-row" id="node-op1">
         <label for="node-input-op1">&nbsp;</label>
-        <input type="text" id="node-input-op1" placeholder="1">
+        <input type="text" id="node-input-op1">
     </div>
     <div class="form-row">
         <label for="node-input-duration"><i class="fa fa-clock-o"></i> then wait</label>
@@ -47,7 +47,7 @@
     </div>
     <div class="form-row" id="node-op2">
         <label for="node-input-op2">&nbsp;</label>
-        <input type="text" id="node-input-op2" placeholder="0">
+        <input type="text" id="node-input-op2">
     </div>
     <div class="form-row">
         <label for="node-input-extend"><i class="fa fa-repeat"></i> and</label>
@@ -97,8 +97,8 @@
         category: 'function',
         color:"#E6E0F8",
         defaults: {
-            op1: {value:""},
-            op2: {value:""},
+            op1: {value:"1"},
+            op2: {value:"0"},
             op1type: {value:""},
             op2type: {value:""},
             duration: {value:"250",required:true,validate:RED.validators.number()},
