@@ -1,0 +1,96 @@
+<!--
+  Copyright 2014 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="redis pub">
+    <div class="form-row node-input-server">
+        <label for="node-input-server"><i class="fa fa-tag"></i> Server</label>
+        <input type="text" id="node-input-server">
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-briefcase"></i> Topic</label>
+        <input type="text" id="node-input-topic" placeholder="Redis Topic">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="redis pub">
+    <p>Connects to a Redis server and publishes <b>msg.payload</b> either to the
+<b>msg.topic</b> OR to the topic specified in the edit window. The value in the
+edit window has precedence.</p>
+	<p>To run this you need a local Redis server running. For details see <a href="http://redis.io/" target="_new">the Redis site</a>.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('redis pub',{
+        category: 'output',
+        color:"#ffaaaa",
+        defaults: {
+            server: { value:"", type:"redis-server"},
+            name: {value:""},
+            topic: {value:""},
+        },
+        inputs:1,
+        outputs:0,
+        icon: "redis.png",
+        align: "right",
+        label: function() {
+            return this.name||this.topic||"redis pub";
+        }
+    });
+</script>
+
+XXX
+<script type="text/x-red" data-template-name="redis sub">
+    <div class="form-row node-input-server">
+        <label for="node-input-server"><i class="fa fa-tag"></i> Server</label>
+        <input type="text" id="node-input-server">
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-briefcase"></i> Topic</label>
+        <input type="text" id="node-input-topic" placeholder="Redis Topic">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="redis sub">
+    <p>Connects to a Redis server and subscribes (actually PSUBSCRIBEs) to the topic pattern specified in the edit window.</p>
+    <p>To run this you need a local Redis server running. For details see <a href="http://redis.io/" target="_new">the Redis site</a>.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('redis sub',{
+        category: 'input',
+        color:"#ffaaaa",
+        defaults: {
+            server: { value:"", type:"redis-server"},
+            name: {value:""},
+            topic: {value:"", required:true},
+        },
+        inputs:0,
+        outputs:1,
+        icon: "redis.png",
+        align: "right",
+        label: function() {
+            return this.name||this.topic;
+        }
+    });
+</script>

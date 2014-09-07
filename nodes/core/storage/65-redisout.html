@@ -15,11 +15,9 @@
 -->
 
 <script type="text/x-red" data-template-name="redis out">
-    <div class="form-row node-input-hostname">
-        <label for="node-input-hostname"><i class="fa fa-bookmark"></i> Host</label>
-        <input class="input-append-left" type="text" id="node-input-hostname" placeholder="127.0.0.1" style="width: 40%;" ><button id="node-input-hostname-lookup" class="btn input-append-right"><span class="caret"></span></button>
-        <label for="node-input-port" style="margin-left: 10px; width: 35px; "> Port</label>
-        <input type="text" id="node-input-port" placeholder="6379" style="width:45px">
+    <div class="form-row node-input-server">
+        <label for="node-input-server"><i class="fa fa-tag"></i> Server</label>
+        <input type="text" id="node-input-server">
     </div>
     <div class="form-row">
         <label for="node-input-key"><i class="fa fa-key"></i> Key</label>
@@ -54,8 +52,7 @@
         category: 'storage-output',
         color:"#ffaaaa",
         defaults: {
-            hostname: { value:"127.0.0.1",required:true},
-            port: { value: 6379,required:true},
+            server: { value:"", type:"redis-server"},
             name: {value:""},
             key: {value:""},
             structtype: {value:"",required:true}
@@ -66,40 +63,30 @@
         align: "right",
         label: function() {
             return this.name||this.key+" ("+this.structtype+")";
-        },
-        oneditprepare: function() {
-            var availableServers = [];
-            var matchedServers = {};
-            RED.nodes.eachNode(function(node) {
-                if (node.type == "redis out" && node.hostname && node.port && !matchedServers[node.hostname+":"+node.port]) {
-                    var label = node.hostname+":"+node.port;
-                    matchedServers[label] = true;
-                    availableServers.push({
-                        label:label,
-                        value:node.hostname,
-                        port:node.port
-                    });
-                }
-            });
-            $( "#node-input-hostname" ).autocomplete({
-                minLength: 0,
-                source: availableServers,
-                select: function( event, ui ) {
-                    $("#node-input-port").val(ui.item.port);
-                }
-            });
-            var tt = this;
-            tt._acOpen = false;
-            $( "#node-input-hostname" ).on( "autocompleteclose", function( event, ui ) { tt._acOpen = false;} );
-            $( "#node-input-hostname-lookup" ).click(function(e) {
-                if (tt._acOpen) {
-                    $( "#node-input-hostname" ).autocomplete( "close");
-                } else {
-                    $( "#node-input-hostname" ).autocomplete( "search", "" );
-                }
-                tt._acOpen = !tt._acOpen;
-                e.preventDefault();
-            });
         }
     });
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('redis-server',{
+        category: 'config',
+        defaults: {
+            host: {value:"localhost",required:true},
+            port: {value:6379,required:true,validate:RED.validators.number()},
+        },
+        label: function() {
+            return this.host+":"+this.port;
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="redis-server">
+    <div class="form-row">
+        <label for="node-config-input-host"><i class="fa fa-bookmark"></i> Host</label>
+        <input type="text" id="node-config-input-host">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-port"><i class="fa fa-bookmark"></i> Port</label>
+        <input type="text" id="node-config-input-port">
+    </div>
 </script>
