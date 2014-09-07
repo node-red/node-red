@@ -17,7 +17,7 @@
 <!--  The Input Node  -->
 <script type="text/x-red" data-template-name="udp in">
     <div class="form-row">
-        <label for="node-input-port"><i class="icon-inbox"></i> Listen</label>
+        <label for="node-input-port"><i class="fa fa-sign-in"></i> Listen</label>
         on port <input type="text" id="node-input-port" placeholder="Port" style="width: 45px">
         for <select id="node-input-multicast" style='width:40%'>
           <option value="false">udp messages</option>
@@ -25,15 +25,15 @@
         </select>
     </div>
     <div class="form-row node-input-group">
-        <label for="node-input-group"><i class="icon-list"></i> Group</label>
+        <label for="node-input-group"><i class="fa fa-list"></i> Group</label>
         <input type="text" id="node-input-group" placeholder="225.0.18.83">
     </div>
     <div class="form-row node-input-iface">
-        <label for="node-input-iface"><i class="icon-random"></i> Interface</label>
+        <label for="node-input-iface"><i class="fa fa-random"></i> Interface</label>
         <input type="text" id="node-input-iface" placeholder="(optional) ip address of eth0">
     </div>
     <div class="form-row">
-        <label for="node-input-datatype"><i class="icon-file"></i> Output</label>
+        <label for="node-input-datatype"><i class="fa fa-sign-out"></i> Output</label>
         <select id="node-input-datatype" style="width: 70%;">
             <option value="buffer">a Buffer</option>
             <option value="utf8">a String</option>
@@ -41,7 +41,7 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-tips">Tip: Make sure your firewall will allow the data in.</div>
@@ -97,7 +97,7 @@
 <!--  The Output Node  -->
 <script type="text/x-red" data-template-name="udp out">
     <div class="form-row">
-        <label for="node-input-port"><i class="icon-envelope"></i> Send a</label>
+        <label for="node-input-port"><i class="fa fa-envelope"></i> Send a</label>
         <select id="node-input-multicast" style='width:40%'>
           <option value="false">udp message</option>
           <option value="broad">broadcast message</option>
@@ -106,11 +106,11 @@
         to port <input type="text" id="node-input-port" placeholder="port" style="width: 70px">
     </div>
     <div class="form-row node-input-addr">
-        <label for="node-input-addr" id="node-input-addr-label"><i class="icon-list"></i> Address</label>
+        <label for="node-input-addr" id="node-input-addr-label"><i class="fa fa-list"></i> Address</label>
         <input type="text" id="node-input-addr" placeholder="destination ip" style="width: 70%;">
     </div>
     <div class="form-row node-input-iface">
-        <label for="node-input-iface"><i class="icon-random"></i> Interface</label>
+        <label for="node-input-iface"><i class="fa fa-random"></i> Interface</label>
         <input type="text" id="node-input-iface" placeholder="(optional) ip address of eth0">
     </div>
     <div class="form-row">
@@ -127,7 +127,7 @@
         <label for="node-input-base64" style="width: 70%;">Decode Base64 encoded payload ?</label>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="icfa faon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-tips">Tip: leave address and port blank if you want to set using <b>msg.ip</b> and <b>msg.port</b>.</div>
@@ -136,12 +136,12 @@
             var id = $("#node-input-multicast option:selected").val();
             if (id !== "multi") {
                 $(".node-input-iface").hide();
-                $("#node-input-addr-label").html('<i class="icon-list"></i> Address');
+                $("#node-input-addr-label").html('<i class="fa fa-list"></i> Address');
                 $("#node-input-addr")[0].placeholder = 'destination ip';
             }
             else {
                 $(".node-input-iface").show();
-                $("#node-input-addr-label").html('<i class="icon-list"></i> Group');
+                $("#node-input-addr-label").html('<i class="fa fa-list"></i> Group');
                 $("#node-input-addr")[0].placeholder = '225.0.18.83';
             }
             if (id === "broad") {
@@ -186,8 +186,7 @@
             $("#node-input-outport-type option").filter(function() {
                 return $(this).val() == type;
             }).attr('selected',true);
-            
-            
+
             $("#node-input-outport-type").change(function() {
                 var type = $(this).children("option:selected").val();
                 if (type == "random") {
@@ -196,9 +195,9 @@
                     $("#node-input-outport").show();
                 }
             });
-            
+
             $("#node-input-outport-type").change();
-            
+
             $("#node-input-multicast").change(function() {
                 var type = $(this).children("option:selected").val();
                 if (type == "false") {
