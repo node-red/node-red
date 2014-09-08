@@ -29,14 +29,6 @@ module.exports = function(RED) {
             if (filename === "") {
                 node.warn('No filename specified');
             } else if (typeof msg.payload != "undefined") {
-                var data = msg.payload;
-                if (typeof data == "object") {
-                    if (!Buffer.isBuffer(data)) {
-                        data = JSON.stringify(data);
-                    }
-                }
-                if (typeof data == "boolean") { data = data.toString(); }
-                if ((this.appendNewline)&&(!Buffer.isBuffer(data))) { data += "\n"; }
                 if (msg.hasOwnProperty('delete')) {
                     fs.unlink(filename, function (err) {
                         if (err) { node.warn('Failed to delete file : '+err); }
@@ -44,6 +36,14 @@ module.exports = function(RED) {
                     });
                 }
                 else {
+                    var data = msg.payload;
+                    if (typeof data == "object") {
+                        if (!Buffer.isBuffer(data)) {
+                            data = JSON.stringify(data);
+                        }
+                    }
+                    if (typeof data == "boolean") { data = data.toString(); }
+                    if ((this.appendNewline)&&(!Buffer.isBuffer(data))) { data += "\n"; }
                     if (this.overwriteFile) {
                         fs.writeFile(filename, data, function (err) {
                             if (err) { node.warn('Failed to write to file : '+err); }
