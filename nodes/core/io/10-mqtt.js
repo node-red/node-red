@@ -95,7 +95,7 @@ module.exports = function(RED) {
                     if (node.topic) {
                         msg.topic = node.topic;
                     }
-                    if (typeof msg.topic === "string") { // topic must be a string
+                    if ((msg.hasOwnProperty("topic")) && (typeof msg.topic === "string") && (msg.topic !== "")) { // topic must exist
                         this.client.publish(msg);  // send the message
                     }
                     else { node.warn("Invalid topic specified"); }
