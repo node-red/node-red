@@ -95,7 +95,10 @@ module.exports = function(RED) {
                     if (node.topic) {
                         msg.topic = node.topic;
                     }
-                    this.client.publish(msg);
+                    if (typeof msg.topic === "string") { // topic must be a string
+                        this.client.publish(msg);  // send the message
+                    }
+                    else { node.warn("Invalid topic specified"); }
                 }
             });
             this.client.on("connectionlost",function() {
