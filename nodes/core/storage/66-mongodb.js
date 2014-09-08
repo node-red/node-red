@@ -27,8 +27,8 @@ module.exports = function(RED) {
         this.name = n.name;
 
         var url = "mongodb://";
-        if (this.credentials && this.credentials.username && this.credentials.password) {
-            url += this.credentials.username+":"+this.credentials.password+"@";
+        if (this.credentials && this.credentials.user && this.credentials.password) {
+            url += this.credentials.user+":"+this.credentials.password+"@";
         }
         url += this.hostname+":"+this.port+"/"+this.db;
 
