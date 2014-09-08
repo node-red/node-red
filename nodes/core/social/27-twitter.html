@@ -38,7 +38,7 @@
     }
     function updateTwitterScreenName(sn) {
         $("#node-config-input-screen_name").val(sn);
-        $("#node-config-twitter-row").html('<label><i class="icon-user"></i> Twitter ID</label><span class="input-xlarge uneditable-input">'+sn+'</span>');
+        $("#node-config-twitter-row").html('<label><i class="fa fa-user"></i> Twitter ID</label><span class="input-xlarge uneditable-input">'+sn+'</span>');
     }
     function pollTwitterCredentials(e) {
         $.getJSON('credentials/twitter-credentials/'+twitterConfigNodeId,function(data) {
@@ -93,11 +93,11 @@
 
 <script type="text/x-red" data-template-name="twitter in">
     <div class="form-row">
-        <label for="node-input-twitter"><i class="icon-user"></i> Log in as</label>
+        <label for="node-input-twitter"><i class="fa fa-user"></i> Log in as</label>
         <input type="text" id="node-input-twitter">
     </div>
     <div class="form-row">
-        <label for="node-input-user"><i class="icon-search"></i> Search</label>
+        <label for="node-input-user"><i class="fa fa-search"></i> Search</label>
         <select type="text" id="node-input-user" style="display: inline-block; vertical-align: middle; width:60%;">
             <option value="false">all public tweets</option>
             <option value="true">the tweets of who you follow</option>
@@ -106,11 +106,11 @@
         </select>
     </div>
     <div class="form-row" id="node-input-tags-row">
-        <label for="node-input-tags"><i class="icon-tags"></i> <span id="node-input-tags-label">for</span></label>
+        <label for="node-input-tags"><i class="fa fa-tags"></i> <span id="node-input-tags-label">for</span></label>
         <input type="text" id="node-input-tags" placeholder="comma-separated words, @ids, #tags">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-tips">Tip: Use commas without spaces between multiple search terms. Comma = OR, Space = AND.
@@ -188,11 +188,11 @@
 
 <script type="text/x-red" data-template-name="twitter out">
     <div class="form-row">
-        <label for="node-input-twitter"><i class="icon-user"></i> Twitter</label>
+        <label for="node-input-twitter"><i class="fa fa-user"></i> Twitter</label>
         <input type="text" id="node-input-twitter">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>

@@ -145,12 +145,12 @@
                 $("#node-config-input-device").autocomplete( "destroy" );
             } catch(err) { }
             $("#node-config-lookup-serial").click(function() {
-                $("#node-config-lookup-serial-icon").removeClass('icon-search');
+                $("#node-config-lookup-serial-icon").removeClass('fa-search');
                 $("#node-config-lookup-serial-icon").addClass('spinner');
                 $("#node-config-lookup-serial").addClass('disabled');
 
                 $.getJSON('arduinoports',function(data) {
-                    $("#node-config-lookup-serial-icon").addClass('icon-search');
+                    $("#node-config-lookup-serial-icon").addClass('fa-search');
                     $("#node-config-lookup-serial-icon").removeClass('spinner');
                     $("#node-config-lookup-serial").removeClass('disabled');
                     var ports = [];
