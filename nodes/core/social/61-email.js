@@ -16,7 +16,6 @@
 
 module.exports = function(RED) {
     "use strict";
-    var util = require('util');
     var nodemailer = require("nodemailer");
     var Imap = require('imap');
 
@@ -105,8 +104,8 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         this.name = n.name;
         this.repeat = n.repeat * 1000 || 300000;
-        this.inserver = n.server || emailkey.server || "imap.gmail.com";
-        this.inport = n.port || emailkey.port || "993";
+        this.inserver = n.server || globalkeys.server || "imap.gmail.com";
+        this.inport = n.port || globalkeys.port || "993";
         var flag = false;
 
         if (this.credentials && this.credentials.hasOwnProperty("userid")) {
