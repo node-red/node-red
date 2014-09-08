@@ -309,6 +309,9 @@ RED.nodes = (function() {
                 //"DO NOT DEPLOY while in this state.<br/>Either, add missing types to Node-RED, restart and then reload page,<br/>or delete unknown "+n.name+", rewire as required, and then deploy.","error");
             }
 
+            var new_workspaces = [];
+            var workspace_map = {};
+            
             for (i=0;i<newNodes.length;i++) {
                 n = newNodes[i];
                 // TODO: remove workspace in next release+1
@@ -319,14 +322,21 @@ RED.nodes = (function() {
                     if (defaultWorkspace == null) {
                         defaultWorkspace = n;
                     }
+                    if (createNewIds) {
+                        var nid = getID();
+                        workspace_map[n.id] = nid;
+                        n.id = nid;
+                    }
                     addWorkspace(n);
                     RED.view.addWorkspace(n);
+                    new_workspaces.push(n);
                 }
             }
             if (defaultWorkspace == null) {
                 defaultWorkspace = { type:"tab", id:getID(), label:"Sheet 1" };
                 addWorkspace(defaultWorkspace);
                 RED.view.addWorkspace(defaultWorkspace);
+                new_workspaces.push(defaultWorkspace);
             }
 
             var node_map = {};
@@ -353,7 +363,10 @@ RED.nodes = (function() {
                     } else {
                         var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires,changed:false};
                         if (createNewIds) {
-                            node.z = RED.view.getWorkspace();
+                            node.z = workspace_map[node.z];
+                            if (!workspaces[node.z]) {
+                                node.z = RED.view.getWorkspace();
+                            }
                             node.id = getID();
                         } else {
                             node.id = n.id;
@@ -401,7 +414,7 @@ RED.nodes = (function() {
                 }
                 delete n.wires;
             }
-            return [new_nodes,new_links];
+            return [new_nodes,new_links,new_workspaces];
         } catch(error) {
             //TODO: get this UI thing out of here! (see above as well)
             RED.notify("<strong>Error</strong>: "+error,"error");

@@ -1397,61 +1397,65 @@ RED.view = (function() {
             if (result) {
                 var new_nodes = result[0];
                 var new_links = result[1];
-                var new_ms = new_nodes.map(function(n) { n.z = activeWorkspace; return {n:n};});
-                var new_node_ids = new_nodes.map(function(n){ return n.id; });
-
-                // TODO: pick a more sensible root node
-                var root_node = new_ms[0].n;
-                var dx = root_node.x;
-                var dy = root_node.y;
-
-                if (mouse_position == null) {
-                    mouse_position = [0,0];
-                }
-
-                var minX = 0;
-                var minY = 0;
-                var i;
-                var node;
+                var new_workspaces = result[2];
                 
-                for (i=0;i<new_ms.length;i++) {
-                    node = new_ms[i];
-                    node.n.selected = true;
-                    node.n.changed = true;
-                    node.n.x -= dx - mouse_position[0];
-                    node.n.y -= dy - mouse_position[1];
-                    node.dx = node.n.x - mouse_position[0];
-                    node.dy = node.n.y - mouse_position[1];
-                    minX = Math.min(node.n.x-node_width/2-5,minX);
-                    minY = Math.min(node.n.y-node_height/2-5,minY);
-                }
-                for (i=0;i<new_ms.length;i++) {
-                    node = new_ms[i];
-                    node.n.x -= minX;
-                    node.n.y -= minY;
-                    node.dx -= minX;
-                    node.dy -= minY;
-                }
-                if (!touchImport) {
-                    mouse_mode = RED.state.IMPORT_DRAGGING;
+                var new_ms = new_nodes.filter(function(n) { return n.z == activeWorkspace }).map(function(n) { return {n:n};});
+                var new_node_ids = new_nodes.map(function(n){ return n.id; });
+                
+                // TODO: pick a more sensible root node
+                if (new_ms.length > 0) {
+                    var root_node = new_ms[0].n;
+                    var dx = root_node.x;
+                    var dy = root_node.y;
+    
+                    if (mouse_position == null) {
+                        mouse_position = [0,0];
+                    }
+    
+                    var minX = 0;
+                    var minY = 0;
+                    var i;
+                    var node;
+                    
+                    for (i=0;i<new_ms.length;i++) {
+                        node = new_ms[i];
+                        node.n.selected = true;
+                        node.n.changed = true;
+                        node.n.x -= dx - mouse_position[0];
+                        node.n.y -= dy - mouse_position[1];
+                        node.dx = node.n.x - mouse_position[0];
+                        node.dy = node.n.y - mouse_position[1];
+                        minX = Math.min(node.n.x-node_width/2-5,minX);
+                        minY = Math.min(node.n.y-node_height/2-5,minY);
+                    }
+                    for (i=0;i<new_ms.length;i++) {
+                        node = new_ms[i];
+                        node.n.x -= minX;
+                        node.n.y -= minY;
+                        node.dx -= minX;
+                        node.dy -= minY;
+                    }
+                    if (!touchImport) {
+                        mouse_mode = RED.state.IMPORT_DRAGGING;
+                    }
+    
+                    RED.keyboard.add(/* ESCAPE */ 27,function(){
+                            RED.keyboard.remove(/* ESCAPE */ 27);
+                            clearSelection();
+                            RED.history.pop();
+                            mouse_mode = 0;
+                    });
+                    clearSelection();
+                    moving_set = new_ms;
                 }
 
-                RED.keyboard.add(/* ESCAPE */ 27,function(){
-                        RED.keyboard.remove(/* ESCAPE */ 27);
-                        clearSelection();
-                        RED.history.pop();
-                        mouse_mode = 0;
-                });
+                RED.history.push({t:'add',nodes:new_node_ids,links:new_links,workspaces:new_workspaces,dirty:RED.view.dirty()});
 
-                RED.history.push({t:'add',nodes:new_node_ids,links:new_links,dirty:RED.view.dirty()});
-
-                clearSelection();
-                moving_set = new_ms;
 
                 redraw();
             }
         } catch(error) {
-            console.log(error);
+            console.log(error.stack);
             RED.notify("<strong>Error</strong>: "+error,"error");
         }
     }
