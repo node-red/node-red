@@ -18,8 +18,6 @@ module.exports = function(RED) {
     "use strict";
     var util = require("util");
     var vm = require("vm");
-    var fs = require('fs');
-    var fspath = require('path');
 
     function FunctionNode(n) {
         RED.nodes.createNode(this,n);

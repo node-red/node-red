@@ -17,7 +17,6 @@
 module.exports = function(RED) {
     "use strict";
     var mustache = require("mustache");
-    var fs = require('fs');
 
     function TemplateNode(n) {
         RED.nodes.createNode(this,n);
