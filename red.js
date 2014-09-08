@@ -179,6 +179,7 @@ RED.start().then(function() {
             if (settings.httpAdminRoot === false) {
                 util.log('[red] Admin UI disabled');
             }
+            process.title = 'node-red';
             util.log('[red] Server now running at '+getListenPath());
         });
     } else {
