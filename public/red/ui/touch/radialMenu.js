@@ -74,11 +74,9 @@ RED.touch.radialMenu = (function() {
                         "text-align": "center",
                         "line-height":"50px"
                     });
-                if (opt.icon) {
-                    opt.el.append("i").attr("class","icon "+opt.icon)
-                } else {
-                    opt.el.html(opt.name);
-                }
+                    
+                opt.el.html(opt.name);
+                
                 if (opt.disabled) {
                     opt.el.style({"border-color":"#ccc",color:"#ccc"});
                 }
