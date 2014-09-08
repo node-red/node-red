@@ -179,9 +179,7 @@ module.exports = function(RED) {
     RED.nodes.registerType("rpi-gpio in",GPIOInNode);
     RED.nodes.registerType("rpi-gpio out",GPIOOutNode);
 
-    var querystring = require('querystring');
     RED.httpAdmin.get('/rpi-gpio/:id',function(req,res) {
-        var credentials = RED.nodes.getCredentials(req.params.id);
         res.send( JSON.stringify(pitype) );
     });
 }
