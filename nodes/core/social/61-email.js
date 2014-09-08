@@ -69,27 +69,25 @@ module.exports = function(RED) {
         });
 
         this.on("input", function(msg) {
-            if (msg != null) {
-                if (smtpTransport) {
-                    node.status({fill:"blue",shape:"dot",text:"sending"});
-					var payload = RED.util.ensureString(msg.payload);
-                    smtpTransport.sendMail({
-                        from: node.userid, // sender address
-                        to: msg.to || node.name, // comma separated list of addressees
-                        subject: msg.topic, // subject line
-                        text: payload // plaintext body
-                    }, function(error, info) {
-                        if (error) {
-                            node.error(error);
-                            node.status({fill:"red",shape:"ring",text:"send failed"});
-                        } else {
-                            node.log("Message sent: " + info.response);
-                            node.status({});
-                        }
-                    });
-                }
-                else { node.warn("No Email credentials found. See info panel."); }
+            if (smtpTransport) {
+                node.status({fill:"blue",shape:"dot",text:"sending"});
+                var payload = RED.util.ensureString(msg.payload);
+                smtpTransport.sendMail({
+                    from: node.userid, // sender address
+                    to: msg.to || node.name, // comma separated list of addressees
+                    subject: msg.topic, // subject line
+                    text: payload // plaintext body
+                }, function(error, info) {
+                    if (error) {
+                        node.error(error);
+                        node.status({fill:"red",shape:"ring",text:"send failed"});
+                    } else {
+                        node.log("Message sent: " + info.response);
+                        node.status({});
+                    }
+                });
             }
+            else { node.warn("No Email credentials found. See info panel."); }
         });
     }
     RED.nodes.registerType("e-mail",EmailNode,{

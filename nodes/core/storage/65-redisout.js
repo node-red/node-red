@@ -79,27 +79,25 @@ module.exports = function(RED) {
         });
 
         this.on("input", function(msg) {
-                if (msg != null) {
-                    var k = this.key || msg.topic;
-                    if (k) {
-                        if (this.structtype == "string") {
-                            this.client.set(k,RED.util.ensureString(msg.payload));
-                        } else if (this.structtype == "hash") {
-                            var r = hashFieldRE.exec(msg.payload);
-                            if (r) {
-                                this.client.hset(k,r[1],r[2]);
-                            } else {
-                                this.warn("Invalid payload for redis hash");
-                            }
-                        } else if (this.structtype == "set") {
-                            this.client.sadd(k,msg.payload);
-                        } else if (this.structtype == "list") {
-                            this.client.rpush(k,msg.payload);
-                        }
+            var k = this.key || msg.topic;
+            if (k) {
+                if (this.structtype == "string") {
+                    this.client.set(k,RED.util.ensureString(msg.payload));
+                } else if (this.structtype == "hash") {
+                    var r = hashFieldRE.exec(msg.payload);
+                    if (r) {
+                        this.client.hset(k,r[1],r[2]);
                     } else {
-                        this.warn("No key or topic set");
+                        this.warn("Invalid payload for redis hash");
                     }
+                } else if (this.structtype == "set") {
+                    this.client.sadd(k,msg.payload);
+                } else if (this.structtype == "list") {
+                    this.client.rpush(k,msg.payload);
                 }
+            } else {
+                this.warn("No key or topic set");
+            }
         });
         this.on("close", function() {
             redisConnectionPool.close(node.client);

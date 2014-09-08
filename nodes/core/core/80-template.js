@@ -47,14 +47,12 @@ module.exports = function(RED) {
         }
 
         node.on("input", function(msg) {
-            if (msg != null) {
-                try {
-                    m = msg;
-                    i = 0;
-                    rec(msg);
-                } catch(err) {
-                    node.error(err.message);
-                }
+            try {
+                m = msg;
+                i = 0;
+                rec(msg);
+            } catch(err) {
+                node.error(err.message);
             }
         });
     }

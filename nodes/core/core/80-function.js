@@ -39,38 +39,36 @@ module.exports = function(RED) {
         try {
             this.script = vm.createScript(functionText);
             this.on("input", function(msg) {
-                if (msg != null) {
-                    try {
-                        var start = process.hrtime();
-                        context.msg = msg;
-                        this.script.runInContext(context);
-                        var results = context.results;
-                        if (results == null) {
-                            results = [];
-                        } else if (results.length == null) {
-                            results = [results];
-                        }
-                        if (msg._topic) {
-                            for (var m in results) {
-                                if (results[m]) {
-                                    if (util.isArray(results[m])) {
-                                        for (var n=0; n < results[m].length; n++) {
-                                            results[m][n]._topic = msg._topic;
-                                        }
-                                    } else {
-                                        results[m]._topic = msg._topic;
+                try {
+                    var start = process.hrtime();
+                    context.msg = msg;
+                    this.script.runInContext(context);
+                    var results = context.results;
+                    if (results == null) {
+                        results = [];
+                    } else if (results.length == null) {
+                        results = [results];
+                    }
+                    if (msg._topic) {
+                        for (var m in results) {
+                            if (results[m]) {
+                                if (util.isArray(results[m])) {
+                                    for (var n=0; n < results[m].length; n++) {
+                                        results[m][n]._topic = msg._topic;
                                     }
+                                } else {
+                                    results[m]._topic = msg._topic;
                                 }
                             }
                         }
-                        this.send(results);
-                        var duration = process.hrtime(start);
-                        if (process.env.NODE_RED_FUNCTION_TIME) {
-                            this.status({fill:"yellow",shape:"dot",text:""+Math.floor((duration[0]* 1e9 +  duration[1])/10000)/100});
-                        }
-                    } catch(err) {
-                        this.error(err.toString());
                     }
+                    this.send(results);
+                    var duration = process.hrtime(start);
+                    if (process.env.NODE_RED_FUNCTION_TIME) {
+                        this.status({fill:"yellow",shape:"dot",text:""+Math.floor((duration[0]* 1e9 +  duration[1])/10000)/100});
+                    }
+                } catch(err) {
+                    this.error(err.toString());
                 }
             });
         } catch(err) {

@@ -244,52 +244,47 @@ module.exports = function(RED) {
                 access_token_secret: credentials.access_token_secret
             });
             node.on("input", function(msg) {
-                if (msg != null) {
-                    
-                    node.status({fill:"blue",shape:"dot",text:"tweeting"});
-                    
-                    if (msg.payload.length > 140) {
-                        msg.payload = msg.payload.slice(0,139);
-                        node.warn("Tweet greater than 140 : truncated");
-                    }
-                    
-                    if (msg.media && Buffer.isBuffer(msg.media)) {
-                        var apiUrl = "https://api.twitter.com/1.1/statuses/update_with_media.json";
-                        var signedUrl = oa.signUrl(apiUrl,
-                            credentials.access_token,
-                            credentials.access_token_secret,
-                            "POST");
-                        
-                        var r = request.post(signedUrl,function(err,httpResponse,body) {
-                            if (err) {
-                                node.error(err.toString());
+                node.status({fill:"blue",shape:"dot",text:"tweeting"});
+
+                if (msg.payload.length > 140) {
+                    msg.payload = msg.payload.slice(0,139);
+                    node.warn("Tweet greater than 140 : truncated");
+                }
+
+                if (msg.media && Buffer.isBuffer(msg.media)) {
+                    var apiUrl = "https://api.twitter.com/1.1/statuses/update_with_media.json";
+                    var signedUrl = oa.signUrl(apiUrl,
+                        credentials.access_token,
+                        credentials.access_token_secret,
+                        "POST");
+
+                    var r = request.post(signedUrl,function(err,httpResponse,body) {
+                        if (err) {
+                            node.error(err.toString());
+                            node.status({fill:"red",shape:"ring",text:"failed"});
+                        } else {
+                            var response = JSON.parse(body);
+                            if (body.errors) {
+                                var errorList = body.errors.map(function(er) { return er.code+": "+er.message }).join(", ");
+                                node.error("tweet failed: "+errorList);
                                 node.status({fill:"red",shape:"ring",text:"failed"});
                             } else {
-                                var response = JSON.parse(body);
-                                if (body.errors) {
-                                    var errorList = body.errors.map(function(er) { return er.code+": "+er.message }).join(", ");
-                                    node.error("tweet failed: "+errorList);
-                                    node.status({fill:"red",shape:"ring",text:"failed"});
-                                } else {
-                                    node.status({});
-                                }
+                                node.status({});
                             }
-                        });
-                        var form = r.form();
-                        form.append("status",msg.payload);
-                        form.append("media[]",msg.media,{filename:"image"});
-                        
-                        
-                        
-                    } else {
-                        twit.updateStatus(msg.payload, function (err, data) {
-                            if (err) {
-                                node.status({fill:"red",shape:"ring",text:"failed"});
-                                node.error(err);
-                            }
-                            node.status({});
-                        });
-                    }
+                        }
+                    });
+                    var form = r.form();
+                    form.append("status",msg.payload);
+                    form.append("media[]",msg.media,{filename:"image"});
+
+                } else {
+                    twit.updateStatus(msg.payload, function (err, data) {
+                        if (err) {
+                            node.status({fill:"red",shape:"ring",text:"failed"});
+                            node.error(err);
+                        }
+                        node.status({});
+                    });
                 }
             });
         }
