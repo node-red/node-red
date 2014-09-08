@@ -122,6 +122,7 @@ RED.editor = (function() {
             width: 500,
             buttons: [
                 {
+                    id: "node-dialog-ok",
                     text: "Ok",
                     click: function() {
                         if (editing_node) {
@@ -237,6 +238,7 @@ RED.editor = (function() {
                     }
                 },
                 {
+                    id: "node-dialog-cancel",
                     text: "Cancel",
                     click: function() {
                         $( this ).dialog( "close" );
@@ -562,6 +564,7 @@ RED.editor = (function() {
             closeOnEscape: false,
             buttons: [
                 {
+                    id: "node-config-dialog-ok",
                     text: "Ok",
                     click: function() {
                         var configProperty = $(this).dialog('option','node-property');
@@ -611,6 +614,7 @@ RED.editor = (function() {
                     }
                 },
                 {
+                    id: "node-config-dialog-cancel",
                     text: "Cancel",
                     click: function() {
                         var configType = $(this).dialog('option','node-type');
