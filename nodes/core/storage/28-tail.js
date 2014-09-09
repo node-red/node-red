@@ -16,7 +16,6 @@
 
 module.exports = function(RED) {
     "use strict";
-    var fs = require("fs");
     var spawn = require('child_process').spawn;
     var plat = require('os').platform();
 

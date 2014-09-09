@@ -112,8 +112,10 @@ module.exports = {
     // can be accessed in a function block as:
     //    context.global.os
 
-    functionGlobalContext: { }
-    //functionGlobalContext: { bonescript:require('bonescript') }
-    //functionGlobalContext: { arduino:require('duino') }
+    functionGlobalContext: {
+        // os:require('os'),
+        // bonescript:require('bonescript'),
+        // arduino:require('duino')
+    }
 
 }

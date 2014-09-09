@@ -82,7 +82,7 @@ module.exports = function(RED) {
             } else if (this.method == "put") {
                 RED.httpNode.put(this.url,corsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "delete") {
-                RED.httpNode.delete(this.url,corsHandler,this.callback,errorHandler);
+                RED.httpNode.delete(this.url,corsHandler,this.callback,this.errorHandler);
             }
 
             this.on("close",function() {

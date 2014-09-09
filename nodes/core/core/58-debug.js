@@ -16,7 +16,6 @@
 
 module.exports = function(RED) {
     var util = require("util");
-    var ws = require("ws");
     var events = require("events");
     var debuglength = RED.settings.debugMaxLength||1000;
     var useColors = false;

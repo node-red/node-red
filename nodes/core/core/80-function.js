@@ -18,48 +18,55 @@ module.exports = function(RED) {
     "use strict";
     var util = require("util");
     var vm = require("vm");
-    var fs = require('fs');
-    var fspath = require('path');
 
     function FunctionNode(n) {
         RED.nodes.createNode(this,n);
         this.name = n.name;
         this.func = n.func;
-        var functionText = "var results = (function(msg){"+this.func+"\n})(msg);";
+        var functionText = "var results = null; results = (function(msg){"+this.func+"\n})(msg);";
         this.topic = n.topic;
-        this.context = {global:RED.settings.functionGlobalContext || {}};
+        var sandbox = {
+            console:console,
+            util:util,
+            Buffer:Buffer,
+            context: {
+                global:RED.settings.functionGlobalContext || {}
+            }
+        };
+        var context = vm.createContext(sandbox);
         try {
             this.script = vm.createScript(functionText);
             this.on("input", function(msg) {
-                if (msg != null) {
-                    var sandbox = {msg:msg,console:console,util:util,Buffer:Buffer,context:this.context};
-                    try {
-                        this.script.runInNewContext(sandbox);
-                        var results = sandbox.results;
-
-                        if (results == null) {
-                            results = [];
-                        } else if (results.length == null) {
-                            results = [results];
-                        }
-                        if (msg._topic) {
-                            for (var m in results) {
-                                if (results[m]) {
-                                    if (util.isArray(results[m])) {
-                                        for (var n=0; n < results[m].length; n++) {
-                                            results[m][n]._topic = msg._topic;
-                                        }
-                                    } else {
-                                        results[m]._topic = msg._topic;
+                try {
+                    var start = process.hrtime();
+                    context.msg = msg;
+                    this.script.runInContext(context);
+                    var results = context.results;
+                    if (results == null) {
+                        results = [];
+                    } else if (results.length == null) {
+                        results = [results];
+                    }
+                    if (msg._topic) {
+                        for (var m in results) {
+                            if (results[m]) {
+                                if (util.isArray(results[m])) {
+                                    for (var n=0; n < results[m].length; n++) {
+                                        results[m][n]._topic = msg._topic;
                                     }
+                                } else {
+                                    results[m]._topic = msg._topic;
                                 }
                             }
                         }
-                        this.send(results);
-
-                    } catch(err) {
-                        this.error(err.toString());
                     }
+                    this.send(results);
+                    var duration = process.hrtime(start);
+                    if (process.env.NODE_RED_FUNCTION_TIME) {
+                        this.status({fill:"yellow",shape:"dot",text:""+Math.floor((duration[0]* 1e9 +  duration[1])/10000)/100});
+                    }
+                } catch(err) {
+                    this.error(err.toString());
                 }
             });
         } catch(err) {

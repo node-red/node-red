@@ -20,9 +20,9 @@ RED.palette = (function() {
     var core = ['input', 'output', 'function', 'social', 'storage', 'analysis', 'advanced'];
     
     function createCategoryContainer(category){
-
+        var escapedCategory = category.replace(" ","_");
         $("#palette-container").append('<div class="palette-category">'+
-            '<div id="header-'+category+'" class="palette-header"><i class="expanded fa fa-caret-down"></i><span>'+category+'</span></div>'+
+            '<div id="header-'+category+'" class="palette-header"><i class="expanded fa fa-caret-down"></i><span>'+category.replace("_"," ")+'</span></div>'+
             '<div class="palette-content" id="palette-base-category-'+category+'">'+
             '<div id="palette-'+category+'-input"></div>'+
             '<div id="palette-'+category+'-output"></div>'+
@@ -41,76 +41,77 @@ RED.palette = (function() {
         }
         
         if (exclusion.indexOf(def.category)===-1) {
-          
-          var category = def.category.split("-");
-          
-          var d = document.createElement("div");
-          d.id = "palette_node_"+nt;
-          d.type = nt;
-          
-          var label = /^(.*?)([ -]in|[ -]out)?$/.exec(nt)[1];
-          
-          d.innerHTML = '<div class="palette_label">'+label+"</div>";
-          d.className="palette_node";
-          if (def.icon) {
-              d.style.backgroundImage = "url(icons/"+def.icon+")";
-              if (def.align == "right") {
-                  d.style.backgroundPosition = "95% 50%";
-              } else if (def.inputs > 0) {
-                  d.style.backgroundPosition = "10% 50%";
-              }
-          }
-          
-          d.style.backgroundColor = def.color;
-          
-          if (def.outputs > 0) {
-              var portOut = document.createElement("div");
-              portOut.className = "palette_port palette_port_output";
-              d.appendChild(portOut);
-          }
-          
-          if (def.inputs > 0) {
-              var portIn = document.createElement("div");
-              portIn.className = "palette_port";
-              d.appendChild(portIn);
-          }
-          
-          if ($("#palette-base-category-"+category[0]).length === 0){
-              createCategoryContainer(category[0]);
-          }
-          
-          if ($("#palette-"+def.category).length === 0) {          
-              $("#palette-base-category-"+category[0]).append('<div id="palette-'+def.category+'"></div>');            
-          }
-          
-          $("#palette-"+def.category).append(d);
-          d.onmousedown = function(e) { e.preventDefault(); }
-          
-          $(d).popover({
-                  title:d.type,
-                  placement:"right",
-                  trigger: "hover",
-                  delay: { show: 750, hide: 50 },
-                  html: true,
-                  container:'body',
-                  content: $(($("script[data-help-name|='"+nt+"']").html()||"<p>no information available</p>").trim())[0] 
-          });
-          $(d).click(function() {
-                  var help = '<div class="node-help">'+($("script[data-help-name|='"+d.type+"']").html()||"")+"</div>";
-                  $("#tab-info").html(help);
-          });
-          $(d).draggable({
-              helper: 'clone',
-              appendTo: 'body',
-              revert: true,
-              revertDuration: 50
-          });
-         
-          $("#header-"+category[0]).off('click').on('click', function(e) {
-              $(this).next().slideToggle();
-              $(this).children("i").toggleClass("expanded");
-          });
-
+            
+            var category = def.category.replace(" ","_");
+            var rootCategory = category.split("-")[0];
+            
+            var d = document.createElement("div");
+            d.id = "palette_node_"+nt;
+            d.type = nt;
+            
+            var label = /^(.*?)([ -]in|[ -]out)?$/.exec(nt)[1];
+            
+            d.innerHTML = '<div class="palette_label">'+label+"</div>";
+            d.className="palette_node";
+            if (def.icon) {
+                d.style.backgroundImage = "url(icons/"+def.icon+")";
+                if (def.align == "right") {
+                    d.style.backgroundPosition = "95% 50%";
+                } else if (def.inputs > 0) {
+                    d.style.backgroundPosition = "10% 50%";
+                }
+            }
+            
+            d.style.backgroundColor = def.color;
+            
+            if (def.outputs > 0) {
+                var portOut = document.createElement("div");
+                portOut.className = "palette_port palette_port_output";
+                d.appendChild(portOut);
+            }
+            
+            if (def.inputs > 0) {
+                var portIn = document.createElement("div");
+                portIn.className = "palette_port";
+                d.appendChild(portIn);
+            }
+            
+            if ($("#palette-base-category-"+rootCategory).length === 0) {
+                createCategoryContainer(rootCategory);
+            }
+            
+            if ($("#palette-"+category).length === 0) {          
+                $("#palette-base-category-"+rootCategory).append('<div id="palette-'+category+'"></div>');            
+            }
+            
+            $("#palette-"+category).append(d);
+            d.onmousedown = function(e) { e.preventDefault(); }
+            
+            $(d).popover({
+                title:d.type,
+                placement:"right",
+                trigger: "hover",
+                delay: { show: 750, hide: 50 },
+                html: true,
+                container:'body',
+                content: $(($("script[data-help-name|='"+nt+"']").html()||"<p>no information available</p>").trim())[0] 
+            });
+            $(d).click(function() {
+                var help = '<div class="node-help">'+($("script[data-help-name|='"+d.type+"']").html()||"")+"</div>";
+                $("#tab-info").html(help);
+            });
+            $(d).draggable({
+                helper: 'clone',
+                appendTo: 'body',
+                revert: true,
+                revertDuration: 50
+            });
+            
+            $("#header-"+category[0]).off('click').on('click', function(e) {
+                $(this).next().slideToggle();
+                $(this).children("i").toggleClass("expanded");
+            });
+            
         }
     }
     

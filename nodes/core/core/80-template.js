@@ -17,7 +17,6 @@
 module.exports = function(RED) {
     "use strict";
     var mustache = require("mustache");
-    var fs = require('fs');
 
     function TemplateNode(n) {
         RED.nodes.createNode(this,n);
@@ -47,14 +46,12 @@ module.exports = function(RED) {
         }
 
         node.on("input", function(msg) {
-            if (msg != null) {
-                try {
-                    m = msg;
-                    i = 0;
-                    rec(msg);
-                } catch(err) {
-                    node.error(err.message);
-                }
+            try {
+                m = msg;
+                i = 0;
+                rec(msg);
+            } catch(err) {
+                node.error(err.message);
             }
         });
     }
