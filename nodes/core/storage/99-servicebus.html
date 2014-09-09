@@ -1,0 +1,275 @@
+<!--
+  Copyright 2014 Paolo Patierno
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="sb queue out">
+	<div class="form-row">
+        <label for="node-input-endpoint"><i class="icon-tasks"></i> Endpoint</label>
+        <input type="text" id="node-input-endpoint">
+    </div>
+	<div class="form-row">
+        <label for="node-input-queueName"><i class="icon-tag"></i> Queue Name</label>
+        <input type="text" id="node-input-queueName" placeholder="queueName">
+    </div>
+	<div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-queueCreate" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-queueCreate" style="width: 70%;">Create if not exsists ?</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="sb queue out">
+    <p>Azure Service Bus node for sending message to a queue</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType("sb queue out", {
+		category: "output",
+		color: "#007fff",
+		defaults: {
+            endpoint: {type: "sb-endpoint", required:true},
+            queueName: {value: "", required: true},
+			queueCreate: {value: false},
+			name: {value: ""}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "bridge.png",
+		label: function() {
+            return this.name||this.queueName||"sb queue out";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+		align: "right"
+	});
+</script>
+
+<script type="text/x-red" data-template-name="sb queue in">
+	<div class="form-row">
+        <label for="node-input-endpoint"><i class="icon-tasks"></i> Endpoint</label>
+        <input type="text" id="node-input-endpoint">
+    </div>
+	<div class="form-row">
+        <label for="node-input-queueName"><i class="icon-tag"></i> Queue Name</label>
+        <input type="text" id="node-input-queueName" placeholder="queueName">
+    </div>
+	<div class="form-row">
+        <label for="node-input-timeout"><i class="icon-tag"></i> Timeout</label>
+        <input type="text" id="node-input-timeout" placeholder="timeout">
+    </div>
+	<div class="form-row">
+		<label for="node-input-isPeekLock"><i class="icon-list"></i> Receive Mode</label>
+		<select type="text" id="node-input-isPeekLock" style="display: inline-block; width: 250px; vertical-align: top;">
+            <option value=false>Receive and Delete</option>
+			<option value=true>Peek Lock</option>
+        </select>
+	</div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="sb queue in">
+    <p>Azure Service Bus node for receiving message from a queue</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType("sb queue in", {
+		category: "input",
+		color: "#007fff",
+		defaults: {
+            endpoint: {type: "sb-endpoint", required:true},
+            queueName: {value: "", required: true},
+			timeout: { value: 60, required: true, validate: RED.validators.number() },
+			isPeekLock: { value: false },
+			name: {value: ""}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "bridge.png",
+		label: function() {
+            return this.name||this.queueName||"sb queue in";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+	});
+</script>
+
+<script type="text/x-red" data-template-name="sb topic">
+	<div class="form-row">
+        <label for="node-input-endpoint"><i class="icon-tasks"></i> Endpoint</label>
+        <input type="text" id="node-input-endpoint">
+    </div>
+	<div class="form-row">
+        <label for="node-input-topicName"><i class="icon-tag"></i> Topic Name</label>
+        <input type="text" id="node-input-topicName" placeholder="topicName">
+    </div>
+	<div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-topicCreate" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-topicCreate" style="width: 70%;">Create if not exsists ?</label>
+    </div>
+	<div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="sb topic">
+    <p>Azure Service Bus node for sending message to a topic</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType("sb topic", {
+		category: "output",
+		color: "#007fff",
+		defaults: {
+            endpoint: {type: "sb-endpoint", required:true},
+            topicName: {value: "", required: true},
+			topicCreate: {value: false },
+			name: {value: ""}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "bridge.png",
+		label: function() {
+            return this.name||this.topicName||"sb topic";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+		align: "right"
+	});
+</script>
+
+<script type="text/x-red" data-template-name="sb subscription">
+	<div class="form-row">
+        <label for="node-input-endpoint"><i class="icon-tasks"></i> Endpoint</label>
+        <input type="text" id="node-input-endpoint">
+    </div>
+	<div class="form-row">
+        <label for="node-input-topicName"><i class="icon-tag"></i> Topic Name</label>
+        <input type="text" id="node-input-topicName" placeholder="topicName">
+    </div>
+	<div class="form-row">
+        <label for="node-input-subscriptionName"><i class="icon-tag"></i> Subscription Name</label>
+        <input type="text" id="node-input-subscriptionName" placeholder="subscriptionName">
+    </div>
+	<div class="form-row">
+        <label for="node-input-timeout"><i class="icon-tag"></i> Timeout</label>
+        <input type="text" id="node-input-timeout" placeholder="timeout">
+    </div>
+	<div class="form-row">
+		<label for="node-input-isPeekLock"><i class="icon-list"></i> Receive Mode</label>
+		<select type="text" id="node-input-isPeekLock" style="display: inline-block; width: 250px; vertical-align: top;">
+            <option value=false>Receive and Delete</option>
+			<option value=true>Peek Lock</option>
+        </select>
+	</div>
+	<div class="form-row">
+		<label for="node-input-filterType"><i class="icon-list"></i> Filter</label>
+		<select type="text" id="node-input-filterType" style="display: inline-block; width: 250px; vertical-align: top;">
+			<option value="trueFilter">None</option>
+			<option value="falseFilter">Disabled</option>
+			<option value="sqlExpressionFilter">SQL</option>
+			<option value="correlationIdFilter">CorrelationId</option>
+		</select>
+	</div>
+	<div class="form-row hidden" id="filter-expression-row">
+		<label for="node-input-filterExpression"><i class="icon-tag"></i> Expression</label>
+        <input type="text" id="node-input-filterExpression" placeholder="filterExpression">
+	</div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="name">
+    </div>
+	
+	<script>
+	{
+		// change event on subscription filter type
+		$("#node-input-filterType").change(function() {
+			// get filter type
+			var filterType = $("#node-input-filterType option:selected").val();
+			
+			// show filter expression for SQL and CorrelationId filters
+			if ((filterType == "sqlExpressionFilter") || (filterType == "correlationIdFilter"))
+				$("#filter-expression-row").show();
+			else
+				$("#filter-expression-row").hide();
+		});
+	}
+	</script>
+</script>
+
+<script type="text/x-red" data-help-name="sb subscription">
+    <p>Azure Service Bus node for receiving message from a subscription</p>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType("sb subscription", {
+		category: "input",
+		color: "#007fff",
+		defaults: {
+            endpoint: {type: "sb-endpoint", required:true},
+            topicName: {value: "", required: true},
+			subscriptionName: {value: "", required: true},
+			timeout: { value: 60, required: true, validate: RED.validators.number() },
+			isPeekLock: { value: false },
+			filterType: { value: "None" },
+			filterExpression: { value: ""},
+			name: {value: ""}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "bridge.png",
+		label: function() {
+            return this.name||(this.topicName + "/" + this.subscriptionName)||"sb subscription";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+	});
+</script>
+
+<script type="text/x-red" data-template-name="sb-endpoint">
+	<div class="form-row">
+        <label for="node-config-input-connString"><i class="icon-tasks"></i> Connection String</label>
+        <input type="text" id="node-config-input-connString" placeholder="connString">
+    </div>
+	<div class="form-row">
+        <label for="node-config-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" placeholder="name">
+    </div>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('sb-endpoint', {
+		category: 'config',
+		defaults: {
+            connString: {value: "", required: true},
+        	name: {value:""}
+        },
+        label: function() {
+            return this.name||"servicebus";
+        }
+	});
+</script>

@@ -38,6 +38,7 @@
         "irc":"0.3.6",
         "follow-redirects":"0.0.3",
         "cors":"2.2.0",
+        "badwords":"0.0.3",
         "mkdirp":"0.3.5",
         "cheerio":"0.15.0",
         "uglify-js":"2.4.13",
