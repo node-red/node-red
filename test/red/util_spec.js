@@ -37,5 +37,34 @@ describe("red/util", function() {
             s.should.equal('123');
         });
     });
+
+    describe('ensureBuffer', function() {
+        it('Buffers are preserved', function() {
+            var b = new Buffer('');
+            util.ensureBuffer(b).should.equal(b);
+        });
+        it('string is converted', function() {
+            var b = util.ensureBuffer('foo');
+            var expected = new Buffer('foo');
+            for (var i = 0; i < expected.length; i++) {
+                b[i].should.equal(expected[i]);
+            }
+            Buffer.isBuffer(b).should.equal(true);
+        });
+        it('Object is converted to JSON', function() {
+            var obj = {foo: "bar"}
+            var b = util.ensureBuffer(obj);
+            Buffer.isBuffer(b).should.equal(true);
+            should.deepEqual(JSON.parse(b), obj);
+        });
+        it('stringifies other things', function() {
+            var b = util.ensureBuffer(123);
+            Buffer.isBuffer(b).should.equal(true);
+            var expected = new Buffer('123');
+            for (var i = 0; i < expected.length; i++) {
+                b[i].should.equal(expected[i]);
+            }
+        });
+    });
 });
 
