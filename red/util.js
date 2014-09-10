@@ -25,7 +25,19 @@ function ensureString(o) {
     return ""+o;
 }
 
+function ensureBuffer(o) {
+    if (Buffer.isBuffer(o)) {
+        return o;
+    } else if (typeof o === "object") {
+        o = JSON.stringify(o);
+    } else if (typeof o !== "string") {
+        o = ""+o;
+    }
+    return new Buffer(o);
+}
+
 module.exports = {
     ensureString: ensureString,
+    ensureBuffer: ensureBuffer,
 };
 
