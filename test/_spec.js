@@ -26,54 +26,68 @@
 
 var fs = require("fs");
 var should = require("should");
+var path = require('path');
 
-var core = "/../red";
+// Directories to check with .js files and _spec.js files respectively
+var jsdir = path.resolve(__dirname, "../red");
+var testdir = path.resolve(__dirname, "red");
 
-/*
- * Walk directory and find all .js files. Then check if a corresponding
- * ./test/*_spec.js file exists.
- */
-function walkDirectory(directory, done) {
-    fs.readdir(directory, function(err, list) {
+var fs = require('fs');
+var walkDirectory = function(dir, topdir, done) {
+    fs.readdir(dir, function(err, list) {
+        var error;
+        var errReturned = false;
         if (err) {
             return done(err);
         }
+
         var i = 0;
-        function nextEntry() {
+        (function next() {
             var file = list[i++];
+
+            // return error if there are no more files to check and error has not been previously returned to avoid multiple calls to done()
             if (!file) {
-                return;
+                if (!errReturned) {
+                    errReturned = true;
+                    return done(error);
+                }
             }
-            file = directory + '/' + file;
+
+            file = path.resolve(dir, file);
             fs.stat(file, function(err, stat) {
                 if (stat && stat.isDirectory()) {
-                    walkDirectory(file, function(err, res) {
-                        nextEntry();
+                    walkDirectory(file, false, function(err) {
+                        if (!error) {
+                            error = err;
+                        }
+                        next();
                     });
                 } else {
-                    if (/\.js$/.test(file)) {
-                        file = file.replace("/../", "/");
-                        file = file.replace(".js", "_spec.js");
-                        fs.exists(file, function(exists) {
+                    if (path.extname(file) === ".js") {
+                        var testFile = file.replace(jsdir, testdir).replace(".js", "_spec.js");
+                        fs.exists(testFile, function (exists) {
                             try {
-                                exists.should.equal(true, file + " does not exist");   
+                                exists.should.equal(true, testFile + " does not exist");
                             } catch (err) {
-                                done(err);
+                                if (!topdir) {
+                                    return done(err);
+                                } else {
+                                    error = err;
+                                    return;
+                                }
                             }
                         });
                     }
-                    nextEntry();
+                    next();
                 }
             });
-        }
-        nextEntry();
+        })();
     });
-}
+};
 
 describe('_spec.js', function() {
     this.timeout(50000); // we might not finish within the Mocha default timeout limit, project will also grow
     it('is checking if all .js files have a corresponding _spec.js test file.', function(done) {
-        walkDirectory(__dirname + core, done);
-        done();
+        walkDirectory(jsdir, true, done);
     });
 });
