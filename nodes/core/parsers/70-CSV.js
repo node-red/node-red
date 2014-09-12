@@ -19,64 +19,131 @@ module.exports = function(RED) {
     function CSVNode(n) {
         RED.nodes.createNode(this,n);
         this.template = n.temp.split(",");
-        this.sep = n.sep || ',';
-        this.sep = this.sep.replace("\\n","\n").replace("\\r","\r").replace("\\t","\t");
+        this.sep = (n.sep || ',').replace("\\t","\t").replace("\\n","\n").replace("\\r","\r");
         this.quo = '"';
+        this.ret = (n.ret || "\n").replace("\\n","\n").replace("\\r","\r");
+        this.winflag = (this.ret === "\r\n");
+        this.lineend = "\n";
+        this.multi = n.multi || "one";
+        this.hdrin = n.hdrin || false;
+        this.hdrout = n.hdrout || false;
+        this.goodtmpl = true;
         var node = this;
 
-        for (var t = 0; t < node.template.length; t++) {
-            node.template[t] = node.template[t].trim(); // remove leading and trailing whitespace
-            if (node.template[t].charAt(0) === '"' && node.template[t].charAt(node.template[t].length -1) === '"') {
-                // remove leading and trialing quotes (if they exist) - and remove whitepace again.
-                node.template[t] = node.template[t].substr(1,node.template[t].length -2).trim();
+        // pass in an array of column names to be trimed, de-quoted and retrimed
+        var clean = function(col) {
+            for (var t = 0; t < col.length; t++) {
+                col[t] = col[t].trim(); // remove leading and trailing whitespace
+                if (col[t].charAt(0) === '"' && col[t].charAt(col[t].length -1) === '"') {
+                    // remove leading and trailing quotes (if they exist) - and remove whitepace again.
+                    col[t] = col[t].substr(1,col[t].length -2).trim();
+                }
             }
+            if ((col.length === 1) && (col[0] === "")) { node.goodtmpl = false; }
+            else { node.goodtmpl = true; }
+            return col;
         }
+        node.template = clean(node.template);
 
         this.on("input", function(msg) {
             if (msg.hasOwnProperty("payload")) {
-                if (typeof msg.payload == "object") { // convert to csv
+                if (typeof msg.payload == "object") { // convert object to CSV string
                     try {
                         var ou = "";
-                        for (var t in node.template) {
-                            if (msg.payload.hasOwnProperty(node.template[t])) {
-                                if (msg.payload[node.template[t]].indexOf(node.sep) != -1) {
-                                    ou += node.quo + msg.payload[node.template[t]] + node.quo + node.sep;
-                                }
-                                else if (msg.payload[node.template[t]].indexOf(node.quo) != -1) {
-                                    msg.payload[node.template[t]] = msg.payload[node.template[t]].replace(/"/g, '""');
-                                    ou += node.quo + msg.payload[node.template[t]] + node.quo + node.sep;
-                                }
-                                else { ou += msg.payload[node.template[t]] + node.sep; }
-                            }
+                        if (node.hdrout) {
+                            ou += node.template.join(node.sep) + node.ret;
                         }
-                        msg.payload = ou.slice(0,-1);
-                        node.send(msg);
+                        if (!Array.isArray(msg.payload)) { msg.payload = [ msg.payload ]; }
+                        for (var s = 0; s < msg.payload.length; s++) {
+                            for (var t=0; t < node.template.length; t++) {
+
+                                // aaargh - resorting to eval here - but fairly contained front and back.
+                                var p = RED.util.ensureString(eval("msg.payload[s]."+node.template[t]));
+
+                                if (p === "undefined") { p = ""; }
+                                if (p.indexOf(node.sep) != -1) { // add quotes if any "commas"
+                                    ou += node.quo + p + node.quo + node.sep;
+                                }
+                                else if (p.indexOf(node.quo) != -1) { // add double quotes if any quotes
+                                    p = p.replace(/"/g, '""');
+                                    ou += node.quo + p + node.quo + node.sep;
+                                }
+                                else { ou += p + node.sep; } // otherwise just add
+                            }
+                            ou = ou.slice(0,-1) + node.ret; // remove final "comma" and add "newline"
+                        }
+                        node.send({payload:ou});
                     }
                     catch(e) { node.log(e); }
                 }
-                else if (typeof msg.payload == "string") { // convert to object
+                else if (typeof msg.payload == "string") { // convert CSV string to object
                     try {
-                        var f = true;
-                        var j = 0;
-                        var k = [""];
-                        var o = {};
+                        var f = true; // flag to indicate if inside or outside a pair of quotes true = outside.
+                        var j = 0; // pointer into array of template items
+                        var k = [""]; // array of data for each of the template items
+                        var o = {}; // output object to build up
+                        var a = []; // output array is needed for multiline option
+                        var first = true; // is this the first line
+                        var tmp = "";
+
+                        // For now we are just going to assume that any r or /n means an end of line...
+                        //   got to be a weird csv that has singleton \r \n in it for another reason...
+
+                        // Now process the whole file/line
                         for (var i = 0; i < msg.payload.length; i++) {
-                            if (msg.payload[i] === node.quo) {
-                                f = !f;
-                                if (msg.payload[i-1] === node.quo) { k[j] += '\"'; }
-                            }
-                            else if ((msg.payload[i] === node.sep) && f) {
-                                if ( node.template[j] && (node.template[j] !== "") ) { o[node.template[j]] = k[j]; }
-                                j += 1;
-                                k[j] = "";
+                            if ((node.hdrin === true) && first) { // if the template is in the first line
+                                if ((msg.payload[i] === "\n")||(msg.payload[i] === "\r")) { // look for first line break
+                                    node.template = clean(tmp.split(node.sep));
+                                    first = false;
+                                }
+                                else { tmp += msg.payload[i]; }
                             }
                             else {
-                                k[j] += msg.payload[i];
+                                if (msg.payload[i] === node.quo) { // if it's a quote toggle inside or outside
+                                    f = !f;
+                                    if (msg.payload[i-1] === node.quo) { k[j] += '\"'; } // if it's a quotequote then it's actually a quote
+                                }
+                                else if ((msg.payload[i] === node.sep) && f) { // if we are outside of quote (ie valid separator
+                                    if (!node.goodtmpl) { node.template[j] = "col"+(j+1); }
+                                    if ( node.template[j] && (node.template[j] !== "") && (k[j] !== "" ) ) {
+                                        if (!isNaN(Number(k[j]))) { k[j] = Number(k[j]); }
+                                        o[node.template[j]] = k[j];
+                                    }
+                                    j += 1;
+                                    k[j] = "";
+                                }
+                                else if (f && ((msg.payload[i] === "\n") || (msg.payload[i] === "\r"))) { // handle multiple lines
+                                    //console.log(j,k,o,k[j]);
+                                    if ( node.template[j] && (node.template[j] !== "") && (k[j] !== "") ) {
+                                        if (!isNaN(Number(k[j]))) { k[j] = Number(k[j]); }
+                                        o[node.template[j]] = k[j].replace(/\r$/,'');
+                                    }
+                                    if (JSON.stringify(o) !== "{}") { // don't send empty objects
+                                        if (node.multi === "one") { node.send({payload:o}); } // either send
+                                        else { a.push(o); } // or add to the array
+                                    }
+                                    j = 0;
+                                    k = [""];
+                                    o = {};
+                                }
+                                else { // just add to the part of the message
+                                    k[j] += msg.payload[i];
+                                }
                             }
                         }
-                        if ( node.template[j] && (node.template[j] !== "") ) { o[node.template[j]] = k[j]; }
+                        // Finished so finalize and send anything left
+                        //console.log(j,k,o,k[j]);
+                        if (!node.goodtmpl) { node.template[j] = "col"+(j+1); }
+                        if ( node.template[j] && (node.template[j] !== "") && (k[j] !== "") ) {
+                            if (!isNaN(Number(k[j]))) { k[j] = Number(k[j]); }
+                            o[node.template[j]] = k[j].replace(/\r$/,'');
+                        }
                         msg.payload = o;
-                        node.send(msg);
+                        if (JSON.stringify(o) !== "{}") { // don't send empty objects
+                            if (node.multi === "one") { node.send({payload:o}); } // either send
+                            else { a.push(o); } // or add to the aray
+                        }
+                        if (node.multi !== "one") { node.send({payload:a}); } // finally send the array
                     }
                     catch(e) { node.log(e); }
                 }

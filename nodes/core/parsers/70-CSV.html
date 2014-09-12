@@ -1,3 +1,4 @@
+
 <!--
   Copyright 2014 IBM Corp.
 
@@ -17,29 +18,60 @@
 <script type="text/x-red" data-template-name="csv">
     <div class="form-row">
         <label for="node-input-temp"><i class="fa fa-list"></i> Columns</label>
-        <input type="text" id="node-input-temp" placeholder="A,B,C,D">
+        <input type="text" id="node-input-temp" placeholder="comma-separated column names">
     </div>
     <div class="form-row">
-        <label for="node-input-sep"><i class="fa fa-chevron-right"></i> Separator</label>
-        <input type="text" id="node-input-sep" placeholder=','>
+        <label for="node-input-select-sep"><i class="fa fa-text-width"></i> Separator</label>
+            <select style="width: 150px" id="node-input-select-sep">
+                <option value=",">comma</option>
+                <option value="\t">tab</option>
+                <option value=" ">space</option>
+                <option value=";">semicolon</option>
+                <option value=":">colon</option>
+                <option value="">other...</option>
+           </select>
+           <input style="width: 40px;" type="text" id="node-input-sep" pattern=".">
     </div>
-    <!-- <div class="form-row">
-        <label for="node-input-quo"><i class="fa fa-tag"></i> Escape</label>
-        <input type="text" id="node-input-quo" placeholder='"'>
-    </div> -->
-    <br/>
+
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div id="node-input-tip" class="form-tips">Tip: you can use "\t" for tab separator.</div>
+    <hr align="middle"/>
+    <div class="form-row">
+        <label style="width: 100%;"><i class="fa fa-gears"></i> CSV-to-Object options</label>
+        <label style="margin-left: 10px; margin-right: -10px;"><i class="fa fa-sign-in"></i> Input</label>
+        <input style="width: 30px" type="checkbox" id="node-input-hdrin"><label style="width: auto;" for="node-input-hdrin">first row contains column names</span>
+    </div>
+    <div class="form-row">
+        <label style="margin-left: 10px; margin-right: -10px;"><i class="fa fa-sign-out"></i> Output</label>
+        <select type="text" id="node-input-multi" style="width: 250px;">
+            <option value="one">a message per row</option>
+            <option value="mult">a single message [array]</option>
+        </select>
+    </div>
+    <hr align="middle"/>
+    <div class="form-row">
+        <label style="width: 100%;"><i class="fa fa-gears"></i> Object-to-CSV options</label>
+        <label style="margin-left: 10px; margin-right: -10px;"><i class="fa fa-sign-in"></i> Output</label>
+        <input style="width: 30px" type="checkbox" id="node-input-hdrout"><label style="width: auto;" for="node-input-hdrout">include column name row</span>
+    </div>
+    <div class="form-row">
+        <label style="margin-left: 10px; margin-right: -10px;"><i class="fa fa-align-left"></i> Newline</label>
+        <select style="width: 150px" id="node-input-ret">
+            <option value='\n'>Linux (\n)</option>
+            <option value='\r'>Mac (\r)</option>
+            <option value='\r\n'>Windows (\r\n)</option>
+       </select>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="csv">
-    <p>A function that parses the <b>msg.payload</b> to convert csv to/from a javascript object. Places the result in the payload.</p>
+    <p>A function that parses the <b>msg.payload</b> to convert csv to/from a javascript object.
+    Places the result in the payload.</p>
     <p>If the input is a string it tries to parse it as CSV and creates a javascript object.</p>
     <p>If the input is a javascript object it tries to build a CSV string.</p>
-    <p>A columns template MUST be specified that contains the ordered list of column headers. For csv input these become the property names.
+    <p>The columns template should contain an ordered list of column headers. For csv input these become the property names.
     For csv output these specify the properties to extract from the object and the order for the csv.</p>
     <p><b>Note:</b> the columns should always be specified comma separated - even if another separator is chosen for the data.</p>
     </script>
@@ -50,9 +82,13 @@
         color:"#DEBD5C",
         defaults: {
             name: {value:""},
-            sep: {value:',',required:true},
+            sep: {value:',',required:true,validate:RED.validators.regex(/^.{1,2}$/)},
             //quo: {value:'"',required:true},
-            temp: {value:"",required:true}
+            hdrin: {value:""},
+            hdrout: {value:""},
+            multi: {value:"one",required:true},
+            ret: {value:'\\n'},
+            temp: {value:""}
         },
         inputs:1,
         outputs:1,
@@ -62,6 +98,26 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            if (this.sep == "," || this.sep == "\\t" || this.sep == ";" || this.sep == ":" || this.sep == " ") {
+                $("#node-input-select-sep").val(this.sep);
+                $("#node-input-sep").hide();
+            } else {
+                $("#node-input-select-sep").val("");
+                $("#node-input-sep").val(this.sep);
+                $("#node-input-sep").show();
+            }
+            $("#node-input-select-sep").change(function() {
+                var v = $("#node-input-select-sep option:selected").val();
+                $("#node-input-sep").val(v);
+                if (v == "") {
+                    $("#node-input-sep").val("");
+                    $("#node-input-sep").show().focus();
+                } else {
+                    $("#node-input-sep").hide();
+                }
+            });
         }
     });
 </script>
