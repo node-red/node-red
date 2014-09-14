@@ -136,10 +136,10 @@
         outputs:1,
         icon: "inject.png",
         label: function() {
-            if (this.payloadType == "string") {
+            if (this.payloadType === "string") {
                 return this.name||this.topic||this.payload||"inject";
             }
-            else { return this.name||"inject"; }
+            else { return this.name||this.topic||"inject"; }
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -158,7 +158,7 @@
                     $("#node-input-once").prop('checked', false);
                 }
             });
-          
+
             var days = [
                 {v:"*",t:"every day"},
                 {v:"1-5",t:"Mondays to Fridays"},
@@ -171,31 +171,31 @@
                 {v:"6",t:"Saturdays"},
                 {v:"0",t:"Sundays"}
             ];
-            
+
             $(".inject-time-days").each(function() {
                 for (var d in days) {
                     $(this).append($("<option></option>").val(days[d].v).text(days[d].t));
                 }
             });
-          
+
             $(".inject-time-times").each(function() {
                 for (var i=0;i<24;i++) {
                     var l = (i<10?"0":"")+i+":00";
                     $(this).append($("<option></option>").val(i).text(l));
                 }
             });
-    
+
             $(".inject-time-count").spinner({
                 //max:60,
                 min:1
             });
-          
+
             $("#inject-time-interval-units").change(function() {
                 var units = $("#inject-time-interval-units option:selected").val();
                 //$("#inject-time-interval-days").prop("disabled",(units == "s")?"disabled":false);
                 //$(".inject-time-count").spinner("option","max",(units == "h")?24:60);
             });
-            
+
             $.widget( "ui.injecttimespinner", $.ui.spinner, {
                 options: {
                     // seconds
@@ -222,11 +222,11 @@
                     return ((h < 10)?"0":"")+h+":"+((m < 10)?"0":"")+m;
                 }
             });
-          
+
             $("#inject-time-time").injecttimespinner();
-        
-        
-        
+
+
+
             var repeattype = "none";
             if (this.repeat != "" && this.repeat != 0) {
                 repeattype = "interval";
@@ -399,6 +399,8 @@
         button: {
             onclick: function() {
                 var label = (this.name||this.payload).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+				if (this.payloadType === "date") { label = "timestamp"; }
+				if (this.payloadType === "none") { label = "blank"; }
                 d3.xhr("inject/"+this.id).post(function(err,resp) {
                         if (err) {
                             if (err.status == 404) {
