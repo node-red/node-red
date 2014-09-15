@@ -60,6 +60,7 @@
             <option value="15">15</option>
             <option value="20">20</option>
             <option value="30">30</option>
+            <option value="0">60</option>
         </select> minutes<br/>
         between <select id="inject-time-interval-time-start" class="inject-time-times"></select>
         and <select id="inject-time-interval-time-end" class="inject-time-times"></select><br/>
@@ -225,8 +226,6 @@
 
             $("#inject-time-time").injecttimespinner();
 
-
-
             var repeattype = "none";
             if (this.repeat != "" && this.repeat != 0) {
                 repeattype = "interval";
@@ -248,27 +247,29 @@
                     $("#inject-time-time").val(time);
                     $("#inject-time-type-select option").filter(function() {return $(this).val() == "s";}).attr('selected',true);
                     $("#inject-time-time-days option").filter(function() {return $(this).val() == days;}).attr('selected',true);
-
-                } else if (cronparts[0] == "0") {
-                    // interval - hours
-                    var hours = cronparts[1].slice(2);
-                    repeattype = "interval";
-                    $("#inject-time-interval-days").prop("disabled",false);
-                    $("#inject-time-interval-days option").filter(function() {return $(this).val() == days;}).attr('selected',true);
-                    $("#inject-time-interval-count").val(hours)
-                    $("#inject-time-interval-units option").filter(function() {return $(this).val() == "h";}).attr('selected',true);
-                } else if (cronparts[1] == "*") {
-                    // interval - minutes
-                    var minutes = cronparts[0].slice(2);
-                    repeattype = "interval";
-                    $("#inject-time-interval-days").prop("disabled",false);
-                    $("#inject-time-interval-days option").filter(function() {return $(this).val() == days;}).attr('selected',true);
-                    $("#inject-time-interval-count").val(minutes)
-                    $("#inject-time-interval-units option").filter(function() {return $(this).val() == "m";}).attr('selected',true);
-                } else {
+                }
+                //else if (cronparts[0] == "0") {
+                //    // interval - hours
+                //    var hours = cronparts[1].slice(2);
+                //    repeattype = "interval";
+                //    $("#inject-time-interval-days").prop("disabled",false);
+                //    $("#inject-time-interval-days option").filter(function() {return $(this).val() == days;}).attr('selected',true);
+                //    $("#inject-time-interval-count").val(hours)
+                //    $("#inject-time-interval-units option").filter(function() {return $(this).val() == "h";}).attr('selected',true);
+                //} else if (cronparts[1] == "*") {
+                //    // interval - minutes
+                //    var minutes = cronparts[0].slice(2);
+                //    repeattype = "interval";
+                //    $("#inject-time-interval-days").prop("disabled",false);
+                //    $("#inject-time-interval-days option").filter(function() {return $(this).val() == days;}).attr('selected',true);
+                //    $("#inject-time-interval-count").val(minutes)
+                //    $("#inject-time-interval-units option").filter(function() {return $(this).val() == "m";}).attr('selected',true);
+                //}
+                else {
                     repeattype = "interval-time";
                     // interval - time period
                     var minutes = cronparts[0].slice(2);
+                    if (minutes === "") { minutes = "0"; }
                     $("#inject-time-interval-time-units").val(minutes);
                     $("#inject-time-interval-time-days option").filter(function() {return $(this).val() == days;}).attr('selected',true);
                     var time = cronparts[1];
@@ -279,8 +280,14 @@
                         // 0 or 0-10
                         var hours = timeparts[0].split("-");
                         if (hours.length == 1) {
-                            start = hours[0];
-                            end = Number(hours[0])+1;
+                            if (hours[0] === "") {
+                                start = "0";
+                                end = "0";
+                            }
+                            else {
+                                start = hours[0];
+                                end = Number(hours[0])+1;
+                            }
                         } else {
                             start = hours[0];
                             end = (Number(hours[1])+1)%24;
@@ -356,7 +363,7 @@
                 var startTime = Number($("#inject-time-interval-time-start option:selected").val());
                 var endTime = Number($("#inject-time-interval-time-end option:selected").val());
                 var days = $("#inject-time-interval-time-days option:selected").val();
-                var timerange = "";
+                var timerange = "*";
                 if (startTime == endTime) {
                     //TODO: invalid
                     repeat = "";
@@ -383,7 +390,12 @@
                     timerange = startpart+","+endpart;
                 }
                 repeat = "";
-                crontab = "*/"+count+" "+timerange+" * * "+days;
+                if (count === "0") {
+                    crontab = count+" "+timerange+" * * "+days;
+                }
+                else {
+                    crontab = "*/"+count+" "+timerange+" * * "+days;
+                }
             } else if (type == "time") {
                 var time = $("#inject-time-time").val();
                 var days = $("#inject-time-time-days option:selected").val();
@@ -399,8 +411,8 @@
         button: {
             onclick: function() {
                 var label = (this.name||this.payload).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-				if (this.payloadType === "date") { label = "timestamp"; }
-				if (this.payloadType === "none") { label = "blank"; }
+                if (this.payloadType === "date") { label = "timestamp"; }
+                if (this.payloadType === "none") { label = "blank"; }
                 d3.xhr("inject/"+this.id).post(function(err,resp) {
                         if (err) {
                             if (err.status == 404) {
