@@ -41,7 +41,7 @@ module.exports = function(RED) {
             password: {type: "password"}
         }
     });
-    
+
     function MongoOutNode(n) {
         RED.nodes.createNode(this,n);
         this.collection = n.collection;
@@ -109,6 +109,7 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         this.collection = n.collection;
         this.mongodb = n.mongodb;
+        this.operation = n.operation || "find";
         this.mongoConfig = RED.nodes.getNode(this.mongodb);
 
         if (this.mongoConfig) {
@@ -120,18 +121,41 @@ module.exports = function(RED) {
                     node.clientDb = db;
                     var coll = db.collection(node.collection);
                     node.on("input",function(msg) {
-                        msg.projection = msg.projection || {};
-                        coll.find(msg.payload,msg.projection).sort(msg.sort).limit(msg.limit).toArray(function(err, items) {
-                            if (err) {
-                                node.error(err);
-                            } else {
-                                msg.payload = items;
-                                delete msg.projection;
-                                delete msg.sort;
-                                delete msg.limit;
-                                node.send(msg);
-                            }
-                        });
+                        if (node.operation === "find") {
+                            msg.projection = msg.projection || {};
+                            coll.find(msg.payload,msg.projection).sort(msg.sort).limit(msg.limit).toArray(function(err, items) {
+                                if (err) {
+                                    node.error(err);
+                                } else {
+                                    msg.payload = items;
+                                    delete msg.projection;
+                                    delete msg.sort;
+                                    delete msg.limit;
+                                    node.send(msg);
+                                }
+                            });
+                        }
+                        else if (node.operation === "count") {
+                            coll.count(msg.payload, function(err, count) {
+                                if (err) {
+                                    node.error(err);
+                                } else {
+                                    msg.payload = count;
+                                    node.send(msg);
+                                }
+                            });
+                        }
+                        else if (node.operation === "aggregate") {
+                            msg.payload = (msg.payload instanceof Array) ? msg.payload : [];
+                            coll.aggregate(msg.payload, function(err, result) {
+                                if (err) {
+                                    node.error(err);
+                                } else {
+                                    msg.payload = result;
+                                    node.send(msg);
+                                }
+                            });
+                        }
                     });
                 }
             });
