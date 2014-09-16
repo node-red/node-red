@@ -86,7 +86,7 @@ module.exports = function(RED) {
                         var first = true; // is this the first line
                         var tmp = "";
 
-                        // For now we are just going to assume that any r or /n means an end of line...
+                        // For now we are just going to assume that any \r or \n means an end of line...
                         //   got to be a weird csv that has singleton \r \n in it for another reason...
 
                         // Now process the whole file/line
@@ -116,7 +116,8 @@ module.exports = function(RED) {
                                     //console.log(j,k,o,k[j]);
                                     if ( node.template[j] && (node.template[j] !== "") && (k[j] !== "") ) {
                                         if (!isNaN(Number(k[j]))) { k[j] = Number(k[j]); }
-                                        o[node.template[j]] = k[j].replace(/\r$/,'');
+                                        else { k[j].replace(/\r$/,''); }
+                                        o[node.template[j]] = k[j];
                                     }
                                     if (JSON.stringify(o) !== "{}") { // don't send empty objects
                                         if (node.multi === "one") { node.send({payload:o}); } // either send
@@ -136,7 +137,8 @@ module.exports = function(RED) {
                         if (!node.goodtmpl) { node.template[j] = "col"+(j+1); }
                         if ( node.template[j] && (node.template[j] !== "") && (k[j] !== "") ) {
                             if (!isNaN(Number(k[j]))) { k[j] = Number(k[j]); }
-                            o[node.template[j]] = k[j].replace(/\r$/,'');
+                            else { k[j].replace(/\r$/,''); }
+                            o[node.template[j]] = k[j];
                         }
                         msg.payload = o;
                         if (JSON.stringify(o) !== "{}") { // don't send empty objects
