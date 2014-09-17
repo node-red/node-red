@@ -68,7 +68,7 @@ describe('html node', function() {
     
     it('should retrieve paragraph contents when specified', function(done) {
         fs.readFile(file, 'utf8', function(err, data) {
-            var flow = [{id:"n1",type:"html",wires:[["n2"]],func:"return msg;",tag:"p"},
+            var flow = [{id:"n1",type:"html",wires:[["n2"]],ret:"text",tag:"p"},
                         {id:"n2", type:"helper"}];
             
             helper.load(htmlNode, flow, function() {
@@ -86,7 +86,7 @@ describe('html node', function() {
     
     it('should retrieve list contents as an array of html as default', function(done) {
         fs.readFile(file, 'utf8', function(err, data) {
-            var flow = [{id:"n1",type:"html",wires:[["n2"]],func:"return msg;",tag:"ol"},
+            var flow = [{id:"n1",type:"html",wires:[["n2"]],tag:"ol"},
                         {id:"n2", type:"helper"}];
             
             helper.load(htmlNode, flow, function() {
@@ -105,7 +105,7 @@ describe('html node', function() {
 
     it('should retrieve list contents as an array of text', function(done) {
         fs.readFile(file, 'utf8', function(err, data) {
-            var flow = [{id:"n1",type:"html",wires:[["n2"]],func:"return msg;",tag:"ol",ret:"text"},
+            var flow = [{id:"n1",type:"html",wires:[["n2"]],tag:"ol",ret:"text"},
                         {id:"n2", type:"helper"}];
             
             helper.load(htmlNode, flow, function() {
@@ -125,7 +125,7 @@ describe('html node', function() {
 
     it('should log on error', function(done) {
         fs.readFile(file,function(err, data) {
-            var flow = [{id:"n1",type:"html",wires:[["n2"]],func:"return msg;",tag:"p"},
+            var flow = [{id:"n1",type:"html",wires:[["n2"]],tag:"p"},
                         {id:"n2", type:"helper"}];
             
             helper.load(htmlNode, flow, function() {
@@ -137,7 +137,7 @@ describe('html node', function() {
                     msg.msg.should.startWith("Error:");
                     done();
                 });
-                n1.receive({payload:data,topic: "bar"});
+                n1.receive({payload:null,topic: "bar"});
             });          
         });
     });
@@ -152,7 +152,7 @@ describe('html node', function() {
         
         it('should retrieve list contents as html as default with output as multiple msgs ', function(done) {
             fs.readFile(file, 'utf8', function(err, data) {
-                var flow = [{id:"n1",type:"html",wires:[["n2"]],func:"return msg;",tag:"ul",as:"multi"},
+                var flow = [{id:"n1",type:"html",wires:[["n2"]],tag:"ul",as:"multi"},
                             {id:"n2", type:"helper"}];
                 
                 helper.load(htmlNode, flow, function() {
@@ -180,7 +180,7 @@ describe('html node', function() {
         
         it('should retrieve list contents as text with output as multiple msgs ', function(done) {
             fs.readFile(file, 'utf8', function(err, data) {
-                var flow = [{id:"n1",type:"html",wires:[["n2"]],func:"return msg;",tag:"ul",ret:"text",as:"multi"},
+                var flow = [{id:"n1",type:"html",wires:[["n2"]],tag:"ul",ret:"text",as:"multi"},
                             {id:"n2", type:"helper"}];
                 
                 helper.load(htmlNode, flow, function() {
