@@ -47,6 +47,8 @@ module.exports = function(RED) {
         this.collection = n.collection;
         this.mongodb = n.mongodb;
         this.payonly = n.payonly || false;
+        this.upsert = n.upsert || false;
+        this.multi = n.multi || false;
         this.operation = n.operation;
         this.mongoConfig = RED.nodes.getNode(this.mongodb);
 
@@ -59,7 +61,7 @@ module.exports = function(RED) {
                     node.clientDb = db;
                     var coll = db.collection(node.collection);
                     node.on("input",function(msg) {
-                        if (node.operation == "store") {
+                        if (node.operation === "save") {
                             delete msg._topic;
                             if (node.payonly) {
                                 if (typeof msg.payload !== "object") { msg.payload = {"payload":msg.payload}; }
@@ -68,7 +70,7 @@ module.exports = function(RED) {
                                 coll.save(msg,function(err,item){if (err){node.error(err);}});
                             }
                         }
-                        else if (node.operation == "insert") {
+                        else if (node.operation === "insert") {
                             delete msg._topic;
                             if (node.payonly) {
                                 if (typeof msg.payload !== "object") { msg.payload = {"payload":msg.payload}; }
@@ -77,17 +79,26 @@ module.exports = function(RED) {
                                 coll.insert(msg,function(err,item){if (err){node.error(err);}});
                             }
                         }
-                        else if (node.operation == "update") {
-                            delete msg._topic;
-                            if (node.payonly) {
-                                if (typeof msg.payload !== "object") { msg.payload = {"payload":msg.payload}; }
-                                coll.update(msg.payload,function(err,item){ if (err){node.error(err);} });
-                            } else {
-                                coll.update(msg,function(err,item){if (err){node.error(err);}});
-                            }
+                        else if (node.operation === "update") {
+                            var query = msg.query || {};
+                            var payload = msg.payload || {};
+                            var options = {
+                                upsert: node.upsert,
+                                multi: node.multi
+                            };
+
+                            coll.update(query, payload, options, function(err, item) {
+                                if (err) {
+                                    node.error(err);
+                                }
+                            });
                         }
                         if (node.operation == "delete") {
-                            coll.remove(msg.payload, {w:1}, function(err, items){ if (err) { node.error(err); } });
+                            coll.remove(msg.payload, function(err, items) {
+                                if (err) {
+                                    node.error(err);
+                                }
+                            });
                         }
                     });
                 }
