@@ -20,16 +20,18 @@
 
 
 module.exports = function(RED) {
-	"use strict";
-    
+    "use strict";
+    // require any external libraries we may need....
+    //var foo = require("foo-library");
+
     // The main node definition - most things happen in here
     function SampleNode(n) {
         // Create a RED node
         RED.nodes.createNode(this,n);
-    
+
         // Store local copies of the node configuration (as defined in the .html)
         this.topic = n.topic;
-    
+
         // Do whatever you need to do in here - declare callbacks etc
         // Note: this sample doesn't do anything much - it will only send
         // this message once at startup...
@@ -37,19 +39,26 @@ module.exports = function(RED) {
         var msg = {};
         msg.topic = this.topic;
         msg.payload = "Hello world !"
-    
+
         // send out the message to the rest of the workspace.
         this.send(msg);
-    
+
+        // respond to inputs....
+        this.on('input', function (msg) {
+            node.warn("I saw a payload: "+msg.payload);
+            // in this example just send it straight on... should process it here really
+            this.send(msg);
+        }
+
         this.on("close", function() {
             // Called when the node is shutdown - eg on redeploy.
             // Allows ports to be closed, connections dropped etc.
             // eg: this.client.disconnect();
         });
     }
-    
+
     // Register the node by name. This must be called before overriding any of the
     // Node functions.
     RED.nodes.registerType("sample",SampleNode);
-    
+
 }
