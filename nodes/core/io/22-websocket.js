@@ -59,7 +59,6 @@ module.exports = function(RED) {
         node.server.on('connection', function(socket){
             var id = (1+Math.random()*4294967295).toString(16);
             node._clients[id] = socket;
-
             socket.on('close',function() {
                 delete node._clients[id];
             });
@@ -84,7 +83,6 @@ module.exports = function(RED) {
                 }
             }
             node._serverListeners = {};
-
             node.server.close();
             node._inputNodes = [];
         });
@@ -117,8 +115,13 @@ module.exports = function(RED) {
     }
 
     WebSocketListenerNode.prototype.broadcast = function(data){
-        for (var i = 0; i < this.server.clients.length; i++) {
-            this.server.clients[i].send(data);
+        try {
+            for (var i = 0; i < this.server.clients.length; i++) {
+                this.server.clients[i].send(data);
+            }
+        }
+        catch(e) { // swallow any errors
+            this.warn("ws:"+i+" : "+e);
         }
     }
 
@@ -160,7 +163,12 @@ module.exports = function(RED) {
                 delete msg._session;
                 payload = JSON.stringify(msg);
             } else {
-                payload = RED.util.ensureString(msg.payload);
+                if (!Buffer.isBuffer(msg.payload)) { // if it's not a buffer make sure it's a string.
+                    payload = RED.util.ensureString(msg.payload);
+                }
+                else {
+                    payload = msg.payload;
+                }
             }
             if (msg._session && msg._session.type == "websocket") {
                 node.serverConfig.send(msg._session.id,payload);
