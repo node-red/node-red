@@ -361,11 +361,14 @@ describe('NodeRegistry', function() {
         typeRegistry.load("wontexist",true).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
-            typeRegistry.addNode(resourcesDir + "DoesNotExist/DoesNotExist.js").then(function(node) {
-                done(new Error("ENOENT not thrown"));
-            }).otherwise(function(e) {
-                e.code.should.eql("ENOENT");
+            typeRegistry.addNode(resourcesDir + "DoesNotExist/DoesNotExist.js").then(function(nodes) {
+                nodes.should.be.an.Array.and.have.lengthOf(1);
+                nodes[0].should.have.property("id");
+                nodes[0].should.have.property("types",[]);
+                nodes[0].should.have.property("err");
                 done();
+            }).otherwise(function(e) {
+                done(e);
             });
             
         }).catch(function(e) {

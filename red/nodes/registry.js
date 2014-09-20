@@ -589,7 +589,11 @@ function loadNodeModule(node) {
 function loadNodeList(nodes) {
     var promises = [];
     nodes.forEach(function(node) {
-        promises.push(loadNodeModule(node));
+        if (!node.err) {
+            promises.push(loadNodeModule(node));
+        } else {
+            promises.push(node);
+        }
     });
     
     return when.settle(promises).then(function(results) {
