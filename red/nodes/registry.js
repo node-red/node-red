@@ -311,6 +311,8 @@ function getNodeFiles(dir) {
                         }
                     }
                 }
+                valid = valid && fs.existsSync(path.join(dir,fn.replace(/\.js$/,".html")))
+                
                 if (valid) {
                     result.push(path.join(dir,fn));
                 }
@@ -383,7 +385,10 @@ function loadNodesFromModule(moduleDir,pkg) {
     for (var n in nodes) {
         if (nodes.hasOwnProperty(n)) {
             var file = path.join(moduleDir,nodes[n]);
-            results.push(loadNodeConfig(file,pkg.name,n));
+            try {
+                results.push(loadNodeConfig(file,pkg.name,n));
+            } catch(err) {
+            }
             var iconDir = path.join(moduleDir,path.dirname(nodes[n]),"icons");
             if (iconDirs.indexOf(iconDir) == -1) {
                 if (fs.existsSync(iconDir)) {
@@ -440,27 +445,35 @@ function loadNodeConfig(file,module,name) {
     } else {
         node.name = path.basename(file)
     }
-    
-    var content = fs.readFileSync(node.template,'utf8');
-    
-    var types = [];
-    
-    var regExp = /<script ([^>]*)data-template-name=['"]([^'"]*)['"]/gi;
-    var match = null;
-    
-    while((match = regExp.exec(content)) !== null) {
-        types.push(match[2]);
-    }
-    node.types = types;
-    node.config = content;
-    
-    // TODO: parse out the javascript portion of the template
-    node.script = "";
-    
-    for (var i=0;i<node.types.length;i++) {
-        if (registry.getTypeId(node.types[i])) {
-            node.err = node.types[i]+" already registered";
-            break;
+    try {
+        var content = fs.readFileSync(node.template,'utf8');
+        
+        var types = [];
+        
+        var regExp = /<script ([^>]*)data-template-name=['"]([^'"]*)['"]/gi;
+        var match = null;
+        
+        while((match = regExp.exec(content)) !== null) {
+            types.push(match[2]);
+        }
+        node.types = types;
+        node.config = content;
+        
+        // TODO: parse out the javascript portion of the template
+        node.script = "";
+        
+        for (var i=0;i<node.types.length;i++) {
+            if (registry.getTypeId(node.types[i])) {
+                node.err = node.types[i]+" already registered";
+                break;
+            }
+        }
+    } catch(err) {
+        node.types = [];
+        if (err.code === 'ENOENT') {
+            node.err = "Error: "+file+" does not exist";
+        } else {
+            node.err = err.toString();
         }
     }
     registry.addNodeSet(id,node);
@@ -514,7 +527,9 @@ function load(defaultNodesDir,disableNodePathScan) {
         }
         var promises = [];
         nodes.forEach(function(node) {
-            promises.push(loadNodeModule(node));
+            if (!node.err) {
+                promises.push(loadNodeModule(node));
+            }
         });
         
         //resolve([]);
