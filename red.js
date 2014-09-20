@@ -171,7 +171,11 @@ RED.start().then(function() {
                 util.log('[red] Error: port in use');
             } else {
                 util.log('[red] Uncaught Exception:');
-                util.log(err.stack);
+                if (err.stack) {
+                    util.log(err.stack);
+                } else {
+                    util.log(err);
+                }
             }
             process.exit(1);
         });
@@ -187,13 +191,21 @@ RED.start().then(function() {
     }
 }).otherwise(function(err) {
     util.log("[red] Failed to start server:");
-    util.log(err.stack);
+    if (err.stack) {
+        util.log(err.stack);
+    } else {
+        util.log(err);
+    }
 });
 
 
 process.on('uncaughtException',function(err) {
     util.log('[red] Uncaught Exception:');
-    util.log(err.stack);
+    if (err.stack) {
+        util.log(err.stack);
+    } else {
+        util.log(err);
+    }
     process.exit(1);
 });
 
