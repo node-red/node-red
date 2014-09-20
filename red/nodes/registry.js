@@ -76,6 +76,12 @@ var registry = (function() {
         init: function() {
             if (settings.available()) {
                 nodeConfigs = settings.get("nodes")||{};
+                // Restore the node id property to individual entries
+                for (var id in nodeConfigs) {
+                    if (nodeConfigs.hasOwnProperty(id)) {
+                        nodeConfigs[id].id = id;
+                    }
+                }
             } else {
                 nodeConfigs = {};
             }
