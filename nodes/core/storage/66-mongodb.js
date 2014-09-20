@@ -123,7 +123,8 @@ module.exports = function(RED) {
                     node.on("input",function(msg) {
                         if (node.operation === "find") {
                             msg.projection = msg.projection || {};
-                            coll.find(msg.payload,msg.projection).sort(msg.sort).limit(msg.limit).toArray(function(err, items) {
+                            msg.find = msg.find || msg.payload;
+                            coll.find(msg.find,msg.projection).sort(msg.sort).limit(msg.limit).toArray(function(err, items) {
                                 if (err) {
                                     node.error(err);
                                 } else {
