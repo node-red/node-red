@@ -99,11 +99,14 @@ if (settings.httpRoot === false) {
     settings.httpNodeRoot = false;
 } else {
     settings.httpRoot = settings.httpRoot||"/";
+    settings.disableEditor = settings.disableEditor||false;
 }
 
 if (settings.httpAdminRoot !== false) {
     settings.httpAdminRoot = formatRoot(settings.httpAdminRoot || settings.httpRoot || "/");
     settings.httpAdminAuth = settings.httpAdminAuth || settings.httpAuth;
+} else {
+    settings.disableEditor = true;
 }
 
 if (settings.httpNodeRoot !== false) {

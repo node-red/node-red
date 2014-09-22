@@ -22,185 +22,192 @@ var exec = require('child_process').exec;
 var createUI = require("./ui");
 var redNodes = require("./nodes");
 var comms = require("./comms");
+var storage = require("./storage");
 
 var app = null;
 var nodeApp = null;
 var server = null;
 var settings = null;
-var storage = null;
 
 function createServer(_server,_settings) {
     server = _server;
     settings = _settings;
+
     comms.init(_server,_settings);
-    storage = require("./storage");
-    app = createUI(settings);
+    
     nodeApp = express();
-    
-    app.get("/flows",function(req,res) {
-        res.json(redNodes.getFlows());
-    });
-    
-    app.post("/flows",
-        express.json(),
-        function(req,res) {
-            var flows = req.body;
-            redNodes.setFlows(flows).then(function() {
-                res.send(204);
-            }).otherwise(function(err) {
-                util.log("[red] Error saving flows : "+err);
-                res.send(500,err.message);
-            });
-        },
-        function(error,req,res,next) {
-            res.send(400,"Invalid Flow");
-        }
-    );
-    
+    app = express();
         
-    app.get("/nodes",function(req,res) {
-        if (req.get("accept") == "application/json") {
-            res.json(redNodes.getNodeList());
-        } else {
-            res.send(redNodes.getNodeConfigs());
+    if (settings.httpAdminRoot !== false) {
+        
+        
+        if (!settings.disableEditor) {
+            createUI(settings,app);
         }
-    });
-    
-    app.post("/nodes",
-        express.json(),
-        function(req,res) {
-            if (!settings.available()) {
-                res.send(400,new Error("Settings unavailable").toString());
-                return;
+        
+        app.get("/flows",function(req,res) {
+            res.json(redNodes.getFlows());
+        });
+        
+        app.post("/flows",
+            express.json(),
+            function(req,res) {
+                var flows = req.body;
+                redNodes.setFlows(flows).then(function() {
+                    res.send(204);
+                }).otherwise(function(err) {
+                    util.log("[red] Error saving flows : "+err);
+                    res.send(500,err.message);
+                });
+            },
+            function(error,req,res,next) {
+                res.send(400,"Invalid Flow");
             }
-            var node = req.body;
-            var promise;
-            if (node.file) {
-                promise = redNodes.addNode(node.file).then(reportAddedModules);
-            } else if (node.module) {
-                var module = redNodes.getNodeModuleInfo(node.module);
-                if (module) {
-                    res.send(400,"Module already loaded");
+        );
+            
+        app.get("/nodes",function(req,res) {
+            if (req.get("accept") == "application/json") {
+                res.json(redNodes.getNodeList());
+            } else {
+                res.send(redNodes.getNodeConfigs());
+            }
+        });
+        
+        app.post("/nodes",
+            express.json(),
+            function(req,res) {
+                if (!settings.available()) {
+                    res.send(400,new Error("Settings unavailable").toString());
                     return;
                 }
-                promise = installModule(node.module);
-            } else {
-                res.send(400,"Invalid request");
-                return;
-            }
-            promise.then(function(info) {
-                res.json(info);
-            }).otherwise(function(err) {
-                if (err.code === 404) {
-                    res.send(404);
-                } else {
-                    res.send(400,err.toString());
-                }
-            });
-        },
-        function(err,req,res,next) {
-            console.log(err.toString());
-            res.send(400,err);
-        }
-    );
-    
-    app.delete("/nodes/:id",
-        function(req,res) {
-            if (!settings.available()) {
-                res.send(400,new Error("Settings unavailable").toString());
-                return;
-            }
-            var id = req.params.id;
-            var removedNodes = [];
-            try {
-                var node = redNodes.getNodeInfo(id);
-                var promise = null;
-                if (!node) {
-                    var module = redNodes.getNodeModuleInfo(id);
-                    if (!module) {
-                        res.send(404);
+                var node = req.body;
+                var promise;
+                if (node.file) {
+                    promise = redNodes.addNode(node.file).then(reportAddedModules);
+                } else if (node.module) {
+                    var module = redNodes.getNodeModuleInfo(node.module);
+                    if (module) {
+                        res.send(400,"Module already loaded");
                         return;
-                    } else {
-                        promise = uninstallModule(id);
                     }
+                    promise = installModule(node.module);
                 } else {
-                    promise = when.resolve([redNodes.removeNode(id)]).then(reportRemovedModules);
+                    res.send(400,"Invalid request");
+                    return;
                 }
-                
-                promise.then(function(removedNodes) {
-                    res.json(removedNodes);
-                }).otherwise(function(err) {
-                    console.log(err.stack);
-                    res.send(400,err.toString());
-                });
-            } catch(err) {
-                res.send(400,err.toString());
-            }
-        },
-        function(err,req,res,next) {
-            res.send(400,err);
-        }
-    );
-    
-    app.get("/nodes/:id", function(req,res) {
-        var id = req.params.id;
-        var result = null;
-        if (req.get("accept") == "application/json") {
-            result = redNodes.getNodeInfo(id);
-        } else {
-            result = redNodes.getNodeConfig(id);
-        }
-        if (result) {
-            res.send(result);
-        } else {
-            res.send(404);
-        }
-    });
-    
-    app.put("/nodes/:id", 
-        express.json(),
-        function(req,res) {
-            if (!settings.available()) {
-                res.send(400,new Error("Settings unavailable").toString());
-                return;
-            }
-            var body = req.body;
-            if (!body.hasOwnProperty("enabled")) {
-                res.send(400,"Invalid request");
-                return;
-            }
-            try {
-                var info;
-                var id = req.params.id;
-                var node = redNodes.getNodeInfo(id);
-                if (!node) {
-                    res.send(404);
-                } else if (!node.err && node.enabled === body.enabled) {
-                    res.json(node);
-                } else {
-                    if (body.enabled) {
-                        info = redNodes.enableNode(id);
-                    } else {
-                        info = redNodes.disableNode(id);
-                    }
-                    if (info.enabled == body.enabled && !info.err) {
-                        comms.publish("node/"+(body.enabled?"enabled":"disabled"),info,false);
-                        util.log("[red] "+(body.enabled?"Enabled":"Disabled")+" node types:");
-                        for (var i=0;i<info.types.length;i++) {
-                            util.log("[red] - "+info.types[i]);
-                        }
-                    } else if (body.enabled && info.err) {
-                        util.log("[red] Failed to enable node:");
-                        util.log("[red] - "+info.name+" : "+info.err);
-                    }
+                promise.then(function(info) {
                     res.json(info);
+                }).otherwise(function(err) {
+                    if (err.code === 404) {
+                        res.send(404);
+                    } else {
+                        res.send(400,err.toString());
+                    }
+                });
+            },
+            function(err,req,res,next) {
+                console.log(err.toString());
+                res.send(400,err);
+            }
+        );
+        
+        app.delete("/nodes/:id",
+            function(req,res) {
+                if (!settings.available()) {
+                    res.send(400,new Error("Settings unavailable").toString());
+                    return;
                 }
-            } catch(err) {
-                res.send(400,err.toString());
-            }            
-        }
-    );
-    
+                var id = req.params.id;
+                var removedNodes = [];
+                try {
+                    var node = redNodes.getNodeInfo(id);
+                    var promise = null;
+                    if (!node) {
+                        var module = redNodes.getNodeModuleInfo(id);
+                        if (!module) {
+                            res.send(404);
+                            return;
+                        } else {
+                            promise = uninstallModule(id);
+                        }
+                    } else {
+                        promise = when.resolve([redNodes.removeNode(id)]).then(reportRemovedModules);
+                    }
+                    
+                    promise.then(function(removedNodes) {
+                        res.json(removedNodes);
+                    }).otherwise(function(err) {
+                        console.log(err.stack);
+                        res.send(400,err.toString());
+                    });
+                } catch(err) {
+                    res.send(400,err.toString());
+                }
+            },
+            function(err,req,res,next) {
+                res.send(400,err);
+            }
+        );
+        
+        app.get("/nodes/:id", function(req,res) {
+            var id = req.params.id;
+            var result = null;
+            if (req.get("accept") == "application/json") {
+                result = redNodes.getNodeInfo(id);
+            } else {
+                result = redNodes.getNodeConfig(id);
+            }
+            if (result) {
+                res.send(result);
+            } else {
+                res.send(404);
+            }
+        });
+        
+        app.put("/nodes/:id", 
+            express.json(),
+            function(req,res) {
+                if (!settings.available()) {
+                    res.send(400,new Error("Settings unavailable").toString());
+                    return;
+                }
+                var body = req.body;
+                if (!body.hasOwnProperty("enabled")) {
+                    res.send(400,"Invalid request");
+                    return;
+                }
+                try {
+                    var info;
+                    var id = req.params.id;
+                    var node = redNodes.getNodeInfo(id);
+                    if (!node) {
+                        res.send(404);
+                    } else if (!node.err && node.enabled === body.enabled) {
+                        res.json(node);
+                    } else {
+                        if (body.enabled) {
+                            info = redNodes.enableNode(id);
+                        } else {
+                            info = redNodes.disableNode(id);
+                        }
+                        if (info.enabled == body.enabled && !info.err) {
+                            comms.publish("node/"+(body.enabled?"enabled":"disabled"),info,false);
+                            util.log("[red] "+(body.enabled?"Enabled":"Disabled")+" node types:");
+                            for (var i=0;i<info.types.length;i++) {
+                                util.log("[red] - "+info.types[i]);
+                            }
+                        } else if (body.enabled && info.err) {
+                            util.log("[red] Failed to enable node:");
+                            util.log("[red] - "+info.name+" : "+info.err);
+                        }
+                        res.json(info);
+                    }
+                } catch(err) {
+                    res.send(400,err.toString());
+                }            
+            }
+        );
+    }
 }
 function reportAddedModules(info) {
     comms.publish("node/added",info,false);
@@ -330,7 +337,6 @@ function start() {
                             });
                         }
                     }
-                    
                 }
                 defer.resolve();
                 

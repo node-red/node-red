@@ -55,6 +55,7 @@ module.exports = {
 
     // By default, the Node-RED UI is available at http://localhost:1880/
     // The following property can be used to specifiy a different root path.
+    // If set to false, this is disabled.
     //httpAdminRoot: '/admin',
 
     // You can protect the user interface with a userid and password by using the following property.
@@ -63,7 +64,8 @@ module.exports = {
 
     // Some nodes, such as HTTP In, can be used to listen for incoming http requests.
     // By default, these are served relative to '/'. The following property
-    // can be used to specifiy a different root path.
+    // can be used to specifiy a different root path. If set to false, this is
+    // disabled.
     //httpNodeRoot: '/nodes',
     
     // To password protect the node-defined HTTP endpoints, the following property
@@ -87,6 +89,11 @@ module.exports = {
     // The following property can be used in place of 'httpAdminAuth' and 'httpNodeAuth',
     // to apply the same authentication to both parts.
     //httpAuth: {user:"user",pass:"5f4dcc3b5aa765d61d8327deb882cf99"},
+    
+    // The following property can be used to disable the editor. The admin API
+    // is not affected by this option. To disable both the editor and the admin
+    // API, use either the httpRoot or httpAdminRoot properties
+    //disableEditor: false,
     
     // The following property can be used to enable HTTPS
     // See http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener

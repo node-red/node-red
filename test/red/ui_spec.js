@@ -15,10 +15,13 @@
  **/
 var request = require("supertest");
 var express = require("express");
+var redUI = require("../../red/ui");
+
 
 describe("red/ui icon handler", function() {
     it('returns the default icon when getting an unknown icon', function(done) {
-        var app = require("../../red/ui")();
+        var app = express();
+        redUI({},app);
         request(app)
             .get("/icons/youwonthaveme.png")
             .expect('Content-Type', /image\/png/)
@@ -32,7 +35,8 @@ describe("red/ui icon handler", function() {
     });
     
     it('returns an icon from disk', function(done) {
-        var app = require("../../red/ui")();
+        var app = express();
+        redUI({},app);
         request(app)
             .get("/icons/arduino.png")
             .expect('Content-Type', /image\/png/)
@@ -82,7 +86,8 @@ describe("icon cache handler", function() {
      * the default PNG would be served
      */
     it('returns an icon using icon cache', function(done) {        
-        var app = require("../../red/ui")();
+        var app = express();
+        redUI({},app);
         events.emit("node-icon-dir", tempDir);
         request(app)
             .get("/icons/cacheMe.png")
@@ -117,41 +122,45 @@ describe("red/ui settings handler", function() {
                 httpNodeRoot: "testHttpNodeRoot",
                 version: "testVersion",
         };
-        var app = require("../../red/ui")(settings);
-        
+        var app = express();
+        redUI(settings,app);
         request(app)
-        .get("/settings")
-        .expect('Content-Type', /application\/json/)
-        .expect(200, "{\n  \"httpNodeRoot\": \"testHttpNodeRoot\",\n  \"version\": \"testVersion\"\n}")
-        .end(function(err, res){
-            if (err){
-                return done(err);
-            }
-            done();
-          });
+            .get("/settings")
+            .expect('Content-Type', /application\/json/)
+            .expect(200, "{\n  \"httpNodeRoot\": \"testHttpNodeRoot\",\n  \"version\": \"testVersion\"\n}")
+            .end(function(err, res){
+                if (err){
+                    return done(err);
+                }
+                done();
+            });
         
     });
 });
 
 describe("red/ui root handler", function() {
     it('server up the main page', function(done) {
-        var app = require("../../red/ui")();
+        var app = express();
+        redUI({},app);
         
         request(app)
-        .get("/")
-        .expect('Content-Type', /text\/html/)
-        .expect(200)
-        .end(function(err, res){
-            if (err){
-                return done(err);
-            }
-            done();
-          });
+            .get("/")
+            .expect('Content-Type', /text\/html/)
+            .expect(200)
+            .end(function(err, res){
+                if (err){
+                    return done(err);
+                }
+                done();
+            });
         
     });
     
     it('redirects to path ending with /', function(done) {
-        var app = express().use('/root', require("../../red/ui")());
+        var rapp = express();
+        redUI({},rapp);
+
+        var app = express().use('/root', rapp);
         
         request(app)
         .get("/root")
