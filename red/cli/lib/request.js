@@ -27,7 +27,18 @@ module.exports = function(path, options) {
             options.headers['content-type'] = 'application/json';
         }
         options.url = basePath+path;
-        request(options, function(error,response,body) {
+        
+        // Pull out the request function so we can stub it in the tests
+        var requestFunc = request.get;
+        
+        if (options.method == 'PUT') {
+            requestFunc = request.put;
+        } else if (options.method == 'POST') {
+            requestFunc = request.post;
+        } else if (options.method == 'DELETE') {
+            requestFunc = request.delete;
+        }
+        requestFunc(options, function(error,response,body) {
             if (!error && response.statusCode == 200) {
                 resolve(JSON.parse(body));
             } else if (error) {

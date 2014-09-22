@@ -13,3 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+ 
+var should = require("should");
+var sinon = require("sinon");
+var fs = require("fs");
+var request = require("request");
+
+var apiRequest = require("../../../../red/cli/lib/request");
+var config = require("../../../../red/cli/lib/config");
+
+describe("cli request", function() {
+    var sandbox = sinon.sandbox.create();
+    before(function() {
+        sandbox.stub(fs,"readFileSync",function() {
+            return '{"target":"http://example.com:1880"}'
+        });
+    });
+    after(function() {
+        sandbox.restore();
+    });
+                
+    it('returns the json response to a get', sinon.test(function(done) {
+        this.stub(request, 'get').yields(null, {statusCode:200}, JSON.stringify({a: "b"}));
+            
+        apiRequest("/foo",{}).then(function(res) {
+            res.should.eql({a:"b"});
+            done();
+        }).otherwise(function(err) {
+            done(err);
+        });
+    }));
+});

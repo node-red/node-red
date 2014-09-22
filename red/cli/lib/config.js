@@ -44,6 +44,10 @@ function save() {
     }
     fs.writeFileSync(configFile,JSON.stringify(config,null,4));
 }
-module.exports = {};
+module.exports = {
+    unload: function() {
+        config = null;
+    }
+};
 module.exports.__defineGetter__('target',function() { load(); return config.target|| "http://localhost:1880" });
 module.exports.__defineSetter__('target',function(v) { load(); config.target = v; save();});
