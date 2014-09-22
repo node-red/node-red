@@ -48,8 +48,10 @@ RED.editor = (function() {
     function validateNodeProperties(node, definition, properties) {
         var isValid = true;
         for (var prop in definition) {
-            if (!validateNodeProperty(node, definition, prop, properties[prop])) {
-                isValid = false;
+            if (definition.hasOwnProperty(prop)) {
+                if (!validateNodeProperty(node, definition, prop, properties[prop])) {
+                    isValid = false;
+                }
             }
         }
         return isValid;
