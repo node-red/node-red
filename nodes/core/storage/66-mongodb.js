@@ -47,47 +47,89 @@ module.exports = function(RED) {
         this.collection = n.collection;
         this.mongodb = n.mongodb;
         this.payonly = n.payonly || false;
+        this.upsert = n.upsert || false;
+        this.multi = n.multi || false;
         this.operation = n.operation;
         this.mongoConfig = RED.nodes.getNode(this.mongodb);
 
         if (this.mongoConfig) {
             var node = this;
-            MongoClient.connect(this.mongoConfig.url, function(err,db) {
+            MongoClient.connect(this.mongoConfig.url, function(err, db) {
                 if (err) {
                     node.error(err);
                 } else {
                     node.clientDb = db;
-                    var coll = db.collection(node.collection);
+                    var coll;
+                    if (node.collection) {
+                        coll = db.collection(node.collection);
+                    }
                     node.on("input",function(msg) {
-                        if (node.operation == "store") {
-                            delete msg._topic;
-                            if (node.payonly) {
-                                if (typeof msg.payload !== "object") { msg.payload = {"payload":msg.payload}; }
-                                coll.save(msg.payload,function(err,item){ if (err){node.error(err);} });
+                        if (!coll) {
+                            if (msg.collection) {
+                                coll = db.collection(msg.collection);
                             } else {
-                                coll.save(msg,function(err,item){if (err){node.error(err);}});
+                                node.error("No collection defined");
+                                return;
                             }
                         }
-                        else if (node.operation == "insert") {
-                            delete msg._topic;
+                        delete msg._topic;
+                        delete msg.collection;
+                        if (node.operation === "store") {
                             if (node.payonly) {
-                                if (typeof msg.payload !== "object") { msg.payload = {"payload":msg.payload}; }
-                                coll.insert(msg.payload,function(err,item){ if (err){node.error(err);} });
+                                if (typeof msg.payload !== "object") {
+                                    msg.payload = {"payload": msg.payload};
+                                }
+                                coll.save(msg.payload,function(err, item) {
+                                    if (err) {
+                                        node.error(err);
+                                    }
+                                });
                             } else {
-                                coll.insert(msg,function(err,item){if (err){node.error(err);}});
+                                coll.save(msg,function(err, item) {
+                                    if (err) {
+                                        node.error(err);
+                                    }
+                                });
                             }
-                        }
-                        else if (node.operation == "update") {
-                            delete msg._topic;
+                        } else if (node.operation === "insert") {
                             if (node.payonly) {
-                                if (typeof msg.payload !== "object") { msg.payload = {"payload":msg.payload}; }
-                                coll.update(msg.payload,function(err,item){ if (err){node.error(err);} });
+                                if (typeof msg.payload !== "object") {
+                                    msg.payload = {"payload": msg.payload};
+                                }
+                                coll.insert(msg.payload, function(err, item) {
+                                    if (err) {
+                                        node.error(err);
+                                    }
+                                });
                             } else {
-                                coll.update(msg,function(err,item){if (err){node.error(err);}});
+                                coll.insert(msg, function(err,item) {
+                                    if (err) {
+                                        node.error(err);
+                                    }
+                                });
                             }
-                        }
-                        if (node.operation == "delete") {
-                            coll.remove(msg.payload, {w:1}, function(err, items){ if (err) { node.error(err); } });
+                        } else if (node.operation === "update") {
+                            if (typeof msg.payload !== "object") {
+                                msg.payload = {"payload": msg.payload};
+                            }
+                            var query = msg.query || {};
+                            var payload = msg.payload || {};
+                            var options = {
+                                upsert: node.upsert,
+                                multi: node.multi
+                            };
+
+                            coll.update(query, payload, options, function(err, item) {
+                                if (err) {
+                                    node.error(err + " " + payload);
+                                }
+                            });
+                        } else if (node.operation === "delete") {
+                            coll.remove(msg.payload, function(err, items) {
+                                if (err) {
+                                    node.error(err);
+                                }
+                            });
                         }
                     });
                 }
@@ -104,7 +146,6 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType("mongodb out",MongoOutNode);
 
-
     function MongoInNode(n) {
         RED.nodes.createNode(this,n);
         this.collection = n.collection;
@@ -119,8 +160,19 @@ module.exports = function(RED) {
                     node.error(err);
                 } else {
                     node.clientDb = db;
-                    var coll = db.collection(node.collection);
-                    node.on("input",function(msg) {
+                    var coll;
+                    if (node.collection) {
+                        coll = db.collection(node.collection);
+                    }
+                    node.on("input", function(msg) {
+                        if (!coll) {
+                            if (msg.collection) {
+                                coll = db.collection(msg.collection);
+                            } else {
+                                node.error("No collection defined");
+                                return;
+                            }
+                        }
                         if (node.operation === "find") {
                             msg.projection = msg.projection || {};
                             coll.find(msg.payload,msg.projection).sort(msg.sort).limit(msg.limit).toArray(function(err, items) {
@@ -134,8 +186,7 @@ module.exports = function(RED) {
                                     node.send(msg);
                                 }
                             });
-                        }
-                        else if (node.operation === "count") {
+                        } else if (node.operation === "count") {
                             coll.count(msg.payload, function(err, count) {
                                 if (err) {
                                     node.error(err);
@@ -144,8 +195,7 @@ module.exports = function(RED) {
                                     node.send(msg);
                                 }
                             });
-                        }
-                        else if (node.operation === "aggregate") {
+                        } else if (node.operation === "aggregate") {
                             msg.payload = (msg.payload instanceof Array) ? msg.payload : [];
                             coll.aggregate(msg.payload, function(err, result) {
                                 if (err) {

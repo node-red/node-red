@@ -40,21 +40,21 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('mongodb',{
+    RED.nodes.registerType('mongodb', {
         category: 'config',
-        color:"rgb(218, 196, 180)",
+        color: "rgb(218, 196, 180)",
         defaults: {
-            hostname: { value:"127.0.0.1",required:true},
-            port: { value: 27017,required:true},
-            db: { value:"",required:true},
-            name: { value:"" }
+            hostname: {value: "127.0.0.1", required: true},
+            port: {value: 27017, required: true},
+            db: {value: "", required: true},
+            name: {value: ""}
         },
         credentials: {
-            user: {type:"text"},
+            user: {type: "text"},
             password: {type: "password"}
         },
         label: function() {
-            return this.name||this.hostname+":"+this.port+"/"+this.db;
+            return this.name || this.hostname + ":" + this.port + "/" + this.db;
         }
     });
 </script>
@@ -74,60 +74,98 @@
         <select type="text" id="node-input-operation" style="display: inline-block; vertical-align: top;">
             <option value="store">save</option>
             <option value="insert">insert</option>
-            <!-- <option value="update">update</option> -->
+            <option value="update">update</option>
             <option value="delete">remove</option>
         </select>
     </div>
     <div class="form-row node-input-payonly">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-payonly" placeholder="Only" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-payonly" style="width: 70%;">Only store msg.payload object ?</label>
+        <label for="node-input-payonly" style="width: 70%;">Only store msg.payload object</label>
+    </div>
+    <div class="form-row node-input-upsert">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-upsert" placeholder="Only" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-upsert" style="width: 70%;">Create a new document if no match found</label>
+    </div>
+    <div class="form-row node-input-multi">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-multi" placeholder="Only" style="display: inline-block; width: auto; vertical-align: top;;">
+        <label for="node-input-multi" style="width: 70%;">Update all matching documents</label>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <script>
-        $("#node-input-operation").change(function() {
-            var id = $("#node-input-operation option:selected").val();
-            if (id == "delete") $(".node-input-payonly").hide();
-            else $(".node-input-payonly").show();
-        });
-    </script>
+    <div class="form-tips" id="node-warning" style="display: none"><b> Tip:</b> If no collection is set, ensure <b>msg.collection</b> will contain the collection name
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="mongodb out">
-    <p>A simple MongoDB output node. Stores the <b>msg</b> object in a chosen collection.</p>
+    <p>A simple MongoDB output node. Can save, insert, update and remove objects from a chosen collection.</p>
+    <p>Save will update an existing object or insert a new object if one does not already exist.</p>
+    <p>Insert will insert a new object.</p>
+    <p>Save and insert either store <b>msg</b> or <b>msg.payload</b>.</p>
+    <p>Update will modify an existing object or objects. The query to select objects to update uses <b>msg.query</b> and the update to the element uses <b>msg.payload</b>.</p>
+    <p>Update can add a object if it does not exist or update multiple objects.</p>
+    <p>Remove will remove objects that match the query passed in on <b>msg.payload</b>. A blank query will delete <i>all of the objects</i> in the collection.</p>
+    <p>You can either set the collection method in the node config or on <b>msg.collection</b>. Setting it in the node will override <b>msg.collection</b>.</p>
     <p>By default MongoDB creates an <i>_id</i> property as the primary key - so repeated injections of the same <b>msg</b> will result in many database entries.</p>
-    <p>If this is NOT the desired behaviour - ie you want repeated entries to overwrite, then you must set the <b>msg._id</b> property to be a constant by the use of a previous function node.</p>
+    <p>If this is NOT the desired behaviour - ie. you want repeated entries to overwrite, then you must set the <b>msg._id</b> property to be a constant by the use of a previous function node.</p>
     <p>This could be a unique constant or you could create one based on some other msg property.</p>
     <p>Currently we do not limit or cap the collection size at all... this may well change.</p>
-    <p>You can also choose to <b>remove</b> items. To do so the <b>msg.payload</b> <i>MUST</i> contain an object that will select the items(s) to remove.
-    A blank object will delete <i>all of the objects</i> in the collection.</p>
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('mongodb out',{
+
+    function oneditprepare() {
+        $("#node-input-operation").change(function () {
+            var id = $("#node-input-operation option:selected").val();
+
+            if (id === "update") {
+                $(".node-input-payonly").hide();
+                $(".node-input-upsert, .node-input-multi").show();
+            } else if (id === "delete") {
+                $(".node-input-payonly, .node-input-upsert, .node-input-multi").hide();
+            } else {
+                $(".node-input-payonly").show();
+                $(".node-input-upsert, .node-input-multi").hide();
+            }
+        });
+
+        $("#node-input-collection").change(function () {
+            if($("#node-input-collection").val() === "") {
+                $("#node-warning").show();
+            } else {
+                $("#node-warning").hide();
+            }
+        });
+    }
+
+    RED.nodes.registerType('mongodb out', {
         category: 'storage-output',
-        color:"rgb(218, 196, 180)",
+        color: "rgb(218, 196, 180)",
         defaults: {
-            mongodb: { type:"mongodb",required:true},
-            name: {value:""},
-            collection: {value:"",required:true},
-            payonly: {value:false},
-            operation: {value:"store"}
+            mongodb: {type: "mongodb", required: true},
+            name: {value: ""},
+            collection: {value: ""},
+            payonly: {value: false},
+            upsert: {value: false},
+            multi: {value: false},
+            operation: {value: "store"}
         },
-        inputs:1,
-        outputs:0,
+        inputs: 1,
+        outputs: 0,
         icon: "mongodb.png",
         align: "right",
         label: function() {
             var mongoNode = RED.nodes.node(this.mongodb);
-            return this.name||(mongoNode?mongoNode.label()+" "+this.collection:"mongodb");
+            return this.name || (mongoNode ? mongoNode.label() + " " + this.collection: "mongodb");
         },
         labelStyle: function() {
-            return this.name?"node_label_italic":"";
-        }
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: oneditprepare
     });
 </script>
 
@@ -153,6 +191,8 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-tips" id="node-warning" style="display: none"><b> Tip:</b> If no collection is set, ensure <b>msg.collection</b> will contain the collection name
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="mongodb in">
@@ -160,29 +200,32 @@
     <p>Find queries a collection using the <b>msg.payload</b> as the query statement as per the .find() function. Optionally, you may also (via a function) set a <b>msg.projection</b> object to constrain the returned fields, a <b>msg.sort</b> object and a <b>msg.limit</b> object.</p>
     <p>Count returns a count of the number of documents in a collection or matching a query using the <b>msg.payload</b> as the query statement.</p>
     <p>Aggregate provides access to the aggregation pipeline using the <b>msg.payload</b> as the pipeline array.</p>
+    <p>You can override the collection the method is performed on by setting <b>msg.collection</b> to the desired collection name.</p>
     <p>See the <a href="http://docs.mongodb.org/manual/reference/method/db.collection.find/" target="new"><i>MongoDB collection methods docs</i></a> for examples.</p>
     <p>The result is returned in <b>msg.payload</b>.</p>
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('mongodb in',{
+
+    RED.nodes.registerType('mongodb in', {
         category: 'storage-input',
-        color:"rgb(218, 196, 180)",
+        color: "rgb(218, 196, 180)",
         defaults: {
-            mongodb: { type:"mongodb",required:true},
-            name: {value:""},
-            collection: {value:"",required:true},
-            operation: {value:"find"}
+            mongodb: {type: "mongodb", required: true},
+            name: {value: ""},
+            collection: {value: ""},
+            operation: {value: "find"}
         },
-        inputs:1,
-        outputs:1,
+        inputs: 1,
+        outputs: 1,
         icon: "mongodb.png",
         label: function() {
             var mongoNode = RED.nodes.node(this.mongodb);
-            return this.name||(mongoNode?mongoNode.label()+" "+this.collection:"mongodb");
+            return this.name || (mongoNode ? mongoNode.label() + " " + this.collection: "mongodb");
         },
         labelStyle: function() {
-            return this.name?"node_label_italic":"";
-        }
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: oneditprepare
     });
 </script>
