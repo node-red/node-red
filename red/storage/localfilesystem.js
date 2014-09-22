@@ -215,7 +215,11 @@ var localfilesystem = {
     getSettings: function() {
         if (fs.existsSync(globalSettingsFile)) {
             return nodeFn.call(fs.readFile,globalSettingsFile,'utf8').then(function(data) {
-                return JSON.parse(data);
+                if (data) {
+                    return JSON.parse(data);
+                } else {
+                    return {};
+                }
             });
         }
         return when.resolve({});
