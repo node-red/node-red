@@ -41,6 +41,7 @@ if (emailkey) {
 
 function ImapNode(n) {
     RED.nodes.createNode(this,n);
+    this.warn("This node has been deprecated and will be deleted in a future release. Please update your flow to use the 'e-mail in' node.");
     this.name = n.name;
     this.repeat = n.repeat * 1000 || 300000;
     var node = this;
