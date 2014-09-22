@@ -419,7 +419,18 @@ function loadNodesFromModule(moduleDir,pkg) {
  */
 function loadNodeConfig(file,module,name) {
     var id = crypto.createHash('sha1').update(file).digest("hex");
+    if (module && name) {
+        var newid = crypto.createHash('sha1').update(module+":"+name).digest("hex");
+        var existingInfo = registry.getNodeInfo(id);
+        if (existingInfo) {
+            // For a brief period, id for modules were calculated incorrectly.
+            // To prevent false-duplicates, this removes the old id entry
+            registry.removeNode(id);
+            registry.saveNodeList();
+        }
+        id = newid;
 
+    }
     var info = registry.getNodeInfo(id);
     
     var isEnabled = true;

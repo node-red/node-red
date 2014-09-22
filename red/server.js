@@ -242,7 +242,7 @@ function installModule(module) {
             if (err) {
                 var lookFor404 = new RegExp(" 404 .*"+module+"$","m");
                 if (lookFor404.test(stdout)) {
-                    util.log("[red] Installation of module "+module+" failed: not found");
+                    util.log("[red] Installation of module "+module+" failed: module not found");
                     var e = new Error();
                     e.code = 404;
                     reject(e);
@@ -324,7 +324,10 @@ function start() {
                     for (i in missingModules) {
                         if (missingModules.hasOwnProperty(i)) {
                             util.log(" - "+i+": "+missingModules[i].join(", "));
-                            promises.push(installModule(i));
+                            installModule(i).otherwise(function(err) {
+                                // Error already reported. Need the otherwise handler
+                                // to stop the error propagating any further
+                            });
                         }
                     }
                     
