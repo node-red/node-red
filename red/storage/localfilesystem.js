@@ -221,7 +221,7 @@ var localfilesystem = {
         return when.resolve({});
     },
     saveSettings: function(settings) {
-        return nodeFn.call(fs.writeFile,globalSettingsFile,JSON.stringify(settings),'utf8');
+        return nodeFn.call(fs.writeFile,globalSettingsFile,JSON.stringify(settings,null,1),'utf8');
     },
     
     
