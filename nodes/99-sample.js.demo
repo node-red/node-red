@@ -48,7 +48,7 @@ module.exports = function(RED) {
             node.warn("I saw a payload: "+msg.payload);
             // in this example just send it straight on... should process it here really
             this.send(msg);
-        }
+        });
 
         this.on("close", function() {
             // Called when the node is shutdown - eg on redeploy.
