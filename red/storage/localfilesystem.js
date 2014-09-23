@@ -216,7 +216,12 @@ var localfilesystem = {
         if (fs.existsSync(globalSettingsFile)) {
             return nodeFn.call(fs.readFile,globalSettingsFile,'utf8').then(function(data) {
                 if (data) {
-                    return JSON.parse(data);
+                    try {
+                        return JSON.parse(data);
+                    } catch(err) {
+                        util.log("[red] Corrupted config detected - resetting");
+                        return {};
+                    }
                 } else {
                     return {};
                 }

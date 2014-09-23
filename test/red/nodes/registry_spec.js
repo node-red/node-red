@@ -17,6 +17,7 @@
 var should = require("should");
 var sinon = require("sinon");
 var path = require("path");
+var when = require("when");
 
 var RedNodes = require("../../../red/nodes");
 var RedNode = require("../../../red/nodes/Node");
@@ -33,7 +34,7 @@ describe('NodeRegistry', function() {
     
     function stubSettings(s,available) {
         s.available =  function() {return available;}
-        s.set = function(s,v) {},
+        s.set = function(s,v) { return when.resolve()},
         s.get = function(s) { return null;}
         return s
     }
@@ -294,7 +295,7 @@ describe('NodeRegistry', function() {
         var settings = {
             nodesDir:[resourcesDir + "TestNode1",resourcesDir + "TestNode2",resourcesDir + "TestNode3"],
             available: function() { return true; },
-            set: function(s,v) {},
+            set: function(s,v) {return when.resolve();},
             get: function(s) { return null;}
         }
         var settingsSave = sinon.spy(settings,"set");
@@ -327,7 +328,7 @@ describe('NodeRegistry', function() {
     it('allows nodes to be added by filename', function(done) {
         var settings = {
             available: function() { return true; },
-            set: function(s,v) {},
+            set: function(s,v) {return when.resolve();},
             get: function(s) { return null;}
         }            
         typeRegistry.init(settings);

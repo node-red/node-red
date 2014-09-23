@@ -330,12 +330,18 @@ function start() {
                     var promises = [];
                     for (i in missingModules) {
                         if (missingModules.hasOwnProperty(i)) {
-                            util.log(" - "+i+": "+missingModules[i].join(", "));
-                            installModule(i).otherwise(function(err) {
-                                // Error already reported. Need the otherwise handler
-                                // to stop the error propagating any further
-                            });
+                            util.log("[red] - "+i+": "+missingModules[i].join(", "));
+                            if (settings.autoInstallModules) {
+                                installModule(i).otherwise(function(err) {
+                                    // Error already reported. Need the otherwise handler
+                                    // to stop the error propagating any further
+                                });
+                            }
                         }
+                    }
+                    if (!settings.autoInstallModules) {
+                        util.log("[red] Removing modules from config");
+                        redNodes.cleanNodeList();
                     }
                 }
                 defer.resolve();

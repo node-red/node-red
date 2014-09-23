@@ -69,7 +69,11 @@ var registry = (function() {
                 nodeList[i] = n;
             }
         }
-        settings.set("nodes",nodeList);
+        if (settings.available()) {
+            return settings.set("nodes",nodeList);
+        } else {
+            return when.reject("Settings unavailable");
+        }
     }
     
     return {
@@ -271,7 +275,22 @@ var registry = (function() {
             return filterNodeInfo(config);
         },
         
-        saveNodeList: saveNodeList
+        saveNodeList: saveNodeList,
+        
+        cleanNodeList: function() {
+            var removed = false;
+            for (var id in nodeConfigs) {
+                if (nodeConfigs.hasOwnProperty(id)) {
+                    if (nodeConfigs[id].module && !nodeModules[nodeConfigs[id].module]) {
+                        registry.removeNode(id);
+                        removed = true;
+                    }
+                }
+            }
+            if (removed) {
+                saveNodeList();
+            }
+        }
     }
 })();
 
@@ -547,10 +566,12 @@ function load(defaultNodesDir,disableNodePathScan) {
         when.settle(promises).then(function(results) {
             // Trigger a load of the configs to get it precached
             registry.getAllNodeConfigs();
+            
             if (settings.available()) {
-                registry.saveNodeList();
+                resolve(registry.saveNodeList());
+            } else {
+                resolve();
             }
-            resolve();
         }); 
     });
 }
@@ -608,11 +629,12 @@ function loadNodeList(nodes) {
     });
     
     return when.settle(promises).then(function(results) {
-        registry.saveNodeList();
-        var list = results.map(function(r) {
-            return filterNodeInfo(r.value);
+        return registry.saveNodeList().then(function() {
+            var list = results.map(function(r) {
+                return filterNodeInfo(r.value);
+            });
+            return list;
         });
-        return list;
     });
 }
 
@@ -666,5 +688,6 @@ module.exports = {
     disableNode: registry.disableNodeSet,
     
     addModule: addModule,
-    removeModule: registry.removeModule
+    removeModule: registry.removeModule,
+    cleanNodeList: registry.cleanNodeList
 }

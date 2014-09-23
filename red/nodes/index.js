@@ -118,6 +118,7 @@ module.exports = {
     getNodeConfigs: registry.getNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
     clearRegistry: registry.clear,
+    cleanNodeList: registry.cleanNodeList,
     
     // Flow handling
     loadFlows: flows.load,
