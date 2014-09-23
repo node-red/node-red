@@ -36,7 +36,7 @@ module.exports = function(path, options) {
         } else if (options.method == 'POST') {
             requestFunc = request.post;
         } else if (options.method == 'DELETE') {
-            requestFunc = request.delete;
+            requestFunc = request.del;
         }
         requestFunc(options, function(error,response,body) {
             if (!error && response.statusCode == 200) {
