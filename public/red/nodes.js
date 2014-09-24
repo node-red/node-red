@@ -108,7 +108,7 @@ RED.nodes = (function() {
             getNodeType: function(nt) {
                 return nodeDefinitions[nt];
             }
-        }
+        };
         return exports;
     })();
     
@@ -128,7 +128,7 @@ RED.nodes = (function() {
                 if (n._def.defaults.hasOwnProperty(d)) {
                     var property = n._def.defaults[d];
                     if (property.type) {
-                        var type = registry.getNodeType(property.type)
+                        var type = registry.getNodeType(property.type);
                         if (type && type.category == "config") {
                             var configNode = configNodes[n[d]];
                             if (configNode) {
@@ -181,7 +181,7 @@ RED.nodes = (function() {
                 if (node._def.defaults.hasOwnProperty(d)) {
                     var property = node._def.defaults[d];
                     if (property.type) {
-                        var type = registry.getNodeType(property.type)
+                        var type = registry.getNodeType(property.type);
                         if (type && type.category == "config") {
                             var configNode = configNodes[node[d]];
                             if (configNode) {
