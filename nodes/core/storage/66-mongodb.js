@@ -42,6 +42,14 @@ module.exports = function(RED) {
         }
     });
 
+    function ensureValidSelectorObject(selector) {
+        if (selector != null && (typeof selector != 'object' || Buffer.isBuffer(selector))) {
+            return {};
+        }
+        return selector;
+    }
+        
+    
     function MongoOutNode(n) {
         RED.nodes.createNode(this,n);
         this.collection = n.collection;
@@ -175,7 +183,8 @@ module.exports = function(RED) {
                         }
                         if (node.operation === "find") {
                             msg.projection = msg.projection || {};
-                            coll.find(msg.payload,msg.projection).sort(msg.sort).limit(msg.limit).toArray(function(err, items) {
+                            var selector = ensureValidSelectorObject(msg.payload);
+                            coll.find(selector,msg.projection).sort(msg.sort).limit(msg.limit).toArray(function(err, items) {
                                 if (err) {
                                     node.error(err);
                                 } else {
@@ -187,7 +196,8 @@ module.exports = function(RED) {
                                 }
                             });
                         } else if (node.operation === "count") {
-                            coll.count(msg.payload, function(err, count) {
+                            var selector = ensureValidSelectorObject(msg.payload);
+                            coll.count(selector, function(err, count) {
                                 if (err) {
                                     node.error(err);
                                 } else {
