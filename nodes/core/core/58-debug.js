@@ -20,40 +20,63 @@ module.exports = function(RED) {
     var debuglength = RED.settings.debugMaxLength||1000;
     var useColors = false;
     // util.inspect.styles.boolean = "red";
-    
+
     function DebugNode(n) {
         RED.nodes.createNode(this,n);
         this.name = n.name;
         this.complete = n.complete;
         this.console = n.console;
-        this.active = (n.active == null)||n.active;
+        this.active = (n.active === null || typeof n.active === "undefined") || n.active;
         var node = this;
-    
+
         this.on("input",function(msg) {
-            if (this.complete == "true") { // debug complete msg object
-                if (this.console == "true") {
+            if (this.complete === "true") {
+            // debug complete msg object
+                if (this.console === "true") {
                     node.log("\n"+util.inspect(msg, {colors:useColors, depth:10}));
                 }
                 if (this.active) {
                     sendDebug({id:this.id,name:this.name,topic:msg.topic,msg:msg,_path:msg._path});
                 }
-            } else { // debug just the msg.payload
-                if (this.console == "true") {
-                    if (typeof msg.payload === "string") {
-                        node.log((msg.payload.indexOf("\n") != -1 ? "\n" : "") + msg.payload);
+            } else {
+            // debug user defined msg property
+                var property = "payload";
+                var output = msg[property];
+                if (this.complete !== "false" && typeof this.complete !== "undefined") {
+                    property = this.complete;
+                    var propertyParts = property.split(".");
+                    try {
+                        output = propertyParts.reduce(function (obj, i) {
+                            return obj[i];
+                        }, msg);
+                    } catch (err) {
+                        node.warn(err);
+                        return;
                     }
-                    else if (typeof msg.payload === "object") { node.log("\n"+util.inspect(msg.payload, {colors:useColors, depth:10})); }
-                    else { node.log(util.inspect(msg.payload, {colors:useColors})); }
+
+                    if (!output) {
+                        node.warn("msg." + this.complete + " does not exist");
+                        return;
+                    }
+                }
+                if (this.console === "true") {
+                    if (typeof output === "string") {
+                        node.log((output.indexOf("\n") !== -1 ? "\n" : "") + output);
+                    } else if (typeof output === "object") {
+                        node.log("\n"+util.inspect(output, {colors:useColors, depth:10}));
+                    } else {
+                        node.log(util.inspect(output, {colors:useColors}));
+                    }
                 }
                 if (this.active) {
-                    sendDebug({id:this.id,name:this.name,topic:msg.topic,msg:msg.payload,_path:msg._path});
+                    sendDebug({id:this.id,name:this.name,topic:msg.topic,property:property,msg:output,_path:msg._path});
                 }
             }
         });
     }
-   
+
     RED.nodes.registerType("debug",DebugNode);
-    
+
     function sendDebug(msg) {
         if (msg.msg instanceof Error) {
             msg.msg = msg.msg.toString();
@@ -75,29 +98,29 @@ module.exports = function(RED) {
             msg.msg = "(boolean) "+msg.msg.toString();
         } else if (msg.msg === 0) {
             msg.msg = "0";
-        } else if (msg.msg == null) {
+        } else if (msg.msg === null || typeof msg.msg === "undefined") {
             msg.msg = "(undefined)";
         }
-    
+
         if (msg.msg.length > debuglength) {
             msg.msg = msg.msg.substr(0,debuglength) +" ....";
         }
-        
+
         RED.comms.publish("debug",msg);
     }
-    
+
     DebugNode.logHandler = new events.EventEmitter();
     DebugNode.logHandler.on("log",function(msg) {
-        if (msg.level == "warn" || msg.level == "error") {
+        if (msg.level === "warn" || msg.level === "error") {
             sendDebug(msg);
         }
     });
     RED.log.addHandler(DebugNode.logHandler);
-    
+
     RED.httpAdmin.post("/debug/:id/:state", function(req,res) {
         var node = RED.nodes.getNode(req.params.id);
         var state = req.params.state;
-        if (node != null) {
+        if (node !== null && typeof node !== "undefined" ) {
             if (state === "enable") {
                 node.active = true;
                 res.send(200);
@@ -111,4 +134,4 @@ module.exports = function(RED) {
             res.send(404);
         }
     });
-}
+};
