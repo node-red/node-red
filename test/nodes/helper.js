@@ -20,7 +20,12 @@ var request = require('supertest');
 var nock;
 if (!process.version.match(/^v0\.[0-9]\./)) {
     // only set nock for node >= 0.10
-    nock = require('nock');
+    try {
+        nock = require('nock');
+    } catch (err) {
+        // nevermind, will skip nock tests
+        nock = null;
+    }
 }
 var RED = require("../../red/red.js");
 var redNodes = require("../../red/nodes");
