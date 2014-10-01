@@ -100,7 +100,14 @@ describe('inject node', function() {
                              });
                              helper.request()
                                  .post('/inject/n1')
-                                 .expect(200).end(function() {});
+                                 .expect(200).end(function(err) {
+                                     if (err) {
+                                         return helper.clearFlows()
+                                             .then(function () {
+                                                 done(err);
+                                             });
+                                     }
+                                 });
                          });
         });
 
