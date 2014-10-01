@@ -17,6 +17,11 @@
 var should = require("should");
 var when = require("when");
 var request = require('supertest');
+var nock;
+if (!process.version.match(/^v0\.[0-9]\./)) {
+    // only set nock for node >= 0.10
+    nock = require('nock');
+}
 var RED = require("../../red/red.js");
 var redNodes = require("../../red/nodes");
 var flows = require("../../red/nodes/flows");
@@ -62,8 +67,8 @@ module.exports = {
         };
         var settings = {
             available: function() { return false; }
-        }
-        
+        };
+
         redNodes.init(settings, storage);
         credentials.init(storage);
         RED.nodes.registerType("helper", helperNode);
@@ -112,5 +117,7 @@ module.exports = {
     },
 
     url: function() { return url; },
+
+    nock: nock,
 
 };
