@@ -20,6 +20,7 @@ var request = require('supertest');
 var RED = require("../../red/red.js");
 var redNodes = require("../../red/nodes");
 var flows = require("../../red/nodes/flows");
+var credentials = require("../../red/nodes/credentials");
 var comms = require("../../red/comms.js");
 
 var http = require('http');
@@ -38,7 +39,12 @@ function helperNode(n) {
 }
 
 module.exports = {
-    load: function(testNode, testFlows, cb) {
+    load: function(testNode, testFlows, testCredentials, cb) {
+        if (typeof testCredentials === 'function') {
+            cb = testCredentials;
+            testCredentials = {};
+        }
+
         var storage = {
             getFlows: function() {
                 var defer = when.defer();
@@ -47,8 +53,11 @@ module.exports = {
             },
             getCredentials: function() {
                 var defer = when.defer();
-                defer.resolve({});
+                defer.resolve(testCredentials);
                 return defer.promise;
+            },
+            saveCredentials: function() {
+                // do nothing
             },
         };
         var settings = {
@@ -56,6 +65,7 @@ module.exports = {
         }
         
         redNodes.init(settings, storage);
+        credentials.init(storage);
         RED.nodes.registerType("helper", helperNode);
         testNode(RED);
         flows.load().then(function() {
@@ -72,6 +82,8 @@ module.exports = {
     getNode: function(id) {
         return flows.get(id);
     },
+
+    credentials: credentials,
 
     clearFlows: function() {
         return flows.clear();
