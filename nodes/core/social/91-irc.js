@@ -24,6 +24,7 @@ module.exports = function(RED) {
         this.server = n.server;
         this.channel = n.channel;
         this.nickname = n.nickname;
+        this.lastseen = 0;
         this.ircclient = null;
         this.on("close", function() {
             if (this.ircclient != null) {
@@ -44,14 +45,35 @@ module.exports = function(RED) {
         if (node.serverConfig.ircclient == null) {
             node.log("Connecting to "+node.serverConfig.server);
             node.status({fill:"grey",shape:"dot",text:"connecting"});
-            node.serverConfig.ircclient = new irc.Client(node.serverConfig.server, node.serverConfig.nickname);
+            node.serverConfig.ircclient = new irc.Client(node.serverConfig.server, node.serverConfig.nickname,{autoConnect:false,retryDelay:20000});
             node.serverConfig.ircclient.addListener('error', function(message) {
                 node.log(JSON.stringify(message));
             });
+            node.serverConfig.ircclient.addListener('netError', function(message) {
+                node.log(JSON.stringify("NET "+message));
+            });
+            node.serverConfig.ircclient.addListener('connect', function() {
+                node.serverConfig.lastseen = Date.now();
+            });
+            node.serverConfig.ircclient.addListener('ping', function(server) {
+                node.serverConfig.lastseen = Date.now();
+                node.log("PING "+JSON.stringify(server));
+            });
+            node.recon = setInterval( function() {
+                //console.log("CHK ",(Date.now()-node.serverConfig.lastseen)/1000);
+                if ((Date.now()-node.serverConfig.lastseen) > 300000) {     // if more than 5 mins since last seen
+                    node.ircclient.send.apply(node.ircclient,["TIME"]);     // request time to check link
+                }
+                if ((Date.now()-node.serverConfig.lastseen) > 603000) {     // If more than 10 mins
+                    node.serverConfig.ircclient.disconnect();
+                    node.serverConfig.ircclient.connect();
+                    node.log("Reconnect");                                  // then retry
+                }
+                node.ircclient.send.apply(node.ircclient,["TIME"]); // request time to check link
+            }, 60000); // check every 1 min
         }
         else { node.status({text:""}); }
         node.ircclient = node.serverConfig.ircclient;
-
 
         node.ircclient.addListener('registered', function(message) {
             node.log(node.ircclient.nick+" ONLINE");
@@ -103,7 +125,12 @@ module.exports = function(RED) {
             var msg = { "payload": { "type": "names", "channel": channel, "names": nicks} };
             node.send([null, msg]);
         });
-
+        node.ircclient.addListener('raw', function (message) { // any message means we are alive
+            node.serverConfig.lastseen = Date.now();
+        });
+        node.on("close", function() {
+            if (node.recon) { clearInterval(node.recon); }
+        });
     }
     RED.nodes.registerType("irc in",IrcInNode);
 
@@ -119,10 +146,33 @@ module.exports = function(RED) {
         if (node.serverConfig.ircclient == null) {
             node.log("Connecting to "+node.serverConfig.server);
             node.status({fill:"grey",shape:"dot",text:"connecting"});
-            node.serverConfig.ircclient = new irc.Client(node.serverConfig.server, node.serverConfig.nickname);
+            node.serverConfig.ircclient = new irc.Client(node.serverConfig.server, node.serverConfig.nickname,{autoConnect:false,retryDelay:20000});
             node.serverConfig.ircclient.addListener('error', function(message) {
                 node.log(JSON.stringify(message));
             });
+            node.serverConfig.ircclient.addListener('netError', function(message) {
+                node.log(JSON.stringify("NET "+message));
+            });
+            node.serverConfig.ircclient.addListener('connect', function() {
+                node.serverConfig.lastseen = Date.now();
+            });
+            node.serverConfig.ircclient.addListener('ping', function(server) {
+                node.serverConfig.lastseen = Date.now();
+                node.log("PING "+JSON.stringify(server));
+            });
+            node.recon = setInterval( function() {
+                //console.log("CHK ",(Date.now()-node.serverConfig.lastseen)/1000);
+                if ((Date.now()-node.serverConfig.lastseen) > 300000) {     // if more than 5 mins since last seen
+                    node.ircclient.send.apply(node.ircclient,["TIME"]);     // request time to check link
+                }
+                if ((Date.now()-node.serverConfig.lastseen) > 603000) {     // If more than 10 mins
+                    node.serverConfig.ircclient.disconnect();
+                    node.serverConfig.ircclient.connect();
+                    console.log("Reconnect");                               // then retry
+                }
+                node.ircclient.send.apply(node.ircclient,["TIME"]); // request time to check link
+            }, 60000); // check every 1 min
+            node.serverConfig.ircclient.connect();
         }
         else { node.status({text:""}); }
         node.ircclient = node.serverConfig.ircclient;
@@ -134,6 +184,10 @@ module.exports = function(RED) {
                 //node.log(data+" JOINED "+node.channel);
                 node.status({fill:"green",shape:"dot",text:"joined"});
             });
+        });
+
+        node.ircclient.addListener('raw', function (message) { // any message received means we are alive
+            if (message.commandType === "reply") { node.serverConfig.lastseen = Date.now(); }
         });
 
         node.on("input", function(msg) {
@@ -167,6 +221,10 @@ module.exports = function(RED) {
                     }
                 }
             }
+        });
+
+        node.on("close", function() {
+            if (node.recon) { clearInterval(node.recon); }
         });
     }
     RED.nodes.registerType("irc out",IrcOutNode);
