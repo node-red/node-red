@@ -51,6 +51,7 @@ module.exports = function(RED) {
             });
             node.serverConfig.ircclient.addListener('netError', function(message) {
                 node.log(JSON.stringify("NET "+message));
+                node.serverConfig.lastseen = Date.now();
             });
             node.serverConfig.ircclient.addListener('connect', function() {
                 node.serverConfig.lastseen = Date.now();
@@ -64,7 +65,7 @@ module.exports = function(RED) {
                 if ((Date.now()-node.serverConfig.lastseen) > 300000) {     // if more than 5 mins since last seen
                     node.ircclient.send.apply(node.ircclient,["TIME"]);     // request time to check link
                 }
-                if ((Date.now()-node.serverConfig.lastseen) > 603000) {     // If more than 10 mins
+                if ((Date.now()-node.serverConfig.lastseen) > 400000) {     // If more than 6.5 mins
                     node.serverConfig.ircclient.disconnect();
                     node.serverConfig.ircclient.connect();
                     node.log("Reconnect");                                  // then retry
@@ -152,6 +153,7 @@ module.exports = function(RED) {
             });
             node.serverConfig.ircclient.addListener('netError', function(message) {
                 node.log(JSON.stringify("NET "+message));
+                node.serverConfig.lastseen = Date.now();
             });
             node.serverConfig.ircclient.addListener('connect', function() {
                 node.serverConfig.lastseen = Date.now();
@@ -165,7 +167,7 @@ module.exports = function(RED) {
                 if ((Date.now()-node.serverConfig.lastseen) > 300000) {     // if more than 5 mins since last seen
                     node.ircclient.send.apply(node.ircclient,["TIME"]);     // request time to check link
                 }
-                if ((Date.now()-node.serverConfig.lastseen) > 603000) {     // If more than 10 mins
+                if ((Date.now()-node.serverConfig.lastseen) > 400000) {     // If more than 6.5 mins
                     node.serverConfig.ircclient.disconnect();
                     node.serverConfig.ircclient.connect();
                     console.log("Reconnect");                               // then retry
