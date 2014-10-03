@@ -16,6 +16,8 @@
 
 var when = require("when");
 
+var assert = require("assert");
+
 var userSettings = null;
 var globalSettings = null;
 var storage = null;
@@ -59,7 +61,13 @@ var persistentSettings = {
             throw new Error("Settings not available");
         }
         globalSettings[prop] = value;
-        return storage.saveSettings(globalSettings);
+        var current = persistentSettings.get(prop);
+        try {
+            assert.deepEqual(current,value);
+            return when.resolve();
+        } catch(err) {
+            return storage.saveSettings(globalSettings);
+        }
     },
     
     available: function() {
