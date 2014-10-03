@@ -69,13 +69,21 @@ module.exports = function(RED) {
         var node = this;
         var options = {};
         if (this.format) {
-            options['encoding'] = this.format;
+            options['encoding'] = this.format; // Node v. 0.10 compatible option, not compatible with v. 0.8
         }
         this.on("input",function(msg) {
             var filename = msg.filename || this.filename;
             if (filename === "") {
                 node.warn('No filename specified');
             } else {
+                // Editing the options based on Node version, API is inconsistent
+                // Could couple this with the initial options assignment but decided to bring it as close
+                // to the fs.writeFile() call as possible to make the workaround obvious
+                if (/^v0.8./.test(process.version)) {
+                    if (this.format) {
+                        options = this.format; // handle Node v0.8 API signature difference
+                    }
+                }
                 fs.readFile(filename,options,function(err,data) {
                     if (err) {
                         node.warn(err);
@@ -85,7 +93,7 @@ module.exports = function(RED) {
                         msg.payload = data;
                     }
                     node.send(msg);
-                });
+                });   
             }
         });
     }
