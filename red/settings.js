@@ -60,8 +60,8 @@ var persistentSettings = {
         if (globalSettings === null) {
             throw new Error("Settings not available");
         }
+        var current = globalSettings[prop];
         globalSettings[prop] = value;
-        var current = persistentSettings.get(prop);
         try {
             assert.deepEqual(current,value);
             return when.resolve();
@@ -72,6 +72,12 @@ var persistentSettings = {
     
     available: function() {
         return (globalSettings !== null);
+    },
+    
+    reset: function() {
+        userSettings = null;
+        globalSettings = null;
+        storage = null;
     }
 }
 

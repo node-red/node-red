@@ -20,6 +20,11 @@ var settings = require("../../red/settings");
 
 
 describe("red/settings", function() {
+        
+    afterEach(function() {
+        settings.reset();
+    });
+    
     it('wraps the user settings as read-only properties', function() {
         var userSettings = {
             a: 123,
