@@ -28,19 +28,22 @@ module.exports = function(RED) {
         this.repeat = n.repeat||25;
         //node.log("opening connection "+this.device);
         var node = this;
-        var pre = "\\\\.\\";
-        if (!plat.match(/^win/)) { pre = ""; }
-
         node.board = new ArduinoFirmata();
-        if (!fs.existsSync(pre+node.device)) {
-            node.warn("Device "+node.device+" not found");
+        if (!plat.match(/^win/)) {   // not Windows
+            if (!fs.existsSync(node.device)) {
+                node.warn("Device "+node.device+" not found");
+            }
+            else {
+                node.board.connect(node.device);
+            }
         }
-        else {
+        else { // Windows - try to connect anyway... this can be bad...
             node.board.connect(node.device);
-            node.board.on('connect', function(){
-                node.log("version "+node.board.boardVersion);
-            });
         }
+
+        node.board.on('boardReady', function(){
+            node.log("version "+node.board.boardVersion);
+        });
 
         node.on('close', function() {
             if (node.board) {
