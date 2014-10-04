@@ -20,6 +20,9 @@ module.exports = function(RED) {
     var ArduinoFirmata = require('arduino-firmata');
     var fs = require('fs');
     var plat = require('os').platform();
+    var portlist = ArduinoFirmata.list(function (err, ports) {
+        portlist = ports;
+    });
 
     // The Board Definition - this opens (and closes) the connection
     function ArduinoNode(n) {
@@ -29,15 +32,10 @@ module.exports = function(RED) {
         //node.log("opening connection "+this.device);
         var node = this;
         node.board = new ArduinoFirmata();
-        if (!plat.match(/^win/)) {   // not Windows
-            if (!fs.existsSync(node.device)) {
-                node.warn("Device "+node.device+" not found");
-            }
-            else {
-                node.board.connect(node.device);
-            }
+        if (portlist.indexOf(node.device) === -1) {
+            node.warn("Device "+node.device+" not found");
         }
-        else { // Windows - try to connect anyway... this can be bad...
+        else {
             node.board.connect(node.device);
         }
 
