@@ -64,7 +64,14 @@ RED.palette = (function() {
                 return $.fn.textWidth.fakeEl.width();
             };
 
-            var label = /^(.*?)([ -]in|[ -]out)?$/.exec(nt)[1];
+            var label;
+                                
+            if (typeof def.paletteLabel === "undefined") {
+                label = /^(.*?)([ -]in|[ -]out)?$/.exec(nt)[1];
+            } else { 
+                label = (typeof def.paletteLabel === "function" ? def.paletteLabel.call(def) : def.paletteLabel)||"";
+            }
+                
             var pixels = $.fn.textWidth(label, '13px helvetica');
             var nodeWidth = 90;
             var labelWidth = nodeWidth - 10;
@@ -126,6 +133,15 @@ RED.palette = (function() {
             $("#palette-"+category).append(d);
             d.onmousedown = function(e) { e.preventDefault(); };
 
+            var popOverContent;
+            try {
+                popOverContent = $("<p><b>"+label+"</b></p>"+($("script[data-help-name|='"+nt+"']").html().trim()||"<p>no information available</p>")).slice(0,2);
+            } catch(err) {
+                // Malformed HTML may cause errors. TODO: need to understand what can break
+                console.log("Error generating pop-over label for '"+nt+"'.");
+                console.log(err.toString());
+                popOverContent = "<p><b>"+label+"</b></p><p>no information available</p>";
+            }
             $(d).popover({
                 title:d.type,
                 placement:"right",
@@ -133,7 +149,7 @@ RED.palette = (function() {
                 delay: { show: 750, hide: 50 },
                 html: true,
                 container:'body',
-                content: $(($("script[data-help-name|='"+nt+"']").html()||"<p>no information available</p>").trim())[0]
+                content: popOverContent
             });
             $(d).click(function() {
                 var help = '<div class="node-help">'+($("script[data-help-name|='"+d.type+"']").html()||"")+"</div>";
