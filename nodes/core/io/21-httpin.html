@@ -156,8 +156,15 @@
             if (this.name) {
                 return this.name;
             } else if (this.url) {
-                var root = RED.settings.httpNodeRoot.slice(0,-1);
-                root += this.url;
+                var root = RED.settings.httpNodeRoot;
+                if (root.slice(-1) != "/") { 
+                    root = root+"/";
+                }
+                if (this.url.charAt(0) == "/") {
+                    root += this.url.slice(1);
+                } else {
+                    root += this.url;
+                }
                 return "["+this.method+"] "+root;
             } else {
                 return "http";
@@ -167,7 +174,10 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
-            var root = RED.settings.httpNodeRoot.slice(0,-1);
+            var root = RED.settings.httpNodeRoot;
+            if (root.slice(-1) == "/") { 
+                root = root.slice(0,-1);
+            }
             if (root == "") {
                 $("#node-input-tip").hide();
             } else {

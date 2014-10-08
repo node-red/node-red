@@ -135,12 +135,22 @@
         inputs:0,
         outputs:0,
         label: function() {
-            var root = RED.settings.httpNodeRoot.slice(0,-1);
-            root += this.path;
+            var root = RED.settings.httpNodeRoot;
+            if (root.slice(-1) != "/") { 
+                root = root+"/";
+            }
+            if (this.path.charAt(0) == "/") {
+                root += this.path.slice(1);
+            } else {
+                root += this.path;
+            }
             return root;
         },
         oneditprepare: function() {
-            var root = RED.settings.httpNodeRoot.slice(0,-1);
+            var root = RED.settings.httpNodeRoot;
+            if (root.slice(-1) == "/") { 
+                root = root.slice(0,-1);
+            }
             if (root == "") {
                 $("#node-config-ws-tip").hide();
             } else {
