@@ -71,8 +71,9 @@ module.exports = function(RED) {
 
     function MQTTOutNode(n) {
         RED.nodes.createNode(this,n);
-
         this.topic = n.topic;
+        this.qos = n.qos || null;
+        this.retain = n.retain;
         this.broker = n.broker;
         this.brokerConfig = RED.nodes.getNode(this.broker);
 
@@ -81,12 +82,22 @@ module.exports = function(RED) {
             this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.brokerConfig.clientid,this.brokerConfig.username,this.brokerConfig.password);
             var node = this;
             this.on("input",function(msg) {
-                if (msg != null) {
-                    if (node.topic) {
-                        msg.topic = node.topic;
+                if (msg.qos) {
+                    msg.qos = parseInt(msg.qos);
+                    if ((msg.qos !== 0) && (msg.qos !== 1) && (msg.qos !== 2)) {
+                        msg.qos = null;
                     }
-                    this.client.publish(msg);
                 }
+                msg.qos = Number(node.qos || msg.qos || 0);
+                msg.retain = node.retain || msg.retain || false;
+                msg.retain = ((msg.retain === true) || (msg.retain === "true")) || false;
+                if (node.topic) {
+                    msg.topic = node.topic;
+                }
+                if ((msg.hasOwnProperty("topic")) && (typeof msg.topic === "string") && (msg.topic !== "")) { // topic must exist
+                    this.client.publish(msg);  // send the message
+                }
+                else { node.warn("Invalid topic specified"); }
             });
             this.client.on("connectionlost",function() {
                 node.status({fill:"red",shape:"ring",text:"disconnected"});

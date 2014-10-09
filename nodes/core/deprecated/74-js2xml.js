@@ -20,6 +20,7 @@ module.exports = function(RED) {
 
     function Js2XmlNode(n) {
         RED.nodes.createNode(this,n);
+        this.warn("This node has been deprecated and will be deleted in a future release. Please update your flow to use the 'xml' node.");
         this.root = n.root;
         var node = this;
 

@@ -36,55 +36,61 @@ function init(_server,_settings) {
 
 function start() {
 
-    var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
-    var path = settings.httpAdminRoot || "/";
-    path = path + (path.slice(-1) == "/" ? "":"/") + "comms";
-    wsServer = new ws.Server({server:server,path:path});
-    
-    wsServer.on('connection',function(ws) {
-        activeConnections.push(ws);
-        ws.on('close',function() {
-            for (var i=0;i<activeConnections.length;i++) {
-                if (activeConnections[i] === ws) {
-                    activeConnections.splice(i,1);
-                    break;
+    if (!settings.disableEditor) {
+        var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
+        var path = settings.httpAdminRoot || "/";
+        path = path + (path.slice(-1) == "/" ? "":"/") + "comms";
+        wsServer = new ws.Server({server:server,path:path});
+        
+        wsServer.on('connection',function(ws) {
+            activeConnections.push(ws);
+            ws.on('close',function() {
+                for (var i=0;i<activeConnections.length;i++) {
+                    if (activeConnections[i] === ws) {
+                        activeConnections.splice(i,1);
+                        break;
+                    }
                 }
-            }
+            });
+            ws.on('message', function(data,flags) {
+                var msg = null;
+                try {
+                    msg = JSON.parse(data);
+                } catch(err) {
+                    util.log("[red:comms] received malformed message : "+err.toString());
+                    return;
+                }
+                if (msg.subscribe) {
+                    handleRemoteSubscription(ws,msg.subscribe);
+                }
+            });
+            ws.on('error', function(err) {
+                util.log("[red:comms] error : "+err.toString());
+            });
         });
-        ws.on('message', function(data,flags) {
-            var msg = null;
-            try {
-                msg = JSON.parse(data);
-            } catch(err) {
-                util.log("[red:comms] received malformed message : "+err.toString());
-                return;
-            }
-            if (msg.subscribe) {
-                handleRemoteSubscription(ws,msg.subscribe);
-            }
+        
+        wsServer.on('error', function(err) {
+            util.log("[red:comms] server error : "+err.toString());
         });
-        ws.on('error', function(err) {
-            util.log("[red:comms] error : "+err.toString());
-        });
-    });
-    
-    wsServer.on('error', function(err) {
-        util.log("[red:comms] server error : "+err.toString());
-    });
-     
-    lastSentTime = Date.now();
-    
-    heartbeatTimer = setInterval(function() {
-        var now = Date.now();
-        if (now-lastSentTime > webSocketKeepAliveTime) {
-            publish("hb",lastSentTime);
-        }
-    }, webSocketKeepAliveTime);
+         
+        lastSentTime = Date.now();
+        
+        heartbeatTimer = setInterval(function() {
+            var now = Date.now();
+            if (now-lastSentTime > webSocketKeepAliveTime) {
+                publish("hb",lastSentTime);
+            }
+        }, webSocketKeepAliveTime);
+    }
 }
 
 function stop() {
-    clearInterval(heartbeatTimer);
-    wsServer.close();
+    if (heartbeatTimer) {
+        clearInterval(heartbeatTimer);
+    }
+    if (wsServer) {
+        wsServer.close();
+    }
 }
 
 function publish(topic,data,retain) {

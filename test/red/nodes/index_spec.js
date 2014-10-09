@@ -43,7 +43,11 @@ describe("red/nodes/index", function() {
             saveCredentials: function(creds) {
                 return when(true);
             }
-     };
+    };
+    
+    var settings = {
+        available: function() { return false }
+    };
 
     function TestNode(n) {
         index.createNode(this, n);
@@ -55,7 +59,7 @@ describe("red/nodes/index", function() {
     
    it('nodes are initialised with credentials',function(done) {      
 
-        index.init({}, storage);
+        index.init(settings, storage);
         index.registerType('test', TestNode);            
         index.loadFlows().then(function() {
             var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});   
@@ -69,7 +73,7 @@ describe("red/nodes/index", function() {
     });
    
    it('flows should be initialised',function(done) {      
-        index.init({}, storage);
+        index.init(settings, storage);
         index.loadFlows().then(function() {
             should.deepEqual(testFlows, index.getFlows());
             done();
@@ -131,7 +135,7 @@ describe("red/nodes/index", function() {
 
    });
    
-   describe('allows nodes to be removed from the registry', function() {
+   describe('allows nodes to be added/remove/enabled/disabled from the registry', function() {
        var registry = require("../../../red/nodes/registry");
        var randomNodeInfo = {id:"5678",types:["random"]};
        
@@ -148,17 +152,21 @@ describe("red/nodes/index", function() {
            sinon.stub(registry,"removeNode",function(id) {
                return randomNodeInfo;
            });
+           sinon.stub(registry,"disableNode",function(id) {
+               return randomNodeInfo;
+           });
        });
        after(function() {
            registry.getNodeInfo.restore();
            registry.removeNode.restore();
+           registry.disableNode.restore();
        });
 
        it(': allows an unused node type to be removed',function(done) {      
-            index.init({}, storage);
+            index.init(settings, storage);
             index.registerType('test', TestNode);            
             index.loadFlows().then(function() {
-                var info = index.removeNode("random");
+                var info = index.removeNode("5678");
                 registry.removeNode.calledOnce.should.be.true;
                 registry.removeNode.calledWith("5678").should.be.true;
                 info.should.eql(randomNodeInfo);
@@ -167,9 +175,23 @@ describe("red/nodes/index", function() {
                 done(err);
             });
        });
+       
+       it(': allows an unused node type to be disabled',function(done) {      
+            index.init(settings, storage);
+            index.registerType('test', TestNode);            
+            index.loadFlows().then(function() {
+                var info = index.disableNode("5678");
+                registry.disableNode.calledOnce.should.be.true;
+                registry.disableNode.calledWith("5678").should.be.true;
+                info.should.eql(randomNodeInfo);
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+       });
 
        it(': prevents removing a node type that is in use',function(done) {      
-            index.init({}, storage);
+            index.init(settings, storage);
             index.registerType('test', TestNode);            
             index.loadFlows().then(function() {
                 /*jshint immed: false */
@@ -183,13 +205,42 @@ describe("red/nodes/index", function() {
             });
        });
        
+       it(': prevents disabling a node type that is in use',function(done) {
+            index.init(settings, storage);
+            index.registerType('test', TestNode);            
+            index.loadFlows().then(function() {
+                /*jshint immed: false */
+                (function() {
+                    index.disabledNode("test");
+                }).should.throw();    
+                
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+       });
+       
        it(': prevents removing a node type that is unknown',function(done) {      
-            index.init({}, storage);
+            index.init(settings, storage);
             index.registerType('test', TestNode);            
             index.loadFlows().then(function() {
                 /*jshint immed: false */
                 (function() {
                     index.removeNode("doesnotexist");
+                }).should.throw();    
+                
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+        });
+       it(': prevents disabling a node type that is unknown',function(done) {      
+            index.init(settings, storage);
+            index.registerType('test', TestNode);            
+            index.loadFlows().then(function() {
+                /*jshint immed: false */
+                (function() {
+                    index.disableNode("doesnotexist");
                 }).should.throw();    
                 
                 done();

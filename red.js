@@ -99,11 +99,14 @@ if (settings.httpRoot === false) {
     settings.httpNodeRoot = false;
 } else {
     settings.httpRoot = settings.httpRoot||"/";
+    settings.disableEditor = settings.disableEditor||false;
 }
 
 if (settings.httpAdminRoot !== false) {
     settings.httpAdminRoot = formatRoot(settings.httpAdminRoot || settings.httpRoot || "/");
     settings.httpAdminAuth = settings.httpAdminAuth || settings.httpAuth;
+} else {
+    settings.disableEditor = true;
 }
 
 if (settings.httpNodeRoot !== false) {
@@ -171,7 +174,11 @@ RED.start().then(function() {
                 util.log('[red] Error: port in use');
             } else {
                 util.log('[red] Uncaught Exception:');
-                util.log(err.stack);
+                if (err.stack) {
+                    util.log(err.stack);
+                } else {
+                    util.log(err);
+                }
             }
             process.exit(1);
         });
@@ -179,6 +186,7 @@ RED.start().then(function() {
             if (settings.httpAdminRoot === false) {
                 util.log('[red] Admin UI disabled');
             }
+            process.title = 'node-red';
             util.log('[red] Server now running at '+getListenPath());
         });
     } else {
@@ -186,13 +194,21 @@ RED.start().then(function() {
     }
 }).otherwise(function(err) {
     util.log("[red] Failed to start server:");
-    util.log(err.stack);
+    if (err.stack) {
+        util.log(err.stack);
+    } else {
+        util.log(err);
+    }
 });
 
 
 process.on('uncaughtException',function(err) {
     util.log('[red] Uncaught Exception:');
-    util.log(err.stack);
+    if (err.stack) {
+        util.log(err.stack);
+    } else {
+        util.log(err);
+    }
     process.exit(1);
 });
 

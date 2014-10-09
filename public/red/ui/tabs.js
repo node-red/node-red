@@ -93,7 +93,7 @@ RED.tabs = (function() {
                 link.on("dblclick",onTabDblClick);
                 if (tab.closeable) {
                     var closeLink = $("<a/>",{href:"#",class:"red-ui-tab-close"}).appendTo(li);
-                    closeLink.html('<i class="icon-remove" />');
+                    closeLink.html('<i class="fa fa-times" />');
                     
                     closeLink.on("click",function(event) {
                         removeTab(tab.id);

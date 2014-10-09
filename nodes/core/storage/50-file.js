@@ -28,34 +28,33 @@ module.exports = function(RED) {
             var filename = msg.filename || this.filename;
             if (filename === "") {
                 node.warn('No filename specified');
+            } else if (msg.hasOwnProperty('delete')) {
+                fs.unlink(filename, function (err) {
+                    if (err) { node.warn('Failed to delete file : '+err); }
+                    //console.log('Deleted file",filename);
+                });
             } else if (typeof msg.payload != "undefined") {
                 var data = msg.payload;
-                if (typeof data == "object") {
+                if (typeof data === "object") {
                     if (!Buffer.isBuffer(data)) {
                         data = JSON.stringify(data);
                     }
                 }
-                if (typeof data == "boolean") { data = data.toString(); }
+                if (typeof data === "boolean") { data = data.toString(); }
                 if ((this.appendNewline)&&(!Buffer.isBuffer(data))) { data += "\n"; }
-                if (msg.hasOwnProperty('delete')) {
-                    fs.unlink(filename, function (err) {
-                        if (err) { node.warn('Failed to delete file : '+err); }
-                        //console.log('Deleted file",filename);
+                if (this.overwriteFile) {
+                    // using "binary" not {encoding:"binary"} to be 0.8 compatible for a while
+                    fs.writeFile(filename, data, "binary", function (err) {
+                        if (err) { node.warn('Failed to write to file : '+err); }
+                        //console.log('Message written to file',filename);
                     });
                 }
                 else {
-                    if (this.overwriteFile) {
-                        fs.writeFile(filename, data, function (err) {
-                            if (err) { node.warn('Failed to write to file : '+err); }
-                            //console.log('Message written to file',filename);
-                        });
-                    }
-                    else {
-                        fs.appendFile(filename, data, function (err) {
-                            if (err) { node.warn('Failed to append to file : '+err); }
-                            //console.log('Message appended to file',filename);
-                        });
-                    }
+                    // using "binary" not {encoding:"binary"} to be 0.8 compatible for a while
+                    fs.appendFile(filename, data, "binary", function (err) {
+                        if (err) { node.warn('Failed to append to file : '+err); }
+                        //console.log('Message appended to file',filename);
+                    });
                 }
             }
         });

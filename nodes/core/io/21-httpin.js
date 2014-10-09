@@ -82,7 +82,7 @@ module.exports = function(RED) {
             } else if (this.method == "put") {
                 RED.httpNode.put(this.url,corsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "delete") {
-                RED.httpNode.delete(this.url,corsHandler,this.callback,errorHandler);
+                RED.httpNode.delete(this.url,corsHandler,this.callback,this.errorHandler);
             }
 
             this.on("close",function() {
@@ -171,7 +171,13 @@ module.exports = function(RED) {
             if (msg.headers) {
                 for (var v in msg.headers) {
                     if (msg.headers.hasOwnProperty(v)) {
-                        opts.headers[v.toLowerCase()] = msg.headers[v];
+                        var name = v.toLowerCase();
+                        if (name !== "content-type" && name !== "content-length") {
+                            // only normalise the known headers used later in this
+                            // function. Otherwise leave them alone.
+                            name = v;
+                        }
+                        opts.headers[name] = msg.headers[v];
                     }
                 }
             }

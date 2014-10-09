@@ -170,6 +170,12 @@ describe('Credentials', function() {
                 },
                 saveCredentials: function(creds) {
                     return when(true);
+                },
+                getSettings: function() {
+                    return when({});
+                },
+                saveSettings: function(s) {
+                    return when();
                 }
         };
         function TestNode(n) {
@@ -188,8 +194,10 @@ describe('Credentials', function() {
         sinon.stub(util, 'log', function(msg) {
             logmsg = msg;
         });
-        
-        index.init({}, storage);
+        var settings = {
+            available: function() { return false;}
+        }
+        index.init(settings, storage);
         index.registerType('test', TestNode);   
         index.loadFlows().then(function() {
             var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});   

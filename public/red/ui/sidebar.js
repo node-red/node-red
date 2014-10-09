@@ -33,10 +33,11 @@ RED.sidebar = (function() {
         //content.style.position = "absolute";
         //$('#sidebar').tabs("refresh");
     }
-    
-    $('#btn-sidebar').click(function() {toggleSidebar();});
-    RED.keyboard.add(/* SPACE */ 32,{ctrl:true},function(){toggleSidebar();d3.event.preventDefault();});
 
+    function removeTab(title) {
+        sidebar_tabs.removeTab("tab-"+title);
+    }
+    
     var sidebarSeparator =  {};
     $("#sidebar-separator").draggable({
             axis: "x",
@@ -49,14 +50,14 @@ RED.sidebar = (function() {
                 sidebarSeparator.chartRight = winWidth-$("#workspace").width()-$("#workspace").offset().left-2;
 
 
-                if (!btnSidebar.hasClass("active")) {
+                if (!RED.menu.isSelected("btn-sidebar")) {
                     sidebarSeparator.opening = true;
                     var newChartRight = 15;
                     $("#sidebar").addClass("closing");
                     $("#workspace").css("right",newChartRight);
                     $("#chart-zoom-controls").css("right",newChartRight+20);
                     $("#sidebar").width(0);
-                    toggleSidebar();
+                    RED.menu.setSelected("btn-sidebar",true);
                     RED.view.resize();
                 }
 
@@ -106,7 +107,7 @@ RED.sidebar = (function() {
                 RED.view.resize();
                 if (sidebarSeparator.closing) {
                     $("#sidebar").removeClass("closing");
-                    toggleSidebar();
+                    RED.menu.setSelected("btn-sidebar",false);
                     if ($("#sidebar").width() < 180) {
                         $("#sidebar").width(180);
                         $("#workspace").css("right",208);
@@ -118,25 +119,16 @@ RED.sidebar = (function() {
             }
     });
     
-    var btnSidebar = $("#btn-sidebar");
-    function toggleSidebar() {
-        //if ($('#sidebar').tabs( "option", "active" ) === false) {
-        //    $('#sidebar').tabs( "option", "active",0);
-        //}
-        btnSidebar.toggleClass("active");
-        
-        if (!btnSidebar.hasClass("active")) {
+    function toggleSidebar(state) {
+        if (!state) {
             $("#main-container").addClass("sidebar-closed");
         } else {
             $("#main-container").removeClass("sidebar-closed");
         }
     }
-    toggleSidebar();
     
     function showSidebar(id) {
-        if (!$("#btn-sidebar").hasClass("active")) {
-            toggleSidebar();
-        }
+        RED.menu.setSelected("btn-sidebar",true);
         sidebar_tabs.activateTab("tab-"+id);
     }
     
@@ -144,10 +136,19 @@ RED.sidebar = (function() {
         return sidebar_tabs.contains("tab-"+id);
     }
     
+    
+    $(function() {
+        RED.keyboard.add(/* SPACE */ 32,{ctrl:true},function(){RED.menu.setSelected("btn-sidebar",!RED.menu.isSelected("btn-sidebar"));d3.event.preventDefault();});
+        showSidebar("info");
+    });
+
+    
     return {
         addTab: addTab,
+        removeTab: removeTab,
         show: showSidebar,
-        containsTab: containsTab
+        containsTab: containsTab,
+        toggleSidebar: toggleSidebar
     }
     
 })();

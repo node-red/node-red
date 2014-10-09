@@ -269,7 +269,7 @@ module.exports = function(RED) {
                                 //}
                             });
                             obj.serial.on("disconnect",function() {
-                                node.warn("Serial Port gone away.");
+                                util.log("[serial] serial port "+port+" gone away");
                             });
                         }
                         setupSerial();

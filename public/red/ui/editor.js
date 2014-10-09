@@ -48,8 +48,10 @@ RED.editor = (function() {
     function validateNodeProperties(node, definition, properties) {
         var isValid = true;
         for (var prop in definition) {
-            if (!validateNodeProperty(node, definition, prop, properties[prop])) {
-                isValid = false;
+            if (definition.hasOwnProperty(prop)) {
+                if (!validateNodeProperty(node, definition, prop, properties[prop])) {
+                    isValid = false;
+                }
             }
         }
         return isValid;
@@ -122,6 +124,7 @@ RED.editor = (function() {
             width: 500,
             buttons: [
                 {
+                    id: "node-dialog-ok",
                     text: "Ok",
                     click: function() {
                         if (editing_node) {
@@ -237,6 +240,7 @@ RED.editor = (function() {
                     }
                 },
                 {
+                    id: "node-dialog-cancel",
                     text: "Cancel",
                     click: function() {
                         $( this ).dialog( "close" );
@@ -287,7 +291,7 @@ RED.editor = (function() {
         input.replaceWith('<select style="width: 60%;" id="node-input-'+property+'"></select>');
         updateConfigNodeSelect(property,type,node[property]);
         var select = $("#node-input-"+property);
-        select.after(' <a id="node-input-lookup-'+property+'" class="btn"><i class="icon icon-pencil"></i></a>');
+        select.after(' <a id="node-input-lookup-'+property+'" class="btn"><i class="fa fa-pencil"></i></a>');
         $('#node-input-lookup-'+property).click(function(e) {
             showEditConfigNodeDialog(property,type,select.find(":selected").val());
             e.preventDefault();
@@ -398,8 +402,8 @@ RED.editor = (function() {
                     changed = true;
                     
                 }
+                node.credentials[cred] = value;
                 if (value != node.credentials._[cred]) {
-                    node.credentials[cred] = value;
                     changed = true;
                 }
             }
@@ -456,6 +460,7 @@ RED.editor = (function() {
         editing_node = node;
         RED.view.state(RED.state.EDITING);
         $("#dialog-form").html($("script[data-template-name='"+node.type+"']").html());
+        $('<input type="text" style="display: none;" />').appendTo("#dialog-form");
         prepareEditDialog(node,node._def,"node-input");
         $( "#dialog" ).dialog("option","title","Edit "+node.type+" node").dialog( "open" );
     }
@@ -561,6 +566,7 @@ RED.editor = (function() {
             closeOnEscape: false,
             buttons: [
                 {
+                    id: "node-config-dialog-ok",
                     text: "Ok",
                     click: function() {
                         var configProperty = $(this).dialog('option','node-property');
@@ -586,7 +592,12 @@ RED.editor = (function() {
                             configNode = RED.nodes.node(configId);
                             for (d in configTypeDef.defaults) {
                                 if (configTypeDef.defaults.hasOwnProperty(d)) {
-                                    configNode[d] = $("#node-config-input-"+d).val();
+                                    var input = $("#node-config-input-"+d);
+                                    if (input.attr('type') === "checkbox") {
+                                      configNode[d] = input.prop('checked');
+                                    } else {
+                                      configNode[d] = input.val();
+                                    }
                                 }
                             }
                             updateConfigNodeSelect(configProperty,configType,configId);
@@ -605,6 +616,7 @@ RED.editor = (function() {
                     }
                 },
                 {
+                    id: "node-config-dialog-cancel",
                     text: "Cancel",
                     click: function() {
                         var configType = $(this).dialog('option','node-type');

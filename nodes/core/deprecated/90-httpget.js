@@ -18,6 +18,7 @@ var RED = require(process.env.NODE_RED_HOME+"/red/red");
 
 function HttpGet(n) {
     RED.nodes.createNode(this,n);
+    this.warn("This node has been deprecated and will be deleted in a future release. Please update your flow to use the 'http request' node.");
     this.baseurl = n.baseurl || "";
     this.append = n.append || "";
     var node = this;

@@ -19,8 +19,9 @@ var nodes = require("./nodes");
 var library = require("./library");
 var comms = require("./comms");
 var log = require("./log");
+var util = require("./util");
 var fs = require("fs");
-var settings = null;
+var settings = require("./settings");
 var credentials = require("./nodes/credentials");
 
 var path = require('path');
@@ -32,16 +33,8 @@ var events = require("events");
 var RED = {
 
     init: function(httpServer,userSettings) {
-        settings = userSettings;
-        
-        var p = require(path.join(process.env.NODE_RED_HOME,"package.json"));
-        if (fs.existsSync(path.join(process.env.NODE_RED_HOME,".git"))) {
-            settings.version = p.version+".git";
-        } else {
-            settings.version = p.version;
-        }
-        
-        
+        userSettings.version = this.version();
+        settings.init(userSettings);
         server.init(httpServer,settings);
         library.init();
         return server.app;
@@ -54,13 +47,22 @@ var RED = {
     credentials: credentials,
     events: events,
     log: log,
-    comms:comms
+    comms: comms,
+    settings:settings,
+    util: util,
+    version: function () {
+        var p = require(path.join(process.env.NODE_RED_HOME,"package.json"));
+        if (fs.existsSync(path.join(process.env.NODE_RED_HOME,".git"))) {
+            return p.version+".git";
+        } else {
+            return p.version;
+        }
+    }
 };
 
 RED.__defineGetter__("app", function() { console.log("Deprecated use of RED.app - use RED.httpAdmin instead"); return server.app });
 RED.__defineGetter__("httpAdmin", function() { return server.app });
 RED.__defineGetter__("httpNode", function() { return server.nodeApp });
 RED.__defineGetter__("server", function() { return server.server });
-RED.__defineGetter__("settings", function() { return settings });
 
 module.exports = RED;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 var when = require('when');
 
 var storageModule;
+var settingsAvailable;
 
 function moduleSelector(aSettings) {
     var toReturn;
@@ -38,48 +39,64 @@ function is_malicious(path) {
 }
 
 var storageModuleInterface = {
-        init : function(settings) {
+        init: function(settings) {
             try {
                 storageModule = moduleSelector(settings);
+                settingsAvailable = storageModule.hasOwnProperty("getSettings") && storageModule.hasOwnProperty("saveSettings");
             } catch (e) {
                 return when.reject(e);
             }
             return storageModule.init(settings);
         },
-        getFlows : function() {
+        getFlows: function() {
             return storageModule.getFlows();
         },
-        saveFlows : function(flows) {
+        saveFlows: function(flows) {
             return storageModule.saveFlows(flows);
         },
-        getCredentials : function() {
+        getCredentials: function() {
             return storageModule.getCredentials();
         },
-        saveCredentials : function(credentials) {
+        saveCredentials: function(credentials) {
             return storageModule.saveCredentials(credentials);
         },
-        getAllFlows : function() {
+        getSettings: function() {
+            if (settingsAvailable) {
+                return storageModule.getSettings();
+            } else {
+                return when.resolve(null);
+            }
+        },
+        saveSettings: function(settings) {
+            if (settingsAvailable) {
+                return storageModule.saveSettings(settings);
+            } else {
+                return when.resolve();
+            }
+        },
+        /* Library Functions */
+        getAllFlows: function() {
             return storageModule.getAllFlows();
         },
-        getFlow : function(fn) {
+        getFlow: function(fn) {
             if (is_malicious(fn)) {
                 return when.reject(new Error('forbidden flow name'));
             }
             return storageModule.getFlow(fn);
         },
-        saveFlow : function(fn, data) {
+        saveFlow: function(fn, data) {
             if (is_malicious(fn)) {
                 return when.reject(new Error('forbidden flow name'));
             }
             return storageModule.saveFlow(fn, data);
         },
-        getLibraryEntry : function(type, path) {
+        getLibraryEntry: function(type, path) {
             if (is_malicious(path)) {
                 return when.reject(new Error('forbidden flow name'));
             }
             return storageModule.getLibraryEntry(type, path);
         },
-        saveLibraryEntry : function(type, path, meta, body) {
+        saveLibraryEntry: function(type, path, meta, body) {
             if (is_malicious(path)) {
                 return when.reject(new Error('forbidden flow name'));
             }

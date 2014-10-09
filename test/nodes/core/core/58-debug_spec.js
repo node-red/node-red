@@ -231,7 +231,8 @@ describe('debug node', function() {
                 n1.emit("input", {payload:"message 1"});
                 helper.request()
                     .post('/debug/n1/enable')
-                    .expect(200).end(function() {
+                    .expect(200).end(function(err) {
+                        if (err) { return done(err); }
                         n1.emit("input", {payload:"message 2"});
                     });
             }, function(msg) {
@@ -249,7 +250,11 @@ describe('debug node', function() {
             websocket_test(function(close) {
                 helper.request()
                     .post('/debug/n1/disable')
-                    .expect(200).end(function() {
+                    .expect(201).end(function(err) {
+                        if (err) {
+                            close();
+                            return done(err);
+                        }
                         n1.emit("input", {payload:"message"});
                         setTimeout(function() {
                             close();

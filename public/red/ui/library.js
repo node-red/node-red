@@ -25,6 +25,7 @@ RED.library = (function() {
                 var li;
                 var a;
                 var ul = document.createElement("ul");
+                ul.id = "btn-import-library-submenu";
                 ul.className = "dropdown-menu";
                 if (data.d) {
                     for (i in data.d) {
@@ -61,7 +62,8 @@ RED.library = (function() {
                 return ul;
             };
             var menu = buildMenu(data,"");
-            $("#flow-menu-parent>ul").replaceWith(menu);
+            //TODO: need an api in RED.menu for this
+            $("#btn-import-library-submenu").replaceWith(menu);
         });
     }
     loadFlowLibrary();
@@ -107,7 +109,7 @@ RED.library = (function() {
                             });
                         }
                     })();
-                    li.innerHTML = '<i class="icon-folder-close"></i> '+v+"</i>";
+                    li.innerHTML = '<i class="fa fa-folder"></i> '+v+"</i>";
                     ul.appendChild(li);
                 } else {
                     // file
@@ -119,7 +121,6 @@ RED.library = (function() {
                            $(".list-selected",ul).removeClass("list-selected");
                            $(this).addClass("list-selected");
                            $.get("library/"+options.url+root+item.fn, function(data) {
-                                   console.log(data);
                                    selectedLibraryItem = item;
                                    libraryEditor.setText(data);
                            });
@@ -132,8 +133,8 @@ RED.library = (function() {
         }
     
         $('#node-input-name').addClass('input-append-left').css("width","65%").after(
-            '<div class="btn-group" style="margin-left: -5px;">'+
-            '<button id="node-input-'+options.type+'-lookup" class="btn input-append-right" data-toggle="dropdown"><i class="icon-book"></i> <span class="caret"></span></button>'+
+            '<div class="btn-group" style="margin-left: 0px;">'+
+            '<button id="node-input-'+options.type+'-lookup" class="btn input-append-right" data-toggle="dropdown"><i class="fa fa-book"></i> <i class="fa fa-caret-down"></i></button>'+
             '<ul class="dropdown-menu pull-right" role="menu">'+
             '<li><a id="node-input-'+options.type+'-menu-open-library" tabindex="-1" href="#">Open Library...</a></li>'+
             '<li><a id="node-input-'+options.type+'-menu-save-library" tabindex="-1" href="#">Save to Library...</a></li>'+

@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,18 @@ body {
   padding-top: 100px;
   background: url("pw_maze_white.png");
 }
+
+#header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: #000;
+    box-sizing: border-box;
+    padding: 5px 0px 5px 20px;
+}
+
 #dropTarget {
     position: absolute;
     top: 0; bottom: 0;
@@ -36,7 +48,9 @@ body {
     font-size: 40px;
     color: #fff;
 }
-
+#dropTarget div i {
+    font-size: 80px;
+}
 div.btn-group, a.btn {
     -webkit-user-select: none;
    -khtml-user-select: none;
@@ -45,30 +59,66 @@ div.btn-group, a.btn {
    user-select: none;
 }
 
-a.brand {
-        line-height: 16px;
+span.logo {
+    pointer-events: none;
+    float: left;
+    font-size: 30px;
+    line-height: 30px;
+    text-decoration: none;
+    color: #ccc;
 }
-a.brand span {
+span.logo span {
     vertical-align: middle;
     font-size: 16px !important;
 }
-a.brand:hover span.red {
-    color: rgb(197, 112, 112) !important;
+span.logo img {
+    height: 18px;
 }
-a.brand:hover {
-    color: #bbb !important;
+#header .button {
+    line-height: 22px;
+    display: inline-block;
+    font-size: 14px;
+    padding: 4px 12px;
+    text-decoration: none;
+    border-radius: 3px;
+    color: #ccc;
+    margin: auto 10px;
+    vertical-align: middle;
 }
-a.brand img {
-    height: 16px;
+#header .button:not(.disabled):hover {
+    box-shadow: 0 0 2px #fff;
+}
+#btn-deploy:not(.disabled):hover {
+    background: #ca3f39;
 }
 
-.navbar-fixed-top {
-    position: absolute !important;
-    z-index: 100 !important;
+#btn-deploy {
+    color: #fff !important;
+    background: #d24741;
+    box-shadow: 0 0 2px #fff;
 }
-.navbar-inner > .container-fluid {
-    padding-right: 10px;
+#btn-deploy:not(.disabled):active {
+    background: #aa1f19 !important;
+    color: #ccc !important;
+    box-shadow: 0 0 2px #999;
 }
+#btn-deploy.disabled {
+    cursor: default;
+    background: #444 ;
+    color: #999 !important;
+}
+
+#btn-sidemenu {
+    font-size: 20px !important;
+}
+#btn-sidemenu:active, #btn-sidemenu.active {
+    background: #333 ;
+}
+#header .button:focus {
+    outline: none;
+}
+
+
 
 #workspace {
    margin-left: 160px;
@@ -141,20 +191,21 @@ a.brand img {
     box-sizing:border-box;
     -moz-box-sizing: border-box;    
 }
-#palette-search i.icon-search {
+#palette-search i.fa-search {
     position: absolute;
     pointer-events: none;
-    left: 3px;
+    left: 4px;
     top: 10px;
 }
-#palette-search i.icon-remove {
+#palette-search i.fa-times {
     position: absolute;
-    right: 3px;
+    right: 6px;
     top: 10px;
 }
 
 #palette-search-clear {
     display: none;
+    color: #000;
 }
 
 #palette-search input {
@@ -192,10 +243,10 @@ a.brand img {
     border-radius: 3px;
     cursor: pointer;
     text-align: left;
-    padding: 3px;
+    padding: 1px;
 }
 .palette-header i {
-    float: right;
+    margin: 3px 4px 3px 3px;
     -webkit-transition: all 0.2s ease-in-out;
     -moz-transition: all 0.2s ease-in-out;
     -o-transition: all 0.2s ease-in-out;
@@ -587,12 +638,15 @@ table.node-info tr.blank {
 }
 table.node-info tr.blank td {
     padding-top: 8px;
+    border: none;
+    font-weight: bold;
+    padding-left: 0px;
 }
 table.node-info td:first-child{
     color: #000;
     vertical-align: top;
     width: 90px;
-    padding: 0 3px;
+    padding: 3px;
     border-right: 1px solid #ddd;
 }
 table.node-info td:last-child{
@@ -611,11 +665,39 @@ div.node-info {
 .hidden {
     display: none;
 }
-
-.dropdown-menu * .icon-ok {
-    display: none;
+/*
+.dropdown-menu {
+    font-size: 14px;
+    background: #000;
 }
-.dropdown-menu * a.active > .icon-ok {
+.dropdown-menu .divider {
+    background: #666;
+    border-bottom: #666;
+}
+.dropdown-menu>li>a {
+    color: #ddd;
+}
+.dropdown-submenu>ul {
+    border: 1px solid white;
+    border-radius: 6px !important;
+}
+.dropdown-menu li.disabled  a {
+    color: #666;
+}
+.dropdown-menu li.disabled  a:hover {
+    background: none;
+}  
+*/
+.dropdown-menu>li>a:hover, .dropdown-menu>li>a:focus, .dropdown-submenu:hover>a, .dropdown-submenu:focus>a {
+    background: #999;
+}
+
+.dropdown-menu * .fa-check {
+    display: none;
+    margin-right: -15px;
+    margin-top: 3px;
+}
+.dropdown-menu * a.active > .fa-check {
     display: inline-block;
 }
 .dropdown-menu>li.disabled>a:hover>[class^="icon-"] {
@@ -625,14 +707,15 @@ div.node-info {
 .dropdown-menu  {
     width: 200px !important;
 }
+.dropdown-menu > li > a > i {
+    width: 10px;
+    text-align: center;
+    margin-left: -8px;
+}
 .dropdown-menu > li > a {
-     padding-left: 28px ;
+     padding-left: 38px ;
      text-indent: -8px ;
      white-space: normal !important;
-}
-
-.navbar-fixed-top, .navbar-fixed-bottom {
-    z-index: 1000;
 }
 
 .popover-title { display: none; }
@@ -722,8 +805,9 @@ div.node-info {
     width: 100%;
     background: #e3e3e3;
     height: 100%;
-    line-height: 28px;
+    line-height: 30px;
     text-align: center;
+    color: #000;
 }
 #btn-workspace-add-tab:hover {
     background: #efefef;
@@ -783,6 +867,7 @@ ul.red-ui-tabs li a.red-ui-tab-close {
     text-align: center;
     padding: 0px;
     border-radius: 5px;
+    color: #666;
 }
 ul.red-ui-tabs li a.red-ui-tab-close:hover {
     background: #bbb !important;

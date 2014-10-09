@@ -66,15 +66,30 @@
         <input type="text" id="node-input-topic" placeholder="Topic">
     </div>
     <div class="form-row">
+        <label for="node-input-qos"><i class="fa fa-empire"></i> QoS</label>
+        <select id="node-input-qos" style="width:125px !important">
+            <option value=""></option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+        </select>
+        &nbsp;&nbsp;<i class="fa fa-history"></i>&nbsp;Retain &nbsp;<select id="node-input-retain" style="width:125px !important">
+            <option value=""></option>
+            <option value="false">false</option>
+            <option value="true">true</option>
+        </select>
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-tips">Tip: Leave topic, qos or retain blank if you want to set them via msg properties.</div>
 </script>
 
 <script type="text/x-red" data-help-name="mqtt out">
-    <p>Connects to a MQTT broker and publishes <b>msg.payload</b> either to the <b>msg.topic</b> OR to the topic specified in the edit window. The value in the edit window has precedence.</p>
-    <p><b>msg.qos</b> and <b>msg.retain</b> may also optionally have been set. If not set they are set to 0 and false respectively.</p>
-    <p>If <b>msg.payload</b> contains a buffer or an object it will be stringified before being sent.</p>
+    <p>Connects to a MQTT broker and publishes <b>msg.payload</b> either to the <b>msg.topic</b> or to the topic specified in the edit window. The value in the edit window has precedence.</p>
+    <p>Likewise QoS and/or retain values in the edit panel will overwrite any <b>msg.qos</b> and <b>msg.retain</b> properties. If nothing is set they default to <i>0</i> and <i>false</i> respectively.</p>
+    <p>If <b>msg.payload</b> contains an object it will be stringified before being sent.</p>
 </script>
 
 <script type="text/javascript">
@@ -83,6 +98,8 @@
         defaults: {
             name: {value:""},
             topic: {value:""},
+            qos: {value:""},
+            retain: {value:""},
             broker: {type:"mqtt-broker", required:true}
         },
         color:"#d8bfd8",

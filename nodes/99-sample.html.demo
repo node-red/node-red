@@ -30,7 +30,7 @@
    <!-- (with the 'node-input-' prefix).                                     -->
    <!-- The available icon classes are defined Twitter Bootstrap glyphicons  -->
     <div class="form-row">
-        <label for="node-input-topic"><i class="icon-tasks"></i> Topic</label>
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
         <input type="text" id="node-input-topic" placeholder="Topic">
     </div>
 
@@ -38,7 +38,7 @@
     <!-- By convention, most nodes have a 'name' property. The following div -->
     <!-- provides the necessary field. Should always be the last option      -->
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
@@ -65,7 +65,7 @@
             name: {value:""},   //  along with default values.
             topic: {value:"", required:true}
         },
-        inputs:0,               // set the number of inputs - only 0 or 1
+        inputs:1,               // set the number of inputs - only 0 or 1
         outputs:1,              // set the number of outputs - 0 to n
         // set the icon (held in icons dir below where you save the node)
         icon: "myicon.png",     // saved in  icons/myicon.png

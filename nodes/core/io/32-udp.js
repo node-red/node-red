@@ -142,7 +142,7 @@ module.exports = function(RED) {
                 } else {
                     var message;
                     if (node.base64) {
-                        message = new Buffer(b64string, 'base64');
+                        message = new Buffer(msg.payload, 'base64');
                     } else if (msg.payload instanceof Buffer) {
                         message = msg.payload;
                     } else {

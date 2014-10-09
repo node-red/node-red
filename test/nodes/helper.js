@@ -17,9 +17,20 @@
 var should = require("should");
 var when = require("when");
 var request = require('supertest');
+var nock;
+if (!process.version.match(/^v0\.[0-9]\./)) {
+    // only set nock for node >= 0.10
+    try {
+        nock = require('nock');
+    } catch (err) {
+        // nevermind, will skip nock tests
+        nock = null;
+    }
+}
 var RED = require("../../red/red.js");
 var redNodes = require("../../red/nodes");
 var flows = require("../../red/nodes/flows");
+var credentials = require("../../red/nodes/credentials");
 var comms = require("../../red/comms.js");
 
 var http = require('http');
@@ -38,7 +49,12 @@ function helperNode(n) {
 }
 
 module.exports = {
-    load: function(testNode, testFlows, cb) {
+    load: function(testNode, testFlows, testCredentials, cb) {
+        if (typeof testCredentials === 'function') {
+            cb = testCredentials;
+            testCredentials = {};
+        }
+
         var storage = {
             getFlows: function() {
                 var defer = when.defer();
@@ -47,11 +63,19 @@ module.exports = {
             },
             getCredentials: function() {
                 var defer = when.defer();
-                defer.resolve({});
+                defer.resolve(testCredentials);
                 return defer.promise;
             },
+            saveCredentials: function() {
+                // do nothing
+            },
         };
-        redNodes.init({}, storage);
+        var settings = {
+            available: function() { return false; }
+        };
+
+        redNodes.init(settings, storage);
+        credentials.init(storage);
         RED.nodes.registerType("helper", helperNode);
         testNode(RED);
         flows.load().then(function() {
@@ -62,12 +86,14 @@ module.exports = {
     unload: function() {
         // TODO: any other state to remove between tests?
         redNodes.clearRegistry();
-        flows.stopFlows();
+        return flows.stopFlows();
     },
 
     getNode: function(id) {
         return flows.get(id);
     },
+
+    credentials: credentials,
 
     clearFlows: function() {
         return flows.clear();
@@ -89,12 +115,14 @@ module.exports = {
         });
     },
     //TODO consider saving TCP handshake/server reinit on start/stop/start sequences
-    stopServer : function(done) {
+    stopServer: function(done) {
         if(server) {
             server.close(done);
         }
     },
 
     url: function() { return url; },
+
+    nock: nock,
 
 };
