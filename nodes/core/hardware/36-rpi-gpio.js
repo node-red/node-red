@@ -19,6 +19,7 @@ module.exports = function(RED) {
     var util = require("util");
     var exec = require('child_process').exec;
     var fs =  require('fs');
+    var wpi = require('wiring-pi');
 
     var gpioCommand = '/usr/local/bin/gpio';
 
@@ -99,29 +100,57 @@ module.exports = function(RED) {
         this.buttonState = -1;
         this.pin = pintable[n.pin];
         this.intype = n.intype;
+        this.usewpi = n.usewpi;
         var node = this;
 
         if (node.pin !== undefined) {
-            exec(gpioCommand+" mode "+node.pin+" "+node.intype, function(err,stdout,stderr) {
-                if (err) { node.error(err); }
-                else {
-                    node._interval = setInterval( function() {
-                        exec(gpioCommand+" read "+node.pin, function(err,stdout,stderr) {
-                            if (err) { node.error(err); }
-                            else {
-                                if (node.buttonState !== Number(stdout)) {
-                                    var previousState = node.buttonState;
-                                    node.buttonState = Number(stdout);
-                                    if (previousState !== -1) {
-                                        var msg = {topic:"pi/"+tablepin[node.pin], payload:node.buttonState};
-                                        node.send(msg);
+            if( node.usewpi ) {
+              console.log("using pin: %s", node.pin);
+
+              //setup pin
+              wpi.wiringPiSetup();
+              wpi.pinMode(Number(node.pin), wpi.modes.INPUT);
+              var wpiPud = wpi.PUD_OFF;
+              wpiPud = (n.intype == "pullup" ? wpi.PUD_UP : (n.intype == "pulldown" ? wpi.PUD_DOWN : wpi.PUD_OFF));
+              wpi.pullUpDnControl(Number(node.pin), wpiPud);
+
+              //now read it
+              node._interval = setInterval( function() {
+                var data = wpi.digitalRead(Number(node.pin));
+                //console.log(data);
+                if (node.buttonState !== Number(data)) {
+                  var previousState = node.buttonState;
+                  node.buttonState = Number(data);
+                  if (previousState !== -1) {
+                      var msg = {topic:"pi/"+tablepin[node.pin], payload:node.buttonState};
+                      node.send(msg);
+                      console.log(msg);
+                  }
+                }
+              }, 250); 
+
+            } else {
+                exec(gpioCommand+" mode "+node.pin+" "+node.intype, function(err,stdout,stderr) {
+                    if (err) { node.error(err); }
+                    else {
+                        node._interval = setInterval( function() {
+                            exec(gpioCommand+" read "+node.pin, function(err,stdout,stderr) {
+                                if (err) { node.error(err); }
+                                else {
+                                    if (node.buttonState !== Number(stdout)) {
+                                        var previousState = node.buttonState;
+                                        node.buttonState = Number(stdout);
+                                        if (previousState !== -1) {
+                                            var msg = {topic:"pi/"+tablepin[node.pin], payload:node.buttonState};
+                                            node.send(msg);
+                                        }
                                     }
                                 }
-                            }
-                        });
-                    }, 250);
-                }
-            });
+                            });
+                        }, 250);
+                    }
+                });                
+            }
         }
         else {
             node.error("Invalid GPIO pin: "+node.pin);
