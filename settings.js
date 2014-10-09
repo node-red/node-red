@@ -112,7 +112,7 @@ module.exports = {
     // can be accessed in a function block as:
     //    context.global.os
 
-    functionGlobalContext: { }
+    functionGlobalContext: { wpi: require('wiring-pi') }
     //functionGlobalContext: { bonescript:require('bonescript') }
     //functionGlobalContext: { arduino:require('duino') }
 
