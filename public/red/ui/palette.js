@@ -55,26 +55,16 @@ RED.palette = (function() {
             d.id = "palette_node_"+nodeTypeId;
             d.type = nt;
 
-            // calculate width of label text
-            $.fn.textWidth = function(text, font) {
-                if (!$.fn.textWidth.fakeEl) {
-                    $.fn.textWidth.fakeEl = $('<span>').hide().appendTo(document.body);
-                }
-                $.fn.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
-                return $.fn.textWidth.fakeEl.width();
-            };
-
             var label;
-                                
+
             if (typeof def.paletteLabel === "undefined") {
                 label = /^(.*?)([ -]in|[ -]out)?$/.exec(nt)[1];
-            } else { 
+            } else {
                 label = (typeof def.paletteLabel === "function" ? def.paletteLabel.call(def) : def.paletteLabel)||"";
             }
-                
-            var pixels = $.fn.textWidth(label, '13px helvetica');
+
+            var pixels = RED.view.calculateTextWidth(label, "palette_label", 0);
             var nodeWidth = 90;
-            var labelWidth = nodeWidth - 10;
             var numLines = Math.ceil(pixels / nodeWidth);
             var multiLine = numLines > 1;
 
