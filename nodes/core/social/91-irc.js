@@ -65,14 +65,14 @@ module.exports = function(RED) {
             node.recon = setInterval( function() {
                 //console.log("CHK ",(Date.now()-node.serverConfig.lastseen)/1000);
                 if ((Date.now()-node.serverConfig.lastseen) > 300000) {     // if more than 5 mins since last seen
-                    node.ircclient.send.apply(node.ircclient,["TIME"]);     // request time to check link
+                    node.serverConfig.ircclient.send.apply(node.serverConfig.ircclient,["TIME"]);     // request time to check link
                 }
                 if ((Date.now()-node.serverConfig.lastseen) > 400000) {     // If more than 6.5 mins
                     node.serverConfig.ircclient.disconnect();
                     node.serverConfig.ircclient.connect();
                     node.log("reconnect");                                  // then retry
                 }
-                node.ircclient.send.apply(node.ircclient,["TIME"]); // request time to check link
+                node.serverConfig.ircclient.send.apply(node.serverConfig.ircclient,["TIME"]); // request time to check link
             }, 60000); // check every 1 min
         }
         else { node.status({text:""}); }
