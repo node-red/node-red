@@ -15,7 +15,7 @@
  **/
 
 var when = require("when");
-
+var clone = require("clone");
 var assert = require("assert");
 
 var userSettings = null;
@@ -45,12 +45,12 @@ var persistentSettings = {
     },
     get: function(prop) {
         if (userSettings.hasOwnProperty(prop)) {
-            return userSettings[prop];
+            return clone(userSettings[prop]);
         }
         if (globalSettings === null) {
             throw new Error("Settings not available");
         }
-        return globalSettings[prop];
+        return clone(globalSettings[prop]);
     },
     
     set: function(prop,value) {
