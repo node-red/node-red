@@ -1,0 +1,24 @@
+23 Sep 02:33:09 - [log] [inject:Trigger] inject: cronjob stopped
+23 Sep 02:33:09 - [red] Starting flows
+23 Sep 02:33:09 - [log] [inject:Trigger] crontab = 00 12 * * *
+23 Sep 02:33:10 - [log] [exec:ifconfig] ifconfig  wlan0
+23 Sep 02:33:10 - [mqtt] [4a71a091.b58e6] disconnected from broker tcp://mosquitto.mooo.com:1883
+23 Sep 02:33:10 - [mqtt] [d3e96502.2c1698] disconnected from broker tcp://test.mosquitto.org:1883
+23 Sep 02:33:10 - [mqtt] [7d8bc91d.827438] connected to broker tcp://mosquitto.mooo.com:1883
+23 Sep 02:33:11 - [mqtt] [351465d8.caeb9a] connected to broker tcp://test.mosquitto.org:1883
+23 Sep 02:33:16 - [error] [twitter out:Tweet ip] Error: HTTP Error 403: Forbidden, API message: {"erro
+rs":[{"code":187,"message":"Status is a duplicate."}]}
+23 Sep 02:33:18 - [log] [exec:7d0e9d28.82f164] sudo cd /home/pi/433utils/RPi_utils & /home/pi/433utils
+/RPi_utils/trisend 5592371
+23 Sep 02:33:26 - [log] [exec:7d0e9d28.82f164] sudo cd /home/pi/433utils/RPi_utils & /home/pi/433utils
+/RPi_utils/trisend 5592371
+23 Sep 02:33:59 - [log] [exec:7d0e9d28.82f164] sudo cd /home/pi/433utils/RPi_utils & /home/pi/433utils
+/RPi_utils/trisend 5592371
+23 Sep 02:49:26 - [mqtt] [351465d8.caeb9a] connection lost to broker tcp://test.mosquitto.org:1883
+23 Sep 02:49:41 - [mqtt] [351465d8.caeb9a] connected to broker tcp://test.mosquitto.org:1883
+23 Sep 03:28:46 - [mqtt] [7d8bc91d.827438] connection lost to broker tcp://mosquitto.mooo.com:1883
+23 Sep 03:28:54 - [mqtt] [351465d8.caeb9a] connection lost to broker tcp://test.mosquitto.org:1883
+23 Sep 03:29:02 - [mqtt] [7d8bc91d.827438] connected to broker tcp://mosquitto.mooo.com:1883
+23 Sep 03:29:11 - [mqtt] [351465d8.caeb9a] connected to broker tcp://test.mosquitto.org:1883
+quit
+

@@ -19,14 +19,13 @@ module.exports = function(RED) {
     var util = require("util");
     var exec = require('child_process').exec;
     var fs =  require('fs');
-
-    var gpioCommand = '/usr/local/bin/gpio';
+    var wpi = require('wiring-pi');
 
     if (!fs.existsSync("/dev/ttyAMA0")) { // unlikely if not on a Pi
         throw "Info : Ignoring Raspberry Pi specific node.";
     }
 
-    if (!fs.existsSync(gpioCommand)) { // gpio command not installed
+    if (!fs.existsSync("/usr/local/bin/gpio")) { // gpio command not installed
         throw "Info : Can't find Raspberry Pi wiringPi gpio command.";
     }
 
@@ -99,29 +98,57 @@ module.exports = function(RED) {
         this.buttonState = -1;
         this.pin = pintable[n.pin];
         this.intype = n.intype;
+        this.usewpi = n.usewpi;
         var node = this;
 
         if (node.pin !== undefined) {
-            exec(gpioCommand+" mode "+node.pin+" "+node.intype, function(err,stdout,stderr) {
-                if (err) { node.error(err); }
-                else {
-                    node._interval = setInterval( function() {
-                        exec(gpioCommand+" read "+node.pin, function(err,stdout,stderr) {
-                            if (err) { node.error(err); }
-                            else {
-                                if (node.buttonState !== Number(stdout)) {
-                                    var previousState = node.buttonState;
-                                    node.buttonState = Number(stdout);
-                                    if (previousState !== -1) {
-                                        var msg = {topic:"pi/"+tablepin[node.pin], payload:node.buttonState};
-                                        node.send(msg);
+            if( node.usewpi ) {
+              console.log("using pin: %s", node.pin);
+
+              //setup pin
+              wpi.wiringPiSetup();
+              wpi.pinMode(Number(node.pin), wpi.modes.INPUT);
+              var wpiPud = wpi.PUD_OFF;
+              wpiPud = (n.intype == "pullup" ? wpi.PUD_UP : (n.intype == "pulldown" ? wpi.PUD_DOWN : wpi.PUD_OFF));
+              wpi.pullUpDnControl(Number(node.pin), wpiPud);
+
+              //now read it
+              node._interval = setInterval( function() {
+                var data = wpi.digitalRead(Number(node.pin));
+                //console.log(data);
+                if (node.buttonState !== Number(data)) {
+                  var previousState = node.buttonState;
+                  node.buttonState = Number(data);
+                  if (previousState !== -1) {
+                      var msg = {topic:"pi/"+tablepin[node.pin], payload:node.buttonState};
+                      node.send(msg);
+                      console.log(msg);
+                  }
+                }
+              }, 250); 
+
+            } else {
+                exec("gpio mode "+node.pin+" "+node.intype, function(err,stdout,stderr) {
+                    if (err) { node.error(err); }
+                    else {
+                        node._interval = setInterval( function() {
+                            exec("gpio read "+node.pin, function(err,stdout,stderr) {
+                                if (err) { node.error(err); }
+                                else {
+                                    if (node.buttonState !== Number(stdout)) {
+                                        var previousState = node.buttonState;
+                                        node.buttonState = Number(stdout);
+                                        if (previousState !== -1) {
+                                            var msg = {topic:"pi/"+tablepin[node.pin], payload:node.buttonState};
+                                            node.send(msg);
+                                        }
                                     }
                                 }
-                            }
-                        });
-                    }, 250);
-                }
-            });
+                            });
+                        }, 250);
+                    }
+                });                
+            }
         }
         else {
             node.error("Invalid GPIO pin: "+node.pin);
@@ -139,7 +166,7 @@ module.exports = function(RED) {
 
         if (node.pin !== undefined) {
             process.nextTick(function() {
-                exec(gpioCommand+" mode "+node.pin+" out", function(err,stdout,stderr) {
+                exec("gpio mode "+node.pin+" out", function(err,stdout,stderr) {
                     if (err) { node.error(err); }
                     else {
                         node.on("input", function(msg) {
@@ -147,7 +174,7 @@ module.exports = function(RED) {
                             if (msg.payload === "false") { msg.payload = false; }
                             var out = Number(msg.payload);
                             if ((out === 0)|(out === 1)) {
-                                exec(gpioCommand+" write "+node.pin+" "+out, function(err,stdout,stderr) {
+                                exec("gpio write "+node.pin+" "+out, function(err,stdout,stderr) {
                                     if (err) { node.error(err); }
                                 });
                             }
@@ -162,14 +189,27 @@ module.exports = function(RED) {
         }
 
         node.on("close", function() {
-            exec(gpioCommand+" mode "+node.pin+" in");
+            exec("gpio mode "+node.pin+" in");
         });
     }
 
+    //exec("gpio mode 0 in",function(err,stdout,stderr) {
+    //    if (err) {
+    //        util.log('[36-rpi-gpio.js] Error: "gpio" command failed for some reason.');
+    //    }
+    //    exec("gpio mode 1 in");
+    //    exec("gpio mode 2 in");
+    //    exec("gpio mode 3 in");
+    //    exec("gpio mode 4 in");
+    //    exec("gpio mode 5 in");
+    //    exec("gpio mode 6 in");
+    //    exec("gpio mode 7 in");
+    //});
+
     var pitype = { type:"" };
-    exec(gpioCommand+" -v | grep Type", function(err,stdout,stderr) {
+    exec("gpio -v | grep Type", function(err,stdout,stderr) {
         if (err) {
-            util.log('[36-rpi-gpio.js] Error: "'+gpioCommand+' -v" command failed for some reason.');
+            util.log('[36-rpi-gpio.js] Error: "gpio -v" command failed for some reason.');
         }
         else {
             pitype = { type:(stdout.split(","))[0].split(": ")[1], rev:(stdout.split(","))[1].split(": ")[1] };
@@ -179,7 +219,9 @@ module.exports = function(RED) {
     RED.nodes.registerType("rpi-gpio in",GPIOInNode);
     RED.nodes.registerType("rpi-gpio out",GPIOOutNode);
 
+    var querystring = require('querystring');
     RED.httpAdmin.get('/rpi-gpio/:id',function(req,res) {
+        var credentials = RED.nodes.getCredentials(req.params.id);
         res.send( JSON.stringify(pitype) );
     });
 }
