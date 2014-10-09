@@ -22,7 +22,7 @@ RED.view = (function() {
         scaleFactor = 1,
         node_width = 100,
         node_height = 30;
-    
+
     var touchLongPressTimeout = 1000,
         startTouchDistance = 0,
         startTouchCenter = [],
@@ -329,7 +329,7 @@ RED.view = (function() {
                 lasso.remove();
                 lasso = null;
             }
-            
+
             if (!touchStartTime) {
                 var point = d3.mouse(this);
                 lasso = vis.append('rect')
@@ -681,7 +681,7 @@ RED.view = (function() {
         var minX = 0;
         var minY = 0;
         var node;
-        
+
         for (var i=0;i<moving_set.length;i++) {
             node = moving_set[i];
             if (node.ox == null && node.oy == null) {
@@ -748,16 +748,16 @@ RED.view = (function() {
     }
 
 
-    function calculateTextWidth(str) {
+    function calculateTextWidth(str, className, offset) {
         var sp = document.createElement("span");
-        sp.className = "node_label";
+        sp.className = className;
         sp.style.position = "absolute";
         sp.style.top = "-1000px";
         sp.innerHTML = (str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
         document.body.appendChild(sp);
         var w = sp.offsetWidth;
         document.body.removeChild(sp);
-        return 50+w;
+        return offset+w;
     }
 
     function resetMouseVars() {
@@ -860,9 +860,9 @@ RED.view = (function() {
 
         dblClickPrimed = (lastClickNode == mousedown_node);
         lastClickNode = mousedown_node;
-        
+
         var i;
-        
+
         if (d.selected && d3.event.ctrlKey) {
             d.selected = false;
             for (i=0;i<moving_set.length;i+=1) {
@@ -935,7 +935,7 @@ RED.view = (function() {
         options.push({name:"edit",disabled:(moving_set.length != 1),onselect:function() { RED.editor.edit(mdn);}});
         options.push({name:"select",onselect:function() {selectAll();}});
         options.push({name:"undo",disabled:(RED.history.depth() === 0),onselect:function() {RED.history.pop();}});
-        
+
         RED.touch.radialMenu.show(obj,pos,options);
         resetMouseVars();
     }
@@ -955,7 +955,7 @@ RED.view = (function() {
                     node.attr("id",d.id);
                     var l = d._def.label;
                     l = (typeof l === "function" ? l.call(d) : l)||"";
-                    d.w = Math.max(node_width,calculateTextWidth(l)+(d._def.inputs>0?7:0) );
+                    d.w = Math.max(node_width,calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0) );
                     d.h = Math.max(node_height,(d.outputs||0) * 15);
 
                     if (d._def.badge) {
@@ -1018,7 +1018,7 @@ RED.view = (function() {
                             touchStartTime = setTimeout(function() {
                                 showTouchMenu(obj,pos);
                             },touchLongPressTimeout);
-                            nodeMouseDown.call(this,d)       
+                            nodeMouseDown.call(this,d)
                         })
                         .on("touchend", function(d) {
                             clearTimeout(touchStartTime);
@@ -1044,11 +1044,11 @@ RED.view = (function() {
                    //node.append("rect").attr("class", "node-gradient-bottom").attr("rx", 6).attr("ry", 6).attr("height",30).attr("stroke","none").attr("fill","url(#gradient-bottom)").style("pointer-events","none");
 
                     if (d._def.icon) {
-                        
+
                         var icon_group = node.append("g")
                             .attr("class","node_icon_group")
                             .attr("x",0).attr("y",0);
-                        
+
                         var icon_shade = icon_group.append("rect")
                             .attr("x",0).attr("y",0)
                             .attr("class","node_icon_shade")
@@ -1057,14 +1057,14 @@ RED.view = (function() {
                             .attr("fill","#000")
                             .attr("fill-opacity","0.05")
                             .attr("height",function(d){return Math.min(50,d.h-4);});
-                            
+
                         var icon = icon_group.append("image")
                             .attr("xlink:href","icons/"+d._def.icon)
                             .attr("class","node_icon")
                             .attr("x",0)
                             .attr("width","30")
                             .attr("height","30");
-                            
+
                         var icon_shade_border = icon_group.append("path")
                             .attr("d",function(d) { return "M 30 1 l 0 "+(d.h-2)})
                             .attr("class","node_icon_shade_border")
@@ -1079,7 +1079,7 @@ RED.view = (function() {
                             //icon.attr('class','node_icon_shade node_icon_shade_'+d._def.align);
                             //icon.attr('class','node_icon_shade_border node_icon_shade_border_'+d._def.align);
                         }
-                        
+
                         //if (d._def.inputs > 0 && d._def.align == null) {
                         //    icon_shade.attr("width",35);
                         //    icon.attr("transform","translate(5,0)");
@@ -1088,7 +1088,7 @@ RED.view = (function() {
                         //if (d._def.outputs > 0 && "right" == d._def.align) {
                         //    icon_shade.attr("width",35); //icon.attr("x",5);
                         //}
-                        
+
                         var img = new Image();
                         img.src = "icons/"+d._def.icon;
                         img.onload = function() {
@@ -1101,7 +1101,7 @@ RED.view = (function() {
                             //    icon_shade_border.attr("d",function(d){return "M "+(d.w-30)+" 1 l 0 "+(d.h-2);});
                             //}
                         }
-                        
+
                         //icon.style("pointer-events","none");
                         icon_group.style("pointer-events","none");
                     }
@@ -1152,7 +1152,7 @@ RED.view = (function() {
                         if (d.resize) {
                             var l = d._def.label;
                             l = (typeof l === "function" ? l.call(d) : l)||"";
-                            d.w = Math.max(node_width,calculateTextWidth(l)+(d._def.inputs>0?7:0) );
+                            d.w = Math.max(node_width,calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0) );
                             d.h = Math.max(node_height,(d.outputs||0) * 15);
                         }
                         var thisNode = d3.select(this);
@@ -1173,7 +1173,7 @@ RED.view = (function() {
                         //thisNode.selectAll(".node_icon_shade_right").attr("x",function(d){return d.w-30;});
                         //thisNode.selectAll(".node_icon_shade_border_right").attr("d",function(d){return "M "+(d.w-30)+" 1 l 0 "+(d.h-2)});
 
-                        
+
                         var numOutputs = d.outputs;
                         var y = (d.h/2)-((numOutputs-1)/2)*13;
                         d.ports = d.ports || d3.range(numOutputs);
@@ -1230,7 +1230,7 @@ RED.view = (function() {
                         thisNode.selectAll(".node_icon_shade").attr("height",function(d){return d.h;});
                         thisNode.selectAll(".node_icon_shade_border").attr("d",function(d){ return "M "+(("right" == d._def.align) ?0:30)+" 1 l 0 "+(d.h-2)});
 
-                        
+
                         thisNode.selectAll('.node_right_button').attr("transform",function(d){
                                 var x = d.w-6;
                                 if (d._def.button.toggle && !d[d._def.button.toggle]) {
@@ -1299,7 +1299,7 @@ RED.view = (function() {
         var link = vis.selectAll(".link").data(RED.nodes.links.filter(function(d) { return d.source.z == activeWorkspace && d.target.z == activeWorkspace }),function(d) { return d.source.id+":"+d.sourcePort+":"+d.target.id;});
 
         var linkEnter = link.enter().insert("g",".node").attr("class","link");
-        
+
         linkEnter.each(function(d,i) {
             var l = d3.select(this);
             l.append("svg:path").attr("class","link_background link_path")
@@ -1398,25 +1398,25 @@ RED.view = (function() {
                 var new_nodes = result[0];
                 var new_links = result[1];
                 var new_workspaces = result[2];
-                
+
                 var new_ms = new_nodes.filter(function(n) { return n.z == activeWorkspace }).map(function(n) { return {n:n};});
                 var new_node_ids = new_nodes.map(function(n){ return n.id; });
-                
+
                 // TODO: pick a more sensible root node
                 if (new_ms.length > 0) {
                     var root_node = new_ms[0].n;
                     var dx = root_node.x;
                     var dy = root_node.y;
-    
+
                     if (mouse_position == null) {
                         mouse_position = [0,0];
                     }
-    
+
                     var minX = 0;
                     var minY = 0;
                     var i;
                     var node;
-                    
+
                     for (i=0;i<new_ms.length;i++) {
                         node = new_ms[i];
                         node.n.selected = true;
@@ -1438,7 +1438,7 @@ RED.view = (function() {
                     if (!touchImport) {
                         mouse_mode = RED.state.IMPORT_DRAGGING;
                     }
-    
+
                     RED.keyboard.add(/* ESCAPE */ 27,function(){
                             RED.keyboard.remove(/* ESCAPE */ 27);
                             clearSelection();
@@ -1630,7 +1630,8 @@ RED.view = (function() {
             //TODO: subscribe/unsubscribe here
             redraw();
         },
-        
+        calculateTextWidth: calculateTextWidth,
+
         //TODO: should these move to an import/export module?
         showImportNodesDialog: showImportNodesDialog,
         showExportNodesDialog: showExportNodesDialog,
