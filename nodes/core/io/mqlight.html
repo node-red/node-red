@@ -126,7 +126,7 @@
     RED.nodes.registerType('mqlight service',{
         category: 'config',
         defaults: {
-            service: {value: "", required: true},
+            service: {value: "amqp://localhost", required: true},
             clientid: {value: ""}
         },
         credentials: {

@@ -17,15 +17,30 @@
 module.exports = function(RED) {
     "use strict";
     var mqlight = require('mqlight');
+    var util = require("util");
 
     function MQLightServiceNode(n) {
         RED.nodes.createNode(this,n);
-        this.service = n.service;
-        this.clientid = n.clientid;
+
+        var id = "mqlight_" + (n.clientid ? n.clientid : (1+Math.random()*4294967295).toString(16));
+
+        var opts = {
+            service: n.service,
+            id: id
+        };
+
         if (this.credentials) {
-            this.username = this.credentials.user;
-            this.password = this.credentials.password;
+            opts.user = this.credentials.user;
+            opts.password = this.credentials.password;
         }
+
+        this.client = mqlight.createClient(opts, function(err) {
+            if (err) {
+                util.log('[mqlight] ['+id+'] not connected service '+n.service);
+            } else {
+                util.log('[mqlight] ['+id+'] connected to service '+n.service);
+            }
+        });
     }
     RED.nodes.registerType("mqlight service",MQLightServiceNode,{
         credentials: {
@@ -42,24 +57,12 @@ module.exports = function(RED) {
         var node = this;
 
         if (node.serviceConfig) {
-            var id = "revc_client_" + (node.serviceConfig.clientid ? node.serviceConfig.clientid : Math.floor((Math.random() * 1000)));
-            var opts = {
-                service: node.serviceConfig.service,
-                id: id
-            };
-
-            if (node.serviceConfig.username && node.serviceConfig.password) {
-                opts.user = node.serviceConfig.username;
-                opts.password = node.serviceConfig.password;
-            }
-
-            var recvClient = mqlight.createClient(opts, function(err) {
-                if (err) {
-                    node.error(err);
-                } else {
+            if (node.serviceConfig.client) {
+            var recvClient = node.serviceConfig.client;
+                recvClient.on("started", function() {
                     recvClient.subscribe(node.topic, function(err, pattern) {
                         if (err) {
-                            node.error("Failed to subscribe: " + err);
+                            node.error(err);
                         }
                     });
                     recvClient.on("message", function(data, delivery) {
@@ -73,12 +76,14 @@ module.exports = function(RED) {
                         };
                         node.send(msg);
                     });
-                }
-            });
+                });
+                recvClient.start();
 
-            node.on("close", function () {
-                recvClient.stop();
-            });
+                node.on("close", function () {
+                    recvClient.stop();
+                });
+            }
+
         }
     }
     RED.nodes.registerType("mqlight in", MQLightIn);
@@ -91,21 +96,10 @@ module.exports = function(RED) {
         var node = this;
 
         if (node.serviceConfig) {
-            var id = "send_client_" + (node.serviceConfig.clientid ? node.serviceConfig.clientid : Math.floor((Math.random() * 1000)));
-            var opts = {
-                service: node.serviceConfig.service,
-                id: id
-            };
+            if (node.serviceConfig.client) {
+                var sendClient = node.serviceConfig.client;
 
-            if (node.serviceConfig.username && node.serviceConfig.password) {
-                opts.user = node.serviceConfig.username;
-                opts.password = node.serviceConfig.password;
-            }
-
-            var sendClient = mqlight.createClient(opts, function(err) {
-                if (err) {
-                    node.error(err);
-                } else {
+                sendClient.on("started", function () {
                     node.on("input", function(msg) {
                         if (node.topic === "") {
                             if (msg.topic) {
@@ -121,12 +115,13 @@ module.exports = function(RED) {
                             }
                         });
                     });
-                }
-            });
+                });
+                sendClient.start();
 
-            node.on("close", function () {
-                sendClient.stop();
-            });
+                node.on("close", function () {
+                    sendClient.stop();
+                });
+            }
         }
     }
     RED.nodes.registerType("mqlight out", MQLightOut);
