@@ -76,13 +76,15 @@ module.exports = function(RED) {
             if (filename === "") {
                 node.warn('No filename specified');
             } else {
+                msg.filename = filename;
                 fs.readFile(filename,options,function(err,data) {
                     if (err) {
                         node.warn(err);
                         msg.error = err;
+                        delete msg.payload;
                     } else {
-                        msg.filename = filename;
                         msg.payload = data;
+                        delete msg.error;
                     }
                     node.send(msg);
                 });
