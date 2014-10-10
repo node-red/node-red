@@ -180,7 +180,7 @@ module.exports = function(RED) {
               if (msg.payload === "false") { msg.payload = false; }
               var out = Number(msg.payload);
               if ((out === 0)|(out === 1)) {
-                wpi.digitalWrite(node.pin, out);
+                wpi.digitalWrite(Number(node.pin), out);
               }
               else { node.warn("Invalid input - not 0 or 1"); }
             });
