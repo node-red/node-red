@@ -164,9 +164,28 @@ module.exports = function(RED) {
     function GPIOOutNode(n) {
         RED.nodes.createNode(this,n);
         this.pin = pintable[n.pin];
+        this.usewpi = n.usewpi;
         var node = this;
 
         if (node.pin !== undefined) {
+          if( node.usewpi ) {
+            console.log("using pin: %s", node.pin);
+
+            //setup pin
+            wpi.wiringPiSetup();
+            wpi.pinMode(Number(node.pin), wpi.modes.OUTPUT);
+
+            node.on("input", function(msg) {
+              if (msg.payload === "true") { msg.payload = true; }
+              if (msg.payload === "false") { msg.payload = false; }
+              var out = Number(msg.payload);
+              if ((out === 0)|(out === 1)) {
+                wpi.digitalWrite(node.pin, out);
+              }
+              else { node.warn("Invalid input - not 0 or 1"); }
+            });
+          }
+          else {
             process.nextTick(function() {
                 exec(gpioCommand+" mode "+node.pin+" out", function(err,stdout,stderr) {
                     if (err) { node.error(err); }
@@ -185,6 +204,7 @@ module.exports = function(RED) {
                     }
                 });
             });
+          }
         }
         else {
             node.error("Invalid GPIO pin: "+node.pin);
