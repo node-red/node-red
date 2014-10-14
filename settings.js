@@ -120,6 +120,7 @@ module.exports = {
     //    context.global.os
 
     functionGlobalContext: {
+        wpi: require('wiring-pi')
         // os:require('os'),
         // bonescript:require('bonescript'),
         // arduino:require('duino')

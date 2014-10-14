@@ -48,6 +48,11 @@
         <!--<option value="tri">tristate</option>-->
         </select>
     </div>
+    <div class="form-row" id="node-usewpi">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-usewpi" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-usewpi" style="width: 70%;">Use wiring-pi ?</label>
+    </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -71,6 +76,7 @@
         defaults: {
             name: { value:"" },
             intype: { value: "in" },
+            usewpi: { value: true },
             pin: { value:"",required:true,validate:RED.validators.number() },
         },
         inputs:0,
@@ -129,6 +135,11 @@
          </select>
          &nbsp;<span id="pitype"></span>
     </div>
+    <div class="form-row" id="node-usewpi">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-usewpi" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-usewpi" style="width: 70%;">Use wiring-pi ?</label>
+    </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -148,6 +159,7 @@
         color:"#c6dbef",
         defaults: {
             name: { value:"" },
+            usewpi: { value: true },
             pin: { value:"",required:true,validate:RED.validators.number() },
         },
         inputs:1,

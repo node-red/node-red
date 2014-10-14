@@ -6,4 +6,5 @@ flows.backup
 nodes/node-red-nodes/
 .npm
 /coverage
+hardcopy.0
 .config.json
