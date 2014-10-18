@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013,2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,31 +169,30 @@ module.exports = function(RED) {
             node.serverConfig.ircclient.addListener('raw', function (message) { // any message received means we are alive
                 if (message.commandType === "reply") { node.serverConfig.lastseen = Date.now(); }
             });
+            node.serverConfig.ircclient.addListener('registered', function(message) {
+                node.log(node.serverConfig.ircclient.nick+" ONLINE");
+                node.status({fill:"yellow",shape:"dot",text:"connected"});
+                node.serverConfig.ircclient.join( node.channel, function(data) {
+                    //node.log(data+" JOINED "+node.channel);
+                    node.status({fill:"green",shape:"dot",text:"joined"});
+                });
+            });
             node.recon = setInterval( function() {
                 //console.log("CHK ",(Date.now()-node.serverConfig.lastseen)/1000);
                 if ((Date.now()-node.serverConfig.lastseen) > 300000) {     // if more than 5 mins since last seen
-                    node.ircclient.send.apply(node.ircclient,["TIME"]);     // request time to check link
+                    node.serverConfig.ircclient.send.apply(node.serverConfig.ircclient,["TIME"]);     // request time to check link
                 }
                 if ((Date.now()-node.serverConfig.lastseen) > 400000) {     // If more than 6.5 mins
                     node.serverConfig.ircclient.disconnect();
                     node.serverConfig.ircclient.connect();
                     node.log("reconnect");                                  // then retry
                 }
-                node.ircclient.send.apply(node.ircclient,["TIME"]); // request time to check link
+                node.serverConfig.ircclient.send.apply(node.serverConfig.ircclient,["TIME"]); // request time to check link
             }, 60000); // check every 1 min
             node.serverConfig.ircclient.connect();
         }
         else { node.status({text:""}); }
         node.ircclient = node.serverConfig.ircclient;
-
-        node.ircclient.addListener('registered', function(message) {
-            node.log(node.ircclient.nick+" ONLINE");
-            node.status({fill:"yellow",shape:"dot",text:"connected"});
-            node.ircclient.join( node.channel, function(data) {
-                //node.log(data+" JOINED "+node.channel);
-                node.status({fill:"green",shape:"dot",text:"joined"});
-            });
-        });
 
         node.on("input", function(msg) {
             if (Object.prototype.toString.call( msg.raw ) === '[object Array]') {
