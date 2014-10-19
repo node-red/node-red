@@ -19,7 +19,6 @@ module.exports = function(RED) {
     var util = require("util");
     var exec = require('child_process').exec;
     var fs =  require('fs');
-    var wpi = require('wiring-pi');
 
     var gpioCommand = '/usr/local/bin/gpio';
 
@@ -107,6 +106,13 @@ module.exports = function(RED) {
             if( node.usewpi ) {
               console.log("using pin: %s", node.pin);
 
+              try {
+                var wpi = require('wiring-pi');
+              } catch(e) {
+                node.error(e);
+                return;
+              }
+
               //setup pin
               wpi.wiringPiSetup();
               wpi.pinMode(Number(node.pin), wpi.modes.INPUT);
@@ -170,6 +176,13 @@ module.exports = function(RED) {
         if (node.pin !== undefined) {
           if( node.usewpi ) {
             console.log("using pin: %s", node.pin);
+
+            try {
+              var wpi = require('wiring-pi');
+            } catch(e) {
+              node.error(e);
+              return;
+            }
 
             //setup pin
             wpi.wiringPiSetup();
