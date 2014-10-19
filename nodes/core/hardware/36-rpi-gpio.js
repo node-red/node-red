@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013,2014 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,8 @@ module.exports = function(RED) {
         this.buttonState = -1;
         this.pin = pintable[n.pin];
         this.intype = n.intype;
+        this.read = n.read || false;
+        if (this.read) { this.buttonState = -2; }
         var node = this;
 
         if (node.pin !== undefined) {
@@ -135,26 +137,31 @@ module.exports = function(RED) {
     function GPIOOutNode(n) {
         RED.nodes.createNode(this,n);
         this.pin = pintable[n.pin];
+        this.set = n.set || false;
+        this.level = n.level || 0;
         var node = this;
 
         if (node.pin !== undefined) {
-            process.nextTick(function() {
-                exec(gpioCommand+" mode "+node.pin+" out", function(err,stdout,stderr) {
-                    if (err) { node.error(err); }
-                    else {
-                        node.on("input", function(msg) {
-                            if (msg.payload === "true") { msg.payload = true; }
-                            if (msg.payload === "false") { msg.payload = false; }
-                            var out = Number(msg.payload);
-                            if ((out === 0)|(out === 1)) {
-                                exec(gpioCommand+" write "+node.pin+" "+out, function(err,stdout,stderr) {
-                                    if (err) { node.error(err); }
-                                });
-                            }
-                            else { node.warn("Invalid input - not 0 or 1"); }
+            exec(gpioCommand+" mode "+node.pin+" out", function(err,stdout,stderr) {
+                if (err) { node.error(err); }
+                else {
+                    if (node.set) {
+                        exec(gpioCommand+" write "+node.pin+" "+node.level, function(err,stdout,stderr) {
+                            if (err) { node.error(err); }
                         });
                     }
-                });
+                    node.on("input", function(msg) {
+                        if (msg.payload === "true") { msg.payload = true; }
+                        if (msg.payload === "false") { msg.payload = false; }
+                        var out = Number(msg.payload);
+                        if ((out === 0)|(out === 1)) {
+                            exec(gpioCommand+" write "+node.pin+" "+out, function(err,stdout,stderr) {
+                                if (err) { node.error(err); }
+                            });
+                        }
+                        else { node.warn("Invalid input - not 0 or 1"); }
+                    });
+                }
             });
         }
         else {
