@@ -36,7 +36,7 @@
     <div class="form-row" id="node-reg-row">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-reg" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-reg" style="width: 70%;">Use regular expressions ?</label>
+        <label for="node-input-reg" style="width: 70%;">Use regular expressions</label>
     </div>
     <div class="form-tips" id="node-tip"></div>
     <br/>
@@ -47,10 +47,10 @@
 </script>
 
 <script type="text/x-red" data-help-name="change">
-    <p>A simple function node to change, replace, add or delete properties of a message.</p>
+    <p>A simple function node to set, replace or delete properties of a message.</p>
     <p>When a message arrives, the selected property is modified by the defined rules.
     The message is then sent to the output.</p>
-    <p><b>Note:</b> Replace only operates on <b>strings</b>. Anything else will be passed straight through.</p>
+    <p><b>Note:</b> Set and replace only operate using <b>strings</b>. Anything else will be passed straight through.</p>
 </script>
 
 <script type="text/javascript">
@@ -82,8 +82,10 @@
             if (this.name) {
                 return this.name;
             }
-            if (this.action == "replace") {
+            if (this.action === "replace") {
                 return "set msg."+this.property;
+            } else if (this.action === "change") {
+                return "replace msg."+this.property;
             } else {
                 return this.action+" msg."+this.property
             }
