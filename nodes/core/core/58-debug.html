@@ -16,11 +16,14 @@
 
 <script type="text/x-red" data-template-name="debug">
     <div class="form-row">
-        <label for="node-input-complete"><i class="fa fa-list"></i> Output</label>
-        <select type="text" id="node-input-complete" style="display: inline-block; width: 250px; vertical-align: top;">
-            <option value="false">payload only</option>
+        <label for="node-input-select-complete"><i class="fa fa-list"></i> Output</label>
+        <select type="text" id="node-input-select-complete" style="display: inline-block; width: 250px; vertical-align: top;">
+            <option value="false">message property</option>
             <option value="true">complete msg object</option>
         </select>
+    </div>
+    <div class="form-row" id="node-prop-row">
+        <label for="node-input-complete">&nbsp;</label>msg.<input type="text" style="width:208px" id="node-input-complete">
     </div>
     <div class="form-row">
         <label for="node-input-console"><i class="fa fa-random"></i> to</label>
@@ -36,27 +39,57 @@
 </script>
 
 <script type="text/x-red" data-help-name="debug">
-    <p>The Debug node can be connected to the output of any node. It will display the timestamp, <b>msg.topic</b> and <b>msg.payload</b> fields of any messages it receives in the debug tab of the sidebar.
-    <br/>The sidebar can be accessed under the options drop-down in the top right corner.</p>
+    <p>The Debug node can be connected to the output of any node. It can be used to display the output of any message property in the debug tab of the sidebar. The default is to display <b>msg.payload</b>.</p>
+    <p>Each message will also display the timestamp, <b>msg.topic</b> and the property chosen to output.</p>
+    <p>The sidebar can be accessed under the options drop-down in the top right corner.</p>
     <p>The button to the right of the node will toggle it's output on and off so you can de-clutter the debug window.</p>
-    <p>If the payload is an object it will be stringified first for display and indicate that by saying "(Object) ".</p>
-    <p>If the payload is a buffer it will be stringified first for display and indicate that by saying "(Buffer) ".</p>
+    <p>If the payload is an object or buffer it will be stringified first for display and indicate that by saying "(Object)" or "(Buffer)".</p>
     <p>Selecting any particular message will highlight (in red) the debug node that reported it. This is useful if you wire up multiple debug nodes.</p>
-    <p>Optionally can show the complete msg object - but the screen can get messy.</p>
+    <p>Optionally can show the complete <b>msg</b> object.</p>
     <p>In addition any calls to node.warn or node.error will appear here.</p>
 </script>
 
 <script type="text/javascript">
+
+    function oneditprepare() {
+        if (this.complete === "true") {
+            // show complete message object
+            $("#node-input-select-complete").val(this.complete);
+            $("#node-prop-row").hide();
+        } else {
+            // show msg.[   ]
+            var property = (this.complete === "false") ? "payload" : this.complete;
+            $("#node-input-select-complete").val("false");
+            $("#node-input-complete").val(property);
+            $("#node-prop-row").show();
+        }
+        $("#node-input-select-complete").change(function() {
+            var v = $("#node-input-select-complete option:selected").val();
+            $("#node-input-complete").val(v);
+            if (v !== "true") {
+                $("#node-input-complete").val("payload");
+                $("#node-prop-row").show();
+                $("#node-input-complete").focus();
+            } else {
+                $("#node-prop-row").hide();
+            }
+        });
+    }
+
     RED.nodes.registerType('debug',{
         category: 'output',
         defaults: {
             name: {value:""},
             active: {value:true},
             console: {value:"false"},
-            complete: {value:"false"}
+            complete: {value:"false", required:true}
         },
         label: function() {
-            return this.name||"debug";
+            if (this.complete === "true") {
+                return this.name||"msg";
+            } else {
+                return this.name || "msg." + (this.complete === "false" ? "payload" : this.complete);
+            }
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -92,26 +125,26 @@
         onpaletteadd: function() {
             var content = document.createElement("div");
             content.id = "tab-debug";
-    
+
             var toolbar = document.createElement("div");
             toolbar.id = "debug-toolbar";
             content.appendChild(toolbar);
-    
+
             toolbar.innerHTML = '<div class="btn-group pull-right"><a id="debug-tab-clear" title="clear log" class="btn btn-mini" href="#"><i class="fa fa-trash"></i></a></div> ';
-    
+
             var messages = document.createElement("div");
             messages.id = "debug-content";
             content.appendChild(messages);
-    
+
             RED.sidebar.addTab("debug",content);
-    
+
             function getTimestamp() {
                 var d = new Date();
                 return d.toLocaleString();
             }
-    
+
             var sbc = document.getElementById("debug-content");
-    
+
             var messageCount = 0;
             var that = this;
             RED._debug = function(msg) {
@@ -120,7 +153,7 @@
                     msg:msg
                 });
             }
-    
+
             this.handleDebugMessage = function(t,o) {
                 var msg = document.createElement("div");
                 msg.onmouseover = function() {
@@ -146,20 +179,25 @@
                     if (node) {
                         RED.view.showWorkspace(node.z);
                     }
-    
+
                 };
                 var name = (o.name?o.name:o.id).toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
                 var topic = (o.topic||"").toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                var property = (o.property?o.property:'').replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
                 var payload = (o.msg||"").toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
                 msg.className = 'debug-message'+(o.level?(' debug-message-level-'+o.level):'');
-                msg.innerHTML = '<span class="debug-message-date">'+getTimestamp()+'</span>'+
+                msg.innerHTML = '<span class="debug-message-date">'+
+                                getTimestamp()+'</span>'+
                                 '<span class="debug-message-name">['+name+']</span>'+
-                                (o.topic?'<span class="debug-message-topic">'+topic+'</span>':'')+
-                                '<span class="debug-message-payload">'+payload+'</span>';
+                                '<span class="debug-message-topic">'+
+                                (o.topic?topic+' : ':'')+
+                                (o.property?'[msg.'+property+']':'[msg]')+
+                                '</span>'+'<span class="debug-message-payload">'+
+                                payload+'</span>';
                 var atBottom = (sbc.scrollHeight-messages.offsetHeight-sbc.scrollTop) < 5;
                 messageCount++;
                 $(messages).append(msg);
-    
+
                 if (messageCount > 200) {
                     $("#debug-content .debug-message:first").remove();
                     messageCount--;
@@ -169,7 +207,7 @@
                 }
             };
             RED.comms.subscribe("debug",this.handleDebugMessage);
-    
+
             $("#debug-tab-clear").click(function() {
                 $(".debug-message").remove();
                 messageCount = 0;
@@ -184,7 +222,8 @@
             RED.comms.unsubscribe("debug",this.handleDebugMessage);
             RED.sidebar.removeTab("debug");
             delete RED._debug;
-        }
+        },
+        oneditprepare: oneditprepare
     });
 </script>
 
