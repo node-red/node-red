@@ -23,8 +23,7 @@
         </select>
     </div>
     <div class="form-row" id="node-prop-row">
-        <label for="node-input-complete">&nbsp;</label>msg.
-        <input type="text" style="width:205px" id="node-input-complete">
+        <label for="node-input-complete">&nbsp;</label>msg.<input type="text" style="width:208px" id="node-input-complete">
     </div>
     <div class="form-row">
         <label for="node-input-console"><i class="fa fa-random"></i> to</label>
@@ -87,9 +86,9 @@
         },
         label: function() {
             if (this.complete === "true") {
-                return this.name||"debug msg";
+                return this.name||"msg";
             } else {
-                return this.name||"debug msg." + this.complete;
+                return this.name || "msg." + (this.complete === "false" ? "payload" : this.complete);
             }
         },
         labelStyle: function() {
