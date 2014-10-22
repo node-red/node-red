@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+ 
+    //Uncomment the following line to support https access. Leave commented for http.
+    //var fs=require('fs');
+    
 module.exports = {
     // the tcp port that the Node-RED web server is listening on
     uiPort: 1880,
