@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+
+// The `https` setting requires the `fs` module. Uncomment the following
+// to make it available:
+//var fs = require("fs");
+
+ 
 module.exports = {
     // the tcp port that the Node-RED web server is listening on
     uiPort: 1880,
@@ -98,6 +104,9 @@ module.exports = {
     // The following property can be used to enable HTTPS
     // See http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener
     // for details on its contents.
+    // See the comment at the top of this file on how to load the `fs` module used by
+    // this setting.
+    // 
     //https: {
     //    key: fs.readFileSync('privatekey.pem'),
     //    cert: fs.readFileSync('certificate.pem')
