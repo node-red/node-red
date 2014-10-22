@@ -29,119 +29,128 @@ function Node(n) {
     if (n.name) {
         this.name = n.name;
     }
-    this.wires = n.wires||[];
+    this.wires = n.wires || [];
 }
 
-util.inherits(Node,EventEmitter);
+util.inherits(Node, EventEmitter);
 
 Node.prototype._on = Node.prototype.on;
 
-Node.prototype.on = function(event,callback) {
+Node.prototype.on = function(event, callback) {
     var node = this;
     if (event == "close") {
         if (callback.length == 1) {
             this.close = function() {
                 return when.promise(function(resolve) {
-                    callback.call(node,function() {
+                    callback.call(node, function() {
                         resolve();
                     });
                 });
-            }
+            };
         } else {
             this.close = callback;
         }
     } else {
-        this._on(event,callback);
+        this._on(event, callback);
     }
-}
+};
 
-Node.prototype.close = function() {
+Node.prototype.close = function() {};
+
+function cloneMessage(msg) {
+    // Temporary fix for #97
+    // TODO: remove this http-node-specific fix somehow
+    var req = msg.req;
+    var res = msg.res;
+    delete msg.req;
+    delete msg.res;
+    var m = clone(msg);
+    if (req) {
+        m.req = req;
+        msg.req = req;
+    }
+    if (res) {
+        m.res = res;
+        msg.res = res;
+    }
+    return m;
 }
 
 Node.prototype.send = function(msg) {
+    var msgSent = false;
     // instanceof doesn't work for some reason here
-    if (msg == null) {
+    if (msg === null || typeof msg === "undefined") {
         return;
     } else if (!util.isArray(msg)) {
         msg = [msg];
     }
-    for (var i=0;i<this.wires.length;i++) {
-        var wires = this.wires[i];
+    var numOutputs = this.wires.length;
+    // for each output of node eg. [msgs to output 0, msgs to output 1, ...]
+    for (var i = 0; i < numOutputs; i++) {
+        var wires = this.wires[i]; // wires leaving output i
         if (i < msg.length) {
-            if (msg[i] != null) {
-                var msgs = msg[i];
-                if (!util.isArray(msg[i])) {
-                    msgs = [msg[i]];
+            var msgs = msg[i]; // msgs going to output i
+            if (msgs !== null && typeof msgs !== "undefined") {
+                if (!util.isArray(msgs)) {
+                    msgs = [msgs];
                 }
-                //if (wires.length == 1) {
-                //    // Single recipient, don't need to clone the message
-                //    var node = flows.get(wires[0]);
-                //    if (node) {
-                //        for (var k in msgs) {
-                //            var mm = msgs[k];
-                //            node.receive(mm);
-                //        }
-                //    }
-                //} else {
-                    // Multiple recipients, must send message copies
-                    for (var j=0;j<wires.length;j++) {
-                        var node = flows.get(wires[j]);
-                        if (node) {
-                            for (var k=0;k<msgs.length;k++) {
-                                var mm = msgs[k];
-                                // Temporary fix for #97
-                                // TODO: remove this http-node-specific fix somehow
-                                var req = mm.req;
-                                var res = mm.res;
-                                delete mm.req;
-                                delete mm.res;
-                                var m = clone(mm);
-                                if (req) {
-                                    m.req = req;
-                                    mm.req = req;
-                                }
-                                if (res) {
-                                    m.res = res;
-                                    mm.res = res;
-                                }
-                                node.receive(m);
+                var node;
+                var k = 0;
+                // for each recipent node of that output
+                for (var j = 0; j < wires.length; j++) {
+                    node = flows.get(wires[j]); // node at end of wire j
+                    if (node) {
+                        // for each msg to send eg. [[m1, m2, ...], ...]
+                        for (k = 0; k < msgs.length; k++) {
+                            if (msgSent) {
+                                // a msg has already been sent so clone
+                                node.receive(cloneMessage(msgs[k]));
+                            } else {
+                                // first msg sent so don't clone
+                                node.receive(msgs[k]);
+                                msgSent = true;
                             }
                         }
                     }
-                //}
+                }
             }
         }
     }
-}
+};
 
 Node.prototype.receive = function(msg) {
-    this.emit("input",msg);
-}
+    this.emit("input", msg);
+};
 
 function log_helper(self, level, msg) {
-    var o = {level:level, id:self.id, type:self.type, msg:msg};
+    var o = {
+        level: level,
+        id: self.id,
+        type: self.type,
+        msg: msg
+    };
     if (self.name) {
         o.name = self.name;
     }
-    self.emit("log",o);
+    self.emit("log", o);
 }
 
 Node.prototype.log = function(msg) {
     log_helper(this, 'log', msg);
-}
+};
 
 Node.prototype.warn = function(msg) {
     log_helper(this, 'warn', msg);
-}
+};
 
 Node.prototype.error = function(msg) {
     log_helper(this, 'error', msg);
-}
+};
 
 /**
  * status: { fill:"red|green", shape:"dot|ring", text:"blah" }
  */
 Node.prototype.status = function(status) {
-    comms.publish("status/"+this.id,status,true);
-}
+    comms.publish("status/" + this.id, status, true);
+};
 module.exports = Node;
