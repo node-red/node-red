@@ -77,7 +77,13 @@ module.exports = {
         redNodes.init(settings, storage);
         credentials.init(storage);
         RED.nodes.registerType("helper", helperNode);
-        testNode(RED);
+        if (Array.isArray(testNode)) {
+            for (var i = 0; i < testNode.length; i++) {
+                testNode[i](RED);
+            }
+        } else {
+            testNode(RED);            
+        }
         flows.load().then(function() {
             should.deepEqual(testFlows, flows.getFlows());
             cb();
