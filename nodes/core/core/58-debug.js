@@ -24,7 +24,15 @@ module.exports = function(RED) {
     function DebugNode(n) {
         RED.nodes.createNode(this,n);
         this.name = n.name;
-        this.complete = n.complete;
+        this.complete = n.complete||"payload";
+        
+        if (this.complete === "false") {
+            this.complete = "payload";
+        }
+        if (this.complete === true) {
+            this.complete = "true";
+        }
+        
         this.console = n.console;
         this.active = (n.active === null || typeof n.active === "undefined") || n.active;
         var node = this;
@@ -50,13 +58,7 @@ module.exports = function(RED) {
                             return obj[i];
                         }, msg);
                     } catch (err) {
-                        node.warn(err);
-                        return;
-                    }
-
-                    if (!output) {
-                        node.warn("msg." + this.complete + " does not exist");
-                        return;
+                        output = undefined;
                     }
                 }
                 if (this.console === "true") {

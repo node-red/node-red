@@ -52,13 +52,13 @@
 <script type="text/javascript">
 
     function oneditprepare() {
-        if (this.complete === "true") {
+        if (this.complete === "true" || this.complete === true) {
             // show complete message object
-            $("#node-input-select-complete").val(this.complete);
+            $("#node-input-select-complete").val("true");
             $("#node-prop-row").hide();
         } else {
             // show msg.[   ]
-            var property = (this.complete === "false") ? "payload" : this.complete;
+            var property = (!this.complete||(this.complete === "false")) ? "payload" : this.complete+"";
             $("#node-input-select-complete").val("false");
             $("#node-input-complete").val(property);
             $("#node-prop-row").show();
@@ -85,10 +85,10 @@
             complete: {value:"false", required:true}
         },
         label: function() {
-            if (this.complete === "true") {
+            if (this.complete === true || this.complete === "true") {
                 return this.name||"msg";
             } else {
-                return this.name || "msg." + (this.complete === "false" ? "payload" : this.complete);
+                return this.name || "msg." + ((!this.complete || this.complete === "false") ? "payload" : this.complete);
             }
         },
         labelStyle: function() {
