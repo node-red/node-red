@@ -18,7 +18,7 @@
     <div class="form-row">
         <label for="node-input-pin"><i class="fa fa-circle"></i> GPIO Pin</label>
         <select type="text" id="node-input-pin" style="width: 200px;">
-            <option value="-" disabled>select pin </option>
+            <option value='' disabled selected style='display:none;'>select pin</option>
             <option value="3">3 - SDA1 </option>
             <option value="5">5 - SCL1 </option>
             <option value="7">7 - GPIO7</option>
@@ -40,7 +40,7 @@
          &nbsp;<span id="pitype"></span>
     </div>
     <div class="form-row">
-        <label for="node-input-intype"><i class="fa fa-long-arrow-up"></i> Resistor ?</label>
+        <label for="node-input-intype"><i class="fa fa-level-up"></i> Resistor ?</label>
         <select type="text" id="node-input-intype" style="width: 150px;">
         <option value="tri">none</option>
         <option value="up">pullup</option>
@@ -51,8 +51,9 @@
     <div class="form-row">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-read" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-read" style="width: 70%;">Read initial state of pin on deploy ?</label>
+        <label for="node-input-read" style="width: 70%;">Read initial state of pin on deploy/restart ?</label>
     </div>
+    <br/>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -113,7 +114,7 @@
     <div class="form-row">
         <label for="node-input-pin"><i class="fa fa-circle"></i> GPIO Pin</label>
         <select type="text" id="node-input-pin" style="width: 200px;">
-            <option value="-">select pin </option>
+            <option value='' disabled selected style='display:none;'>select pin</option>
             <option value="3">3 - SDA1 </option>
             <option value="5">5 - SCL1 </option>
             <option value="7">7 - GPIO7</option>
@@ -146,6 +147,7 @@
             <option value="1">initial level of pin - high (1)</option>
         </select>
     </div>
+    <br/>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
