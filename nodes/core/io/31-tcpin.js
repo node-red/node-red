@@ -182,8 +182,11 @@ module.exports = function(RED) {
                     node.error('unable to listen on port '+node.port+' : '+err);
                 } else {
                     node.log('listening on port '+node.port);
-
                     node.on('close', function() {
+                        for (var c in connectionPool) {
+                            connectionPool[c].end();
+                            connectionPool[c].unref();
+                        }
                         node.closing = true;
                         server.close();
                         node.log('stopped listening on port '+node.port);
@@ -334,6 +337,10 @@ module.exports = function(RED) {
                 } else {
                     node.log('listening on port '+node.port);
                     node.on('close', function() {
+                        for (var c in connectedSockets) {
+                            connectedSockets[c].end();
+                            connectedSockets[c].unref();
+                        }
                         server.close();
                         node.log('stopped listening on port '+node.port);
                     });
