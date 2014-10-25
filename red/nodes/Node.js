@@ -30,6 +30,20 @@ function Node(n) {
         this.name = n.name;
     }
     this.wires = n.wires || [];
+    
+    var wc = 0;
+    this.wires.forEach(function(w) {
+        wc+=w.length;
+    });
+    this._wireCount = wc;
+    if (wc === 0) {
+        // With nothing wired to the node, no-op send
+        this.send = function(msg) {}
+    } else if (this.wires.length === 1 && this.wires[0].length === 1) {
+        // Single wire, so we can shortcut the send when
+        // a single message is sent
+        this._wire = this.wires[0][0];
+    }
 }
 
 util.inherits(Node, EventEmitter);
@@ -78,13 +92,27 @@ function cloneMessage(msg) {
 
 Node.prototype.send = function(msg) {
     var msgSent = false;
-    // instanceof doesn't work for some reason here
+    
     if (msg === null || typeof msg === "undefined") {
         return;
     } else if (!util.isArray(msg)) {
-        msg = [msg];
+        if (this._wire) {
+            // A single message and a single wire on output 0
+            // TODO: pre-load flows.get calls - cannot do in constructor
+            //       as not all nodes are defined at that point
+            flows.get(this._wire).receive(msg);
+            return;
+        } else {
+            msg = [msg];
+        }
     }
+    
     var numOutputs = this.wires.length;
+    
+    // Build a list of send events so that all cloning is done before
+    // any calls to node.receive
+    var sendEvents = [];
+    
     // for each output of node eg. [msgs to output 0, msgs to output 1, ...]
     for (var i = 0; i < numOutputs; i++) {
         var wires = this.wires[i]; // wires leaving output i
@@ -103,11 +131,10 @@ Node.prototype.send = function(msg) {
                         // for each msg to send eg. [[m1, m2, ...], ...]
                         for (k = 0; k < msgs.length; k++) {
                             if (msgSent) {
-                                // a msg has already been sent so clone
-                                node.receive(cloneMessage(msgs[k]));
+                                sendEvents.push({n:node,m:cloneMessage(msgs[k])});
                             } else {
                                 // first msg sent so don't clone
-                                node.receive(msgs[k]);
+                                sendEvents.push({n:node,m:msgs[k]});
                                 msgSent = true;
                             }
                         }
@@ -115,6 +142,11 @@ Node.prototype.send = function(msg) {
                 }
             }
         }
+    }
+    
+    for (i=0;i<sendEvents.length;i++) {
+        var ev = sendEvents[i];
+        ev.n.receive(ev.m);
     }
 };
 
