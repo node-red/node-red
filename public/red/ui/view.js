@@ -427,9 +427,12 @@ RED.view = (function() {
                 );
             d3.event.preventDefault();
         } else if (mouse_mode == RED.state.MOVING) {
-            mousePos = mouse_position;
+            mousePos = d3.mouse(document.body);
+            if (isNaN(mousePos[0])) {
+                mousePos = d3.touches(document.body)[0];
+            }
             var d = (mouse_offset[0]-mousePos[0])*(mouse_offset[0]-mousePos[0]) + (mouse_offset[1]-mousePos[1])*(mouse_offset[1]-mousePos[1]);
-            if (d > 2) {
+            if (d > 3) {
                 mouse_mode = RED.state.MOVING_ACTIVE;
                 clickElapsed = 0;
             }
