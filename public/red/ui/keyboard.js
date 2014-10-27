@@ -24,19 +24,20 @@ RED.keyboard = (function() {
         if (handler && handler.ondown) {
             if (!handler.modifiers ||
                 ((!handler.modifiers.shift || d3.event.shiftKey) &&
-                 (!handler.modifiers.ctrl  || d3.event.ctrlKey ) &&
+                 (!handler.modifiers.ctrl  || !handler.modifiers.meta || d3.event.ctrlKey || d3.event.metaKey) &&
                  (!handler.modifiers.alt   || d3.event.altKey  ) )) {
                 handler.ondown();
             }
         }
     });
+
     d3.select(window).on("keyup",function() {
         if (!active) { return; }
         var handler = handlers[d3.event.keyCode];
         if (handler && handler.onup) {
             if (!handler.modifiers ||
                 ((!handler.modifiers.shift || d3.event.shiftKey) &&
-                 (!handler.modifiers.ctrl  || d3.event.ctrlKey ) &&
+                 (!handler.modifiers.ctrl  || !handler.modifiers.meta || d3.event.ctrlKey || d3.event.metaKey) &&
                  (!handler.modifiers.alt   || d3.event.altKey  ) )) {
                 handler.onup();
             }
@@ -46,7 +47,6 @@ RED.keyboard = (function() {
         var mod = modifiers;
         var cbdown = ondown;
         var cbup = onup;
-
         if (typeof modifiers == "function") {
             mod = {};
             cbdown = modifiers;
