@@ -232,7 +232,7 @@
                 var r = "s";
                 var c = this.repeat;
                 if (this.repeat % 60 === 0) { r = "m"; c = c/60; }
-                if (this.repeat % 1440 === 0) { r = "h"; c = c/24; }
+                if (this.repeat % 1440 === 0) { r = "h"; c = c/60; }
                 $("#inject-time-interval-count").val(c);
                 $("#inject-time-interval-units").val(r);
                 //$("#inject-time-interval-units option").filter(function() {return $(this).val() == "s";}).attr('selected',true);
