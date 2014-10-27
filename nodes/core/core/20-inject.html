@@ -355,7 +355,7 @@
                         repeat = count * 60;
                     } else if (units == "h") {
                         //crontab = "0 */"+count+" * * "+days;
-                        repeat = count * 60 * 24;
+                        repeat = count * 60 * 60;
                     }
                 }
             } else if (type == "interval-time") {
