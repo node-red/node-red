@@ -469,7 +469,14 @@ RED.nodes = (function() {
 
                         for (var d2 in node._def.defaults) {
                             if (node._def.defaults.hasOwnProperty(d2)) {
-                                node[d2] = n[d2];
+                                //check if the imported property is already in the node to be imported
+                                if (n.hasOwnProperty(d2)) {
+                                    //copy the property
+                                    node[d2] = n[d2];
+                                } else {
+                                    //otherwise copy the default value
+                                    node[d2] = node._def.defaults[d2].value;
+                                }
                             }
                         }
 
