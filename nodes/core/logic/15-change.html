@@ -61,7 +61,9 @@
             action: {value:"replace",required:true},
             property: {value:"payload",required:true},
             from: {value:"",validate: function(v) {
-                if (this.action == "change" && this.reg) {
+                if (this.action === "change" && !this.from) {
+                    return false;
+                } else if (this.action === "change" && this.reg) {
                     try {
                         var re = new RegExp(this.from, "g");
                         return true;

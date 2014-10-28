@@ -16,6 +16,7 @@
 
 module.exports = function(RED) {
     "use strict";
+
     function ChangeNode(n) {
         RED.nodes.createNode(this, n);
         this.action = n.action;
@@ -28,7 +29,7 @@ module.exports = function(RED) {
             this.from = this.from.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
         }
 
-        this.on('input', function (msg) {
+        this.on('input', function(msg) {
             var propertyParts;
             var depth = 0;
 
@@ -42,19 +43,40 @@ module.exports = function(RED) {
 
             propertyParts = node.property.split(".");
             try {
-                propertyParts.reduce(function (obj, i) {
+                propertyParts.reduce(function(obj, i) {
+                    var to = node.to;
+                    // Set msg from property to another msg property
+                    if (node.action === "replace" && node.to.indexOf("msg.") === 0) {
+                        var parts = to.substring(4);
+                        var msgPropParts = parts.split(".");
+                        try {
+                            msgPropParts.reduce(function(ob, j) {
+                                to = (typeof ob[j] !== "undefined" ? ob[j] : undefined);
+                                return to;
+                            }, msg);
+                        } catch (err) {}
+                    }
+
                     if (++depth === propertyParts.length) {
                         if (node.action === "change") {
                             if (typeof obj[i] === "string") {
                                 obj[i] = obj[i].replace(node.re, node.to);
                             }
                         } else if (node.action === "replace") {
-                            obj[i] = node.to;
+                            if (typeof to === "undefined") {
+                                delete(obj[i]);
+                            } else {
+                                obj[i] = to;
+                            }
                         } else if (node.action === "delete") {
                             delete(obj[i]);
                         }
                     } else {
-                        if (!obj[i]) {
+                        // to property doesn't exist, don't create empty object
+                        if (typeof to === "undefined") {
+                            return;
+                        // setting a non-existent multilevel object, create empty parent
+                        } else if (!obj[i]) {
                             obj[i] = {};
                         }
                         return obj[i];
