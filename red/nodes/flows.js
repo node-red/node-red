@@ -79,6 +79,7 @@ function createSubflow(sf,sfn) {
     var Node = require("./Node");
     var subflowInstance = {
         id: sfn.id,
+        type: sfn.type,
         name: sfn.name,
         wires: []
     }

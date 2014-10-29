@@ -46,6 +46,12 @@ function loadFlows(testFlows, cb) {
 
 describe('flows', function() {
 
+    afterEach(function(done) {
+        flows.clear().then(function() {
+            loadFlows([],done);
+        });
+    });
+    
     describe('#add',function() {
         it('should be called by node constructor',function(done) {
             var n = new RedNode({id:'123',type:'abc'});
@@ -104,6 +110,58 @@ describe('flows', function() {
                 events.emit('type-registered','inject');
             });
             events.once('nodes-started', function() {
+                typeRegistryGet.restore();
+                done();
+            });
+        });
+        
+        it('should not instantiate nodes of an unused subflow', function(done) {
+            RED.registerType('abc', function() {});
+            var typeRegistryGet = sinon.stub(typeRegistry,"get",function(nt) {
+                return function() {};
+            });
+            loadFlows([{"id":"n1","type":"subflow",inputs:[],outputs:[],wires:[]},
+                       {"id":"n2","type":"abc","z":"n1",wires:[]}
+                      ],function() { });
+            events.once('nodes-started', function() {
+                (flows.get("n2") == null).should.be.true;
+                var ncount = 0
+                flows.each(function(n) {
+                    ncount++;
+                });
+                ncount.should.equal(0);
+                console.log(ncount);
+                typeRegistryGet.restore();
+                done();
+            });
+        });
+        it('should instantiate nodes of an used subflow with new IDs', function(done) {
+            RED.registerType('abc', function() {});
+            var typeRegistryGet = sinon.stub(typeRegistry,"get",function(nt) {
+                return RedNode;
+            });
+            loadFlows([{"id":"n1","type":"subflow",inputs:[],outputs:[]},
+                       {"id":"n2","type":"abc","z":"n1","name":"def",wires:[]},
+                       {"id":"n3","type":"subflow:n1"}
+                      ], function() { });
+            events.once('nodes-started', function() {
+                // n2 should not get instantiated with that id
+                (flows.get("n2") == null).should.be.true;
+                var ncount = 0
+                var nodes = [];
+                flows.each(function(n) {
+                    nodes.push(n);
+                });
+                nodes.should.have.lengthOf(2);
+                
+                // Assume the nodes are instantiated in this order - not
+                // a requirement, but makes the test easier to write.
+                nodes[0].should.have.property("id","n3");
+                nodes[0].should.have.property("type","subflow:n1");
+                nodes[1].should.not.have.property("id","n2");
+                nodes[1].should.have.property("name","def");
+                
+                // TODO: verify instance wiring is correct
                 typeRegistryGet.restore();
                 done();
             });
