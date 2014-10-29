@@ -50,12 +50,21 @@ RED.history = (function() {
                             RED.view.removeWorkspace(ev.workspaces[i]);
                         }
                     }
+                    if (ev.subflows) {
+                        for (i=0;i<ev.subflows.length;i++) {
+                            RED.nodes.removeSubflow(ev.subflows[i]);
+                            RED.view.removeWorkspace(ev.subflows[i]);
+                        }
+                    }
                 } else if (ev.t == "delete") {
                     if (ev.workspaces) {
                         for (i=0;i<ev.workspaces.length;i++) {
                             RED.nodes.addWorkspace(ev.workspaces[i]);
                             RED.view.addWorkspace(ev.workspaces[i]);
                         }
+                    }
+                    if (ev.subflow) {
+                        RED.nodes.addSubflow(ev.subflow);
                     }
                     if (ev.nodes) {
                         for (i=0;i<ev.nodes.length;i++) {
@@ -80,15 +89,66 @@ RED.history = (function() {
                             ev.node[i] = ev.changes[i];
                         }
                     }
-                    RED.editor.updateNodeProperties(ev.node);
+                    if (ev.subflow) {
+                        if (ev.node.in.length > ev.subflow.inputCount) {
+                            ev.node.in.splice(ev.subflow.inputCount);
+                        } else if (ev.subflow.inputs.length > 0) {
+                            ev.node.in = ev.node.in.concat(ev.subflow.inputs);
+                        }
+                        if (ev.node.out.length > ev.subflow.outputCount) {
+                            ev.node.out.splice(ev.subflow.outputCount);
+                        } else if (ev.subflow.outputs.length > 0) {
+                            ev.node.out = ev.node.out.concat(ev.subflow.outputs);
+                        }
+                        RED.nodes.eachNode(function(n) {
+                            if (n.type == "subflow:"+ev.node.id) {
+                                n.changed = ev.changed;
+                                n.inputs = ev.node.in.length;
+                                n.outputs = ev.node.out.length;
+                                RED.editor.updateNodeProperties(n);
+                            }
+                        });
+                        
+                        
+                        
+                        RED.palette.refresh();
+                    } else {
+                        RED.editor.updateNodeProperties(ev.node);
+                        RED.editor.validateNode(ev.node);
+                    }
                     if (ev.links) {
                         for (i=0;i<ev.links.length;i++) {
                             RED.nodes.addLink(ev.links[i]);
                         }
                     }
-                    RED.editor.validateNode(ev.node);
                     ev.node.dirty = true;
                     ev.node.changed = ev.changed;
+                } else if (ev.t == "createSubflow") {
+                    if (ev.nodes) {
+                        RED.nodes.eachNode(function(n) {
+                            if (n.z === ev.subflow.id) {
+                                n.z = ev.activeWorkspace;
+                                n.dirty = true;
+                            }
+                        });
+                        for (i=0;i<ev.nodes.length;i++) {
+                            RED.nodes.remove(ev.nodes[i]);
+                        }
+                    }
+                    if (ev.links) {
+                        for (i=0;i<ev.links.length;i++) {
+                            RED.nodes.removeLink(ev.links[i]);
+                        }
+                    }
+                    
+                    RED.nodes.removeSubflow(ev.subflow);
+                    RED.view.removeWorkspace(ev.subflow);
+                    
+                    if (ev.removedLinks) {
+                        for (i=0;i<ev.removedLinks.length;i++) {
+                            RED.nodes.addLink(ev.removedLinks[i]);
+                        }
+                    }
                 }
                 RED.view.dirty(ev.dirty);
                 RED.view.redraw();

@@ -51,11 +51,7 @@
         <div id="workspace-add-tab"><a id="btn-workspace-add-tab" href="#"><i class="fa fa-plus"></i></a></div>
         <div id="chart"></div>
         <div id="workspace-toolbar">
-            <div class="btn-group">
-                <a class="btn btn-small" href="#"><i class="fa fa-search-minus"></i></a>
-                <a class="btn btn-small" href="#"><i class="fa fa-dot-circle-o"></i></a>
-                <a class="btn btn-small" href="#"><i class="fa fa-search-plus"></i></a>
-            </div>
+            <a class="button" id="workspace-edit-subflow" href="#"><i class="fa fa-pencil"></i> edit subflow properties</a>
         </div>
     </div>
 
@@ -81,6 +77,20 @@
 
 <div id="dialog" class="hide"><form id="dialog-form" class="form-horizontal"></form></div>
 <div id="node-config-dialog" class="hide"><form id="dialog-config-form" class="form-horizontal"></form><div class="form-tips" id="node-config-dialog-user-count"></div></div>
+<div id="subflow-dialog" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <label>Name</label><input type="text" id="subflow-input-name">
+        </div>
+        <div class="form-row">
+            <label>Inputs</label><input style="width: 60px; height: 1.7em;" id="subflow-input-inCount">
+        </div>
+        <div class="form-row">
+            <label>Outputs</label><input style="width: 60px; height: 1.7em;" id="subflow-input-outCount">
+        </div>
+    </form>
+    <div class="form-tips" id="subflow-dialog-user-count"></div>
+</div>
 
 <div id="node-dialog-confirm-deploy" class="hide">
     <form class="form-horizontal">
@@ -199,7 +209,6 @@
         </div>
     </form>
 </div>
-
 <script type="text/x-red" data-template-name="export-clipboard-dialog">
     <div class="form-row">
         <label for="node-input-export" style="display: block; width:100%;"><i class="fa fa-clipboard"></i> Nodes:</label>
@@ -219,6 +228,13 @@
     <div class="form-row">
         <label for="node-input-import"><i class="fa fa-clipboard"></i> Nodes:</label>
         <textarea style="font-family: monospace; font-size: 12px; background:rgb(226, 229, 255); padding-left: 0.5em;" class="input-block-level" id="node-input-import" rows="5" placeholder="Paste nodes here"></textarea>
+    </div>
+</script>
+
+<script type="text/x-red" data-template-name="subflow">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="name">
     </div>
 </script>
 

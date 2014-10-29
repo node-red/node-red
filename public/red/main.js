@@ -301,6 +301,9 @@ var RED = (function() {
                 null,
                 {id:"btn-config-nodes",icon:"fa fa-th-list",label:"Configuration nodes...",onselect:RED.sidebar.config.show},
                 null,
+                {id:"btn-create-subflow",icon:"fa fa-share-alt",label:"Create subflow",onselect:RED.view.createSubflow},
+                {id:"btn-convert-subflow",icon:"fa fa-share-alt",label:"Convert to subflow",disabled:true,onselect:RED.view.convertToSubflow},
+                null,
                 {id:"btn-workspace-menu",icon:"fa fa-th-large",label:"Workspaces",options:[
                     {id:"btn-workspace-add",icon:"fa fa-plus",label:"Add"},
                     {id:"btn-workspace-edit",icon:"fa fa-pencil",label:"Rename"},
