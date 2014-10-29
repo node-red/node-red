@@ -95,10 +95,12 @@ module.exports = function(RED) {
                 }
                 if (RED.settings.httpNodeCors) {
                     var route = RED.httpNode.route['options'];
-                    for (var j = 0; j<route.length; j++) {
-                        if (route[j].path == this.url) {
-                            route.splice(j,1);
-                            //break;
+                    if (route) {
+                        for (var j = 0; j<route.length; j++) {
+                            if (route[j].path == this.url) {
+                                route.splice(j,1);
+                                //break;
+                            }
                         }
                     }
                 }
