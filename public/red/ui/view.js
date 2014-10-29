@@ -651,8 +651,8 @@ RED.view = (function() {
         } else {
             RED.keyboard.add(/* backspace */ 8,function(){deleteSelection();d3.event.preventDefault();});
             RED.keyboard.add(/* delete */ 46,function(){deleteSelection();d3.event.preventDefault();});
-            RED.keyboard.add(/* c */ 67,{ctrl:true,meta:true},function(){copySelection();d3.event.preventDefault();});
-            RED.keyboard.add(/* x */ 88,{ctrl:true,meta:true},function(){copySelection();deleteSelection();d3.event.preventDefault();});
+            RED.keyboard.add(/* c */ 67,{ctrl:true},function(){copySelection();d3.event.preventDefault();});
+            RED.keyboard.add(/* x */ 88,{ctrl:true},function(){copySelection();deleteSelection();d3.event.preventDefault();});
         }
         if (moving_set.length === 0) {
             RED.keyboard.remove(/* up   */ 38);
@@ -1369,14 +1369,14 @@ RED.view = (function() {
         }
     }
 
-    RED.keyboard.add(/* z */ 90,{ctrl:true,meta:true},function(){RED.history.pop();});
-    RED.keyboard.add(/* a */ 65,{ctrl:true,meta:true},function(){selectAll();d3.event.preventDefault();});
-    RED.keyboard.add(/* = */ 187,{ctrl:true,meta:true},function(){zoomIn();d3.event.preventDefault();});
-    RED.keyboard.add(/* - */ 189,{ctrl:true,meta:true},function(){zoomOut();d3.event.preventDefault();});
-    RED.keyboard.add(/* 0 */ 48,{ctrl:true,meta:true},function(){zoomZero();d3.event.preventDefault();});
-    RED.keyboard.add(/* v */ 86,{ctrl:true,meta:true},function(){importNodes(clipboard);d3.event.preventDefault();});
-    RED.keyboard.add(/* e */ 69,{ctrl:true,meta:true},function(){showExportNodesDialog();d3.event.preventDefault();});
-    RED.keyboard.add(/* i */ 73,{ctrl:true,meta:true},function(){showImportNodesDialog();d3.event.preventDefault();});
+    RED.keyboard.add(/* z */ 90,{ctrl:true},function(){RED.history.pop();});
+    RED.keyboard.add(/* a */ 65,{ctrl:true},function(){selectAll();d3.event.preventDefault();});
+    RED.keyboard.add(/* = */ 187,{ctrl:true},function(){zoomIn();d3.event.preventDefault();});
+    RED.keyboard.add(/* - */ 189,{ctrl:true},function(){zoomOut();d3.event.preventDefault();});
+    RED.keyboard.add(/* 0 */ 48,{ctrl:true},function(){zoomZero();d3.event.preventDefault();});
+    RED.keyboard.add(/* v */ 86,{ctrl:true},function(){importNodes(clipboard);d3.event.preventDefault();});
+    RED.keyboard.add(/* e */ 69,{ctrl:true},function(){showExportNodesDialog();d3.event.preventDefault();});
+    RED.keyboard.add(/* i */ 73,{ctrl:true},function(){showImportNodesDialog();d3.event.preventDefault();});
 
     // TODO: 'dirty' should be a property of RED.nodes - with an event callback for ui hooks
     function setDirty(d) {
