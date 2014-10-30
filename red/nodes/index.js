@@ -54,7 +54,7 @@ function init(_settings,storage) {
 function checkTypeInUse(id) {
     var nodeInfo = registry.getNodeInfo(id);
     if (!nodeInfo) {
-        throw new Error("Unrecognised id: "+info);
+        throw new Error("Unrecognised id: "+id);
     }
     var inUse = {};
     flows.each(function(n) {
