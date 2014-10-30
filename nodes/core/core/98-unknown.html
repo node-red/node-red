@@ -16,13 +16,15 @@
 
 <script type="text/x-red" data-template-name="unknown">
     <div class="form-tips"><p>This node is a type unknown to your installation of Node-RED.</p>
-    <p><i>If you deploy with the node in this state, it will lose all of its configuration.</i></p>
+    <p><i>If you deploy with the node in this state, it's configuration will be preserved, but
+    the flow will not start until the missing type is installed.</i></p>
     <p>See the Info side bar for more help</p></div>
 </script>
 
 <script type="text/x-red" data-help-name="unknown">
     <p>This node is a type unknown to your installation of Node-RED.</p>
-    <p><i>If you deploy with the node in this state, it will lose all of its configuration.</i></p>
+    <p><i>If you deploy with the node in this state, it's configuration will be preserved, but
+    the flow will not start until the missing type is installed.</i></p>
     <p>It is possible this node type is already installed, but is missing a dependency. Check the Node-RED start-up log for
        any error messages associated with the missing node type. Use <b>npm install &lt;module&gt;</b> to install any missing modules
        and restart Node-RED and reimport the nodes.</p>

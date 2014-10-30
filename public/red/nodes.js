@@ -330,17 +330,25 @@ RED.nodes = (function() {
         var node = {};
         node.id = n.id;
         node.type = n.type;
-        for (var d in n._def.defaults) {
-            if (n._def.defaults.hasOwnProperty(d)) {
-                node[d] = n[d];
+        if (node.type == "unknown") {
+            for (var p in n._orig) {
+                if (n._orig.hasOwnProperty(p)) {
+                    node[p] = n._orig[p];
+                }
             }
-        }
-        if(exportCreds && n.credentials) {
-            node.credentials = {};
-            for (var cred in n._def.credentials) {
-                if (n._def.credentials.hasOwnProperty(cred)) {
-                    if (n.credentials[cred] != null) {
-                        node.credentials[cred] = n.credentials[cred];
+        } else {
+            for (var d in n._def.defaults) {
+                if (n._def.defaults.hasOwnProperty(d)) {
+                    node[d] = n[d];
+                }
+            }
+            if(exportCreds && n.credentials) {
+                node.credentials = {};
+                for (var cred in n._def.credentials) {
+                    if (n._def.credentials.hasOwnProperty(cred)) {
+                        if (n.credentials[cred] != null) {
+                            node.credentials[cred] = n.credentials[cred];
+                        }
                     }
                 }
             }
@@ -503,16 +511,15 @@ RED.nodes = (function() {
                     !registry.getNodeType(n.type) &&
                     n.type.substring(0,8) != "subflow:") {
                     // TODO: get this UI thing out of here! (see below as well)
-                    n.name = n.type;
-                    n.type = "unknown";
-                    if (unknownTypes.indexOf(n.name)==-1) {
-                        unknownTypes.push(n.name);
+                    
+                    if (unknownTypes.indexOf(n.type)==-1) {
+                        unknownTypes.push(n.type);
                     }
-                    if (n.x == null && n.y == null) {
-                        // config node - remove it
-                        newNodes.splice(i,1);
-                        i--;
-                    }
+                    //if (n.x == null && n.y == null) {
+                    //    // config node - remove it
+                    //    newNodes.splice(i,1);
+                    //    i--;
+                    //}
                 }
             }
             if (unknownTypes.length > 0) {
@@ -653,27 +660,46 @@ RED.nodes = (function() {
                             node.inputs = subflow.in.length;
                         } else {
                             if (!node._def) {
-                                node._def = {
-                                    color:"#fee",
-                                    defaults: {},
-                                    label: "unknown: "+n.type,
-                                    labelStyle: "node_label_italic",
-                                    outputs: n.outputs||n.wires.length
+                                if (node.x && node.y) {
+                                    node._def = {
+                                        color:"#fee",
+                                        defaults: {},
+                                        label: "unknown: "+n.type,
+                                        labelStyle: "node_label_italic",
+                                        outputs: n.outputs||n.wires.length
+                                    }
+                                } else {
+                                    node._def = {
+                                        category:"config"
+                                    };
+                                    node.users = [];
                                 }
+                                var orig = {};
+                                for (var p in n) {
+                                    if (n.hasOwnProperty(p) && p!="x" && p!="y" && p!="z" && p!="id" && p!="wires") {
+                                        orig[p] = n[p];
+                                    }
+                                }
+                                node._orig = orig;
+                                node.name = n.type;
+                                node.type = "unknown";
                             }
-                            node.inputs = n.inputs||node._def.inputs;
-                            node.outputs = n.outputs||node._def.outputs;
-    
-                            for (var d2 in node._def.defaults) {
-                                if (node._def.defaults.hasOwnProperty(d2)) {
-                                    node[d2] = n[d2];
+                            if (node._def.category != "config") {
+                                node.inputs = n.inputs||node._def.inputs;
+                                node.outputs = n.outputs||node._def.outputs;
+                                for (var d2 in node._def.defaults) {
+                                    if (node._def.defaults.hasOwnProperty(d2)) {
+                                        node[d2] = n[d2];
+                                    }
                                 }
                             }
                         }
                         addNode(node);
                         RED.editor.validateNode(node);
                         node_map[n.id] = node;
-                        new_nodes.push(node);
+                        if (node._def.category != "config") {
+                            new_nodes.push(node);
+                        }
                     }
                 }
             }
