@@ -264,8 +264,8 @@ module.exports = function(RED) {
                             node.status({fill:"red",shape:"ring",text:"failed"});
                         } else {
                             var response = JSON.parse(body);
-                            if (body.errors) {
-                                var errorList = body.errors.map(function(er) { return er.code+": "+er.message }).join(", ");
+                            if (response.errors) {
+                                var errorList = response.errors.map(function(er) { return er.code+": "+er.message }).join(", ");
                                 node.error("tweet failed: "+errorList);
                                 node.status({fill:"red",shape:"ring",text:"failed"});
                             } else {
