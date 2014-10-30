@@ -13,15 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 
 
 RED.menu = (function() {
-    
+
     var menuItems = {};
-    
+
     function createMenuItem(opt) {
         var item;
+
+        function setState() {
+            var savedStateActive = isSavedStateActive(opt.id);
+            if (savedStateActive) {
+                link.addClass("active");
+                opt.onselect.call(opt, true);
+            } else if (savedStateActive === false) {
+                link.removeClass("active");
+                opt.onselect.call(opt, false);
+            } else if (opt.hasOwnProperty("selected")) {
+                if (opt.selected) {
+                    link.addClass("active");
+                } else {
+                    link.removeClass("active");
+                }
+                opt.onselect.call(opt, opt.selected);
+            }
+        }
+
         if (opt === null) {
             item = $('<li class="divider"></li>');
         } else {
@@ -31,27 +50,28 @@ RED.menu = (function() {
                 (opt.icon?'<i class="'+opt.icon+'"></i> ':'')+
                 opt.label+
                 '</a>').appendTo(item);
-                
+
             menuItems[opt.id] = opt;
-            
+
             if (opt.onselect) {
                 link.click(function() {
                     if ($(this).parent().hasClass("disabled")) {
                         return;
                     }
                     if (opt.toggle) {
-                        setSelected(opt.id,!isSelected(opt.id));
+                        setSelected(opt.id, !isSelected(opt.id));
                     } else {
                         opt.onselect.call(opt);
                     }
-                })
+                });
+                setState();
             } else if (opt.href) {
                 link.attr("target","_blank").attr("href",opt.href);
             }
             if (opt.options) {
                 item.addClass("dropdown-submenu pull-left");
                 var submenu = $('<ul id="'+opt.id+'-submenu" class="dropdown-menu"></ul>').appendTo(item);
-                
+
                 for (var i=0;i<opt.options.length;i++) {
                     createMenuItem(opt.options[i]).appendTo(submenu);
                 }
@@ -60,26 +80,35 @@ RED.menu = (function() {
                 item.addClass("disabled");
             }
         }
-        
-        
+
+
         return item;
-        
+
     }
     function createMenu(options) {
-        
+
         var button = $("#"+options.id);
-        
+
         var topMenu = $("<ul/>",{class:"dropdown-menu"}).insertAfter(button);
-        
+
         for (var i=0;i<options.options.length;i++) {
             var opt = options.options[i];
             createMenuItem(opt).appendTo(topMenu);
         }
     }
-    
-    function isSelected(id) {
-        return $("#"+id).hasClass("active");
+
+    function isSavedStateActive(id) {
+        return RED.settings.get("menu-" + id);
     }
+
+    function isSelected(id) {
+        return $("#" + id).hasClass("active");
+    }
+
+    function setSavedState(id, state) {
+        RED.settings.set("menu-" + id, state);
+    }
+
     function setSelected(id,state) {
         if (isSelected(id) == state) {
             return;
@@ -93,8 +122,9 @@ RED.menu = (function() {
         if (opt.onselect) {
             opt.onselect.call(opt,state);
         }
+        setSavedState(id, state);
     }
-    
+
     function setDisabled(id,state) {
         if (state) {
             $("#"+id).parent().addClass("disabled");
@@ -102,14 +132,14 @@ RED.menu = (function() {
             $("#"+id).parent().removeClass("disabled");
         }
     }
-    
+
     function addItem(id,opt) {
         createMenuItem(opt).appendTo("#"+id+"-submenu");
     }
     function removeItem(id) {
         $("#"+id).parent().remove();
     }
-    
+
     function setAction(id,action) {
         menuItems[id].onselect = action;
         $("#"+id).click(function() {
@@ -123,7 +153,7 @@ RED.menu = (function() {
             }
         });
     }
-    
+
     return {
         init: createMenu,
         setSelected: setSelected,
