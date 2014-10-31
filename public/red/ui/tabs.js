@@ -42,9 +42,9 @@ RED.tabs = (function() {
         function onTabMouseEnter() {
             var _jself = jQuery(this);
             var holderWidth = _jself.parent().outerWidth()
+            _jself.addClass('mouse-entered');
             if(holderWidth < _jself.outerWidth()) {
                 setTimeout(function() {
-                    _jself.addClass('mouse-entered');
                     _jself.parent().animate({width: _jself.outerWidth()}, 500);
                 },500);
             }
