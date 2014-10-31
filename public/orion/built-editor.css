@@ -1,12 +1,12 @@
 .textview {
 	background-color: white;
-	font-family: "Consolas", "Monaco", "Vera Mono", "monospace";
-	font-size: 10pt;
+	font-family: "Consolas", "Monaco", "Vera Mono", monospace;
+	font-size: 12px;
 	min-width: 50px;
 	min-height: 50px;
 }
 .textviewScroll {
-	padding: 1px 2px;
+	padding: 4px 2px 4px 2px;
 }
 .textviewContent {
   cursor: auto;
@@ -16,6 +16,10 @@
 }
 .textviewRightRuler {
 	border-left: 1px solid #eaeaea;
+}
+.textviewInnerRightRuler {
+	border-left: 1px solid #eaeaea;
+	background-color: white;
 }
 .textviewMarginRuler {
 	border-left: 1px solid #eaeaea;
@@ -38,11 +42,40 @@
 .ruler.overview {
 	width: 14px;
 }
+.ruler.zoom {
+	width: 100px;
+	height: 100%;
+}
 .rulerLines {
 	color: silver;
 }
 .rulerLines.even
 .rulerLines.odd {
+}
+.rulerZoomWindow {
+	background-color: rgba(0, 0, 0, 0.1);
+	margin-left: 1px;
+	border: 1px solid #eee;
+	position: absolute;
+	width: calc(100% - 4px);
+	border-radius: 5px;
+	z-index: 100;
+}
+.textviewZoom {
+	font-size: 2px !important;
+	cursor: pointer;
+}
+.textviewZoom .textviewContent {
+	cursor: pointer;
+}
+.textviewZoom .textviewScroll {
+	padding: 0;
+}
+.textviewZoom .punctuation.separator.tab {
+	background-image: none;
+}
+.textviewZoom .punctuation.separator.space {
+	background-image: none;
 }
 .tooltipTheme.textview {
 	background-color: InfoBackground !important;
@@ -52,8 +85,8 @@
 	padding: 0px;
 }
 .textviewTooltip {
-	font-family: "Consolas", "Monaco", "Vera Mono", "monospace";
-	font-size: 10pt;
+	font-family: "Consolas", "Monaco", "Vera Mono", monospace;
+	font-size: 12px;
 	background-color: InfoBackground;
 	color: InfoText;
 	padding: 2px;
@@ -79,8 +112,57 @@
 .tooltipTheme .annotationLine.currentLine {
 	background-color: transparent !important;
 }
+.textViewFind {
+	background-color: #ddd;
+	position: absolute;
+	top: -50px;
+	right: -1000px;
+	border: 1px solid #aaa;
+	border-top: 0;
+	border-bottom-right-radius: 4px;
+	border-bottom-left-radius: 4px;
+	padding: 2px;
+	z-index: 100;
+}
+.textViewFind.show {
+	top: 0;
+	right: 40px;
+	transition: top 0.3s ease-out;
+	-ms-transition: top 0.3s ease-out;
+	-moz-transition: top 0.3s ease-out;
+	-webkit-transition: top 0.3s ease-out;
+	-o-transition: top 0.3s ease-out;
+}
+.textViewFindButton {
+	margin-right: 1px;
+	margin-left: 0;
+}
+.textViewFindButton:first-child {
+	margin-left: 5px;
+}
+.textViewFindButton:last-child {
+	margin-right: 5px;
+}
+.textViewFindButton.checked {
+	color: blue;
+	text-decoration: underline;
+}
+.textViewReplaceInput {
+}
+.textViewFindInput {
+}
+.textViewFindCloseButton {
+	width: 16px;
+	height: 16px;
+	border-width: 0;
+	background-color: transparent;
+	vertical-align: baseline;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-image: url(data:image/gif;base64,R0lGODlhEAAQAJEAAAAAAP///4CAgP///yH5BAEAAAMALAAAAAAQABAAAAIdnI+py+1vhECSyTluu9px+HkctnSdUh0pxLYuVAAAOw==);
+}
 .contentassist {
-	font-size:9pt;
+	font-size:12px;
 	display: none;
 	background-color: white;
 	position: fixed;
@@ -89,13 +171,14 @@
 	z-index:100;
 	cursor: default;
 	min-width: 70px;
-	max-width: 350px;
-	max-height: 170px;
+	width: 350px;
+	height: 170px;
 	overflow: hidden;
 	white-space: nowrap;
 	border-radius: 5px;
 	box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 10px;
 	line-height: 18px;
+	resize: both;
 }
 .contentassist:focus {
 	outline: none;
@@ -108,9 +191,9 @@
 }
 .contentassist hr{
 	border: 0;
-    height: 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+	height: 0;
+	border-top: 1px solid rgba(0, 0, 0, 0.1);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 .contentassist .proposal-noemphasis-keyword {
 	background-color: aliceblue;
@@ -124,11 +207,11 @@
 }
 .contentassist .proposal-noemphasis-title-keywords {
 	background-color: aliceblue;
-	color: grey;
+	color: gray;
 }
 .contentassist .proposal-noemphasis-title {
 	background-color: aliceblue;
-	color: grey;
+	color: gray;
 	padding-top: 5px;
 }
 .contentassist .proposal-noemphasis-title::before {
@@ -161,6 +244,7 @@
 .contentassist .cloneProposal {
 	box-shadow: rgba(0, 0, 0, 0.9) 2px 2px 8px;
 	position: fixed;
+	visibility: visible;
 	z-index: 1000; 
 }
 .contentassist>div {
@@ -168,77 +252,43 @@
 }
 .cloneWrapper {
 	display: block;
+	height: 0;			
 	overflow: visible;
+	visibility: hidden; 
+	width: 0;			
 	z-index: 1000; 
 }
 .contentassist.cloneWrapper:hover {
 	overflow: visible;
 }
-.comment.block.documentation, .comment-block-documentation {
-	color: #00008F;
-}
 .comment {
 	color: #3C802C;
-}
-.constant.character.entity, .constant-character-entity {
-	font-style: normal;
 }
 .constant {
 	color: blue;
 }
-.entity.name.function, .entity.name.type, .entity-name-function, .entity-name-type {
-	font-weight: bold;
-}
-.entity.name.tag, .entity-name-tag {
-	color: #CC4C07;
-}
-.entity.other.attribute.name, .entity-other-attribute-name {
-	color: #3C802C;
-}
 .entity {
 	color: #3f7f7f;
-}
-.invalid.illegal, .invalid-illegal {
-	color: white;
-	background-color: red;
-}
-.invalid.deprecated, .invalid-deprecated {
-	text-decoration: line-through;
 }
 .invalid {
 	color: red;
 	font-weight: bold;
 }
-.keyword.other.documentation.markup {
-	color: #7F7F9F;
-}
-.keyword.other.documentation {
-	color: #7F9FBF;
-}
-.keyword.operator, .keyword-operator {
-	color: #ddd;
-}
 .keyword {
-	color: #CC4C07;
+	color: #9F4177;
 	font-weight: bold;
 }
-.markup.heading, .markup-heading {
-	font-weight: bold;
+.storage {
+	color: #7F0055;
 }
-.markup.quote, .markup-quote {
-	font-style: italic;
+.string {
+	color: #446fbd;
 }
-.meta.annotation.currentLine {
-	background-color: #EAF2FE;
+.support {
+	color: #21439c;
 }
-.meta.tag {
-	color: #3f7f7f;
-}
-.punctuation.definition.comment, .punctuation-definition-comment {
-	color: #3f5fbf;
-}
-.punctuation.definition.string, .punctuation-definition-string {
-	color: blue;
+.variable {
+	color: #0000c0;
 }
 .punctuation.separator.space {
 	
@@ -252,24 +302,51 @@
 	background-repeat: no-repeat;
 	background-position: left center;
 }
-.storage {
-	color: #7F0055;
+.comment-block-documentation {
+	color: #00008F;
 }
-.string {
-	color: #446fbd;
+.constant-character-entity {
+	font-style: normal;
 }
-.support {
-	color: #21439c;
+.entity-name-function, .entity-name-type {
+	font-weight: bold;
+	color: #67BBB8;
 }
-.variable.parameter, .variable-parameter {
-	color: black;
+.entity-name-tag {
+	color: #98937B;
 }
-.variable.language, .variable-language {
-	color: #7F0055;
+.entity-other-attribute-name {
+	color: #3C802C;
+}
+.invalid-illegal {
+	color: white;
+	background-color: red;
+}
+.invalid-deprecated {
+	text-decoration: line-through;
+}
+.keyword-operator {
+	color: #CC4C07;
 	font-weight: bold;
 }
-.variable {
-	color: #0000c0;
+.meta.annotation.currentLine {
+	background-color: #EAF2FE;
+}
+.meta.tag {
+	color: #3f7f7f;
+}
+.punctuation-definition-comment {
+	color: #3f5fbf;
+}
+.punctuation-definition-string {
+	color: blue;
+}
+.variable-parameter {
+	color: #D1416F;
+}
+.variable-language {
+	color: #7F0055;
+	font-weight: bold;
 }
 .cm-meta { color: #00008F; }
 .cm-keyword { font-weight: bold; color: #7F0055; }
@@ -446,12 +523,12 @@
 	border: 1px solid #ff3232;
 }
 .annotationOverview.currentLine {
-	background-color: #f8a852;
-	border: 1px solid #f79327;
+	background-color: #EAF2FE;
+	border: 1px solid black;
 }
 .annotationOverview.matchingSearch {
-background-color: #C3E1FF;
-border: 1px solid #afcae5;
+	background-color: #C3E1FF;
+	border: 1px solid #afcae5;
 }
 .annotationOverview.currentSearch {
 	background-color: #53D1FF;
@@ -523,4 +600,72 @@ border: 1px solid #afcae5;
 }
 .annotationLine.currentLine {
 	background-color: #EAF2FE;
+}
+.comment.block.documentation {
+	color: #00008F;
+}
+.constant.character.entity {
+	font-style: normal;
+}
+.entity.name.function, .entity.name.type {
+	font-weight: bold;
+	color: #67BBB8;
+}
+.entity.name {
+	color: #98937B;
+}
+.entity.other.attribute.name {
+	color: #3C802C;
+}
+.meta.documentation.tag {
+	color: #7F7F9F;
+}
+.meta.documentation.annotation {
+	color: #7F9FBF;
+}
+.markup.bold {
+	font-weight: bold;
+}
+.markup.heading, .markup-heading {
+	color: blue;
+}
+.markup.italic {
+	font-style: italic;
+}
+.markup.list {
+	color: #CC4C07;
+}
+.markup.other.separator {
+	color: #00008F;
+}
+.markup.other.strikethrough {
+	text-decoration: line-through;
+}
+.markup.other.table {
+	color: #3C802C;
+}
+.markup.quote, .markup-quote {
+	color: #446fbd;
+}
+.markup.raw {
+	font-family: monospace
+}
+.markup.underline.link {
+	text-decoration: underline;
+}
+.punctuation.definition.comment {
+	color: #3f5fbf;
+}
+.punctuation.definition.string {
+	color: blue;
+}
+.variable.parameter {
+	color: #D1416F;
+}
+.variable.language {
+	color: #7F0055;
+	font-weight: bold;
+}
+.variable.other {
+	color: #E038AD;
 }
