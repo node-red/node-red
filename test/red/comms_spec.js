@@ -174,13 +174,16 @@ describe("comms", function() {
             });
             ws.on('message', function(data) {
                 var msg = JSON.parse(data);
-                msg.should.have.property('topic', 'foo');
-                msg.should.have.property('data', 'bar');
-                count++;
-                if (count == 5) {
-                    clearInterval(interval);
-                    ws.close();
-                    done();
+                // It is possible a heartbeat message may arrive - so ignore them
+                if (msg.topic != "hb") {
+                    msg.should.have.property('topic', 'foo');
+                    msg.should.have.property('data', 'bar');
+                    count++;
+                    if (count == 5) {
+                        clearInterval(interval);
+                        ws.close();
+                        done();
+                    }
                 }
             });
         });
