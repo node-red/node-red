@@ -656,6 +656,7 @@ RED.nodes = (function() {
                                 node._def = registry.getNodeType(node.type);
                                 delete node.i;
                             }
+                            node.name = n.name;
                             node.outputs = subflow.out.length;
                             node.inputs = subflow.in.length;
                         } else {
