@@ -42,7 +42,7 @@ body {
     display: none;
 }
 #dropTarget div {
-    display: table-cell; 
+    display: table-cell;
     vertical-align: middle;
     text-align: center;
     font-size: 40px;
@@ -199,7 +199,7 @@ span.logo img {
     padding: 5px;
     overflow-y: auto;
     box-sizing:border-box;
-    -moz-box-sizing: border-box;    
+    -moz-box-sizing: border-box;
 }
 .palette-spinner {
     padding-top: 40px;
@@ -217,7 +217,7 @@ span.logo img {
     padding: 3px;
     border-top: 1px solid #999;
     box-sizing:border-box;
-    -moz-box-sizing: border-box;    
+    -moz-box-sizing: border-box;
 }
 #palette-search i.fa-search {
     position: absolute;
@@ -246,8 +246,8 @@ span.logo img {
     margin: 0px;
     height: 30px;
     box-sizing:border-box;
-    -moz-box-sizing: border-box;    
-    
+    -moz-box-sizing: border-box;
+
 }
 #palette-search input:focus {
     border: none;
@@ -319,7 +319,7 @@ span.logo img {
    top:8px;
    left: -5px;
    box-sizing: border-box;
-    -moz-box-sizing: border-box;    
+    -moz-box-sizing: border-box;
    background:#d9d9d9;
    border-radius: 3px;
    width: 10px;
@@ -338,7 +338,7 @@ span.logo img {
 #sidebar {
     background: #fff;
     box-sizing: border-box;
-    -moz-box-sizing: border-box;    
+    -moz-box-sizing: border-box;
 }
 #sidebar.closing {
     background: #eee;
@@ -754,7 +754,7 @@ div.node-info {
 }
 .dropdown-menu li.disabled  a:hover {
     background: none;
-}  
+}
 */
 .dropdown-menu>li>a:hover, .dropdown-menu>li>a:focus, .dropdown-submenu:hover>a, .dropdown-submenu:focus>a {
     background: #999;
@@ -908,16 +908,20 @@ ul.red-ui-tabs li {
     margin: 0 5px 0 0;
     height: 23px;
     line-height: 17px;
-    max-width: 150px;
     width: 14%;
     overflow: hidden;
     white-space: nowrap;
 }
 
+ul.red-ui-tabs li:hover {
+  background: #f0f0f0;
+}
+
 ul.red-ui-tabs li a.red-ui-tab-label {
-    display: block; 
+    display: block;
     padding: 3px 16px;
     color: #666;
+    position: absolute;
 }
 ul.red-ui-tabs li {
     position: relative;
@@ -1029,6 +1033,6 @@ i.spinner {
     background: url(spin.svg) no-repeat 50% 50%;
     background-size: contain
 }
-    
-    
+
+
 
