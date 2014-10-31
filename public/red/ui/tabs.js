@@ -13,32 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 
 
 RED.tabs = (function() {
-    
-    
+
+
     function createTabs(options) {
         var tabs = {};
-        
+
         var ul = $("#"+options.id)
         ul.addClass("red-ui-tabs");
         ul.children().first().addClass("active");
         ul.children().addClass("red-ui-tab");
-        
+
         function onTabClick() {
             activateTab($(this));
             return false;
         }
-        
+
         function onTabDblClick() {
             if (options.ondblclick) {
                 options.ondblclick(tabs[$(this).attr('href').slice(1)]);
             }
             return false;
         }
-        
+
+        function onTabMouseEnter() {
+            var _jself = jQuery(this);
+            var holderWidth = _jself.parent().outerWidth()
+            if(holderWidth < _jself.outerWidth()) {
+                setTimeout(function() {
+                    _jself.addClass('mouse-entered');
+                    _jself.parent().animate({width: _jself.outerWidth()}, 500);
+                },500);
+            }
+        }
+
+        function onTabMouseLeave() {
+            var _jself = jQuery(this);
+            if(_jself.hasClass('mouse-entered')) {
+                _jself.removeClass('mouse-entered');
+                var tabWidth = getTabWidth();
+                _jself.parent().animate({width: tabWidth + '%'}, 400);
+            }
+        }
+
         function activateTab(link) {
             if (typeof link === "string") {
                 link = ul.find("a[href='#"+link+"']");
@@ -51,20 +71,27 @@ RED.tabs = (function() {
                 }
             }
         }
-        
-        function updateTabWidths() {
+
+        function getTabWidth() {
             var tabs = ul.find("li.red-ui-tab");
             var width = ul.width();
             var tabCount = tabs.size();
             var tabWidth = (width-6-(tabCount*7))/tabCount;
             var pct = 100*tabWidth/width;
+            return pct;
+        }
+
+        function updateTabWidths() {
+            var tabs = ul.find("li.red-ui-tab");
+            var pct = getTabWidth();
             tabs.css({width:pct+"%"});
         }
-        
+
+
         ul.find("li.red-ui-tab a").on("click",onTabClick).on("dblclick",onTabDblClick);
         updateTabWidths();
-        
-        
+
+
         function removeTab(id) {
             var li = ul.find("a[href='#"+id+"']").parent();
             if (li.hasClass("active")) {
@@ -81,20 +108,22 @@ RED.tabs = (function() {
             delete tabs[id];
             updateTabWidths();
         }
-        
+
         return {
             addTab: function(tab) {
                 tabs[tab.id] = tab;
                 var li = $("<li/>",{class:"red-ui-tab"}).appendTo(ul);
                 var link = $("<a/>",{href:"#"+tab.id, class:"red-ui-tab-label"}).appendTo(li);
                 link.html(tab.label);
-                
+
                 link.on("click",onTabClick);
+                link.on("mouseenter",onTabMouseEnter);
+                link.on("mouseleave",onTabMouseLeave);
                 link.on("dblclick",onTabDblClick);
                 if (tab.closeable) {
                     var closeLink = $("<a/>",{href:"#",class:"red-ui-tab-close"}).appendTo(li);
                     closeLink.html('<i class="fa fa-times" />');
-                    
+
                     closeLink.on("click",function(event) {
                         removeTab(tab.id);
                     });
@@ -127,7 +156,7 @@ RED.tabs = (function() {
 
         }
     }
-    
+
     return {
         create: createTabs
     }
