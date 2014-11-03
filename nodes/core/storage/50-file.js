@@ -25,7 +25,15 @@ module.exports = function(RED) {
         this.overwriteFile = n.overwriteFile;
         var node = this;
         this.on("input",function(msg) {
-            var filename = msg.filename || this.filename;
+            var filename;
+            if (msg.filename) {
+                if (n.filename) {
+                    node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
+                }
+                filename = msg.filename;
+            } else {
+                filename = this.filename;
+            }
             if (filename === "") {
                 node.warn('No filename specified');
             } else if (msg.hasOwnProperty('delete')) {
@@ -72,7 +80,15 @@ module.exports = function(RED) {
             options['encoding'] = this.format;
         }
         this.on("input",function(msg) {
-            var filename = msg.filename || this.filename;
+            var filename;
+            if (msg.filename) {
+                if (n.filename) {
+                    node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
+                }
+                filename = msg.filename;
+            } else {
+                filename = this.filename;
+            }
             if (filename === "") {
                 node.warn('No filename specified');
             } else {
@@ -92,4 +108,4 @@ module.exports = function(RED) {
         });
     }
     RED.nodes.registerType("file in",FileInNode);
-}
+};

@@ -72,6 +72,9 @@ module.exports = function(RED) {
             if (smtpTransport) {
                 node.status({fill:"blue",shape:"dot",text:"sending"});
                 var payload = RED.util.ensureString(msg.payload);
+                if (msg.to && node.name) {
+                    node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
+                }
                 smtpTransport.sendMail({
                     from: node.userid, // sender address
                     to: msg.to || node.name, // comma separated list of addressees
@@ -243,4 +246,4 @@ module.exports = function(RED) {
             global: { type:"boolean"}
         }
     });
-}
+};
