@@ -214,6 +214,11 @@ function parseConfig() {
     // Clean up any orphaned credentials
     credentials.clean(flowNodes.get);
     events.emit("nodes-started");
+
+    // Send to nodes the ready state
+    for (var node in nodes) {
+        nodes[node].emit("ready");
+    }
 }
 
 /**

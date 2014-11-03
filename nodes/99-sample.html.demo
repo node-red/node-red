@@ -61,6 +61,7 @@
 <script type="text/javascript">
     RED.nodes.registerType('sample',{
         category: 'input',      // the palette category
+        color:"#16bbcf",        // optional color
         defaults: {             // defines the editable properties of the node
             name: {value:""},   //  along with default values.
             topic: {value:"", required:true}
