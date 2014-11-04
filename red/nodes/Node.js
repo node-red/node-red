@@ -92,6 +92,7 @@ function cloneMessage(msg) {
 
 Node.prototype.send = function(msg) {
     var msgSent = false;
+    var node;
     
     if (msg === null || typeof msg === "undefined") {
         return;
@@ -100,7 +101,10 @@ Node.prototype.send = function(msg) {
             // A single message and a single wire on output 0
             // TODO: pre-load flows.get calls - cannot do in constructor
             //       as not all nodes are defined at that point
-            flows.get(this._wire).receive(msg);
+            node = flows.get(this._wire);
+            if (node) {
+                node.receive(msg);
+            }
             return;
         } else {
             msg = [msg];
@@ -122,7 +126,6 @@ Node.prototype.send = function(msg) {
                 if (!util.isArray(msgs)) {
                     msgs = [msgs];
                 }
-                var node;
                 var k = 0;
                 // for each recipent node of that output
                 for (var j = 0; j < wires.length; j++) {
