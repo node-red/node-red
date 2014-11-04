@@ -20,48 +20,49 @@ var redApp = null;
 var storage = require("../storage");
 
 function createLibrary(type) {
-    
-    redApp.get(new RegExp("/library/"+type+"($|\/(.*))"),function(req,res) {
-        var path = req.params[1]||"";
-        storage.getLibraryEntry(type,path).then(function(result) {
-            if (typeof result === "string") {
-                res.writeHead(200, {'Content-Type': 'text/plain'});
-                res.write(result);
-                res.end(); 
-            } else {
-                res.json(result);
-            }
-        }).otherwise(function(err) {
-            if (err) {
-                util.log("[red] Error loading library entry '"+path+"' : "+err);
-                if (err.message.indexOf('forbidden') === 0) {
-                    res.send(403);
-                    return;
+    if (redApp) {
+        redApp.get(new RegExp("/library/"+type+"($|\/(.*))"),function(req,res) {
+            var path = req.params[1]||"";
+            storage.getLibraryEntry(type,path).then(function(result) {
+                if (typeof result === "string") {
+                    res.writeHead(200, {'Content-Type': 'text/plain'});
+                    res.write(result);
+                    res.end(); 
+                } else {
+                    res.json(result);
                 }
-            }
-            res.send(404);
-        });
-    });
-    
-    redApp.post(new RegExp("/library/"+type+"\/(.*)"),function(req,res) {
-        var path = req.params[0];
-        var fullBody = '';
-        req.on('data', function(chunk) {
-                fullBody += chunk.toString();
-        });
-        req.on('end', function() {
-                storage.saveLibraryEntry(type,path,req.query,fullBody).then(function() {
-                    res.send(204);
-                }).otherwise(function(err) {
-                    util.log("[red] Error saving library entry '"+path+"' : "+err);
+            }).otherwise(function(err) {
+                if (err) {
+                    util.log("[red] Error loading library entry '"+path+"' : "+err);
                     if (err.message.indexOf('forbidden') === 0) {
                         res.send(403);
                         return;
                     }
-                    res.send(500);
-                });
+                }
+                res.send(404);
+            });
         });
-    });
+        
+        redApp.post(new RegExp("/library/"+type+"\/(.*)"),function(req,res) {
+            var path = req.params[0];
+            var fullBody = '';
+            req.on('data', function(chunk) {
+                    fullBody += chunk.toString();
+            });
+            req.on('end', function() {
+                    storage.saveLibraryEntry(type,path,req.query,fullBody).then(function() {
+                        res.send(204);
+                    }).otherwise(function(err) {
+                        util.log("[red] Error saving library entry '"+path+"' : "+err);
+                        if (err.message.indexOf('forbidden') === 0) {
+                            res.send(403);
+                            return;
+                        }
+                        res.send(500);
+                    });
+            });
+        });
+    }
 }
 module.exports = {
     init: function(app) {

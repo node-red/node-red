@@ -17,7 +17,7 @@
 var express = require('express');
 var util = require('util');
 var when = require('when');
-var exec = require('child_process').exec;
+var child_process = require('child_process');
 
 var redNodes = require("./nodes");
 var comms = require("./comms");
@@ -28,7 +28,7 @@ var nodeApp = null;
 var server = null;
 var settings = null;
 
-function createServer(_server,_settings) {
+function init(_server,_settings) {
     server = _server;
     settings = _settings;
 
@@ -36,7 +36,6 @@ function createServer(_server,_settings) {
     
     nodeApp = express();
     app = express();
-    
     
     if (settings.httpAdminRoot !== false) {
         require("./api").init(app);
@@ -147,7 +146,7 @@ function installModule(module) {
             return;
         }
         util.log("[red] Installing module: "+module);
-        var child = exec('npm install --production '+module, function(err, stdin, stdout) {
+        var child = child_process.exec('npm install --production '+module, function(err, stdin, stdout) {
             if (err) {
                 var lookFor404 = new RegExp(" 404 .*"+module+"$","m");
                 if (lookFor404.test(stdout)) {
@@ -171,14 +170,14 @@ function installModule(module) {
 }
 
 function uninstallModule(module) {
-    var list = redNodes.removeModule(module);
     return when.promise(function(resolve,reject) {
         if (/[\s;]/.test(module)) {
             reject(new Error("Invalid module name"));
             return;
         }
+        var list = redNodes.removeModule(module);
         util.log("[red] Removing module: "+module);
-        var child = exec('npm remove '+module, function(err, stdin, stdout) {
+        var child = child_process.exec('npm remove '+module, function(err, stdin, stdout) {
             if (err) {
                 util.log("[red] Removal of module "+module+" failed:");
                 util.log("------------------------------------------");
@@ -202,7 +201,7 @@ function stop() {
 }
 
 module.exports = { 
-    init: createServer,
+    init: init,
     start: start,
     stop: stop,
     

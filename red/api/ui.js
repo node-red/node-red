@@ -32,7 +32,7 @@ events.on("node-icon-dir",function(dir) {
 module.exports = {
     ensureSlash: function(req,res,next) {
         if (req.originalUrl.slice(-1) != "/") {
-            res.redirect(req.originalUrl+"/");
+            res.redirect(301,req.originalUrl+"/");
         } else {
             next();
         }

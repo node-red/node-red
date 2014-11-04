@@ -17,6 +17,7 @@ var express = require('express');
 var fs = require("fs");
 var events = require("../events");
 var path = require("path");
+var util = require("util");
 
 var redNodes = require("../nodes");
 var settings = require("../settings");

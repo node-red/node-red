@@ -75,9 +75,17 @@ var persistentSettings = {
     },
     
     reset: function() {
+        for (var i in userSettings) {
+            if (userSettings.hasOwnProperty(i)) {
+                delete persistentSettings[i];
+            }
+        }
         userSettings = null;
         globalSettings = null;
         storage = null;
+        
+
+        
     }
 }
 

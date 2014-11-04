@@ -15,52 +15,68 @@
  **/
 
 var should = require("should");
-var sinon = require('sinon');
 var request = require('supertest');
-var http = require('http');
 var express = require('express');
 
-var fs = require('fs-extra');
-var path = require('path');
 var when = require('when');
 
 var app = express();
-var RED = require("../../red/red.js");
-var server = require("../../red/server.js");
-var nodes = require("../../red/nodes");
+var RED = require("../../../red/red.js");
+var storage = require("../../../red/storage");
+var library = require("../../../red/api/library");
 
-describe("library", function() {
-    var userDir = path.join(__dirname,".testUserHome");
-    before(function(done) {
-        fs.remove(userDir,function(err) {
-            fs.mkdir(userDir,function() {
-                sinon.stub(nodes, 'load', function() {
-                    return when.promise(function(resolve,reject){
-                        resolve([]);
-                    });
-                });
-                RED.init(http.createServer(function(req,res){app(req,res)}),
-                         {userDir: userDir});
-                server.start().then(function () { done(); });
-            });
+describe("library api", function() {
+        
+    function initStorage(_flows,_libraryEntries) {
+        var flows = _flows;
+        var libraryEntries = _libraryEntries;
+        storage.init({
+            storageModule: {
+                init: function() {
+                    return when.resolve();
+                },
+                getAllFlows: function() {
+                    return when.resolve(flows);
+                },
+                getFlow: function(fn) {
+                    if (flows[fn]) {
+                        return when.resolve(flows[fn]);
+                    } else {
+                        return when.reject();
+                    }
+                },
+                saveFlow: function(fn,data) {
+                    flows[fn] = data;
+                    return when.resolve();
+                },
+                getLibraryEntry: function(type,path) {
+                    if (libraryEntries[type] && libraryEntries[type][path]) {
+                        return when.resolve(libraryEntries[type][path]);
+                    } else {
+                        return when.reject();
+                    }
+                },
+                saveLibraryEntry: function(type,path,meta,body) {
+                    libraryEntries[type][path] = body;
+                    return when.resolve();
+                }
+            }
         });
-    });
-
-    after(function(done) {
-        fs.remove(userDir,done);
-        server.stop();
-        nodes.load.restore();
-    });
-
-    afterEach(function(done) {
-        fs.remove(userDir,function(err) {
-            fs.mkdir(userDir,done);
-        });
-    });
+    }
 
     describe("flows", function() {
+        var app;
+    
+        before(function() {
+            app = express();
+            app.use(express.json());
+            app.get("/library/flows",library.getAll);
+            app.post(new RegExp("/library/flows\/(.*)"),library.post);
+            app.get(new RegExp("/library/flows\/(.*)"),library.get);                
+        });
         it('returns empty result', function(done) {
-            request(RED.httpAdmin)
+            initStorage({});
+            request(app)
                 .get('/library/flows')
                 .expect(200)
                 .end(function(err,res) {
@@ -68,20 +84,24 @@ describe("library", function() {
                         throw err;
                     }
                     res.body.should.not.have.property('f');
+                    res.body.should.not.have.property('d');
                     done();
                 });
         });
 
         it('returns 404 for non-existent entry', function(done) {
-            request(RED.httpAdmin)
+            initStorage({});
+            request(app)
                 .get('/library/flows/foo')
                 .expect(404)
                 .end(done);
         });
-
+        
+        
         it('can store and retrieve item', function(done) {
+            initStorage({});
             var flow = '[]';
-            request(RED.httpAdmin)
+            request(app)
                 .post('/library/flows/foo')
                 .set('Content-Type', 'text/plain')
                 .send(flow)
@@ -89,7 +109,7 @@ describe("library", function() {
                     if (err) {
                         throw err;
                     }
-                    request(RED.httpAdmin)
+                    request(app)
                         .get('/library/flows/foo')
                         .expect(200)
                         .end(function(err,res) {
@@ -101,55 +121,57 @@ describe("library", function() {
                         });
                 });
         });
-
+        
         it('lists a stored item', function(done) {
-            request(RED.httpAdmin)
-                .post('/library/flows/bar')
-                .expect(204)
-                .end(function () {
-                    request(RED.httpAdmin)
-                        .get('/library/flows')
-                        .expect(200)
-                        .end(function(err,res) {
-                            if (err) {
-                                throw err;
-                            }
-                            res.body.should.have.property('f');
-                            should.deepEqual(res.body.f,['bar']);
-                            done();
-                        });
+            initStorage({f:["bar"]});
+            request(app)
+                .get('/library/flows')
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.should.have.property('f');
+                    should.deepEqual(res.body.f,['bar']);
+                    done();
                 });
         });
-
-        it('returns 403 for malicious access attempt', function(done) {
+        
+        it('returns 403 for malicious get attempt', function(done) {
+            initStorage({});
             // without the userDir override the malicious url would be
             // http://127.0.0.1:1880/library/flows/../../package to
             // obtain package.json from the node-red root.
-            request(RED.httpAdmin)
+            request(app)
                 .get('/library/flows/../../../../../package')
                 .expect(403)
                 .end(done);
         });
-
-        it('returns 403 for malicious access attempt', function(done) {
+        it('returns 403 for malicious post attempt', function(done) {
+            initStorage({});
             // without the userDir override the malicious url would be
             // http://127.0.0.1:1880/library/flows/../../package to
             // obtain package.json from the node-red root.
-            request(RED.httpAdmin)
+            request(app)
                 .post('/library/flows/../../../../../package')
                 .expect(403)
                 .end(done);
         });
-
     });
 
     describe("type", function() {
+        var app;
+        
         before(function() {
-            RED.library.register('test');
+            app = express();
+            app.use(express.json());
+            library.init(app);
+            RED.library.register("test");
         });
 
         it('returns empty result', function(done) {
-            request(RED.httpAdmin)
+            initStorage({},{'test':{"":[]}});
+            request(app)
                 .get('/library/test')
                 .expect(200)
                 .end(function(err,res) {
@@ -160,17 +182,19 @@ describe("library", function() {
                     done();
                 });
         });
-
+    
         it('returns 404 for non-existent entry', function(done) {
-            request(RED.httpAdmin)
+            initStorage({},{});
+            request(app)
                 .get('/library/test/foo')
                 .expect(404)
                 .end(done);
         });
-
+    
         it('can store and retrieve item', function(done) {
+            initStorage({},{'test':{}});
             var flow = '[]';
-            request(RED.httpAdmin)
+            request(app)
                 .post('/library/test/foo')
                 .set('Content-Type', 'text/plain')
                 .send(flow)
@@ -178,7 +202,7 @@ describe("library", function() {
                     if (err) {
                         throw err;
                     }
-                    request(RED.httpAdmin)
+                    request(app)
                         .get('/library/test/foo')
                         .expect(200)
                         .end(function(err,res) {
@@ -190,48 +214,46 @@ describe("library", function() {
                         });
                 });
         });
-
+        
         it('lists a stored item', function(done) {
-            request(RED.httpAdmin)
-                .post('/library/test/bar')
-                .expect(204)
-                .end(function () {
-                    request(RED.httpAdmin)
-                        .get('/library/test')
-                        .expect(200)
-                        .end(function(err,res) {
-                            if (err) {
-                                throw err;
-                            }
-                            should.deepEqual(res.body,[{ fn: 'bar'}]);
-                            done();
-                        });
-                });
+            initStorage({},{'test':{'':['abc','def']}});
+                request(app)
+                    .get('/library/test')
+                    .expect(200)
+                    .end(function(err,res) {
+                        if (err) {
+                            throw err;
+                        }
+                        // This response isn't strictly accurate - but it
+                        // verifies the api returns what storage gave it
+                        should.deepEqual(res.body,['abc','def']);
+                        done();
+                    });
         });
-
-
+        
+    
         it('returns 403 for malicious access attempt', function(done) {
-            request(RED.httpAdmin)
+            request(app)
                 .get('/library/test/../../../../../../../../../../etc/passwd')
                 .expect(403)
                 .end(done);
         });
-
+    
         it('returns 403 for malicious access attempt', function(done) {
-            request(RED.httpAdmin)
+            request(app)
                 .get('/library/test/..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\etc\\passwd')
                 .expect(403)
                 .end(done);
         });
-
+    
         it('returns 403 for malicious access attempt', function(done) {
-            request(RED.httpAdmin)
+            request(app)
                 .post('/library/test/../../../../../../../../../../etc/passwd')
                 .set('Content-Type', 'text/plain')
                 .send('root:x:0:0:root:/root:/usr/bin/tclsh')
                 .expect(403)
                 .end(done);
         });
-
+    
     });
 });

@@ -55,7 +55,7 @@ module.exports = {
             return;
         }
         promise.then(function(info) {
-                res.json(info);
+            res.json(info);
         }).otherwise(function(err) {
             if (err.code === 404) {
                 res.send(404);
@@ -90,7 +90,6 @@ module.exports = {
             promise.then(function(removedNodes) {
                 res.json(removedNodes);
             }).otherwise(function(err) {
-                console.log(err.stack);
                 res.send(400,err.toString());
             });
         } catch(err) {

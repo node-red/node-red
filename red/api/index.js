@@ -60,6 +60,8 @@ function init(adminApp) {
     adminApp.get("/library/flows",library.getAll);
     adminApp.get(new RegExp("/library/flows\/(.*)"),library.get);
     
+    
+    // Error Handler
     adminApp.use(errorHandler);
 }
 
