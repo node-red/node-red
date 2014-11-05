@@ -47,19 +47,19 @@ function createLibrary(type) {
             var path = req.params[0];
             var fullBody = '';
             req.on('data', function(chunk) {
-                    fullBody += chunk.toString();
+                fullBody += chunk.toString();
             });
             req.on('end', function() {
-                    storage.saveLibraryEntry(type,path,req.query,fullBody).then(function() {
-                        res.send(204);
-                    }).otherwise(function(err) {
-                        util.log("[red] Error saving library entry '"+path+"' : "+err);
-                        if (err.message.indexOf('forbidden') === 0) {
-                            res.send(403);
-                            return;
-                        }
-                        res.send(500);
-                    });
+                storage.saveLibraryEntry(type,path,req.query,fullBody).then(function() {
+                    res.send(204);
+                }).otherwise(function(err) {
+                    util.log("[red] Error saving library entry '"+path+"' : "+err);
+                    if (err.message.indexOf('forbidden') === 0) {
+                        res.send(403);
+                        return;
+                    }
+                    res.send(500);
+                });
             });
         });
     }
@@ -91,22 +91,16 @@ module.exports = {
         });
     },
     post: function(req,res) {
-        //TODO: do content-type properly
-        var fullBody = '';
-        req.on('data', function(chunk) {
-            fullBody += chunk.toString();
-        });
-        req.on('end', function() {
-            storage.saveFlow(req.params[0],fullBody).then(function() {
-                res.send(204);
-            }).otherwise(function(err) {
-                util.log("[red] Error loading flow '"+req.params[0]+"' : "+err);
-                if (err.message.indexOf('forbidden') === 0) {
-                    res.send(403);
-                    return;
-                }
-                res.send(500);
-            });
+        var flow = JSON.stringify(req.body);
+        storage.saveFlow(req.params[0],flow).then(function() {
+            res.send(204);
+        }).otherwise(function(err) {
+            util.log("[red] Error loading flow '"+req.params[0]+"' : "+err);
+            if (err.message.indexOf('forbidden') === 0) {
+                res.send(403);
+                return;
+            }
+            res.send(500);
         });
     }
 }

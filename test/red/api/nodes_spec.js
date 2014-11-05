@@ -150,6 +150,23 @@ describe("nodes api", function() {
                 });
         });
 
+        it('returns 400 if request is invalid', function(done) {
+            var settingsAvailable = sinon.stub(settings,'available', function() {
+                return true;
+            });
+            request(app)
+                .post('/nodes')
+                .send({})
+                .expect(400)
+                .end(function(err,res) {
+                    settingsAvailable.restore();
+                    if (err) {
+                        throw err;
+                    }
+                    done();
+                });
+        });
+        
         describe('by module', function() {
             it('installs the module and returns node info', function(done) {
                 var settingsAvailable = sinon.stub(settings,'available', function() {

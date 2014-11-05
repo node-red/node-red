@@ -103,7 +103,7 @@ describe("library api", function() {
             var flow = '[]';
             request(app)
                 .post('/library/flows/foo')
-                .set('Content-Type', 'text/plain')
+                .set('Content-Type', 'application/json')
                 .send(flow)
                 .expect(204).end(function (err, res) {
                     if (err) {

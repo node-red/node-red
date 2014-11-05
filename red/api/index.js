@@ -31,10 +31,10 @@ var errorHandler = function(err,req,res,next) {
 
 function init(adminApp) {
     
-    library.init(adminApp);
-    
     adminApp.use(express.json());
     
+    library.init(adminApp);
+
     // Editor
     if (!settings.disableEditor) {
         adminApp.get("/",ui.ensureSlash);

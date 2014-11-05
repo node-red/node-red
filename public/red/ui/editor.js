@@ -236,7 +236,12 @@ RED.editor = (function() {
                                 //TODO: move this to RED.library
                                 var flowName = $("#node-input-filename").val();
                                 if (!/^\s*$/.test(flowName)) {
-                                    $.post('library/flows/'+flowName,$("#node-input-filename").attr('nodes'),function() {
+                                    $.ajax({
+                                        url:'library/flows/'+flowName,
+                                        type: "POST",
+                                        data: $("#node-input-filename").attr('nodes'),
+                                        contentType: "application/json; charset=utf-8"
+                                    }).done(function() {
                                             RED.library.loadFlowLibrary();
                                             RED.notify("Saved nodes","success");
                                     });
