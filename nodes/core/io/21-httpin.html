@@ -118,8 +118,7 @@
 
 <script type="text/x-red" data-help-name="http request">
     <p>Provides a node for making http requests.</p>
-    <p>The URL and HTTP method can be configured in the node, but also
-       overridden by the incoming message:
+    <p>The URL and HTTP method can be configured in the node, if they are left blank they should be set in an incoming message on <code>msg.url</code> and <code>msg.method</code>:</p>
     <ul>
         <li><code>url</code>, if set, is used as the url of the request. Must start with http: or https:</li>
         <li><code>method</code>, if set, is used as the HTTP method of the request.
@@ -157,7 +156,7 @@
                 return this.name;
             } else if (this.url) {
                 var root = RED.settings.httpNodeRoot;
-                if (root.slice(-1) != "/") { 
+                if (root.slice(-1) != "/") {
                     root = root+"/";
                 }
                 if (this.url.charAt(0) == "/") {
@@ -175,7 +174,7 @@
         },
         oneditprepare: function() {
             var root = RED.settings.httpNodeRoot;
-            if (root.slice(-1) == "/") { 
+            if (root.slice(-1) == "/") {
                 root = root.slice(0,-1);
             }
             if (root == "") {
