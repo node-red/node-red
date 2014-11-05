@@ -16,7 +16,7 @@
 
 var server = require("./server");
 var nodes = require("./nodes");
-var library = require("./library");
+var library = require("./api/library");
 var comms = require("./comms");
 var log = require("./log");
 var util = require("./util");
@@ -36,14 +36,13 @@ var RED = {
         userSettings.version = this.version();
         settings.init(userSettings);
         server.init(httpServer,settings);
-        library.init();
         return server.app;
     },
     
     start: server.start,
     stop: server.stop,
     nodes: nodes,
-    library: library,
+    library: { register: library.register },
     credentials: credentials,
     events: events,
     log: log,
