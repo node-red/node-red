@@ -39,6 +39,19 @@ describe("ui api", function() {
                 .get('/foo')
                 .expect(301,done);
         });
+        it('redirects if the path, with query string, does not end in a slash',function(done) {
+            request(app)
+                .get('/foo?abc=def')
+                .expect(301)
+                .end(function(err,res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    res.header['location'].should.equal("/foo/?abc=def");
+                    done();
+                });
+        });
+
         it('does not redirect if the path ends in a slash',function(done) {
             request(app)
                 .get('/foo/')

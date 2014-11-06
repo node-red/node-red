@@ -31,8 +31,11 @@ events.on("node-icon-dir",function(dir) {
 
 module.exports = {
     ensureSlash: function(req,res,next) {
-        if (req.originalUrl.slice(-1) != "/") {
-            res.redirect(301,req.originalUrl+"/");
+        var parts = req.originalUrl.split("?");
+        if (parts[0].slice(-1) != "/") {
+            parts[0] += "/";
+            var redirect = parts.join("?");
+            res.redirect(301,redirect);
         } else {
             next();
         }
