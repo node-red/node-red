@@ -19,7 +19,7 @@ var util = require('util');
 
 var ui = require("./ui");
 var nodes = require("./nodes");
-var modules = require("./modules");
+var plugins = require("./plugins");
 var flows = require("./flows");
 var library = require("./library");
 
@@ -56,9 +56,9 @@ function init(adminApp) {
     adminApp.put("/nodes/:id",nodes.put);
     adminApp.delete("/nodes/:id",nodes.delete);
 
-    // Modules
-    adminApp.get("/modules",modules.getAll);
-    adminApp.get("/modules/:id",modules.get);
+    // Plugins
+    adminApp.get("/plugins",plugins.getAll);
+    adminApp.get("/plugins/:id",plugins.get);
 
     // Library
     adminApp.post(new RegExp("/library/flows\/(.*)"),library.post);

@@ -33,7 +33,7 @@ function filterNodeInfo(n) {
         name: n.name,
         types: n.types,
         enabled: n.enabled
-    }
+    };
     if (n.hasOwnProperty("loaded")) {
         r.loaded = n.loaded;
     }
@@ -164,13 +164,13 @@ var registry = (function() {
             }
             return list;
         },
-        getModuleList: function() {
+        getPluginList: function() {
             var list = [];
-            for (var module in nodeModules) {
-                if (nodeModules.hasOwnProperty(module)) {
-                    var nodes = nodeModules[module].nodes;
+            for (var plugin in nodeModules) {
+                if (nodeModules.hasOwnProperty(plugin)) {
+                    var nodes = nodeModules[plugin].nodes;
                     var m = {
-                        name: module,
+                        name: plugin,
                         nodes: []
                     };
                     for (var i = 0; i < nodes.length; ++i) {
@@ -181,10 +181,10 @@ var registry = (function() {
             }
             return list;
         },
-        getModule: function(module) {
-            var nodes = nodeModules[module].nodes;
+        getPluginInfo: function(plugin) {
+            var nodes = nodeModules[plugin].nodes;
             var m = {
-                name: module,
+                name: plugin,
                 nodes: []
             };
             for (var i = 0; i < nodes.length; ++i) {
@@ -329,7 +329,7 @@ var registry = (function() {
                 saveNodeList();
             }
         }
-    }
+    };
 })();
 
 
@@ -368,7 +368,7 @@ function getNodeFiles(dir) {
                         }
                     }
                 }
-                valid = valid && fs.existsSync(path.join(dir,fn.replace(/\.js$/,".html")))
+                valid = valid && fs.existsSync(path.join(dir,fn.replace(/\.js$/,".html")));
 
                 if (valid) {
                     result.push(path.join(dir,fn));
@@ -505,13 +505,13 @@ function loadNodeConfig(file,module,name) {
         template: file.replace(/\.js$/,".html"),
         enabled: isEnabled,
         loaded:false
-    }
+    };
 
     if (module) {
         node.name = module+":"+name;
         node.module = module;
     } else {
-        node.name = path.basename(file)
+        node.name = path.basename(file);
     }
     try {
         var content = fs.readFileSync(node.template,'utf8');
@@ -717,9 +717,9 @@ module.exports = {
     get: registry.getNodeConstructor,
     getNodeInfo: registry.getNodeInfo,
     getNodeModuleInfo: registry.getModuleInfo,
-    getModule: registry.getModule,
+    getPluginInfo: registry.getPluginInfo,
     getNodeList: registry.getNodeList,
-    getModuleList: registry.getModuleList,
+    getPluginList: registry.getPluginList,
     getNodeConfigs: registry.getAllNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
     addNode: addNode,
@@ -730,4 +730,4 @@ module.exports = {
     addModule: addModule,
     removeModule: registry.removeModule,
     cleanNodeList: registry.cleanNodeList
-}
+};
