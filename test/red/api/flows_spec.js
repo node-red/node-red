@@ -20,7 +20,6 @@ var express = require('express');
 var sinon = require('sinon');
 var when = require('when');
 
-var app = express();
 var redNodes = require("../../../red/nodes");
 
 var flows = require("../../../red/api/flows");

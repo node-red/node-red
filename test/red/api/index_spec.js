@@ -47,12 +47,11 @@ describe("api index", function() {
                 .get("/icons/default.png")
                 .expect(404,done)
         });
-        it('does not serve settings', function(done) {
+        it('serves settings', function(done) {
             request(app)
                 .get("/settings")
-                .expect(404,done)
+                .expect(200,done)
         });
-        
     });
     
     describe("enables editor", function() {
