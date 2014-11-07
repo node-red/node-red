@@ -224,8 +224,8 @@
 <script type="text/x-red" data-template-name="tcp request">
     <div class="form-row">
         <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
-        <input type="text" id="node-input-server" placeholder="ip.address" style="width:50%">
-        &nbsp;port <input type="text" id="node-input-port" placeholder="port" style="width:50px">
+        <input type="text" id="node-input-server" placeholder="ip.address" style="width:45%">
+        &nbsp;port <input type="text" id="node-input-port" placeholder="number" style="width:60px">
     </div>
     <div class="form-row">
         <label for="node-input-out"><i class="fa fa-sign-out"></i> Return</label>
@@ -273,7 +273,7 @@
     returned characters into a fixed buffer, match a specified character before returning,
     wait a fixed timeout from first reply and then return, or just sit and wait for data.</p>
     <p>The response will be output in <b>msg.payload</b> as a buffer, so you may want to .toString() it.</p>
-    <p>If you leave tcp host and port blank you must set them by using the <b>msg.host</b> and <b>msg.port</b> properties.</p>
+    <p>If you leave tcp host or port blank they must be set by using the <b>msg.host</b> and <b>msg.port</b> properties.</p>
 </script>
 
 <script type="text/javascript">
