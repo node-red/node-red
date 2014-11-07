@@ -2016,20 +2016,22 @@ RED.view = (function() {
                 type:"subflow",
                 id:subflowId,
                 name:name,
-                in: candidateInputs.map(function(v,i) { return {
+                in: candidateInputs.map(function(v,i) { var index = i; return {
                     type:"subflow",
                     direction:"in",
                     x:v.target.x-(v.target.w/2)-80,
                     y:v.target.y,
                     z:subflowId,
+                    i:index,
                     wires:[{id:v.target.id}]
                 }}),
-                out: candidateOutputs.map(function(v) { return {
+                out: candidateOutputs.map(function(v,i) { var index = i; return {
                     type:"subflow",
                     direction:"in",
                     x:v.source.x+(v.source.w/2)+80,
                     y:v.source.y,
                     z:subflowId,
+                    i:index,
                     wires:[{id:v.source.id,port:v.sourcePort}]
                 }})
             };

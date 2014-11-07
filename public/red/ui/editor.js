@@ -750,8 +750,8 @@ RED.editor = (function() {
                         var wasDirty = RED.view.dirty();
                         
                         var newName = $("#subflow-input-name").val();
-                        var newInCount = $("#subflow-input-inCount").val();
-                        var newOutCount = $("#subflow-input-outCount").val();
+                        var newInCount = Number($("#subflow-input-inCount").val())||0;
+                        var newOutCount = Number($("#subflow-input-outCount").val())||0;
                         
                         var oldInCount = editing_node.in.length;
                         var oldOutCount = editing_node.out.length;
