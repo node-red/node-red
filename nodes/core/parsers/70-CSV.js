@@ -106,7 +106,7 @@ module.exports = function(RED) {
                                 else if ((msg.payload[i] === node.sep) && f) { // if we are outside of quote (ie valid separator
                                     if (!node.goodtmpl) { node.template[j] = "col"+(j+1); }
                                     if ( node.template[j] && (node.template[j] !== "") && (k[j] !== "" ) ) {
-                                        if (!isNaN(Number(k[j]))) { k[j] = Number(k[j]); }
+                                        if ( (k[j].charAt(0) !== "+") && !isNaN(Number(k[j])) ) { k[j] = Number(k[j]); }
                                         o[node.template[j]] = k[j];
                                     }
                                     j += 1;
@@ -115,7 +115,7 @@ module.exports = function(RED) {
                                 else if (f && ((msg.payload[i] === "\n") || (msg.payload[i] === "\r"))) { // handle multiple lines
                                     //console.log(j,k,o,k[j]);
                                     if ( node.template[j] && (node.template[j] !== "") && (k[j] !== "") ) {
-                                        if (!isNaN(Number(k[j]))) { k[j] = Number(k[j]); }
+                                        if ( (k[j].charAt(0) !== "+") && !isNaN(Number(k[j])) ) { k[j] = Number(k[j]); }
                                         else { k[j].replace(/\r$/,''); }
                                         o[node.template[j]] = k[j];
                                     }
@@ -136,7 +136,7 @@ module.exports = function(RED) {
                         //console.log(j,k,o,k[j]);
                         if (!node.goodtmpl) { node.template[j] = "col"+(j+1); }
                         if ( node.template[j] && (node.template[j] !== "") && (k[j] !== "") ) {
-                            if (!isNaN(Number(k[j]))) { k[j] = Number(k[j]); }
+                            if ( (k[j].charAt(0) !== "+") && !isNaN(Number(k[j])) ) { k[j] = Number(k[j]); }
                             else { k[j].replace(/\r$/,''); }
                             o[node.template[j]] = k[j];
                         }
