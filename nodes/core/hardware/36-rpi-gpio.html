@@ -58,7 +58,7 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-tips">Tip: Only Digital I/O is supported - input must be 0 or 1.</div>
+    <div class="form-tips">Tip: Only Digital Input is supported - input must be 0 or 1.</div>
 </script>
 
 <script type="text/x-red" data-help-name="rpi-gpio in">
@@ -113,7 +113,7 @@
 <script type="text/x-red" data-template-name="rpi-gpio out">
     <div class="form-row">
         <label for="node-input-pin"><i class="fa fa-circle"></i> GPIO Pin</label>
-        <select type="text" id="node-input-pin" style="width: 200px;">
+        <select type="text" id="node-input-pin" style="width: 275px;">
             <option value='' disabled selected style='display:none;'>select pin</option>
             <option value="3">3 - SDA1 </option>
             <option value="5">5 - SCL1 </option>
@@ -121,7 +121,7 @@
             <option value="8">8 - TxD </option>
             <option value="10">10 - RxD </option>
             <option value="11">11 - GPIO0</option>
-            <option value="12">12 - GPIO1</option>
+            <option value="12">12 - GPIO1 (PWM)</option>
             <option value="13">13 - GPIO2</option>
             <option value="15">15 - GPIO3</option>
             <option value="16">16 - GPIO4</option>
@@ -135,14 +135,21 @@
          </select>
          &nbsp;<span id="pitype"></span>
     </div>
-    <div class="form-row">
+    <div class="form-row" id="node-set-pwm">
+        <label>&nbsp;&nbsp;&nbsp;&nbsp;Type</label>
+        <select id="node-input-out" style="width: 275px;">
+            <option value="out">Digital output</option>
+            <option value="pwm">PWM output</option>
+        </select>
+    </div>
+    <div class="form-row" id="node-set-tick">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-set" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-set" style="width: 70%;">Initialise pin state ?</label>
     </div>
     <div class="form-row" id="node-set-state">
         <label for="node-input-level">&nbsp;</label>
-        <select id="node-input-level" style="width: 300px;">
+        <select id="node-input-level" style="width: 275px;">
             <option value="0">initial level of pin - low (0)</option>
             <option value="1">initial level of pin - high (1)</option>
         </select>
@@ -152,13 +159,15 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-tips">Tip: Only Digital I/O is supported - input must be 0 or 1.</div>
+    <div class="form-tips" id="dig-tip"><b>Tip</b>: For digital output - input must be 0 or 1.</div>
+    <div class="form-tips" id="pwm-tip"><b>Tip</b>: For PWM output - input must be between 0 to 1023.</div>
 </script>
 
 <script type="text/x-red" data-help-name="rpi-gpio out">
     <p>Raspberry Pi output node. Expects a <b>msg.payload</b> with either a 0 or 1 (or true or false). Requires the gpio command to work.</p>
     <p>Will set the selected physical pin high or low depending on the value passed in.</p>
     <p>The initial value of the pin at deploy time can also be set to 0 or 1.</p>
+    <p>Use of PWM on Pin 12 - GPIO1 will interfere with any other audio playback.</p>
     <p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
 </script>
 
@@ -169,20 +178,23 @@
         defaults: {
             name: { value:"" },
             pin: { value:"",required:true,validate:RED.validators.number() },
-            set: { value:false },
-            level: { value:"0" }
+            set: { value:"" },
+            level: { value:"0" },
+            out: { value:"out" }
         },
         inputs:1,
         outputs:0,
         icon: "rpi.png",
         align: "right",
         label: function() {
-            return this.name||"Pin: "+this.pin;
+            if ((this.pin == 12) && (this.out === "pwm")) { return this.name || "PWM: 12"; }
+            else { return this.name||"Pin: "+this.pin ; }
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+            if (!$("#node-input-out").val()) { $("#node-input-out").val("out"); }
             $.getJSON('rpi-gpio/'+this.id,function(data) {
                 $('#pitype').text(data.type);
                 if (data.type === "Model B+") {
@@ -200,13 +212,44 @@
                 }
             });
 
-            $("#node-input-set").change(function() {
+            var hidepwm = function() {
+                if ($('#node-input-pin').val() == 12) {
+                    $('#node-set-pwm').show();
+                }
+                else {
+                    $('#node-set-pwm').hide();
+                    $('#node-input-out').val("out");
+                }
+            };
+            $("#node-input-pin").change(function () { hidepwm(); });
+            hidepwm();
+
+            var hidestate = function () {
+                if ($("#node-input-out").val() === "pwm") {
+                    $('#node-set-tick').hide();
+                    $('#node-set-state').hide();
+                    $('#node-input-set').prop('checked', false);
+                    $("#dig-tip").hide();
+                    $("#pwm-tip").show();
+                }
+                else {
+                    $('#node-set-tick').show();
+                    $("#dig-tip").show();
+                    $("#pwm-tip").hide();
+                }
+            };
+            $("#node-input-out").change(function () { hidestate(); });
+            hidestate();
+
+            var setstate = function () {
                 if ($('#node-input-set').is(":checked")) {
                     $("#node-set-state").show();
                 } else {
                     $("#node-set-state").hide();
                 }
-            });
+            };
+            $("#node-input-set").change(function () { setstate(); });
+            setstate();
         }
     });
 </script>
