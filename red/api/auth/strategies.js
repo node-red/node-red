@@ -29,7 +29,7 @@ var bearerStrategy = function (accessToken, done) {
         if (token) {
             users.get(token.user).then(function(user) {
                 if (user) {
-                    done(null,user,{scope:token.scope});
+                    done(null,{username:user.username},{scope:token.scope});
                 } else {
                     done(null,false);
                 }

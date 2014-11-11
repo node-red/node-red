@@ -26,6 +26,7 @@ RED.sidebar = (function() {
             $("#"+tab.id).remove();
         }
     });
+    
     function addTab(title,content,closeable) {
         $("#sidebar-content").append(content);
         $(content).hide();
@@ -129,22 +130,23 @@ RED.sidebar = (function() {
     }
     
     function showSidebar(id) {
-        //RED.menu.setSelected("btn-sidebar", true);
-        sidebar_tabs.activateTab("tab-" + id);
+        if (id) {
+            sidebar_tabs.activateTab("tab-"+id);
+        }
     }
     
     function containsTab(id) {
         return sidebar_tabs.contains("tab-"+id);
     }
     
-    
-    $(function() {
+    function init () {
         RED.keyboard.add(/* SPACE */ 32,{ctrl:true},function(){RED.menu.setSelected("btn-sidebar",!RED.menu.isSelected("btn-sidebar"));d3.event.preventDefault();});
-        showSidebar("info");
-    });
-
+        showSidebar();
+        RED.sidebar.info.show();
+    }
     
     return {
+        init: init,
         addTab: addTab,
         removeTab: removeTab,
         show: showSidebar,

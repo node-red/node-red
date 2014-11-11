@@ -53,11 +53,20 @@ function getToken(req,res,next) {
     return server.token()(req,res,next);
 }
 
+function login(req,res) {
+    var response = {
+        "type":"credentials",
+        "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"}]
+    }
+
+    res.json(response);
+}
 
 module.exports = {
     authenticate: authenticate,
     ensureClientSecret: ensureClientSecret,
     authenticateClient: authenticateClient,
     getToken: getToken,
-    errorHandler: server.errorHandler()
+    errorHandler: server.errorHandler(),
+    login: login
 }

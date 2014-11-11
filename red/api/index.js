@@ -50,6 +50,7 @@ function init(adminApp) {
         auth.getToken,
         auth.errorHandler
     );
+    apiApp.get("/auth/login",auth.login);
 
     // Flows
     apiApp.get("/flows",flows.get);

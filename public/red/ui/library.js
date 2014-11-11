@@ -66,9 +66,6 @@ RED.library = (function() {
             $("#btn-import-library-submenu").replaceWith(menu);
         });
     }
-    loadFlowLibrary();
-
-
     
     function createUI(options) {
         var libraryData = {};
@@ -360,6 +357,9 @@ RED.library = (function() {
     }
     
     return {
+        init: function() {
+            loadFlowLibrary();
+        },
         create: createUI,
         loadFlowLibrary: loadFlowLibrary
     }

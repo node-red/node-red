@@ -19,7 +19,8 @@ module.exports = {
     settings: function(req,res) {
         var safeSettings = {
             httpNodeRoot: settings.httpNodeRoot,
-            version: settings.version
+            version: settings.version,
+            user: req.user
         };
         res.json(safeSettings);
     }
