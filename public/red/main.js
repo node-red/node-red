@@ -142,12 +142,9 @@ var RED = (function() {
     });
 
     function loadSettings() {
-        $.get('settings', function(data) {
-            RED.settings = data;
-            console.log("Node-RED: "+data.version);
-            loadNodeList();
-        });
+        RED.settings.init(loadNodeList);
     }
+
     function loadNodeList() {
         $.ajax({
             headers: {
@@ -286,7 +283,7 @@ var RED = (function() {
     $(function() {
         RED.menu.init({id:"btn-sidemenu",
             options: [
-                {id:"btn-sidebar",icon:"fa fa-columns",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar},
+                {id:"btn-sidebar",icon:"fa fa-columns",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
                 null,
                 {id:"btn-node-status",icon:"fa fa-info",label:"Node Status",toggle:true,onselect:toggleStatus},
                 null,
