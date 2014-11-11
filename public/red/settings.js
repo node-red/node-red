@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Antoine Aflalo
+ * Copyright 2014 IBM, Antoine Aflalo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ RED.settings = (function () {
         }
     };
 
-    var init = function (callback) {
+    var init = function (then,otherwise) {
         $.ajax({
             headers: {
                 "Accept": "application/json"
@@ -69,17 +69,21 @@ RED.settings = (function () {
             success: function (data) {
                 setProperties(data);
                 console.log("Node-RED: " + data.version);
-                callback();
+                console.log(data);
+                then();
+            },
+            error: function(jqXHR,textStatus,errorThrown) {
+                otherwise(jqXHR.status,textStatus);
             }
         });
     };
 
 
     return {
+        init: init,
         set: set,
         get: get,
-        remove: remove,
-        init : init
+        remove: remove
     }
 })
 ();
