@@ -66,6 +66,37 @@ RED.history = (function() {
                     if (ev.subflow) {
                         RED.nodes.addSubflow(ev.subflow);
                     }
+                    if (ev.subflowOutputs && ev.subflowOutputs.length > 0) {
+                        var subflow = RED.nodes.subflow(ev.subflowOutputs[0].z);
+                        ev.subflowOutputs.sort(function(a,b) { return a.i-b.i});
+                        for (i=0;i<ev.subflowOutputs.length;i++) {
+                            var output = ev.subflowOutputs[i];
+                            subflow.out.splice(output.i,0,output);
+                            for (var j=output.i+1;j<subflow.out.length;j++) {
+                                subflow.out[j].i++;
+                                subflow.out[j].dirty = true;
+                            }
+                            RED.nodes.eachLink(function(l) {
+                                if (l.source.type == "subflow:"+subflow.id) {
+                                    if (l.sourcePort >= output.i) {
+                                        l.sourcePort++;
+                                    }
+                                }
+                            });
+                        }
+                        RED.nodes.eachNode(function(n) {
+                            if (n.type == "subflow:"+subflow.id) {
+                                n.changed = true;
+                                n.inputs = subflow.in.length;
+                                n.outputs = subflow.out.length;
+                                while (n.outputs > n.ports.length) {
+                                    n.ports.push(n.ports.length);
+                                }
+                                n.resize = true;
+                                n.dirty = true;
+                            }
+                        });
+                    }
                     if (ev.nodes) {
                         for (i=0;i<ev.nodes.length;i++) {
                             RED.nodes.add(ev.nodes[i]);

@@ -773,7 +773,7 @@ RED.editor = (function() {
                         if (editing_node.in.length < newInCount) {
                             var l = editing_node.in.length;
                             for (i=l;i<newInCount;i++) {
-                                var newInput = {type:"subflow",direction:"in",z:editing_node.id,i:i,x:xpos,y:70};
+                                var newInput = {type:"subflow",direction:"in",z:editing_node.id,i:i,x:xpos,y:70,id:RED.node.id()};
                                 addedInputs.push(newInput);
                                 editing_node.in.push(newInput);
                                 xpos += 55;
@@ -785,7 +785,7 @@ RED.editor = (function() {
                         }
                         if (editing_node.out.length < newOutCount) {
                             for (i=editing_node.out.length;i<newOutCount;i++) {
-                                var newOutput = {type:"subflow",direction:"out",z:editing_node.id,i:i,x:xpos,y:70};
+                                var newOutput = {type:"subflow",direction:"out",z:editing_node.id,i:i,x:xpos,y:70,id:RED.node.id()};
                                 addedOutputs.push(newOutput);
                                 editing_node.out.push(newOutput);
                                 xpos += 55;

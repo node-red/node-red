@@ -744,7 +744,7 @@ RED.view = (function() {
             RED.keyboard.add(/* right*/ 39, function() { if(d3.event.shiftKey){moveSelection( 20,  0)}else{moveSelection( 1, 0);}d3.event.preventDefault();},endKeyboardMove);
         }
         if (moving_set.length == 1) {
-            if (moving_set[0].n.type === "subflow" && !moving_set[0].n.id) {
+            if (moving_set[0].n.type === "subflow" && moving_set[0].n.direction) {
                 RED.sidebar.info.refresh(RED.nodes.subflow(moving_set[0].n.z));
             } else {
                 RED.sidebar.info.refresh(moving_set[0].n);
@@ -795,6 +795,8 @@ RED.view = (function() {
     function deleteSelection() {
         var removedNodes = [];
         var removedLinks = [];
+        var removedSubflowOutputs = [];
+        
         var startDirty = dirty;
         if (moving_set.length > 0) {
             for (var i=0;i<moving_set.length;i++) {
@@ -808,9 +810,52 @@ RED.view = (function() {
                     removedNodes.push(node);
                     removedLinks = removedLinks.concat(rmlinks);
                 } else {
+                    if (node.direction === "out") {
+                        removedSubflowOutputs.push(node);
+                    }
                     node.dirty = true;
                 }
             }
+            removedSubflowOutputs.sort(function(a,b) { return b.i-a.i});
+            for (i=0;i<removedSubflowOutputs.length;i++) {
+                var output = removedSubflowOutputs[i];
+                activeSubflow.out.splice(output.i,1);
+                var subflowRemovedLinks = [];
+                var subflowMovedLinks = [];
+                RED.nodes.eachLink(function(l) {
+                    if (l.target.type == "subflow" && l.target.z == activeSubflow.id && l.target.i == output.i) {
+                        subflowRemovedLinks.push(l);
+                    }
+                    if (l.source.type == "subflow:"+activeSubflow.id) {
+                        if (l.sourcePort == output.i) {
+                            subflowRemovedLinks.push(l);
+                        } else if (l.sourcePort > output.i) {
+                            subflowMovedLinks.push(l);
+                        }
+                    }
+                });
+                subflowRemovedLinks.forEach(function(l) { RED.nodes.removeLink(l)});
+                subflowMovedLinks.forEach(function(l) { l.sourcePort--; });
+
+                removedLinks = removedLinks.concat(subflowRemovedLinks);
+                for (var j=output.i;j<activeSubflow.out.length;j++) {
+                    activeSubflow.out[j].i--;
+                    activeSubflow.out[j].dirty = true;
+                }
+            }
+            RED.nodes.eachNode(function(n) {
+                if (n.type == "subflow:"+activeSubflow.id) {
+                    n.changed = true;
+                    n.inputs = activeSubflow.in.length;
+                    n.outputs = activeSubflow.out.length;
+                    while (n.outputs < n.ports.length) {
+                        n.ports.pop();
+                    }
+                    n.resize = true;
+                    n.dirty = true;
+                }
+            });
+            
             moving_set = [];
             if (removedNodes.length > 0) {
                 setDirty(true);
@@ -821,7 +866,7 @@ RED.view = (function() {
             removedLinks.push(selected_link);
             setDirty(true);
         }
-        RED.history.push({t:'delete',nodes:removedNodes,links:removedLinks,dirty:startDirty});
+        RED.history.push({t:'delete',nodes:removedNodes,links:removedLinks,subflowOutputs:removedSubflowOutputs,dirty:startDirty});
 
         selected_link = null;
         updateSelection();
@@ -1049,7 +1094,7 @@ RED.view = (function() {
             // Don't bother redrawing nodes if we're drawing links
 
             if (activeSubflow) {
-                var subflowOutputs = vis.selectAll(".subflowoutput").data(activeSubflow.out,function(d,i){ return d.z+":"+i;});
+                var subflowOutputs = vis.selectAll(".subflowoutput").data(activeSubflow.out,function(d,i){ return d.id;});
                 subflowOutputs.exit().remove();
                 var outGroup = subflowOutputs.enter().insert("svg:g").attr("class","node subflowoutput").attr("transform",function(d) { return "translate("+(d.x-20)+","+(d.y-20)+")"});
                 outGroup.each(function(d,i) {
@@ -1090,9 +1135,9 @@ RED.view = (function() {
                     .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
 
                 outGroup.append("svg:text").attr('class','port_label').attr('x',20).attr('y',8).style("font-size","10px").text("output");
-                outGroup.append("svg:text").attr('class','port_label').attr('x',20).attr('y',24).text(function(d,i){ return i+1});
+                outGroup.append("svg:text").attr('class','port_label port_index').attr('x',20).attr('y',24).text(function(d,i){ return i+1});
 
-                var subflowInputs = vis.selectAll(".subflowinput").data(activeSubflow.in,function(d,i){ return d.z+":"+i;});
+                var subflowInputs = vis.selectAll(".subflowinput").data(activeSubflow.in,function(d,i){ return d.id;});
                 subflowInputs.exit().remove();
                 var inGroup = subflowInputs.enter().insert("svg:g").attr("class","node subflowinput").attr("transform",function(d) { return "translate("+(d.x-20)+","+(d.y-20)+")"});
                 inGroup.each(function(d,i) {
@@ -1135,15 +1180,16 @@ RED.view = (function() {
                 
                 
                 
-                subflowOutputs.each(function(d) {
+                subflowOutputs.each(function(d,i) {
                     if (d.dirty) {
                         var output = d3.select(this);
                         output.selectAll(".subflowport").classed("node_selected",function(d) { return d.selected; })
+                        output.selectAll(".port_index").text(function(d){ return d.i+1});
                         output.attr("transform", function(d) { return "translate(" + (d.x-d.w/2) + "," + (d.y-d.h/2) + ")"; });
                         d.dirty = false;
                     }
                 });
-                subflowInputs.each(function(d) {
+                subflowInputs.each(function(d,i) {
                     if (d.dirty) {
                         var input = d3.select(this);
                         input.selectAll(".subflowport").classed("node_selected",function(d) { return d.selected; })
@@ -2023,6 +2069,7 @@ RED.view = (function() {
                     y:v.target.y,
                     z:subflowId,
                     i:index,
+                    id:RED.nodes.id(),
                     wires:[{id:v.target.id}]
                 }}),
                 out: candidateOutputs.map(function(v,i) { var index = i; return {
@@ -2032,6 +2079,7 @@ RED.view = (function() {
                     y:v.source.y,
                     z:subflowId,
                     i:index,
+                    id:RED.nodes.id(),
                     wires:[{id:v.source.id,port:v.sourcePort}]
                 }})
             };

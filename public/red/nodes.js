@@ -588,12 +588,14 @@ RED.nodes = (function() {
                         input.direction = "in";
                         input.z = n.id;
                         input.i = i;
+                        input.id = getID();
                     });
                     n.out.forEach(function(output,i) {
                         output.type = "subflow";
                         output.direction = "out";
                         output.z = n.id;
                         output.i = i;
+                        output.id = getID();
                     });
                     new_subflows.push(n);
                     addSubflow(n);
