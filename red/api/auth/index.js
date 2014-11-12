@@ -30,7 +30,7 @@ var server = oauth2orize.createServer();
 server.exchange(oauth2orize.exchange.password(strategies.passwordTokenExchange));
 
 function authenticate(req,res,next) {
-    if (settings.httpAdminAuth) {
+    if (settings.adminAuth) {
         if (/^\/auth\/.*/.test(req.originalUrl)) {
             next();
         } else {

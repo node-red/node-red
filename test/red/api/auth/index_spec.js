@@ -35,7 +35,7 @@ describe("api auth middleware",function() {
                     done(new Error("authentication not applied to auth path"));
                 }
             });
-            settings.init({httpAdminAuth:{}});
+            settings.init({adminAuth:{}});
             var req = {
                 originalUrl: "/auth/token"
             };
@@ -52,7 +52,7 @@ describe("api auth middleware",function() {
                     done();
                 }
             });
-            settings.init({httpAdminAuth:{}});
+            settings.init({adminAuth:{}});
             var req = {
                 originalUrl: "/"
             };

@@ -46,7 +46,7 @@ function start() {
         wsServer = new ws.Server({server:server,path:path});
         
         wsServer.on('connection',function(ws) {
-            var pendingAuth = (settings.httpAdminAuth != null);
+            var pendingAuth = (settings.adminAuth != null);
             if (!pendingAuth) {
                 activeConnections.push(ws);
             } else {

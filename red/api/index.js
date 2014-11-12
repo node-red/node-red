@@ -60,7 +60,6 @@ function init(adminApp) {
     );
     adminApp.get("/auth/login",auth.login);
     adminApp.post("/auth/revoke",auth.revoke);
-    
 
     // Flows
     adminApp.get("/flows",flows.get);

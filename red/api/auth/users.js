@@ -22,9 +22,9 @@ var settings = require("../../settings");
 //{username:"nick",password:crypto.createHash('md5').update("foo",'utf8').digest('hex')}
 var users = [];
 
-if (settings.httpAdminAuth) {
-    if (settings.httpAdminAuth.user && settings.httpAdminAuth.pass) {
-        users.push({username:settings.httpAdminAuth.user, password:settings.httpAdminAuth.pass});
+if (settings.adminAuth) {
+    if (settings.adminAuth.user && settings.adminAuth.pass) {
+        users.push({username:settings.adminAuth.user, password:settings.adminAuth.pass});
     }
 }
 
