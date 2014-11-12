@@ -29,6 +29,10 @@ RED.comms = (function() {
                 errornotification.close();
                 errornotification = null;
             }
+            var auth_tokens = RED.settings.get("auth-tokens");
+            if (auth_tokens) {
+                ws.send(JSON.stringify({auth:auth_tokens.access_token}));
+            }
             for (var t in subscriptions) {
                 if (subscriptions.hasOwnProperty(t)) {
                     ws.send(JSON.stringify({subscribe:t}));

@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+var tokens = require("./api/auth/tokens");
+
 var ws = require("ws");
 var log = require("./log");
 
@@ -21,6 +23,7 @@ var server;
 var settings;
 
 var wsServer;
+var pendingConnections = [];
 var activeConnections = [];
 
 var retained = {};
@@ -43,13 +46,17 @@ function start() {
         wsServer = new ws.Server({server:server,path:path});
         
         wsServer.on('connection',function(ws) {
-            activeConnections.push(ws);
+            var pendingAuth = (settings.httpAdminAuth != null);
+            if (!pendingAuth) {
+                activeConnections.push(ws);
+            } else {
+                pendingConnections.push(ws);
+            }
             ws.on('close',function() {
-                for (var i=0;i<activeConnections.length;i++) {
-                    if (activeConnections[i] === ws) {
-                        activeConnections.splice(i,1);
-                        break;
-                    }
+                if (!pendingAuth) {
+                    removeActiveConnection(ws);
+                } else {
+                    removePendingConnection(ws);
                 }
             });
             ws.on('message', function(data,flags) {
@@ -60,8 +67,24 @@ function start() {
                     log.warn("comms received malformed message : "+err.toString());
                     return;
                 }
-                if (msg.subscribe) {
-                    handleRemoteSubscription(ws,msg.subscribe);
+                if (!pendingAuth) {
+                    if (msg.subscribe) {
+                        handleRemoteSubscription(ws,msg.subscribe);
+                    }
+                } else {
+                    if (msg.auth) {
+                        tokens.get(msg.auth).then(function(client) {
+                            if (!client) {
+                                ws.close();
+                            } else {
+                                pendingAuth = false;
+                                removePendingConnection(ws);
+                                activeConnections.push(ws);
+                            }
+                        });
+                    } else {
+                        ws.close();
+                    }
                 }
             });
             ws.on('error', function(err) {
@@ -123,6 +146,22 @@ function handleRemoteSubscription(ws,topic) {
     }
 }
 
+function removeActiveConnection(ws) {
+    for (var i=0;i<activeConnections.length;i++) {
+        if (activeConnections[i] === ws) {
+            activeConnections.splice(i,1);
+            break;
+        }
+    }
+}
+function removePendingConnection(ws) {
+    for (var i=0;i<pendingConnections.length;i++) {
+        if (pendingConnections[i] === ws) {
+            pendingConnections.splice(i,1);
+            break;
+        }
+    }
+}
 
 module.exports = {
     init:init,
