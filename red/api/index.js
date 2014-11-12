@@ -35,55 +35,56 @@ var errorHandler = function(err,req,res,next) {
 
 function init(adminApp) {
     
-    var apiApp = express();
     
+    // Editor
+    if (!settings.disableEditor) {
+        var editorApp = express();
+        editorApp.get("/",ui.ensureSlash);
+        editorApp.get("/icons/:icon",ui.icon);
+        editorApp.use("/",ui.editor);
+        adminApp.use(editorApp);
+    }
+
     adminApp.use(express.json());
     adminApp.use(express.urlencoded());
     
     //TODO: all passport references ought to be in ./auth
-    apiApp.use(passport.initialize());
+    adminApp.use(passport.initialize());
     
-    apiApp.use(auth.authenticate);
-    apiApp.post("/auth/token",
+    adminApp.use(auth.authenticate);
+    adminApp.post("/auth/token",
         auth.ensureClientSecret,
         auth.authenticateClient,
         auth.getToken,
         auth.errorHandler
     );
-    apiApp.get("/auth/login",auth.login);
+    adminApp.get("/auth/login",auth.login);
+    adminApp.post("/auth/revoke",auth.revoke);
+    
 
     // Flows
-    apiApp.get("/flows",flows.get);
-    apiApp.post("/flows",flows.post);
+    adminApp.get("/flows",flows.get);
+    adminApp.post("/flows",flows.post);
     
     // Nodes
-    apiApp.get("/nodes",nodes.getAll);
-    apiApp.post("/nodes",nodes.post);
+    adminApp.get("/nodes",nodes.getAll);
+    adminApp.post("/nodes",nodes.post);
 
-    apiApp.get("/nodes/:mod",nodes.getModule);
-    apiApp.put("/nodes/:mod",nodes.putModule);
-    apiApp.delete("/nodes/:mod",nodes.delete);
+    adminApp.get("/nodes/:mod",nodes.getModule);
+    adminApp.put("/nodes/:mod",nodes.putModule);
+    adminApp.delete("/nodes/:mod",nodes.delete);
     
-    apiApp.get("/nodes/:mod/:set",nodes.getSet);
-    apiApp.put("/nodes/:mod/:set",nodes.putSet);
+    adminApp.get("/nodes/:mod/:set",nodes.getSet);
+    adminApp.put("/nodes/:mod/:set",nodes.putSet);
 
     // Library
-    library.init(apiApp);
-    apiApp.post(new RegExp("/library/flows\/(.*)"),library.post);
-    apiApp.get("/library/flows",library.getAll);
-    apiApp.get(new RegExp("/library/flows\/(.*)"),library.get);
+    library.init(adminApp);
+    adminApp.post(new RegExp("/library/flows\/(.*)"),library.post);
+    adminApp.get("/library/flows",library.getAll);
+    adminApp.get(new RegExp("/library/flows\/(.*)"),library.get);
     
     // Settings
-    apiApp.get("/settings",info.settings);
-    
-    // Editor
-    if (!settings.disableEditor) {
-        adminApp.get("/",ui.ensureSlash);
-        adminApp.get("/icons/:icon",ui.icon);
-        adminApp.use("/",ui.editor);
-    }
-    
-    adminApp.use(apiApp);
+    adminApp.get("/settings",info.settings);
     
     // Error Handler
     adminApp.use(errorHandler);

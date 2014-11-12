@@ -139,8 +139,8 @@ RED.menu = (function() {
     function createMenu(options) {
 
         var button = $("#"+options.id);
-        
-        var topMenu = $("<ul/>",{id:options.id+"-submenu", class:"dropdown-menu pull-right"}).insertAfter(button);
+
+        var topMenu = $("<ul/>",{id:options.id+"-submenu", class:"dropdown-menu"}).insertAfter(button);
 
         for (var i=0;i<options.options.length;i++) {
             var opt = options.options[i];

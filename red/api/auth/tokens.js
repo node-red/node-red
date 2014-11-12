@@ -35,6 +35,10 @@ module.exports = {
         var token = generateToken(256);
         tokens[token] = {user:user,client:client,scope:scope};
         return when.resolve(token);
+    },
+    revoke: function(token) {
+        delete tokens[token];
+        return when.resolve();
     }
     
 };

@@ -18,6 +18,7 @@ var passport = require("passport");
 var oauth2orize = require("oauth2orize");
 
 var strategies = require("./strategies");
+var tokens = require("./tokens");
 
 var settings = require("../../settings");
 
@@ -62,11 +63,19 @@ function login(req,res) {
     res.json(response);
 }
 
+function revoke(req,res) {
+    var token = req.body.token;
+    tokens.revoke(token).then(function() {
+        res.send(200);
+    });
+}
+
 module.exports = {
     authenticate: authenticate,
     ensureClientSecret: ensureClientSecret,
     authenticateClient: authenticateClient,
     getToken: getToken,
     errorHandler: server.errorHandler(),
-    login: login
+    login: login,
+    revoke: revoke
 }

@@ -58,7 +58,20 @@ RED.settings = (function () {
         }
     };
 
-    var init = function (then,otherwise) {
+    var init = function (done) {
+        
+        $.ajaxSetup({
+            beforeSend: function(jqXHR,settings) {
+                // Only attach auth header for requests to relative paths
+                if (!/^\s*(https?:|\/|\.)/.test(settings.url)) {
+                    var auth_tokens = RED.settings.get("auth-tokens");
+                    if (auth_tokens) {
+                        jqXHR.setRequestHeader("authorization","bearer "+auth_tokens.access_token);
+                    }
+                }
+            }
+        });
+        
         $.ajax({
             headers: {
                 "Accept": "application/json"
@@ -69,11 +82,10 @@ RED.settings = (function () {
             success: function (data) {
                 setProperties(data);
                 console.log("Node-RED: " + data.version);
-                console.log(data);
-                then();
+                done(null);
             },
             error: function(jqXHR,textStatus,errorThrown) {
-                otherwise(jqXHR.status,textStatus);
+                done(jqXHR.status,textStatus);
             }
         });
     };

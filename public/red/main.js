@@ -268,131 +268,160 @@ var RED = (function() {
         $("#btn-deploy img").attr("src",deploymentTypes[type].img);
     }
 
-    function load() {
-        RED.settings.init(function() {
-            RED.menu.init({id:"btn-sidemenu",
-                options: [
-                    {id:"btn-sidebar",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
-                    {id:"btn-node-status",label:"Display node status",toggle:true,onselect:toggleStatus, selected: true},
-                    null,
-                    {id:"btn-import-menu",label:"Import",options:[
-                        {id:"btn-import-clipboard",label:"Clipboard",onselect:RED.view.showImportNodesDialog},
-                        {id:"btn-import-library",label:"Library",options:[]}
-                    ]},
-                    {id:"btn-export-menu",label:"Export",disabled:true,options:[
-                        {id:"btn-export-clipboard",label:"Clipboard",disabled:true,onselect:RED.view.showExportNodesDialog},
-                        {id:"btn-export-library",label:"Library",disabled:true,onselect:RED.view.showExportNodesLibraryDialog}
-                    ]},
-                    null,
-                    {id:"btn-config-nodes",label:"Configuration nodes",onselect:RED.sidebar.config.show},
-                    null,
-                    {id:"btn-subflow-menu",label:"Subflows", options: [
-                        {id:"btn-create-subflow",label:"Create subflow",onselect:RED.view.createSubflow},
-                        {id:"btn-convert-subflow",label:"Selection to subflow",disabled:true,onselect:RED.view.convertToSubflow},
-                    ]},
-                    null,
-                    {id:"btn-workspace-menu",label:"Workspaces",options:[
-                        {id:"btn-workspace-add",label:"Add"},
-                        {id:"btn-workspace-edit",label:"Rename"},
-                        {id:"btn-workspace-delete",label:"Delete"},
-                        null
-                    ]},
-                    null,
-                    {id:"btn-keyboard-shortcuts",label:"Keyboard Shortcuts",onselect:showHelp},
-                    {id:"btn-help",label:"Node-RED Website", href:"http://nodered.org/docs"}
-                ]
-            });
-            
-            RED.menu.init({id:"btn-deploy-options",
-                options: [
-                    {id:"btn-deploy-full",toggle:"deploy-type",icon:"images/deploy-full.png",label:"Full",sublabel:"Deploys everything in the workspace",onselect:function(s) { if(s){changeDeploymentType("full")}}},
-                    {id:"btn-deploy-flow",toggle:"deploy-type",icon:"images/deploy-flows.png",label:"Modified Flows",sublabel:"Only deploys flows that contain changed nodes", onselect:function(s) {if(s){changeDeploymentType("flows")}}},
-                    {id:"btn-deploy-node",toggle:"deploy-type",icon:"images/deploy-nodes.png",label:"Modified Nodes",sublabel:"Only deploys nodes that have changed",onselect:function(s) { if(s){changeDeploymentType("nodes")}}}
-                ]
-            });
-            
-            RED.menu.init({id:"workspace-subflow-edit-menu",
-                options: [
-                    {id:"btn-subflow-add-input",label:"Add Input", onselect:function() { }},
-                    {id:"btn-subflow-add-output",label:"Add Output", onselect:function() { }},
-                    {id:"btn-subflow-edit-name",label:"Edit Name", onselect:function() { }},
-                    {id:"btn-subflow-delete",label:"Delete", onselect:function() { }},
-                ]
-            });
+    function loadEditor() {
+        RED.menu.init({id:"btn-sidemenu",
+            options: [
+                {id:"btn-sidebar",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
+                {id:"btn-node-status",label:"Display node status",toggle:true,onselect:toggleStatus, selected: true},
+                null,
+                {id:"btn-import-menu",label:"Import",options:[
+                    {id:"btn-import-clipboard",label:"Clipboard",onselect:RED.view.showImportNodesDialog},
+                    {id:"btn-import-library",label:"Library",options:[]}
+                ]},
+                {id:"btn-export-menu",label:"Export",disabled:true,options:[
+                    {id:"btn-export-clipboard",label:"Clipboard",disabled:true,onselect:RED.view.showExportNodesDialog},
+                    {id:"btn-export-library",label:"Library",disabled:true,onselect:RED.view.showExportNodesLibraryDialog}
+                ]},
+                null,
+                {id:"btn-config-nodes",label:"Configuration nodes",onselect:RED.sidebar.config.show},
+                null,
+                {id:"btn-subflow-menu",label:"Subflows", options: [
+                    {id:"btn-create-subflow",label:"Create subflow",onselect:RED.view.createSubflow},
+                    {id:"btn-convert-subflow",label:"Selection to subflow",disabled:true,onselect:RED.view.convertToSubflow},
+                ]},
+                null,
+                {id:"btn-workspace-menu",label:"Workspaces",options:[
+                    {id:"btn-workspace-add",label:"Add"},
+                    {id:"btn-workspace-edit",label:"Rename"},
+                    {id:"btn-workspace-delete",label:"Delete"},
+                    null
+                ]},
+                null,
+                {id:"btn-keyboard-shortcuts",label:"Keyboard Shortcuts",onselect:showHelp},
+                {id:"btn-help",label:"Node-RED Website", href:"http://nodered.org/docs"}
+            ]
+        });
         
-            $("#main-container").show();
-            $("#btn-deploy").show();
-            $("#btn-sidemenu").show();
-            
-            RED.library.init();
-            RED.palette.init();
-            RED.sidebar.init();
-            RED.view.init();
-            
-            RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
-            RED.comms.connect();
-            loadNodeList();
-        },
-        function(err,msg) {
-            if (err == 401) {
-                $.ajax({
-                    dataType: "json",
-                    url: "auth/login",
-                    success: function(data) {
-                        if (data.type == "credentials") {
-                            for (var i=0;i<data.prompts.length;i++) {
-                                var field = data.prompts[i];
-                                var row = $("<div/>",{class:"form-row"});
-                                $('<label for="node-dialog-login-'+field.id+'">'+field.label+':</label><br/>').appendTo(row);
-                                $('<input style="width: 100%" id="node-dialog-login-'+field.id+'" type="'+field.type+'"/>').appendTo(row);
-                                row.appendTo("#node-dialog-login-fields");
-                            }
-                            $('<div class="form-row" style="text-align: right"><span id="node-dialog-login-failed" style="line-height: 2em;float:left;" class="hide">Login failed</span><img src="spin.svg" style="height: 30px" class="login-spinner hide"/> <a href="#" id="node-dialog-login-submit">Login</a></div>').appendTo("#node-dialog-login-fields");
-                            $("#node-dialog-login-submit").button().click(function( event ) {
-                                $("#node-dialog-login-submit").button("option","disabled",true);
-                                $("#node-dialog-login-failed").hide();
-                                $(".login-spinner").show();
-                                $.ajax({
-                                    url:"auth/token",
-                                    type: "POST",
-                                    data: {
-                                        grant_type: "password",
-                                        username: $("#node-dialog-login-username").val(),
-                                        password: $("#node-dialog-login-password").val(),
-                                        client_id: "node-red-admin",
-                                        scope:"*"
-                                        }
-                                }).done(function(data,textStatus,xhr) {
-                                    $.ajaxSetup({
-                                        headers:{"authorization":"bearer "+data.access_token} 
-                                    });
-                                    $("#node-dialog-login").dialog("close");
-                                    load();
-                                }).fail(function(jqXHR,textStatus,errorThrown) {
-                                    $("#node-dialog-login-failed").show();
-                                }).always(function() {
-                                    $("#node-dialog-login-submit").button("option","disabled",false);
-                                    $(".login-spinner").hide();
-                                });
-                                event.preventDefault();
-                            });
+        RED.menu.init({id:"btn-deploy-options",
+            options: [
+                {id:"btn-deploy-full",toggle:"deploy-type",icon:"images/deploy-full.png",label:"Full",sublabel:"Deploys everything in the workspace",onselect:function(s) { if(s){changeDeploymentType("full")}}},
+                {id:"btn-deploy-flow",toggle:"deploy-type",icon:"images/deploy-flows.png",label:"Modified Flows",sublabel:"Only deploys flows that contain changed nodes", onselect:function(s) {if(s){changeDeploymentType("flows")}}},
+                {id:"btn-deploy-node",toggle:"deploy-type",icon:"images/deploy-nodes.png",label:"Modified Nodes",sublabel:"Only deploys nodes that have changed",onselect:function(s) { if(s){changeDeploymentType("nodes")}}}
+            ]
+        });
+        
+        if (RED.settings.user) {
+            $("#header .username").html(RED.settings.user.username);
+            $("#header .user").show();
+            RED.menu.addItem("btn-sidemenu", null);
+            RED.menu.addItem("btn-sidemenu",{
+                id:"btn-logout",
+                icon:"fa fa-user",
+                label:"Logout",
+                onselect:function() {
+                    // TODO: invalidate token
+                    
+                    $.ajax({
+                        url: "auth/revoke",
+                        type: "POST",
+                        data: {token:RED.settings.get("auth-tokens").access_token},
+                        success: function() {
+                            RED.settings.remove("auth-tokens");
+                            document.location.reload(true);
                         }
-                    }     
-                });
-                
-                var dialog = $("#node-dialog-login");
-                dialog.dialog({
-                    autoOpen: false,
-                    dialogClass: "ui-dialog-no-close",
-                    modal: true,
-                    closeOnEscape: false,
-                    width: 600,
-                    resizable: false,
-                    draggable: false,
-                    open: function(event, ui) { console.log("opening");$(".ui-dialog-titlebar", ui.dialog || ui).hide(); }
-                });
-                dialog.dialog("open");
+                    })
+                    
+                }
+            });
             
+        }
+    
+        $("#main-container").show();
+        $("#btn-deploy").show();
+        $("#btn-sidemenu").show();
+        
+        RED.library.init();
+        RED.palette.init();
+        RED.sidebar.init();
+        RED.view.init();
+        
+        RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
+        RED.comms.connect();
+        loadNodeList();
+    }
+    
+    function showLogin() {
+        var dialog = $("#node-dialog-login");
+        dialog.dialog({
+            autoOpen: false,
+            dialogClass: "ui-dialog-no-close",
+            modal: true,
+            closeOnEscape: false,
+            width: 600,
+            resizable: false,
+            draggable: false
+        });
+        $("#node-dialog-login-fields").empty();
+        $.ajax({
+            dataType: "json",
+            url: "auth/login",
+            success: function(data) {
+                if (data.type == "credentials") {
+                    for (var i=0;i<data.prompts.length;i++) {
+                        var field = data.prompts[i];
+                        var row = $("<div/>",{class:"form-row"});
+                        $('<label for="node-dialog-login-'+field.id+'">'+field.label+':</label><br/>').appendTo(row);
+                        $('<input style="width: 100%" id="node-dialog-login-'+field.id+'" type="'+field.type+'"/>').appendTo(row);
+                        row.appendTo("#node-dialog-login-fields");
+                    }
+                    $('<div class="form-row" style="text-align: right"><span id="node-dialog-login-failed" style="line-height: 2em;float:left;" class="hide">Login failed</span><img src="spin.svg" style="height: 30px" class="login-spinner hide"/> <a href="#" id="node-dialog-login-submit">Login</a></div>').appendTo("#node-dialog-login-fields");
+                    $("#node-dialog-login-submit").button().click(function( event ) {
+                        $("#node-dialog-login-submit").button("option","disabled",true);
+                        $("#node-dialog-login-failed").hide();
+                        $(".login-spinner").show();
+                        
+                        var body = {
+                            client_id: "node-red-admin",
+                            grant_type: "password",
+                            scope:"*"
+                        }
+                        for (var i=0;i<data.prompts.length;i++) {
+                            var field = data.prompts[i];
+                            body[field.id] = $("#node-dialog-login-"+field.id).val();
+                        }
+                        $.ajax({
+                            url:"auth/token",
+                            type: "POST",
+                            data: body
+                        }).done(function(data,textStatus,xhr) {
+                            RED.settings.set("auth-tokens",data);
+                            $("#node-dialog-login").dialog("close");
+                            load();
+                        }).fail(function(jqXHR,textStatus,errorThrown) {
+                            RED.settings.remove("auth-tokens");
+                            $("#node-dialog-login-failed").show();
+                        }).always(function() {
+                            $("#node-dialog-login-submit").button("option","disabled",false);
+                            $(".login-spinner").hide();
+                        });
+                        event.preventDefault();
+                    });
+                }
+                dialog.dialog("open");
+            }     
+        });
+    }
+
+    function load() {
+        RED.settings.init(function(err,msg) {
+            if (err) {
+                if (err === 401) {
+                    showLogin();
+                } else {
+                    console.log("Unexpected error:",err,msg);
+                }
+            } else {
+                loadEditor();
             }
         });
     }

@@ -29,7 +29,10 @@ body {
     background: #000;
     box-sizing: border-box;
     padding: 0px 0px 0px 20px;
+    color: #C7C7C7;
+    font-size: 14px;
 }
+
 
 #dropTarget {
     position: absolute;
@@ -66,7 +69,6 @@ span.logo {
     font-size: 30px;
     line-height: 30px;
     text-decoration: none;
-    color: #C7C7C7;
 }
 span.logo span {
     vertical-align: middle;
