@@ -227,9 +227,23 @@ RED.view = (function() {
 
     var drag_line = vis.append("svg:path").attr("class", "drag_line");
 
-    $("#workspace-edit-subflow").click(function(event) {
+    $("#workspace-subflow-edit").click(function(event) {
         showSubflowDialog(activeSubflow.id);
         event.preventDefault();
+    });
+    $("#workspace-subflow-add-input").click(function(event) {
+        event.preventDefault();
+        if ($(this).hasClass("disabled")) {
+            return;
+        }
+        addSubflowInput(activeSubflow.id);
+    });
+    $("#workspace-subflow-add-output").click(function(event) {
+        event.preventDefault();
+        if ($(this).hasClass("disabled")) {
+            return;
+        }
+        addSubflowOutput(activeSubflow.id);
     });
     
     var workspace_tabs = RED.tabs.create({
@@ -252,7 +266,9 @@ RED.view = (function() {
 
             activeWorkspace = tab.id;
             activeSubflow = RED.nodes.subflow(activeWorkspace);
-            
+            if (activeSubflow) {
+                $("#workspace-subflow-add-input").toggleClass("disabled",activeSubflow.in.length > 0);
+            }
             if (workspaceScrollPositions[activeWorkspace]) {
                 chart.scrollLeft(workspaceScrollPositions[activeWorkspace].left);
                 chart.scrollTop(workspaceScrollPositions[activeWorkspace].top);
@@ -853,14 +869,15 @@ RED.view = (function() {
                 var subflowRemovedInputLinks = [];
                 RED.nodes.eachLink(function(l) {
                     if (l.source.type == "subflow" && l.source.z == activeSubflow.id && l.source.i == input.i) {
-                        subflowRemovedLinks.push(l);
+                        subflowRemovedInputLinks.push(l);
                     } else if (l.target.type == "subflow:"+activeSubflow.id) {
-                        subflowRemovedLinks.push(l);
+                        subflowRemovedInputLinks.push(l);
                     }
                 });
                 subflowRemovedInputLinks.forEach(function(l) { RED.nodes.removeLink(l)});
                 removedLinks = removedLinks.concat(subflowRemovedInputLinks);
                 activeSubflow.in = [];
+                $("#workspace-subflow-add-input").toggleClass("disabled",false);
             }
             
             RED.nodes.eachNode(function(n) {
@@ -1817,7 +1834,104 @@ RED.view = (function() {
     
     function showSubflowDialog(id) {
         RED.editor.editSubflow(RED.nodes.subflow(id));
+    }
+    function findAvailableSubflowIOPosition(subflow) {
+        var pos = {x:70,y:70};
+        for (var i=0;i<subflow.out.length+subflow.in.length;i++) {
+            var port;
+            if (i < subflow.out.length) {
+                port = subflow.out[i];
+            } else {
+                port = subflow.in[i-subflow.out.length];
+            }
+            if (port.x == pos.x && port.y == pos.y) {
+                pos.x += 55;
+                i=0;
+            }
+        }
+        return pos;
+    }
+    
+    function addSubflowInput(id) {
+        var subflow = RED.nodes.subflow(id);
+        var position = findAvailableSubflowIOPosition(subflow);
+        var newInput = {
+            type:"subflow",
+            direction:"in",
+            z:subflow.id,
+            i:subflow.in.length,
+            x:position.x,
+            y:position.y,
+            id:RED.nodes.id()
+        };
+        var oldInCount = subflow.in.length;
+        subflow.in.push(newInput);
+        subflow.dirty = true;
+        var wasDirty = RED.view.dirty();
+        var wasChanged = subflow.changed;
+        subflow.changed = true;
         
+        RED.nodes.eachNode(function(n) {
+            if (n.type == "subflow:"+subflow.id) {
+                n.changed = true;
+                n.inputs = subflow.in.length;
+                RED.editor.updateNodeProperties(n);
+            }
+        });
+        var historyEvent = {
+            t:'edit',
+            node:subflow,
+            dirty:wasDirty,
+            changed:wasChanged,
+            subflow: {
+                inputCount: oldInCount
+            }
+        };
+        RED.history.push(historyEvent);
+        $("#workspace-subflow-add-input").toggleClass("disabled",true);
+        updateSelection();
+        RED.view.redraw();
+    }
+        
+    function addSubflowOutput(id) {
+        var subflow = RED.nodes.subflow(id);
+        var position = findAvailableSubflowIOPosition(subflow);
+        
+        var newOutput = {
+            type:"subflow",
+            direction:"out",
+            z:subflow.id,
+            i:subflow.out.length,
+            x:position.x,
+            y:position.y,
+            id:RED.nodes.id()
+        };
+        var oldOutCount = subflow.out.length;
+        subflow.out.push(newOutput);
+        subflow.dirty = true;
+        var wasDirty = RED.view.dirty();
+        var wasChanged = subflow.changed;
+        subflow.changed = true;
+        
+        RED.nodes.eachNode(function(n) {
+            if (n.type == "subflow:"+subflow.id) {
+                n.changed = true;
+                n.outputs = subflow.out.length;
+                RED.editor.updateNodeProperties(n);
+            }
+        });
+        var historyEvent = {
+            t:'edit',
+            node:subflow,
+            dirty:wasDirty,
+            changed:wasChanged,
+            subflow: {
+                outputCount: oldOutCount
+            }
+        };
+        RED.history.push(historyEvent);
+        updateSelection();
+        RED.view.redraw();
     }
 
     $("#node-dialog-rename-workspace form" ).submit(function(e) { e.preventDefault();});

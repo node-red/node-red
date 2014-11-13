@@ -750,74 +750,21 @@ RED.editor = (function() {
                         var wasDirty = RED.view.dirty();
                         
                         var newName = $("#subflow-input-name").val();
-                        var newInCount = Number($("#subflow-input-inCount").val())||0;
-                        var newOutCount = Number($("#subflow-input-outCount").val())||0;
-                        
-                        var oldInCount = editing_node.in.length;
-                        var oldOutCount = editing_node.out.length;
-                        
+
                         if (newName != editing_node.name) {
                             changes['name'] = editing_node.name;
                             editing_node.name = newName;
                             changed = true;
                             $("#btn-workspace-menu-"+editing_node.id.replace(".","-")).text("Subflow: "+newName);
                         }
-                        
-                        var xpos = 40;
-                        var addedOutputs = [];
-                        var removedOutputs = [];
-                        var addedInputs = [];
-                        var removedInputs = [];
-                        var removedLinks = [];
-                        
-                        if (editing_node.in.length < newInCount) {
-                            var l = editing_node.in.length;
-                            for (i=l;i<newInCount;i++) {
-                                var newInput = {type:"subflow",direction:"in",z:editing_node.id,i:i,x:xpos,y:70,id:RED.node.id()};
-                                addedInputs.push(newInput);
-                                editing_node.in.push(newInput);
-                                xpos += 55;
-                            }
-                            changed = true;
-                        } else if (editing_node.in.length > newInCount) {
-                            removedInputs = editing_node.in.splice(newInCount);
-                            changed = true;
-                        }
-                        if (editing_node.out.length < newOutCount) {
-                            for (i=editing_node.out.length;i<newOutCount;i++) {
-                                var newOutput = {type:"subflow",direction:"out",z:editing_node.id,i:i,x:xpos,y:70,id:RED.node.id()};
-                                addedOutputs.push(newOutput);
-                                editing_node.out.push(newOutput);
-                                xpos += 55;
-                            }
-                            changed = true;
-                        } else if (editing_node.out.length > newOutCount) {
-                            removedOutputs = editing_node.out.splice(newOutCount);
-                            changed = true;
-                        }
-                        
-                        if (removedOutputs.length > 0 || removedInputs.length > 0) {
-                            RED.nodes.eachLink(function(l) {
-                                if (newInCount === 0 && l.source.type == "subflow" && l.source.z == editing_node.id) {
-                                    removedLinks.push(l);
-                                    return;
-                                }
-                                if (l.target.type == "subflow" && l.target.z == editing_node.id && l.target.i >= newOutCount) {
-                                    removedLinks.push(l);
-                                    return;
-                                }
-                            });
-                            removedLinks.forEach(function(l) { RED.nodes.removeLink(l)});
-                        }
+
                         RED.palette.refresh();
                         
                         if (changed) {
                             RED.nodes.eachNode(function(n) {
                                 if (n.type == "subflow:"+editing_node.id) {
                                     n.changed = true;
-                                    n.inputs = editing_node.in.length;
-                                    n.outputs = editing_node.out.length;
-                                    removedLinks = removedLinks.concat(updateNodeProperties(n));
+                                    updateNodeProperties(n);
                                 }
                             });
                             var wasChanged = editing_node.changed;
@@ -827,15 +774,8 @@ RED.editor = (function() {
                                 t:'edit',
                                 node:editing_node,
                                 changes:changes,
-                                links:removedLinks,
                                 dirty:wasDirty,
-                                changed:wasChanged,
-                                subflow: {
-                                    outputCount: oldOutCount,
-                                    inputCount: oldInCount,
-                                    outputs: removedOutputs,
-                                    inputs: removedInputs
-                                }
+                                changed:wasChanged
                             };
                             
                             RED.history.push(historyEvent);
@@ -873,8 +813,6 @@ RED.editor = (function() {
         editing_node = subflow;
         RED.view.state(RED.state.EDITING);
         $("#subflow-input-name").val(subflow.name);
-        $("#subflow-input-inCount").spinner({ min:0, max:1 }).val(subflow.in.length);
-        $("#subflow-input-outCount").spinner({ min:0 }).val(subflow.out.length);
         var userCount = 0;
         var subflowType = "subflow:"+editing_node.id;
         
@@ -883,7 +821,6 @@ RED.editor = (function() {
                 userCount++;
             }
         });
-        
         
         $("#subflow-dialog-user-count").html("There "+(userCount==1?"is":"are")+" "+userCount+" instance"+(userCount==1?" ":"s")+" of this subflow").show();
         $("#subflow-dialog").dialog("option","title","Edit flow "+subflow.name).dialog( "open" );

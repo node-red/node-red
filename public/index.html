@@ -51,7 +51,9 @@
         <div id="workspace-add-tab"><a id="btn-workspace-add-tab" href="#"><i class="fa fa-plus"></i></a></div>
         <div id="chart"></div>
         <div id="workspace-toolbar">
-            <a class="button" id="workspace-edit-subflow" href="#"><i class="fa fa-pencil"></i> edit subflow properties</a>
+            <a class="button" id="workspace-subflow-edit" href="#"><i class="fa fa-pencil"></i> edit subflow name</a>
+            <a class="button disabled" id="workspace-subflow-add-input" href="#"><i class="fa fa-plus"></i> input</a>
+            <a class="button" id="workspace-subflow-add-output" href="#"><i class="fa fa-plus"></i> output</a>
         </div>
     </div>
 
@@ -81,12 +83,6 @@
     <form class="form-horizontal">
         <div class="form-row">
             <label>Name</label><input type="text" id="subflow-input-name">
-        </div>
-        <div class="form-row">
-            <label>Inputs</label><input style="width: 60px; height: 1.7em;" id="subflow-input-inCount">
-        </div>
-        <div class="form-row">
-            <label>Outputs</label><input style="width: 60px; height: 1.7em;" id="subflow-input-outCount">
         </div>
     </form>
     <div class="form-tips" id="subflow-dialog-user-count"></div>

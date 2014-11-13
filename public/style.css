@@ -137,12 +137,18 @@ span.logo img {
     background: #f6f6f6;
     vertical-align: middle;
     box-shadow: 0 0 2px #888;
+    margin-right: 5px;
 }
-#workspace-toolbar .button:hover {
+#workspace-toolbar .button.disabled {
+    box-shadow: 0 0 2px #bbb;
+    color: #aaa;
+    cursor: default;
+}
+#workspace-toolbar .button:not(.disabled):hover {
     background: #e6e6e6;
     box-shadow: 0 0 2px #666;
 }
-#workspace-toolbar .button:active {
+#workspace-toolbar .button:not(.disabled):active {
     background: #e0e0e0;
     box-shadow: 0 0 2px #444;
 }
