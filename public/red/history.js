@@ -66,8 +66,14 @@ RED.history = (function() {
                     if (ev.subflow) {
                         RED.nodes.addSubflow(ev.subflow);
                     }
+                    var subflow;
+                    if (ev.subflowInputs && ev.subflowInputs.length > 0) {
+                        subflow = RED.nodes.subflow(ev.subflowInputs[0].z);
+                        subflow.in.push(ev.subflowInputs[0]);
+                        subflow.in[0].dirty = true;
+                    }
                     if (ev.subflowOutputs && ev.subflowOutputs.length > 0) {
-                        var subflow = RED.nodes.subflow(ev.subflowOutputs[0].z);
+                        subflow = RED.nodes.subflow(ev.subflowOutputs[0].z);
                         ev.subflowOutputs.sort(function(a,b) { return a.i-b.i});
                         for (i=0;i<ev.subflowOutputs.length;i++) {
                             var output = ev.subflowOutputs[i];
@@ -84,6 +90,8 @@ RED.history = (function() {
                                 }
                             });
                         }
+                    }
+                    if (subflow) {
                         RED.nodes.eachNode(function(n) {
                             if (n.type == "subflow:"+subflow.id) {
                                 n.changed = true;

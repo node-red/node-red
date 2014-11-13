@@ -796,6 +796,7 @@ RED.view = (function() {
         var removedNodes = [];
         var removedLinks = [];
         var removedSubflowOutputs = [];
+        var removedSubflowInputs = [];
         
         var startDirty = dirty;
         if (moving_set.length > 0) {
@@ -812,6 +813,8 @@ RED.view = (function() {
                 } else {
                     if (node.direction === "out") {
                         removedSubflowOutputs.push(node);
+                    } else if (node.direction === "in") {
+                        removedSubflowInputs.push(node);
                     }
                     node.dirty = true;
                 }
@@ -843,6 +846,23 @@ RED.view = (function() {
                     activeSubflow.out[j].dirty = true;
                 }
             }
+            // Assume 0/1 inputs
+            
+            if (removedSubflowInputs.length == 1) {
+                var input = removedSubflowInputs[0];
+                var subflowRemovedInputLinks = [];
+                RED.nodes.eachLink(function(l) {
+                    if (l.source.type == "subflow" && l.source.z == activeSubflow.id && l.source.i == input.i) {
+                        subflowRemovedLinks.push(l);
+                    } else if (l.target.type == "subflow:"+activeSubflow.id) {
+                        subflowRemovedLinks.push(l);
+                    }
+                });
+                subflowRemovedInputLinks.forEach(function(l) { RED.nodes.removeLink(l)});
+                removedLinks = removedLinks.concat(subflowRemovedInputLinks);
+                activeSubflow.in = [];
+            }
+            
             RED.nodes.eachNode(function(n) {
                 if (n.type == "subflow:"+activeSubflow.id) {
                     n.changed = true;
@@ -866,7 +886,7 @@ RED.view = (function() {
             removedLinks.push(selected_link);
             setDirty(true);
         }
-        RED.history.push({t:'delete',nodes:removedNodes,links:removedLinks,subflowOutputs:removedSubflowOutputs,dirty:startDirty});
+        RED.history.push({t:'delete',nodes:removedNodes,links:removedLinks,subflowOutputs:removedSubflowOutputs,subflowInputs:removedSubflowInputs,dirty:startDirty});
 
         selected_link = null;
         updateSelection();
