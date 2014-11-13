@@ -835,35 +835,36 @@ RED.view = (function() {
                     node.dirty = true;
                 }
             }
-            removedSubflowOutputs.sort(function(a,b) { return b.i-a.i});
-            for (i=0;i<removedSubflowOutputs.length;i++) {
-                var output = removedSubflowOutputs[i];
-                activeSubflow.out.splice(output.i,1);
-                var subflowRemovedLinks = [];
-                var subflowMovedLinks = [];
-                RED.nodes.eachLink(function(l) {
-                    if (l.target.type == "subflow" && l.target.z == activeSubflow.id && l.target.i == output.i) {
-                        subflowRemovedLinks.push(l);
-                    }
-                    if (l.source.type == "subflow:"+activeSubflow.id) {
-                        if (l.sourcePort == output.i) {
+            if (removedSubflowOutputs.length > 0) {
+                removedSubflowOutputs.sort(function(a,b) { return b.i-a.i});
+                for (i=0;i<removedSubflowOutputs.length;i++) {
+                    var output = removedSubflowOutputs[i];
+                    activeSubflow.out.splice(output.i,1);
+                    var subflowRemovedLinks = [];
+                    var subflowMovedLinks = [];
+                    RED.nodes.eachLink(function(l) {
+                        if (l.target.type == "subflow" && l.target.z == activeSubflow.id && l.target.i == output.i) {
                             subflowRemovedLinks.push(l);
-                        } else if (l.sourcePort > output.i) {
-                            subflowMovedLinks.push(l);
                         }
+                        if (l.source.type == "subflow:"+activeSubflow.id) {
+                            if (l.sourcePort == output.i) {
+                                subflowRemovedLinks.push(l);
+                            } else if (l.sourcePort > output.i) {
+                                subflowMovedLinks.push(l);
+                            }
+                        }
+                    });
+                    subflowRemovedLinks.forEach(function(l) { RED.nodes.removeLink(l)});
+                    subflowMovedLinks.forEach(function(l) { l.sourcePort--; });
+    
+                    removedLinks = removedLinks.concat(subflowRemovedLinks);
+                    for (var j=output.i;j<activeSubflow.out.length;j++) {
+                        activeSubflow.out[j].i--;
+                        activeSubflow.out[j].dirty = true;
                     }
-                });
-                subflowRemovedLinks.forEach(function(l) { RED.nodes.removeLink(l)});
-                subflowMovedLinks.forEach(function(l) { l.sourcePort--; });
-
-                removedLinks = removedLinks.concat(subflowRemovedLinks);
-                for (var j=output.i;j<activeSubflow.out.length;j++) {
-                    activeSubflow.out[j].i--;
-                    activeSubflow.out[j].dirty = true;
                 }
             }
             // Assume 0/1 inputs
-            
             if (removedSubflowInputs.length == 1) {
                 var input = removedSubflowInputs[0];
                 var subflowRemovedInputLinks = [];
@@ -880,18 +881,20 @@ RED.view = (function() {
                 $("#workspace-subflow-add-input").toggleClass("disabled",false);
             }
             
-            RED.nodes.eachNode(function(n) {
-                if (n.type == "subflow:"+activeSubflow.id) {
-                    n.changed = true;
-                    n.inputs = activeSubflow.in.length;
-                    n.outputs = activeSubflow.out.length;
-                    while (n.outputs < n.ports.length) {
-                        n.ports.pop();
+            if (activeSubflow) {
+                RED.nodes.eachNode(function(n) {
+                    if (n.type == "subflow:"+activeSubflow.id) {
+                        n.changed = true;
+                        n.inputs = activeSubflow.in.length;
+                        n.outputs = activeSubflow.out.length;
+                        while (n.outputs < n.ports.length) {
+                            n.ports.pop();
+                        }
+                        n.resize = true;
+                        n.dirty = true;
                     }
-                    n.resize = true;
-                    n.dirty = true;
-                }
-            });
+                });
+            }
             
             moving_set = [];
             if (removedNodes.length > 0) {
