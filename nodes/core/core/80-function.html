@@ -72,7 +72,7 @@
                 min:1
             });
 
-            function functionDialogResize(ev,ui) {
+            function functionDialogResize() {
                 var rows = $("#dialog-form>div:not(.node-text-editor-row)");
                 var height = $("#dialog-form").height();
                 for (var i=0;i<rows.size();i++) {
@@ -87,7 +87,9 @@
             $( "#dialog" ).one("dialogopen", function(ev) {
                 var size = $( "#dialog" ).dialog('option','sizeCache-function');
                 if (size) {
-                    functionDialogResize(null,{size:size});
+                    $("#dialog").dialog('option','width',size.width);
+                    $("#dialog").dialog('option','height',size.height);
+                    functionDialogResize();
                 }
             });
             $( "#dialog" ).one("dialogclose", function(ev,ui) {

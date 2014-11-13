@@ -64,7 +64,7 @@
         },
         oneditprepare: function() {
 
-            function templateDialogResize(ev,ui) {
+            function templateDialogResize() {
                 var rows = $("#dialog-form>div:not(.node-text-editor-row)");
                 var height = $("#dialog-form").height();
                 for (var i=0;i<rows.size();i++) {
@@ -79,7 +79,9 @@
             $( "#dialog" ).one("dialogopen", function(ev) {
                 var size = $( "#dialog" ).dialog('option','sizeCache-template');
                 if (size) {
-                    templateDialogResize(null,{size:size});
+                    $("#dialog").dialog('option','width',size.width);
+                    $("#dialog").dialog('option','height',size.height);
+                    templateDialogResize();
                 }
             });
             $( "#dialog" ).one("dialogclose", function(ev,ui) {

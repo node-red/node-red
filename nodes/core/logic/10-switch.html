@@ -159,7 +159,7 @@
                 generateRule(i+1,rule);
             }
 
-            function switchDialogResize(ev,ui) {
+            function switchDialogResize() {
                 var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
                 var height = $("#dialog-form").height();
                 for (var i=0;i<rows.size();i++) {
@@ -174,7 +174,9 @@
             $( "#dialog" ).one("dialogopen", function(ev) {
                 var size = $( "#dialog" ).dialog('option','sizeCache-switch');
                 if (size) {
-                    switchDialogResize(null,{size:size});
+                    $("#dialog").dialog('option','width',size.width);
+                    $("#dialog").dialog('option','height',size.height);
+                    switchDialogResize();
                 }
             });
             $( "#dialog" ).one("dialogclose", function(ev,ui) {
