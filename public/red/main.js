@@ -142,12 +142,9 @@ var RED = (function() {
     });
 
     function loadSettings() {
-        $.get('settings', function(data) {
-            RED.settings = data;
-            console.log("Node-RED: "+data.version);
-            loadNodeList();
-        });
+        RED.settings.init(loadNodeList);
     }
+
     function loadNodeList() {
         $.ajax({
             headers: {
@@ -205,7 +202,7 @@ var RED = (function() {
                     var i,m;
                     var typeList;
                     var info;
-                    
+
                     if (topic == "node/added") {
                         var addedTypes = [];
                         for (i=0;i<msg.length;i++) {
@@ -245,7 +242,7 @@ var RED = (function() {
                                     typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
                                     RED.notify("Node"+(msg.types.length!=1 ? "s":"")+" added to palette:"+typeList,"success");
                                 });
-                            } 
+                            }
                         }
                     } else if (topic == "node/disabled") {
                         if (msg.types) {
@@ -286,7 +283,7 @@ var RED = (function() {
     $(function() {
         RED.menu.init({id:"btn-sidemenu",
             options: [
-                {id:"btn-sidebar",icon:"fa fa-columns",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar},
+                {id:"btn-sidebar",icon:"fa fa-columns",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
                 null,
                 {id:"btn-node-status",icon:"fa fa-info",label:"Node Status",toggle:true,onselect:toggleStatus},
                 null,
@@ -320,6 +317,10 @@ var RED = (function() {
         loadSettings();
         RED.comms.connect();
     });
+
+    if ((window.location.hostname !== "localhost") && (window.location.hostname !== "127.0.0.1")) {
+        document.title = "Node-RED : "+window.location.hostname;
+    }
 
     return {
     };

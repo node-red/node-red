@@ -208,11 +208,11 @@ RED.palette = (function() {
                 portInput.remove();
             }
             
-            if (portOutput === 0 && sf.out.length > 0) {
+            if (portOutput.length === 0 && sf.out.length > 0) {
                 var portOut = document.createElement("div");
                 portOut.className = "palette_port palette_port_output";
                 paletteNode.append(portOut);
-            } else if (portOutput !== 0 && sf.out.length === 0) {
+            } else if (portOutput.length !== 0 && sf.out.length === 0) {
                 portOutput.remove();
             } 
             setLabel(sf.type+":"+sf.id,paletteNode,sf.name);

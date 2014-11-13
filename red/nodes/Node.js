@@ -16,8 +16,9 @@
 
 var util = require("util");
 var EventEmitter = require("events").EventEmitter;
-var clone = require("clone");
 var when = require("when");
+
+var redUtil = require("../util");
 
 var flows = require("./flows");
 var comms = require("../comms");
@@ -71,24 +72,7 @@ Node.prototype.on = function(event, callback) {
 
 Node.prototype.close = function() {};
 
-function cloneMessage(msg) {
-    // Temporary fix for #97
-    // TODO: remove this http-node-specific fix somehow
-    var req = msg.req;
-    var res = msg.res;
-    delete msg.req;
-    delete msg.res;
-    var m = clone(msg);
-    if (req) {
-        m.req = req;
-        msg.req = req;
-    }
-    if (res) {
-        m.res = res;
-        msg.res = res;
-    }
-    return m;
-}
+
 
 Node.prototype.send = function(msg) {
     var msgSent = false;
@@ -134,7 +118,7 @@ Node.prototype.send = function(msg) {
                         // for each msg to send eg. [[m1, m2, ...], ...]
                         for (k = 0; k < msgs.length; k++) {
                             if (msgSent) {
-                                sendEvents.push({n:node,m:cloneMessage(msgs[k])});
+                                sendEvents.push({n:node,m:redUtil.cloneMessage(msgs[k])});
                             } else {
                                 // first msg sent so don't clone
                                 sendEvents.push({n:node,m:msgs[k]});

@@ -139,13 +139,15 @@ module.exports = function(RED) {
         this.pin = pintable[n.pin];
         this.set = n.set || false;
         this.level = n.level || 0;
+        this.out = n.out || "out";
         var node = this;
+        (node.out === "pwm") ? (node.op = "pwm") : (node.op = "write");
 
         if (node.pin !== undefined) {
-            exec(gpioCommand+" mode "+node.pin+" out", function(err,stdout,stderr) {
+            exec(gpioCommand+" mode "+node.pin+" "+node.out, function(err,stdout,stderr) {
                 if (err) { node.error(err); }
                 else {
-                    if (node.set) {
+                    if (node.set && (node.out === "out")) {
                         exec(gpioCommand+" write "+node.pin+" "+node.level, function(err,stdout,stderr) {
                             if (err) { node.error(err); }
                         });
@@ -154,12 +156,14 @@ module.exports = function(RED) {
                         if (msg.payload === "true") { msg.payload = true; }
                         if (msg.payload === "false") { msg.payload = false; }
                         var out = Number(msg.payload);
-                        if ((out === 0)|(out === 1)) {
-                            exec(gpioCommand+" write "+node.pin+" "+out, function(err,stdout,stderr) {
+                        var limit = 1;
+                        if (node.out === "pwm") { limit = 1023; }
+                        if ((out >= 0) && (out <= limit)) {
+                            exec(gpioCommand+" "+node.op+" "+node.pin+" "+out, function(err,stdout,stderr) {
                                 if (err) { node.error(err); }
                             });
                         }
-                        else { node.warn("Invalid input - not 0 or 1"); }
+                        else { node.warn("Invalid input: "+out); }
                     });
                 }
             });

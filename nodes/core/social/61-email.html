@@ -70,8 +70,8 @@
 
 <script type="text/x-red" data-help-name="e-mail">
     <p>Sends the <b>msg.payload</b> as an email, with a subject of <b>msg.topic</b>.</p>
+    <p>The default message recipient can be configured in the node, if it is left blank it should be set in an incoming message on <b>msg.to</b>.</p>
     <!-- <p>It sends the message to the configured recipient <i>only</i>.</p> -->
-    <p>You may dynamically overide the default recipient by setting a <b>msg.to</b> property.</p>
     <!-- <p><b>msg.topic</b> is used to set the subject of the email, and <b>msg.payload</b> is the body text.</p> -->
 </script>
 

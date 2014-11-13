@@ -41,7 +41,7 @@ module.exports = {
     //  defaults to no timeout
     //socketTimeout: 120000,
 
-    // Maximum number of lines in debug window before pruning
+    // The maximum length, in characters, of any message sent to the debug sidebar tab
     debugMaxLength: 1000,
 
     // The file containing the flows. If not set, it defaults to flows_<hostname>.json

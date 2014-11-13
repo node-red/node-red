@@ -236,7 +236,12 @@ RED.editor = (function() {
                                 //TODO: move this to RED.library
                                 var flowName = $("#node-input-filename").val();
                                 if (!/^\s*$/.test(flowName)) {
-                                    $.post('library/flows/'+flowName,$("#node-input-filename").attr('nodes'),function() {
+                                    $.ajax({
+                                        url:'library/flows/'+flowName,
+                                        type: "POST",
+                                        data: $("#node-input-filename").attr('nodes'),
+                                        contentType: "application/json; charset=utf-8"
+                                    }).done(function() {
                                             RED.library.loadFlowLibrary();
                                             RED.notify("Saved nodes","success");
                                     });
@@ -745,8 +750,8 @@ RED.editor = (function() {
                         var wasDirty = RED.view.dirty();
                         
                         var newName = $("#subflow-input-name").val();
-                        var newInCount = $("#subflow-input-inCount").val();
-                        var newOutCount = $("#subflow-input-outCount").val();
+                        var newInCount = Number($("#subflow-input-inCount").val())||0;
+                        var newOutCount = Number($("#subflow-input-outCount").val())||0;
                         
                         var oldInCount = editing_node.in.length;
                         var oldOutCount = editing_node.out.length;
@@ -768,7 +773,7 @@ RED.editor = (function() {
                         if (editing_node.in.length < newInCount) {
                             var l = editing_node.in.length;
                             for (i=l;i<newInCount;i++) {
-                                var newInput = {type:"subflow",direction:"in",z:editing_node.id,i:i,x:xpos,y:70};
+                                var newInput = {type:"subflow",direction:"in",z:editing_node.id,i:i,x:xpos,y:70,id:RED.node.id()};
                                 addedInputs.push(newInput);
                                 editing_node.in.push(newInput);
                                 xpos += 55;
@@ -780,7 +785,7 @@ RED.editor = (function() {
                         }
                         if (editing_node.out.length < newOutCount) {
                             for (i=editing_node.out.length;i<newOutCount;i++) {
-                                var newOutput = {type:"subflow",direction:"out",z:editing_node.id,i:i,x:xpos,y:70};
+                                var newOutput = {type:"subflow",direction:"out",z:editing_node.id,i:i,x:xpos,y:70,id:RED.node.id()};
                                 addedOutputs.push(newOutput);
                                 editing_node.out.push(newOutput);
                                 xpos += 55;
