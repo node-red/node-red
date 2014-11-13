@@ -19,17 +19,18 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-row" style="padding-top:10px;">
+    <div class="form-row">
         If msg.<input type="text" id="node-input-property" style="width: 200px;"/>
     </div>
-    <div class="form-row">
-        <div id="node-input-rule-container-div" style="border-radius: 5px; height: 310px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
-        <ol id="node-input-rule-container" style=" list-style-type:none; margin: 0;">
-        </ol>
+    <div class="form-row node-input-rule-container-row" style="margin-bottom: 0px;">
+        <div id="node-input-rule-container-div" style="box-sizing: border-box; border-radius: 5px; height: 310px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
+            <ol id="node-input-rule-container" style=" list-style-type:none; margin: 0;"></ol>
         </div>
-        <a href="#" class="btn btn-mini" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> Add</a>
     </div>
-    <div>
+    <div class="form-row">
+        <a href="#" class="btn btn-mini" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> rule</a>
+    </div>
+    <div class="form-row">
         <select id="node-input-checkall" style="width:100%; margin-right:5px;">
             <option value="true">checking all rules</option>
             <option value="false">stopping after first match</option>
@@ -159,7 +160,14 @@
             }
 
             function switchDialogResize(ev,ui) {
-                $("#node-input-rule-container-div").css("height",(ui.size.height-260)+"px");
+                var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
+                var height = $("#dialog-form").height();
+                for (var i=0;i<rows.size();i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                var editorRow = $("#dialog-form>div.node-input-rule-container-row");
+                height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+                $("#node-input-rule-container-div").css("height",height+"px");
             };
 
             $( "#dialog" ).on("dialogresize", switchDialogResize);

@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013 IBM Corp.
+  Copyright 2013, 2014 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-row">
-        <label for="node-input-func"><i class="fa fa-wrench"></i> Function</label>
-        <input type="hidden" id="node-input-func" autofocus="autofocus">
+    <div class="form-row" style="margin-bottom: 0px;">
+            <label for="node-input-func"><i class="fa fa-wrench"></i> Function</label>
+            <input type="hidden" id="node-input-func" autofocus="autofocus">
+    </div>
+    <div class="form-row node-text-editor-row">
         <div style="height: 250px;" class="node-text-editor" id="node-input-func-editor" ></div>
     </div>
     <div class="form-row">
@@ -71,7 +73,14 @@
             });
 
             function functionDialogResize(ev,ui) {
-                $("#node-input-func-editor").css("height",(ui.size.height-275)+"px");
+                var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+                var height = $("#dialog-form").height();
+                for (var i=0;i<rows.size();i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                var editorRow = $("#dialog-form>div.node-text-editor-row");
+                height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+                $(".node-text-editor").css("height",height+"px");
             };
 
             $( "#dialog" ).on("dialogresize", functionDialogResize);

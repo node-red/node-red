@@ -658,12 +658,13 @@ g.link_unknown path.link_line {
     margin-bottom: 5px;
 }
 
-form.dialog-form {
+#dialog-form {
     margin: 0;
+    height: 100%;
 }
 .form-row {
     clear: both;
-    margin-bottom:20px;
+    margin-bottom:10px;
 }
 .form-row label {
     display: inline-block;
@@ -1050,7 +1051,7 @@ i.spinner {
     box-shadow: 2px 2px 12px rgba(0,0,0,0.2);
 }
 .ui-dialog .ui-dialog-content {
-    padding: 30px 30px 10px 30px;
+    padding: 25px 25px 10px 25px;
 }
 .ui-dialog .ui-dialog-titlebar {
     padding: 10px;
