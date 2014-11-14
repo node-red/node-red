@@ -138,7 +138,12 @@
         icon: "inject.png",
         label: function() {
             if (this.payloadType === "string") {
-                return this.name||this.topic||this.payload||"inject";
+                if (this.topic !== "") {
+                    return this.name||this.topic +" : "+this.payload||this.topic;
+                }
+                else {
+                    return this.name||this.payload||this.topic||"inject";
+                }
             }
             else { return this.name||this.topic||"inject"; }
         },
