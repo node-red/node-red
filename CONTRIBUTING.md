@@ -58,7 +58,7 @@ code base. Some basic rules include:
  - opening brace on same line as `if`/`for`/`function`/etc, closing brace on its
    own line.
 
-### Contributor License Aggreement
+### Contributor License Agreement
 
 In order for us to accept pull-requests, the contributor must first complete
 a Contributor License Agreement (CLA). This clarifies the intellectual 

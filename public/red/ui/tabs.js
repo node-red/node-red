@@ -116,6 +116,13 @@ RED.tabs = (function() {
             },
             contains: function(id) {
                 return ul.find("a[href='#"+id+"']").length > 0;
+            },
+            renameTab: function(id,name) {
+                tabs[id].name = name;
+                var tab = ul.find("a[href='#"+id+"']");
+                tab.attr("title",name);
+                tab.text(name);
+                updateTabWidths();
             }
 
         }

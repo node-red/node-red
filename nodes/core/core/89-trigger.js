@@ -37,11 +37,11 @@ module.exports = function(RED) {
         if (!isNaN(this.op1)) { this.op1 = Number(this.op1); }
         if (!isNaN(this.op2)) { this.op2 = Number(this.op2); }
         if (this.op1 == "true") { this.op1 = true; }
-        if (this.op2 == "true") { this.op1 = true; }
-        if (this.op1 == "false") { this.op2 = false; }
+        if (this.op2 == "true") { this.op2 = true; }
+        if (this.op1 == "false") { this.op1 = false; }
         if (this.op2 == "false") { this.op2 = false; }
         if (this.op1 == "null") { this.op1 = null; }
-        if (this.op2 == "null") { this.op1 = null; }
+        if (this.op2 == "null") { this.op2 = null; }
         try { this.op1 = JSON.parse(this.op1); }
         catch(e) { this.op1 = this.op1; }
         try { this.op2 = JSON.parse(this.op2); }

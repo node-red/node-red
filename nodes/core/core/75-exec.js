@@ -35,7 +35,7 @@ module.exports = function(RED) {
                 var arg = [];
                 if (node.append.length > 0) { arg = node.append.split(","); }
                 if (msg.payload.trim() !== "") { arg.unshift(msg.payload); }
-                node.log(node.cmd+" ["+arg+"]");
+                if (RED.settings.verbose) { node.log(node.cmd+" ["+arg+"]"); }
                 if (node.cmd.indexOf(" ") == -1) {
                     var ex = spawn(node.cmd,arg);
                     ex.stdout.on('data', function (data) {
@@ -62,7 +62,7 @@ module.exports = function(RED) {
             }
             else {
                 var cl = node.cmd+" "+msg.payload+" "+node.append;
-                node.log(cl);
+                if (RED.settings.verbose) { node.log(cl); }
                 var child = exec(cl, function (error, stdout, stderr) {
                     msg.payload = stdout;
                     var msg2 = {payload:stderr};

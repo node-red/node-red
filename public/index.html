@@ -51,11 +51,9 @@
         <div id="workspace-add-tab"><a id="btn-workspace-add-tab" href="#"><i class="fa fa-plus"></i></a></div>
         <div id="chart"></div>
         <div id="workspace-toolbar">
-            <div class="btn-group">
-                <a class="btn btn-small" href="#"><i class="fa fa-search-minus"></i></a>
-                <a class="btn btn-small" href="#"><i class="fa fa-dot-circle-o"></i></a>
-                <a class="btn btn-small" href="#"><i class="fa fa-search-plus"></i></a>
-            </div>
+            <a class="button" id="workspace-subflow-edit" href="#"><i class="fa fa-pencil"></i> edit subflow name</a>
+            <a class="button disabled" id="workspace-subflow-add-input" href="#"><i class="fa fa-plus"></i> input</a>
+            <a class="button" id="workspace-subflow-add-output" href="#"><i class="fa fa-plus"></i> output</a>
         </div>
     </div>
 
@@ -81,6 +79,14 @@
 
 <div id="dialog" class="hide"><form id="dialog-form" class="form-horizontal"></form></div>
 <div id="node-config-dialog" class="hide"><form id="dialog-config-form" class="form-horizontal"></form><div class="form-tips" id="node-config-dialog-user-count"></div></div>
+<div id="subflow-dialog" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <label>Name</label><input type="text" id="subflow-input-name">
+        </div>
+    </form>
+    <div class="form-tips" id="subflow-dialog-user-count"></div>
+</div>
 
 <div id="node-dialog-confirm-deploy" class="hide">
     <form class="form-horizontal">
@@ -135,6 +141,9 @@
         <tr>
           <td><span class="help-key">Ctrl</span> <span class="help-key">+</span></td><td>Zoom in</td>
           <td><span class="help-key">Ctrl</span> <span class="help-key">-</span></td><td>Zoom out</td>
+        </tr>
+        <tr>
+          <td colspan="4">Mac users can use the <b>⌘ - Cmd</b> key rather than Ctrl key.</td>
         </tr>
     </table>
   </div>
@@ -196,7 +205,6 @@
         </div>
     </form>
 </div>
-
 <script type="text/x-red" data-template-name="export-clipboard-dialog">
     <div class="form-row">
         <label for="node-input-export" style="display: block; width:100%;"><i class="fa fa-clipboard"></i> Nodes:</label>
@@ -219,6 +227,13 @@
     </div>
 </script>
 
+<script type="text/x-red" data-template-name="subflow">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="name">
+    </div>
+</script>
+
 <script src="jquery/js/jquery-1.11.1.min.js"></script>
 <script src="bootstrap/js/bootstrap.min.js"></script>
 <script src="jquery/js/jquery-ui-1.10.3.custom.min.js"></script>
@@ -231,6 +246,7 @@
 <script src="red/nodes.js"></script>
 <script src="red/history.js"></script>
 <script src="red/validators.js"></script>
+<script src="red/settings.js"></script>
 <script src="red/ui/menu.js"></script>
 <script src="red/ui/keyboard.js"></script>
 <script src="red/ui/tabs.js"></script>

@@ -35,7 +35,7 @@ body {
     position: absolute;
     top: 0; bottom: 0;
     left: 0; right: 0;
-    background: rgba(100,100,100,0.5);
+    background: rgba(0,0,0,0.1);
     display:table;
     width: 100%;
     height: 100%;
@@ -74,6 +74,14 @@ span.logo span {
 span.logo img {
     height: 18px;
 }
+.button {
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+}
+
 #header .button {
     line-height: 22px;
     display: inline-block;
@@ -118,7 +126,32 @@ span.logo img {
     outline: none;
 }
 
-
+#workspace-toolbar .button {
+    line-height: 18px;
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 8px;
+    text-decoration: none;
+    border-radius: 3px;
+    color: #666;
+    background: #f6f6f6;
+    vertical-align: middle;
+    box-shadow: 0 0 2px #888;
+    margin-right: 5px;
+}
+#workspace-toolbar .button.disabled {
+    box-shadow: 0 0 2px #bbb;
+    color: #aaa;
+    cursor: default;
+}
+#workspace-toolbar .button:not(.disabled):hover {
+    background: #e6e6e6;
+    box-shadow: 0 0 2px #666;
+}
+#workspace-toolbar .button:not(.disabled):active {
+    background: #e0e0e0;
+    box-shadow: 0 0 2px #444;
+}
 
 #workspace {
    margin-left: 160px;
@@ -140,8 +173,9 @@ span.logo img {
     position: absolute;
     top: 30px;
     left:0;
-    right: 18px;
-    padding: 5px;
+    right: 20px;
+    padding: 7px;
+    border-bottom-right-radius: 5px;
     background: #f3f3f3;
 }
 
@@ -263,9 +297,10 @@ span.logo img {
     clear: both;
 }
 .palette_label {
-   line-height: 25px;
-   text-align: center;
-
+    margin: 4px 0;
+    line-height: 20px;
+    text-align: center;
+    overflow: hidden;
 }
 .palette_node {
    cursor:move;
@@ -425,6 +460,22 @@ span.logo img {
    user-select: none;
 }
 
+.port_label {
+   stroke-width: 0;
+   fill: #888;
+   font-size: 16px;
+   alignment-baseline: middle;
+   text-anchor: middle;
+   pointer-events: none;
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+}
+
+
 .function_label {
    font-size: 12px;
 }
@@ -460,9 +511,21 @@ span.logo img {
 
 }
 .port {
+   stroke: #999;
+   stroke-width: 2;
    fill: #ddd;
    cursor: crosshair;
 }
+
+.port_highlight {
+   stroke: #6DA332;
+   stroke-width: 3;
+   fill: #fff;
+   pointer-events:none;
+   fill-opacity: 0.5;
+}
+
+
 .node_error {
     stroke: #ff0000;
     stroke-width: 2;
@@ -491,7 +554,7 @@ span.logo img {
    stroke: #ff0000;
 }
 .node_selected {
-   stroke: #ff7f0e;
+   stroke: #ff7f0e !important;
 }
 .node_highlighted {
    stroke: #dd1616;
@@ -504,6 +567,11 @@ span.logo img {
 .port_hovered {
   stroke: #ff7f0e;
   fill:  #ff7f0e;
+}
+.subflowport {
+    stroke-dasharray: 5,5;
+    fill: #eee;
+    stroke: #999;
 }
 
 .drag_line {
@@ -525,6 +593,12 @@ span.logo img {
   stroke-width: 4;
   fill: none;
   pointer-events: none;
+}
+
+.link_subflow {
+  stroke: #bbb;
+  stroke-dasharray: 10,5;
+  stroke-width: 3;
 }
 
 .link_outline {
@@ -557,7 +631,7 @@ g.link_unknown path.link_line {
    left:0;
    width: 100%;
    height: 100%;
-   background: rgba(0,0,0,0.5);
+   background: rgba(0,0,0,0.1);
    text-align: center;
    display: none;
 }
@@ -584,9 +658,13 @@ g.link_unknown path.link_line {
     margin-bottom: 5px;
 }
 
+#dialog-form {
+    margin: 0;
+    height: 100%;
+}
 .form-row {
     clear: both;
-    margin-bottom: 7px;
+    margin-bottom:10px;
 }
 .form-row label {
     display: inline-block;
@@ -620,10 +698,6 @@ button.input-append-right {
 .form-tips code {
     border: none;
     padding: auto;
-}
-
-.ui-tabs .ui-tabs-panel {
-    padding: 0px;
 }
 
 table.node-info {
@@ -720,11 +794,6 @@ div.node-info {
 
 .popover-title { display: none; }
 
-.ui-autocomplete {
-    max-height: 250px;
-    overflow-x: hidden;
-    overflow-y: scroll;
-}
 
 .leftButton {
     margin-right: 200px !important;
@@ -961,6 +1030,43 @@ i.spinner {
     background: url(spin.svg) no-repeat 50% 50%;
     background-size: contain
 }
-    
-    
+
+
+/* jQuery Theme overrides */
+.ui-tabs .ui-tabs-panel {
+    padding: 0px;
+}
+
+.ui-autocomplete {
+    max-height: 250px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.ui-dialog {
+    border-radius: 1px;
+    border: 1px solid #eee;
+    background: #fff;
+    padding: 0;
+    box-shadow: 2px 2px 12px rgba(0,0,0,0.2);
+}
+.ui-dialog .ui-dialog-content {
+    padding: 25px 25px 10px 25px;
+}
+.ui-dialog .ui-dialog-titlebar {
+    padding: 10px;
+    background: #f0f0f0;
+    border: none;
+    border-bottom: 2px solid #888;
+    border-radius: 0;
+}
+.ui-corner-all {
+    border-radius: 2px;
+}
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+    background: #f3f3f3;
+}
+.ui-dialog-no-close .ui-dialog-titlebar-close {
+    display: none;
+}
 

@@ -108,7 +108,27 @@ describe("red/settings", function() {
         }).otherwise(function(err) {
             done(err);
         });
+    });
+    
+    it('removes persistent settings when reset', function() {
+        var userSettings = {
+            a: 123,
+            b: "test",
+            c: [1,2,3]
+        }
+        settings.init(userSettings);
         
+        settings.available().should.be.false;
+        
+        settings.should.have.property("a",123);
+        settings.should.have.property("b","test");
+        settings.c.should.be.an.Array.with.lengthOf(3);
+        
+        settings.reset();
+        
+        settings.should.not.have.property("a");
+        settings.should.not.have.property("d");
+        settings.should.not.have.property("c");
         
     });
 });

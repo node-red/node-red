@@ -15,37 +15,32 @@
  **/
 var express = require('express');
 var fs = require("fs");
-var events = require("./events");
 var path = require("path");
 
-var icon_paths = [path.resolve(__dirname + '/../public/icons')];
+var events = require("../events");
+var settings = require("../settings");
 
-var settings; // settings has to be global, otherwise variable not in scope for express
+var icon_paths = [path.resolve(__dirname + '/../../public/icons')];
+var iconCache = {};
+//TODO: create a default icon
+var defaultIcon = path.resolve(__dirname + '/../../public/icons/arrow-in.png');
 
 events.on("node-icon-dir",function(dir) {
     icon_paths.push(path.resolve(dir));
 });
 
-
-function setupUI(_settings,app) {
-    
-    settings = _settings;
-    
-    // Need to ensure the url ends with a '/' so the static serving works
-    // with relative paths
-    app.get("/",function(req,res) {
-        if (req.originalUrl.slice(-1) != "/") {
-            res.redirect(req.originalUrl+"/");
+module.exports = {
+    ensureSlash: function(req,res,next) {
+        var parts = req.originalUrl.split("?");
+        if (parts[0].slice(-1) != "/") {
+            parts[0] += "/";
+            var redirect = parts.join("?");
+            res.redirect(301,redirect);
         } else {
-            req.next();
+            next();
         }
-    });
-    
-    var iconCache = {};
-    //TODO: create a default icon
-    var defaultIcon = path.resolve(__dirname + '/../public/icons/arrow-in.png');
-    
-    app.get("/icons/:icon",function(req,res) {
+    },
+    icon: function(req,res) {
         if (iconCache[req.params.icon]) {
             res.sendfile(iconCache[req.params.icon]); // if not found, express prints this to the console and serves 404
         } else { 
@@ -59,19 +54,13 @@ function setupUI(_settings,app) {
             }
             res.sendfile(defaultIcon);
         }
-    });
-    
-    app.get("/settings", function(req,res) {
+    },
+    settings: function(req,res) {
         var safeSettings = {
             httpNodeRoot: settings.httpNodeRoot,
             version: settings.version
         };
         res.json(safeSettings);
-    });
-    
-    app.use("/",express.static(__dirname + '/../public'));
-    
-    return app;
-}
-
-module.exports = setupUI;
+    },
+    editor: express.static(__dirname + '/../../public')
+};

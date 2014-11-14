@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 var should = require("should");
 var sinon = require('sinon');
 var RedNode = require("../../../red/nodes/Node");
@@ -28,7 +28,7 @@ describe('Node', function() {
             n.should.not.have.property('name');
             n.wires.should.be.empty;
         });
-        
+
         it('is called with an id, a type and a name',function() {
             var n = new RedNode({id:'123',type:'abc',name:'barney'});
             n.should.have.property('id','123');
@@ -36,7 +36,7 @@ describe('Node', function() {
             n.should.have.property('name','barney');
             n.wires.should.be.empty;
         });
-        
+
         it('is called with an id, a type and some wires',function() {
             var n = new RedNode({id:'123',type:'abc',wires:['123','456']});
             n.should.have.property('id','123');
@@ -44,9 +44,9 @@ describe('Node', function() {
             n.should.not.have.property('name');
             n.wires.should.have.length(2);
         });
-        
+
     });
-    
+
     describe('#close', function() {
         it('emits close event when closed',function(done) {
             var n = new RedNode({id:'123',type:'abc'});
@@ -56,7 +56,7 @@ describe('Node', function() {
             var p = n.close();
             should.not.exist(p);
         });
-        
+
         it('returns a promise when provided a callback with a done parameter',function(testdone) {
             var n = new RedNode({id:'123',type:'abc'});
             n.on('close',function(done) {
@@ -71,8 +71,8 @@ describe('Node', function() {
             });
         });
     });
-    
-    
+
+
     describe('#receive', function() {
         it('emits input event when called', function(done) {
             var n = new RedNode({id:'123',type:'abc'});
@@ -84,74 +84,84 @@ describe('Node', function() {
             n.receive(message);
         });
     });
-    
+
     describe('#send', function() {
-            
+
         it('emits a single message', function(done) {
             var n1 = new RedNode({id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({id:'n2',type:'abc'});
             var message = {payload:"hello world"};
-            
+
             n2.on('input',function(msg) {
-                // msg equals message, but is a new copy
+                // msg equals message, and is not a new copy
                 should.deepEqual(msg,message);
-                should.notStrictEqual(msg,message);
+                should.strictEqual(msg,message);
                 done();
             });
-            
+
             n1.send(message);
         });
-        
+
         it('emits multiple messages on a single output', function(done) {
             var n1 = new RedNode({id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({id:'n2',type:'abc'});
-            
+
             var messages = [
                 {payload:"hello world"},
                 {payload:"hello world again"}
             ];
-            
+
             var rcvdCount = 0;
-            
+
             n2.on('input',function(msg) {
                 should.deepEqual(msg,messages[rcvdCount]);
-                should.notStrictEqual(msg,messages[rcvdCount]);
+
+                if (rcvdCount === 0) {
+                    // first msg sent, don't clone
+                    should.strictEqual(msg,messages[rcvdCount]);
+                } else {
+                    // second msg sent, clone
+                    should.notStrictEqual(msg,messages[rcvdCount]);
+                }
+
                 rcvdCount += 1;
-                if (rcvdCount == 2) {
+                if (rcvdCount === 2) {
                     done();
                 }
             });
             n1.send([messages]);
         });
-        
+
         it('emits messages to multiple outputs', function(done) {
             var n1 = new RedNode({id:'n1',type:'abc',wires:[['n2'],['n3'],['n4','n5']]});
             var n2 = new RedNode({id:'n2',type:'abc'});
             var n3 = new RedNode({id:'n3',type:'abc'});
             var n4 = new RedNode({id:'n4',type:'abc'});
             var n5 = new RedNode({id:'n5',type:'abc'});
-            
+
             var messages = [
                 {payload:"hello world"},
                 null,
                 {payload:"hello world again"}
             ];
-            
+
             var rcvdCount = 0;
-            
+
+            // first message sent, don't clone
             n2.on('input',function(msg) {
                 should.deepEqual(msg,messages[0]);
-                should.notStrictEqual(msg,messages[0]);
+                should.strictEqual(msg,messages[0]);
                 rcvdCount += 1;
                 if (rcvdCount == 3) {
                     done();
                 }
             });
-            
+
             n3.on('input',function(msg) {
                     should.fail(null,null,"unexpected message");
             });
-            
+
+            // second message sent, clone
             n4.on('input',function(msg) {
                 should.deepEqual(msg,messages[2]);
                 should.notStrictEqual(msg,messages[2]);
@@ -160,7 +170,8 @@ describe('Node', function() {
                     done();
                 }
             });
-            
+
+            // third message sent, clone
             n5.on('input',function(msg) {
                 should.deepEqual(msg,messages[2]);
                 should.notStrictEqual(msg,messages[2]);
@@ -169,7 +180,7 @@ describe('Node', function() {
                     done();
                 }
             });
-            
+
             n1.send(messages);
         });
 
@@ -180,11 +191,11 @@ describe('Node', function() {
             n2.on('input',function(msg) {
                 should.fail(null,null,"unexpected message");
             });
-            
+
             setTimeout(function() {
                 done();
             }, 200);
-            
+
             n1.send();
         });
 
@@ -197,9 +208,10 @@ describe('Node', function() {
                 {payload:"hello world again"}
             ];
 
+            // only one message sent, so no copy needed
             n2.on('input',function(msg) {
                 should.deepEqual(msg,messages[1]);
-                should.notStrictEqual(msg,messages[1]);
+                should.strictEqual(msg,messages[1]);
                 done();
             });
 
@@ -207,15 +219,26 @@ describe('Node', function() {
         });
 
         it('emits messages without cloning req or res', function(done) {
-            var n1 = new RedNode({id:'n1',type:'abc',wires:[['n2']]});
+            var n1 = new RedNode({id:'n1',type:'abc',wires:[['n2'],['n3']]});
             var n2 = new RedNode({id:'n2',type:'abc'});
+            var n3 = new RedNode({id:'n3',type:'abc'});
 
             var req = {};
             var res = {};
             var cloned = {};
             var message = {payload: "foo", cloned: cloned, req: req, res: res};
 
+            // first message to be sent, so should not be cloned
             n2.on('input',function(msg) {
+                should.deepEqual(msg, message);
+                msg.cloned.should.be.exactly(message.cloned);
+                msg.req.should.be.exactly(message.req);
+                msg.res.should.be.exactly(message.res);
+                done();
+            });
+
+            // second message to be sent, so should be cloned
+            n3.on('input',function(msg) {
                 should.deepEqual(msg, message);
                 msg.cloned.should.not.be.exactly(message.cloned);
                 msg.req.should.be.exactly(message.req);

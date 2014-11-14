@@ -103,11 +103,11 @@
     </div>
     <div class="form-row">
         <table><tr>
-            <td width = "102px"><i class="fa fa-wrench"></i> Settings</td>
-            <td width = "100px">Baud Rate</td>
-            <td width = "80px">Data Bits</td>
-            <td width = "80px">Parity</td>
-            <td width = "80px">Stop Bits</td>
+            <td width="102px"><i class="fa fa-wrench"></i> Settings</td>
+            <td width="100px">Baud Rate</td>
+            <td width="80px">Data Bits</td>
+            <td width="80px">Parity</td>
+            <td width="80px">Stop Bits</td>
         </tr><tr><td>&nbsp;</td>
         <td>
         <select type="text" id="node-config-input-serialbaud" style="width: 100px;">
@@ -153,63 +153,36 @@
     </tr></table><br/>
 
     <div class="form-row">
-        <label for="node-config-input-out"><i class="fa fa-cut"></i> Split input</label>
-        <select type="text" id="node-config-input-out" style="width:52%;">
-            <option value="char">when character received is</option>
-            <option value="time">after a fixed timeout of</option>
-            <option value="count">a fixed number of characters</option>
+        <label><i class="fa fa-sign-in"></i> Input</label>
+    </div>
+    <div class="form-row" style="padding-left: 10px;">
+        Split input
+        <select type="text" id="node-config-input-out" style="margin-left: 5px; width:200px;">
+            <option value="char">on the character</option>
+            <option value="time">after a timeout of</option>
+            <option value="count">into fixed lengths of</option>
         </select>
         <input type="text" id="node-config-input-newline"  style="width:50px;">
         <span id="node-units"></span>
     </div>
-
-    <div class="form-row">
-        <label for="node-config-input-bin"><i class="fa fa-sign-in"></i> and deliver</label>
-        <select type="text" id="node-config-input-bin" style="width: 77%;">
+    <div class="form-row" style="padding-left: 10px;">
+        and deliver
+        <select type="text" id="node-config-input-bin" style="margin-left: 5px; width: 150px;">
             <option value="false">ascii strings</option>
             <option value="bin">binary buffers</option>
         </select>
     </div>
     <br/>
-    <div class="form-row" id="node-config-addchar">
-        <label for="node-config-input-addchar"><i class="fa fa-sign-out"></i> On output</label>
-        <select type="text" id="node-config-input-addchar" style="width: 77%;">
-            <option value="false">don't add 'split' character to output messages</option>
-            <option value="true">add 'split' character to output messages</option>
-        </select>
+    <div id="node-config-addchar">
+        <div class="form-row">
+            <label><i class="fa fa-sign-out"></i> Output</label>
+        </div>
+        <div class="form-row">
+            <input style="width: 30px;margin-left: 10px; vertical-align: top;" type="checkbox" id="node-config-input-addchar"><label style="width: auto;" for="node-config-input-addchar">add split character to output messages</label>
+        </div>
     </div>
     <div class="form-tips" id="tip-split">Tip: the "Split on" character is used to split the input into separate messages. It can also be added to every message sent out to the serial port.</div>
     <div class="form-tips" id="tip-bin" hidden>Tip: In timeout mode timeout starts from arrival of first character.</div>
-    <script>
-        var previous = null;
-        $("#node-config-input-out").on('focus', function () { previous = this.value; }).change(function() {
-            if (previous == null) { previous = $("#node-config-input-out").val(); }
-            if ($("#node-config-input-out").val() == "char") {
-                if (previous != "char") { $("#node-config-input-newline").val("\\n"); }
-                $("#node-units").text("");
-                $("#node-config-addchar").show();
-                $("#tip-split").show();
-                $("#tip-bin").hide();
-            }
-            else if ($("#node-config-input-out").val() == "time") {
-                if (previous != "time") { $("#node-config-input-newline").val("0"); }
-                $("#node-units").text("ms");
-                $("#node-config-addchar").hide();
-                $("#node-config-input-addchar").val("false");
-                $("#tip-split").hide();
-                $("#tip-bin").show();
-            }
-            else {
-                if (previous != "count") { $("#node-config-input-newline").val("12"); }
-                $("#node-units").text("chars");
-                $("#node-config-addchar").hide();
-                $("#node-config-input-addchar").val("false");
-                $("#tip-split").hide();
-                $("#tip-bin").hide();
-            }
-        });
-
-    </script>
 </script>
 
 <script type="text/javascript">
@@ -223,8 +196,8 @@
             parity: {value:"none",required:true},
             stopbits: {value:1,required:true},
             newline: {value:"\\n"},
-            bin: {value:""},
-            out: {value:""},
+            bin: {value:"false"},
+            out: {value:"char"},
             addchar: {value:false}
         },
         label: function() {
@@ -235,6 +208,34 @@
             return this.serialport+":"+this.serialbaud+"-"+this.databits+this.parity.charAt(0).toUpperCase()+this.stopbits;
         },
         oneditprepare: function() {
+            var previous = null;
+            $("#node-config-input-out").on('focus', function () { previous = this.value; }).change(function() {
+                if (previous == null) { previous = $("#node-config-input-out").val(); }
+                if ($("#node-config-input-out").val() == "char") {
+                    if (previous != "char") { $("#node-config-input-newline").val("\\n"); }
+                    $("#node-units").text("");
+                    $("#node-config-addchar").show();
+                    $("#tip-split").show();
+                    $("#tip-bin").hide();
+                }
+                else if ($("#node-config-input-out").val() == "time") {
+                    if (previous != "time") { $("#node-config-input-newline").val("0"); }
+                    $("#node-units").text("ms");
+                    $("#node-config-addchar").hide();
+                    $("#node-config-input-addchar").val("false");
+                    $("#tip-split").hide();
+                    $("#tip-bin").show();
+                }
+                else {
+                    if (previous != "count") { $("#node-config-input-newline").val(""); }
+                    $("#node-units").text("chars");
+                    $("#node-config-addchar").hide();
+                    $("#node-config-input-addchar").val("false");
+                    $("#tip-split").hide();
+                    $("#tip-bin").hide();
+                }
+            });
+
             try {
                 $("#node-config-input-serialport").autocomplete( "destroy" );
             } catch(err) {

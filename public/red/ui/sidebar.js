@@ -124,12 +124,13 @@ RED.sidebar = (function() {
             $("#main-container").addClass("sidebar-closed");
         } else {
             $("#main-container").removeClass("sidebar-closed");
+            sidebar_tabs.resize();
         }
     }
     
     function showSidebar(id) {
-        RED.menu.setSelected("btn-sidebar",true);
-        sidebar_tabs.activateTab("tab-"+id);
+        //RED.menu.setSelected("btn-sidebar", true);
+        sidebar_tabs.activateTab("tab-" + id);
     }
     
     function containsTab(id) {

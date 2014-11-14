@@ -66,9 +66,9 @@ module.exports = function(RED) {
                 } else {
                     node.send({req:req,res:res});
                 }
-            }
+            };
 
-            var corsHandler = function(req,res,next) { next(); }
+            var corsHandler = function(req,res,next) { next(); };
 
             if (RED.settings.httpNodeCors) {
                 corsHandler = cors(RED.settings.httpNodeCors);
@@ -95,10 +95,12 @@ module.exports = function(RED) {
                 }
                 if (RED.settings.httpNodeCors) {
                     var route = RED.httpNode.route['options'];
-                    for (var j = 0; j<route.length; j++) {
-                        if (route[j].path == this.url) {
-                            route.splice(j,1);
-                            //break;
+                    if (route) {
+                        for (var j = 0; j<route.length; j++) {
+                            if (route[j].path == this.url) {
+                                route.splice(j,1);
+                                //break;
+                            }
                         }
                     }
                 }
@@ -152,6 +154,9 @@ module.exports = function(RED) {
             node.status({fill:"blue",shape:"dot",text:"requesting"});
             var url;
             if (msg.url) {
+                if (n.url) {
+                    node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
+                }
                 url = msg.url;
             } else if (isTemplatedUrl) {
                 url = mustache.render(nodeUrl,msg);
@@ -163,7 +168,15 @@ module.exports = function(RED) {
                 url = "http://"+url;
             }
 
-            var method = (msg.method||nodeMethod).toUpperCase();
+            var method;
+            if (msg.method) {
+                if (n.method) {
+                    node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
+                }
+                method = msg.method.toUpperCase();
+            } else {
+                method = nodeMethod.toUpperCase();
+            }
             //node.log(method+" : "+url);
             var opts = urllib.parse(url);
             opts.method = method;
@@ -238,4 +251,4 @@ module.exports = function(RED) {
             password: {type: "password"}
         }
     });
-}
+};

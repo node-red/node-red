@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+var clone = require("clone");
+
 function ensureString(o) {
     if (Buffer.isBuffer(o)) {
         return o.toString();
@@ -36,8 +38,28 @@ function ensureBuffer(o) {
     return new Buffer(o);
 }
 
+function cloneMessage(msg) {
+    // Temporary fix for #97
+    // TODO: remove this http-node-specific fix somehow
+    var req = msg.req;
+    var res = msg.res;
+    delete msg.req;
+    delete msg.res;
+    var m = clone(msg);
+    if (req) {
+        m.req = req;
+        msg.req = req;
+    }
+    if (res) {
+        m.res = res;
+        msg.res = res;
+    }
+    return m;
+}
+
 module.exports = {
     ensureString: ensureString,
     ensureBuffer: ensureBuffer,
+    cloneMessage: cloneMessage
 };
 

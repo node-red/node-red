@@ -31,6 +31,8 @@ RED.view = (function() {
 
 
     var activeWorkspace = 0;
+    var activeSubflow = null;
+    
     var workspaceScrollPositions = {};
 
     var selected_link = null,
@@ -225,6 +227,25 @@ RED.view = (function() {
 
     var drag_line = vis.append("svg:path").attr("class", "drag_line");
 
+    $("#workspace-subflow-edit").click(function(event) {
+        showSubflowDialog(activeSubflow.id);
+        event.preventDefault();
+    });
+    $("#workspace-subflow-add-input").click(function(event) {
+        event.preventDefault();
+        if ($(this).hasClass("disabled")) {
+            return;
+        }
+        addSubflowInput(activeSubflow.id);
+    });
+    $("#workspace-subflow-add-output").click(function(event) {
+        event.preventDefault();
+        if ($(this).hasClass("disabled")) {
+            return;
+        }
+        addSubflowOutput(activeSubflow.id);
+    });
+    
     var workspace_tabs = RED.tabs.create({
         id: "workspace-tabs",
         onchange: function(tab) {
@@ -244,6 +265,10 @@ RED.view = (function() {
             var scrollStartTop = chart.scrollTop();
 
             activeWorkspace = tab.id;
+            activeSubflow = RED.nodes.subflow(activeWorkspace);
+            if (activeSubflow) {
+                $("#workspace-subflow-add-input").toggleClass("disabled",activeSubflow.in.length > 0);
+            }
             if (workspaceScrollPositions[activeWorkspace]) {
                 chart.scrollLeft(workspaceScrollPositions[activeWorkspace].left);
                 chart.scrollTop(workspaceScrollPositions[activeWorkspace].top);
@@ -257,6 +282,9 @@ RED.view = (function() {
                 mouse_position[0] += scrollDeltaLeft;
                 mouse_position[1] += scrollDeltaTop;
             }
+            
+            RED.menu.setDisabled("btn-workspace-edit", activeSubflow);
+            RED.menu.setDisabled("btn-workspace-delete",workspace_tabs.count() == 1 || activeSubflow);
 
             clearSelection();
             RED.nodes.eachNode(function(n) {
@@ -265,7 +293,11 @@ RED.view = (function() {
             redraw();
         },
         ondblclick: function(tab) {
-            showRenameWorkspaceDialog(tab.id);
+            if (tab.type != "subflow") {
+                showRenameWorkspaceDialog(tab.id);
+            } else {
+                showSubflowDialog(tab.id);
+            }
         },
         onadd: function(tab) {
             RED.menu.addItem("btn-workspace-menu",{
@@ -300,11 +332,12 @@ RED.view = (function() {
     }
     $(function() {
         $('#btn-workspace-add-tab').on("click",addWorkspace);
-        $('#btn-workspace-add').on("click",addWorkspace);
-        $('#btn-workspace-edit').on("click",function() {
+        
+        RED.menu.setAction('btn-workspace-add',addWorkspace);
+        RED.menu.setAction('btn-workspace-edit',function() {
             showRenameWorkspaceDialog(activeWorkspace);
         });
-        $('#btn-workspace-delete').on("click",function() {
+        RED.menu.setAction('btn-workspace-delete',function() {
             deleteWorkspace(activeWorkspace);
         });
     });
@@ -349,7 +382,6 @@ RED.view = (function() {
 
     function canvasMouseMove() {
         mouse_position = d3.touches(this)[0]||d3.mouse(this);
-
         // Prevent touch scrolling...
         //if (d3.touches(this)[0]) {
         //    d3.event.preventDefault();
@@ -427,9 +459,12 @@ RED.view = (function() {
                 );
             d3.event.preventDefault();
         } else if (mouse_mode == RED.state.MOVING) {
-            mousePos = mouse_position;
+            mousePos = d3.mouse(document.body);
+            if (isNaN(mousePos[0])) {
+                mousePos = d3.touches(document.body)[0];
+            }
             var d = (mouse_offset[0]-mousePos[0])*(mouse_offset[0]-mousePos[0]) + (mouse_offset[1]-mousePos[1])*(mouse_offset[1]-mousePos[1]);
-            if (d > 2) {
+            if (d > 3) {
                 mouse_mode = RED.state.MOVING_ACTIVE;
                 clickElapsed = 0;
             }
@@ -475,7 +510,9 @@ RED.view = (function() {
                 }
             }
         }
-        redraw();
+        if (mouse_mode !== 0) {
+            redraw();
+        }
     }
 
     function canvasMouseUp() {
@@ -499,6 +536,22 @@ RED.view = (function() {
                     }
                 }
             });
+            if (activeSubflow) {
+                activeSubflow.in.forEach(function(n) {
+                    n.selected = (n.x > x && n.x < x2 && n.y > y && n.y < y2);
+                    if (n.selected) {
+                        n.dirty = true;
+                        moving_set.push({n:n});
+                    }
+                });
+                activeSubflow.out.forEach(function(n) {
+                    n.selected = (n.x > x && n.x < x2 && n.y > y && n.y < y2);
+                    if (n.selected) {
+                        n.dirty = true;
+                        moving_set.push({n:n});
+                    }
+                });
+            }
             updateSelection();
             lasso.remove();
             lasso = null;
@@ -542,11 +595,28 @@ RED.view = (function() {
             else { zoomIn(); }
         }
     });
+    
     $("#chart").droppable({
             accept:".palette_node",
             drop: function( event, ui ) {
                 d3.event = event;
                 var selected_tool = ui.draggable[0].type;
+                
+                var m = /^subflow:(.+)$/.exec(selected_tool);
+                
+                if (activeSubflow && m) {
+                    var subflowId = m[1];
+                    if (subflowId === activeSubflow.id) {
+                        RED.notify("<strong>Error</strong>: Cannot add subflow to itself","error");
+                        return;
+                    }
+                    if (RED.nodes.subflowContains(m[1],activeSubflow.id)) {
+                        RED.notify("<strong>Error</strong>: Cannot add subflow - circular reference detected","error");
+                        return;
+                    }
+                    
+                }
+                
                 var mousePos = d3.touches(this)[0]||d3.mouse(this);
                 mousePos[1] += this.scrollTop;
                 mousePos[0] += this.scrollLeft;
@@ -557,17 +627,25 @@ RED.view = (function() {
 
                 nn.type = selected_tool;
                 nn._def = RED.nodes.getType(nn.type);
-                nn.outputs = nn._def.outputs;
-                nn.changed = true;
 
-                for (var d in nn._def.defaults) {
-                    if (nn._def.defaults.hasOwnProperty(d)) {
-                        nn[d] = nn._def.defaults[d].value;
+                if (!m) {
+                    nn.inputs = nn._def.inputs || 0;
+                    nn.outputs = nn._def.outputs;
+                    nn.changed = true;
+    
+                    for (var d in nn._def.defaults) {
+                        if (nn._def.defaults.hasOwnProperty(d)) {
+                            nn[d] = nn._def.defaults[d].value;
+                        }
                     }
-                }
-
-                if (nn._def.onadd) {
-                    nn._def.onadd.call(nn);
+    
+                    if (nn._def.onadd) {
+                        nn._def.onadd.call(nn);
+                    }
+                } else {
+                    var subflow = RED.nodes.subflow(m[1]);
+                    nn.inputs = subflow.in.length;
+                    nn.outputs = subflow.out.length;
                 }
 
                 nn.h = Math.max(node_height,(nn.outputs||0) * 15);
@@ -615,6 +693,23 @@ RED.view = (function() {
                 }
             }
         });
+        if (activeSubflow) {
+            activeSubflow.in.forEach(function(n) {
+                if (!n.selected) {
+                    n.selected = true;
+                    n.dirty = true;
+                    moving_set.push({n:n});
+                }
+            });
+            activeSubflow.out.forEach(function(n) {
+                if (!n.selected) {
+                    n.selected = true;
+                    n.dirty = true;
+                    moving_set.push({n:n});
+                }
+            });
+        }
+        
         selected_link = null;
         updateSelection();
         redraw();
@@ -635,10 +730,12 @@ RED.view = (function() {
             RED.menu.setDisabled("btn-export-menu",true);
             RED.menu.setDisabled("btn-export-clipboard",true);
             RED.menu.setDisabled("btn-export-library",true);
+            RED.menu.setDisabled("btn-convert-subflow",true);
         } else {
             RED.menu.setDisabled("btn-export-menu",false);
             RED.menu.setDisabled("btn-export-clipboard",false);
             RED.menu.setDisabled("btn-export-library",false);
+            RED.menu.setDisabled("btn-convert-subflow",false);
         }
         if (moving_set.length === 0 && selected_link == null) {
             RED.keyboard.remove(/* backspace */ 8);
@@ -663,7 +760,13 @@ RED.view = (function() {
             RED.keyboard.add(/* right*/ 39, function() { if(d3.event.shiftKey){moveSelection( 20,  0)}else{moveSelection( 1, 0);}d3.event.preventDefault();},endKeyboardMove);
         }
         if (moving_set.length == 1) {
-            RED.sidebar.info.refresh(moving_set[0].n);
+            if (moving_set[0].n.type === "subflow" && moving_set[0].n.direction) {
+                RED.sidebar.info.refresh(RED.nodes.subflow(moving_set[0].n.z));
+            } else {
+                RED.sidebar.info.refresh(moving_set[0].n);
+            }
+        } else if (moving_set.length === 0 && activeSubflow) {
+            RED.sidebar.info.refresh(activeSubflow);
         } else {
             RED.sidebar.info.clear();
         }
@@ -708,27 +811,102 @@ RED.view = (function() {
     function deleteSelection() {
         var removedNodes = [];
         var removedLinks = [];
+        var removedSubflowOutputs = [];
+        var removedSubflowInputs = [];
+        
         var startDirty = dirty;
         if (moving_set.length > 0) {
             for (var i=0;i<moving_set.length;i++) {
                 var node = moving_set[i].n;
                 node.selected = false;
-                if (node.x < 0) {
-                    node.x = 25
+                if (node.type != "subflow") {
+                    if (node.x < 0) {
+                        node.x = 25
+                    }
+                    var rmlinks = RED.nodes.remove(node.id);
+                    removedNodes.push(node);
+                    removedLinks = removedLinks.concat(rmlinks);
+                } else {
+                    if (node.direction === "out") {
+                        removedSubflowOutputs.push(node);
+                    } else if (node.direction === "in") {
+                        removedSubflowInputs.push(node);
+                    }
+                    node.dirty = true;
                 }
-                var rmlinks = RED.nodes.remove(node.id);
-                removedNodes.push(node);
-                removedLinks = removedLinks.concat(rmlinks);
             }
+            if (removedSubflowOutputs.length > 0) {
+                removedSubflowOutputs.sort(function(a,b) { return b.i-a.i});
+                for (i=0;i<removedSubflowOutputs.length;i++) {
+                    var output = removedSubflowOutputs[i];
+                    activeSubflow.out.splice(output.i,1);
+                    var subflowRemovedLinks = [];
+                    var subflowMovedLinks = [];
+                    RED.nodes.eachLink(function(l) {
+                        if (l.target.type == "subflow" && l.target.z == activeSubflow.id && l.target.i == output.i) {
+                            subflowRemovedLinks.push(l);
+                        }
+                        if (l.source.type == "subflow:"+activeSubflow.id) {
+                            if (l.sourcePort == output.i) {
+                                subflowRemovedLinks.push(l);
+                            } else if (l.sourcePort > output.i) {
+                                subflowMovedLinks.push(l);
+                            }
+                        }
+                    });
+                    subflowRemovedLinks.forEach(function(l) { RED.nodes.removeLink(l)});
+                    subflowMovedLinks.forEach(function(l) { l.sourcePort--; });
+    
+                    removedLinks = removedLinks.concat(subflowRemovedLinks);
+                    for (var j=output.i;j<activeSubflow.out.length;j++) {
+                        activeSubflow.out[j].i--;
+                        activeSubflow.out[j].dirty = true;
+                    }
+                }
+            }
+            // Assume 0/1 inputs
+            if (removedSubflowInputs.length == 1) {
+                var input = removedSubflowInputs[0];
+                var subflowRemovedInputLinks = [];
+                RED.nodes.eachLink(function(l) {
+                    if (l.source.type == "subflow" && l.source.z == activeSubflow.id && l.source.i == input.i) {
+                        subflowRemovedInputLinks.push(l);
+                    } else if (l.target.type == "subflow:"+activeSubflow.id) {
+                        subflowRemovedInputLinks.push(l);
+                    }
+                });
+                subflowRemovedInputLinks.forEach(function(l) { RED.nodes.removeLink(l)});
+                removedLinks = removedLinks.concat(subflowRemovedInputLinks);
+                activeSubflow.in = [];
+                $("#workspace-subflow-add-input").toggleClass("disabled",false);
+            }
+            
+            if (activeSubflow) {
+                RED.nodes.eachNode(function(n) {
+                    if (n.type == "subflow:"+activeSubflow.id) {
+                        n.changed = true;
+                        n.inputs = activeSubflow.in.length;
+                        n.outputs = activeSubflow.out.length;
+                        while (n.outputs < n.ports.length) {
+                            n.ports.pop();
+                        }
+                        n.resize = true;
+                        n.dirty = true;
+                    }
+                });
+            }
+            
             moving_set = [];
-            setDirty(true);
+            if (removedNodes.length > 0) {
+                setDirty(true);
+            }
         }
         if (selected_link) {
             RED.nodes.removeLink(selected_link);
             removedLinks.push(selected_link);
             setDirty(true);
         }
-        RED.history.push({t:'delete',nodes:removedNodes,links:removedLinks,dirty:startDirty});
+        RED.history.push({t:'delete',nodes:removedNodes,links:removedLinks,subflowOutputs:removedSubflowOutputs,subflowInputs:removedSubflowInputs,dirty:startDirty});
 
         selected_link = null;
         updateSelection();
@@ -740,10 +918,12 @@ RED.view = (function() {
             var nns = [];
             for (var n=0;n<moving_set.length;n++) {
                 var node = moving_set[n].n;
-                nns.push(RED.nodes.convertNode(node));
+                if (node.type != "subflow") {
+                    nns.push(RED.nodes.convertNode(node));
+                }
             }
             clipboard = JSON.stringify(nns);
-            RED.notify(moving_set.length+" node"+(moving_set.length>1?"s":"")+" copied");
+            RED.notify(nns.length+" node"+(nns.length>1?"s":"")+" copied");
         }
     }
 
@@ -769,6 +949,7 @@ RED.view = (function() {
     }
 
     function portMouseDown(d,portType,portIndex) {
+        //console.log(d,portType,portIndex);
         // disable zoom
         //vis.call(d3.behavior.zoom().on("zoom"), null);
         mousedown_node = d;
@@ -791,7 +972,7 @@ RED.view = (function() {
                             if (n.x-hw<mouse_position[0] && n.x+hw> mouse_position[0] &&
                                 n.y-hh<mouse_position[1] && n.y+hh>mouse_position[1]) {
                                     mouseup_node = n;
-                                    portType = mouseup_node._def.inputs>0?1:0;
+                                    portType = mouseup_node.inputs>0?1:0;
                                     portIndex = 0;
                             }
                         }
@@ -814,16 +995,16 @@ RED.view = (function() {
                 dst = mousedown_node;
                 src_port = portIndex;
             }
-
             var existingLink = false;
             RED.nodes.eachLink(function(d) {
-                    existingLink = existingLink || (d.source === src && d.target === dst && d.sourcePort == src_port);
+                existingLink = existingLink || (d.source === src && d.target === dst && d.sourcePort == src_port);
             });
             if (!existingLink) {
                 var link = {source: src, sourcePort:src_port, target: dst};
                 RED.nodes.addLink(link);
                 RED.history.push({t:'add',links:[link],dirty:dirty});
                 setDirty(true);
+            } else {
             }
             selected_link = null;
             redraw();
@@ -832,12 +1013,18 @@ RED.view = (function() {
 
     function nodeMouseUp(d) {
         if (dblClickPrimed && mousedown_node == d && clickElapsed > 0 && clickElapsed < 750) {
-            RED.editor.edit(d);
+            mouse_mode = RED.state.DEFAULT;
+            if (d.type != "subflow") {
+                RED.editor.edit(d);
+            } else {
+                RED.editor.editSubflow(activeSubflow);
+            }
             clickElapsed = 0;
             d3.event.stopPropagation();
             return;
         }
-        portMouseUp(d, d._def.inputs > 0 ? 1 : 0, 0);
+        var direction = d._def? (d.inputs > 0 ? 1: 0) : (d.direction == "in" ? 0: 1)
+        portMouseUp(d, direction, 0);
     }
 
     function nodeMouseDown(d) {
@@ -946,6 +1133,115 @@ RED.view = (function() {
         if (mouse_mode != RED.state.JOINING) {
             // Don't bother redrawing nodes if we're drawing links
 
+            if (activeSubflow) {
+                var subflowOutputs = vis.selectAll(".subflowoutput").data(activeSubflow.out,function(d,i){ return d.id;});
+                subflowOutputs.exit().remove();
+                var outGroup = subflowOutputs.enter().insert("svg:g").attr("class","node subflowoutput").attr("transform",function(d) { return "translate("+(d.x-20)+","+(d.y-20)+")"});
+                outGroup.each(function(d,i) {
+                    d.w=40;
+                    d.h=40;
+                });
+                outGroup.append("rect").attr("class","subflowport").attr("rx",8).attr("ry",8).attr("width",40).attr("height",40)
+                    // TODO: This is exactly the same set of handlers used for regular nodes - DRY 
+                    .on("mouseup",nodeMouseUp)
+                    .on("mousedown",nodeMouseDown)
+                    .on("touchstart",function(d) {
+                            var obj = d3.select(this);
+                            var touch0 = d3.event.touches.item(0);
+                            var pos = [touch0.pageX,touch0.pageY];
+                            startTouchCenter = [touch0.pageX,touch0.pageY];
+                            startTouchDistance = 0;
+                            touchStartTime = setTimeout(function() {
+                                    showTouchMenu(obj,pos);
+                            },touchLongPressTimeout);
+                            nodeMouseDown.call(this,d)       
+                    })
+                    .on("touchend", function(d) {
+                            clearTimeout(touchStartTime);
+                            touchStartTime = null;
+                            if  (RED.touch.radialMenu.active()) {
+                                d3.event.stopPropagation();
+                                return;
+                            }
+                            nodeMouseUp.call(this,d);
+                    });
+                    
+                outGroup.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",10).attr("height",10).attr("x",-5).attr("y",15)
+                    .on("mousedown", function(d,i){portMouseDown(d,1,0);} )
+                    .on("touchstart", function(d,i){portMouseDown(d,1,0);} )
+                    .on("mouseup", function(d,i){portMouseUp(d,1,0);})
+                    .on("touchend",function(d,i){portMouseUp(d,1,0);} )
+                    .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || mousedown_port_type !== 0 ));})
+                    .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
+
+                outGroup.append("svg:text").attr('class','port_label').attr('x',20).attr('y',8).style("font-size","10px").text("output");
+                outGroup.append("svg:text").attr('class','port_label port_index').attr('x',20).attr('y',24).text(function(d,i){ return i+1});
+
+                var subflowInputs = vis.selectAll(".subflowinput").data(activeSubflow.in,function(d,i){ return d.id;});
+                subflowInputs.exit().remove();
+                var inGroup = subflowInputs.enter().insert("svg:g").attr("class","node subflowinput").attr("transform",function(d) { return "translate("+(d.x-20)+","+(d.y-20)+")"});
+                inGroup.each(function(d,i) {
+                    d.w=40;
+                    d.h=40;
+                });
+                inGroup.append("rect").attr("class","subflowport").attr("rx",8).attr("ry",8).attr("width",40).attr("height",40)
+                    // TODO: This is exactly the same set of handlers used for regular nodes - DRY 
+                    .on("mouseup",nodeMouseUp)
+                    .on("mousedown",nodeMouseDown)
+                    .on("touchstart",function(d) {
+                            var obj = d3.select(this);
+                            var touch0 = d3.event.touches.item(0);
+                            var pos = [touch0.pageX,touch0.pageY];
+                            startTouchCenter = [touch0.pageX,touch0.pageY];
+                            startTouchDistance = 0;
+                            touchStartTime = setTimeout(function() {
+                                    showTouchMenu(obj,pos);
+                            },touchLongPressTimeout);
+                            nodeMouseDown.call(this,d)       
+                    })
+                    .on("touchend", function(d) {
+                            clearTimeout(touchStartTime);
+                            touchStartTime = null;
+                            if  (RED.touch.radialMenu.active()) {
+                                d3.event.stopPropagation();
+                                return;
+                            }
+                            nodeMouseUp.call(this,d);
+                    });
+                    
+                inGroup.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",10).attr("height",10).attr("x",35).attr("y",15)
+                    .on("mousedown", function(d,i){portMouseDown(d,0,i);} )
+                    .on("touchstart", function(d,i){portMouseDown(d,0,i);} )
+                    .on("mouseup", function(d,i){portMouseUp(d,0,i);})
+                    .on("touchend",function(d,i){portMouseUp(d,0,i);} )
+                    .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || mousedown_port_type !== 0 ));})
+                    .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
+                inGroup.append("svg:text").attr('class','port_label').attr('x',18).attr('y',20).style("font-size","10px").text("input");
+                
+                
+                
+                subflowOutputs.each(function(d,i) {
+                    if (d.dirty) {
+                        var output = d3.select(this);
+                        output.selectAll(".subflowport").classed("node_selected",function(d) { return d.selected; })
+                        output.selectAll(".port_index").text(function(d){ return d.i+1});
+                        output.attr("transform", function(d) { return "translate(" + (d.x-d.w/2) + "," + (d.y-d.h/2) + ")"; });
+                        d.dirty = false;
+                    }
+                });
+                subflowInputs.each(function(d,i) {
+                    if (d.dirty) {
+                        var input = d3.select(this);
+                        input.selectAll(".subflowport").classed("node_selected",function(d) { return d.selected; })
+                        input.attr("transform", function(d) { return "translate(" + (d.x-d.w/2) + "," + (d.y-d.h/2) + ")"; });
+                        d.dirty = false;
+                    }
+                });
+            } else {
+                vis.selectAll(".subflowoutput").remove();
+                vis.selectAll(".subflowinput").remove();
+            }
+            
             var node = vis.selectAll(".nodegroup").data(RED.nodes.nodes.filter(function(d) { return d.z == activeWorkspace }),function(d){return d.id});
             node.exit().remove();
 
@@ -1079,8 +1375,8 @@ RED.view = (function() {
                             //icon.attr('class','node_icon_shade node_icon_shade_'+d._def.align);
                             //icon.attr('class','node_icon_shade_border node_icon_shade_border_'+d._def.align);
                         }
-
-                        //if (d._def.inputs > 0 && d._def.align == null) {
+                        
+                        //if (d.inputs > 0 && d._def.align == null) {
                         //    icon_shade.attr("width",35);
                         //    icon.attr("transform","translate(5,0)");
                         //    icon_shade_border.attr("transform","translate(5,0)");
@@ -1130,17 +1426,6 @@ RED.view = (function() {
 
                     //node.append("circle").attr({"class":"centerDot","cx":0,"cy":0,"r":5});
 
-                    if (d._def.inputs > 0) {
-                        text.attr("x",38);
-                        node.append("rect").attr("class","port port_input").attr("rx",3).attr("ry",3).attr("x",-5).attr("width",10).attr("height",10)
-                            .on("mousedown",function(d){portMouseDown(d,1,0);})
-                            .on("touchstart",function(d){portMouseDown(d,1,0);})
-                            .on("mouseup",function(d){portMouseUp(d,1,0);} )
-                            .on("touchend",function(d){portMouseUp(d,1,0);} )
-                            .on("mouseover",function(d) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || mousedown_port_type != 1 ));})
-                            .on("mouseout",function(d) { var port = d3.select(this); port.classed("port_hovered",false);})
-                    }
-
                     //node.append("path").attr("class","node_error").attr("d","M 3,-3 l 10,0 l -5,-8 z");
                     node.append("image").attr("class","node_error hidden").attr("xlink:href","icons/node-error.png").attr("x",0).attr("y",-6).attr("width",10).attr("height",9);
                     node.append("image").attr("class","node_changed hidden").attr("xlink:href","icons/node-changed.png").attr("x",12).attr("y",-6).attr("width",10).attr("height",10);
@@ -1154,6 +1439,7 @@ RED.view = (function() {
                             l = (typeof l === "function" ? l.call(d) : l)||"";
                             d.w = Math.max(node_width,calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0) );
                             d.h = Math.max(node_height,(d.outputs||0) * 15);
+                            d.resize = false;
                         }
                         var thisNode = d3.select(this);
                         //thisNode.selectAll(".centerDot").attr({"cx":function(d) { return d.w/2;},"cy":function(d){return d.h/2}});
@@ -1173,18 +1459,35 @@ RED.view = (function() {
                         //thisNode.selectAll(".node_icon_shade_right").attr("x",function(d){return d.w-30;});
                         //thisNode.selectAll(".node_icon_shade_border_right").attr("d",function(d){return "M "+(d.w-30)+" 1 l 0 "+(d.h-2)});
 
-
+                        var inputPorts = thisNode.selectAll(".port_input");
+                        if (d.inputs === 0 && !inputPorts.empty()) {
+                            inputPorts.remove();
+                            //nodeLabel.attr("x",30);
+                        } else if (d.inputs === 1 && inputPorts.empty()) {
+                            var inputGroup = thisNode.append("g").attr("class","port_input");
+                            inputGroup.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",10).attr("height",10)
+                                .on("mousedown",function(d){portMouseDown(d,1,0);})
+                                .on("touchstart",function(d){portMouseDown(d,1,0);})
+                                .on("mouseup",function(d){portMouseUp(d,1,0);} )
+                                .on("touchend",function(d){portMouseUp(d,1,0);} )
+                                .on("mouseover",function(d) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || mousedown_port_type != 1 ));})
+                                .on("mouseout",function(d) { var port = d3.select(this); port.classed("port_hovered",false);})
+                        }
+                        
                         var numOutputs = d.outputs;
                         var y = (d.h/2)-((numOutputs-1)/2)*13;
                         d.ports = d.ports || d3.range(numOutputs);
                         d._ports = thisNode.selectAll(".port_output").data(d.ports);
-                        d._ports.enter().append("rect").attr("class","port port_output").attr("rx",3).attr("ry",3).attr("width",10).attr("height",10)
+                        var output_group = d._ports.enter().append("g").attr("class","port_output");
+                        
+                        output_group.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",10).attr("height",10)
                             .on("mousedown",(function(){var node = d; return function(d,i){portMouseDown(node,0,i);}})() )
                             .on("touchstart",(function(){var node = d; return function(d,i){portMouseDown(node,0,i);}})() )
                             .on("mouseup",(function(){var node = d; return function(d,i){portMouseUp(node,0,i);}})() )
                             .on("touchend",(function(){var node = d; return function(d,i){portMouseUp(node,0,i);}})() )
                             .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || mousedown_port_type !== 0 ));})
                             .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
+                            
                         d._ports.exit().remove();
                         if (d._ports) {
                             numOutputs = d.outputs || 1;
@@ -1192,7 +1495,8 @@ RED.view = (function() {
                             var x = d.w - 5;
                             d._ports.each(function(d,i) {
                                     var port = d3.select(this);
-                                    port.attr("y",(y+13*i)-5).attr("x",x);
+                                    //port.attr("y",(y+13*i)-5).attr("x",x);
+                                    port.attr("transform", function(d) { return "translate("+x+","+((y+13*i)-5)+")";});
                             });
                         }
                         thisNode.selectAll('text.node_label').text(function(d,i){
@@ -1204,7 +1508,7 @@ RED.view = (function() {
                                     }
                                 }
                                 return "";
-                        })
+                            })
                             .attr('y', function(d){return (d.h/2)-1;})
                             .attr('class',function(d){
                                 return 'node_label'+
@@ -1223,7 +1527,7 @@ RED.view = (function() {
 
                         thisNode.selectAll(".port_input").each(function(d,i) {
                                 var port = d3.select(this);
-                                port.attr("y",function(d){return (d.h/2)-5;})
+                                port.attr("transform",function(d){return "translate(-5,"+((d.h/2)-5)+")";})
                         });
 
                         thisNode.selectAll(".node_icon").attr("y",function(d){return (d.h-d3.select(this).attr("height"))/2;});
@@ -1296,7 +1600,14 @@ RED.view = (function() {
             });
         }
 
-        var link = vis.selectAll(".link").data(RED.nodes.links.filter(function(d) { return d.source.z == activeWorkspace && d.target.z == activeWorkspace }),function(d) { return d.source.id+":"+d.sourcePort+":"+d.target.id;});
+        var link = vis.selectAll(".link").data(
+            RED.nodes.links.filter(function(d) {
+                return d.source.z == activeWorkspace && d.target.z == activeWorkspace;
+            }),
+            function(d) {
+                return d.source.id+":"+d.sourcePort+":"+d.target.id+":"+d.target.i;
+            }
+        );
 
         var linkEnter = link.enter().insert("g",".node").attr("class","link");
 
@@ -1320,7 +1631,8 @@ RED.view = (function() {
                     d3.event.stopPropagation();
                 });
             l.append("svg:path").attr("class","link_outline link_path");
-            l.append("svg:path").attr("class","link_line link_path");
+            l.append("svg:path").attr("class","link_line link_path")
+                .classed("link_subflow", function(d) { return activeSubflow && (d.source.type === "subflow" || d.target.type === "subflow") });
         });
 
         link.exit().remove();
@@ -1364,6 +1676,7 @@ RED.view = (function() {
         if (d3.event) {
             d3.event.preventDefault();
         }
+        
     }
 
     RED.keyboard.add(/* z */ 90,{ctrl:true},function(){RED.history.pop();});
@@ -1398,7 +1711,8 @@ RED.view = (function() {
                 var new_nodes = result[0];
                 var new_links = result[1];
                 var new_workspaces = result[2];
-
+                var new_subflows = result[3];
+                
                 var new_ms = new_nodes.filter(function(n) { return n.z == activeWorkspace }).map(function(n) { return {n:n};});
                 var new_node_ids = new_nodes.map(function(n){ return n.id; });
 
@@ -1449,14 +1763,25 @@ RED.view = (function() {
                     moving_set = new_ms;
                 }
 
-                RED.history.push({t:'add',nodes:new_node_ids,links:new_links,workspaces:new_workspaces,dirty:RED.view.dirty()});
+                RED.history.push({
+                    t:'add',
+                    nodes:new_node_ids,
+                    links:new_links,
+                    workspaces:new_workspaces,
+                    subflows:new_subflows,
+                    dirty:RED.view.dirty()
+                });
 
 
                 redraw();
             }
         } catch(error) {
-            console.log(error.stack);
-            RED.notify("<strong>Error</strong>: "+error,"error");
+            if (error.code != "NODE_RED") {
+                console.log(error.stack);
+                RED.notify("<strong>Error</strong>: "+error,"error");
+            } else {
+                RED.notify("<strong>Error</strong>: "+error.message,"error");
+            }
         }
     }
 
@@ -1509,6 +1834,108 @@ RED.view = (function() {
         $( "#node-input-workspace-name" ).val(ws.label);
         $( "#node-dialog-rename-workspace" ).dialog("open");
     }
+    
+    function showSubflowDialog(id) {
+        RED.editor.editSubflow(RED.nodes.subflow(id));
+    }
+    function findAvailableSubflowIOPosition(subflow) {
+        var pos = {x:70,y:70};
+        for (var i=0;i<subflow.out.length+subflow.in.length;i++) {
+            var port;
+            if (i < subflow.out.length) {
+                port = subflow.out[i];
+            } else {
+                port = subflow.in[i-subflow.out.length];
+            }
+            if (port.x == pos.x && port.y == pos.y) {
+                pos.x += 55;
+                i=0;
+            }
+        }
+        return pos;
+    }
+    
+    function addSubflowInput(id) {
+        var subflow = RED.nodes.subflow(id);
+        var position = findAvailableSubflowIOPosition(subflow);
+        var newInput = {
+            type:"subflow",
+            direction:"in",
+            z:subflow.id,
+            i:subflow.in.length,
+            x:position.x,
+            y:position.y,
+            id:RED.nodes.id()
+        };
+        var oldInCount = subflow.in.length;
+        subflow.in.push(newInput);
+        subflow.dirty = true;
+        var wasDirty = RED.view.dirty();
+        var wasChanged = subflow.changed;
+        subflow.changed = true;
+        
+        RED.nodes.eachNode(function(n) {
+            if (n.type == "subflow:"+subflow.id) {
+                n.changed = true;
+                n.inputs = subflow.in.length;
+                RED.editor.updateNodeProperties(n);
+            }
+        });
+        var historyEvent = {
+            t:'edit',
+            node:subflow,
+            dirty:wasDirty,
+            changed:wasChanged,
+            subflow: {
+                inputCount: oldInCount
+            }
+        };
+        RED.history.push(historyEvent);
+        $("#workspace-subflow-add-input").toggleClass("disabled",true);
+        updateSelection();
+        RED.view.redraw();
+    }
+        
+    function addSubflowOutput(id) {
+        var subflow = RED.nodes.subflow(id);
+        var position = findAvailableSubflowIOPosition(subflow);
+        
+        var newOutput = {
+            type:"subflow",
+            direction:"out",
+            z:subflow.id,
+            i:subflow.out.length,
+            x:position.x,
+            y:position.y,
+            id:RED.nodes.id()
+        };
+        var oldOutCount = subflow.out.length;
+        subflow.out.push(newOutput);
+        subflow.dirty = true;
+        var wasDirty = RED.view.dirty();
+        var wasChanged = subflow.changed;
+        subflow.changed = true;
+        
+        RED.nodes.eachNode(function(n) {
+            if (n.type == "subflow:"+subflow.id) {
+                n.changed = true;
+                n.outputs = subflow.out.length;
+                RED.editor.updateNodeProperties(n);
+            }
+        });
+        var historyEvent = {
+            t:'edit',
+            node:subflow,
+            dirty:wasDirty,
+            changed:wasChanged,
+            subflow: {
+                outputCount: oldOutCount
+            }
+        };
+        RED.history.push(historyEvent);
+        updateSelection();
+        RED.view.redraw();
+    }
 
     $("#node-dialog-rename-workspace form" ).submit(function(e) { e.preventDefault();});
     $( "#node-dialog-rename-workspace" ).dialog({
@@ -1532,11 +1959,10 @@ RED.view = (function() {
                     var workspace = $(this).dialog('option','workspace');
                     var label = $( "#node-input-workspace-name" ).val();
                     if (workspace.label != label) {
-                        workspace.label = label;
-                        var link = $("#workspace-tabs a[href='#"+workspace.id+"']");
-                        link.attr("title",label);
-                        link.text(label);
+                        workspace_tabs.renameTab(workspace.id,label);
                         RED.view.dirty(true);
+                        $("#btn-workspace-menu-"+workspace.id.replace(".","-")).text(label);
+                        // TODO: update entry in menu
                     }
                     $( this ).dialog( "close" );
                 }
@@ -1604,7 +2030,9 @@ RED.view = (function() {
             workspace_tabs.resize();
         },
         removeWorkspace: function(ws) {
-            workspace_tabs.removeTab(ws.id);
+            if (workspace_tabs.contains(ws.id)) {
+                workspace_tabs.removeTab(ws.id);
+            }
         },
         getWorkspace: function() {
             return activeWorkspace;
@@ -1612,7 +2040,14 @@ RED.view = (function() {
         showWorkspace: function(id) {
             workspace_tabs.activateTab(id);
         },
-        redraw:redraw,
+        redraw: function() {
+            RED.nodes.eachSubflow(function(sf) {
+                if (workspace_tabs.contains(sf.id)) {
+                    workspace_tabs.renameTab(sf.id,"Subflow: "+sf.name);
+                }
+            });
+            redraw();   
+        },
         dirty: function(d) {
             if (d == null) {
                 return dirty;
@@ -1635,6 +2070,224 @@ RED.view = (function() {
         //TODO: should these move to an import/export module?
         showImportNodesDialog: showImportNodesDialog,
         showExportNodesDialog: showExportNodesDialog,
-        showExportNodesLibraryDialog: showExportNodesLibraryDialog
+        showExportNodesLibraryDialog: showExportNodesLibraryDialog, 
+        addFlow: function() {
+            var ws = {type:"subflow",id:RED.nodes.id(),label:"Flow 1", closeable: true};
+            RED.nodes.addWorkspace(ws);
+            workspace_tabs.addTab(ws);
+            workspace_tabs.activateTab(ws.id);
+            return ws;
+        },
+        
+        showSubflow: function(id) {
+            if (!workspace_tabs.contains(id)) {
+                var sf = RED.nodes.subflow(id);
+                workspace_tabs.addTab({type:"subflow",id:id,label:"Subflow: "+sf.name, closeable: true});
+                workspace_tabs.resize();
+            }
+            workspace_tabs.activateTab(id);
+        },
+        
+        createSubflow: function() {
+            var lastIndex = 0;
+            RED.nodes.eachSubflow(function(sf) {
+               var m = (new RegExp("^Subflow (\\d+)$")).exec(sf.name);
+               if (m) {
+                   lastIndex = Math.max(lastIndex,m[1]);
+               }
+            });
+            
+            var name = "Subflow "+(lastIndex+1);
+               
+            var subflowId = RED.nodes.id();
+            var subflow = {
+                type:"subflow",
+                id:subflowId,
+                name:name,
+                in: [],
+                out: []
+            };
+            RED.nodes.addSubflow(subflow);
+            RED.history.push({
+                t:'createSubflow',
+                subflow: subflow,
+                dirty:RED.view.dirty()
+            });
+            RED.view.showSubflow(subflowId);
+        },
+        
+        convertToSubflow: function() {
+            if (moving_set.length === 0) {
+                RED.notify("<strong>Cannot create subflow</strong>: no nodes selected","error");
+                return;
+            }
+            var i;
+            var nodes = {};
+            var new_links = [];
+            var removedLinks = [];
+            
+            var candidateInputs = [];
+            var candidateOutputs = [];
+            
+            var boundingBox = [moving_set[0].n.x,moving_set[0].n.y,moving_set[0].n.x,moving_set[0].n.y];
+            
+            for (i=0;i<moving_set.length;i++) {
+                var n = moving_set[i];
+                nodes[n.n.id] = {n:n.n,outputs:{}};
+                boundingBox = [
+                    Math.min(boundingBox[0],n.n.x),
+                    Math.min(boundingBox[1],n.n.y),
+                    Math.max(boundingBox[2],n.n.x),
+                    Math.max(boundingBox[3],n.n.y)
+                ]
+            }
+            
+            var center = [(boundingBox[2]+boundingBox[0]) / 2,(boundingBox[3]+boundingBox[1]) / 2];
+            
+            RED.nodes.eachLink(function(link) {
+                if (nodes[link.source.id] && nodes[link.target.id]) {
+                    // A link wholely within the selection
+                }
+                
+                if (nodes[link.source.id] && !nodes[link.target.id]) {
+                    // An outbound link from the selection
+                    candidateOutputs.push(link);
+                    removedLinks.push(link);
+                }
+                if (!nodes[link.source.id] && nodes[link.target.id]) {
+                    // An inbound link
+                    candidateInputs.push(link);
+                    removedLinks.push(link);
+                }
+            });
+            
+            var outputs = {};
+            candidateOutputs = candidateOutputs.filter(function(v) {
+                 if (outputs[v.source.id+":"+v.sourcePort]) {
+                     outputs[v.source.id+":"+v.sourcePort].targets.push(v.target);
+                     return false;
+                 }
+                 v.targets = [];
+                 v.targets.push(v.target);
+                 outputs[v.source.id+":"+v.sourcePort] = v;
+                 return true;
+            });
+            candidateOutputs.sort(function(a,b) { return a.source.y-b.source.y});
+            
+            if (candidateInputs.length > 1) {
+                 RED.notify("<strong>Cannot create subflow</strong>: multiple inputs to selection","error");
+                 return;
+            }
+            //if (candidateInputs.length == 0) {
+            //     RED.notify("<strong>Cannot create subflow</strong>: no input to selection","error");
+            //     return;
+            //}
+            
+            
+            var lastIndex = 0;
+            RED.nodes.eachSubflow(function(sf) {
+               var m = (new RegExp("^Subflow (\\d+)$")).exec(sf.name);
+               if (m) {
+                   lastIndex = Math.max(lastIndex,m[1]);
+               }
+            });
+            
+            var name = "Subflow "+(lastIndex+1);
+               
+            var subflowId = RED.nodes.id();
+            var subflow = {
+                type:"subflow",
+                id:subflowId,
+                name:name,
+                in: candidateInputs.map(function(v,i) { var index = i; return {
+                    type:"subflow",
+                    direction:"in",
+                    x:v.target.x-(v.target.w/2)-80,
+                    y:v.target.y,
+                    z:subflowId,
+                    i:index,
+                    id:RED.nodes.id(),
+                    wires:[{id:v.target.id}]
+                }}),
+                out: candidateOutputs.map(function(v,i) { var index = i; return {
+                    type:"subflow",
+                    direction:"in",
+                    x:v.source.x+(v.source.w/2)+80,
+                    y:v.source.y,
+                    z:subflowId,
+                    i:index,
+                    id:RED.nodes.id(),
+                    wires:[{id:v.source.id,port:v.sourcePort}]
+                }})
+            };
+            RED.nodes.addSubflow(subflow);
+
+            var subflowInstance = {
+                id:RED.nodes.id(),
+                type:"subflow:"+subflow.id,
+                x: center[0],
+                y: center[1],
+                z: activeWorkspace,
+                inputs: subflow.in.length,
+                outputs: subflow.out.length,
+                h: Math.max(node_height,(subflow.out.length||0) * 15),
+                changed:true
+            }
+            subflowInstance._def = RED.nodes.getType(subflowInstance.type);
+            RED.editor.validateNode(subflowInstance);
+            RED.nodes.add(subflowInstance);
+            
+            candidateInputs.forEach(function(l) {
+                var link = {source:l.source, sourcePort:l.sourcePort, target: subflowInstance};
+                new_links.push(link);
+                RED.nodes.addLink(link);
+            });
+            
+            candidateOutputs.forEach(function(output,i) {
+                output.targets.forEach(function(target) {
+                    var link = {source:subflowInstance, sourcePort:i, target: target};
+                    new_links.push(link);
+                    RED.nodes.addLink(link);
+                });
+            });
+            
+            subflow.in.forEach(function(input) {
+                input.wires.forEach(function(wire) {
+                    var link = {source: input, sourcePort: 0, target: RED.nodes.node(wire.id) }
+                    new_links.push(link);
+                    RED.nodes.addLink(link);
+                });
+            });
+            subflow.out.forEach(function(output,i) {
+                output.wires.forEach(function(wire) {
+                    var link = {source: RED.nodes.node(wire.id), sourcePort: wire.port , target: output }
+                    new_links.push(link);
+                    RED.nodes.addLink(link);
+                });
+            });
+            
+            for (i=0;i<removedLinks.length;i++) {
+                RED.nodes.removeLink(removedLinks[i]);
+            }
+            
+            for (i=0;i<moving_set.length;i++) {
+                moving_set[i].n.z = subflow.id;
+            }
+
+            RED.history.push({
+                t:'createSubflow',
+                nodes:[subflowInstance.id],
+                links:new_links,
+                subflow: subflow,
+
+                activeWorkspace: activeWorkspace,
+                removedLinks: removedLinks,
+                
+                dirty:RED.view.dirty()
+            });
+            
+            setDirty(true);
+            redraw();
+        }
     };
 })();

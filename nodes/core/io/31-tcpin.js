@@ -182,8 +182,11 @@ module.exports = function(RED) {
                     node.error('unable to listen on port '+node.port+' : '+err);
                 } else {
                     node.log('listening on port '+node.port);
-
                     node.on('close', function() {
+                        for (var c in connectionPool) {
+                            connectionPool[c].end();
+                            connectionPool[c].unref();
+                        }
                         node.closing = true;
                         server.close();
                         node.log('stopped listening on port '+node.port);
@@ -334,6 +337,10 @@ module.exports = function(RED) {
                 } else {
                     node.log('listening on port '+node.port);
                     node.on('close', function() {
+                        for (var c in connectedSockets) {
+                            connectedSockets[c].end();
+                            connectedSockets[c].unref();
+                        }
                         server.close();
                         node.log('stopped listening on port '+node.port);
                     });
@@ -370,12 +377,19 @@ module.exports = function(RED) {
                 client = net.Socket();
                 client.setTimeout(socketTimeout);
                 node.status({});
-                client.connect(node.port, node.server, function() {
-                    //node.log('client connected');
-                    node.status({fill:"green",shape:"dot",text:"connected"});
-                    node.connected = true;
-                    client.write(msg.payload);
-                });
+                var host = node.server || msg.host;
+                var port = node.port || msg.port;
+                if (host && port) {
+                    client.connect(port, host, function() {
+                        //node.log('client connected');
+                        node.status({fill:"green",shape:"dot",text:"connected"});
+                        node.connected = true;
+                        client.write(msg.payload);
+                    });
+                }
+                else {
+                    node.warn("Host and/or port not set");
+                }
 
                 client.on('data', function(data) {
                     //node.log("data:"+ data.length+":"+ data);
@@ -451,7 +465,7 @@ module.exports = function(RED) {
                     if (client) {
                         client.end();
                         setTimeout(function() {
-                            client.connect(node.port, node.server, function() {
+                            client.connect(port, host, function() {
                                 //node.log('client connected');
                                 node.connected = true;
                                 client.write(msg.payload);
