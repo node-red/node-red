@@ -17,7 +17,7 @@
 <script type="text/x-red" data-template-name="rpi-gpio in">
     <div class="form-row">
         <label for="node-input-pin"><i class="fa fa-circle"></i> GPIO Pin</label>
-        <select type="text" id="node-input-pin" style="width: 200px;">
+        <select type="text" id="node-input-pin" style="width: 250px;">
             <option value='' disabled selected style='display:none;'>select pin</option>
             <option value="3">3 - SDA1 </option>
             <option value="5">5 - SCL1 </option>
@@ -66,7 +66,7 @@
     <p>You may also enable the input pullup resitor or the pulldown resistor.</p>
     <p>The <b>msg.topic</b> is set to <i>pi/{the pin number}</i></p>
     <p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
-    <p><b>Note:</b> This node currently polls the pin every 250mS. This is not ideal as it loads the cpu, and should be rewritten to try to use interrupts.</p>
+    <p><b>Note:</b> This node currently polls the pin every 250mS. This is not ideal as it loads the cpu.</p>
 </script>
 
 <script type="text/javascript">
@@ -89,9 +89,10 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+            var pinnow = this.pin;
             $.getJSON('rpi-gpio/'+this.id,function(data) {
                 $('#pitype').text(data.type);
-                if (data.type === "Model B+") {
+                if ((data.type === "Model B+") || (data.type === "Model A+")) {
                     $('#node-input-pin').append($("<option></option>").attr("value",27).text("27 - SDA0"));
                     $('#node-input-pin').append($("<option></option>").attr("value",28).text("28 - SCL0"));
                     $('#node-input-pin').append($("<option></option>").attr("value",29).text("29 - GPIO21"));
@@ -103,6 +104,7 @@
                     $('#node-input-pin').append($("<option></option>").attr("value",37).text("37 - GPIO25"));
                     $('#node-input-pin').append($("<option></option>").attr("value",38).text("38 - GPIO28"));
                     $('#node-input-pin').append($("<option></option>").attr("value",40).text("40 - GPIO29"));
+                    $('#node-input-pin').val(pinnow);
                 }
             });
         }
@@ -113,7 +115,7 @@
 <script type="text/x-red" data-template-name="rpi-gpio out">
     <div class="form-row">
         <label for="node-input-pin"><i class="fa fa-circle"></i> GPIO Pin</label>
-        <select type="text" id="node-input-pin" style="width: 275px;">
+        <select type="text" id="node-input-pin" style="width: 250px;">
             <option value='' disabled selected style='display:none;'>select pin</option>
             <option value="3">3 - SDA1 </option>
             <option value="5">5 - SCL1 </option>
@@ -137,7 +139,7 @@
     </div>
     <div class="form-row" id="node-set-pwm">
         <label>&nbsp;&nbsp;&nbsp;&nbsp;Type</label>
-        <select id="node-input-out" style="width: 275px;">
+        <select id="node-input-out" style="width: 250px;">
             <option value="out">Digital output</option>
             <option value="pwm">PWM output</option>
         </select>
@@ -149,7 +151,7 @@
     </div>
     <div class="form-row" id="node-set-state">
         <label for="node-input-level">&nbsp;</label>
-        <select id="node-input-level" style="width: 275px;">
+        <select id="node-input-level" style="width: 250px;">
             <option value="0">initial level of pin - low (0)</option>
             <option value="1">initial level of pin - high (1)</option>
         </select>
@@ -194,10 +196,11 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+            var pinnow = this.pin;
             if (!$("#node-input-out").val()) { $("#node-input-out").val("out"); }
             $.getJSON('rpi-gpio/'+this.id,function(data) {
                 $('#pitype').text(data.type);
-                if (data.type === "Model B+") {
+                if ((data.type === "Model B+") || (data.type === "Model A+")) {
                     $('#node-input-pin').append($("<option></option>").attr("value",27).text("27 - SDA0"));
                     $('#node-input-pin').append($("<option></option>").attr("value",28).text("28 - SCL0"));
                     $('#node-input-pin').append($("<option></option>").attr("value",29).text("29 - GPIO21"));
@@ -209,6 +212,7 @@
                     $('#node-input-pin').append($("<option></option>").attr("value",37).text("37 - GPIO25"));
                     $('#node-input-pin').append($("<option></option>").attr("value",38).text("38 - GPIO28"));
                     $('#node-input-pin').append($("<option></option>").attr("value",40).text("40 - GPIO29"));
+                    $('#node-input-pin').val(pinnow);
                 }
             });
 
