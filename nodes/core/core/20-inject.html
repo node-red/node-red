@@ -138,15 +138,17 @@
         icon: "inject.png",
         label: function() {
             if (this.payloadType === "string") {
-                return this.name||this.topic||this.payload||"inject";
-                //if (this.topic !== "") {
-                //    return this.name||this.topic +" : "+this.payload||this.topic;
-                //}
-                //else {
-                //    return this.name||this.payload||this.topic||"inject";
-                //}
+                if ((this.topic.length + this.payload.length) <= 32) {
+                    return this.name||this.topic + ":" + this.payload;
+                }
+                else if (this.payload.length < 24) {
+                    return this.name||":"+this.payload;
+                }
             }
-            else { return this.name||this.topic||"inject"; }
+            if ((this.topic.length < 24) && (this.topic.length > 0)) {
+                return this.name||this.topic+":";
+            }
+            else { return this.name||(this.payloadType==="date"?"timestamp":null)||"inject"; }
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
