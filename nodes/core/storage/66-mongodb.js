@@ -48,8 +48,8 @@ module.exports = function(RED) {
         }
         return selector;
     }
-        
-    
+
+
     function MongoOutNode(n) {
         RED.nodes.createNode(this,n);
         this.collection = n.collection;
@@ -72,7 +72,7 @@ module.exports = function(RED) {
                         coll = db.collection(node.collection);
                     }
                     node.on("input",function(msg) {
-                        if (!coll) {
+                        if (!node.collection) {
                             if (msg.collection) {
                                 coll = db.collection(msg.collection);
                             } else {
@@ -173,7 +173,7 @@ module.exports = function(RED) {
                         coll = db.collection(node.collection);
                     }
                     node.on("input", function(msg) {
-                        if (!coll) {
+                        if (!node.collection) {
                             if (msg.collection) {
                                 coll = db.collection(msg.collection);
                             } else {
