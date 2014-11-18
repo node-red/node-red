@@ -608,6 +608,8 @@ RED.nodes = (function() {
                 new_workspaces.push(defaultWorkspace);
             }
 
+            RED.view.showLastActiveWorkspace();
+
             var node_map = {};
             var new_nodes = [];
             var new_links = [];

@@ -22,7 +22,7 @@ RED.tabs = (function() {
     function createTabs(options) {
         var tabs = {};
         
-        var ul = $("#"+options.id)
+        var ul = $("#"+options.id);
         ul.addClass("red-ui-tabs");
         ul.children().first().addClass("active");
         ul.children().addClass("red-ui-tab");
@@ -38,6 +38,16 @@ RED.tabs = (function() {
             }
             return false;
         }
+
+        function saveActiveTab(link) {
+            if (options.saveActiveTab && link.attr('href')) {
+                RED.settings.set("tab-" + options.id, link.attr("href").slice(1));
+            }
+        }
+
+        function getLastActiveTab() {
+           return RED.settings.get("tab-" + options.id);
+        }
         
         function activateTab(link) {
             if (typeof link === "string") {
@@ -46,7 +56,8 @@ RED.tabs = (function() {
             if (!link.parent().hasClass("active")) {
                 ul.children().removeClass("active");
                 link.parent().addClass("active");
-                if (options.onchange) {
+                saveActiveTab(link);
+                if (options.onchange && link.attr('href')) {
                     options.onchange(tabs[link.attr('href').slice(1)]);
                 }
             }
@@ -104,7 +115,7 @@ RED.tabs = (function() {
                     options.onadd(tab);
                 }
                 link.attr("title",tab.label);
-                if (ul.find("li.red-ui-tab").size() == 1) {
+                if (ul.find("li.red-ui-tab").size() == 1 && !getLastActiveTab()) {
                     activateTab(link);
                 }
             },
@@ -123,6 +134,23 @@ RED.tabs = (function() {
                 tab.attr("title",label);
                 tab.text(label);
                 updateTabWidths();
+            },
+            activateSavedTab: function () {
+                if (!options.saveActiveTab) {
+                    return;
+                }
+                var activeTab = getLastActiveTab();
+                if (activeTab === undefined) {
+                    return;
+                }
+                var link = ul.find("a[href='#" + activeTab + "']");
+                if (link.length !== 0) {
+                    activateTab($(link[0]));
+                } else {
+                    var found = ul.find("a")[0];
+                    activateTab($(found));
+                }
+
             }
 
         }

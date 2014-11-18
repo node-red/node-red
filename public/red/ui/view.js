@@ -248,6 +248,7 @@ RED.view = (function() {
     
     var workspace_tabs = RED.tabs.create({
         id: "workspace-tabs",
+        saveActiveTab: true,
         onchange: function(tab) {
             if (tab.type == "subflow") {
                 $("#workspace-toolbar").show();
@@ -2028,6 +2029,9 @@ RED.view = (function() {
         addWorkspace: function(ws) {
             workspace_tabs.addTab(ws);
             workspace_tabs.resize();
+        },
+        showLastActiveWorkspace: function() {
+          workspace_tabs.activateSavedTab();
         },
         removeWorkspace: function(ws) {
             if (workspace_tabs.contains(ws.id)) {
