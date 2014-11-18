@@ -19,7 +19,7 @@ module.exports = function(RED) {
     var ntwitter = require('twitter-ng');
     var OAuth= require('oauth').OAuth;
     var request = require('request');
-    
+
     function TwitterNode(n) {
         RED.nodes.createNode(this,n);
         this.screen_name = n.screen_name;
@@ -31,8 +31,8 @@ module.exports = function(RED) {
             access_token_secret: {type:"password"}
         }
     });
-    
-    
+
+
     /**
      * Populate msg.location based on data found in msg.tweet.
      */
@@ -40,21 +40,19 @@ module.exports = function(RED) {
         if(msg.tweet) {
             if(msg.tweet.geo) { // if geo is set, always set location from geo
                 if(msg.tweet.geo.coordinates && msg.tweet.geo.coordinates.length === 2) {
-                    if(!msg.location) {
-                        msg.location = {};
-                    }
+                    if (!msg.location) { msg.location = {}; }
                     // coordinates[0] is lat, coordinates[1] is lon
                     msg.location.lat = msg.tweet.geo.coordinates[0];
                     msg.location.lon = msg.tweet.geo.coordinates[1];
+                    msg.location.icon = "twitter";
                 }
             } else if(msg.tweet.coordinates) { // otherwise attempt go get it from coordinates
                 if(msg.tweet.coordinates.coordinates && msg.tweet.coordinates.coordinates.length === 2) {
-                    if(!msg.location) {
-                        msg.location = {};
-                    }
+                    if (!msg.location) { msg.location = {}; }
                     // WARNING! coordinates[1] is lat, coordinates[0] is lon!!!
                     msg.location.lat = msg.tweet.coordinates.coordinates[1];
                     msg.location.lon = msg.tweet.coordinates.coordinates[0];
+                    msg.location.icon = "twitter";
                 }
             } // if none of these found then just do nothing
         } // if no msg.tweet then just do nothing
@@ -78,7 +76,6 @@ module.exports = function(RED) {
                 access_token_key: credentials.access_token,
                 access_token_secret: credentials.access_token_secret
             });
-
 
             //setInterval(function() {
             //        twit.get("/application/rate_limit_status.json",null,function(err,cb) {
@@ -119,11 +116,13 @@ module.exports = function(RED) {
                                     if (cb) {
                                         for (var t=cb.length-1;t>=0;t-=1) {
                                             var tweet = cb[t];
-                                            var where = tweet.user.location||"";
+                                            var where = tweet.user.location;
                                             var la = tweet.lang || tweet.user.lang;
-                                            //console.log(tweet.user.location,"=>",tweet.user.screen_name,"=>",pay);
-                                            var msg = { topic:node.topic+"/"+tweet.user.screen_name, payload:tweet.text, location:where, lang:la, tweet:tweet };
-                                            addLocationToTweet(msg);
+                                            var msg = { topic:node.topic+"/"+tweet.user.screen_name, payload:tweet.text, lang:la, tweet:tweet };
+                                            if (where) {
+                                                msg.location = {place:where};
+                                                addLocationToTweet(msg);
+                                            }
                                             node.send(msg);
                                             if (t == 0) {
                                                 node.since_ids[u] = tweet.id_str;
@@ -163,8 +162,13 @@ module.exports = function(RED) {
                                 if (cb) {
                                     for (var t=cb.length-1;t>=0;t-=1) {
                                         var tweet = cb[t];
-                                        var msg = { topic:node.topic+"/"+tweet.sender.screen_name, payload:tweet.text, tweet:tweet };
-                                        addLocationToTweet(msg);
+                                        var where = tweet.sender.location;
+                                        var la = tweet.lang || tweet.sender.lang;
+                                        var msg = { topic:node.topic+"/"+tweet.sender.screen_name, payload:tweet.text, lang:la, tweet:tweet };
+                                        if (where) {
+                                            msg.location = {place:where};
+                                            addLocationToTweet(msg);
+                                        }
                                         node.send(msg);
                                         if (t == 0) {
                                             node.since_id = tweet.id_str;
@@ -184,7 +188,7 @@ module.exports = function(RED) {
                     if (this.user === "true") { thing = 'user'; }
                     var st = { track: [node.tags] };
                     var bits = node.tags.split(",");
-                    if ((bits.length > 0) && (bits.length % 4 == 0)) {
+                    if (bits.length == 4) {
                         if ((Number(bits[0]) < Number(bits[2])) && (Number(bits[1]) < Number(bits[3]))) {
                             st = { locations: node.tags };
                         }
@@ -202,13 +206,14 @@ module.exports = function(RED) {
                                 //twit.stream('statuses/filter', { track: [node.tags] }, function(stream) {
                                 node.stream = stream;
                                 stream.on('data', function(tweet) {
-                                    //console.log(tweet.user);
                                     if (tweet.user !== undefined) {
-                                        var where = tweet.user.location||"";
+                                        var where = tweet.user.location;
                                         var la = tweet.lang || tweet.user.lang;
-                                        //console.log(tweet.user.location,"=>",tweet.user.screen_name,"=>",pay);
-                                        var msg = { topic:node.topic+"/"+tweet.user.screen_name, payload:tweet.text, location:where, lang:la, tweet:tweet };
-                                        addLocationToTweet(msg);
+                                        var msg = { topic:node.topic+"/"+tweet.user.screen_name, payload:tweet.text, lang:la, tweet:tweet };
+                                        if (where) {
+                                            msg.location = {place:where};
+                                            addLocationToTweet(msg);
+                                        }
                                         node.send(msg);
                                     }
                                 });

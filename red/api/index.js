@@ -19,6 +19,7 @@ var util = require('util');
 
 var ui = require("./ui");
 var nodes = require("./nodes");
+var plugins = require("./plugins");
 var flows = require("./flows");
 var library = require("./library");
 
@@ -27,12 +28,12 @@ var settings = require("../settings");
 var errorHandler = function(err,req,res,next) {
     //TODO: standardize json response
     res.send(400,err.toString());
-}
+};
 
 function init(adminApp) {
-    
+
     adminApp.use(express.json());
-    
+
     library.init(adminApp);
 
     // Editor
@@ -42,11 +43,11 @@ function init(adminApp) {
         adminApp.get("/settings",ui.settings);
         adminApp.use("/",ui.editor);
     }
-    
+
     // Flows
     adminApp.get("/flows",flows.get);
     adminApp.post("/flows",flows.post);
-    
+
     // Nodes
     adminApp.get("/nodes",nodes.getAll);
     adminApp.post("/nodes",nodes.post);
@@ -54,17 +55,21 @@ function init(adminApp) {
     adminApp.get("/nodes/:id",nodes.get);
     adminApp.put("/nodes/:id",nodes.put);
     adminApp.delete("/nodes/:id",nodes.delete);
-    
+
+    // Plugins
+    adminApp.get("/plugins",plugins.getAll);
+    adminApp.get("/plugins/:id",plugins.get);
+
     // Library
     adminApp.post(new RegExp("/library/flows\/(.*)"),library.post);
     adminApp.get("/library/flows",library.getAll);
     adminApp.get(new RegExp("/library/flows\/(.*)"),library.get);
-    
-    
+
+
     // Error Handler
     adminApp.use(errorHandler);
 }
 
 module.exports = {
     init: init
-}
+};

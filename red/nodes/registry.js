@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 var util = require("util");
 var when = require("when");
 var whenNode = require('when/node');
 var fs = require("fs");
 var path = require("path");
-var crypto = require("crypto"); 
+var crypto = require("crypto");
 var UglifyJS = require("uglify-js");
 
 var events = require("../events");
@@ -33,7 +33,7 @@ function filterNodeInfo(n) {
         name: n.name,
         types: n.types,
         enabled: n.enabled
-    }
+    };
     if (n.hasOwnProperty("loaded")) {
         r.loaded = n.loaded;
     }
@@ -53,10 +53,10 @@ var registry = (function() {
     var nodeConstructors = {};
     var nodeTypeToId = {};
     var nodeModules = {};
-    
+
     function saveNodeList() {
         var nodeList = {};
-        
+
         for (var i in nodeConfigs) {
             if (nodeConfigs.hasOwnProperty(i)) {
                 var nodeConfig = nodeConfigs[i];
@@ -75,7 +75,7 @@ var registry = (function() {
             return when.reject("Settings unavailable");
         }
     }
-    
+
     return {
         init: function() {
             if (settings.available()) {
@@ -95,19 +95,19 @@ var registry = (function() {
             nodeList = [];
             nodeConfigCache = null;
         },
-        
+
         addNodeSet: function(id,set) {
             if (!set.err) {
                 set.types.forEach(function(t) {
                     nodeTypeToId[t] = id;
                 });
             }
-            
+
             if (set.module) {
                 nodeModules[set.module] = nodeModules[set.module]||{nodes:[]};
                 nodeModules[set.module].nodes.push(id);
             }
-            
+
             nodeConfigs[id] = set;
             nodeList.push(id);
             nodeConfigCache = null;
@@ -159,10 +159,38 @@ var registry = (function() {
             var list = [];
             for (var id in nodeConfigs) {
                 if (nodeConfigs.hasOwnProperty(id)) {
-                    list.push(filterNodeInfo(nodeConfigs[id]))
+                    list.push(filterNodeInfo(nodeConfigs[id]));
                 }
             }
             return list;
+        },
+        getPluginList: function() {
+            var list = [];
+            for (var plugin in nodeModules) {
+                if (nodeModules.hasOwnProperty(plugin)) {
+                    var nodes = nodeModules[plugin].nodes;
+                    var m = {
+                        name: plugin,
+                        nodes: []
+                    };
+                    for (var i = 0; i < nodes.length; ++i) {
+                        m.nodes.push(filterNodeInfo(nodeConfigs[nodes[i]]));
+                    }
+                    list.push(m);
+                }
+            }
+            return list;
+        },
+        getPluginInfo: function(plugin) {
+            var nodes = nodeModules[plugin].nodes;
+            var m = {
+                name: plugin,
+                nodes: []
+            };
+            for (var i = 0; i < nodes.length; ++i) {
+                m.nodes.push(filterNodeInfo(nodeConfigs[nodes[i]]));
+            }
+            return m;
         },
         registerNodeConstructor: function(type,constructor) {
             if (nodeConstructors[type]) {
@@ -175,8 +203,8 @@ var registry = (function() {
             nodeConstructors[type] = constructor;
             events.emit("type-registered",type);
         },
-        
-        
+
+
         /**
          * Gets all of the node template configs
          * @return all of the node templates in a single string
@@ -201,7 +229,7 @@ var registry = (function() {
             }
             return nodeConfigCache;
         },
-        
+
         getNodeConfig: function(id) {
             var config = nodeConfigs[id];
             if (config) {
@@ -214,7 +242,7 @@ var registry = (function() {
                 return null;
             }
         },
-        
+
         getNodeConstructor: function(type) {
             var config = nodeConfigs[nodeTypeToId[type]];
             if (!config || (config.enabled && !config.err)) {
@@ -222,7 +250,7 @@ var registry = (function() {
             }
             return null;
         },
-        
+
         clear: function() {
             nodeConfigCache = null;
             nodeConfigs = {};
@@ -230,20 +258,25 @@ var registry = (function() {
             nodeConstructors = {};
             nodeTypeToId = {};
         },
-        
+
         getTypeId: function(type) {
             return nodeTypeToId[type];
         },
-        
+
         getModuleInfo: function(type) {
             return nodeModules[type];
         },
-        
+
         enableNodeSet: function(id) {
             if (!settings.available()) {
                 throw new Error("Settings unavailable");
             }
-            var config = nodeConfigs[id];
+            var config;
+            if (nodeTypeToId[id]) {
+                config = nodeConfigs[nodeTypeToId[id]];
+            } else {
+                config = nodeConfigs[id];
+            }
             if (config) {
                 delete config.err;
                 config.enabled = true;
@@ -258,12 +291,17 @@ var registry = (function() {
             }
             return filterNodeInfo(config);
         },
-        
+
         disableNodeSet: function(id) {
             if (!settings.available()) {
                 throw new Error("Settings unavailable");
             }
-            var config = nodeConfigs[id];
+            var config;
+            if (nodeTypeToId[id]) {
+                config = nodeConfigs[nodeTypeToId[id]];
+            } else {
+                config = nodeConfigs[id];
+            }
             if (config) {
                 // TODO: persist setting
                 config.enabled = false;
@@ -274,9 +312,9 @@ var registry = (function() {
             }
             return filterNodeInfo(config);
         },
-        
+
         saveNodeList: saveNodeList,
-        
+
         cleanNodeList: function() {
             var removed = false;
             for (var id in nodeConfigs) {
@@ -291,7 +329,7 @@ var registry = (function() {
                 saveNodeList();
             }
         }
-    }
+    };
 })();
 
 
@@ -330,14 +368,14 @@ function getNodeFiles(dir) {
                         }
                     }
                 }
-                valid = valid && fs.existsSync(path.join(dir,fn.replace(/\.js$/,".html")))
-                
+                valid = valid && fs.existsSync(path.join(dir,fn.replace(/\.js$/,".html")));
+
                 if (valid) {
                     result.push(path.join(dir,fn));
                 }
             }
         } else if (stats.isDirectory()) {
-            // Ignore /.dirs/, /lib/ /node_modules/ 
+            // Ignore /.dirs/, /lib/ /node_modules/
             if (!/^(\..*|lib|icons|node_modules|test)$/.test(fn)) {
                 result = result.concat(getNodeFiles(path.join(dir,fn)));
             } else if (fn === "icons") {
@@ -385,7 +423,7 @@ function scanTreeForNodesModules(moduleName) {
             }
         } catch(err) {
         }
-        
+
         dir = up;
         up = path.resolve(path.join(dir,".."));
     }
@@ -451,7 +489,7 @@ function loadNodeConfig(file,module,name) {
 
     }
     var info = registry.getNodeInfo(id);
-    
+
     var isEnabled = true;
 
     if (info) {
@@ -460,38 +498,38 @@ function loadNodeConfig(file,module,name) {
         }
         isEnabled = info.enabled;
     }
-    
+
     var node = {
         id: id,
         file: file,
         template: file.replace(/\.js$/,".html"),
         enabled: isEnabled,
         loaded:false
-    }
-    
+    };
+
     if (module) {
         node.name = module+":"+name;
         node.module = module;
     } else {
-        node.name = path.basename(file)
+        node.name = path.basename(file);
     }
     try {
         var content = fs.readFileSync(node.template,'utf8');
-        
+
         var types = [];
-        
+
         var regExp = /<script ([^>]*)data-template-name=['"]([^'"]*)['"]/gi;
         var match = null;
-        
+
         while((match = regExp.exec(content)) !== null) {
             types.push(match[2]);
         }
         node.types = types;
         node.config = content;
-        
+
         // TODO: parse out the javascript portion of the template
         node.script = "";
-        
+
         for (var i=0;i<node.types.length;i++) {
             if (registry.getTypeId(node.types[i])) {
                 node.err = node.types[i]+" already registered";
@@ -525,7 +563,7 @@ function load(defaultNodesDir,disableNodePathScan) {
         } else {
             nodeFiles = getNodeFiles(__dirname+"/../../nodes");
         }
-        
+
         if (settings.nodesDir) {
             var dir = settings.nodesDir;
             if (typeof settings.nodesDir == "string") {
@@ -540,10 +578,10 @@ function load(defaultNodesDir,disableNodePathScan) {
             try {
                 nodes.push(loadNodeConfig(file));
             } catch(err) {
-                // 
+                //
             }
         });
-        
+
         // TODO: disabling npm module loading if defaultNodesDir set
         //       This indicates a test is being run - don't want to pick up
         //       unexpected nodes.
@@ -561,18 +599,18 @@ function load(defaultNodesDir,disableNodePathScan) {
                 promises.push(loadNodeModule(node));
             }
         });
-        
+
         //resolve([]);
         when.settle(promises).then(function(results) {
             // Trigger a load of the configs to get it precached
             registry.getAllNodeConfigs();
-            
+
             if (settings.available()) {
                 resolve(registry.saveNodeList());
             } else {
                 resolve();
             }
-        }); 
+        });
     });
 }
 
@@ -582,7 +620,7 @@ function load(defaultNodesDir,disableNodePathScan) {
  * @return a promise that resolves to an update node info object. The object
  *         has the following properties added:
  *            err: any error encountered whilst loading the node
- *            
+ *
  */
 function loadNodeModule(node) {
     var nodeDir = path.dirname(node.file);
@@ -627,7 +665,7 @@ function loadNodeList(nodes) {
             promises.push(node);
         }
     });
-    
+
     return when.settle(promises).then(function(results) {
         return registry.saveNodeList().then(function() {
             var list = results.map(function(r) {
@@ -643,7 +681,7 @@ function addNode(file) {
         throw new Error("Settings unavailable");
     }
     var nodes = [];
-    try { 
+    try {
         nodes.push(loadNodeConfig(file));
     } catch(err) {
         return when.reject(err);
@@ -679,15 +717,17 @@ module.exports = {
     get: registry.getNodeConstructor,
     getNodeInfo: registry.getNodeInfo,
     getNodeModuleInfo: registry.getModuleInfo,
+    getPluginInfo: registry.getPluginInfo,
     getNodeList: registry.getNodeList,
+    getPluginList: registry.getPluginList,
     getNodeConfigs: registry.getAllNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
     addNode: addNode,
     removeNode: registry.removeNode,
     enableNode: registry.enableNodeSet,
     disableNode: registry.disableNodeSet,
-    
+
     addModule: addModule,
     removeModule: registry.removeModule,
     cleanNodeList: registry.cleanNodeList
-}
+};

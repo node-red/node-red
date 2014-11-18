@@ -28,14 +28,14 @@ function registerType(type,constructor,opts) {
     if (opts && opts.credentials) {
         credentials.register(type,opts.credentials);
     }
-    registry.registerType(type,constructor);    
+    registry.registerType(type,constructor);
 }
 
 /**
  * Called from a Node's constructor function, invokes the super-class
  * constructor and attaches any credentials to the node.
  * @param node the node object being created
- * @param def the instance definition for the node 
+ * @param def the instance definition for the node
  */
 function createNode(node,def) {
     Node.call(node,def);
@@ -95,40 +95,42 @@ module.exports = {
     // Lifecycle
     init: init,
     load: registry.load,
-    
+
     // Node registry
     createNode: createNode,
     getNode: flows.get,
-    
+
     addNode: registry.addNode,
     removeNode: removeNode,
-    
+
     addModule: registry.addModule,
     removeModule: removeModule,
-    
+
     enableNode: registry.enableNode,
     disableNode: disableNode,
-    
+
     // Node type registry
     registerType: registerType,
     getType: registry.get,
     getNodeInfo: registry.getNodeInfo,
     getNodeModuleInfo: registry.getNodeModuleInfo,
+    getPluginInfo: registry.getPluginInfo,
     getNodeList: registry.getNodeList,
+    getPluginList: registry.getPluginList,
     getNodeConfigs: registry.getNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
     clearRegistry: registry.clear,
     cleanNodeList: registry.cleanNodeList,
-    
+
     // Flow handling
     loadFlows: flows.load,
     stopFlows: flows.stopFlows,
     setFlows: flows.setFlows,
     getFlows: flows.getFlows,
-    
+
     // Credentials
     addCredentials: credentials.add,
     getCredentials: credentials.get,
     deleteCredentials: credentials.delete
-}
+};
 
