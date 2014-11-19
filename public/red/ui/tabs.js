@@ -117,11 +117,11 @@ RED.tabs = (function() {
             contains: function(id) {
                 return ul.find("a[href='#"+id+"']").length > 0;
             },
-            renameTab: function(id,name) {
-                tabs[id].name = name;
+            renameTab: function(id,label) {
+                tabs[id].label = label;
                 var tab = ul.find("a[href='#"+id+"']");
-                tab.attr("title",name);
-                tab.text(name);
+                tab.attr("title",label);
+                tab.text(label);
                 updateTabWidths();
             }
 
