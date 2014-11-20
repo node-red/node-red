@@ -95,7 +95,6 @@ var registry = (function() {
             nodeList = [];
             nodeConfigCache = null;
         },
-
         addNodeSet: function(id,set) {
             if (!set.err) {
                 set.types.forEach(function(t) {
@@ -103,10 +102,8 @@ var registry = (function() {
                 });
             }
 
-            if (set.module) {
-                nodeModules[set.module] = nodeModules[set.module]||{nodes:[]};
-                nodeModules[set.module].nodes.push(id);
-            }
+            nodeModules[set.module] = nodeModules[set.module]||{nodes:[]};
+            nodeModules[set.module].nodes.push(set.name);
 
             nodeConfigs[id] = set;
             nodeList.push(id);
@@ -141,7 +138,7 @@ var registry = (function() {
             }
             var infoList = [];
             for (var i=0;i<nodes.nodes.length;i++) {
-                infoList.push(registry.removeNode(nodes.nodes[i]));
+                infoList.push(registry.removeNode(module+"/"+nodes.nodes[i]));
             }
             delete nodeModules[module];
             saveNodeList();
@@ -174,7 +171,7 @@ var registry = (function() {
                         nodes: []
                     };
                     for (var i = 0; i < nodes.length; ++i) {
-                        m.nodes.push(filterNodeInfo(nodeConfigs[nodes[i]]));
+                        m.nodes.push(filterNodeInfo(nodeConfigs[plugin+"/"+nodes[i]]));
                     }
                     list.push(m);
                 }
@@ -188,7 +185,7 @@ var registry = (function() {
                 nodes: []
             };
             for (var i = 0; i < nodes.length; ++i) {
-                m.nodes.push(filterNodeInfo(nodeConfigs[nodes[i]]));
+                m.nodes.push(filterNodeInfo(nodeConfigs[plugin+"/"+nodes[i]]));
             }
             return m;
         },
@@ -475,14 +472,7 @@ function loadNodesFromModule(moduleDir,pkg) {
  *         }
  */
 function loadNodeConfig(file,module,name) {
-    var id = crypto.createHash('sha1').update(module+":"+name).digest("hex");
-    var existingInfo = registry.getNodeInfo(id);
-    if (existingInfo) {
-        // For a brief period, id for modules were calculated incorrectly.
-        // To prevent false-duplicates, this removes the old id entry
-        registry.removeNode(id);
-        registry.saveNodeList();
-    }
+    var id = module + "/" + name;
     var info = registry.getNodeInfo(id);
 
     var isEnabled = true;
@@ -496,14 +486,14 @@ function loadNodeConfig(file,module,name) {
 
     var node = {
         id: id,
+        module: module,
+        name: name,
         file: file,
         template: file.replace(/\.js$/,".html"),
         enabled: isEnabled,
         loaded:false
     };
 
-    node.name = module+":"+name;
-    node.module = module;
     try {
         var content = fs.readFileSync(node.template,'utf8');
 
@@ -673,7 +663,7 @@ function addNode(file) {
     }
     var nodes = [];
     try {
-        nodes.push(loadNodeConfig(file));
+        nodes.push(loadNodeConfig(file,"node-red",path.basename(file).replace(/^\d+-/,"").replace(/\.js$/,"")));
     } catch(err) {
         return when.reject(err);
     }
