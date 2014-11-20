@@ -64,7 +64,7 @@ module.exports = {
             }
         });
     },
-    
+
     delete: function(req,res) {
         if (!settings.available()) {
             res.send(400,new Error("Settings unavailable").toString());
@@ -86,7 +86,7 @@ module.exports = {
             } else {
                 promise = when.resolve([redNodes.removeNode(id)]).then(server.reportRemovedModules);
             }
-            
+
             promise.then(function(removedNodes) {
                 res.json(removedNodes);
             }).otherwise(function(err) {
@@ -96,11 +96,11 @@ module.exports = {
             res.send(400,err.toString());
         }
     },
-    
-    get: function(req,res) {
-        var id = req.params.id;
+
+    getSet: function(req,res) {
+        var id = req.params.mod + "/" + req.params.set;
         var result = null;
-        if (req.get("accept") == "application/json") {
+        if (req.get("accept") === "application/json") {
             result = redNodes.getNodeInfo(id);
         } else {
             result = redNodes.getNodeConfig(id);
@@ -111,7 +111,17 @@ module.exports = {
             res.send(404);
         }
     },
-    
+
+    getModule: function(req,res) {
+        var module = req.params.mod;
+        var result = redNodes.getModuleInfo(module);
+        if (result) {
+            res.send(result);
+        } else {
+            res.send(404);
+        }
+    },
+
     put: function(req,res) {
         if (!settings.available()) {
             res.send(400,new Error("Settings unavailable").toString());
@@ -150,6 +160,6 @@ module.exports = {
             }
         } catch(err) {
             res.send(400,err.toString());
-        }            
+        }
     }
-}
+};

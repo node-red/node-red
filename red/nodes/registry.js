@@ -161,31 +161,31 @@ var registry = (function() {
             }
             return list;
         },
-        getPluginList: function() {
+        getModuleList: function() {
             var list = [];
-            for (var plugin in nodeModules) {
-                if (nodeModules.hasOwnProperty(plugin)) {
-                    var nodes = nodeModules[plugin].nodes;
+            for (var module in nodeModules) {
+                if (nodeModules.hasOwnProperty(module)) {
+                    var nodes = nodeModules[module].nodes;
                     var m = {
-                        name: plugin,
+                        name: module,
                         nodes: []
                     };
                     for (var i = 0; i < nodes.length; ++i) {
-                        m.nodes.push(filterNodeInfo(nodeConfigs[plugin+"/"+nodes[i]]));
+                        m.nodes.push(filterNodeInfo(nodeConfigs[module+"/"+nodes[i]]));
                     }
                     list.push(m);
                 }
             }
             return list;
         },
-        getPluginInfo: function(plugin) {
-            var nodes = nodeModules[plugin].nodes;
+        getModuleInfo: function(module) {
+            var nodes = nodeModules[module].nodes;
             var m = {
-                name: plugin,
+                name: module,
                 nodes: []
             };
             for (var i = 0; i < nodes.length; ++i) {
-                m.nodes.push(filterNodeInfo(nodeConfigs[plugin+"/"+nodes[i]]));
+                m.nodes.push(filterNodeInfo(nodeConfigs[module+"/"+nodes[i]]));
             }
             return m;
         },
@@ -260,7 +260,7 @@ var registry = (function() {
             return nodeTypeToId[type];
         },
 
-        getModuleInfo: function(type) {
+        getNodeModuleInfo: function(type) {
             return nodeModules[type];
         },
 
@@ -398,7 +398,7 @@ function scanTreeForNodesModules(moduleName) {
             var files = fs.readdirSync(pm);
             for (var i=0;i<files.length;i++) {
                 var fn = files[i];
-                if (!registry.getModuleInfo(fn)) {
+                if (!registry.getNodeModuleInfo(fn)) {
                     if (!moduleName || fn == moduleName) {
                         var pkgfn = path.join(pm,fn,"package.json");
                         try {
@@ -675,7 +675,7 @@ function addModule(module) {
         throw new Error("Settings unavailable");
     }
     var nodes = [];
-    if (registry.getModuleInfo(module)) {
+    if (registry.getNodeModuleInfo(module)) {
         return when.reject(new Error("Module already loaded"));
     }
     var moduleFiles = scanTreeForNodesModules(module);
@@ -695,14 +695,19 @@ module.exports = {
     load:load,
     clear: registry.clear,
     registerType: registry.registerNodeConstructor,
+
     get: registry.getNodeConstructor,
     getNodeInfo: registry.getNodeInfo,
-    getNodeModuleInfo: registry.getModuleInfo,
-    getPluginInfo: registry.getPluginInfo,
     getNodeList: registry.getNodeList,
-    getPluginList: registry.getPluginList,
+
+    getNodeModuleInfo: registry.getNodeModuleInfo,
+
+    getModuleInfo: registry.getModuleInfo,
+    getModuleList: registry.getModuleList,
+
     getNodeConfigs: registry.getAllNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
+
     addNode: addNode,
     removeNode: registry.removeNode,
     enableNode: registry.enableNodeSet,

@@ -40,7 +40,7 @@ describe("plugins api", function() {
 
     describe('get plugins', function() {
         it('returns plugins list', function(done) {
-            var getPluginList = sinon.stub(redNodes,'getPluginList', function() {
+            var getPluginList = sinon.stub(redNodes,'getModuleList', function() {
                 return [1,2,3];
             });
             request(app)
@@ -57,7 +57,7 @@ describe("plugins api", function() {
         });
 
         it('returns an individual plugin info', function(done) {
-            var getPluginInfo = sinon.stub(redNodes,'getPluginInfo', function(id) {
+            var getPluginInfo = sinon.stub(redNodes,'getModuleInfo', function(id) {
                 return {"name":"123", "nodes":[1,2,3]};
             });
             request(app)

@@ -18,11 +18,11 @@ var redNodes = require("../nodes");
 
 module.exports = {
     getAll: function(req,res) {
-        res.json(redNodes.getPluginList());
+        res.json(redNodes.getModuleList());
     },
     get: function(req,res) {
         var id = req.params.id;
-        var result = redNodes.getPluginInfo(id);
+        var result = redNodes.getModuleInfo(id);
         if (result) {
             res.send(result);
         } else {

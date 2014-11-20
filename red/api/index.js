@@ -52,9 +52,11 @@ function init(adminApp) {
     adminApp.get("/nodes",nodes.getAll);
     adminApp.post("/nodes",nodes.post);
 
-    adminApp.get("/nodes/:id",nodes.get);
+    adminApp.get("/nodes/:mod",nodes.getModule);
     adminApp.put("/nodes/:id",nodes.put);
     adminApp.delete("/nodes/:id",nodes.delete);
+
+    adminApp.get("/nodes/:mod/:set",nodes.getSet);
 
     // Plugins
     adminApp.get("/plugins",plugins.getAll);

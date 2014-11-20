@@ -28,7 +28,7 @@ var settings = require("../../../red/settings");
 var nodes = require("../../../red/api/nodes");
 
 describe("nodes api", function() {
-        
+
     var app;
 
     before(function() {
@@ -36,11 +36,12 @@ describe("nodes api", function() {
         app.use(express.json());
         app.get("/nodes",nodes.getAll);
         app.post("/nodes",nodes.post);
-        app.get("/nodes/:id",nodes.get);
+        app.get("/nodes/:mod",nodes.getModule);
+        app.get("/nodes/:mod/:set",nodes.getSet);
         app.put("/nodes/:id",nodes.put);
         app.delete("/nodes/:id",nodes.delete);
     });
-    
+
     describe('get nodes', function() {
         it('returns node list', function(done) {
             var getNodeList = sinon.stub(redNodes,'getNodeList', function() {
@@ -59,7 +60,7 @@ describe("nodes api", function() {
                     done();
                 });
         });
-        
+
         it('returns node configs', function(done) {
             var getNodeConfigs = sinon.stub(redNodes,'getNodeConfigs', function() {
                 return "<script></script>";
@@ -77,13 +78,46 @@ describe("nodes api", function() {
                     done();
                 });
         });
-        
-        it('returns an individual node info', function(done) {
-            var getNodeInfo = sinon.stub(redNodes,'getNodeInfo', function(id) {
-                return {"123":{id:"123"}}[id];
+
+        it('returns node module info', function(done) {
+            var getNodeInfo = sinon.stub(redNodes,'getModuleInfo', function(id) {
+                return {"node-red":{name:"node-red"}}[id];
             });
             request(app)
-                .get('/nodes/123')
+                .get('/nodes/node-red')
+                .expect(200)
+                .end(function(err,res) {
+                    getNodeInfo.restore();
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.should.have.property("name","node-red");
+                    done();
+                });
+        });
+
+        it('returns 404 for unknown module', function(done) {
+            var getNodeInfo = sinon.stub(redNodes,'getModuleInfo', function(id) {
+                return {"node-red":{name:"node-red"}}[id];
+            });
+            request(app)
+                .get('/nodes/node-blue')
+                .expect(404)
+                .end(function(err,res) {
+                    getNodeInfo.restore();
+                    if (err) {
+                        throw err;
+                    }
+                    done();
+                });
+        });
+
+        it('returns individual node info', function(done) {
+            var getNodeInfo = sinon.stub(redNodes,'getNodeInfo', function(id) {
+                return {"node-red/123":{id:"node-red/123"}}[id];
+            });
+            request(app)
+                .get('/nodes/node-red/123')
                 .set('Accept', 'application/json')
                 .expect(200)
                 .end(function(err,res) {
@@ -91,17 +125,17 @@ describe("nodes api", function() {
                     if (err) {
                         throw err;
                     }
-                    res.body.should.have.property("id","123");
+                    res.body.should.have.property("id","node-red/123");
                     done();
                 });
         });
-        
-        it('returns an individual node configs', function(done) {
+
+        it('returns individual node configs', function(done) {
             var getNodeConfig = sinon.stub(redNodes,'getNodeConfig', function(id) {
-                return {"123":"<script></script>"}[id];
+                return {"node-red/123":"<script></script>"}[id];
             });
             request(app)
-                .get('/nodes/123')
+                .get('/nodes/node-red/123')
                 .set('Accept', 'text/html')
                 .expect(200)
                 .expect("<script></script>")
@@ -113,13 +147,13 @@ describe("nodes api", function() {
                     done();
                 });
         });
-        
+
         it('returns 404 for unknown node', function(done) {
             var getNodeInfo = sinon.stub(redNodes,'getNodeInfo', function(id) {
-                return {"123":{id:"123"}}[id];
+                return {"node-red/123":{id:"node-red/123"}}[id];
             });
             request(app)
-                .get('/nodes/456')
+                .get('/nodes/node-red/456')
                 .set('Accept', 'application/json')
                 .expect(404)
                 .end(function(err,res) {
@@ -131,9 +165,9 @@ describe("nodes api", function() {
                 });
         });
     });
-    
+
     describe('install', function() {
-        
+
         it('returns 400 if settings are unavailable', function(done) {
             var settingsAvailable = sinon.stub(settings,'available', function() {
                 return false;
@@ -166,7 +200,7 @@ describe("nodes api", function() {
                     done();
                 });
         });
-        
+
         describe('by module', function() {
             it('installs the module and returns node info', function(done) {
                 var settingsAvailable = sinon.stub(settings,'available', function() {
@@ -178,7 +212,7 @@ describe("nodes api", function() {
                 var installModule = sinon.stub(server,'installModule', function() {
                     return when.resolve({id:"123"});
                 });
-                
+
                 request(app)
                     .post('/nodes')
                     .send({module: 'foo'})
@@ -194,7 +228,7 @@ describe("nodes api", function() {
                         done();
                     });
             });
-            
+
             it('fails the install if already installed', function(done) {
                 var settingsAvailable = sinon.stub(settings,'available', function() {
                     return true;
@@ -205,7 +239,7 @@ describe("nodes api", function() {
                 var installModule = sinon.stub(server,'installModule', function() {
                     return when.resolve({id:"123"});
                 });
-                
+
                 request(app)
                     .post('/nodes')
                     .send({module: 'foo'})
@@ -220,7 +254,7 @@ describe("nodes api", function() {
                         done();
                     });
             });
-            
+
             it('fails the install if module error', function(done) {
                 var settingsAvailable = sinon.stub(settings,'available', function() {
                     return true;
@@ -231,7 +265,7 @@ describe("nodes api", function() {
                 var installModule = sinon.stub(server,'installModule', function() {
                     return when.reject(new Error("test error"));
                 });
-                
+
                 request(app)
                     .post('/nodes')
                     .send({module: 'foo'})
@@ -259,7 +293,7 @@ describe("nodes api", function() {
                     err.code = 404;
                     return when.reject(err);
                 });
-                
+
                 request(app)
                     .post('/nodes')
                     .send({module: 'foo'})
@@ -292,7 +326,7 @@ describe("nodes api", function() {
                     done();
                 });
         });
-         
+
         describe('by module', function() {
             it('uninstalls the module and returns node info', function(done) {
                 var settingsAvailable = sinon.stub(settings,'available', function() {
@@ -307,7 +341,7 @@ describe("nodes api", function() {
                 var uninstallModule = sinon.stub(server,'uninstallModule', function() {
                     return when.resolve({id:"123"});
                 });
-                
+
                 request(app)
                     .del('/nodes/foo')
                     .expect(200)
@@ -323,7 +357,7 @@ describe("nodes api", function() {
                         done();
                     });
             });
-            
+
             it('fails the uninstall if the module is not installed', function(done) {
                 var settingsAvailable = sinon.stub(settings,'available', function() {
                     return true;
@@ -334,7 +368,7 @@ describe("nodes api", function() {
                 var getNodeModuleInfo = sinon.stub(redNodes,'getNodeModuleInfo',function(id) {
                     return null;
                 });
-                
+
                 request(app)
                     .del('/nodes/foo')
                     .expect(404)
@@ -381,7 +415,7 @@ describe("nodes api", function() {
         });
 
     });
-    
+
     describe('enable/disable', function() {
         it('returns 400 if settings are unavailable', function(done) {
             var settingsAvailable = sinon.stub(settings,'available', function() {
@@ -398,7 +432,7 @@ describe("nodes api", function() {
                     done();
                 });
         });
-        
+
         it('returns 400 for invalid payload', function(done) {
             var settingsAvailable = sinon.stub(settings,'available', function() {
                 return true;
@@ -439,7 +473,7 @@ describe("nodes api", function() {
                     done();
                 });
         });
-        
+
         it('enables disabled node', function(done) {
             var settingsAvailable = sinon.stub(settings,'available', function() {
                 return true;
@@ -464,7 +498,7 @@ describe("nodes api", function() {
                     }
                     res.body.should.have.property("id","123");
                     res.body.should.have.property("enabled",true);
-                    
+
                     done();
                 });
         });
@@ -492,7 +526,7 @@ describe("nodes api", function() {
                     }
                     res.body.should.have.property("id","123");
                     res.body.should.have.property("enabled",false);
-                    
+
                     done();
                 });
         });
@@ -507,11 +541,11 @@ describe("nodes api", function() {
                 var enableNode = sinon.stub(redNodes,'enableNode',function(id) {
                     return {id:"123",enabled: true,types:['a']};
                 });
-    
+
                 var disableNode = sinon.stub(redNodes,'disableNode',function(id) {
                     return {id:"123",enabled: false,types:['a']};
                 });
-    
+
                 request(app)
                     .put('/nodes/foo')
                     .send({enabled:state})
@@ -530,7 +564,7 @@ describe("nodes api", function() {
                         disableNodeCalled.should.be.false;
                         res.body.should.have.property("id","123");
                         res.body.should.have.property("enabled",state);
-                        
+
                         done();
                     });
             }
@@ -552,11 +586,11 @@ describe("nodes api", function() {
                 var enableNode = sinon.stub(redNodes,'enableNode',function(id) {
                     return {id:"123",enabled: true,types:['a']};
                 });
-    
+
                 var disableNode = sinon.stub(redNodes,'disableNode',function(id) {
                     return {id:"123",enabled: false,types:['a']};
                 });
-    
+
                 request(app)
                     .put('/nodes/foo')
                     .send({enabled:state})
@@ -575,7 +609,7 @@ describe("nodes api", function() {
                         disableNodeCalled.should.be.equal(!state);
                         res.body.should.have.property("id","123");
                         res.body.should.have.property("enabled",state);
-                        
+
                         done();
                     });
             }
@@ -587,6 +621,6 @@ describe("nodes api", function() {
             });
         });
     });
-    
-    
+
+
 });

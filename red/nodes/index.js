@@ -112,13 +112,18 @@ module.exports = {
     // Node type registry
     registerType: registerType,
     getType: registry.get,
+
     getNodeInfo: registry.getNodeInfo,
-    getNodeModuleInfo: registry.getNodeModuleInfo,
-    getPluginInfo: registry.getPluginInfo,
     getNodeList: registry.getNodeList,
-    getPluginList: registry.getPluginList,
+
+    getNodeModuleInfo: registry.getNodeModuleInfo,
+
+    getModuleInfo: registry.getModuleInfo,
+    getModuleList: registry.getModuleList,
+
     getNodeConfigs: registry.getNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
+
     clearRegistry: registry.clear,
     cleanNodeList: registry.cleanNodeList,
 

@@ -435,7 +435,7 @@ describe('NodeRegistry', function() {
         typeRegistry.load("wontexist",true).then(function(){
 
             typeRegistry.addModule("TestNodeModule").then(function() {
-                var list = typeRegistry.getPluginList();
+                var list = typeRegistry.getModuleList();
                 list.should.be.an.Array.and.have.lengthOf(1);
                 list[0].should.have.property("name", "TestNodeModule");
                 list[0].should.have.property("nodes");
@@ -487,9 +487,9 @@ describe('NodeRegistry', function() {
         typeRegistry.load("wontexist",true).then(function(){
 
             typeRegistry.addModule("TestNodeModule").then(function(nodes) {
-                var list = typeRegistry.getPluginList();
+                var list = typeRegistry.getModuleList();
 
-                var plugin = typeRegistry.getPluginInfo(list[0].name);
+                var plugin = typeRegistry.getModuleInfo(list[0].name);
                 plugin.should.have.property("name", list[0].name);
                 plugin.should.have.property("nodes", nodes);
                 done();
