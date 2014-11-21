@@ -149,8 +149,9 @@ var registry = (function() {
                 return filterNodeInfo(nodeConfigs[nodeTypeToId[typeOrId]]);
             } else if (nodeConfigs[typeOrId]) {
                 return filterNodeInfo(nodeConfigs[typeOrId]);
+            } else {
+                return null;
             }
-            return null;
         },
         getNodeList: function() {
             var list = [];
@@ -179,15 +180,20 @@ var registry = (function() {
             return list;
         },
         getModuleInfo: function(module) {
-            var nodes = nodeModules[module].nodes;
-            var m = {
-                name: module,
-                nodes: []
-            };
-            for (var i = 0; i < nodes.length; ++i) {
-                m.nodes.push(filterNodeInfo(nodeConfigs[module+"/"+nodes[i]]));
+            if (nodeModules[module]) {
+                var nodes = nodeModules[module].nodes;
+                var m = {
+                    name: module,
+                    version: "TODO",
+                    nodes: []
+                };
+                for (var i = 0; i < nodes.length; ++i) {
+                    m.nodes.push(filterNodeInfo(nodeConfigs[module+"/"+nodes[i]]));
+                }
+                return m;
+            } else {
+                return null;
             }
-            return m;
         },
         registerNodeConstructor: function(type,constructor) {
             if (nodeConstructors[type]) {

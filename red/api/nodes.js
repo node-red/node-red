@@ -122,7 +122,7 @@ module.exports = {
         }
     },
 
-    put: function(req,res) {
+    putSet: function(req,res) {
         if (!settings.available()) {
             res.send(400,new Error("Settings unavailable").toString());
             return;
@@ -133,9 +133,9 @@ module.exports = {
             return;
         }
         try {
-            var info;
-            var id = req.params.id;
+            var id = req.params.mod+"/"+req.params.set;
             var node = redNodes.getNodeInfo(id);
+            var info;
             if (!node) {
                 res.send(404);
             } else if (!node.err && node.enabled === body.enabled) {
@@ -158,6 +158,51 @@ module.exports = {
                 }
                 res.json(info);
             }
+        } catch(err) {
+            res.send(400,err.toString());
+        }
+    },
+
+    putModule: function(req,res) {
+        if (!settings.available()) {
+            res.send(400,new Error("Settings unavailable").toString());
+            return;
+        }
+        var body = req.body;
+        if (!body.hasOwnProperty("enabled")) {
+            res.send(400,"Invalid request");
+            return;
+        }
+        try {
+            var mod = req.params.mod;
+            var module = redNodes.getModuleInfo(mod);
+            if (!module) {
+                res.send(404);
+                return;
+            }
+            var nodes = module.nodes;
+            for (var i = 0; i < nodes.length; ++i) {
+                var node = nodes[i];
+                var info;
+                if (node.err || node.enabled !== body.enabled) {
+                    if (body.enabled) {
+                        info = redNodes.enableNode(node.id);
+                    } else {
+                        info = redNodes.disableNode(node.id);
+                    }
+                    if (info.enabled === body.enabled && !info.err) {
+                        comms.publish("node/"+(body.enabled?"enabled":"disabled"),info,false);
+                        util.log("[red] "+(body.enabled?"Enabled":"Disabled")+" node types:");
+                        for (var j = 0; j < info.types.length; j++) {
+                            util.log("[red] - " + info.types[j]);
+                        }
+                    } else if (body.enabled && info.err) {
+                        util.log("[red] Failed to enable node:");
+                        util.log("[red] - "+info.name+" : "+info.err);
+                    }
+                }
+            }
+            res.json(module);
         } catch(err) {
             res.send(400,err.toString());
         }
