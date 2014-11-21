@@ -54,7 +54,7 @@ function init(adminApp) {
 
     adminApp.get("/nodes/:mod",nodes.getModule);
     adminApp.put("/nodes/:mod",nodes.putModule);
-    adminApp.delete("/nodes/:id",nodes.delete);
+    adminApp.delete("/nodes/:mod",nodes.delete);
 
     adminApp.get("/nodes/:mod/:set",nodes.getSet);
     adminApp.put("/nodes/:mod/:set",nodes.putSet);

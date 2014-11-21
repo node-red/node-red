@@ -70,25 +70,19 @@ module.exports = {
             res.send(400,new Error("Settings unavailable").toString());
             return;
         }
-        var id = req.params.id;
-        var removedNodes = [];
+        var mod = req.params.mod;
         try {
-            var node = redNodes.getNodeInfo(id);
             var promise = null;
-            if (!node) {
-                var module = redNodes.getNodeModuleInfo(id);
-                if (!module) {
-                    res.send(404);
-                    return;
-                } else {
-                    promise = server.uninstallModule(id);
-                }
+            var module = redNodes.getNodeModuleInfo(mod);
+            if (!module) {
+                res.send(404);
+                return;
             } else {
-                promise = when.resolve([redNodes.removeNode(id)]).then(server.reportRemovedModules);
+                promise = server.uninstallModule(mod);
             }
 
-            promise.then(function(removedNodes) {
-                res.json(removedNodes);
+            promise.then(function() {
+                res.send(204);
             }).otherwise(function(err) {
                 res.send(400,err.toString());
             });

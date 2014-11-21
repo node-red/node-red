@@ -329,7 +329,7 @@ describe("nodes api", function() {
         });
 
         describe('by module', function() {
-            it('uninstalls the module and returns node info', function(done) {
+            it('uninstalls the module', function(done) {
                 var settingsAvailable = sinon.stub(settings,'available', function() {
                     return true;
                 });
@@ -345,7 +345,7 @@ describe("nodes api", function() {
 
                 request(app)
                     .del('/nodes/foo')
-                    .expect(200)
+                    .expect(204)
                     .end(function(err,res) {
                         settingsAvailable.restore();
                         getNodeInfo.restore();
@@ -354,7 +354,6 @@ describe("nodes api", function() {
                         if (err) {
                             throw err;
                         }
-                        res.body.should.have.property("id","123");
                         done();
                     });
             });
