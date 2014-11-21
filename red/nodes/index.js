@@ -55,20 +55,21 @@ function checkTypeInUse(id) {
     var nodeInfo = registry.getNodeInfo(id);
     if (!nodeInfo) {
         throw new Error("Unrecognised id: "+id);
-    }
-    var inUse = {};
-    flows.each(function(n) {
-        inUse[n.type] = (inUse[n.type]||0)+1;
-    });
-    var nodesInUse = [];
-    nodeInfo.types.forEach(function(t) {
-        if (inUse[t]) {
-            nodesInUse.push(t);
+    } else {
+        var inUse = {};
+        flows.each(function(n) {
+            inUse[n.type] = (inUse[n.type]||0)+1;
+        });
+        var nodesInUse = [];
+        nodeInfo.types.forEach(function(t) {
+            if (inUse[t]) {
+                nodesInUse.push(t);
+            }
+        });
+        if (nodesInUse.length > 0) {
+            var msg = nodesInUse.join(", ");
+            throw new Error("Type in use: "+msg);
         }
-    });
-    if (nodesInUse.length > 0) {
-        var msg = nodesInUse.join(", ");
-        throw new Error("Type in use: "+msg);
     }
 }
 
@@ -79,12 +80,15 @@ function removeNode(id) {
 
 function removeModule(module) {
     var info = registry.getNodeModuleInfo(module);
-    for (var i=0;i<info.nodes.length;i++) {
-        checkTypeInUse(info.nodes[i]);
+    if (!info) {
+        throw new Error("Unrecognised module: "+module);
+    } else {
+        for (var i=0;i<info.nodes.length;i++) {
+            checkTypeInUse(module+"/"+info.nodes[i]);
+        }
+        return registry.removeModule(module);
     }
-    return registry.removeModule(module);
 }
-
 
 function disableNode(id) {
     checkTypeInUse(id);

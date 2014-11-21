@@ -34,6 +34,7 @@ module.exports = {
             res.send(redNodes.getNodeConfigs());
         }
     },
+
     post: function(req,res) {
         if (!settings.available()) {
             res.send(400,new Error("Settings unavailable").toString());
@@ -55,7 +56,7 @@ module.exports = {
             return;
         }
         promise.then(function(info) {
-            res.json(info);
+            res.json(redNodes.getModuleInfo(node.module));
         }).otherwise(function(err) {
             if (err.code === 404) {
                 res.send(404);

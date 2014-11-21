@@ -203,12 +203,20 @@ describe("nodes api", function() {
         });
 
         describe('by module', function() {
-            it('installs the module and returns node info', function(done) {
+            it('installs the module and returns module info', function(done) {
                 var settingsAvailable = sinon.stub(settings,'available', function() {
                     return true;
                 });
                 var getNodeModuleInfo = sinon.stub(redNodes,'getNodeModuleInfo',function(id) {
                     return null;
+                });
+                var getModuleInfo = sinon.stub(redNodes,'getModuleInfo',function(module) {
+                    if (module === "foo") {
+                        return {
+                            name:"foo",
+                            nodes:[{id:123}]
+                        };
+                    }
                 });
                 var installModule = sinon.stub(server,'installModule', function() {
                     return when.resolve({id:"123"});
@@ -221,11 +229,14 @@ describe("nodes api", function() {
                     .end(function(err,res) {
                         settingsAvailable.restore();
                         getNodeModuleInfo.restore();
+                        getModuleInfo.restore();
                         installModule.restore();
                         if (err) {
                             throw err;
                         }
-                        res.body.should.have.property("id","123");
+                        res.body.should.have.property("name","foo");
+                        res.body.should.have.property("nodes");
+                        res.body.nodes[0].should.have.property("id","123");
                         done();
                     });
             });
