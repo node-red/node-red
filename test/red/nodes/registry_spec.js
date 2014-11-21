@@ -710,6 +710,55 @@ describe('NodeRegistry', function() {
         });
     });
 
+    it('adds module with version number', function(done) {
+        var fs = require("fs");
+        var path = require("path");
+
+        var pathJoin = (function() {
+            var _join = path.join;
+            return sinon.stub(path,"join",function() {
+                if (arguments.length  == 3 && arguments[2] == "package.json") {
+                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1],arguments[2]);
+                }
+                if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
+                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1]);
+                }
+                return _join.apply(this,arguments);
+            });
+        })();
+
+        var readdirSync = (function() {
+            var originalReaddirSync = fs.readdirSync;
+            var callCount = 0;
+            return sinon.stub(fs,"readdirSync",function(dir) {
+                var result = [];
+                if (callCount == 1) {
+                    result = originalReaddirSync(resourcesDir + "TestNodeModule" + path.sep + "node_modules");
+                }
+                callCount++;
+                return result;
+            });
+        })();
+        typeRegistry.init(settingsWithStorage);
+        typeRegistry.load("wontexist",true).then(function(){
+            typeRegistry.addModule("TestNodeModule","0.0.1").then(function(node) {
+                var module = typeRegistry.getModuleInfo("TestNodeModule");
+
+                module.should.have.property("name","TestNodeModule");
+                module.should.have.property("version","0.0.1");
+
+                done();
+            }).catch(function(e) {
+                done(e);
+            });
+
+        }).catch(function(e) {
+            done(e);
+        }).finally(function() {
+            readdirSync.restore();
+            pathJoin.restore();
+        });
+    });
 
     it('rejects adding duplicate node modules', function(done) {
         var fs = require("fs");

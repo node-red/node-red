@@ -33,10 +33,10 @@ function init(_server,_settings) {
     settings = _settings;
 
     comms.init(_server,_settings);
-    
+
     nodeApp = express();
     app = express();
-    
+
     if (settings.httpAdminRoot !== false) {
         require("./api").init(app);
     }
@@ -44,7 +44,7 @@ function init(_server,_settings) {
 
 function start() {
     var defer = when.defer();
-    
+
     storage.init(settings).then(function() {
         settings.load(storage).then(function() {
             console.log("\nWelcome to Node-RED\n===================\n");
@@ -95,7 +95,7 @@ function start() {
                     }
                 }
                 defer.resolve();
-                
+
                 redNodes.loadFlows();
             }).otherwise(function(err) {
                 console.log(err);
@@ -105,7 +105,7 @@ function start() {
     }).otherwise(function(err) {
         defer.reject(err);
     });
-    
+
     return defer.promise;
 }
 
@@ -138,7 +138,7 @@ function reportRemovedModules(removedNodes) {
     return removedNodes;
 }
 
-function installModule(module) { 
+function installModule(module) {
     //TODO: ensure module is 'safe'
     return when.promise(function(resolve,reject) {
         if (/[\s;]/.test(module)) {
@@ -162,8 +162,10 @@ function installModule(module) {
                     reject(new Error("Install failed"));
                 }
             } else {
-                util.log("[red] Installed module: "+module);
-                resolve(redNodes.addModule(module).then(reportAddedModules));
+                var grandchild = child_process.exec('npm view '+module+' version', function(err, stdin, stdout) {
+                    util.log("[red] Installed module: "+module+":"+stdin);
+                    resolve(redNodes.addModule(module,stdin).then(reportAddedModules));
+                });
             }
         });
     });
@@ -200,11 +202,11 @@ function stop() {
     comms.stop();
 }
 
-module.exports = { 
+module.exports = {
     init: init,
     start: start,
     stop: stop,
-    
+
     reportAddedModules: reportAddedModules,
     reportRemovedModules: reportRemovedModules,
     installModule: installModule,

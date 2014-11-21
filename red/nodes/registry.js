@@ -95,7 +95,7 @@ var registry = (function() {
             nodeList = [];
             nodeConfigCache = null;
         },
-        addNodeSet: function(id,set) {
+        addNodeSet: function(id,set,version) {
             if (!set.err) {
                 set.types.forEach(function(t) {
                     nodeTypeToId[t] = id;
@@ -104,6 +104,10 @@ var registry = (function() {
 
             nodeModules[set.module] = nodeModules[set.module]||{nodes:[]};
             nodeModules[set.module].nodes.push(set.name);
+
+            if (version) {
+                nodeModules[set.module].version = version.replace(/(\r\n|\n|\r)/gm,"");
+            }
 
             nodeConfigs[id] = set;
             nodeList.push(id);
@@ -181,10 +185,11 @@ var registry = (function() {
         },
         getModuleInfo: function(module) {
             if (nodeModules[module]) {
+                console.log(nodeModules[module]);
                 var nodes = nodeModules[module].nodes;
                 var m = {
                     name: module,
-                    version: "TODO",
+                    version: nodeModules[module].version,
                     nodes: []
                 };
                 for (var i = 0; i < nodes.length; ++i) {
@@ -438,7 +443,7 @@ function scanTreeForNodesModules(moduleName) {
  * @param moduleDir the root directory of the package
  * @param pkg the module's package.json object
  */
-function loadNodesFromModule(moduleDir,pkg) {
+function loadNodesFromModule(moduleDir,pkg,version) {
     var nodes = pkg['node-red'].nodes||{};
     var results = [];
     var iconDirs = [];
@@ -446,7 +451,7 @@ function loadNodesFromModule(moduleDir,pkg) {
         if (nodes.hasOwnProperty(n)) {
             var file = path.join(moduleDir,nodes[n]);
             try {
-                results.push(loadNodeConfig(file,pkg.name,n));
+                results.push(loadNodeConfig(file,pkg.name,n,version));
             } catch(err) {
             }
             var iconDir = path.join(moduleDir,path.dirname(nodes[n]),"icons");
@@ -477,7 +482,7 @@ function loadNodesFromModule(moduleDir,pkg) {
  *            types: an array of node type names in this file
  *         }
  */
-function loadNodeConfig(file,module,name) {
+function loadNodeConfig(file,module,name,version) {
     var id = module + "/" + name;
     var info = registry.getNodeInfo(id);
 
@@ -531,7 +536,7 @@ function loadNodeConfig(file,module,name) {
             node.err = err.toString();
         }
     }
-    registry.addNodeSet(id,node);
+    registry.addNodeSet(id,node,version);
     return node;
 }
 
@@ -676,7 +681,7 @@ function addNode(file) {
     return loadNodeList(nodes);
 }
 
-function addModule(module) {
+function addModule(module,version) {
     if (!settings.available()) {
         throw new Error("Settings unavailable");
     }
@@ -691,7 +696,7 @@ function addModule(module) {
         return when.reject(err);
     }
     moduleFiles.forEach(function(moduleFile) {
-        nodes = nodes.concat(loadNodesFromModule(moduleFile.dir,moduleFile.package));
+        nodes = nodes.concat(loadNodesFromModule(moduleFile.dir,moduleFile.package,version));
     });
     return loadNodeList(nodes);
 }
