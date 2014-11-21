@@ -197,7 +197,7 @@ module.exports = {
                     }
                 }
             }
-            res.json(module);
+            res.json(redNodes.getModuleInfo(mod));
         } catch(err) {
             res.send(400,err.toString());
         }
