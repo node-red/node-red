@@ -402,7 +402,7 @@ describe('NodeRegistry', function() {
 
     });
 
-    it('returns plugins list', function(done) {
+    it('returns modules list', function(done) {
         var fs = require("fs");
         var path = require("path");
 
@@ -454,7 +454,7 @@ describe('NodeRegistry', function() {
         });
     });
 
-    it('returns plugin info', function(done) {
+    it('returns module info', function(done) {
         var fs = require("fs");
         var path = require("path");
 
@@ -489,9 +489,9 @@ describe('NodeRegistry', function() {
             typeRegistry.addModule("TestNodeModule").then(function(nodes) {
                 var list = typeRegistry.getModuleList();
 
-                var plugin = typeRegistry.getModuleInfo(list[0].name);
-                plugin.should.have.property("name", list[0].name);
-                plugin.should.have.property("nodes", nodes);
+                var module = typeRegistry.getModuleInfo(list[0].name);
+                module.should.have.property("name", list[0].name);
+                module.should.have.property("nodes", nodes);
                 done();
             }).catch(function(e) {
                 done(e);
