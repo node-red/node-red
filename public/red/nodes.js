@@ -343,13 +343,22 @@ RED.nodes = (function() {
                 }
             }
             if(exportCreds && n.credentials) {
+                var credentialSet = {};
                 node.credentials = {};
                 for (var cred in n._def.credentials) {
                     if (n._def.credentials.hasOwnProperty(cred)) {
-                        if (n.credentials[cred] != null) {
-                            node.credentials[cred] = n.credentials[cred];
+                        if (n._def.credentials[cred].type == 'password') {
+                            if (n.credentials["has_"+cred] != n.credentials._["has_"+cred] ||
+                                (n.credentials["has_"+cred] && n.credentials[cred])) {
+                                credentialSet[cred] = n.credentials[cred];
+                            }
+                        } else if (n.credentials[cred] != null && n.credentials[cred] != n.credentials._[cred]) {
+                            credentialSet[cred] = n.credentials[cred];
                         }
                     }
+                }
+                if (Object.keys(credentialSet).length > 0) {
+                    node.credentials = credentialSet;
                 }
             }
         }

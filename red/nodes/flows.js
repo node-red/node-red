@@ -22,12 +22,15 @@ var typeRegistry = require("./registry");
 var credentials = require("./credentials");
 var log = require("../log");
 var events = require("../events");
+var redUtil = require("../util");
 
 var storage = null;
 
 var nodes = {};
 var subflows = {};
 var activeConfig = [];
+var activeConfigNodes = {};
+
 var missingTypes = [];
 
 events.on('type-registered',function(type) {
@@ -142,6 +145,7 @@ function parseConfig() {
     var type;
     var subflow;
     missingTypes = [];
+    activeConfigNodes = {};
     
     // Scan the configuration for any unknown node types
     for (i=0;i<activeConfig.length;i++) {
@@ -183,13 +187,15 @@ function parseConfig() {
             subflow.nodes.push(activeConfig[i]);
         }
     }
+    var subflowNameRE = /^subflow:(.+)$/;
     
     // Instantiate each node in the flow
     for (i=0;i<activeConfig.length;i++) {
+        activeConfigNodes[activeConfig[i].id] = activeConfig[i];
         var nn = null;
         type = activeConfig[i].type;
         
-        var m = /^subflow:(.+)$/.exec(type);
+        var m = subflowNameRE.exec(type);
         if (!m) {
             // TODO: remove workspace in next release+1
             if (type != "workspace" && type != "tab" && type != "subflow" && !subflows[activeConfig[i].z]) {
@@ -224,6 +230,23 @@ function stopFlows() {
         util.log("[red] Stopping flows");
     }
     return flowNodes.clear();
+}
+
+
+function diffNodes(oldNode,newNode) {
+    if (oldNode == null) {
+        return true;
+    } else {
+        for (var p in newNode) {
+            if (newNode.hasOwnProperty(p) && p != "x" && p != "y") {
+                if (!redUtil.compareObjects(oldNode[p],newNode[p])) {
+                    return true;
+                    break;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 var flowNodes = module.exports = {
@@ -319,14 +342,133 @@ var flowNodes = module.exports = {
      * @return a promise for the starting of the new flow
      */
     setFlows: function (config) {
-        // Extract any credential updates
+        //TODO: identify the deleted nodes
+        var newNodes = {};
+        var changedNodeStack = [];
+        var changedSubflowsObj = {};
+        var visited = {};
+        
+        var nodeLinks = {};
+        var changedNodes = {};
+        var linkChangedNodes = {};
+        var deletedNodes = [];
+        
         for (var i=0; i<config.length; i++) {
             var node = config[i];
+            newNodes[node.id] = node;
+            var changed = false;
+            // Extract any credential updates
             if (node.credentials) {
                 credentials.extract(node);
+                
+                changed = true;
                 delete node.credentials;
+            } else {
+                // Check for any changes on the node
+                changed = diffNodes(activeConfigNodes[node.id],node);
+            }
+            
+            if (changed) {
+                changedNodes[node.id] = node;
+                changedNodeStack.push(node.id);
+                // If this is part of a subflow, mark the subflow as changed
+                if (activeConfigNodes[node.z] && activeConfigNodes[node.z].type == "subflow") {
+                    changedSubflowsObj[node.z] = true;
+                }
             }
         }
+        
+        activeConfig.forEach(function(n) {
+            if (!newNodes[n.id]) {
+                deletedNodes.push(n.id);
+                // Upstream nodes will be flagged as changed as their wires
+                // array will be different.
+                // Need to flag downstream nodes
+                if (n.wires) {
+                    for (var j=0;j<n.wires.length;j++) {
+                        var wires = n.wires[j];
+                        for (var k=0;k<wires.length;k++) {
+                            var nn = newNodes[wires[k]];
+                            if (nn) {
+                                linkChangedNodes[wires[k]] = nn;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // For all changed subflows, mark any instances as changed
+        // If the subflow instance exists in a subflow, recursively mark them all
+        var changedSubflows = Object.keys(changedSubflowsObj);
+        while (changedSubflows.length > 0) {
+            var newChangedSubflowsObj = {};
+            changedSubflows.forEach(function(id) {
+                changedNodes[id] = newNodes[id];
+            });
+            
+            var subflowNameRE = /^subflow:(.*)$/;
+            config.forEach(function(n) {
+                var m = subflowNameRE.exec(n.type);
+                if (m && changedSubflowsObj[m[1]]) {
+                    // This is an instance of a changed subflow
+                    changedNodes[n.id] = n;
+                    if (activeConfigNodes[n.z] && activeConfigNodes[n.z].type == "subflow" && !changedNodes[n.z]) {
+                        // This instance is itself in a subflow that has not yet been dealt with
+                        newChangedSubflowsObj[n.z] = true;
+                    }
+                }
+            });
+            changedSubflowsObj = newChangedSubflowsObj;
+            changedSubflows = Object.keys(newChangedSubflowsObj);
+        }
+        
+        // Build the list of what each node is connected to
+        config.forEach(function(n) {
+            nodeLinks[n.id] = nodeLinks[n.id] || [];
+            if (n.wires) {
+                for (var j=0;j<n.wires.length;j++) {
+                    var wires = n.wires[j];
+                    for (var k=0;k<wires.length;k++) {
+                        nodeLinks[n.id].push(wires[k]);
+                        var nn = newNodes[wires[k]];
+                        if (nn) {
+                            nodeLinks[nn.id] = nodeLinks[nn.id] || [];
+                            nodeLinks[nn.id].push(n.id);
+                        }
+                    }
+                }
+            }
+        });
+        
+        // For all of the changed nodes, mark all downstream and upstream
+        // nodes as linkChanged, and add them to the stack to propagate
+        while(changedNodeStack.length > 0) {
+            var nid = changedNodeStack.pop();
+            var n = newNodes[nid];
+            if (!visited[nid]) {
+                visited[nid] = true;
+                if (nodeLinks[nid]) {
+                    nodeLinks[nid].forEach(function(id) {
+                        var nn = newNodes[id];
+                        if (!changedNodes[id]) {
+                            linkChangedNodes[id] = nn;
+                            changedNodeStack.push(nn.id);
+                        }
+                    });
+                }
+            }
+        }
+
+        config.forEach(function(n) {
+            if (changedNodes[n.id]|| linkChangedNodes[n.id]) {
+                console.log(changedNodes[n.id]!=null,linkChangedNodes[n.id]!=null,n.id,n.type,n.name);
+            }
+        });
+        deletedNodes.forEach(function(n) {
+            console.log("Deleted:",n);
+        });
+        
         return credentials.save()
             .then(function() { return storage.saveFlows(config);})
             .then(function() { return stopFlows();})
