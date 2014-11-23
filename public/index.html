@@ -32,7 +32,13 @@
 <div id="header">
     <span class="logo"><img src="node-red.png"> <span>Node-RED</span></span>
     <div class="pull-right">
-        <a id="btn-deploy" class="button action-deploy disabled" href="#"><i id="btn-icn-deploy" class="fa fa-download"></i> Deploy</a>
+        <span class="deploy-button-group button-group">
+            <a id="btn-deploy" class="action-deploy disabled" href="#"><i id="btn-icn-deploy" class="fa fa-download"></i> Deploy</a>
+            <a id="btn-deploy-options"  data-toggle="dropdown"  class="" href="#"><i class="fa fa-caret-down"></i></a>
+            <ul class="dropdown-menu" role="menu">
+             <li>Foo</li>
+            </ul>
+        </span>
         <a id="btn-sidemenu" class="button dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-bars"></i></a>
     </div>
 </div>

@@ -96,24 +96,76 @@ span.logo img {
 #header .button:not(.disabled):hover {
     box-shadow: 0 0 2px #fff;
 }
+
+#btn-deploy {
+    background: #d24741;
+    color: #fff !important;
+}
+#btn-deploy + a {
+    background: #BA403B;
+    color: #fff;
+}
+#btn-deploy + a:hover {
+    background: #AD3C38;
+    color: #fff;
+}
+#btn-deploy + a:active {
+    background: #aa1f19;
+    color: #ccc;
+}
+
 #btn-deploy:not(.disabled):hover {
     background: #ca3f39;
 }
 
-#btn-deploy {
-    color: #fff !important;
-    background: #d24741;
-    box-shadow: 0 0 2px #fff;
-}
+
 #btn-deploy:not(.disabled):active {
     background: #aa1f19 !important;
-    color: #ccc !important;
-    box-shadow: 0 0 2px #999;
 }
+#btn-deploy:not(.disabled):active {
+    color: #ccc !important;
+}
+
 #btn-deploy.disabled {
     cursor: default;
-    background: #444 ;
+    background: #444;
     color: #999 !important;
+}
+#btn-deploy.disabled + a {
+    background: #666;
+    color: #ddd;
+}
+#btn-deploy.disabled + a:hover {
+    background: #555;
+    color: #ddd;
+}
+#btn-deploy.disabled + a:active {
+    background: #444;
+    color: #ddd;
+}
+
+
+.button-group {
+    display: inline-block;
+    border-radius: 3px;
+    margin: auto 10px;
+    vertical-align: middle;
+    background: #555;
+    overflow: hidden;
+    box-shadow: 0 0 2px #fff;
+    clear: both;
+}
+.button-group > a {
+    float: left;
+    line-height: 22px;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    padding: 4px 8px;
+    color: #ccc;
+    margin: 0;
+}
+.button-group > a:last-child {
 }
 
 #btn-sidemenu {
