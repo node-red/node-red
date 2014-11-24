@@ -52,7 +52,7 @@ var registry = (function() {
     var nodeList = [];
     var nodeConstructors = {};
     var nodeTypeToId = {};
-    var nodeModules = {};
+    var moduleNodes = {};
 
     function saveNodeList() {
         var nodeList = {};
@@ -89,7 +89,7 @@ var registry = (function() {
             } else {
                 nodeConfigs = {};
             }
-            nodeModules = {};
+            moduleNodes = {};
             nodeTypeToId = {};
             nodeConstructors = {};
             nodeList = [];
@@ -102,11 +102,10 @@ var registry = (function() {
                 });
             }
 
-            nodeModules[set.module] = nodeModules[set.module]||{nodes:[]};
-            nodeModules[set.module].nodes.push(set.name);
+            moduleNodes[set.module] = moduleNodes[set.module]||[];
+            moduleNodes[set.module].push(set.name);
 
             if (version) {
-                nodeModules[set.module].version = version.replace(/(\r\n|\n|\r)/gm,"");
             }
 
             nodeConfigs[id] = set;
@@ -136,15 +135,15 @@ var registry = (function() {
             if (!settings.available()) {
                 throw new Error("Settings unavailable");
             }
-            var nodes = nodeModules[module];
+            var nodes = moduleNodes[module];
             if (!nodes) {
                 throw new Error("Unrecognised module: "+module);
             }
             var infoList = [];
-            for (var i=0;i<nodes.nodes.length;i++) {
-                infoList.push(registry.removeNode(module+"/"+nodes.nodes[i]));
+            for (var i=0;i<nodes.length;i++) {
+                infoList.push(registry.removeNode(module+"/"+nodes[i]));
             }
-            delete nodeModules[module];
+            delete moduleNodes[module];
             saveNodeList();
             return infoList;
         },
@@ -168,9 +167,9 @@ var registry = (function() {
         },
         getModuleList: function() {
             var list = [];
-            for (var module in nodeModules) {
-                if (nodeModules.hasOwnProperty(module)) {
-                    var nodes = nodeModules[module].nodes;
+            for (var module in moduleNodes) {
+                if (moduleNodes.hasOwnProperty(module)) {
+                    var nodes = moduleNodes[module];
                     var m = {
                         name: module,
                         nodes: []
@@ -184,12 +183,11 @@ var registry = (function() {
             return list;
         },
         getModuleInfo: function(module) {
-            if (nodeModules[module]) {
-                console.log(nodeModules[module]);
-                var nodes = nodeModules[module].nodes;
+            if (moduleNodes[module]) {
+                console.log(moduleNodes[module]);
+                var nodes = moduleNodes[module];
                 var m = {
                     name: module,
-                    version: nodeModules[module].version,
                     nodes: []
                 };
                 for (var i = 0; i < nodes.length; ++i) {
@@ -271,8 +269,8 @@ var registry = (function() {
             return nodeTypeToId[type];
         },
 
-        getNodeModuleInfo: function(type) {
-            return nodeModules[type];
+        getNodeModuleInfo: function(module) {
+            return moduleNodes[module];
         },
 
         enableNodeSet: function(id) {
@@ -327,7 +325,7 @@ var registry = (function() {
             var removed = false;
             for (var id in nodeConfigs) {
                 if (nodeConfigs.hasOwnProperty(id)) {
-                    if (nodeConfigs[id].module && !nodeModules[nodeConfigs[id].module]) {
+                    if (nodeConfigs[id].module && !moduleNodes[nodeConfigs[id].module]) {
                         registry.removeNode(id);
                         removed = true;
                     }
