@@ -130,7 +130,7 @@ module.exports = function(RED) {
                         msg.payload = msg.payload * 1;
                         if ((msg.payload >= 0) && (msg.payload <= 255)) {
                             //console.log(msg.payload, node.pin);
-                            node.board.servoWrite(node.pin, msg.payload);
+                            node.board.analogWrite(node.pin, msg.payload);
                         }
                     }
                     if (node.state == "SERVO") {
