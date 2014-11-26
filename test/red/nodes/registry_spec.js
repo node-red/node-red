@@ -289,26 +289,30 @@ describe('NodeRegistry', function() {
         var settings = {
             nodesDir:[resourcesDir + "TestNode1",resourcesDir + "TestNode2",resourcesDir + "TestNode3"],
             available: function() { return true; },
-            set: function(s,v) {return when.resolve();},
-            get: function(s) { return null;}
-        }
+            set: function(s,v) { return when.resolve(); },
+            get: function(s) { return null; }
+        };
         var settingsSave = sinon.spy(settings,"set");
         typeRegistry.init(settings);
         typeRegistry.load("wontexist",true).then(function() {
-            var list = typeRegistry.getNodeList();
-            list.should.be.Array.and.have.length(3);
+            var nodeList = typeRegistry.getNodeList();
+            var moduleList = typeRegistry.getModuleList();
+            nodeList.should.be.Array.and.have.length(3);
+            moduleList.should.be.Array.and.have.length(1);
 
             settingsSave.callCount.should.equal(1);
-            settingsSave.firstCall.args[0].should.be.equal("nodes");
+            settingsSave.firstCall.args[0].should.be.equal("modules");
             var savedList = settingsSave.firstCall.args[1];
 
-            savedList[list[0].id].name == list[0].name;
-            savedList[list[1].id].name == list[1].name;
-            savedList[list[2].id].name == list[2].name;
+            savedList[moduleList[0].name].name.should.equal(moduleList[0].name);
 
-            savedList[list[0].id].should.not.have.property("err");
-            savedList[list[1].id].should.not.have.property("err");
-            savedList[list[2].id].should.not.have.property("err");
+            savedList[moduleList[0].name].nodes[moduleList[0].nodes[0].name].name.should.equal(moduleList[0].nodes[0].name);
+            savedList[moduleList[0].name].nodes[moduleList[0].nodes[1].name].name.should.equal(moduleList[0].nodes[1].name);
+            savedList[moduleList[0].name].nodes[moduleList[0].nodes[2].name].name.should.equal(moduleList[0].nodes[2].name);
+
+            savedList[moduleList[0].name].nodes[moduleList[0].nodes[0].name].should.not.have.property("err");
+            savedList[moduleList[0].name].nodes[moduleList[0].nodes[1].name].should.not.have.property("err");
+            savedList[moduleList[0].name].nodes[moduleList[0].nodes[2].name].should.not.have.property("err");
 
             done();
         }).catch(function(e) {
@@ -550,7 +554,6 @@ describe('NodeRegistry', function() {
             var nodeConstructor = typeRegistry.get("test-node-1");
             (typeof nodeConstructor).should.be.equal("undefined");
 
-
             done();
         }).catch(function(e) {
             done(e);
@@ -746,6 +749,11 @@ describe('NodeRegistry', function() {
 
                 module.should.have.property("name","TestNodeModule");
                 module.should.have.property("version","0.0.1");
+
+                var modules = typeRegistry.getModuleList();
+
+                modules[0].should.have.property("name","TestNodeModule");
+                modules[0].should.have.property("version","0.0.1");
 
                 done();
             }).catch(function(e) {

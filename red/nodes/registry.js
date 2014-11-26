@@ -46,31 +46,58 @@ function filterNodeInfo(n) {
     return r;
 }
 
+function isEmpty(obj) {
+    for(var prop in obj) {
+        if(obj.hasOwnProperty(prop)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function getModule(id) {
+    return id.split("/")[0];
+}
+
+function getNode(id) {
+    return id.split("/")[1];
+}
+
 var registry = (function() {
     var nodeConfigCache = null;
-    var nodeConfigs = {};
+    var moduleConfigs = {};
     var nodeList = [];
     var nodeConstructors = {};
     var nodeTypeToId = {};
     var moduleNodes = {};
 
     function saveNodeList() {
-        var nodeList = {};
+        var moduleList = {};
 
-        for (var i in nodeConfigs) {
-            if (nodeConfigs.hasOwnProperty(i)) {
-                var nodeConfig = nodeConfigs[i];
-                var n = filterNodeInfo(nodeConfig);
-                n.file = nodeConfig.file;
-                delete n.loaded;
-                delete n.err;
-                delete n.file;
-                delete n.id;
-                nodeList[i] = n;
+        for (var mod in moduleConfigs) {
+            if (moduleConfigs.hasOwnProperty(mod)) {
+                var module = mod;
+                if (!moduleList[module]) {
+                    moduleList[module] = {};
+                    moduleList[module].name = module;
+                    moduleList[module].nodes = {};
+                }
+                var nodes = moduleConfigs[mod].nodes;
+                for(var node in nodes) {
+                    if (nodes.hasOwnProperty(node)) {
+                        var config = nodes[node];
+                        var n = filterNodeInfo(config);
+                        delete n.loaded;
+                        delete n.err;
+                        delete n.file;
+                        delete n.id;
+                        moduleList[module].nodes[node] = n;
+                    }
+                }
             }
         }
         if (settings.available()) {
-            return settings.set("nodes",nodeList);
+            return settings.set("modules",moduleList);
         } else {
             return when.reject("Settings unavailable");
         }
@@ -79,15 +106,9 @@ var registry = (function() {
     return {
         init: function() {
             if (settings.available()) {
-                nodeConfigs = settings.get("nodes")||{};
-                // Restore the node id property to individual entries
-                for (var id in nodeConfigs) {
-                    if (nodeConfigs.hasOwnProperty(id)) {
-                        nodeConfigs[id].id = id;
-                    }
-                }
+                moduleConfigs = settings.get("modules")||{};
             } else {
-                nodeConfigs = {};
+                moduleConfigs = {};
             }
             moduleNodes = {};
             nodeTypeToId = {};
@@ -105,19 +126,27 @@ var registry = (function() {
             moduleNodes[set.module] = moduleNodes[set.module]||[];
             moduleNodes[set.module].push(set.name);
 
-            if (version) {
+            if (!moduleConfigs[set.module]) {
+                moduleConfigs[set.module] = {
+                    name: set.module,
+                    nodes: {}
+                };
             }
 
-            nodeConfigs[id] = set;
+            if (version) {
+                moduleConfigs[set.module].version = version;
+            }
+
+            moduleConfigs[set.module].nodes[set.name] = set;
             nodeList.push(id);
             nodeConfigCache = null;
         },
         removeNode: function(id) {
-            var config = nodeConfigs[id];
+            var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
             if (!config) {
                 throw new Error("Unrecognised id: "+id);
             }
-            delete nodeConfigs[id];
+            delete moduleConfigs[getModule(id)].nodes[getNode(id)];
             var i = nodeList.indexOf(id);
             if (i > -1) {
                 nodeList.splice(i,1);
@@ -148,19 +177,31 @@ var registry = (function() {
             return infoList;
         },
         getNodeInfo: function(typeOrId) {
+            var id = typeOrId;
             if (nodeTypeToId[typeOrId]) {
-                return filterNodeInfo(nodeConfigs[nodeTypeToId[typeOrId]]);
-            } else if (nodeConfigs[typeOrId]) {
-                return filterNodeInfo(nodeConfigs[typeOrId]);
-            } else {
-                return null;
+                id = nodeTypeToId[typeOrId];
             }
+            if (id) {
+                var module = moduleConfigs[getModule(id)];
+                if (module) {
+                    var config = module.nodes[getNode(id)];
+                    if (config) {
+                        return filterNodeInfo(config);
+                    }
+                }
+            }
+            return null;
         },
         getNodeList: function() {
             var list = [];
-            for (var id in nodeConfigs) {
-                if (nodeConfigs.hasOwnProperty(id)) {
-                    list.push(filterNodeInfo(nodeConfigs[id]));
+            for (var module in moduleConfigs) {
+                if (moduleConfigs.hasOwnProperty(module)) {
+                    var nodes = moduleConfigs[module].nodes;
+                    for (var node in nodes) {
+                        if (nodes.hasOwnProperty(node)) {
+                            list.push(filterNodeInfo(nodes[node]));
+                        }
+                    }
                 }
             }
             return list;
@@ -172,10 +213,11 @@ var registry = (function() {
                     var nodes = moduleNodes[module];
                     var m = {
                         name: module,
+                        version: moduleConfigs[module].version,
                         nodes: []
                     };
                     for (var i = 0; i < nodes.length; ++i) {
-                        m.nodes.push(filterNodeInfo(nodeConfigs[module+"/"+nodes[i]]));
+                        m.nodes.push(filterNodeInfo(moduleConfigs[module].nodes[nodes[i]]));
                     }
                     list.push(m);
                 }
@@ -184,14 +226,14 @@ var registry = (function() {
         },
         getModuleInfo: function(module) {
             if (moduleNodes[module]) {
-                console.log(moduleNodes[module]);
                 var nodes = moduleNodes[module];
                 var m = {
                     name: module,
+                    version: moduleConfigs[module].version,
                     nodes: []
                 };
                 for (var i = 0; i < nodes.length; ++i) {
-                    m.nodes.push(filterNodeInfo(nodeConfigs[module+"/"+nodes[i]]));
+                    m.nodes.push(filterNodeInfo(moduleConfigs[module].nodes[nodes[i]]));
                 }
                 return m;
             } else {
@@ -220,7 +262,8 @@ var registry = (function() {
                 var result = "";
                 var script = "";
                 for (var i=0;i<nodeList.length;i++) {
-                    var config = nodeConfigs[nodeList[i]];
+                    var id = nodeList[i];
+                    var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
                     if (config.enabled && !config.err) {
                         result += config.config;
                         script += config.script;
@@ -237,7 +280,7 @@ var registry = (function() {
         },
 
         getNodeConfig: function(id) {
-            var config = nodeConfigs[id];
+            var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
             if (config) {
                 var result = config.config;
                 if (config.script) {
@@ -250,7 +293,15 @@ var registry = (function() {
         },
 
         getNodeConstructor: function(type) {
-            var config = nodeConfigs[nodeTypeToId[type]];
+            var id = nodeTypeToId[type];
+
+            var config;
+            if (typeof id === "undefined") {
+                config = undefined;
+            } else {
+                config = moduleConfigs[getModule(id)].nodes[getNode(id)];
+            }
+
             if (!config || (config.enabled && !config.err)) {
                 return nodeConstructors[type];
             }
@@ -259,7 +310,7 @@ var registry = (function() {
 
         clear: function() {
             nodeConfigCache = null;
-            nodeConfigs = {};
+            moduleConfigs = {};
             nodeList = [];
             nodeConstructors = {};
             nodeTypeToId = {};
@@ -273,16 +324,16 @@ var registry = (function() {
             return moduleNodes[module];
         },
 
-        enableNodeSet: function(id) {
+        enableNodeSet: function(typeOrId) {
             if (!settings.available()) {
                 throw new Error("Settings unavailable");
             }
-            var config;
-            if (nodeTypeToId[id]) {
-                config = nodeConfigs[nodeTypeToId[id]];
-            } else {
-                config = nodeConfigs[id];
+            var id = typeOrId;
+            if (nodeTypeToId[typeOrId]) {
+                id = nodeTypeToId[typeOrId];
             }
+            var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
+
             if (config) {
                 delete config.err;
                 config.enabled = true;
@@ -293,21 +344,21 @@ var registry = (function() {
                 nodeConfigCache = null;
                 saveNodeList();
             } else {
-                throw new Error("Unrecognised id: "+id);
+                throw new Error("Unrecognised id: "+typeOrId);
             }
             return filterNodeInfo(config);
         },
 
-        disableNodeSet: function(id) {
+        disableNodeSet: function(typeOrId) {
             if (!settings.available()) {
                 throw new Error("Settings unavailable");
             }
-            var config;
-            if (nodeTypeToId[id]) {
-                config = nodeConfigs[nodeTypeToId[id]];
-            } else {
-                config = nodeConfigs[id];
+            var id = typeOrId;
+            if (nodeTypeToId[typeOrId]) {
+                id = nodeTypeToId[typeOrId];
             }
+            var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
+
             if (config) {
                 // TODO: persist setting
                 config.enabled = false;
@@ -323,9 +374,9 @@ var registry = (function() {
 
         cleanNodeList: function() {
             var removed = false;
-            for (var id in nodeConfigs) {
-                if (nodeConfigs.hasOwnProperty(id)) {
-                    if (nodeConfigs[id].module && !moduleNodes[nodeConfigs[id].module]) {
+            for (var mod in moduleConfigs) {
+                if (moduleConfigs.hasOwnProperty(mod)) {
+                    if (moduleConfigs[mod] && !moduleNodes[mod]) {
                         registry.removeNode(id);
                         removed = true;
                     }
