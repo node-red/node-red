@@ -372,13 +372,18 @@ var registry = (function() {
 
         saveNodeList: saveNodeList,
 
-        cleanNodeList: function() {
+        cleanModuleList: function() {
             var removed = false;
             for (var mod in moduleConfigs) {
                 if (moduleConfigs.hasOwnProperty(mod)) {
                     if (moduleConfigs[mod] && !moduleNodes[mod]) {
-                        registry.removeNode(id);
-                        removed = true;
+                        var nodes = moduleConfigs[mod].nodes;
+                        for (var node in nodes) {
+                            if (nodes.hasOwnProperty(node)) {
+                                registry.removeNode(mod+"/"+node);
+                                removed = true;
+                            }
+                        }
                     }
                 }
             }
@@ -775,5 +780,5 @@ module.exports = {
 
     addModule: addModule,
     removeModule: registry.removeModule,
-    cleanNodeList: registry.cleanNodeList
+    cleanModuleList: registry.cleanModuleList
 };

@@ -91,7 +91,7 @@ function start() {
                     }
                     if (!settings.autoInstallModules) {
                         util.log("[red] Removing modules from config");
-                        redNodes.cleanNodeList();
+                        redNodes.cleanModuleList();
                     }
                 }
                 defer.resolve();
