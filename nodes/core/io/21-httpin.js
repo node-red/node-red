@@ -94,7 +94,7 @@ module.exports = function(RED) {
                     }
                 }
                 if (RED.settings.httpNodeCors) {
-                    var route = RED.httpNode.route['options'];
+                    var route = RED.httpNode.routes['options'];
                     if (route) {
                         for (var j = 0; j<route.length; j++) {
                             if (route[j].path == this.url) {
