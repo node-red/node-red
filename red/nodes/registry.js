@@ -319,13 +319,15 @@ var registry = (function() {
             if (!settings.available()) {
                 throw new Error("Settings unavailable");
             }
+
             var id = typeOrId;
             if (nodeTypeToId[typeOrId]) {
                 id = nodeTypeToId[typeOrId];
             }
-            var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
 
-            if (config) {
+            var config;
+            try {
+                config = moduleConfigs[getModule(id)].nodes[getNode(id)];
                 delete config.err;
                 config.enabled = true;
                 if (!config.loaded) {
@@ -334,7 +336,7 @@ var registry = (function() {
                 }
                 nodeConfigCache = null;
                 saveNodeList();
-            } else {
+            } catch (err) {
                 throw new Error("Unrecognised id: "+typeOrId);
             }
             return filterNodeInfo(config);
@@ -348,14 +350,14 @@ var registry = (function() {
             if (nodeTypeToId[typeOrId]) {
                 id = nodeTypeToId[typeOrId];
             }
-            var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
-
-            if (config) {
+            var config;
+            try {
+                config = moduleConfigs[getModule(id)].nodes[getNode(id)];
                 // TODO: persist setting
                 config.enabled = false;
                 nodeConfigCache = null;
                 saveNodeList();
-            } else {
+            } catch (err) {
                 throw new Error("Unrecognised id: "+id);
             }
             return filterNodeInfo(config);

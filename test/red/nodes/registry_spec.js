@@ -991,14 +991,14 @@ describe('NodeRegistry', function() {
     });
 
     it('fails to enable/disable non-existent nodes', function(done) {
-        typeRegistry.init(settings);
+        typeRegistry.init(settingsWithStorage);
         typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
 
             /*jshint immed: false */
             (function() {
-                    typeRegistry.disableNode("123");
+                typeRegistry.disableNode("123");
             }).should.throw();
 
             /*jshint immed: false */
