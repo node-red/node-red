@@ -46,15 +46,6 @@ function filterNodeInfo(n) {
     return r;
 }
 
-function isEmpty(obj) {
-    for(var prop in obj) {
-        if(obj.hasOwnProperty(prop)) {
-            return false;
-        }
-    }
-    return true;
-}
-
 function getModule(id) {
     return id.split("/")[0];
 }
