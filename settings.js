@@ -133,26 +133,6 @@ module.exports = {
     //    cert: fs.readFileSync('certificate.pem')
     //},
 
-    // The following property can be used to configure cross-origin resource sharing
-    // in the HTTP nodes.
-    // See https://github.com/troygoode/node-cors#configuration-options for
-    // details on its contents. The following is a basic permissive set of options:
-    //httpNodeCors: {
-    //    origin: "*",
-    //    methods: "GET,PUT,POST,DELETE"
-    //},
-    holidays: [
-        {"New year":      "01.01.0000"}, // With name and every year
-        "05.06.2014",  // Just date without name
-        {"Easter Monday": "06.04.2014"}, // With name and specific year
-        {"Christmas":     "24.12.0000"}  // With name and every year
-    ],
-    // Format of the holiday dates: you can use
-    // D or d to define day of month position
-    // M ot m to define month position (from 1 to 12
-    // Y or y to define year position
-    holidaysFormat: "D.M.Y",        // Holidays format, default is d.m.y
-
     // Anything in this hash is globally available to all functions.
     // It is accessed as context.global.
     // eg:
