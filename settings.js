@@ -101,6 +101,27 @@ module.exports = {
     // API, use either the httpRoot or httpAdminRoot properties
     //disableEditor: false,
     
+    // The following property can be used for "inject" node, if "interval between times" or "at a specific time" in repeat mode is selected and "holidays" are used.
+    // List here in array the holiday dates that are relevant for you with specified in the "holidaysFormat" date format.
+    // You can provide the name for the holiday, but it will not be shown anywhere.
+    // Dates can have the year or you can set the year to "0000" if the date is the same every year.
+    // Day can be from 1 to 31.
+    // Month can be from 1 to 12.
+    // Year can be 00-99 or 2000-3099. "0000" means this date is valid in every year. "00" year will be interpreted as 2000.
+    holidays: [
+        {"New year":      "01.01.0000"},   // With name and every year
+        {"Halloween":     "31.10.0000"},
+        //                  "05.06.2014",  // Just date without name
+        //{"Easter Monday": "06.04.2014"}, // With name and specific year
+        {"Christmas Eve": "24.12.0000"},
+        {"Christmas Day": "25.12.0000"}
+    ],
+    // Format of the holiday dates: you can use
+    // D or d to define day of month position
+    // M ot m to define month position (from 1 to 12
+    // Y or y to define year position
+    holidaysFormat: "d.m.y",        // Holidays format, default is d.m.y like 24.12.2015
+	
     // The following property can be used to enable HTTPS
     // See http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener
     // for details on its contents.
@@ -120,7 +141,18 @@ module.exports = {
     //    origin: "*",
     //    methods: "GET,PUT,POST,DELETE"
     //},
-    
+    holidays: [
+        {"New year":      "01.01.0000"}, // With name and every year
+        "05.06.2014",  // Just date without name
+        {"Easter Monday": "06.04.2014"}, // With name and specific year
+        {"Christmas":     "24.12.0000"}  // With name and every year
+    ],
+    // Format of the holiday dates: you can use
+    // D or d to define day of month position
+    // M ot m to define month position (from 1 to 12
+    // Y or y to define year position
+    holidaysFormat: "D.M.Y",        // Holidays format, default is d.m.y
+
     // Anything in this hash is globally available to all functions.
     // It is accessed as context.global.
     // eg:
