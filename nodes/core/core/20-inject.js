@@ -124,7 +124,7 @@ module.exports = function(RED) {
                             if (typeof holidaysList[i] == "string") {
                                 holidaysList[i] = {"Unnamed": holidaysList[i]};
                             }
-
+                            // Parse dates if not parsed
                             if (!holidaysList._date) {
                                 for (var name in holidaysList[i]) {
                                     holidaysList[i]._date = getDMY(holidaysList[i][name]);
@@ -139,20 +139,15 @@ module.exports = function(RED) {
                             this.cronjob.push(new cron.CronJob(crontab.join(' '),
                                 function () {
                                     var d = new Date();
-                                    var found = false;
 
                                     // Check if triggered date is in the list, because cron does not supports years
                                     for (var i = 0; i < holidaysList.length; i++) {
                                         if (holidaysList[i]._date.day   == d.getDate() &&
                                             holidaysList[i]._date.month == d.getMonth() &&
                                             (holidaysList[i]._date.year == -1 || holidaysList[i]._date.year == d.getFullYear())) {
-                                            found = true;
+                                            node.emit("input", {});
                                             break;
                                         }
-                                    }
-
-                                    if (found) {
-                                        node.emit("input", {});
                                     }
                                 },
                                 null, true));
