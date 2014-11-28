@@ -65,15 +65,14 @@ var registry = (function() {
     function saveNodeList() {
         var moduleList = {};
 
-        for (var mod in moduleConfigs) {
-            if (moduleConfigs.hasOwnProperty(mod)) {
-                var module = mod;
+        for (var module in moduleConfigs) {
+            if (moduleConfigs.hasOwnProperty(module)) {
                 if (!moduleList[module]) {
                     moduleList[module] = {};
                     moduleList[module].name = module;
                     moduleList[module].nodes = {};
                 }
-                var nodes = moduleConfigs[mod].nodes;
+                var nodes = moduleConfigs[module].nodes;
                 for(var node in nodes) {
                     if (nodes.hasOwnProperty(node)) {
                         var config = nodes[node];
