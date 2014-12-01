@@ -68,7 +68,7 @@ module.exports = function(RED) {
                 }
             };
 
-            var corsHandler = function(req,res,next) { next(); };
+            var corsHandler = function(req,res,next) { next(); }
 
             if (RED.settings.httpNodeCors) {
                 corsHandler = cors(RED.settings.httpNodeCors);
@@ -144,6 +144,7 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType("http response",HTTPOut);
 
+
     function HTTPRequest(n) {
         RED.nodes.createNode(this,n);
         var nodeUrl = n.url;
@@ -154,7 +155,7 @@ module.exports = function(RED) {
             node.status({fill:"blue",shape:"dot",text:"requesting"});
             var url;
             if (msg.url) {
-                if (n.url) {
+                if (n.url && (n.url !== msg.url)) {
                     node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
                 }
                 url = msg.url;
@@ -170,7 +171,7 @@ module.exports = function(RED) {
 
             var method;
             if (msg.method) {
-                if (n.method) {
+                if (n.method && (n.method !== msg.method)) {
                     node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
                 }
                 method = msg.method.toUpperCase();
@@ -251,4 +252,4 @@ module.exports = function(RED) {
             password: {type: "password"}
         }
     });
-};
+}

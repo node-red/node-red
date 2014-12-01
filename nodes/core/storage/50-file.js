@@ -27,7 +27,7 @@ module.exports = function(RED) {
         this.on("input",function(msg) {
             var filename;
             if (msg.filename) {
-                if (n.filename) {
+                if (n.filename && (n.filename !== msg.filename)) {
                     node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
                 }
                 filename = msg.filename;
@@ -89,7 +89,7 @@ module.exports = function(RED) {
         this.on("input",function(msg) {
             var filename;
             if (msg.filename) {
-                if (n.filename) {
+                if (n.filename && (n.filename !== msg.filename)) {
                     node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
                 }
                 filename = msg.filename;
