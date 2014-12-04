@@ -163,8 +163,9 @@ function installModule(module) {
                 }
             } else {
                 var grandchild = child_process.exec('npm view '+module+' version', function(err, stdin, stdout) {
-                    util.log("[red] Installed module: "+module+":"+stdin);
-                    resolve(redNodes.addModule(module,stdin).then(reportAddedModules));
+                    var version = stdin.replace(/\s/g, "");
+                    util.log("[red] Installed module: "+module+":"+version);
+                    resolve(redNodes.addModule(module,version).then(reportAddedModules));
                 });
             }
         });
