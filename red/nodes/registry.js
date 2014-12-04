@@ -20,13 +20,13 @@ var whenNode = require('when/node');
 var fs = require("fs");
 var path = require("path");
 var crypto = require("crypto");
-var UglifyJS = require("uglify-js");
 
 var events = require("../events");
 
 var Node;
+var UglifyJS;
 var settings;
-
+ 
 function filterNodeInfo(n) {
     var r = {
         id: n.id,
@@ -89,6 +89,12 @@ var registry = (function() {
             } else {
                 nodeConfigs = {};
             }
+            
+            if (settings.available() && !settings.disableMinify) {
+                console.log("uglify-jsがろーどされたぞ!!");
+                UglifyJS = require("uglify-js");
+            }
+            
             nodeModules = {};
             nodeTypeToId = {};
             nodeConstructors = {};
@@ -222,7 +228,7 @@ var registry = (function() {
                 }
                 if (script.length > 0) {
                     result += '<script type="text/javascript">';
-                    result += UglifyJS.minify(script, {fromString: true}).code;
+                    result += UglifyJS ? UglifyJS.minify(script, {fromString: true}).code : script;
                     result += '</script>';
                 }
                 nodeConfigCache = result;

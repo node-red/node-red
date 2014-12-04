@@ -101,6 +101,10 @@ module.exports = {
     // API, use either the httpRoot or httpAdminRoot properties
     //disableEditor: false,
     
+    // The following property can be used to disable the minify. 
+    // If set to true, plain JavaScript is output.
+    //disableMinify: false,
+    
     // The following property can be used to enable HTTPS
     // See http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener
     // for details on its contents.
