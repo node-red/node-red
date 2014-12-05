@@ -83,8 +83,8 @@ function removeModule(module) {
     if (!info) {
         throw new Error("Unrecognised module: "+module);
     } else {
-        for (var i=0;i<info.nodes.length;i++) {
-            checkTypeInUse(module+"/"+info.nodes[i]);
+        for (var i=0;i<info.length;i++) {
+            checkTypeInUse(module+"/"+info[i]);
         }
         return registry.removeModule(module);
     }
