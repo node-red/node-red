@@ -23,7 +23,7 @@ var sinon = require('sinon');
 var index = require("../../../red/nodes/index");
 
 describe("red/nodes/index", function() {
-        
+
     afterEach(function() {
         index.clearRegistry();
     });
@@ -44,7 +44,7 @@ describe("red/nodes/index", function() {
                 return when(true);
             }
     };
-    
+
     var settings = {
         available: function() { return false }
     };
@@ -56,13 +56,13 @@ describe("red/nodes/index", function() {
             // do nothing
         });
     }
-    
-   it('nodes are initialised with credentials',function(done) {      
+
+   it('nodes are initialised with credentials',function(done) {
 
         index.init(settings, storage);
-        index.registerType('test', TestNode);            
+        index.registerType('test', TestNode);
         index.loadFlows().then(function() {
-            var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});   
+            var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});
             testnode.credentials.should.have.property('b',1);
             testnode.credentials.should.have.property('c',2);
             done();
@@ -71,8 +71,8 @@ describe("red/nodes/index", function() {
         });
 
     });
-   
-   it('flows should be initialised',function(done) {      
+
+   it('flows should be initialised',function(done) {
         index.init(settings, storage);
         index.loadFlows().then(function() {
             should.deepEqual(testFlows, index.getFlows());
@@ -82,7 +82,7 @@ describe("red/nodes/index", function() {
         });
 
     });
-   
+
    describe("registerType should register credentials definition", function() {
        var http = require('http');
        var express = require('express');
@@ -91,7 +91,7 @@ describe("red/nodes/index", function() {
        var credentials = require("../../../red/nodes/credentials");
        var localfilesystem = require("../../../red/storage/localfilesystem");
        var RED = require("../../../red/red.js");
-       
+
        var userDir = path.join(__dirname,".testUserHome");
        before(function(done) {
            fs.remove(userDir,function(err) {
@@ -109,7 +109,7 @@ describe("red/nodes/index", function() {
                    RED.init(http.createServer(function(req,res){app(req,res)}),
                             {userDir: userDir});
                    server.start().then(function () {
-                       done(); 
+                       done();
                     });
                });
            });
@@ -121,24 +121,24 @@ describe("red/nodes/index", function() {
            index.load.restore();
            localfilesystem.getCredentials.restore();
        });
-       
-       it(': definition defined',function(done) {      
+
+       it(': definition defined',function(done) {
            index.registerType('test', TestNode, {
                credentials: {
                    foo: {type:"test"}
-               }   
-           }); 
-           var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});    
+               }
+           });
+           var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});
            credentials.getDefinition("test").should.have.property('foo');
            done();
        });
 
    });
-   
-   describe('allows nodes to be added/remove/enabled/disabled from the registry', function() {
+
+   describe('allows nodes to be added/removed/enabled/disabled from the registry', function() {
        var registry = require("../../../red/nodes/registry");
        var randomNodeInfo = {id:"5678",types:["random"]};
-       
+
        before(function() {
            sinon.stub(registry,"getNodeInfo",function(id) {
                if (id == "test") {
@@ -162,9 +162,9 @@ describe("red/nodes/index", function() {
            registry.disableNode.restore();
        });
 
-       it(': allows an unused node type to be removed',function(done) {      
+       it(': allows an unused node type to be removed',function(done) {
             index.init(settings, storage);
-            index.registerType('test', TestNode);            
+            index.registerType('test', TestNode);
             index.loadFlows().then(function() {
                 var info = index.removeNode("5678");
                 registry.removeNode.calledOnce.should.be.true;
@@ -175,10 +175,10 @@ describe("red/nodes/index", function() {
                 done(err);
             });
        });
-       
-       it(': allows an unused node type to be disabled',function(done) {      
+
+       it(': allows an unused node type to be disabled',function(done) {
             index.init(settings, storage);
-            index.registerType('test', TestNode);            
+            index.registerType('test', TestNode);
             index.loadFlows().then(function() {
                 var info = index.disableNode("5678");
                 registry.disableNode.calledOnce.should.be.true;
@@ -190,66 +190,131 @@ describe("red/nodes/index", function() {
             });
        });
 
-       it(': prevents removing a node type that is in use',function(done) {      
+       it(': prevents removing a node type that is in use',function(done) {
             index.init(settings, storage);
-            index.registerType('test', TestNode);            
+            index.registerType('test', TestNode);
             index.loadFlows().then(function() {
                 /*jshint immed: false */
                 (function() {
                     index.removeNode("test");
-                }).should.throw();    
-                
+                }).should.throw();
+
                 done();
             }).otherwise(function(err) {
                 done(err);
             });
        });
-       
+
        it(': prevents disabling a node type that is in use',function(done) {
             index.init(settings, storage);
-            index.registerType('test', TestNode);            
+            index.registerType('test', TestNode);
             index.loadFlows().then(function() {
                 /*jshint immed: false */
                 (function() {
                     index.disabledNode("test");
-                }).should.throw();    
-                
+                }).should.throw();
+
                 done();
             }).otherwise(function(err) {
                 done(err);
             });
        });
-       
-       it(': prevents removing a node type that is unknown',function(done) {      
+
+       it(': prevents removing a node type that is unknown',function(done) {
             index.init(settings, storage);
-            index.registerType('test', TestNode);            
+            index.registerType('test', TestNode);
             index.loadFlows().then(function() {
                 /*jshint immed: false */
                 (function() {
                     index.removeNode("doesnotexist");
-                }).should.throw();    
-                
+                }).should.throw();
+
                 done();
             }).otherwise(function(err) {
                 done(err);
             });
         });
-       it(': prevents disabling a node type that is unknown',function(done) {      
+       it(': prevents disabling a node type that is unknown',function(done) {
             index.init(settings, storage);
-            index.registerType('test', TestNode);            
+            index.registerType('test', TestNode);
             index.loadFlows().then(function() {
                 /*jshint immed: false */
                 (function() {
                     index.disableNode("doesnotexist");
-                }).should.throw();    
-                
+                }).should.throw();
+
                 done();
             }).otherwise(function(err) {
                 done(err);
             });
         });
-
     });
-   
-   
+
+   describe('allows modules to be removed from the registry', function() {
+       var registry = require("../../../red/nodes/registry");
+       var randomNodeInfo = {id:"5678",types:["random"]};
+       var randomModuleInfo = {
+          name:"random",
+          nodes: [randomNodeInfo]
+        };
+
+       before(function() {
+           sinon.stub(registry,"getNodeInfo",function(id) {
+               if (id == "node-red/foo") {
+                   return {id:"1234",types:["test"]};
+               } else if (id == "doesnotexist") {
+                   return null;
+               } else {
+                   return randomNodeInfo;
+               }
+           });
+           sinon.stub(registry,"getNodeModuleInfo",function(module) {
+               if (module == "node-red") {
+                  return ["foo"];
+               } else if (module == "doesnotexist") {
+                   return null;
+               } else {
+                  return randomModuleInfo.nodes;
+               }
+           });
+           sinon.stub(registry,"removeModule",function(id) {
+               return randomModuleInfo;
+           });
+       });
+       after(function() {
+           registry.getNodeInfo.restore();
+           registry.getNodeModuleInfo.restore();
+           registry.removeModule.restore();
+       });
+
+       it(': prevents removing a module that is in use',function(done) {
+            index.init(settings, storage);
+            index.registerType('test', TestNode);
+            index.loadFlows().then(function() {
+                /*jshint immed: false */
+                (function() {
+                    index.removeModule("node-red");
+                }).should.throw();
+
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+       });
+
+       it(': prevents removing a module that is unknown',function(done) {
+            index.init(settings, storage);
+            index.registerType('test', TestNode);
+            index.loadFlows().then(function() {
+                /*jshint immed: false */
+                (function() {
+                    index.removeModule("doesnotexist");
+                }).should.throw();
+
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+        });
+    });
 });

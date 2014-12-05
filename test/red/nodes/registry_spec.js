@@ -33,10 +33,10 @@ describe('NodeRegistry', function() {
     var resourcesDir = __dirname+ path.sep + "resources" + path.sep;
 
     function stubSettings(s,available) {
-        s.available =  function() {return available;}
-        s.set = function(s,v) { return when.resolve()},
-        s.get = function(s) { return null;}
-        return s
+        s.available =  function() {return available;};
+        s.set = function(s,v) { return when.resolve();};
+        s.get = function(s) { return null;};
+        return s;
     }
     var settings = stubSettings({},false);
     var settingsWithStorage = stubSettings({},true);
@@ -56,8 +56,9 @@ describe('NodeRegistry', function() {
         typeRegistry.load(resourcesDir + "TestNode1",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
-            list[0].should.have.property("id");
-            list[0].should.have.property("name","TestNode1.js");
+            list[0].should.have.property("id","node-red/TestNode1");
+            list[0].should.have.property("name","TestNode1");
+            list[0].should.have.property("module","node-red");
             list[0].should.have.property("types",["test-node-1"]);
             list[0].should.have.property("enabled",true);
             list[0].should.not.have.property("err");
@@ -78,8 +79,9 @@ describe('NodeRegistry', function() {
         typeRegistry.load(resourcesDir + "TestNode2",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
-            list[0].should.have.property("id");
-            list[0].should.have.property("name","TestNode2.js");
+            list[0].should.have.property("id","node-red/TestNode2");
+            list[0].should.have.property("name","TestNode2");
+            list[0].should.have.property("module","node-red");
             list[0].should.have.property("types",["test-node-2"]);
             list[0].should.have.property("enabled",true);
             list[0].should.not.have.property("err");
@@ -98,8 +100,9 @@ describe('NodeRegistry', function() {
         typeRegistry.load(resourcesDir + "TestNode3",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
-            list[0].should.have.property("id");
-            list[0].should.have.property("name","TestNode3.js");
+            list[0].should.have.property("id","node-red/TestNode3");
+            list[0].should.have.property("name","TestNode3");
+            list[0].should.have.property("module","node-red");
             list[0].should.have.property("types",["test-node-3"]);
             list[0].should.have.property("enabled",true);
             list[0].should.have.property("err","fail");
@@ -119,8 +122,9 @@ describe('NodeRegistry', function() {
         typeRegistry.load(resourcesDir + "MultipleNodes1",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
-            list[0].should.have.property("id");
-            list[0].should.have.property("name","MultipleNodes1.js");
+            list[0].should.have.property("id","node-red/MultipleNodes1");
+            list[0].should.have.property("name","MultipleNodes1");
+            list[0].should.have.property("module","node-red");
             list[0].should.have.property("types",["test-node-multiple-1a","test-node-multiple-1b"]);
             list[0].should.have.property("enabled",true);
             list[0].should.not.have.property("err");
@@ -142,8 +146,9 @@ describe('NodeRegistry', function() {
         typeRegistry.load(resourcesDir + "NestedDirectoryNode",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
-            list[0].should.have.property("id");
-            list[0].should.have.property("name","NestedNode.js");
+            list[0].should.have.property("id","node-red/NestedNode");
+            list[0].should.have.property("name","NestedNode");
+            list[0].should.have.property("module","node-red");
             list[0].should.have.property("types",["nested-node-1"]);
             list[0].should.have.property("enabled",true);
             list[0].should.not.have.property("err");
@@ -159,7 +164,9 @@ describe('NodeRegistry', function() {
         typeRegistry.load(resourcesDir + "NestedDirectoryNode",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
-            list[0].should.have.property("name","NestedNode.js");
+            list[0].should.have.property("id","node-red/NestedNode");
+            list[0].should.have.property("name","NestedNode");
+            list[0].should.have.property("module","node-red");
             list[0].should.have.property("types",["nested-node-1"]);
             list[0].should.have.property("enabled",true);
             list[0].should.not.have.property("err");
@@ -189,25 +196,12 @@ describe('NodeRegistry', function() {
         typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
 
-            list.should.be.an.Array.and.have.lengthOf(2);
-            list[0].should.have.property("id");
-            list[0].should.have.property("name","TestNode1.js");
+            list.should.be.an.Array.and.have.lengthOf(1);
+            list[0].should.have.property("id","node-red/TestNode1");
+            list[0].should.have.property("name","TestNode1");
             list[0].should.have.property("types",["test-node-1"]);
             list[0].should.have.property("enabled",true);
             list[0].should.not.have.property("err");
-
-            list[1].should.have.property("id");
-            list[1].id.should.not.equal(list[0].id);
-
-            list[1].should.have.property("name","TestNode1.js");
-            list[1].should.have.property("types",["test-node-1"]);
-            list[1].should.have.property("enabled",true);
-            list[1].should.have.property("err");
-            /already registered/.test(list[1].err).should.be.true;
-
-            var nodeConstructor = typeRegistry.get("test-node-1");
-            // Verify the duplicate node hasn't replaced the original one
-            nodeConstructor.name.should.be.equal("TestNode");
 
             done();
         }).catch(function(e) {
@@ -295,26 +289,30 @@ describe('NodeRegistry', function() {
         var settings = {
             nodesDir:[resourcesDir + "TestNode1",resourcesDir + "TestNode2",resourcesDir + "TestNode3"],
             available: function() { return true; },
-            set: function(s,v) {return when.resolve();},
-            get: function(s) { return null;}
-        }
+            set: function(s,v) { return when.resolve(); },
+            get: function(s) { return null; }
+        };
         var settingsSave = sinon.spy(settings,"set");
         typeRegistry.init(settings);
         typeRegistry.load("wontexist",true).then(function() {
-            var list = typeRegistry.getNodeList();
-            list.should.be.Array.and.have.length(3);
+            var nodeList = typeRegistry.getNodeList();
+            var moduleList = typeRegistry.getModuleList();
+            nodeList.should.be.Array.and.have.length(3);
+            moduleList.should.be.Array.and.have.length(1);
 
             settingsSave.callCount.should.equal(1);
-            settingsSave.firstCall.args[0].should.be.equal("nodes");
+            settingsSave.firstCall.args[0].should.be.equal("modules");
             var savedList = settingsSave.firstCall.args[1];
 
-            savedList[list[0].id].name == list[0].name;
-            savedList[list[1].id].name == list[1].name;
-            savedList[list[2].id].name == list[2].name;
+            savedList[moduleList[0].name].name.should.equal(moduleList[0].name);
 
-            savedList[list[0].id].should.not.have.property("err");
-            savedList[list[1].id].should.not.have.property("err");
-            savedList[list[2].id].should.not.have.property("err");
+            savedList[moduleList[0].name].nodes[moduleList[0].nodes[0].name].name.should.equal(moduleList[0].nodes[0].name);
+            savedList[moduleList[0].name].nodes[moduleList[0].nodes[1].name].name.should.equal(moduleList[0].nodes[1].name);
+            savedList[moduleList[0].name].nodes[moduleList[0].nodes[2].name].name.should.equal(moduleList[0].nodes[2].name);
+
+            savedList[moduleList[0].name].nodes[moduleList[0].nodes[0].name].should.not.have.property("err");
+            savedList[moduleList[0].name].nodes[moduleList[0].nodes[1].name].should.not.have.property("err");
+            savedList[moduleList[0].name].nodes[moduleList[0].nodes[2].name].should.not.have.property("err");
 
             done();
         }).catch(function(e) {
@@ -336,10 +334,12 @@ describe('NodeRegistry', function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
 
+            // TODO: Needs module and name params for loadNodeConfig
             typeRegistry.addNode(resourcesDir + "TestNode1/TestNode1.js").then(function(node) {
                 list = typeRegistry.getNodeList();
-                list[0].should.have.property("id");
-                list[0].should.have.property("name","TestNode1.js");
+                list[0].should.have.property("id","node-red/TestNode1");
+                list[0].should.have.property("name","TestNode1");
+                list[0].should.have.property("module","node-red");
                 list[0].should.have.property("types",["test-node-1"]);
                 list[0].should.have.property("enabled",true);
                 list[0].should.not.have.property("err");
@@ -386,8 +386,9 @@ describe('NodeRegistry', function() {
             var id = list[0].id;
             var type = list[0].types[0];
 
-            list[0].should.have.property("id");
-            list[0].should.have.property("name","TestNode1.js");
+            list[0].should.have.property("id","node-red/TestNode1");
+            list[0].should.have.property("name","TestNode1");
+            list[0].should.have.property("module","node-red");
             list[0].should.have.property("types",["test-node-1"]);
             list[0].should.have.property("enabled",true);
             list[0].should.not.have.property("err");
@@ -405,7 +406,7 @@ describe('NodeRegistry', function() {
 
     });
 
-    it('returns plugins list', function(done) {
+    it('returns modules list', function(done) {
         var fs = require("fs");
         var path = require("path");
 
@@ -438,7 +439,7 @@ describe('NodeRegistry', function() {
         typeRegistry.load("wontexist",true).then(function(){
 
             typeRegistry.addModule("TestNodeModule").then(function() {
-                var list = typeRegistry.getPluginList();
+                var list = typeRegistry.getModuleList();
                 list.should.be.an.Array.and.have.lengthOf(1);
                 list[0].should.have.property("name", "TestNodeModule");
                 list[0].should.have.property("nodes");
@@ -457,7 +458,7 @@ describe('NodeRegistry', function() {
         });
     });
 
-    it('returns plugin info', function(done) {
+    it('returns module info', function(done) {
         var fs = require("fs");
         var path = require("path");
 
@@ -490,11 +491,11 @@ describe('NodeRegistry', function() {
         typeRegistry.load("wontexist",true).then(function(){
 
             typeRegistry.addModule("TestNodeModule").then(function(nodes) {
-                var list = typeRegistry.getPluginList();
+                var list = typeRegistry.getModuleList();
 
-                var plugin = typeRegistry.getPluginInfo(list[0].name);
-                plugin.should.have.property("name", list[0].name);
-                plugin.should.have.property("nodes", nodes);
+                var module = typeRegistry.getModuleInfo(list[0].name);
+                module.should.have.property("name", list[0].name);
+                module.should.have.property("nodes", nodes);
                 done();
             }).catch(function(e) {
                 done(e);
@@ -532,8 +533,9 @@ describe('NodeRegistry', function() {
         typeRegistry.load(resourcesDir + "TestNode1",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
-            list[0].should.have.property("id");
-            list[0].should.have.property("name","TestNode1.js");
+            list[0].should.have.property("id","node-red/TestNode1");
+            list[0].should.have.property("name","TestNode1");
+            list[0].should.have.property("module","node-red");
             list[0].should.have.property("types",["test-node-1"]);
             list[0].should.have.property("enabled",true);
             list[0].should.have.property("loaded",true);
@@ -551,7 +553,6 @@ describe('NodeRegistry', function() {
 
             var nodeConstructor = typeRegistry.get("test-node-1");
             (typeof nodeConstructor).should.be.equal("undefined");
-
 
             done();
         }).catch(function(e) {
@@ -612,14 +613,16 @@ describe('NodeRegistry', function() {
         typeRegistry.load("wontexist",false).then(function(){
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(2);
-            list[0].should.have.property("id");
-            list[0].should.have.property("name","TestNodeModule:TestNodeMod1");
+            list[0].should.have.property("id","TestNodeModule/TestNodeMod1");
+            list[0].should.have.property("name","TestNodeMod1");
+            list[0].should.have.property("module","TestNodeModule");
             list[0].should.have.property("types",["test-node-mod-1"]);
             list[0].should.have.property("enabled",true);
             list[0].should.not.have.property("err");
 
-            list[1].should.have.property("id");
-            list[1].should.have.property("name","TestNodeModule:TestNodeMod2");
+            list[1].should.have.property("id","TestNodeModule/TestNodeMod2");
+            list[1].should.have.property("name","TestNodeMod2");
+            list[1].should.have.property("module","TestNodeModule");
             list[1].should.have.property("types",["test-node-mod-2"]);
             list[1].should.have.property("enabled",true);
             list[1].should.have.property("err");
@@ -681,14 +684,16 @@ describe('NodeRegistry', function() {
             typeRegistry.addModule("TestNodeModule").then(function(node) {
                 list = typeRegistry.getNodeList();
                 list.should.be.an.Array.and.have.lengthOf(2);
-                list[0].should.have.property("id");
-                list[0].should.have.property("name","TestNodeModule:TestNodeMod1");
+                list[0].should.have.property("id","TestNodeModule/TestNodeMod1");
+                list[0].should.have.property("name","TestNodeMod1");
+                list[0].should.have.property("module","TestNodeModule");
                 list[0].should.have.property("types",["test-node-mod-1"]);
                 list[0].should.have.property("enabled",true);
                 list[0].should.not.have.property("err");
 
-                list[1].should.have.property("id");
-                list[1].should.have.property("name","TestNodeModule:TestNodeMod2");
+                list[1].should.have.property("id","TestNodeModule/TestNodeMod2");
+                list[1].should.have.property("name","TestNodeMod2");
+                list[1].should.have.property("module","TestNodeModule");
                 list[1].should.have.property("types",["test-node-mod-2"]);
                 list[1].should.have.property("enabled",true);
                 list[1].should.have.property("err");
@@ -708,6 +713,60 @@ describe('NodeRegistry', function() {
         });
     });
 
+    it('adds module with version number', function(done) {
+        var fs = require("fs");
+        var path = require("path");
+
+        var pathJoin = (function() {
+            var _join = path.join;
+            return sinon.stub(path,"join",function() {
+                if (arguments.length  == 3 && arguments[2] == "package.json") {
+                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1],arguments[2]);
+                }
+                if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
+                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1]);
+                }
+                return _join.apply(this,arguments);
+            });
+        })();
+
+        var readdirSync = (function() {
+            var originalReaddirSync = fs.readdirSync;
+            var callCount = 0;
+            return sinon.stub(fs,"readdirSync",function(dir) {
+                var result = [];
+                if (callCount == 1) {
+                    result = originalReaddirSync(resourcesDir + "TestNodeModule" + path.sep + "node_modules");
+                }
+                callCount++;
+                return result;
+            });
+        })();
+        typeRegistry.init(settingsWithStorage);
+        typeRegistry.load("wontexist",true).then(function(){
+            typeRegistry.addModule("TestNodeModule","0.0.1").then(function(node) {
+                var module = typeRegistry.getModuleInfo("TestNodeModule");
+
+                module.should.have.property("name","TestNodeModule");
+                module.should.have.property("version","0.0.1");
+
+                var modules = typeRegistry.getModuleList();
+
+                modules[0].should.have.property("name","TestNodeModule");
+                modules[0].should.have.property("version","0.0.1");
+
+                done();
+            }).catch(function(e) {
+                done(e);
+            });
+
+        }).catch(function(e) {
+            done(e);
+        }).finally(function() {
+            readdirSync.restore();
+            pathJoin.restore();
+        });
+    });
 
     it('rejects adding duplicate node modules', function(done) {
         var fs = require("fs");
@@ -847,13 +906,14 @@ describe('NodeRegistry', function() {
     });
 
 
-    it('allows nodes to be enabled and disabled by hex-id', function(done) {
+    it('allows nodes to be enabled and disabled by id', function(done) {
         typeRegistry.init(settingsWithStorage);
         typeRegistry.load(resourcesDir+path.sep+"TestNode1",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.have.lengthOf(1);
-            list[0].should.have.property("id");
-            list[0].should.have.property("name","TestNode1.js");
+            list[0].should.have.property("id","node-red/TestNode1");
+            list[0].should.have.property("name","TestNode1");
+            list[0].should.have.property("module","node-red");
             list[0].should.have.property("enabled",true);
 
             var nodeConfig = typeRegistry.getNodeConfigs();
@@ -892,8 +952,9 @@ describe('NodeRegistry', function() {
             var list = typeRegistry.getNodeList();
 
             list.should.be.an.Array.and.have.lengthOf(1);
-            list[0].should.have.property("id");
-            list[0].should.have.property("name","TestNode1.js");
+            list[0].should.have.property("id","node-red/TestNode1");
+            list[0].should.have.property("name","TestNode1");
+            list[0].should.have.property("module","node-red");
             list[0].should.have.property("types",["test-node-1"]);
             list[0].should.have.property("enabled",true);
 
@@ -930,14 +991,14 @@ describe('NodeRegistry', function() {
     });
 
     it('fails to enable/disable non-existent nodes', function(done) {
-        typeRegistry.init(settings);
+        typeRegistry.init(settingsWithStorage);
         typeRegistry.load("wontexist",true).then(function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
 
             /*jshint immed: false */
             (function() {
-                    typeRegistry.disableNode("123");
+                typeRegistry.disableNode("123");
             }).should.throw();
 
             /*jshint immed: false */

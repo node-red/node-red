@@ -55,20 +55,21 @@ function checkTypeInUse(id) {
     var nodeInfo = registry.getNodeInfo(id);
     if (!nodeInfo) {
         throw new Error("Unrecognised id: "+id);
-    }
-    var inUse = {};
-    flows.each(function(n) {
-        inUse[n.type] = (inUse[n.type]||0)+1;
-    });
-    var nodesInUse = [];
-    nodeInfo.types.forEach(function(t) {
-        if (inUse[t]) {
-            nodesInUse.push(t);
+    } else {
+        var inUse = {};
+        flows.each(function(n) {
+            inUse[n.type] = (inUse[n.type]||0)+1;
+        });
+        var nodesInUse = [];
+        nodeInfo.types.forEach(function(t) {
+            if (inUse[t]) {
+                nodesInUse.push(t);
+            }
+        });
+        if (nodesInUse.length > 0) {
+            var msg = nodesInUse.join(", ");
+            throw new Error("Type in use: "+msg);
         }
-    });
-    if (nodesInUse.length > 0) {
-        var msg = nodesInUse.join(", ");
-        throw new Error("Type in use: "+msg);
     }
 }
 
@@ -79,12 +80,15 @@ function removeNode(id) {
 
 function removeModule(module) {
     var info = registry.getNodeModuleInfo(module);
-    for (var i=0;i<info.nodes.length;i++) {
-        checkTypeInUse(info.nodes[i]);
+    if (!info) {
+        throw new Error("Unrecognised module: "+module);
+    } else {
+        for (var i=0;i<info.length;i++) {
+            checkTypeInUse(module+"/"+info[i]);
+        }
+        return registry.removeModule(module);
     }
-    return registry.removeModule(module);
 }
-
 
 function disableNode(id) {
     checkTypeInUse(id);
@@ -112,15 +116,20 @@ module.exports = {
     // Node type registry
     registerType: registerType,
     getType: registry.get,
+
     getNodeInfo: registry.getNodeInfo,
-    getNodeModuleInfo: registry.getNodeModuleInfo,
-    getPluginInfo: registry.getPluginInfo,
     getNodeList: registry.getNodeList,
-    getPluginList: registry.getPluginList,
+
+    getNodeModuleInfo: registry.getNodeModuleInfo,
+
+    getModuleInfo: registry.getModuleInfo,
+    getModuleList: registry.getModuleList,
+
     getNodeConfigs: registry.getNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
+
     clearRegistry: registry.clear,
-    cleanNodeList: registry.cleanNodeList,
+    cleanModuleList: registry.cleanModuleList,
 
     // Flow handling
     loadFlows: flows.load,

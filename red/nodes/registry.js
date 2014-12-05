@@ -46,31 +46,48 @@ function filterNodeInfo(n) {
     return r;
 }
 
+function getModule(id) {
+    return id.split("/")[0];
+}
+
+function getNode(id) {
+    return id.split("/")[1];
+}
+
 var registry = (function() {
     var nodeConfigCache = null;
-    var nodeConfigs = {};
+    var moduleConfigs = {};
     var nodeList = [];
     var nodeConstructors = {};
     var nodeTypeToId = {};
-    var nodeModules = {};
+    var moduleNodes = {};
 
     function saveNodeList() {
-        var nodeList = {};
+        var moduleList = {};
 
-        for (var i in nodeConfigs) {
-            if (nodeConfigs.hasOwnProperty(i)) {
-                var nodeConfig = nodeConfigs[i];
-                var n = filterNodeInfo(nodeConfig);
-                n.file = nodeConfig.file;
-                delete n.loaded;
-                delete n.err;
-                delete n.file;
-                delete n.id;
-                nodeList[i] = n;
+        for (var module in moduleConfigs) {
+            if (moduleConfigs.hasOwnProperty(module)) {
+                if (!moduleList[module]) {
+                    moduleList[module] = {};
+                    moduleList[module].name = module;
+                    moduleList[module].nodes = {};
+                }
+                var nodes = moduleConfigs[module].nodes;
+                for(var node in nodes) {
+                    if (nodes.hasOwnProperty(node)) {
+                        var config = nodes[node];
+                        var n = filterNodeInfo(config);
+                        delete n.loaded;
+                        delete n.err;
+                        delete n.file;
+                        delete n.id;
+                        moduleList[module].nodes[node] = n;
+                    }
+                }
             }
         }
         if (settings.available()) {
-            return settings.set("nodes",nodeList);
+            return settings.set("modules",moduleList);
         } else {
             return when.reject("Settings unavailable");
         }
@@ -79,45 +96,47 @@ var registry = (function() {
     return {
         init: function() {
             if (settings.available()) {
-                nodeConfigs = settings.get("nodes")||{};
-                // Restore the node id property to individual entries
-                for (var id in nodeConfigs) {
-                    if (nodeConfigs.hasOwnProperty(id)) {
-                        nodeConfigs[id].id = id;
-                    }
-                }
+                moduleConfigs = settings.get("modules")||{};
             } else {
-                nodeConfigs = {};
+                moduleConfigs = {};
             }
-            nodeModules = {};
+            moduleNodes = {};
             nodeTypeToId = {};
             nodeConstructors = {};
             nodeList = [];
             nodeConfigCache = null;
         },
-
-        addNodeSet: function(id,set) {
+        addNodeSet: function(id,set,version) {
             if (!set.err) {
                 set.types.forEach(function(t) {
                     nodeTypeToId[t] = id;
                 });
             }
 
-            if (set.module) {
-                nodeModules[set.module] = nodeModules[set.module]||{nodes:[]};
-                nodeModules[set.module].nodes.push(id);
+            moduleNodes[set.module] = moduleNodes[set.module]||[];
+            moduleNodes[set.module].push(set.name);
+
+            if (!moduleConfigs[set.module]) {
+                moduleConfigs[set.module] = {
+                    name: set.module,
+                    nodes: {}
+                };
             }
 
-            nodeConfigs[id] = set;
+            if (version) {
+                moduleConfigs[set.module].version = version;
+            }
+
+            moduleConfigs[set.module].nodes[set.name] = set;
             nodeList.push(id);
             nodeConfigCache = null;
         },
         removeNode: function(id) {
-            var config = nodeConfigs[id];
+            var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
             if (!config) {
                 throw new Error("Unrecognised id: "+id);
             }
-            delete nodeConfigs[id];
+            delete moduleConfigs[getModule(id)].nodes[getNode(id)];
             var i = nodeList.indexOf(id);
             if (i > -1) {
                 nodeList.splice(i,1);
@@ -135,62 +154,81 @@ var registry = (function() {
             if (!settings.available()) {
                 throw new Error("Settings unavailable");
             }
-            var nodes = nodeModules[module];
+            var nodes = moduleNodes[module];
             if (!nodes) {
                 throw new Error("Unrecognised module: "+module);
             }
             var infoList = [];
-            for (var i=0;i<nodes.nodes.length;i++) {
-                infoList.push(registry.removeNode(nodes.nodes[i]));
+            for (var i=0;i<nodes.length;i++) {
+                infoList.push(registry.removeNode(module+"/"+nodes[i]));
             }
-            delete nodeModules[module];
+            delete moduleNodes[module];
             saveNodeList();
             return infoList;
         },
         getNodeInfo: function(typeOrId) {
+            var id = typeOrId;
             if (nodeTypeToId[typeOrId]) {
-                return filterNodeInfo(nodeConfigs[nodeTypeToId[typeOrId]]);
-            } else if (nodeConfigs[typeOrId]) {
-                return filterNodeInfo(nodeConfigs[typeOrId]);
+                id = nodeTypeToId[typeOrId];
+            }
+            if (id) {
+                var module = moduleConfigs[getModule(id)];
+                if (module) {
+                    var config = module.nodes[getNode(id)];
+                    if (config) {
+                        return filterNodeInfo(config);
+                    }
+                }
             }
             return null;
         },
         getNodeList: function() {
             var list = [];
-            for (var id in nodeConfigs) {
-                if (nodeConfigs.hasOwnProperty(id)) {
-                    list.push(filterNodeInfo(nodeConfigs[id]));
+            for (var module in moduleConfigs) {
+                if (moduleConfigs.hasOwnProperty(module)) {
+                    var nodes = moduleConfigs[module].nodes;
+                    for (var node in nodes) {
+                        if (nodes.hasOwnProperty(node)) {
+                            list.push(filterNodeInfo(nodes[node]));
+                        }
+                    }
                 }
             }
             return list;
         },
-        getPluginList: function() {
+        getModuleList: function() {
             var list = [];
-            for (var plugin in nodeModules) {
-                if (nodeModules.hasOwnProperty(plugin)) {
-                    var nodes = nodeModules[plugin].nodes;
+            for (var module in moduleNodes) {
+                if (moduleNodes.hasOwnProperty(module)) {
+                    var nodes = moduleNodes[module];
                     var m = {
-                        name: plugin,
+                        name: module,
+                        version: moduleConfigs[module].version,
                         nodes: []
                     };
                     for (var i = 0; i < nodes.length; ++i) {
-                        m.nodes.push(filterNodeInfo(nodeConfigs[nodes[i]]));
+                        m.nodes.push(filterNodeInfo(moduleConfigs[module].nodes[nodes[i]]));
                     }
                     list.push(m);
                 }
             }
             return list;
         },
-        getPluginInfo: function(plugin) {
-            var nodes = nodeModules[plugin].nodes;
-            var m = {
-                name: plugin,
-                nodes: []
-            };
-            for (var i = 0; i < nodes.length; ++i) {
-                m.nodes.push(filterNodeInfo(nodeConfigs[nodes[i]]));
+        getModuleInfo: function(module) {
+            if (moduleNodes[module]) {
+                var nodes = moduleNodes[module];
+                var m = {
+                    name: module,
+                    version: moduleConfigs[module].version,
+                    nodes: []
+                };
+                for (var i = 0; i < nodes.length; ++i) {
+                    m.nodes.push(filterNodeInfo(moduleConfigs[module].nodes[nodes[i]]));
+                }
+                return m;
+            } else {
+                return null;
             }
-            return m;
         },
         registerNodeConstructor: function(type,constructor) {
             if (nodeConstructors[type]) {
@@ -214,7 +252,8 @@ var registry = (function() {
                 var result = "";
                 var script = "";
                 for (var i=0;i<nodeList.length;i++) {
-                    var config = nodeConfigs[nodeList[i]];
+                    var id = nodeList[i];
+                    var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
                     if (config.enabled && !config.err) {
                         result += config.config;
                         script += config.script;
@@ -231,7 +270,7 @@ var registry = (function() {
         },
 
         getNodeConfig: function(id) {
-            var config = nodeConfigs[id];
+            var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
             if (config) {
                 var result = config.config;
                 if (config.script) {
@@ -244,7 +283,15 @@ var registry = (function() {
         },
 
         getNodeConstructor: function(type) {
-            var config = nodeConfigs[nodeTypeToId[type]];
+            var id = nodeTypeToId[type];
+
+            var config;
+            if (typeof id === "undefined") {
+                config = undefined;
+            } else {
+                config = moduleConfigs[getModule(id)].nodes[getNode(id)];
+            }
+
             if (!config || (config.enabled && !config.err)) {
                 return nodeConstructors[type];
             }
@@ -253,7 +300,7 @@ var registry = (function() {
 
         clear: function() {
             nodeConfigCache = null;
-            nodeConfigs = {};
+            moduleConfigs = {};
             nodeList = [];
             nodeConstructors = {};
             nodeTypeToId = {};
@@ -263,21 +310,23 @@ var registry = (function() {
             return nodeTypeToId[type];
         },
 
-        getModuleInfo: function(type) {
-            return nodeModules[type];
+        getNodeModuleInfo: function(module) {
+            return moduleNodes[module];
         },
 
-        enableNodeSet: function(id) {
+        enableNodeSet: function(typeOrId) {
             if (!settings.available()) {
                 throw new Error("Settings unavailable");
             }
-            var config;
-            if (nodeTypeToId[id]) {
-                config = nodeConfigs[nodeTypeToId[id]];
-            } else {
-                config = nodeConfigs[id];
+
+            var id = typeOrId;
+            if (nodeTypeToId[typeOrId]) {
+                id = nodeTypeToId[typeOrId];
             }
-            if (config) {
+
+            var config;
+            try {
+                config = moduleConfigs[getModule(id)].nodes[getNode(id)];
                 delete config.err;
                 config.enabled = true;
                 if (!config.loaded) {
@@ -286,28 +335,28 @@ var registry = (function() {
                 }
                 nodeConfigCache = null;
                 saveNodeList();
-            } else {
-                throw new Error("Unrecognised id: "+id);
+            } catch (err) {
+                throw new Error("Unrecognised id: "+typeOrId);
             }
             return filterNodeInfo(config);
         },
 
-        disableNodeSet: function(id) {
+        disableNodeSet: function(typeOrId) {
             if (!settings.available()) {
                 throw new Error("Settings unavailable");
             }
-            var config;
-            if (nodeTypeToId[id]) {
-                config = nodeConfigs[nodeTypeToId[id]];
-            } else {
-                config = nodeConfigs[id];
+            var id = typeOrId;
+            if (nodeTypeToId[typeOrId]) {
+                id = nodeTypeToId[typeOrId];
             }
-            if (config) {
+            var config;
+            try {
+                config = moduleConfigs[getModule(id)].nodes[getNode(id)];
                 // TODO: persist setting
                 config.enabled = false;
                 nodeConfigCache = null;
                 saveNodeList();
-            } else {
+            } catch (err) {
                 throw new Error("Unrecognised id: "+id);
             }
             return filterNodeInfo(config);
@@ -315,13 +364,18 @@ var registry = (function() {
 
         saveNodeList: saveNodeList,
 
-        cleanNodeList: function() {
+        cleanModuleList: function() {
             var removed = false;
-            for (var id in nodeConfigs) {
-                if (nodeConfigs.hasOwnProperty(id)) {
-                    if (nodeConfigs[id].module && !nodeModules[nodeConfigs[id].module]) {
-                        registry.removeNode(id);
-                        removed = true;
+            for (var mod in moduleConfigs) {
+                if (moduleConfigs.hasOwnProperty(mod)) {
+                    if (moduleConfigs[mod] && !moduleNodes[mod]) {
+                        var nodes = moduleConfigs[mod].nodes;
+                        for (var node in nodes) {
+                            if (nodes.hasOwnProperty(node)) {
+                                registry.removeNode(mod+"/"+node);
+                                removed = true;
+                            }
+                        }
                     }
                 }
             }
@@ -401,7 +455,7 @@ function scanTreeForNodesModules(moduleName) {
             var files = fs.readdirSync(pm);
             for (var i=0;i<files.length;i++) {
                 var fn = files[i];
-                if (!registry.getModuleInfo(fn)) {
+                if (!registry.getNodeModuleInfo(fn)) {
                     if (!moduleName || fn == moduleName) {
                         var pkgfn = path.join(pm,fn,"package.json");
                         try {
@@ -435,7 +489,7 @@ function scanTreeForNodesModules(moduleName) {
  * @param moduleDir the root directory of the package
  * @param pkg the module's package.json object
  */
-function loadNodesFromModule(moduleDir,pkg) {
+function loadNodesFromModule(moduleDir,pkg,version) {
     var nodes = pkg['node-red'].nodes||{};
     var results = [];
     var iconDirs = [];
@@ -443,7 +497,7 @@ function loadNodesFromModule(moduleDir,pkg) {
         if (nodes.hasOwnProperty(n)) {
             var file = path.join(moduleDir,nodes[n]);
             try {
-                results.push(loadNodeConfig(file,pkg.name,n));
+                results.push(loadNodeConfig(file,pkg.name,n,version));
             } catch(err) {
             }
             var iconDir = path.join(moduleDir,path.dirname(nodes[n]),"icons");
@@ -474,20 +528,8 @@ function loadNodesFromModule(moduleDir,pkg) {
  *            types: an array of node type names in this file
  *         }
  */
-function loadNodeConfig(file,module,name) {
-    var id = crypto.createHash('sha1').update(file).digest("hex");
-    if (module && name) {
-        var newid = crypto.createHash('sha1').update(module+":"+name).digest("hex");
-        var existingInfo = registry.getNodeInfo(id);
-        if (existingInfo) {
-            // For a brief period, id for modules were calculated incorrectly.
-            // To prevent false-duplicates, this removes the old id entry
-            registry.removeNode(id);
-            registry.saveNodeList();
-        }
-        id = newid;
-
-    }
+function loadNodeConfig(file,module,name,version) {
+    var id = module + "/" + name;
     var info = registry.getNodeInfo(id);
 
     var isEnabled = true;
@@ -501,18 +543,14 @@ function loadNodeConfig(file,module,name) {
 
     var node = {
         id: id,
+        module: module,
+        name: name,
         file: file,
         template: file.replace(/\.js$/,".html"),
         enabled: isEnabled,
         loaded:false
     };
 
-    if (module) {
-        node.name = module+":"+name;
-        node.module = module;
-    } else {
-        node.name = path.basename(file);
-    }
     try {
         var content = fs.readFileSync(node.template,'utf8');
 
@@ -544,7 +582,7 @@ function loadNodeConfig(file,module,name) {
             node.err = err.toString();
         }
     }
-    registry.addNodeSet(id,node);
+    registry.addNodeSet(id,node,version);
     return node;
 }
 
@@ -576,7 +614,7 @@ function load(defaultNodesDir,disableNodePathScan) {
         var nodes = [];
         nodeFiles.forEach(function(file) {
             try {
-                nodes.push(loadNodeConfig(file));
+                nodes.push(loadNodeConfig(file,"node-red",path.basename(file).replace(/^\d+-/,"").replace(/\.js$/,"")));
             } catch(err) {
                 //
             }
@@ -682,19 +720,19 @@ function addNode(file) {
     }
     var nodes = [];
     try {
-        nodes.push(loadNodeConfig(file));
+        nodes.push(loadNodeConfig(file,"node-red",path.basename(file).replace(/^\d+-/,"").replace(/\.js$/,"")));
     } catch(err) {
         return when.reject(err);
     }
     return loadNodeList(nodes);
 }
 
-function addModule(module) {
+function addModule(module,version) {
     if (!settings.available()) {
         throw new Error("Settings unavailable");
     }
     var nodes = [];
-    if (registry.getModuleInfo(module)) {
+    if (registry.getNodeModuleInfo(module)) {
         return when.reject(new Error("Module already loaded"));
     }
     var moduleFiles = scanTreeForNodesModules(module);
@@ -704,7 +742,7 @@ function addModule(module) {
         return when.reject(err);
     }
     moduleFiles.forEach(function(moduleFile) {
-        nodes = nodes.concat(loadNodesFromModule(moduleFile.dir,moduleFile.package));
+        nodes = nodes.concat(loadNodesFromModule(moduleFile.dir,moduleFile.package,version));
     });
     return loadNodeList(nodes);
 }
@@ -714,14 +752,19 @@ module.exports = {
     load:load,
     clear: registry.clear,
     registerType: registry.registerNodeConstructor,
+
     get: registry.getNodeConstructor,
     getNodeInfo: registry.getNodeInfo,
-    getNodeModuleInfo: registry.getModuleInfo,
-    getPluginInfo: registry.getPluginInfo,
     getNodeList: registry.getNodeList,
-    getPluginList: registry.getPluginList,
+
+    getNodeModuleInfo: registry.getNodeModuleInfo,
+
+    getModuleInfo: registry.getModuleInfo,
+    getModuleList: registry.getModuleList,
+
     getNodeConfigs: registry.getAllNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
+
     addNode: addNode,
     removeNode: registry.removeNode,
     enableNode: registry.enableNodeSet,
@@ -729,5 +772,5 @@ module.exports = {
 
     addModule: addModule,
     removeModule: registry.removeModule,
-    cleanNodeList: registry.cleanNodeList
+    cleanModuleList: registry.cleanModuleList
 };
