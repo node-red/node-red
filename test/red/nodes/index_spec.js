@@ -270,7 +270,7 @@ describe("red/nodes/index", function() {
            });
            sinon.stub(registry,"getNodeModuleInfo",function(module) {
                if (module == "node-red") {
-                  return {name:"node-red",nodes:["foo"]};
+                  return ["foo"];
                } else if (module == "doesnotexist") {
                    return null;
                } else {
