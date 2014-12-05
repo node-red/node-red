@@ -93,10 +93,53 @@ var registry = (function() {
         }
     }
 
+    function loadNodeConfigs() {
+        var configs = settings.get("nodes");
+        
+        if (!configs) {
+            return {};
+        } else if (configs['node-red']) {
+            return configs;
+        } else {
+            // Migrate from the 0.9.1 format of settings
+            var newConfigs = {};
+            for (var id in configs) {
+                if (configs.hasOwnProperty(id)) {
+                    var nodeConfig = configs[id];
+                    var moduleName;
+                    var nodeSetName;
+                    
+                    if (nodeConfig.module) {
+                        moduleName = nodeConfig.module;
+                        nodeSetName = nodeConfig.name.split(":")[1];
+                    } else {
+                        moduleName = "node-red";
+                        nodeSetName = nodeConfig.name.replace(/^\d+-/,"").replace(/\.js$/,"")
+                    }
+                    
+                    if (!newConfigs[moduleName]) {
+                        newConfigs[moduleName] = {
+                            name: moduleName,
+                            nodes:{}
+                        }
+                    }
+                    newConfigs[moduleName].nodes[nodeSetName] = {
+                        name: nodeSetName,
+                        types: nodeConfig.types,
+                        enabled: nodeConfig.enabled,
+                        module: moduleName
+                    }
+                }
+            }
+            settings.set("nodes",newConfigs);
+            return newConfigs;
+        }
+    }
+    
     return {
         init: function() {
             if (settings.available()) {
-                moduleConfigs = settings.get("modules")||{};
+                moduleConfigs = loadNodeConfigs();
             } else {
                 moduleConfigs = {};
             }
