@@ -275,6 +275,9 @@ var registry = (function() {
                 return null;
             }
         },
+        getModuleVersion: function(module) {
+            return moduleConfigs[module].version;
+        },
         registerNodeConstructor: function(type,constructor) {
             if (nodeConstructors[type]) {
                 throw new Error(type+" already registered");
@@ -286,7 +289,6 @@ var registry = (function() {
             nodeConstructors[type] = constructor;
             events.emit("type-registered",type);
         },
-
 
         /**
          * Gets all of the node template configs
@@ -807,6 +809,7 @@ module.exports = {
 
     getModuleInfo: registry.getModuleInfo,
     getModuleList: registry.getModuleList,
+    getModuleVersion: registry.getModuleVersion,
 
     getNodeConfigs: registry.getAllNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
