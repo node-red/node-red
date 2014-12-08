@@ -301,7 +301,7 @@ describe('NodeRegistry', function() {
             moduleList.should.be.Array.and.have.length(1);
 
             settingsSave.callCount.should.equal(1);
-            settingsSave.firstCall.args[0].should.be.equal("modules");
+            settingsSave.firstCall.args[0].should.be.equal("nodes");
             var savedList = settingsSave.firstCall.args[1];
 
             savedList[moduleList[0].name].name.should.equal(moduleList[0].name);
