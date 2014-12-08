@@ -96,7 +96,7 @@ var registry = (function() {
             }
         }
         if (settings.available()) {
-            return settings.set("modules",moduleList);
+            return settings.set("nodes",moduleList);
         } else {
             return when.reject("Settings unavailable");
         }
