@@ -19,15 +19,16 @@ var ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy
 
 var crypto = require("crypto");
 
-var tokens = require("./tokens");
-var users = require("./users");
-var clients = require("./clients");
+var Tokens = require("./tokens");
+var Users = require("./users");
+var Clients = require("./clients");
 
 var bearerStrategy = function (accessToken, done) {
     // is this a valid token?
-    tokens.get(accessToken).then(function(token) {
+    Tokens.get(accessToken).then(function(token) {
         if (token) {
-            users.get(token.user).then(function(user) {
+            Users.get(token.user).then(function(user) {
+                    console.log(user);
                 if (user) {
                     done(null,{username:user.username},{scope:token.scope});
                 } else {
@@ -42,7 +43,7 @@ var bearerStrategy = function (accessToken, done) {
 bearerStrategy.BearerStrategy = new BearerStrategy(bearerStrategy);
 
 var clientPasswordStrategy = function(clientId, clientSecret, done) {
-    clients.get(clientId).then(function(client) {
+    Clients.get(clientId).then(function(client) {
         if (client && client.secret == clientSecret) {
             done(null,client);
         } else {
@@ -53,9 +54,9 @@ var clientPasswordStrategy = function(clientId, clientSecret, done) {
 clientPasswordStrategy.ClientPasswordStrategy = new ClientPasswordStrategy(clientPasswordStrategy);
 
 var passwordTokenExchange = function(client, username, password, scope, done) {
-  users.get(username).then(function(user) {
-      if (user && user.password == crypto.createHash('md5').update(password,'utf8').digest('hex')) {
-          tokens.create(username,client.id,scope).then(function(token) {
+  Users.get(username,password).then(function(user) {
+      if (user) {
+          Tokens.create(username,client.id,scope).then(function(token) {
               done(null,token);
           });
       } else {
