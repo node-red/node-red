@@ -17,6 +17,8 @@
 RED.comms = (function() {
     
     var errornotification = null;
+    var clearErrorTimer = null;
+    
     var subscriptions = {};
     var ws;
     function connectWS() {
@@ -26,8 +28,10 @@ RED.comms = (function() {
         ws = new WebSocket(path);
         ws.onopen = function() {
             if (errornotification) {
-                errornotification.close();
-                errornotification = null;
+                clearErrorTimer = setTimeout(function() {
+                    errornotification.close();
+                    errornotification = null;
+                },1000);
             }
             var auth_tokens = RED.settings.get("auth-tokens");
             if (auth_tokens) {
@@ -60,6 +64,9 @@ RED.comms = (function() {
         ws.onclose = function() {
             if (errornotification == null) {
                 errornotification = RED.notify("<b>Error</b>: Lost connection to server","error",true);
+            } else if (clearErrorTimer) {
+                clearTimeout(clearErrorTimer);
+                clearErrorTimer = null;
             }
             setTimeout(connectWS,1000);
         }
