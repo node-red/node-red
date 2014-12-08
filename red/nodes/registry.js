@@ -68,16 +68,9 @@ var registry = (function() {
         for (var module in moduleConfigs) {
             if (moduleConfigs.hasOwnProperty(module)) {
                 if (!moduleList[module]) {
-                    var version;
-                    if (module === "node-red") {
-                        version = settings.version;
-                    } else {
-                        version = moduleConfigs[module].version;
-                    }
-
                     moduleList[module] = {
                         name: module,
-                        version: version,
+                        version: moduleConfigs[module].version,
                         nodes: {}
                     };
                 }
@@ -541,7 +534,7 @@ function scanTreeForNodesModules(moduleName) {
  * @param moduleDir the root directory of the package
  * @param pkg the module's package.json object
  */
-function loadNodesFromModule(moduleDir,pkg,version) {
+function loadNodesFromModule(moduleDir,pkg) {
     var nodes = pkg['node-red'].nodes||{};
     var results = [];
     var iconDirs = [];
@@ -549,7 +542,7 @@ function loadNodesFromModule(moduleDir,pkg,version) {
         if (nodes.hasOwnProperty(n)) {
             var file = path.join(moduleDir,nodes[n]);
             try {
-                results.push(loadNodeConfig(file,pkg.name,n,version));
+                results.push(loadNodeConfig(file,pkg.name,n,pkg.version));
             } catch(err) {
             }
             var iconDir = path.join(moduleDir,path.dirname(nodes[n]),"icons");
@@ -667,7 +660,7 @@ function load(defaultNodesDir,disableNodePathScan) {
         var nodes = [];
         nodeFiles.forEach(function(file) {
             try {
-                nodes.push(loadNodeConfig(file,"node-red",path.basename(file).replace(/^\d+-/,"").replace(/\.js$/,"")));
+                nodes.push(loadNodeConfig(file,"node-red",path.basename(file).replace(/^\d+-/,"").replace(/\.js$/,""),settings.version));
             } catch(err) {
                 //
             }
@@ -773,14 +766,14 @@ function addNode(file) {
     }
     var nodes = [];
     try {
-        nodes.push(loadNodeConfig(file,"node-red",path.basename(file).replace(/^\d+-/,"").replace(/\.js$/,"")));
+        nodes.push(loadNodeConfig(file,"node-red",path.basename(file).replace(/^\d+-/,"").replace(/\.js$/,""),settings.version));
     } catch(err) {
         return when.reject(err);
     }
     return loadNodeList(nodes);
 }
 
-function addModule(module,version) {
+function addModule(module) {
     if (!settings.available()) {
         throw new Error("Settings unavailable");
     }
@@ -795,7 +788,7 @@ function addModule(module,version) {
         return when.reject(err);
     }
     moduleFiles.forEach(function(moduleFile) {
-        nodes = nodes.concat(loadNodesFromModule(moduleFile.dir,moduleFile.package,version));
+        nodes = nodes.concat(loadNodesFromModule(moduleFile.dir,moduleFile.package));
     });
     return loadNodeList(nodes);
 }

@@ -162,11 +162,8 @@ function installModule(module) {
                     reject(new Error("Install failed"));
                 }
             } else {
-                var grandchild = child_process.exec('npm view '+module+' version', function(err, stdin, stdout) {
-                    var version = stdin.replace(/\s/g, "");
-                    util.log("[red] Installed module: "+module+":"+version);
-                    resolve(redNodes.addModule(module,version).then(reportAddedModules));
-                });
+                util.log("[red] Installed module: "+module);
+                resolve(redNodes.addModule(module).then(reportAddedModules));
             }
         });
     });
