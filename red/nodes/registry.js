@@ -68,9 +68,18 @@ var registry = (function() {
         for (var module in moduleConfigs) {
             if (moduleConfigs.hasOwnProperty(module)) {
                 if (!moduleList[module]) {
-                    moduleList[module] = {};
-                    moduleList[module].name = module;
-                    moduleList[module].nodes = {};
+                    var version;
+                    if (module === "node-red") {
+                        version = settings.version;
+                    } else {
+                        version = moduleConfigs[module].version;
+                    }
+
+                    moduleList[module] = {
+                        name: module,
+                        version: version,
+                        nodes: {}
+                    };
                 }
                 var nodes = moduleConfigs[module].nodes;
                 for(var node in nodes) {
@@ -95,7 +104,7 @@ var registry = (function() {
 
     function loadNodeConfigs() {
         var configs = settings.get("nodes");
-        
+
         if (!configs) {
             return {};
         } else if (configs['node-red']) {
@@ -108,34 +117,34 @@ var registry = (function() {
                     var nodeConfig = configs[id];
                     var moduleName;
                     var nodeSetName;
-                    
+
                     if (nodeConfig.module) {
                         moduleName = nodeConfig.module;
                         nodeSetName = nodeConfig.name.split(":")[1];
                     } else {
                         moduleName = "node-red";
-                        nodeSetName = nodeConfig.name.replace(/^\d+-/,"").replace(/\.js$/,"")
+                        nodeSetName = nodeConfig.name.replace(/^\d+-/,"").replace(/\.js$/,"");
                     }
-                    
+
                     if (!newConfigs[moduleName]) {
                         newConfigs[moduleName] = {
                             name: moduleName,
                             nodes:{}
-                        }
+                        };
                     }
                     newConfigs[moduleName].nodes[nodeSetName] = {
                         name: nodeSetName,
                         types: nodeConfig.types,
                         enabled: nodeConfig.enabled,
                         module: moduleName
-                    }
+                    };
                 }
             }
             settings.set("nodes",newConfigs);
             return newConfigs;
         }
     }
-    
+
     return {
         init: function() {
             if (settings.available()) {
@@ -625,6 +634,7 @@ function loadNodeConfig(file,module,name,version) {
             node.err = err.toString();
         }
     }
+
     registry.addNodeSet(id,node,version);
     return node;
 }
