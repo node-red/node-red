@@ -23,7 +23,6 @@ module.exports = function(RED) {
     var getBody = require('raw-body');
     var mustache = require("mustache");
     var querystring = require("querystring");
-
     var cors = require('cors');
     var jsonParser = express.json();
     var urlencParser = express.urlencoded();
@@ -150,6 +149,7 @@ module.exports = function(RED) {
         var nodeUrl = n.url;
         var isTemplatedUrl = (nodeUrl||"").indexOf("{{") != -1;
         var nodeMethod = n.method || "GET";
+        this.ret = n.ret || "txt";
         var node = this;
         this.on("input",function(msg) {
             node.status({fill:"blue",shape:"dot",text:"requesting"});
@@ -170,15 +170,19 @@ module.exports = function(RED) {
             }
 
             var method;
-            if (msg.method) {
-                if (n.method && (n.method !== msg.method)) {
-                    node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
+            if (msg.method) {                               // if method set in msg
+                if (n.method && (n.method !== "use")) {     // warn if override option not set
+                    node.warn("Deprecated: msg properties should not override fixed node properties. Use explicit override option. See bit.ly/nr-override-msg-props");
                 }
-                method = msg.method.toUpperCase();
+                method = msg.method.toUpperCase();          // but use it anyway
             } else {
-                method = nodeMethod.toUpperCase();
+                if (n.method !== "use") {
+                    method = nodeMethod.toUpperCase();      // otherwise use the selected method
+                } else {                                    // unless they selected override
+                    method = "GET";                         // - in which case default to GET
+                }
             }
-            //node.log(method+" : "+url);
+            node.log(method+" : "+url);
             var opts = urllib.parse(url);
             opts.method = method;
             opts.headers = {};
@@ -221,7 +225,7 @@ module.exports = function(RED) {
             }
 
             var req = ((/^https/.test(url))?https:http).request(opts,function(res) {
-                res.setEncoding('utf8');
+                (node.ret === "bin") ? res.setEncoding('binary') : res.setEncoding('utf8');
                 msg.statusCode = res.statusCode;
                 msg.headers = res.headers;
                 msg.payload = "";
@@ -229,6 +233,13 @@ module.exports = function(RED) {
                     msg.payload += chunk;
                 });
                 res.on('end',function() {
+                    if (node.ret === "bin") {
+                        msg.payload = new Buffer(msg.payload,"binary");
+                    }
+                    else if (node.ret === "obj") {
+                        try { msg.payload = JSON.parse(msg.payload); }
+                        catch(e) { node.warn("JSON parse error"); }
+                    }
                     node.send(msg);
                     node.status({});
                 });

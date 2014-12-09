@@ -91,6 +91,7 @@
         <option value="POST">POST</option>
         <option value="PUT">PUT</option>
         <option value="DELETE">DELETE</option>
+        <option value="use">- set by msg.method -</option>
         </select>
     </div>
     <div class="form-row">
@@ -100,7 +101,7 @@
     <div class="form-row">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-useAuth" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-useAuth" style="width: 70%;">Use basic authentication?</label>
+        <label for="node-input-useAuth" style="width: 70%;">Use basic authentication ?</label>
     </div>
     <div class="form-row node-input-useAuth-row">
         <label for="node-input-user"><i class="fa fa-user"></i> Username</label>
@@ -111,9 +112,18 @@
         <input type="password" id="node-input-password">
     </div>
     <div class="form-row">
+        <label for="node-input-ret"><i class="fa fa-arrow-left"></i> Return</label>
+        <select type="text" id="node-input-ret" style="width:72%;">
+        <option value="txt">a UTF-8 string</option>
+        <option value="bin">a binary buffer</option>
+        <option value="obj">a parsed JSON object</option>
+        </select>
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-tips" id="tip-json" hidden>Tip: If the JSON parse fails the fetched string is returned as-is.</div>
 </script>
 
 <script type="text/x-red" data-help-name="http request">
@@ -212,6 +222,7 @@
         defaults: {
             name: {value:""},
             method:{value:"GET"},
+            ret: {value:"txt"},
             url:{value:""},
             //user -> credentials
             //pass -> credentials
@@ -248,6 +259,14 @@
                     $('#node-input-password').val('');
                 }
             });
-        },
+
+            $("#node-input-ret").change(function() {
+                if ($("#node-input-ret").val() === "obj") {
+                    $("#tip-json").show();
+                } else {
+                    $("#tip-json").hide();
+                }
+            });
+        }
     });
 </script>
