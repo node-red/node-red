@@ -45,12 +45,12 @@ RED.palette = (function() {
         var portHeight = 10;
 
         var words = label.split(" ");
-        
+
         var displayLines = [];
-        
+
         var currentLine = words[0];
         var currentLineWidth = RED.view.calculateTextWidth(currentLine, "palette_label", 0);
-        
+
         for (var i=1;i<words.length;i++) {
             var newWidth = RED.view.calculateTextWidth(currentLine+" "+words[i], "palette_label", 0);
             if (newWidth < nodeWidth) {
@@ -63,16 +63,16 @@ RED.palette = (function() {
             }
         }
         displayLines.push(currentLine);
-        
+
         var lines = displayLines.join("<br/>");
         var multiLineNodeHeight = 8+(lineHeight*displayLines.length);
         el.css({height:multiLineNodeHeight+"px"});
 
         var labelElement = el.find(".palette_label");
         labelElement.html(lines);
-        
+
         el.find(".palette_port").css({top:(multiLineNodeHeight/2-5)+"px"});
-        
+
         var popOverContent;
         try {
             var l = "<p><b>"+label+"</b></p>";
@@ -87,16 +87,16 @@ RED.palette = (function() {
             popOverContent = "<p><b>"+label+"</b></p><p>no information available</p>";
         }
 
-        
+
         el.data('popover').options.content = popOverContent;
     }
-    
+
     function escapeNodeType(nt) {
         return nt.replace(" ","_").replace(".","_").replace(":","_");
     }
-    
+
     function addNodeType(nt,def) {
-        
+
         var nodeTypeId = escapeNodeType(nt);
         if ($("#palette_node_"+nodeTypeId).length) {
             return;
@@ -120,7 +120,7 @@ RED.palette = (function() {
             }
 
             d.innerHTML = '<div class="palette_label"></div>';
-            
+
             d.className="palette_node";
             if (def.icon) {
                 d.style.backgroundImage = "url(icons/"+def.icon+")";
@@ -175,7 +175,7 @@ RED.palette = (function() {
                 revert: true,
                 revertDuration: 50
             });
-            
+
             setLabel(nt,$(d),label);
         }
     }
@@ -193,13 +193,13 @@ RED.palette = (function() {
         var nodeTypeId = escapeNodeType(nt);
         $("#palette_node_"+nodeTypeId).show();
     }
-    
+
     function refreshNodeTypes() {
         RED.nodes.eachSubflow(function(sf) {
             var paletteNode = $("#palette_node_subflow_"+sf.id.replace(".","_"));
             var portInput = paletteNode.find(".palette_port_input");
             var portOutput = paletteNode.find(".palette_port_output");
-            
+
             if (portInput.length === 0 && sf.in.length > 0) {
                 var portIn = document.createElement("div");
                 portIn.className = "palette_port palette_port_input";
@@ -207,18 +207,18 @@ RED.palette = (function() {
             } else if (portInput.length !== 0 && sf.in.length === 0) {
                 portInput.remove();
             }
-            
+
             if (portOutput.length === 0 && sf.out.length > 0) {
                 var portOut = document.createElement("div");
                 portOut.className = "palette_port palette_port_output";
                 paletteNode.append(portOut);
             } else if (portOutput.length !== 0 && sf.out.length === 0) {
                 portOutput.remove();
-            } 
+            }
             setLabel(sf.type+":"+sf.id,paletteNode,sf.name);
         });
     }
-    
+
     function filterChange() {
         var val = $("#palette-search-input").val();
         if (val === "") {
@@ -227,7 +227,7 @@ RED.palette = (function() {
             $("#palette-search-clear").show();
         }
 
-        var re = new RegExp(val);
+        var re = new RegExp(val,'i');
         $(".palette_node").each(function(i,el) {
             if (val === "" || re.test(el.id)) {
                 $(this).show();
