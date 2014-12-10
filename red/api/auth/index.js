@@ -18,23 +18,29 @@ var passport = require("passport");
 var oauth2orize = require("oauth2orize");
 
 var strategies = require("./strategies");
-var tokens = require("./tokens");
+var Tokens = require("./tokens");
+var Users = require("./users");
 
 var settings = require("../../settings");
 
 passport.use(strategies.bearerStrategy.BearerStrategy);
 passport.use(strategies.clientPasswordStrategy.ClientPasswordStrategy);
+passport.use(strategies.anonymousStrategy);
 
 var server = oauth2orize.createServer();
 
 server.exchange(oauth2orize.exchange.password(strategies.passwordTokenExchange));
+
+function init() {
+    Users.init();
+}
 
 function authenticate(req,res,next) {
     if (settings.adminAuth) {
         if (/^\/auth\/.*/.test(req.originalUrl)) {
             next();
         } else {
-            return passport.authenticate('bearer', { session: false })(req,res,next);
+            return passport.authenticate(['bearer','anon'], { session: false })(req,res,next); 
         }
     } else {
         next();
@@ -59,18 +65,18 @@ function login(req,res) {
         "type":"credentials",
         "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"}]
     }
-
     res.json(response);
 }
 
 function revoke(req,res) {
     var token = req.body.token;
-    tokens.revoke(token).then(function() {
+    Tokens.revoke(token).then(function() {
         res.send(200);
     });
 }
 
 module.exports = {
+    init: init,
     authenticate: authenticate,
     ensureClientSecret: ensureClientSecret,
     authenticateClient: authenticateClient,

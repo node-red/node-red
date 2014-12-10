@@ -16,6 +16,7 @@
 
 var express = require("express");
 var util = require('util');
+var path = require('path');
 var passport = require('passport');
 
 var ui = require("./ui");
@@ -25,6 +26,7 @@ var library = require("./library");
 var info = require("./info");
 
 var auth = require("./auth");
+var needsPermission = require("./auth/permissions").needsPermission;
 
 var settings = require("../settings");
 
@@ -35,6 +37,7 @@ var errorHandler = function(err,req,res,next) {
 
 function init(adminApp) {
     
+    auth.init();
     
     // Editor
     if (!settings.disableEditor) {
@@ -62,28 +65,28 @@ function init(adminApp) {
     adminApp.post("/auth/revoke",auth.revoke);
 
     // Flows
-    adminApp.get("/flows",flows.get);
-    adminApp.post("/flows",flows.post);
+    adminApp.get("/flows",needsPermission("flows.read"),flows.get);
+    adminApp.post("/flows",needsPermission("flows.write"),flows.post);
     
     // Nodes
-    adminApp.get("/nodes",nodes.getAll);
-    adminApp.post("/nodes",nodes.post);
+    adminApp.get("/nodes",needsPermission("nodes.read"),nodes.getAll);
+    adminApp.post("/nodes",needsPermission("nodes.write"),nodes.post);
 
-    adminApp.get("/nodes/:mod",nodes.getModule);
-    adminApp.put("/nodes/:mod",nodes.putModule);
-    adminApp.delete("/nodes/:mod",nodes.delete);
+    adminApp.get("/nodes/:mod",needsPermission("nodes.read"),nodes.getModule);
+    adminApp.put("/nodes/:mod",needsPermission("nodes.write"),nodes.putModule);
+    adminApp.delete("/nodes/:mod",needsPermission("nodes.write"),nodes.delete);
     
-    adminApp.get("/nodes/:mod/:set",nodes.getSet);
-    adminApp.put("/nodes/:mod/:set",nodes.putSet);
+    adminApp.get("/nodes/:mod/:set",needsPermission("nodes.read"),nodes.getSet);
+    adminApp.put("/nodes/:mod/:set",needsPermission("nodes.write"),nodes.putSet);
 
     // Library
     library.init(adminApp);
-    adminApp.post(new RegExp("/library/flows\/(.*)"),library.post);
-    adminApp.get("/library/flows",library.getAll);
-    adminApp.get(new RegExp("/library/flows\/(.*)"),library.get);
+    adminApp.post(new RegExp("/library/flows\/(.*)"),needsPermission("library.write"),library.post);
+    adminApp.get("/library/flows",needsPermission("library.read"),library.getAll);
+    adminApp.get(new RegExp("/library/flows\/(.*)"),needsPermission("library.read"),library.get);
     
     // Settings
-    adminApp.get("/settings",info.settings);
+    adminApp.get("/settings",needsPermission("settings.read"),info.settings);
     
     // Error Handler
     adminApp.use(errorHandler);

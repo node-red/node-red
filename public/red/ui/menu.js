@@ -140,7 +140,13 @@ RED.menu = (function() {
 
         var button = $("#"+options.id);
 
-        var topMenu = $("<ul/>",{id:options.id+"-submenu", class:"dropdown-menu"}).insertAfter(button);
+        //button.click(function(event) {
+        //    $("#"+options.id+"-submenu").show();
+        //    event.preventDefault();
+        //});
+        
+        
+        var topMenu = $("<ul/>",{id:options.id+"-submenu", class:"dropdown-menu pull-right"}).insertAfter(button);
 
         for (var i=0;i<options.options.length;i++) {
             var opt = options.options[i];

@@ -19,30 +19,79 @@ var crypto = require("crypto");
 var util = require("util");
 
 var settings = require("../../settings");
+/*
+    adminAuth: {
+        type: "credentials",
+        users: [{
+            username: "nol",
+            password: "5f4dcc3b5aa765d61d8327deb882cf99" // password
+        }],
+        anonymous: {}
+    },
+    
+    adminAuth: {
+        type: "credentials",
+        api: {
+            get: function(username) {}
+            authenticate: function(username,password) {}
+            anonymous: function() {}
+        }
+*/
 
 //{username:"nick",password:crypto.createHash('md5').update("foo",'utf8').digest('hex')}
 var users = {};
 var passwords = {};
-var api = {};
+var anonymousUser = null;
 
-if (settings.adminAuth) {
-    if (settings.adminAuth.type == "credentials") {
-        if (settings.adminAuth.users) {
-            if (util.isArray(settings.adminAuth.users)) {
-                for (var i=0;i<settings.adminAuth.users.length;i++) {
-                    var u = settings.adminAuth.users[i];
-                    users[u.username] = {
-                        "username":u.username
-                    };
-                    passwords[u.username] = u.password;
+var api = {
+    get: function(username) {
+        return when.resolve(null);
+    },
+    authenticate: function(username,password) {
+        return when.resolve(null);
+    },
+    anonymous: function() {
+        return when.resolve(null);
+    }
+}
+function init() {
+    users = {};
+    passwords = {};
+    anonymousUser = null;
+    if (settings.adminAuth) {
+        if (settings.adminAuth.type == "credentials") {
+            if (settings.adminAuth.api) {
+                api.get = settings.adminAuth.api.get || api.get;
+                api.authenticate = settings.adminAuth.api.authenticate || api.authenticate;
+                api.anonymous = settings.adminAuth.api.anonymous || api.anonymous;
+            } else {
+                if (settings.adminAuth.users) {
+                    var us = settings.adminAuth.users;
+                    if (!util.isArray(us)) {
+                        us = [us];
+                    }
+                    for (var i=0;i<us.length;i++) {
+                        var u = us[i];
+                        users[u.username] = {
+                            "username":u.username,
+                            "permissions":u.permissions
+                        };
+                        passwords[u.username] = u.password;
+                    }
                 }
-                var api = {
+                if (settings.adminAuth.anonymous) {
+                    anonymousUser = {
+                        "anonymous": true,
+                        "permissions":settings.adminAuth.anonymous.permissions
+                    }
+                }
+                api = {
                     get: function(username) {
                         return when.resolve(users[username]);
                     },
                     authenticate: function(username,password) {
                         return api.get(username).then(function(user) {
-                            if (user) { 
+                            if (user) {
                                 var pass = crypto.createHash('md5').update(password,'utf8').digest('hex');
                                 if (pass == passwords[username]) {
                                     return when.resolve(user);
@@ -50,15 +99,20 @@ if (settings.adminAuth) {
                             }
                             return when.resolve(null);
                         });
+                    },
+                    anonymous: function() {
+                        return when.resolve(anonymousUser);
                     }
                 }
-            } else {
-                api = settings.adminAuth.users;
             }
         }
     }
 }
-
-module.exports = api;
+module.exports = {
+    init: init,
+    get: function(username) { return api.get(username) },
+    authenticate: function(username,password) { return api.authenticate(username,password) },
+    anonymous: function() { return api.anonymous(); }
+};
 
 

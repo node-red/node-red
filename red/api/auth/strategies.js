@@ -16,9 +16,10 @@
 
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy;
+var passport = require("passport");
 
 var crypto = require("crypto");
-
+var util = require("util");
 var Tokens = require("./tokens");
 var Users = require("./users");
 var Clients = require("./clients");
@@ -29,7 +30,7 @@ var bearerStrategy = function (accessToken, done) {
         if (token) {
             Users.get(token.user).then(function(user) {
                 if (user) {
-                    done(null,{username:user.username},{scope:token.scope});
+                    done(null,user,{scope:token.scope});
                 } else {
                     done(null,false);
                 }
@@ -53,19 +54,38 @@ var clientPasswordStrategy = function(clientId, clientSecret, done) {
 clientPasswordStrategy.ClientPasswordStrategy = new ClientPasswordStrategy(clientPasswordStrategy);
 
 var passwordTokenExchange = function(client, username, password, scope, done) {
-  Users.get(username,password).then(function(user) {
+  Users.authenticate(username,password).then(function(user) {
       if (user) {
           Tokens.create(username,client.id,scope).then(function(token) {
               done(null,token);
           });
       } else {
-          done(new Error("Invalid"),false);
+          done(null,false);
       }
   });
+}
+
+
+function AnonymousStrategy() {
+  passport.Strategy.call(this);
+  this.name = 'anon';
+}
+util.inherits(AnonymousStrategy, passport.Strategy);
+AnonymousStrategy.prototype.authenticate = function(req) {
+    var authorization = req.headers['authorization'];
+    var self = this;
+    Users.anonymous().then(function(anon) {
+        if (anon) {
+            self.success(anon);
+        } else {
+            self.fail(401);
+        }
+    });
 }
 
 module.exports = {
     bearerStrategy: bearerStrategy,
     clientPasswordStrategy: clientPasswordStrategy,
-    passwordTokenExchange: passwordTokenExchange
+    passwordTokenExchange: passwordTokenExchange,
+    anonymousStrategy: new AnonymousStrategy()
 }

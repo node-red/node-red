@@ -119,7 +119,7 @@ module.exports = function(RED) {
     });
     RED.log.addHandler(DebugNode.logHandler);
 
-    RED.httpAdmin.post("/debug/:id/:state", function(req,res) {
+    RED.httpAdmin.post("/debug/:id/:state", RED.auth.needsPermission("debug.write"), function(req,res) {
         var node = RED.nodes.getNode(req.params.id);
         var state = req.params.state;
         if (node !== null && typeof node !== "undefined" ) {

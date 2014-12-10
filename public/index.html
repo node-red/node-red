@@ -36,7 +36,7 @@
                 <a id="btn-deploy" class="action-deploy disabled" href="#"><img id="btn-icn-deploy" src="images/deploy-full-o.png"> <span>Deploy</span></a>
                 <a id="btn-deploy-options"  data-toggle="dropdown"  class="" href="#"><i class="fa fa-caret-down"></i></a>
             </span></li>
-        <li><span class="user hide"><i class="fa fa-user"></i> <span class="username"></span></span></li>
+            <li><a id="btn-usermenu" class="button" data-toggle="dropdown" href="#"><i class="fa fa-user"></i></a></li>
         <li><a id="btn-sidemenu" class="button" data-toggle="dropdown" href="#"><i class="fa fa-bars"></i></a></li>
     <ul>
 </div>
@@ -240,14 +240,6 @@
     </div>
 </script>
 
-<div id="node-dialog-login" class="hide">
-    <div style="display: inline-block;width: 250px; vertical-align: top; margin-right: 10px; margin-bottom: 20px;"><img src="node-red-256.png"/></div>
-    <div style="display: inline-block; width: 250px; vertical-align: bottom; margin-left: 10px; margin-bottom: 20px;">
-        <form id="node-dialog-login-fields" class="form-horizontal"></form>
-    </div>
-</div>
-
-
 <script src="jquery/js/jquery-1.11.1.min.js"></script>
 <script src="bootstrap/js/bootstrap.min.js"></script>
 <script src="jquery/js/jquery-ui-1.10.3.custom.min.js"></script>
@@ -257,6 +249,7 @@
 <script src="d3.v3.min.js"></script>
 <script src="red/main.js"></script>
 <script src="red/settings.js"></script>
+<script src="red/user.js"></script>
 <script src="red/comms.js"></script>
 <script src="red/ui/state.js"></script>
 <script src="red/nodes.js"></script>

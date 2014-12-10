@@ -14,8 +14,6 @@
  * limitations under the License.
  **/
 
-var tokens = require("./api/auth/tokens");
-
 var ws = require("ws");
 var log = require("./log");
 
@@ -37,24 +35,23 @@ function init(_server,_settings) {
     settings = _settings;
 }
 
-function start() {
 
+function start() {
+    var Tokens = require("./api/auth/tokens");
+    var Users = require("./api/auth/users");
+    var Permissions = require("./api/auth/permissions");
+    
     if (!settings.disableEditor) {
-        var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
-        var path = settings.httpAdminRoot || "/";
-        path = path + (path.slice(-1) == "/" ? "":"/") + "comms";
-        wsServer = new ws.Server({server:server,path:path});
-        
-        wsServer.on('connection',function(ws) {
-            var pendingAuth = (settings.adminAuth != null);
-            if (!pendingAuth) {
-                activeConnections.push(ws);
-            } else {
-                pendingConnections.push(ws);
-            }
-            ws.on('close',function() {
+        Users.anonymous().then(function(anonymousUser) {
+            var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
+            var path = settings.httpAdminRoot || "/";
+            path = path + (path.slice(-1) == "/" ? "":"/") + "comms";
+            wsServer = new ws.Server({server:server,path:path});
+            
+            wsServer.on('connection',function(ws) {
+                var pendingAuth = (settings.adminAuth != null);
                 if (!pendingAuth) {
-                    removeActiveConnection(ws);
+                    activeConnections.push(ws);
                 } else {
                     removePendingConnection(ws);
                 }
@@ -67,31 +64,64 @@ function start() {
                     log.warn("comms received malformed message : "+err.toString());
                     return;
                 }
-                if (!pendingAuth) {
-                    if (msg.subscribe) {
-                        handleRemoteSubscription(ws,msg.subscribe);
+                ws.on('close',function() {
+                    removeActiveConnection(ws);
+                    removePendingConnection(ws);
+                });
+                ws.on('message', function(data,flags) {
+                    var msg = null;
+                    try {
+                        msg = JSON.parse(data);
+                    } catch(err) {
+                        util.log("[red:comms] received malformed message : "+err.toString());
+                        return;
                     }
-                } else {
-                    if (msg.auth) {
-                        tokens.get(msg.auth).then(function(client) {
-                            if (!client) {
+                    if (!pendingAuth) {
+                        if (msg.subscribe) {
+                            handleRemoteSubscription(ws,msg.subscribe);
+                        }
+                    } else {
+                        var completeConnection = function(user) {
+                            if (!user || !Permissions.hasPermission(user,"status.read")) {
                                 ws.close();
                             } else {
                                 pendingAuth = false;
                                 removePendingConnection(ws);
                                 activeConnections.push(ws);
+                                ws.send(JSON.stringify({auth:"ok"}));
                             }
-                        });
-                    } else {
-                        ws.close();
+                        }
+                        if (msg.auth) {
+                            Tokens.get(msg.auth).then(function(client) {
+                                if (client) {
+                                    Users.get(client.user).then(completeConnection);
+                                } else {
+                                    completeConnection(null);
+                                }
+                            });
+                        } else {
+                            completeConnection(anonymousUser);
+                        }
                     }
-                }
+                });
+                ws.on('error', function(err) {
+                        util.log("[red:comms] error : "+err.toString());
+                });
             });
+            
             ws.on('error', function(err) {
                 log.warn("comms error : "+err.toString());
             });
+            
+            lastSentTime = Date.now();
+            
+            heartbeatTimer = setInterval(function() {
+                    var now = Date.now();
+                    if (now-lastSentTime > webSocketKeepAliveTime) {
+                        publish("hb",lastSentTime);
+                    }
+            }, webSocketKeepAliveTime);
         });
-        
         wsServer.on('error', function(err) {
             log.warn("comms server error : "+err.toString());
         });

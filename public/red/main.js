@@ -311,34 +311,46 @@ var RED = (function() {
         });
         
         if (RED.settings.user) {
-            $("#header .username").html(RED.settings.user.username);
-            $("#header .user").show();
-            RED.menu.addItem("btn-sidemenu", null);
-            RED.menu.addItem("btn-sidemenu",{
-                id:"btn-logout",
-                icon:"fa fa-user",
-                label:"Logout",
-                onselect:function() {
-                    // TODO: invalidate token
-                    
-                    $.ajax({
-                        url: "auth/revoke",
-                        type: "POST",
-                        data: {token:RED.settings.get("auth-tokens").access_token},
-                        success: function() {
-                            RED.settings.remove("auth-tokens");
-                            document.location.reload(true);
-                        }
-                    })
-                    
-                }
+            RED.menu.init({id:"btn-usermenu",
+                options: []
             });
             
+            function updateUserMenu() {
+                $("#btn-usermenu-submenu li").remove();
+                if (RED.settings.user.anonymous) {
+                    RED.menu.addItem("btn-usermenu",{
+                        id:"btn-login",
+                        label:"Login",
+                        onselect: function() {
+                            RED.user.login({cancelable:true},function() {
+                                RED.settings.load(function() {
+                                    RED.notify("Logged in as "+RED.settings.user.username,"success");
+                                    updateUserMenu();
+                                });
+                            });
+                        }
+                    });
+                } else {
+                    RED.menu.addItem("btn-usermenu",{
+                        id:"btn-username",
+                        icon:"fa fa-user",
+                        label:"<b>"+RED.settings.user.username+"</b>"
+                    });
+                    RED.menu.addItem("btn-usermenu",{
+                        id:"btn-logout",
+                        label:"Logout",
+                        onselect: function() {
+                            RED.user.logout();
+                        }
+                    });
+                }
+                    
+            }
+            updateUserMenu();
         }
     
         $("#main-container").show();
-        $("#btn-deploy").show();
-        $("#btn-sidemenu").show();
+        $(".header-toolbar").show();
         
         RED.library.init();
         RED.palette.init();
@@ -349,92 +361,14 @@ var RED = (function() {
         RED.comms.connect();
         loadNodeList();
     }
-    
-    function showLogin() {
-        var dialog = $("#node-dialog-login");
-        dialog.dialog({
-            autoOpen: false,
-            dialogClass: "ui-dialog-no-close",
-            modal: true,
-            closeOnEscape: false,
-            width: 600,
-            resizable: false,
-            draggable: false
-        });
-        $("#node-dialog-login-fields").empty();
-        $.ajax({
-            dataType: "json",
-            url: "auth/login",
-            success: function(data) {
-                if (data.type == "credentials") {
-                    for (var i=0;i<data.prompts.length;i++) {
-                        var field = data.prompts[i];
-                        var row = $("<div/>",{class:"form-row"});
-                        $('<label for="node-dialog-login-'+field.id+'">'+field.label+':</label><br/>').appendTo(row);
-                        $('<input style="width: 100%" id="node-dialog-login-'+field.id+'" type="'+field.type+'"/>').appendTo(row);
-                        row.appendTo("#node-dialog-login-fields");
-                    }
-                    $('<div class="form-row" style="text-align: right"><span id="node-dialog-login-failed" style="line-height: 2em;float:left;" class="hide">Login failed</span><img src="spin.svg" style="height: 30px" class="login-spinner hide"/> <a href="#" id="node-dialog-login-submit">Login</a></div>').appendTo("#node-dialog-login-fields");
-                    $("#node-dialog-login-submit").button().click(function( event ) {
-                        $("#node-dialog-login-submit").button("option","disabled",true);
-                        $("#node-dialog-login-failed").hide();
-                        $(".login-spinner").show();
-                        
-                        var body = {
-                            client_id: "node-red-admin",
-                            grant_type: "password",
-                            scope:"*"
-                        }
-                        for (var i=0;i<data.prompts.length;i++) {
-                            var field = data.prompts[i];
-                            body[field.id] = $("#node-dialog-login-"+field.id).val();
-                        }
-                        $.ajax({
-                            url:"auth/token",
-                            type: "POST",
-                            data: body
-                        }).done(function(data,textStatus,xhr) {
-                            RED.settings.set("auth-tokens",data);
-                            $("#node-dialog-login").dialog("close");
-                            load();
-                        }).fail(function(jqXHR,textStatus,errorThrown) {
-                            RED.settings.remove("auth-tokens");
-                            $("#node-dialog-login-failed").show();
-                        }).always(function() {
-                            $("#node-dialog-login-submit").button("option","disabled",false);
-                            $(".login-spinner").hide();
-                        });
-                        event.preventDefault();
-                    });
-                }
-                dialog.dialog("open");
-            }     
-        });
-    }
 
-    function load() {
-        RED.settings.init(function(err,msg) {
-            if (err) {
-                if (err === 401) {
-                    showLogin();
-                } else {
-                    console.log("Unexpected error:",err,msg);
-                }
-            } else {
-                loadEditor();
-            }
-        });
-    }
-    
     $(function() {
             
         if ((window.location.hostname !== "localhost") && (window.location.hostname !== "127.0.0.1")) {
             document.title = "Node-RED : "+window.location.hostname;
         }
-        $("#btn-deploy").hide();
-        $("#btn-sidemenu").hide();
         
-        load();
+        RED.settings.init(loadEditor);
     });
 
 

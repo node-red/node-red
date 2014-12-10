@@ -21,10 +21,23 @@ RED.comms = (function() {
     
     var subscriptions = {};
     var ws;
+    var pendingAuth = false;
+    
     function connectWS() {
         var path = location.hostname+":"+location.port+document.location.pathname;
         path = path+(path.slice(-1) == "/"?"":"/")+"comms";
         path = "ws"+(document.location.protocol=="https:"?"s":"")+"://"+path;
+        var auth_tokens = RED.settings.get("auth-tokens");
+        pendingAuth = (auth_tokens!=null);
+        
+        function completeConnection() {
+            for (var t in subscriptions) {
+                if (subscriptions.hasOwnProperty(t)) {
+                    ws.send(JSON.stringify({subscribe:t}));
+                }
+            }
+        }
+        
         ws = new WebSocket(path);
         ws.onopen = function() {
             if (errornotification) {
@@ -33,19 +46,18 @@ RED.comms = (function() {
                     errornotification = null;
                 },1000);
             }
-            var auth_tokens = RED.settings.get("auth-tokens");
-            if (auth_tokens) {
+            if (pendingAuth) {
                 ws.send(JSON.stringify({auth:auth_tokens.access_token}));
-            }
-            for (var t in subscriptions) {
-                if (subscriptions.hasOwnProperty(t)) {
-                    ws.send(JSON.stringify({subscribe:t}));
-                }
+            } else {
+                completeConnection();
             }
         }
         ws.onmessage = function(event) {
             var msg = JSON.parse(event.data);
-            if (msg.topic) {
+            if (pendingAuth && msg.auth == "ok") {
+                pendingAuth = false;
+                completeConnection();
+            } else if (msg.topic) {
                 for (var t in subscriptions) {
                     if (subscriptions.hasOwnProperty(t)) {
                         var re = new RegExp("^"+t.replace(/([\[\]\?\(\)\\\\$\^\*\.|])/g,"\\$1").replace(/\+/g,"[^/]+").replace(/\/#$/,"(\/.*)?")+"$");

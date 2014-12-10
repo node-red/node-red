@@ -16,6 +16,9 @@
 
 
 RED.settings = (function () {
+    
+    var loadedSettings = {};
+        
     var hasLocalStorage = function () {
         try {
             return 'localStorage' in window && window['localStorage'] !== null;
@@ -51,15 +54,20 @@ RED.settings = (function () {
     };
 
     var setProperties = function(data) {
-        for(var prop in data) {
-            if(data.hasOwnProperty(prop)) {
+        for (var prop in loadedSettings) {
+            if (loadedSettings.hasOwnProperty(prop) && RED.settings.hasOwnProperty(prop)) {
+                delete RED.settings[prop];
+            }
+        }
+        for (prop in data) {
+            if (data.hasOwnProperty(prop)) {
                 RED.settings[prop] = data[prop];
             }
         }
+        loadedSettings = data;
     };
 
     var init = function (done) {
-        
         $.ajaxSetup({
             beforeSend: function(jqXHR,settings) {
                 // Only attach auth header for requests to relative paths
@@ -71,6 +79,11 @@ RED.settings = (function () {
                 }
             }
         });
+
+        load(done);
+    }
+    
+    var load = function(done) {
         
         $.ajax({
             headers: {
@@ -81,11 +94,18 @@ RED.settings = (function () {
             url: 'settings',
             success: function (data) {
                 setProperties(data);
+                if (RED.settings.user && RED.settings.user.anonymous) {
+                    RED.settings.remove("auth-tokens");
+                }
                 console.log("Node-RED: " + data.version);
-                done(null);
+                done();
             },
             error: function(jqXHR,textStatus,errorThrown) {
-                done(jqXHR.status,textStatus);
+                if (jqXHR.status === 401) {
+                    RED.user.login(function() { load(done); });
+                 } else {
+                     console.log("Unexpected error:",jqXHR.status,textStatus);
+                 }
             }
         });
     };
@@ -93,6 +113,7 @@ RED.settings = (function () {
 
     return {
         init: init,
+        load: load,
         set: set,
         get: get,
         remove: remove
