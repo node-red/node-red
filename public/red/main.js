@@ -315,7 +315,7 @@ var RED = (function() {
                 options: []
             });
             
-            function updateUserMenu() {
+            var updateUserMenu = function() {
                 $("#btn-usermenu-submenu li").remove();
                 if (RED.settings.user.anonymous) {
                     RED.menu.addItem("btn-usermenu",{
@@ -347,6 +347,8 @@ var RED = (function() {
                     
             }
             updateUserMenu();
+        } else {
+            $("#btn-usermenu").parent().hide();
         }
     
         $("#main-container").show();

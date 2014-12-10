@@ -85,10 +85,13 @@ span.logo img {
 }
 
 #header ul.header-toolbar > li {
-    display: inline-block;
     padding: 0;
     margin: 0;
     position: relative;
+}
+
+#header ul.header-toolbar > li {
+    display: inline-block;
 }
 
 .button {
@@ -181,7 +184,7 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
 
 .button-group {
     display: inline-block;
-    margin: auto 10px;
+    margin: auto 15px;
     vertical-align: middle;
     background: #555;
     clear: both;
@@ -199,16 +202,16 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
 .button-group > a:last-child {
 }
 
-#btn-sidemenu {
+#header .button {
     font-size: 20px !important;
 }
-#btn-sidemenu:active, #btn-sidemenu.active {
+#header .button:active, #header .button.active {
     background: #121212;
 }
 #header .button:focus {
     outline: none;
 }
-li.open #btn-sidemenu {
+#header li.open .button {
     background: #121212;
     border-color: #121212;
 }
