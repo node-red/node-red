@@ -38,6 +38,7 @@ module.exports = function(RED) {
         this.timeoutUnits = n.timeoutUnits;
         this.randomUnits = n.randomUnits;
         this.rateUnits = n.rateUnits;
+        this.msgProperty = n.msgProperty;
 
         if (n.timeoutUnits === "milliseconds") {
             this.timeout = n.timeout;
@@ -193,6 +194,28 @@ module.exports = function(RED) {
                     clearTimeout(this.randomID);
                 }
             });
+        } else if (this.pauseType === "msg") {
+            this.on("input", function(msg) {
+				var arr = n.msgProperty.split('.');
+				var curVal = msg;
+				for(var i = 0; i<arr.length; i++){
+					curVal = curVal[arr[i]]
+				}
+                var id;
+                id = setTimeout(function(){
+                    node.idList.splice(node.idList.indexOf(id),1);
+                    node.send(msg);
+                }, (this.timeout/n.timeout) * curVal);
+                this.idList.push(id);
+            });
+
+            this.on("close", function() {
+                for (var i=0; i<this.idList.length; i++ ) {
+                    clearTimeout(this.idList[i]);
+                }
+                this.idList = [];
+            });
+
         }
     }
     RED.nodes.registerType("delay",DelayNode);

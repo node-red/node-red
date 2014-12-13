@@ -23,6 +23,7 @@
           <option value="delay">Delay message</option>
           <option value="random">Random delay</option>
           <option value="rate">Limit rate to</option>
+          <option value="msg">Message Driven delay</option>
           <option value="queue">Topic based fair queue</option>
         </select>
     </div>
@@ -66,7 +67,17 @@
           <option value="days">Days</option>
         </select>
     </div>
-
+        <div id="msg-details" class="form-row">
+        <label for="node-input-msgProperty"><i class="fa fa-clock-o"></i> For</label>
+        <input type="text" id="node-input-msgProperty" placeholder="property" style="width:50px !important">
+        <select id="node-input-timeoutUnits" style="width:200px !important">
+          <option value="milliseconds">Milliseconds</option>
+          <option value="seconds">Seconds</option>
+          <option value="minutes">Minutes</option>
+          <option value="hours">Hours</option>
+          <option value="days">Days</option>
+        </select>
+    </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -100,6 +111,7 @@
             randomFirst: {value:"1", required:true, validate:RED.validators.number()},
             randomLast: {value:"5", required:true, validate:RED.validators.number()},
             randomUnits: {value: "seconds"},
+            msgProperty: {value: "payload"},
             drop: {value:false}
         },
         inputs:1,                // set the number of inputs - only 0 or 1
@@ -115,6 +127,8 @@
               return this.name||"limit "+this.rate+" msg/"+ units;
             } else if (this.pauseType == "random") {
               return this.name || "random";
+            } else if (this.pauseType == "msg") {
+              return this.name || "msg."+ this.msgProperty;
             }
             else {
                 var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
@@ -136,11 +150,13 @@
             $("#rate-details").hide();
             $("#random-details").hide();
             $("#node-input-dr").hide();
+            $("#msg-details").hide();
           } else if (this.pauseType == "rate") {
             $("#delay-details").hide();
             $("#rate-details").show();
             $("#random-details").hide();
             $("#node-input-dr").show();
+            $("#msg-details").hide();
           } else if (this.pauseType == "random") {
             $("#delay-details").hide();
             $("#rate-details").hide();
@@ -150,6 +166,13 @@
             $("#delay-details").hide();
             $("#rate-details").show();
             $("#random-details").hide();
+            $("#node-input-dr").hide();
+            $("#msg-details").show();
+          } else if (this.pauseType == "msg") {
+            $("#delay-details").hide();
+            $("#rate-details").hide();
+            $("#random-details").hide();
+            $("#msg-details").show();
             $("#node-input-dr").hide();
           }
 
@@ -171,12 +194,14 @@
               $("#rate-details").hide();
               $("#random-details").hide();
               $("#node-input-dr").hide();
+              $("#msg-details").hide();
             } else if (this.value == "rate") {
               $("#delay-details").hide();
               $("#rate-details").show();
               $("#random-details").hide();
               $("#node-input-dr").show();
-              } else if (this.value == "random") {
+              $("#msg-details").hide();
+            } else if (this.value == "random") {
               $("#delay-details").hide();
               $("#rate-details").hide();
               $("#random-details").show();
@@ -185,6 +210,13 @@
               $("#delay-details").hide();
               $("#rate-details").show();
               $("#random-details").hide();
+              $("#node-input-dr").hide();
+              $("#msg-detail").hide();
+            }else if (this.value == "msg") {
+              $("#delay-details").hide();
+              $("#rate-details").hide();
+              $("#random-details").hide();
+              $("#msg-details").show();
               $("#node-input-dr").hide();
             }
           });
