@@ -31,32 +31,9 @@ module.exports = function(RED) {
         node.wholemsg = (n.wholemsg === "true");
 
         node._inputNodes = [];    // collection of nodes that want to receive events
-
-        var path = RED.settings.httpNodeRoot || "/";
-        path = path + (path.slice(-1) == "/" ? "":"/") + (node.path.charAt(0) == "/" ? node.path.substring(1) : node.path);
-
-        // Workaround https://github.com/einaros/ws/pull/253
-        // Listen for 'newListener' events from RED.server
-        node._serverListeners = {};
-
-        var storeListener = function(/*String*/event,/*function*/listener){
-            if(event == "error" || event == "upgrade" || event == "listening"){
-                node._serverListeners[event] = listener;
-            }
-        }
-
         node._clients = {};
 
-        RED.server.addListener('newListener',storeListener);
-
-        // Create a WebSocket Server
-        node.server = new ws.Server({server:RED.server,path:path});
-
-        // Workaround https://github.com/einaros/ws/pull/253
-        // Stop listening for new listener events
-        RED.server.removeListener('newListener',storeListener);
-
-        node.server.on('connection', function(socket){
+        function handleConnection(/*socket*/socket) {
             var id = (1+Math.random()*4294967295).toString(16);
             node._clients[id] = socket;
             socket.on('close',function() {
@@ -68,7 +45,43 @@ module.exports = function(RED) {
             socket.on('error', function(err) {
                 node.warn("An error occured on the ws connection: "+inspect(err));
             });
-        });
+        }
+
+        // match absolute url
+        node.isServer = !/^ws{1,2}:\/\//i.test(node.path);
+        if(node.isServer)
+        {
+            var path = RED.settings.httpNodeRoot || "/";
+            path = path + (path.slice(-1) == "/" ? "":"/") + (node.path.charAt(0) == "/" ? node.path.substring(1) : node.path);
+
+            // Workaround https://github.com/einaros/ws/pull/253
+            // Listen for 'newListener' events from RED.server
+            node._serverListeners = {};
+
+            var storeListener = function(/*String*/event,/*function*/listener){
+                if(event == "error" || event == "upgrade" || event == "listening"){
+                    node._serverListeners[event] = listener;
+                }
+            }
+
+            RED.server.addListener('newListener',storeListener);
+
+            // Create a WebSocket Server
+            node.server = new ws.Server({server:RED.server,path:path});
+
+            // Workaround https://github.com/einaros/ws/pull/253
+            // Stop listening for new listener events
+            RED.server.removeListener('newListener',storeListener);
+
+            node.server.on('connection', handleConnection);
+        }
+        else
+        {
+            // Connect to remote endpoint
+            var socket = new ws(node.path);
+            node.server = socket; // keep for closing
+            handleConnection(socket);
+        }
 
         node.on("close", function() {
             // Workaround https://github.com/einaros/ws/pull/253
@@ -88,6 +101,7 @@ module.exports = function(RED) {
         });
     }
     RED.nodes.registerType("websocket-listener",WebSocketListenerNode);
+    RED.nodes.registerType("websocket-client",WebSocketListenerNode);
 
     WebSocketListenerNode.prototype.registerInputNode = function(/*Node*/handler){
         this._inputNodes.push(handler);
@@ -116,8 +130,13 @@ module.exports = function(RED) {
 
     WebSocketListenerNode.prototype.broadcast = function(data){
         try {
-            for (var i = 0; i < this.server.clients.length; i++) {
-                this.server.clients[i].send(data);
+            if(this.isServer) {
+                for (var i = 0; i < this.server.clients.length; i++) {
+                    this.server.clients[i].send(data);
+                }                
+            }
+            else {
+                this.server.send(data);
             }
         }
         catch(e) { // swallow any errors
@@ -125,7 +144,7 @@ module.exports = function(RED) {
         }
     }
 
-    WebSocketListenerNode.prototype.send = function(id,data) {
+    WebSocketListenerNode.prototype.reply = function(id,data) {
         var session = this._clients[id];
         if (session) {
             try {
@@ -138,7 +157,7 @@ module.exports = function(RED) {
 
     function WebSocketInNode(n) {
         RED.nodes.createNode(this,n);
-        this.server = n.server;
+        this.server = (n.client)?n.client:n.server;
         var node = this;
         this.serverConfig = RED.nodes.getNode(this.server);
         if (this.serverConfig) {
@@ -152,7 +171,7 @@ module.exports = function(RED) {
     function WebSocketOutNode(n) {
         RED.nodes.createNode(this,n);
         var node = this;
-        this.server = n.server;
+        this.server = (n.client)?n.client:n.server;
         this.serverConfig = RED.nodes.getNode(this.server);
         if (!this.serverConfig) {
             this.error("Missing server configuration");
@@ -171,7 +190,7 @@ module.exports = function(RED) {
                 }
             }
             if (msg._session && msg._session.type == "websocket") {
-                node.serverConfig.send(msg._session.id,payload);
+                node.serverConfig.reply(msg._session.id,payload);
             } else {
                 node.serverConfig.broadcast(payload,function(error){
                     if (!!error) {
