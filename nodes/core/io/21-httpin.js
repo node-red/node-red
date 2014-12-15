@@ -182,7 +182,6 @@ module.exports = function(RED) {
                     method = "GET";                         // - in which case default to GET
                 }
             }
-            node.log(method+" : "+url);
             var opts = urllib.parse(url);
             opts.method = method;
             opts.headers = {};
