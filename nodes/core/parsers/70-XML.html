@@ -17,8 +17,36 @@
 <script type="text/x-red" data-template-name="xml">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <input type="text" id="node-input-name" placeholder="Name" style="width:280px !important">
     </div>
+    <div class="form-row" id="advanced">
+    </div>
+    <div id="advanced-options">
+        <div class="form-row">
+            <i class="fa fa-key"></i> Represent XML tag attributes as a property named <input type="text" id="node-input-attr" style="width:20px !important">
+        </div>
+        <div class="form-row">
+            <i class="fa fa-key"></i> Prefix to access character content <input type="text" id="node-input-chr" style="width:20px !important">
+        </div>
+        <div class="form-tips">There is no simple way to convert XML attributes to JSON
+        so the approach taken here is to add a property, named $ by default, to the JSON structure.</div>
+    </div>
+    <script> {
+        var showadvanced = showadvanced || true;
+        var showall = function() {
+            showadvanced = !showadvanced;
+            if (showadvanced) {
+                $("#advanced-options").show();
+                $("#advanced").html('<label for="node-advanced" style="width:200px !important"><i class="fa fa-minus-square"></i> Advanced options</label>');
+            }
+            else {
+                $("#advanced-options").hide();
+                $("#advanced").html('<label for="node-advanced" style="width:200px !important"><i class="fa fa-plus-square"></i> Advanced options ...</label>');
+            }
+        };
+        showall();
+        $("#advanced").click( function() { showall(); });
+    } </script>
 </script>
 
 <script type="text/x-red" data-help-name="xml">
@@ -33,6 +61,8 @@
         category: 'function',
         color:"#DEBD5C",
         defaults: {
+            attr: {value:'$',required:true},
+            chr: {value:'_',required:true},
             name: {value:""}
         },
         inputs:1,
