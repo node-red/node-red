@@ -138,15 +138,15 @@
         icon: "inject.png",
         label: function() {
             if (this.payloadType === "string") {
-                if ((this.topic.length + this.payload.length) <= 32) {
+                if ((this.topic !== "") && ((this.topic.length + this.payload.length) <= 32)) {
                     return this.name||this.topic + ":" + this.payload;
                 }
                 else if (this.payload.length < 24) {
-                    return this.name||":"+this.payload;
+                    return this.name||this.payload;
                 }
             }
             if ((this.topic.length < 24) && (this.topic.length > 0)) {
-                return this.name||this.topic+":";
+                return this.name||this.topic;
             }
             else { return this.name||(this.payloadType==="date"?"timestamp":null)||"inject"; }
         },
@@ -334,7 +334,7 @@
 
             $("#node-input-payloadType").change(function() {
                 var id = $("#node-input-payloadType option:selected").val();
-                if (id == "string") {
+                if (id === "string") {
                     $("#node-input-row-payload").show();
                 } else {
                     $("#node-input-row-payload").hide();

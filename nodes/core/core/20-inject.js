@@ -16,7 +16,7 @@
 
 module.exports = function(RED) {
     var cron = require("cron");
-    
+
     function InjectNode(n) {
         RED.nodes.createNode(this,n);
         this.topic = n.topic;
@@ -28,7 +28,7 @@ module.exports = function(RED) {
         var node = this;
         this.interval_id = null;
         this.cronjob = null;
-    
+
         if (this.repeat && !isNaN(this.repeat) && this.repeat > 0) {
             this.repeat = this.repeat * 1000;
             this.log("repeat = "+this.repeat);
@@ -47,16 +47,16 @@ module.exports = function(RED) {
                 this.error("'cron' module not found");
             }
         }
-    
+
         if (this.once) {
             setTimeout( function(){ node.emit("input",{}); }, 100);
         }
-    
+
         this.on("input",function(msg) {
             var msg = {topic:this.topic};
             if ( (this.payloadType == null && this.payload == "") || this.payloadType == "date") {
                 msg.payload = Date.now();
-            } else if (this.payloadType == null || this.payloadType == "string") {
+            } else if (this.payloadType == null || this.payloadType === "string") {
                 msg.payload = this.payload;
             } else {
                 msg.payload = "";
@@ -65,9 +65,9 @@ module.exports = function(RED) {
             msg = null;
         });
     }
-    
+
     RED.nodes.registerType("inject",InjectNode);
-    
+
     InjectNode.prototype.close = function() {
         if (this.interval_id != null) {
             clearInterval(this.interval_id);
@@ -78,7 +78,7 @@ module.exports = function(RED) {
             delete this.cronjob;
         }
     }
-    
+
     RED.httpAdmin.post("/inject/:id", function(req,res) {
             var node = RED.nodes.getNode(req.params.id);
             if (node != null) {
