@@ -117,6 +117,9 @@ describe("nodes api", function() {
             var getNodeInfo = sinon.stub(redNodes,'getNodeInfo', function(id) {
                 return {"node-red/123":{id:"node-red/123"}}[id];
             });
+            var getModuleVersion = sinon.stub(redNodes,'getModuleVersion', function(module) {
+                return {"node-red": {version: "0.0.1"}}[module];
+            });
             request(app)
                 .get('/nodes/node-red/123')
                 .set('Accept', 'application/json')
