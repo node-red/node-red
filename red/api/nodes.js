@@ -142,10 +142,8 @@ module.exports = {
             var info;
             if (!node) {
                 res.send(404);
-            } else if (!node.err && node.enabled === body.enabled) {
-                res.json(node);
             } else {
-                res.json(putNode(id, body.enabled));
+                res.json(putNode(node, body.enabled));
             }
         } catch(err) {
             res.send(400,err.toString());
@@ -169,7 +167,7 @@ module.exports = {
                 var matching = getMatchingNodes(mod);
                 if (matching.length === 1) {
                     // One match, assume correct
-                    res.json(putNode(matching[0].id, body.enabled));
+                    res.json(putNode(matching[0], body.enabled));
                     return;
                 } else if (matching.length > 1) {
                     // Multiple matches, need clarification
@@ -229,24 +227,28 @@ function getMatchingNodes(node) {
     return matching;
 }
 
-function putNode(id, enabled) {
+function putNode(node, enabled) {
     var info;
 
-    if (enabled) {
-        info = redNodes.enableNode(id);
+    if (!node.err && node.enabled === enabled) {
+        info = node;
     } else {
-        info = redNodes.disableNode(id);
-    }
-
-    if (info.enabled === enabled && !info.err) {
-        comms.publish("node/"+(enabled?"enabled":"disabled"),info,false);
-        util.log("[red] "+(enabled?"Enabled":"Disabled")+" node types:");
-        for (var i=0;i<info.types.length;i++) {
-            util.log("[red] - "+info.types[i]);
+        if (enabled) {
+            info = redNodes.enableNode(node.id);
+        } else {
+            info = redNodes.disableNode(node.id);
         }
-    } else if (enabled && info.err) {
-        util.log("[red] Failed to enable node:");
-        util.log("[red] - "+info.name+" : "+info.err);
+
+        if (info.enabled === enabled && !info.err) {
+            comms.publish("node/"+(enabled?"enabled":"disabled"),info,false);
+            util.log("[red] "+(enabled?"Enabled":"Disabled")+" node types:");
+            for (var i=0;i<info.types.length;i++) {
+                util.log("[red] - "+info.types[i]);
+            }
+        } else if (enabled && info.err) {
+            util.log("[red] Failed to enable node:");
+            util.log("[red] - "+info.name+" : "+info.err);
+        }
     }
 
     return info;
