@@ -31,6 +31,7 @@ module.exports = function(RED) {
 
         // Store local copies of the node configuration (as defined in the .html)
         this.topic = n.topic;
+        var node = this;
 
         // Do whatever you need to do in here - declare callbacks etc
         // Note: this sample doesn't do anything much - it will only send
@@ -41,19 +42,20 @@ module.exports = function(RED) {
         msg.payload = "Hello world !"
 
         // send out the message to the rest of the workspace.
-        this.send(msg);
+        // ... this message will get sent at startup so you may not see it in a debug node.
+        node.send(msg);
 
         // respond to inputs....
-        this.on('input', function (msg) {
+        node.on('input', function (msg) {
             node.warn("I saw a payload: "+msg.payload);
             // in this example just send it straight on... should process it here really
-            this.send(msg);
+            node.send(msg);
         });
 
-        this.on("close", function() {
+        node.on("close", function() {
             // Called when the node is shutdown - eg on redeploy.
             // Allows ports to be closed, connections dropped etc.
-            // eg: this.client.disconnect();
+            // eg: node.client.disconnect();
         });
     }
 
