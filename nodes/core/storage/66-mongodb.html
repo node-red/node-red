@@ -197,7 +197,7 @@
 
 <script type="text/x-red" data-help-name="mongodb in">
     <p>Calls a MongoDB collection method based on the selected operator.</p>
-    <p>Find queries a collection using the <b>msg.payload</b> as the query statement as per the .find() function. Optionally, you may also (via a function) set a <b>msg.projection</b> object to constrain the returned fields, a <b>msg.sort</b> object and a <b>msg.limit</b> object.</p>
+        <p>Find queries a collection using the <b>msg.payload</b> as the query statement as per the .find() function. Optionally, you may also (via a function) set a <b>msg.projection</b> object to constrain the returned fields, a <b>msg.sort</b> object, a <b>msg.limit</b> number and a <b>msg.skip</b> number.</p>
     <p>Count returns a count of the number of documents in a collection or matching a query using the <b>msg.payload</b> as the query statement.</p>
     <p>Aggregate provides access to the aggregation pipeline using the <b>msg.payload</b> as the pipeline array.</p>
     <p>You can either set the collection method in the node config or on <b>msg.collection</b>. Setting it in the node will override <b>msg.collection</b>.</p>
