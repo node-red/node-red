@@ -206,7 +206,7 @@ module.exports = function(RED) {
                                 }
                             });
                         } else if (node.operation === "aggregate") {
-                            msg.payload = (msg.payload instanceof Array) ? msg.payload : [];
+                            msg.payload = (Array.isArray(msg.payload)) ? msg.payload : [];
                             coll.aggregate(msg.payload, function(err, result) {
                                 if (err) {
                                     node.error(err);
