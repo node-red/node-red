@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #
 # Copyright 2014 IBM Corp.
 #
@@ -43,7 +44,7 @@ if len(sys.argv) > 1:
             except Exception as ex:
                 print "bad data: "+data
 
-    if cmd == "buzz":
+    elif cmd == "buzz":
         #print "Initialised pin "+str(pin)+" to Buzz"
         GPIO.setup(pin,GPIO.OUT)
         p = GPIO.PWM(pin, 100)
@@ -115,11 +116,56 @@ if len(sys.argv) > 1:
                 GPIO.cleanup(pin)
                 sys.exit(0)
 
+    elif cmd == "byte":
+        #print "Initialised BYTE mode - "+str(pin)+
+        list = [7,11,13,12,15,16,18,22]
+        GPIO.setup(list,GPIO.OUT)
+
+        while True:
+            try:
+                data = raw_input()
+                if data == "close":
+                    GPIO.cleanup()
+                    sys.exit(0)
+                data = int(data)
+            except EOFError:        # hopefully always caused by us sigint'ing the program
+                GPIO.cleanup()
+                sys.exit(0)
+            except:
+                data = 0
+            for bit in range(8):
+                if pin == 1:
+                    mask = 1 << (7 - bit)
+                else:
+                    mask = 1 << bit
+                GPIO.output(list[bit], data & mask)
+
     elif cmd == "rev":
         print GPIO.RPI_REVISION
 
     elif cmd == "ver":
         print GPIO.VERSION
+
+    elif cmd == "mouse":  # catch mice button events
+        file = open( "/dev/input/mice", "rb" )
+        oldbutt = 0
+
+        def getMouseEvent():
+          global oldbutt
+          global pin
+          buf = file.read(3)
+          pin = pin & 0x07
+          button = ord( buf[0] ) & pin # mask out just the required button(s)
+          if button != oldbutt:  # only send if changed
+              oldbutt = button
+              print button
+
+        while True:
+            try:
+                getMouseEvent()
+            except:
+                file.close()
+                sys.exit(0)
 
 else:
     print "Bad parameters - {in|out|pwm} {pin} {value|up|down}"

@@ -38,6 +38,9 @@ module.exports = function(RED) {
         throw "Error : nrgpio must to be executable.";
     }
 
+    // the magic to make python print stuff immediately
+    process.env.PYTHONUNBUFFERED = 1;
+
     var pinsInUse = {};
     var pinTypes = {"out":"digital output", "tri":"input", "up":"input with pull up", "down":"input with pull down", "pwm":"PWM output"};
 
@@ -208,6 +211,48 @@ module.exports = function(RED) {
         }
     });
     RED.nodes.registerType("rpi-gpio out",GPIOOutNode);
+
+    function PiMouseNode(n) {
+        RED.nodes.createNode(this,n);
+        this.butt = n.butt || 7;
+        var node = this;
+
+        node.child = spawn(gpioCommand+".py", ["mouse",node.butt]);
+        node.status({fill:"green",shape:"dot",text:"OK"});
+
+        node.child.stdout.on('data', function (data) {
+            data = Number(data);
+            if (data === 0) { node.send({ topic:"pi/mouse", button:data, payload:0 }); }
+            else { node.send({ topic:"pi/mouse", button:data, payload:1 }); }
+        });
+
+        node.child.stderr.on('data', function (data) {
+            if (RED.settings.verbose) { node.log("err: "+data+" :"); }
+        });
+
+        node.child.on('close', function (code) {
+            if (RED.settings.verbose) { node.log("ret: "+code+" :"); }
+            node.child = null;
+            node.running = false;
+            node.status({fill:"red",shape:"circle",text:""});
+        });
+
+        node.child.on('error', function (err) {
+            if (err.errno === "ENOENT") { node.warn('Command not found'); }
+            else if (err.errno === "EACCES") { node.warn('Command not executable'); }
+            else { node.log('error: ' + err); }
+        });
+
+        node.on("close", function() {
+            if (node.child != null) {
+                node.child.kill('SIGINT');
+                node.child = null;
+            }
+            node.status({fill:"red",shape:"circle",text:""});
+            if (RED.settings.verbose) { node.log("end"); }
+        });
+    }
+    RED.nodes.registerType("rpi-mouse",PiMouseNode);
 
     RED.httpAdmin.get('/rpi-gpio/:id',function(req,res) {
         res.send( JSON.stringify(pitype) );
