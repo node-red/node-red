@@ -18,6 +18,7 @@ module.exports = function(RED) {
     "use strict";
     var spawn = require('child_process').spawn;
     var exec = require('child_process').exec;
+    var isUtf8 = require('is-utf8');
 
     function ExecNode(n) {
         RED.nodes.createNode(this,n);
@@ -40,12 +41,14 @@ module.exports = function(RED) {
                     var ex = spawn(node.cmd,arg);
                     ex.stdout.on('data', function (data) {
                         //console.log('[exec] stdout: ' + data);
-                        msg.payload = data.toString();
+                        if (isUtf8(data)) { msg.payload = data.toString(); }
+                        else { msg.payload = data; }
                         node.send([msg,null,null]);
                     });
                     ex.stderr.on('data', function (data) {
                         //console.log('[exec] stderr: ' + data);
-                        msg.payload = data.toString();
+                        if (isUtf8(data)) { msg.payload = data.toString(); }
+                        else { msg.payload = new Buffer(data); }
                         node.send([null,msg,null]);
                     });
                     ex.on('close', function (code) {
@@ -63,7 +66,7 @@ module.exports = function(RED) {
             else {
                 var cl = node.cmd+" "+msg.payload+" "+node.append;
                 if (RED.settings.verbose) { node.log(cl); }
-                var child = exec(cl, function (error, stdout, stderr) {
+                var child = exec(cl, {encoding: 'binary'}, function (error, stdout, stderr) {
                     msg.payload = stdout;
                     var msg2 = {payload:stderr};
                     var msg3 = null;
