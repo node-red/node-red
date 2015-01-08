@@ -47,8 +47,8 @@ RED.menu = (function() {
             item = $('<li></li>');
             var link = $('<a '+(opt.id?'id="'+opt.id+'" ':'')+'tabindex="-1" href="#">'+
                 (opt.toggle?'<i class="fa fa-check pull-right"></i>':'')+
-                (opt.icon?'<i class="'+opt.icon+'"></i> ':'')+
-                opt.label+
+                (opt.icon!==undefined?'<i class="'+(opt.icon?opt.icon:'" style="display: inline-block;"')+'"></i> ':"")+
+                '<span class="menu-label">'+opt.label+'</span>'+
                 '</a>').appendTo(item);
 
             menuItems[opt.id] = opt;
@@ -67,6 +67,11 @@ RED.menu = (function() {
                 setState();
             } else if (opt.href) {
                 link.attr("target","_blank").attr("href",opt.href);
+            } else if (!opt.options) {
+                item.addClass("disabled");
+                link.click(function(event) {
+                    event.preventDefault();
+                });
             }
             if (opt.options) {
                 item.addClass("dropdown-submenu pull-left");
@@ -79,6 +84,17 @@ RED.menu = (function() {
             if (opt.disabled) {
                 item.addClass("disabled");
             }
+            if (opt.tip) {
+                item.popover({
+                    placement:"left",
+                    trigger: "hover",
+                    delay: { show: 350, hide: 20 },
+                    html: true,
+                    container:'body',
+                    content: opt.tip
+                });
+            }
+            
         }
 
 
@@ -88,8 +104,8 @@ RED.menu = (function() {
     function createMenu(options) {
 
         var button = $("#"+options.id);
-
-        var topMenu = $("<ul/>",{class:"dropdown-menu"}).insertAfter(button);
+        
+        var topMenu = $("<ul/>",{id:options.id+"-submenu", class:"dropdown-menu pull-right"}).insertAfter(button);
 
         for (var i=0;i<options.options.length;i++) {
             var opt = options.options[i];

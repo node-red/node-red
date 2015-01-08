@@ -28,11 +28,13 @@ module.exports = {
     },
     post: function(req,res) {
         var flows = req.body;
-        redNodes.setFlows(flows).then(function() {
+        var deploymentType = req.get("Node-RED-Deployment-Type")||"full";
+        redNodes.setFlows(flows,deploymentType).then(function() {
             res.send(204);
         }).otherwise(function(err) {
             util.log("[red] Error saving flows : "+err);
             res.send(500,err.message);
+            console.log(err.stack);
         });
     }
 }

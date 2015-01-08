@@ -111,15 +111,18 @@ module.exports = {
 
     /**
      * Deletes any credentials for nodes that no longer exist
-     * @param getNode a function that can return a node for a given id
+     * @param config a flow config
      * @return a promise for the saving of credentials to storage
      */
-    clean: function (getNode) {
+    clean: function (config) {
+        var existingIds = {};
+        config.forEach(function(n) {
+            existingIds[n.id] = true;     
+        });
         var deletedCredentials = false;
         for (var c in credentialCache) {
             if (credentialCache.hasOwnProperty(c)) {
-                var n = getNode(c);
-                if (!n) {
+                if (!existingIds[c]) {
                     deletedCredentials = true;
                     delete credentialCache[c];
                 }
@@ -164,7 +167,6 @@ module.exports = {
             
             var dashedType = nodeType.replace(/\s+/g, '-');
             var definition = credentialsDef[dashedType];
-            
             if (!definition) {
                 util.log('Credential Type ' + nodeType + ' is not registered.');
                 return;

@@ -74,6 +74,19 @@ span.logo span {
 span.logo img {
     height: 18px;
 }
+#header ul.header-toolbar {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+#header ul.header-toolbar > li {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
 .button {
    -webkit-user-select: none;
    -khtml-user-select: none;
@@ -83,6 +96,8 @@ span.logo img {
 }
 
 #header .button {
+    min-width: 20px;
+    text-align: center;
     line-height: 22px;
     display: inline-block;
     font-size: 14px;
@@ -90,7 +105,7 @@ span.logo img {
     text-decoration: none;
     border-radius: 3px;
     color: #ccc;
-    margin: auto 10px;
+    margin: auto 5px;
     vertical-align: middle;
 }
 #header .button:not(.disabled):hover {

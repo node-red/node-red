@@ -394,7 +394,7 @@ RED.nodes = (function() {
             var wires = links.filter(function(d) { return d.source === p });
             for (var i=0;i<wires.length;i++) {
                 var w = wires[i];
-                if (w.target.id != p.id) {
+                if (w.target.type != "subflow") {
                     nIn.wires.push({id:w.target.id})
                 }
             }

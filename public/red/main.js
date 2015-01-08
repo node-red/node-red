@@ -15,6 +15,14 @@
  **/
 var RED = (function() {
 
+    var deploymentTypes = {
+        "full":"Deploy",
+        "nodes":"Deploy changed nodes",
+        "flows":"Deploy changed flows"
+    }
+    var deploymentType = "full";
+    
+    
     function hideDropTarget() {
         $("#dropTarget").hide();
         RED.keyboard.remove(/* ESCAPE */ 27);
@@ -82,7 +90,10 @@ var RED = (function() {
                 url:"flows",
                 type: "POST",
                 data: JSON.stringify(nns),
-                contentType: "application/json; charset=utf-8"
+                contentType: "application/json; charset=utf-8",
+                headers: {
+                    "Node-RED-Deployment-Type":deploymentType
+                }
             }).done(function(data,textStatus,xhr) {
                 RED.notify("Successfully deployed","success");
                 RED.nodes.eachNode(function(node) {
@@ -280,6 +291,12 @@ var RED = (function() {
         dialog.modal();
     }
 
+    
+    function changeDeploymentType(type) {
+        deploymentType = type;
+        $("#btn-deploy span").text(deploymentTypes[type]);
+    }
+    
     $(function() {
         RED.menu.init({id:"btn-sidemenu",
             options: [
@@ -312,6 +329,15 @@ var RED = (function() {
                 {id:"btn-help",icon:"fa fa-question",label:"Help...", href:"http://nodered.org/docs"}
             ]
         });
+        
+        //RED.menu.init({id:"btn-deploy-options",
+        //    options: [
+        //        {id:"btn-deploy-select",label:"Select deployment type"},
+        //        {id:"btn-deploy-full",icon:null,label:"Full deploy",tip:"Deploys all nodes",onselect:function() { changeDeploymentType("full")}},
+        //        {id:"btn-deploy-node",icon:null,label:"Deploy changed nodes",tip:"Deploys all nodes that have been changed",onselect:function() { changeDeploymentType("nodes")}},
+        //        {id:"btn-deploy-flow",icon:null,label:"Deploy changed flows",tip:"Deploys all nodes in flows that contain changes",onselect:function() { changeDeploymentType("flows")}}
+        //    ]
+        //});
 
         RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
         loadSettings();
