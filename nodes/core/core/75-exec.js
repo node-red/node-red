@@ -66,8 +66,8 @@ module.exports = function(RED) {
             else {
                 var cl = node.cmd+" "+msg.payload+" "+node.append;
                 if (RED.settings.verbose) { node.log(cl); }
-                var child = exec(cl, {encoding: 'binary'}, function (error, stdout, stderr) {
-                    msg.payload = new Buffer(stdout);
+                var child = exec(cl, {encoding: 'binary', maxBuffer:10000000}, function (error, stdout, stderr) {
+                    msg.payload = new Buffer(stdout,"binary");
                     if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
                     var msg2 = {payload:stderr};
                     var msg3 = null;

@@ -42,6 +42,7 @@
     <p>Optionally can use spawn() instead, which returns output from stdout and stderr as the command runs (ie one line at a time). On completion it then returns a return code (on the 3rd output).</p>
     <p>Spawn only expect one command word, with all extra parameters to be comma separated and passed as the append.</p>
     <p>The optional append gets added to the command after the <b>msg.payload</b> - so you can do things like pipe the result to another command.</p>
+    <p>If stdout is binary a <i>buffer</i> is returned - otherwise returns a <i>string</i>.</p>
 </script>
 
 <script type="text/javascript">
