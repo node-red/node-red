@@ -149,7 +149,7 @@ var flowNodes = module.exports = {
         });
         
         if (credentialsChanged) {
-            credentialsSavePromise = credentials.save();
+            credentialSavePromise = credentials.save();
         } else {
             credentialSavePromise = when.resolve();
         }

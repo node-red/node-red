@@ -84,7 +84,6 @@ Node.prototype.close = function() {};
 
 
 Node.prototype.send = function(msg) {
-    console.log(this.id,this.type,this.wires);
     var msgSent = false;
     var node;
     
