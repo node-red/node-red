@@ -130,13 +130,13 @@ function createSubflow(sf,sfn,subflows) {
                     }
                 }
             }
-        }
-        Object.keys(modifiedNodes).forEach(function(id) {
-            var node = modifiedNodes[id];
-            subflowNode.instanceNodes[id].updateWires(node.wires);
-        });
-        if (subflowInstanceModified) {
-            subflowNode._updateWires(subflowInstance.wires);
+            Object.keys(modifiedNodes).forEach(function(id) {
+                var node = modifiedNodes[id];
+                subflowNode.instanceNodes[id].updateWires(node.wires);
+            });
+            if (subflowInstanceModified) {
+                subflowNode._updateWires(subflowInstance.wires);
+            }
         }
     }
     
@@ -217,8 +217,10 @@ function Flow(config) {
 
 Flow.prototype.parseConfig = function(config) {
     var i;
-    this.config = config;
+    var nodeConfig;
+    var nodeType;
     
+    this.config = config;
     
     this.allNodes = {};
     
@@ -228,8 +230,8 @@ Flow.prototype.parseConfig = function(config) {
     var unknownTypes = {};
     
     for (i=0;i<this.config.length;i++) {
-        var nodeConfig = this.config[i];
-        var nodeType = nodeConfig.type;
+        nodeConfig = this.config[i];
+        nodeType = nodeConfig.type;
         if (nodeType == "subflow") {
             this.subflows[nodeConfig.id] = {
                 type: "subflow",
@@ -242,11 +244,11 @@ Flow.prototype.parseConfig = function(config) {
     //console.log("Known subflows:",Object.keys(this.subflows));
     
     for (i=0;i<this.config.length;i++) {
-        var nodeConfig = this.config[i];
+        nodeConfig = this.config[i];
         
         this.allNodes[nodeConfig.id] = nodeConfig;
         
-        var nodeType = nodeConfig.type;
+        nodeType = nodeConfig.type;
         
         if (nodeConfig.credentials) {
             credentials.extract(nodeConfig);
