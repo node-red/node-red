@@ -102,6 +102,7 @@ module.exports = function(RED) {
                                 if (msg.payload[i] === node.quo) { // if it's a quote toggle inside or outside
                                     f = !f;
                                     if (msg.payload[i-1] === node.quo) { k[j] += '\"'; } // if it's a quotequote then it's actually a quote
+                                    if ((msg.payload[i-1] !== node.sep) && (msg.payload[i+1] !== node.sep)) { k[j] += msg.payload[i]; }
                                 }
                                 else if ((msg.payload[i] === node.sep) && f) { // if we are outside of quote (ie valid separator
                                     if (!node.goodtmpl) { node.template[j] = "col"+(j+1); }
