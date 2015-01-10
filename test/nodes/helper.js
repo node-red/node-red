@@ -102,7 +102,7 @@ module.exports = {
     credentials: credentials,
 
     clearFlows: function() {
-        return flows.clear();
+        return flows.stopFlows();
     },
 
     request: function() {

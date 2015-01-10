@@ -72,7 +72,7 @@ describe("flows api", function() {
     });
     it('returns error when set fails', function(done) {
         var setFlows = sinon.stub(redNodes,'setFlows', function() {
-            return when.reject(new Error("test error"));
+            return when.reject(new Error("expected error"));
         });
         request(app)
             .post('/flows')
@@ -83,7 +83,7 @@ describe("flows api", function() {
                 if (err) {
                     throw err;
                 }
-                res.text.should.eql("test error");
+                res.text.should.eql("expected error");
                 done();
             });
     });

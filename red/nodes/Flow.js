@@ -207,11 +207,11 @@ function diffNodeConfigs(oldNode,newNode) {
 var subflowInstanceRE = /^subflow:(.+)$/;
 
 function Flow(config) {
+    
     this.activeNodes = {};
     this.subflowInstanceNodes = {};
 
     this.parseConfig(config);
-    
     
 }
 
@@ -383,6 +383,14 @@ Flow.prototype.getNode = function(id) {
 Flow.prototype.getFlow = function() {
     //console.log(this.config);
     return this.config;
+}
+
+Flow.prototype.eachNode = function(callback) {
+    for (var id in this.activeNodes) {
+        if (this.activeNodes.hasOwnProperty(id)) {
+            callback(this.activeNodes[id]);
+        }
+    }
 }
 
 Flow.prototype.applyConfig = function(config,type) {

@@ -41,16 +41,6 @@ describe('NodeRegistry', function() {
     var settings = stubSettings({},false);
     var settingsWithStorage = stubSettings({},true);
 
-    it('automatically registers new nodes',function() {
-        var testNode = RedNodes.getNode('123');
-        should.not.exist(n);
-        var n = new RedNode({id:'123',type:'abc'});
-
-        var newNode = RedNodes.getNode('123');
-
-        should.strictEqual(n,newNode);
-    });
-
     it('handles nodes that export a function', function(done) {
         typeRegistry.init(settings);
         typeRegistry.load(resourcesDir + "TestNode1",true).then(function() {
@@ -239,11 +229,12 @@ describe('NodeRegistry', function() {
         });
     });
 
-    it('returns nothing for an unregistered type config', function() {
+    it('returns nothing for an unregistered type config', function(done) {
         typeRegistry.init(settings);
         typeRegistry.load("wontexist",true).then(function(){
             var config = typeRegistry.getNodeConfig("imaginary-shark");
             (config === null).should.be.true;
+            done();
         }).catch(function(e) {
             done(e);
         });

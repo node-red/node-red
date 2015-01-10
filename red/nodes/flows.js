@@ -81,6 +81,10 @@ var flowNodes = module.exports = {
         return activeFlow.getNode(i);
     },
     
+    eachNode: function(cb) {
+        activeFlow.eachNode(cb);
+    },
+    
     /**
      * Stops all active nodes and clears the active set
      * @return a promise for the stopping of all active nodes
@@ -174,7 +178,7 @@ var flowNodes = module.exports = {
             var missingTypes = activeFlow.getMissingTypes();
             if (missingTypes.length > 0) {
                 util.log("[red] Waiting for missing types to be registered:");
-                for (i=0;i<missingTypes.length;i++) {
+                for (var i=0;i<missingTypes.length;i++) {
                     util.log("[red]  - "+missingTypes[i]);
                 }
             }
