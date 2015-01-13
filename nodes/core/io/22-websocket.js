@@ -125,7 +125,7 @@ module.exports = function(RED) {
         }
     }
 
-    WebSocketListenerNode.prototype.send = function(id,data) {
+    WebSocketListenerNode.prototype.reply = function(id,data) {
         var session = this._clients[id];
         if (session) {
             try {
@@ -171,7 +171,7 @@ module.exports = function(RED) {
                 }
             }
             if (msg._session && msg._session.type == "websocket") {
-                node.serverConfig.send(msg._session.id,payload);
+                node.serverConfig.reply(msg._session.id,payload);
             } else {
                 node.serverConfig.broadcast(payload,function(error){
                     if (!!error) {
