@@ -104,14 +104,23 @@ module.exports = function(RED) {
             node.error("Invalid GPIO pin: "+node.pin);
         }
 
-        node.on("close", function() {
+        var wfi = function(done) {
+            if (!node.running) {
+                if (RED.settings.verbose) { node.log("end"); }
+                done();
+                return;
+            }
+            setTimeout( function() { wfi(done); }, 333 );
+        }
+
+        node.on("close", function(done) {
+            node.status({fill:"red",shape:"circle",text:""});
+            delete pinsInUse[node.pin];
             if (node.child != null) {
                 node.child.stdin.write(" close "+node.pin);
                 node.child.kill('SIGKILL');
             }
-            node.status({fill:"red",shape:"circle",text:""});
-            delete pinsInUse[node.pin];
-            if (RED.settings.verbose) { node.log("end"); }
+            wfi(done);
         });
     }
     RED.nodes.registerType("rpi-gpio in",GPIOInNode);
@@ -140,7 +149,7 @@ module.exports = function(RED) {
             var limit = 1;
             if (node.out === "pwm") { limit = 100; }
             if ((out >= 0) && (out <= limit)) {
-                if (RED.settings.verbose) { node.log("inp: "+msg.payload); }
+                if (RED.settings.verbose) { node.log("out: "+msg.payload); }
                 if (node.child !== null) { node.child.stdin.write(msg.payload+"\n"); }
                 else { node.warn("Command not running"); }
                 node.status({fill:"green",shape:"dot",text:msg.payload});
@@ -185,14 +194,23 @@ module.exports = function(RED) {
             node.error("Invalid GPIO pin: "+node.pin);
         }
 
-        node.on("close", function() {
+        var wfi = function(done) {
+            if (!node.running) {
+                if (RED.settings.verbose) { node.log("end"); }
+                done();
+                return;
+            }
+            setTimeout( function() { wfi(done); }, 333 );
+        }
+
+        node.on("close", function(done) {
+            node.status({fill:"red",shape:"circle",text:""});
+            delete pinsInUse[node.pin];
             if (node.child != null) {
                 node.child.stdin.write(" close "+node.pin);
                 node.child.kill('SIGKILL');
             }
-            node.status({fill:"red",shape:"circle",text:""});
-            delete pinsInUse[node.pin];
-            if (RED.settings.verbose) { node.log("end"); }
+            wfi(done);
         });
 
     }
@@ -243,13 +261,22 @@ module.exports = function(RED) {
             else { node.log('error: ' + err); }
         });
 
-        node.on("close", function() {
+        var wfi = function(done) {
+            if (!node.running) {
+                if (RED.settings.verbose) { node.log("end"); }
+                done();
+                return;
+            }
+            setTimeout( function() { wfi(done); }, 333 );
+        }
+
+        node.on("close", function(done) {
+            node.status({fill:"red",shape:"circle",text:""});
             if (node.child != null) {
                 node.child.kill('SIGINT');
                 node.child = null;
             }
-            node.status({fill:"red",shape:"circle",text:""});
-            if (RED.settings.verbose) { node.log("end"); }
+            wfi(done());
         });
     }
     RED.nodes.registerType("rpi-mouse",PiMouseNode);
