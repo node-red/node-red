@@ -16,9 +16,9 @@
 var RED = (function() {
 
     var deploymentTypes = {
-        "full":"Deploy",
-        "nodes":"Deploy changed nodes",
-        "flows":"Deploy changed flows"
+        "full":{label:"Deploy",img:"images/deploy-full-o.png"},
+        "nodes":{label:"Deploy modified nodes",img:"images/deploy-nodes-o.png"},
+        "flows":{label:"Deploy modified flows",img:"images/deploy-flows-o.png"}
     }
     var deploymentType = "full";
     
@@ -294,7 +294,8 @@ var RED = (function() {
     
     function changeDeploymentType(type) {
         deploymentType = type;
-        $("#btn-deploy span").text(deploymentTypes[type]);
+        $("#btn-deploy img").attr("src",deploymentTypes[type].img);
+        //$("#btn-deploy span").text(deploymentTypes[type].label);
     }
     
     $(function() {
@@ -330,14 +331,13 @@ var RED = (function() {
             ]
         });
         
-        //RED.menu.init({id:"btn-deploy-options",
-        //    options: [
-        //        {id:"btn-deploy-select",label:"Select deployment type"},
-        //        {id:"btn-deploy-full",icon:null,label:"Full deploy",tip:"Deploys all nodes",onselect:function() { changeDeploymentType("full")}},
-        //        {id:"btn-deploy-node",icon:null,label:"Deploy changed nodes",tip:"Deploys all nodes that have been changed",onselect:function() { changeDeploymentType("nodes")}},
-        //        {id:"btn-deploy-flow",icon:null,label:"Deploy changed flows",tip:"Deploys all nodes in flows that contain changes",onselect:function() { changeDeploymentType("flows")}}
-        //    ]
-        //});
+        RED.menu.init({id:"btn-deploy-options",
+            options: [
+                {id:"btn-deploy-full",toggle:"deploy-type",icon:"images/deploy-full.png",label:"Full",sublabel:"Deploys everything in the workspace",onselect:function(s) { if(s){changeDeploymentType("full")}}},
+                {id:"btn-deploy-flow",toggle:"deploy-type",icon:"images/deploy-flows.png",label:"Modified Flows",sublabel:"Only deploys flows that contain changed nodes", onselect:function(s) {if(s){changeDeploymentType("flows")}}},
+                {id:"btn-deploy-node",toggle:"deploy-type",icon:"images/deploy-nodes.png",label:"Modified Nodes",sublabel:"Only deploys nodes that have changed",onselect:function(s) { if(s){changeDeploymentType("nodes")}}}
+            ]
+        });
 
         RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
         loadSettings();

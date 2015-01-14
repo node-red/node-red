@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2014 IBM Corp.
+ * Copyright 2013, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,29 +113,29 @@ span.logo img {
 }
 
 #btn-deploy {
-    background: #d24741;
+    background: #8C101C; /*#d24741;*/
     color: #fff !important;
 }
 #btn-deploy + a {
-    background: #BA403B;
+    background: #8C101C; /*#BA403B;*/
     color: #fff;
 }
 #btn-deploy + a:hover {
-    background: #AD3C38;
+    background: #6E0A1E; /*#AD3C38;*/
     color: #fff;
 }
 #btn-deploy + a:active {
-    background: #aa1f19;
+    background: #4C0A17; /*#aa1f19;*/
     color: #ccc;
 }
 
 #btn-deploy:not(.disabled):hover {
-    background: #ca3f39;
+    background: #6E0A1E; /*#ca3f39;*/
 }
 
 
 #btn-deploy:not(.disabled):active {
-    background: #aa1f19 !important;
+    background: #4C0A17 /*#aa1f19*/ !important;
 }
 #btn-deploy:not(.disabled):active {
     color: #ccc !important;
@@ -146,8 +146,9 @@ span.logo img {
     background: #444;
     color: #999 !important;
 }
+
 #btn-deploy.disabled + a {
-    background: #666;
+    background: #444;
     color: #ddd;
 }
 #btn-deploy.disabled + a:hover {
@@ -159,6 +160,12 @@ span.logo img {
     color: #ddd;
 }
 
+#btn-deploy img {
+    margin-right: 8px;
+}
+#btn-deploy.disabled img {
+    opacity: 0.3;
+}
 
 .button-group {
     display: inline-block;
@@ -192,6 +199,11 @@ span.logo img {
 #header .button:focus {
     outline: none;
 }
+li.open #btn-sidemenu {
+    background: #666 ;
+}
+
+
 
 #workspace-toolbar .button {
     line-height: 18px;
@@ -806,29 +818,7 @@ div.node-info {
 .hidden {
     display: none;
 }
-/*
-.dropdown-menu {
-    font-size: 14px;
-    background: #000;
-}
-.dropdown-menu .divider {
-    background: #666;
-    border-bottom: #666;
-}
-.dropdown-menu>li>a {
-    color: #ddd;
-}
-.dropdown-submenu>ul {
-    border: 1px solid white;
-    border-radius: 6px !important;
-}
-.dropdown-menu li.disabled  a {
-    color: #666;
-}
-.dropdown-menu li.disabled  a:hover {
-    background: none;
-}  
-*/
+
 .dropdown-menu>li>a:hover, .dropdown-menu>li>a:focus, .dropdown-submenu:hover>a, .dropdown-submenu:focus>a {
     background: #999;
 }
@@ -846,7 +836,9 @@ div.node-info {
 }
 /** Fix for unreachable dropdown menu **/
 .dropdown-menu  {
+    border-radius: 0;
     width: 200px !important;
+    margin-left: 0px !important;
 }
 .dropdown-menu > li > a > i {
     width: 10px;
@@ -1137,3 +1129,121 @@ i.spinner {
     display: none;
 }
 
+/*
+ul#btn-deploy-options-submenu {
+    background: black;
+    border-radius: 0;
+    width: 300px !important;
+}
+
+ul#btn-deploy-options-submenu li a {
+    padding: 10px 30px;
+    color: white;
+}
+
+ul#btn-deploy-options-submenu li a img {
+    margin-right: 10px;
+    padding: 4px;
+    border: 3px solid rgba(0,0,0,0);
+}
+
+ul#btn-deploy-options-submenu li a.active img {
+    border: 3px solid #777677;
+}
+
+ul#btn-deploy-options-submenu li a span.menu-label-container {
+    width: 180px;
+    vertical-align: top;
+    display: inline-block;
+    text-indent: 0px;
+}
+ul#btn-deploy-options-submenu li a span.menu-label {
+    font-size: 16px;
+    display: inline-block;
+    text-indent: 0px;
+}
+ul#btn-deploy-options-submenu li a span.menu-sublabel {
+    color: #aeaeae;
+    font-size: 13px;
+    display: inline-block;
+    text-indent: 0px;
+}
+
+ul#btn-deploy-options-submenu li a:hover {
+    background: #323232;
+}
+*/
+
+#header ul.dropdown-menu {
+    background: black;
+    width: 300px !important;
+}
+
+#header ul.dropdown-menu li a {
+    color: white;
+    padding: 8px 40px;
+}
+
+#header ul.dropdown-menu li a img {
+    margin-right: 10px;
+    padding: 4px;
+    border: 3px solid rgba(0,0,0,0);
+}
+
+#header ul.dropdown-menu li a.active img {
+    border: 3px solid #777677;
+}
+
+#header ul.dropdown-menu li a span.menu-label-container {
+    width: 180px;
+    vertical-align: top;
+    display: inline-block;
+    text-indent: 0px;
+}
+#header ul.dropdown-menu li a span.menu-label {
+    font-size: 13px;
+    display: inline-block;
+    text-indent: 0px;
+}
+#header ul.dropdown-menu li a span.menu-sublabel {
+    color: #aeaeae;
+    font-size: 13px;
+    display: inline-block;
+    text-indent: 0px;
+}
+
+#header ul.dropdown-menu li a:hover {
+    background: #323232;
+}
+
+#header ul.dropdown-menu li.divider {
+    background: #5A5A5A;
+    border-bottom-color: #464646;
+}
+
+/* Deploy menu customisations */
+#header ul#btn-deploy-options-submenu li a span.menu-label {
+    font-size: 16px;
+    display: inline-block;
+    text-indent: 0px;
+}
+#header ul#btn-deploy-options-submenu li a {
+    padding: 10px 30px;
+    color: white;
+}
+.dropdown-submenu>a:after {
+    display: none;
+}
+.dropdown-submenu>a:before {
+display: block;
+float: left;
+width: 0;
+height: 0;
+margin-top: 5px;
+margin-left: -35px;
+border-color: transparent;
+border-right-color: #ccc;
+border-style: solid;
+border-width: 5px 5px 5px 0;
+content: " ";
+}

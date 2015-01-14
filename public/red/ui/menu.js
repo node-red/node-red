@@ -45,11 +45,27 @@ RED.menu = (function() {
             item = $('<li class="divider"></li>');
         } else {
             item = $('<li></li>');
-            var link = $('<a '+(opt.id?'id="'+opt.id+'" ':'')+'tabindex="-1" href="#">'+
-                (opt.toggle?'<i class="fa fa-check pull-right"></i>':'')+
-                (opt.icon!==undefined?'<i class="'+(opt.icon?opt.icon:'" style="display: inline-block;"')+'"></i> ':"")+
-                '<span class="menu-label">'+opt.label+'</span>'+
-                '</a>').appendTo(item);
+            
+            var linkContent = '<a '+(opt.id?'id="'+opt.id+'" ':'')+'tabindex="-1" href="#">'+
+                (opt.toggle?'<i class="fa fa-check pull-right"></i>':'');
+            if (opt.icon !== undefined) {
+                if (/\.png/.test(opt.icon)) {
+                    linkContent += '<img src="'+opt.icon+'"/> ';
+                } else {
+                    linkContent += '<i class="'+(opt.icon?opt.icon:'" style="display: inline-block;"')+'"></i> ';
+                }
+            }
+            
+            if (opt.sublabel) {
+                linkContent += '<span class="menu-label-container"><span class="menu-label">'+opt.label+'</span>'+
+                               '<span class="menu-sublabel">'+opt.sublabel+'</span></span>'
+            } else {
+                linkContent += '<span class="menu-label">'+opt.label+'</span>'
+            }
+            
+            linkContent += '</a>';
+                
+            var link = $(linkContent).appendTo(item);
 
             menuItems[opt.id] = opt;
 
@@ -59,7 +75,22 @@ RED.menu = (function() {
                         return;
                     }
                     if (opt.toggle) {
-                        setSelected(opt.id, !isSelected(opt.id));
+                        var selected = isSelected(opt.id);
+                        if (typeof opt.toggle === "string") {
+                            if (!selected) {
+                                for (var m in menuItems) {
+                                    if (menuItems.hasOwnProperty(m)) {
+                                        var mi = menuItems[m];
+                                        if (mi.id != opt.id && opt.toggle == mi.toggle) {
+                                            setSelected(mi.id,false);
+                                        }
+                                    }
+                                }
+                                setSelected(opt.id,true);
+                            }
+                        } else {
+                            setSelected(opt.id, !selected);
+                        }
                     } else {
                         opt.onselect.call(opt);
                     }
