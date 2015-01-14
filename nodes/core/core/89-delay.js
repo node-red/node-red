@@ -62,8 +62,8 @@ module.exports = function(RED) {
         }
 
         if (n.randomUnits === "milliseconds") {
-            this.randomFirst = n.randomFirst;
-            this.randomLast = n.randomLast;
+            this.randomFirst = n.randomFirst * 1;
+            this.randomLast = n.randomLast * 1;
         } else if (n.randomUnits === "seconds") {
             this.randomFirst = n.randomFirst * 1000;
             this.randomLast = n.randomLast * 1000;

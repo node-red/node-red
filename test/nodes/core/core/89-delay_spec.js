@@ -368,7 +368,7 @@ describe('delayNode', function() {
     });
     
     it(' randomly delays the message in milliseconds', function(done) {
-        randomDelayTest(400, 800, "milliseconds", done);
+        randomDelayTest("400", "800", "milliseconds", done);
     });
     
     it('randomly delays the message in minutes', function(done) {
