@@ -13,12 +13,79 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+<script type="text/javascript">
+function ws_oneditprepare() {
+    $("#websocket-client-row").hide();            
+    $("#node-input-mode").change(function(){
+        if( $("#node-input-mode").val() === 'client') {
+            $("#websocket-server-row").hide();
+            $("#websocket-client-row").show();
+        }
+        else {
+            $("#websocket-server-row").show();
+            $("#websocket-client-row").hide();
+        }
+    });
 
+    if(this.client) {
+        $("#node-input-mode").val('client').change();
+    }
+    else {
+        $("#node-input-mode").val('server').change();
+    }
+}
+
+function ws_oneditsave() {
+    if($("#node-input-mode").val() === 'client') {
+        $("#node-input-server").append('<option value="">Dummy</option>');
+        $("#node-input-server").val('');                
+    }
+    else {
+        $("#node-input-client").append('<option value="">Dummy</option>');
+        $("#node-input-client").val('');                
+    }
+}
+
+function ws_label() {
+    var nodeid = (this.client)?this.client:this.server;
+    var wsNode = RED.nodes.node(nodeid);
+    return this.name||(wsNode?"[ws] "+wsNode.label():"websocket");
+}
+
+function ws_validateserver() {
+    if($("#node-input-mode").val() === 'client' || (this.client && !this.server)) {
+        return true;
+    }
+    else {
+        return RED.nodes.node(this.server) != null;
+    }
+}
+
+function ws_validateclient() {
+    if($("#node-input-mode").val() === 'client' || (this.client && !this.server)) {
+        return RED.nodes.node(this.client) != null;
+    }
+    else {
+        return true;
+    }
+}
+</script>
 <!-- WebSocket Input Node -->
 <script type="text/x-red" data-template-name="websocket in">
     <div class="form-row">
+        <label for="node-input-mode"><i class="fa fa-dot-circle-o"></i> Type</label>
+        <select id="node-input-mode">
+            <option value="server">Listen on</option>
+            <option value="client">Connect to</option>
+        </select>
+    </div>
+    <div class="form-row" id="websocket-server-row">
         <label for="node-input-server"><i class="fa fa-bookmark"></i> Path</label>
         <input type="text" id="node-input-server">
+    </div>
+    <div class="form-row" id="websocket-client-row">
+        <label for="node-input-client"><i class="fa fa-bookmark"></i> URL</label>
+        <input type="text" id="node-input-client">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -29,7 +96,7 @@
 <script type="text/x-red" data-help-name="websocket in">
     <p>WebSocket input node.</p>
     <p>By default, the data received from the WebSocket will be in <b>msg.payload</b>.
-    The listener can be configured to expect a properly formed JSON string, in which
+    The socket can be configured to expect a properly formed JSON string, in which
     case it will parse the JSON and send on the resulting object as the entire message.</p>
 </script>
 
@@ -38,27 +105,38 @@
         category: 'input',
         defaults: {
             name: {value:""},
-            server: {type:"websocket-listener"}
+            server: {type:"websocket-listener", validate: ws_validateserver},
+            client: {type:"websocket-client", validate: ws_validateclient}
         },
         color:"rgb(215, 215, 160)",
         inputs:0,
         outputs:1,
         icon: "white-globe.png",
-        label: function() {
-            var wsNode = RED.nodes.node(this.server);
-            return this.name||(wsNode?"[ws] "+wsNode.label():"websocket");
-        },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
-        }
+        },
+        label: ws_label,
+        oneditsave: ws_oneditsave,
+        oneditprepare: ws_oneditprepare
     });
 </script>
 
 <!-- WebSocket out Node -->
 <script type="text/x-red" data-template-name="websocket out">
     <div class="form-row">
+        <label for="node-input-mode"><i class="fa fa-dot-circle-o"></i> Type</label>
+        <select id="node-input-mode">
+            <option value="server">Listen on</option>
+            <option value="client">Connect to</option>
+        </select>
+    </div>
+    <div class="form-row" id="websocket-server-row">
         <label for="node-input-server"><i class="fa fa-bookmark"></i> Path</label>
         <input type="text" id="node-input-server">
+    </div>
+    <div class="form-row" id="websocket-client-row">
+        <label for="node-input-client"><i class="fa fa-bookmark"></i> URL</label>
+        <input type="text" id="node-input-client">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -68,7 +146,7 @@
 
 <script type="text/x-red" data-help-name="websocket out">
     <p>WebSocket out node.</p>
-    <p>By default, <b>msg.payload</b> will be sent over the WebSocket. The listener
+    <p>By default, <b>msg.payload</b> will be sent over the WebSocket. The socket
     can be configured to encode the entire message object as a JSON string and send that
     over the WebSocket.</p>
 
@@ -84,20 +162,20 @@
         category: 'output',
         defaults: {
             name: {value:""},
-            server: {type:"websocket-listener", required:true}
+            server: {type:"websocket-listener", validate: ws_validateserver},
+            client: {type:"websocket-client", validate: ws_validateclient}
         },
         color:"rgb(215, 215, 160)",
         inputs:1,
         outputs:0,
         icon: "white-globe.png",
         align: "right",
-        label: function() {
-            var wsNode = RED.nodes.node(this.server);
-            return this.name||(wsNode?"[ws] "+wsNode.label():"websocket");
-        },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
-        }
+        },
+        label: ws_label,
+        oneditsave: ws_oneditsave,
+        oneditprepare: ws_oneditprepare
     });
 </script>
 
@@ -115,7 +193,7 @@
         </select>
     </div>
     <div class="form-tips">
-    Be default, <code>payload</code> will contain the data to be sent over, or received from a websocket.
+    By default, <code>payload</code> will contain the data to be sent over, or received from a websocket.
     The listener can be configured to send or receive the entire message object as a JSON formatted string.
     <p id="node-config-ws-tip">This path will be relative to <code><span id="node-config-ws-path"></span></code>.</p>
     </div>
@@ -157,7 +235,45 @@
                 $("#node-config-ws-path").html(root);
                 $("#node-config-ws-tip").show();
             }
-            //document.getElementById("node-config-wsdocpath").innerHTML=
+        }
+    });
+</script>
+
+<!-- WebSocket Client configuration node -->
+<script type="text/x-red" data-template-name="websocket-client">
+    <div class="form-row">
+        <label for="node-config-input-path"><i class="fa fa-bookmark"></i> URL</label>
+        <input type="text" id="node-config-input-path" placeholder="ws://example.com/ws">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-wholemsg">&nbsp;</label>
+        <select type="text" id="node-config-input-wholemsg" style="width: 70%;">
+            <option value="false">Send/Receive payload</option>
+            <option value="true">Send/Receive entire message</option>
+        </select>
+    </div>
+    <div class="form-tips">
+    <p>URL should use ws:&#47;&#47; or wss:&#47;&#47; scheme and point to an existing websocket listener.</p>
+    By default, <code>payload</code> will contain the data to be sent over, or received from a websocket.
+    The client can be configured to send or receive the entire message object as a JSON formatted string.
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="websocket-client">
+   <p>This configuration node connects a WebSocket client to the specified URL.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('websocket-client',{
+        category: 'config',
+        defaults: {
+            path: {value:"",required:true,validate:RED.validators.regex(/^((?!\/debug\/ws).)*$/) },
+            wholemsg: {value:"false"}
+        },
+        inputs:0,
+        outputs:0,
+        label: function() {
+            return this.path;
         }
     });
 </script>
