@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,6 +210,7 @@ function Flow(config) {
     
     this.activeNodes = {};
     this.subflowInstanceNodes = {};
+    this.started = false;
 
     this.parseConfig(config);
     
@@ -251,7 +252,6 @@ Flow.prototype.parseConfig = function(config) {
         nodeType = nodeConfig.type;
         
         if (nodeConfig.credentials) {
-            credentials.extract(nodeConfig);
             delete nodeConfig.credentials;
         }
         
@@ -297,6 +297,7 @@ Flow.prototype.parseConfig = function(config) {
 }
 
 Flow.prototype.start = function() {
+    this.started = true;
     if (this.missingTypes.length > 0) {
         throw new Error("missing types");
     }
@@ -354,6 +355,7 @@ Flow.prototype.stop = function(nodeList) {
         }
         when.settle(promises).then(function() {
             events.emit("nodes-stopped");
+            flow.started = false;
             resolve();
         });
     });
@@ -368,7 +370,7 @@ Flow.prototype.typeRegistered = function(type) {
         var i = this.missingTypes.indexOf(type);
         if (i != -1) {
             this.missingTypes.splice(i,1);
-            if (this.missingTypes.length === 0) {
+            if (this.missingTypes.length === 0 && this.started) {
                 this.start();
             }
         }
@@ -505,7 +507,7 @@ Flow.prototype.diffFlow = function(config) {
     
     this.config.forEach(function(node) {
         for (var prop in node) {
-            if (node.hasOwnProperty(prop) && prop != "z") {
+            if (node.hasOwnProperty(prop) && prop != "z" && prop != "id" && prop != "wires") {
                 // This node has a property that references a changed node
                 // Assume it is a config node change and mark this node as
                 // changed.
@@ -553,7 +555,7 @@ Flow.prototype.diffFlow = function(config) {
         buildNodeLinks(newLinks,node,configNodes);
     });
     
-    var markLinkedNodes = function(linkChanged,changedNodes,linkMap,allNodes) {
+    var markLinkedNodes = function(linkChanged,otherChangedNodes,linkMap,allNodes) {
         var stack = Object.keys(changedNodes);
         var visited = {};
         
@@ -563,8 +565,8 @@ Flow.prototype.diffFlow = function(config) {
             var linkedNodes = linkMap[id];
             if (linkedNodes) {
                 for (var i=0;i<linkedNodes.length;i++) {
-                    linkedNodeId = linkedNodes[i];
-                    if (changedNodes[linkedNodeId] || linkChanged[linkedNodeId]) {
+                    var linkedNodeId = linkedNodes[i];
+                    if (changedNodes[linkedNodeId] || deletedNodes[linkedNodeId] || otherChangedNodes[linkedNodeId] || linkChanged[linkedNodeId]) {
                         // Do nothing - this linked node is already marked as changed, so will get done
                     } else {
                         linkChanged[linkedNodeId] = true;
@@ -575,12 +577,11 @@ Flow.prototype.diffFlow = function(config) {
         }
     }
     
-    markLinkedNodes(linkChangedNodes,changedNodes,newLinks,configNodes);
-    markLinkedNodes(linkChangedNodes,deletedNodes,activeLinks,flow.allNodes);
-    
+    markLinkedNodes(linkChangedNodes,{},newLinks,configNodes);
+    markLinkedNodes(linkChangedNodes,{},activeLinks,flow.allNodes);
     
     var modifiedLinkNodes = {};
-    
+
     config.forEach(function(node) {
         if (!changedNodes[node.id]) {
             // only concerned about unchanged nodes whose wiring may have changed
@@ -596,25 +597,27 @@ Flow.prototype.diffFlow = function(config) {
             newNodeLinks.forEach(function(link) {
                 if (newLinkMap[link] != oldLinkMap[link]) {
                     modifiedLinkNodes[node.id] = node;
-                    modifiedLinkNodes[link] = configNodes[link];
                     linkChangedNodes[node.id] = node;
-                    linkChangedNodes[link] = configNodes[link];
+                    if (!changedNodes[link] && !deletedNodes[link]) {
+                        modifiedLinkNodes[link] = configNodes[link];
+                        linkChangedNodes[link] = configNodes[link];
+                    }
                 }
             });
-            
             oldNodeLinks.forEach(function(link) {
                 if (newLinkMap[link] != oldLinkMap[link]) {
                     modifiedLinkNodes[node.id] = node;
-                    modifiedLinkNodes[link] = configNodes[link];
                     linkChangedNodes[node.id] = node;
-                    linkChangedNodes[link] = configNodes[link];
+                    if (!changedNodes[link] && !deletedNodes[link]) {
+                        modifiedLinkNodes[link] = configNodes[link];
+                        linkChangedNodes[link] = configNodes[link];
+                    }
                 }
             });
         }
     });
     
     markLinkedNodes(linkChangedNodes,modifiedLinkNodes,newLinks,configNodes);
-    
     
     //config.forEach(function(n) {
     //    console.log((changedNodes[n.id]!=null)?"[C]":"[ ]",(linkChangedNodes[n.id]!=null)?"[L]":"[ ]","[ ]",n.id,n.type,n.name);
