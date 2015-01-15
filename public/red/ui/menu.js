@@ -46,8 +46,12 @@ RED.menu = (function() {
         } else {
             item = $('<li></li>');
             
-            var linkContent = '<a '+(opt.id?'id="'+opt.id+'" ':'')+'tabindex="-1" href="#">'+
-                (opt.toggle?'<i class="fa fa-check pull-right"></i>':'');
+            var linkContent = '<a '+(opt.id?'id="'+opt.id+'" ':'')+'tabindex="-1" href="#">';
+            if (opt.toggle) {
+                linkContent += '<i class="fa fa-square pull-left"></i>';
+                linkContent += '<i class="fa fa-check-square pull-left"></i>';
+                
+            }
             if (opt.icon !== undefined) {
                 if (/\.png/.test(opt.icon)) {
                     linkContent += '<img src="'+opt.icon+'"/> ';
