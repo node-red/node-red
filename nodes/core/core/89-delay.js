@@ -21,16 +21,6 @@ module.exports = function(RED) {
     var MILLIS_TO_NANOS = 1000000;
     var SECONDS_TO_NANOS = 1000000000;
 
-    function random(n) {
-        var wait = n.randomFirst + (n.diff * Math.random());
-        if (n.buffer.length > 0) {
-            n.send(n.buffer.pop());
-            n.randomID = setTimeout(function() {random(n);},wait);
-        } else {
-            n.randomID = -1;
-        }
-    }
-
     function DelayNode(n) {
         RED.nodes.createNode(this,n);
 
@@ -62,8 +52,8 @@ module.exports = function(RED) {
         }
 
         if (n.randomUnits === "milliseconds") {
-            this.randomFirst = n.randomFirst;
-            this.randomLast = n.randomLast;
+            this.randomFirst = n.randomFirst * 1;
+            this.randomLast = n.randomLast * 1;
         } else if (n.randomUnits === "seconds") {
             this.randomFirst = n.randomFirst * 1000;
             this.randomLast = n.randomLast * 1000;
@@ -180,19 +170,22 @@ module.exports = function(RED) {
             });
 
         } else if (this.pauseType === "random") {
-            this.on("input",function(msg){
-                node.buffer.push(msg);
-                if (node.randomID === -1) {
-                    var wait = node.randomFirst + (node.diff * Math.random());
-                    node.randomID = setTimeout(function() {random(node);},wait);
-                }
+            this.on("input", function(msg) {
+                var wait = node.randomFirst + (node.diff * Math.random());
+                var id = setTimeout(function(){
+                    node.idList.splice(node.idList.indexOf(id),1);
+                    node.send(msg);
+                }, wait);
+                this.idList.push(id);
             });
 
-            this.on("close", function (){
-                if (this.randomID !== -1) {
-                    clearTimeout(this.randomID);
+            this.on("close", function() {
+                for (var i=0; i<this.idList.length; i++ ) {
+                    clearTimeout(this.idList[i]);
                 }
+                this.idList = [];
             });
+
         }
     }
     RED.nodes.registerType("delay",DelayNode);
