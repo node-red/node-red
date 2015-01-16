@@ -39,8 +39,13 @@ function registerType(type,constructor,opts) {
  */
 function createNode(node,def) {
     Node.call(node,def);
-    var creds = credentials.get(node.id);
+    var id = node.id;
+    if (def._alias) {
+        id = def._alias;
+    }
+    var creds = credentials.get(id);
     if (creds) {
+        //console.log("Attaching credentials to ",node.id);
         node.credentials = creds;
     }
 }
@@ -57,7 +62,8 @@ function checkTypeInUse(id) {
         throw new Error("Unrecognised id: "+id);
     } else {
         var inUse = {};
-        flows.each(function(n) {
+        var config = flows.getFlows();
+        config.forEach(function(n) {
             inUse[n.type] = (inUse[n.type]||0)+1;
         });
         var nodesInUse = [];

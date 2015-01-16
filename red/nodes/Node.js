@@ -25,12 +25,19 @@ var comms = require("../comms");
 
 function Node(n) {
     this.id = n.id;
-    flows.add(this);
     this.type = n.type;
     if (n.name) {
         this.name = n.name;
     }
-    this.wires = n.wires || [];
+    flows.add(this);
+    this.updateWires(n.wires);
+}
+
+util.inherits(Node, EventEmitter);
+
+Node.prototype.updateWires = function(wires) {
+    this.wires = wires || [];
+    delete this._wire;
     
     var wc = 0;
     this.wires.forEach(function(w) {
@@ -40,14 +47,16 @@ function Node(n) {
     if (wc === 0) {
         // With nothing wired to the node, no-op send
         this.send = function(msg) {}
-    } else if (this.wires.length === 1 && this.wires[0].length === 1) {
-        // Single wire, so we can shortcut the send when
-        // a single message is sent
-        this._wire = this.wires[0][0];
+    } else {
+        this.send = Node.prototype.send;
+        if (this.wires.length === 1 && this.wires[0].length === 1) {
+            // Single wire, so we can shortcut the send when
+            // a single message is sent
+            this._wire = this.wires[0][0];
+        }
     }
-}
 
-util.inherits(Node, EventEmitter);
+}
 
 Node.prototype._on = Node.prototype.on;
 

@@ -20,6 +20,18 @@
 
  
 module.exports = {
+    
+    adminAuth: {
+        type: "credentials",
+        users: [ {
+            username: "nol",
+            password: "5f4dcc3b5aa765d61d8327deb882cf99", // password
+            permissions: "*"
+        }],
+        anonymous: {
+            permissions: "read"
+        }
+    },
     // the tcp port that the Node-RED web server is listening on
     uiPort: 1880,
 

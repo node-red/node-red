@@ -45,11 +45,31 @@ RED.menu = (function() {
             item = $('<li class="divider"></li>');
         } else {
             item = $('<li></li>');
-            var link = $('<a '+(opt.id?'id="'+opt.id+'" ':'')+'tabindex="-1" href="#">'+
-                (opt.toggle?'<i class="fa fa-check pull-right"></i>':'')+
-                (opt.icon?'<i class="'+opt.icon+'"></i> ':'')+
-                opt.label+
-                '</a>').appendTo(item);
+            
+            var linkContent = '<a '+(opt.id?'id="'+opt.id+'" ':'')+'tabindex="-1" href="#">';
+            if (opt.toggle) {
+                linkContent += '<i class="fa fa-square pull-left"></i>';
+                linkContent += '<i class="fa fa-check-square pull-left"></i>';
+                
+            }
+            if (opt.icon !== undefined) {
+                if (/\.png/.test(opt.icon)) {
+                    linkContent += '<img src="'+opt.icon+'"/> ';
+                } else {
+                    linkContent += '<i class="'+(opt.icon?opt.icon:'" style="display: inline-block;"')+'"></i> ';
+                }
+            }
+            
+            if (opt.sublabel) {
+                linkContent += '<span class="menu-label-container"><span class="menu-label">'+opt.label+'</span>'+
+                               '<span class="menu-sublabel">'+opt.sublabel+'</span></span>'
+            } else {
+                linkContent += '<span class="menu-label">'+opt.label+'</span>'
+            }
+            
+            linkContent += '</a>';
+                
+            var link = $(linkContent).appendTo(item);
 
             menuItems[opt.id] = opt;
 
@@ -59,7 +79,22 @@ RED.menu = (function() {
                         return;
                     }
                     if (opt.toggle) {
-                        setSelected(opt.id, !isSelected(opt.id));
+                        var selected = isSelected(opt.id);
+                        if (typeof opt.toggle === "string") {
+                            if (!selected) {
+                                for (var m in menuItems) {
+                                    if (menuItems.hasOwnProperty(m)) {
+                                        var mi = menuItems[m];
+                                        if (mi.id != opt.id && opt.toggle == mi.toggle) {
+                                            setSelected(mi.id,false);
+                                        }
+                                    }
+                                }
+                                setSelected(opt.id,true);
+                            }
+                        } else {
+                            setSelected(opt.id, !selected);
+                        }
                     } else {
                         opt.onselect.call(opt);
                     }
@@ -67,6 +102,11 @@ RED.menu = (function() {
                 setState();
             } else if (opt.href) {
                 link.attr("target","_blank").attr("href",opt.href);
+            } else if (!opt.options) {
+                item.addClass("disabled");
+                link.click(function(event) {
+                    event.preventDefault();
+                });
             }
             if (opt.options) {
                 item.addClass("dropdown-submenu pull-left");
@@ -79,6 +119,17 @@ RED.menu = (function() {
             if (opt.disabled) {
                 item.addClass("disabled");
             }
+            if (opt.tip) {
+                item.popover({
+                    placement:"left",
+                    trigger: "hover",
+                    delay: { show: 350, hide: 20 },
+                    html: true,
+                    container:'body',
+                    content: opt.tip
+                });
+            }
+            
         }
 
 
@@ -88,8 +139,8 @@ RED.menu = (function() {
     function createMenu(options) {
 
         var button = $("#"+options.id);
-
-        var topMenu = $("<ul/>",{class:"dropdown-menu"}).insertAfter(button);
+        
+        var topMenu = $("<ul/>",{id:options.id+"-submenu", class:"dropdown-menu pull-right"}).insertAfter(button);
 
         for (var i=0;i<options.options.length;i++) {
             var opt = options.options[i];

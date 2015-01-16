@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2014 IBM Corp.
+ * Copyright 2013, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ body {
     height: 40px;
     background: #000;
     box-sizing: border-box;
-    padding: 5px 0px 5px 20px;
+    padding: 0px 0px 0px 20px;
 }
 
 #dropTarget {
@@ -52,7 +52,7 @@ body {
     font-size: 80px;
 }
 div.btn-group, a.btn {
-    -webkit-user-select: none;
+   -webkit-user-select: none;
    -khtml-user-select: none;
    -moz-user-select: none;
    -ms-user-select: none;
@@ -62,10 +62,11 @@ div.btn-group, a.btn {
 span.logo {
     pointer-events: none;
     float: left;
+    margin-top: 5px;
     font-size: 30px;
     line-height: 30px;
     text-decoration: none;
-    color: #ccc;
+    color: #C7C7C7;
 }
 span.logo span {
     vertical-align: middle;
@@ -74,6 +75,20 @@ span.logo span {
 span.logo img {
     height: 18px;
 }
+#header ul.header-toolbar {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    float: right;
+}
+
+#header ul.header-toolbar > li {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
 .button {
    -webkit-user-select: none;
    -khtml-user-select: none;
@@ -83,48 +98,120 @@ span.logo img {
 }
 
 #header .button {
-    line-height: 22px;
+    min-width: 20px;
+    text-align: center;
+    line-height: 40px;
     display: inline-block;
     font-size: 14px;
-    padding: 4px 12px;
+    padding: 0px 12px;
     text-decoration: none;
-    border-radius: 3px;
-    color: #ccc;
-    margin: auto 10px;
+    color: #C7C7C7;
+    margin: auto 5px;
     vertical-align: middle;
+    border-left: 2px solid #000;
+    border-right: 2px solid #000;
 }
 #header .button:not(.disabled):hover {
-    box-shadow: 0 0 2px #fff;
-}
-#btn-deploy:not(.disabled):hover {
-    background: #ca3f39;
+    border-color: #323232;
 }
 
 #btn-deploy {
-    color: #fff !important;
-    background: #d24741;
-    box-shadow: 0 0 2px #fff;
+    background: #8C101C; /*#d24741;*/
+    color: #eee !important;
+}
+#btn-deploy + a {
+    background: #8C101C; /*#BA403B;*/
+    color: #eee;
+}
+#btn-deploy + a:hover {
+    background: #6E0A1E; /*#AD3C38;*/
+    color: #eee;
+}
+#btn-deploy + a:active {
+    background: #4C0A17; /*#aa1f19;*/
+    color: #ccc;
+}
+span.deploy-button-group.open > #btn-deploy + a {
+    background: #121212 !important;
+}
+
+#btn-deploy:not(.disabled):hover {
+    background: #6E0A1E; /*#ca3f39;*/
+}
+
+
+#btn-deploy:not(.disabled):active {
+    background: #4C0A17 /*#aa1f19*/ !important;
 }
 #btn-deploy:not(.disabled):active {
-    background: #aa1f19 !important;
     color: #ccc !important;
-    box-shadow: 0 0 2px #999;
 }
+
 #btn-deploy.disabled {
     cursor: default;
-    background: #444 ;
+    background: #444;
     color: #999 !important;
+}
+
+#btn-deploy.disabled + a {
+    background: #444;
+    color: #ddd;
+}
+#btn-deploy.disabled + a:hover {
+    background: #555;
+    color: #ddd;
+}
+#btn-deploy.disabled + a:active {
+    background: #444;
+    color: #ddd;
+}
+span.deploy-button-group.open > #btn-deploy.disabled + a {
+    background: #121212 !important;
+}
+
+
+#btn-deploy img {
+    margin-right: 8px;
+}
+#btn-deploy.disabled img {
+    opacity: 0.3;
+}
+
+.button-group {
+    display: inline-block;
+    margin: auto 10px;
+    vertical-align: middle;
+    background: #555;
+    clear: both;
+}
+.button-group > a {
+    float: left;
+    line-height: 22px;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    padding: 4px 8px;
+    color: #ccc;
+    margin: 0;
+}
+.button-group > a:last-child {
 }
 
 #btn-sidemenu {
     font-size: 20px !important;
 }
 #btn-sidemenu:active, #btn-sidemenu.active {
-    background: #333 ;
+    background: #121212;
 }
 #header .button:focus {
     outline: none;
 }
+li.open #btn-sidemenu {
+    background: #121212;
+    border-color: #121212;
+}
+
+
 
 #workspace-toolbar .button {
     line-height: 18px;
@@ -739,47 +826,39 @@ div.node-info {
 .hidden {
     display: none;
 }
-/*
-.dropdown-menu {
-    font-size: 14px;
-    background: #000;
-}
-.dropdown-menu .divider {
-    background: #666;
-    border-bottom: #666;
-}
-.dropdown-menu>li>a {
-    color: #ddd;
-}
-.dropdown-submenu>ul {
-    border: 1px solid white;
-    border-radius: 6px !important;
-}
-.dropdown-menu li.disabled  a {
-    color: #666;
-}
-.dropdown-menu li.disabled  a:hover {
-    background: none;
-}  
-*/
+
 .dropdown-menu>li>a:hover, .dropdown-menu>li>a:focus, .dropdown-submenu:hover>a, .dropdown-submenu:focus>a {
     background: #999;
 }
 
-.dropdown-menu * .fa-check {
+.dropdown-menu * .fa-check-square {
     display: none;
-    margin-right: -15px;
+    color: #e0e0e0;
+    margin-left: -25px;
     margin-top: 3px;
 }
-.dropdown-menu * a.active > .fa-check {
+.dropdown-menu * a.active > .fa-check-square {
     display: inline-block;
 }
+.dropdown-menu * .fa-square {
+    display: inline-block;
+    color: #e0e0e0;
+    margin-left: -25px;
+    margin-top: 3px;
+}
+.dropdown-menu * a.active > .fa-square {
+    display: none;
+}
+
+
 .dropdown-menu>li.disabled>a:hover>[class^="icon-"] {
     background-image: url("bootstrap/img/glyphicons-halflings.png") !important;
 }
 /** Fix for unreachable dropdown menu **/
 .dropdown-menu  {
+    border-radius: 0;
     width: 200px !important;
+    margin-left: 0px !important;
 }
 .dropdown-menu > li > a > i {
     width: 10px;
@@ -792,8 +871,32 @@ div.node-info {
      white-space: normal !important;
 }
 
-.popover-title { display: none; }
+.dropdown-submenu>a:after {
+    display: none;
+}
+.dropdown-submenu>a:before {
+    display: block;
+    float: left;
+    width: 0;
+    height: 0;
+    margin-top: 5px;
+    margin-left: -30px;
+    border-color: transparent;
+    border-right-color: #e0e0e0;
+    border-style: solid;
+    border-width: 5px 5px 5px 0;
+    content: " ";
+}
 
+.dropdown-submenu.disabled > a:before {
+    border-right-color: #444;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+    border-radius: 0;
+}
+
+
+.popover-title { display: none; }
 
 .leftButton {
     margin-right: 200px !important;
@@ -1069,4 +1172,74 @@ i.spinner {
 .ui-dialog-no-close .ui-dialog-titlebar-close {
     display: none;
 }
+
+#header ul.dropdown-menu {
+    background: #121212;
+    width: 250px !important;
+    margin-top: 0;
+}
+
+#header ul.dropdown-menu li a {
+    color: #C7C7C7;
+    padding: 3px 40px;
+}
+
+#header ul.dropdown-menu li a img {
+    margin-right: 10px;
+    padding: 4px;
+    border: 3px solid rgba(0,0,0,0);
+}
+
+#header ul.dropdown-menu li a.active img {
+    border: 3px solid #777677;
+}
+
+#header ul.dropdown-menu li a span.menu-label-container {
+    width: 180px;
+    vertical-align: top;
+    display: inline-block;
+    text-indent: 0px;
+}
+#header ul.dropdown-menu li a span.menu-label {
+    font-size: 14px;
+    display: inline-block;
+    text-indent: 0px;
+}
+#header ul.dropdown-menu li a span.menu-sublabel {
+    color: #aeaeae;
+    font-size: 13px;
+    display: inline-block;
+    text-indent: 0px;
+}
+
+#header ul.dropdown-menu > li:hover > a,
+#header ul.dropdown-menu > li:focus > a {
+    background: #323232 !important;
+}
+
+#header ul.dropdown-menu li.divider {
+    background: #464646;
+    border-bottom-color: #323232;
+}
+#header ul.dropdown-menu li.disabled a {
+    color: #666;
+}
+    
+/* Deploy menu customisations */
+#header ul#btn-deploy-options-submenu {
+    width: 300px !important;
+}
+#header ul#btn-deploy-options-submenu li a span.menu-label {
+    font-size: 16px;
+    display: inline-block;
+    text-indent: 0px;
+}
+#header ul#btn-deploy-options-submenu li a {
+    padding: 10px 30px;
+    color: #fff;
+}
+#header ul#btn-deploy-options-submenu li a > i.fa {
+    display: none !important;
+}
+
 

@@ -31,10 +31,13 @@
 <body spellcheck="false">
 <div id="header">
     <span class="logo"><img src="node-red.png"> <span>Node-RED</span></span>
-    <div class="pull-right">
-        <a id="btn-deploy" class="button action-deploy disabled" href="#"><i id="btn-icn-deploy" class="fa fa-download"></i> Deploy</a>
-        <a id="btn-sidemenu" class="button dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-bars"></i></a>
-    </div>
+    <ul class="header-toolbar">
+        <li><span class="deploy-button-group button-group">
+                <a id="btn-deploy" class="action-deploy disabled" href="#"><img id="btn-icn-deploy" src="images/deploy-full-o.png"> <span>Deploy</span></a>
+                <a id="btn-deploy-options"  data-toggle="dropdown"  class="" href="#"><i class="fa fa-caret-down"></i></a>
+            </span></li>
+        <li><a id="btn-sidemenu" class="button" data-toggle="dropdown" href="#"><i class="fa fa-bars"></i></a></li>
+    <ul>
 </div>
 <div id="main-container" class="sidebar-closed">
     <div id="palette">

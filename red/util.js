@@ -57,9 +57,51 @@ function cloneMessage(msg) {
     return m;
 }
 
+function compareObjects(obj1,obj2) {
+    if (obj1 === obj2) {
+        return true;
+    }
+    if (obj1 == null || obj2 == null) {
+        return false;
+    }
+    if (!(obj1 instanceof Object) && !(obj2 instanceof Object)) {
+        return false;
+    }
+    var isArray1 = Array.isArray(obj1);
+    var isArray2 = Array.isArray(obj2);
+    if (isArray1 != isArray2) {
+        return false;
+    }
+    if (isArray1 && isArray2) {
+        if (obj1.length != obj2.length) {
+            return false;
+        }
+        for (var i=0;i<obj1.length;i++) {
+            if (!compareObjects(obj1[i],obj2[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    var keys1 = Object.keys(obj1);
+    var keys2 = Object.keys(obj2);
+    if (keys1.length != keys2.length) {
+        return false;
+    }
+    for (var k in obj1) {
+        if (obj1.hasOwnProperty(k)) {
+            if (!compareObjects(obj1[k],obj2[k])) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 module.exports = {
     ensureString: ensureString,
     ensureBuffer: ensureBuffer,
-    cloneMessage: cloneMessage
+    cloneMessage: cloneMessage,
+    compareObjects: compareObjects
 };
 

@@ -317,7 +317,11 @@ var registry = (function() {
         },
 
         getNodeConfig: function(id) {
-            var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
+            var config = moduleConfigs[getModule(id)];
+            if (!config) {
+                return null;
+            }
+            config = config.nodes[getNode(id)];
             if (config) {
                 var result = config.config;
                 if (config.script) {
