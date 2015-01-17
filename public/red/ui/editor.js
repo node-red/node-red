@@ -701,45 +701,6 @@ RED.editor = (function() {
         width: 500,
         buttons: [
             {
-                class: 'leftButton',
-                text: "Delete",
-                click: function() {
-                    var removedNodes = [];
-                    var removedLinks = [];
-                    var startDirty = RED.view.dirty();
-
-                    RED.nodes.eachNode(function(n) {
-                        if (n.type == "subflow:"+editing_node.id) {
-                            removedNodes.push(n);
-                        }
-                        if (n.z == editing_node.id) {
-                            removedNodes.push(n);
-                        }
-                    });
-                    
-                    for (var i=0;i<removedNodes.length;i++) {
-                        var rmlinks = RED.nodes.remove(removedNodes[i].id);
-                        removedLinks = removedLinks.concat(rmlinks);
-                    }
-                    
-                    RED.nodes.removeSubflow(editing_node);
-                    
-                    RED.view.removeWorkspace(editing_node);
-                    
-                    RED.history.push({
-                        t:'delete',
-                        nodes:removedNodes,
-                        links:removedLinks,
-                        subflow: editing_node,
-                        dirty:startDirty
-                    });
-                    RED.view.dirty(true);
-                    RED.view.redraw();
-
-                    $( this ).dialog( "close" );
-                }
-            },
-            {
                 id: "subflow-dialog-ok",
                 text: "Ok",
                 click: function() {

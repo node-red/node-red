@@ -246,6 +246,41 @@ RED.view = (function() {
         addSubflowOutput(activeSubflow.id);
     });
     
+    $("#workspace-subflow-delete").click(function(event) {
+        event.preventDefault();
+        var removedNodes = [];
+        var removedLinks = [];
+        var startDirty = RED.view.dirty();
+        
+        RED.nodes.eachNode(function(n) {
+            if (n.type == "subflow:"+activeSubflow.id) {
+                removedNodes.push(n);
+            }
+            if (n.z == activeSubflow.id) {
+                removedNodes.push(n);
+            }
+        });
+        
+        for (var i=0;i<removedNodes.length;i++) {
+            var rmlinks = RED.nodes.remove(removedNodes[i].id);
+            removedLinks = removedLinks.concat(rmlinks);
+        }
+        
+        RED.nodes.removeSubflow(activeSubflow);
+        
+        RED.history.push({
+                t:'delete',
+                nodes:removedNodes,
+                links:removedLinks,
+                subflow: activeSubflow,
+                dirty:startDirty
+        });
+        
+        RED.view.removeWorkspace(activeSubflow);
+        RED.view.dirty(true);
+        RED.view.redraw();
+    });
+    
     var workspace_tabs = RED.tabs.create({
         id: "workspace-tabs",
         onchange: function(tab) {
