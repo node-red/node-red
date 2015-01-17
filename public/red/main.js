@@ -16,9 +16,9 @@
 var RED = (function() {
 
     var deploymentTypes = {
-        "full":{label:"Deploy",img:"images/deploy-full-o.png"},
-        "nodes":{label:"Deploy modified nodes",img:"images/deploy-nodes-o.png"},
-        "flows":{label:"Deploy modified flows",img:"images/deploy-flows-o.png"}
+        "full":{img:"images/deploy-full-o.png"},
+        "nodes":{img:"images/deploy-nodes-o.png"},
+        "flows":{img:"images/deploy-flows-o.png"}
     }
     var deploymentType = "full";
     
@@ -295,38 +295,39 @@ var RED = (function() {
     function changeDeploymentType(type) {
         deploymentType = type;
         $("#btn-deploy img").attr("src",deploymentTypes[type].img);
-        //$("#btn-deploy span").text(deploymentTypes[type].label);
     }
     
     $(function() {
         RED.menu.init({id:"btn-sidemenu",
             options: [
-                {id:"btn-sidebar",_icon:"fa fa-columns",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
-                {id:"btn-node-status",_icon:"fa fa-info",label:"Node Status",toggle:true,onselect:toggleStatus},
+                {id:"btn-sidebar",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
+                {id:"btn-node-status",label:"Node Status",toggle:true,onselect:toggleStatus},
                 null,
-                {id:"btn-import-menu",_icon:"fa fa-sign-in",label:"Import...",options:[
-                    {id:"btn-import-clipboard",_icon:"fa fa-clipboard",label:"Clipboard...",onselect:RED.view.showImportNodesDialog},
-                    {id:"btn-import-library",_icon:"fa fa-book",label:"Library",options:[]}
+                {id:"btn-import-menu",label:"Import",options:[
+                    {id:"btn-import-clipboard",label:"Clipboard",onselect:RED.view.showImportNodesDialog},
+                    {id:"btn-import-library",label:"Library",options:[]}
                 ]},
-                {id:"btn-export-menu",_icon:"fa fa-sign-out",label:"Export...",disabled:true,options:[
-                    {id:"btn-export-clipboard",_icon:"fa fa-clipboard",label:"Clipboard...",disabled:true,onselect:RED.view.showExportNodesDialog},
-                    {id:"btn-export-library",_icon:"fa fa-book",label:"Library...",disabled:true,onselect:RED.view.showExportNodesLibraryDialog}
+                {id:"btn-export-menu",label:"Export",disabled:true,options:[
+                    {id:"btn-export-clipboard",label:"Clipboard",disabled:true,onselect:RED.view.showExportNodesDialog},
+                    {id:"btn-export-library",label:"Library",disabled:true,onselect:RED.view.showExportNodesLibraryDialog}
                 ]},
                 null,
-                {id:"btn-config-nodes",_icon:"fa fa-th-list",label:"Configuration nodes...",onselect:RED.sidebar.config.show},
+                {id:"btn-config-nodes",label:"Configuration nodes",onselect:RED.sidebar.config.show},
                 null,
-                {id:"btn-create-subflow",_icon:"fa fa-share-alt",label:"Create subflow",onselect:RED.view.createSubflow},
-                {id:"btn-convert-subflow",_icon:"fa fa-share-alt",label:"Convert to subflow",disabled:true,onselect:RED.view.convertToSubflow},
+                {id:"btn-subflow-menu",label:"Subflows", options: [
+                    {id:"btn-create-subflow",label:"Create subflow",onselect:RED.view.createSubflow},
+                    {id:"btn-convert-subflow",label:"Selection to subflow",disabled:true,onselect:RED.view.convertToSubflow},
+                ]},
                 null,
-                {id:"btn-workspace-menu",_icon:"fa fa-th-large",label:"Workspaces",options:[
-                    {id:"btn-workspace-add",_icon:"fa fa-plus",label:"Add"},
-                    {id:"btn-workspace-edit",_icon:"fa fa-pencil",label:"Rename"},
-                    {id:"btn-workspace-delete",_icon:"fa fa-minus",label:"Delete"},
+                {id:"btn-workspace-menu",label:"Workspaces",options:[
+                    {id:"btn-workspace-add",label:"Add"},
+                    {id:"btn-workspace-edit",label:"Rename"},
+                    {id:"btn-workspace-delete",label:"Delete"},
                     null
                 ]},
                 null,
-                {id:"btn-keyboard-shortcuts",_icon:"fa fa-keyboard-o",label:"Keyboard Shortcuts",onselect:showHelp},
-                {id:"btn-help",_icon:"fa fa-question",label:"Help...", href:"http://nodered.org/docs"}
+                {id:"btn-keyboard-shortcuts",label:"Keyboard Shortcuts",onselect:showHelp},
+                {id:"btn-help",label:"Help", href:"http://nodered.org/docs"}
             ]
         });
         
