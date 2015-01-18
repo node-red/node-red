@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -327,7 +327,7 @@ var RED = (function() {
                 ]},
                 null,
                 {id:"btn-keyboard-shortcuts",label:"Keyboard Shortcuts",onselect:showHelp},
-                {id:"btn-help",label:"Help", href:"http://nodered.org/docs"}
+                {id:"btn-help",label:"Node-RED Website", href:"http://nodered.org/docs"}
             ]
         });
         
@@ -336,6 +336,15 @@ var RED = (function() {
                 {id:"btn-deploy-full",toggle:"deploy-type",icon:"images/deploy-full.png",label:"Full",sublabel:"Deploys everything in the workspace",onselect:function(s) { if(s){changeDeploymentType("full")}}},
                 {id:"btn-deploy-flow",toggle:"deploy-type",icon:"images/deploy-flows.png",label:"Modified Flows",sublabel:"Only deploys flows that contain changed nodes", onselect:function(s) {if(s){changeDeploymentType("flows")}}},
                 {id:"btn-deploy-node",toggle:"deploy-type",icon:"images/deploy-nodes.png",label:"Modified Nodes",sublabel:"Only deploys nodes that have changed",onselect:function(s) { if(s){changeDeploymentType("nodes")}}}
+            ]
+        });
+        
+        RED.menu.init({id:"workspace-subflow-edit-menu",
+            options: [
+                {id:"btn-subflow-add-input",label:"Add Input", onselect:function() { }},
+                {id:"btn-subflow-add-output",label:"Add Output", onselect:function() { }},
+                {id:"btn-subflow-edit-name",label:"Edit Name", onselect:function() { }},
+                {id:"btn-subflow-delete",label:"Delete", onselect:function() { }},
             ]
         });
 
