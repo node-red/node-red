@@ -23,17 +23,20 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-     <div id="node-input-tip" class="form-tips">On Windows you must use double slashes \\ in any directory names.</div>
+     <div id="node-input-tip" class="form-tips">On Windows you must use double back-slashes \\ in any directory names.</div>
 </script>
 
 <script type="text/x-red" data-help-name="watch">
-    <p>Watches a directory or file for any changes.</p>
-    <p>You can enter a list of comma separated directories or files if you like. You will need to put " around any that have spaces in.</p>
-    <p>On Windows you must use double slashes \\ in any directory names.</p>
-    <p>The full filename of the file that actually changed is put into <b>msg.payload</b>, while a stringified version of the watched criteria is returned in <b>msg.topic</b>.</p>
+    <p>Watches a directory or file for changes.</p>
+    <p>You can enter a list of comma separated directories and/or files. You will
+    need to put quotes "..." around any that have spaces in.</p>
+    <p>On Windows you must use double back-slashes \\ in any directory names.</p>
+    <p>The full filename of the file that actually changed is put into <b>msg.payload</b>,
+    while a stringified version of the watch list is returned in <b>msg.topic</b>.</p>
     <p><b>msg.file</b> contains just the short filename of the file that changed.</p>
-    <p>Of course in Linux, <i>everything</i> could be a file and thus watched...</p>
-    <p><b>Note: </b>The directory or file must exist in order to be watched. If the file or directory gets deleted it may no longer be monitored even if it gets re-created.</p>
+    <p>Of course in Linux, <i>everything</i> is a file and thus can be watched...</p>
+    <p><b>Note: </b>The directory or file must exist in order to be watched. If the file
+    or directory gets deleted it may no longer be monitored even if it gets re-created.</p>
 </script>
 
 <script type="text/javascript">
