@@ -64,15 +64,6 @@ var flowNodes = module.exports = {
     },
     
     /**
-     * Add a node to the current active set
-     * @param n the node to add
-     */
-    add: function(n) {
-        //console.log("ADDED NODE:",n.id,n.type,n.name||"");
-        n.on("log",log.log);
-    },
-    
-    /**
      * Get a node
      * @param i the node id
      * @return the node

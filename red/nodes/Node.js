@@ -19,6 +19,7 @@ var EventEmitter = require("events").EventEmitter;
 var when = require("when");
 
 var redUtil = require("../util");
+var Log = require("../log");
 
 var flows = require("./flows");
 var comms = require("../comms");
@@ -29,7 +30,6 @@ function Node(n) {
     if (n.name) {
         this.name = n.name;
     }
-    flows.add(this);
     this.updateWires(n.wires);
 }
 
@@ -81,7 +81,9 @@ Node.prototype.on = function(event, callback) {
 
 Node.prototype.close = function() {};
 
-
+function constructUniqueIdentifier() {
+    return (1+Math.random()*4294967295).toString(16);
+}
 
 Node.prototype.send = function(msg) {
     var msgSent = false;
@@ -89,11 +91,15 @@ Node.prototype.send = function(msg) {
     
     if (msg === null || typeof msg === "undefined") {
         return;
-    } else if (!util.isArray(msg)) {
+    } else if (!util.isArray(msg)) {       
         if (this._wire) {
             // A single message and a single wire on output 0
             // TODO: pre-load flows.get calls - cannot do in constructor
             //       as not all nodes are defined at that point
+            if (!msg._messageUuid) {
+                msg._messageUuid = constructUniqueIdentifier();
+            }
+            this.metric(msg,"Node.prototype.send");
             node = flows.get(this._wire);
             if (node) {
                 node.receive(msg);
@@ -127,9 +133,18 @@ Node.prototype.send = function(msg) {
                         // for each msg to send eg. [[m1, m2, ...], ...]
                         for (k = 0; k < msgs.length; k++) {
                             if (msgSent) {
-                                sendEvents.push({n:node,m:redUtil.cloneMessage(msgs[k])});
+                                var clonedmsg = redUtil.cloneMessage(msgs[k]);
+                                // overwriting any previously written uuid because a cloned 
+                                // message is a different one
+                                clonedmsg._messageUuid = constructUniqueIdentifier();
+                                this.metric(clonedmsg,"Node.prototype.send",{parentuuid:msgs[k]._messageUuid});
+                                sendEvents.push({n:node,m:clonedmsg});
                             } else {
                                 // first msg sent so don't clone
+                                if (msgs[k]._messageUuid === null) {
+                                    msgs[k]._messageUuid = constructUniqueIdentifier();
+                                }
+                                this.metric(msgs[k],"Node.prototype.send");
                                 sendEvents.push({n:node,m:msgs[k]});
                                 msgSent = true;
                             }
@@ -146,7 +161,14 @@ Node.prototype.send = function(msg) {
     }
 };
 
-Node.prototype.receive = function(msg) {
+Node.prototype.receive = function(msg) {     
+    if (!msg) {
+        msg = {};
+    }
+    if (!msg._messageUuid) {
+        msg._messageUuid = constructUniqueIdentifier();
+    }
+    this.metric(msg,"Node.prototype.receive"); 
     this.emit("input", msg);
 };
 
@@ -160,7 +182,7 @@ function log_helper(self, level, msg) {
     if (self.name) {
         o.name = self.name;
     }
-    self.emit("log", o);
+    Log.log(o);
 }
 
 Node.prototype.log = function(msg) {
@@ -174,6 +196,16 @@ Node.prototype.warn = function(msg) {
 Node.prototype.error = function(msg) {
     log_helper(this, 'error', msg);
 };
+
+Node.prototype.metric = function(msg, eventname, metrics) {
+    metrics = metrics || {};
+    metrics.level = "metric";
+    metrics.nodeid = this.id;
+    metrics.event = eventname;    
+    metrics.msguuid = msg._messageUuid;
+   
+    Log.log(metrics);
+}
 
 /**
  * status: { fill:"red|green", shape:"dot|ring", text:"blah" }

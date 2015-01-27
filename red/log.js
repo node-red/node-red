@@ -21,7 +21,10 @@ var logHandlers = [];
 
 var ConsoleLogHandler = new EventEmitter();
 ConsoleLogHandler.on("log",function(msg) {
+   if (msg.level !== 'metric') {
         util.log("["+msg.level+"] ["+msg.type+":"+(msg.name||msg.id)+"] "+msg.msg);
+   }
+   
 });
 
 var log = module.exports = {
@@ -30,6 +33,7 @@ var log = module.exports = {
     },
     
     log: function(msg) {
+        msg.timestamp = Date.now();
         logHandlers.forEach(function(handler) {
             handler.emit("log",msg);
         });
