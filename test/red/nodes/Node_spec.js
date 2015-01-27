@@ -17,6 +17,7 @@
 var should = require("should");
 var sinon = require('sinon');
 var RedNode = require("../../../red/nodes/Node");
+var Log = require("../../../red/log");
 var flows = require("../../../red/nodes/flows");
 
 var comms = require('../../../red/comms');
@@ -85,6 +86,26 @@ describe('Node', function() {
             });
             n.receive(message);
         });
+        
+        it('writes metric info with undefined msg', function(done){
+            var n = new RedNode({id:'123',type:'abc'});
+            n.on('input',function(msg) {
+                (typeof msg).should.not.be.equal("undefined");
+                (typeof msg._messageUuid).should.not.be.equal("undefined");
+                done();
+            });
+            n.receive();
+        });
+        
+        it('writes metric info with null msg', function(done){
+            var n = new RedNode({id:'123',type:'abc'});
+            n.on('input',function(msg) {
+                (typeof msg).should.not.be.equal("undefined");
+                (typeof msg._messageUuid).should.not.be.equal("undefined");
+                done();
+            });
+            n.receive(null);
+        });
     });
 
     describe('#send', function() {
@@ -122,19 +143,16 @@ describe('Node', function() {
 
             var rcvdCount = 0;
 
-            n2.on('input',function(msg) {
-                should.deepEqual(msg,messages[rcvdCount]);
-
+            n2.on('input',function(msg) {                
                 if (rcvdCount === 0) {
                     // first msg sent, don't clone
+                    should.deepEqual(msg,messages[rcvdCount]);
                     should.strictEqual(msg,messages[rcvdCount]);
+                    rcvdCount += 1;
                 } else {
                     // second msg sent, clone
+                    msg.payload.should.equal(messages[rcvdCount].payload);
                     should.notStrictEqual(msg,messages[rcvdCount]);
-                }
-
-                rcvdCount += 1;
-                if (rcvdCount === 2) {
                     flowGet.restore();
                     done();
                 }
@@ -160,7 +178,8 @@ describe('Node', function() {
 
             var rcvdCount = 0;
 
-            // first message sent, don't clone
+            // first message sent, don't clone 
+            // message uuids should match
             n2.on('input',function(msg) {
                 should.deepEqual(msg,messages[0]);
                 should.strictEqual(msg,messages[0]);
@@ -176,8 +195,9 @@ describe('Node', function() {
             });
 
             // second message sent, clone
+            // message uuids wont match since we've cloned
             n4.on('input',function(msg) {
-                should.deepEqual(msg,messages[2]);
+                msg.payload.should.equal(messages[2].payload);
                 should.notStrictEqual(msg,messages[2]);
                 rcvdCount += 1;
                 if (rcvdCount == 3) {
@@ -187,8 +207,9 @@ describe('Node', function() {
             });
 
             // third message sent, clone
+            // message uuids wont match since we've cloned
             n5.on('input',function(msg) {
-                should.deepEqual(msg,messages[2]);
+                msg.payload.should.equal(messages[2].payload);
                 should.notStrictEqual(msg,messages[2]);
                 rcvdCount += 1;
                 if (rcvdCount == 3) {
@@ -280,54 +301,84 @@ describe('Node', function() {
 
     });
 
+
     describe('#log', function() {
-        it('emits a log message', function(done) {
+        it('produces a log message', function(done) {
             var n = new RedNode({id:'123',type:'abc'});
-            n.on('log',function(obj) {
-                should.deepEqual({level:"log", id:n.id,
-                                  type:n.type, msg:"a log message"}, obj);
-                done();
+            var loginfo = {};
+            sinon.stub(Log, 'log', function(msg) {
+                loginfo = msg;
             });
             n.log("a log message");
+            should.deepEqual({level:"log", id:n.id,
+                               type:n.type, msg:"a log message", }, loginfo);
+            Log.log.restore();
+            done();
         });
     });
 
     describe('#log', function() {
-        it('emits a log message with a name', function(done) {
+        it('produces a log message with a name', function(done) {
             var n = new RedNode({id:'123', type:'abc', name:"barney"});
-            n.on('log',function(obj) {
-                should.deepEqual({level:"log", id:n.id, name: "barney",
-                                  type:n.type, msg:"a log message"}, obj);
-                done();
+            var loginfo = {};
+            sinon.stub(Log, 'log', function(msg) {
+                loginfo = msg;
             });
             n.log("a log message");
+            should.deepEqual({level:"log", id:n.id, name: "barney",
+                              type:n.type, msg:"a log message"}, loginfo);
+            Log.log.restore();
+            done();
         });
     });
 
     describe('#warn', function() {
-        it('emits a warning', function(done) {
+        it('produces a warning message', function(done) {
             var n = new RedNode({id:'123',type:'abc'});
-            n.on('log',function(obj) {
-                should.deepEqual({level:"warn", id:n.id,
-                                  type:n.type, msg:"a warning"}, obj);
-                done();
+            var loginfo = {};
+            sinon.stub(Log, 'log', function(msg) {
+                loginfo = msg;
             });
             n.warn("a warning");
+            should.deepEqual({level:"warn", id:n.id,
+                              type:n.type, msg:"a warning"}, loginfo);
+            Log.log.restore();
+            done();
         });
     });
 
     describe('#error', function() {
-        it('emits an error message', function(done) {
+        it('produces an error message', function(done) {
             var n = new RedNode({id:'123',type:'abc'});
-            n.on('log',function(obj) {
-                should.deepEqual({level:"error", id:n.id,
-                                  type:n.type, msg:"an error message"}, obj);
-                done();
+            var loginfo = {};
+            sinon.stub(Log, 'log', function(msg) {
+                loginfo = msg;
             });
             n.error("an error message");
+            should.deepEqual({level:"error", id:n.id,
+                             type:n.type, msg:"an error message"}, loginfo);
+            Log.log.restore();
+            done();
         });
     });
 
+    describe('#metric', function() {
+        it('produces a metric message', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            var loginfo = {};
+            sinon.stub(Log, 'log', function(msg) {
+                loginfo = msg;
+            });
+            var msg = {payload:"foo", _messageUuid:"987654321"};
+            n.metric(msg,"test.metric",{size:"15mb"});
+            should.deepEqual({size:"15mb", level:"metric", nodeid:n.id,
+                                  event:"test.metric",msguuid:"987654321"}, loginfo);
+            Log.log.restore();
+            done();
+        });
+    });
+    
+    
     describe('#status', function() {
         after(function() {
             comms.publish.restore();

@@ -551,7 +551,6 @@ describe('Flow', function() {
     describe('#applyConfig',function() {
         var getType;
         var getNode;
-        var flowsAdd;
         var credentialsClean;
         
         var stoppedNodes = {};
@@ -562,6 +561,7 @@ describe('Flow', function() {
             var node = this;
             this.handled = 0;
             this.stopped = false;
+            currentNodes[node.id] = node;
             this.on('input',function(msg) {
                 node.handled++;
                 node.send(msg);
@@ -578,9 +578,6 @@ describe('Flow', function() {
         
         
         before(function() {
-            flowsAdd = sinon.stub(flows,"add",function(node) {
-                currentNodes[node.id] = node;
-            });
             getNode = sinon.stub(flows,"get",function(id) {
                 return currentNodes[id];
             });
@@ -592,7 +589,6 @@ describe('Flow', function() {
         });
         after(function() {
             getType.restore();
-            flowsAdd.restore();
             credentialsClean.restore();
             getNode.restore();
         });
