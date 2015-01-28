@@ -42,7 +42,7 @@ function start() {
     var Permissions = require("./api/auth/permissions");
     
     if (!settings.disableEditor) {
-        Users.anonymous().then(function(anonymousUser) {
+        Users.default().then(function(anonymousUser) {
             var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
             var path = settings.httpAdminRoot || "/";
             path = path + (path.slice(-1) == "/" ? "":"/") + "comms";
@@ -53,16 +53,7 @@ function start() {
                 if (!pendingAuth) {
                     activeConnections.push(ws);
                 } else {
-                    removePendingConnection(ws);
-                }
-            });
-            ws.on('message', function(data,flags) {
-                var msg = null;
-                try {
-                    msg = JSON.parse(data);
-                } catch(err) {
-                    log.warn("comms received malformed message : "+err.toString());
-                    return;
+                    pendingConnections.push(ws);
                 }
                 ws.on('close',function() {
                     removeActiveConnection(ws);
@@ -73,7 +64,7 @@ function start() {
                     try {
                         msg = JSON.parse(data);
                     } catch(err) {
-                        util.log("[red:comms] received malformed message : "+err.toString());
+                        log.warn("comms received malformed message : "+err.toString());
                         return;
                     }
                     if (!pendingAuth) {
@@ -81,59 +72,55 @@ function start() {
                             handleRemoteSubscription(ws,msg.subscribe);
                         }
                     } else {
-                        var completeConnection = function(user) {
+                        var completeConnection = function(user,sendAck) {
                             if (!user || !Permissions.hasPermission(user,"status.read")) {
                                 ws.close();
                             } else {
                                 pendingAuth = false;
                                 removePendingConnection(ws);
                                 activeConnections.push(ws);
-                                ws.send(JSON.stringify({auth:"ok"}));
+                                if (sendAck) {
+                                    ws.send(JSON.stringify({auth:"ok"}));
+                                }
                             }
                         }
                         if (msg.auth) {
                             Tokens.get(msg.auth).then(function(client) {
                                 if (client) {
-                                    Users.get(client.user).then(completeConnection);
+                                    Users.get(client.user).then(function(user) {
+                                        completeConnection(user,true);
+                                    });
                                 } else {
-                                    completeConnection(null);
+                                    completeConnection(null,false);
                                 }
                             });
                         } else {
-                            completeConnection(anonymousUser);
+                            completeConnection(anonymousUser,false);
+                            //TODO: duplicated code - pull non-auth message handling out
+                            if (msg.subscribe) {
+                                handleRemoteSubscription(ws,msg.subscribe);
+                            }
                         }
                     }
                 });
                 ws.on('error', function(err) {
-                        util.log("[red:comms] error : "+err.toString());
+                    log.warn("comms error : "+err.toString());
                 });
             });
             
-            ws.on('error', function(err) {
-                log.warn("comms error : "+err.toString());
+            wsServer.on('error', function(err) {
+                log.warn("comms server error : "+err.toString());
             });
-            
+             
             lastSentTime = Date.now();
             
             heartbeatTimer = setInterval(function() {
-                    var now = Date.now();
-                    if (now-lastSentTime > webSocketKeepAliveTime) {
-                        publish("hb",lastSentTime);
-                    }
+                var now = Date.now();
+                if (now-lastSentTime > webSocketKeepAliveTime) {
+                    publish("hb",lastSentTime);
+                }
             }, webSocketKeepAliveTime);
         });
-        wsServer.on('error', function(err) {
-            log.warn("comms server error : "+err.toString());
-        });
-         
-        lastSentTime = Date.now();
-        
-        heartbeatTimer = setInterval(function() {
-            var now = Date.now();
-            if (now-lastSentTime > webSocketKeepAliveTime) {
-                publish("hb",lastSentTime);
-            }
-        }, webSocketKeepAliveTime);
     }
 }
 

@@ -32,6 +32,7 @@ var settings = require("../settings");
 
 var errorHandler = function(err,req,res,next) {
     //TODO: standardize json response
+    console.log(err.stack);
     res.send(400,err.toString());
 };
 
@@ -51,18 +52,19 @@ function init(adminApp) {
     adminApp.use(express.json());
     adminApp.use(express.urlencoded());
     
-    //TODO: all passport references ought to be in ./auth
-    adminApp.use(passport.initialize());
-    
-    adminApp.use(auth.authenticate);
-    adminApp.post("/auth/token",
-        auth.ensureClientSecret,
-        auth.authenticateClient,
-        auth.getToken,
-        auth.errorHandler
-    );
-    adminApp.get("/auth/login",auth.login);
-    adminApp.post("/auth/revoke",auth.revoke);
+    if (settings.adminAuth) {
+        //TODO: all passport references ought to be in ./auth
+        adminApp.use(passport.initialize());
+        adminApp.use(auth.authenticate);
+        adminApp.post("/auth/token",
+            auth.ensureClientSecret,
+            auth.authenticateClient,
+            auth.getToken,
+            auth.errorHandler
+        );
+        adminApp.get("/auth/login",auth.login);
+        adminApp.post("/auth/revoke",auth.revoke);
+    }
 
     // Flows
     adminApp.get("/flows",needsPermission("flows.read"),flows.get);

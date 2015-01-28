@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  **/
  
 var should = require("should");
+var when = require("when");
 var sinon = require("sinon");
-var request = require('supertest');
-var express = require('express');
 
 var passport = require("passport");
 
 var auth = require("../../../../red/api/auth");
+var Tokens = require("../../../../red/api/auth/tokens");
 
 var settings = require("../../../../red/settings");
 
@@ -103,4 +103,36 @@ describe("api auth middleware",function() {
             })
         });
     });
+    
+    describe("revoke", function() {
+        it("revokes a token", function(done) {
+            var revokeToken = sinon.stub(Tokens,"revoke",function() {
+                return when.resolve();
+            });
+            
+            var req = { body: { token: "abcdef" } };
+            
+            var res = { send: function(resp) {
+                revokeToken.restore();
+
+                resp.should.equal(200);
+                done();
+            }};
+            
+            auth.revoke(req,res);
+        });
+    });
+    
+    describe("login", function() {
+        it("returns login details", function(done) {
+            auth.login(null,{json: function(resp) {
+                resp.should.have.a.property("type","credentials");
+                resp.should.have.a.property("prompts");
+                resp.prompts.should.have.a.lengthOf(2);
+                done();
+            }});
+        });
+            
+    });
+    
 });

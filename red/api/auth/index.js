@@ -22,6 +22,8 @@ var Tokens = require("./tokens");
 var Users = require("./users");
 
 var settings = require("../../settings");
+var log = require("../../log");
+
 
 passport.use(strategies.bearerStrategy.BearerStrategy);
 passport.use(strategies.clientPasswordStrategy.ClientPasswordStrategy);
@@ -32,7 +34,10 @@ var server = oauth2orize.createServer();
 server.exchange(oauth2orize.exchange.password(strategies.passwordTokenExchange));
 
 function init() {
-    Users.init();
+    if (settings.adminAuth) {
+        Users.init(settings.adminAuth);
+        Tokens.init(settings)
+    }
 }
 
 function authenticate(req,res,next) {
@@ -70,6 +75,7 @@ function login(req,res) {
 
 function revoke(req,res) {
     var token = req.body.token;
+    // TODO: audit log
     Tokens.revoke(token).then(function() {
         res.send(200);
     });
@@ -81,7 +87,13 @@ module.exports = {
     ensureClientSecret: ensureClientSecret,
     authenticateClient: authenticateClient,
     getToken: getToken,
-    errorHandler: server.errorHandler(),
+    errorHandler: function(err,req,res,next) {
+        //TODO: standardize json response
+        //TODO: audit log statment
+        //console.log(err.stack);
+        //log.log({level:"audit",type:"auth",msg:err.toString()});
+        return server.errorHandler()(err,req,res,next);
+    },
     login: login,
     revoke: revoke
 }

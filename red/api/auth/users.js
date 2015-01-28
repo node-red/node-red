@@ -17,8 +17,6 @@
 var when = require("when");
 var crypto = require("crypto");
 var util = require("util");
-
-var settings = require("../../settings");
 /*
     adminAuth: {
         type: "credentials",
@@ -26,7 +24,7 @@ var settings = require("../../settings");
             username: "nol",
             password: "5f4dcc3b5aa765d61d8327deb882cf99" // password
         }],
-        anonymous: {}
+        default: {}
     },
     
     adminAuth: {
@@ -34,85 +32,85 @@ var settings = require("../../settings");
         api: {
             get: function(username) {}
             authenticate: function(username,password) {}
-            anonymous: function() {}
+            default: function() {}
         }
 */
 
 //{username:"nick",password:crypto.createHash('md5').update("foo",'utf8').digest('hex')}
+
 var users = {};
 var passwords = {};
-var anonymousUser = null;
+var defaultUser = null;
+
+function authenticate(username,password) {
+    var user = users[username];
+    if (user) {
+        var pass = crypto.createHash('md5').update(password,'utf8').digest('hex');
+        if (pass == passwords[username]) {
+            return when.resolve(user);
+        }
+    }
+    return when.resolve(null);
+}
+function get(username) {
+    return when.resolve(users[username]);
+}
+function getDefaultUser() {
+    return when.resolve(null);
+}
 
 var api = {
-    get: function(username) {
-        return when.resolve(null);
-    },
-    authenticate: function(username,password) {
-        return when.resolve(null);
-    },
-    anonymous: function() {
-        return when.resolve(null);
-    }
+    get: get,
+    authenticate: authenticate,
+    default: getDefaultUser
 }
-function init() {
+
+function init(config) {
     users = {};
     passwords = {};
-    anonymousUser = null;
-    if (settings.adminAuth) {
-        if (settings.adminAuth.type == "credentials") {
-            if (settings.adminAuth.api) {
-                api.get = settings.adminAuth.api.get || api.get;
-                api.authenticate = settings.adminAuth.api.authenticate || api.authenticate;
-                api.anonymous = settings.adminAuth.api.anonymous || api.anonymous;
+    defaultUser = null;
+    if (config.type == "credentials") {
+        if (config.users) {
+            if (typeof config.users === "function") {
+                api.get = config.users;
             } else {
-                if (settings.adminAuth.users) {
-                    var us = settings.adminAuth.users;
-                    if (!util.isArray(us)) {
-                        us = [us];
-                    }
-                    for (var i=0;i<us.length;i++) {
-                        var u = us[i];
-                        users[u.username] = {
-                            "username":u.username,
-                            "permissions":u.permissions
-                        };
-                        passwords[u.username] = u.password;
-                    }
+                var us = config.users;
+                if (!util.isArray(us)) {
+                    us = [us];
                 }
-                if (settings.adminAuth.anonymous) {
-                    anonymousUser = {
-                        "anonymous": true,
-                        "permissions":settings.adminAuth.anonymous.permissions
-                    }
-                }
-                api = {
-                    get: function(username) {
-                        return when.resolve(users[username]);
-                    },
-                    authenticate: function(username,password) {
-                        return api.get(username).then(function(user) {
-                            if (user) {
-                                var pass = crypto.createHash('md5').update(password,'utf8').digest('hex');
-                                if (pass == passwords[username]) {
-                                    return when.resolve(user);
-                                }
-                            }
-                            return when.resolve(null);
-                        });
-                    },
-                    anonymous: function() {
-                        return when.resolve(anonymousUser);
-                    }
+                for (var i=0;i<us.length;i++) {
+                    var u = us[i];
+                    users[u.username] = {
+                        "username":u.username,
+                        "permissions":u.permissions
+                    };
+                    passwords[u.username] = u.password;
                 }
             }
         }
+        if (config.authenticate && typeof config.authenticate === "function") {
+            api.authenticate = config.authenticate;
+        } else {
+            api.authenticate = authenticate;
+        }
+    }
+    if (config.default) {
+        api.default = function() {
+            return when.resolve({
+                "anonymous": true,
+                "permissions":config.default.permissions
+            });
+        }
+    } else {
+        api.default = getDefaultUser;
     }
 }
+
 module.exports = {
     init: init,
     get: function(username) { return api.get(username) },
     authenticate: function(username,password) { return api.authenticate(username,password) },
-    anonymous: function() { return api.anonymous(); }
+    default: function() { return api.default(); }
 };
 
 

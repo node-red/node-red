@@ -61,7 +61,7 @@ RED.user = (function() {
                         $(".login-spinner").show();
                         
                         var body = {
-                            client_id: "node-red-admin",
+                            client_id: "node-red-editor",
                             grant_type: "password",
                             scope:"*"
                         }

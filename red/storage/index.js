@@ -18,6 +18,7 @@ var when = require('when');
 
 var storageModule;
 var settingsAvailable;
+var sessionsAvailable;
 
 function moduleSelector(aSettings) {
     var toReturn;
@@ -43,6 +44,7 @@ var storageModuleInterface = {
             try {
                 storageModule = moduleSelector(settings);
                 settingsAvailable = storageModule.hasOwnProperty("getSettings") && storageModule.hasOwnProperty("saveSettings");
+                sessionsAvailable = storageModule.hasOwnProperty("getUserSessions") && storageModule.hasOwnProperty("saveUserSessions");
             } catch (e) {
                 return when.reject(e);
             }
@@ -74,6 +76,7 @@ var storageModuleInterface = {
                 return when.resolve();
             }
         },
+        
         /* Library Functions */
         getAllFlows: function() {
             return storageModule.getAllFlows();

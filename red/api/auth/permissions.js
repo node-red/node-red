@@ -16,8 +16,8 @@
 
 var util = require('util');
 
-var readRE = /^(.*)\.read$/
-var writeRE = /^(.*)\.write$/
+var readRE = /^((.+)\.)?read$/
+var writeRE = /^((.+)\.)?write$/
 
 function needsPermission(perm) {
     return function(req,res,next) {

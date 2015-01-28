@@ -17,6 +17,7 @@
 var when = require("when");
 
 var clients = [
+    {id:"node-red-editor",secret:"not_available"},
     {id:"node-red-admin",secret:"not_available"}
 ];
 
