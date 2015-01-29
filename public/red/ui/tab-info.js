@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 RED.sidebar.info = (function() {
-    
+
     var content = document.createElement("div");
     content.id = "tab-info";
     content.style.paddingTop = "4px";
@@ -22,7 +22,7 @@ RED.sidebar.info = (function() {
     content.style.paddingRight = "4px";
 
     RED.sidebar.addTab("info",content);
-    
+
     function jsonFilter(key,value) {
         if (key === "") {
             return value;
@@ -39,7 +39,7 @@ RED.sidebar.info = (function() {
         }
         return value;
     }
-    
+
     function refresh(node) {
         var table = '<table class="node-info"><tbody>';
 
@@ -66,7 +66,7 @@ RED.sidebar.info = (function() {
                     var val = node[n]||"";
                     var type = typeof val;
                     if (type === "string") {
-                        if (val.length > 30) { 
+                        if (val.length > 30) {
                             val = val.substring(0,30)+" ...";
                         }
                         val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
@@ -86,7 +86,7 @@ RED.sidebar.info = (function() {
                         val = JSON.stringify(val,jsonFilter," ");
                         val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
                     }
-                    
+
                     table += "<tr><td>"+n+"</td><td>"+val+"</td></tr>";
                 }
             }
@@ -94,15 +94,26 @@ RED.sidebar.info = (function() {
         table += "</tbody></table><br/>";
         var helpText = $("script[data-help-name|='"+node.type+"']").html()||"";
         table  += '<div class="node-help">'+helpText+"</div>";
-        
+
         if (node._def.info) {
             var info = node._def.info;
-            table += '<div class="node-help">'+(typeof info === "function" ? info.call(node) : info)+'</div>';
+            marked.setOptions({
+                renderer: new marked.Renderer(),
+                gfm: true,
+                tables: true,
+                breaks: false,
+                pedantic: false,
+                sanitize: true,
+                smartLists: true,
+                smartypants: false
+            });
+            table += '<div class="node-help">'+marked(typeof info === "function" ? info.call(node) : info)+'</div>';
+            //table += '<div class="node-help">'+(typeof info === "function" ? info.call(node) : info)+'</div>';
         }
-        
+
         $("#tab-info").html(table);
     }
-    
+
     return {
         refresh:refresh,
         clear: function() {
