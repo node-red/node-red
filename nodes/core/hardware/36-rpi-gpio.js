@@ -91,7 +91,7 @@ module.exports = function(RED) {
                 node.running = false;
                 node.status({fill:"red",shape:"circle",text:""});
                 if (RED.settings.verbose) { node.log("closed"); }
-                node.done();
+                if (node.done) { node.done(); }
             });
 
             node.child.on('error', function (err) {
@@ -109,10 +109,11 @@ module.exports = function(RED) {
             node.status({fill:"red",shape:"circle",text:""});
             delete pinsInUse[node.pin];
             if (node.child != null) {
+                node.done = done;
                 node.child.stdin.write(" close "+node.pin);
                 node.child.kill('SIGKILL');
             }
-            node.done = done;
+            else { done(); }
         });
     }
     RED.nodes.registerType("rpi-gpio in",GPIOInNode);
@@ -173,7 +174,7 @@ module.exports = function(RED) {
                 node.running = false;
                 node.status({fill:"red",shape:"circle",text:""});
                 if (RED.settings.verbose) { node.log("closed"); }
-                node.done();
+                if (node.done) { node.done(); }
             });
 
             node.child.on('error', function (err) {
@@ -191,10 +192,11 @@ module.exports = function(RED) {
             node.status({fill:"red",shape:"circle",text:""});
             delete pinsInUse[node.pin];
             if (node.child != null) {
+                node.done = done;
                 node.child.stdin.write(" close "+node.pin);
                 node.child.kill('SIGKILL');
             }
-            node.done = done;
+            else { done(); }
         });
 
     }
@@ -237,7 +239,7 @@ module.exports = function(RED) {
             node.running = false;
             node.status({fill:"red",shape:"circle",text:""});
             if (RED.settings.verbose) { node.log("closed"); }
-            node.done();
+            if (node.done) { node.done(); }
         });
 
         node.child.on('error', function (err) {
@@ -249,10 +251,11 @@ module.exports = function(RED) {
         node.on("close", function(done) {
             node.status({fill:"red",shape:"circle",text:""});
             if (node.child != null) {
+                node.done = done;
                 node.child.kill('SIGINT');
                 node.child = null;
             }
-            node.done = done;
+            else { done(); }
         });
     }
     RED.nodes.registerType("rpi-mouse",PiMouseNode);
