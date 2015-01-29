@@ -33,6 +33,7 @@ module.exports = function(RED) {
         this.base64 = n.base64;
         this.server = (typeof n.server == 'boolean')?n.server:(n.server == "server");
         this.closing = false;
+        this.connected = false;
         var node = this;
         var count = 0;
 
@@ -47,6 +48,7 @@ module.exports = function(RED) {
                 var id = (1+Math.random()*4294967295).toString(16);
                 client = net.connect(node.port, node.host, function() {
                     buffer = (node.datatype == 'buffer')? new Buffer(0):"";
+                    node.connected = true;
                     node.log("connected to "+node.host+":"+node.port);
                     node.status({fill:"green",shape:"dot",text:"connected"});
                 });
@@ -92,6 +94,7 @@ module.exports = function(RED) {
                 });
                 client.on('close', function() {
                     delete connectionPool[id];
+                    node.connected = false;
                     node.status({fill:"red",shape:"ring",text:"disconnected"});
                     if (!node.closing) {
                         if (end) { // if we were asked to close then try to reconnect once very quick.
@@ -102,6 +105,8 @@ module.exports = function(RED) {
                             node.log("connection lost to "+node.host+":"+node.port);
                             reconnectTimeout = setTimeout(setupTcpClient, reconnectTime);
                         }
+                    } else {
+                        if (node.done) { node.done(); }
                     }
                 });
                 client.on('error', function(err) {
@@ -110,10 +115,12 @@ module.exports = function(RED) {
             }
             setupTcpClient();
 
-            this.on('close', function() {
+            this.on('close', function(done) {
+                node.done = done;
                 this.closing = true;
                 client.end();
                 clearTimeout(reconnectTimeout);
+                if (!node.connected) { done(); }
             });
         } else {
             var server = net.createServer(function (socket) {
@@ -207,19 +214,19 @@ module.exports = function(RED) {
         this.beserver = n.beserver;
         this.name = n.name;
         this.closing = false;
+        this.connected = false;
         var node = this;
 
         if (!node.beserver||node.beserver=="client") {
             var reconnectTimeout;
             var client = null;
-            var connected = false;
             var end = false;
 
             var setupTcpClient = function() {
                 node.log("connecting to "+node.host+":"+node.port);
                 node.status({fill:"grey",shape:"dot",text:"connecting"});
                 client = net.connect(node.port, node.host, function() {
-                    connected = true;
+                    node.connected = true;
                     node.log("connected to "+node.host+":"+node.port);
                     node.status({fill:"green",shape:"dot",text:"connected"});
                 });
@@ -230,7 +237,7 @@ module.exports = function(RED) {
                 });
                 client.on('close', function() {
                     node.status({fill:"red",shape:"ring",text:"disconnected"});
-                    connected = false;
+                    node.connected = false;
                     client.destroy();
                     if (!node.closing) {
                         if (end) {
@@ -241,13 +248,15 @@ module.exports = function(RED) {
                             node.log("connection lost to "+node.host+":"+node.port);
                             reconnectTimeout = setTimeout(setupTcpClient,reconnectTime);
                         }
+                    } else {
+                        if (node.done) { node.done(); }
                     }
                 });
             }
             setupTcpClient();
 
             node.on("input", function(msg) {
-                if (connected && msg.payload != null) {
+                if (node.connected && msg.payload != null) {
                     if (Buffer.isBuffer(msg.payload)) {
                         client.write(msg.payload);
                     } else if (typeof msg.payload === "string" && node.base64) {
@@ -262,10 +271,12 @@ module.exports = function(RED) {
                 }
             });
 
-            node.on("close", function() {
+            node.on("close", function(done) {
+                node.done = done;
                 this.closing = true;
                 client.end();
                 clearTimeout(reconnectTimeout);
+                if (!node.connected) { done(); }
             });
 
         } else if (node.beserver == "reply") {
@@ -454,6 +465,10 @@ module.exports = function(RED) {
                     client = null;
                 });
 
+                client.on('close', function() {
+                    if (node.done) { node.done(); }
+                });
+
                 client.on('error', function() {
                     node.log('connect failed');
                     node.status({fill:"red",shape:"ring",text:"error"});
@@ -477,8 +492,13 @@ module.exports = function(RED) {
             else { client.write(msg.payload); }
         });
 
-        this.on("close", function() {
-            if (client) { buf = null; client.end(); }
+        this.on("close", function(done) {
+            node.done = done;
+            if (client) {
+                buf = null;
+                client.end();
+            }
+            if (!node.connected) { done(); }
         });
 
     }
