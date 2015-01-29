@@ -186,7 +186,7 @@ function log_helper(self, level, msg) {
 }
 
 Node.prototype.log = function(msg) {
-    log_helper(this, 'log', msg);
+    log_helper(this, 'info', msg);
 };
 
 Node.prototype.warn = function(msg) {

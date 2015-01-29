@@ -136,7 +136,7 @@ describe('html node', function() {
                     n1.receive({payload:null,topic: "bar"});
                     helper.log().called.should.be.true;
                     var logEvents = helper.log().args.filter(function(evt) {
-                        return evt[0].level == "log";
+                        return evt[0].level == "info";
                     });
                     logEvents.should.have.length(1);
                     // Each logEvent is the array of args passed to the function.

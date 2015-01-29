@@ -310,7 +310,7 @@ describe('Node', function() {
                 loginfo = msg;
             });
             n.log("a log message");
-            should.deepEqual({level:"log", id:n.id,
+            should.deepEqual({level:"info", id:n.id,
                                type:n.type, msg:"a log message", }, loginfo);
             Log.log.restore();
             done();
@@ -325,7 +325,7 @@ describe('Node', function() {
                 loginfo = msg;
             });
             n.log("a log message");
-            should.deepEqual({level:"log", id:n.id, name: "barney",
+            should.deepEqual({level:"info", id:n.id, name: "barney",
                               type:n.type, msg:"a log message"}, loginfo);
             Log.log.restore();
             done();
