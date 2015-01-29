@@ -70,43 +70,49 @@ describe('JSON node', function() {
             jn1.receive({payload:obj,topic: "bar"});
         });
     });
-    // HELEN - commenting out for now
-//    it('should log an error if asked to parse an invalid json string', function(done) {
-//        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
-//                    {id:"jn2", type:"helper"}];
-//        helper.load(jsonNode, flow, function() {
-//            var jn1 = helper.getNode("jn1");
-//            var jn2 = helper.getNode("jn2");
-//            jn1.on("log", function(msg) {
-//                if (msg.level && (msg.level === 'metric')) {
-//                    // do nothing as we've just hit a metric related msg
-//                } else {
-//                    msg.should.have.property('msg');
-//                    should.deepEqual("SyntaxError: Unexpected token o"+ "\nfoo", msg.msg);
-//                    done();
-//                }
-//            });
-//            jn1.receive({payload:'foo',topic: "bar"});
-//        });
-//    });
-    // HELEN - commenting out for now   
-//    it('should log an error if asked to parse something thats not json or js', function(done) {
-//        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
-//                    {id:"jn2", type:"helper"}];
-//        helper.load(jsonNode, flow, function() {
-//            var jn1 = helper.getNode("jn1");
-//            var jn2 = helper.getNode("jn2");
-//            jn1.on("log", function(msg) {
-//                if (msg.level && (msg.level === 'metric')) {
-//                    // do nothing as we've just hit a metric related msg
-//                } else {
-//                    msg.should.have.property('msg');
-//                    should.deepEqual("dropped: 1", msg.msg);
-//                    done();
-//                }
-//            });
-//            jn1.receive({payload:1,topic: "bar"});
-//        });
-//    });
+    
+    it('should log an error if asked to parse an invalid json string', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            try {
+                helper.log().called.should.be.false;
+                var jn1 = helper.getNode("jn1");
+                var jn2 = helper.getNode("jn2");
+                jn1.receive({payload:'foo',topic: "bar"});
+                helper.log().called.should.be.true;
+                var logEvents = helper.log().args.filter(function(evt) {
+                    return evt[0].level == "log";
+                });
+                logEvents.should.have.length(1);
+                logEvents[0][0].should.have.a.property('msg',"SyntaxError: Unexpected token o"+ "\nfoo");
+                done();
+            } catch(err) {
+                done(err);
+            }
+        });
+    });
+    
+    it('should log an error if asked to parse something thats not json or js', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            try {
+                helper.log().called.should.be.false;
+                var jn1 = helper.getNode("jn1");
+                var jn2 = helper.getNode("jn2");
+                jn1.receive({payload:1,topic: "bar"});
+                helper.log().called.should.be.true;
+                var logEvents = helper.log().args.filter(function(evt) {
+                    return evt[0].level == "log";
+                });
+                logEvents.should.have.length(1);
+                logEvents[0][0].should.have.a.property('msg',"dropped: 1");
+                done();
+            } catch(err) {
+                done(err);
+            }
+        });
+    });
     
 });

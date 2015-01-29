@@ -15,6 +15,7 @@
  **/
 
 var should = require("should");
+var sinon = require("sinon");
 var when = require("when");
 var request = require('supertest');
 var nock;
@@ -32,6 +33,7 @@ var redNodes = require("../../red/nodes");
 var flows = require("../../red/nodes/flows");
 var credentials = require("../../red/nodes/credentials");
 var comms = require("../../red/comms.js");
+var log = require("../../red/log.js");
 
 var http = require('http');
 var express = require('express');
@@ -41,7 +43,7 @@ var address = '127.0.0.1';
 var listenPort = 0; // use ephemeral port
 var port;
 var url;
-
+var logSpy;
 var server;
 
 function helperNode(n) {
@@ -50,6 +52,8 @@ function helperNode(n) {
 
 module.exports = {
     load: function(testNode, testFlows, testCredentials, cb) {
+        logSpy = sinon.spy(log,"log");
+        
         if (typeof testCredentials === 'function') {
             cb = testCredentials;
             testCredentials = {};
@@ -92,6 +96,7 @@ module.exports = {
     unload: function() {
         // TODO: any other state to remove between tests?
         redNodes.clearRegistry();
+        logSpy.restore();
         return flows.stopFlows();
     },
 
@@ -130,5 +135,7 @@ module.exports = {
     url: function() { return url; },
 
     nock: nock,
-
+    
+    log: function() { return logSpy;}
 };
+

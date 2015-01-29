@@ -131,23 +131,27 @@ describe('function node', function() {
         });
     });
 
-    // HELEN - commenting out for now
-//    it('should handle and log script error', function(done) {
-//        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"retunr"}];
-//        helper.load(functionNode, flow, function() {
-//            var n1 = helper.getNode("n1");
-//            n1.on("log", function(msg) {
-//                if (msg.level === 'error') {
-//                    msg.should.have.property('level', 'error');
-//                    msg.should.have.property('id', 'n1');
-//                    msg.should.have.property('type', 'function');
-//                    msg.should.have.property('msg', 'ReferenceError: retunr is not defined');
-//                    done();                    
-//                }
-//
-//            });
-//            n1.receive({payload:"foo",topic: "bar"});
-//        });
-//    });
+    it('should handle and log script error', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"retunr"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            n1.receive({payload:"foo",topic: "bar"});
+            try {
+                helper.log().called.should.be.true;
+                var logEvents = helper.log().args.filter(function(evt) {
+                    return evt[0].level == "error";
+                });
+                logEvents.should.have.length(1);
+                var msg = logEvents[0][0];
+                msg.should.have.property('level', 'error');
+                msg.should.have.property('id', 'n1');
+                msg.should.have.property('type', 'function');
+                msg.should.have.property('msg', 'ReferenceError: retunr is not defined');
+                done();
+            } catch(err) {
+                done(err);
+            }
+        });
+    });
 
 });

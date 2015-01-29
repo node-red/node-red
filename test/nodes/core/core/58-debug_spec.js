@@ -54,34 +54,35 @@ describe('debug node', function() {
         });
     });
 
-    // HELEN - commenting out for now
-//    it('should publish to console', function(done) {
-//        var flow = [{id:"n1", type:"debug", console: "true" }];
-//        helper.load(debugNode, flow, function() {
-//            var n1 = helper.getNode("n1");
-//            var count = 0;
-//            n1.on('log', function(msg) {
-//                var tstmp = msg._timestamp;
-//                msg.should.eql({level:'log',id:'n1',type:'debug',msg:'test', _timestamp:tstmp});
-//                count++;
-//                if (count == 2) {
-//                    done();
-//                }
-//            });
-//            websocket_test(function() {
-//                n1.emit("input", {payload:"test"});
-//            }, function(msg) {
-//                JSON.parse(msg).should.eql({
-//                    topic:"debug",data:{id:"n1",msg:"test",property:"payload"}
-//                });
-//                count++;
-//            }, function() {
-//                if (count == 2) {
-//                    done();
-//                }
-//            });
-//        });
-//    });
+    it('should publish to console', function(done) {
+        var flow = [{id:"n1", type:"debug", console: "true" }];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var count = 0;
+            websocket_test(function() {
+                n1.emit("input", {payload:"test"});
+            }, function(msg) {
+                JSON.parse(msg).should.eql({
+                    topic:"debug",data:{id:"n1",msg:"test",property:"payload"}
+                });
+                count++;
+            }, function() {
+                try {
+                    helper.log().called.should.be.true;
+                    var logEvents = helper.log().args.filter(function(evt) {
+                        return evt[0].level == "log";
+                    });
+                    logEvents.should.have.length(1);
+                    var tstmp = logEvents[0][0].timestamp;
+                    logEvents[0][0].should.eql({level:'log',id:'n1',type:'debug',msg:'test', timestamp:tstmp});
+
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
+    });
 
     it('should publish complete message', function(done) {
         var flow = [{id:"n1", type:"debug", complete: "true" }];
