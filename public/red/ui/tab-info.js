@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,18 @@
  * limitations under the License.
  **/
 RED.sidebar.info = (function() {
-
+        
+    marked.setOptions({
+        renderer: new marked.Renderer(),
+        gfm: true,
+        tables: true,
+        breaks: false,
+        pedantic: false,
+        sanitize: true,
+        smartLists: true,
+        smartypants: false
+    });
+    
     var content = document.createElement("div");
     content.id = "tab-info";
     content.style.paddingTop = "4px";
@@ -97,16 +108,6 @@ RED.sidebar.info = (function() {
 
         if (node._def.info) {
             var info = node._def.info;
-            marked.setOptions({
-                renderer: new marked.Renderer(),
-                gfm: true,
-                tables: true,
-                breaks: false,
-                pedantic: false,
-                sanitize: true,
-                smartLists: true,
-                smartypants: false
-            });
             table += '<div class="node-help">'+marked(typeof info === "function" ? info.call(node) : info)+'</div>';
             //table += '<div class="node-help">'+(typeof info === "function" ? info.call(node) : info)+'</div>';
         }
