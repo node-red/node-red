@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013 IBM Corp.
+  Copyright 2013, 2015 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@
             ];
 
             function generateRule(i,rule) {
-                var container = $('<li/>',{style:"margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"});
+                var container = $('<li/>',{style:"cursor: move; background: #fff; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"});
                 var row = $('<div/>').appendTo(container);
                 var row2 = $('<div/>',{style:"padding-top: 5px; text-align: right;"}).appendTo(container);
 
@@ -169,6 +169,17 @@
                 height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
                 $("#node-input-rule-container-div").css("height",height+"px");
             };
+            
+            $( "#node-input-rule-container" ).sortable({
+                axis: "y",
+                update: function( event, ui ) {
+                    var rules = $("#node-input-rule-container").children();
+                    rules.each(function(i) {
+                        $(this).find(".node-input-rule-index").html(i+1);
+                    });
+                }
+            });
+            $( "#node-input-rule-container" ).disableSelection();
 
             $( "#dialog" ).on("dialogresize", switchDialogResize);
             $( "#dialog" ).one("dialogopen", function(ev) {
