@@ -36,6 +36,7 @@ var RED = {
         userSettings.version = this.version();
         settings.init(userSettings);
         server.init(httpServer,settings);
+        log.init(userSettings);
         return server.app;
     },
     
