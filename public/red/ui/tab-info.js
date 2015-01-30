@@ -106,7 +106,7 @@ RED.sidebar.info = (function() {
         var helpText = $("script[data-help-name|='"+node.type+"']").html()||"";
         table  += '<div class="node-help">'+helpText+"</div>";
 
-        if (node._def.info) {
+        if (node._def && node._def.info) {
             var info = node._def.info;
             table += '<div class="node-help">'+marked(typeof info === "function" ? info.call(node) : info)+'</div>';
             //table += '<div class="node-help">'+(typeof info === "function" ? info.call(node) : info)+'</div>';
