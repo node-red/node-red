@@ -1,5 +1,5 @@
 /**
- * Copyright 2013,2014 IBM Corp.
+ * Copyright 2013,2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ module.exports = function(RED) {
     var cors = require('cors');
     var jsonParser = express.json();
     var urlencParser = express.urlencoded();
+    var onHeaders = require('on-headers');
 
     function rawBodyParser(req, res, next) {
         if (req._body) { return next(); }
@@ -73,15 +74,40 @@ module.exports = function(RED) {
                 corsHandler = cors(RED.settings.httpNodeCors);
                 RED.httpNode.options(this.url,corsHandler);
             }
-
+            
+            var metricsHandler = function(req,res,next) { next(); };
+            
+            if(RED.settings.metricsOn && RED.settings.metricsOn === true) {
+                metricsHandler = function(req, res, next) {
+                    var startAt = process.hrtime();
+                    
+                    onHeaders(res, function() {
+                        if(res._metrics) {
+                            var diff = process.hrtime(startAt);
+                            var ms = diff[0] * 1e3 + diff[1] * 1e-6;
+                            var metricResponseTime = ms.toFixed(3);
+                            var metricContentLength = res._headers["content-length"];
+                            
+                            //assuming that _id has been set for res._metrics in HttpOut node!
+                            node.metric("response.time.millis", res._metrics , metricResponseTime);
+                            node.metric("response.content.length.bytes", res._metrics , metricContentLength);
+                            
+                            // MUST DELETE, given that content-length is calculated BEFORE _metrics is hacked onto res response!!!
+                            delete res._metrics;
+                        }
+                      });
+                    next();
+                };
+            }
+            
             if (this.method == "get") {
-                RED.httpNode.get(this.url,corsHandler,this.callback,this.errorHandler);
+                RED.httpNode.get(this.url,corsHandler,metricsHandler,this.callback,this.errorHandler);
             } else if (this.method == "post") {
-                RED.httpNode.post(this.url,corsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+                RED.httpNode.post(this.url,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "put") {
-                RED.httpNode.put(this.url,corsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+                RED.httpNode.put(this.url,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "delete") {
-                RED.httpNode.delete(this.url,corsHandler,this.callback,this.errorHandler);
+                RED.httpNode.delete(this.url,corsHandler,metricsHandler,this.callback,this.errorHandler);
             }
 
             this.on("close",function() {
@@ -134,6 +160,14 @@ module.exports = function(RED) {
                         }
                         msg.res.set('content-length', len);
                     }
+                    
+                    // Deliberately setting AFTER content-length has been calculated as _metrics WILL be deleted by middleware, SEE middleware code!
+                    if(RED.settings.metricsOn && RED.settings.metricsOn === true) {
+                        // populating a field object on res so that the on headers callback can call metrics properly
+                        msg.res._metrics = {};
+                        msg.res._metrics._id = msg._id;
+                    }
+                    
                     msg.res.send(statusCode,msg.payload);
                 }
             } else {
@@ -222,7 +256,9 @@ module.exports = function(RED) {
                     opts.headers['content-length'] = Buffer.byteLength(payload);
                 }
             }
-
+            if(RED.settings.metricsOn && RED.settings.metricsOn === true) {
+                var preRequestTimestamp = process.hrtime();
+            }
             var req = ((/^https/.test(url))?https:http).request(opts,function(res) {
                 (node.ret === "bin") ? res.setEncoding('binary') : res.setEncoding('utf8');
                 msg.statusCode = res.statusCode;
@@ -232,6 +268,18 @@ module.exports = function(RED) {
                     msg.payload += chunk;
                 });
                 res.on('end',function() {
+                    if(RED.settings.metricsOn && RED.settings.metricsOn === true) {
+                        if(preRequestTimestamp) {
+                            var diff = process.hrtime(preRequestTimestamp);
+                            var ms = diff[0] * 1e3 + diff[1] * 1e-6;
+                            var metricRequestDurationMillis = ms.toFixed(3);
+                            
+                            node.metric("request.duration.millis", msg, metricRequestDurationMillis);
+                        }
+                        if(res.client && res.client.bytesRead) {
+                            node.metric("response.client.bytes.read", msg, res.client.bytesRead);
+                        }
+                    }
                     if (node.ret === "bin") {
                         msg.payload = new Buffer(msg.payload,"binary");
                     }
