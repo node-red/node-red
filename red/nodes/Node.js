@@ -141,7 +141,7 @@ Node.prototype.send = function(msg) {
                                 sendEvents.push({n:node,m:clonedmsg});
                             } else {
                                 // first msg sent so don't clone
-                                if (msgs[k]._messageUuid === null) {
+                                if (!msgs[k]._messageUuid) {
                                     msgs[k]._messageUuid = constructUniqueIdentifier();
                                 }
                                 this.metric(msgs[k],"Node.prototype.send");
