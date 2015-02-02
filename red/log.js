@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ var ConsoleLogHandler = new EventEmitter();
 ConsoleLogHandler.on("log",function(msg) {
     if ((msg.level === 'metric')) {
         if (metricsOn) {
-            util.log("["+msg.level+"] ["+msg.event+":"+ msg.nodeid+":"+ msg.msguuid+"]"+metrics);
+            util.log("["+msg.level+"] ["+msg.event+":"+ msg.nodeid+":"+ msg.msguuid+"]"+msg);
         }
     } else if (shouldReportMessage(msg.level)) {
         util.log("["+msg.level+"] ["+msg.type+":"+(msg.name||msg.id)+"] "+msg.msg);
@@ -43,7 +43,7 @@ ConsoleLogHandler.on("log",function(msg) {
 });
 
 function shouldReportMessage(msglevel) {
-    if (((msglevel === 'fatal') && (logLevel === 10)) ||
+    if (((msglevel === 'fatal') && (logLevel >= 10)) ||
             ((msglevel === 'error') && (logLevel >= 20)) ||
             ((msglevel === 'warn') && (logLevel >= 30)) ||
             ((msglevel === 'info') && (logLevel >= 40)) ||
