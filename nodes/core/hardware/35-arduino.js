@@ -43,14 +43,15 @@ module.exports = function(RED) {
             node.log("version "+node.board.boardVersion);
         });
 
-        node.on('close', function() {
+        node.on('close', function(done) {
             if (node.board) {
                 try {
                     node.board.close(function() {
+                        done();
                         node.log("port closed");
                     });
-                } catch(e) { }
-            }
+                } catch(e) { done(); }
+            } else { done(); }
         });
     }
     RED.nodes.registerType("arduino-board",ArduinoNode);

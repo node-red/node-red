@@ -31,6 +31,7 @@ module.exports = function(RED) {
                     node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
                 }
                 filename = msg.filename;
+                node.status({fill:"grey",shape:"dot",text:msg.filename});
             } else {
                 filename = this.filename;
             }
