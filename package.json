@@ -6,7 +6,7 @@
     "license"      : "Apache",
     "repository"   : {
         "type":"git",
-        "url":"https://github.com/node-red/node-red.git"
+        "url":"https://github.com/vramdal/node-red.git"
     },
     "main"         : "red/red.js",
     "scripts"      : {

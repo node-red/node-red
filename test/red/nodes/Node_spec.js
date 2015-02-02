@@ -298,7 +298,31 @@ describe('Node', function() {
 
             n1.send(message);
         });
+        it("logs the uuid for all messages sent", function(done) {
+            var flowGet = sinon.stub(flows,"get",function(id) {
+                return {'n1':sender,'n2':receiver1,'n3':receiver2}[id];
+            });
+            var logHandler = {
+                messagesSent: 0,
+                emit: function(event, msg) {
+                    if (msg.event == "Node.prototype.send" && msg.level == "metric") {
+                        this.messagesSent++;
+                        (typeof msg.msguuid).should.not.be.equal("undefined");
+                        if (this.messagesSent >= 2) {
+                            flowGet.restore();
+                            done();
+                        }
+                    }
+                }
+            };
 
+            Log.addHandler(logHandler);
+
+            var sender = new RedNode({id:'n1',type:'abc', wires:[['n2', 'n3']]});
+            var receiver1 = new RedNode({id:'n2',type:'abc'});
+            var receiver2 = new RedNode({id:'n3',type:'abc'});
+            sender.send({"some": "message"});
+        })
     });
 
 
