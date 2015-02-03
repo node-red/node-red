@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -319,7 +319,7 @@ describe('Node', function() {
                 loginfo = msg;
             });
             n.log("a log message");
-            should.deepEqual({level:"log", id:n.id,
+            should.deepEqual({level:"info", id:n.id,
                                type:n.type, msg:"a log message", }, loginfo);
             Log.log.restore();
             done();
@@ -334,7 +334,7 @@ describe('Node', function() {
                 loginfo = msg;
             });
             n.log("a log message");
-            should.deepEqual({level:"log", id:n.id, name: "barney",
+            should.deepEqual({level:"info", id:n.id, name: "barney",
                               type:n.type, msg:"a log message"}, loginfo);
             Log.log.restore();
             done();
@@ -379,9 +379,9 @@ describe('Node', function() {
                 loginfo = msg;
             });
             var msg = {payload:"foo", _messageUuid:"987654321"};
-            n.metric(msg,"test.metric",{size:"15mb"});
-            should.deepEqual({size:"15mb", level:"metric", nodeid:n.id,
-                                  event:"test.metric",msguuid:"987654321"}, loginfo);
+            n.metric("test.metric",msg,"15mb");
+            should.deepEqual({level:"metric", nodeid:n.id,
+                                  event:"test.metric",msguuid:"987654321", metric:"15mb"}, loginfo);
             Log.log.restore();
             done();
         });

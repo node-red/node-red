@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,11 +70,11 @@ describe('debug node', function() {
                 try {
                     helper.log().called.should.be.true;
                     var logEvents = helper.log().args.filter(function(evt) {
-                        return evt[0].level == "log";
+                        return evt[0].level == "info";
                     });
                     logEvents.should.have.length(1);
                     var tstmp = logEvents[0][0].timestamp;
-                    logEvents[0][0].should.eql({level:'log',id:'n1',type:'debug',msg:'test', timestamp:tstmp});
+                    logEvents[0][0].should.eql({level:'info',id:'n1',type:'debug',msg:'test', timestamp:tstmp});
 
                     done();
                 } catch(err) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ describe('JSON node', function() {
                 jn1.receive({payload:'foo',topic: "bar"});
                 helper.log().called.should.be.true;
                 var logEvents = helper.log().args.filter(function(evt) {
-                    return evt[0].level == "log";
+                    return evt[0].level == "info";
                 });
                 logEvents.should.have.length(1);
                 logEvents[0][0].should.have.a.property('msg',"SyntaxError: Unexpected token o"+ "\nfoo");
@@ -104,7 +104,7 @@ describe('JSON node', function() {
                 jn1.receive({payload:1,topic: "bar"});
                 helper.log().called.should.be.true;
                 var logEvents = helper.log().args.filter(function(evt) {
-                    return evt[0].level == "log";
+                    return evt[0].level == "info";
                 });
                 logEvents.should.have.length(1);
                 logEvents[0][0].should.have.a.property('msg',"dropped: 1");
