@@ -42,7 +42,7 @@ body {
     display: none;
 }
 #dropTarget div {
-    display: table-cell; 
+    display: table-cell;
     vertical-align: middle;
     text-align: center;
     font-size: 40px;
@@ -292,7 +292,7 @@ li.open #btn-sidemenu {
     padding: 5px;
     overflow-y: auto;
     box-sizing:border-box;
-    -moz-box-sizing: border-box;    
+    -moz-box-sizing: border-box;
 }
 .palette-spinner {
     padding-top: 40px;
@@ -310,7 +310,7 @@ li.open #btn-sidemenu {
     padding: 3px;
     border-top: 1px solid #999;
     box-sizing:border-box;
-    -moz-box-sizing: border-box;    
+    -moz-box-sizing: border-box;
 }
 #palette-search i.fa-search {
     position: absolute;
@@ -339,9 +339,9 @@ li.open #btn-sidemenu {
     margin: 0px;
     height: 30px;
     box-sizing:border-box;
-    -moz-box-sizing: border-box;    
-    
+    -moz-box-sizing: border-box;
 }
+
 #palette-search input:focus {
     border: none;
     box-shadow: none;
@@ -412,7 +412,7 @@ li.open #btn-sidemenu {
    top:8px;
    left: -5px;
    box-sizing: border-box;
-    -moz-box-sizing: border-box;    
+    -moz-box-sizing: border-box;
    background:#d9d9d9;
    border-radius: 3px;
    width: 10px;
@@ -431,7 +431,7 @@ li.open #btn-sidemenu {
 #sidebar {
     background: #fff;
     box-sizing: border-box;
-    -moz-box-sizing: border-box;    
+    -moz-box-sizing: border-box;
 }
 #sidebar.closing {
     background: #eee;
@@ -760,6 +760,16 @@ g.link_unknown path.link_line {
 .form-row input {
     width:70%;
 }
+.form-row label .cb1 {
+    display: inline !important;
+    width: auto !important;
+    vertical-align: top !important;
+}
+.form-row label .cb2 {
+    display: inline !important;
+    width: auto !important;
+    vertical-align: top !important;
+}
 
 input.input-append-left {
     border-top-right-radius: 0px;
@@ -1019,7 +1029,7 @@ ul.red-ui-tabs li {
 }
 
 ul.red-ui-tabs li a.red-ui-tab-label {
-    display: block; 
+    display: block;
     padding: 3px 16px;
     color: #666;
 }
@@ -1224,7 +1234,7 @@ i.spinner {
 #header ul.dropdown-menu li.disabled a {
     color: #666;
 }
-    
+
 /* Deploy menu customisations */
 #header ul#btn-deploy-options-submenu {
     width: 300px !important;
@@ -1241,5 +1251,3 @@ i.spinner {
 #header ul#btn-deploy-options-submenu li a > i.fa {
     display: none !important;
 }
-
-
