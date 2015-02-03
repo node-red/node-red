@@ -74,7 +74,7 @@ module.exports = function(RED) {
         this.buffer = [];
         this.intervalID = -1;
         this.randomID = -1;
-        this.lastSent;
+        this.lastSent = null;
         this.drop = n.drop;
         var node = this;
 
