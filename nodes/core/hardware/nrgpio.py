@@ -19,6 +19,10 @@ import sys
 
 bounce = 20     # bounce time in mS to apply
 
+if sys.version_info >= (3,0):
+    print("Sorry - currently only configured to work with python 2.x")
+    sys.exit(1)
+
 if len(sys.argv) > 1:
     cmd = sys.argv[1].lower()
     pin = int(sys.argv[2])

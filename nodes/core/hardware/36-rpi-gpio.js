@@ -57,7 +57,7 @@ module.exports = function(RED) {
         }
         else {
             if ((pinsInUse[this.pin] !== this.intype)||(pinsInUse[this.pin] === "pwm")) {
-                node.error("GPIO pin "+this.pin+" already set as "+pinTypes[pinsInUse[this.pin]]);
+                node.warn("GPIO pin "+this.pin+" already set as "+pinTypes[pinsInUse[this.pin]]);
             }
         }
 
@@ -89,24 +89,27 @@ module.exports = function(RED) {
             node.child.on('close', function (code) {
                 node.child = null;
                 node.running = false;
-                node.status({fill:"red",shape:"circle",text:""});
                 if (RED.settings.verbose) { node.log("closed"); }
-                if (node.done) { node.done(); }
+                if (node.done) {
+                    node.status({fill:"grey",shape:"ring",text:"closed"});
+                    node.done();
+                }
+                else { node.status({fill:"red",shape:"ring",text:"stopped"}); }
             });
 
             node.child.on('error', function (err) {
-                if (err.errno === "ENOENT") { node.warn('Command not found'); }
-                else if (err.errno === "EACCES") { node.warn('Command not executable'); }
+                if (err.errno === "ENOENT") { node.error('nrgpio command not found'); }
+                else if (err.errno === "EACCES") { node.error('nrgpio command not executable'); }
                 else { node.log('error: ' + err); }
             });
 
         }
         else {
-            node.error("Invalid GPIO pin: "+node.pin);
+            node.warn("Invalid GPIO pin: "+node.pin);
         }
 
         node.on("close", function(done) {
-            node.status({fill:"red",shape:"circle",text:""});
+            node.status({fill:"grey",shape:"ring",text:"close"});
             delete pinsInUse[node.pin];
             if (node.child != null) {
                 node.done = done;
@@ -131,7 +134,7 @@ module.exports = function(RED) {
         }
         else {
             if ((pinsInUse[this.pin] !== this.out)||(pinsInUse[this.pin] === "pwm")) {
-                node.error("GPIO pin "+this.pin+" already set as "+pinTypes[pinsInUse[this.pin]]);
+                node.warn("GPIO pin "+this.pin+" already set as "+pinTypes[pinsInUse[this.pin]]);
             }
         }
 
@@ -143,9 +146,14 @@ module.exports = function(RED) {
             if (node.out === "pwm") { limit = 100; }
             if ((out >= 0) && (out <= limit)) {
                 if (RED.settings.verbose) { node.log("out: "+msg.payload); }
-                if (node.child !== null) { node.child.stdin.write(msg.payload+"\n"); }
-                else { node.warn("Command not running"); }
-                node.status({fill:"green",shape:"dot",text:msg.payload});
+                if (node.child !== null) {
+                    node.child.stdin.write(msg.payload+"\n");
+                    node.status({fill:"green",shape:"dot",text:msg.payload});
+                }
+                else {
+                    node.error("nrpgio python command not running");
+                    node.status({fill:"red",shape:"ring",text:"not running"});
+                }
             }
             else { node.warn("Invalid input: "+out); }
         }
@@ -172,24 +180,27 @@ module.exports = function(RED) {
             node.child.on('close', function (code) {
                 node.child = null;
                 node.running = false;
-                node.status({fill:"red",shape:"circle",text:""});
                 if (RED.settings.verbose) { node.log("closed"); }
-                if (node.done) { node.done(); }
+                if (node.done) {
+                    node.status({fill:"grey",shape:"ring",text:"closed"});
+                    node.done();
+                }
+                else { node.status({fill:"red",shape:"ring",text:"stopped"}); }
             });
 
             node.child.on('error', function (err) {
-                if (err.errno === "ENOENT") { node.warn('Command not found'); }
-                else if (err.errno === "EACCES") { node.warn('Command not executable'); }
+                if (err.errno === "ENOENT") { node.error('nrgpio ommand not found'); }
+                else if (err.errno === "EACCES") { node.error('nrgpio command not executable'); }
                 else { node.log('error: ' + err); }
             });
 
         }
         else {
-            node.error("Invalid GPIO pin: "+node.pin);
+            node.warn("Invalid GPIO pin: "+node.pin);
         }
 
         node.on("close", function(done) {
-            node.status({fill:"red",shape:"circle",text:""});
+            node.status({fill:"grey",shape:"ring",text:"close"});
             delete pinsInUse[node.pin];
             if (node.child != null) {
                 node.done = done;
@@ -237,19 +248,22 @@ module.exports = function(RED) {
         node.child.on('close', function (code) {
             node.child = null;
             node.running = false;
-            node.status({fill:"red",shape:"circle",text:""});
             if (RED.settings.verbose) { node.log("closed"); }
-            if (node.done) { node.done(); }
+            if (node.done) {
+                node.status({fill:"grey",shape:"ring",text:"closed"});
+                node.done();
+            }
+            else { node.status({fill:"red",shape:"ring",text:"stopped"}); }
         });
 
         node.child.on('error', function (err) {
-            if (err.errno === "ENOENT") { node.warn('Command not found'); }
-            else if (err.errno === "EACCES") { node.warn('Command not executable'); }
+            if (err.errno === "ENOENT") { node.error('nrgpio ommand not found'); }
+            else if (err.errno === "EACCES") { node.error('nrgpio ommand not executable'); }
             else { node.log('error: ' + err); }
         });
 
         node.on("close", function(done) {
-            node.status({fill:"red",shape:"circle",text:""});
+            node.status({fill:"grey",shape:"ring",text:"close"});
             if (node.child != null) {
                 node.done = done;
                 node.child.kill('SIGINT');
