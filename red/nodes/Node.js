@@ -99,7 +99,7 @@ Node.prototype.send = function(msg) {
             if (!msg._messageUuid) {
                 msg._messageUuid = constructUniqueIdentifier();
             }
-            this.metric(msg,"Node.prototype.send");
+            this.metric("Node.prototype.send", msg);
             node = flows.get(this._wire);
             if (node) {
                 node.receive(msg);
@@ -137,14 +137,14 @@ Node.prototype.send = function(msg) {
                                 // overwriting any previously written uuid because a cloned 
                                 // message is a different one
                                 clonedmsg._messageUuid = constructUniqueIdentifier();
-                                this.metric(clonedmsg,"Node.prototype.send",{parentuuid:msgs[k]._messageUuid});
+                                this.metric("Node.prototype.send",clonedmsg,msgs[k]._messageUuid);
                                 sendEvents.push({n:node,m:clonedmsg});
                             } else {
                                 // first msg sent so don't clone
-                                if (msgs[k]._messageUuid === null) {
+                                if (!msgs[k]._messageUuid) {
                                     msgs[k]._messageUuid = constructUniqueIdentifier();
                                 }
-                                this.metric(msgs[k],"Node.prototype.send");
+                                this.metric("Node.prototype.send", msgs[k]);
                                 sendEvents.push({n:node,m:msgs[k]});
                                 msgSent = true;
                             }
@@ -168,7 +168,7 @@ Node.prototype.receive = function(msg) {
     if (!msg._messageUuid) {
         msg._messageUuid = constructUniqueIdentifier();
     }
-    this.metric(msg,"Node.prototype.receive"); 
+    this.metric("Node.prototype.receive",msg); 
     this.emit("input", msg);
 };
 
@@ -197,12 +197,13 @@ Node.prototype.error = function(msg) {
     log_helper(this, 'error', msg);
 };
 
-Node.prototype.metric = function(msg, eventname, metrics) {
-    metrics = metrics || {};
+Node.prototype.metric = function(eventname, msg, metricValue) {
+    var metrics = {};
     metrics.level = "metric";
     metrics.nodeid = this.id;
     metrics.event = eventname;    
     metrics.msguuid = msg._messageUuid;
+    metrics.metric = metricValue;
    
     Log.log(metrics);
 }
