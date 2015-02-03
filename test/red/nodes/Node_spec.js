@@ -264,7 +264,7 @@ describe('Node', function() {
         });
 
         it('emits messages without cloning req or res', function(done) {
-            var n1 = new RedNode({id:'n1',type:'abc',wires:[['n2'],['n3']]});
+            var n1 = new RedNode({id:'n1',type:'abc',wires:[[['n2'],['n3']]]});
             var n2 = new RedNode({id:'n2',type:'abc'});
             var n3 = new RedNode({id:'n3',type:'abc'});
             var flowGet = sinon.stub(flows,"get",function(id) {
@@ -276,24 +276,33 @@ describe('Node', function() {
             var cloned = {};
             var message = {payload: "foo", cloned: cloned, req: req, res: res};
 
+            var rcvdCount = 0;
+            
             // first message to be sent, so should not be cloned
             n2.on('input',function(msg) {
                 should.deepEqual(msg, message);
                 msg.cloned.should.be.exactly(message.cloned);
                 msg.req.should.be.exactly(message.req);
                 msg.res.should.be.exactly(message.res);
-                flowGet.restore();
-                done();
+                rcvdCount += 1;
+                if (rcvdCount == 2) {
+                    flowGet.restore();
+                    done();
+                }
             });
 
             // second message to be sent, so should be cloned
+            // message uuids wont match since we've cloned
             n3.on('input',function(msg) {
-                should.deepEqual(msg, message);
+                msg.payload.should.equal(message.payload);
                 msg.cloned.should.not.be.exactly(message.cloned);
                 msg.req.should.be.exactly(message.req);
                 msg.res.should.be.exactly(message.res);
-                flowGet.restore();
-                done();
+                rcvdCount += 1;
+                if (rcvdCount == 2) {
+                    flowGet.restore();
+                    done();
+                }
             });
 
             n1.send(message);
