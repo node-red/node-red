@@ -379,9 +379,9 @@ describe('Node', function() {
                 loginfo = msg;
             });
             var msg = {payload:"foo", _messageUuid:"987654321"};
-            n.metric(msg,"test.metric",{size:"15mb"});
-            should.deepEqual({size:"15mb", level:"metric", nodeid:n.id,
-                                  event:"test.metric",msguuid:"987654321"}, loginfo);
+            n.metric("test.metric",msg,"15mb");
+            should.deepEqual({level:"metric", nodeid:n.id,
+                                  event:"test.metric",msguuid:"987654321", metric:"15mb"}, loginfo);
             Log.log.restore();
             done();
         });
