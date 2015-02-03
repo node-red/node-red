@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  **/
 
 var ws = require("ws");
-var util = require("util");
+var log = require("./log");
 
 var server;
 var settings;
@@ -57,7 +57,7 @@ function start() {
                 try {
                     msg = JSON.parse(data);
                 } catch(err) {
-                    util.log("[red:comms] received malformed message : "+err.toString());
+                    log.warn("comms received malformed message : "+err.toString());
                     return;
                 }
                 if (msg.subscribe) {
@@ -65,12 +65,12 @@ function start() {
                 }
             });
             ws.on('error', function(err) {
-                util.log("[red:comms] error : "+err.toString());
+                log.warn("comms error : "+err.toString());
             });
         });
         
         wsServer.on('error', function(err) {
-            util.log("[red:comms] server error : "+err.toString());
+            log.warn("comms server error : "+err.toString());
         });
          
         lastSentTime = Date.now();
@@ -110,7 +110,7 @@ function publishTo(ws,topic,data) {
     try {
         ws.send(msg);
     } catch(err) {
-        util.log("[red:comms] send error : "+err.toString());
+        log.warn("comms send error : "+err.toString());
     }
 }
 

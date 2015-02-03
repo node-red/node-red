@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  **/
 
-var util = require("util");
 var when = require("when");
+
+var log = require("../log");
 
 var credentialCache = {};
 var storage = null;
@@ -75,7 +76,7 @@ module.exports = {
         return storage.getCredentials().then(function (creds) {
             credentialCache = creds;
         }).otherwise(function (err) {
-            util.log("[red] Error loading credentials : " + err);
+            log.warn("Error loading credentials : " + err);
         });
     },
     
@@ -168,7 +169,7 @@ module.exports = {
             var dashedType = nodeType.replace(/\s+/g, '-');
             var definition = credentialsDef[dashedType];
             if (!definition) {
-                util.log('Credential Type ' + nodeType + ' is not registered.');
+                log.warn('Credential Type ' + nodeType + ' is not registered.');
                 return;
             }
             

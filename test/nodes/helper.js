@@ -53,6 +53,13 @@ function helperNode(n) {
 module.exports = {
     load: function(testNode, testFlows, testCredentials, cb) {
         logSpy = sinon.spy(log,"log");
+        logSpy.FATAL = log.FATAL;
+        logSpy.ERROR = log.ERROR;
+        logSpy.WARN = log.WARN;  
+        logSpy.INFO = log.INFO;   
+        logSpy.DEBUG = log.DEBUG; 
+        logSpy.TRACE = log.TRACE;  
+        logSpy.METRIC = log.METRIC; 
         
         if (typeof testCredentials === 'function') {
             cb = testCredentials;

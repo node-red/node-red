@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@ var express = require('express');
 var fs = require("fs");
 var path = require("path");
 var when = require('when');
-var util = require('util');
 
 var events = require("../events");
 var redNodes = require("../nodes");
 var comms = require("../comms");
 var server = require("../server");
+var log = require("../log");
 
 var settings = require("../settings");
 
@@ -196,13 +196,13 @@ module.exports = {
                     }
                     if (info.enabled === body.enabled && !info.err) {
                         comms.publish("node/"+(body.enabled?"enabled":"disabled"),info,false);
-                        util.log("[red] "+(body.enabled?"Enabled":"Disabled")+" node types:");
+                        log.info(" "+(body.enabled?"Enabled":"Disabled")+" node types:");
                         for (var j = 0; j < info.types.length; j++) {
-                            util.log("[red] - " + info.types[j]);
+                            log.info(" - " + info.types[j]);
                         }
                     } else if (body.enabled && info.err) {
-                        util.log("[red] Failed to enable node:");
-                        util.log("[red] - "+info.name+" : "+info.err);
+                        log.warn("Failed to enable node:");
+                        log.warn(" - "+info.name+" : "+info.err);
                     }
                 }
             }
@@ -241,13 +241,13 @@ function putNode(node, enabled) {
 
         if (info.enabled === enabled && !info.err) {
             comms.publish("node/"+(enabled?"enabled":"disabled"),info,false);
-            util.log("[red] "+(enabled?"Enabled":"Disabled")+" node types:");
+            log.info(" "+(enabled?"Enabled":"Disabled")+" node types:");
             for (var i=0;i<info.types.length;i++) {
-                util.log("[red] - "+info.types[i]);
+                log.info(" - "+info.types[i]);
             }
         } else if (enabled && info.err) {
-            util.log("[red] Failed to enable node:");
-            util.log("[red] - "+info.name+" : "+info.err);
+            log.warn("Failed to enable node:");
+            log.warn(" - "+info.name+" : "+info.err);
         }
     }
 

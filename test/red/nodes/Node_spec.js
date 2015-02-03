@@ -91,7 +91,7 @@ describe('Node', function() {
             var n = new RedNode({id:'123',type:'abc'});
             n.on('input',function(msg) {
                 (typeof msg).should.not.be.equal("undefined");
-                (typeof msg._messageUuid).should.not.be.equal("undefined");
+                (typeof msg._id).should.not.be.equal("undefined");
                 done();
             });
             n.receive();
@@ -101,7 +101,7 @@ describe('Node', function() {
             var n = new RedNode({id:'123',type:'abc'});
             n.on('input',function(msg) {
                 (typeof msg).should.not.be.equal("undefined");
-                (typeof msg._messageUuid).should.not.be.equal("undefined");
+                (typeof msg._id).should.not.be.equal("undefined");
                 done();
             });
             n.receive(null);
@@ -308,6 +308,31 @@ describe('Node', function() {
             n1.send(message);
         });
 
+         it("logs the uuid for all messages sent", function(done) {
+            var flowGet = sinon.stub(flows,"get",function(id) {
+                return {'n1':sender,'n2':receiver1,'n3':receiver2}[id];
+            });
+            var logHandler = {
+                messagesSent: 0,
+                emit: function(event, msg) {
+                    if (msg.event == "node.abc.send" && msg.level == Log.METRIC) {
+                        this.messagesSent++;
+                        (typeof msg.msgid).should.not.be.equal("undefined");
+                        flowGet.restore();
+                        done();
+                    }
+                }
+            };
+
+            Log.addHandler(logHandler);
+
+            var sender = new RedNode({id:'n1',type:'abc', wires:[['n2', 'n3']]});
+            var receiver1 = new RedNode({id:'n2',type:'abc'});
+            var receiver2 = new RedNode({id:'n3',type:'abc'});
+            sender.send({"some": "message"});
+        })
+        
+        
     });
 
 
@@ -319,14 +344,11 @@ describe('Node', function() {
                 loginfo = msg;
             });
             n.log("a log message");
-            should.deepEqual({level:"info", id:n.id,
+            should.deepEqual({level:Log.INFO, id:n.id,
                                type:n.type, msg:"a log message", }, loginfo);
             Log.log.restore();
             done();
         });
-    });
-
-    describe('#log', function() {
         it('produces a log message with a name', function(done) {
             var n = new RedNode({id:'123', type:'abc', name:"barney"});
             var loginfo = {};
@@ -334,7 +356,7 @@ describe('Node', function() {
                 loginfo = msg;
             });
             n.log("a log message");
-            should.deepEqual({level:"info", id:n.id, name: "barney",
+            should.deepEqual({level:Log.INFO, id:n.id, name: "barney",
                               type:n.type, msg:"a log message"}, loginfo);
             Log.log.restore();
             done();
@@ -349,7 +371,7 @@ describe('Node', function() {
                 loginfo = msg;
             });
             n.warn("a warning");
-            should.deepEqual({level:"warn", id:n.id,
+            should.deepEqual({level:Log.WARN, id:n.id,
                               type:n.type, msg:"a warning"}, loginfo);
             Log.log.restore();
             done();
@@ -364,7 +386,7 @@ describe('Node', function() {
                 loginfo = msg;
             });
             n.error("an error message");
-            should.deepEqual({level:"error", id:n.id,
+            should.deepEqual({level:Log.ERROR, id:n.id,
                              type:n.type, msg:"an error message"}, loginfo);
             Log.log.restore();
             done();
@@ -378,10 +400,10 @@ describe('Node', function() {
             sinon.stub(Log, 'log', function(msg) {
                 loginfo = msg;
             });
-            var msg = {payload:"foo", _messageUuid:"987654321"};
+            var msg = {payload:"foo", _id:"987654321"};
             n.metric("test.metric",msg,"15mb");
-            should.deepEqual({level:"metric", nodeid:n.id,
-                                  event:"test.metric",msguuid:"987654321", metric:"15mb"}, loginfo);
+            should.deepEqual({metric:"15mb", level:Log.METRIC, nodeid:n.id,
+                                  event:"node.abc.test.metric",msgid:"987654321"}, loginfo);
             Log.log.restore();
             done();
         });

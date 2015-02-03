@@ -76,13 +76,11 @@ describe('JSON node', function() {
                     {id:"jn2", type:"helper"}];
         helper.load(jsonNode, flow, function() {
             try {
-                helper.log().called.should.be.false;
                 var jn1 = helper.getNode("jn1");
                 var jn2 = helper.getNode("jn2");
                 jn1.receive({payload:'foo',topic: "bar"});
-                helper.log().called.should.be.true;
                 var logEvents = helper.log().args.filter(function(evt) {
-                    return evt[0].level == "info";
+                    return evt[0].type == "json";
                 });
                 logEvents.should.have.length(1);
                 logEvents[0][0].should.have.a.property('msg',"SyntaxError: Unexpected token o"+ "\nfoo");
@@ -98,13 +96,11 @@ describe('JSON node', function() {
                     {id:"jn2", type:"helper"}];
         helper.load(jsonNode, flow, function() {
             try {
-                helper.log().called.should.be.false;
                 var jn1 = helper.getNode("jn1");
                 var jn2 = helper.getNode("jn2");
                 jn1.receive({payload:1,topic: "bar"});
-                helper.log().called.should.be.true;
                 var logEvents = helper.log().args.filter(function(evt) {
-                    return evt[0].level == "info";
+                    return evt[0].type == "json";
                 });
                 logEvents.should.have.length(1);
                 logEvents[0][0].should.have.a.property('msg',"dropped: 1");

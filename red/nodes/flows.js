@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-var util = require("util");
 var clone = require("clone");
 var when = require("when");
 
@@ -37,7 +36,7 @@ var activeConfigNodes = {};
 events.on('type-registered',function(type) {
     if (activeFlow) {
         if (activeFlow.typeRegistered(type)) {
-            util.log("[red] Missing type registered: "+type);
+            log.info("Missing type registered: "+type);
         }
     }
 });
@@ -58,7 +57,7 @@ var flowNodes = module.exports = {
                 flowNodes.startFlows();
             });
         }).otherwise(function(err) {
-            util.log("[red] Error loading flows : "+err);
+            log.warn("Error loading flows : "+err);
             console.log(err.stack);
         });
     },
@@ -162,22 +161,22 @@ var flowNodes = module.exports = {
         }
     },
     startFlows: function() {
-        util.log("[red] Starting flows");
+        log.info("Starting flows");
         try {
             activeFlow.start();
         } catch(err) {
             var missingTypes = activeFlow.getMissingTypes();
             if (missingTypes.length > 0) {
-                util.log("[red] Waiting for missing types to be registered:");
+                log.info("Waiting for missing types to be registered:");
                 for (var i=0;i<missingTypes.length;i++) {
-                    util.log("[red]  - "+missingTypes[i]);
+                    log.info(" - "+missingTypes[i]);
                 }
             }
         }
         
     },
     stopFlows: function() {
-        util.log("[red] Stopping flows");
+        log.info("Stopping flows");
         return activeFlow.stop();
     }
 };

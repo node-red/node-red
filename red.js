@@ -170,34 +170,34 @@ RED.start().then(function() {
     if (settings.httpAdminRoot !== false || settings.httpNodeRoot !== false || settings.httpStatic) {
         server.on('error', function(err) {
             if (err.errno === "EADDRINUSE") {
-                util.log('[red] Unable to listen on '+getListenPath());
-                util.log('[red] Error: port in use');
+                RED.log.error('Unable to listen on '+getListenPath());
+                RED.log.error('Error: port in use');
             } else {
-                util.log('[red] Uncaught Exception:');
+                RED.log.error('Uncaught Exception:');
                 if (err.stack) {
-                    util.log(err.stack);
+                    RED.log.error(err.stack);
                 } else {
-                    util.log(err);
+                    RED.log.error(err);
                 }
             }
             process.exit(1);
         });
         server.listen(settings.uiPort,settings.uiHost,function() {
             if (settings.httpAdminRoot === false) {
-                util.log('[red] Admin UI disabled');
+                RED.log.info('Admin UI disabled');
             }
             process.title = 'node-red';
-            util.log('[red] Server now running at '+getListenPath());
+            RED.log.info('Server now running at '+getListenPath());
         });
     } else {
         util.log('[red] Running in headless mode');
     }
 }).otherwise(function(err) {
-    util.log("[red] Failed to start server:");
+    RED.log.error("Failed to start server:");
     if (err.stack) {
-        util.log(err.stack);
+        RED.log.error(err.stack);
     } else {
-        util.log(err);
+        RED.log.error(err);
     }
 });
 

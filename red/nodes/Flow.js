@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-var util = require("util");
 var when = require("when");
 var clone = require("clone");
 
@@ -22,6 +21,7 @@ var typeRegistry = require("./registry");
 var credentials = require("./credentials");
 var redUtil = require("../util");
 var events = require("../events");
+var log = require("../log");
 
 function getID() {
     return (1+Math.random()*4294967295).toString(16);
@@ -35,10 +35,10 @@ function createNode(type,config) {
             nn = new nt(clone(config));
         }
         catch (err) {
-            util.log("[red] "+type+" : "+err);
+            log.warn(type+" : "+err);
         }
     } else {
-        util.log("[red] unknown type: "+type);
+        log.warn("unknown type: "+type);
     }
     return nn;
 }

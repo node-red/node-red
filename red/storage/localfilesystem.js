@@ -18,9 +18,10 @@ var fs = require('fs');
 var when = require('when');
 var nodeFn = require('when/node/function');
 var keys = require('when/keys');
-var util = require('util');
 var fspath = require("path");
 var mkdirp = require("mkdirp");
+
+var log = require("../log");
 
 var promiseDir = nodeFn.lift(mkdirp);
 
@@ -170,12 +171,12 @@ var localfilesystem = {
         var defer = when.defer();
         fs.exists(flowsFullPath, function(exists) {
             if (exists) {
-                util.log("[red] Loading flows : "+flowsFile);
+                log.info("Loading flows : "+flowsFile);
                 defer.resolve(nodeFn.call(fs.readFile,flowsFullPath,'utf8').then(function(data) {
                     return JSON.parse(data);
                 }));
             } else {
-                util.log("[red] Flows file not found : "+flowsFile   );
+                log.info("Flows file not found : "+flowsFile   );
                 defer.resolve([]);
             }
         });
@@ -236,7 +237,7 @@ var localfilesystem = {
                     try {
                         return JSON.parse(data);
                     } catch(err) {
-                        util.log("[red] Corrupted config detected - resetting");
+                        log.info("Corrupted config detected - resetting");
                         return {};
                     }
                 } else {

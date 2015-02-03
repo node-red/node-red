@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,64 +17,63 @@
 var util = require("util");
 var EventEmitter = require("events").EventEmitter;
 
-var logLevel;
-var metricsOn;
 
 var levels = {
-    "fatal" : 10,
-    "error" : 20,
-    "warn" : 30,
-    "info" : 40,
-    "debug" : 50,
-    "trace" : 60
+    fatal:  10,
+    error:  20,
+    warn:   30,
+    info:   40,
+    debug:  50,
+    trace:  60,
+    metric: 99
+}
+var levelNames = {
+    10: "fatal",
+    20: "error",
+    30: "warn",
+    40: "info",
+    50: "debug",
+    60: "trace",
+    99: "metric",
 }
 
 var logHandlers = [];
 
-var ConsoleLogHandler = new EventEmitter();
-ConsoleLogHandler.on("log",function(msg) {
-    if ((msg.level === 'metric')) {
-        if (metricsOn) {
-            util.log("["+msg.level+"] ["+msg.event+":"+ msg.nodeid+":"+ msg.msguuid+"]"+metrics);
+var ConsoleLogHandler = function(settings) {
+    this.logLevel = levels[settings.level]||levels.info;
+    this.metricsOn = settings.metrics||false;
+    
+    this.on("log",function(msg) {
+        if (this.shouldReportMessage(msg.level)) {
+            if (msg.level == log.METRIC) {
+                util.log("[metric] "+JSON.stringify(msg));
+            } else {
+                util.log("["+levelNames[msg.level]+"] "+(msg.type?"["+msg.type+":"+(msg.name||msg.id)+"] ":"")+msg.msg);
+            }
         }
-    } else if (shouldReportMessage(msg.level)) {
-        util.log("["+msg.level+"] ["+msg.type+":"+(msg.name||msg.id)+"] "+msg.msg);
-    }
-});
+    });
+}
+util.inherits(ConsoleLogHandler, EventEmitter);
 
-function shouldReportMessage(msglevel) {
-    if (((msglevel === 'fatal') && (logLevel === 10)) ||
-            ((msglevel === 'error') && (logLevel >= 20)) ||
-            ((msglevel === 'warn') && (logLevel >= 30)) ||
-            ((msglevel === 'info') && (logLevel >= 40)) ||
-            ((msglevel === 'debug') && (logLevel >= 50)) ||
-            ((msglevel === 'trace') && (logLevel === 60))) {
-        return true;
-    }
-    return false;
+ConsoleLogHandler.prototype.shouldReportMessage = function(msglevel) {
+    return msglevel <= this.logLevel || (msglevel == log.METRIC && this.metricsOn);
 }
 
-
 var log = module.exports = {
-        
+    FATAL:  10,
+    ERROR:  20,
+    WARN:   30,
+    INFO:   40,
+    DEBUG:  50,
+    TRACE:  60,
+    METRIC: 99,
+    
     init: function(settings) {
-        if (settings.logLevel) {
-            var levelNames = Object.keys(levels);
-            levelNames.forEach(function(levelName) {
-                if (levelName === settings.logLevel) {
-                   logLevel =levels[levelName];
-                }
-            });
-        } 
-        if (!logLevel) {
-            // handles case if someone has put in garbage for the log level
-            logLevel = 40;
+        var consoleSettings = {};
+        if (settings.logging) {
+            consoleSettings = settings.logging.console || {};
         }
-        if (settings.metricsOn) {
-            metricsOn = settings.metricsOn
-        } else {
-            metricsOn = false;
-        }
+        log.addHandler(new ConsoleLogHandler(consoleSettings));
     },
         
     addHandler: function(func) {
@@ -86,7 +85,12 @@ var log = module.exports = {
         logHandlers.forEach(function(handler) {
             handler.emit("log",msg);
         });
+    },
+    info: function(msg) {
+        log.log({level:log.INFO,msg:msg});
+    },
+    warn: function(msg) {
+        log.log({level:log.WARN,msg:msg});
     }
 }
 
-log.addHandler(ConsoleLogHandler);

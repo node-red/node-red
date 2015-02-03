@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ var express = require('express');
 var fs = require("fs");
 var events = require("../events");
 var path = require("path");
-var util = require("util");
 
+var log = require("../log");
 var redNodes = require("../nodes");
 var settings = require("../settings");
 
@@ -32,9 +32,9 @@ module.exports = {
         redNodes.setFlows(flows,deploymentType).then(function() {
             res.send(204);
         }).otherwise(function(err) {
-            util.log("[red] Error saving flows : "+err);
+            log.warn("Error saving flows : "+err.message);
+            log.warn(err.stack);
             res.send(500,err.message);
-            console.log(err.stack);
         });
     }
 }

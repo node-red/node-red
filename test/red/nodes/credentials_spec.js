@@ -21,6 +21,7 @@ var util = require("util");
 
 var index = require("../../../red/nodes/index");
 var credentials = require("../../../red/nodes/credentials");
+var log = require("../../../red/log");
 
 describe('Credentials', function() {
     
@@ -131,18 +132,18 @@ describe('Credentials', function() {
                 return when(true);
             }
         };
-        var logmsg = 'no errors yet';
-        sinon.stub(util, 'log', function(msg) {
+        var logmsg = 'nothing logged yet';
+        sinon.stub(log, 'warn', function(msg) {
             logmsg = msg;
         });
         
         credentials.init(storage);
         credentials.load().then(function() {
-            should.equal('[red] Error loading credentials : test forcing failure', logmsg);
-            util.log.restore();
+            logmsg.should.equal("Error loading credentials : test forcing failure");
+            log.warn.restore();
             done();
         }).otherwise(function(err){
-            util.log.restore();
+            log.warn.restore();
             done(err);
         });
     });
@@ -189,7 +190,7 @@ describe('Credentials', function() {
             });
         }
         var logmsg = 'nothing logged yet';
-        sinon.stub(util, 'log', function(msg) {
+        sinon.stub(log, 'warn', function(msg) {
             logmsg = msg;
         });
         var settings = {
@@ -201,10 +202,10 @@ describe('Credentials', function() {
             var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});   
             credentials.extract(testnode);
             should.equal(logmsg, 'Credential Type test is not registered.');
-            util.log.restore();
+            log.warn.restore();
             done();
         }).otherwise(function(err){
-            util.log.restore();
+            log.warn.restore();
             done(err);
         });
     });

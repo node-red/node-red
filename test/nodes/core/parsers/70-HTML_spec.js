@@ -129,14 +129,13 @@ describe('html node', function() {
                         {id:"n2", type:"helper"}];
             
             helper.load(htmlNode, flow, function() {
-                var n1 = helper.getNode("n1");
-                var n2 = helper.getNode("n2");
                 try {
-                    helper.log().called.should.be.false;
+                    var n1 = helper.getNode("n1");
+                    var n2 = helper.getNode("n2");
                     n1.receive({payload:null,topic: "bar"});
                     helper.log().called.should.be.true;
                     var logEvents = helper.log().args.filter(function(evt) {
-                        return evt[0].level == "info";
+                        return evt[0].type == "html";
                     });
                     logEvents.should.have.length(1);
                     // Each logEvent is the array of args passed to the function.

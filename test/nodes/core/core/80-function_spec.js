@@ -139,11 +139,11 @@ describe('function node', function() {
             try {
                 helper.log().called.should.be.true;
                 var logEvents = helper.log().args.filter(function(evt) {
-                    return evt[0].level == "error";
+                    return evt[0].type == "function";
                 });
                 logEvents.should.have.length(1);
                 var msg = logEvents[0][0];
-                msg.should.have.property('level', 'error');
+                msg.should.have.property('level', helper.log().ERROR);
                 msg.should.have.property('id', 'n1');
                 msg.should.have.property('type', 'function');
                 msg.should.have.property('msg', 'ReferenceError: retunr is not defined');

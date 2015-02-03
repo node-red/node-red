@@ -84,9 +84,8 @@ describe('XML node', function() {
             n1.receive({payload:'<not valid xml>',topic: "bar"});
             setTimeout(function() {
                 try {
-                    helper.log().called.should.be.true;
                     var logEvents = helper.log().args.filter(function(evt) {
-                        return evt[0].level == "error";
+                        return evt[0].type == "xml";
                     });
                     logEvents.should.have.length(1);
                     logEvents[0][0].should.have.a.property('msg');
@@ -109,9 +108,8 @@ describe('XML node', function() {
             n1.receive({payload:1,topic: "bar"});
             setTimeout(function() {
                 try {
-                    helper.log().called.should.be.true;
                     var logEvents = helper.log().args.filter(function(evt) {
-                        return evt[0].level == "info";
+                        return evt[0].type == "xml";
                     });
                     logEvents.should.have.length(1);
                     logEvents[0][0].should.have.a.property('msg',"This node only handles xml strings or js objects.");
