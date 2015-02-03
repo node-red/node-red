@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013,2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,9 +61,11 @@ module.exports = function(RED) {
                         }
                     }
                     this.send(results);
-                    var duration = process.hrtime(start);
-                    if (process.env.NODE_RED_FUNCTION_TIME) {
-                        this.status({fill:"yellow",shape:"dot",text:""+Math.floor((duration[0]* 1e9 +  duration[1])/10000)/100});
+                    if (RED.settings.metricsOn && (RED.settings.metricsOn === true)) {
+                        var duration = process.hrtime(start);
+                        var converted = Math.floor((duration[0]* 1e9 +  duration[1])/10000)/100;
+                        this.metric("duration", results, converted);
+                        this.status({fill:"yellow",shape:"dot",text:""+converted});
                     }
                 } catch(err) {
                     this.error(err.toString());
