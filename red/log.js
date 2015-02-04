@@ -19,6 +19,7 @@ var EventEmitter = require("events").EventEmitter;
 
 
 var levels = {
+    off:    0,
     fatal:  10,
     error:  20,
     warn:   30,
@@ -72,6 +73,7 @@ var log = module.exports = {
     METRIC: 99,
     
     init: function(settings) {
+        logHandlers = [];
         var consoleSettings = {};
         if (settings.logging) {
             consoleSettings = settings.logging.console || {};

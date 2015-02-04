@@ -123,7 +123,9 @@ module.exports = {
 
     startServer: function(done) {
         server = http.createServer(function(req,res){app(req,res);});
-        RED.init(server, {});
+        RED.init(server, {
+            logging:{console:{level:'off'}}
+        });
         server.listen(listenPort, address);
         server.on('listening', function() {
             port = server.address().port;
