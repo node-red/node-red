@@ -62,7 +62,7 @@ describe('LocalFileSystem', function() {
         localfilesystem.init({userDir:userDir}).then(function() {
             var flowFile = 'flows_'+require('os').hostname()+'.json';
             var flowFilePath = path.join(userDir,flowFile);
-            var flowFileBackupPath = path.join(userDir,"flows.backup");
+            var flowFileBackupPath = path.join(userDir,"."+flowFile+".backup");
             fs.existsSync(flowFilePath).should.be.false;
             fs.existsSync(flowFileBackupPath).should.be.false;
             localfilesystem.saveFlows(testFlow).then(function() {
@@ -114,7 +114,7 @@ describe('LocalFileSystem', function() {
         var defaultFlowFilePath = path.join(userDir,defaultFlowFile);
         var flowFile = 'test.json';
         var flowFilePath = path.join(userDir,flowFile);
-        var flowFileBackupPath = path.join(userDir,"flows.backup");
+        var flowFileBackupPath = path.join(userDir,"."+flowFile+".backup");
 
         localfilesystem.init({userDir:userDir, flowFile:flowFilePath}).then(function() {
             fs.existsSync(defaultFlowFilePath).should.be.false;

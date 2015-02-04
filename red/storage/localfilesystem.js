@@ -28,7 +28,7 @@ var promiseDir = nodeFn.lift(mkdirp);
 var settings;
 var flowsFile;
 var flowsFullPath;
-var flowsPrev;
+var flowsFileBackup;
 var credentialsFile;
 var oldCredentialsFile;
 var userDir;
@@ -153,10 +153,17 @@ var localfilesystem = {
             flowsFile = 'flows_'+require('os').hostname()+'.json';
             flowsFullPath = fspath.join(userDir,flowsFile);
         }
-        var fsext = fspath.extname(flowsFile);
-        credentialsFile = fspath.join(userDir,fspath.basename(flowsFile,fsext)+"_cred"+fsext);
+        var ffExt = fspath.extname(flowsFullPath);
+        var ffName = fspath.basename(flowsFullPath);
+        var ffBase = fspath.basename(flowsFullPath,ffExt);
+        var ffDir = fspath.dirname(flowsFullPath);
+        
+        credentialsFile = fspath.join(userDir,ffBase+"_cred"+ffExt);
+        credentialsFileBackup = fspath.join(userDir,"."+ffBase+"_cred"+ffExt+".backup");
+        
         oldCredentialsFile = fspath.join(userDir,"credentials.json");
-        flowsPrev = fspath.join(userDir,"flows.backup");
+        
+        flowsFileBackup = fspath.join(ffDir,"."+ffName+".backup");
 
         libDir = fspath.join(userDir,"lib");
         libFlowsDir = fspath.join(libDir,"flows");
@@ -185,7 +192,7 @@ var localfilesystem = {
 
     saveFlows: function(flows) {
         if (fs.existsSync(flowsFullPath)) {
-            fs.renameSync(flowsFullPath,flowsPrev);
+            fs.renameSync(flowsFullPath,flowsFileBackup);
         }
         
         var flowData;
@@ -221,6 +228,9 @@ var localfilesystem = {
     },
 
     saveCredentials: function(credentials) {
+        if (fs.existsSync(credentialsFile)) {
+            fs.renameSync(credentialsFile,credentialsFileBackup);
+        }
         var credentialData;
         if (settings.flowFilePretty) {
             credentialData = JSON.stringify(credentials,null,4);
