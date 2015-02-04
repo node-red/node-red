@@ -301,7 +301,7 @@ var RED = (function() {
         RED.menu.init({id:"btn-sidemenu",
             options: [
                 {id:"btn-sidebar",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
-                {id:"btn-node-status",label:"Node Status",toggle:true,onselect:toggleStatus},
+                {id:"btn-node-status",label:"Display node status",toggle:true,onselect:toggleStatus, selected: true},
                 null,
                 {id:"btn-import-menu",label:"Import",options:[
                     {id:"btn-import-clipboard",label:"Clipboard",onselect:RED.view.showImportNodesDialog},
