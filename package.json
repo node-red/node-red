@@ -44,6 +44,7 @@
         "nodemailer":"1.3.0",
         "imap":"0.8.13",
         "request":"2.42.0",
+        "on-headers":"1.0.0",
         "colors":"0.6.2",
         "is-utf8":"0.2.0",
         "serialport":"1.4.10",
