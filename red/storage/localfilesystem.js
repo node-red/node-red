@@ -30,6 +30,7 @@ var flowsFile;
 var flowsFullPath;
 var flowsFileBackup;
 var credentialsFile;
+var credentialsFileBackup;
 var oldCredentialsFile;
 var userDir;
 var libDir;
