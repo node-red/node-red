@@ -19,6 +19,7 @@ var nodes = require("./nodes");
 var library = require("./api/library");
 var comms = require("./comms");
 var log = require("./log");
+var memoryMetricsReporter = require("./reporter");
 var util = require("./util");
 var fs = require("fs");
 var settings = require("./settings");
@@ -37,11 +38,18 @@ var RED = {
         settings.init(userSettings);
         server.init(httpServer,settings);
         log.init(userSettings);
+        memoryMetricsReporter.init(userSettings);
         return server.app;
     },
     
-    start: server.start,
-    stop: server.stop,
+    start: function() {
+        memoryMetricsReporter.start();
+        return server.start();
+    },
+    stop: function() {
+        memoryMetricsReporter.stop();
+        return server.stop();
+    },
     nodes: nodes,
     library: { register: library.register },
     credentials: credentials,
