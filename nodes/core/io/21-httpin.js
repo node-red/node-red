@@ -88,7 +88,7 @@ module.exports = function(RED) {
                             var metricContentLength = res._headers["content-length"];
                             //assuming that _id has been set for res._metrics in HttpOut node!
                             node.metric("response.time.millis", {_id:res._msgId} , metricResponseTime);
-                            node.metric("response.content.length.bytes", {_id:res._msgId} , metricContentLength);
+                            node.metric("response.content-length.bytes", {_id:res._msgId} , metricContentLength);
                         }
                     });
                     next();
