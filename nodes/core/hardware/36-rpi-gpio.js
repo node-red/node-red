@@ -148,7 +148,7 @@ module.exports = function(RED) {
                 if (RED.settings.verbose) { node.log("out: "+msg.payload); }
                 if (node.child !== null) {
                     node.child.stdin.write(msg.payload+"\n");
-                    node.status({fill:"green",shape:"dot",text:msg.payload});
+                    node.status({fill:"green",shape:"dot",text:msg.payload.toString()});
                 }
                 else {
                     node.error("nrpgio python command not running");
