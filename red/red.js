@@ -34,9 +34,9 @@ var RED = {
 
     init: function(httpServer,userSettings) {
         userSettings.version = this.version();
+        log.init(userSettings);
         settings.init(userSettings);
         server.init(httpServer,settings);
-        log.init(userSettings);
         return server.app;
     },
     

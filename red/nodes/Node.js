@@ -213,7 +213,7 @@ Node.prototype.metric = function(eventname, msg, metricValue) {
     metrics.nodeid = this.id;
     metrics.event = "node."+this.type+"."+eventname;    
     metrics.msgid = msg._id;
-    metrics.metric = metricValue;
+    metrics.value = metricValue;
     Log.log(metrics);
 }
 

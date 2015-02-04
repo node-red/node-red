@@ -19,7 +19,7 @@ var EventEmitter = require("events").EventEmitter;
 
 
 var levels = {
-    off:    0,
+    off:    1,
     fatal:  10,
     error:  20,
     warn:   30,
@@ -46,7 +46,6 @@ var ConsoleLogHandler = function(settings) {
     this.logLevel = levels[settings.level]||levels.info;
     this.metricsOn = settings.metrics||false;
     metricsEnabled = this.metricsOn;
-    
     this.on("log",function(msg) {
         if (this.shouldReportMessage(msg.level)) {
             if (msg.level == log.METRIC) {

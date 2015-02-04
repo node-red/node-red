@@ -402,7 +402,7 @@ describe('Node', function() {
             });
             var msg = {payload:"foo", _id:"987654321"};
             n.metric("test.metric",msg,"15mb");
-            should.deepEqual({metric:"15mb", level:Log.METRIC, nodeid:n.id,
+            should.deepEqual({value:"15mb", level:Log.METRIC, nodeid:n.id,
                                   event:"node.abc.test.metric",msgid:"987654321"}, loginfo);
             Log.log.restore();
             done();
