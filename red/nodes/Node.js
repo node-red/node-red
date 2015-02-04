@@ -201,7 +201,13 @@ Node.prototype.error = function(msg) {
     log_helper(this, Log.ERROR, msg);
 };
 
+/**
+ * If called with no args, returns whether metric collection is enabled
+ */
 Node.prototype.metric = function(eventname, msg, metricValue) {
+    if (typeof eventname === "undefined") {
+        return Log.metric();
+    }
     var metrics = {};
     metrics.level = Log.METRIC;
     metrics.nodeid = this.id;

@@ -34,14 +34,17 @@ var levelNames = {
     40: "info",
     50: "debug",
     60: "trace",
-    99: "metric",
+    99: "metric"
 }
 
 var logHandlers = [];
 
+var metricsEnabled = false;
+
 var ConsoleLogHandler = function(settings) {
     this.logLevel = levels[settings.level]||levels.info;
     this.metricsOn = settings.metrics||false;
+    metricsEnabled = this.metricsOn;
     
     this.on("log",function(msg) {
         if (this.shouldReportMessage(msg.level)) {
@@ -91,6 +94,10 @@ var log = module.exports = {
     },
     warn: function(msg) {
         log.log({level:log.WARN,msg:msg});
+    },
+    
+    metric: function() {
+        return metricsEnabled;
     }
 }
 
