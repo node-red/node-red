@@ -81,7 +81,7 @@ function start() {
                     for (i in missingModules) {
                         if (missingModules.hasOwnProperty(i)) {
                             log.warn(" - "+i+": "+missingModules[i].join(", "));
-                            if (settings.autoInstallModules) {
+                            if (settings.autoInstallModules && i != "node-red") {
                                 installModule(i).otherwise(function(err) {
                                     // Error already reported. Need the otherwise handler
                                     // to stop the error propagating any further

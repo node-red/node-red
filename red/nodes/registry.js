@@ -419,9 +419,22 @@ var registry = (function() {
             var removed = false;
             for (var mod in moduleConfigs) {
                 if (moduleConfigs.hasOwnProperty(mod)) {
-                    if (moduleConfigs[mod] && !moduleNodes[mod]) {
-                        var nodes = moduleConfigs[mod].nodes;
-                        for (var node in nodes) {
+                    var nodes = moduleConfigs[mod].nodes;
+                    var node;
+                    if (mod == "node-red") {
+                        // For core nodes, look for nodes that are enabled, !loaded and !errored
+                        for (node in nodes) {
+                            if (nodes.hasOwnProperty(node)) {
+                                var n = nodes[node];
+                                if (n.enabled && !n.err && !n.loaded) {
+                                    registry.removeNode(mod+"/"+node);
+                                    removed = true;
+                                }
+                            }
+                        }
+                    } else if (moduleConfigs[mod] && !moduleNodes[mod]) {
+                        // For node modules, look for missing ones
+                        for (node in nodes) {
                             if (nodes.hasOwnProperty(node)) {
                                 registry.removeNode(mod+"/"+node);
                                 removed = true;
