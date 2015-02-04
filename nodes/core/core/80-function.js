@@ -61,10 +61,10 @@ module.exports = function(RED) {
                         }
                     }
                     this.send(results);
-                    if (RED.settings.metricsOn && (RED.settings.metricsOn === true)) {
-                        var duration = process.hrtime(start);
-                        var converted = Math.floor((duration[0]* 1e9 +  duration[1])/10000)/100;
-                        this.metric("duration", results, converted);
+                    var duration = process.hrtime(start);
+                    var converted = Math.floor((duration[0]* 1e9 +  duration[1])/10000)/100;
+                    this.metric("duration", msg, converted);
+                    if (process.env.NODE_RED_FUNCTION_TIME) {
                         this.status({fill:"yellow",shape:"dot",text:""+converted});
                     }
                 } catch(err) {
