@@ -189,7 +189,7 @@ module.exports = function(RED) {
             });
 
             node.child.on('error', function (err) {
-                if (err.errno === "ENOENT") { node.error('nrgpio ommand not found'); }
+                if (err.errno === "ENOENT") { node.error('nrgpio command not found'); }
                 else if (err.errno === "EACCES") { node.error('nrgpio command not executable'); }
                 else { node.log('error: ' + err); }
             });
@@ -257,7 +257,7 @@ module.exports = function(RED) {
         });
 
         node.child.on('error', function (err) {
-            if (err.errno === "ENOENT") { node.error('nrgpio ommand not found'); }
+            if (err.errno === "ENOENT") { node.error('nrgpio command not found'); }
             else if (err.errno === "EACCES") { node.error('nrgpio ommand not executable'); }
             else { node.log('error: ' + err); }
         });
