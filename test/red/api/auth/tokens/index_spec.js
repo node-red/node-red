@@ -67,34 +67,13 @@ describe("Tokens", function() {
             Tokens.init({sessionStorageModule:{
                 init:function(settings){},
                 get: function(token) {
-                    return when.resolve({user:"fred",accessExpires: Date.now()+10000});
+                    return when.resolve({user:"fred"});
                 }
             }});
             
             Tokens.get("1234").then(function(token) {
                 try {
                     token.should.have.a.property("user","fred");
-                    done();
-                } catch(err) {
-                    done(err);
-                }
-            });
-        });
-        it('deletes an expired token and returns null', function(done) {
-            var sessionStorageModule = {
-                init:function(settings){},
-                get: function(token) {
-                    return when.resolve({user:"fred",accessExpires: Date.now()-10000});
-                },
-                delete: sinon.stub().returns(when.resolve())
-            };
-            
-            Tokens.init({sessionStorageModule:sessionStorageModule});
-            
-            Tokens.get("1234").then(function(token) {
-                try {
-                    should.not.exist(token);
-                    sessionStorageModule.delete.calledWith("1234").should.be.true;
                     done();
                 } catch(err) {
                     done(err);

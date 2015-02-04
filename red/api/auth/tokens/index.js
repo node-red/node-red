@@ -50,15 +50,7 @@ module.exports = {
         sessionModule.init(settings);
     },
     get: function(token) {
-        return sessionModule.get(token).then(function(session) {
-            if (session && session.accessExpires < Date.now()) {
-                return sessionModule.delete(token).then(function() {
-                    return null;
-                });
-            } else {
-                return session;
-            }
-        })
+        return sessionModule.get(token);
     },
     create: function(user,client,scope) {
         var accessToken = generateToken(128);
