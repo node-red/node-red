@@ -35,27 +35,4 @@ describe("Auth permissions", function() {
             permissions.hasPermission({permissions:"read"},"node.write").should.be.false;
         });
     });
-    
-    describe("needsPermission middleware", function() {
-        it('passes if no user on request',function(done) {
-            var needsPermission = permissions.needsPermission("*");
-            needsPermission({},null,function() {
-                done();
-            });
-        });
-        it('passes if user has required permission',function(done) {
-            var needsPermission = permissions.needsPermission("read");
-            needsPermission({user:{permissions:"read"}},null,function() {
-                done();
-            });
-        });
-        it('rejects if user does not have required permission',function(done) {
-            var needsPermission = permissions.needsPermission("write");
-            needsPermission({user:{permissions:"read"}},{send: function(code) {
-                code.should.equal(401);
-                done();
-            }},null);
-        });
-        
-    });
 });

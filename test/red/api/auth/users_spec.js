@@ -27,7 +27,8 @@ describe("Users", function() {
                 type:"credentials",
                 users:[{
                     username:"fred",
-                    password:"5f4dcc3b5aa765d61d8327deb882cf99", // 'password'
+                    password:'$2a$08$LpYMefvGZ3MjAfZGzcoyR.1BcfHh4wy4NpbN.cEny5aHnWOqjKOXK',
+                    // 'password' -> require('bcryptjs').hashSync('password', 8); 
                     permissions:"*"
                 }]
             });

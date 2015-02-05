@@ -23,7 +23,7 @@ var util = require("./util");
 var fs = require("fs");
 var settings = require("./settings");
 var credentials = require("./nodes/credentials");
-var permissions = require("./api/auth/permissions");
+var auth = require("./api/auth");
 
 var path = require('path');
 
@@ -52,7 +52,7 @@ var RED = {
     settings:settings,
     util: util,
     auth: {
-        needsPermission: permissions.needsPermission
+        needsPermission: auth.needsPermission
     },
     version: function () {
         var p = require(path.join(process.env.NODE_RED_HOME,"package.json"));

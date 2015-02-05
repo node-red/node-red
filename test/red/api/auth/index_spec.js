@@ -27,59 +27,6 @@ var settings = require("../../../../red/settings");
 
 
 describe("api auth middleware",function() {
-    describe("authenticate",function() {
-        it("does not trigger on auth paths", sinon.test(function(done) {
-            this.stub(passport,"authenticate",function() {
-                return function() {
-                    settings.reset();
-                    done(new Error("authentication not applied to auth path"));
-                }
-            });
-            settings.init({adminAuth:{}});
-            var req = {
-                originalUrl: "/auth/token"
-            };
-            auth.authenticate(req,null,function() {
-                settings.reset();
-                done();
-            });
-             
-        }));
-        it("does trigger on non-auth paths", sinon.test(function(done) {
-            this.stub(passport,"authenticate",function() {
-                return function() {
-                    settings.reset();
-                    done();
-                }
-            });
-            settings.init({adminAuth:{}});
-            var req = {
-                originalUrl: "/"
-            };
-            auth.authenticate(req,null,function() {
-                settings.reset();
-                done(new Error("authentication applied to non-auth path"));
-            });
-             
-        }));
-        it("does not trigger on non-auth paths with auth disabled", sinon.test(function(done) {
-            this.stub(passport,"authenticate",function() {
-                return function() {
-                    settings.reset();
-                    done(new Error("authentication applied when disabled"));
-                }
-            });
-            settings.init({});
-            var req = {
-                originalUrl: "/"
-            };
-            auth.authenticate(req,null,function() {
-                settings.reset();
-                done();
-            });
-             
-        }));
-    });
     
     describe("ensureClientSecret", function() {
         it("leaves client_secret alone if not present",function(done) {

@@ -19,18 +19,6 @@ var util = require('util');
 var readRE = /^((.+)\.)?read$/
 var writeRE = /^((.+)\.)?write$/
 
-function needsPermission(perm) {
-    return function(req,res,next) {
-        if (!req.user) {
-            return next();
-        }
-        if (hasPermission(req.user,perm)) {
-            return next();
-        }
-        return res.send(401);
-    }
-}
-
 function hasPermission(user,permission) {
     if (!user.permissions) {
         return false;
@@ -45,6 +33,4 @@ function hasPermission(user,permission) {
 
 module.exports = {
     hasPermission: hasPermission,
-    needsPermission: needsPermission,
-    
 }

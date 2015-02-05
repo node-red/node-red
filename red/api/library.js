@@ -17,10 +17,11 @@
 var redApp = null;
 var storage = require("../storage");
 var log = require("../log");
+var needsPermission = require("./auth").needsPermission;
 
 function createLibrary(type) {
     if (redApp) {
-        redApp.get(new RegExp("/library/"+type+"($|\/(.*))"),function(req,res) {
+        redApp.get(new RegExp("/library/"+type+"($|\/(.*))"),needsPermission("library.read"),function(req,res) {
             var path = req.params[1]||"";
             storage.getLibraryEntry(type,path).then(function(result) {
                 if (typeof result === "string") {
@@ -42,7 +43,7 @@ function createLibrary(type) {
             });
         });
         
-        redApp.post(new RegExp("/library/"+type+"\/(.*)"),function(req,res) {
+        redApp.post(new RegExp("/library/"+type+"\/(.*)"),needsPermission("library.write"),function(req,res) {
             var path = req.params[0];
             var fullBody = '';
             req.on('data', function(chunk) {

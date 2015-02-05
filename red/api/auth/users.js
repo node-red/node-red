@@ -15,30 +15,8 @@
 **/
 
 var when = require("when");
-var crypto = require("crypto");
 var util = require("util");
-/*
-    adminAuth: {
-        type: "credentials",
-        users: [{
-            username: "nol",
-            password: "5f4dcc3b5aa765d61d8327deb882cf99" // password
-            permissions: "* read write"
-        }],
-        default: {
-            permissions: "* read write"
-        }
-    },
-    
-    adminAuth: {
-        type: "credentials",
-        users: function(username) {return when.resolve(user)},
-        authenticate: function(username,password) { return when.resolve(user);}
-        default: function() { return when.resolve(defaultUser) }
-    }
-*/
-
-//{username:"nick",password:crypto.createHash('md5').update("foo",'utf8').digest('hex')}
+var bcrypt = require('bcryptjs');
 
 var users = {};
 var passwords = {};
@@ -47,10 +25,11 @@ var defaultUser = null;
 function authenticate(username,password) {
     var user = users[username];
     if (user) {
-        var pass = crypto.createHash('md5').update(password,'utf8').digest('hex');
-        if (pass == passwords[username]) {
-            return when.resolve(user);
-        }
+        return when.promise(function(resolve,reject) {
+            bcrypt.compare(password, passwords[username], function(err, res) {
+                resolve(res?user:null);
+            });
+        });
     }
     return when.resolve(null);
 }

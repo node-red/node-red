@@ -26,7 +26,7 @@ var library = require("./library");
 var info = require("./info");
 
 var auth = require("./auth");
-var needsPermission = require("./auth/permissions").needsPermission;
+var needsPermission = auth.needsPermission;
 
 var settings = require("../settings");
 
@@ -38,7 +38,7 @@ var errorHandler = function(err,req,res,next) {
 
 function init(adminApp) {
     
-    auth.init();
+    auth.init(settings);
     
     // Editor
     if (!settings.disableEditor) {
@@ -55,7 +55,6 @@ function init(adminApp) {
     if (settings.adminAuth) {
         //TODO: all passport references ought to be in ./auth
         adminApp.use(passport.initialize());
-        adminApp.use(auth.authenticate);
         adminApp.post("/auth/token",
             auth.ensureClientSecret,
             auth.authenticateClient,

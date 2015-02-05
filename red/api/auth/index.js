@@ -20,8 +20,9 @@ var oauth2orize = require("oauth2orize");
 var strategies = require("./strategies");
 var Tokens = require("./tokens");
 var Users = require("./users");
+var permissions = require("./permissions");
 
-var settings = require("../../settings");
+var settings = null;
 var log = require("../../log");
 
 
@@ -33,22 +34,29 @@ var server = oauth2orize.createServer();
 
 server.exchange(oauth2orize.exchange.password(strategies.passwordTokenExchange));
 
-function init() {
+function init(_settings) {
+    settings = _settings;
     if (settings.adminAuth) {
         Users.init(settings.adminAuth);
         Tokens.init(settings)
     }
 }
 
-function authenticate(req,res,next) {
-    if (settings.adminAuth) {
-        if (/^\/auth\/.*/.test(req.originalUrl)) {
-            next();
+function needsPermission(permission) {
+    return function(req,res,next) {
+        if (settings.adminAuth) {
+            return passport.authenticate(['bearer','anon'],{ session: false })(req,res,function() {
+                if (!req.user) {
+                    return next();
+                }
+                if (permissions.hasPermission(req.user,permission)) {
+                    return next();
+                }
+                return res.send(401);
+            });
         } else {
-            return passport.authenticate(['bearer','anon'], { session: false })(req,res,next); 
+            next();
         }
-    } else {
-        next();
     }
 }
 
@@ -83,7 +91,7 @@ function revoke(req,res) {
 
 module.exports = {
     init: init,
-    authenticate: authenticate,
+    needsPermission: needsPermission,
     ensureClientSecret: ensureClientSecret,
     authenticateClient: authenticateClient,
     getToken: getToken,
