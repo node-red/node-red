@@ -183,7 +183,7 @@
                 handle:".node-input-rule-handle",
                 cursor: "move"
             });
-            $( "#node-input-rule-container" ).disableSelection();
+            $( "#node-input-rule-container .node-input-rule-handle" ).disableSelection();
 
             $( "#dialog" ).on("dialogresize", switchDialogResize);
             $( "#dialog" ).one("dialogopen", function(ev) {
