@@ -23,17 +23,19 @@ var util = require("util");
         users: [{
             username: "nol",
             password: "5f4dcc3b5aa765d61d8327deb882cf99" // password
+            permissions: "* read write"
         }],
-        default: {}
+        default: {
+            permissions: "* read write"
+        }
     },
     
     adminAuth: {
         type: "credentials",
-        api: {
-            get: function(username) {}
-            authenticate: function(username,password) {}
-            default: function() {}
-        }
+        users: function(username) {return when.resolve(user)},
+        authenticate: function(username,password) { return when.resolve(user);}
+        default: function() { return when.resolve(defaultUser) }
+    }
 */
 
 //{username:"nick",password:crypto.createHash('md5').update("foo",'utf8').digest('hex')}
@@ -95,11 +97,15 @@ function init(config) {
         }
     }
     if (config.default) {
-        api.default = function() {
-            return when.resolve({
-                "anonymous": true,
-                "permissions":config.default.permissions
-            });
+        if (typeof config.default === "function") {
+            api.default = config.default;
+        } else {
+            api.default = function() {
+                return when.resolve({
+                    "anonymous": true,
+                    "permissions":config.default.permissions
+                });
+            }
         }
     } else {
         api.default = getDefaultUser;
