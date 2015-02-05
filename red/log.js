@@ -96,6 +96,16 @@ var log = module.exports = {
     warn: function(msg) {
         log.log({level:log.WARN,msg:msg});
     },
+    error: function(msg) {
+        log.log({level:log.ERROR,msg:msg});
+    },
+    trace: function(msg) {
+        log.log({level:log.TRACE,msg:msg});
+    },
+    debug: function(msg) {
+        log.log({level:log.DEBUG,msg:msg});
+    },
+    
     
     metric: function() {
         return metricsEnabled;
