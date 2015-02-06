@@ -103,21 +103,24 @@
             toggle: "active",
             onclick: function() {
                 var label = this.name||"debug";
-                d3.xhr("debug/"+this.id+"/"+(this.active?"enable":"disable")).post(function(err,resp) {
-                    if (err) {
-                        if (err.status == 404) {
+                $.ajax({
+                    url: "debug/"+this.id+"/"+(this.active?"enable":"disable"),
+                    type: "POST",
+                    success: function(resp, textStatus, xhr) {
+                        if (xhr.status == 200) {
+                            RED.notify("Successfully activated: "+label,"success");
+                        } else if (xhr.status == 201) {
+                            RED.notify("Successfully deactivated: "+label,"success");
+                        }
+                    },
+                    error: function(jqXHR,textStatus,errorThrown) {
+                        if (jqXHR.status == 404) {
                             RED.notify("<strong>Error</strong>: debug node not deployed","error");
-                        } else if (err.status == 0) {
+                        } else if (jqXHR.status == 0) {
                             RED.notify("<strong>Error</strong>: no response from server","error");
                         } else {
-                            RED.notify("<strong>Error</strong>: unexpected error: ("+err.status+")"+err.response,"error");
+                            RED.notify("<strong>Error</strong>: unexpected error: ("+err.status+") "+err.response,"error");
                         }
-                    } else if (resp.status == 200) {
-                        RED.notify("Successfully activated: "+label,"success");
-                    } else if (resp.status == 201) {
-                        RED.notify("Successfully deactivated: "+label,"success");
-                    } else {
-                        RED.notify("<strong>Error</strong>: unexpected response: ("+resp.status+") "+resp.response,"error");
                     }
                 });
             }

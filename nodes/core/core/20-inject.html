@@ -492,7 +492,7 @@
                         } else if (jqXHR.status == 0) {
                             RED.notify("<strong>Error</strong>: no response from server","error");
                         } else {
-                            RED.notify("<strong>Error</strong>: unexpected error: ("+jqXHR.status+")"+textStatus,"error");
+                            RED.notify("<strong>Error</strong>: unexpected error: ("+jqXHR.status+") "+textStatus,"error");
                         }
                     }
                 });

@@ -274,11 +274,11 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType("rpi-mouse",PiMouseNode);
 
-    RED.httpAdmin.get('/rpi-gpio/:id',function(req,res) {
-        res.send( JSON.stringify(pitype) );
+    RED.httpAdmin.get('/rpi-gpio/:id', RED.auth.needsPermission('rpi-gpio.read'), function(req,res) {
+        res.json(pitype);
     });
 
-    RED.httpAdmin.get('/rpi-pins/:id',function(req,res) {
-        res.send( JSON.stringify(pinsInUse) );
+    RED.httpAdmin.get('/rpi-pins/:id', RED.auth.needsPermission('rpi-gpio.read'), function(req,res) {
+        res.json(pinsInUse);
     });
 }

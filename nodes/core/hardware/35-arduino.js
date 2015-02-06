@@ -150,12 +150,9 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType("arduino out",DuinoNodeOut);
 
-    RED.httpAdmin.get("/arduinoports",function(req,res) {
+    RED.httpAdmin.get("/arduinoports", RED.auth.needsPermission("arduino.read"), function(req,res) {
         ArduinoFirmata.list(function (err, ports) {
-            //console.log(JSON.stringify(ports));
-            res.writeHead(200, {'Content-Type': 'text/plain'});
-            res.write(JSON.stringify(ports));
-            res.end();
+            res.json(ports);
         });
     });
 }

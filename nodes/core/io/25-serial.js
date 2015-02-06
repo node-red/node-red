@@ -299,12 +299,9 @@ module.exports = function(RED) {
         }
     }();
 
-    RED.httpAdmin.get("/serialports",function(req,res) {
+    RED.httpAdmin.get("/serialports", RED.auth.needsPermission('serial.read'), function(req,res) {
         serialp.list(function (err, ports) {
-            //console.log(JSON.stringify(ports));
-            res.writeHead(200, {'Content-Type': 'text/plain'});
-            res.write(JSON.stringify(ports));
-            res.end();
+            res.json(ports);
         });
     });
 }

@@ -17,6 +17,7 @@
 var when = require("when");
 
 var log = require("../log");
+var needsPermission = require("../api/auth").needsPermission;
 
 var credentialCache = {};
 var storage = null;
@@ -27,7 +28,7 @@ var redApp = null;
  * Adds an HTTP endpoint to allow look up of credentials for a given node id.
  */
 function registerEndpoint(type) {
-    redApp.get('/credentials/' + type + '/:id', function (req, res) {
+    redApp.get('/credentials/' + type + '/:id', needsPermission(type+".read"), function (req, res) {
         // TODO: This could be a generic endpoint with the type value
         //       parameterised.
         //
