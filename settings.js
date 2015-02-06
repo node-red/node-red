@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,6 +133,13 @@ module.exports = {
         // bonescript:require('bonescript'),
         // arduino:require('duino')
     },
+    
+    
+    // The following property can be used to order the categories in the editor
+    // palette. If a node's category is not in the list, the category will get
+    // added to the end of the palette.
+    // If not set, the following default order is used:
+    //paletteCategories: ['input', 'output', 'function', 'subflows', 'social', 'storage', 'analysis', 'advanced'],
 
     // Configure the logging output
     logging: {

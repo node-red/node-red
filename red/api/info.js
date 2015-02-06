@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  **/
 var settings = require('../settings');
 
+var util = require('util');
+
 module.exports = {
     settings: function(req,res) {
         var safeSettings = {
@@ -22,6 +24,11 @@ module.exports = {
             version: settings.version,
             user: req.user
         };
+        
+        if (util.isArray(settings.paletteCategories)) {
+            safeSettings.paletteCategories = settings.paletteCategories;
+        }
+        
         res.json(safeSettings);
     }
 }

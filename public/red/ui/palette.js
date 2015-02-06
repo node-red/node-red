@@ -21,8 +21,8 @@ RED.palette = (function() {
 
     function createCategoryContainer(category){
         var escapedCategory = category.replace(" ","_");
-        $("#palette-container").append('<div class="palette-category">'+
-            '<div id="header-'+category+'" class="palette-header"><i class="expanded fa fa-caret-down"></i><span>'+category.replace("_"," ")+'</span></div>'+
+        var catDiv = $("#palette-container").append('<div id="palette-container-'+category+'" class="palette-category hide">'+
+            '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-caret-down"></i><span>'+category.replace("_"," ")+'</span></div>'+
             '<div class="palette-content" id="palette-base-category-'+category+'">'+
             '<div id="palette-'+category+'-input"></div>'+
             '<div id="palette-'+category+'-output"></div>'+
@@ -30,7 +30,7 @@ RED.palette = (function() {
             '</div>'+
             '</div>');
 
-        $("#header-"+category).on('click', function(e) {
+        $("#palette-header-"+category).on('click', function(e) {
             $(this).next().slideToggle();
             $(this).children("i").toggleClass("expanded");
         });
@@ -151,6 +151,7 @@ RED.palette = (function() {
             if ($("#palette-base-category-"+rootCategory).length === 0) {
                 createCategoryContainer(rootCategory);
             }
+            $("#palette-container-"+rootCategory).show();
 
             if ($("#palette-"+category).length === 0) {
                 $("#palette-base-category-"+rootCategory).append('<div id="palette-'+category+'"></div>');
@@ -241,7 +242,12 @@ RED.palette = (function() {
 
     function init() {
         $(".palette-spinner").show();
-        core.forEach(createCategoryContainer);
+        if (RED.settings.paletteCategories) {
+            RED.settings.paletteCategories.forEach(createCategoryContainer);
+        } else {
+            core.forEach(createCategoryContainer);
+        }
+        
         $("#palette-search-input").focus(function(e) {
             RED.keyboard.disable();
         });
