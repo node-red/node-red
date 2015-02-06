@@ -31,17 +31,18 @@
 <body spellcheck="false">
 <div id="header">
     <span class="logo"><img src="node-red.png"> <span>Node-RED</span></span>
-    <ul class="header-toolbar">
+    <ul class="header-toolbar hide">
         <li><span class="deploy-button-group button-group">
                 <a id="btn-deploy" class="action-deploy disabled" href="#"><img id="btn-icn-deploy" src="images/deploy-full-o.png"> <span>Deploy</span></a>
                 <a id="btn-deploy-options"  data-toggle="dropdown"  class="" href="#"><i class="fa fa-caret-down"></i></a>
             </span></li>
+        <li><a id="btn-usermenu" class="button hide" data-toggle="dropdown" href="#"><i class="fa fa-user"></i></a></li>
         <li><a id="btn-sidemenu" class="button" data-toggle="dropdown" href="#"><i class="fa fa-bars"></i></a></li>
     <ul>
 </div>
-<div id="main-container" class="sidebar-closed">
+<div id="main-container" class="sidebar-closed hide">
     <div id="palette">
-        <img src="spin.svg" class="palette-spinner"/>
+        <img src="spin.svg" class="palette-spinner hide"/>
         <div id="palette-container" class="palette-scroll">
         </div>
         <div id="palette-search">
@@ -80,6 +81,7 @@
 
 <div id="notifications"></div>
 <div id="dropTarget"><div>Drop the flow here<br/><i class="fa fa-download"></i></div></div>
+<div id="shade"></div>
 
 <div id="dialog" class="hide"><form id="dialog-form" class="form-horizontal"></form></div>
 <div id="node-config-dialog" class="hide"><form id="dialog-config-form" class="form-horizontal"></form><div class="form-tips" id="node-config-dialog-user-count"></div></div>
@@ -246,12 +248,13 @@
 <script src="orion/built-editor.min.js"></script>
 <script src="d3.v3.min.js"></script>
 <script src="red/main.js"></script>
+<script src="red/settings.js"></script>
+<script src="red/user.js"></script>
 <script src="red/comms.js"></script>
 <script src="red/ui/state.js"></script>
 <script src="red/nodes.js"></script>
 <script src="red/history.js"></script>
 <script src="red/validators.js"></script>
-<script src="red/settings.js"></script>
 <script src="red/ui/menu.js"></script>
 <script src="red/ui/keyboard.js"></script>
 <script src="red/ui/tabs.js"></script>

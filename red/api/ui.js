@@ -55,12 +55,5 @@ module.exports = {
             res.sendfile(defaultIcon);
         }
     },
-    settings: function(req,res) {
-        var safeSettings = {
-            httpNodeRoot: settings.httpNodeRoot,
-            version: settings.version
-        };
-        res.json(safeSettings);
-    },
     editor: express.static(__dirname + '/../../public')
 };

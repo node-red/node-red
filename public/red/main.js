@@ -22,34 +22,6 @@ var RED = (function() {
     }
     var deploymentType = "full";
     
-    
-    function hideDropTarget() {
-        $("#dropTarget").hide();
-        RED.keyboard.remove(/* ESCAPE */ 27);
-    }
-
-    $('#chart').on("dragenter",function(event) {
-        if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
-            $("#dropTarget").css({display:'table'});
-            RED.keyboard.add(/* ESCAPE */ 27,hideDropTarget);
-        }
-    });
-
-    $('#dropTarget').on("dragover",function(event) {
-        if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
-            event.preventDefault();
-        }
-    })
-    .on("dragleave",function(event) {
-        hideDropTarget();
-    })
-    .on("drop",function(event) {
-        var data = event.originalEvent.dataTransfer.getData("text/plain");
-        hideDropTarget();
-        RED.view.importNodes(data);
-        event.preventDefault();
-    });
-
     function save(force) {
         if (RED.view.dirty()) {
             //$("#debug-tab-clear").click();  // uncomment this to auto clear debug on deploy
@@ -290,14 +262,13 @@ var RED = (function() {
 
         dialog.modal();
     }
-
     
     function changeDeploymentType(type) {
         deploymentType = type;
         $("#btn-deploy img").attr("src",deploymentTypes[type].img);
     }
-    
-    $(function() {
+
+    function loadEditor() {
         RED.menu.init({id:"btn-sidemenu",
             options: [
                 {id:"btn-sidebar",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
@@ -339,23 +310,68 @@ var RED = (function() {
             ]
         });
         
-        RED.menu.init({id:"workspace-subflow-edit-menu",
-            options: [
-                {id:"btn-subflow-add-input",label:"Add Input", onselect:function() { }},
-                {id:"btn-subflow-add-output",label:"Add Output", onselect:function() { }},
-                {id:"btn-subflow-edit-name",label:"Edit Name", onselect:function() { }},
-                {id:"btn-subflow-delete",label:"Delete", onselect:function() { }},
-            ]
-        });
-
+        if (RED.settings.user) {
+            RED.menu.init({id:"btn-usermenu",
+                options: []
+            });
+            
+            var updateUserMenu = function() {
+                $("#btn-usermenu-submenu li").remove();
+                if (RED.settings.user.anonymous) {
+                    RED.menu.addItem("btn-usermenu",{
+                        id:"btn-login",
+                        label:"Login",
+                        onselect: function() {
+                            RED.user.login({cancelable:true},function() {
+                                RED.settings.load(function() {
+                                    RED.notify("Logged in as "+RED.settings.user.username,"success");
+                                    updateUserMenu();
+                                });
+                            });
+                        }
+                    });
+                } else {
+                    RED.menu.addItem("btn-usermenu",{
+                        id:"btn-username",
+                        label:"<b>"+RED.settings.user.username+"</b>"
+                    });
+                    RED.menu.addItem("btn-usermenu",{
+                        id:"btn-logout",
+                        label:"Logout",
+                        onselect: function() {
+                            RED.user.logout();
+                        }
+                    });
+                }
+                    
+            }
+            updateUserMenu();
+        } else {
+            $("#btn-usermenu").parent().hide();
+        }
+    
+        $("#main-container").show();
+        $(".header-toolbar").show();
+        
+        RED.library.init();
+        RED.palette.init();
+        RED.sidebar.init();
+        RED.view.init();
+        
         RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
-        loadSettings();
         RED.comms.connect();
+        loadNodeList();
+    }
+
+    $(function() {
+            
+        if ((window.location.hostname !== "localhost") && (window.location.hostname !== "127.0.0.1")) {
+            document.title = "Node-RED : "+window.location.hostname;
+        }
+        
+        RED.settings.init(loadEditor);
     });
 
-    if ((window.location.hostname !== "localhost") && (window.location.hostname !== "127.0.0.1")) {
-        document.title = "Node-RED : "+window.location.hostname;
-    }
 
     return {
     };

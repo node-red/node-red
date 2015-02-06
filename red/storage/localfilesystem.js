@@ -262,7 +262,6 @@ var localfilesystem = {
         return writeFile(globalSettingsFile,JSON.stringify(settings,null,1));
     },
     
-    
     getAllFlows: function() {
         return listFiles(libFlowsDir);
     },

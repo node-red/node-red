@@ -139,6 +139,12 @@ RED.menu = (function() {
     function createMenu(options) {
 
         var button = $("#"+options.id);
+
+        //button.click(function(event) {
+        //    $("#"+options.id+"-submenu").show();
+        //    event.preventDefault();
+        //});
+        
         
         var topMenu = $("<ul/>",{id:options.id+"-submenu", class:"dropdown-menu pull-right"}).insertAfter(button);
 

@@ -36,8 +36,6 @@ RED.palette = (function() {
         });
     }
 
-    core.forEach(createCategoryContainer);
-
     function setLabel(type, el,label) {
         var nodeWidth = 80;
         var nodeHeight = 25;
@@ -241,32 +239,37 @@ RED.palette = (function() {
         });
     }
 
-    $("#palette-search-input").focus(function(e) {
-        RED.keyboard.disable();
-    });
-    $("#palette-search-input").blur(function(e) {
-        RED.keyboard.enable();
-    });
-
-    $("#palette-search-clear").on("click",function(e) {
-        e.preventDefault();
-        $("#palette-search-input").val("");
-        filterChange();
-        $("#palette-search-input").focus();
-    });
-
-    $("#palette-search-input").val("");
-    $("#palette-search-input").on("keyup",function() {
-        filterChange();
-    });
-
-    $("#palette-search-input").on("focus",function() {
-        $("body").one("mousedown",function() {
-            $("#palette-search-input").blur();
+    function init() {
+        $(".palette-spinner").show();
+        core.forEach(createCategoryContainer);
+        $("#palette-search-input").focus(function(e) {
+            RED.keyboard.disable();
         });
-    });
+        $("#palette-search-input").blur(function(e) {
+            RED.keyboard.enable();
+        });
+    
+        $("#palette-search-clear").on("click",function(e) {
+            e.preventDefault();
+            $("#palette-search-input").val("");
+            filterChange();
+            $("#palette-search-input").focus();
+        });
+    
+        $("#palette-search-input").val("");
+        $("#palette-search-input").on("keyup",function() {
+            filterChange();
+        });
+    
+        $("#palette-search-input").on("focus",function() {
+            $("body").one("mousedown",function() {
+                $("#palette-search-input").blur();
+            });
+        });
+    }
 
     return {
+        init: init,
         add:addNodeType,
         remove:removeNodeType,
         hide:hideNodeType,

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 Antoine Aflalo
+ * Copyright 2014 IBM, Antoine Aflalo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 
 RED.settings = (function () {
+    
+    var loadedSettings = {};
+        
     var hasLocalStorage = function () {
         try {
             return 'localStorage' in window && window['localStorage'] !== null;
@@ -51,14 +54,37 @@ RED.settings = (function () {
     };
 
     var setProperties = function(data) {
-        for(var prop in data) {
-            if(data.hasOwnProperty(prop)) {
+        for (var prop in loadedSettings) {
+            if (loadedSettings.hasOwnProperty(prop) && RED.settings.hasOwnProperty(prop)) {
+                delete RED.settings[prop];
+            }
+        }
+        for (prop in data) {
+            if (data.hasOwnProperty(prop)) {
                 RED.settings[prop] = data[prop];
             }
         }
+        loadedSettings = data;
     };
 
-    var init = function (callback) {
+    var init = function (done) {
+        $.ajaxSetup({
+            beforeSend: function(jqXHR,settings) {
+                // Only attach auth header for requests to relative paths
+                if (!/^\s*(https?:|\/|\.)/.test(settings.url)) {
+                    var auth_tokens = RED.settings.get("auth-tokens");
+                    if (auth_tokens) {
+                        jqXHR.setRequestHeader("authorization","bearer "+auth_tokens.access_token);
+                    }
+                }
+            }
+        });
+
+        load(done);
+    }
+    
+    var load = function(done) {
+        
         $.ajax({
             headers: {
                 "Accept": "application/json"
@@ -68,18 +94,29 @@ RED.settings = (function () {
             url: 'settings',
             success: function (data) {
                 setProperties(data);
+                if (RED.settings.user && RED.settings.user.anonymous) {
+                    RED.settings.remove("auth-tokens");
+                }
                 console.log("Node-RED: " + data.version);
-                callback();
+                done();
+            },
+            error: function(jqXHR,textStatus,errorThrown) {
+                if (jqXHR.status === 401) {
+                    RED.user.login(function() { load(done); });
+                 } else {
+                     console.log("Unexpected error:",jqXHR.status,textStatus);
+                 }
             }
         });
     };
 
 
     return {
+        init: init,
+        load: load,
         set: set,
         get: get,
-        remove: remove,
-        init : init
+        remove: remove
     }
 })
 ();

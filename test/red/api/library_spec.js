@@ -24,6 +24,7 @@ var app = express();
 var RED = require("../../../red/red.js");
 var storage = require("../../../red/storage");
 var library = require("../../../red/api/library");
+var auth = require("../../../red/api/auth");
 
 describe("library api", function() {
         
@@ -166,6 +167,7 @@ describe("library api", function() {
             app = express();
             app.use(express.json());
             library.init(app);
+            auth.init({});
             RED.library.register("test");
         });
 

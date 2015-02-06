@@ -29,7 +29,10 @@ body {
     background: #000;
     box-sizing: border-box;
     padding: 0px 0px 0px 20px;
+    color: #C7C7C7;
+    font-size: 14px;
 }
+
 
 #dropTarget {
     position: absolute;
@@ -66,7 +69,6 @@ span.logo {
     font-size: 30px;
     line-height: 30px;
     text-decoration: none;
-    color: #C7C7C7;
 }
 span.logo span {
     vertical-align: middle;
@@ -83,10 +85,13 @@ span.logo img {
 }
 
 #header ul.header-toolbar > li {
-    display: inline-block;
     padding: 0;
     margin: 0;
     position: relative;
+}
+
+#header ul.header-toolbar > li {
+    display: inline-block;
 }
 
 .button {
@@ -179,7 +184,7 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
 
 .button-group {
     display: inline-block;
-    margin: auto 10px;
+    margin: auto 15px;
     vertical-align: middle;
     background: #555;
     clear: both;
@@ -197,16 +202,16 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
 .button-group > a:last-child {
 }
 
-#btn-sidemenu {
+#header .button {
     font-size: 20px !important;
 }
-#btn-sidemenu:active, #btn-sidemenu.active {
+#header .button:active, #header .button.active {
     background: #121212;
 }
 #header .button:focus {
     outline: none;
 }
-li.open #btn-sidemenu {
+#header li.open .button {
     background: #121212;
     border-color: #121212;
 }
@@ -1235,6 +1240,11 @@ i.spinner {
     color: #666;
 }
 
+#header ul.dropdown-menu > li.disabled:hover > a,
+#header ul.dropdown-menu > li.disabled:focus > a {
+    background: none !important;
+}
+
 /* Deploy menu customisations */
 #header ul#btn-deploy-options-submenu {
     width: 300px !important;
@@ -1250,4 +1260,10 @@ i.spinner {
 }
 #header ul#btn-deploy-options-submenu li a > i.fa {
     display: none !important;
+}
+
+/* User menu customisations */
+#header ul#btn-usermenu-submenu li a#btn-username > .menu-label {
+    font-size: 16px;
+    color: #fff;
 }

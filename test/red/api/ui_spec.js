@@ -20,7 +20,6 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 
-var settings = require("../../../red/settings");
 var events = require("../../../red/events");
 var ui = require("../../../red/api/ui");
 
@@ -130,39 +129,6 @@ describe("ui api", function() {
                     }
                     Buffer.isBuffer(res.body).should.be.true;
                     compareBuffers(res.body,testIcon);
-                    done();
-                });
-        });
-    });
-    
-    describe("settings handler", function() {
-        before(function() {
-            var userSettings = {
-                foo: 123,
-                httpNodeRoot: "testHttpNodeRoot",
-                version: "testVersion"
-            }
-            settings.init(userSettings);
-            app = express();
-            app.get("/settings",ui.settings);
-            //app.use("/",ui.editor);
-        });
-        
-        after(function() {
-            settings.reset();
-        });
-        
-        it('returns the filtered settings', function(done) {
-            request(app)
-                .get("/settings")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.have.property("httpNodeRoot","testHttpNodeRoot");
-                    res.body.should.have.property("version","testVersion");
-                    res.body.should.not.have.property("foo",123);
                     done();
                 });
         });

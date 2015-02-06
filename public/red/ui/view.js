@@ -365,7 +365,8 @@ RED.view = (function() {
         RED.history.push({t:'add',workspaces:[ws],dirty:dirty});
         RED.view.dirty(true);
     }
-    $(function() {
+    
+    function init() {
         $('#btn-workspace-add-tab').on("click",addWorkspace);
         
         RED.menu.setAction('btn-workspace-add',addWorkspace);
@@ -375,7 +376,7 @@ RED.view = (function() {
         RED.menu.setAction('btn-workspace-delete',function() {
             deleteWorkspace(activeWorkspace);
         });
-    });
+    }
 
     function deleteWorkspace(id) {
         if (workspace_tabs.count() == 1) {
@@ -2051,8 +2052,36 @@ RED.view = (function() {
         }
 
     });
+    
+    function hideDropTarget() {
+        $("#dropTarget").hide();
+        RED.keyboard.remove(/* ESCAPE */ 27);
+    }
 
+    $('#chart').on("dragenter",function(event) {
+        if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
+            $("#dropTarget").css({display:'table'});
+            RED.keyboard.add(/* ESCAPE */ 27,hideDropTarget);
+        }
+    });
+
+    $('#dropTarget').on("dragover",function(event) {
+        if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
+            event.preventDefault();
+        }
+    })
+    .on("dragleave",function(event) {
+        hideDropTarget();
+    })
+    .on("drop",function(event) {
+        var data = event.originalEvent.dataTransfer.getData("text/plain");
+        hideDropTarget();
+        RED.view.importNodes(data);
+        event.preventDefault();
+    });
+    
     return {
+        init: init,
         state:function(state) {
             if (state == null) {
                 return mouse_mode

@@ -23,6 +23,7 @@
     "dependencies": {
         "express": "3.17.2",
         "when": "3.4.6",
+        "bcryptjs": "2.1.0",
         "nopt": "3.0.1",
         "mqtt": "0.3.x",
         "ws": "0.4.32",
@@ -49,7 +50,11 @@
         "is-utf8":"0.2.0",
         "serialport":"1.4.10",
         "feedparser":"0.19.2",
-        "fs.notify":"0.0.4"
+        "fs.notify":"0.0.4",
+        "passport":"0.2.1",
+        "passport-http-bearer":"1.0.1",
+        "passport-oauth2-client-password":"0.1.2",
+        "oauth2orize":"1.0.1"
     },
     "devDependencies": {
         "grunt": "0.4.5",

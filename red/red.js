@@ -23,6 +23,7 @@ var util = require("./util");
 var fs = require("fs");
 var settings = require("./settings");
 var credentials = require("./nodes/credentials");
+var auth = require("./api/auth");
 
 var path = require('path');
 
@@ -50,6 +51,9 @@ var RED = {
     comms: comms,
     settings:settings,
     util: util,
+    auth: {
+        needsPermission: auth.needsPermission
+    },
     version: function () {
         var p = require(path.join(process.env.NODE_RED_HOME,"package.json"));
         if (fs.existsSync(path.join(process.env.NODE_RED_HOME,".git"))) {

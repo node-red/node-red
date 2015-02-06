@@ -32,8 +32,13 @@ RED.sidebar.info = (function() {
     content.style.paddingLeft = "4px";
     content.style.paddingRight = "4px";
 
-    RED.sidebar.addTab("info",content);
-
+    function show() {
+        if (!RED.sidebar.containsTab("info")) {
+            RED.sidebar.addTab("info",content,false);
+        }
+        RED.sidebar.show("info");
+    }
+    
     function jsonFilter(key,value) {
         if (key === "") {
             return value;
@@ -116,6 +121,7 @@ RED.sidebar.info = (function() {
     }
 
     return {
+        show: show,
         refresh:refresh,
         clear: function() {
             $("#tab-info").html("");

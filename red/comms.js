@@ -21,6 +21,7 @@ var server;
 var settings;
 
 var wsServer;
+var pendingConnections = [];
 var activeConnections = [];
 
 var retained = {};
@@ -34,53 +35,92 @@ function init(_server,_settings) {
     settings = _settings;
 }
 
-function start() {
 
+function start() {
+    var Tokens = require("./api/auth/tokens");
+    var Users = require("./api/auth/users");
+    var Permissions = require("./api/auth/permissions");
+    
     if (!settings.disableEditor) {
-        var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
-        var path = settings.httpAdminRoot || "/";
-        path = path + (path.slice(-1) == "/" ? "":"/") + "comms";
-        wsServer = new ws.Server({server:server,path:path});
-        
-        wsServer.on('connection',function(ws) {
-            activeConnections.push(ws);
-            ws.on('close',function() {
-                for (var i=0;i<activeConnections.length;i++) {
-                    if (activeConnections[i] === ws) {
-                        activeConnections.splice(i,1);
-                        break;
+        Users.default().then(function(anonymousUser) {
+            var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
+            var path = settings.httpAdminRoot || "/";
+            path = path + (path.slice(-1) == "/" ? "":"/") + "comms";
+            wsServer = new ws.Server({server:server,path:path});
+            
+            wsServer.on('connection',function(ws) {
+                var pendingAuth = (settings.adminAuth != null);
+                if (!pendingAuth) {
+                    activeConnections.push(ws);
+                } else {
+                    pendingConnections.push(ws);
+                }
+                ws.on('close',function() {
+                    removeActiveConnection(ws);
+                    removePendingConnection(ws);
+                });
+                ws.on('message', function(data,flags) {
+                    var msg = null;
+                    try {
+                        msg = JSON.parse(data);
+                    } catch(err) {
+                        log.warn("comms received malformed message : "+err.toString());
+                        return;
                     }
-                }
+                    if (!pendingAuth) {
+                        if (msg.subscribe) {
+                            handleRemoteSubscription(ws,msg.subscribe);
+                        }
+                    } else {
+                        var completeConnection = function(user,sendAck) {
+                            if (!user || !Permissions.hasPermission(user,"status.read")) {
+                                ws.close();
+                            } else {
+                                pendingAuth = false;
+                                removePendingConnection(ws);
+                                activeConnections.push(ws);
+                                if (sendAck) {
+                                    ws.send(JSON.stringify({auth:"ok"}));
+                                }
+                            }
+                        }
+                        if (msg.auth) {
+                            Tokens.get(msg.auth).then(function(client) {
+                                if (client) {
+                                    Users.get(client.user).then(function(user) {
+                                        completeConnection(user,true);
+                                    });
+                                } else {
+                                    completeConnection(null,false);
+                                }
+                            });
+                        } else {
+                            completeConnection(anonymousUser,false);
+                            //TODO: duplicated code - pull non-auth message handling out
+                            if (msg.subscribe) {
+                                handleRemoteSubscription(ws,msg.subscribe);
+                            }
+                        }
+                    }
+                });
+                ws.on('error', function(err) {
+                    log.warn("comms error : "+err.toString());
+                });
             });
-            ws.on('message', function(data,flags) {
-                var msg = null;
-                try {
-                    msg = JSON.parse(data);
-                } catch(err) {
-                    log.warn("comms received malformed message : "+err.toString());
-                    return;
-                }
-                if (msg.subscribe) {
-                    handleRemoteSubscription(ws,msg.subscribe);
-                }
+            
+            wsServer.on('error', function(err) {
+                log.warn("comms server error : "+err.toString());
             });
-            ws.on('error', function(err) {
-                log.warn("comms error : "+err.toString());
-            });
+             
+            lastSentTime = Date.now();
+            
+            heartbeatTimer = setInterval(function() {
+                var now = Date.now();
+                if (now-lastSentTime > webSocketKeepAliveTime) {
+                    publish("hb",lastSentTime);
+                }
+            }, webSocketKeepAliveTime);
         });
-        
-        wsServer.on('error', function(err) {
-            log.warn("comms server error : "+err.toString());
-        });
-         
-        lastSentTime = Date.now();
-        
-        heartbeatTimer = setInterval(function() {
-            var now = Date.now();
-            if (now-lastSentTime > webSocketKeepAliveTime) {
-                publish("hb",lastSentTime);
-            }
-        }, webSocketKeepAliveTime);
     }
 }
 
@@ -123,6 +163,22 @@ function handleRemoteSubscription(ws,topic) {
     }
 }
 
+function removeActiveConnection(ws) {
+    for (var i=0;i<activeConnections.length;i++) {
+        if (activeConnections[i] === ws) {
+            activeConnections.splice(i,1);
+            break;
+        }
+    }
+}
+function removePendingConnection(ws) {
+    for (var i=0;i<pendingConnections.length;i++) {
+        if (pendingConnections[i] === ws) {
+            pendingConnections.splice(i,1);
+            break;
+        }
+    }
+}
 
 module.exports = {
     init:init,

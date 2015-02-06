@@ -83,9 +83,6 @@ var persistentSettings = {
         userSettings = null;
         globalSettings = null;
         storage = null;
-        
-
-        
     }
 }
 
