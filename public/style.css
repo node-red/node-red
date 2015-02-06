@@ -1240,6 +1240,11 @@ i.spinner {
     color: #666;
 }
 
+#header ul.dropdown-menu > li.disabled:hover > a,
+#header ul.dropdown-menu > li.disabled:focus > a {
+    background: none !important;
+}
+
 /* Deploy menu customisations */
 #header ul#btn-deploy-options-submenu {
     width: 300px !important;
@@ -1255,4 +1260,10 @@ i.spinner {
 }
 #header ul#btn-deploy-options-submenu li a > i.fa {
     display: none !important;
+}
+
+/* User menu customisations */
+#header ul#btn-usermenu-submenu li a#btn-username > .menu-label {
+    font-size: 16px;
+    color: #fff;
 }

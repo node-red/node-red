@@ -333,7 +333,6 @@ var RED = (function() {
                 } else {
                     RED.menu.addItem("btn-usermenu",{
                         id:"btn-username",
-                        icon:"fa fa-user",
                         label:"<b>"+RED.settings.user.username+"</b>"
                     });
                     RED.menu.addItem("btn-usermenu",{
