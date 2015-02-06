@@ -217,7 +217,7 @@ describe("nodes api", function() {
                     if (module === "foo") {
                         return {
                             name:"foo",
-                            nodes:[{id:123}]
+                            nodes:[{id:"123"}]
                         };
                     }
                 });

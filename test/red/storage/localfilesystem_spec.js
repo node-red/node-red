@@ -264,7 +264,7 @@ describe('LocalFileSystem', function() {
     it('should return an empty list of library objects',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             localfilesystem.getLibraryEntry('object','').then(function(flows) {
-                flows.should.eql({});
+                flows.should.eql([]);
                 done();
             }).otherwise(function(err) {
                 done(err);
