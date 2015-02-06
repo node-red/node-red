@@ -96,8 +96,8 @@ Node.prototype.send = function(msg) {
             // A single message and a single wire on output 0
             // TODO: pre-load flows.get calls - cannot do in constructor
             //       as not all nodes are defined at that point
-            if (!msg._id) {
-                msg._id = constructUniqueIdentifier();
+            if (!msg._msgid) {
+                msg._msgid = constructUniqueIdentifier();
             }
             this.metric("send",msg);
             node = flows.get(this._wire);
@@ -136,7 +136,7 @@ Node.prototype.send = function(msg) {
                         for (k = 0; k < msgs.length; k++) {
                             var m = msgs[k];
                             if (!sentMessageId) {
-                                sentMessageId = m._id;
+                                sentMessageId = m._msgid;
                             }
                             if (msgSent) {
                                 var clonedmsg = redUtil.cloneMessage(m);
@@ -154,12 +154,12 @@ Node.prototype.send = function(msg) {
     if (!sentMessageId) {
         sentMessageId = constructUniqueIdentifier();
     }
-    this.metric("send",{_id:sentMessageId});
+    this.metric("send",{_msgid:sentMessageId});
     
     for (i=0;i<sendEvents.length;i++) {
         var ev = sendEvents[i];
-        if (!ev.m._id) {
-            ev.m._id = sentMessageId;
+        if (!ev.m._msgid) {
+            ev.m._msgid = sentMessageId;
         }
         ev.n.receive(ev.m);
     }
@@ -169,8 +169,8 @@ Node.prototype.receive = function(msg) {
     if (!msg) {
         msg = {};
     }
-    if (!msg._id) {
-        msg._id = constructUniqueIdentifier();
+    if (!msg._msgid) {
+        msg._msgid = constructUniqueIdentifier();
     }
     this.metric("receive",msg); 
     this.emit("input", msg);
@@ -212,7 +212,7 @@ Node.prototype.metric = function(eventname, msg, metricValue) {
     metrics.level = Log.METRIC;
     metrics.nodeid = this.id;
     metrics.event = "node."+this.type+"."+eventname;    
-    metrics.msgid = msg._id;
+    metrics.msgid = msg._msgid;
     metrics.value = metricValue;
     Log.log(metrics);
 }

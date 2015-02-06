@@ -91,7 +91,7 @@ describe('Node', function() {
             var n = new RedNode({id:'123',type:'abc'});
             n.on('input',function(msg) {
                 (typeof msg).should.not.be.equal("undefined");
-                (typeof msg._id).should.not.be.equal("undefined");
+                (typeof msg._msgid).should.not.be.equal("undefined");
                 done();
             });
             n.receive();
@@ -101,7 +101,7 @@ describe('Node', function() {
             var n = new RedNode({id:'123',type:'abc'});
             n.on('input',function(msg) {
                 (typeof msg).should.not.be.equal("undefined");
-                (typeof msg._id).should.not.be.equal("undefined");
+                (typeof msg._msgid).should.not.be.equal("undefined");
                 done();
             });
             n.receive(null);
@@ -400,7 +400,7 @@ describe('Node', function() {
             sinon.stub(Log, 'log', function(msg) {
                 loginfo = msg;
             });
-            var msg = {payload:"foo", _id:"987654321"};
+            var msg = {payload:"foo", _msgid:"987654321"};
             n.metric("test.metric",msg,"15mb");
             should.deepEqual({value:"15mb", level:Log.METRIC, nodeid:n.id,
                                   event:"node.abc.test.metric",msgid:"987654321"}, loginfo);
