@@ -2,6 +2,11 @@
 
 We welcome contributions, but request you follow these guidelines.
 
+ - [Raising issues](#raising-issues)
+ - [Feature requests](#feature-requests)
+ - [Pull-Requests](#pull-requests)
+   - [Contributor License Agreement](#contributor-license-agreement)
+ 
 ## Raising issues
 
 Please raise any bug reports on the project's 
@@ -21,42 +26,15 @@ At a minimum, please include:
  - Version of node.js - what does `node -v` say?
 
 
-## New features
+## Feature requests
 
 For feature requests, please raise them on the [mailing list](https://groups.google.com/forum/#!forum/node-red).
 
 ## Pull-Requests
 
-### Changes to existing code
-if you want to raise a pull-request with a new feature, or a refactoring
+If you want to raise a pull-request with a new feature, or a refactoring
 of existing code, it may well get rejected if you haven't discussed it on 
 the [mailing list](https://groups.google.com/forum/#!forum/node-red) first.
-
-### New nodes
-
-The plugin nature of Node-RED means anyone can create a new node to extend
-its capabilities.
-
-We want to avoid duplication as that can lead to confusion. Many of our existing
-nodes offer a starting point of functionality. If they are missing features,
-we would rather extend them than add separate 'advanced' versions. But the key
-to that approach is getting the UX right to not lose the simplicity.
-
-To contribute a new node, please raise a pull-request against the 
-`node-red-nodes` repository.
-
-Eventually, the nodes will be npm-installable, but we're not there yet. We'll
-also have some sort of registry of nodes to help with discoverability.
-
-### Coding standards
-
-Please ensure you follow the coding standards used through-out the existing
-code base. Some basic rules include:
-
- - all files must have the Apache license in the header.
- - indent with 4-spaces, no tabs. No arguments.
- - opening brace on same line as `if`/`for`/`function`/etc, closing brace on its
-   own line.
 
 ### Contributor License Agreement
 
@@ -73,6 +51,17 @@ You can download the CLAs here:
 
 If you are an IBMer, please contact us directly as the contribution process is
 slightly different.
+
+### Coding standards
+
+Please ensure you follow the coding standards used through-out the existing
+code base. Some basic rules include:
+
+ - all files must have the Apache license in the header.
+ - indent with 4-spaces, no tabs. No arguments.
+ - opening brace on same line as `if`/`for`/`function`/etc, closing brace on its
+   own line.
+
 
 
 

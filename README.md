@@ -19,23 +19,22 @@ Check out [INSTALL](INSTALL.md) for full instructions on getting started.
 4. node red.js
 5. Open <http://localhost:1880>
 
-## Documentation
+## Getting Help
 
 More documentation can be found [here](http://nodered.org/docs).
 
-For further help, or general discussion, there is also a [mailing list](https://groups.google.com/forum/#!forum/node-red).
+For further help, or general discussion, please use the [mailing list](https://groups.google.com/forum/#!forum/node-red).
 
 ## Browser Support
 
 The Node-RED editor runs in the browser. We routinely develop and test using
-Chrome and Firefox. We have anecdotal evidence that it works in IE9.
+Chrome and Firefox. We have anecdotal evidence that it works in recent versions of IE.
 
-We do not yet support mobile browsers, although that is high on our priority
-list.
+We have basic support for using in mobile/tablet browsers.
 
 ## Contributing
 
-Please see our [contributing guide](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md).
+Before raising a pull-request, please read our [contributing guide](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md).
 
 ## Authors
 
@@ -48,4 +47,4 @@ For more open-source projects from IBM, head over [here](http://ibm.github.io).
 
 ## Copyright and license
 
-Copyright 2013, 2014 IBM Corp. under [the Apache 2.0 license](LICENSE).
+Copyright 2013, 2015 IBM Corp. under [the Apache 2.0 license](LICENSE).
