@@ -23,7 +23,7 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         this.name = n.name;
         this.func = n.func;
-        var functionText = "var results = null; results = (function(msg){"+this.func+"\n})(msg);";
+        var functionText = "var results = null; results = (function(msg){\n"+this.func+"\n})(msg);";
         this.topic = n.topic;
         var sandbox = {
             console:console,
@@ -68,10 +68,22 @@ module.exports = function(RED) {
                         this.status({fill:"yellow",shape:"dot",text:""+converted});
                     }
                 } catch(err) {
-                    this.error(err.toString());
+                    var errorMessage = err.toString();
+                    var stack = err.stack.split(/\r?\n/);
+                    if (stack.length > 0) {
+                        var m = /at undefined:(\d+):(\d+)$/.exec(stack[1]);
+                        if (m) {
+                            var line = Number(m[1])-1;
+                            var cha = m[2];
+                            errorMessage += " (line "+line+", col "+cha+")";
+                        }
+                    }
+                    this.error(errorMessage);
                 }
             });
         } catch(err) {
+            // eg SyntaxError - which v8 doesn't include line number information
+            // so we can't do better than this
             this.error(err);
         }
     }
