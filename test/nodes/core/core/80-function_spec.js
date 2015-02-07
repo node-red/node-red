@@ -146,7 +146,7 @@ describe('function node', function() {
                 msg.should.have.property('level', helper.log().ERROR);
                 msg.should.have.property('id', 'n1');
                 msg.should.have.property('type', 'function');
-                msg.should.have.property('msg', 'ReferenceError: retunr is not defined');
+                msg.should.have.property('msg', 'ReferenceError: retunr is not defined (line 1, col 1)');
                 done();
             } catch(err) {
                 done(err);
