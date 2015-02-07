@@ -113,7 +113,7 @@ module.exports = function(RED) {
 
     DebugNode.logHandler = new events.EventEmitter();
     DebugNode.logHandler.on("log",function(msg) {
-        if (msg.level === "warn" || msg.level === "error") {
+        if (msg.level === RED.log.WARN || msg.level === RED.log.ERROR) {
             sendDebug(msg);
         }
     });
