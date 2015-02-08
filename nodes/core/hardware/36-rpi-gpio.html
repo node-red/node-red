@@ -57,6 +57,7 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-tips" id="pin-tip"><b>Pins in Use</b>: </div>
     <div class="form-tips">Tip: Only Digital Input is supported - input must be 0 or 1.</div>
 </script>
 
@@ -69,6 +70,7 @@
     </script>
 
 <script type="text/javascript">
+    var pinsInUse = {};
     RED.nodes.registerType('rpi-gpio in',{
         category: 'Raspberry Pi',
         color:"#c6dbef",
@@ -81,6 +83,12 @@
         inputs:0,
         outputs:1,
         icon: "rpi.png",
+        info: function() {
+            if ( Object.keys(pinsInUse).length !== 0 ) {
+                return "**Pins in use** : "+Object.keys(pinsInUse);
+            }
+            else { return ""; }
+        },
         label: function() {
             return this.name||"Pin: "+this.pin ;
         },
@@ -89,7 +97,6 @@
         },
         oneditprepare: function() {
             var pinnow = this.pin;
-            var pinsInUse = {};
             $.getJSON('rpi-gpio/'+this.id,function(data) {
                 $('#pitype').text(data.type);
                 if ((data.type === "Model B+") || (data.type === "Model A+")) {
@@ -110,13 +117,14 @@
 
             $.getJSON('rpi-pins/'+this.id,function(data) {
                 pinsInUse = data || {};
+                $('#pin-tip').html("<b>Pins in Use</b>: "+Object.keys(data));
             });
 
             $("#node-input-pin").change(function() {
                 var pinnew = $("#node-input-pin").val();
                 if ((pinnew) && (pinnew !== pinnow)) {
                     if (pinsInUse.hasOwnProperty(pinnew)) {
-                        RED.notify("Pin "+pinnew+" already in use.","info");
+                        RED.notify("Pin "+pinnew+" already in use.","warn");
                     }
                     pinnow = pinnew;
                 }
@@ -181,6 +189,7 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-tips" id="pin-tip"><b>Pins in Use</b>: </div>
     <div class="form-tips" id="dig-tip"><b>Tip</b>: For digital output - input must be 0 or 1.</div>
     <div class="form-tips" id="pwm-tip"><b>Tip</b>: For PWM output - input must be between 0 to 1023.</div>
 </script>
@@ -195,6 +204,7 @@
 </script>
 
 <script type="text/javascript">
+    var pinsInUse = {};
     RED.nodes.registerType('rpi-gpio out',{
         category: 'Raspberry Pi',
         color:"#c6dbef",
@@ -208,6 +218,12 @@
         inputs:1,
         outputs:0,
         icon: "rpi.png",
+        info: function() {
+            if ( Object.keys(pinsInUse).length !== 0 ) {
+                return "**Pins in use** : "+Object.keys(pinsInUse);
+            }
+            else { return ""; }
+        },
         align: "right",
         label: function() {
             if (this.out === "pwm") { return this.name || "PWM: "+this.pin; }
@@ -218,7 +234,6 @@
         },
         oneditprepare: function() {
             var pinnow = this.pin;
-            var pinsInUse = {};
             if (!$("#node-input-out").val()) { $("#node-input-out").val("out"); }
             $.getJSON('rpi-gpio/'+this.id,function(data) {
                 $('#pitype').text(data.type);
@@ -240,13 +255,14 @@
 
             $.getJSON('rpi-pins/'+this.id,function(data) {
                 pinsInUse = data || {};
+                $('#pin-tip').html("<b>Pins in Use</b>: "+Object.keys(data));
             });
 
             $("#node-input-pin").change(function() {
                 var pinnew = $("#node-input-pin").val();
                 if ((pinnew) && (pinnew !== pinnow)) {
                     if (pinsInUse.hasOwnProperty(pinnew)) {
-                        RED.notify("Pin "+pinnew+" already in use.","info");
+                        RED.notify("Pin "+pinnew+" already in use.","warn");
                     }
                     pinnow = pinnew;
                 }
