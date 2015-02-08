@@ -70,9 +70,13 @@
 
 <script type="text/x-red" data-help-name="e-mail">
     <p>Sends the <b>msg.payload</b> as an email, with a subject of <b>msg.topic</b>.</p>
-    <p>The default message recipient can be configured in the node, if it is left blank it should be set in an incoming message on <b>msg.to</b>.</p>
-    <!-- <p>It sends the message to the configured recipient <i>only</i>.</p> -->
-    <!-- <p><b>msg.topic</b> is used to set the subject of the email, and <b>msg.payload</b> is the body text.</p> -->
+    <p>The default message recipient can be configured in the node, if it is left
+    blank it should be set using the <b>msg.to</b> property of the incoming message.</p>
+    <p>The payload can be html format.</p>
+    <p>If the payload is a binary buffer then it will be converted to an attachment.
+    The filename should be set using <b>msg.filename</b>.</p>
+    <p>Alternatively you may provide <b>msg.attachments</b> which should contain an array of one or
+    more attachments in <a href="https://www.npmjs.com/package/nodemailer#attachments" target="_new">nodemailer</a> format.</p>
 </script>
 
 <script type="text/javascript">
