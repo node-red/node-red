@@ -15,6 +15,7 @@
  **/
 
 module.exports = function(RED) {
+    "use strict";
     var util = require("util");
     var events = require("events");
     var debuglength = RED.settings.debugMaxLength||1000;
@@ -25,14 +26,14 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         this.name = n.name;
         this.complete = n.complete||"payload";
-        
+
         if (this.complete === "false") {
             this.complete = "payload";
         }
         if (this.complete === true) {
             this.complete = "true";
         }
-        
+
         this.console = n.console;
         this.active = (n.active === null || typeof n.active === "undefined") || n.active;
         var node = this;
