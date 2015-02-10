@@ -58,68 +58,71 @@ RED.sidebar.info = (function() {
 
     function refresh(node) {
         var table = '<table class="node-info"><tbody>';
-        //table += '<tr class="blank"><td colspan="2">Node</td></tr>';
-
-        if (node.type.indexOf("subflow") === 0) {
+        table += '<tr class="blank"><td colspan="2">Node</td></tr>';
+        table += "<tr><td>Type</td><td>&nbsp;"+node.type+"</td></tr>";
+        table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
+        
+        var m = /^subflow(:(.+))?$/.exec(node.type);
+        if (m) {
+            var subflowNode;
+            if (m[2]) {
+                subflowNode = RED.nodes.subflow(m[2]);
+            } else {
+                subflowNode = node;
+            }
+            
+            table += '<tr class="blank"><td colspan="2">Subflow</td></tr>';
+            
             var userCount = 0;
+            var subflowType = "subflow:"+subflowNode.id;
             RED.nodes.eachNode(function(n) {
-                if (n.type === node.type) {
+                if (n.type === subflowType) {
                     userCount++;
                 }
             });
-            node.name = node.name || "";
-            if (node.type !== "subflow") {
-                table += "<tr><td>Type</td><td>&nbsp;"+(RED.nodes.subflow(node.type.split(":")[1]).name||node.type)+"</td></tr>";
-                table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
-                table += "<tr><td>name</td><td>"+node.name+"</td></tr>";
-                table += "<tr><td>inputs</td><td>"+node.inputs+"</td></tr>";
-                table += "<tr><td>outputs</td><td>"+node.outputs+"</td></tr>";
-                table += "<tr><td>instances</td><td>"+userCount+"</td></tr>";
-            } else {
-                table += "<tr><td>Type</td><td>&nbsp;"+node.type+"</td></tr>";
-                table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
-                table += "<tr><td>name</td><td>"+node.name+"</td></tr>";
-            }
+            table += "<tr><td>name</td><td>"+subflowNode.name+"</td></tr>";
+            table += "<tr><td>instances</td><td>"+userCount+"</td></tr>";
         }
-        else if (node._def) {
-            if (node.type !== "comment") {
-            table += "<tr><td>Type</td><td>&nbsp;"+node.type+"</td></tr>";
-            table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
+        
+        if (node.type != "subflow" && node.type != "comment") {
             table += '<tr class="blank"><td colspan="2">Properties</td></tr>';
-            for (var n in node._def.defaults) {
-                if (node._def.defaults.hasOwnProperty(n)) {
-                    var val = node[n]||"";
-                    var type = typeof val;
-                    if (type === "string") {
-                        if (val.length > 30) {
-                            val = val.substring(0,30)+" ...";
+            if (node._def) {
+                for (var n in node._def.defaults) {
+                    if (node._def.defaults.hasOwnProperty(n)) {
+                        var val = node[n]||"";
+                        var type = typeof val;
+                        if (type === "string") {
+                            if (val.length > 30) {
+                                val = val.substring(0,30)+" ...";
+                            }
+                            val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                        } else if (type === "number") {
+                            val = val.toString();
+                        } else if ($.isArray(val)) {
+                            val = "[<br/>";
+                            for (var i=0;i<Math.min(node[n].length,10);i++) {
+                                var vv = JSON.stringify(node[n][i],jsonFilter," ").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                                val += "&nbsp;"+i+": "+vv+"<br/>";
+                            }
+                            if (node[n].length > 10) {
+                                val += "&nbsp;... "+node[n].length+" items<br/>";
+                            }
+                            val += "]";
+                        } else {
+                            val = JSON.stringify(val,jsonFilter," ");
+                            val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
                         }
-                        val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-                    } else if (type === "number") {
-                        val = val.toString();
-                    } else if ($.isArray(val)) {
-                        val = "[<br/>";
-                        for (var i=0;i<Math.min(node[n].length,10);i++) {
-                            var vv = JSON.stringify(node[n][i],jsonFilter," ").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-                            val += "&nbsp;"+i+": "+vv+"<br/>";
-                        }
-                        if (node[n].length > 10) {
-                            val += "&nbsp;... "+node[n].length+" items<br/>";
-                        }
-                        val += "]";
-                    } else {
-                        val = JSON.stringify(val,jsonFilter," ");
-                        val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    
+                        table += "<tr><td>"+n+"</td><td>"+val+"</td></tr>";
                     }
-
-                    table += "<tr><td>"+n+"</td><td>"+val+"</td></tr>";
                 }
-            }
             }
         }
         table += "</tbody></table><br/>";
-        var helpText = $("script[data-help-name|='"+node.type+"']").html()||"";
-        table  += '<div class="node-help">'+helpText+"</div>";
+        if (node.type != "comment") {
+            var helpText = $("script[data-help-name|='"+node.type+"']").html()||"";
+            table  += '<div class="node-help">'+helpText+"</div>";
+        }
 
         if (node._def && node._def.info) {
             var info = node._def.info;
