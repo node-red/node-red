@@ -47,7 +47,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload:"test"});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",name:"Debug",msg:"test",
+                    topic:"debug",data:{id:"n1",name:"Debug",msg:"(string) test",
                     property:"payload"}
                 });
             }, done);
@@ -63,7 +63,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload:"test"});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"test",property:"payload"}
+                    topic:"debug",data:{id:"n1",msg:"(string) test",property:"payload"}
                 });
                 count++;
             }, function() {
@@ -107,7 +107,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload:"test", foo:"bar"});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"bar",property:"foo"}
+                    topic:"debug",data:{id:"n1",msg:"(string) bar",property:"foo"}
                 });
             }, done);
         });
@@ -121,7 +121,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload:"test", foo: {bar: "bar"}});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"bar",property:"foo.bar"}
+                    topic:"debug",data:{id:"n1",msg:"(string) bar",property:"foo.bar"}
                 });
             }, done);
         });
@@ -232,7 +232,7 @@ describe('debug node', function() {
                     topic:"debug",
                     data:{
                         id:"n1",
-                        msg: Array(1001).join("X")+' ....',
+                        msg: "(string) "+Array(992).join("X")+' ....',
                         property:"payload"
                     }
                 });
@@ -273,7 +273,7 @@ describe('debug node', function() {
                     });
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"message 2",property:"payload"}
+                    topic:"debug",data:{id:"n1",msg:"(string) message 2",property:"payload"}
                 });
             }, done);
         });
