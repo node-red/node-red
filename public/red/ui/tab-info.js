@@ -61,20 +61,25 @@ RED.sidebar.info = (function() {
         //table += '<tr class="blank"><td colspan="2">Node</td></tr>';
 
         if (node.type.indexOf("subflow") === 0) {
-            table += "<tr><td>Type</td><td>&nbsp;"+(RED.nodes.subflow(node.type.split(":")[1]).name||node.type)+"</td></tr>";
-            table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
             var userCount = 0;
             RED.nodes.eachNode(function(n) {
-                console.log(n);
                 if (n.type === node.type) {
                     userCount++;
                 }
             });
             node.name = node.name || "";
-            table += "<tr><td>name</td><td>"+node.name+"</td></tr>";
-            table += "<tr><td>inputs</td><td>"+node.inputs+"</td></tr>";
-            table += "<tr><td>outputs</td><td>"+node.outputs+"</td></tr>";
-            table += "<tr><td>instances</td><td>"+userCount+"</td></tr>";
+            if (node.type !== "subflow") {
+                table += "<tr><td>Type</td><td>&nbsp;"+(RED.nodes.subflow(node.type.split(":")[1]).name||node.type)+"</td></tr>";
+                table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
+                table += "<tr><td>name</td><td>"+node.name+"</td></tr>";
+                table += "<tr><td>inputs</td><td>"+node.inputs+"</td></tr>";
+                table += "<tr><td>outputs</td><td>"+node.outputs+"</td></tr>";
+                table += "<tr><td>instances</td><td>"+userCount+"</td></tr>";
+            } else {
+                table += "<tr><td>Type</td><td>&nbsp;"+node.type+"</td></tr>";
+                table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
+                table += "<tr><td>name</td><td>"+node.name+"</td></tr>";
+            }
         }
         else if (node._def) {
             if (node.type !== "comment") {
