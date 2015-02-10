@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 RED.sidebar.info = (function() {
-        
+
     marked.setOptions({
         renderer: new marked.Renderer(),
         gfm: true,
@@ -25,7 +25,7 @@ RED.sidebar.info = (function() {
         smartLists: true,
         smartypants: false
     });
-    
+
     var content = document.createElement("div");
     content.id = "tab-info";
     content.style.paddingTop = "4px";
@@ -38,7 +38,7 @@ RED.sidebar.info = (function() {
         }
         RED.sidebar.show("info");
     }
-    
+
     function jsonFilter(key,value) {
         if (key === "") {
             return value;
@@ -58,25 +58,29 @@ RED.sidebar.info = (function() {
 
     function refresh(node) {
         var table = '<table class="node-info"><tbody>';
+        //table += '<tr class="blank"><td colspan="2">Node</td></tr>';
 
-        table += '<tr class="blank"><td colspan="2">Node</td></tr>';
-        table += "<tr><td>Type</td><td>&nbsp;"+node.type+"</td></tr>";
-        table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
-        table += '<tr class="blank"><td colspan="2">Properties</td></tr>';
-        if (node.type == "subflow") {
+        if (node.type.indexOf("subflow") === 0) {
+            table += "<tr><td>Type</td><td>&nbsp;"+(RED.nodes.subflow(node.type.split(":")[1]).name||node.type)+"</td></tr>";
+            table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
             var userCount = 0;
-            var subflowType = "subflow:"+node.id;
             RED.nodes.eachNode(function(n) {
-                if (n.type === subflowType) {
+                console.log(n);
+                if (n.type === node.type) {
                     userCount++;
                 }
             });
+            node.name = node.name || "";
             table += "<tr><td>name</td><td>"+node.name+"</td></tr>";
-            table += "<tr><td>inputs</td><td>"+node.in.length+"</td></tr>";
-            table += "<tr><td>outputs</td><td>"+node.out.length+"</td></tr>";
+            table += "<tr><td>inputs</td><td>"+node.inputs+"</td></tr>";
+            table += "<tr><td>outputs</td><td>"+node.outputs+"</td></tr>";
             table += "<tr><td>instances</td><td>"+userCount+"</td></tr>";
         }
-        if (node._def) {
+        else if (node._def) {
+            if (node.type !== "comment") {
+            table += "<tr><td>Type</td><td>&nbsp;"+node.type+"</td></tr>";
+            table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
+            table += '<tr class="blank"><td colspan="2">Properties</td></tr>';
             for (var n in node._def.defaults) {
                 if (node._def.defaults.hasOwnProperty(n)) {
                     var val = node[n]||"";
@@ -105,6 +109,7 @@ RED.sidebar.info = (function() {
 
                     table += "<tr><td>"+n+"</td><td>"+val+"</td></tr>";
                 }
+            }
             }
         }
         table += "</tbody></table><br/>";
