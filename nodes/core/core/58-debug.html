@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013 IBM Corp.
+  Copyright 2013, 2015 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -192,13 +192,16 @@
                 payload = payload.substring(payload.indexOf(')')+1);
                 msg.className = 'debug-message'+(o.level?(' debug-message-level-'+o.level):'');
                 msg.innerHTML = '<span class="debug-message-date">'+
-                                getTimestamp()+'</span>'+
-                                '<span class="debug-message-name">['+name+']</span>'+
-                                '<span class="debug-message-topic">'+
-                                (o.topic?topic+' : ':'')+
-                                (o.property?'[msg.'+property+']':'[msg]')+" : "+typ+
-                                '</span>'+'<span class="debug-message-payload">'+
-                                payload+'</span>';
+                                getTimestamp()+'</span><span class="debug-message-name">['+name+']'+
+                                '</span>';
+				// NOTE: relying on function error to have a "type" that all other msgs don't
+                if (o.hasOwnProperty("type") && (o.type === "function")) {
+                    msg.innerHTML += '<span class="debug-message-topic">[function] : (error)</span>';
+                } else {
+                    msg.innerHTML += '<span class="debug-message-topic">'+(o.topic?topic+' : ':'')+
+                                    (o.property?'[msg.'+property+']':'[msg]')+" : "+typ+'</span>';
+                }
+                msg.innerHTML += '<span class="debug-message-payload">'+ payload+ '</span>';
                 var atBottom = (sbc.scrollHeight-messages.offsetHeight-sbc.scrollTop) < 5;
                 messageCount++;
                 $(messages).append(msg);
@@ -263,7 +266,7 @@
         display: block;
         background: #fff;
         padding: 1px 5px;
-        font-size: 9px;
+        font-size: 10px;
         color: #a66;
     }
     .debug-message-name {
