@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013 IBM Corp.
+  Copyright 2013, 2015 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
     <div class="form-row node-text-editor-row">
         <div style="height: 250px;" class="node-text-editor" id="node-input-info-editor" ></div>
     </div>
-    <div class="form-tips">Tip: The text here can be styled as <i><a href="https://help.github.com/articles/markdown-basics/" target="_new">Github flavored Markdown</a></i></div>
+    <div class="form-tips">Tip: The text here can be styled as <i><a href="https://help.github.com/articles/markdown-basics/" target="_new">Github flavoured Markdown</a></i></div>
 </script>
 
 <script type="text/x-red" data-help-name="comment">
@@ -51,13 +51,17 @@
             return this.name?"node_label_italic":"";
         },
         info: function() {
-            return "### "+this.name+"\n"+this.info;
+            var t = this.name || "Comment node";
+            var b = this.info || "Use this node to add simple documentation.\n\nAnything you add will be rendered in this info panel.\n\nYou may use Markdown syntax to **enhance** the *presentation*.";
+            return "### "+t+"\n"+b;
         },
         oneditprepare: function() {
+            var that = this;
             $( "#node-input-outputs" ).spinner({
                 min:1
             });
             function functionDialogResize() {
+                that.editor.resize();
                 var rows = $("#dialog-form>div:not(.node-text-editor-row)");
                 var height = $("#dialog-form").height();
                 for (var i=0;i<rows.size();i++) {
@@ -80,20 +84,19 @@
                 var height = $( "#dialog" ).dialog('option','height');
                 $( "#dialog" ).off("dialogresize",functionDialogResize);
             });
-            var that = this;
-            require(["orion/editor/edit"], function(edit) {
-                that.editor = edit({
-                    parent:document.getElementById('node-input-info-editor'),
-                    lang:"text",
-                    showLinesRuler:false,
-                    showFoldingRuler:false,
-                    contents: $("#node-input-info").val()
-                });
-                $("#node-input-name").focus();
-            });
+            ace.require("ace/ext/language_tools");
+            that.editor = ace.edit('node-input-info-editor');
+            that.editor.setTheme("ace/theme/chrome");
+            that.editor.getSession().setMode("ace/mode/markdown");
+            that.editor.getSession().setFoldStyle("markbeginend");
+            that.editor.setOptions({enableBasicAutocompletion:true, enableSnippets:true});
+            that.editor.$blockScrolling = Infinity;
+            that.editor.setValue($("#node-input-info").val());
+            that.editor.gotoLine(1);
+            document.getElementById('node-input-info-editor').style.fontSize='17px';
         },
         oneditsave: function() {
-            $("#node-input-info").val(this.editor.getText());
+            $("#node-input-info").val(this.editor.getValue());
             delete this.editor;
         }
     });
