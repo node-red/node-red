@@ -20,8 +20,9 @@
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-row" style="margin-bottom: 0px;">
-            <label for="node-input-func"><i class="fa fa-wrench"></i> Function</label>
-            <input type="hidden" id="node-input-func" autofocus="autofocus">
+        <label for="node-input-func"><i class="fa fa-wrench"></i> Function</label>
+        <input type="hidden" id="node-input-func" autofocus="autofocus">
+        <input type="hidden" id="node-input-valid">
     </div>
     <div class="form-row node-text-editor-row">
         <div style="height: 250px;" class="node-text-editor" id="node-input-func-editor" ></div>
@@ -59,7 +60,8 @@
         defaults: {
             name: {value:""},
             func: {value:"\nreturn msg;"},
-            outputs: {value:1}
+            outputs: {value:1},
+            valid: {value:true,required:true}
         },
         inputs:1,
         outputs:1,
@@ -122,6 +124,16 @@
             $("#node-input-name").focus();
         },
         oneditsave: function() {
+            var annot = this.editor.getSession().getAnnotations();
+            console.log(this);
+            this.valid = true;
+            for (var k=0; k < annot.length; k++) {
+                //console.log(annot[k].type,":",annot[k].text, "on line", annot[k].row);
+                if (annot[k].type === "error") {
+                    $("#node-input-valid").val(null);
+                    delete this.valid;
+                }
+            }
             $("#node-input-func").val(this.editor.getValue());
             delete this.editor;
         }
