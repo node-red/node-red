@@ -553,6 +553,9 @@ RED.editor = (function() {
                             if (configTypeDef.ondelete) {
                                 configTypeDef.ondelete.call(RED.nodes.node(configId));
                             }
+                            if (configTypeDef.oneditdelete) {
+                                configTypeDef.oneditdelete.call(RED.nodes.node(configId));
+                            }
                             RED.nodes.remove(configId);
                             for (var i=0;i<configNode.users.length;i++) {
                                 var user = configNode.users[i];
