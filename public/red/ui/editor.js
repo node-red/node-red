@@ -259,7 +259,7 @@ RED.editor = (function() {
                     click: function() {
                         if (editing_node._def) {
                             if (editing_node._def.oneditcancel) {
-                                editing_node._def.oneditcancel.call(editing_node,true);
+                                editing_node._def.oneditcancel.call(editing_node);
                             }
                         }
                         $( this ).dialog( "close" );
