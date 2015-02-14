@@ -40,14 +40,14 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    <div class="form-tips">Tip: The <b>Select</b> value is a <a href="http://api.jquery.com/category/selectors/" target="_new"><i><u>jQuery</u></i></a> style selector.</div>
+    <div class="form-tips">Tip: The <b>Select</b> value is a <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_new"><i><u>CSS Selector</u></i></a>, similar to a jQuery selector.</div>
 </script>
 
 <script type="text/x-red" data-help-name="html">
     <p>Extracts elements from an html document held in <b>msg.payload</b> using a selector.</p>
     <p>The selector uses <a href=="https://github.com/cheeriojs/cheerio/blob/master/Readme.md" target="_new">Cheerio</a>
-     which uses the <a href="https://github.com/fb55/CSSselect" target="_new">CSS selector</a> syntax.</p>
-    <p>The result is either a single message with a payload containing an array of the matched elements, or multiple
+     which uses the <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_new">CSS selector</a> syntax.</p>
+    <p>The result can be either a single message with a payload containing an array of the matched elements, or multiple
        messages that each contain a matched element.</p>
 </script>
 
