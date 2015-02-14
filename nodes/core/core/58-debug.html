@@ -194,8 +194,9 @@
                 msg.innerHTML = '<span class="debug-message-date">'+
                                 getTimestamp()+'</span><span class="debug-message-name">['+name+']'+
                                 '</span>';
-				// NOTE: relying on function error to have a "type" that all other msgs don't
+                // NOTE: relying on function error to have a "type" that all other msgs don't
                 if (o.hasOwnProperty("type") && (o.type === "function")) {
+                    msg.className = 'debug-message debug-message-level-20';
                     msg.innerHTML += '<span class="debug-message-topic">[function] : (error)</span>';
                 } else {
                     msg.innerHTML += '<span class="debug-message-topic">'+(o.topic?topic+' : ':'')+
@@ -284,11 +285,11 @@
         border-left-color: #eee;
         border-right-color: #eee;
     }
-    .debug-message-level-warn {
+    .debug-message-level-30 {
         border-left-color: #ffdf9d;
         border-right-color: #ffdf9d;
     }
-    .debug-message-level-error {
+    .debug-message-level-20 {
         border-left-color: #f99;
         border-right-color: #f99;
     }
