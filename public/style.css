@@ -765,16 +765,6 @@ g.link_unknown path.link_line {
 .form-row input {
     width:70%;
 }
-.form-row label .cb1 {
-    display: inline !important;
-    width: auto !important;
-    vertical-align: top !important;
-}
-.form-row label .cb2 {
-    display: inline !important;
-    width: auto !important;
-    vertical-align: top !important;
-}
 
 input.input-append-left {
     border-top-right-radius: 0px;
