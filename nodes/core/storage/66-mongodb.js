@@ -184,7 +184,16 @@ module.exports = function(RED) {
                         if (node.operation === "find") {
                             msg.projection = msg.projection || {};
                             var selector = ensureValidSelectorObject(msg.payload);
-                            coll.find(selector,msg.projection).sort(msg.sort).limit(msg.limit).skip(msg.skip).toArray(function(err, items) {
+                            var limit = msg.limit;
+                            if (typeof limit === "string" && !isNaN(limit)) {
+                                limit = Number(limit);
+                            }
+                            var skip = msg.skip;
+                            if (typeof skip === "string" && !isNaN(skip)) {
+                                skip = Number(skip);
+                            }
+
+                            coll.find(selector,msg.projection).sort(msg.sort).limit(limit).skip(skip).toArray(function(err, items) {
                                 if (err) {
                                     node.error(err);
                                 } else {
