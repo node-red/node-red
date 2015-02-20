@@ -869,26 +869,6 @@ describe('Flow', function() {
             done();
         });
         
-        it("reports error with undefined message object",function(done) {
-            var config = [
-                {id:"1",type:"test",z:"tab1",name:"a",wires:["2"]},
-                {id:"2",type:"catch",z:"tab1",wires:[[]]},
-                {id:"3",type:"catch",z:"tab2",wires:[[]]}
-            ];
-            var flow = new Flow(config);
-            flow.start();
-            flow.handleError(getNode(1),"test error");
-            var n2 = getNode(2);
-            n2.handled.should.have.lengthOf(1);
-            n2.handled[0].should.have.property("error");
-            n2.handled[0].error.should.have.property("message","test error");
-            n2.handled[0].error.should.have.property("source");
-            n2.handled[0].error.source.should.have.property("id","1");
-            n2.handled[0].error.source.should.have.property("type","test");
-            getNode(3).handled.should.have.lengthOf(0);
-            done();
-        });
-        
         it("reports error with Error object",function(done) {
             var config = [
                 {id:"1",type:"test",z:"tab1",name:"a",wires:["2"]},

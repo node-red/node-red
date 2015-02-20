@@ -734,7 +734,7 @@ Flow.prototype.diffFlow = function(config) {
 
 Flow.prototype.handleError = function(node,logMessage,msg) {
     var errorMessage;
-    if (typeof msg !== "undefined") {
+    if (msg) {
         errorMessage = redUtil.cloneMessage(msg);
     } else {
         errorMessage = {};

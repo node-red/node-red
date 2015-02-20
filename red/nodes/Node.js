@@ -201,7 +201,9 @@ Node.prototype.warn = function(msg) {
 Node.prototype.error = function(logMessage,msg) {
     logMessage = logMessage || "";
     log_helper(this, Log.ERROR, logMessage);
-    flows.handleError(this,logMessage,msg);
+    if (msg) {
+        flows.handleError(this,logMessage,msg);
+    }
 };
 
 /**
