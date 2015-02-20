@@ -208,18 +208,19 @@ function diffNodeConfigs(oldNode,newNode) {
 function createCatchNodeMap(nodes) {
     var catchNodes = {};
     var subflowInstances = {};
+    var id;
     /*
      - a catchNode with same z as error node
      - if error occurs on a subflow without catchNode, look at z of subflow instance
     */
-    for (var id in nodes) {
+    for (id in nodes) {
         if (nodes.hasOwnProperty(id)) {
             if (nodes[id].type === "catch") {
                 catchNodes[nodes[id].z] = nodes[id];
             }
         }
     }
-    for (var id in nodes) {
+    for (id in nodes) {
         if (nodes.hasOwnProperty(id)) {
             var m = /^subflow:(.+)$/.exec(nodes[id].type);
             if (m) {
@@ -227,7 +228,7 @@ function createCatchNodeMap(nodes) {
             }
         }
     }
-    for (var id in subflowInstances) {
+    for (id in subflowInstances) {
         if (subflowInstances.hasOwnProperty(id)) {
             var z = id;
             while(subflowInstances[z]) {
@@ -744,8 +745,8 @@ Flow.prototype.handleError = function(node,logMessage,msg) {
     errorMessage.error = {
         message: logMessage.toString(),
         source: {
-            id: this.id,
-            type: this.type
+            id: node.id,
+            type: node.type
         }
     };
     if (this.catchNodeMap[node.z]) {

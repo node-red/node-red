@@ -574,9 +574,6 @@ describe('Flow', function() {
         }
         util.inherits(TestNode,Node);
         
-
-        
-        
         before(function() {
             getNode = sinon.stub(flows,"get",function(id) {
                 return currentNodes[id];
@@ -809,9 +806,129 @@ describe('Flow', function() {
                 done();
             });
         });
+    });
         
+    describe('#handleError',function() {
+        var getType;
+        var getNode;
+        var credentialsClean;
         
+        var currentNodes = {};
         
+        var TestNode = function(n) {
+            Node.call(this,n);
+            var node = this;
+            this.handled = [];
+            currentNodes[node.id] = node;
+            this.on('input',function(msg) {
+                node.handled.push(msg);
+                node.send(msg);
+            });
+        }
+        util.inherits(TestNode,Node);
         
+        before(function() {
+            getNode = sinon.stub(flows,"get",function(id) {
+                return currentNodes[id];
+            });
+            getType = sinon.stub(typeRegistry,"get",function(type) {
+                return TestNode;
+            });
+            credentialsClean = sinon.stub(credentials,"clean",function(config){});
+                
+        });
+        after(function() {
+            getType.restore();
+            credentialsClean.restore();
+            getNode.restore();
+        });
+        
+        beforeEach(function() {
+            currentNodes = {};
+        });
+        
+        it("reports error to catch nodes on same z",function(done) {
+            var config = [
+                {id:"1",type:"test",z:"tab1",name:"a",wires:["2"]},
+                {id:"2",type:"catch",z:"tab1",wires:[[]]},
+                {id:"3",type:"catch",z:"tab2",wires:[[]]}
+            ];
+            var flow = new Flow(config);
+            flow.start();
+            var msg = {a:1};
+            flow.handleError(getNode(1),"test error",msg);
+            var n2 = getNode(2);
+            n2.handled.should.have.lengthOf(1);
+            n2.handled[0].should.have.property("a",1);
+            n2.handled[0].should.have.property("error");
+            n2.handled[0].error.should.have.property("message","test error");
+            n2.handled[0].error.should.have.property("source");
+            n2.handled[0].error.source.should.have.property("id","1");
+            n2.handled[0].error.source.should.have.property("type","test");
+            getNode(3).handled.should.have.lengthOf(0);
+            done();
+        });
+        
+        it("reports error with undefined message object",function(done) {
+            var config = [
+                {id:"1",type:"test",z:"tab1",name:"a",wires:["2"]},
+                {id:"2",type:"catch",z:"tab1",wires:[[]]},
+                {id:"3",type:"catch",z:"tab2",wires:[[]]}
+            ];
+            var flow = new Flow(config);
+            flow.start();
+            flow.handleError(getNode(1),"test error");
+            var n2 = getNode(2);
+            n2.handled.should.have.lengthOf(1);
+            n2.handled[0].should.have.property("error");
+            n2.handled[0].error.should.have.property("message","test error");
+            n2.handled[0].error.should.have.property("source");
+            n2.handled[0].error.source.should.have.property("id","1");
+            n2.handled[0].error.source.should.have.property("type","test");
+            getNode(3).handled.should.have.lengthOf(0);
+            done();
+        });
+        
+        it("reports error with Error object",function(done) {
+            var config = [
+                {id:"1",type:"test",z:"tab1",name:"a",wires:["2"]},
+                {id:"2",type:"catch",z:"tab1",wires:[[]]},
+                {id:"3",type:"catch",z:"tab2",wires:[[]]}
+            ];
+            var flow = new Flow(config);
+            flow.start();
+            var msg = {a:1,error:"existing"};
+            flow.handleError(getNode(1),"test error",msg);
+            var n2 = getNode(2);
+            n2.handled.should.have.lengthOf(1);
+            n2.handled[0].should.have.property("error");
+            n2.handled[0].should.have.property("_error","existing");
+            n2.handled[0].error.should.have.property("message","test error");
+            n2.handled[0].error.should.have.property("source");
+            n2.handled[0].error.source.should.have.property("id","1");
+            n2.handled[0].error.source.should.have.property("type","test");
+            getNode(3).handled.should.have.lengthOf(0);
+            done();
+        });
+        
+         it("reports error with Error object",function(done) {
+            var config = [
+                {id:"1",type:"test",z:"tab1",name:"a",wires:["2"]},
+                {id:"2",type:"catch",z:"tab1",wires:[[]]},
+                {id:"3",type:"catch",z:"tab2",wires:[[]]}
+            ];
+            var flow = new Flow(config);
+            flow.start();
+            flow.handleError(getNode(1),new Error("test error"));
+            var n2 = getNode(2);
+            n2.handled.should.have.lengthOf(1);
+            n2.handled[0].should.have.property("error");
+            n2.handled[0].error.should.have.property("message","Error: test error");
+            n2.handled[0].error.should.have.property("source");
+            n2.handled[0].error.source.should.have.property("id","1");
+            n2.handled[0].error.source.should.have.property("type","test");
+            getNode(3).handled.should.have.lengthOf(0);
+            done();
+        });
     });
 });
