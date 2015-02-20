@@ -21,7 +21,25 @@
     </div>
 </script>
 <script type="text/x-red" data-help-name="catch">
-    <p>Catch errors that occur within flows on the same tab</p>
+    <p>Catch errors thrown by nodes on the same tab.</p>
+    <p>If a node throws a error whilst handling a message, the flow will typically
+       halt. This node can be used to catch those errors and handle them with a
+       dedicated flow.</p>
+    <p>The node will catch errors thrown by any node on the same tab. If there
+       are multiple catch nodes on a tab, they will all get triggered.</p>
+    <p>If an error is thrown within a subflow, the error will get handled by any
+       catch nodes within the subflow. If none exists, the error is propagated
+       up to the tab the subflow instance is on.</p>
+    <p>The message sent by this node will be the original message if the node that
+       threw the error provided it. The message will have an <code>error</code>
+       property with the following attributes:
+       <ul>
+        <li><code>message</code> : the error message</li>
+        <li><code>source.id</code> : the id of the node that threw the error</li>
+        <li><code>source.type</code> : the type of the node that threw the error</li>
+       </ul>
+   </p>
+   <p>If the message already had a <code>error</code> property, it is copied to <code>_error</code>.</p>
 </script>
 
 <script type="text/javascript">
@@ -33,7 +51,7 @@
         },
         inputs:0,
         outputs:1,
-        icon: "arrow-in.png",
+        icon: "alert.png",
         label: function() {
             return this.name||"catch";
         },
