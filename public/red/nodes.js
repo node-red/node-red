@@ -615,6 +615,7 @@ RED.nodes = (function() {
                 addWorkspace(defaultWorkspace);
                 RED.view.addWorkspace(defaultWorkspace);
                 new_workspaces.push(defaultWorkspace);
+                activeWorkspace = RED.view.getWorkspace();
             }
 
             var node_map = {};
