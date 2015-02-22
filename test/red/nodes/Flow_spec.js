@@ -910,5 +910,72 @@ describe('Flow', function() {
             getNode(3).handled.should.have.lengthOf(0);
             done();
         });
+         
+        it('reports error in subflow to a local handler', function(done) {
+            var config = [
+                {id:"1",type:"test",z:"tab1",wires:[[]]},
+                {id:"2",type:"subflow:sf1",z:"tab1",wires:[[]]},
+                {id:"3",type:"catch",z:"tab1",wires:[]},
+                {id:"sf1",type:"subflow","in": [],"out": []},
+                {id:"sf1-1",z:"sf1",type:"test",wires:[]},
+                {id:"sf1-catch",type:"catch",z:"sf1",wires:[]}
+            ];
+            var flow = new Flow(config);
+            flow.start();
+            var instanceNode;
+            var instanceCatch;
+            for (var id in currentNodes) {
+                if (currentNodes.hasOwnProperty(id)) {
+                    if (currentNodes[id].z == '2') {
+                        if (currentNodes[id].type == "catch") {
+                            instanceCatch = currentNodes[id];
+                        } else {
+                            instanceNode = currentNodes[id];
+                        }
+                    }
+                }
+            }
+            flow.handleError(instanceNode,new Error("test error"));
+            var n3 = instanceCatch;
+            n3.handled.should.have.lengthOf(1);
+            n3.handled[0].should.have.property("error");
+            n3.handled[0].error.should.have.property("message","Error: test error");
+            n3.handled[0].error.should.have.property("source");
+            n3.handled[0].error.source.should.have.property("id",instanceNode.id);
+            n3.handled[0].error.source.should.have.property("type","test");
+            getNode(3).handled.should.have.lengthOf(0);
+            done();
+        });                 
+        it('reports error in subflow to a parent handler', function(done) {
+            var config = [
+                {id:"1",type:"test",z:"tab1",wires:[[]]},
+                {id:"2",type:"subflow:sf1",z:"tab1",wires:[[]]},
+                {id:"3",type:"catch",z:"tab1",wires:[]},
+                {id:"4",type:"catch",z:"tab2",wires:[]},
+                {id:"sf1",type:"subflow","in": [],"out": []},
+                {id:"sf1-1",z:"sf1",type:"test",wires:[]}
+            ];
+            var flow = new Flow(config);
+            flow.start();
+            var instanceNode;
+            
+            for (var id in currentNodes) {
+                if (currentNodes.hasOwnProperty(id)) {
+                    if (currentNodes[id].z == '2') {
+                        instanceNode = currentNodes[id];
+                    }
+                }
+            }
+            flow.handleError(instanceNode,new Error("test error"));
+            var n3 = getNode(3);
+            n3.handled.should.have.lengthOf(1);
+            n3.handled[0].should.have.property("error");
+            n3.handled[0].error.should.have.property("message","Error: test error");
+            n3.handled[0].error.should.have.property("source");
+            n3.handled[0].error.source.should.have.property("id",instanceNode.id);
+            n3.handled[0].error.source.should.have.property("type","test");
+            getNode(4).handled.should.have.lengthOf(0);
+            done();
+        });
     });
 });
