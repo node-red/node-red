@@ -124,8 +124,9 @@ module.exports = function(RED) {
                                     }
                                     if (JSON.stringify(o) !== "{}") { // don't send empty objects
                                         if (node.multi === "one") {
-                                            msg.payload = o;
-                                            node.send(msg); // either send
+                                            var newMessage = RED.util.cloneMessage(msg);
+                                            newMessage.payload = o;
+                                            node.send(newMessage); // either send
                                         }
                                         else { a.push(o); } // or add to the array
                                     }
@@ -148,8 +149,9 @@ module.exports = function(RED) {
                         }
                         if (JSON.stringify(o) !== "{}") { // don't send empty objects
                             if (node.multi === "one") {
-                                msg.payload = o;
-                                node.send(msg); // either send
+                                var newMessage = RED.util.cloneMessage(msg);
+                                newMessage.payload = o;
+                                node.send(newMessage); // either send
                             }
                             else { a.push(o); } // or add to the aray
                         }
