@@ -504,7 +504,7 @@ Flow.prototype.diffFlow = function(config) {
     });
     
     this.config.forEach(function(node) {
-        if (!configNodes[node.id]) {
+        if (!configNodes[node.id] && node.type != "tab") {
             deletedNodes[node.id] = node;
         }
         buildNodeLinks(activeLinks,node,flow.allNodes);
