@@ -55,10 +55,11 @@ function start() {
                     reportMetrics();
                 }, 15000);
             }
-            console.log("\nWelcome to Node-RED\n===================\n");
+            console.log("\n\n   Welcome to Node-RED\n   ===================\n");
             if (settings.version) {
-                log.info("Version: "+settings.version);
+                log.info("Node-RED version: v"+settings.version);
             }
+            log.info("Node.js  version: "+process.version);
             log.info("Loading palette nodes");
             redNodes.init(settings,storage);
             redNodes.load().then(function() {
@@ -203,20 +204,20 @@ function uninstallModule(module) {
 
 function reportMetrics() {
     var memUsage = process.memoryUsage();
-    
+
     // only need to init these once per report
     var metrics = {};
     metrics.level = log.METRIC;
-    
+
     //report it
     metrics.event = "runtime.memory.rss"
     metrics.value = memUsage.rss;
     log.log(metrics);
-    
+
     metrics.event = "runtime.memory.heapTotal"
     metrics.value = memUsage.heapTotal;
     log.log(metrics);
-    
+
     metrics.event = "runtime.memory.heapUsed"
     metrics.value = memUsage.heapUsed;
     log.log(metrics);
