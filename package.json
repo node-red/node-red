@@ -1,6 +1,6 @@
 {
     "name"         : "node-red",
-    "version"      : "0.10.2",
+    "version"      : "0.10.3",
     "description"  : "A visual tool for wiring the Internet of Things",
     "homepage"     : "http://nodered.org",
     "license"      : "Apache",
@@ -12,6 +12,9 @@
     "scripts"      : {
         "start": "node red.js",
         "test": "./node_modules/.bin/grunt"
+    },
+    "bin"          : {
+        "node-red": "./red.js"
     },
     "contributors": [
         {"name": "Nick O'Leary"},
