@@ -121,13 +121,14 @@ settings.flowFile = flowFile || settings.flowFile;
 
 RED.init(server,settings);
 
-//if (settings.httpAdminRoot !== false && settings.httpAdminAuth) {
-//    app.use(settings.httpAdminRoot,
-//        express.basicAuth(function(user, pass) {
-//            return user === settings.httpAdminAuth.user && crypto.createHash('md5').update(pass,'utf8').digest('hex') === settings.httpAdminAuth.pass;
-//        })
-//    );
-//}
+if (settings.httpAdminRoot !== false && settings.httpAdminAuth) {
+    RED.log.warn("use of httpAdminAuth is deprecated. Use adminAuth instead");
+    app.use(settings.httpAdminRoot,
+        express.basicAuth(function(user, pass) {
+            return user === settings.httpAdminAuth.user && crypto.createHash('md5').update(pass,'utf8').digest('hex') === settings.httpAdminAuth.pass;
+        })
+    );
+}
 
 if (settings.httpNodeRoot !== false && settings.httpNodeAuth) {
     app.use(settings.httpNodeRoot,
