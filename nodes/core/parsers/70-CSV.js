@@ -75,7 +75,7 @@ module.exports = function(RED) {
                         msg.payload = ou;
                         node.send(msg);
                     }
-                    catch(e) { node.log(e); }
+                    catch(e) { node.error(e); }
                 }
                 else if (typeof msg.payload == "string") { // convert CSV string to object
                     try {
@@ -160,9 +160,9 @@ module.exports = function(RED) {
                             node.send(msg); // finally send the array
                         }
                     }
-                    catch(e) { node.log(e); }
+                    catch(e) { node.error(e); }
                 }
-                else { node.log("This node only handles csv strings or js objects."); }
+                else { node.warn("This node only handles csv strings or js objects."); }
             }
         });
     }

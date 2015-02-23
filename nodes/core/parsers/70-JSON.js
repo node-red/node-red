@@ -28,7 +28,7 @@ module.exports = function(RED) {
                         msg.payload = JSON.parse(msg.payload);
                         node.send(msg);
                     }
-                    catch(e) { node.log(e+ "\n"+msg.payload); }
+                    catch(e) { node.error(e+ "\n"+msg.payload); }
                 }
                 else if (typeof msg.payload === "object") {
                     if (!Buffer.isBuffer(msg.payload) ) {
@@ -38,7 +38,7 @@ module.exports = function(RED) {
                         }
                     }
                 }
-                else { node.log("dropped: "+msg.payload); }
+                else { node.warn("dropped: "+msg.payload); }
             }
         });
     }

@@ -52,7 +52,7 @@ module.exports = function(RED) {
                     node.send(msg);
                 }
             } catch (error) {
-                node.log('Error: '+error.message);
+                node.error('Error: '+error.message);
             }
         });
     }

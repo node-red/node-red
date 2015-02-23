@@ -40,7 +40,7 @@ module.exports = function(RED) {
                         }
                     });
                 }
-                else { node.log("This node only handles xml strings or js objects."); }
+                else { node.warn("This node only handles xml strings or js objects."); }
             }
         });
     }
