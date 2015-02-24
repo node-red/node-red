@@ -251,6 +251,7 @@ module.exports = function(RED) {
                 msg.statusCode = res.statusCode;
                 msg.headers = res.headers;
                 msg.payload = "";
+                msg.url = url;
                 res.on('data',function(chunk) {
                     msg.payload += chunk;
                 });
