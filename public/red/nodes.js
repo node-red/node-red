@@ -608,6 +608,21 @@ RED.nodes = (function() {
                     });
                     new_subflows.push(n);
                     addSubflow(n);
+                } else {
+                    var def = registry.getNodeType(n.type);
+                    if (def && def.category == "config") {
+                        if (!RED.nodes.node(n.id)) {
+                            var configNode = {id:n.id,type:n.type,users:[]};
+                            for (var d in def.defaults) {
+                                if (def.defaults.hasOwnProperty(d)) {
+                                    configNode[d] = n[d];
+                                }
+                            }
+                            configNode.label = def.label;
+                            configNode._def = def;
+                            RED.nodes.add(configNode);
+                        }
+                    }
                 }
             }
             if (defaultWorkspace == null) {
@@ -627,19 +642,7 @@ RED.nodes = (function() {
                 // TODO: remove workspace in next release+1
                 if (n.type !== "workspace" && n.type !== "tab" && n.type !== "subflow") {
                     var def = registry.getNodeType(n.type);
-                    if (def && def.category == "config") {
-                        if (!RED.nodes.node(n.id)) {
-                            var configNode = {id:n.id,type:n.type,users:[]};
-                            for (var d in def.defaults) {
-                                if (def.defaults.hasOwnProperty(d)) {
-                                    configNode[d] = n[d];
-                                }
-                            }
-                            configNode.label = def.label;
-                            configNode._def = def;
-                            RED.nodes.add(configNode);
-                        }
-                    } else {
+                    if (!def || def.category != "config") {
                         var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires,changed:false};
                         if (createNewIds) {
                             if (subflow_map[node.z]) {

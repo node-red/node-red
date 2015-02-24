@@ -228,11 +228,14 @@ Flow.prototype.parseConfig = function(config) {
     this.nodes = {};
     this.subflows = {};
     
+    this.configNodes = {};
+    
     var unknownTypes = {};
     
     for (i=0;i<this.config.length;i++) {
         nodeConfig = this.config[i];
         nodeType = nodeConfig.type;
+        this.allNodes[nodeConfig.id] = nodeConfig;
         if (nodeType == "subflow") {
             this.subflows[nodeConfig.id] = {
                 type: "subflow",
@@ -243,11 +246,9 @@ Flow.prototype.parseConfig = function(config) {
         
     }
     //console.log("Known subflows:",Object.keys(this.subflows));
-    
     for (i=0;i<this.config.length;i++) {
         nodeConfig = this.config[i];
         
-        this.allNodes[nodeConfig.id] = nodeConfig;
         
         nodeType = nodeConfig.type;
         
@@ -272,6 +273,15 @@ Flow.prototype.parseConfig = function(config) {
                     this.subflows[nodeConfig.z].nodes.push(nodeInfo);
                 } else {
                     this.nodes[nodeConfig.id] = nodeInfo;
+                }
+                for (var prop in nodeConfig) {
+                    if (nodeConfig.hasOwnProperty(prop) &&
+                        prop != "id" && 
+                        prop != "z" && 
+                        prop != "wires" &&
+                        this.allNodes[nodeConfig[prop]]) {
+                            this.configNodes[nodeConfig[prop]] = this.allNodes[nodeConfig[prop]];
+                    }
                 }
             }
         }
@@ -302,10 +312,22 @@ Flow.prototype.start = function() {
         throw new Error("missing types");
     }
     events.emit("nodes-starting");
-
-    for (var id in this.nodes) {
+    
+    var id;
+    var node;
+    
+    for (id in this.configNodes) {
+        if (this.configNodes.hasOwnProperty(id)) {
+            node = this.configNodes[id];
+            if (!this.activeNodes[id]) {
+                this.activeNodes[id] = createNode(node.type,node);
+            }
+        }
+    }
+    
+    for (id in this.nodes) {
         if (this.nodes.hasOwnProperty(id)) {
-            var node = this.nodes[id];
+            node = this.nodes[id];
             if (!node.subflow) {
                 if (!this.activeNodes[id]) {
                     this.activeNodes[id] = createNode(node.type,node.config);
@@ -460,7 +482,7 @@ Flow.prototype.applyConfig = function(config,type) {
 
 Flow.prototype.diffFlow = function(config) {
     var flow = this;
-    var configNodes = {};
+    var flowNodes = {};
     var changedNodes = {};
     var deletedNodes = {};
     var linkChangedNodes = {};
@@ -489,7 +511,7 @@ Flow.prototype.diffFlow = function(config) {
     }
     
     config.forEach(function(node) {
-        configNodes[node.id] = node;
+        flowNodes[node.id] = node;
     });
     
     config.forEach(function(node) {
@@ -500,7 +522,7 @@ Flow.prototype.diffFlow = function(config) {
         } else {
             changed = diffNodeConfigs(flow.allNodes[node.id],node);
             if (!changed) {
-                if (configNodes[node.z] && configNodes[node.z].type == "subflow") {
+                if (flowNodes[node.z] && flowNodes[node.z].type == "subflow") {
                     var originalNode = flow.allNodes[node.id];
                     if (originalNode && !redUtil.compareObjects(originalNode.wires,node.wires)) {
                         // This is a node in a subflow whose wiring has changed. Mark subflow as changed
@@ -515,7 +537,7 @@ Flow.prototype.diffFlow = function(config) {
     });
     
     this.config.forEach(function(node) {
-        if (!configNodes[node.id] && node.type != "tab") {
+        if (!flowNodes[node.id] && node.type != "tab") {
             deletedNodes[node.id] = node;
         }
         buildNodeLinks(activeLinks,node,flow.allNodes);
@@ -550,7 +572,7 @@ Flow.prototype.diffFlow = function(config) {
         }
     };
     
-    Object.keys(changedNodes).forEach(function(n) { checkSubflowMembership(configNodes,n)});
+    Object.keys(changedNodes).forEach(function(n) { checkSubflowMembership(flowNodes,n)});
     Object.keys(deletedNodes).forEach(function(n) { checkSubflowMembership(flow.allNodes,n)});
     
     while (changedSubflowStack.length > 0) {
@@ -560,7 +582,7 @@ Flow.prototype.diffFlow = function(config) {
             if (node.type == "subflow:"+subflowId) {
                 if (!changedNodes[node.id]) {
                     changedNodes[node.id] = node;
-                    checkSubflowMembership(configNodes,node.id);
+                    checkSubflowMembership(flowNodes,node.id);
                 }
             }
         });
@@ -568,7 +590,7 @@ Flow.prototype.diffFlow = function(config) {
     }
     
     config.forEach(function(node) {
-        buildNodeLinks(newLinks,node,configNodes);
+        buildNodeLinks(newLinks,node,flowNodes);
     });
     
     var markLinkedNodes = function(linkChanged,otherChangedNodes,linkMap,allNodes) {
@@ -591,7 +613,7 @@ Flow.prototype.diffFlow = function(config) {
             }
         }
     }
-    markLinkedNodes(linkChangedNodes,{},newLinks,configNodes);
+    markLinkedNodes(linkChangedNodes,{},newLinks,flowNodes);
     markLinkedNodes(linkChangedNodes,{},activeLinks,flow.allNodes);
     
     var modifiedLinkNodes = {};
@@ -613,8 +635,8 @@ Flow.prototype.diffFlow = function(config) {
                     modifiedLinkNodes[node.id] = node;
                     linkChangedNodes[node.id] = node;
                     if (!changedNodes[link] && !deletedNodes[link]) {
-                        modifiedLinkNodes[link] = configNodes[link];
-                        linkChangedNodes[link] = configNodes[link];
+                        modifiedLinkNodes[link] = flowNodes[link];
+                        linkChangedNodes[link] = flowNodes[link];
                     }
                 }
             });
@@ -623,15 +645,15 @@ Flow.prototype.diffFlow = function(config) {
                     modifiedLinkNodes[node.id] = node;
                     linkChangedNodes[node.id] = node;
                     if (!changedNodes[link] && !deletedNodes[link]) {
-                        modifiedLinkNodes[link] = configNodes[link];
-                        linkChangedNodes[link] = configNodes[link];
+                        modifiedLinkNodes[link] = flowNodes[link];
+                        linkChangedNodes[link] = flowNodes[link];
                     }
                 }
             });
         }
     });
 
-    markLinkedNodes(linkChangedNodes,modifiedLinkNodes,newLinks,configNodes);
+    markLinkedNodes(linkChangedNodes,modifiedLinkNodes,newLinks,flowNodes);
     
     //config.forEach(function(n) {
     //    console.log((changedNodes[n.id]!=null)?"[C]":"[ ]",(linkChangedNodes[n.id]!=null)?"[L]":"[ ]","[ ]",n.id,n.type,n.name);
@@ -643,14 +665,14 @@ Flow.prototype.diffFlow = function(config) {
     //});
     
     var diff = {
-        deleted: Object.keys(deletedNodes).filter(function(id) { return deletedNodes[id].type != "subflow" && (!deletedNodes[id].z || configNodes[deletedNodes[id].z].type != "subflow")}),
-        changed: Object.keys(changedNodes).filter(function(id) { return changedNodes[id].type != "subflow" && (!changedNodes[id].z || configNodes[changedNodes[id].z].type != "subflow")}),
-        linked: Object.keys(linkChangedNodes).filter(function(id) { return linkChangedNodes[id].type != "subflow" && (!linkChangedNodes[id].z || configNodes[linkChangedNodes[id].z].type != "subflow")}),
+        deleted: Object.keys(deletedNodes).filter(function(id) { return deletedNodes[id].type != "subflow" && (!deletedNodes[id].z || flowNodes[deletedNodes[id].z].type != "subflow")}),
+        changed: Object.keys(changedNodes).filter(function(id) { return changedNodes[id].type != "subflow" && (!changedNodes[id].z || flowNodes[changedNodes[id].z].type != "subflow")}),
+        linked: Object.keys(linkChangedNodes).filter(function(id) { return linkChangedNodes[id].type != "subflow" && (!linkChangedNodes[id].z || flowNodes[linkChangedNodes[id].z].type != "subflow")}),
         wiringChanged: []
     }
     
     config.forEach(function(n) {
-        if (!configNodes[n.z] || configNodes[n.z].type != "subflow") {
+        if (!flowNodes[n.z] || flowNodes[n.z].type != "subflow") {
             var originalNode = flow.allNodes[n.id];
             if (originalNode && !redUtil.compareObjects(originalNode.wires,n.wires)) {
                 diff.wiringChanged.push(n.id);
