@@ -55,7 +55,7 @@ function start() {
                     reportMetrics();
                 }, 15000);
             }
-            console.log("\n\n   Welcome to Node-RED\n   ===================\n");
+            console.log("\n\nWelcome to Node-RED\n===================\n");
             if (settings.version) {
                 log.info("Node-RED version: v"+settings.version);
             }
