@@ -42,9 +42,9 @@ module.exports = function(RED) {
         server.on('message', function (message, remote) {
             var msg;
             if (node.datatype =="base64") {
-                msg = { payload:message.toString('base64'), fromip:remote.address+':'+remote.port };
+                msg = { payload:message.toString('base64'), fromip:remote.address+':'+remote.port, ip:remote.address, port:remote.port };
             } else if (node.datatype =="utf8") {
-                msg = { payload:message.toString('utf8'), fromip:remote.address+':'+remote.port };
+                msg = { payload:message.toString('utf8'), fromip:remote.address+':'+remote.port, ip:remote.address, port:remote.port };
             } else {
                 msg = { payload:message, fromip:remote.address+':'+remote.port, ip:remote.address, port:remote.port };
             }
