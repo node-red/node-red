@@ -567,6 +567,7 @@ RED.nodes = (function() {
             var new_subflows = [];
             var subflow_map = {};
             var nid;
+            var def;
             for (i=0;i<newNodes.length;i++) {
                 n = newNodes[i];
                 // TODO: remove workspace in next release+1
@@ -609,7 +610,7 @@ RED.nodes = (function() {
                     new_subflows.push(n);
                     addSubflow(n);
                 } else {
-                    var def = registry.getNodeType(n.type);
+                    def = registry.getNodeType(n.type);
                     if (def && def.category == "config") {
                         if (!RED.nodes.node(n.id)) {
                             var configNode = {id:n.id,type:n.type,users:[]};
@@ -641,7 +642,7 @@ RED.nodes = (function() {
                 n = newNodes[i];
                 // TODO: remove workspace in next release+1
                 if (n.type !== "workspace" && n.type !== "tab" && n.type !== "subflow") {
-                    var def = registry.getNodeType(n.type);
+                    def = registry.getNodeType(n.type);
                     if (!def || def.category != "config") {
                         var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires,changed:false};
                         if (createNewIds) {
