@@ -301,7 +301,6 @@ Flow.prototype.start = function() {
     if (this.missingTypes.length > 0) {
         throw new Error("missing types");
     }
-    
     events.emit("nodes-starting");
 
     for (var id in this.nodes) {
@@ -435,7 +434,13 @@ Flow.prototype.applyConfig = function(config,type) {
     }
         
     var flow = this;
+    if (type != "full") {
+        log.info("Stopping modified "+type);
+    }
     return this.stop(activeNodesToStop).then(function() {
+        if (type != "full") {
+            log.info("Stopped modified "+type);
+        }
         flow.parseConfig(config);
         for (var i=0;i<nodesToRewire.length;i++) {
             var node = flow.activeNodes[nodesToRewire[i]];
@@ -443,7 +448,13 @@ Flow.prototype.applyConfig = function(config,type) {
                 node.updateWires(flow.allNodes[node.id].wires);
             }
         }
+        if (type != "full") {
+            log.info("Starting modified "+type);
+        }
         flow.start();
+        if (type != "full") {
+            log.info("Started modified "+type);
+        }
     })
 }
 

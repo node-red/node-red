@@ -76,45 +76,6 @@ var flowNodes = module.exports = {
     },
     
     /**
-     * Stops all active nodes and clears the active set
-     * @return a promise for the stopping of all active nodes
-     */
-    //clear: function(nodesToStop) {
-    //    var stopList;
-    //    if (nodesToStop == null) {
-    //        stopList = Object.keys(nodes);
-    //    } else {
-    //        stopList = Object.keys(nodesToStop);
-    //    }
-    //    console.log(stopList);
-    //    return when.promise(function(resolve) {
-    //        events.emit("nodes-stopping");
-    //        var promises = [];
-    //        console.log("running nodes:",Object.keys(nodes).length);
-    //        for (var i=0;i<stopList.length;i++) {
-    //            var node = nodes[stopList[i]];
-    //            if (node) {
-    //                try {
-    //                    var p = node.close();
-    //                    if (p) {
-    //                        promises.push(p);
-    //                    }
-    //                } catch(err) {
-    //                    node.error(err);
-    //                }
-    //                delete nodes[stopList[i]];
-    //                delete activeConfigNodes[stopList[i]];
-    //            }
-    //        }
-    //        console.log("running nodes:",Object.keys(nodes).length);
-    //        when.settle(promises).then(function() {
-    //            events.emit("nodes-stopped");
-    //            resolve();
-    //        });
-    //    });
-    //},
-
-    /**
      * @return the active configuration
      */
     getFlows: function() {
@@ -135,7 +96,12 @@ var flowNodes = module.exports = {
         
         var credentialSavePromise = null;
         
-        config.forEach(function(node) {
+        
+        // Clone config and extract credentials prior to saving
+        // Original config needs to retain credentials so that flow.applyConfig
+        // knows which nodes have had changes.
+        var cleanConfig = clone(config);
+        cleanConfig.forEach(function(node) {
             if (node.credentials) {
                 credentials.extract(node);
                 credentialsChanged = true;
@@ -148,22 +114,22 @@ var flowNodes = module.exports = {
             credentialSavePromise = when.resolve();
         }
         
-        
         if (type=="full") {
             return credentialSavePromise
-                    .then(function() { return storage.saveFlows(config);})
-                    .then(function() { return flowNodes.stopFlows(); })
-                    .then(function() { activeFlow = new Flow(config); flowNodes.startFlows();});
+                .then(function() { return storage.saveFlows(cleanConfig);})
+                .then(function() { return flowNodes.stopFlows(); })
+                .then(function() { activeFlow = new Flow(config); flowNodes.startFlows();});
         } else {
             return credentialSavePromise
-                    .then(function() { return storage.saveFlows(config);})
-                    .then(function() { return activeFlow.applyConfig(config,type); });
+                .then(function() { return storage.saveFlows(cleanConfig);})
+                .then(function() { return activeFlow.applyConfig(config,type); });
         }
     },
     startFlows: function() {
         log.info("Starting flows");
         try {
             activeFlow.start();
+        log.info("Started flows");
         } catch(err) {
             var missingTypes = activeFlow.getMissingTypes();
             if (missingTypes.length > 0) {
@@ -177,7 +143,10 @@ var flowNodes = module.exports = {
     },
     stopFlows: function() {
         log.info("Stopping flows");
-        return activeFlow.stop();
+        return activeFlow.stop().then(function() {
+            log.info("Stopped flows");
+            return;
+        });
     }
 };
 

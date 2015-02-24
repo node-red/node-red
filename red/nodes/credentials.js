@@ -190,6 +190,7 @@ module.exports = {
                 }
             }
             credentialCache[nodeID] = savedCredentials;
+            delete node.credentials;
         }
     },
     
