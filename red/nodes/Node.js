@@ -60,26 +60,48 @@ Node.prototype.updateWires = function(wires) {
 
 Node.prototype._on = Node.prototype.on;
 
-Node.prototype.on = function(event, callback) {
+Node.prototype.on = function(event,callback) {
     var node = this;
     if (event == "close") {
+    	node.closes = node.closes || [];
         if (callback.length == 1) {
-            this.close = function() {
+           node.closes.push( function() {
                 return when.promise(function(resolve) {
-                    callback.call(node, function() {
+                    callback.call(node,function() {
                         resolve();
                     });
                 });
-            };
+            });
         } else {
-            this.close = callback;
+            node.closes.push( callback );
         }
     } else {
-        this._on(event, callback);
+        this._on(event,callback);
     }
 };
 
-Node.prototype.close = function() {};
+Node.prototype.close = function() {
+	var node = this;
+	if(node.closes){
+		var defer = when.defer();
+		var promises = [];
+		for (var c in node.closes) {
+			try {
+		    	var p = node.closes[c].apply(node);
+		    	if (p) {
+		    		promises.push(p);
+		    	}
+		    } catch(err) {
+		    	node.error(err);
+		    }
+		}
+		when.settle(promises).then(function() {
+			defer.resolve();
+		});
+		return defer.promise;
+	}
+};
+
 
 function constructUniqueIdentifier() {
     return (1+Math.random()*4294967295).toString(16);
