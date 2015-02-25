@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Copyright 2013, 2015 IBM Corp.
  *
@@ -49,7 +48,7 @@ var parsedArgs = nopt(knownOpts,shortHands,process.argv,2)
 
 if (parsedArgs.help) {
     console.log("Node-RED v"+RED.version());
-    console.log("Usage: node red.js [-v] [-?] [--settings settings.js] [--userDir DIR] [flows.json]");
+    console.log("Usage: node-red [-v] [-?] [--settings settings.js] [--userDir DIR] [flows.json]");
     console.log("");
     console.log("Options:");
     console.log("  -s, --settings FILE  use specified settings file");

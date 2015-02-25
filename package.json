@@ -14,7 +14,7 @@
         "test": "./node_modules/.bin/grunt"
     },
     "bin"          : {
-        "node-red": "./red.js"
+        "node-red": "bin/node-red"
     },
     "contributors": [
         {"name": "Nick O'Leary"},
