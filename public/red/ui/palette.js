@@ -17,7 +17,7 @@
 RED.palette = (function() {
 
     var exclusion = ['config','unknown','deprecated'];
-    var core = ['input', 'output', 'function', 'subflows', 'social', 'storage', 'analysis', 'advanced'];
+    var core = ['subflows', 'input', 'output', 'function', 'social', 'storage', 'analysis', 'advanced'];
 
     function createCategoryContainer(category){
         var escapedCategory = category.replace(" ","_");
