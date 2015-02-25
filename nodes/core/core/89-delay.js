@@ -147,7 +147,6 @@ module.exports = function(RED) {
                     node.send(node.buffer.shift()); // send the first on the queue
                 }
                 node.status({text:node.buffer.length});
-                //console.log(node.buffer);
             },node.rate);
 
             this.on("input", function(msg) {

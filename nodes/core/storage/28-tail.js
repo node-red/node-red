@@ -57,7 +57,7 @@ module.exports = function(RED) {
         });
 
         tail.stderr.on("data", function(data) {
-            node.warn(data.toString());
+            node.error(data.toString());
         });
 
         this.on("close", function() {

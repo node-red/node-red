@@ -174,7 +174,7 @@ module.exports = function(RED) {
                             i = 0;
                         }
                     }
-                    else { console.log("Should never get here"); }
+                    else { node.log("should never get here"); }
                 }
             });
             this.port.on('ready', function() {
@@ -235,7 +235,7 @@ module.exports = function(RED) {
                             //    },true, function(err, results) { if (err) obj.serial.emit('error',err); });
                             //}
                             obj.serial.on('error', function(err) {
-                                util.log("[serial] serial port "+port+" error "+err);
+                                RED.log.error("serial port "+port+" error "+err);
                                 obj._emitter.emit('closed');
                                 obj.tout = setTimeout(function() {
                                     setupSerial();
@@ -243,7 +243,7 @@ module.exports = function(RED) {
                             });
                             obj.serial.on('close', function() {
                                 if (!obj._closing) {
-                                    util.log("[serial] serial port "+port+" closed unexpectedly");
+                                    RED.log.error("serial port "+port+" closed unexpectedly");
                                     obj._emitter.emit('closed');
                                     obj.tout = setTimeout(function() {
                                         setupSerial();
@@ -251,7 +251,7 @@ module.exports = function(RED) {
                                 }
                             });
                             obj.serial.on('open',function() {
-                                util.log("[serial] serial port "+port+" opened at "+baud+" baud "+databits+""+parity.charAt(0).toUpperCase()+stopbits);
+                                RED.log.info("serial port "+port+" opened at "+baud+" baud "+databits+""+parity.charAt(0).toUpperCase()+stopbits);
                                 if (obj.tout) { clearTimeout(obj.tout); }
                                 //obj.serial.flush();
                                 obj._emitter.emit('ready');
@@ -269,7 +269,7 @@ module.exports = function(RED) {
                                 //}
                             });
                             obj.serial.on("disconnect",function() {
-                                util.log("[serial] serial port "+port+" gone away");
+                                RED.log.error("serial port "+port+" gone away");
                             });
                         }
                         setupSerial();
@@ -286,7 +286,7 @@ module.exports = function(RED) {
                     connections[port]._closing = true;
                     try {
                         connections[port].close(function() {
-                            util.log("[serial] serial port closed");
+                            RED.log.info("serial port closed");
                             done();
                         });
                     }

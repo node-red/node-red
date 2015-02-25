@@ -61,7 +61,6 @@
             access_token: {type: "password"},
             access_token_secret: {type:"password"}
         },
-            
         label: function() {
             return this.screen_name;
         },
@@ -177,11 +176,10 @@
                     $("#node-input-tags-row").show();
                     $("#node-input-tags-label").html("for");
                     $("#node-input-tags").attr("placeholder","comma-separated words, @ids, #hashtags");
-                }                
+                }
 
             });
             $("#node-input-user").change();
-        
         }
     });
 </script>

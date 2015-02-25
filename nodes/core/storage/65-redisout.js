@@ -16,7 +16,6 @@
 
 module.exports = function(RED) {
     "use strict";
-    var util = require("util");
     var redis = require("redis");
 
     var hashFieldRE = /^([^=]+)=(.*)$/;
@@ -29,10 +28,10 @@ module.exports = function(RED) {
                 if (!connections[id]) {
                     connections[id] = redis.createClient(port,host);
                     connections[id].on("error",function(err) {
-                            util.log("[redis] "+err);
+                        RED.log.error(err);
                     });
                     connections[id].on("connect",function() {
-                            util.log("[redis] connected to "+host+":"+port);
+                        if (RED.settings.verbose) { RED.log.info("connected to "+host+":"+port); }
                     });
                     connections[id]._id = id;
                     connections[id]._nodeCount = 0;

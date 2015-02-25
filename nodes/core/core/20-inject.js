@@ -32,13 +32,13 @@ module.exports = function(RED) {
 
         if (this.repeat && !isNaN(this.repeat) && this.repeat > 0) {
             this.repeat = this.repeat * 1000;
-            this.log("repeat = "+this.repeat);
+            if (RED.settings.verbose) { this.log("repeat = "+this.repeat); }
             this.interval_id = setInterval( function() {
                 node.emit("input",{});
             }, this.repeat );
         } else if (this.crontab) {
             if (cron) {
-                this.log("crontab = "+this.crontab);
+                if (RED.settings.verbose) { this.log("crontab = "+this.crontab); }
                 this.cronjob = new cron.CronJob(this.crontab,
                     function() {
                         node.emit("input",{});
@@ -72,14 +72,14 @@ module.exports = function(RED) {
     InjectNode.prototype.close = function() {
         if (this.interval_id != null) {
             clearInterval(this.interval_id);
-            this.log("inject: repeat stopped");
+            if (RED.settings.verbose) { this.log("inject: repeat stopped"); }
         } else if (this.cronjob != null) {
             this.cronjob.stop();
-            this.log("inject: cronjob stopped");
+            if (RED.settings.verbose) { this.log("inject: cronjob stopped"); }
             delete this.cronjob;
         }
     }
-    
+
     RED.httpAdmin.post("/inject/:id", RED.auth.needsPermission("inject.write"), function(req,res) {
         var node = RED.nodes.getNode(req.params.id);
         if (node != null) {
@@ -89,7 +89,6 @@ module.exports = function(RED) {
             } catch(err) {
                 res.send(500);
                 node.error("Inject failed:"+err);
-                console.log(err.stack);
             }
         } else {
             res.send(404);

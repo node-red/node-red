@@ -16,7 +16,6 @@
 
 module.exports = function(RED) {
     "use strict";
-    var util = require("util");
     var exec = require('child_process').exec;
     var spawn = require('child_process').spawn;
     var fs =  require('fs');
@@ -24,17 +23,17 @@ module.exports = function(RED) {
     var gpioCommand = __dirname+'/nrgpio';
 
     if (!fs.existsSync("/dev/ttyAMA0")) { // unlikely if not on a Pi
-        //util.log("Info : Ignoring Raspberry Pi specific node.");
+        //RED.log.info("Ignoring Raspberry Pi specific node.");
         throw "Info : Ignoring Raspberry Pi specific node.";
     }
 
     if (!fs.existsSync("/usr/share/doc/python-rpi.gpio")) {
-        util.log("[rpi-gpio] Info : Can't find Pi RPi.GPIO python library.");
+        RED.log.warn("Can't find Pi RPi.GPIO python library.");
         throw "Warning : Can't find Pi RPi.GPIO python library.";
     }
 
     if ( !(1 & parseInt ((fs.statSync(gpioCommand).mode & parseInt ("777", 8)).toString (8)[0]) )) {
-        util.log("[rpi-gpio] Error : "+gpioCommand+" needs to be executable.");
+        RED.log.error(gpioCommand+" needs to be executable.");
         throw "Error : nrgpio must to be executable.";
     }
 
@@ -100,7 +99,7 @@ module.exports = function(RED) {
             node.child.on('error', function (err) {
                 if (err.errno === "ENOENT") { node.error('nrgpio command not found'); }
                 else if (err.errno === "EACCES") { node.error('nrgpio command not executable'); }
-                else { node.log('error: ' + err); }
+                else { node.error('error: ' + err.errno); }
             });
 
         }
@@ -113,7 +112,7 @@ module.exports = function(RED) {
             delete pinsInUse[node.pin];
             if (node.child != null) {
                 node.done = done;
-                node.child.stdin.write(" close "+node.pin);
+                node.child.stdin.write("close "+node.pin);
                 node.child.kill('SIGKILL');
             }
             else { done(); }
@@ -191,7 +190,7 @@ module.exports = function(RED) {
             node.child.on('error', function (err) {
                 if (err.errno === "ENOENT") { node.error('nrgpio command not found'); }
                 else if (err.errno === "EACCES") { node.error('nrgpio command not executable'); }
-                else { node.log('error: ' + err); }
+                else { node.error('error: ' + err.errno); }
             });
 
         }
@@ -204,7 +203,7 @@ module.exports = function(RED) {
             delete pinsInUse[node.pin];
             if (node.child != null) {
                 node.done = done;
-                node.child.stdin.write(" close "+node.pin);
+                node.child.stdin.write("close "+node.pin);
                 node.child.kill('SIGKILL');
             }
             else { done(); }
@@ -215,14 +214,14 @@ module.exports = function(RED) {
     var pitype = { type:"" };
     exec(gpioCommand+" rev 0", function(err,stdout,stderr) {
         if (err) {
-            console.log('[rpi-gpio] Version command failed for some reason.');
+            RED.log.info('Version command failed for some reason.');
         }
         else {
             if (stdout.trim() == "0") { pitype = { type:"Compute" }; }
             else if (stdout.trim() == "1") { pitype = { type:"A/B v1" }; }
             else if (stdout.trim() == "2") { pitype = { type:"A/B v2" }; }
             else if (stdout.trim() == "3") { pitype = { type:"Model B+" }; }
-            else { console.log("SAW Pi TYPE",stdout.trim()); }
+            else { RED.log.info("Saw Pi Type",stdout.trim()); }
         }
     });
     RED.nodes.registerType("rpi-gpio out",GPIOOutNode);
@@ -259,7 +258,7 @@ module.exports = function(RED) {
         node.child.on('error', function (err) {
             if (err.errno === "ENOENT") { node.error('nrgpio command not found'); }
             else if (err.errno === "EACCES") { node.error('nrgpio ommand not executable'); }
-            else { node.log('error: ' + err); }
+            else { node.error('error: ' + err.errno); }
         });
 
         node.on("close", function(done) {

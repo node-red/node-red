@@ -16,7 +16,6 @@
 
 module.exports = function(RED) {
     "use strict";
-    var util = require("util");
     var ArduinoFirmata = require('arduino-firmata');
     var fs = require('fs');
     var plat = require('os').platform();
@@ -33,14 +32,14 @@ module.exports = function(RED) {
         var node = this;
         node.board = new ArduinoFirmata();
         if (portlist.indexOf(node.device) === -1) {
-            node.warn("Device "+node.device+" not found");
+            node.warn("device "+node.device+" not found");
         }
         else {
             node.board.connect(node.device);
         }
 
         node.board.on('boardReady', function(){
-            node.log("version "+node.board.boardVersion);
+            if (RED.settings.verbose) { node.log("version "+node.board.boardVersion); }
         });
 
         node.on('close', function(done) {
@@ -48,7 +47,7 @@ module.exports = function(RED) {
                 try {
                     node.board.close(function() {
                         done();
-                        node.log("port closed");
+                        if (RED.settings.verbose) { node.log("port closed"); }
                     });
                 } catch(e) { done(); }
             } else { done(); }
@@ -95,7 +94,7 @@ module.exports = function(RED) {
             });
         }
         else {
-            util.log("[Firmata-arduino] port not configured");
+            this.warn("port not configured");
         }
     }
     RED.nodes.registerType("arduino in",DuinoNodeIn);
@@ -145,7 +144,7 @@ module.exports = function(RED) {
             });
         }
         else {
-            util.log("[Firmata-arduino] port not configured");
+            this.warn("port not configured");
         }
     }
     RED.nodes.registerType("arduino out",DuinoNodeOut);

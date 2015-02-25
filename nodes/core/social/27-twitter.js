@@ -218,7 +218,7 @@ module.exports = function(RED) {
                                     }
                                 });
                                 stream.on('limit', function(tweet) {
-                                    node.log("tweet rate limit hit");
+                                    node.warn("tweet rate limit hit");
                                 });
                                 stream.on('error', function(tweet,rc) {
                                     if (rc == 420) {
@@ -367,8 +367,8 @@ module.exports = function(RED) {
             credentials.oauth_verifier,
             function(error, oauth_access_token, oauth_access_token_secret, results){
                 if (error){
-                    console.log(error);
-                    res.send("yeah something broke.");
+                    RED.log.error(error);
+                    res.send("something in twitter oauth broke.");
                 } else {
                     credentials = {};
                     credentials.access_token = oauth_access_token;
