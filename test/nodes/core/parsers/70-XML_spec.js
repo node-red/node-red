@@ -65,7 +65,6 @@ describe('XML node', function() {
             var n2 = helper.getNode("n2");
             n2.on("input", function(msg) {
                 msg.should.have.property('topic', 'bar');
-                console.log(msg.payload);
                 var index = msg.payload.indexOf('<employees><firstName>John</firstName><lastName>Smith</lastName></employees>');
                 index.should.be.above(-1);
                 done();
