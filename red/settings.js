@@ -25,13 +25,12 @@ var storage = null;
 var persistentSettings = {
     init: function(settings) {
         userSettings = settings;
-        
         for (var i in settings) {
             if (settings.hasOwnProperty(i)) {
                 (function() {
                     var j = i;
                     persistentSettings.__defineGetter__(j,function() { return userSettings[j]; });
-                    persistentSettings.__defineSetter__(j,function() { throw new Error("Property '"+i+"' is read-only"); });
+                    persistentSettings.__defineSetter__(j,function() { throw new Error("Property '"+j+"' is read-only"); });
                 })();
             }
         }

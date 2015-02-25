@@ -17,6 +17,8 @@
 var express = require('express');
 var when = require('when');
 var child_process = require('child_process');
+var path = require("path");
+var fs = require("fs");
 
 var redNodes = require("./nodes");
 var comms = require("./comms");
@@ -129,7 +131,7 @@ function reportAddedModules(info) {
                     (info[i].module?info[i].module+":":"")+
                     info[i].types[j]+
                     (info[i].err?" : "+info[i].err:"")
-                    );
+                );
             }
         }
     }
@@ -141,7 +143,7 @@ function reportRemovedModules(removedNodes) {
     log.info("Removed node types:");
     for (var j=0;j<removedNodes.length;j++) {
         for (var i=0;i<removedNodes[j].types.length;i++) {
-            log.info(" - "+(removedNodes[i].module?removedNodes[i].module+":":"")+removedNodes[j].types[i]);
+            log.info(" - "+(removedNodes[j].module?removedNodes[j].module+":":"")+removedNodes[j].types[i]);
         }
     }
     return removedNodes;
@@ -155,26 +157,32 @@ function installModule(module) {
             return;
         }
         log.info("Installing module: "+module);
-        var child = child_process.exec('npm install --production '+module, function(err, stdin, stdout) {
-            if (err) {
-                var lookFor404 = new RegExp(" 404 .*"+module+"$","m");
-                if (lookFor404.test(stdout)) {
-                    log.warn("Installation of module "+module+" failed: module not found");
-                    var e = new Error();
-                    e.code = 404;
-                    reject(e);
+        var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
+        var child = child_process.exec('npm install --production '+module,
+            {
+                cwd: installDir
+            },
+            function(err, stdin, stdout) {
+                if (err) {
+                    var lookFor404 = new RegExp(" 404 .*"+module+"$","m");
+                    if (lookFor404.test(stdout)) {
+                        log.warn("Installation of module "+module+" failed: module not found");
+                        var e = new Error();
+                        e.code = 404;
+                        reject(e);
+                    } else {
+                        log.warn("Installation of module "+module+" failed:");
+                        log.warn("------------------------------------------");
+                        log.warn(err.toString());
+                        log.warn("------------------------------------------");
+                        reject(new Error("Install failed"));
+                    }
                 } else {
-                    log.warn("Installation of module "+module+" failed:");
-                    log.warn("------------------------------------------");
-                    log.warn(err.toString());
-                    log.warn("------------------------------------------");
-                    reject(new Error("Install failed"));
+                    log.info("Installed module: "+module);
+                    resolve(redNodes.addModule(module).then(reportAddedModules));
                 }
-            } else {
-                log.info("Installed module: "+module);
-                resolve(redNodes.addModule(module).then(reportAddedModules));
             }
-        });
+        );
     });
 }
 
@@ -184,40 +192,51 @@ function uninstallModule(module) {
             reject(new Error("Invalid module name"));
             return;
         }
+        var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
+        var moduleDir = path.join(installDir,"node_modules",module);
+        if (!fs.existsSync(moduleDir)) {
+            return reject(new Error("Unabled to uninstall "+module+"."));
+        }
+        
         var list = redNodes.removeModule(module);
         log.info("Removing module: "+module);
-        var child = child_process.exec('npm remove '+module, function(err, stdin, stdout) {
-            if (err) {
-                log.warn("Removal of module "+module+" failed:");
-                log.warn("------------------------------------------");
-                log.warn(err.toString());
-                log.warn("------------------------------------------");
-                reject(new Error("Removal failed"));
-            } else {
-                log.info("Removed module: "+module);
-                reportRemovedModules(list);
-                resolve(list);
+        var child = child_process.exec('npm remove '+module, 
+            {
+                cwd: installDir
+            },
+            function(err, stdin, stdout) {
+                if (err) {
+                    log.warn("Removal of module "+module+" failed:");
+                    log.warn("------------------------------------------");
+                    log.warn(err.toString());
+                    log.warn("------------------------------------------");
+                    reject(new Error("Removal failed"));
+                } else {
+                    log.info("Removed module: "+module);
+                    reportRemovedModules(list);
+                    resolve(list);
+                }
             }
-        });
+        );
     });
 }
 
 function reportMetrics() {
     var memUsage = process.memoryUsage();
-
+    
     // only need to init these once per report
     var metrics = {};
     metrics.level = log.METRIC;
-
+    
     //report it
     metrics.event = "runtime.memory.rss"
     metrics.value = memUsage.rss;
     log.log(metrics);
-
+    
     metrics.event = "runtime.memory.heapTotal"
     metrics.value = memUsage.heapTotal;
     log.log(metrics);
-
+    
     metrics.event = "runtime.memory.heapUsed"
     metrics.value = memUsage.heapUsed;
     log.log(metrics);

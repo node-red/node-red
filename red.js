@@ -1,5 +1,6 @@
+#!/usr/bin/env node
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +21,24 @@ var express = require("express");
 var crypto = require("crypto");
 var nopt = require("nopt");
 var path = require("path");
+var fs = require("fs");
 var RED = require("./red/red.js");
 
 var server;
 var app = express();
 
-var settingsFile = "./settings";
+var settingsFile;
 var flowFile;
 
 var knownOpts = {
     "settings":[path],
+    "userDir":[path],
     "v": Boolean,
     "help": Boolean
 };
 var shortHands = {
     "s":["--settings"],
+    "u":["--userDir"],
     "?":["--help"]
 };
 nopt.invalidHandler = function(k,v,t) {
@@ -45,10 +49,11 @@ var parsedArgs = nopt(knownOpts,shortHands,process.argv,2)
 
 if (parsedArgs.help) {
     console.log("Node-RED v"+RED.version());
-    console.log("Usage: node red.js [-v] [-?] [--settings settings.js] [flows.json]");
+    console.log("Usage: node red.js [-v] [-?] [--settings settings.js] [--userDir DIR] [flows.json]");
     console.log("");
     console.log("Options:");
     console.log("  -s, --settings FILE  use specified settings file");
+    console.log("  -u, --userDir  DIR   use specified user directory");
     console.log("  -v                   enable verbose output");
     console.log("  -?, --help           show usage");
     console.log("");
@@ -60,13 +65,27 @@ if (parsedArgs.argv.remain.length > 0) {
 }
 
 if (parsedArgs.settings) {
+    // User-specified settings file
     settingsFile = parsedArgs.settings;
+} else if (parsedArgs.userDir && fs.existsSync(path.join(parsedArgs.userDir,"settings.js"))) {
+    // User-specified userDir that contains a settings.js
+    settingsFile = path.join(parsedArgs.userDir,"settings.js");
+} else {
+    var userSettingsFile = path.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE,".node-red","settings.js");
+    if (fs.existsSync(userSettingsFile)) {
+        // $HOME/.node-red/settings.js exists
+        settingsFile = userSettingsFile;
+    } else {
+        // Use default settings.js
+        settingsFile = "./settings";
+    }
 }
+
 try {
     var settings = require(settingsFile);
 } catch(err) {
     if (err.code == 'MODULE_NOT_FOUND') {
-        console.log("Unable to load settings file "+settingsFile);
+        console.log("Unable to load settings file: "+settingsFile);
     } else {
         console.log(err);
     }
@@ -117,7 +136,12 @@ if (settings.httpNodeRoot !== false) {
 settings.uiPort = settings.uiPort||1880;
 settings.uiHost = settings.uiHost||"0.0.0.0";
 
-settings.flowFile = flowFile || settings.flowFile;
+if (flowFile) {
+    settings.flowFile = flowFile;
+}
+if (parsedArgs.userDir) {
+    settings.userDir = parsedArgs.userDir;
+}
 
 RED.init(server,settings);
 

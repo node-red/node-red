@@ -32,7 +32,6 @@ var flowsFileBackup;
 var credentialsFile;
 var credentialsFileBackup;
 var oldCredentialsFile;
-var userDir;
 var libDir;
 var libFlowsDir;
 var globalSettingsFile;
@@ -145,38 +144,50 @@ function writeFile(path,content) {
 var localfilesystem = {
     init: function(_settings) {
         settings = _settings;
-        userDir = settings.userDir || process.env.NODE_RED_HOME;
-
+        
+        var promises = [];
+        
+        if (!settings.userDir) {
+            if (fs.existsSync(fspath.join(process.env.NODE_RED_HOME,".config.json"))) {
+                settings.userDir = process.env.NODE_RED_HOME;
+            } else {
+                settings.userDir = fspath.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE,".node-red");
+                promises.push(promiseDir(settings.userDir));
+            }
+        }
+        
         if (settings.flowFile) {
             flowsFile = settings.flowFile;
             flowsFullPath = flowsFile;
         } else {
             flowsFile = 'flows_'+require('os').hostname()+'.json';
-            flowsFullPath = fspath.join(userDir,flowsFile);
+            flowsFullPath = fspath.join(settings.userDir,flowsFile);
         }
         var ffExt = fspath.extname(flowsFullPath);
         var ffName = fspath.basename(flowsFullPath);
         var ffBase = fspath.basename(flowsFullPath,ffExt);
         var ffDir = fspath.dirname(flowsFullPath);
         
-        credentialsFile = fspath.join(userDir,ffBase+"_cred"+ffExt);
-        credentialsFileBackup = fspath.join(userDir,"."+ffBase+"_cred"+ffExt+".backup");
+        credentialsFile = fspath.join(settings.userDir,ffBase+"_cred"+ffExt);
+        credentialsFileBackup = fspath.join(settings.userDir,"."+ffBase+"_cred"+ffExt+".backup");
         
-        oldCredentialsFile = fspath.join(userDir,"credentials.json");
+        oldCredentialsFile = fspath.join(settings.userDir,"credentials.json");
         
         flowsFileBackup = fspath.join(ffDir,"."+ffName+".backup");
 
-        libDir = fspath.join(userDir,"lib");
+        libDir = fspath.join(settings.userDir,"lib");
         libFlowsDir = fspath.join(libDir,"flows");
-
         
-        globalSettingsFile = fspath.join(userDir,".config.json");
+        globalSettingsFile = fspath.join(settings.userDir,".config.json");
         
-        return promiseDir(libFlowsDir);
+        promises.push(promiseDir(libFlowsDir));
+        
+        return when.all(promises);
     },
 
     getFlows: function() {
         var defer = when.defer();
+        log.info("User Directory : "+settings.userDir);
         fs.exists(flowsFullPath, function(exists) {
             if (exists) {
                 log.info("Loading flows : "+flowsFile);
@@ -184,7 +195,7 @@ var localfilesystem = {
                     return JSON.parse(data);
                 }));
             } else {
-                log.info("Flows file not found : "+flowsFile   );
+                log.info("Creating new flows file : "+flowsFile   );
                 defer.resolve([]);
             }
         });
