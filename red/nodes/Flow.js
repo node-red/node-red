@@ -60,6 +60,7 @@ function createSubflow(sf,sfn,subflows) {
         node_map[node.id] = node;
         node._alias = node.id;
         node.id = nid;
+        node.z = sfn.id;
         newNodes.push(node);
     }
     // Update all subflow interior wiring to reflect new node IDs
@@ -80,6 +81,7 @@ function createSubflow(sf,sfn,subflows) {
     var subflowInstance = {
         id: sfn.id,
         type: sfn.type,
+        z: sfn.z,
         name: sfn.name,
         wires: []
     }
@@ -203,6 +205,47 @@ function diffNodeConfigs(oldNode,newNode) {
     return false;
 }
 
+function createCatchNodeMap(nodes) {
+    var catchNodes = {};
+    var subflowInstances = {};
+    var id;
+    /*
+     - a catchNode with same z as error node
+     - if error occurs on a subflow without catchNode, look at z of subflow instance
+    */
+    for (id in nodes) {
+        if (nodes.hasOwnProperty(id)) {
+            if (nodes[id].type === "catch") {
+                catchNodes[nodes[id].z] = nodes[id];
+            }
+        }
+    }
+    for (id in nodes) {
+        if (nodes.hasOwnProperty(id)) {
+            var m = /^subflow:(.+)$/.exec(nodes[id].type);
+            if (m) {
+                subflowInstances[id] = nodes[id];
+            }
+        }
+    }
+    for (id in subflowInstances) {
+        if (subflowInstances.hasOwnProperty(id)) {
+            var z = id;
+            while(subflowInstances[z]) {
+                var sfi = subflowInstances[z];
+                if (!catchNodes[z]) {
+                    z = sfi.z;
+                } else {
+                    break;
+                }
+            }
+            if (catchNodes[z]) {
+                catchNodes[id] = catchNodes[z];
+            }
+        }
+    }
+    return catchNodes;
+}
 
 var subflowInstanceRE = /^subflow:(.+)$/;
 
@@ -229,6 +272,8 @@ Flow.prototype.parseConfig = function(config) {
     this.subflows = {};
     
     this.configNodes = {};
+    
+    this.catchNodeMap = null;
     
     var unknownTypes = {};
     
@@ -349,6 +394,9 @@ Flow.prototype.start = function() {
             }
         }
     }
+    
+    this.catchNodeMap = createCatchNodeMap(this.activeNodes);
+    
     credentials.clean(this.config);
     events.emit("nodes-started");
 }
@@ -681,7 +729,34 @@ Flow.prototype.diffFlow = function(config) {
     });
     
     return diff;
-    
 }
+
+
+Flow.prototype.handleError = function(node,logMessage,msg) {
+    var errorMessage;
+    if (msg) {
+        errorMessage = redUtil.cloneMessage(msg);
+    } else {
+        errorMessage = {};
+    }
+    if (errorMessage.hasOwnProperty("error")) {
+        errorMessage._error = errorMessage.error;
+    }
+    errorMessage.error = {
+        message: logMessage.toString(),
+        source: {
+            id: node.id,
+            type: node.type
+        }
+    };
+    if (this.catchNodeMap[node.z]) {
+        this.catchNodeMap[node.z].receive(errorMessage);
+    } else {
+        if (this.activeNodes[node.z] && this.catchNodeMap[this.activeNodes[node.z].z]) {
+            this.catchNodeMap[this.activeNodes[node.z].z].receive(errorMessage);
+        }
+    }
+}
+
 
 module.exports = Flow;

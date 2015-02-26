@@ -385,10 +385,22 @@ describe('Node', function() {
             sinon.stub(Log, 'log', function(msg) {
                 loginfo = msg;
             });
-            n.error("an error message");
+            sinon.stub(flows,"handleError", function(node,message,msg) {
+            });
+            
+            var message = {a:1};
+            
+            n.error("an error message",message);
             should.deepEqual({level:Log.ERROR, id:n.id,
                              type:n.type, msg:"an error message"}, loginfo);
+            
+            flows.handleError.called.should.be.true;
+            flows.handleError.args[0][0].should.eql(n);
+            flows.handleError.args[0][1].should.eql("an error message");
+            flows.handleError.args[0][2].should.eql(message);
+            
             Log.log.restore();
+            flows.handleError.restore();
             done();
         });
     });

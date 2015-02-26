@@ -147,6 +147,9 @@ var flowNodes = module.exports = {
             log.info("Stopped flows");
             return;
         });
+    },
+    handleError: function(node,logMessage,msg) {
+        activeFlow.handleError(node,logMessage,msg);
     }
 };
 

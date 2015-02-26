@@ -27,6 +27,7 @@ var comms = require("../comms");
 function Node(n) {
     this.id = n.id;
     this.type = n.type;
+    this.z = n.z;
     if (n.name) {
         this.name = n.name;
     }
@@ -197,8 +198,12 @@ Node.prototype.warn = function(msg) {
     log_helper(this, Log.WARN, msg);
 };
 
-Node.prototype.error = function(msg) {
-    log_helper(this, Log.ERROR, msg);
+Node.prototype.error = function(logMessage,msg) {
+    logMessage = logMessage || "";
+    log_helper(this, Log.ERROR, logMessage);
+    if (msg) {
+        flows.handleError(this,logMessage,msg);
+    }
 };
 
 /**
