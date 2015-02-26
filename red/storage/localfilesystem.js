@@ -158,7 +158,23 @@ var localfilesystem = {
         
         if (settings.flowFile) {
             flowsFile = settings.flowFile;
-            flowsFullPath = flowsFile;
+            
+            if (flowsFile[0] == "/") {
+                // Absolute path
+                flowsFullPath = flowsFile;
+            } else if (flowsFile.substring(0,2) === "./") {
+                // Relative to cwd
+                flowsFullPath = fspath.join(process.cwd(),flowsFile);
+            } else {
+                if (fs.existsSync(fspath.join(process.cwd(),flowsFile))) {
+                    // Found in cwd
+                    flowsFullPath = fspath.join(process.cwd(),flowsFile);
+                } else {
+                    // Use userDir
+                    flowsFullPath = fspath.join(settings.userDir,flowsFile);
+                }
+            }
+                
         } else {
             flowsFile = 'flows_'+require('os').hostname()+'.json';
             flowsFullPath = fspath.join(settings.userDir,flowsFile);
@@ -170,7 +186,7 @@ var localfilesystem = {
         
         credentialsFile = fspath.join(settings.userDir,ffBase+"_cred"+ffExt);
         credentialsFileBackup = fspath.join(settings.userDir,"."+ffBase+"_cred"+ffExt+".backup");
-        
+
         oldCredentialsFile = fspath.join(settings.userDir,"credentials.json");
         
         flowsFileBackup = fspath.join(ffDir,"."+ffName+".backup");
@@ -186,20 +202,20 @@ var localfilesystem = {
     },
 
     getFlows: function() {
-        var defer = when.defer();
-        log.info("User Directory : "+settings.userDir);
-        fs.exists(flowsFullPath, function(exists) {
-            if (exists) {
-                log.info("Loading flows : "+flowsFile);
-                defer.resolve(nodeFn.call(fs.readFile,flowsFullPath,'utf8').then(function(data) {
-                    return JSON.parse(data);
-                }));
-            } else {
-                log.info("Creating new flows file : "+flowsFile   );
-                defer.resolve([]);
-            }
+        return when.promise(function(resolve) {
+            log.info("User Directory : "+settings.userDir);
+            log.info("Flows file     : "+flowsFullPath);
+            fs.exists(flowsFullPath, function(exists) {
+                if (exists) {
+                    resolve(nodeFn.call(fs.readFile,flowsFullPath,'utf8').then(function(data) {
+                        return JSON.parse(data);
+                    }));
+                } else {
+                    log.info("Creating new flows file");
+                    resolve([]);
+                }
+            });
         });
-        return defer.promise;
     },
 
     saveFlows: function(flows) {
@@ -218,25 +234,25 @@ var localfilesystem = {
     },
 
     getCredentials: function() {
-        var defer = when.defer();
-        fs.exists(credentialsFile, function(exists) {
-            if (exists) {
-                defer.resolve(nodeFn.call(fs.readFile, credentialsFile, 'utf8').then(function(data) {
-                    return JSON.parse(data)
-                }));
-            } else {
-                fs.exists(oldCredentialsFile, function(exists) {
-                    if (exists) {
-                        defer.resolve(nodeFn.call(fs.readFile, oldCredentialsFile, 'utf8').then(function(data) {
-                            return JSON.parse(data)
-                        }));
-                    } else {
-                        defer.resolve({});
-                    }
-                });
-            }
+        return when.promise(function(resolve) {
+            fs.exists(credentialsFile, function(exists) {
+                if (exists) {
+                    resolve(nodeFn.call(fs.readFile, credentialsFile, 'utf8').then(function(data) {
+                        return JSON.parse(data)
+                    }));
+                } else {
+                    fs.exists(oldCredentialsFile, function(exists) {
+                        if (exists) {
+                            resolve(nodeFn.call(fs.readFile, oldCredentialsFile, 'utf8').then(function(data) {
+                                return JSON.parse(data)
+                            }));
+                        } else {
+                            resolve({});
+                        }
+                    });
+                }
+            });
         });
-        return defer.promise;
     },
 
     saveCredentials: function(credentials) {

@@ -70,18 +70,24 @@ if (parsedArgs.settings) {
     // User-specified userDir that contains a settings.js
     settingsFile = path.join(parsedArgs.userDir,"settings.js");
 } else {
-    var userSettingsFile = path.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE,".node-red","settings.js");
-    if (fs.existsSync(userSettingsFile)) {
-        // $HOME/.node-red/settings.js exists
-        settingsFile = userSettingsFile;
+    if (fs.existsSync(path.join(process.env.NODE_RED_HOME,".config.json"))) {
+        // NODE_RED_HOME contains user data - use its settings.js
+        settingsFile = path.join(process.env.NODE_RED_HOME,"settings.js");
     } else {
-        // Use default settings.js
-        settingsFile = "./settings";
+        var userSettingsFile = path.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE,".node-red","settings.js");    
+        if (fs.existsSync(userSettingsFile)) {
+            // $HOME/.node-red/settings.js exists
+            settingsFile = userSettingsFile;
+        } else {
+            // Use default settings.js
+            settingsFile = "./settings";
+        }
     }
 }
 
 try {
     var settings = require(settingsFile);
+    settings.settingsFile = settingsFile;
 } catch(err) {
     if (err.code == 'MODULE_NOT_FOUND') {
         console.log("Unable to load settings file: "+settingsFile);
