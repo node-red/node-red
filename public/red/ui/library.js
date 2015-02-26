@@ -294,19 +294,26 @@ RED.library = (function() {
                 //}
             }
             var queryArgs = [];
+            var data = {};
             for (var i=0;i<options.fields.length;i++) {
                 var field = options.fields[i];
                 if (field == "name") {
-                    queryArgs.push("name="+encodeURIComponent(name));
+                    data.name = name;
                 } else {
-                    queryArgs.push(encodeURIComponent(field)+"="+encodeURIComponent($("#node-input-"+field).val()));
+                    data[field] = $("#node-input-"+field).val();
                 }
             }
-            var queryString = queryArgs.join("&");
             
-            var text = options.editor.getText();
-            $.post("library/"+options.url+'/'+fullpath+"?"+queryString,text,function() {
-                    RED.notify("Saved "+options.type,"success");
+            data.text = options.editor.getText();
+            $.ajax({
+                url:"library/"+options.url+'/'+fullpath,
+                type: "POST",
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=utf-8"
+            }).done(function(data,textStatus,xhr) {
+                RED.notify("Saved "+options.type,"success");
+            }).fail(function(xhr,textStatus,err) {
+                RED.notify("Saved failed: "+xhr.responseText,"error");
             });
         }
         $( "#node-dialog-library-save-confirm" ).dialog({

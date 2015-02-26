@@ -45,21 +45,19 @@ function createLibrary(type) {
         
         redApp.post(new RegExp("/library/"+type+"\/(.*)"),needsPermission("library.write"),function(req,res) {
             var path = req.params[0];
-            var fullBody = '';
-            req.on('data', function(chunk) {
-                fullBody += chunk.toString();
-            });
-            req.on('end', function() {
-                storage.saveLibraryEntry(type,path,req.query,fullBody).then(function() {
-                    res.send(204);
-                }).otherwise(function(err) {
-                    log.warn("Error saving library entry '"+path+"' : "+err);
-                    if (err.message.indexOf('forbidden') === 0) {
-                        res.send(403);
-                        return;
-                    }
-                    res.send(500);
-                });
+            var meta = req.body;
+            var text = meta.text;
+            delete meta.text;
+            
+            storage.saveLibraryEntry(type,path,meta,text).then(function() {
+                res.send(204);
+            }).otherwise(function(err) {
+                log.warn("Error saving library entry '"+path+"' : "+err);
+                if (err.message.indexOf('forbidden') === 0) {
+                    res.send(403);
+                    return;
+                }
+                res.send(500);
             });
         });
     }

@@ -195,10 +195,10 @@ describe("library api", function() {
     
         it('can store and retrieve item', function(done) {
             initStorage({},{'test':{}});
-            var flow = '[]';
+            var flow = {text:"test content"};
             request(app)
                 .post('/library/test/foo')
-                .set('Content-Type', 'text/plain')
+                .set('Content-Type', 'application/json')
                 .send(flow)
                 .expect(204).end(function (err, res) {
                     if (err) {
@@ -211,16 +211,16 @@ describe("library api", function() {
                             if (err) {
                                 throw err;
                             }
-                            res.text.should.equal(flow);
+                            res.text.should.equal(flow.text);
                             done();
                         });
                 });
         });
         
         it('lists a stored item', function(done) {
-            initStorage({},{'test':{'':['abc','def']}});
+            initStorage({},{'test':{'a':['abc','def']}});
                 request(app)
-                    .get('/library/test')
+                    .get('/library/test/a')
                     .expect(200)
                     .end(function(err,res) {
                         if (err) {
