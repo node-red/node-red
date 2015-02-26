@@ -22,7 +22,7 @@
     <div class="form-row" style="margin-bottom: 0px;">
         <label for="node-input-template"><i class="fa fa-file-code-o"></i> Template</label>
         <input type="hidden" id="node-input-template" autofocus="autofocus">
-        <select id="node-input-mark" style="width:110px; float:right;">
+        <select id="node-input-format" style=" font-size: 0.8em; margin-bottom: 3px; width:110px; float:right;">
             <option value="handlebars">mustache</option>
             <option value="html">HTML</option>
             <option value="json">JSON</option>
@@ -61,7 +61,7 @@
         defaults: {
             name: {value:""},
             field: {value:"payload"},
-            mark: {value:"handlebars"},
+            format: {value:"handlebars"},
             template: {value:"This is the payload: {{payload}} !"},
         },
         inputs:1,
@@ -96,30 +96,21 @@
                 var height = $( "#dialog" ).dialog('option','height');
                 $( "#dialog" ).off("dialogresize",templateDialogResize);
             });
-            ace.require("ace/ext/language_tools");
-            that.editor = ace.edit('node-input-template-editor');
-            that.editor.setText = that.editor.setValue; // alias to make library work :-)
-            that.editor.getText = that.editor.getValue; // alias to make library work
-            //that.editor.setTheme("ace/theme/solarized_light");
-            //that.editor.setTheme("ace/theme/crimson_editor");
-            //that.editor.setTheme("ace/theme/chrome");
-            that.editor.setTheme("ace/theme/tomorrow");
-            that.editor.getSession().setMode("ace/mode/html");
-            that.editor.getSession().setFoldStyle("markbeginend");
-            that.editor.setOptions({enableBasicAutocompletion:true, enableSnippets:true});
-            that.editor.$blockScrolling = Infinity;
-            that.editor.setValue($("#node-input-template").val());
-            that.editor.gotoLine(1);
-            document.getElementById('node-input-template-editor').style.fontSize='17px';
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-template-editor',
+                mode: 'ace/mode/html'
+            });
+            this.editor.setValue($("#node-input-template").val(),-1);
             RED.library.create({
                 url:"functions", // where to get the data from
                 type:"function", // the type of object the library is for
                 editor:that.editor, // the field name the main text body goes to
                 fields:['name','outputs']
             });
-            $("#node-input-name").focus();
-            $("#node-input-mark").change(function() {
-                var mod = "ace/mode/"+$("#node-input-mark").val();
+            this.editor.focus();
+            
+            $("#node-input-format").change(function() {
+                var mod = "ace/mode/"+$("#node-input-format").val();
                 that.editor.getSession().setMode({
                    path: mod,
                    v: Date.now()

@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2014 IBM Corp.
+ * Copyright 2013, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -805,6 +805,29 @@ RED.editor = (function() {
         editConfig: showEditConfigNodeDialog,
         editSubflow: showEditSubflowDialog,
         validateNode: validateNode,
-        updateNodeProperties: updateNodeProperties // TODO: only exposed for edit-undo
+        updateNodeProperties: updateNodeProperties, // TODO: only exposed for edit-undo
+        
+        createEditor: function(options) {
+            var editor = ace.edit(options.id);
+            editor.setTheme("ace/theme/tomorrow");
+            if (options.mode) {
+                editor.getSession().setMode(options.mode);
+            }
+            if (options.foldStyle) {
+                editor.getSession().setFoldStyle(options.foldStyle);
+            } else {
+                editor.getSession().setFoldStyle('markbeginend');
+            }
+            if (options.options) {
+                editor.setOptions(options.options);
+            } else {
+                editor.setOptions({
+                    enableBasicAutocompletion:true,
+                    enableSnippets:true
+                });
+            }
+            editor.$blockScrolling = Infinity;
+            return editor;
+        }
     }
 })();

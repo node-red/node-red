@@ -84,16 +84,12 @@
                 var height = $( "#dialog" ).dialog('option','height');
                 $( "#dialog" ).off("dialogresize",functionDialogResize);
             });
-            ace.require("ace/ext/language_tools");
-            that.editor = ace.edit('node-input-info-editor');
-            that.editor.setTheme("ace/theme/chrome");
-            that.editor.getSession().setMode("ace/mode/markdown");
-            that.editor.getSession().setFoldStyle("markbeginend");
-            that.editor.setOptions({enableBasicAutocompletion:true, enableSnippets:true});
-            that.editor.$blockScrolling = Infinity;
-            that.editor.setValue($("#node-input-info").val());
-            that.editor.gotoLine(1);
-            document.getElementById('node-input-info-editor').style.fontSize='17px';
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-info-editor',
+                mode: 'ace/mode/markdown'
+            });
+            this.editor.setValue($("#node-input-info").val(),-1);
+            this.editor.focus();
         },
         oneditsave: function() {
             $("#node-input-info").val(this.editor.getValue());

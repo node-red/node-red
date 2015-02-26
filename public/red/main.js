@@ -369,6 +369,8 @@ var RED = (function() {
             document.title = "Node-RED : "+window.location.hostname;
         }
         
+        ace.require("ace/ext/language_tools");
+
         RED.settings.init(loadEditor);
     });
 

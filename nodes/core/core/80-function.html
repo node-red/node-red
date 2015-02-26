@@ -100,32 +100,23 @@
                 $( "#dialog" ).off("dialogresize",functionDialogResize);
             });
 
-            ace.require("ace/ext/language_tools");
-            that.editor = ace.edit('node-input-func-editor');
-            that.editor.setText = that.editor.setValue; // alias to make library work :-)
-            that.editor.getText = that.editor.getValue; // alias to make library work
-            //that.editor.setTheme("ace/theme/solarized_light");
-            //that.editor.setTheme("ace/theme/crimson_editor");
-            //that.editor.setTheme("ace/theme/chrome");
-            that.editor.setTheme("ace/theme/tomorrow");
-            that.editor.getSession().setMode("ace/mode/javascript");
-            that.editor.getSession().setFoldStyle("markbeginend");
-            that.editor.setOptions({enableBasicAutocompletion:true, enableSnippets:true});
-            that.editor.$blockScrolling = Infinity;
-            that.editor.setValue($("#node-input-func").val());
-            that.editor.gotoLine(1,1);
-            document.getElementById('node-input-func-editor').style.fontSize='17px';
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-func-editor',
+                mode: 'ace/mode/javascript'
+            });
+            this.editor.setValue($("#node-input-func").val(),-1);
+            
             RED.library.create({
                 url:"functions", // where to get the data from
                 type:"function", // the type of object the library is for
-                editor:that.editor, // the field name the main text body goes to
+                editor:this.editor, // the field name the main text body goes to
+                mode:"ace/mode/javascript",
                 fields:['name','outputs']
             });
-            $("#node-input-name").focus();
+            this.editor.focus();
         },
         oneditsave: function() {
             var annot = this.editor.getSession().getAnnotations();
-            console.log(this);
             this.valid = true;
             for (var k=0; k < annot.length; k++) {
                 //console.log(annot[k].type,":",annot[k].text, "on line", annot[k].row);
