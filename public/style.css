@@ -965,6 +965,7 @@ div.node-info {
     border:1px solid #ccc;
     border-radius:5px;
     overflow: hidden;
+    font-size: 16px !important;
 }
 #workspace-tabs {
     margin-right: 28px;

@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013, 2014 IBM Corp.
+  Copyright 2013, 2015 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-row" style="margin-bottom: 0px;">
-            <label for="node-input-func"><i class="fa fa-wrench"></i> Function</label>
-            <input type="hidden" id="node-input-func" autofocus="autofocus">
+        <label for="node-input-func"><i class="fa fa-wrench"></i> Function</label>
+        <input type="hidden" id="node-input-func" autofocus="autofocus">
+        <input type="hidden" id="node-input-valid">
     </div>
     <div class="form-row node-text-editor-row">
         <div style="height: 250px;" class="node-text-editor" id="node-input-func-editor" ></div>
@@ -34,22 +35,22 @@
 </script>
 
 <script type="text/x-red" data-help-name="function">
-	<p>A function block where you can write code to do more interesting things.</p>
-	<p>The message is passed in as a JavaScript object called <code>msg</code>.</p>
-	<p>By convention it will have a <code>msg.payload</code> property containing
-	   the body of the message.</p>
-	<p>The function should return the messages it wants to pass on to the next nodes
-	in the flow. It can return:</p>
-	<ul>
-	  <li>a single message object - passed to nodes connected to the first output</li>
-	  <li>an array of message objects - passed to nodes connected to the corresponding outputs</li>
+    <p>A function block where you can write code to do more interesting things.</p>
+    <p>The message is passed in as a JavaScript object called <code>msg</code>.</p>
+    <p>By convention it will have a <code>msg.payload</code> property containing
+       the body of the message.</p>
+    <p>The function should return the messages it wants to pass on to the next nodes
+    in the flow. It can return:</p>
+    <ul>
+      <li>a single message object - passed to nodes connected to the first output</li>
+      <li>an array of message objects - passed to nodes connected to the corresponding outputs</li>
     </ul>
     <p>If any element of the array is itself an array of messages, multiple
-	      messages are sent to the corresponding output.</p>
-	<p>If null is returned, either by itself or as an element of the array, no
-	      message is passed on.</p>
-	<p>See the <a target="_new" href="http://nodered.org/docs/writing-functions.html">online documentation</a> for more help.</p>
-	      
+          messages are sent to the corresponding output.</p>
+    <p>If null is returned, either by itself or as an element of the array, no
+          message is passed on.</p>
+    <p>See the <a target="_new" href="http://nodered.org/docs/writing-functions.html">online documentation</a> for more help.</p>
+
 </script>
 
 <script type="text/javascript">
@@ -59,7 +60,8 @@
         defaults: {
             name: {value:""},
             func: {value:"\nreturn msg;"},
-            outputs: {value:1}
+            outputs: {value:1},
+            valid: {value:true,required:true}
         },
         inputs:1,
         outputs:1,
@@ -68,11 +70,13 @@
             return this.name;
         },
         oneditprepare: function() {
+            var that = this;
             $( "#node-input-outputs" ).spinner({
                 min:1
             });
 
             function functionDialogResize() {
+                that.editor.resize();
                 var rows = $("#dialog-form>div:not(.node-text-editor-row)");
                 var height = $("#dialog-form").height();
                 for (var i=0;i<rows.size();i++) {
@@ -82,7 +86,6 @@
                 height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
                 $(".node-text-editor").css("height",height+"px");
             };
-
             $( "#dialog" ).on("dialogresize", functionDialogResize);
             $( "#dialog" ).one("dialogopen", function(ev) {
                 var size = $( "#dialog" ).dialog('option','sizeCache-function');
@@ -96,25 +99,33 @@
                 var height = $( "#dialog" ).dialog('option','height');
                 $( "#dialog" ).off("dialogresize",functionDialogResize);
             });
-            var that = this;
-            require(["orion/editor/edit"], function(edit) {
-                that.editor = edit({
-                    parent:document.getElementById('node-input-func-editor'),
-                    lang:"js",
-                    contents: $("#node-input-func").val()
-                });
-                RED.library.create({
-                    url:"functions", // where to get the data from
-                    type:"function", // the type of object the library is for
-                    editor:that.editor, // the field name the main text body goes to
-                    fields:['name','outputs']
-                });
-                $("#node-input-name").focus();
 
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-func-editor',
+                mode: 'ace/mode/javascript'
             });
+            this.editor.setValue($("#node-input-func").val(),-1);
+            
+            RED.library.create({
+                url:"functions", // where to get the data from
+                type:"function", // the type of object the library is for
+                editor:this.editor, // the field name the main text body goes to
+                mode:"ace/mode/javascript",
+                fields:['name','outputs']
+            });
+            this.editor.focus();
         },
         oneditsave: function() {
-            $("#node-input-func").val(this.editor.getText())
+            var annot = this.editor.getSession().getAnnotations();
+            this.valid = true;
+            for (var k=0; k < annot.length; k++) {
+                //console.log(annot[k].type,":",annot[k].text, "on line", annot[k].row);
+                if (annot[k].type === "error") {
+                    $("#node-input-valid").val(null);
+                    delete this.valid;
+                }
+            }
+            $("#node-input-func").val(this.editor.getValue());
             delete this.editor;
         }
     });

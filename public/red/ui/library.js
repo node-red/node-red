@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,19 @@ RED.library = (function() {
         var selectedLibraryItem = null;
         var libraryEditor = null;
         
+        // Orion editor has set/getText
+        // ACE editor has set/getValue
+        // normalise to set/getValue
+        if (options.editor.setText) {
+            // Orion doesn't like having pos passed in, so proxy the call to drop it
+            options.editor.setValue = function(text,pos) {
+                options.editor.setText.call(options.editor,text);
+            }
+        }
+        if (options.editor.getText) {
+            options.editor.getValue = options.editor.getText;
+        }
+        
         function buildFileListItem(item) {
             var li = document.createElement("li");
             li.onmouseover = function(e) { $(this).addClass("list-hover"); };
@@ -119,7 +132,7 @@ RED.library = (function() {
                            $(this).addClass("list-selected");
                            $.get("library/"+options.url+root+item.fn, function(data) {
                                    selectedLibraryItem = item;
-                                   libraryEditor.setText(data);
+                                   libraryEditor.setValue(data,-1);
                            });
                        }
                    })();
@@ -144,7 +157,7 @@ RED.library = (function() {
             $("#node-select-library").children().remove();
             var bc = $("#node-dialog-library-breadcrumbs");
             bc.children().first().nextAll().remove();
-            libraryEditor.setText('');
+            libraryEditor.setValue('',-1);
             
             $.getJSON("library/"+options.url,function(data) {
                 $("#node-select-library").append(buildFileList("/",data));
@@ -205,14 +218,18 @@ RED.library = (function() {
             e.preventDefault();
         });
     
-        require(["orion/editor/edit"], function(edit) {
-            libraryEditor = edit({
-                parent:document.getElementById('node-select-library-text'),
-                lang:"js",
-                readonly: true
-            });
+        libraryEditor = ace.edit('node-select-library-text');
+        libraryEditor.setTheme("ace/theme/tomorrow");
+        if (options.mode) {
+            libraryEditor.getSession().setMode(options.mode);
+        }
+        libraryEditor.setOptions({
+            readOnly: true,
+            highlightActiveLine: false,
+            highlightGutterLine: false
         });
-    
+        libraryEditor.renderer.$cursorLayer.element.style.opacity=0;
+        libraryEditor.$blockScrolling = Infinity;
         
         $( "#node-dialog-library-lookup" ).dialog({
             title: options.type+" library",
@@ -229,7 +246,7 @@ RED.library = (function() {
                                 var field = options.fields[i];
                                 $("#node-input-"+field).val(selectedLibraryItem[field]);
                             }
-                            options.editor.setText(libraryEditor.getText());
+                            options.editor.setValue(libraryEditor.getValue(),-1);
                         }
                         $( this ).dialog( "close" );
                     }
@@ -304,7 +321,7 @@ RED.library = (function() {
                 }
             }
             
-            data.text = options.editor.getText();
+            data.text = options.editor.getValue();
             $.ajax({
                 url:"library/"+options.url+'/'+fullpath,
                 type: "POST",
