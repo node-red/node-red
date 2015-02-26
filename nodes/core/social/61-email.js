@@ -170,9 +170,9 @@ module.exports = function(RED) {
             imap.once('ready', function() {
                 node.status({fill:"blue",shape:"dot",text:"fetching"});
                 var pay = {};
-                imap.openBox('INBOX', true, function(err, box) {
+                imap.openBox('INBOX', false, function(err, box) {
                     if (box.messages.total > 0) {
-                        var f = imap.seq.fetch(box.messages.total + ':*', { bodies: ['HEADER.FIELDS (FROM SUBJECT DATE)','TEXT'] });
+                        var f = imap.seq.fetch(box.messages.total + ':*', { markSeen:true, bodies: ['HEADER.FIELDS (FROM SUBJECT DATE)','TEXT'] });
                         f.on('message', function(msg, seqno) {
                             node.log('message: #'+ seqno);
                             var prefix = '(#' + seqno + ') ';
