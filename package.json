@@ -15,7 +15,7 @@
     },
     "bin"          : {
         "node-red": "./red.js",
-        "node-red-pi": "bin/node-red"
+        "node-red-pi": "bin/node-red-pi"
     },
     "contributors": [
         {"name": "Nick O'Leary"},
