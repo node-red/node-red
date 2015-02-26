@@ -18,7 +18,6 @@ module.exports = function(RED) {
     "use strict";
     var settings = RED.settings;
     var events = require("events");
-    var util = require("util");
     var serialp = require("serialport");
     var bufMaxSize = 32768;  // Max serial buffer size, for inputs...
 
