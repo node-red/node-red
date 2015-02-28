@@ -21,6 +21,7 @@ module.exports = function(RED) {
 
     function FunctionNode(n) {
         RED.nodes.createNode(this,n);
+        var node = this;
         this.name = n.name;
         this.func = n.func;
         var functionText = "var results = null; results = (function(msg){\n"+this.func+"\n})(msg);";
@@ -29,6 +30,17 @@ module.exports = function(RED) {
             console:console,
             util:util,
             Buffer:Buffer,
+            node: {
+                log : function() {
+                    node.log.apply(node, arguments);
+                },
+                error: function(){
+                    node.error.apply(node, arguments);
+                },
+                warn: function() {
+                    node.warn.apply(node, arguments);
+                }
+            },
             context: {
                 global:RED.settings.functionGlobalContext || {}
             }

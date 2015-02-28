@@ -39,6 +39,13 @@
     <p>The message is passed in as a JavaScript object called <code>msg</code>.</p>
     <p>By convention it will have a <code>msg.payload</code> property containing
        the body of the message.</p>
+    <p>If your node need to log anything use the <code>node</code> object:
+        <ul>
+            <li>Info: <code>node.log(msg);</code></li>
+            <li>Warning: <code>node.warn(msg);</code></li>
+            <li>Error: <code>node.error(msg);</code></li>
+        </ul>
+    </p>
     <p>The function should return the messages it wants to pass on to the next nodes
     in the flow. It can return:</p>
     <ul>
