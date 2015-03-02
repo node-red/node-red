@@ -139,14 +139,18 @@ var flowNodes = module.exports = {
                 }
             }
         }
-        
     },
     stopFlows: function() {
         log.info("Stopping flows");
-        return activeFlow.stop().then(function() {
-            log.info("Stopped flows");
+        if (activeFlow) {
+            return activeFlow.stop().then(function() {
+                log.info("Stopped flows");
+                return;
+            });
+        } else {
+            log.info("Stopped");
             return;
-        });
+        }
     },
     handleError: function(node,logMessage,msg) {
         activeFlow.handleError(node,logMessage,msg);
@@ -154,4 +158,3 @@ var flowNodes = module.exports = {
 };
 
 var activeFlow = null;
-
