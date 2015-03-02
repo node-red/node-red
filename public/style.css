@@ -259,7 +259,9 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
    left:0px;
    right:0px;
 }
-
+#chart svg:focus {
+    outline: none;
+}
 #workspace-toolbar {
     display: none;
     position: absolute;

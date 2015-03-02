@@ -67,10 +67,14 @@ RED.view = (function() {
         .append("svg:svg")
         .attr("width", space_width)
         .attr("height", space_height)
+        .attr("tabindex",1)
         .attr("pointer-events", "all")
-        .style("cursor","crosshair");
-
-     var vis = outer
+        .style("cursor","crosshair")
+        .on("mousedown", function() {
+            this.focus();
+        });
+        
+    var vis = outer
         .append('svg:g')
         .on("dblclick.zoom", null)
         .append('svg:g')
@@ -1064,6 +1068,7 @@ RED.view = (function() {
     }
 
     function nodeMouseDown(d) {
+        focusView();
         //var touch0 = d3.event;
         //var pos = [touch0.pageX,touch0.pageY];
         //RED.touch.radialMenu.show(d3.select(this),pos);
@@ -1319,7 +1324,7 @@ RED.view = (function() {
                             .attr("height",node_height-12)
                             .attr("fill",function(d) { return d._def.color;})
                             .attr("cursor","pointer")
-                            .on("mousedown",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.2);d3.event.preventDefault(); d3.event.stopPropagation();}})
+                            .on("mousedown",function(d) {if (!lasso) {focusView();d3.select(this).attr("fill-opacity",0.2);d3.event.preventDefault(); d3.event.stopPropagation();}})
                             .on("mouseup",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.4);d3.event.preventDefault();d3.event.stopPropagation();}})
                             .on("mouseover",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.4);}})
                             .on("mouseout",function(d) {if (!lasso) {
@@ -1656,6 +1661,7 @@ RED.view = (function() {
                     selected_link = mousedown_link;
                     updateSelection();
                     redraw();
+                    focusView();
                     d3.event.stopPropagation();
                 })
                 .on("touchstart",function(d) {
@@ -1664,6 +1670,7 @@ RED.view = (function() {
                     selected_link = mousedown_link;
                     updateSelection();
                     redraw();
+                    focusView();
                     d3.event.stopPropagation();
                 });
             l.append("svg:path").attr("class","link_outline link_path");
@@ -1732,6 +1739,10 @@ RED.view = (function() {
         } else {
             $("#btn-deploy").addClass("disabled");
         }
+    }
+    
+    function focusView() {
+        $("#chart svg").focus();
     }
 
     /**
@@ -2058,6 +2069,7 @@ RED.view = (function() {
         RED.keyboard.remove(/* ESCAPE */ 27);
     }
 
+    
     $('#chart').on("dragenter",function(event) {
         if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
             $("#dropTarget").css({display:'table'});
@@ -2119,6 +2131,7 @@ RED.view = (function() {
                 setDirty(d);
             }
         },
+        focus: focusView,
         importNodes: importNodes,
         resize: function() {
             workspace_tabs.resize();
@@ -2130,7 +2143,7 @@ RED.view = (function() {
             redraw();
         },
         calculateTextWidth: calculateTextWidth,
-
+        
         //TODO: should these move to an import/export module?
         showImportNodesDialog: showImportNodesDialog,
         showExportNodesDialog: showExportNodesDialog,

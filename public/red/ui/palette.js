@@ -169,6 +169,7 @@ RED.palette = (function() {
                 container:'body'
             });
             $(d).click(function() {
+                RED.view.focus();
                 var help = '<div class="node-help">'+($("script[data-help-name|='"+d.type+"']").html()||"")+"</div>";
                 $("#tab-info").html(help);
             });
@@ -176,7 +177,8 @@ RED.palette = (function() {
                 helper: 'clone',
                 appendTo: 'body',
                 revert: true,
-                revertDuration: 50
+                revertDuration: 50,
+                start: function() {RED.view.focus();}
             });
 
             setLabel(nt,$(d),label);
