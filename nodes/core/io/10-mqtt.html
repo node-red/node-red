@@ -32,7 +32,7 @@
 <script type="text/x-red" data-help-name="mqtt in">
     <p>MQTT input node. Connects to a broker and subscribes to the specified topic. The topic may contain MQTT wildcards.</p>
     <p>Outputs an object called <b>msg</b> containing <b>msg.topic, msg.payload, msg.qos</b> and <b>msg.retain</b>.</p>
-    <p><b>msg.payload</b> is a String.</p>
+    <p><b>msg.payload</b> is usually a string, but can also be a binary buffer.</p>
 </script>
 
 <script type="text/javascript">
