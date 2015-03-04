@@ -151,7 +151,7 @@ var localfilesystem = {
             if (fs.existsSync(fspath.join(process.env.NODE_RED_HOME,".config.json"))) {
                 settings.userDir = process.env.NODE_RED_HOME;
             } else {
-                settings.userDir = fspath.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE,".node-red");
+                settings.userDir = fspath.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE || process.env.NODE_RED_HOME,".node-red");
                 promises.push(promiseDir(settings.userDir));
             }
         }
