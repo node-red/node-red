@@ -321,6 +321,7 @@ Flow.prototype.parseConfig = function(config) {
                 }
                 for (var prop in nodeConfig) {
                     if (nodeConfig.hasOwnProperty(prop) &&
+                        prop != "type" &&
                         prop != "id" && 
                         prop != "z" && 
                         prop != "wires" &&
