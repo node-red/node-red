@@ -28,6 +28,8 @@ function Node(n) {
     this.id = n.id;
     this.type = n.type;
     this.z = n.z;
+    this._closeCallbacks = [];
+    
     if (n.name) {
         this.name = n.name;
     }
@@ -64,23 +66,35 @@ Node.prototype._on = Node.prototype.on;
 Node.prototype.on = function(event, callback) {
     var node = this;
     if (event == "close") {
-        if (callback.length == 1) {
-            this.close = function() {
-                return when.promise(function(resolve) {
-                    callback.call(node, function() {
-                        resolve();
-                    });
-                });
-            };
-        } else {
-            this.close = callback;
-        }
+        this._closeCallbacks.push(callback);
     } else {
         this._on(event, callback);
     }
 };
 
-Node.prototype.close = function() {};
+Node.prototype.close = function() {
+    var promises = [];
+    var node = this;
+    for (var i=0;i<this._closeCallbacks.length;i++) {
+        var callback = this._closeCallbacks[i];
+        if (callback.length == 1) {
+            promises.push(
+                when.promise(function(resolve) {
+                    callback.call(node, function() {
+                        resolve();
+                    });
+                })
+            );
+        } else {
+            callback.call(node);
+        }
+    }
+    if (promises.length > 0) {
+        return when.settle(promises);
+    } else {
+        return;
+    }
+};
 
 function constructUniqueIdentifier() {
     return (1+Math.random()*4294967295).toString(16);

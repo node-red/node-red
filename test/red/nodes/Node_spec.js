@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,34 @@ describe('Node', function() {
             should.exist(p);
             p.then(function() {
                 testdone();
+            });
+        });
+        
+        it('allows multiple close handlers to be registered',function(testdone) {
+            var n = new RedNode({id:'123',type:'abc'});
+            var callbacksClosed = 0;
+            n.on('close',function(done) {
+                setTimeout(function() {
+                    callbacksClosed++;
+                    done();
+                },200);
+            });
+            n.on('close',function(done) {
+                setTimeout(function() {
+                    callbacksClosed++;
+                    done();
+                },200);
+            });
+            n.on('close',function() {
+                callbacksClosed++;
+            });
+            var p = n.close();
+            should.exist(p);
+            p.then(function() {
+                callbacksClosed.should.eql(3);
+                testdone();
+            }).otherwise(function(e) {
+                testdone(e);
             });
         });
     });
