@@ -160,12 +160,12 @@ RED.nodes = (function() {
             }
             nodes.push(n);
         }
+        if (n._def.onadd) {
+            n._def.onadd.call(n);
+        }
     }
     function addLink(l) {
         links.push(l);
-    }
-    function addConfig(c) {
-        configNodes[c.id] = c;
     }
 
     function getNode(id) {
@@ -183,11 +183,13 @@ RED.nodes = (function() {
 
     function removeNode(id) {
         var removedLinks = [];
+        var node;
         if (id in configNodes) {
+            node = configNodes[id];
             delete configNodes[id];
             RED.sidebar.config.refresh();
         } else {
-            var node = getNode(id);
+            node = getNode(id);
             if (node) {
                 nodes.splice(nodes.indexOf(node),1);
                 removedLinks = links.filter(function(l) { return (l.source === node) || (l.target === node); });
@@ -213,6 +215,9 @@ RED.nodes = (function() {
                     RED.sidebar.config.refresh();
                 }
             }
+        }
+        if (node._def.onremove) {
+            node._def.onremove.call(n);
         }
         return removedLinks;
     }
@@ -758,6 +763,7 @@ RED.nodes = (function() {
                     delete output.wires;
                 });
             }
+            
             return [new_nodes,new_links,new_workspaces,new_subflows];
         } catch(error) {
             if (error.code != "NODE_RED") {
@@ -770,7 +776,7 @@ RED.nodes = (function() {
         }
 
     }
-
+    
     return {
         registry:registry,
         setNodeList: registry.setNodeList,
