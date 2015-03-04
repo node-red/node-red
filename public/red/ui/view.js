@@ -799,6 +799,17 @@ RED.view = (function() {
             RED.keyboard.add(/* left */ 37, function() { if(d3.event.shiftKey){moveSelection(-20,  0)}else{moveSelection(-1, 0);}d3.event.preventDefault();},endKeyboardMove);
             RED.keyboard.add(/* right*/ 39, function() { if(d3.event.shiftKey){moveSelection( 20,  0)}else{moveSelection( 1, 0);}d3.event.preventDefault();},endKeyboardMove);
         }
+        var selection = {};
+        
+        if (moving_set.length > 0) {
+            selection.nodes = moving_set.map(function(n) { return n.n;});
+        }
+        if (selected_link != null) {
+            selection.link = selected_link;
+        }
+        
+        eventHandler.emit("selection-changed",selection);
+        
         if (moving_set.length == 1) {
             if (moving_set[0].n.type === "subflow" && moving_set[0].n.direction) {
                 RED.sidebar.info.refresh(RED.nodes.subflow(moving_set[0].n.z));
@@ -810,6 +821,8 @@ RED.view = (function() {
         } else {
             RED.sidebar.info.clear();
         }
+        
+        
     }
     function endKeyboardMove() {
         var ns = [];
@@ -2092,8 +2105,29 @@ RED.view = (function() {
         event.preventDefault();
     });
     
+    // TODO: DRY
+    var eventHandler = (function() {
+        var handlers = {};
+        
+        return {
+            on: function(evt,func) {
+                handlers[evt] = handlers[evt]||[];
+                handlers[evt].push(func);
+            },
+            emit: function(evt,arg) {
+                if (handlers[evt]) {
+                    for (var i=0;i<handlers[evt].length;i++) {
+                        handlers[evt][i](arg);
+                    }
+                    
+                }
+            }
+        }
+    })();
+    
     return {
         init: init,
+        on: eventHandler.on,
         state:function(state) {
             if (state == null) {
                 return mouse_mode
@@ -2143,7 +2177,19 @@ RED.view = (function() {
             redraw();
         },
         calculateTextWidth: calculateTextWidth,
-        
+        select: function(selection) {
+            clearSelection();
+            if (typeof selection == "string") {
+                var selectedNode = RED.nodes.node(selection);
+                if (selectedNode) {
+                    selectedNode.selected = true;
+                    selectedNode.dirty = true;
+                    moving_set = [{n:selectedNode}];
+                }
+            }
+            updateSelection();
+            redraw();
+        },
         //TODO: should these move to an import/export module?
         showImportNodesDialog: showImportNodesDialog,
         showExportNodesDialog: showExportNodesDialog,
