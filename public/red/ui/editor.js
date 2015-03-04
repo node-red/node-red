@@ -257,7 +257,7 @@ RED.editor = (function() {
                     id: "node-dialog-cancel",
                     text: "Cancel",
                     click: function() {
-                        if (editing_node._def) {
+                        if (editing_node && editing_node._def) {
                             if (editing_node._def.oneditcancel) {
                                 editing_node._def.oneditcancel.call(editing_node);
                             }
