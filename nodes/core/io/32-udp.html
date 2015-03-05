@@ -17,9 +17,8 @@
 <!--  The Input Node  -->
 <script type="text/x-red" data-template-name="udp in">
     <div class="form-row">
-        <label for="node-input-port"><i class="fa fa-sign-in"></i> Listen</label>
-        on port <input type="text" id="node-input-port" placeholder="Port" style="width: 45px">
-        for <select id="node-input-multicast" style='width:40%'>
+        <label for="node-input-port"><i class="fa fa-sign-in"></i> Listen for</label>
+        <select id="node-input-multicast" style='width:62%'>
           <option value="false">udp messages</option>
           <option value="true">multicast messages</option>
         </select>
@@ -31,6 +30,14 @@
     <div class="form-row node-input-iface">
         <label for="node-input-iface"><i class="fa fa-random"></i> Interface</label>
         <input type="text" id="node-input-iface" placeholder="(optional) ip address of eth0">
+    </div>
+    <div class="form-row">
+        <label for="node-input-port"><i class="fa fa-sign-in"></i> on Port</label>
+        <input type="text" id="node-input-port" placeholder="Port" style="width: 80px">
+        &nbsp;&nbsp;using <select id="node-input-ipv" style="width:80px">
+          <option value="udp4">ipv4</option>
+          <option value="udp6">ipv6</option>
+        </select>
     </div>
     <div class="form-row">
         <label for="node-input-datatype"><i class="fa fa-sign-out"></i> Output</label>
@@ -74,9 +81,10 @@
             name: {value:""},
             iface: {value:""},
             port: {value:"",required:true,validate:RED.validators.number()},
-            datatype: {value:"buffer",required:true},
+            ipv: {value:"udp4"},
             multicast: {value:"false"},
-            group: {value:"",validate:function(v) { return (this.multicast !== "true")||v.length > 0;} }
+            group: {value:"",validate:function(v) { return (this.multicast !== "true")||v.length > 0;} },
+            datatype: {value:"buffer",required:true}
         },
         inputs:0,
         outputs:1,
@@ -98,7 +106,7 @@
 <script type="text/x-red" data-template-name="udp out">
     <div class="form-row">
         <label for="node-input-port"><i class="fa fa-envelope"></i> Send a</label>
-        <select id="node-input-multicast" style='width:40%'>
+        <select id="node-input-multicast" style="width:40%">
           <option value="false">udp message</option>
           <option value="broad">broadcast message</option>
           <option value="multi">multicast message</option>
@@ -107,7 +115,11 @@
     </div>
     <div class="form-row node-input-addr">
         <label for="node-input-addr" id="node-input-addr-label"><i class="fa fa-list"></i> Address</label>
-        <input type="text" id="node-input-addr" placeholder="destination ip" style="width: 70%;">
+        <input type="text" id="node-input-addr" placeholder="destination ip" style="width: 50%;">
+        <select id="node-input-ipv" style="width:70px">
+          <option value="udp4">ipv4</option>
+          <option value="udp6">ipv6</option>
+        </select>
     </div>
     <div class="form-row node-input-iface">
         <label for="node-input-iface"><i class="fa fa-random"></i> Interface</label>
@@ -167,6 +179,7 @@
             addr: {value:""},
             iface: {value:""},
             port: {value:""},
+            ipv: {value:"udp4"},
             outport: {value:""},
             base64: {value:false,required:true},
             multicast: {value:"false"}

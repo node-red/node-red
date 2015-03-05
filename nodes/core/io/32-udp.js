@@ -26,9 +26,10 @@ module.exports = function(RED) {
         this.datatype = n.datatype;
         this.iface = n.iface || null;
         this.multicast = n.multicast;
+        this.ipv = n.ipv || "udp4";
         var node = this;
 
-        var server = dgram.createSocket('udp4');
+        var server = dgram.createSocket(node.ipv);  // default to ipv4
 
         server.on("error", function (err) {
             if ((err.code == "EACCES") && (node.port < 1024)) {
@@ -83,7 +84,7 @@ module.exports = function(RED) {
 
         // Hack for when you have both in and out udp nodes sharing a port
         //   if udp in starts last it shares better - so give it a chance to be last
-        setTimeout( function() { server.bind(node.port,node.iface); }, 250);;
+        setTimeout( function() { server.bind(node.port,node.iface); }, 250);
     }
     RED.nodes.registerType("udp in",UDPin);
 
@@ -98,9 +99,10 @@ module.exports = function(RED) {
         this.addr = n.addr;
         this.iface = n.iface || null;
         this.multicast = n.multicast;
+        this.ipv = n.ipv || "udp4";
         var node = this;
 
-        var sock = dgram.createSocket('udp4');  // only use ipv4 for now
+        var sock = dgram.createSocket(node.ipv);  // default to ipv4
 
         if (node.multicast != "false") {
             if (node.outport == "") { node.outport = node.port; }
