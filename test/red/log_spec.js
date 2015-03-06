@@ -19,4 +19,21 @@ describe("red/log", function() {
     it('can be required without errors', function() {
         require("../../red/log");
     });
+
+    var log = require("../../red/log");
+
+    it('it can raise an error', function() {
+        var m = {level:20, msg:"This is an error", type:"test", id:"12345", name:"ERROR" };
+        var ret = log.error(m);
+    });
+
+    it('it can raise a trace', function() {
+        var m = {level:60, msg:"This is a trace", type:"test", id:"12345", name:"TRACE" };
+        var ret = log.trace(m);
+    });
+
+    it('it can raise a debug', function() {
+        var m = {level:50, msg:"This is a debug", type:"test", id:"12345", name:"DEBUG" };
+        var ret = log.debug(m);
+    });
 });

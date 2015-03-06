@@ -26,6 +26,7 @@ var persistentSettings = {
     init: function(settings) {
         userSettings = settings;
         for (var i in settings) {
+            /* istanbul ignore else */
             if (settings.hasOwnProperty(i)) {
                 (function() {
                     var j = i;
@@ -51,7 +52,7 @@ var persistentSettings = {
         }
         return clone(globalSettings[prop]);
     },
-    
+
     set: function(prop,value) {
         if (userSettings.hasOwnProperty(prop)) {
             throw new Error("Property '"+prop+"' is read-only");
@@ -68,13 +69,14 @@ var persistentSettings = {
             return storage.saveSettings(globalSettings);
         }
     },
-    
+
     available: function() {
         return (globalSettings !== null);
     },
-    
+
     reset: function() {
         for (var i in userSettings) {
+            /* istanbul ignore else */
             if (userSettings.hasOwnProperty(i)) {
                 delete persistentSettings[i];
             }

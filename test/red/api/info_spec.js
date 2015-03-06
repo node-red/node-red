@@ -30,17 +30,18 @@ describe("info api", function() {
             var userSettings = {
                 foo: 123,
                 httpNodeRoot: "testHttpNodeRoot",
-                version: "testVersion"
+                version: "testVersion",
+                paletteCategories :["red","blue","green"]
             }
             settings.init(userSettings);
             app = express();
             app.get("/settings",info.settings);
         });
-        
+
         after(function() {
             settings.reset();
         });
-        
+
         it('returns the filtered settings', function(done) {
             request(app)
                 .get("/settings")
