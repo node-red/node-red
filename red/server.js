@@ -197,10 +197,10 @@ function uninstallModule(module) {
         if (!fs.existsSync(moduleDir)) {
             return reject(new Error("Unabled to uninstall "+module+"."));
         }
-        
+
         var list = redNodes.removeModule(module);
         log.info("Removing module: "+module);
-        var child = child_process.exec('npm remove '+module, 
+        var child = child_process.exec('npm remove '+module,
             {
                 cwd: installDir
             },
@@ -223,26 +223,24 @@ function uninstallModule(module) {
 
 function reportMetrics() {
     var memUsage = process.memoryUsage();
-    
+
     // only need to init these once per report
     var metrics = {};
     metrics.level = log.METRIC;
-    
+
     //report it
     metrics.event = "runtime.memory.rss"
     metrics.value = memUsage.rss;
     log.log(metrics);
-    
+
     metrics.event = "runtime.memory.heapTotal"
     metrics.value = memUsage.heapTotal;
     log.log(metrics);
-    
+
     metrics.event = "runtime.memory.heapUsed"
     metrics.value = memUsage.heapUsed;
     log.log(metrics);
 }
-
-
 
 function stop() {
     if (runtimeMetricInterval) {
@@ -261,9 +259,9 @@ module.exports = {
     reportAddedModules: reportAddedModules,
     reportRemovedModules: reportRemovedModules,
     installModule: installModule,
-    uninstallModule: uninstallModule
-}
+    uninstallModule: uninstallModule,
 
-module.exports.__defineGetter__("app", function() { return app });
-module.exports.__defineGetter__("nodeApp", function() { return nodeApp });
-module.exports.__defineGetter__("server", function() { return server });
+    get app() { return app },
+    get nodeApp() { return nodeApp },
+    get server() { return server }
+}

@@ -24,15 +24,12 @@ var fs = require("fs");
 var settings = require("./settings");
 var credentials = require("./nodes/credentials");
 var auth = require("./api/auth");
-
 var path = require('path');
+var events = require("events");
 
 process.env.NODE_RED_HOME = process.env.NODE_RED_HOME || path.resolve(__dirname+"/..");
 
-var events = require("events");
-
 var RED = {
-
     init: function(httpServer,userSettings) {
         userSettings.version = this.version();
         log.init(userSettings);
@@ -40,7 +37,6 @@ var RED = {
         server.init(httpServer,settings);
         return server.app;
     },
-    
     start: server.start,
     stop: server.stop,
     nodes: nodes,
@@ -55,18 +51,16 @@ var RED = {
         needsPermission: auth.needsPermission
     },
     version: function () {
-        var p = require(path.join(process.env.NODE_RED_HOME,"package.json"));
+        var p = require(path.join(process.env.NODE_RED_HOME,"package.json")).version;
+        /* istanbul ignore else */
         if (fs.existsSync(path.join(process.env.NODE_RED_HOME,".git"))) {
-            return p.version+".git";
-        } else {
-            return p.version;
+            p += ".git";
         }
-    }
+        return p;
+    },
+    get app() { console.log("Deprecated use of RED.app - use RED.httpAdmin instead"); return server.app },
+    get httpAdmin() { return server.app },
+    get httpNode() { return server.nodeApp },
+    get server() { return server.server }
 };
-
-RED.__defineGetter__("app", function() { console.log("Deprecated use of RED.app - use RED.httpAdmin instead"); return server.app });
-RED.__defineGetter__("httpAdmin", function() { return server.app });
-RED.__defineGetter__("httpNode", function() { return server.nodeApp });
-RED.__defineGetter__("server", function() { return server.server });
-
 module.exports = RED;
