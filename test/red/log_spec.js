@@ -23,7 +23,7 @@ describe("red/log", function() {
     });
 
     var log = require("../../red/log");
-    var sett = {logging: { console: { level: 'metric', metrics: true } } }
+    var sett = {logging: { console: { level: 'metric', metrics: true } } };
     log.init(sett);
 
     beforeEach(function () {

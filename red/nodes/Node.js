@@ -29,7 +29,7 @@ function Node(n) {
     this.type = n.type;
     this.z = n.z;
     this._closeCallbacks = [];
-    
+
     if (n.name) {
         this.name = n.name;
     }
@@ -41,7 +41,7 @@ util.inherits(Node, EventEmitter);
 Node.prototype.updateWires = function(wires) {
     this.wires = wires || [];
     delete this._wire;
-    
+
     var wc = 0;
     this.wires.forEach(function(w) {
         wc+=w.length;
@@ -103,10 +103,10 @@ function constructUniqueIdentifier() {
 Node.prototype.send = function(msg) {
     var msgSent = false;
     var node;
-    
+
     if (msg === null || typeof msg === "undefined") {
         return;
-    } else if (!util.isArray(msg)) {       
+    } else if (!util.isArray(msg)) {
         if (this._wire) {
             // A single message and a single wire on output 0
             // TODO: pre-load flows.get calls - cannot do in constructor
@@ -116,6 +116,7 @@ Node.prototype.send = function(msg) {
             }
             this.metric("send",msg);
             node = flows.get(this._wire);
+            /* istanbul ignore else */
             if (node) {
                 node.receive(msg);
             }
@@ -124,18 +125,19 @@ Node.prototype.send = function(msg) {
             msg = [msg];
         }
     }
-    
+
     var numOutputs = this.wires.length;
-    
+
     // Build a list of send events so that all cloning is done before
     // any calls to node.receive
     var sendEvents = [];
-    
+
     var sentMessageId = null;
-    
+
     // for each output of node eg. [msgs to output 0, msgs to output 1, ...]
     for (var i = 0; i < numOutputs; i++) {
         var wires = this.wires[i]; // wires leaving output i
+        /* istanbul ignore else */
         if (i < msg.length) {
             var msgs = msg[i]; // msgs going to output i
             if (msgs !== null && typeof msgs !== "undefined") {
@@ -150,6 +152,7 @@ Node.prototype.send = function(msg) {
                         // for each msg to send eg. [[m1, m2, ...], ...]
                         for (k = 0; k < msgs.length; k++) {
                             var m = msgs[k];
+                            /* istanbul ignore else */
                             if (!sentMessageId) {
                                 sentMessageId = m._msgid;
                             }
@@ -166,13 +169,15 @@ Node.prototype.send = function(msg) {
             }
         }
     }
+    /* istanbul ignore else */
     if (!sentMessageId) {
         sentMessageId = constructUniqueIdentifier();
     }
     this.metric("send",{_msgid:sentMessageId});
-    
+
     for (i=0;i<sendEvents.length;i++) {
         var ev = sendEvents[i];
+        /* istanbul ignore else */
         if (!ev.m._msgid) {
             ev.m._msgid = sentMessageId;
         }
@@ -180,14 +185,14 @@ Node.prototype.send = function(msg) {
     }
 };
 
-Node.prototype.receive = function(msg) {     
+Node.prototype.receive = function(msg) {
     if (!msg) {
         msg = {};
     }
     if (!msg._msgid) {
         msg._msgid = constructUniqueIdentifier();
     }
-    this.metric("receive",msg); 
+    this.metric("receive",msg);
     this.emit("input", msg);
 };
 
@@ -215,6 +220,7 @@ Node.prototype.warn = function(msg) {
 Node.prototype.error = function(logMessage,msg) {
     logMessage = logMessage || "";
     log_helper(this, Log.ERROR, logMessage);
+    /* istanbul ignore else */
     if (msg) {
         flows.handleError(this,logMessage,msg);
     }
@@ -230,7 +236,7 @@ Node.prototype.metric = function(eventname, msg, metricValue) {
     var metrics = {};
     metrics.level = Log.METRIC;
     metrics.nodeid = this.id;
-    metrics.event = "node."+this.type+"."+eventname;    
+    metrics.event = "node."+this.type+"."+eventname;
     metrics.msgid = msg._msgid;
     metrics.value = metricValue;
     Log.log(metrics);

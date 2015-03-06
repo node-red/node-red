@@ -417,14 +417,13 @@ describe('Node', function() {
             });
             
             var message = {a:1};
-            
-            n.error("an error message",message);
-            should.deepEqual({level:Log.ERROR, id:n.id,
-                             type:n.type, msg:"an error message"}, loginfo);
-            
+
+            n.error(null,message);
+            should.deepEqual({level:Log.ERROR, id:n.id, type:n.type, msg:""}, loginfo);
+
             flows.handleError.called.should.be.true;
             flows.handleError.args[0][0].should.eql(n);
-            flows.handleError.args[0][1].should.eql("an error message");
+            flows.handleError.args[0][1].should.eql("");
             flows.handleError.args[0][2].should.eql(message);
             
             Log.log.restore();
@@ -448,8 +447,22 @@ describe('Node', function() {
             done();
         });
     });
-    
-    
+
+    describe('#metric', function() {
+        it('returns metric value if eventname undefined', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            var loginfo = {};
+            sinon.stub(Log, 'log', function(msg) {
+                loginfo = msg;
+            });
+            var msg = {payload:"foo", _msgid:"987654321"};
+            var m = n.metric(undefined,msg,"15mb");
+            m.should.equal(true);
+            Log.log.restore();
+            done();
+        });
+    });
+
     describe('#status', function() {
         after(function() {
             comms.publish.restore();

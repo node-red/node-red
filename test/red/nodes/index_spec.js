@@ -58,7 +58,6 @@ describe("red/nodes/index", function() {
     }
 
    it('nodes are initialised with credentials',function(done) {
-
         index.init(settings, storage);
         index.registerType('test', TestNode);
         index.loadFlows().then(function() {
@@ -69,7 +68,6 @@ describe("red/nodes/index", function() {
         }).otherwise(function(err) {
             done(err);
         });
-
     });
 
    it('flows should be initialised',function(done) {
@@ -128,7 +126,7 @@ describe("red/nodes/index", function() {
                    foo: {type:"test"}
                }
            });
-           var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});
+           var testnode = new TestNode({id:'tab1',type:'test',name:'barney', '_alias':'tab1'});
            credentials.getDefinition("test").should.have.property('foo');
            done();
        });
