@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 var should = require("should");
+var sinon = require("sinon");
+var util = require("util");
 
 describe("red/log", function() {
     it('can be required without errors', function() {
@@ -21,19 +23,33 @@ describe("red/log", function() {
     });
 
     var log = require("../../red/log");
+    var sett = {logging: { console: { level: 'metric', metrics: true } } }
+    log.init(sett);
+
+    beforeEach(function () {
+        var spy = sinon.spy(util, 'log');
+    });
+
+    afterEach(function() {
+        util.log.restore();
+    });
 
     it('it can raise an error', function() {
-        var m = {level:20, msg:"This is an error", type:"test", id:"12345", name:"ERROR" };
-        var ret = log.error(m);
+        var ret = log.error("This is an error");
+        sinon.assert.calledWithMatch(util.log,"");
     });
 
     it('it can raise a trace', function() {
-        var m = {level:60, msg:"This is a trace", type:"test", id:"12345", name:"TRACE" };
-        var ret = log.trace(m);
+        var ret = log.trace("This is a trace");
+        sinon.assert.calledWithMatch(util.log,"");
     });
 
     it('it can raise a debug', function() {
-        var m = {level:50, msg:"This is a debug", type:"test", id:"12345", name:"DEBUG" };
-        var ret = log.debug(m);
+        var ret = log.debug("This is a debug");
+        sinon.assert.calledWithMatch(util.log,"");
+    });
+
+    it('it checks level of metrics', function() {
+        log.metric().should.equal(true);
     });
 });

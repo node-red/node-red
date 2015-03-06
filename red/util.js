@@ -89,6 +89,7 @@ function compareObjects(obj1,obj2) {
         return false;
     }
     for (var k in obj1) {
+        /* istanbul ignore else */
         if (obj1.hasOwnProperty(k)) {
             if (!compareObjects(obj1[k],obj2[k])) {
                 return false;
@@ -104,4 +105,3 @@ module.exports = {
     cloneMessage: cloneMessage,
     compareObjects: compareObjects
 };
-

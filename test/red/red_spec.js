@@ -24,22 +24,22 @@ describe("red/red", function() {
 
     it('returns an app object', function() {
         var srv = RED.app.use("/test", function() { return "app"; });
-        //srv.should.be.an.instanceOf(Object);
+        srv.should.be.an.instanceOf(Object);
     });
 
     it('returns an httpAdmin object', function() {
         var srv = RED.httpAdmin.use("/test", function() { return "Admin"; });
-        //srv.should.be.an.instanceOf(Object);
+        srv.should.be.an.instanceOf(Object);
     });
 
     it('returns an httpNode object', function() {
         var srv = RED.httpNode.use("/test", function() { return "Node"; });
-        //srv.should.be.an.instanceOf(Object);
+        srv.should.be.an.instanceOf(Object);
     });
 
     it('it returns a server object', function() {
         var srv = RED.server;
-        //srv.should.be.an.instanceOf(Object).and.have.property('domain', null);
+        srv.should.be.an.instanceOf(Object).and.have.property('domain', null);
         //srv.should.be.an.instanceOf(Object).and.have.property('timeout', 120000);
     });
 

@@ -52,6 +52,7 @@ describe("info api", function() {
                     }
                     res.body.should.have.property("httpNodeRoot","testHttpNodeRoot");
                     res.body.should.have.property("version","testVersion");
+                    res.body.should.have.property("paletteCategories",["red","blue","green"]);
                     res.body.should.not.have.property("foo",123);
                     done();
                 });
