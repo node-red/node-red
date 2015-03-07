@@ -196,8 +196,14 @@
                                 '</span>';
                 // NOTE: relying on function error to have a "type" that all other msgs don't
                 if (o.hasOwnProperty("type") && (o.type === "function")) {
-                    msg.className = 'debug-message debug-message-level-20';
-                    msg.innerHTML += '<span class="debug-message-topic">[function] : (error)</span>';
+                    var errorLvlType = 'error';
+                    var errorLvl = 20;
+                    if (o.hasOwnProperty("level") && o.level === 30) {
+                        errorLvl = 30;
+                        errorLvlType = 'warn'
+                    }
+                    msg.className = 'debug-message debug-message-level-' + errorLvl;
+                    msg.innerHTML += '<span class="debug-message-topic">[function] : (' + errorLvlType + ')</span>';
                 } else {
                     msg.innerHTML += '<span class="debug-message-topic">'+(o.topic?topic+' : ':'')+
                                     (o.property?'[msg.'+property+']':'[msg]')+" : "+typ+'</span>';
