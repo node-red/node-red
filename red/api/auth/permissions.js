@@ -29,6 +29,9 @@ function hasPermission(user,permission) {
     if (user.permissions == "read") {
         return readRE.test(permission);
     }
+    else {
+        return false; // anything not allowed is disallowed
+    }
 }
 
 module.exports = {

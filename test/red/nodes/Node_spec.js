@@ -19,7 +19,6 @@ var sinon = require('sinon');
 var RedNode = require("../../../red/nodes/Node");
 var Log = require("../../../red/log");
 var flows = require("../../../red/nodes/flows");
-
 var comms = require('../../../red/comms');
 
 describe('Node', function() {
@@ -359,8 +358,6 @@ describe('Node', function() {
             var receiver2 = new RedNode({id:'n3',type:'abc'});
             sender.send({"some": "message"});
         })
-        
-        
     });
 
 
@@ -457,7 +454,7 @@ describe('Node', function() {
             });
             var msg = {payload:"foo", _msgid:"987654321"};
             var m = n.metric(undefined,msg,"15mb");
-            m.should.equal(true);
+            m.should.be.a.boolean;
             Log.log.restore();
             done();
         });

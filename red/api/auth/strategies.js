@@ -61,11 +61,12 @@ var loginSignUpWindow = 36000000; // 10 minutes
 var passwordTokenExchange = function(client, username, password, scope, done) {
     var now = Date.now();
     loginAttempts = loginAttempts.filter(function(logEntry) {
-        return logEntry.time + loginSignUpWindow > now;  
+        return logEntry.time + loginSignUpWindow > now;
     });
     loginAttempts.push({time:now, user:username});
     var attemptCount = 0;
     loginAttempts.forEach(function(logEntry) {
+        /* istanbul ignore else */
         if (logEntry.user == username) {
             attemptCount++;
         }
@@ -75,11 +76,11 @@ var passwordTokenExchange = function(client, username, password, scope, done) {
         done(new Error("Too many login attempts. Wait 10 minutes and try again"),false);
         return;
     }
-    
+
     Users.authenticate(username,password).then(function(user) {
         if (user) {
             loginAttempts = loginAttempts.filter(function(logEntry) {
-                return logEntry.user !== username;  
+                return logEntry.user !== username;
             });
             Tokens.create(username,client.id,scope).then(function(tokens) {
                 // TODO: audit log

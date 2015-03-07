@@ -51,5 +51,8 @@ describe("red/log", function() {
 
     it('it checks level of metrics', function() {
         log.metric().should.equal(true);
+        var sett = {logging: { console: { level: 'info', metrics: false } } };
+        log.init(sett);
     });
+
 });

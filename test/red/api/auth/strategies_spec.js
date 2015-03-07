@@ -18,28 +18,26 @@ var should = require("should");
 var when = require('when');
 var sinon = require('sinon');
 
-
 var strategies = require("../../../../red/api/auth/strategies");
 var Users = require("../../../../red/api/auth/users");
 var Tokens = require("../../../../red/api/auth/tokens");
 var Clients = require("../../../../red/api/auth/clients");
 
-
 describe("Auth strategies", function() {
     describe("Password Token Exchange", function() {
-        
+
         var userAuthentication;
         afterEach(function() {
             if (userAuthentication) {
                 userAuthentication.restore();
             }
         });
-        
+
         it('Handles authentication failure',function(done) {
             userAuthentication = sinon.stub(Users,"authenticate",function(username,password) {
                 return when.resolve(null);
             });
-            
+
             strategies.passwordTokenExchange({},"user","password","scope",function(err,token) {
                 try {
                     should.not.exist(err);
@@ -50,7 +48,7 @@ describe("Auth strategies", function() {
                 }
             });
         });
-        
+
         it('Creates new token on authentication success',function(done) {
             userAuthentication = sinon.stub(Users,"authenticate",function(username,password) {
                 return when.resolve({username:"user"});
@@ -62,7 +60,7 @@ describe("Auth strategies", function() {
                 tokenDetails.scope = scope;
                 return when.resolve({accessToken: "123456"});
             });
-            
+
             strategies.passwordTokenExchange({id:"myclient"},"user","password","scope",function(err,token) {
                 try {
                     should.not.exist(err);
@@ -77,10 +75,10 @@ describe("Auth strategies", function() {
                     tokenCreate.restore();
                 }
             });
-            
+
         });
     });
-    
+
     describe("Anonymous Strategy", function() {
         it('Succeeds if anon user enabled',function(done) {
             var userDefault = sinon.stub(Users,"default",function() {
@@ -111,13 +109,13 @@ describe("Auth strategies", function() {
             strategies.anonymousStrategy.authenticate({});
         });
     });
-    
+
     describe("Bearer Strategy", function() {
         it('Rejects invalid token',function(done) {
             var getToken = sinon.stub(Tokens,"get",function(token) {
                 return when.resolve(null);
             });
-            
+
             strategies.bearerStrategy("1234",function(err,user) {
                 try {
                     should.not.exist(err);
@@ -137,7 +135,7 @@ describe("Auth strategies", function() {
             var getUser = sinon.stub(Users,"get",function(username) {
                 return when.resolve("aUser");
             });
-            
+
             strategies.bearerStrategy("1234",function(err,user,opts) {
                 try {
                     should.not.exist(err);
@@ -152,15 +150,37 @@ describe("Auth strategies", function() {
                 }
             });
         });
+        it('Fail if no user for token',function(done) {
+            var getToken = sinon.stub(Tokens,"get",function(token) {
+                return when.resolve({user:"user",scope:"scope"});
+            });
+            var getUser = sinon.stub(Users,"get",function(username) {
+                return when.resolve(null);
+            });
+
+            strategies.bearerStrategy("1234",function(err,user,opts) {
+                try {
+                    should.not.exist(err);
+                    user.should.equal(false);
+                    should.not.exist(opts);
+                    done();
+                } catch(e) {
+                    done(e);
+                } finally {
+                    getToken.restore();
+                    getUser.restore();
+                }
+            });
+        });
     });
-    
+
     describe("Client Password Strategy", function() {
         it('Accepts valid client',function(done) {
             var testClient = {id:"node-red-editor",secret:"not_available"};
             var getClient = sinon.stub(Clients,"get",function(client) {
                 return when.resolve(testClient);
             });
-            
+
             strategies.clientPasswordStrategy(testClient.id,testClient.secret,function(err,client) {
                 try {
                     should.not.exist(err);
@@ -178,7 +198,7 @@ describe("Auth strategies", function() {
             var getClient = sinon.stub(Clients,"get",function(client) {
                 return when.resolve(testClient);
             });
-            
+
             strategies.clientPasswordStrategy(testClient.id,"invalid_secret",function(err,client) {
                 try {
                     should.not.exist(err);
@@ -192,11 +212,9 @@ describe("Auth strategies", function() {
             });
         });
         it('Rejects invalid client id',function(done) {
-            var testClient = {id:"node-red-editor",secret:"not_available"};
             var getClient = sinon.stub(Clients,"get",function(client) {
                 return when.resolve(null);
             });
-            
             strategies.clientPasswordStrategy("invalid_id","invalid_secret",function(err,client) {
                 try {
                     should.not.exist(err);
@@ -209,6 +227,28 @@ describe("Auth strategies", function() {
                 }
             });
         });
+
+        var userAuthentication;
+        it('Blocks after 5 failures',function(done) {
+            userAuthentication = sinon.stub(Users,"authenticate",function(username,password) {
+                return when.resolve(null);
+            });
+            for (var z=0; z<5; z++) {
+                strategies.passwordTokenExchange({},"user","badpassword","scope",function(err,token) {
+                });
+            }
+            strategies.passwordTokenExchange({},"user","badpassword","scope",function(err,token) {
+                try {
+                    err.toString().should.equal("Error: Too many login attempts. Wait 10 minutes and try again");
+                    token.should.be.false;
+                    done();
+                } catch(e) {
+                    done(e);
+                } finally {
+                    userAuthentication.restore();
+                }
+            });
+        });
+
     });
 });
-            

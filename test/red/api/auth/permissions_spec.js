@@ -15,9 +15,7 @@
  **/
 
 var should = require("should");
-
 var permissions = require("../../../../red/api/auth/permissions");
-
 
 describe("Auth permissions", function() {
     describe("hasPermission", function() {
@@ -33,6 +31,9 @@ describe("Auth permissions", function() {
             permissions.hasPermission({permissions:"read"},"node.read").should.be.true;
             permissions.hasPermission({permissions:"read"},"write").should.be.false;
             permissions.hasPermission({permissions:"read"},"node.write").should.be.false;
+        });
+        it('a user with foo permissions',function() {
+            permissions.hasPermission({permissions:"foo"},"foo").should.be.false;
         });
     });
 });
