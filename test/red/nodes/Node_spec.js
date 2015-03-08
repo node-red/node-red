@@ -483,6 +483,18 @@ describe('Node', function() {
             Log.log.restore();
             done();
         });
+        it('returns not defined if eventname defined', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            var loginfo = {};
+            sinon.stub(Log, 'log', function(msg) {
+                loginfo = msg;
+            });
+            var msg = {payload:"foo", _msgid:"987654321"};
+            var m = n.metric("info",msg,"15mb");
+            should(m).be.undefined;
+            Log.log.restore();
+            done();
+        });
     });
 
     describe('#status', function() {

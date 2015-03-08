@@ -49,6 +49,17 @@ describe("red/log", function() {
         sinon.assert.calledWithMatch(util.log,"");
     });
 
+    it('it can raise a metric', function() {
+        var metrics = {};
+        metrics.level = log.METRIC;
+        metrics.nodeid = "testid";
+        metrics.event = "node.test.testevent";
+        metrics.msgid = "12345";
+        metrics.value = "the metric payload";
+        var ret = log.log(metrics);
+        sinon.assert.calledWithMatch(util.log,"");
+    });
+
     it('it checks metrics are enabled', function() {
         log.metric().should.equal(true);
         var sett = {logging: { console: { level: 'info', metrics: false } } };
