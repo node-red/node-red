@@ -49,10 +49,14 @@ describe("red/log", function() {
         sinon.assert.calledWithMatch(util.log,"");
     });
 
-    it('it checks level of metrics', function() {
+    it('it checks metrics are enabled', function() {
         log.metric().should.equal(true);
         var sett = {logging: { console: { level: 'info', metrics: false } } };
         log.init(sett);
+    });
+
+    it('it checks metrics are disabled', function() {
+        log.metric().should.equal(false);
     });
 
 });

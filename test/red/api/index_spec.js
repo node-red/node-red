@@ -27,7 +27,7 @@ describe("api index", function() {
 
     describe("disables editor", function() {
         before(function() {
-            settings.init({disableEditor:true,adminAuth:{type: "credentials",users:[],default:{permissions:"read"}}});
+            settings.init({disableEditor:true});
             app = express();
             api.init(app);
         });
@@ -49,6 +49,34 @@ describe("api index", function() {
             request(app)
                 .get("/settings")
                 .expect(200,done)
+        });
+        it('does not serve auth', function(done) {
+            request(app)
+                .get("/auth/login")
+                .expect(404,done)
+        });
+    });
+
+    describe("can serve auth", function() {
+        before(function() {
+            //settings.init({disableEditor:true});
+            settings.init({adminAuth:{type: "credentials",users:[],default:{permissions:"read"}}});
+            app = express();
+            api.init(app);
+        });
+        after(function() {
+            settings.reset();
+        });
+
+        it('it now serves auth', function(done) {
+            request(app)
+                .get("/auth/login")
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) { return done(err); }
+                    res.body.type.should.equal("credentials");
+                    done();
+                });
         });
     });
 

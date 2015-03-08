@@ -72,7 +72,7 @@ describe('Node', function() {
                 testdone();
             });
         });
-        
+
         it('allows multiple close handlers to be registered',function(testdone) {
             var n = new RedNode({id:'123',type:'abc'});
             var callbacksClosed = 0;
@@ -113,7 +113,7 @@ describe('Node', function() {
             });
             n.receive(message);
         });
-        
+
         it('writes metric info with undefined msg', function(done){
             var n = new RedNode({id:'123',type:'abc'});
             n.on('input',function(msg) {
@@ -123,7 +123,7 @@ describe('Node', function() {
             });
             n.receive();
         });
-        
+
         it('writes metric info with null msg', function(done){
             var n = new RedNode({id:'123',type:'abc'});
             n.on('input',function(msg) {
@@ -170,7 +170,7 @@ describe('Node', function() {
 
             var rcvdCount = 0;
 
-            n2.on('input',function(msg) {                
+            n2.on('input',function(msg) {
                 if (rcvdCount === 0) {
                     // first msg sent, don't clone
                     should.deepEqual(msg,messages[rcvdCount]);
@@ -205,7 +205,7 @@ describe('Node', function() {
 
             var rcvdCount = 0;
 
-            // first message sent, don't clone 
+            // first message sent, don't clone
             // message uuids should match
             n2.on('input',function(msg) {
                 should.deepEqual(msg,messages[0]);
@@ -273,7 +273,7 @@ describe('Node', function() {
             var flowGet = sinon.stub(flows,"get",function(id) {
                 return {'n1':n1,'n2':n2}[id];
             });
-            
+
             var messages = [
                 {payload:"hello world"},
                 {payload:"hello world again"}
@@ -304,7 +304,7 @@ describe('Node', function() {
             var message = {payload: "foo", cloned: cloned, req: req, res: res};
 
             var rcvdCount = 0;
-            
+
             // first message to be sent, so should not be cloned
             n2.on('input',function(msg) {
                 should.deepEqual(msg, message);
@@ -404,7 +404,7 @@ describe('Node', function() {
     });
 
     describe('#error', function() {
-        it('produces an error message', function(done) {
+        it('handles a null error message', function(done) {
             var n = new RedNode({id:'123',type:'abc'});
             var loginfo = {};
             sinon.stub(Log, 'log', function(msg) {
@@ -412,7 +412,7 @@ describe('Node', function() {
             });
             sinon.stub(flows,"handleError", function(node,message,msg) {
             });
-            
+
             var message = {a:1};
 
             n.error(null,message);
@@ -422,11 +422,36 @@ describe('Node', function() {
             flows.handleError.args[0][0].should.eql(n);
             flows.handleError.args[0][1].should.eql("");
             flows.handleError.args[0][2].should.eql(message);
-            
+
             Log.log.restore();
             flows.handleError.restore();
             done();
         });
+
+        it('produces an error message', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            var loginfo = {};
+            sinon.stub(Log, 'log', function(msg) {
+                loginfo = msg;
+            });
+            sinon.stub(flows,"handleError", function(node,message,msg) {
+            });
+
+            var message = {a:2};
+
+            n.error("This is an error",message);
+            should.deepEqual({level:Log.ERROR, id:n.id, type:n.type, msg:"This is an error"}, loginfo);
+
+            flows.handleError.called.should.be.true;
+            flows.handleError.args[0][0].should.eql(n);
+            flows.handleError.args[0][1].should.eql("This is an error");
+            flows.handleError.args[0][2].should.eql(message);
+
+            Log.log.restore();
+            flows.handleError.restore();
+            done();
+        });
+
     });
 
     describe('#metric', function() {
