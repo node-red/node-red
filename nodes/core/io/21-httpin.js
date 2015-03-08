@@ -74,7 +74,7 @@ module.exports = function(RED) {
                 corsHandler = cors(RED.settings.httpNodeCors);
                 RED.httpNode.options(this.url,corsHandler);
             }
-            
+
             var metricsHandler = function(req,res,next) { next(); }
 
             if (this.metric()) {
@@ -94,7 +94,7 @@ module.exports = function(RED) {
                     next();
                 };
             }
-            
+
             if (this.method == "get") {
                 RED.httpNode.get(this.url,corsHandler,metricsHandler,this.callback,this.errorHandler);
             } else if (this.method == "post") {
@@ -155,7 +155,7 @@ module.exports = function(RED) {
                         }
                         msg.res.set('content-length', len);
                     }
-                    
+
                     msg.res._msgId = msg._id;
                     msg.res.send(statusCode,msg.payload);
                 }
@@ -251,7 +251,7 @@ module.exports = function(RED) {
                 msg.statusCode = res.statusCode;
                 msg.headers = res.headers;
                 msg.payload = "";
-                msg.url = url;
+                // msg.url = url;   // revert when fully deprecated
                 res.on('data',function(chunk) {
                     msg.payload += chunk;
                 });
