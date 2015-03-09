@@ -75,7 +75,7 @@ RED.editor = (function() {
         }
         if (valid && definition[property].type && RED.nodes.getType(definition[property].type) && !("validate" in definition[property])) {
             if (!value || value == "_ADD_") {
-                valid = false;
+                valid = definition[property].hasOwnProperty("required") && !definition[property].required;
             } else {
                 var v = RED.nodes.node(value).valid;
                 valid = (v==null || v);
