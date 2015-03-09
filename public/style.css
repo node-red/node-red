@@ -752,10 +752,12 @@ g.link_unknown path.link_line {
     margin-bottom: 5px;
 }
 
-#dialog-form {
+#dialog-form, #dialog-config-form {
     margin: 0;
     height: 100%;
 }
+
+
 .form-row {
     clear: both;
     margin-bottom:10px;
@@ -788,6 +790,7 @@ button.input-append-right {
     padding: 8px;
     border-radius: 5px;
     border: 1px solid #999;
+    max-width: 450px;
 }
 .form-tips code {
     border: none;

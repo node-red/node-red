@@ -130,7 +130,8 @@ RED.editor = (function() {
             modal: true,
             autoOpen: false,
             closeOnEscape: false,
-            width: 500,
+            minWidth: 500,
+            width: 'auto',
             buttons: [
                 {
                     id: "node-dialog-ok",
@@ -273,6 +274,10 @@ RED.editor = (function() {
             },
             open: function(e) {
                 $(this).parent().find(".ui-dialog-titlebar-close").hide();
+                var minWidth = $(this).dialog('option','minWidth');
+                if ($(this).outerWidth() < minWidth) {
+                    $(this).dialog('option','width',minWidth);
+                }
                 RED.keyboard.disable();
                 if (editing_node) {
                     var size = $(this).dialog('option','sizeCache-'+editing_node.type);
@@ -289,7 +294,7 @@ RED.editor = (function() {
                     RED.view.state(RED.state.DEFAULT);
                 }
                 $( this ).dialog('option','height','auto');
-                $( this ).dialog('option','width','500');
+                $( this ).dialog('option','width','auto');
                 if (editing_node) {
                     RED.sidebar.info.refresh(editing_node);
                 }
@@ -610,7 +615,8 @@ RED.editor = (function() {
     $( "#node-config-dialog" ).dialog({
             modal: true,
             autoOpen: false,
-            width: 500,
+            minWidth: 500,
+            width: 'auto',
             closeOnEscape: false,
             buttons: [
                 {
@@ -689,13 +695,19 @@ RED.editor = (function() {
             ],
             resize: function(e,ui) {
             },
-            open: function(e,ui) {
+            open: function(e) {
                 $(this).parent().find(".ui-dialog-titlebar-close").hide();
+                var minWidth = $(this).dialog('option','minWidth');
+                if ($(this).outerWidth() < minWidth) {
+                    $(this).dialog('option','width',minWidth);
+                }
                 if (RED.view.state() != RED.state.EDITING) {
                     RED.keyboard.disable();
                 }
             },
             close: function(e) {
+                $(this).dialog('option','width','auto');
+                $(this).dialog('option','height','auto');
                 $("#dialog-config-form").html("");
                 if (RED.view.state() != RED.state.EDITING) {
                     RED.keyboard.enable();
@@ -708,7 +720,8 @@ RED.editor = (function() {
         modal: true,
         autoOpen: false,
         closeOnEscape: false,
-        width: 500,
+        minWidth: 500,
+        width: 'auto',
         buttons: [
             {
                 id: "subflow-dialog-ok",
@@ -766,9 +779,13 @@ RED.editor = (function() {
                 }
             }
         ],
-        open: function(e,ui) {
+        open: function(e) {
             $(this).parent().find(".ui-dialog-titlebar-close").hide();
             RED.keyboard.disable();
+            var minWidth = $(this).dialog('option','minWidth');
+            if ($(this).outerWidth() < minWidth) {
+                $(this).dialog('option','width',minWidth);
+            }
         },
         close: function(e) {
             RED.keyboard.enable();
