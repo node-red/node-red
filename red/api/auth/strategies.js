@@ -55,13 +55,13 @@ var clientPasswordStrategy = function(clientId, clientSecret, done) {
 clientPasswordStrategy.ClientPasswordStrategy = new ClientPasswordStrategy(clientPasswordStrategy);
 
 var loginAttempts = [];
-var loginSignUpWindow = 36000000; // 10 minutes
+var loginSignInWindow = 600000; // 10 minutes
 
 
 var passwordTokenExchange = function(client, username, password, scope, done) {
     var now = Date.now();
     loginAttempts = loginAttempts.filter(function(logEntry) {
-        return logEntry.time + loginSignUpWindow > now;
+        return logEntry.time + loginSignInWindow > now;
     });
     loginAttempts.push({time:now, user:username});
     var attemptCount = 0;
