@@ -28,13 +28,15 @@ RED.editor = (function() {
      * @returns {boolean} whether the node is valid. Sets node.dirty if needed
      */
     function validateNode(node) {
-        var oldValue = node.valid;
-        node.valid = validateNodeProperties(node, node._def.defaults, node);
-        if (node._def._creds) {
-            node.valid = node.valid && validateNodeProperties(node, node._def.credentials, node._def._creds);
-        }
-        if (oldValue != node.valid) {
-            node.dirty = true;
+        if (node._def) {
+            var oldValue = node.valid;
+            node.valid = validateNodeProperties(node, node._def.defaults, node);
+            if (node._def._creds) {
+                node.valid = node.valid && validateNodeProperties(node, node._def.credentials, node._def._creds);
+            }
+            if (oldValue != node.valid) {
+                node.dirty = true;
+            }
         }
     }
     
