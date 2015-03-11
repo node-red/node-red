@@ -131,7 +131,8 @@ module.exports = {
     functionGlobalContext: {
         // os:require('os'),
         // bonescript:require('bonescript'),
-        // arduino:require('duino')
+        // jfive:require("johnny-five"),
+        // jboard:require("johnny-five").Board()
     },
     
     
