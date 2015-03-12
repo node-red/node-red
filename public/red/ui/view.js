@@ -1095,15 +1095,19 @@ RED.view = (function() {
     }
 
     function nodeButtonClicked(d) {
-        if (d._def.button.toggle) {
-            d[d._def.button.toggle] = !d[d._def.button.toggle];
-            d.dirty = true;
-        }
-        if (d._def.button.onclick) {
-            d._def.button.onclick.call(d);
-        }
-        if (d.dirty) {
-            redraw();
+        if (!d.changed) {
+            if (d._def.button.toggle) {
+                d[d._def.button.toggle] = !d[d._def.button.toggle];
+                d.dirty = true;
+            }
+            if (d._def.button.onclick) {
+                d._def.button.onclick.call(d);
+            }
+            if (d.dirty) {
+                redraw();
+            }
+        } else {
+            RED.notify("<strong>Warning</strong>: node has undeployed changes","warning");
         }
         d3.event.preventDefault();
     }
@@ -1276,6 +1280,7 @@ RED.view = (function() {
                             .attr("height",node_height-4)
                             .attr("fill","#eee");//function(d) { return d._def.color;})
                         nodeButtonGroup.append('rect')
+                            .attr("class","node_button_button")
                             .attr("x",function(d) { return d._def.align == "right"? 10:5})
                             .attr("y",4)
                             .attr("rx",5)
@@ -1284,10 +1289,10 @@ RED.view = (function() {
                             .attr("height",node_height-12)
                             .attr("fill",function(d) { return d._def.color;})
                             .attr("cursor","pointer")
-                            .on("mousedown",function(d) {if (!lasso) {focusView();d3.select(this).attr("fill-opacity",0.2);d3.event.preventDefault(); d3.event.stopPropagation();}})
-                            .on("mouseup",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.4);d3.event.preventDefault();d3.event.stopPropagation();}})
-                            .on("mouseover",function(d) {if (!lasso) { d3.select(this).attr("fill-opacity",0.4);}})
-                            .on("mouseout",function(d) {if (!lasso) {
+                            .on("mousedown",function(d) {if (!lasso && !d.changed) {focusView();d3.select(this).attr("fill-opacity",0.2);d3.event.preventDefault(); d3.event.stopPropagation();}})
+                            .on("mouseup",function(d) {if (!lasso && !d.changed) { d3.select(this).attr("fill-opacity",0.4);d3.event.preventDefault();d3.event.stopPropagation();}})
+                            .on("mouseover",function(d) {if (!lasso && !d.changed) { d3.select(this).attr("fill-opacity",0.4);}})
+                            .on("mouseout",function(d) {if (!lasso  && !d.changed) {
                                 var op = 1;
                                 if (d._def.button.toggle) {
                                     op = d[d._def.button.toggle]?1:0.2;
@@ -1536,7 +1541,12 @@ RED.view = (function() {
                         thisNode.selectAll(".node_icon_shade").attr("height",function(d){return d.h;});
                         thisNode.selectAll(".node_icon_shade_border").attr("d",function(d){ return "M "+(("right" == d._def.align) ?0:30)+" 1 l 0 "+(d.h-2)});
 
-
+                        thisNode.selectAll('.node_button').attr("opacity",function(d) {
+                            return d.changed?0.4:1
+                        });
+                        thisNode.selectAll('.node_button_button').attr("cursor",function(d) {
+                            return d.changed?"":"pointer";
+                        });
                         thisNode.selectAll('.node_right_button').attr("transform",function(d){
                                 var x = d.w-6;
                                 if (d._def.button.toggle && !d[d._def.button.toggle]) {
