@@ -286,8 +286,8 @@ var RED = (function() {
                 {id:"btn-config-nodes",label:"Configuration nodes",onselect:RED.sidebar.config.show},
                 null,
                 {id:"btn-subflow-menu",label:"Subflows", options: [
-                    {id:"btn-create-subflow",label:"Create subflow",onselect:RED.view.createSubflow},
-                    {id:"btn-convert-subflow",label:"Selection to subflow",disabled:true,onselect:RED.view.convertToSubflow},
+                    {id:"btn-create-subflow",label:"Create subflow",onselect:RED.subflow.createSubflow},
+                    {id:"btn-convert-subflow",label:"Selection to subflow",disabled:true,onselect:RED.subflow.convertToSubflow},
                 ]},
                 null,
                 {id:"btn-workspace-menu",label:"Workspaces",options:[
@@ -356,7 +356,23 @@ var RED = (function() {
         RED.library.init();
         RED.palette.init();
         RED.sidebar.init();
+        RED.subflow.init();
         RED.view.init();
+        
+        RED.view.on("selection-changed",function(selection) {
+            if (!selection.nodes) {
+                RED.menu.setDisabled("btn-export-menu",true);
+                RED.menu.setDisabled("btn-export-clipboard",true);
+                RED.menu.setDisabled("btn-export-library",true);
+                RED.menu.setDisabled("btn-convert-subflow",true);
+            } else {
+                RED.menu.setDisabled("btn-export-menu",false);
+                RED.menu.setDisabled("btn-export-clipboard",false);
+                RED.menu.setDisabled("btn-export-library",false);
+                RED.menu.setDisabled("btn-convert-subflow",false);
+            }
+        });
+        
         
         RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
         RED.comms.connect();

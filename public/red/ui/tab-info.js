@@ -132,12 +132,34 @@ RED.sidebar.info = (function() {
 
         $("#tab-info").html(table);
     }
+    
+    function clear() {
+        $("#tab-info").html("");
+    }
+    
+    RED.view.on("selection-changed",function(selection) {
+        if (selection.nodes) {
+            if (selection.nodes.length == 1) {
+                var node = selection.nodes[0];
+                if (node.type === "subflow" && node.direction) {
+                    refresh(RED.nodes.subflow(node.z));
+                } else {
+                    refresh(node);
+                }
+            }
+        } else {
+            var subflow = RED.nodes.subflow(RED.view.getWorkspace());
+            if (subflow) {
+                refresh(subflow);
+            } else {
+                clear();
+            }
+        }
+    });
 
     return {
         show: show,
         refresh:refresh,
-        clear: function() {
-            $("#tab-info").html("");
-        }
+        clear: clear
     }
 })();
