@@ -799,6 +799,8 @@ RED.editor = (function() {
             editing_node = null;
         }
     });
+    $("#subflow-dialog form" ).submit(function(e) { e.preventDefault();});
+
     
     function showEditSubflowDialog(subflow) {
         editing_node = subflow;
