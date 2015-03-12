@@ -752,7 +752,7 @@ g.link_unknown path.link_line {
     margin-bottom: 5px;
 }
 
-#dialog-form, #dialog-config-form {
+.dialog-form, #dialog-form, #dialog-config-form {
     margin: 0;
     height: 100%;
 }

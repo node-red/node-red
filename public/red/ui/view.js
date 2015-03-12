@@ -29,14 +29,13 @@ RED.view = (function() {
         moveTouchCenter = [],
         touchStartTime = 0;
 
+    var workspaceScrollPositions = {};
 
-    var activeWorkspace = 0;
+
     var activeSubflow = null;
     var activeNodes = [];
     var activeLinks = [];
     
-    var workspaceScrollPositions = {};
-
     var selected_link = null,
         mousedown_link = null,
         mousedown_node = null,
@@ -234,40 +233,38 @@ RED.view = (function() {
     var drag_line = vis.append("svg:path").attr("class", "drag_line");
 
     function updateActiveNodes() {
+        //TODO: remove direct access to RED.nodes.nodes
         activeNodes = RED.nodes.nodes.filter(function(d) {
-            return d.z == activeWorkspace;
+            return d.z == RED.workspaces.active();
         });
         activeLinks = RED.nodes.links.filter(function(d) {
-            return d.source.z == activeWorkspace && d.target.z == activeWorkspace;
+            return d.source.z == RED.workspaces.active() && d.target.z == RED.workspaces.active();
         })
     }
-    
-    var workspace_tabs = RED.tabs.create({
-        id: "workspace-tabs",
-        onchange: function(tab) {
-            if (tab.type == "subflow") {
-                $("#workspace-toolbar").show();
-            } else {
-                $("#workspace-toolbar").hide();
-            }
+
+    function init() {
+        RED.workspaces.on("change",function(event) {
             var chart = $("#chart");
-            if (activeWorkspace !== 0) {
-                workspaceScrollPositions[activeWorkspace] = {
+            if (event.old !== 0) {
+                workspaceScrollPositions[event.old] = {
                     left:chart.scrollLeft(),
                     top:chart.scrollTop()
                 };
             }
             var scrollStartLeft = chart.scrollLeft();
             var scrollStartTop = chart.scrollTop();
-
-            activeWorkspace = tab.id;
-            activeSubflow = RED.nodes.subflow(activeWorkspace);
+            
+            activeSubflow = RED.nodes.subflow(event.workspace);
             if (activeSubflow) {
                 $("#workspace-subflow-add-input").toggleClass("disabled",activeSubflow.in.length > 0);
             }
-            if (workspaceScrollPositions[activeWorkspace]) {
-                chart.scrollLeft(workspaceScrollPositions[activeWorkspace].left);
-                chart.scrollTop(workspaceScrollPositions[activeWorkspace].top);
+            
+            RED.menu.setDisabled("btn-workspace-edit", activeSubflow);
+            RED.menu.setDisabled("btn-workspace-delete",RED.workspaces.count() == 1 || activeSubflow);
+            
+            if (workspaceScrollPositions[event.workspace]) {
+                chart.scrollLeft(workspaceScrollPositions[event.workspace].left);
+                chart.scrollTop(workspaceScrollPositions[event.workspace].top);
             } else {
                 chart.scrollLeft(0);
                 chart.scrollTop(0);
@@ -278,10 +275,6 @@ RED.view = (function() {
                 mouse_position[0] += scrollDeltaLeft;
                 mouse_position[1] += scrollDeltaTop;
             }
-            
-            RED.menu.setDisabled("btn-workspace-edit", activeSubflow);
-            RED.menu.setDisabled("btn-workspace-delete",workspace_tabs.count() == 1 || activeSubflow);
-
             clearSelection();
             RED.nodes.eachNode(function(n) {
                 n.dirty = true;
@@ -289,69 +282,8 @@ RED.view = (function() {
             updateSelection();
             updateActiveNodes();
             redraw();
-        },
-        ondblclick: function(tab) {
-            if (tab.type != "subflow") {
-                showRenameWorkspaceDialog(tab.id);
-            } else {
-                RED.editor.editSubflow(RED.nodes.subflow(tab.id));
-            }
-        },
-        onadd: function(tab) {
-            RED.menu.addItem("btn-workspace-menu",{
-                id:"btn-workspace-menu-"+tab.id.replace(".","-"),
-                label:tab.label,
-                onselect:function() {
-                    workspace_tabs.activateTab(tab.id);
-                }
-            });
-            RED.menu.setDisabled("btn-workspace-delete",workspace_tabs.count() == 1);
-            updateActiveNodes();
-        },
-        onremove: function(tab) {
-            RED.menu.setDisabled("btn-workspace-delete",workspace_tabs.count() == 1);
-            RED.menu.removeItem("btn-workspace-menu-"+tab.id.replace(".","-"));
-            updateActiveNodes();
-        }
-    });
 
-    var workspaceIndex = 0;
-
-    function addWorkspace() {
-        var tabId = RED.nodes.id();
-        do {
-            workspaceIndex += 1;
-        } while($("#workspace-tabs a[title='Sheet "+workspaceIndex+"']").size() !== 0);
-
-        var ws = {type:"tab",id:tabId,label:"Sheet "+workspaceIndex};
-        RED.nodes.addWorkspace(ws);
-        workspace_tabs.addTab(ws);
-        workspace_tabs.activateTab(tabId);
-        RED.history.push({t:'add',workspaces:[ws],dirty:dirty});
-        RED.view.dirty(true);
-    }
-    
-    function init() {
-        $('#btn-workspace-add-tab').on("click",addWorkspace);
-        
-        RED.menu.setAction('btn-workspace-add',addWorkspace);
-        RED.menu.setAction('btn-workspace-edit',function() {
-            showRenameWorkspaceDialog(activeWorkspace);
         });
-        RED.menu.setAction('btn-workspace-delete',function() {
-            deleteWorkspace(activeWorkspace);
-        });
-        updateActiveNodes();
-    }
-
-    function deleteWorkspace(id) {
-        if (workspace_tabs.count() == 1) {
-            return;
-        }
-        var ws = RED.nodes.workspace(id);
-        $( "#node-dialog-delete-workspace" ).dialog('option','workspace',ws);
-        $( "#node-dialog-delete-workspace-name" ).text(ws.label);
-        $( "#node-dialog-delete-workspace" ).dialog('open');
     }
 
     function canvasMouseDown() {
@@ -530,7 +462,7 @@ RED.view = (function() {
                 clearSelection();
             }
             RED.nodes.eachNode(function(n) {
-                if (n.z == activeWorkspace && !n.selected) {
+                if (n.z == RED.workspaces.active() && !n.selected) {
                     n.selected = (n.x > x && n.x < x2 && n.y > y && n.y < y2);
                     if (n.selected) {
                         n.dirty = true;
@@ -625,7 +557,7 @@ RED.view = (function() {
                 mousePos[1] /= scaleFactor;
                 mousePos[0] /= scaleFactor;
 
-                var nn = { id:(1+Math.random()*4294967295).toString(16),x: mousePos[0],y:mousePos[1],w:node_width,z:activeWorkspace};
+                var nn = { id:(1+Math.random()*4294967295).toString(16),x: mousePos[0],y:mousePos[1],w:node_width,z:RED.workspaces.active()};
 
                 nn.type = selected_tool;
                 nn._def = RED.nodes.getType(nn.type);
@@ -688,7 +620,7 @@ RED.view = (function() {
 
     function selectAll() {
         RED.nodes.eachNode(function(n) {
-            if (n.z == activeWorkspace) {
+            if (n.z == RED.workspaces.active()) {
                 if (!n.selected) {
                     n.selected = true;
                     n.dirty = true;
@@ -960,7 +892,7 @@ RED.view = (function() {
         if (mouse_mode == RED.state.JOINING && mousedown_node) {
             if (typeof TouchEvent != "undefined" && d3.event instanceof TouchEvent) {
                 RED.nodes.eachNode(function(n) {
-                        if (n.z == activeWorkspace) {
+                        if (n.z == RED.workspaces.active()) {
                             var hw = n.w/2;
                             var hh = n.h/2;
                             if (n.x-hw<mouse_position[0] && n.x+hw> mouse_position[0] &&
@@ -1246,7 +1178,7 @@ RED.view = (function() {
                 vis.selectAll(".subflowinput").remove();
             }
             
-            //var node = vis.selectAll(".nodegroup").data(RED.nodes.nodes.filter(function(d) { return d.z == activeWorkspace }),function(d){return d.id});
+            //var node = vis.selectAll(".nodegroup").data(RED.nodes.nodes.filter(function(d) { return d.z == RED.workspaces.active() }),function(d){return d.id});
             var node = vis.selectAll(".nodegroup").data(activeNodes,function(d){return d.id});
             node.exit().remove();
 
@@ -1712,8 +1644,6 @@ RED.view = (function() {
     RED.keyboard.add(/* - */ 189,{ctrl:true},function(){zoomOut();d3.event.preventDefault();});
     RED.keyboard.add(/* 0 */ 48,{ctrl:true},function(){zoomZero();d3.event.preventDefault();});
     RED.keyboard.add(/* v */ 86,{ctrl:true},function(){importNodes(clipboard);d3.event.preventDefault();});
-    RED.keyboard.add(/* e */ 69,{ctrl:true},function(){showExportNodesDialog();d3.event.preventDefault();});
-    RED.keyboard.add(/* i */ 73,{ctrl:true},function(){showImportNodesDialog();d3.event.preventDefault();});
 
     // TODO: 'dirty' should be a property of RED.nodes - with an event callback for ui hooks
     function setDirty(d) {
@@ -1744,7 +1674,7 @@ RED.view = (function() {
                 var new_workspaces = result[2];
                 var new_subflows = result[3];
                 
-                var new_ms = new_nodes.filter(function(n) { return n.z == activeWorkspace }).map(function(n) { return {n:n};});
+                var new_ms = new_nodes.filter(function(n) { return n.z == RED.workspaces.active() }).map(function(n) { return {n:n};});
                 var new_node_ids = new_nodes.map(function(n){ return n.id; });
 
                 // TODO: pick a more sensible root node
@@ -1816,136 +1746,6 @@ RED.view = (function() {
         }
     }
 
-    function showExportNodesDialog() {
-        mouse_mode = RED.state.EXPORT;
-        var nns = RED.nodes.createExportableNodeSet(moving_set);
-        $("#dialog-form").html($("script[data-template-name='export-clipboard-dialog']").html());
-        $("#node-input-export").val(JSON.stringify(nns));
-        $("#node-input-export").focus(function() {
-                var textarea = $(this);
-                textarea.select();
-                textarea.mouseup(function() {
-                        textarea.unbind("mouseup");
-                        return false;
-                });
-        });
-        $( "#dialog" ).dialog("option","title","Export nodes to clipboard").dialog( "open" );
-        $("#node-input-export").focus();
-    }
-
-    function showExportNodesLibraryDialog() {
-        mouse_mode = RED.state.EXPORT;
-        var nns = RED.nodes.createExportableNodeSet(moving_set);
-        $("#dialog-form").html($("script[data-template-name='export-library-dialog']").html());
-        $("#node-input-filename").attr('nodes',JSON.stringify(nns));
-        $( "#dialog" ).dialog("option","title","Export nodes to library").dialog( "open" );
-    }
-
-    function showImportNodesDialog() {
-        mouse_mode = RED.state.IMPORT;
-        $("#dialog-form").html($("script[data-template-name='import-dialog']").html());
-        $("#node-input-import").val("");
-        $( "#dialog" ).dialog("option","title","Import nodes").dialog( "open" );
-    }
-
-    function showRenameWorkspaceDialog(id) {
-        var ws = RED.nodes.workspace(id);
-        $( "#node-dialog-rename-workspace" ).dialog("option","workspace",ws);
-
-        if (workspace_tabs.count() == 1) {
-            $( "#node-dialog-rename-workspace").next().find(".leftButton")
-                .prop('disabled',true)
-                .addClass("ui-state-disabled");
-        } else {
-            $( "#node-dialog-rename-workspace").next().find(".leftButton")
-                .prop('disabled',false)
-                .removeClass("ui-state-disabled");
-        }
-
-        $( "#node-input-workspace-name" ).val(ws.label);
-        $( "#node-dialog-rename-workspace" ).dialog("open");
-    }
-    
-    $("#node-dialog-rename-workspace form" ).submit(function(e) { e.preventDefault();});
-    $( "#node-dialog-rename-workspace" ).dialog({
-        modal: true,
-        autoOpen: false,
-        width: 500,
-        title: "Rename sheet",
-        buttons: [
-            {
-                class: 'leftButton',
-                text: "Delete",
-                click: function() {
-                    var workspace = $(this).dialog('option','workspace');
-                    $( this ).dialog( "close" );
-                    deleteWorkspace(workspace.id);
-                }
-            },
-            {
-                text: "Ok",
-                click: function() {
-                    var workspace = $(this).dialog('option','workspace');
-                    var label = $( "#node-input-workspace-name" ).val();
-                    if (workspace.label != label) {
-                        workspace_tabs.renameTab(workspace.id,label);
-                        RED.view.dirty(true);
-                        $("#btn-workspace-menu-"+workspace.id.replace(".","-")).text(label);
-                        // TODO: update entry in menu
-                    }
-                    $( this ).dialog( "close" );
-                }
-            },
-            {
-                text: "Cancel",
-                click: function() {
-                    $( this ).dialog( "close" );
-                }
-            }
-        ],
-        open: function(e) {
-            RED.keyboard.disable();
-        },
-        close: function(e) {
-            RED.keyboard.enable();
-        }
-    });
-    $( "#node-dialog-delete-workspace" ).dialog({
-        modal: true,
-        autoOpen: false,
-        width: 500,
-        title: "Confirm delete",
-        buttons: [
-            {
-                text: "Ok",
-                click: function() {
-                    var workspace = $(this).dialog('option','workspace');
-                    RED.view.removeWorkspace(workspace);
-                    var historyEvent = RED.nodes.removeWorkspace(workspace.id);
-                    historyEvent.t = 'delete';
-                    historyEvent.dirty = dirty;
-                    historyEvent.workspaces = [workspace];
-                    RED.history.push(historyEvent);
-                    RED.view.dirty(true);
-                    $( this ).dialog( "close" );
-                }
-            },
-            {
-                text: "Cancel",
-                click: function() {
-                    $( this ).dialog( "close" );
-                }
-            }
-        ],
-        open: function(e) {
-            RED.keyboard.disable();
-        },
-        close: function(e) {
-            RED.keyboard.enable();
-        }
-
-    });
-    
     function hideDropTarget() {
         $("#dropTarget").hide();
         RED.keyboard.remove(/* ESCAPE */ 27);
@@ -2004,30 +1804,12 @@ RED.view = (function() {
                 mouse_mode = state;
             }
         },
-        addWorkspace: function(ws) {
-            workspace_tabs.addTab(ws);
-            workspace_tabs.resize();
-        },
-        removeWorkspace: function(ws) {
-            if (workspace_tabs.contains(ws.id)) {
-                workspace_tabs.removeTab(ws.id);
-            }
-        },
-        getWorkspace: function() {
-            return activeWorkspace;
-        },
-        showWorkspace: function(id) {
-            workspace_tabs.activateTab(id);
-        },
+        
         redraw: function(updateActive) {
             if (updateActive) {
                 updateActiveNodes();
             }
-            RED.nodes.eachSubflow(function(sf) {
-                if (workspace_tabs.contains(sf.id)) {
-                    workspace_tabs.renameTab(sf.id,"Subflow: "+sf.name);
-                }
-            });
+            RED.workspaces.refresh();
             redraw();   
         },
         dirty: function(d) {
@@ -2039,14 +1821,15 @@ RED.view = (function() {
         },
         focus: focusView,
         importNodes: importNodes,
-        resize: function() {
-            workspace_tabs.resize();
-        },
         status: function(s) {
-            showStatus = s;
-            RED.nodes.eachNode(function(n) { n.dirty = true;});
-            //TODO: subscribe/unsubscribe here
-            redraw();
+            if (s == null) {
+                return showStatus;
+            } else {
+                showStatus = s;
+                RED.nodes.eachNode(function(n) { n.dirty = true;});
+                //TODO: subscribe/unsubscribe here
+                redraw();
+            }
         },
         calculateTextWidth: calculateTextWidth,
         select: function(selection) {
@@ -2073,26 +1856,6 @@ RED.view = (function() {
                 selection.link = selected_link;
             }
             return selection;
-        },
-        //TODO: should these move to an import/export module?
-        showImportNodesDialog: showImportNodesDialog,
-        showExportNodesDialog: showExportNodesDialog,
-        showExportNodesLibraryDialog: showExportNodesLibraryDialog, 
-        addFlow: function() {
-            var ws = {type:"subflow",id:RED.nodes.id(),label:"Flow 1", closeable: true};
-            RED.nodes.addWorkspace(ws);
-            workspace_tabs.addTab(ws);
-            workspace_tabs.activateTab(ws.id);
-            return ws;
-        },
-        
-        showSubflow: function(id) {
-            if (!workspace_tabs.contains(id)) {
-                var sf = RED.nodes.subflow(id);
-                workspace_tabs.addTab({type:"subflow",id:id,label:"Subflow: "+sf.name, closeable: true});
-                workspace_tabs.resize();
-            }
-            workspace_tabs.activateTab(id);
         }
     };
 })();

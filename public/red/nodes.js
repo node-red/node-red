@@ -429,16 +429,16 @@ RED.nodes = (function() {
         var exportedConfigNodes = {};
         var exportedSubflows = {};
         for (var n=0;n<set.length;n++) {
-            var node = set[n].n;
+            var node = set[n];
             if (node.type.substring(0,8) == "subflow:") {
                 var subflowId = node.type.substring(8);
                 if (!exportedSubflows[subflowId]) {
                     exportedSubflows[subflowId] = true;
                     var subflow = getSubflow(subflowId);
-                    var subflowSet = [{n:subflow}];
+                    var subflowSet = [subflow];
                     RED.nodes.eachNode(function(n) {
                         if (n.z == subflowId) {
-                            subflowSet.push({n:n});
+                            subflowSet.push(n);
                         }
                     });
                     var exportableSubflow = createExportableNodeSet(subflowSet);
@@ -543,7 +543,7 @@ RED.nodes = (function() {
                 //"DO NOT DEPLOY while in this state.<br/>Either, add missing types to Node-RED, restart and then reload page,<br/>or delete unknown "+n.name+", rewire as required, and then deploy.","error");
             }
 
-            var activeWorkspace = RED.view.getWorkspace();
+            var activeWorkspace = RED.workspaces.active();
             var activeSubflow = getSubflow(activeWorkspace);
             if (activeSubflow) {
                 for (i=0;i<newNodes.length;i++) {
@@ -589,7 +589,7 @@ RED.nodes = (function() {
                         n.id = nid;
                     }
                     addWorkspace(n);
-                    RED.view.addWorkspace(n);
+                    RED.workspaces.add(n);
                     new_workspaces.push(n);
                 } else if (n.type === "subflow") {
                     subflow_map[n.id] = n;
@@ -634,9 +634,9 @@ RED.nodes = (function() {
             if (defaultWorkspace == null) {
                 defaultWorkspace = { type:"tab", id:getID(), label:"Sheet 1" };
                 addWorkspace(defaultWorkspace);
-                RED.view.addWorkspace(defaultWorkspace);
+                RED.workspaces.add(defaultWorkspace);
                 new_workspaces.push(defaultWorkspace);
-                activeWorkspace = RED.view.getWorkspace();
+                activeWorkspace = RED.workspaces.active();
             }
 
             var node_map = {};

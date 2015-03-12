@@ -59,7 +59,6 @@ RED.sidebar = (function() {
                     $("#chart-zoom-controls").css("right",newChartRight+20);
                     $("#sidebar").width(0);
                     RED.menu.setSelected("btn-sidebar",true);
-                    RED.view.resize();
                     eventHandler.emit("resize");
                 }
                 sidebarSeparator.width = $("#sidebar").width();
@@ -100,11 +99,9 @@ RED.sidebar = (function() {
                 $("#sidebar").width(newSidebarWidth);
 
                 sidebar_tabs.resize();
-                RED.view.resize();
                 eventHandler.emit("resize");
             },
             stop:function(event,ui) {
-                RED.view.resize();
                 if (sidebarSeparator.closing) {
                     $("#sidebar").removeClass("closing");
                     RED.menu.setSelected("btn-sidebar",false);

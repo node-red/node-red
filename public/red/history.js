@@ -47,20 +47,20 @@ RED.history = (function() {
                     if (ev.workspaces) {
                         for (i=0;i<ev.workspaces.length;i++) {
                             RED.nodes.removeWorkspace(ev.workspaces[i].id);
-                            RED.view.removeWorkspace(ev.workspaces[i]);
+                            RED.workspaces.remove(ev.workspaces[i]);
                         }
                     }
                     if (ev.subflows) {
                         for (i=0;i<ev.subflows.length;i++) {
                             RED.nodes.removeSubflow(ev.subflows[i]);
-                            RED.view.removeWorkspace(ev.subflows[i]);
+                            RED.workspaces.remove(ev.subflows[i]);
                         }
                     }
                 } else if (ev.t == "delete") {
                     if (ev.workspaces) {
                         for (i=0;i<ev.workspaces.length;i++) {
                             RED.nodes.addWorkspace(ev.workspaces[i]);
-                            RED.view.addWorkspace(ev.workspaces[i]);
+                            RED.workspaces.add(ev.workspaces[i]);
                         }
                     }
                     if (ev.subflow) {
@@ -183,7 +183,7 @@ RED.history = (function() {
                     }
                     
                     RED.nodes.removeSubflow(ev.subflow);
-                    RED.view.removeWorkspace(ev.subflow);
+                    RED.workspaces.remove(ev.subflow);
                     
                     if (ev.removedLinks) {
                         for (i=0;i<ev.removedLinks.length;i++) {

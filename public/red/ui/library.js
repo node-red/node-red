@@ -380,6 +380,14 @@ RED.library = (function() {
 
     }
     
+    function exportFlow() {
+        //TODO: don't rely on the main dialog
+        var nns = RED.nodes.createExportableNodeSet(RED.view.selection().nodes);
+        $("#dialog-form").html($("script[data-template-name='export-library-dialog']").html());
+        $("#node-input-filename").attr('nodes',JSON.stringify(nns));
+        $( "#dialog" ).dialog("option","title","Export nodes to library").dialog( "open" );
+    }
+    
     return {
         init: function() {
             RED.view.on("selection-changed",function(selection) {
@@ -397,7 +405,9 @@ RED.library = (function() {
             loadFlowLibrary();
         },
         create: createUI,
-        loadFlowLibrary: loadFlowLibrary
+        loadFlowLibrary: loadFlowLibrary,
+        
+        export: exportFlow
     }
 })();
 

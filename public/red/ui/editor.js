@@ -234,24 +234,20 @@ RED.editor = (function() {
                             editing_node.dirty = true;
                             validateNode(editing_node);
                             RED.view.redraw();
-                        } else if (RED.view.state() == RED.state.EXPORT) {
-                            if (/library/.test($( "#dialog" ).dialog("option","title"))) {
-                                //TODO: move this to RED.library
-                                var flowName = $("#node-input-filename").val();
-                                if (!/^\s*$/.test(flowName)) {
-                                    $.ajax({
-                                        url:'library/flows/'+flowName,
-                                        type: "POST",
-                                        data: $("#node-input-filename").attr('nodes'),
-                                        contentType: "application/json; charset=utf-8"
-                                    }).done(function() {
-                                            RED.library.loadFlowLibrary();
-                                            RED.notify("Saved nodes","success");
-                                    });
-                                }
+                        } else if (/Export nodes to library/.test($( "#dialog" ).dialog("option","title"))) {
+                            //TODO: move this to RED.library
+                            var flowName = $("#node-input-filename").val();
+                            if (!/^\s*$/.test(flowName)) {
+                                $.ajax({
+                                    url:'library/flows/'+flowName,
+                                    type: "POST",
+                                    data: $("#node-input-filename").attr('nodes'),
+                                    contentType: "application/json; charset=utf-8"
+                                }).done(function() {
+                                        RED.library.loadFlowLibrary();
+                                        RED.notify("Saved nodes","success");
+                                });
                             }
-                        } else if (RED.view.state() == RED.state.IMPORT) {
-                            RED.view.importNodes($("#node-input-import").val());
                         }
                         $( this ).dialog( "close" );
                     }
@@ -500,7 +496,7 @@ RED.editor = (function() {
                 class: 'leftButton',
                 text: "Edit flow",
                 click: function() {
-                    RED.view.showSubflow(id);
+                    RED.workspaces.show(id);
                     $("#node-dialog-ok").click();
                 }
             });

@@ -275,12 +275,12 @@ var RED = (function() {
                 {id:"btn-node-status",label:"Display node status",toggle:true,onselect:toggleStatus, selected: true},
                 null,
                 {id:"btn-import-menu",label:"Import",options:[
-                    {id:"btn-import-clipboard",label:"Clipboard",onselect:RED.view.showImportNodesDialog},
+                    {id:"btn-import-clipboard",label:"Clipboard",onselect:RED.clipboard.import},
                     {id:"btn-import-library",label:"Library",options:[]}
                 ]},
                 {id:"btn-export-menu",label:"Export",disabled:true,options:[
-                    {id:"btn-export-clipboard",label:"Clipboard",disabled:true,onselect:RED.view.showExportNodesDialog},
-                    {id:"btn-export-library",label:"Library",disabled:true,onselect:RED.view.showExportNodesLibraryDialog}
+                    {id:"btn-export-clipboard",label:"Clipboard",disabled:true,onselect:RED.clipboard.export},
+                    {id:"btn-export-library",label:"Library",disabled:true,onselect:RED.library.export}
                 ]},
                 null,
                 {id:"btn-config-nodes",label:"Configuration nodes",onselect:RED.sidebar.config.show},
@@ -291,9 +291,9 @@ var RED = (function() {
                 ]},
                 null,
                 {id:"btn-workspace-menu",label:"Workspaces",options:[
-                    {id:"btn-workspace-add",label:"Add"},
-                    {id:"btn-workspace-edit",label:"Rename"},
-                    {id:"btn-workspace-delete",label:"Delete"},
+                    {id:"btn-workspace-add",label:"Add",onselect:RED.workspaces.add},
+                    {id:"btn-workspace-edit",label:"Rename",onselect:RED.workspaces.edit},
+                    {id:"btn-workspace-delete",label:"Delete",onselect:RED.workspaces.remove},
                     null
                 ]},
                 null,
@@ -357,6 +357,8 @@ var RED = (function() {
         RED.palette.init();
         RED.sidebar.init();
         RED.subflow.init();
+        RED.workspaces.init();
+        RED.clipboard.init();
         RED.view.init();
         
         RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});

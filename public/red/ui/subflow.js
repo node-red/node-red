@@ -18,7 +18,7 @@ RED.subflow = (function() {
         
 
     function getSubflow() {
-        return RED.nodes.subflow(RED.view.getWorkspace());
+        return RED.nodes.subflow(RED.workspaces.active());
     }
     
     function findAvailableSubflowIOPosition(subflow) {
@@ -39,7 +39,7 @@ RED.subflow = (function() {
     }
     
     function addSubflowInput() {
-        var subflow = RED.nodes.subflow(RED.view.getWorkspace());
+        var subflow = RED.nodes.subflow(RED.workspaces.active());
         var position = findAvailableSubflowIOPosition(subflow);
         var newInput = {
             type:"subflow",
@@ -79,7 +79,7 @@ RED.subflow = (function() {
     }
     
     function addSubflowOutput(id) {
-        var subflow = RED.nodes.subflow(RED.view.getWorkspace());
+        var subflow = RED.nodes.subflow(RED.workspaces.active());
         var position = findAvailableSubflowIOPosition(subflow);
         
         var newOutput = {
@@ -120,7 +120,7 @@ RED.subflow = (function() {
     
     function init() {
         $("#workspace-subflow-edit").click(function(event) {
-            RED.editor.editSubflow(RED.nodes.subflow(RED.view.getWorkspace()));
+            RED.editor.editSubflow(RED.nodes.subflow(RED.workspaces.active()));
             event.preventDefault();
         });
         $("#workspace-subflow-add-input").click(function(event) {
@@ -170,7 +170,7 @@ RED.subflow = (function() {
                     dirty:startDirty
             });
             
-            RED.view.removeWorkspace(activeSubflow);
+            RED.workspaces.remove(activeSubflow);
             RED.view.dirty(true);
             RED.view.redraw();
         });
@@ -210,7 +210,7 @@ RED.subflow = (function() {
             subflow: subflow,
             dirty:RED.view.dirty()
         });
-        RED.view.showSubflow(subflowId);
+        RED.workspaces.show(subflowId);
     }
         
     function convertToSubflow() {
@@ -328,7 +328,7 @@ RED.subflow = (function() {
             type:"subflow:"+subflow.id,
             x: center[0],
             y: center[1],
-            z: RED.view.getWorkspace(),
+            z: RED.workspaces.active(),
             inputs: subflow.in.length,
             outputs: subflow.out.length,
             h: Math.max(30/*node_height*/,(subflow.out.length||0) * 15),
@@ -381,7 +381,7 @@ RED.subflow = (function() {
             links:new_links,
             subflow: subflow,
     
-            activeWorkspace: RED.view.getWorkspace(),
+            activeWorkspace: RED.workspaces.active(),
             removedLinks: removedLinks,
             
             dirty:RED.view.dirty()

@@ -148,7 +148,7 @@ RED.sidebar.info = (function() {
                 }
             }
         } else {
-            var subflow = RED.nodes.subflow(RED.view.getWorkspace());
+            var subflow = RED.nodes.subflow(RED.workspaces.active());
             if (subflow) {
                 refresh(subflow);
             } else {
