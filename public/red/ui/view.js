@@ -32,6 +32,8 @@ RED.view = (function() {
 
     var activeWorkspace = 0;
     var activeSubflow = null;
+    var activeNodes = [];
+    var activeLinks = [];
     
     var workspaceScrollPositions = {};
 
@@ -231,6 +233,15 @@ RED.view = (function() {
 
     var drag_line = vis.append("svg:path").attr("class", "drag_line");
 
+    function updateActiveNodes() {
+        activeNodes = RED.nodes.nodes.filter(function(d) {
+            return d.z == activeWorkspace;
+        });
+        activeLinks = RED.nodes.links.filter(function(d) {
+            return d.source.z == activeWorkspace && d.target.z == activeWorkspace;
+        })
+    }
+    
     var workspace_tabs = RED.tabs.create({
         id: "workspace-tabs",
         onchange: function(tab) {
@@ -273,9 +284,10 @@ RED.view = (function() {
 
             clearSelection();
             RED.nodes.eachNode(function(n) {
-                    n.dirty = true;
+                n.dirty = true;
             });
             updateSelection();
+            updateActiveNodes();
             redraw();
         },
         ondblclick: function(tab) {
@@ -294,10 +306,12 @@ RED.view = (function() {
                 }
             });
             RED.menu.setDisabled("btn-workspace-delete",workspace_tabs.count() == 1);
+            updateActiveNodes();
         },
         onremove: function(tab) {
             RED.menu.setDisabled("btn-workspace-delete",workspace_tabs.count() == 1);
             RED.menu.removeItem("btn-workspace-menu-"+tab.id.replace(".","-"));
+            updateActiveNodes();
         }
     });
 
@@ -327,6 +341,7 @@ RED.view = (function() {
         RED.menu.setAction('btn-workspace-delete',function() {
             deleteWorkspace(activeWorkspace);
         });
+        updateActiveNodes();
     }
 
     function deleteWorkspace(id) {
@@ -563,6 +578,7 @@ RED.view = (function() {
         }
         if (mouse_mode == RED.state.IMPORT_DRAGGING) {
             RED.keyboard.remove(/* ESCAPE */ 27);
+            updateActiveNodes();
             setDirty(true);
         }
         redraw();
@@ -644,6 +660,7 @@ RED.view = (function() {
                 clearSelection();
                 nn.selected = true;
                 moving_set.push({n:nn});
+                updateActiveNodes();
                 updateSelection();
                 redraw();
 
@@ -886,6 +903,7 @@ RED.view = (function() {
         RED.history.push({t:'delete',nodes:removedNodes,links:removedLinks,subflowOutputs:removedSubflowOutputs,subflowInputs:removedSubflowInputs,dirty:startDirty});
 
         selected_link = null;
+        updateActiveNodes();
         updateSelection();
         redraw();
     }
@@ -980,6 +998,7 @@ RED.view = (function() {
                 var link = {source: src, sourcePort:src_port, target: dst};
                 RED.nodes.addLink(link);
                 RED.history.push({t:'add',links:[link],dirty:dirty});
+                updateActiveNodes();
                 setDirty(true);
             } else {
             }
@@ -1220,7 +1239,8 @@ RED.view = (function() {
                 vis.selectAll(".subflowinput").remove();
             }
             
-            var node = vis.selectAll(".nodegroup").data(RED.nodes.nodes.filter(function(d) { return d.z == activeWorkspace }),function(d){return d.id});
+            //var node = vis.selectAll(".nodegroup").data(RED.nodes.nodes.filter(function(d) { return d.z == activeWorkspace }),function(d){return d.id});
+            var node = vis.selectAll(".nodegroup").data(activeNodes,function(d){return d.id});
             node.exit().remove();
 
             var nodeEnter = node.enter().insert("svg:g").attr("class", "node nodegroup");
@@ -1579,9 +1599,7 @@ RED.view = (function() {
         }
 
         var link = vis.selectAll(".link").data(
-            RED.nodes.links.filter(function(d) {
-                return d.source.z == activeWorkspace && d.target.z == activeWorkspace;
-            }),
+            activeLinks,
             function(d) {
                 return d.source.id+":"+d.sourcePort+":"+d.target.id+":"+d.target.i;
             }
@@ -1756,7 +1774,7 @@ RED.view = (function() {
                     dirty:RED.view.dirty()
                 });
 
-
+                updateActiveNodes();
                 redraw();
             }
         } catch(error) {
@@ -1972,7 +1990,10 @@ RED.view = (function() {
         showWorkspace: function(id) {
             workspace_tabs.activateTab(id);
         },
-        redraw: function() {
+        redraw: function(updateActive) {
+            if (updateActive) {
+                updateActiveNodes();
+            }
             RED.nodes.eachSubflow(function(sf) {
                 if (workspace_tabs.contains(sf.id)) {
                     workspace_tabs.renameTab(sf.id,"Subflow: "+sf.name);

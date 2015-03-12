@@ -169,7 +169,7 @@ var RED = (function() {
             success: function(nodes) {
                 RED.nodes.import(nodes);
                 RED.view.dirty(false);
-                RED.view.redraw();
+                RED.view.redraw(true);
                 RED.comms.subscribe("status/#",function(topic,msg) {
                     var parts = topic.split("/");
                     var node = RED.nodes.node(parts[1]);
@@ -358,21 +358,6 @@ var RED = (function() {
         RED.sidebar.init();
         RED.subflow.init();
         RED.view.init();
-        
-        RED.view.on("selection-changed",function(selection) {
-            if (!selection.nodes) {
-                RED.menu.setDisabled("btn-export-menu",true);
-                RED.menu.setDisabled("btn-export-clipboard",true);
-                RED.menu.setDisabled("btn-export-library",true);
-                RED.menu.setDisabled("btn-convert-subflow",true);
-            } else {
-                RED.menu.setDisabled("btn-export-menu",false);
-                RED.menu.setDisabled("btn-export-clipboard",false);
-                RED.menu.setDisabled("btn-export-library",false);
-                RED.menu.setDisabled("btn-convert-subflow",false);
-            }
-        });
-        
         
         RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
         RED.comms.connect();

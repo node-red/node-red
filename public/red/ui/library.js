@@ -382,6 +382,18 @@ RED.library = (function() {
     
     return {
         init: function() {
+            RED.view.on("selection-changed",function(selection) {
+                if (!selection.nodes) {
+                    RED.menu.setDisabled("btn-export-menu",true);
+                    RED.menu.setDisabled("btn-export-clipboard",true);
+                    RED.menu.setDisabled("btn-export-library",true);
+                } else {
+                    RED.menu.setDisabled("btn-export-menu",false);
+                    RED.menu.setDisabled("btn-export-clipboard",false);
+                    RED.menu.setDisabled("btn-export-library",false);
+                }
+            });
+            
             loadFlowLibrary();
         },
         create: createUI,

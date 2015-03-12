@@ -174,6 +174,15 @@ RED.subflow = (function() {
             RED.view.dirty(true);
             RED.view.redraw();
         });
+        
+        RED.view.on("selection-changed",function(selection) {
+            if (!selection.nodes) {
+                RED.menu.setDisabled("btn-convert-subflow",true);
+            } else {
+                RED.menu.setDisabled("btn-convert-subflow",false);
+            }
+        });
+        
     }
         
     function createSubflow() {
@@ -379,7 +388,7 @@ RED.subflow = (function() {
         });
         
         RED.view.dirty(true);
-        RED.view.redraw();
+        RED.view.redraw(true);
     }
     
     
