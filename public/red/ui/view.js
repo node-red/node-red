@@ -1674,12 +1674,21 @@ RED.view = (function() {
                 }
             })
     
-            link.classed("link_selected", function(d) {
+            link.classed("link_selected", function(d) { return d === selected_link || d.selected; });
+            link.classed("link_unknown",function(d) { 
                 delete d.added;
-                return d === selected_link || d.selected;
+                return d.target.type == "unknown" || d.source.type == "unknown"
             });
-            link.classed("link_unknown",function(d) { return d.target.type == "unknown" || d.source.type == "unknown"});
+        } else {
+            // JOINING - unselect any selected links
+            vis.selectAll(".link_selected").data(
+                activeLinks,
+                function(d) {
+                    return d.source.id+":"+d.sourcePort+":"+d.target.id+":"+d.target.i;
+                }
+            ).classed("link_selected", false);
         }
+        
 
         if (d3.event) {
             d3.event.preventDefault();
