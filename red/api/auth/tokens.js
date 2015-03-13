@@ -15,7 +15,6 @@
  **/
 
 var when = require("when");
-var Sessions;
 
 function generateToken(length) {
     var c = "ABCDEFGHIJKLMNOPQRSTUZWXYZabcdefghijklmnopqrstuvwxyz1234567890";
@@ -27,30 +26,18 @@ function generateToken(length) {
 }
 
 
-var sessionModule;
-
-function moduleSelector(aSettings) {
-    var toReturn;
-    if (aSettings.sessionStorageModule) {
-        if (typeof aSettings.sessionStorageModule === "string") {
-            // TODO: allow storage modules to be specified by absolute path
-            toReturn = require("./"+aSettings.sessionStorageModule);
-        } else {
-            toReturn = aSettings.sessionStorageModule;
-        }
-    } else {
-        toReturn = require("./localfilesystem");
-    }
-    return toReturn;
-}
+var storage;
+var sessions = {};
 
 module.exports = {
-    init: function(settings) {
-        sessionModule = moduleSelector(settings);
-        sessionModule.init(settings);
+    init: function(_storage) {
+        storage = _storage;
+        return storage.getSessions().then(function(_sessions) {
+             sessions = _sessions||{};   
+        });
     },
     get: function(token) {
-        return sessionModule.get(token);
+        return when.resolve(sessions[token]);
     },
     create: function(user,client,scope) {
         var accessToken = generateToken(128);
@@ -60,14 +47,16 @@ module.exports = {
             scope:scope,
             accessToken: accessToken,
         };
-        return sessionModule.create(accessToken,session).then(function() {
+        sessions[accessToken] = session;
+        return storage.saveSessions(sessions).then(function() {
             return {
                 accessToken: accessToken,
             }
         });
     },
     revoke: function(token) {
-        return sessionModule.delete(token);
+        delete sessions[token];
+        return storage.saveSessions(sessions);
     }
 }
 

@@ -36,9 +36,9 @@ var errorHandler = function(err,req,res,next) {
     res.send(400,err.toString());
 };
 
-function init(adminApp) {
+function init(adminApp,storage) {
     
-    auth.init(settings);
+    auth.init(settings,storage);
     
     // Editor
     if (!settings.disableEditor) {

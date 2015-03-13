@@ -44,13 +44,11 @@ describe("red/server", function() {
     
     it("initialises components", function() {
         var commsInit = sinon.stub(comms,"init",function() {});
-        var apiInit = sinon.stub(api,"init",function() {});
         
         var dummyServer = {};
         server.init(dummyServer,{httpAdminRoot:"/"});
         
         commsInit.called.should.be.true;
-        apiInit.called.should.be.true;
         
         should.exist(server.app);
         should.exist(server.nodeApp);
@@ -58,26 +56,6 @@ describe("red/server", function() {
         server.server.should.equal(dummyServer);
         
         commsInit.restore();
-        apiInit.restore();
-    });
-    
-    it("does not initalise api when disabled", function() {
-        var commsInit = sinon.stub(comms,"init",function() {});
-        var apiInit = sinon.stub(api,"init",function() {});
-        
-        var dummyServer = {};
-        server.init(dummyServer,{httpAdminRoot:false});
-        
-        commsInit.called.should.be.true;
-        apiInit.called.should.be.false;
-        
-        should.exist(server.app);
-        should.exist(server.nodeApp);
-        
-        server.server.should.equal(dummyServer);
-        
-        commsInit.restore();
-        apiInit.restore();
     });
     
     it("stops components", function() {

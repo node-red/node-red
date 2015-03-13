@@ -17,6 +17,7 @@
 var should = require("should");
 var request = require("supertest");
 var express = require("express");
+var when = require("when");
 var fs = require("fs");
 var path = require("path");
 var settings = require("../../../red/settings");
@@ -62,7 +63,7 @@ describe("api index", function() {
             //settings.init({disableEditor:true});
             settings.init({adminAuth:{type: "credentials",users:[],default:{permissions:"read"}}});
             app = express();
-            api.init(app);
+            api.init(app,{getSessions:function(){return when.resolve({})}});
         });
         after(function() {
             settings.reset();

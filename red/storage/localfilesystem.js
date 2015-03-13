@@ -32,6 +32,7 @@ var flowsFileBackup;
 var credentialsFile;
 var credentialsFileBackup;
 var oldCredentialsFile;
+var sessionsFile;
 var libDir;
 var libFlowsDir;
 var globalSettingsFile;
@@ -191,6 +192,8 @@ var localfilesystem = {
         
         flowsFileBackup = fspath.join(ffDir,"."+ffName+".backup");
 
+        sessionsFile = fspath.join(settings.userDir,".sessions.json");
+
         libDir = fspath.join(settings.userDir,"lib");
         libFlowsDir = fspath.join(libDir,"flows");
         
@@ -287,6 +290,26 @@ var localfilesystem = {
     },
     saveSettings: function(settings) {
         return writeFile(globalSettingsFile,JSON.stringify(settings,null,1));
+    },
+    getSessions: function() {
+        if (fs.existsSync(sessionsFile)) {
+            return nodeFn.call(fs.readFile,sessionsFile,'utf8').then(function(data) {
+                if (data) {
+                    try {
+                        return JSON.parse(data);
+                    } catch(err) {
+                        log.info("Corrupted sessions file - resetting");
+                        return {};
+                    }
+                } else {
+                    return {};
+                }
+            });
+        }
+        return when.resolve({});
+    },
+    saveSessions: function(sessions) {
+        return writeFile(sessionsFile,JSON.stringify(sessions));
     },
     
     getAllFlows: function() {

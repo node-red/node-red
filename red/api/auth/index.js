@@ -34,11 +34,11 @@ var server = oauth2orize.createServer();
 
 server.exchange(oauth2orize.exchange.password(strategies.passwordTokenExchange));
 
-function init(_settings) {
+function init(_settings,storage) {
     settings = _settings;
     if (settings.adminAuth) {
         Users.init(settings.adminAuth);
-        Tokens.init(settings)
+        Tokens.init(storage);
     }
 }
 
