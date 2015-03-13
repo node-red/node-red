@@ -99,8 +99,8 @@ describe('Flow', function() {
         });
         
     });
-    describe('#start',function() {
-
+    
+    describe('missing types',function() {
         it('prevents a flow with missing types from starting', function() {
             var getType = sinon.stub(typeRegistry,"get",function(type) {
                 if (type == "test") {
@@ -122,9 +122,7 @@ describe('Flow', function() {
                 getType.restore();
             }
         });
-    });
-    
-    describe('missing types',function() {
+            
         it('removes missing types as they are registered', function() {
             var getType = sinon.stub(typeRegistry,"get",function(type) {
                 if (type == "test") {
@@ -192,363 +190,227 @@ describe('Flow', function() {
         });
     });
     
-    describe('#diffFlow',function() {
+    describe('#start',function() {
         var getType;
-        before(function() {
-            getType = sinon.stub(typeRegistry,"get",function(type) {
-                // For this test, don't care what the actual type is, just
-                // that this returns a non-false result
-                return {};
+        var getNode;
+        var credentialsClean;
+        
+        var stoppedNodes = {};
+        var currentNodes = {};
+        var rewiredNodes = {};
+        var createCount = 0;
+        
+        var TestNode = function(n) {
+            Node.call(this,n);
+            createCount++;
+            var node = this;
+            this.handled = 0;
+            this.stopped = false;
+            currentNodes[node.id] = node;
+            this.on('input',function(msg) {
+                node.handled++;
+                node.send(msg);
             });
+            this.on('close',function() {
+                node.stopped = true;
+                stoppedNodes[node.id] = node;
+                delete currentNodes[node.id];
+            });
+            this.updateWires = function(newWires) {
+                rewiredNodes[node.id] = node;
+                node.newWires = newWires;
+            };
+        }
+        util.inherits(TestNode,Node);
+        
+        before(function() {
+            getNode = sinon.stub(flows,"get",function(id) {
+                return currentNodes[id];
+            });
+            getType = sinon.stub(typeRegistry,"get",function(type) {
+                return TestNode;
+            });
+            credentialsClean = sinon.stub(credentials,"clean",function(config){});
                 
         });
         after(function() {
             getType.restore();
+            credentialsClean.restore();
+            getNode.restore();
         });
         
-        it('handles an identical configuration', function() {
-            var config = [{id:"123",type:"test",foo:"a",wires:[]}];
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(config);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",[]);
-            diffResult.should.have.property("linked",[]);
-            diffResult.should.have.property("wiringChanged",[]);
+        beforeEach(function() {
+            currentNodes = {};
+            stoppedNodes = {};
+            rewiredNodes = {};
+            createCount = 0;
         });
         
-        it('identifies nodes with changed properties, including downstream linked', function() {
-            var config = [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[[1]]},{id:"3",type:"test",foo:"a",wires:[]}];
-            var newConfig = clone(config);
-            newConfig[0].foo = "b";
+        it("instantiates an initial configuration and stops it",function(done) {
+            var config = [{id:"1",type:"test",foo:"a",wires:["2"]},{id:"2",type:"test",bar:"b",wires:[["3"]]},{id:"3",type:"test",foo:"a",wires:[]}];
             
             var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
+            flow.start();
             
-            var diffResult = flow.diffFlow(newConfig);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",["1"]);
-            diffResult.should.have.property("linked",["2"]);
-            diffResult.should.have.property("wiringChanged",[]);
-        });
-        
-        it('identifies nodes with changed properties, including upstream linked', function() {
-            var config =    [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[[1]]},{id:"3",type:"test",foo:"a",wires:[]}];
-            var newConfig = clone(config);
-            newConfig[1].bar = "c";
+            currentNodes.should.have.a.property("1");
+            currentNodes.should.have.a.property("2");
+            currentNodes.should.have.a.property("3");
             
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
+            currentNodes["1"].should.have.a.property("handled",0);
+            currentNodes["2"].should.have.a.property("handled",0);
+            currentNodes["3"].should.have.a.property("handled",0);
             
-            var diffResult = flow.diffFlow(newConfig);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",["2"]);
-            diffResult.should.have.property("linked",["1"]);
-            diffResult.should.have.property("wiringChanged",[]);
-        });
-                
-        it('identifies nodes with changed credentials, including downstream linked', function() {
-            var config =    [{id:"1",type:"test",wires:[]},{id:"2",type:"test",bar:"b",wires:[[1]]},{id:"3",type:"test",foo:"a",wires:[]}];
-            var newConfig = clone(config);
-            newConfig[0].credentials = {};
             
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
+            currentNodes["1"].receive({payload:"test"});
+                    
+            currentNodes["1"].should.have.a.property("handled",1);
+            currentNodes["2"].should.have.a.property("handled",1);
+            currentNodes["3"].should.have.a.property("handled",1);
             
-            var diffResult = flow.diffFlow(newConfig);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",["1"]);
-            diffResult.should.have.property("linked",["2"]);
-            diffResult.should.have.property("wiringChanged",[]);
-        });
-        
-        it('identifies nodes with changed wiring', function() {
-            var config =    [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[[1]]},{id:"3",type:"test",foo:"a",wires:[]}];
-            var newConfig = clone(config);
-            newConfig[1].wires[0][0] = 2;
-            
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",[]);
-            diffResult.should.have.property("linked",["1","2"]);
-            diffResult.should.have.property("wiringChanged",["2"]);
-        });
-        
-        it('identifies nodes with changed wiring - second connection added', function() {
-            var config =    [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[[1]]},{id:"3",type:"test",foo:"a",wires:[]}];
-            var newConfig = clone(config);
-            newConfig[1].wires[0].push([1]);
-            
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",[]);
-            diffResult.should.have.property("linked",["1","2"]);
-            diffResult.should.have.property("wiringChanged",["2"]);
-        });
-        
-                it('identifies nodes with changed wiring - second connection added', function() {
-            var config =    [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[[1]]},{id:"3",type:"test",foo:"a",wires:[]}];
-            var newConfig = clone(config);
-            newConfig[1].wires[0].push([1]);
-            
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",[]);
-            diffResult.should.have.property("linked",["1","2"]);
-            diffResult.should.have.property("wiringChanged",["2"]);
+            flow.stop().then(function() {
+                currentNodes.should.not.have.a.property("1");
+                currentNodes.should.not.have.a.property("2");
+                currentNodes.should.not.have.a.property("3");
+                stoppedNodes.should.have.a.property("1");
+                stoppedNodes.should.have.a.property("2");
+                stoppedNodes.should.have.a.property("3");
+                done();
+            });
         });
 
-        it('identifies nodes with changed wiring - node connected', function() {
-            var config =  [{id:"1",type:"test",foo:"a",wires:[["2"]]},{id:"2",type:"test",bar:"b",wires:[[]]},{id:"3",type:"test",foo:"a",wires:[]}];
-            var newConfig = clone(config);
-            newConfig[1].wires.push("3");
+        it("rewires nodes specified by diff",function(done) {
+            var config = [{id:"1",type:"test",foo:"a",wires:["2"]},{id:"2",type:"test",bar:"b",wires:[["3"]]},{id:"3",type:"test",foo:"a",wires:[]}];
             
             var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",[]);
-            diffResult.should.have.property("linked",["1","2","3"]);
-            diffResult.should.have.property("wiringChanged",["2"]);
-        });
-        
-        it('identifies new nodes', function() {
-            var config = [{id:"1",type:"test",foo:"a",wires:[]},{id:"3",type:"test",foo:"a",wires:[]}];
-            var newConfig = clone(config);
-            newConfig.push({id:"2",type:"test",bar:"b",wires:[[1]]});
-            
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
-
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",["2"]);
-            diffResult.should.have.property("linked",["1"]);
-            diffResult.should.have.property("wiringChanged",[]);
-        });
-        
-        it('identifies deleted nodes', function() {
-            var config = [{id:"1",type:"test",foo:"a",wires:[[2]]},{id:"2",type:"test",bar:"b",wires:[[3]]},{id:"3",type:"test",foo:"a",wires:[]}];
-            var newConfig = clone(config);
-            newConfig.splice(1,1);
-            newConfig[0].wires = [];
-            
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
-
-            diffResult.should.have.property("deleted",["2"]);
-            diffResult.should.have.property("changed",[]);
-            diffResult.should.have.property("linked",["1","3"]);
-            diffResult.should.have.property("wiringChanged",["1"]);
+            createCount.should.equal(0);
+            flow.start();
+            createCount.should.equal(3);
+            flow.start({rewire:"2"});
+            createCount.should.equal(3);
+            rewiredNodes.should.have.a.property("2");
+            done();
         });
 
-        it('identifies config nodes changes', function() {
-            var config = [{id:"1",type:"test",foo:"configNode",wires:[[2]]},{id:"2",type:"test",bar:"b",wires:[[3]]},{id:"3",type:"test",foo:"a",wires:[]},{id:"configNode",type:"testConfig"}];
-            var newConfig = clone(config);
-            newConfig[3].foo = "bar";
-            
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
 
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",["1","configNode"]);
-            diffResult.should.have.property("linked",["2","3"]);
-            diffResult.should.have.property("wiringChanged",[]);
-        });
 
-        it('marks a parent subflow as changed for an internal property change', function() {
-            var config = [
-                {id:"1",type:"test",wires:[[2]]},
-                {id:"2",type:"subflow:sf1",wires:[[3]]},
-                {id:"3",type:"test",wires:[]},
-                {id:"sf1",type:"subflow"},
-                {id:"sf1-1",z:"sf1",type:"test",foo:"a"},
-                {id:"4",type:"subflow:sf1"}
-            ];
-            
-            var newConfig = clone(config);
-            newConfig[4].foo = "b";
-            
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
-
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",["2","4"]);
-            diffResult.should.have.property("linked",["1","3"]);
-            diffResult.should.have.property("wiringChanged",[]);
-        });
-        
-        it('marks a parent subflow as changed for an internal wiring change', function() {
-            var config = [
-                {id:"1",type:"test",wires:[[2]]},
-                {id:"2",type:"subflow:sf1",wires:[[3]]},
-                {id:"3",type:"test",wires:[]},
-                {id:"sf1",type:"subflow"},
-                {id:"sf1-1",z:"sf1",type:"test"},
-                {id:"sf1-2",z:"sf1",type:"test"}
-            ];
-            
-            var newConfig = clone(config);
-            newConfig[4].wires = [["sf1-2"]];
-            
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",["2"]);
-            diffResult.should.have.property("linked",["1","3"]);
-            diffResult.should.have.property("wiringChanged",[]);
-        });
-        it('marks a parent subflow as changed for an internal node delete', function() {
-            var config = [
-                {id:"1",type:"test",wires:[[2]]},
-                {id:"2",type:"subflow:sf1",wires:[[3]]},
-                {id:"3",type:"test",wires:[]},
-                {id:"sf1",type:"subflow"},
-                {id:"sf1-1",z:"sf1",type:"test"},
-                {id:"sf1-2",z:"sf1",type:"test"}
-            ];
-            
-            var newConfig = clone(config);
-            newConfig.splice(5,1);
-            
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",["2"]);
-            diffResult.should.have.property("linked",["1","3"]);
-            diffResult.should.have.property("wiringChanged",[]);
-        });
-        it('marks a parent subflow as changed for an internal subflow wiring change - input removed', function() {
-            var config = [
-                {id:"1",type:"test",wires:[[2]]},
-                {id:"2",type:"subflow:sf1",wires:[[3]]},
-                {id:"3",type:"test",wires:[]},
-                {id:"sf1",type:"subflow","in": [{"wires": [{"id": "sf1-1"}]}],"out": [{"wires": [{"id": "sf1-2","port": 0}]}]},
-                {id:"sf1-1",z:"sf1",type:"test"},
-                {id:"sf1-2",z:"sf1",type:"test"}
-            ];
-            
-            var newConfig = clone(config);
-            newConfig[3].in[0].wires = [];
-            
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",["2"]);
-            diffResult.should.have.property("linked",["1","3"]);
-            diffResult.should.have.property("wiringChanged",[]);
-        });
-        it('marks a parent subflow as changed for an internal subflow wiring change - input added', function() {
-            var config = [
-                {id:"1",type:"test",wires:[[2]]},
-                {id:"2",type:"subflow:sf1",wires:[[3]]},
-                {id:"3",type:"test",wires:[]},
-                {id:"sf1",type:"subflow","in": [{"wires": [{"id": "sf1-1"}]}],"out": [{"wires": [{"id": "sf1-2","port": 0}]}]},
-                {id:"sf1-1",z:"sf1",type:"test"},
-                {id:"sf1-2",z:"sf1",type:"test"}
-            ];
-            
-            var newConfig = clone(config);
-            newConfig[3].in[0].wires.push({"id":"sf1-2"});
-            
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",["2"]);
-            diffResult.should.have.property("linked",["1","3"]);
-            diffResult.should.have.property("wiringChanged",[]);
-        });
-        
-        it('marks a parent subflow as changed for an internal subflow wiring change - output added', function() {
-            var config = [
-                {id:"1",type:"test",wires:[[2]]},
-                {id:"2",type:"subflow:sf1",wires:[[3]]},
-                {id:"3",type:"test",wires:[]},
-                {id:"sf1",type:"subflow","in": [{"wires": [{"id": "sf1-1"}]}],"out": [{"wires": [{"id": "sf1-2","port": 0}]}]},
-                {id:"sf1-1",z:"sf1",type:"test"},
-                {id:"sf1-2",z:"sf1",type:"test"}
-            ];
-            
-            var newConfig = clone(config);
-            newConfig[3].out[0].wires.push({"id":"sf1-2","port":0});
-            
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",["2"]);
-            diffResult.should.have.property("linked",["1","3"]);
-            diffResult.should.have.property("wiringChanged",[]);
-        });
-        
-        it('marks a parent subflow as changed for an internal subflow wiring change - output removed', function() {
-            var config = [
-                {id:"1",type:"test",wires:[[2]]},
-                {id:"2",type:"subflow:sf1",wires:[[3]]},
-                {id:"3",type:"test",wires:[]},
-                {id:"sf1",type:"subflow","in": [{"wires": [{"id": "sf1-1"}]}],"out": [{"wires": [{"id": "sf1-2","port": 0}]}]},
-                {id:"sf1-1",z:"sf1",type:"test"},
-                {id:"sf1-2",z:"sf1",type:"test"}
-            ];
-            
-            var newConfig = clone(config);
-            newConfig[3].out[0].wires = [];
-            
-            var flow = new Flow(config);
-            flow.getMissingTypes().should.have.length(0);
-            
-            var diffResult = flow.diffFlow(newConfig);
-        
-            diffResult.should.have.property("deleted",[]);
-            diffResult.should.have.property("changed",["2"]);
-            diffResult.should.have.property("linked",["1","3"]);
-            diffResult.should.have.property("wiringChanged",[]);
-        });
-          
-        
     });
     
-    describe('#applyConfig',function() {
+    describe('#stop', function() {
+        var getType;
+        var getNode;
+        var credentialsClean;
+        
+        var stoppedNodes = {};
+        var currentNodes = {};
+        
+        var TestNode = function(n) {
+            Node.call(this,n);
+            var node = this;
+            this.handled = 0;
+            this.stopped = false;
+            currentNodes[node.id] = node;
+            this.on('input',function(msg) {
+                node.handled++;
+                node.send(msg);
+            });
+            this.on('close',function() {
+                node.stopped = true;
+                stoppedNodes[node.id] = node;
+                delete currentNodes[node.id];
+            });
+        }
+        util.inherits(TestNode,Node);
+        
+        var TestAsyncNode = function(n) {
+            Node.call(this,n);
+            var node = this;
+            this.handled = 0;
+            this.stopped = false;
+            currentNodes[node.id] = node;
+            this.on('input',function(msg) {
+                node.handled++;
+                node.send(msg);
+            });
+            this.on('close',function(done) {
+                setTimeout(function() {
+                    node.stopped = true;
+                    stoppedNodes[node.id] = node;
+                    delete currentNodes[node.id];
+                    done();
+                },500);
+            });
+        }
+        util.inherits(TestAsyncNode,Node);
+        
+        before(function() {
+            getNode = sinon.stub(flows,"get",function(id) {
+                return currentNodes[id];
+            });
+            getType = sinon.stub(typeRegistry,"get",function(type) {
+                if (type=="test") {
+                    return TestNode;
+                } else {
+                    return TestAsyncNode;
+                }
+            });
+            credentialsClean = sinon.stub(credentials,"clean",function(config){});
+                
+        });
+        after(function() {
+            getType.restore();
+            credentialsClean.restore();
+            getNode.restore();
+        });
+        
+        beforeEach(function() {
+            currentNodes = {};
+            stoppedNodes = {};
+        });
+        
+        it("stops all nodes",function(done) {
+            var config = [{id:"1",type:"test",foo:"a",wires:["2"]},{id:"2",type:"asyncTest",bar:"b",wires:[["3"]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var flow = new Flow(config);
+            flow.start();
+            
+            currentNodes.should.have.a.property("1");
+            currentNodes.should.have.a.property("2");
+            currentNodes.should.have.a.property("3");
+            
+            flow.stop().then(function() {
+                currentNodes.should.not.have.a.property("1");
+                currentNodes.should.not.have.a.property("2");
+                currentNodes.should.not.have.a.property("3");
+                stoppedNodes.should.have.a.property("1");
+                stoppedNodes.should.have.a.property("2");
+                stoppedNodes.should.have.a.property("3");
+                done();
+            });
+        });
+        
+        it("stops nodes specified by diff",function(done) {
+            var config = [{id:"1",type:"test",foo:"a",wires:["2"]},{id:"2",type:"test",bar:"b",wires:[["3"]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var flow = new Flow(config);
+            flow.start();
+            
+            currentNodes.should.have.a.property("1");
+            currentNodes.should.have.a.property("2");
+            currentNodes.should.have.a.property("3");
+            
+            flow.stop({stop:["2"]}).then(function() {
+                currentNodes.should.have.a.property("1");
+                currentNodes.should.not.have.a.property("2");
+                currentNodes.should.have.a.property("3");
+                stoppedNodes.should.not.have.a.property("1");
+                stoppedNodes.should.have.a.property("2");
+                stoppedNodes.should.not.have.a.property("3");
+                done();
+            });
+        });
+
+    });
+
+    
+    describe('#diffConfig',function() {
         var getType;
         var getNode;
         var credentialsClean;
@@ -595,38 +457,647 @@ describe('Flow', function() {
             stoppedNodes = {};
         });
         
-        it("instantiates an initial configuration and stops it",function(done) {
-            var config = [{id:"1",type:"test",foo:"a",wires:["2"]},{id:"2",type:"test",bar:"b",wires:[["3"]]},{id:"3",type:"test",foo:"a",wires:[]}];
+        
+        it('handles an identical configuration', function() {
+            var config = [{id:"123",type:"test",foo:"a",wires:[]}];
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(config,"full");
+            diffResult.should.have.property("config",config);
+            diffResult.should.have.property("type","full");
+            diffResult.should.have.property("stop",["123"]);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(config,"nodes");
+            diffResult.should.have.property("config",config);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop",[]);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(config,"flows");
+            diffResult.should.have.property("config",config);
+            diffResult.should.have.property("type","flows");
+            diffResult.should.have.property("stop",[]);
+            diffResult.should.have.property("rewire",[]);
+        });
+        
+        it('identifies nodes with changed properties, including downstream linked', function() {
+            var config = [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[[1]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var newConfig = clone(config);
+            newConfig[0].foo = "b";
             
             var flow = new Flow(config);
             flow.start();
+            flow.getMissingTypes().should.have.length(0);
             
-            currentNodes.should.have.a.property("1");
-            currentNodes.should.have.a.property("2");
-            currentNodes.should.have.a.property("3");
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.stop.sort().should.eql(["1","2","3"]);
+            diffResult.should.have.property("rewire",[]);
             
-            currentNodes["1"].should.have.a.property("handled",0);
-            currentNodes["2"].should.have.a.property("handled",0);
-            currentNodes["3"].should.have.a.property("handled",0);
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop",["1"]);
+            diffResult.should.have.property("rewire",[]);
             
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.should.have.property("stop",["1","2"]);
+            diffResult.should.have.property("rewire",[]);
+            diffResult.should.have.property("config",newConfig);
+        });
+        
+        it('identifies nodes with changed properties, including upstream linked', function() {
+            var config =    [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[[1]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var newConfig = clone(config);
+            newConfig[1].bar = "c";
             
-            currentNodes["1"].receive({payload:"test"});
-                    
-            currentNodes["1"].should.have.a.property("handled",1);
-            currentNodes["2"].should.have.a.property("handled",1);
-            currentNodes["3"].should.have.a.property("handled",1);
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
             
-            flow.stop().then(function() {
-                currentNodes.should.not.have.a.property("1");
-                currentNodes.should.not.have.a.property("2");
-                currentNodes.should.not.have.a.property("3");
-                stoppedNodes.should.have.a.property("1");
-                stoppedNodes.should.have.a.property("2");
-                stoppedNodes.should.have.a.property("3");
-                done();
-            });
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.stop.sort().should.eql(["1","2","3"]);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop",["2"]);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.stop.sort().should.eql(["1","2"]);
+            diffResult.should.have.property("rewire",[]);
+            diffResult.should.have.property("config",newConfig);
+        });
+                
+        it('identifies nodes with changed credentials, including downstream linked', function() {
+            var config =    [{id:"1",type:"test",wires:[]},{id:"2",type:"test",bar:"b",wires:[[1]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var newConfig = clone(config);
+            newConfig[0].credentials = {};
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.stop.sort().should.eql(["1","2","3"]);
+            diffResult.should.have.property("rewire",[]);
+            
+            newConfig[0].credentials = {};
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop",["1"]);
+            diffResult.should.have.property("rewire",[]);
+            
+            newConfig[0].credentials = {};
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.stop.sort().should.eql(["1","2"]);
+            diffResult.should.have.property("rewire",[]);
+            diffResult.should.have.property("config",newConfig);
+        });
+        
+        it('identifies nodes with changed wiring', function() {
+            var config =    [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[[1]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var newConfig = clone(config);
+            newConfig[1].wires[0][0] = 2;
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.stop.sort().should.eql(["1","2","3"]);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop",[]);
+            diffResult.should.have.property("rewire",["2"]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.stop.sort().should.eql(["1","2"]);
+            diffResult.should.have.property("rewire",["2"]);
+            diffResult.should.have.property("config",newConfig);
+
+
+        });
+        
+        it('identifies nodes with changed wiring - second connection added', function() {
+            var config =    [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[[1]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var newConfig = clone(config);
+            newConfig[1].wires[0].push([1]);
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+        
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.stop.sort().should.eql(["1","2","3"]);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop",[]);
+            diffResult.should.have.property("rewire",["2"]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.stop.sort().should.eql(["1","2"]);
+            diffResult.should.have.property("rewire",["2"]);
+            diffResult.should.have.property("config",newConfig);
+        });
+        
+        it('identifies nodes with changed wiring - second connection added', function() {
+            var config =    [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[[1]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var newConfig = clone(config);
+            newConfig[1].wires[0].push([1]);
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.stop.sort().should.eql(["1","2","3"]);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop",[]);
+            diffResult.should.have.property("rewire",["2"]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.stop.sort().should.eql(["1","2"]);
+            diffResult.should.have.property("rewire",["2"]);
+            diffResult.should.have.property("config",newConfig);
+
         });
 
+        it('identifies nodes with changed wiring - node connected', function() {
+            var config =  [{id:"1",type:"test",foo:"a",wires:[["2"]]},{id:"2",type:"test",bar:"b",wires:[[]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var newConfig = clone(config);
+            newConfig[1].wires.push("3");
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.stop.sort().should.eql(["1","2","3"]);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop",[]);
+            diffResult.should.have.property("rewire",["2"]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.stop.sort().should.eql(["1","2","3"]);
+            diffResult.should.have.property("rewire",["2"]);
+            diffResult.should.have.property("config",newConfig);
+        });
+        
+        it('identifies new nodes', function() {
+            var config = [{id:"1",type:"test",foo:"a",wires:[]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var newConfig = clone(config);
+            newConfig.push({id:"2",type:"test",bar:"b",wires:[[1]]});
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.stop.sort().should.eql(["1","3"]);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop",[]);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.stop.sort().should.eql(["1"]);
+            diffResult.should.have.property("rewire",[]);
+            diffResult.should.have.property("config",newConfig);
+        });
+        
+        it('identifies deleted nodes', function() {
+            var config = [{id:"1",type:"test",foo:"a",wires:[[2]]},{id:"2",type:"test",bar:"b",wires:[[3]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var newConfig = clone(config);
+            newConfig.splice(1,1);
+            newConfig[0].wires = [];
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.stop.sort().should.eql(["1","2","3"]);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop",["2"]);
+            diffResult.should.have.property("rewire",["1"]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.stop.sort().should.eql(["1","2","3"]);
+            diffResult.should.have.property("rewire",["1"]);
+            diffResult.should.have.property("config",newConfig);
+            
+            
+        });
+
+        it('identifies config nodes changes', function() {
+            var config = [{id:"1",type:"test",foo:"configNode",wires:[[2]]},{id:"2",type:"test",bar:"b",wires:[[3]]},{id:"3",type:"test",foo:"a",wires:[]},{id:"configNode",type:"testConfig"}];
+            var newConfig = clone(config);
+            newConfig[3].foo = "bar";
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.stop.sort().should.eql(["1","2","3","configNode"]);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop",["1","configNode"]);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.stop.sort().should.eql(["1","2","3","configNode"]);
+            diffResult.should.have.property("rewire",[]);
+            diffResult.should.have.property("config",newConfig);
+            
+            
+        });
+
+        it('marks a parent subflow as changed for an internal property change', function() {
+            var config = [
+                {id:"1",type:"test",wires:[[2]]},
+                {id:"2",type:"subflow:sf1",wires:[[3]]},
+                {id:"3",type:"test",wires:[]},
+                {id:"sf1",type:"subflow"},
+                {id:"sf1-1",z:"sf1",type:"test",foo:"a",wires:[]},
+                {id:"4",type:"subflow:sf1",wires:[]}
+            ];
+            
+            var newConfig = clone(config);
+            newConfig[4].foo = "b";
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.should.have.property("stop").with.lengthOf(6);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop").with.lengthOf(4);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.should.have.property("stop").with.lengthOf(6);
+            diffResult.should.have.property("rewire",[]);
+            diffResult.should.have.property("config",newConfig);
+            
+        });
+        
+        it('marks a parent subflow as changed for an internal wiring change', function() {
+            var config = [
+                {id:"1",type:"test",wires:[[2]]},
+                {id:"2",type:"subflow:sf1",wires:[[3]]},
+                {id:"3",type:"test",wires:[]},
+                {id:"sf1",type:"subflow"},
+                {id:"sf1-1",z:"sf1",type:"test",wires:[]},
+                {id:"sf1-2",z:"sf1",type:"test",wires:[]}
+            ];
+            
+            var newConfig = clone(config);
+            newConfig[4].wires = [["sf1-2"]];
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.should.have.property("stop").with.lengthOf(5);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop").with.lengthOf(3);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.should.have.property("stop").with.lengthOf(5);
+            diffResult.should.have.property("rewire",[]);
+            diffResult.should.have.property("config",newConfig);
+
+
+        });
+        it('marks a parent subflow as changed for an internal node delete', function() {
+            var config = [
+                {id:"1",type:"test",wires:[[2]]},
+                {id:"2",type:"subflow:sf1",wires:[[3]]},
+                {id:"3",type:"test",wires:[]},
+                {id:"sf1",type:"subflow"},
+                {id:"sf1-1",z:"sf1",type:"test",wires:[]},
+                {id:"sf1-2",z:"sf1",type:"test",wires:[]}
+            ];
+            
+            var newConfig = clone(config);
+            newConfig.splice(5,1);
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.should.have.property("stop").with.lengthOf(5);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop").with.lengthOf(3);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.should.have.property("stop").with.lengthOf(5);
+            diffResult.should.have.property("rewire",[]);
+            diffResult.should.have.property("config",newConfig);
+            
+        });
+        it('marks a parent subflow as changed for an internal subflow wiring change - input removed', function() {
+            var config = [
+                {id:"1",type:"test",wires:[[2]]},
+                {id:"2",type:"subflow:sf1",wires:[[3]]},
+                {id:"3",type:"test",wires:[]},
+                {id:"sf1",type:"subflow","in": [{"wires": [{"id": "sf1-1"}]}],"out": [{"wires": [{"id": "sf1-2","port": 0}]}]},
+                {id:"sf1-1",z:"sf1",type:"test",wires:[]},
+                {id:"sf1-2",z:"sf1",type:"test",wires:[]}
+            ];
+            
+            var newConfig = clone(config);
+            newConfig[3].in[0].wires = [];
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.should.have.property("stop").with.lengthOf(5);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop").with.lengthOf(3);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.should.have.property("stop").with.lengthOf(5);
+            diffResult.should.have.property("rewire",[]);
+            diffResult.should.have.property("config",newConfig);
+        });
+        
+        it('marks a parent subflow as changed for an internal subflow wiring change - input added', function() {
+            var config = [
+                {id:"1",type:"test",wires:[[2]]},
+                {id:"2",type:"subflow:sf1",wires:[[3]]},
+                {id:"3",type:"test",wires:[]},
+                {id:"sf1",type:"subflow","in": [{"wires": [{"id": "sf1-1"}]}],"out": [{"wires": [{"id": "sf1-2","port": 0}]}]},
+                {id:"sf1-1",z:"sf1",type:"test",wires:[]},
+                {id:"sf1-2",z:"sf1",type:"test",wires:[]}
+            ];
+            
+            var newConfig = clone(config);
+            newConfig[3].in[0].wires.push({"id":"sf1-2"});
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.should.have.property("stop").with.lengthOf(5);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop").with.lengthOf(3);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.should.have.property("stop").with.lengthOf(5);
+            diffResult.should.have.property("rewire",[]);
+            diffResult.should.have.property("config",newConfig);
+        });
+        
+        it('marks a parent subflow as changed for an internal subflow wiring change - output added', function() {
+            var config = [
+                {id:"1",type:"test",wires:[[2]]},
+                {id:"2",type:"subflow:sf1",wires:[[3]]},
+                {id:"3",type:"test",wires:[]},
+                {id:"sf1",type:"subflow","in": [{"wires": [{"id": "sf1-1"}]}],"out": [{"wires": [{"id": "sf1-2","port": 0}]}]},
+                {id:"sf1-1",z:"sf1",type:"test",wires:[]},
+                {id:"sf1-2",z:"sf1",type:"test",wires:[]}
+            ];
+            
+            var newConfig = clone(config);
+            newConfig[3].out[0].wires.push({"id":"sf1-2","port":0});
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.should.have.property("stop").with.lengthOf(5);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop").with.lengthOf(3);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.should.have.property("stop").with.lengthOf(5);
+            diffResult.should.have.property("rewire",[]);
+            diffResult.should.have.property("config",newConfig);
+        });
+        
+        it('marks a parent subflow as changed for an internal subflow wiring change - output removed', function() {
+            var config = [
+                {id:"1",type:"test",wires:[[2]]},
+                {id:"2",type:"subflow:sf1",wires:[[3]]},
+                {id:"3",type:"test",wires:[]},
+                {id:"sf1",type:"subflow","in": [{"wires": [{"id": "sf1-1"}]}],"out": [{"wires": [{"id": "sf1-2","port": 0}]}]},
+                {id:"sf1-1",z:"sf1",type:"test",wires:[]},
+                {id:"sf1-2",z:"sf1",type:"test",wires:[]}
+            ];
+            
+            var newConfig = clone(config);
+            newConfig[3].out[0].wires = [];
+            
+            var flow = new Flow(config);
+            flow.start();
+            flow.getMissingTypes().should.have.length(0);
+            
+            var diffResult = flow.diffConfig(newConfig,"full");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","full");
+            diffResult.should.have.property("stop").with.lengthOf(5);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"nodes");
+            diffResult.should.have.property("config",newConfig);
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop").with.lengthOf(3);
+            diffResult.should.have.property("rewire",[]);
+            
+            diffResult = flow.diffConfig(newConfig,"flows");
+            diffResult.should.have.property("type","flows");
+            diffResult.should.have.property("stop").with.lengthOf(5);
+            diffResult.should.have.property("rewire",[]);
+            diffResult.should.have.property("config",newConfig);
+        });
+          
+        
+    });
+
+    describe("#diffConfig",function() {
+            return;
+        var getType;
+        var getNode;
+        var credentialsClean;
+        
+        var stoppedNodes = {};
+        var currentNodes = {};
+        
+        var TestNode = function(n) {
+            Node.call(this,n);
+            var node = this;
+            this.handled = 0;
+            this.stopped = false;
+            currentNodes[node.id] = node;
+            this.on('input',function(msg) {
+                node.handled++;
+                node.send(msg);
+            });
+            this.on('close',function() {
+                node.stopped = true;
+                stoppedNodes[node.id] = node;
+                delete currentNodes[node.id];
+            });
+        }
+        util.inherits(TestNode,Node);
+        
+        before(function() {
+            getNode = sinon.stub(flows,"get",function(id) {
+                return currentNodes[id];
+            });
+            getType = sinon.stub(typeRegistry,"get",function(type) {
+                return TestNode;
+            });
+            credentialsClean = sinon.stub(credentials,"clean",function(config){});
+                
+        });
+        after(function() {
+            getType.restore();
+            credentialsClean.restore();
+            getNode.restore();
+        });
+        
+        beforeEach(function() {
+            currentNodes = {};
+            stoppedNodes = {};
+        });
+        
+        it('handles an identical configuration', function() {
+            var config = [{id:"123",type:"test",foo:"a",wires:[]}];
+            var newConfig = [{id:"123",type:"test",foo:"a",wires:[]}];
+            
+            var flow = new Flow(config);
+            flow.start();
+            var diffResult = flow.diffConfig(newConfig,"nodes");
+        
+            diffResult.should.have.property("type","nodes");
+            diffResult.should.have.property("stop",[]);
+            diffResult.should.have.property("rewire",[]);
+            diffResult.should.have.property("config",newConfig);
+        });
+        
+        
+    });
+    
+    
+    describe("#dead",function() {
+        return;
         it("stops all nodes on new full deploy",function(done) {
             var config = [{id:"1",type:"test",foo:"a",wires:["2"]},{id:"2",type:"test",bar:"b",wires:[["3"]]},{id:"3",type:"test",foo:"a",wires:[]}];
             var newConfig = [{id:"4",type:"test",foo:"a",wires:["5"]},{id:"5",type:"test",bar:"b",wires:[["6"]]},{id:"6",type:"test",foo:"a",wires:[]}];
@@ -652,6 +1123,7 @@ describe('Flow', function() {
                 done();
             });
         });
+        return true;
         
         it("stops only modified nodes on 'nodes' deploy",function(done) {
             var config = [{id:"1",type:"test",name:"a",wires:["2"]},{id:"2",type:"test",name:"b",wires:[["3"]]},{id:"3",type:"test",name:"c",wires:[]}];

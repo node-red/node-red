@@ -123,7 +123,7 @@ var flowNodes = module.exports = {
             return credentialSavePromise
                 .then(function() { return storage.saveFlows(cleanConfig);})
                 .then(function() { 
-                    var configDiff = activeFlow.applyConfig(config,type);
+                    var configDiff = activeFlow.diffConfig(config,type);
                     return flowNodes.stopFlows(configDiff).then(function() {
                         activeFlow.parseConfig(config);
                         flowNodes.startFlows(configDiff);
