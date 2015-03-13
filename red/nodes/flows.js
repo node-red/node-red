@@ -122,14 +122,28 @@ var flowNodes = module.exports = {
         } else {
             return credentialSavePromise
                 .then(function() { return storage.saveFlows(cleanConfig);})
-                .then(function() { return activeFlow.applyConfig(config,type); });
+                .then(function() { 
+                    var configDiff = activeFlow.applyConfig(config,type);
+                    return flowNodes.stopFlows(configDiff).then(function() {
+                        activeFlow.parseConfig(config);
+                        flowNodes.startFlows(configDiff);
+                    });
+                });
         }
     },
-    startFlows: function() {
-        log.info("Starting flows");
+    startFlows: function(configDiff) {
+        if (configDiff) {
+            log.info("Starting modified "+configDiff.type);
+        } else {
+            log.info("Starting flows");
+        }
         try {
-            activeFlow.start();
-        log.info("Started flows");
+            activeFlow.start(configDiff);
+            if (configDiff) {
+                log.info("Started modified "+configDiff.type);
+            } else {
+                log.info("Started flows");
+            }
         } catch(err) {
             var missingTypes = activeFlow.getMissingTypes();
             if (missingTypes.length > 0) {
@@ -140,11 +154,19 @@ var flowNodes = module.exports = {
             }
         }
     },
-    stopFlows: function() {
-        log.info("Stopping flows");
+    stopFlows: function(configDiff) {
+        if (configDiff) {
+            log.info("Stopping modified "+configDiff.type);
+        } else {
+            log.info("Stopping flows");
+        }
         if (activeFlow) {
-            return activeFlow.stop().then(function() {
-                log.info("Stopped flows");
+            return activeFlow.stop(configDiff).then(function() {
+                if (configDiff) {
+                    log.info("Stopped modified "+configDiff.type);
+                } else {
+                    log.info("Stopped flows");
+                }
                 return;
             });
         } else {
