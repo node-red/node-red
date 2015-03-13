@@ -63,7 +63,7 @@ function start() {
             }
             log.info("Node.js  version: "+process.version);
             log.info("Loading palette nodes");
-            redNodes.init(settings,storage);
+            redNodes.init(settings,storage,app);
             redNodes.load().then(function() {
                 var i;
                 var nodes = redNodes.getNodeList();

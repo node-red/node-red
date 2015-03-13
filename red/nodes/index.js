@@ -50,8 +50,8 @@ function createNode(node,def) {
     }
 }
 
-function init(_settings,storage) {
-    credentials.init(storage);
+function init(_settings,storage,app) {
+    credentials.init(storage,app);
     flows.init(storage);
     registry.init(_settings);
 }

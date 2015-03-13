@@ -63,11 +63,9 @@ function registerEndpoint(type) {
 
 
 module.exports = {
-    init: function (_storage) {
+    init: function (_storage,_app) {
         storage = _storage;
-        // TODO: this should get passed in init function call rather than
-        //       required directly.
-        redApp = require("../server").app;
+        redApp = _app;
     },
     
     /**
@@ -166,7 +164,6 @@ module.exports = {
         var newCreds = node.credentials;
         if (newCreds) {
             var savedCredentials = credentialCache[nodeID] || {};
-            
             var dashedType = nodeType.replace(/\s+/g, '-');
             var definition = credentialsDef[dashedType];
             if (!definition) {

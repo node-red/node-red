@@ -19,9 +19,14 @@ var sinon = require("sinon");
 var when = require("when");
 var util = require("util");
 
+var express = require("express");
+var request = require("supertest");
+
 var index = require("../../../red/nodes/index");
 var credentials = require("../../../red/nodes/credentials");
 var log = require("../../../red/log");
+var auth = require("../../../red/api/auth");
+
 
 describe('Credentials', function() {
     
@@ -50,8 +55,20 @@ describe('Credentials', function() {
         });
     });
     
-    
     it('saves to storage', function(done) {
+        var storage = {
+            saveCredentials: function(creds) {
+                return when.resolve("saveCalled");
+            }
+        };
+        credentials.init(storage);
+        credentials.save().then(function(res) {
+            res.should.equal("saveCalled");
+            done();
+        });
+    });   
+    
+    it('saves to storage when new cred added', function(done) {
         var storage = {
             getCredentials: function() {
                 return when.promise(function(resolve,reject) {
@@ -210,159 +227,111 @@ describe('Credentials', function() {
         });
     });
     
-    //describe('extract and store credential updates in the provided node', function() {
-    //    var path = require('path');
-    //    var fs = require('fs-extra');
-    //    var http = require('http');
-    //    var express = require('express');
-    //    var server = require("../../../red/server");
-    //    var localfilesystem = require("../../../red/storage/localfilesystem");
-    //    var app = express();
-    //    var RED = require("../../../red/red.js");
-    //    
-    //    var userDir = path.join(__dirname,".testUserHome");
-    //    before(function(done) {
-    //        fs.remove(userDir,function(err) {
-    //            fs.mkdir(userDir,function() {
-    //                sinon.stub(index, 'load', function() {
-    //                    return when.promise(function(resolve,reject){
-    //                        resolve([]);
-    //                    });
-    //                });
-    //                sinon.stub(localfilesystem, 'getCredentials', function() {
-    //                     return when.promise(function(resolve,reject) {
-    //                            resolve({"tab1":{"foo": 2, "pswd":'sticks'}});
-    //                     });
-    //                }) ;
-    //                RED.init(http.createServer(function(req,res){app(req,res)}),
-    //                         {userDir: userDir});
-    //                server.start().then(function () {
-    //                    done(); 
-    //                 });
-    //            });
-    //        });
-    //    });
-    //
-    //    after(function(done) {
-    //        fs.remove(userDir,done);
-    //        server.stop();
-    //        index.load.restore();
-    //        localfilesystem.getCredentials.restore();
-    //    });
-    //
-    //    function TestNode(n) {
-    //        index.createNode(this, n);
-    //        var node = this;
-    //        this.on("log", function() {
-    //            // do nothing
-    //        });
-    //    }
-    //    
-    //    it(': credential updated with good value', function(done) {
-    //        index.registerType('test', TestNode, {
-    //            credentials: {
-    //                foo: {type:"test"}
-    //            }
-    //        });   
-    //        index.loadFlows().then(function() {
-    //            var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});   
-    //            credentials.extract(testnode);
-    //            should.exist(credentials.get('tab1'));
-    //            credentials.get('tab1').should.have.property('foo',2);
-    //            
-    //            // set credentials to be an updated value and checking this is extracted properly
-    //            testnode.credentials = {"foo": 3};
-    //            credentials.extract(testnode);
-    //            should.exist(credentials.get('tab1'));
-    //            credentials.get('tab1').should.not.have.property('foo',2);
-    //            credentials.get('tab1').should.have.property('foo',3);
-    //            done();                    
-    //        }).otherwise(function(err){
-    //            done(err);
-    //        });
-    //    });
-    //
-    //    it(': credential updated with empty value', function(done) {
-    //        index.registerType('test', TestNode, {
-    //            credentials: {
-    //                foo: {type:"test"}
-    //            }
-    //        });   
-    //        index.loadFlows().then(function() {
-    //            var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});   
-    //            // setting value of "foo" credential to be empty removes foo as a property
-    //            testnode.credentials = {"foo": ''};
-    //            credentials.extract(testnode);
-    //            should.exist(credentials.get('tab1'));
-    //            credentials.get('tab1').should.not.have.property('foo',2);
-    //            credentials.get('tab1').should.not.have.property('foo');
-    //            done();                    
-    //        }).otherwise(function(err){
-    //            done(err);
-    //        });
-    //    });
-    //
-    //    it(': undefined credential updated', function(done) {
-    //        index.registerType('test', TestNode, {
-    //            credentials: {
-    //                foo: {type:"test"}
-    //            }
-    //        });   
-    //        index.loadFlows().then(function() {
-    //            var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});   
-    //            // setting value of an undefined credential should not change anything
-    //            testnode.credentials = {"bar": 4};
-    //            credentials.extract(testnode);
-    //            should.exist(credentials.get('tab1'));
-    //            credentials.get('tab1').should.have.property('foo',2);
-    //            credentials.get('tab1').should.not.have.property('bar');
-    //            done();                    
-    //        }).otherwise(function(err){
-    //            done(err);
-    //        });
-    //    });
-    //    
-    //    it(': password credential updated', function(done) {
-    //        index.registerType('password', TestNode, {
-    //            credentials: {
-    //                pswd: {type:"password"}
-    //            }
-    //        });   
-    //        index.loadFlows().then(function() {
-    //            var testnode = new TestNode({id:'tab1',type:'password',name:'barney'});   
-    //            // setting value of password credential should update password 
-    //            testnode.credentials = {"pswd": 'fiddle'};
-    //            credentials.extract(testnode);
-    //            should.exist(credentials.get('tab1'));
-    //            credentials.get('tab1').should.have.property('pswd','fiddle');
-    //            credentials.get('tab1').should.not.have.property('pswd','sticks');
-    //            done();                    
-    //        }).otherwise(function(err){
-    //            done(err);
-    //        });
-    //    });    
-    //
-    //    it(': password credential not updated', function(done) {
-    //        index.registerType('password', TestNode, {
-    //            credentials: {
-    //                pswd: {type:"password"}
-    //            }
-    //        });   
-    //        index.loadFlows().then(function() {
-    //            var testnode = new TestNode({id:'tab1',type:'password',name:'barney'});   
-    //            // setting value of password credential should update password 
-    //            testnode.credentials = {"pswd": '__PWRD__'};
-    //            credentials.extract(testnode);
-    //            should.exist(credentials.get('tab1'));
-    //            credentials.get('tab1').should.have.property('pswd','sticks');
-    //            credentials.get('tab1').should.not.have.property('pswd','__PWRD__');
-    //            done();                    
-    //        }).otherwise(function(err){
-    //            done(err);
-    //        });
-    //    });    
-    //
-    //})
+    it('extract and store credential updates in the provided node', function(done) {
+        credentials.init({saveCredentials:function(){}},express());
+        credentials.register("test",{
+            user1:{type:"text"},
+            password1:{type:"password"},
+            user2:{type:"text"},
+            password2:{type:"password"},
+            user3:{type:"text"},
+            password3:{type:"password"}
+            
+        });
+        credentials.add("node",{user1:"abc",password1:"123",user2:"def",password2:"456",user3:"ghi",password3:"789"});
+        var node = {id:"node",type:"test",credentials:{
+            // user1 unchanged
+            password1:"__PWRD__",
+            user2: "",
+            password2:"   ",
+            user3:"newUser",
+            password3:"newPassword"
+        }};
+        credentials.extract(node);
+        
+        node.should.not.have.a.property("credentials");
+        
+        var newCreds = credentials.get("node");
+        newCreds.should.have.a.property("user1","abc");
+        newCreds.should.have.a.property("password1","123");
+        newCreds.should.not.have.a.property("user2");
+        newCreds.should.not.have.a.property("password2");
+        newCreds.should.have.a.property("user3","newUser");
+        newCreds.should.have.a.property("password3","newPassword");
+        
+        done();
+    });
+    
+    describe('registerEndpoint',function() {
+        it('returns empty credentials if none are stored',function(done) {
+            auth.init({});
+            var app = express();
+            credentials.init({saveCredentials:function(){}},app);
+            credentials.register("test",{
+                user1:{type:"text"},
+                password1:{type:"password"},
+                user2:{type:"text"},
+                password2:{type:"password"},
+                user3:{type:"text"},
+                password3:{type:"password"}
+                
+            });
+            request(app)
+                .get("/credentials/test/123")
+                .expect("Content-Type",/json/)
+                .end(function(err,res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        try {
+                            res.body.should.eql({});
+                            done();
+                        } catch(e) {
+                            done(e);
+                        }
+                    }
+                })
+        });
+        it('returns stored credentials',function(done) {
+            auth.init({});
+            var app = express();
+            credentials.init({saveCredentials:function(){}},app);
+            credentials.register("test",{
+                user1:{type:"text"},
+                password1:{type:"password"},
+                user2:{type:"text"},
+                password2:{type:"password"},
+                user3:{type:"text"},
+                password3:{type:"password"}
+                
+            });
+            credentials.add("node",{user1:"abc",password1:"123",user2:"def",password2:"456",user3:"ghi",password3:"789"});
+            request(app)
+                .get("/credentials/test/node")
+                .expect("Content-Type",/json/)
+                .end(function(err,res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        try {
+                            res.body.should.have.a.property("user1","abc");
+                            res.body.should.have.a.property("user2","def");
+                            res.body.should.have.a.property("user3","ghi");
+                            res.body.should.have.a.property("has_password1",true);
+                            res.body.should.have.a.property("has_password2",true);
+                            res.body.should.have.a.property("has_password3",true);
+                            res.body.should.not.have.a.property("password1");
+                            res.body.should.not.have.a.property("password2");
+                            res.body.should.not.have.a.property("password3");
+                            done();
+                        } catch(e) {
+                            done(e);
+                        }
+                    }
+                })
+        });
+            
+    });
 
     //describe('registerEndpoint', function() {
     //    var path = require('path');
