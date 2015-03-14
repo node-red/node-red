@@ -57,12 +57,58 @@ RED.keyboard = (function() {
     function removeHandler(key) {
         delete handlers[key];
     }
-
+    
+    
+    var dialog = $('<div id="keyboard-help-dialog" class="hide">'+
+    '<div style="vertical-align: top;display:inline-block; box-sizing: border-box; width:50%; padding: 10px;">'+
+        '<table class="keyboard-shortcuts">'+
+            '<tr><td><span class="help-key">Ctrl</span> + <span class="help-key">a</span></td><td>Select all nodes</td></tr>'+
+            '<tr><td><span class="help-key">Shift</span> + <span class="help-key">Click</span></td><td>Select all connected nodes</td></tr>'+
+            '<tr><td><span class="help-key">Ctrl</span> + <span class="help-key">Click</span></td><td>Add/remove node from selection</td></tr>'+
+            '<tr><td><span class="help-key">Delete</span></td><td>Delete selected nodes or link</td></tr>'+
+            '<tr><td>&nbsp;</td><td></td></tr>'+
+            '<tr><td><span class="help-key">Ctrl</span> + <span class="help-key">i</span></td><td>Import nodes</td></tr>'+
+            '<tr><td><span class="help-key">Ctrl</span> + <span class="help-key">e</span></td><td>Export selected nodes</td></tr>'+
+        '</table>'+
+    '</div>'+
+    '<div style="vertical-align: top;display:inline-block; box-sizing: border-box; width:50%; padding: 10px;">'+
+        '<table class="keyboard-shortcuts">'+
+            '<tr><td><span class="help-key">Ctrl</span> + <span class="help-key">Space</span></td><td>Toggle sidebar</td></tr>'+
+            '<tr><td></td><td></td></tr>'+
+            '<tr><td><span class="help-key">Delete</span></td><td>Delete selected nodes or link</td></tr>'+
+            '<tr><td></td><td></td></tr>'+
+            '<tr><td><span class="help-key">Ctrl</span> + <span class="help-key">c</span></td><td>Copy selected nodes</td></tr>'+
+            '<tr><td><span class="help-key">Ctrl</span> + <span class="help-key">x</span></td><td>Cut selected nodes</td></tr>'+
+            '<tr><td><span class="help-key">Ctrl</span> + <span class="help-key">v</span></td><td>Paste nodes</td></tr>'+
+        '</table>'+
+    '</div>'+
+    '</div>')
+    .appendTo("body")
+    .dialog({
+        modal: true,
+        autoOpen: false,
+        width: "800",
+        title:"Keyboard shortcuts",
+        resizable: false,
+        open: function() {
+            RED.keyboard.disable();
+        },
+        close: function() {
+            RED.keyboard.enable();
+        }
+    });
+    
+    function showKeyboardHelp() {
+        dialog.dialog("open");
+    }
+    
     return {
         add: addHandler,
         remove: removeHandler,
         disable: function(){ active = false;},
-        enable: function(){ active = true; }
+        enable: function(){ active = true; },
+        
+        showHelp: showKeyboardHelp
     }
 
 })();

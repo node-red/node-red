@@ -914,13 +914,21 @@ div.node-info {
 #node-help {
     width: 700px;
 }
-#node-help * td {
-    padding: 0.8em 0.5em;
+#keyboard-help-dialog {
+    font-size: 0.9em;
 }
-#node-help * tr > td:first-child+td+td {
-    padding-left: 5em;
+.keyboard-shortcuts {
+    padding: 10px;
 }
-
+.keyboard-shortcuts td  {
+    padding: 7px 5px;
+    margin-bottom: 10px;
+    white-space: pre;
+}
+.keyboard-shortcuts td:first-child {
+    text-align: right;
+    padding-right: 10px;
+}
 .help-key {
     border: 1px solid #ddd;
     padding: 4px;

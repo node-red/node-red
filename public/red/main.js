@@ -245,24 +245,6 @@ var RED = (function() {
         RED.view.status(statusEnabled);
     }
 
-    function showHelp() {
-
-        var dialog = $('#node-help');
-
-        //$("#node-help").draggable({
-        //        handle: ".modal-header"
-        //});
-
-        dialog.on('show',function() {
-            RED.keyboard.disable();
-        });
-        dialog.on('hidden',function() {
-            RED.keyboard.enable();
-        });
-
-        dialog.modal();
-    }
-    
     function changeDeploymentType(type) {
         deploymentType = type;
         $("#btn-deploy img").attr("src",deploymentTypes[type].img);
@@ -297,7 +279,7 @@ var RED = (function() {
                     null
                 ]},
                 null,
-                {id:"btn-keyboard-shortcuts",label:"Keyboard Shortcuts",onselect:showHelp},
+                {id:"btn-keyboard-shortcuts",label:"Keyboard Shortcuts",onselect:RED.keyboard.showHelp},
                 {id:"btn-help",label:"Node-RED Website", href:"http://nodered.org/docs"}
             ]
         });
@@ -361,7 +343,7 @@ var RED = (function() {
         RED.clipboard.init();
         RED.view.init();
         
-        RED.keyboard.add(/* ? */ 191,{shift:true},function(){showHelp();d3.event.preventDefault();});
+        RED.keyboard.add(/* ? */ 191,{shift:true},function(){RED.keyboard.showHelp();d3.event.preventDefault();});
         RED.comms.connect();
         loadNodeList();
     }
