@@ -282,8 +282,100 @@ RED.view = (function() {
             updateSelection();
             updateActiveNodes();
             redraw();
-
         });
+        
+        $('#btn-zoom-out').click(function() {zoomOut();});
+        $('#btn-zoom-zero').click(function() {zoomZero();});
+        $('#btn-zoom-in').click(function() {zoomIn();});
+        $("#chart").on('DOMMouseScroll mousewheel', function (evt) {
+            if ( evt.altKey ) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                var move = -(evt.originalEvent.detail) || evt.originalEvent.wheelDelta;
+                if (move <= 0) { zoomOut(); }
+                else { zoomIn(); }
+            }
+        });
+        
+        // Handle nodes dragged from the palette
+        $("#chart").droppable({
+            accept:".palette_node",
+            drop: function( event, ui ) {
+                d3.event = event;
+                var selected_tool = ui.draggable[0].type;
+                
+                var m = /^subflow:(.+)$/.exec(selected_tool);
+                
+                if (activeSubflow && m) {
+                    var subflowId = m[1];
+                    if (subflowId === activeSubflow.id) {
+                        RED.notify("<strong>Error</strong>: Cannot add subflow to itself","error");
+                        return;
+                    }
+                    if (RED.nodes.subflowContains(m[1],activeSubflow.id)) {
+                        RED.notify("<strong>Error</strong>: Cannot add subflow - circular reference detected","error");
+                        return;
+                    }
+                    
+                }
+                
+                var mousePos = d3.touches(this)[0]||d3.mouse(this);
+                mousePos[1] += this.scrollTop;
+                mousePos[0] += this.scrollLeft;
+                mousePos[1] /= scaleFactor;
+                mousePos[0] /= scaleFactor;
+                
+                var nn = { id:(1+Math.random()*4294967295).toString(16),x: mousePos[0],y:mousePos[1],w:node_width,z:RED.workspaces.active()};
+                
+                nn.type = selected_tool;
+                nn._def = RED.nodes.getType(nn.type);
+                
+                if (!m) {
+                    nn.inputs = nn._def.inputs || 0;
+                    nn.outputs = nn._def.outputs;
+                    nn.changed = true;
+                    
+                    for (var d in nn._def.defaults) {
+                        if (nn._def.defaults.hasOwnProperty(d)) {
+                            nn[d] = nn._def.defaults[d].value;
+                        }
+                    }
+                    
+                    if (nn._def.onadd) {
+                        nn._def.onadd.call(nn);
+                    }
+                } else {
+                    var subflow = RED.nodes.subflow(m[1]);
+                    nn.inputs = subflow.in.length;
+                    nn.outputs = subflow.out.length;
+                }
+                
+                nn.h = Math.max(node_height,(nn.outputs||0) * 15);
+                RED.history.push({t:'add',nodes:[nn.id],dirty:dirty});
+                RED.nodes.add(nn);
+                RED.editor.validateNode(nn);
+                setDirty(true);
+                // auto select dropped node - so info shows (if visible)
+                clearSelection();
+                nn.selected = true;
+                moving_set.push({n:nn});
+                updateActiveNodes();
+                updateSelection();
+                redraw();
+                
+                if (nn._def.autoedit) {
+                    RED.editor.edit(nn);
+                }
+            }
+        });
+        
+        RED.keyboard.add(/* z */ 90,{ctrl:true},function(){RED.history.pop();});
+        RED.keyboard.add(/* a */ 65,{ctrl:true},function(){selectAll();d3.event.preventDefault();});
+        RED.keyboard.add(/* = */ 187,{ctrl:true},function(){zoomIn();d3.event.preventDefault();});
+        RED.keyboard.add(/* - */ 189,{ctrl:true},function(){zoomOut();d3.event.preventDefault();});
+        RED.keyboard.add(/* 0 */ 48,{ctrl:true},function(){zoomZero();d3.event.preventDefault();});
+        RED.keyboard.add(/* v */ 86,{ctrl:true},function(){importNodes(clipboard);d3.event.preventDefault();});
+
     }
 
     function canvasMouseDown() {
@@ -516,90 +608,6 @@ RED.view = (function() {
         resetMouseVars();
         redraw();
     }
-
-    $('#btn-zoom-out').click(function() {zoomOut();});
-    $('#btn-zoom-zero').click(function() {zoomZero();});
-    $('#btn-zoom-in').click(function() {zoomIn();});
-    $("#chart").on('DOMMouseScroll mousewheel', function (evt) {
-        if ( evt.altKey ) {
-            evt.preventDefault();
-            evt.stopPropagation();
-            var move = -(evt.originalEvent.detail) || evt.originalEvent.wheelDelta;
-            if (move <= 0) { zoomOut(); }
-            else { zoomIn(); }
-        }
-    });
-    
-    $("#chart").droppable({
-            accept:".palette_node",
-            drop: function( event, ui ) {
-                d3.event = event;
-                var selected_tool = ui.draggable[0].type;
-                
-                var m = /^subflow:(.+)$/.exec(selected_tool);
-                
-                if (activeSubflow && m) {
-                    var subflowId = m[1];
-                    if (subflowId === activeSubflow.id) {
-                        RED.notify("<strong>Error</strong>: Cannot add subflow to itself","error");
-                        return;
-                    }
-                    if (RED.nodes.subflowContains(m[1],activeSubflow.id)) {
-                        RED.notify("<strong>Error</strong>: Cannot add subflow - circular reference detected","error");
-                        return;
-                    }
-                    
-                }
-                
-                var mousePos = d3.touches(this)[0]||d3.mouse(this);
-                mousePos[1] += this.scrollTop;
-                mousePos[0] += this.scrollLeft;
-                mousePos[1] /= scaleFactor;
-                mousePos[0] /= scaleFactor;
-
-                var nn = { id:(1+Math.random()*4294967295).toString(16),x: mousePos[0],y:mousePos[1],w:node_width,z:RED.workspaces.active()};
-
-                nn.type = selected_tool;
-                nn._def = RED.nodes.getType(nn.type);
-
-                if (!m) {
-                    nn.inputs = nn._def.inputs || 0;
-                    nn.outputs = nn._def.outputs;
-                    nn.changed = true;
-    
-                    for (var d in nn._def.defaults) {
-                        if (nn._def.defaults.hasOwnProperty(d)) {
-                            nn[d] = nn._def.defaults[d].value;
-                        }
-                    }
-    
-                    if (nn._def.onadd) {
-                        nn._def.onadd.call(nn);
-                    }
-                } else {
-                    var subflow = RED.nodes.subflow(m[1]);
-                    nn.inputs = subflow.in.length;
-                    nn.outputs = subflow.out.length;
-                }
-
-                nn.h = Math.max(node_height,(nn.outputs||0) * 15);
-                RED.history.push({t:'add',nodes:[nn.id],dirty:dirty});
-                RED.nodes.add(nn);
-                RED.editor.validateNode(nn);
-                setDirty(true);
-                // auto select dropped node - so info shows (if visible)
-                clearSelection();
-                nn.selected = true;
-                moving_set.push({n:nn});
-                updateActiveNodes();
-                updateSelection();
-                redraw();
-
-                if (nn._def.autoedit) {
-                    RED.editor.edit(nn);
-                }
-            }
-    });
 
     function zoomIn() {
         if (scaleFactor < 2) {
@@ -1638,13 +1646,6 @@ RED.view = (function() {
         
     }
 
-    RED.keyboard.add(/* z */ 90,{ctrl:true},function(){RED.history.pop();});
-    RED.keyboard.add(/* a */ 65,{ctrl:true},function(){selectAll();d3.event.preventDefault();});
-    RED.keyboard.add(/* = */ 187,{ctrl:true},function(){zoomIn();d3.event.preventDefault();});
-    RED.keyboard.add(/* - */ 189,{ctrl:true},function(){zoomOut();d3.event.preventDefault();});
-    RED.keyboard.add(/* 0 */ 48,{ctrl:true},function(){zoomZero();d3.event.preventDefault();});
-    RED.keyboard.add(/* v */ 86,{ctrl:true},function(){importNodes(clipboard);d3.event.preventDefault();});
-
     // TODO: 'dirty' should be a property of RED.nodes - with an event callback for ui hooks
     function setDirty(d) {
         dirty = d;
@@ -1746,34 +1747,6 @@ RED.view = (function() {
         }
     }
 
-    function hideDropTarget() {
-        $("#dropTarget").hide();
-        RED.keyboard.remove(/* ESCAPE */ 27);
-    }
-
-    
-    $('#chart').on("dragenter",function(event) {
-        if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
-            $("#dropTarget").css({display:'table'});
-            RED.keyboard.add(/* ESCAPE */ 27,hideDropTarget);
-        }
-    });
-
-    $('#dropTarget').on("dragover",function(event) {
-        if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
-            event.preventDefault();
-        }
-    })
-    .on("dragleave",function(event) {
-        hideDropTarget();
-    })
-    .on("drop",function(event) {
-        var data = event.originalEvent.dataTransfer.getData("text/plain");
-        hideDropTarget();
-        RED.view.importNodes(data);
-        event.preventDefault();
-    });
-    
     // TODO: DRY
     var eventHandler = (function() {
         var handlers = {};

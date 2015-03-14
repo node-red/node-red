@@ -119,6 +119,11 @@ RED.clipboard = (function() {
             dialog.dialog("option","title","Export nodes to clipboard").dialog( "open" );
         }
     }
+    
+    function hideDropTarget() {
+        $("#dropTarget").hide();
+        RED.keyboard.remove(/* ESCAPE */ 27);
+    }
         
     return {
         init: function() {
@@ -135,6 +140,32 @@ RED.clipboard = (function() {
             });
             RED.keyboard.add(/* e */ 69,{ctrl:true},function(){exportNodes();d3.event.preventDefault();});
             RED.keyboard.add(/* i */ 73,{ctrl:true},function(){importNodes();d3.event.preventDefault();});
+            
+            
+            
+            $('#chart').on("dragenter",function(event) {
+                if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
+                    $("#dropTarget").css({display:'table'});
+                    RED.keyboard.add(/* ESCAPE */ 27,hideDropTarget);
+                }
+            });
+            
+            $('#dropTarget').on("dragover",function(event) {
+                if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
+                    event.preventDefault();
+                }
+            })
+            .on("dragleave",function(event) {
+                hideDropTarget();
+            })
+            .on("drop",function(event) {
+                var data = event.originalEvent.dataTransfer.getData("text/plain");
+                hideDropTarget();
+                RED.view.importNodes(data);
+                event.preventDefault();
+            });
+            
+            
         },
         import: importNodes,
         export: exportNodes
