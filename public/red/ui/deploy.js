@@ -72,12 +72,15 @@ RED.deploy = (function() {
         
         RED.nodes.on('change',function(state) {
             if (state.dirty) {
+                window.onbeforeunload = function() {
+                    return "You have undeploy changes.\n\nLeaving this page will lose these changes.";
+                }
                 $("#btn-deploy").removeClass("disabled");
             } else {
+                window.onbeforeunload = null;
                 $("#btn-deploy").addClass("disabled");
             }
         });
-        
     }
     
     function save(force) {
