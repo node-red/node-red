@@ -23,6 +23,13 @@ RED.nodes = (function() {
     var workspaces = {};
     var subflows = {};
     
+    var dirty = false;
+    
+    function setDirty(d) {
+        dirty = d;
+        eventHandler.emit("change",{dirty:dirty});
+    }
+    
     var registry = (function() {
         var nodeList = [];
         var nodeSets = {};
@@ -772,7 +779,29 @@ RED.nodes = (function() {
         return [new_nodes,new_links,new_workspaces,new_subflows];
     }
     
+    // TODO: DRY
+    var eventHandler = (function() {
+        var handlers = {};
+        
+        return {
+            on: function(evt,func) {
+                handlers[evt] = handlers[evt]||[];
+                handlers[evt].push(func);
+            },
+            emit: function(evt,arg) {
+                if (handlers[evt]) {
+                    for (var i=0;i<handlers[evt].length;i++) {
+                        handlers[evt][i](arg);
+                    }
+                    
+                }
+            }
+        }
+    })();
+    
     return {
+        on: eventHandler.on,
+        
         registry:registry,
         setNodeList: registry.setNodeList,
         
@@ -832,6 +861,13 @@ RED.nodes = (function() {
         createExportableNodeSet: createExportableNodeSet,
         createCompleteNodeSet: createCompleteNodeSet,
         id: getID,
+        dirty: function(d) {
+            if (d == null) {
+                return dirty;
+            } else {
+                setDirty(d);
+            }
+        },
         nodes: nodes, // TODO: exposed for d3 vis
         links: links  // TODO: exposed for d3 vis
     };

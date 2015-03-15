@@ -124,7 +124,7 @@ RED.clipboard = (function() {
         $("#dropTarget").hide();
         RED.keyboard.remove(/* ESCAPE */ 27);
     }
-        
+    
     return {
         init: function() {
             RED.view.on("selection-changed",function(selection) {

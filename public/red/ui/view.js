@@ -46,7 +46,6 @@ RED.view = (function() {
         mouse_position = null,
         mouse_mode = 0,
         moving_set = [],
-        dirty = false,
         lasso = null,
         showStatus = false,
         lastClickNode = null,
@@ -284,6 +283,14 @@ RED.view = (function() {
             redraw();
         });
         
+        RED.nodes.on('change',function(state) {
+            if (state.dirty) {
+                $("#btn-deploy").removeClass("disabled");
+            } else {
+                $("#btn-deploy").addClass("disabled");
+            }
+        });
+        
         $('#btn-zoom-out').click(function() {zoomOut();});
         $('#btn-zoom-zero').click(function() {zoomZero();});
         $('#btn-zoom-in').click(function() {zoomIn();});
@@ -351,10 +358,10 @@ RED.view = (function() {
                 }
                 
                 nn.h = Math.max(node_height,(nn.outputs||0) * 15);
-                RED.history.push({t:'add',nodes:[nn.id],dirty:dirty});
+                RED.history.push({t:'add',nodes:[nn.id],dirty:RED.nodes.dirty()});
                 RED.nodes.add(nn);
                 RED.editor.validateNode(nn);
-                setDirty(true);
+                RED.nodes.dirty(true);
                 // auto select dropped node - so info shows (if visible)
                 clearSelection();
                 nn.selected = true;
@@ -591,7 +598,7 @@ RED.view = (function() {
                 for (var j=0;j<moving_set.length;j++) {
                     ns.push({n:moving_set[j].n,ox:moving_set[j].ox,oy:moving_set[j].oy});
                 }
-                RED.history.push({t:'move',nodes:ns,dirty:dirty});
+                RED.history.push({t:'move',nodes:ns,dirty:RED.nodes.dirty()});
             }
         }
         if (mouse_mode == RED.state.MOVING || mouse_mode == RED.state.MOVING_ACTIVE) {
@@ -603,7 +610,7 @@ RED.view = (function() {
         if (mouse_mode == RED.state.IMPORT_DRAGGING) {
             RED.keyboard.remove(/* ESCAPE */ 27);
             updateActiveNodes();
-            setDirty(true);
+            RED.nodes.dirty(true);
         }
         resetMouseVars();
         redraw();
@@ -711,7 +718,7 @@ RED.view = (function() {
             delete moving_set[i].ox;
             delete moving_set[i].oy;
         }
-        RED.history.push({t:'move',nodes:ns,dirty:dirty});
+        RED.history.push({t:'move',nodes:ns,dirty:RED.nodes.dirty()});
     }
     function moveSelection(dx,dy) {
         var minX = 0;
@@ -747,7 +754,7 @@ RED.view = (function() {
         var removedSubflowOutputs = [];
         var removedSubflowInputs = [];
         
-        var startDirty = dirty;
+        var startDirty = RED.nodes.dirty();
         if (moving_set.length > 0) {
             for (var i=0;i<moving_set.length;i++) {
                 var node = moving_set[i].n;
@@ -830,14 +837,14 @@ RED.view = (function() {
             }
             
             moving_set = [];
-            if (removedNodes.length > 0) {
-                setDirty(true);
+            if (removedNodes.length > 0 || removedSubflowOutputs.length > 0 || removedSubflowInputs.length > 0) {
+                RED.nodes.dirty(true);
             }
         }
         if (selected_link) {
             RED.nodes.removeLink(selected_link);
             removedLinks.push(selected_link);
-            setDirty(true);
+            RED.nodes.dirty(true);
         }
         RED.history.push({t:'delete',nodes:removedNodes,links:removedLinks,subflowOutputs:removedSubflowOutputs,subflowInputs:removedSubflowInputs,dirty:startDirty});
 
@@ -936,9 +943,9 @@ RED.view = (function() {
             if (!existingLink) {
                 var link = {source: src, sourcePort:src_port, target: dst};
                 RED.nodes.addLink(link);
-                RED.history.push({t:'add',links:[link],dirty:dirty});
+                RED.history.push({t:'add',links:[link],dirty:RED.nodes.dirty()});
                 updateActiveNodes();
-                setDirty(true);
+                RED.nodes.dirty(true);
             } else {
             }
             selected_link = null;
@@ -970,7 +977,7 @@ RED.view = (function() {
         if (mouse_mode == RED.state.IMPORT_DRAGGING) {
             RED.keyboard.remove(/* ESCAPE */ 27);
             updateSelection();
-            setDirty(true);
+            RED.nodes.dirty(true);
             redraw();
             resetMouseVars();
             d3.event.stopPropagation();
@@ -1646,16 +1653,6 @@ RED.view = (function() {
         
     }
 
-    // TODO: 'dirty' should be a property of RED.nodes - with an event callback for ui hooks
-    function setDirty(d) {
-        dirty = d;
-        if (dirty) {
-            $("#btn-deploy").removeClass("disabled");
-        } else {
-            $("#btn-deploy").addClass("disabled");
-        }
-    }
-    
     function focusView() {
         $("#chart svg").focus();
     }
@@ -1731,7 +1728,7 @@ RED.view = (function() {
                     links:new_links,
                     workspaces:new_workspaces,
                     subflows:new_subflows,
-                    dirty:RED.view.dirty()
+                    dirty:RED.nodes.dirty()
                 });
 
                 updateActiveNodes();
@@ -1784,13 +1781,6 @@ RED.view = (function() {
             }
             RED.workspaces.refresh();
             redraw();   
-        },
-        dirty: function(d) {
-            if (d == null) {
-                return dirty;
-            } else {
-                setDirty(d);
-            }
         },
         focus: focusView,
         importNodes: importNodes,

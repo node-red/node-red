@@ -23,7 +23,7 @@ var RED = (function() {
     var deploymentType = "full";
     
     function save(force) {
-        if (RED.view.dirty()) {
+        if (RED.nodes.dirty()) {
             //$("#debug-tab-clear").click();  // uncomment this to auto clear debug on deploy
 
             if (!force) {
@@ -56,7 +56,7 @@ var RED = (function() {
 
             $("#btn-icn-deploy").removeClass('fa-download');
             $("#btn-icn-deploy").addClass('spinner');
-            RED.view.dirty(false);
+            RED.nodes.dirty(false);
 
             $.ajax({
                 url:"flows",
@@ -86,7 +86,7 @@ var RED = (function() {
                 RED.history.markAllDirty();
                 RED.view.redraw();
             }).fail(function(xhr,textStatus,err) {
-                RED.view.dirty(true);
+                RED.nodes.dirty(true);
                 if (xhr.responseText) {
                     RED.notify("<strong>Error</strong>: "+xhr.responseText,"error");
                 } else {
@@ -168,7 +168,7 @@ var RED = (function() {
             url: 'flows',
             success: function(nodes) {
                 RED.nodes.import(nodes);
-                RED.view.dirty(false);
+                RED.nodes.dirty(false);
                 RED.view.redraw(true);
                 RED.comms.subscribe("status/#",function(topic,msg) {
                     var parts = topic.split("/");

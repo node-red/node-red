@@ -191,7 +191,7 @@ RED.history = (function() {
                         }
                     }
                 }
-                RED.view.dirty(ev.dirty);
+                RED.nodes.dirty(ev.dirty);
                 RED.view.redraw(true);
                 RED.palette.refresh();
             }

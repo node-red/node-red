@@ -53,7 +53,7 @@ RED.subflow = (function() {
         var oldInCount = subflow.in.length;
         subflow.in.push(newInput);
         subflow.dirty = true;
-        var wasDirty = RED.view.dirty();
+        var wasDirty = RED.nodes.dirty();
         var wasChanged = subflow.changed;
         subflow.changed = true;
         
@@ -94,7 +94,7 @@ RED.subflow = (function() {
         var oldOutCount = subflow.out.length;
         subflow.out.push(newOutput);
         subflow.dirty = true;
-        var wasDirty = RED.view.dirty();
+        var wasDirty = RED.nodes.dirty();
         var wasChanged = subflow.changed;
         subflow.changed = true;
         
@@ -142,7 +142,7 @@ RED.subflow = (function() {
             event.preventDefault();
             var removedNodes = [];
             var removedLinks = [];
-            var startDirty = RED.view.dirty();
+            var startDirty = RED.nodes.dirty();
             
             RED.nodes.eachNode(function(n) {
                 if (n.type == "subflow:"+getSubflow().id) {
@@ -171,7 +171,7 @@ RED.subflow = (function() {
             });
             
             RED.workspaces.remove(activeSubflow);
-            RED.view.dirty(true);
+            RED.nodes.dirty(true);
             RED.view.redraw();
         });
         
@@ -208,7 +208,7 @@ RED.subflow = (function() {
         RED.history.push({
             t:'createSubflow',
             subflow: subflow,
-            dirty:RED.view.dirty()
+            dirty:RED.nodes.dirty()
         });
         RED.workspaces.show(subflowId);
     }
@@ -384,10 +384,10 @@ RED.subflow = (function() {
             activeWorkspace: RED.workspaces.active(),
             removedLinks: removedLinks,
             
-            dirty:RED.view.dirty()
+            dirty:RED.nodes.dirty()
         });
         
-        RED.view.dirty(true);
+        RED.nodes.dirty(true);
         RED.view.redraw(true);
     }
     
