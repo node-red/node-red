@@ -530,6 +530,7 @@ function diffFlow(flow,config) {
     var flowNodes = {};
     var changedNodes = {};
     var deletedNodes = {};
+    var deletedTabs = {};
     var linkChangedNodes = {};
     
     var activeLinks = {};
@@ -582,8 +583,12 @@ function diffFlow(flow,config) {
     });
     
     flow.config.forEach(function(node) {
-        if (!flowNodes[node.id] && node.type != "tab") {
-            deletedNodes[node.id] = node;
+        if (!flowNodes[node.id]) {
+            if (node.type != "tab") {
+                deletedNodes[node.id] = node;
+            } else {
+                deletedTabs[node.id] = node;
+            }
         }
         buildNodeLinks(activeLinks,node,flow.allNodes);
     });
@@ -700,17 +705,17 @@ function diffFlow(flow,config) {
 
     markLinkedNodes(linkChangedNodes,modifiedLinkNodes,newLinks,flowNodes);
     
-    //config.forEach(function(n) {
-    //    console.log((changedNodes[n.id]!=null)?"[C]":"[ ]",(linkChangedNodes[n.id]!=null)?"[L]":"[ ]","[ ]",n.id,n.type,n.name);
-    //});
-    
-    //Object.keys(deletedNodes).forEach(function(id) {
-    //    var n = flow.allNodes[id];
-    //    console.log("[ ] [ ] [D]",n.id,n.type);
-    //});
+    // config.forEach(function(n) {
+    //     console.log((changedNodes[n.id]!=null)?"[C]":"[ ]",(linkChangedNodes[n.id]!=null)?"[L]":"[ ]","[ ]",n.id,n.type,n.name);
+    // });
+    // 
+    // Object.keys(deletedNodes).forEach(function(id) {
+    //     var n = flow.allNodes[id];
+    //     console.log("[ ] [ ] [D]",n.id,n.type);
+    // });
     
     var diff = {
-        deleted: Object.keys(deletedNodes).filter(function(id) { return deletedNodes[id].type != "subflow" && (!deletedNodes[id].z || flowNodes[deletedNodes[id].z].type != "subflow")}),
+        deleted: Object.keys(deletedNodes).filter(function(id) { return deletedNodes[id].type != "subflow" && (!deletedNodes[id].z || deletedTabs[deletedNodes[id].z] || flowNodes[deletedNodes[id].z].type != "subflow")}),
         changed: Object.keys(changedNodes).filter(function(id) { return changedNodes[id].type != "subflow" && (!changedNodes[id].z || flowNodes[changedNodes[id].z].type != "subflow")}),
         linked: Object.keys(linkChangedNodes).filter(function(id) { return linkChangedNodes[id].type != "subflow" && (!linkChangedNodes[id].z || flowNodes[linkChangedNodes[id].z].type != "subflow")}),
         wiringChanged: []
