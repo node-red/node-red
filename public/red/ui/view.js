@@ -283,14 +283,6 @@ RED.view = (function() {
             redraw();
         });
         
-        RED.nodes.on('change',function(state) {
-            if (state.dirty) {
-                $("#btn-deploy").removeClass("disabled");
-            } else {
-                $("#btn-deploy").addClass("disabled");
-            }
-        });
-        
         $('#btn-zoom-out').click(function() {zoomOut();});
         $('#btn-zoom-zero').click(function() {zoomZero();});
         $('#btn-zoom-in').click(function() {zoomIn();});
