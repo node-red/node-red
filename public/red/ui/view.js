@@ -929,10 +929,7 @@ RED.view = (function() {
                 dst = mousedown_node;
                 src_port = portIndex;
             }
-            var existingLink = false;
-            RED.nodes.eachLink(function(d) {
-                existingLink = existingLink || (d.source === src && d.target === dst && d.sourcePort == src_port);
-            });
+            var existingLink = RED.nodes.filterLinks({source:src,target:dst,sourcePort: src_port}).length !== 0;
             if (!existingLink) {
                 var link = {source: src, sourcePort:src_port, target: dst};
                 RED.nodes.addLink(link);

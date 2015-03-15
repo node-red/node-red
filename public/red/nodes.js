@@ -813,6 +813,9 @@ RED.nodes = (function() {
                     continue;
                 }
             }
+            if (filter.sourcePort && link.sourcePort !== filter.sourcePort) {
+                continue;
+            }
             result.push(link);
         }
         return result;

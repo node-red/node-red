@@ -114,11 +114,7 @@ RED.editor = (function() {
             }
         }
         if (node.inputs === 0) {
-            RED.nodes.eachLink(function(l) {
-                if (l.target === node) {
-                    removedLinks.push(l);
-                }
-            });
+            removedLinks.concat(RED.nodes.filterLinks({target:node}));
         }
         for (var l=0;l<removedLinks.length;l++) {
             RED.nodes.removeLink(removedLinks[l]);
