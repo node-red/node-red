@@ -171,46 +171,8 @@ var RED = (function() {
             ]
         });
         
-        if (RED.settings.user) {
-            RED.menu.init({id:"btn-usermenu",
-                options: []
-            });
-            
-            var updateUserMenu = function() {
-                $("#btn-usermenu-submenu li").remove();
-                if (RED.settings.user.anonymous) {
-                    RED.menu.addItem("btn-usermenu",{
-                        id:"btn-login",
-                        label:"Login",
-                        onselect: function() {
-                            RED.user.login({cancelable:true},function() {
-                                RED.settings.load(function() {
-                                    RED.notify("Logged in as "+RED.settings.user.username,"success");
-                                    updateUserMenu();
-                                });
-                            });
-                        }
-                    });
-                } else {
-                    RED.menu.addItem("btn-usermenu",{
-                        id:"btn-username",
-                        label:"<b>"+RED.settings.user.username+"</b>"
-                    });
-                    RED.menu.addItem("btn-usermenu",{
-                        id:"btn-logout",
-                        label:"Logout",
-                        onselect: function() {
-                            RED.user.logout();
-                        }
-                    });
-                }
-                    
-            }
-            updateUserMenu();
-        } else {
-            $("#btn-usermenu").parent().hide();
-        }
-    
+        RED.user.init();
+        
         RED.library.init();
         RED.palette.init();
         RED.sidebar.init();

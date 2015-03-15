@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,53 @@ RED.user = (function() {
         })
     }
     
+    function updateUserMenu() {
+        $("#btn-usermenu-submenu li").remove();
+        if (RED.settings.user.anonymous) {
+            RED.menu.addItem("btn-usermenu",{
+                id:"btn-login",
+                label:"Login",
+                onselect: function() {
+                    RED.user.login({cancelable:true},function() {
+                        RED.settings.load(function() {
+                            RED.notify("Logged in as "+RED.settings.user.username,"success");
+                            updateUserMenu();
+                        });
+                    });
+                }
+            });
+        } else {
+            RED.menu.addItem("btn-usermenu",{
+                id:"btn-username",
+                label:"<b>"+RED.settings.user.username+"</b>"
+            });
+            RED.menu.addItem("btn-usermenu",{
+                id:"btn-logout",
+                label:"Logout",
+                onselect: function() {
+                    RED.user.logout();
+                }
+            });
+        }
+        
+    }
+    
+    
+    
+    function init() {
+        if (RED.settings.user) {
+            $('<li><a id="btn-usermenu" class="button hide" data-toggle="dropdown" href="#"><i class="fa fa-user"></i></a></li>')
+                .prependTo(".header-toolbar");
+
+            RED.menu.init({id:"btn-usermenu",
+                options: []
+            });
+            updateUserMenu();
+        }
+        
+    }
     return {
+        init: init,
         login: login,
         logout: logout
     }
