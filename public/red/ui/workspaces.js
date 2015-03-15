@@ -44,10 +44,7 @@ RED.workspaces = (function() {
         }
         var nodes = [];
         if (!force) {
-            //TODO: remove direct access to RED.nodes.nodes
-            nodes = RED.nodes.nodes.filter(function(d) {
-                return d.z == ws.id;
-            });
+            nodes = RED.nodes.filterNodes({z:ws.id});
         }
         if (force || nodes.length === 0) {
             removeWorkspace(ws);

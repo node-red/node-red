@@ -779,6 +779,45 @@ RED.nodes = (function() {
         return [new_nodes,new_links,new_workspaces,new_subflows];
     }
     
+    // TODO: only supports filter.z
+    function filterNodes(filter) {
+        var result = [];
+        
+        for (var n=0;n<nodes.length;n++) {
+            var node = nodes[n];
+            if (filter.z && node.z !== filter.z) {
+                continue;
+            }
+            result.push(node);
+        }
+        return result;
+    }
+    function filterLinks(filter) {
+        var result = [];
+        
+        for (var n=0;n<links.length;n++) {
+            var link = links[n];
+            if (filter.source) {
+                if (filter.source.id && link.source.id !== filter.source.id) {
+                    continue;
+                }
+                if (filter.source.z && link.source.z !== filter.source.z) {
+                    continue;
+                }
+            }
+            if (filter.target) {
+                if (filter.target.id && link.target.id !== filter.target.id) {
+                    continue;
+                }
+                if (filter.target.z && link.target.z !== filter.target.z) {
+                    continue;
+                }
+            }
+            result.push(link);
+        }
+        return result;
+    }
+    
     // TODO: DRY
     var eventHandler = (function() {
         var handlers = {};
@@ -854,7 +893,12 @@ RED.nodes = (function() {
                 }
             }
         },
+        
         node: getNode,
+        
+        filterNodes: filterNodes,
+        filterLinks: filterLinks,
+        
         import: importNodes,
         refreshValidation: refreshValidation,
         getAllFlowNodes: getAllFlowNodes,
@@ -867,8 +911,6 @@ RED.nodes = (function() {
             } else {
                 setDirty(d);
             }
-        },
-        nodes: nodes, // TODO: exposed for d3 vis
-        links: links  // TODO: exposed for d3 vis
+        }
     };
 })();

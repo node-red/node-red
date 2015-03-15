@@ -232,13 +232,14 @@ RED.view = (function() {
     var drag_line = vis.append("svg:path").attr("class", "drag_line");
 
     function updateActiveNodes() {
-        //TODO: remove direct access to RED.nodes.nodes
-        activeNodes = RED.nodes.nodes.filter(function(d) {
-            return d.z == RED.workspaces.active();
+        var activeWorkspace = RED.workspaces.active();
+        
+        activeNodes = RED.nodes.filterNodes({z:activeWorkspace});
+        
+        activeLinks = RED.nodes.filterLinks({
+            source:{z:activeWorkspace},
+            target:{z:activeWorkspace}
         });
-        activeLinks = RED.nodes.links.filter(function(d) {
-            return d.source.z == RED.workspaces.active() && d.target.z == RED.workspaces.active();
-        })
     }
 
     function init() {
@@ -1185,7 +1186,6 @@ RED.view = (function() {
                 vis.selectAll(".subflowinput").remove();
             }
             
-            //var node = vis.selectAll(".nodegroup").data(RED.nodes.nodes.filter(function(d) { return d.z == RED.workspaces.active() }),function(d){return d.id});
             var node = vis.selectAll(".nodegroup").data(activeNodes,function(d){return d.id});
             node.exit().remove();
 
