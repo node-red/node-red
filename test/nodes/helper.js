@@ -18,6 +18,7 @@ var should = require("should");
 var sinon = require("sinon");
 var when = require("when");
 var request = require('supertest');
+var express = require("express");
 var nock;
 if (!process.version.match(/^v0\.[0-9]\./)) {
     // only set nock for node >= 0.10
@@ -86,7 +87,7 @@ module.exports = {
         };
 
         redNodes.init(settings, storage);
-        credentials.init(storage);
+        credentials.init(storage,express());
         RED.nodes.registerType("helper", helperNode);
         if (Array.isArray(testNode)) {
             for (var i = 0; i < testNode.length; i++) {
