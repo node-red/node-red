@@ -90,7 +90,7 @@ module.exports = function(RED) {
                             errorMessage += " (line "+line+", col "+cha+")";
                         }
                     }
-                    this.error(errorMessage);
+                    this.error(errorMessage, msg);
                 }
             });
         } catch(err) {

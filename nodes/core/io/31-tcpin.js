@@ -470,13 +470,13 @@ module.exports = function(RED) {
                 });
 
                 client.on('error', function() {
-                    node.log('connect failed');
+                    node.error('connect failed',msg);
                     node.status({fill:"red",shape:"ring",text:"error"});
                     if (client) { client.end(); }
                 });
 
                 client.on('timeout',function() {
-                    node.log('connect timeout');
+                    node.warn('connect timeout');
                     if (client) {
                         client.end();
                         setTimeout(function() {

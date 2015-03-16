@@ -19,6 +19,9 @@ var should = require("should");
 var changeNode = require("../../../../nodes/core/logic/15-change.js");
 var helper = require("../../helper.js");
 
+var Log = require("../../../../red/log.js");
+
+
 describe('ChangeNode', function() {
 
     beforeEach(function(done) {
@@ -335,21 +338,15 @@ describe('ChangeNode', function() {
             var flow = [{"id":"changeNode1","type":"change","action":"change","property":"payload","from":"\\+**+","to":"NUMBER","reg":true,"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
             helper.load(changeNode, flow, function() {
-                var changeNode1 = helper.getNode("changeNode1");
-                var helperNode1 = helper.getNode("helperNode1");
-
-                sinon.stub(changeNode1, 'error', function(error) {
-                    if(error.indexOf("regular expression" > -1)) {
-                        done();
-                    } else {
-                        try {
-                            should.fail(null, null, "An error should be reported for an invalid regex");
-                        } catch (err) {
-                            done(err);
-                        }
-                    }
-                 });
-                changeNode1.receive({payload:"This is irrelevant"});
+                var logEvents = helper.log().args.filter(function (evt) {
+                    return evt[0].type == "change";
+                });
+                logEvents.should.have.length(1);
+                var msg = logEvents[0][0];
+                msg.should.have.property('level', helper.log().ERROR);
+                msg.should.have.property('id', 'changeNode1');
+                done();
+            
             });
         });
     });

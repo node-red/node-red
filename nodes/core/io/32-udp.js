@@ -154,7 +154,7 @@ module.exports = function(RED) {
                     }
                     sock.send(message, 0, message.length, por, add, function(err, bytes) {
                         if (err) {
-                            node.error("udp : "+err);
+                            node.error("udp : "+err,msg);
                         }
                         message = null;
                     });

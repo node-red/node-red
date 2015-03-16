@@ -93,7 +93,7 @@ module.exports = function(RED) {
                 }
                 smtpTransport.sendMail(sendopts, function(error, info) {
                     if (error) {
-                        node.error(error);
+                        node.error(error,msg);
                         node.status({fill:"red",shape:"ring",text:"send failed"});
                     } else {
                         node.log("Message sent: " + info.response);

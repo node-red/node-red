@@ -76,7 +76,7 @@ module.exports = function(RED) {
                             if (msg.collection) {
                                 coll = db.collection(msg.collection);
                             } else {
-                                node.error("No collection defined");
+                                node.error("No collection defined",msg);
                                 return;
                             }
                         }
@@ -89,13 +89,13 @@ module.exports = function(RED) {
                                 }
                                 coll.save(msg.payload,function(err, item) {
                                     if (err) {
-                                        node.error(err);
+                                        node.error(err,msg);
                                     }
                                 });
                             } else {
                                 coll.save(msg,function(err, item) {
                                     if (err) {
-                                        node.error(err);
+                                        node.error(err,msg);
                                     }
                                 });
                             }
@@ -106,13 +106,13 @@ module.exports = function(RED) {
                                 }
                                 coll.insert(msg.payload, function(err, item) {
                                     if (err) {
-                                        node.error(err);
+                                        node.error(err,msg);
                                     }
                                 });
                             } else {
                                 coll.insert(msg, function(err,item) {
                                     if (err) {
-                                        node.error(err);
+                                        node.error(err,msg);
                                     }
                                 });
                             }
@@ -129,13 +129,13 @@ module.exports = function(RED) {
 
                             coll.update(query, payload, options, function(err, item) {
                                 if (err) {
-                                    node.error(err + " " + payload);
+                                    node.error(err,msg);
                                 }
                             });
                         } else if (node.operation === "delete") {
                             coll.remove(msg.payload, function(err, items) {
                                 if (err) {
-                                    node.error(err);
+                                    node.error(err,msg);
                                 }
                             });
                         }

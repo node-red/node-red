@@ -37,16 +37,12 @@ module.exports = function(RED) {
                 node.emit("input",{});
             }, this.repeat );
         } else if (this.crontab) {
-            if (cron) {
-                if (RED.settings.verbose) { this.log("crontab = "+this.crontab); }
-                this.cronjob = new cron.CronJob(this.crontab,
-                    function() {
-                        node.emit("input",{});
-                    },
-                    null,true);
-            } else {
-                this.error("'cron' module not found");
-            }
+            if (RED.settings.verbose) { this.log("crontab = "+this.crontab); }
+            this.cronjob = new cron.CronJob(this.crontab,
+                function() {
+                    node.emit("input",{});
+                },
+                null,true);
         }
 
         if (this.once) {

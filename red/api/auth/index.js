@@ -44,7 +44,7 @@ function init(_settings,storage) {
 
 function needsPermission(permission) {
     return function(req,res,next) {
-        if (settings.adminAuth) {
+        if (settings && settings.adminAuth) {
             return passport.authenticate(['bearer','anon'],{ session: false })(req,res,function() {
                 if (!req.user) {
                     return next();

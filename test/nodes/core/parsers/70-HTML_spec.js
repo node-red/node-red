@@ -140,7 +140,7 @@ describe('html node', function() {
                     logEvents.should.have.length(1);
                     // Each logEvent is the array of args passed to the function.
                     logEvents[0][0].should.have.a.property('msg');
-                    logEvents[0][0].msg.should.startWith("Error:");
+                    logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
             
                     done();
                 } catch(err) {

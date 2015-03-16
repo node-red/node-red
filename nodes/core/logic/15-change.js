@@ -24,67 +24,69 @@ module.exports = function(RED) {
         this.from = n.from || "";
         this.to = n.to || "";
         this.reg = (n.reg === null || n.reg);
-        var node = this;
-        if (node.reg === false) {
+        if (this.reg === false) {
             this.from = this.from.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
         }
-
-        this.on('input', function(msg) {
-            var propertyParts;
-            var depth = 0;
-
-            if (node.action === "change") {
-                try {
-                    node.re = new RegExp(this.from, "g");
-                } catch (e) {
-                    node.error(e.message);
-                }
-            }
-
-            propertyParts = node.property.split(".");
+        var valid = true;
+        if (this.action === "change") {
             try {
-                propertyParts.reduce(function(obj, i) {
-                    var to = node.to;
-                    // Set msg from property to another msg property
-                    if (node.action === "replace" && node.to.indexOf("msg.") === 0) {
-                        var parts = to.substring(4);
-                        var msgPropParts = parts.split(".");
-                        try {
-                            msgPropParts.reduce(function(ob, j) {
-                                to = (typeof ob[j] !== "undefined" ? ob[j] : undefined);
-                                return to;
-                            }, msg);
-                        } catch (err) {}
-                    }
-
-                    if (++depth === propertyParts.length) {
-                        if (node.action === "change") {
-                            if (typeof obj[i] === "string") {
-                                obj[i] = obj[i].replace(node.re, node.to);
-                            }
-                        } else if (node.action === "replace") {
-                            if (typeof to === "undefined") {
+                this.re = new RegExp(this.from, "g");
+            } catch (e) {
+                valid = false;
+                this.error("Invalid 'from' property: "+e.message);
+            }
+        }
+        if (valid) {
+            var node = this;
+            this.on('input', function(msg) {
+                var propertyParts;
+                var depth = 0;
+    
+                propertyParts = node.property.split(".");
+                try {
+                    propertyParts.reduce(function(obj, i) {
+                        var to = node.to;
+                        // Set msg from property to another msg property
+                        if (node.action === "replace" && node.to.indexOf("msg.") === 0) {
+                            var parts = to.substring(4);
+                            var msgPropParts = parts.split(".");
+                            try {
+                                msgPropParts.reduce(function(ob, j) {
+                                    to = (typeof ob[j] !== "undefined" ? ob[j] : undefined);
+                                    return to;
+                                }, msg);
+                            } catch (err) {}
+                        }
+    
+                        if (++depth === propertyParts.length) {
+                            if (node.action === "change") {
+                                if (typeof obj[i] === "string") {
+                                    obj[i] = obj[i].replace(node.re, node.to);
+                                }
+                            } else if (node.action === "replace") {
+                                if (typeof to === "undefined") {
+                                    delete(obj[i]);
+                                } else {
+                                    obj[i] = to;
+                                }
+                            } else if (node.action === "delete") {
                                 delete(obj[i]);
-                            } else {
-                                obj[i] = to;
                             }
-                        } else if (node.action === "delete") {
-                            delete(obj[i]);
+                        } else {
+                            // to property doesn't exist, don't create empty object
+                            if (typeof to === "undefined") {
+                                return;
+                            // setting a non-existent multilevel object, create empty parent
+                            } else if (!obj[i]) {
+                                obj[i] = {};
+                            }
+                            return obj[i];
                         }
-                    } else {
-                        // to property doesn't exist, don't create empty object
-                        if (typeof to === "undefined") {
-                            return;
-                        // setting a non-existent multilevel object, create empty parent
-                        } else if (!obj[i]) {
-                            obj[i] = {};
-                        }
-                        return obj[i];
-                    }
-                }, msg);
-            } catch (err) {}
-            node.send(msg);
-        });
+                    }, msg);
+                } catch (err) {}
+                node.send(msg);
+            });
+        }
     }
     RED.nodes.registerType("change", ChangeNode);
 };

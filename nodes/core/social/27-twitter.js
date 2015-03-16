@@ -296,13 +296,13 @@ module.exports = function(RED) {
 
                     var r = request.post(signedUrl,function(err,httpResponse,body) {
                         if (err) {
-                            node.error(err.toString());
+                            node.error(err,msg);
                             node.status({fill:"red",shape:"ring",text:"failed"});
                         } else {
                             var response = JSON.parse(body);
                             if (response.errors) {
                                 var errorList = response.errors.map(function(er) { return er.code+": "+er.message }).join(", ");
-                                node.error("tweet failed: "+errorList);
+                                node.error("Send tweet failed: "+errorList,msg);
                                 node.status({fill:"red",shape:"ring",text:"failed"});
                             } else {
                                 node.status({});
@@ -317,7 +317,7 @@ module.exports = function(RED) {
                     twit.updateStatus(msg.payload, function (err, data) {
                         if (err) {
                             node.status({fill:"red",shape:"ring",text:"failed"});
-                            node.error(err);
+                            node.error(err,msg);
                         }
                         node.status({});
                     });

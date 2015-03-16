@@ -28,7 +28,7 @@ module.exports = function(RED) {
                         msg.payload = JSON.parse(msg.payload);
                         node.send(msg);
                     }
-                    catch(e) { node.error(e+ "\n"+msg.payload); }
+                    catch(e) { node.error(e.message,msg); }
                 }
                 else if (typeof msg.payload === "object") {
                     if (!Buffer.isBuffer(msg.payload) ) {

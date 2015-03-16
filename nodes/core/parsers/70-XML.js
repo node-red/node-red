@@ -33,7 +33,7 @@ module.exports = function(RED) {
                 }
                 else if (typeof msg.payload == "string") {
                     parseString(msg.payload, {strict:true,async:true,attrkey:node.attrkey,charkey:node.charkey}, function (err, result) {
-                        if (err) { node.error(err); }
+                        if (err) { node.error(err, msg); }
                         else {
                             msg.payload = result;
                             node.send(msg);

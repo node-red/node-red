@@ -68,7 +68,8 @@ module.exports = function(RED) {
                 }
                 node.port.write(payload,function(err,res) {
                     if (err) {
-                        node.error(err);
+                        var errmsg = err.toString().replace("Serialport","Serialport "+node.port.serial.path); 
+                        node.error(errmsg,msg);
                     }
                 });
             });

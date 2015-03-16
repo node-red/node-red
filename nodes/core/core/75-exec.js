@@ -59,7 +59,7 @@ module.exports = function(RED) {
                         node.send([null,null,msg]);
                     });
                     ex.on('error', function (code) {
-                        node.error(code);
+                        node.error(code,msg);
                     });
                 }
                 else { node.error("Spawn command must be just the command - no spaces or extra parameters"); }
