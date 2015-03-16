@@ -132,7 +132,7 @@ module.exports = {
         // os:require('os'),
         // bonescript:require('bonescript'),
         // jfive:require("johnny-five"),
-        // jboard:require("johnny-five").Board()
+        // j5board:require("johnny-five").Board({repl:false})
     },
     
     
