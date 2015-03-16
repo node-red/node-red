@@ -24,7 +24,7 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
 
         this.files = n.files.split(",");
-        for (var f =0; f < this.files.length; f++) {
+        for (var f=0; f < this.files.length; f++) {
             this.files[f] = this.files[f].trim();
         }
         this.p = (this.files.length == 1) ? this.files[0] : JSON.stringify(this.files);
@@ -32,15 +32,25 @@ module.exports = function(RED) {
 
         var notifications = new Notify(node.files);
         notifications.on('change', function (file, event, path) {
+            var stat;
             try {
                 if (fs.statSync(path).isDirectory()) { path = path + sep + file; }
+                stat = fs.statSync(path);
             } catch(e) { }
-            var msg = { payload: path, topic: node.p, file: file };
+            var type = "other";
+            if (stat.isFile()) { type = "file"; }
+            if (stat.isDirectory()) { type = "directory"; }
+            if (stat.isBlockDevice()) { type = "blockdevice"; }
+            if (stat.isCharacterDevice()) { type = "characterdevice"; }
+            if (stat.isSocket()) { type = "socket"; }
+            if (stat.isFIFO()) { type = "fifo"; }
+            var msg = { payload:path, topic:node.p, file:file, type:type, size:stat.size };
             node.send(msg);
         });
 
         notifications.on('error', function (error, path) {
-            node.warn(error);
+            var msg = { payload:path };
+            node.error(error,msg);
         });
 
         this.close = function() {

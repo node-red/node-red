@@ -33,7 +33,9 @@
     <p>On Windows you must use double back-slashes \\ in any directory names.</p>
     <p>The full filename of the file that actually changed is put into <b>msg.payload</b>,
     while a stringified version of the watch list is returned in <b>msg.topic</b>.</p>
-    <p><b>msg.file</b> contains just the short filename of the file that changed.</p>
+    <p><b>msg.file</b> contains just the short filename of the file that changed.
+    <b>msg.type</b> has the type of thing changed, usually <i>file</i> or <i>directory</i>,
+    while <b>msg.size</b> holds the file size in bytes.</p>
     <p>Of course in Linux, <i>everything</i> is a file and thus can be watched...</p>
     <p><b>Note: </b>The directory or file must exist in order to be watched. If the file
     or directory gets deleted it may no longer be monitored even if it gets re-created.</p>
