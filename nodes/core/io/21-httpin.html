@@ -139,7 +139,8 @@
     </ul>
     <p>When configured within the node, the URL property can contain <a href="http://mustache.github.io/mustache.5.html" target="_new">mustache-style</a> tags. These allow the
     url to be constructed using values of the incoming message. For example, if the url is set to
-    <code>example.com/{{topic}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.</p>
+    <code>example.com/{{{topic}}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.
+    Using {{{...}}} prevents mustache from escaping characters like / & etc.</p>
     <p>
     The output message contains the following properties:
     <ul>
