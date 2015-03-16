@@ -150,7 +150,7 @@ module.exports = function(RED) {
                     node.status({fill:"green",shape:"dot",text:msg.payload.toString()});
                 }
                 else {
-                    node.error("nrpgio python command not running");
+                    node.error("nrpgio python command not running",msg);
                     node.status({fill:"red",shape:"ring",text:"not running"});
                 }
             }
