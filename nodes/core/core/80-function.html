@@ -39,15 +39,21 @@
     <p>The message is passed in as a JavaScript object called <code>msg</code>.</p>
     <p>By convention it will have a <code>msg.payload</code> property containing
        the body of the message.</p>
-    <p>If your node need to log anything use the <code>node</code> object:
+    <h4>Logging and Error Handling</h4>
+    <p>To log any information, or report an error, the following functions are available:</p>
         <ul>
-            <li>Info: <code>node.log(msg);</code></li>
-            <li>Warning: <code>node.warn(msg);</code></li>
-            <li>Error: <code>node.error(msg);</code></li>
+            <li><code>node.log("Log")</code></li>
+            <li><code>node.warn("Warning")</code></li>
+            <li><code>node.error("Error")</code></li>
         </ul>
     </p>
-    <p>The function should return the messages it wants to pass on to the next nodes
-    in the flow. It can return:</p>
+    <p>The Catch node can also be used to handle errors. To invoke a Catch node,
+    pass <code>msg</code> as a second argument to <code>node.error</code>:</p>
+    <pre>node.error("Error",msg)</pre>
+    <h4>Sending messages</h4>
+    <p>The function can either return the messages it wants to pass on to the next nodes
+    in the flow, or can call <code>node.send(messages)</code>.</p>
+    <p>It can return/send:</p>
     <ul>
       <li>a single message object - passed to nodes connected to the first output</li>
       <li>an array of message objects - passed to nodes connected to the corresponding outputs</li>

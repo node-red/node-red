@@ -105,13 +105,17 @@ describe('function node', function() {
             var count = 0;
             n2.on("input", function(msg) {
                 count++;
-                should(msg).have.property('payload', count);
-                should(msg).have.property('_topic', 'baz');
-                if (count == 2) {
-                    done();
+                try {
+                    should(msg).have.property('payload', count);
+                    should(msg).have.property('_msgid', 1234);
+                    if (count == 2) {
+                        done();
+                    }
+                } catch(err) {
+                    done(err);
                 }
             });
-            n1.receive({payload:"foo", topic: "bar", _topic:"baz"});
+            n1.receive({payload:"foo", topic: "bar",_msgid:1234});
         });
     });
 
