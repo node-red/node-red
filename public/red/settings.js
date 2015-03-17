@@ -68,13 +68,20 @@ RED.settings = (function () {
     };
 
     var init = function (done) {
+        var accessTokenMatch = /[?&]access_token=(.*?)(?:$|&)/.exec(window.location.search);
+        if (accessTokenMatch) {
+            var accessToken = accessTokenMatch[1];
+            RED.settings.set("auth-tokens",{access_token: accessToken});
+            window.location.search = "";
+        }
+        
         $.ajaxSetup({
             beforeSend: function(jqXHR,settings) {
                 // Only attach auth header for requests to relative paths
                 if (!/^\s*(https?:|\/|\.)/.test(settings.url)) {
                     var auth_tokens = RED.settings.get("auth-tokens");
                     if (auth_tokens) {
-                        jqXHR.setRequestHeader("authorization","bearer "+auth_tokens.access_token);
+                        jqXHR.setRequestHeader("Authorization","Bearer "+auth_tokens.access_token);
                     }
                 }
             }
@@ -84,7 +91,6 @@ RED.settings = (function () {
     }
     
     var load = function(done) {
-        
         $.ajax({
             headers: {
                 "Accept": "application/json"
@@ -102,6 +108,9 @@ RED.settings = (function () {
             },
             error: function(jqXHR,textStatus,errorThrown) {
                 if (jqXHR.status === 401) {
+                    if (/[?&]access_token=(.*?)(?:$|&)/.test(window.location.search)) {
+                        window.location.search = "";
+                    }
                     RED.user.login(function() { load(done); });
                  } else {
                      console.log("Unexpected error:",jqXHR.status,textStatus);
