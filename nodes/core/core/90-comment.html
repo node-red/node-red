@@ -61,7 +61,6 @@
                 min:1
             });
             function functionDialogResize() {
-                that.editor.resize();
                 var rows = $("#dialog-form>div:not(.node-text-editor-row)");
                 var height = $("#dialog-form").height();
                 for (var i=0;i<rows.size();i++) {
@@ -70,6 +69,7 @@
                 var editorRow = $("#dialog-form>div.node-text-editor-row");
                 height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
                 $(".node-text-editor").css("height",height+"px");
+                that.editor.resize();
             };
             $( "#dialog" ).on("dialogresize", functionDialogResize);
             $( "#dialog" ).one("dialogopen", function(ev) {
