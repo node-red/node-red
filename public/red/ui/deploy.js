@@ -60,7 +60,7 @@ RED.deploy = (function() {
                     }
                 ]
         });
-        
+
         RED.menu.init({id:"btn-deploy-options",
             options: [
                 {id:"btn-deploy-full",toggle:"deploy-type",icon:"images/deploy-full.png",label:"Full",sublabel:"Deploys everything in the workspace",onselect:function(s) { if(s){changeDeploymentType("full")}}},
@@ -68,12 +68,11 @@ RED.deploy = (function() {
                 {id:"btn-deploy-node",toggle:"deploy-type",icon:"images/deploy-nodes.png",label:"Modified Nodes",sublabel:"Only deploys nodes that have changed",onselect:function(s) { if(s){changeDeploymentType("nodes")}}}
             ]
         });
-        
-        
+
         RED.nodes.on('change',function(state) {
             if (state.dirty) {
                 window.onbeforeunload = function() {
-                    return "You have undeploy changes.\n\nLeaving this page will lose these changes.";
+                    return "You have undeployed changes.\n\nLeaving this page will lose these changes.";
                 }
                 $("#btn-deploy").removeClass("disabled");
             } else {
@@ -82,7 +81,7 @@ RED.deploy = (function() {
             }
         });
     }
-    
+
     function save(force) {
         if (RED.nodes.dirty()) {
             //$("#debug-tab-clear").click();  // uncomment this to auto clear debug on deploy
