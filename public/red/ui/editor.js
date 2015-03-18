@@ -271,6 +271,8 @@ RED.editor = (function() {
                 var minWidth = $(this).dialog('option','minWidth');
                 if ($(this).outerWidth() < minWidth) {
                     $(this).dialog('option','width',minWidth);
+                } else {
+                    $(this).dialog('option','width',$(this).outerWidth());
                 }
                 RED.keyboard.disable();
                 if (editing_node) {

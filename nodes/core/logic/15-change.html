@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013 IBM Corp.
+  Copyright 2013, 2015 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,42 +15,34 @@
 -->
 
 <script type="text/x-red" data-template-name="change">
-    <div>
-        <select id="node-input-action" style="width:95%; margin-right:5px;">
-            <option value="replace">Set the value of the message property</option>
-            <option value="change">Search/replace the value of the message property</option>
-            <option value="delete">Delete the message property</option>
-        </select>
-    </div>
-    <div class="form-row" style="padding-top:10px;" id="node-prop1-row">
-        <label for="node-input-property">called</label> msg.<input type="text" id="node-input-property" style="width: 63%;"/>
-    </div>
-    <div class="form-row" id="node-from-row">
-        <label for="node-input-from" id="node-input-f"></label>
-        <input type="text" id="node-input-from" placeholder="this"/>
-    </div>
-    <div class="form-row" id="node-to-row">
-        <label for="node-input-to" id="node-input-t"></label>
-        <input type="text" id="node-input-to" placeholder="that"/>
-    </div>
-    <div class="form-row" id="node-reg-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-reg" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-reg" style="width: 70%;">Use regular expressions</label>
-    </div>
-    <div class="form-tips" id="node-tip"></div>
-    <br/>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-row" style="margin-bottom:0;">
+        <label><i class="fa fa-list"></i> Rules</label>
+    </div>
+    <div class="form-row node-input-rule-container-row" style="margin-bottom: 0px;">
+        <div id="node-input-rule-container-div" style="box-sizing: border-box; border-radius: 5px; height: 300px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
+            <ol id="node-input-rule-container" style=" list-style-type:none; margin: 0;"></ol>
+        </div>
+    </div>
+    <div class="form-row">
+        <a href="#" class="btn btn-mini" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> rule</a>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="change">
-    <p>A simple function node to set, replace or delete properties of a message.</p>
-    <p>When a message arrives, the selected property is modified by the defined rules.
-    The message is then sent to the output.</p>
-    <p><b>Note:</b> Set and replace only operate using <b>strings</b>. Anything else will be passed straight through.</p>
+    <p>Set, change or delete properties of a message.</p>
+    <p>The node can specify multiple rules that will be applied to the message in turn.</p>
+    <p>The available operations are:</p>
+    <ul>
+        <li><b>Set</b> - set a property. The <b>to</b> property can either be a string value, or reference
+         another message property by name, for example: <code>msg.topic</code>.</li>
+        <li><b>Change</b> - search &amp; replace parts of the property. If regular expressions
+            are enabled, the <b>replace with</b> property can include capture groups, for example <code>$1</code></li>
+        <li><b>Delete</b> - delete a property.</li>
+    </ul>
 </script>
 
 <script type="text/javascript">
@@ -58,24 +50,14 @@
         color: "#E2D96E",
         category: 'function',
         defaults: {
-            action: {value:"replace",required:true},
-            property: {value:"payload",required:true},
-            from: {value:"",validate: function(v) {
-                if (this.action === "change" && !this.from) {
-                    return false;
-                } else if (this.action === "change" && this.reg) {
-                    try {
-                        var re = new RegExp(this.from, "g");
-                        return true;
-                    } catch(err) {
-                        return false;
-                    }
-                }
-                return true;
-            }},
+            name: {value:""},
+            rules:{value:[{t:"set",p:"payload",to:""}]},
+            // legacy
+            action: {value:""},
+            property: {value:""},
+            from: {value:""},
             to: {value:""},
-            reg: {value:false},
-            name: {value:""}
+            reg: {value:false}
         },
         inputs: 1,
         outputs: 1,
@@ -84,12 +66,26 @@
             if (this.name) {
                 return this.name;
             }
-            if (this.action === "replace") {
-                return "set msg."+this.property;
-            } else if (this.action === "change") {
-                return "replace msg."+this.property;
+            if (!this.rules) {
+                if (this.action === "replace") {
+                    return "set msg."+this.property;
+                } else if (this.action === "change") {
+                    return "change msg."+this.property;
+                } else {
+                    return this.action+" msg."+this.property
+                }
             } else {
-                return this.action+" msg."+this.property
+                if (this.rules.length == 1) {
+                    if (this.rules[0].t === "set") {
+                        return "set msg."+this.rules[0].p;
+                    } else if (this.rules[0].t === "change") {
+                        return "change msg."+this.rules[0].p;
+                    } else {
+                        return "delete msg."+this.rules[0].p;
+                    }
+                } else {
+                    return "change: "+(this.rules.length||"no")+" rules";
+                }
             }
         },
         labelStyle: function() {
@@ -97,47 +93,155 @@
         },
         oneditprepare: function() {
             if (this.reg === null) { $("#node-input-reg").prop('checked', true); }
-            $("#node-input-action").change( function() {
-                var a = $("#node-input-action").val();
-                if (a === "replace") {
-                    $("#node-input-todo").html("called");
-                    //$("#node-input-f").html("name");
-                    $("#node-input-t").html("to");
-                    $("#node-from-row").hide();
-                    $("#node-to-row").show();
-                    $("#node-reg-row").hide();
-                    $("#node-tip").show();
-                    $("#node-tip").html("Tip: expects a new property name and either a fixed value OR the full name of another message property eg: msg.sentiment.score");
-                }
-                if (a === "delete") {
-                    $("#node-input-todo").html("called");
-                    //$("#node-input-f").html("called");
-                    //$("#node-input-t").html("to");
-                    $("#node-from-row").hide();
-                    $("#node-to-row").hide();
-                    $("#node-reg-row").hide();
-                    $("#node-tip").hide();
-                }
-                if (a === "change") {
-                    $("#node-input-todo").html("called");
-                    $("#node-input-f").html("Search for");
-                    $("#node-input-t").html("replace with");
-                    $("#node-from-row").show();
-                    $("#node-to-row").show();
-                    $("#node-reg-row").show();
-                    $("#node-tip").show();
-                    $("#node-tip").html("Tip: only works on string properties. If regular expressions are used, the <i>replace with</i> field can contain capture results, eg $1.");
-                }
-                //if (a === "replace") {
-                 //   $("#node-input-todo").html("called");
-                 //   //$("#node-input-f").html("with");
-                 //   $("#node-input-t").html("with");
-                 //   $("#node-from-row").hide();
-                 //   $("#node-to-row").show();
-                 //   $("#node-tip").html("Tip: accepts either a fixed value OR the full name of another msg.property eg: msg.sentiment.score");
-                //}
-            });
             $("#node-input-action").change();
+            
+            function generateRule(rule) {
+                var container = $('<li/>',{style:"background: #fff; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"});
+                
+                var row1 = $('<div/>').appendTo(container);
+                
+                var row2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(container);
+                var row3 = $('<div/>',{style:"margin-top:8px;"}).appendTo(container);
+
+                var selectField = $('<select/>',{class:"node-input-rule-type",style:"width: 100px"}).appendTo(row1);
+                var selectOptions = [{v:"set",l:"Set"},{v:"change",l:"Change"},{v:"delete",l:"Delete"}];
+                for (var i=0;i<3;i++) {
+                    selectField.append($("<option></option>").val(selectOptions[i].v).text(selectOptions[i].l));
+                }
+                
+                $('<div/>',{style:"display:inline-block; width: 50px; text-align: right;"}).text("msg.").appendTo(row1);
+                var propertyName = $('<input/>',{style:"width: 220px",class:"node-input-rule-property-name",type:"text"}).appendTo(row1);
+
+                
+                var finalspan = $('<span/>',{style:"float: right; margin-top: 3px;margin-right: 10px;"}).appendTo(row1);
+                var deleteButton = $('<a/>',{href:"#",class:"btn btn-mini", style:"margin-left: 5px;"}).appendTo(finalspan);
+                $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
+
+                
+                $('<div/>',{style:"display: inline-block;text-align:right; width:150px;padding-right: 10px; box-sizing: border-box;"}).text("to").appendTo(row2);
+                var propertyValue = $('<input/>',{style:"width: 220px",class:"node-input-rule-property-value",type:"text"}).appendTo(row2);
+                
+                var row3_1 = $('<div/>').appendTo(row3);
+                $('<div/>',{style:"display: inline-block;text-align:right; width:150px;padding-right: 10px; box-sizing: border-box;"}).text("Search for").appendTo(row3_1);
+                var fromValue = $('<input/>',{style:"width: 220px",class:"node-input-rule-property-search-value",type:"text"}).appendTo(row3_1);
+                
+                var row3_2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(row3);
+                $('<div/>',{style:"display: inline-block;text-align:right; width:150px;padding-right: 10px; box-sizing: border-box;"}).text("replace with").appendTo(row3_2);
+                var toValue = $('<input/>',{style:"width: 220px",class:"node-input-rule-property-replace-value",type:"text"}).appendTo(row3_2);
+                
+                var row3_3 = $('<div/>',{style:"margin-top:8px;"}).appendTo(row3);
+                var id = "node-input-rule-property-regex-"+Math.floor(Math.random()*10000);
+                var useRegExp = $('<input/>',{id:id,class:"node-input-rule-property-re",type:"checkbox", style:"margin-left: 150px; margin-right: 10px; display: inline-block; width: auto; vertical-align: top;"}).appendTo(row3_3);
+                $('<label/>',{for:id,style:"width: auto;"}).text("Use regular expressions").appendTo(row3_3);
+                
+
+                selectField.change(function() {
+                    var type = $(this).val();
+                    
+                    if (type == "set") {
+                        row2.show();
+                        row3.hide();
+                    } else if (type == "change") {
+                        row2.hide();
+                        row3.show();
+                    } else if (type == "delete") {
+                        row2.hide();
+                        row3.hide();
+                        $("#node-tip").hide();
+                    }
+                });
+                deleteButton.click(function() {
+                    container.css({"background":"#fee"});
+                    container.fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                });
+                
+                selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
+                propertyName.val(rule.p);
+                propertyValue.val(rule.to);
+                fromValue.val(rule.from);
+                toValue.val(rule.to);
+                useRegExp.prop('checked', rule.re);
+                selectField.change();
+                
+                $("#node-input-rule-container").append(container);
+            }
+            $("#node-input-add-rule").click(function() {
+                generateRule({t:"replace",p:"payload"});
+            });
+            
+            if (!this.rules) {
+                var rule = {
+                    t:(this.action=="replace"?"set":this.action),
+                    p:this.property
+                }
+                
+                if (rule.t === "set") {
+                    rule.to = this.to;
+                } else if (rule.t === "change") {
+                    rule.from = this.from;
+                    rule.to = this.to;
+                    rule.re = this.reg;
+                }
+                
+                delete this.to;
+                delete this.from;
+                delete this.reg;
+                delete this.action;
+                delete this.property;
+                
+                this.rules = [rule];
+            }
+            
+            for (var i=0;i<this.rules.length;i++) {
+                generateRule(this.rules[i]);
+            }
+            
+            function changeDialogResize() {
+                var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
+                var height = $("#dialog-form").height();
+                for (var i=0;i<rows.size();i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                var editorRow = $("#dialog-form>div.node-input-rule-container-row");
+                height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+                $("#node-input-rule-container-div").css("height",height+"px");
+            };
+            $( "#dialog" ).on("dialogresize", changeDialogResize);
+            $( "#dialog" ).one("dialogopen", function(ev) {
+                var size = $( "#dialog" ).dialog('option','sizeCache-change');
+                if (size) {
+                    $("#dialog").dialog('option','width',size.width);
+                    $("#dialog").dialog('option','height',size.height);
+                    changeDialogResize();
+                }
+            });
+            $( "#dialog" ).one("dialogclose", function(ev,ui) {
+                $( "#dialog" ).off("dialogresize",changeDialogResize);
+            });
+        },
+        oneditsave: function() {
+            var rules = $("#node-input-rule-container").children();
+            var ruleset;
+            var node = this;
+            node.rules= [];
+            rules.each(function(i) {
+                var rule = $(this);
+                var type = rule.find(".node-input-rule-type option:selected").val();
+                var r = {
+                    t:type,
+                    p:rule.find(".node-input-rule-property-name").val()
+                };
+                if (type === "set") {
+                    r.to = rule.find(".node-input-rule-property-value").val();
+                } else if (type === "change") {
+                    r.from = rule.find(".node-input-rule-property-search-value").val();
+                    r.to = rule.find(".node-input-rule-property-replace-value").val();
+                    r.re = rule.find(".node-input-rule-property-re").prop('checked');
+                }
+                node.rules.push(r);
+            });
         }
     });
 </script>

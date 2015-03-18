@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,15 +34,6 @@ describe('ChangeNode', function() {
     });
 
     describe('#replace' , function() {
-        it('should be loaded', function(done) {
-            var flow = [{"id":"changeNode1","type":"change","action":"replace","property":"payload","from":"","to":"","reg":false,"name":"changeNode","wires":[[]]}];
-            helper.load(changeNode, flow, function() {
-                var changeNode1 = helper.getNode("changeNode1");
-                changeNode1.should.have.property('name', 'changeNode');
-                done();
-            });
-        });
-
         it('sets the value of the message property', function(done) {
             var flow = [{"id":"changeNode1","type":"change","action":"replace","property":"payload","from":"","to":"changed","reg":false,"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
@@ -223,7 +214,6 @@ describe('ChangeNode', function() {
             });
         });
     });
-
     describe('#change', function() {
         it('changes the value of the message property', function(done) {
             var flow = [{"id":"changeNode1","type":"change","action":"change","property":"payload","from":"Hello","to":"Goodbye","reg":false,"name":"changeNode","wires":[["helperNode1"]]},
@@ -426,5 +416,61 @@ describe('ChangeNode', function() {
             });
         });
     });
-});
+    describe('- multiple rules', function() {
+            
+        it('handles multiple rules', function(done) {
+            var flow = [{"id":"changeNode1","type":"change","wires":[["helperNode1"]],
+                        rules:[
+                            {t:"set",p:"payload",to:"newValue"},
+                            {t:"change",p:"changeProperty",from:"this",to:"that"},
+                            {t:"delete",p:"deleteProperty"}
+                        ]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal("newValue");
+                        msg.changeProperty.should.equal("change that value");
+                        should.not.exist(msg.deleteProperty);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({
+                    payload:"changeMe",
+                    changeProperty:"change this value",
+                    deleteProperty:"delete this value"
+                });
+            });
+        });
+        it('applies multiple rules in order', function(done) {
+            var flow = [{"id":"changeNode1","type":"change","wires":[["helperNode1"]],
+                        rules:[
+                            {t:"set",p:"payload",to:"a this (hi)"},
+                            {t:"change",p:"payload",from:"this",to:"that"},
+                            {t:"change",p:"payload",from:"\\(.*\\)",to:"[new]",re:true},
+                        ]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal("a that [new]");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({
+                    payload:"changeMe"
+                });
+            });
+        });
+    
+    });
+});    
 
