@@ -815,18 +815,17 @@ RED.view = (function() {
             }
             
             if (activeSubflow) {
-                RED.nodes.eachNode(function(n) {
-                    if (n.type == "subflow:"+activeSubflow.id) {
-                        n.changed = true;
-                        n.inputs = activeSubflow.in.length;
-                        n.outputs = activeSubflow.out.length;
-                        while (n.outputs < n.ports.length) {
-                            n.ports.pop();
-                        }
-                        n.resize = true;
-                        n.dirty = true;
+                RED.nodes.filterNodes({type:"subflow:"+activeSubflow.id}).forEach(function(n) {
+                    n.changed = true;
+                    n.inputs = activeSubflow.in.length;
+                    n.outputs = activeSubflow.out.length;
+                    while (n.outputs < n.ports.length) {
+                        n.ports.pop();
                     }
+                    n.resize = true;
+                    n.dirty = true;
                 });
+                RED.editor.validateNode(activeSubflow);
             }
             
             moving_set = [];

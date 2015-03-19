@@ -387,6 +387,7 @@ RED.subflow = (function() {
             dirty:RED.nodes.dirty()
         });
         
+        RED.editor.validateNode(subflow);
         RED.nodes.dirty(true);
         RED.view.redraw(true);
     }

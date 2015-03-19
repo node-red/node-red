@@ -15,7 +15,6 @@
  **/
 RED.editor = (function() {
     var editing_node = null;
-    // TODO: should IMPORT/EXPORT get their own dialogs?
 
     function getCredentialsURL(nodeType, nodeID) {
         var dashedType = nodeType.replace(/\s+/g, '-');
@@ -28,16 +27,54 @@ RED.editor = (function() {
      * @returns {boolean} whether the node is valid. Sets node.dirty if needed
      */
     function validateNode(node) {
-        if (node._def) {
-            var oldValue = node.valid;
+        var oldValue = node.valid;
+        node.valid = true;
+        var subflow;
+        var isValid;
+        
+        if (node.type.indexOf("subflow:")===0) {
+            subflow = RED.nodes.subflow(node.type.substring(8));
+            isValid = subflow.valid;
+            if (isValid === undefined) {
+                isValid = validateNode(subflow);
+            }
+            node.valid = isValid;
+        } else if (node._def) {
             node.valid = validateNodeProperties(node, node._def.defaults, node);
             if (node._def._creds) {
                 node.valid = node.valid && validateNodeProperties(node, node._def.credentials, node._def._creds);
             }
-            if (oldValue != node.valid) {
-                node.dirty = true;
+        } else if (node.type == "subflow") {
+            var subflowNodes = RED.nodes.filterNodes({z:node.id});
+            for (var i=0;i<subflowNodes.length;i++) {
+                isValid = subflowNodes[i].valid;
+                if (isValid === undefined) {
+                    isValid = validateNode(subflowNodes[i]);
+                }
+                node.valid = node.valid && isValid;
+            }
+            var subflowInstances = RED.nodes.filterNodes({type:"subflow:"+node.id});
+            var modifiedTabs = {};
+            for (i=0;i<subflowInstances.length;i++) {
+                subflowInstances[i].valid = node.valid;
+                subflowInstances[i].dirty = true;
+                modifiedTabs[subflowInstances[i].z] = true;
+            }
+            Object.keys(modifiedTabs).forEach(function(id) {
+                var subflow = RED.nodes.subflow(id);
+                if (subflow) {
+                    validateNode(subflow);
+                }
+            });
+        }
+        if (oldValue !== node.valid) {
+            node.dirty = true;
+            subflow = RED.nodes.subflow(node.z);
+            if (subflow) {
+                validateNode(subflow);
             }
         }
+        return node.valid;
     }
     
     /**
