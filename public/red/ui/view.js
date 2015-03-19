@@ -1032,7 +1032,7 @@ RED.view = (function() {
     }
 
     function nodeButtonClicked(d) {
-        if (!d.changed) {
+        if (!activeSubflow && !d.changed) {
             if (d._def.button.toggle) {
                 d[d._def.button.toggle] = !d[d._def.button.toggle];
                 d.dirty = true;
@@ -1043,8 +1043,10 @@ RED.view = (function() {
             if (d.dirty) {
                 redraw();
             }
-        } else {
+        } else if (d.changed) {
             RED.notify("<strong>Warning</strong>: node has undeployed changes","warning");
+        } else {
+            RED.notify("<strong>Warning</strong>: node actions disabled within subflow","warning");
         }
         d3.event.preventDefault();
     }
@@ -1478,10 +1480,10 @@ RED.view = (function() {
                         thisNode.selectAll(".node_icon_shade_border").attr("d",function(d){ return "M "+(("right" == d._def.align) ?0:30)+" 1 l 0 "+(d.h-2)});
 
                         thisNode.selectAll('.node_button').attr("opacity",function(d) {
-                            return d.changed?0.4:1
+                            return (activeSubflow||d.changed)?0.4:1
                         });
                         thisNode.selectAll('.node_button_button').attr("cursor",function(d) {
-                            return d.changed?"":"pointer";
+                            return (activeSubflow||d.changed)?"":"pointer";
                         });
                         thisNode.selectAll('.node_right_button').attr("transform",function(d){
                                 var x = d.w-6;
