@@ -25,12 +25,12 @@ describe("Users", function() {
         before(function() {
             Users.init({
                 type:"credentials",
-                users:[{
+                users:{
                     username:"fred",
                     password:'$2a$08$LpYMefvGZ3MjAfZGzcoyR.1BcfHh4wy4NpbN.cEny5aHnWOqjKOXK',
-                    // 'password' -> require('bcryptjs').hashSync('password', 8); 
+                    // 'password' -> require('bcryptjs').hashSync('password', 8);
                     permissions:"*"
-                }]
+                }
             });
         });
         describe('#get',function() {
@@ -46,7 +46,7 @@ describe("Users", function() {
                     }
                 });
             });
-            
+
             it('returns null for unknown user', function(done) {
                 Users.get("barney").then(function(user) {
                     try {
@@ -58,7 +58,7 @@ describe("Users", function() {
                 });
             });
         });
-        
+
         describe('#default',function() {
             it('returns null for default user', function(done) {
                 Users.default().then(function(user) {
@@ -71,9 +71,8 @@ describe("Users", function() {
                 });
             });
         });
-        
+
         describe('#authenticate',function() {
-   
             it('authenticates a known user', function(done) {
                 Users.authenticate('fred','password').then(function(user) {
                     try {
@@ -96,7 +95,7 @@ describe("Users", function() {
                     }
                 });
             });
-            
+
             it('rejects invalid user', function(done) {
                 Users.authenticate('barney','wrong').then(function(user) {
                     try {
@@ -109,8 +108,7 @@ describe("Users", function() {
             });
         });
     });
-    
-    
+
     describe('Initalised with a credentials object including anon',function() {
         before(function() {
             Users.init({
@@ -133,8 +131,8 @@ describe("Users", function() {
             });
         });
     });
-    
-   describe('Initialised with a credentials object with user functions',function() {
+
+    describe('Initialised with a credentials object with user functions',function() {
        var authUsername = '';
        var authPassword = '';
        before(function() {
@@ -150,7 +148,7 @@ describe("Users", function() {
                }
            });
        });
-       
+
         describe('#get',function() {
             it('delegates get user',function(done) {
                 Users.get('dave').then(function(user) {
@@ -179,8 +177,47 @@ describe("Users", function() {
                 });
             });
         });
-        
-        
-        
-   });
+    });
+
+    describe('Initialised with bad settings to test else cases',function() {
+        before(function() {
+            Users.init({
+                type:"foo",
+                users:{
+                        username:"fred",
+                        password:'$2a$08$LpYMefvGZ3MjAfZGzcoyR.1BcfHh4wy4NpbN.cEny5aHnWOqjKOXK',
+                        permissions:"*"
+                    }
+            });
+        });
+        describe('#get',function() {
+            it('should fail to return user fred',function(done) {
+                Users.get("fred").then(function(userf) {
+                    try {
+                        userf.should.not.have.a.property("username","fred");
+                        userf.should.not.have.a.property("permissions","*");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+            });
+        });
+    });
+
+    describe('Initialised with default set as function',function() {
+        before(function() {
+            Users.init({
+                type:"credentials",
+                default: function() { return("Done"); }
+            });
+        });
+        describe('#default',function() {
+            it('handles api.default being a function',function(done) {
+                Users.should.have.property('default').which.is.a.Function;
+                (Users.default()).should.equal("Done");
+                done();
+            });
+        });
+    });
 });
