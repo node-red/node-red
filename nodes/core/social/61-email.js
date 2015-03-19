@@ -72,10 +72,10 @@ module.exports = function(RED) {
             if (smtpTransport) {
                 node.status({fill:"blue",shape:"dot",text:"sending"});
                 if (msg.to && node.name && (msg.to !== node.name)) {
-                    node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
+                    node.warn("Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props");
                 }
                 var sendopts = { from: node.userid };   // sender address
-                sendopts.to = msg.to || node.name; // comma separated list of addressees
+                sendopts.to = node.name || msg.to; // comma separated list of addressees
                 sendopts.subject = msg.topic || msg.title || "Message from Node-RED"; // subject line
                 if (Buffer.isBuffer(msg.payload)) { // if it's a buffer in the payload then auto create an attachment instead
                     sendopts.attachments = [ { content: msg.payload, filename:(msg.filename.replace(/^.*[\\\/]/, '') || "file.bin") } ];

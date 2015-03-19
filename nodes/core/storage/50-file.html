@@ -85,7 +85,7 @@
         align: "right",
         label: function() {
             if (this.overwriteFile === "delete") { return this.name||"delete "+this.filename; }
-            else { return this.name||this.filename; }
+            else { return this.name||this.filename||"file"; }
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -110,7 +110,7 @@
         outputs:1,
         icon: "file.png",
         label: function() {
-            return this.name||this.filename;
+            return this.name||this.filename||"file";
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";

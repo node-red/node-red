@@ -177,34 +177,24 @@ module.exports = function(RED) {
         this.on("input",function(msg) {
             var preRequestTimestamp = process.hrtime();
             node.status({fill:"blue",shape:"dot",text:"requesting"});
-            var url;
-            if (msg.url) {
-                if (n.url && (n.url !== msg.url)) {
-                    node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
-                }
-                url = msg.url;
-            } else if (isTemplatedUrl) {
+            var url = nodeUrl || msg.url;
+            if (msg.url && nodeUrl && (nodeUrl !== msg.url)) {  // revert change below when warning is finally removed
+                node.warn("Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props");
+            }
+            if (isTemplatedUrl) {
                 url = mustache.render(nodeUrl,msg);
-            } else {
-                url = nodeUrl;
             }
             // url must start http:// or https:// so assume http:// if not set
             if (!((url.indexOf("http://")===0) || (url.indexOf("https://")===0))) {
                 url = "http://"+url;
             }
 
-            var method;
-            if (msg.method) {                               // if method set in msg
-                if (n.method && (n.method !== "use")) {     // warn if override option not set
-                    node.warn("Deprecated: msg properties should not override fixed node properties. Use explicit override option. See bit.ly/nr-override-msg-props");
-                }
-                method = msg.method.toUpperCase();          // but use it anyway
-            } else {
-                if (n.method !== "use") {
-                    method = nodeMethod.toUpperCase();      // otherwise use the selected method
-                } else {                                    // unless they selected override
-                    method = "GET";                         // - in which case default to GET
-                }
+            var method = nodeMethod.toUpperCase() || "GET";
+            if (msg.method && n.method && (n.method !== "use")) {     // warn if override option not set
+                node.warn("Warning: msg properties can no longer override fixed node properties. Use explicit override option. See bit.ly/nr-override-msg-props");
+            }
+            if (msg.method && n.method && (n.method === "use")) {
+                method = msg.method.toUpperCase();          // use the msg parameter
             }
             var opts = urllib.parse(url);
             opts.method = method;
@@ -251,7 +241,7 @@ module.exports = function(RED) {
                 msg.statusCode = res.statusCode;
                 msg.headers = res.headers;
                 msg.payload = "";
-                // msg.url = url;   // revert when fully deprecated
+                // msg.url = url;   // revert when warning above finally removed
                 res.on('data',function(chunk) {
                     msg.payload += chunk;
                 });

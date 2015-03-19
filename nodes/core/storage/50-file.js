@@ -20,29 +20,26 @@ module.exports = function(RED) {
 
     function FileNode(n) {
         RED.nodes.createNode(this,n);
-        this.filename = n.filename || "";
+        this.filename = n.filename;
         this.appendNewline = n.appendNewline;
         this.overwriteFile = n.overwriteFile.toString();
         var node = this;
         this.on("input",function(msg) {
-            var filename;
-            if (msg.filename) {
-                if (n.filename && (n.filename !== msg.filename)) {
-                    node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
-                }
-                filename = msg.filename;
-                node.status({fill:"grey",shape:"dot",text:msg.filename});
-            } else {
-                filename = this.filename;
+            var filename = this.filename || msg.filename || "";
+            if (msg.filename && n.filename && (n.filename !== msg.filename)) {
+                node.warn("Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props");
+            }
+            if (!this.filename) {
+                node.status({fill:"grey",shape:"dot",text:filename});
             }
             if (filename === "") {
                 node.warn('No filename specified');
-            } else if (msg.hasOwnProperty('delete')) {
-                node.warn("Deprecated: please use specific delete option in config dialog.");
-                fs.unlink(filename, function (err) {
-                    if (err) { node.error('Failed to delete file : '+err,msg); }
-                });
-            } else if (typeof msg.payload != "undefined") {
+            } else if (msg.hasOwnProperty('delete')) { // remove warning at some point in future
+                node.warn("Warning: Invalid delete. Please use specific delete option in config dialog.");
+                //fs.unlink(filename, function (err) {
+                    //if (err) { node.error('Failed to delete file : '+err,msg); }
+                //});
+            } else if (msg.payload && (typeof msg.payload != "undefined")) {
                 var data = msg.payload;
                 if ((typeof data === "object")&&(!Buffer.isBuffer(data))) {
                     data = JSON.stringify(data);
@@ -80,7 +77,7 @@ module.exports = function(RED) {
     function FileInNode(n) {
         RED.nodes.createNode(this,n);
 
-        this.filename = n.filename || "";
+        this.filename = n.filename;
         this.format = n.format;
         var node = this;
         var options = {};
@@ -88,14 +85,12 @@ module.exports = function(RED) {
             options['encoding'] = this.format;
         }
         this.on("input",function(msg) {
-            var filename;
-            if (msg.filename) {
-                if (n.filename && (n.filename !== msg.filename)) {
-                    node.warn("Deprecated: msg properties should not override set node properties. See bit.ly/nr-override-msg-props");
-                }
-                filename = msg.filename;
-            } else {
-                filename = this.filename;
+            var filename = this.filename || msg.filename || "";
+            if (msg.filename && n.filename && (n.filename !== msg.filename)) {
+                node.warn("Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props");
+            }
+            if (!this.filename) {
+                node.status({fill:"grey",shape:"dot",text:filename});
             }
             if (filename === "") {
                 node.warn('No filename specified');
