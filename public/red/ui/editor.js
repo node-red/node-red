@@ -659,6 +659,10 @@ RED.editor = (function() {
                             configTypeDef.oneditsave.call(RED.nodes.node(configId));
                         }
                         validateNode(configNode);
+                        for (var i=0;i<configNode.users.length;i++) {
+                            var user = configNode.users[i];
+                            validateNode(user);
+                        }
 
                         RED.nodes.dirty(true);
                         $(this).dialog("close");
