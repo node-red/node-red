@@ -16,8 +16,9 @@
 
 var when = require("when");
 var util = require("util");
-var bcrypt = require('bcryptjs');
-
+var bcrypt;
+try { bcrypt = require('bcrypt'); }
+catch(e) { bcrypt = require('bcryptjs'); }
 var users = {};
 var passwords = {};
 var defaultUser = null;
@@ -56,6 +57,7 @@ function init(config) {
                 api.get = config.users;
             } else {
                 var us = config.users;
+                /* istanbul ignore else */
                 if (!util.isArray(us)) {
                     us = [us];
                 }
@@ -97,5 +99,3 @@ module.exports = {
     authenticate: function(username,password) { return api.authenticate(username,password) },
     default: function() { return api.default(); }
 };
-
-

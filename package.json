@@ -59,6 +59,9 @@
         "passport-oauth2-client-password":"0.1.2",
         "oauth2orize":"1.0.1"
     },
+    "optionalDependencies": {
+        "bcrypt":"0.8.1"
+    },
     "devDependencies": {
         "grunt": "0.4.5",
         "grunt-cli": "0.1.13",
