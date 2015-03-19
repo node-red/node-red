@@ -236,12 +236,6 @@ RED.nodes = (function() {
         }
     }
 
-    function refreshValidation() {
-        for (var n=0;n<nodes.length;n++) {
-            RED.editor.validateNode(nodes[n]);
-        }
-    }
-
     function addWorkspace(ws) {
         workspaces[ws.id] = ws;
     }
@@ -535,17 +529,10 @@ RED.nodes = (function() {
                 n.type != "tab" && 
                 n.type != "subflow" &&
                 !registry.getNodeType(n.type) &&
-                n.type.substring(0,8) != "subflow:") {
-                // TODO: get this UI thing out of here! (see below as well)
-                
-                if (unknownTypes.indexOf(n.type)==-1) {
+                n.type.substring(0,8) != "subflow:" &&
+                unknownTypes.indexOf(n.type)==-1) {
+            
                     unknownTypes.push(n.type);
-                }
-                //if (n.x == null && n.y == null) {
-                //    // config node - remove it
-                //    newNodes.splice(i,1);
-                //    i--;
-                //}
             }
         }
         if (unknownTypes.length > 0) {
@@ -764,10 +751,10 @@ RED.nodes = (function() {
             n.out.forEach(function(output) {
                 output.wires.forEach(function(wire) {
                     var link;
-                    if (wire.id == n.id) {
+                    if (subflow_map[wire.id] && subflow_map[wire.id].id == n.id) {
                         link = {source:n.in[wire.port], sourcePort:wire.port,target:output};
                     } else {
-                        link = {source:node_map[wire.id], sourcePort:wire.port,target:output};
+                        link = {source:node_map[wire.id]||subflow_map[wire.id], sourcePort:wire.port,target:output};
                     }
                     addLink(link);
                     new_links.push(link);
@@ -779,13 +766,16 @@ RED.nodes = (function() {
         return [new_nodes,new_links,new_workspaces,new_subflows];
     }
     
-    // TODO: only supports filter.z
+    // TODO: supports filter.z|type
     function filterNodes(filter) {
         var result = [];
         
         for (var n=0;n<nodes.length;n++) {
             var node = nodes[n];
             if (filter.z && node.z !== filter.z) {
+                continue;
+            }
+            if (filter.type && node.type !== filter.type) {
                 continue;
             }
             result.push(node);
@@ -903,7 +893,7 @@ RED.nodes = (function() {
         filterLinks: filterLinks,
         
         import: importNodes,
-        refreshValidation: refreshValidation,
+        
         getAllFlowNodes: getAllFlowNodes,
         createExportableNodeSet: createExportableNodeSet,
         createCompleteNodeSet: createCompleteNodeSet,
