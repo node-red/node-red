@@ -827,6 +827,7 @@ button.input-append-right {
 }
 
 table.node-info {
+    font-size: 14px;
     margin: 5px;
     width: 97%;
 }
@@ -857,6 +858,16 @@ table.node-info td:last-child{
 div.node-info {
     margin: 5px;
 }
+.node-info-property-header {
+    color: #666;
+}
+
+.node-info-property-header:hover,
+.node-info-property-header:focus {
+    color: #666;
+    text-decoration: none;
+}
+
 
 .input-error {
     border-color: rgb(214, 97, 95) !important;

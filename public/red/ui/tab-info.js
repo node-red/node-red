@@ -32,6 +32,8 @@ RED.sidebar.info = (function() {
     content.style.paddingLeft = "4px";
     content.style.paddingRight = "4px";
 
+    var propertiesExpanded = false;
+    
     function show() {
         if (!RED.sidebar.containsTab("info")) {
             RED.sidebar.addTab("info",content,false);
@@ -59,6 +61,9 @@ RED.sidebar.info = (function() {
     function refresh(node) {
         var table = '<table class="node-info"><tbody>';
         table += '<tr class="blank"><td colspan="2">Node</td></tr>';
+        if (node.type != "subflow" && node.name) {
+            table += "<tr><td>Name</td><td>&nbsp;"+node.name+"</td></tr>";
+        }
         table += "<tr><td>Type</td><td>&nbsp;"+node.type+"</td></tr>";
         table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
         
@@ -84,18 +89,22 @@ RED.sidebar.info = (function() {
             table += "<tr><td>instances</td><td>"+userCount+"</td></tr>";
         }
         
-        if (node.type != "subflow" && node.type != "comment") {
-            table += '<tr class="blank"><td colspan="2">Properties</td></tr>';
+        if (!m && node.type != "subflow" && node.type != "comment") {
+            table += '<tr class="blank"><td colspan="2"><a href="#" class="node-info-property-header"><i style="width: 10px; text-align: center;" class="fa fa-caret-'+(propertiesExpanded?"down":"right")+'"></i> Properties</a></td></tr>';
             if (node._def) {
                 for (var n in node._def.defaults) {
-                    if (node._def.defaults.hasOwnProperty(n)) {
+                    if (n != "name" && node._def.defaults.hasOwnProperty(n)) {
                         var val = node[n]||"";
                         var type = typeof val;
                         if (type === "string") {
-                            if (val.length > 30) {
-                                val = val.substring(0,30)+" ...";
+                            if (val.length == 0) {
+                                val += '<span style="font-style: italic; color: #ccc;">blank</span>';
+                            } else {
+                                if (val.length > 30) {
+                                    val = val.substring(0,30)+" ...";
+                                }
+                                val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
                             }
-                            val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
                         } else if (type === "number") {
                             val = val.toString();
                         } else if ($.isArray(val)) {
@@ -113,12 +122,12 @@ RED.sidebar.info = (function() {
                             val = val.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
                         }
     
-                        table += "<tr><td>"+n+"</td><td>"+val+"</td></tr>";
+                        table += '<tr class="node-info-property-row'+(propertiesExpanded?"":" hide")+'"><td>'+n+"</td><td>"+val+"</td></tr>";
                     }
                 }
             }
         }
-        table += "</tbody></table><br/>";
+        table += "</tbody></table><hr/>";
         if (node.type != "comment") {
             var helpText = $("script[data-help-name|='"+node.type+"']").html()||"";
             table  += '<div class="node-help">'+helpText+"</div>";
@@ -131,6 +140,23 @@ RED.sidebar.info = (function() {
         }
 
         $("#tab-info").html(table);
+        
+        $(".node-info-property-header").click(function(e) {
+            var icon = $(this).find("i");
+            if (icon.hasClass("fa-caret-right")) {
+                icon.removeClass("fa-caret-right");
+                icon.addClass("fa-caret-down");
+                $(".node-info-property-row").show();
+                propertiesExpanded = true;
+            } else {
+                icon.addClass("fa-caret-right");
+                icon.removeClass("fa-caret-down");
+                $(".node-info-property-row").hide();
+                propertiesExpanded = false;
+            }
+            
+            e.preventDefault();
+        });
     }
     
     function clear() {
