@@ -178,6 +178,13 @@ RED.palette = (function() {
                 revertDuration: 50,
                 start: function() {RED.view.focus();}
             });
+            
+            if (def.category == "subflows") {
+                $(d).dblclick(function(e) {
+                    RED.workspaces.show(nt.substring(8));
+                    e.preventDefault();
+                });
+            }
 
             setLabel(nt,$(d),label);
         }
