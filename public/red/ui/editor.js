@@ -173,6 +173,7 @@ RED.editor = (function() {
     $( "#dialog" ).dialog({
             modal: true,
             autoOpen: false,
+            dialogClass: "ui-dialog-no-close",
             closeOnEscape: false,
             minWidth: 500,
             width: 'auto',
@@ -313,7 +314,6 @@ RED.editor = (function() {
                 }
             },
             open: function(e) {
-                $(this).parent().find(".ui-dialog-titlebar-close").hide();
                 var minWidth = $(this).dialog('option','minWidth');
                 if ($(this).outerWidth() < minWidth) {
                     $(this).dialog('option','width',minWidth);
@@ -657,6 +657,7 @@ RED.editor = (function() {
     $( "#node-config-dialog" ).dialog({
             modal: true,
             autoOpen: false,
+            dialogClass: "ui-dialog-no-close",
             minWidth: 500,
             width: 'auto',
             closeOnEscape: false,
@@ -742,7 +743,6 @@ RED.editor = (function() {
             resize: function(e,ui) {
             },
             open: function(e) {
-                $(this).parent().find(".ui-dialog-titlebar-close").hide();
                 var minWidth = $(this).dialog('option','minWidth');
                 if ($(this).outerWidth() < minWidth) {
                     $(this).dialog('option','width',minWidth);
@@ -765,6 +765,7 @@ RED.editor = (function() {
     $( "#subflow-dialog" ).dialog({
         modal: true,
         autoOpen: false,
+        dialogClass: "ui-dialog-no-close",
         closeOnEscape: false,
         minWidth: 500,
         width: 'auto',
@@ -826,7 +827,6 @@ RED.editor = (function() {
             }
         ],
         open: function(e) {
-            $(this).parent().find(".ui-dialog-titlebar-close").hide();
             RED.keyboard.disable();
             var minWidth = $(this).dialog('option','minWidth');
             if ($(this).outerWidth() < minWidth) {
