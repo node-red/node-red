@@ -281,7 +281,7 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
 
 #palette {
    background: #f3f3f3;
-   width: 140px;
+   width: 170px;
    text-align: center;
    -webkit-user-select: none;
    -khtml-user-select: none;
@@ -391,11 +391,15 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
     clear: both;
 }
 .palette_label {
-    margin: 4px 0;
+    margin: 4px 0 4px 30px;
     line-height: 20px;
     text-align: center;
     overflow: hidden;
 }
+.palette_label_right {
+    margin: 4px 30px 4px 0;
+}
+
 .palette_node {
    cursor:move;
    font-size:13px;
@@ -406,7 +410,7 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
    border: 2px solid #999;
    background-position: 5% 50%;
    background-repeat: no-repeat;
-   width: 90px;
+   width: 120px;
    background-size: contain;
    position: relative;
 }
@@ -427,12 +431,37 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
    border: 1px solid #999;
 }
 .palette_port_output {
-    left:85px;
+    left:auto;
+    right: -6px;
 }
 
 .palette_node:hover .palette_port {
   border-color: #999;
   background-color: #eee;
+}
+.palette_icon_container {
+    position: absolute;
+    text-align: center;
+    top:0;
+    bottom:0;
+    left:0;
+    width: 30px;
+    border-right: 2px solid rgba(0,0,0,0.1);
+    background-color: rgba(0,0,0,0.05);
+}
+.palette_icon_container_right {
+    left: auto;
+    right: 0;
+    border-right: none;
+    border-left: 2px solid rgba(0,0,0,0.1);
+}
+.palette_icon {
+    display: inline-block;
+    width: 20px;
+    height: 100%;
+    background-position: 50% 50%;
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
 #sidebar {
@@ -459,7 +488,7 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
 #workspace {
     position: absolute;
     margin: 0;
-    top:5px; left:160px; bottom: 10px; right: 330px;
+    top:5px; left:190px; bottom: 10px; right: 330px;
 }
 #chart-zoom-controls {
     position: absolute;

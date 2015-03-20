@@ -121,17 +121,15 @@ RED.palette = (function() {
                 label = (typeof def.paletteLabel === "function" ? def.paletteLabel.call(def) : def.paletteLabel)||"";
             }
 
-            d.innerHTML = '<div class="palette_label"></div>';
+            
+            $('<div/>',{class:"palette_label"+(def.align=="right"?" palette_label_right":"")}).appendTo(d);
 
             d.className="palette_node";
+            
+            
             if (def.icon) {
-                d.style.backgroundImage = "url(icons/"+def.icon+")";
-                d.style.backgroundSize = "18px 27px";
-                if (def.align == "right") {
-                    d.style.backgroundPosition = "95% 50%";
-                } else if (def.inputs > 0) {
-                    d.style.backgroundPosition = "10% 50%";
-                }
+                var iconContainer = $('<div/>',{class:"palette_icon_container"+(def.align=="right"?" palette_icon_container_right":"")}).appendTo(d);
+                $('<div/>',{class:"palette_icon",style:"background-image: url(icons/"+def.icon+")"}).appendTo(iconContainer);
             }
 
             d.style.backgroundColor = def.color;
