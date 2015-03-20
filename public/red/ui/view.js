@@ -333,7 +333,6 @@ RED.view = (function() {
                 if (!m) {
                     nn.inputs = nn._def.inputs || 0;
                     nn.outputs = nn._def.outputs;
-                    nn.changed = true;
                     
                     for (var d in nn._def.defaults) {
                         if (nn._def.defaults.hasOwnProperty(d)) {
@@ -350,6 +349,7 @@ RED.view = (function() {
                     nn.outputs = subflow.out.length;
                 }
                 
+                nn.changed = true;
                 nn.h = Math.max(node_height,(nn.outputs||0) * 15);
                 RED.history.push({t:'add',nodes:[nn.id],dirty:RED.nodes.dirty()});
                 RED.nodes.add(nn);

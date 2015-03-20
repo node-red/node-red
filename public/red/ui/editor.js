@@ -28,17 +28,22 @@ RED.editor = (function() {
      */
     function validateNode(node) {
         var oldValue = node.valid;
+        var oldChanged = node.changed;
         node.valid = true;
         var subflow;
         var isValid;
+        var hasChanged;
         
         if (node.type.indexOf("subflow:")===0) {
             subflow = RED.nodes.subflow(node.type.substring(8));
             isValid = subflow.valid;
+            hasChanged = subflow.changed;
             if (isValid === undefined) {
                 isValid = validateNode(subflow);
+                hasChanged = subflow.changed;
             }
             node.valid = isValid;
+            node.changed = hasChanged;
         } else if (node._def) {
             node.valid = validateNodeProperties(node, node._def.defaults, node);
             if (node._def._creds) {
@@ -48,15 +53,19 @@ RED.editor = (function() {
             var subflowNodes = RED.nodes.filterNodes({z:node.id});
             for (var i=0;i<subflowNodes.length;i++) {
                 isValid = subflowNodes[i].valid;
+                hasChanged = subflowNodes[i].changed;
                 if (isValid === undefined) {
                     isValid = validateNode(subflowNodes[i]);
+                    hasChanged = subflowNodes[i].changed;
                 }
                 node.valid = node.valid && isValid;
+                node.changed = node.changed || hasChanged;
             }
             var subflowInstances = RED.nodes.filterNodes({type:"subflow:"+node.id});
             var modifiedTabs = {};
             for (i=0;i<subflowInstances.length;i++) {
                 subflowInstances[i].valid = node.valid;
+                subflowInstances[i].changed = node.changed;
                 subflowInstances[i].dirty = true;
                 modifiedTabs[subflowInstances[i].z] = true;
             }
@@ -67,7 +76,7 @@ RED.editor = (function() {
                 }
             });
         }
-        if (oldValue !== node.valid) {
+        if (oldValue !== node.valid || oldChanged !== node.changed) {
             node.dirty = true;
             subflow = RED.nodes.subflow(node.z);
             if (subflow) {
