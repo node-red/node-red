@@ -98,7 +98,6 @@ RED.palette = (function() {
     }
 
     function addNodeType(nt,def) {
-
         var nodeTypeId = escapeNodeType(nt);
         if ($("#palette_node_"+nodeTypeId).length) {
             return;
@@ -192,7 +191,15 @@ RED.palette = (function() {
 
     function removeNodeType(nt) {
         var nodeTypeId = escapeNodeType(nt);
-        $("#palette_node_"+nodeTypeId).remove();
+        var paletteNode = $("#palette_node_"+nodeTypeId);
+        var categoryNode = paletteNode.closest(".palette-category");
+        paletteNode.remove();
+        if (categoryNode.find(".palette_node").length === 0) {
+            if (categoryNode.find("i").hasClass("expanded")) {
+                categoryNode.find(".palette-content").slideToggle();
+                categoryNode.find("i").toggleClass("expanded");
+            }
+        }
     }
     function hideNodeType(nt) {
         var nodeTypeId = escapeNodeType(nt);
