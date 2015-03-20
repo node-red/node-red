@@ -82,14 +82,18 @@ module.exports = function(RED) {
 
     function sendDebug(msg) {
         if (msg.msg instanceof Error) {
+            msg.format = "error";
             msg.msg = msg.msg.toString();
         } else if (msg.msg instanceof Buffer) {
-            msg.msg = "(Buffer) "+msg.msg.toString('hex');
+            msg.format = "buffer";
+            msg.msg = msg.msg.toString('hex');
         } else if (typeof msg.msg === 'object') {
             var seen = [];
-            var ty = "(Object) ";
-            if (util.isArray(msg.msg)) { ty = "(Array) "; }
-            msg.msg = ty + JSON.stringify(msg.msg, function(key, value) {
+            msg.format = "object";
+            if (util.isArray(msg.msg)) {
+                msg.format = "array";
+            }
+            msg.msg = JSON.stringify(msg.msg, function(key, value) {
                 if (typeof value === 'object' && value !== null) {
                     if (seen.indexOf(value) !== -1) { return "[circular]"; }
                     seen.push(value);
@@ -98,14 +102,21 @@ module.exports = function(RED) {
             }," ");
             seen = null;
         } else if (typeof msg.msg === "boolean") {
-            msg.msg = "(boolean) "+msg.msg.toString();
+            msg.format = "boolean";
+            msg.msg = msg.msg.toString();
         } else if (typeof msg.msg === "number") {
-            msg.msg = "(number) "+msg.msg.toString();
+            msg.format = "number";
+            msg.msg = msg.msg.toString();
         } else if (msg.msg === 0) {
+            msg.format = "number";
             msg.msg = "0";
         } else if (msg.msg === null || typeof msg.msg === "undefined") {
+            msg.format = (msg.msg === null)?"null":"undefined";
             msg.msg = "(undefined)";
-        } else { msg.msg = "(string) "+msg.msg; }
+        } else {
+            msg.format = "string";
+            msg.msg = msg.msg;
+        }
 
         if (msg.msg.length > debuglength) {
             msg.msg = msg.msg.substr(0,debuglength) +" ....";

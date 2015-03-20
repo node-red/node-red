@@ -21,7 +21,7 @@ var typeRegistry = require("./registry");
 var credentials = require("./credentials");
 var redUtil = require("../util");
 var events = require("../events");
-var log = require("../log");
+var Log = require("../log");
 
 function getID() {
     return (1+Math.random()*4294967295).toString(16);
@@ -35,10 +35,15 @@ function createNode(type,config) {
             nn = new nt(clone(config));
         }
         catch (err) {
-            log.warn(type+" : "+err);
+            Log.log({
+                level: Log.ERROR,
+                id:config.id,
+                type: type,
+                msg: err
+            });
         }
     } else {
-        log.warn("unknown type: "+type);
+        Log.error("Unknown type: "+type);
     }
     return nn;
 }

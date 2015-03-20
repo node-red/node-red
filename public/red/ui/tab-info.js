@@ -97,7 +97,7 @@ RED.sidebar.info = (function() {
                         var val = node[n]||"";
                         var type = typeof val;
                         if (type === "string") {
-                            if (val.length == 0) {
+                            if (val.length === 0) {
                                 val += '<span style="font-style: italic; color: #ccc;">blank</span>';
                             } else {
                                 if (val.length > 30) {

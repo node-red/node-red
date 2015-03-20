@@ -47,8 +47,8 @@ describe('debug node', function() {
                 n1.emit("input", {payload:"test"});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",name:"Debug",msg:"(string) test",
-                    property:"payload"}
+                    topic:"debug",data:{id:"n1",name:"Debug",msg:"test",
+                    format:"string",property:"payload"}
                 });
             }, done);
         });
@@ -63,7 +63,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload:"test"});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"(string) test",property:"payload"}
+                    topic:"debug",data:{id:"n1",msg:"test",property:"payload",format:"string"}
                 });
                 count++;
             }, function() {
@@ -93,7 +93,7 @@ describe('debug node', function() {
             }, function(msg) {
                 JSON.parse(msg).should.eql({
                     topic:"debug",
-                    data:{id:"n1",msg:'(Object) {\n "payload": "test"\n}'}
+                    data:{id:"n1",msg:'{\n "payload": "test"\n}',format:"object"}
                 });
             }, done);
         });
@@ -107,7 +107,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload:"test", foo:"bar"});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"(string) bar",property:"foo"}
+                    topic:"debug",data:{id:"n1",msg:"bar",property:"foo",format:"string"}
                 });
             }, done);
         });
@@ -121,7 +121,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload:"test", foo: {bar: "bar"}});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"(string) bar",property:"foo.bar"}
+                    topic:"debug",data:{id:"n1",msg:"bar",property:"foo.bar",format:"string"}
                 });
             }, done);
         });
@@ -135,7 +135,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload: new Error("oops")});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"Error: oops",property:"payload"}
+                    topic:"debug",data:{id:"n1",msg:"Error: oops",property:"payload",format:"error"}
                 });
             }, done);
         });
@@ -149,7 +149,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload: true});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg: '(boolean) true',property:"payload"}
+                    topic:"debug",data:{id:"n1",msg: 'true',property:"payload",format:"boolean"}
                 });
             }, done);
         });
@@ -163,7 +163,7 @@ describe('debug node', function() {
                 n1.emit("input", {});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg: '(undefined)',property:"payload"}
+                    topic:"debug",data:{id:"n1",msg: '(undefined)',property:"payload",format:"undefined"}
                 });
             }, done);
         });
@@ -178,7 +178,7 @@ describe('debug node', function() {
             }, function(msg) {
                 JSON.parse(msg).should.eql({
                     topic:"debug",
-                    data:{id:"n1",msg:'(Object) {\n "type": "foo"\n}',property:"payload"}
+                    data:{id:"n1",msg:'{\n "type": "foo"\n}',property:"payload",format:"object"}
                 });
             }, done);
         });
@@ -193,7 +193,7 @@ describe('debug node', function() {
             }, function(msg) {
                 JSON.parse(msg).should.eql({
                     topic:"debug",
-                    data:{id:"n1",msg: '(Array) [\n 0,\n 1,\n 2,\n 3\n]',
+                    data:{id:"n1",msg: '[\n 0,\n 1,\n 2,\n 3\n]',format:"array",
                     property:"payload"}
                 });
             }, done);
@@ -213,8 +213,8 @@ describe('debug node', function() {
                     topic:"debug",
                     data:{
                         id:"n1",
-                        msg:'(Object) {\n "name": "bar",\n "o": "[circular]"\n}',
-                        property:"payload"
+                        msg:'{\n "name": "bar",\n "o": "[circular]"\n}',
+                        property:"payload",format:"object"
                     }
                 });
             }, done);
@@ -228,12 +228,14 @@ describe('debug node', function() {
             websocket_test(function() {
                 n1.emit("input", {payload: Array(1002).join("X")});
             }, function(msg) {
-                JSON.parse(msg).should.eql({
+                var a = JSON.parse(msg);
+                a.should.eql({
                     topic:"debug",
                     data:{
                         id:"n1",
-                        msg: "(string) "+Array(992).join("X")+' ....',
-                        property:"payload"
+                        msg: Array(1001).join("X")+' ....',
+                        property:"payload",
+                        format:"string"
                     }
                 });
             }, done);
@@ -251,8 +253,9 @@ describe('debug node', function() {
                     topic:"debug",
                     data:{
                         id:"n1",
-                        msg: '(Buffer) 48454c4c4f',
-                        property:"payload"
+                        msg: '48454c4c4f',
+                        property:"payload",
+                        format: "buffer"
                     }
                 });
             }, done);
@@ -273,7 +276,7 @@ describe('debug node', function() {
                     });
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"(string) message 2",property:"payload"}
+                    topic:"debug",data:{id:"n1",msg:"message 2",property:"payload",format:"string"}
                 });
             }, done);
         });
