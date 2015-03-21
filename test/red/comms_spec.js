@@ -135,7 +135,138 @@ describe("comms", function() {
             });
         }
     });
-
+    describe("disabled editor", function() {
+        var server;
+        var url;
+        var port;
+        before(function(done) {
+            server = http.createServer(function(req,res){app(req,res)});
+            comms.init(server, {disableEditor:true});
+            server.listen(listenPort, address);
+            server.on('listening', function() {
+                port = server.address().port;
+                url = 'http://' + address + ':' + port + '/comms';
+                comms.start();
+                done();
+            });
+        });
+        
+        after(function() {
+            comms.stop();
+        });
+    
+        it('rejects websocket connections',function(done) {
+            var ws = new WebSocket(url);
+            ws.on('open', function() {
+                 done(new Error("Socket connection unexpectedly accepted"));
+                 ws.close();
+            });
+            ws.on('error', function() {
+                done();
+            });
+                
+        });
+    });
+    
+    describe("non-default httpAdminRoot set: /adminPath", function() {
+        var server;
+        var url;
+        var port;
+        before(function(done) {
+            server = http.createServer(function(req,res){app(req,res)});
+            comms.init(server, {httpAdminRoot:"/adminPath"});
+            server.listen(listenPort, address);
+            server.on('listening', function() {
+                port = server.address().port;
+                url = 'http://' + address + ':' + port + '/adminPath/comms';
+                comms.start();
+                done();
+            });
+        });
+        
+        after(function() {
+            comms.stop();
+        });
+    
+        it('accepts connections',function(done) {
+            var ws = new WebSocket(url);
+            ws.on('open', function() {
+                 ws.close();
+                 done();
+            });
+            ws.on('error', function() {
+                done(new Error("Socket connection failed"));
+            });
+                
+        });
+    });
+    
+    describe("non-default httpAdminRoot set: /adminPath/", function() {
+        var server;
+        var url;
+        var port;
+        before(function(done) {
+            server = http.createServer(function(req,res){app(req,res)});
+            comms.init(server, {httpAdminRoot:"/adminPath/"});
+            server.listen(listenPort, address);
+            server.on('listening', function() {
+                port = server.address().port;
+                url = 'http://' + address + ':' + port + '/adminPath/comms';
+                comms.start();
+                done();
+            });
+        });
+        
+        after(function() {
+            comms.stop();
+        });
+    
+        it('accepts connections',function(done) {
+            var ws = new WebSocket(url);
+            ws.on('open', function() {
+                 ws.close();
+                 done();
+            });
+            ws.on('error', function() {
+                done(new Error("Socket connection failed"));
+            });
+                
+        });
+    });
+        
+    describe("non-default httpAdminRoot set: adminPath", function() {
+        var server;
+        var url;
+        var port;
+        before(function(done) {
+            server = http.createServer(function(req,res){app(req,res)});
+            comms.init(server, {httpAdminRoot:"adminPath"});
+            server.listen(listenPort, address);
+            server.on('listening', function() {
+                port = server.address().port;
+                url = 'http://' + address + ':' + port + '/adminPath/comms';
+                comms.start();
+                done();
+            });
+        });
+        
+        after(function() {
+            comms.stop();
+        });
+    
+        it('accepts connections',function(done) {
+            var ws = new WebSocket(url);
+            ws.on('open', function() {
+                 ws.close();
+                 done();
+            });
+            ws.on('error', function() {
+                done(new Error("Socket connection failed"));
+            });
+                
+        });
+    });
+    
     describe("keep alives", function() {
         var server;
         var url;

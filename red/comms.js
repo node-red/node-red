@@ -40,12 +40,11 @@ function start() {
     var Tokens = require("./api/auth/tokens");
     var Users = require("./api/auth/users");
     var Permissions = require("./api/auth/permissions");
-    
     if (!settings.disableEditor) {
         Users.default().then(function(anonymousUser) {
             var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
             var path = settings.httpAdminRoot || "/";
-            path = path + (path.slice(-1) == "/" ? "":"/") + "comms";
+            path = (path.slice(0,1) != "/" ? "/":"") + path + (path.slice(-1) == "/" ? "":"/") + "comms";
             wsServer = new ws.Server({server:server,path:path});
             
             wsServer.on('connection',function(ws) {
@@ -127,9 +126,11 @@ function start() {
 function stop() {
     if (heartbeatTimer) {
         clearInterval(heartbeatTimer);
+        heartbeatTimer = null;
     }
     if (wsServer) {
         wsServer.close();
+        wsServer = null;
     }
 }
 

@@ -80,11 +80,13 @@ describe("red/settings", function() {
             c: [1,2,3]
         }
         var savedSettings = null;
+        var saveCount = 0;
         var storage = {
             getSettings: function() {
                 return when.resolve({globalA:789});
             },
             saveSettings: function(settings) {
+                saveCount++;
                 savedSettings = settings;
                 return when.resolve();
             }
@@ -102,8 +104,14 @@ describe("red/settings", function() {
             settings.available().should.be.true;
             settings.get("globalA").should.equal(789);
             settings.set("globalA","abc").then(function() {
+                savedSettings.globalA.should.equal("abc");
+                saveCount.should.equal(1);
+                settings.set("globalA","abc").then(function() {
                     savedSettings.globalA.should.equal("abc");
+                    // setting to existing value should not trigger save
+                    saveCount.should.equal(1);
                     done();
+                });
             });
         }).otherwise(function(err) {
             done(err);

@@ -54,7 +54,7 @@ function start() {
             if (log.metric()) {
                 runtimeMetricInterval = setInterval(function() {
                     reportMetrics();
-                }, 15000);
+                }, settings.runtimeMetricInterval||15000);
             }
             console.log("\n\nWelcome to Node-RED\n===================\n");
             if (settings.version) {
@@ -92,7 +92,7 @@ function start() {
                         if (missingModules.hasOwnProperty(i)) {
                             log.warn(" - "+i+": "+missingModules[i].join(", "));
                             if (settings.autoInstallModules && i != "node-red") {
-                                installModule(i).otherwise(function(err) {
+                                serverAPI.installModule(i).otherwise(function(err) {
                                     // Error already reported. Need the otherwise handler
                                     // to stop the error propagating any further
                                 });
@@ -216,22 +216,21 @@ function uninstallModule(module) {
 function reportMetrics() {
     var memUsage = process.memoryUsage();
 
-    // only need to init these once per report
-    var metrics = {};
-    metrics.level = log.METRIC;
-
-    //report it
-    metrics.event = "runtime.memory.rss"
-    metrics.value = memUsage.rss;
-    log.log(metrics);
-
-    metrics.event = "runtime.memory.heapTotal"
-    metrics.value = memUsage.heapTotal;
-    log.log(metrics);
-
-    metrics.event = "runtime.memory.heapUsed"
-    metrics.value = memUsage.heapUsed;
-    log.log(metrics);
+    log.log({
+        level: log.METRIC,
+        event: "runtime.memory.rss",
+        value: memUsage.rss
+    });
+    log.log({
+        level: log.METRIC,
+        event: "runtime.memory.heapTotal",
+        value: memUsage.heapTotal
+    });
+    log.log({
+        level: log.METRIC,
+        event: "runtime.memory.heapUsed",
+        value: memUsage.heapUsed
+    });
 }
 
 function stop() {
@@ -243,7 +242,7 @@ function stop() {
     comms.stop();
 }
 
-module.exports = {
+var serverAPI = module.exports = {
     init: init,
     start: start,
     stop: stop,

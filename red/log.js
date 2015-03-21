@@ -47,7 +47,6 @@ var ConsoleLogHandler = function(settings) {
     this.metricsOn = settings.metrics||false;
     metricsEnabled = this.metricsOn;
     this.on("log",function(msg) {
-        /* istanbul ignore else */
         if (this.shouldReportMessage(msg.level)) {
             if (msg.level == log.METRIC) {
                 util.log("[metric] "+JSON.stringify(msg));
