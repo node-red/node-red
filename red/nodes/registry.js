@@ -67,23 +67,26 @@ var registry = (function() {
 
         for (var module in moduleConfigs) {
             if (moduleConfigs.hasOwnProperty(module)) {
-                if (!moduleList[module]) {
-                    moduleList[module] = {
-                        name: module,
-                        version: moduleConfigs[module].version,
-                        nodes: {}
-                    };
-                }
-                var nodes = moduleConfigs[module].nodes;
-                for(var node in nodes) {
-                    if (nodes.hasOwnProperty(node)) {
-                        var config = nodes[node];
-                        var n = filterNodeInfo(config);
-                        delete n.loaded;
-                        delete n.err;
-                        delete n.file;
-                        delete n.id;
-                        moduleList[module].nodes[node] = n;
+                if (Object.keys(moduleConfigs[module].nodes).length > 0) {
+                    if (!moduleList[module]) {
+                        moduleList[module] = {
+                            name: module,
+                            version: moduleConfigs[module].version,
+                            nodes: {}
+                        };
+                    }
+                    var nodes = moduleConfigs[module].nodes;
+                    for(var node in nodes) {
+                        if (nodes.hasOwnProperty(node)) {
+                            var config = nodes[node];
+                            var n = filterNodeInfo(config);
+                            delete n.loaded;
+                            delete n.err;
+                            delete n.file;
+                            delete n.id;
+                            n.file = config.file;
+                            moduleList[module].nodes[node] = n;
+                        }
                     }
                 }
             }
@@ -208,6 +211,7 @@ var registry = (function() {
                 infoList.push(registry.removeNode(module+"/"+nodes[i]));
             }
             delete moduleNodes[module];
+            delete moduleConfigs[module];
             saveNodeList();
             return infoList;
         },
@@ -440,6 +444,7 @@ var registry = (function() {
                                 removed = true;
                             }
                         }
+                        delete moduleConfigs[mod];
                     }
                 }
             }
