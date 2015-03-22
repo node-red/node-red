@@ -31,10 +31,11 @@ describe('debug node', function() {
 
 
     it('should be loaded', function(done) {
-        var flow = [{id:"n1", type:"debug", name: "Debug" }];
+        var flow = [{id:"n1", type:"debug", name: "Debug", complete:"false" }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             n1.should.have.property('name', 'Debug');
+            n1.should.have.property('complete', "payload");
             done();
         });
     });
@@ -55,7 +56,7 @@ describe('debug node', function() {
     });
 
     it('should publish to console', function(done) {
-        var flow = [{id:"n1", type:"debug", console: "true" }];
+        var flow = [{id:"n1", type:"debug", console: "true"}];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             var count = 0;

@@ -25,13 +25,10 @@ module.exports = function(RED) {
     function DebugNode(n) {
         RED.nodes.createNode(this,n);
         this.name = n.name;
-        this.complete = n.complete||"payload";
+        this.complete = (n.complete||"payload").toString();
 
         if (this.complete === "false") {
             this.complete = "payload";
-        }
-        if (this.complete === true) {
-            this.complete = "true";
         }
 
         this.console = n.console;

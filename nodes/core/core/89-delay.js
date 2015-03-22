@@ -31,32 +31,29 @@ module.exports = function(RED) {
 
         if (n.timeoutUnits === "milliseconds") {
             this.timeout = n.timeout;
-        } else if (n.timeoutUnits === "seconds") {
-            this.timeout = n.timeout * 1000;
-        } else if (n.timeoutUnits === "minutes") {
+        }  else if (n.timeoutUnits === "minutes") {
             this.timeout = n.timeout * (60 * 1000);
         } else if (n.timeoutUnits === "hours") {
             this.timeout = n.timeout * (60 * 60 * 1000);
         } else if (n.timeoutUnits === "days") {
             this.timeout = n.timeout * (24 * 60 * 60 * 1000);
+        } else {   // Default to seconds
+            this.timeout = n.timeout * 1000;
         }
 
-        if (n.rateUnits === "second") {
-            this.rate = 1000/n.rate;
-        } else if (n.rateUnits === "minute") {
+        if (n.rateUnits === "minute") {
             this.rate = (60 * 1000)/n.rate;
         } else if (n.rateUnits === "hour") {
             this.rate = (60 * 60 * 1000)/n.rate;
         } else if (n.rateUnits === "day") {
             this.rate = (24 * 60 * 60 * 1000)/n.rate;
+        } else {  // Default to seconds
+            this.rate = 1000/n.rate;
         }
 
         if (n.randomUnits === "milliseconds") {
             this.randomFirst = n.randomFirst * 1;
             this.randomLast = n.randomLast * 1;
-        } else if (n.randomUnits === "seconds") {
-            this.randomFirst = n.randomFirst * 1000;
-            this.randomLast = n.randomLast * 1000;
         } else if (n.randomUnits === "minutes") {
             this.randomFirst = n.randomFirst * (60 * 1000);
             this.randomLast = n.randomLast * (60 * 1000);
@@ -66,6 +63,9 @@ module.exports = function(RED) {
         } else if (n.randomUnits === "days") {
             this.randomFirst = n.randomFirst * (24 * 60 * 60 * 1000);
             this.randomLast = n.randomLast * (24 * 60 * 60 * 1000);
+        } else {  // Default to seconds
+            this.randomFirst = n.randomFirst * 1000;
+            this.randomLast = n.randomLast * 1000;
         }
 
         this.diff = this.randomLast - this.randomFirst;

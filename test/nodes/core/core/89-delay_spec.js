@@ -29,26 +29,47 @@ var secondsToHours = 3600;
 var secondsToDays = 86400;
 
 
-describe('delayNode', function() {
-    
+describe('delay Node', function() {
+
     beforeEach(function(done) {
         helper.startServer(done);
     });
-    
+
     afterEach(function(done) {
         helper.unload();
         helper.stopServer(done);
     });
 
     it('should be loaded', function(done) {
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[[]]}];
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","rateUnits":"day","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[[]]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
             delayNode1.should.have.property('name', 'delayNode');
+            delayNode1.should.have.property('rate', 86400000);
             done();
         });
     });
-    
+
+    it('should be able to set rate to hour', function(done) {
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","rateUnits":"hour","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[[]]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            delayNode1.should.have.property('name', 'delayNode');
+            delayNode1.should.have.property('rate', 3600000);
+            done();
+        });
+    });
+
+    it('should be able to set rate to minute', function(done) {
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","rateUnits":"minute","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[[]]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            delayNode1.should.have.property('name', 'delayNode');
+            delayNode1.should.have.property('rate', 60000);
+            done();
+        });
+    });
+
     var TimeUnitEnum = {
             MILLIS : "milliseconds",
             SECONDS : "seconds",
@@ -367,7 +388,7 @@ describe('delayNode', function() {
         randomDelayTest(0.4, 0.8, "seconds", done);
     });
     
-    it(' randomly delays the message in milliseconds', function(done) {
+    it('randomly delays the message in milliseconds', function(done) {
         randomDelayTest("400", "800", "milliseconds", done);
     });
     
@@ -416,5 +437,43 @@ describe('delayNode', function() {
             }
         });
     });
-    
+
+    it('handles delay queue', function(done) {
+        this.timeout(6000);
+
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"queue","timeout":5,"timeoutUnits":"seconds","rate":1000,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var messages = 2;
+            var c = 0;
+
+            helperNode1.on("input", function(msg) {
+                c += 1;
+                msg.should.have.a.property('payload');
+                msg.should.have.a.property('topic');
+                if (msg.topic === "A") {
+                    msg.payload.should.equal(4);
+                }
+                else {
+                    msg.topic.should.equal("_none_");
+                    msg.payload.should.equal(2);
+                }
+                if (c == 2) {
+                    done(); // it will timeout if we don't receive both messages
+                }
+            });
+
+            // send test messages
+            delayNode1.receive({payload:1,topic:"A"});
+            delayNode1.receive({payload:1});
+            delayNode1.receive({payload:2,topic:"A"});
+            delayNode1.receive({payload:3,topic:"A"});
+            delayNode1.receive({payload:2});            // only this should get out
+            delayNode1.receive({payload:4,topic:"A"});  // and this one also
+
+        });
+    });
+
 });

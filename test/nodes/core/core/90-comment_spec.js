@@ -18,7 +18,7 @@ var should = require("should");
 var commentNode = require("../../../../nodes/core/core/90-comment.js");
 var helper = require("../../helper.js");
 
-describe('comment node', function() {
+describe('comment Node', function() {
 
     afterEach(function() {
         helper.unload();
