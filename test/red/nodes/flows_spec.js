@@ -17,11 +17,14 @@
 var should = require("should");
 var sinon = require("sinon");
 var when = require("when");
+var clone = require("clone");
 var flows = require("../../../red/nodes/flows");
 var RedNode = require("../../../red/nodes/Node");
 var RED = require("../../../red/nodes");
 var events = require("../../../red/events");
+var credentials = require("../../../red/nodes/credentials");
 var typeRegistry = require("../../../red/nodes/registry");
+var Flow = require("../../../red/nodes/Flow");
 
 
 var settings = {
@@ -141,24 +144,87 @@ describe('flows', function() {
     });
 
     describe('#setFlows',function() {
-        it('should save and start an empty tab flow',function(done) {
-            var saved = 0;
-            var testFlows = [{"type":"tab","id":"tab1","label":"Sheet 1"}];
-            var storage = {
-                saveFlows: function(conf) {
-                    var defer = when.defer();
-                    defer.resolve();
-                    should.deepEqual(testFlows, conf);
-                    return defer.promise;
-                },
-                saveCredentials: function (creds) {
-                    return when(true);
-                }
-            };
-            RED.init(settings, storage);
-            flows.setFlows(testFlows);
-            events.once('nodes-started', function() { done(); });
+        var credentialsExtact;
+        var credentialsSave;
+        var stopFlows;
+        var startFlows;
+        var credentialsExtractNode;
+        beforeEach(function() {
+            credentialsExtact = sinon.stub(credentials,"extract",function(node) {credentialsExtractNode = clone(node);delete node.credentials;});
+            credentialsSave = sinon.stub(credentials,"save",function() { return when.resolve();});
+            stopFlows = sinon.stub(flows,"stopFlows",function() {return when.resolve();});
+            startFlows = sinon.stub(flows,"startFlows",function() {});
         });
+        afterEach(function() {
+            credentialsExtact.restore();
+            credentialsSave.restore();
+            startFlows.restore();
+            stopFlows.restore();
+        });
+        
+        it('should extract credentials from nodes', function(done) {
+            var testFlow = [{"type":"testNode","credentials":{"a":1}},{"type":"testNode2"}];
+            var resultFlow = clone(testFlow);
+            var storage = { saveFlows: sinon.spy() };
+            flows.init(storage);
+            flows.setFlows(testFlow,"full").then(function() {
+                try {
+                    credentialsExtact.calledOnce.should.be.true;
+                    // credential property stripped
+                    testFlow.should.not.have.property("credentials");
+                    credentialsExtractNode.should.eql(resultFlow[0]);
+                    credentialsExtractNode.should.not.equal(resultFlow[0]);
+                    
+                    credentialsSave.calledOnce.should.be.true;
+                    
+                    storage.saveFlows.calledOnce.should.be.true;
+                    storage.saveFlows.args[0][0].should.eql(testFlow);
+                    
+                    stopFlows.calledOnce.should.be.true;
+                    startFlows.calledOnce.should.be.true;
+                    
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
+        
+        it('should apply diff on partial deployment', function(done) {
+            var testFlow = [{"type":"testNode"},{"type":"testNode2"}];
+            var testFlow2 = [{"type":"testNode3"},{"type":"testNode4"}];
+            var storage = { saveFlows: sinon.spy() };
+            flows.init(storage);
+            
+            flows.setFlows(testFlow,"full").then(function() {
+                flows.setFlows(testFlow2,"nodes").then(function() {
+                    try {
+                        credentialsExtact.called.should.be.false;
+                        
+                        storage.saveFlows.calledTwice.should.be.true;
+                        storage.saveFlows.args[1][0].should.eql(testFlow2);
+                        
+                        stopFlows.calledTwice.should.be.true;
+                        startFlows.calledTwice.should.be.true;
+                        
+                        var configDiff = {
+                            type: 'nodes',
+                            stop: [],
+                            rewire: [],
+                            config: testFlow2
+                        }
+                        stopFlows.args[1][0].should.eql(configDiff);
+                        startFlows.args[1][0].should.eql(configDiff);
+                        
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+            });
+        });
+        
+        
     });
 
 });
