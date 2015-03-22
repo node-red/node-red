@@ -66,6 +66,7 @@ var registry = (function() {
         var moduleList = {};
 
         for (var module in moduleConfigs) {
+            /* istanbul ignore else */
             if (moduleConfigs.hasOwnProperty(module)) {
                 if (Object.keys(moduleConfigs[module].nodes).length > 0) {
                     if (!moduleList[module]) {
@@ -77,6 +78,7 @@ var registry = (function() {
                     }
                     var nodes = moduleConfigs[module].nodes;
                     for(var node in nodes) {
+                        /* istanbul ignore else */
                         if (nodes.hasOwnProperty(node)) {
                             var config = nodes[node];
                             var n = filterNodeInfo(config);
@@ -109,6 +111,7 @@ var registry = (function() {
             // Migrate from the 0.9.1 format of settings
             var newConfigs = {};
             for (var id in configs) {
+                /* istanbul ignore else */
                 if (configs.hasOwnProperty(id)) {
                     var nodeConfig = configs[id];
                     var moduleName;
@@ -220,6 +223,8 @@ var registry = (function() {
             if (nodeTypeToId[typeOrId]) {
                 id = nodeTypeToId[typeOrId];
             }
+            
+            /* istanbul ignore else */
             if (id) {
                 var module = moduleConfigs[getModule(id)];
                 if (module) {
@@ -234,9 +239,11 @@ var registry = (function() {
         getNodeList: function() {
             var list = [];
             for (var module in moduleConfigs) {
+                /* istanbul ignore else */
                 if (moduleConfigs.hasOwnProperty(module)) {
                     var nodes = moduleConfigs[module].nodes;
                     for (var node in nodes) {
+                        /* istanbul ignore else */
                         if (nodes.hasOwnProperty(node)) {
                             list.push(filterNodeInfo(nodes[node]));
                         }
@@ -248,6 +255,7 @@ var registry = (function() {
         getModuleList: function() {
             var list = [];
             for (var module in moduleNodes) {
+                /* istanbul ignore else */
                 if (moduleNodes.hasOwnProperty(module)) {
                     var nodes = moduleNodes[module];
                     var m = {
@@ -307,14 +315,14 @@ var registry = (function() {
                     var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
                     if (config.enabled && !config.err) {
                         result += config.config;
-                        script += config.script;
+                        //script += config.script;
                     }
                 }
-                if (script.length > 0) {
-                    result += '<script type="text/javascript">';
-                    result += UglifyJS.minify(script, {fromString: true}).code;
-                    result += '</script>';
-                }
+                //if (script.length > 0) {
+                //    result += '<script type="text/javascript">';
+                //    result += UglifyJS.minify(script, {fromString: true}).code;
+                //    result += '</script>';
+                //}
                 nodeConfigCache = result;
             }
             return nodeConfigCache;
@@ -328,9 +336,9 @@ var registry = (function() {
             config = config.nodes[getNode(id)];
             if (config) {
                 var result = config.config;
-                if (config.script) {
-                    result += '<script type="text/javascript">'+config.script+'</script>';
-                }
+                //if (config.script) {
+                //    result += '<script type="text/javascript">'+config.script+'</script>';
+                //}
                 return result;
             } else {
                 return null;
@@ -422,12 +430,14 @@ var registry = (function() {
         cleanModuleList: function() {
             var removed = false;
             for (var mod in moduleConfigs) {
+                /* istanbul ignore else */
                 if (moduleConfigs.hasOwnProperty(mod)) {
                     var nodes = moduleConfigs[mod].nodes;
                     var node;
                     if (mod == "node-red") {
                         // For core nodes, look for nodes that are enabled, !loaded and !errored
                         for (node in nodes) {
+                            /* istanbul ignore else */
                             if (nodes.hasOwnProperty(node)) {
                                 var n = nodes[node];
                                 if (n.enabled && !n.err && !n.loaded) {
@@ -439,6 +449,7 @@ var registry = (function() {
                     } else if (moduleConfigs[mod] && !moduleNodes[mod]) {
                         // For node modules, look for missing ones
                         for (node in nodes) {
+                            /* istanbul ignore else */
                             if (nodes.hasOwnProperty(node)) {
                                 registry.removeNode(mod+"/"+node);
                                 removed = true;
@@ -577,6 +588,7 @@ function loadNodesFromModule(moduleDir,pkg) {
     var results = [];
     var iconDirs = [];
     for (var n in nodes) {
+        /* istanbul ignore else */
         if (nodes.hasOwnProperty(n)) {
             var file = path.join(moduleDir,nodes[n]);
             try {
@@ -649,8 +661,7 @@ function loadNodeConfig(file,module,name,version) {
         node.config = content;
 
         // TODO: parse out the javascript portion of the template
-        node.script = "";
-
+        //node.script = "";
         for (var i=0;i<node.types.length;i++) {
             if (registry.getTypeId(node.types[i])) {
                 node.err = node.types[i]+" already registered";
