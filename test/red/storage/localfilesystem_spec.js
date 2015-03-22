@@ -41,7 +41,55 @@ describe('LocalFileSystem', function() {
             done(err);
         });
     });
-
+    
+    
+    it('should set userDir to NRH is .config.json present',function(done) {
+        var oldNRH = process.env.NODE_RED_HOME;
+        process.env.NODE_RED_HOME = path.join(userDir,"NRH");
+        fs.mkdirSync(process.env.NODE_RED_HOME);
+        fs.writeFileSync(path.join(process.env.NODE_RED_HOME,".config.json"),"{}","utf8");
+        var settings = {};
+        localfilesystem.init(settings).then(function() {
+            try {
+                fs.existsSync(path.join(process.env.NODE_RED_HOME,"lib")).should.be.true;
+                fs.existsSync(path.join(process.env.NODE_RED_HOME,"lib",'flows')).should.be.true;
+                settings.userDir.should.equal(process.env.NODE_RED_HOME);
+                done();
+            } catch(err) {
+                done(err);
+            } finally {
+                process.env.NODE_RED_HOME = oldNRH;
+            }
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+    
+    it('should set userDir to HOME/.node-red',function(done) {
+        var oldNRH = process.env.NODE_RED_HOME;
+        process.env.NODE_RED_HOME = path.join(userDir,"NRH");
+        var oldHOME = process.env.HOME;
+        process.env.HOME = path.join(userDir,"HOME");
+        
+        fs.mkdirSync(process.env.HOME);
+        var settings = {};
+        localfilesystem.init(settings).then(function() {
+            try {
+                fs.existsSync(path.join(process.env.HOME,".node-red","lib")).should.be.true;
+                fs.existsSync(path.join(process.env.HOME,".node-red","lib",'flows')).should.be.true;
+                settings.userDir.should.equal(path.join(process.env.HOME,".node-red"));
+                done();
+            } catch(err) {
+                done(err);
+            } finally {
+                process.env.NODE_RED_HOME = oldNRH;
+                process.env.HOME = oldHOME;
+            }
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+    
     it('should handle missing flow file',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             var flowFile = 'flows_'+require('os').hostname()+'.json';
@@ -108,7 +156,28 @@ describe('LocalFileSystem', function() {
             done(err);
         });
     });
-
+    
+    it('should format the flows file when flowFilePretty specified',function(done) {
+        var flowFile = 'test.json';
+        var flowFilePath = path.join(userDir,flowFile);
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath,flowFilePretty:true}).then(function() {
+            localfilesystem.saveFlows(testFlow).then(function() {
+                var content = fs.readFileSync(flowFilePath,"utf8");
+                content.split("\n").length.should.be.above(1);
+                localfilesystem.getFlows().then(function(flows) {
+                    flows.should.eql(testFlow);
+                    done();
+                }).otherwise(function(err) {
+                    done(err);
+                });
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+    
     it('should backup the flows file', function(done) {
         var defaultFlowFile = 'flows_'+require('os').hostname()+'.json';
         var defaultFlowFilePath = path.join(userDir,defaultFlowFile);
@@ -197,6 +266,179 @@ describe('LocalFileSystem', function() {
         });
     });
 
+    
+    it('should backup existing credentials', function(done) {
+        var flowFile = 'test.json';
+        var flowFilePath = path.join(userDir,flowFile);
+        var credFile = path.join(userDir,"test_cred.json");
+        var credFileBackup = path.join(userDir,".test_cred.json.backup");
+
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}).then(function() {
+
+            fs.writeFileSync(credFile,"{}","utf8");
+            
+            fs.existsSync(credFile).should.be.true;
+            fs.existsSync(credFileBackup).should.be.false;
+
+            var credentials = {"abc":{"type":"creds"}};
+
+            localfilesystem.saveCredentials(credentials).then(function() {
+                fs.existsSync(credFile).should.be.true;
+                fs.existsSync(credFileBackup).should.be.true;
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+    
+    
+    it('should format the creds file when flowFilePretty specified',function(done) {
+        var flowFile = 'test.json';
+        var flowFilePath = path.join(userDir,flowFile);
+        var credFile = path.join(userDir,"test_cred.json");
+
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath, flowFilePretty:true}).then(function() {
+
+            fs.existsSync(credFile).should.be.false;
+
+            var credentials = {"abc":{"type":"creds"}};
+
+            localfilesystem.saveCredentials(credentials).then(function() {
+                fs.existsSync(credFile).should.be.true;
+                var content = fs.readFileSync(credFile,"utf8");
+                content.split("\n").length.should.be.above(1);
+                localfilesystem.getCredentials().then(function(creds) {
+                    creds.should.eql(credentials);
+                    done();
+                }).otherwise(function(err) {
+                    done(err);
+                });
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+    
+    it('should handle non-existent settings', function(done) {
+        var settingsFile = path.join(userDir,".settings.json");
+
+        localfilesystem.init({userDir:userDir}).then(function() {
+            fs.existsSync(settingsFile).should.be.false;
+            localfilesystem.getSettings().then(function(settings) {
+                settings.should.eql({});
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+    
+    it('should handle corrupt settings', function(done) {
+        var settingsFile = path.join(userDir,".config.json");
+        fs.writeFileSync(settingsFile,"[This is not json","utf8");
+        localfilesystem.init({userDir:userDir}).then(function() {
+            fs.existsSync(settingsFile).should.be.true;
+            localfilesystem.getSettings().then(function(settings) {
+                settings.should.eql({});
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+    
+    it('should handle settings', function(done) {
+        var settingsFile = path.join(userDir,".config.json");
+
+        localfilesystem.init({userDir:userDir}).then(function() {
+            fs.existsSync(settingsFile).should.be.false;
+
+            var settings = {"abc":{"type":"creds"}};
+
+            localfilesystem.saveSettings(settings).then(function() {
+                fs.existsSync(settingsFile).should.be.true;
+                localfilesystem.getSettings().then(function(_settings) {
+                    _settings.should.eql(settings);
+                    done();
+                }).otherwise(function(err) {
+                    done(err);
+                });
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+    
+    it('should handle non-existent sessions', function(done) {
+        var sessionsFile = path.join(userDir,".sessions.json");
+
+        localfilesystem.init({userDir:userDir}).then(function() {
+            fs.existsSync(sessionsFile).should.be.false;
+            localfilesystem.getSessions().then(function(sessions) {
+                sessions.should.eql({});
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+        
+    it('should handle corrupt sessions', function(done) {
+        var sessionsFile = path.join(userDir,".sessions.json");
+        fs.writeFileSync(sessionsFile,"[This is not json","utf8");
+        localfilesystem.init({userDir:userDir}).then(function() {
+            fs.existsSync(sessionsFile).should.be.true;
+            localfilesystem.getSessions().then(function(sessions) {
+                sessions.should.eql({});
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+
+    it('should handle sessions', function(done) {
+        var sessionsFile = path.join(userDir,".sessions.json");
+
+        localfilesystem.init({userDir:userDir}).then(function() {
+            fs.existsSync(sessionsFile).should.be.false;
+
+            var sessions = {"abc":{"type":"creds"}};
+
+            localfilesystem.saveSessions(sessions).then(function() {
+                fs.existsSync(sessionsFile).should.be.true;
+                localfilesystem.getSessions().then(function(_sessions) {
+                    _sessions.should.eql(sessions);
+                    done();
+                }).otherwise(function(err) {
+                    done(err);
+                });
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+    
+    
+    
+    
     it('should return an empty list of library flows',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             localfilesystem.getAllFlows().then(function(flows) {
