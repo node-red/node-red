@@ -45,7 +45,7 @@ function init(_server,_settings) {
 
 function start() {
     return storage.init(settings)
-        .then(settings.load(storage))
+        .then(function() { return settings.load(storage)})
         .then(function() {
             if (settings.httpAdminRoot !== false) {
                 require("./api").init(app,storage);
