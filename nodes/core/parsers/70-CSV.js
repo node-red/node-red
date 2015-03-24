@@ -18,7 +18,7 @@ module.exports = function(RED) {
     "use strict";
     function CSVNode(n) {
         RED.nodes.createNode(this,n);
-        this.template = n.temp.split(",");
+        this.template = (n.temp || "").split(",");
         this.sep = (n.sep || ',').replace("\\t","\t").replace("\\n","\n").replace("\\r","\r");
         this.quo = '"';
         this.ret = (n.ret || "\n").replace("\\n","\n").replace("\\r","\r");
@@ -104,7 +104,7 @@ module.exports = function(RED) {
                                 if (line[i] === node.quo) { // if it's a quote toggle inside or outside
                                     f = !f;
                                     if (line[i-1] === node.quo) { k[j] += '\"'; } // if it's a quotequote then it's actually a quote
-                                    if ((line[i-1] !== node.sep) && (line[i+1] !== node.sep)) { k[j] += line[i]; }
+                                    //if ((line[i-1] !== node.sep) && (line[i+1] !== node.sep)) { k[j] += line[i]; }
                                 }
                                 else if ((line[i] === node.sep) && f) { // if we are outside of quote (ie valid separator
                                     if (!node.goodtmpl) { node.template[j] = "col"+(j+1); }
@@ -117,6 +117,7 @@ module.exports = function(RED) {
                                 }
                                 else if (f && ((line[i] === "\n") || (line[i] === "\r"))) { // handle multiple lines
                                     //console.log(j,k,o,k[j]);
+                                    if (!node.goodtmpl) { node.template[j] = "col"+(j+1); }
                                     if ( node.template[j] && (node.template[j] !== "") && (k[j] !== "") ) {
                                         if ( (k[j].charAt(0) !== "+") && !isNaN(Number(k[j])) ) { k[j] = Number(k[j]); }
                                         else { k[j].replace(/\r$/,''); }
@@ -164,6 +165,7 @@ module.exports = function(RED) {
                 }
                 else { node.warn("This node only handles csv strings or js objects."); }
             }
+            else { node.send(msg); } // If no payload - just pass it on.
         });
     }
     RED.nodes.registerType("csv",CSVNode);
