@@ -18,12 +18,14 @@ var should = require("should");
 var path = require('path');
 var fs = require('fs-extra');
 var mkdirp = require('mkdirp');
+var sinon = require('sinon');
 
 var tailNode = require("../../../../nodes/core/storage/28-tail.js");
 var helper = require("../../helper.js");
 
-describe('TailNode', function() {
+describe('tail Node', function() {
 
+    var wait = 150;
     var resourcesDir = path.join(__dirname,"..","..","..","resources");
     var fileToTail = path.join(resourcesDir,"28-tail-test-file.txt");
 
@@ -48,7 +50,7 @@ describe('TailNode', function() {
         });
     });
 
-    it('tail should tail a file', function(done) {
+    it('should tail a file', function(done) {
         var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail, "wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(tailNode, flow, function() {
@@ -66,11 +68,11 @@ describe('TailNode', function() {
             setTimeout( function() {
                 fs.appendFileSync(fileToTail, "Tail message line 3\n");
                 fs.appendFileSync(fileToTail, "Tail message line 4\n");
-            },100);
+            },wait);
         });
     });
 
-    it('tail should work in non-split mode', function(done) {
+    it('should work in non-split mode', function(done) {
         var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":false, "filename":fileToTail, "wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(tailNode, flow, function() {
@@ -84,11 +86,11 @@ describe('TailNode', function() {
             });
             setTimeout( function() {
                 fs.appendFileSync(fileToTail, "Tail message line 5\nTail message line 6\n");
-            },150);
+            },wait);
         });
     });
 
-    it('tail should handle a non-existent file', function(done) {
+    it('should handle a non-existent file', function(done) {
         fs.unlinkSync(fileToTail);
         var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail, "wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
@@ -101,10 +103,22 @@ describe('TailNode', function() {
                 done();
             });
             setTimeout( function() {
-                fs.writeFileSync(fileToTail, "Tail message line\n");
-            },150);
+                fs.writeFile(fileToTail, "Tail message line\n");
+            },wait);
         });
     });
+
+    it('should throw an error if run on Windows', function(done) {
+        // Stub os platform so we can make it look like windows
+        var os = require('os');
+        var spy = sinon.stub(os, 'platform', function(arg){ return("windows"); });
+
+        /*jshint immed: false */
+        (function() { tailNode("1234"); }).should.throw();
+        os.platform.restore();
+        done();
+    });
+
     /*
     it('tail should handle file truncation', function(done) {
         var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail, "wires":[["helperNode1"]]},
@@ -130,7 +144,7 @@ describe('TailNode', function() {
                 } else {
                     msg.payload.should.equal("Tail message line append "+inputCounter);
                 }
-                
+
                 if (inputCounter === 5) {
                     setTimeout(function() {
                         warned.should.be.true;
@@ -145,7 +159,7 @@ describe('TailNode', function() {
                 function() { fs.appendFileSync(fileToTail, "Tail message line append 4\n");},
                 function() { fs.appendFileSync(fileToTail, "Tail message line append 5\n");}
             ];
-            
+
             function processAction() {
                 var action = actions.shift();
                 action();
@@ -157,7 +171,7 @@ describe('TailNode', function() {
             }
             setTimeout( function() {
                 processAction();
-            },150);
+            },wait);
         });
     });
     */

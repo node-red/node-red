@@ -21,7 +21,7 @@ var helper = require("../../helper.js");
 describe('XML node', function() {
 
     before(function(done) {
-        helper.startServer(done);   
+        helper.startServer(done);
     });
 
     afterEach(function() {
@@ -117,6 +117,21 @@ describe('XML node', function() {
                     done(err);
                 }
             },200);
+        });
+    });
+
+    it('should just pass through if payload is missing', function(done) {
+        var flow = [{id:"n1",type:"xml",wires:[["n2"]],func:"return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(xmlNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.not.have.property('payload');
+                done();
+            });
+            n1.receive({topic: "bar"});
         });
     });
 

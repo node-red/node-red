@@ -31,15 +31,15 @@ module.exports = function(RED) {
                     catch(e) { node.error(e.message,msg); }
                 }
                 else if (typeof msg.payload === "object") {
-                    if (!Buffer.isBuffer(msg.payload) ) {
-                        if (!util.isArray(msg.payload)) {
-                            msg.payload = JSON.stringify(msg.payload);
-                            node.send(msg);
-                        }
+                    if ((!Buffer.isBuffer(msg.payload)) && (!util.isArray(msg.payload))) {
+                        msg.payload = JSON.stringify(msg.payload);
+                        node.send(msg);
                     }
+                    else { node.warn("Dropped: "+msg.payload); }
                 }
-                else { node.warn("dropped: "+msg.payload); }
+                else { node.warn("Dropped: "+msg.payload); }
             }
+            else { node.send(msg); } // If no payload - just pass it on.
         });
     }
     RED.nodes.registerType("json",JSONNode);

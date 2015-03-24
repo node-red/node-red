@@ -25,35 +25,39 @@ module.exports = function(RED) {
         this.as = n.as || "single";
         var node = this;
         this.on("input", function(msg) {
-            try {
-                var $ = cheerio.load(msg.payload);
-                var pay = [];
-                $(node.tag).each(function() {
-                    if (node.as === "multi") {
-                        var pay2 = null;
-                        if (node.ret === "html") { pay2 = $(this).html(); }
-                        if (node.ret === "text") { pay2 = $(this).text(); }
-                        //if (node.ret === "attr") { pay2 = $(this)[0]["attribs"]; }
-                        //if (node.ret === "val")  { pay2 = $(this).val(); }
-                        if (pay2) {
-                            msg.payload = pay2;
-                            node.send(msg);
+            if (msg.hasOwnProperty("payload")) {
+                try {
+                    var $ = cheerio.load(msg.payload);
+                    var pay = [];
+                    $(node.tag).each(function() {
+                        if (node.as === "multi") {
+                            var pay2 = null;
+                            if (node.ret === "html") { pay2 = $(this).html(); }
+                            if (node.ret === "text") { pay2 = $(this).text(); }
+                            //if (node.ret === "attr") { pay2 = $(this)[0]["attribs"]; }
+                            //if (node.ret === "val")  { pay2 = $(this).val(); }
+                            /* istanbul ignore else */
+                            if (pay2) {
+                                msg.payload = pay2;
+                                node.send(msg);
+                            }
                         }
+                        if (node.as === "single") {
+                            if (node.ret === "html") { pay.push( $(this).html() ); }
+                            if (node.ret === "text") { pay.push( $(this).text() ); }
+                            //if (node.ret === "attr") { pay.push( $(this)[0]["attribs"] ); }
+                            //if (node.ret === "val")  { pay.push( $(this).val() ); }
+                        }
+                    });
+                    if ((node.as === "single") && (pay.length !== 0)) {
+                        msg.payload = pay;
+                        node.send(msg);
                     }
-                    if (node.as === "single") {
-                        if (node.ret === "html") { pay.push( $(this).html() ); }
-                        if (node.ret === "text") { pay.push( $(this).text() ); }
-                        //if (node.ret === "attr") { pay.push( $(this)[0]["attribs"] ); }
-                        //if (node.ret === "val")  { pay.push( $(this).val() ); }
-                    }
-                });
-                if ((node.as === "single") && (pay.length !== 0)) {
-                    msg.payload = pay;
-                    node.send(msg);
+                } catch (error) {
+                    node.error(error.message,msg);
                 }
-            } catch (error) {
-                node.error(error.message,msg);
             }
+            else { node.send(msg); } // If no payload - just pass it on.
         });
     }
     RED.nodes.registerType("html",CheerioNode);

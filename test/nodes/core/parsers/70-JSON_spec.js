@@ -62,12 +62,11 @@ describe('JSON node', function() {
             var jn1 = helper.getNode("jn1");
             var jn2 = helper.getNode("jn2");
             jn2.on("input", function(msg) {
-                msg.should.have.property('topic', 'bar');
                 should.equal(msg.payload, '{"employees":[{"firstName":"John","lastName":"Smith"}]}');
                 done();
             });
             var obj = {employees:[{firstName:"John", lastName:"Smith"}]};
-            jn1.receive({payload:obj,topic: "bar"});
+            jn1.receive({payload:obj});
         });
     });
     
@@ -96,20 +95,48 @@ describe('JSON node', function() {
         var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
                     {id:"jn2", type:"helper"}];
         helper.load(jsonNode, flow, function() {
-            try {
-                var jn1 = helper.getNode("jn1");
-                var jn2 = helper.getNode("jn2");
-                jn1.receive({payload:1,topic: "bar"});
-                var logEvents = helper.log().args.filter(function(evt) {
-                    return evt[0].type == "json";
-                });
-                logEvents.should.have.length(1);
-                logEvents[0][0].should.have.a.property('msg',"dropped: 1");
-                done();
-            } catch(err) {
-                done(err);
-            }
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            setTimeout(function() {
+                try {
+                    var logEvents = helper.log().args.filter(function(evt) {
+                        return evt[0].type == "json";
+                    });
+                    //console.log(logEvents);
+                    logEvents.should.have.length(4);
+                    logEvents[0][0].should.have.a.property('msg');
+                    logEvents[0][0].msg.toString().should.startWith('Dropped: ');
+                    logEvents[1][0].should.have.a.property('msg');
+                    logEvents[1][0].msg.toString().should.startWith('Dropped: ');
+                    logEvents[2][0].should.have.a.property('msg');
+                    logEvents[2][0].msg.toString().should.startWith('Dropped: ');
+                    logEvents[3][0].should.have.a.property('msg');
+                    logEvents[3][0].msg.toString().should.startWith('Dropped: ');
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            },150);
+            jn1.receive({payload:true});
+            jn1.receive({payload:1});
+            jn1.receive({payload:["a"]});
+            jn1.receive({payload:new Buffer("a")});
         });
     });
-    
+
+    it('should pass straight through if no payload set', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.not.have.property('payload');
+                done();
+            });
+            jn1.receive({topic: "bar"});
+        });
+    });
+
 });

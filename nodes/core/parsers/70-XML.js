@@ -42,6 +42,7 @@ module.exports = function(RED) {
                 }
                 else { node.warn("This node only handles xml strings or js objects."); }
             }
+            else { node.send(msg); } // If no payload - just pass it on.
         });
     }
     RED.nodes.registerType("xml",XMLNode);
