@@ -44,6 +44,7 @@
     of the defined rules. The message is then sent to the output of <i>all</i>
     rules that pass.</p>
     <p>Note: the <i>otherwise</i> rule applies as a "not any of" the rules preceding it.</p>
+    <p>Note: Regular Expressions will be put into 'new RegExp( val )' and should not have leading/trailing '/'s. Insenstive RegEx passes in the 'i' flag as the second parameter.</p>
 </script>
 
 <script type="text/javascript">
@@ -75,6 +76,7 @@
                 {v:"btwn",t:"is between"},
                 {v:"cont",t:"contains"},
                 {v:"regex",t:"matches regex"},
+                {v:"iregex",t:"matches iregex"},
                 {v:"true",t:"is true"},
                 {v:"false",t:"is false"},
                 {v:"null",t:"is null"},

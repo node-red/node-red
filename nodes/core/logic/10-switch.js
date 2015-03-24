@@ -26,6 +26,7 @@ module.exports = function(RED) {
         'btwn': function(a, b, c) { return a >= b && a <= c; },
         'cont': function(a, b) { return (a + "").indexOf(b) != -1; },
         'regex': function(a, b) { return (a + "").match(new RegExp(b)); },
+        'iregex': function(a, b) { return (a + "").match(new RegExp(b,'i')); },
         'true': function(a) { return a === true; },
         'false': function(a) { return a === false; },
         'null': function(a) { return typeof a == "undefined"; },
