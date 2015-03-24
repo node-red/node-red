@@ -22,7 +22,7 @@ var helper = require("../../helper.js");
 var Log = require("../../../../red/log.js");
 
 
-describe('ChangeNode', function() {
+describe('change Node', function() {
 
     beforeEach(function(done) {
         helper.startServer(done);
@@ -33,7 +33,34 @@ describe('ChangeNode', function() {
         helper.stopServer(done);
     });
 
+    it('should load node with defaults', function(done) {
+        var flow = [{ id: "c1", type: "change", name:"change1" }];
+        helper.load(changeNode, flow, function() {
+            helper.getNode("c1").should.have.property("name", "change1");
+            helper.getNode("c1").should.have.property("rules", [{t:undefined,p:''}]);
+            done();
+        });
+    });
+    it('should load defaults if set to replace', function(done) {
+        var flow = [{ id: "c1", type: "change", name:"change1", action:"replace" }];
+        helper.load(changeNode, flow, function() {
+            helper.getNode("c1").should.have.property("name", "change1");
+            helper.getNode("c1").should.have.property("rules", [ { p: '', t: 'set', to: '' } ]);
+            done();
+        });
+    });
+    it('should load defaults if set to change', function(done) {
+        var flow = [{ id: "c1", type: "change", name:"change1", action:"change"  }];
+        helper.load(changeNode, flow, function() {
+            //console.log(helper.getNode("c1"));
+            helper.getNode("c1").should.have.property("name", "change1");
+            helper.getNode("c1").should.have.property("rules", [ { from: /(?:)/g, p: '', re: undefined, t: 'change', to: '' } ]);
+            done();
+        });
+    });
+
     describe('#replace' , function() {
+
         it('sets the value of the message property', function(done) {
             var flow = [{"id":"changeNode1","type":"change","action":"replace","property":"payload","from":"","to":"changed","reg":false,"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
@@ -336,7 +363,7 @@ describe('ChangeNode', function() {
                 msg.should.have.property('level', helper.log().ERROR);
                 msg.should.have.property('id', 'changeNode1');
                 done();
-            
+
             });
         });
     });
@@ -417,7 +444,7 @@ describe('ChangeNode', function() {
         });
     });
     describe('- multiple rules', function() {
-            
+
         it('handles multiple rules', function(done) {
             var flow = [{"id":"changeNode1","type":"change","wires":[["helperNode1"]],
                         rules:[
@@ -470,7 +497,6 @@ describe('ChangeNode', function() {
                 });
             });
         });
-    
-    });
-});    
 
+    });
+});

@@ -35,10 +35,10 @@ module.exports = function(RED) {
 
     function SwitchNode(n) {
         RED.nodes.createNode(this, n);
-        this.rules = n.rules;
+        this.rules = n.rules || [];
         this.property = n.property;
         this.checkall = n.checkall || "true";
-        var propertyParts = n.property.split(".");
+        var propertyParts = (n.property || "payload").split(".");
         var node = this;
 
         for (var i=0; i<this.rules.length; i+=1) {

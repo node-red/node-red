@@ -19,26 +19,28 @@ var should = require("should");
 var switchNode = require("../../../../nodes/core/logic/10-switch.js");
 var helper = require("../../helper.js");
 
-describe('SwitchNode', function() {
-    
+describe('switch Node', function() {
+
     beforeEach(function(done) {
         helper.startServer(done);
     });
-    
+
     afterEach(function(done) {
         helper.unload();
         helper.stopServer(done);
     });
-    
-    it('should be loaded', function(done) {
-        var flow = [{"id":"switchNode1","type":"switch","name":"switchNode","property":"payload","rules":[{"t":"eq","v":""}],"checkall":"true","outputs":1,"wires":[[]]}];
+
+    it('should be loaded with some defaults', function(done) {
+        var flow = [{"id":"switchNode1","type":"switch","name":"switchNode"}];
         helper.load(switchNode, flow, function() {
             var switchNode1 = helper.getNode("switchNode1");
             switchNode1.should.have.property('name', 'switchNode');
+            switchNode1.should.have.property('checkall', "true");
+            switchNode1.should.have.property('rules', []);
             done();
         });
     });
-    
+
     /**
      * Test a switch node where one argument is consumed by the rule (such as greater than).
      * @param rule - the switch rule (see 10-switc.js) string we're using

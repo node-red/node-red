@@ -19,8 +19,8 @@ var should = require("should");
 var rangeNode = require("../../../../nodes/core/logic/16-range.js");
 var helper = require("../../helper.js");
 
-describe('RangeNode', function() {
-    
+describe('range Node', function() {
+
     beforeEach(function(done) {
         helper.startServer(done);
     });
@@ -30,11 +30,12 @@ describe('RangeNode', function() {
         helper.stopServer(done);
     });
 
-    it('should be loaded', function(done) {
-        var flow = [{"id":"rangeNode1","type":"range","minin":"0","maxin":"99","minout":"100","maxout":"199","action":"range","round":true,"name":"rangeNode","wires":[[]]}];
+    it('should load some defaults', function(done) {
+        var flow = [{"id":"rangeNode1","type":"range","name":"rangeNode"}];
         helper.load(rangeNode, flow, function() {
             var rangeNode1 = helper.getNode("rangeNode1");
             rangeNode1.should.have.property('name', 'rangeNode');
+            rangeNode1.should.have.property('round', false);
             done();
         });
     });
@@ -45,7 +46,7 @@ describe('RangeNode', function() {
      * @param minin - map from minimum value
      * @param maxin - map from maximum value
      * @param minout - map to minimum value
-     * @param maxout - map to maximum value 
+     * @param maxout - map to maximum value
      * @param round - whether to round the result to the nearest integer
      * @param aPayload - what payload to send to the range node
      * @param expectedResult - what result we're expecting
