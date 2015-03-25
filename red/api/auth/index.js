@@ -74,9 +74,12 @@ function getToken(req,res,next) {
 }
 
 function login(req,res) {
-    var response = {
-        "type":"credentials",
-        "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"}]
+    var response = {};
+    if (settings.adminAuth) {
+        response = {
+            "type":"credentials",
+            "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"}]
+        }
     }
     res.json(response);
 }

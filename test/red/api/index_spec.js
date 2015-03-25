@@ -51,11 +51,6 @@ describe("api index", function() {
                 .get("/settings")
                 .expect(200,done)
         });
-        it('does not serve auth', function(done) {
-            request(app)
-                .get("/auth/login")
-                .expect(404,done)
-        });
     });
 
     describe("can serve auth", function() {

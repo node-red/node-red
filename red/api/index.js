@@ -51,6 +51,8 @@ function init(adminApp,storage) {
 
     adminApp.use(express.json());
     adminApp.use(express.urlencoded());
+
+    adminApp.get("/auth/login",auth.login);
     
     if (settings.adminAuth) {
         //TODO: all passport references ought to be in ./auth
@@ -61,7 +63,6 @@ function init(adminApp,storage) {
             auth.getToken,
             auth.errorHandler
         );
-        adminApp.get("/auth/login",auth.login);
         adminApp.post("/auth/revoke",auth.revoke);
     }
 

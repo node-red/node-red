@@ -21,6 +21,7 @@ var sinon = require("sinon");
 var passport = require("passport");
 
 var auth = require("../../../../red/api/auth");
+var Users = require("../../../../red/api/auth/users");
 var Tokens = require("../../../../red/api/auth/tokens");
 
 var settings = require("../../../../red/settings");
@@ -71,11 +72,27 @@ describe("api auth middleware",function() {
     });
     
     describe("login", function() {
-        it("returns login details", function(done) {
+        beforeEach(function() {
+            sinon.stub(Tokens,"init",function(){});
+            sinon.stub(Users,"init",function(){});
+        });
+        afterEach(function() {
+            Tokens.init.restore();
+            Users.init.restore();
+        });
+        it("returns login details - credentials", function(done) {
+            auth.init({adminAuth:{}},null);
             auth.login(null,{json: function(resp) {
                 resp.should.have.a.property("type","credentials");
                 resp.should.have.a.property("prompts");
                 resp.prompts.should.have.a.lengthOf(2);
+                done();
+            }});
+        });
+        it("returns login details - none", function(done) {
+            auth.init({},null);
+            auth.login(null,{json: function(resp) {
+                resp.should.eql({});
                 done();
             }});
         });
