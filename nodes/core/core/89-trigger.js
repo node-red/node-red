@@ -23,7 +23,7 @@ module.exports = function(RED) {
         this.op2 = n.op2 || "0";
         this.op1type = n.op1type || "val";
         this.op2type = n.op2type || "val";
-        this.extend = n.extend || false;
+        this.extend = n.extend || "false";
         this.units = n.units || "ms";
         this.duration = n.duration || 250;
         if (this.duration <= 0) { this.duration = 0; }
