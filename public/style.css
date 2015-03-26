@@ -391,13 +391,12 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
     clear: both;
 }
 .palette_label {
-    margin: 4px 0 4px 30px;
+    margin: 4px 0 4px 28px;
     line-height: 20px;
-    text-align: center;
     overflow: hidden;
 }
 .palette_label_right {
-    margin: 4px 30px 4px 0;
+    margin: 4px 28px 4px 0;
 }
 
 .palette_node {
