@@ -29,7 +29,7 @@ var settings = require("../settings");
 module.exports = {
     getAll: function(req,res) {
         if (req.get("accept") == "application/json") {
-            res.json(redNodes.getNodeList());
+            res.json(redNodes.getNodeList().map(function(n) { delete n.loaded; return n }));
         } else {
             res.send(redNodes.getNodeConfigs());
         }

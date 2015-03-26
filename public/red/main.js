@@ -84,12 +84,10 @@ var RED = (function() {
                             m = msg[i];
                             var id = m.id;
                             RED.nodes.addNodeSet(m);
-                            if (m.loaded) {
-                                addedTypes = addedTypes.concat(m.types);
-                                $.get('nodes/'+id, function(data) {
-                                    $("body").append(data);
-                                });
-                            }
+                            addedTypes = addedTypes.concat(m.types);
+                            $.get('nodes/'+id, function(data) {
+                                $("body").append(data);
+                            });
                         }
                         if (addedTypes.length) {
                             typeList = "<ul><li>"+addedTypes.join("</li><li>")+"</li></ul>";
