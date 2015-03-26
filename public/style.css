@@ -394,6 +394,7 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
     margin: 4px 0 4px 28px;
     line-height: 20px;
     overflow: hidden;
+    text-align: center;
 }
 .palette_label_right {
     margin: 4px 28px 4px 0;
