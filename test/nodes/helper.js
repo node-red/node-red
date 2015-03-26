@@ -56,12 +56,12 @@ module.exports = {
         logSpy = sinon.spy(log,"log");
         logSpy.FATAL = log.FATAL;
         logSpy.ERROR = log.ERROR;
-        logSpy.WARN = log.WARN;  
-        logSpy.INFO = log.INFO;   
-        logSpy.DEBUG = log.DEBUG; 
-        logSpy.TRACE = log.TRACE;  
-        logSpy.METRIC = log.METRIC; 
-        
+        logSpy.WARN = log.WARN;
+        logSpy.INFO = log.INFO;
+        logSpy.DEBUG = log.DEBUG;
+        logSpy.TRACE = log.TRACE;
+        logSpy.METRIC = log.METRIC;
+
         if (typeof testCredentials === 'function') {
             cb = testCredentials;
             testCredentials = {};
@@ -94,7 +94,7 @@ module.exports = {
                 testNode[i](RED);
             }
         } else {
-            testNode(RED);            
+            testNode(RED);
         }
         flows.load().then(function() {
             should.deepEqual(testFlows, flows.getFlows());
@@ -138,14 +138,17 @@ module.exports = {
     //TODO consider saving TCP handshake/server reinit on start/stop/start sequences
     stopServer: function(done) {
         if(server) {
-            server.close(done);
+            try {
+                server.close(done);
+            } catch(e) {
+                done();
+            }
         }
     },
 
     url: function() { return url; },
 
     nock: nock,
-    
+
     log: function() { return logSpy;}
 };
-
