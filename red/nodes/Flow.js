@@ -462,8 +462,10 @@ Flow.prototype.typeRegistered = function(type) {
             if (this.missingTypes.length === 0 && this.started) {
                 this.start();
             }
+            return true;
         }
     }
+    return false;
     
 }
 

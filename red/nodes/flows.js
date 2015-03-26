@@ -34,8 +34,7 @@ var activeConfig = [];
 var activeConfigNodes = {};
 
 events.on('type-registered',function(type) {
-    if (activeFlow) {
-        activeFlow.typeRegistered(type);
+    if (activeFlow && activeFlow.typeRegistered(type)) {
         log.info("Missing type registered: "+type);
     }
 });

@@ -141,11 +141,16 @@ describe('Flow', function() {
                 
                 flow.getMissingTypes().should.eql(["test1","test2"]);
                 
-                flow.typeRegistered("test1");
+                var resp = flow.typeRegistered("a-random-node");
+                resp.should.be.false;
+
+                resp = flow.typeRegistered("test1");
+                resp.should.be.true;
                 flow.getMissingTypes().should.eql(["test2"]);
                 flowStart.called.should.be.false;
     
-                flow.typeRegistered("test2");
+                resp = flow.typeRegistered("test2");
+                resp.should.be.true;
                 flow.getMissingTypes().should.eql([]);
                 flowStart.called.should.be.false;
             } finally {
