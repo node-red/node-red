@@ -814,19 +814,6 @@ function loadNodeList(nodes) {
     });
 }
 
-function addNode(file) {
-    if (!settings.available()) {
-        throw new Error("Settings unavailable");
-    }
-    var nodes = [];
-    try {
-        nodes.push(loadNodeConfig(file,"node-red",path.basename(file).replace(/^\d+-/,"").replace(/\.js$/,""),settings.version));
-    } catch(err) {
-        return when.reject(err);
-    }
-    return loadNodeList(nodes);
-}
-
 function addModule(module) {
     if (!settings.available()) {
         throw new Error("Settings unavailable");
@@ -866,8 +853,6 @@ module.exports = {
     getNodeConfigs: registry.getAllNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
 
-    addNode: addNode,
-    removeNode: registry.removeNode,
     enableNode: registry.enableNodeSet,
     disableNode: registry.disableNodeSet,
 

@@ -42,9 +42,7 @@ module.exports = {
         }
         var node = req.body;
         var promise;
-        if (node.file) {
-            promise = redNodes.addNode(node.file).then(server.reportAddedModules);
-        } else if (node.module) {
+        if (node.module) {
             var module = redNodes.getNodeModuleInfo(node.module);
             if (module) {
                 res.send(400,"Module already loaded");
@@ -116,13 +114,7 @@ module.exports = {
         if (result) {
             res.send(result);
         } else {
-            // check if module is actually a node-set
-            var matching = getMatchingNodes(module);
-            if (matching.length > 0) {
-                res.json(matching);
-            } else {
-                res.send(404);
-            }
+            res.send(404);
         }
     },
 
@@ -164,24 +156,7 @@ module.exports = {
             var mod = req.params.mod;
             var module = redNodes.getModuleInfo(mod);
             if (!module) {
-                var matching = getMatchingNodes(mod);
-                if (matching.length === 1) {
-                    // One match, assume correct
-                    res.json(putNode(matching[0], body.enabled));
-                    return;
-                } else if (matching.length > 1) {
-                    // Multiple matches, need clarification
-                    result = {
-                        multipleMatches: true,
-                        matches: matching
-                    };
-                    res.json(result);
-                    return;
-                } else {
-                    // Doesn't exist
-                    res.send(404);
-                    return;
-                }
+                return res.send(404);
             }
 
             var nodes = module.nodes;
@@ -212,20 +187,6 @@ module.exports = {
         }
     }
 };
-
-function getMatchingNodes(node) {
-    var nodes = redNodes.getNodeList();
-    var matching = [];
-
-    nodes.forEach(function(n) {
-        if (n.name === node) {
-            n.version = redNodes.getModuleVersion(n.module);
-            matching.push(n);
-        }
-    });
-
-    return matching;
-}
 
 function putNode(node, enabled) {
     var info;

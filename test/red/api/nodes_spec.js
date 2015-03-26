@@ -812,63 +812,6 @@ describe("nodes api", function() {
             });
         });
 
-        describe('no-ops if a node specified by type name already in the right state', function() {
-            function run(state,done) {
-                var node = {id:"123",enabled:state,types:['a']};
-                var settingsAvailable = sinon.stub(settings,'available', function() {
-                    return true;
-                });
-                var getModuleInfo = sinon.stub(redNodes,'getModuleInfo',function(id) {
-                    return null;
-                });
-                var enableNode = sinon.stub(redNodes,'enableNode',function(id) {
-                    node.enabled = true;
-                    return node;
-                });
-                var disableNode = sinon.stub(redNodes,'disableNode',function(id) {
-                    node.enabled = false;
-                    return node;
-                });
-                var getNodeList = sinon.stub(redNodes,'getNodeList', function() {
-                    return [{name: 'foo', enabled: state}, {name: 'bar'}];
-                });
-                var getModuleVersion = sinon.stub(redNodes,'getModuleVersion', function() {
-                    return '0.0.1';
-                });
-
-                request(app)
-                    .put('/nodes/foo')
-                    .send({enabled:state})
-                    .expect(200)
-                    .end(function(err,res) {
-                        settingsAvailable.restore();
-                        getModuleInfo.restore();
-                        var enableNodeCalled = enableNode.called;
-                        var disableNodeCalled = disableNode.called;
-                        enableNode.restore();
-                        disableNode.restore();
-                        getNodeList.restore();
-                        getModuleVersion.restore();
-                        if (err) {
-                            throw err;
-                        }
-                        enableNodeCalled.should.be.false;
-                        disableNodeCalled.should.be.false;
-                        res.body.should.have.property("name","foo");
-                        res.body.should.have.property("version");
-                        res.body.should.have.property("enabled",state);
-
-                        done();
-                    });
-            }
-            it('already enabled', function(done) {
-                run(true,done);
-            });
-            it('already disabled', function(done) {
-                run(false,done);
-            });
-        });
-
         describe('does not no-op if err on a node in module', function() {
             function run(state,done) {
                 var node = {id:"123",enabled:state,types:['a'],err:"foo"};
