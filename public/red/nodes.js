@@ -260,7 +260,24 @@ RED.nodes = (function() {
         return {nodes:removedNodes,links:removedLinks};
     }
 
-    function addSubflow(sf) {
+    function addSubflow(sf, createNewIds) {
+        if (createNewIds) {
+            var subflowNames = Object.keys(subflows).map(function(sfid) {
+                return subflows[sfid].name;
+            });
+            
+            subflowNames.sort();
+            var copyNumber = 1;
+            var subflowName = sf.name;
+            subflowNames.forEach(function(name) {
+                if (subflowName == name) {
+                    copyNumber++;
+                    subflowName = sf.name+" ("+copyNumber+")";
+                }
+            });
+            sf.name = subflowName;
+        }
+        
         subflows[sf.id] = sf;
         RED.nodes.registerType("subflow:"+sf.id, {
             defaults:{name:{value:""}},
@@ -612,7 +629,7 @@ RED.nodes = (function() {
                     output.id = getID();
                 });
                 new_subflows.push(n);
-                addSubflow(n);
+                addSubflow(n,createNewIds);
             } else {
                 def = registry.getNodeType(n.type);
                 if (def && def.category == "config") {
