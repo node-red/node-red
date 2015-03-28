@@ -186,6 +186,15 @@ RED.palette = (function() {
             }
 
             setLabel(nt,$(d),label);
+            
+            var categoryNode = $("#palette-container-"+category);
+            if (categoryNode.find(".palette_node").length === 1) {
+                if (!categoryNode.find("i").hasClass("expanded")) {
+                    categoryNode.find(".palette-content").slideToggle();
+                    categoryNode.find("i").toggleClass("expanded");
+                }
+            }
+            
         }
     }
 
