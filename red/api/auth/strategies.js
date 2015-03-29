@@ -24,6 +24,7 @@ var util = require("util");
 var Tokens = require("./tokens");
 var Users = require("./users");
 var Clients = require("./clients");
+var permissions = require("./permissions");
 
 var bearerStrategy = function (accessToken, done) {
     // is this a valid token?
@@ -79,13 +80,17 @@ var passwordTokenExchange = function(client, username, password, scope, done) {
 
     Users.authenticate(username,password).then(function(user) {
         if (user) {
-            loginAttempts = loginAttempts.filter(function(logEntry) {
-                return logEntry.user !== username;
-            });
-            Tokens.create(username,client.id,scope).then(function(tokens) {
-                // TODO: audit log
-                done(null,tokens.accessToken);
-            });
+            if (permissions.hasPermission(user,scope)) {
+                loginAttempts = loginAttempts.filter(function(logEntry) {
+                    return logEntry.user !== username;
+                });
+                Tokens.create(username,client.id,scope).then(function(tokens) {
+                    // TODO: audit log
+                    done(null,tokens.accessToken);
+                });
+            } else {
+                done(null,false);
+            }
         } else {
             // TODO: audit log
             done(null,false);

@@ -19,17 +19,36 @@ var util = require('util');
 var readRE = /^((.+)\.)?read$/
 var writeRE = /^((.+)\.)?write$/
 
-function hasPermission(user,permission) {
-    if (!user.permissions) {
-        return false;
-    }
-    if (user.permissions == "*") {
+function hasPermission(userScope,permission) {
+    var i;
+    if (util.isArray(userScope)) {
+        if (userScope.length === 0) {
+            return false;
+        }
+        for (i=0;i<userScope.length;i++) {
+            if (!hasPermission(userScope[i],permission)) {
+                return false;
+            }
+        }
         return true;
     }
-    if (user.permissions == "read") {
-        return readRE.test(permission);
+    
+    if (userScope == "*") {
+        return true;
     }
-    else {
+    
+    if (util.isArray(permission)) {
+        for (var i=0;i<permission.length;i++) {
+            if (!hasPermission(userScope,permission[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    if (userScope == "read") {
+        return readRE.test(permission);
+    } else {
         return false; // anything not allowed is disallowed
     }
 }

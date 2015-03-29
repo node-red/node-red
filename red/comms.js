@@ -71,8 +71,8 @@ function start() {
                             handleRemoteSubscription(ws,msg.subscribe);
                         }
                     } else {
-                        var completeConnection = function(user,sendAck) {
-                            if (!user || !Permissions.hasPermission(user,"status.read")) {
+                        var completeConnection = function(userScope,sendAck) {
+                            if (!userScope || !Permissions.hasPermission(userScope,"status.read")) {
                                 ws.close();
                             } else {
                                 pendingAuth = false;
@@ -87,7 +87,7 @@ function start() {
                             Tokens.get(msg.auth).then(function(client) {
                                 if (client) {
                                     Users.get(client.user).then(function(user) {
-                                        completeConnection(user,true);
+                                        completeConnection(client.scope,true);
                                     });
                                 } else {
                                     completeConnection(null,false);

@@ -49,7 +49,7 @@ function needsPermission(permission) {
                 if (!req.user) {
                     return next();
                 }
-                if (permissions.hasPermission(req.user,permission)) {
+                if (permissions.hasPermission(req.authInfo.scope,permission)) {
                     return next();
                 }
                 return res.send(401);
@@ -101,7 +101,7 @@ module.exports = {
     errorHandler: function(err,req,res,next) {
         //TODO: standardize json response
         //TODO: audit log statment
-        //console.log(err.stack);
+        console.log(err.stack);
         //log.log({level:"audit",type:"auth",msg:err.toString()});
         return server.errorHandler()(err,req,res,next);
     },

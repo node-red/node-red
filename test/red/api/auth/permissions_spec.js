@@ -20,20 +20,24 @@ var permissions = require("../../../../red/api/auth/permissions");
 describe("Auth permissions", function() {
     describe("hasPermission", function() {
         it('a user with no permissions',function() {
-            permissions.hasPermission({},"*").should.be.false;
+            permissions.hasPermission([],"*").should.be.false;
         });
         it('a user with global permissions',function() {
-            permissions.hasPermission({permissions:"*"},"read").should.be.true;
-            permissions.hasPermission({permissions:"*"},"write").should.be.true;
+            permissions.hasPermission("*","read").should.be.true;
+            permissions.hasPermission(["*"],"write").should.be.true;
         });
         it('a user with read permissions',function() {
-            permissions.hasPermission({permissions:"read"},"read").should.be.true;
-            permissions.hasPermission({permissions:"read"},"node.read").should.be.true;
-            permissions.hasPermission({permissions:"read"},"write").should.be.false;
-            permissions.hasPermission({permissions:"read"},"node.write").should.be.false;
+            permissions.hasPermission(["read"],"read").should.be.true;
+            permissions.hasPermission(["read"],"node.read").should.be.true;
+            permissions.hasPermission(["read"],"write").should.be.false;
+            permissions.hasPermission(["read"],"node.write").should.be.false;
         });
         it('a user with foo permissions',function() {
-            permissions.hasPermission({permissions:"foo"},"foo").should.be.false;
+            permissions.hasPermission("foo","foo").should.be.false;
+        });
+        it('an array of permissions', function() {
+            permissions.hasPermission(["*"],["foo.read","foo.write"]).should.be.true;
+            permissions.hasPermission("read",["foo.read","foo.write"]).should.be.false;
         });
     });
 });
