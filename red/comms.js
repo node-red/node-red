@@ -87,14 +87,22 @@ function start() {
                             Tokens.get(msg.auth).then(function(client) {
                                 if (client) {
                                     Users.get(client.user).then(function(user) {
-                                        completeConnection(client.scope,true);
+                                        if (user) {
+                                            completeConnection(client.scope,true);
+                                        } else {
+                                            completeConnection(null,false);
+                                        }
                                     });
                                 } else {
                                     completeConnection(null,false);
                                 }
                             });
                         } else {
-                            completeConnection(anonymousUser,false);
+                            if (anonymousUser) {
+                                completeConnection(anonymousUser.permissions,false);
+                            } else {
+                                completeConnection(null,false);
+                            }
                             //TODO: duplicated code - pull non-auth message handling out
                             if (msg.subscribe) {
                                 handleRemoteSubscription(ws,msg.subscribe);

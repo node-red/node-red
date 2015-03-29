@@ -80,7 +80,7 @@ var passwordTokenExchange = function(client, username, password, scope, done) {
 
     Users.authenticate(username,password).then(function(user) {
         if (user) {
-            if (permissions.hasPermission(user,scope)) {
+            if (permissions.hasPermission(user.permissions,scope)) {
                 loginAttempts = loginAttempts.filter(function(logEntry) {
                     return logEntry.user !== username;
                 });
@@ -107,7 +107,7 @@ AnonymousStrategy.prototype.authenticate = function(req) {
     var self = this;
     Users.default().then(function(anon) {
         if (anon) {
-            self.success(anon);
+            self.success(anon,{scope:anon.permissions});
         } else {
             self.fail(401);
         }

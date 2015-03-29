@@ -38,6 +38,7 @@ describe("Auth permissions", function() {
         it('an array of permissions', function() {
             permissions.hasPermission(["*"],["foo.read","foo.write"]).should.be.true;
             permissions.hasPermission("read",["foo.read","foo.write"]).should.be.false;
+            permissions.hasPermission("read",["foo.read","bar.read"]).should.be.true;
         });
     });
 });

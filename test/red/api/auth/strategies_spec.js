@@ -30,6 +30,7 @@ describe("Auth strategies", function() {
         afterEach(function() {
             if (userAuthentication) {
                 userAuthentication.restore();
+                userAuthentication = null;
             }
         });
 
@@ -48,10 +49,26 @@ describe("Auth strategies", function() {
                 }
             });
         });
+        
+        it('Handles scope overreach',function(done) {
+            userAuthentication = sinon.stub(Users,"authenticate",function(username,password) {
+                return when.resolve({username:"user",permissions:"read"});
+            });
+
+            strategies.passwordTokenExchange({},"user","password","*",function(err,token) {
+                try {
+                    should.not.exist(err);
+                    token.should.be.false;
+                    done();
+                } catch(e) {
+                    done(e);
+                }
+            });
+        });
 
         it('Creates new token on authentication success',function(done) {
             userAuthentication = sinon.stub(Users,"authenticate",function(username,password) {
-                return when.resolve({username:"user"});
+                return when.resolve({username:"user",permissions:"*"});
             });
             var tokenDetails = {};
             var tokenCreate = sinon.stub(Tokens,"create",function(username,client,scope) {
@@ -61,13 +78,13 @@ describe("Auth strategies", function() {
                 return when.resolve({accessToken: "123456"});
             });
 
-            strategies.passwordTokenExchange({id:"myclient"},"user","password","scope",function(err,token) {
+            strategies.passwordTokenExchange({id:"myclient"},"user","password","read",function(err,token) {
                 try {
                     should.not.exist(err);
                     token.should.equal("123456");
                     tokenDetails.should.have.property("username","user");
                     tokenDetails.should.have.property("client","myclient");
-                    tokenDetails.should.have.property("scope","scope");
+                    tokenDetails.should.have.property("scope","read");
                     done();
                 } catch(e) {
                     done(e);

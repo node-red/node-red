@@ -38,7 +38,7 @@ function hasPermission(userScope,permission) {
     }
     
     if (util.isArray(permission)) {
-        for (var i=0;i<permission.length;i++) {
+        for (i=0;i<permission.length;i++) {
             if (!hasPermission(userScope,permission[i])) {
                 return false;
             }

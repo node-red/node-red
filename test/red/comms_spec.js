@@ -344,9 +344,9 @@ describe("comms", function() {
             });
             getToken = sinon.stub(Tokens,"get",function(token) {
                 if (token == "1234") {
-                    return when.resolve({user:"fred"});
+                    return when.resolve({user:"fred",scope:["*"]});
                 } else if (token == "5678") {
-                    return when.resolve({user:"barney"});
+                    return when.resolve({user:"barney",scope:["*"]});
                 } else {
                     return when.resolve(null);
                 }
@@ -401,8 +401,12 @@ describe("comms", function() {
             });
             
             ws.on('close', function() {
-                received.should.equal(2);
-                done();
+                try {
+                    received.should.equal(2);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
             });
         });
         
@@ -466,8 +470,12 @@ describe("comms", function() {
                 ws.close();
             });
             ws.on('close', function() {
-                count.should.equal(1);
-                done();
+                try {
+                    count.should.equal(1);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
             });
         });
     });
