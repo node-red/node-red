@@ -38,7 +38,7 @@ function init(_settings,storage) {
     settings = _settings;
     if (settings.adminAuth) {
         Users.init(settings.adminAuth);
-        Tokens.init(storage);
+        Tokens.init(settings.adminAuth,storage);
     }
 }
 

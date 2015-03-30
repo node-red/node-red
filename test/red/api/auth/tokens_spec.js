@@ -24,7 +24,7 @@ var Tokens = require("../../../../red/api/auth/tokens");
 describe("Tokens", function() {
     describe("#init",function() {
         it('loads sessions', function(done) {
-            Tokens.init({
+            Tokens.init({},{
                 getSessions:function() {
                     done();
                     return when.resolve();
@@ -36,9 +36,9 @@ describe("Tokens", function() {
     
     describe("#get",function() {
         it('returns a valid token', function(done) {
-            Tokens.init({
+            Tokens.init({},{
                 getSessions:function() {
-                    return when.resolve({"1234":{"user":"fred"}});
+                    return when.resolve({"1234":{"user":"fred","expires":Date.now()+1000}});
                 }
             }).then(function() {
                 Tokens.get("1234").then(function(token) {
@@ -53,7 +53,7 @@ describe("Tokens", function() {
         });
         
         it('returns null for an invalid token', function(done) {
-            Tokens.init({
+            Tokens.init({},{
                 getSessions:function() {
                     return when.resolve({});
                 }
@@ -68,12 +68,41 @@ describe("Tokens", function() {
                 });
             });
         });
+        it('returns null for an expired token', function(done) {
+            var saveSessions = sinon.stub().returns(when.resolve());
+            var expiryTime = Date.now()+50;
+            Tokens.init({},{
+                getSessions:function() {
+                    return when.resolve({"1234":{"user":"fred","expires":expiryTime}});
+                },
+                saveSessions: saveSessions
+            }).then(function() {
+                Tokens.get("1234").then(function(token) {
+                    try {
+                        should.exist(token);
+                        setTimeout(function() {
+                            Tokens.get("1234").then(function(token) {
+                                try {
+                                    should.not.exist(token);
+                                    saveSessions.calledOnce.should.be.true;
+                                    done();
+                                } catch(err) {
+                                    done(err);
+                                }
+                            });
+                        },100);
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+            });
+        });
     });
     
     describe("#create",function() {
         it('creates a token', function(done) {
             var savedSession;
-            Tokens.init({
+            Tokens.init({sessionExpiryTime: 10},{
                 getSessions:function() {
                     return when.resolve({});
                 },
@@ -82,6 +111,9 @@ describe("Tokens", function() {
                     return when.resolve();
                 }
             });
+            var expectedExpiryTime = Date.now()+10000;
+            
+            
             Tokens.create("user","client","scope").then(function(token) {
                 try {
                     should.exist(savedSession);
@@ -92,6 +124,8 @@ describe("Tokens", function() {
                     savedSession[sessionKeys[0]].should.have.a.property('user','user');
                     savedSession[sessionKeys[0]].should.have.a.property('client','client');
                     savedSession[sessionKeys[0]].should.have.a.property('scope','scope');
+                    savedSession[sessionKeys[0]].should.have.a.property('expires');
+                    savedSession[sessionKeys[0]].expires.should.be.within(expectedExpiryTime-200,expectedExpiryTime+200);
                     done();
                 } catch(err) {
                     done(err);
@@ -103,9 +137,9 @@ describe("Tokens", function() {
     describe("#revoke", function() {
         it('revokes a token', function(done) {
             var savedSession;
-            Tokens.init({
+            Tokens.init({},{
                 getSessions:function() {
-                    return when.resolve({"1234":{"user":"fred"}});
+                    return when.resolve({"1234":{"user":"fred","expires":Date.now()+1000}});
                 },
                 saveSessions:function(sess) {
                     savedSession = sess;

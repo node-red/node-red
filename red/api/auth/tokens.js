@@ -27,30 +27,66 @@ function generateToken(length) {
 
 
 var storage;
+
+var sessionExpiryTime
+
 var sessions = {};
 
+function expireSessions() {
+    var now = Date.now();
+    var modified = false;
+    for (var t in sessions) {
+        if (sessions.hasOwnProperty(t)) {
+            var session = sessions[t];
+            if (!session.hasOwnProperty("expires") || session.expires < now) {
+                delete sessions[t];
+                modified = true;
+            }
+        }
+    }
+    if (modified) {
+        return storage.saveSessions(sessions);
+    } else {
+        return when.resolve();
+    }
+}
+
 module.exports = {
-    init: function(_storage) {
+    init: function(adminAuthSettings, _storage) {
         storage = _storage;
+        
+        sessionExpiryTime = adminAuthSettings.sessionExpiryTime || 604800; // 1 week in seconds
+        
         return storage.getSessions().then(function(_sessions) {
-             sessions = _sessions||{};   
+             sessions = _sessions||{};
+             return expireSessions();
         });
     },
     get: function(token) {
+        if (sessions[token]) {
+            if (sessions[token].expires < Date.now()) {
+                return expireSessions().then(function() { return null });
+            }
+        }
         return when.resolve(sessions[token]);
     },
     create: function(user,client,scope) {
         var accessToken = generateToken(128);
+        
+        var accessTokenExpiresAt = Date.now() + (sessionExpiryTime*1000);
+        
         var session = {
             user:user,
             client:client,
             scope:scope,
             accessToken: accessToken,
+            expires: accessTokenExpiresAt
         };
         sessions[accessToken] = session;
         return storage.saveSessions(sessions).then(function() {
             return {
                 accessToken: accessToken,
+                expires_in: sessionExpiryTime
             }
         });
     },
