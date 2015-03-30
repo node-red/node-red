@@ -65,9 +65,8 @@ function start() {
             redNodes.init(settings,storage,app);
             redNodes.load().then(function() {
                 var i;
-                var nodes = redNodes.getNodeList();
-                var nodeErrors = nodes.filter(function(n) { return n.err!=null;});
-                var nodeMissing = nodes.filter(function(n) { return n.module && n.enabled && !n.loaded && !n.err;});
+                var nodeErrors = redNodes.getNodeList(function(n) { return n.err!=null;});
+                var nodeMissing = redNodes.getNodeList(function(n) { return n.module && n.enabled && !n.loaded && !n.err;});
                 if (nodeErrors.length > 0) {
                     log.warn("------------------------------------------");
                     if (settings.verbose) {
@@ -114,15 +113,15 @@ function start() {
 
 
 function reportAddedModules(info) {
-    comms.publish("node/added",info,false);
-    if (info.length > 0) {
+    comms.publish("node/added",info.nodes,false);
+    if (info.nodes.length > 0) {
         log.info("Added node types:");
-        for (var i=0;i<info.length;i++) {
-            for (var j=0;j<info[i].types.length;j++) {
+        for (var i=0;i<info.nodes.length;i++) {
+            for (var j=0;j<info.nodes[i].types.length;j++) {
                 log.info(" - "+
-                    (info[i].module?info[i].module+":":"")+
-                    info[i].types[j]+
-                    (info[i].err?" : "+info[i].err:"")
+                    (info.nodes[i].module?info.nodes[i].module+":":"")+
+                    info.nodes[i].types[j]+
+                    (info.nodes[i].err?" : "+info.nodes[i].err:"")
                 );
             }
         }

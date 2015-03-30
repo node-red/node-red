@@ -34,9 +34,6 @@ function filterNodeInfo(n) {
         types: n.types,
         enabled: n.enabled
     };
-    if (n.hasOwnProperty("loaded")) {
-        r.loaded = n.loaded;
-    }
     if (n.hasOwnProperty("module")) {
         r.module = n.module;
     }
@@ -82,7 +79,6 @@ var registry = (function() {
                         if (nodes.hasOwnProperty(node)) {
                             var config = nodes[node];
                             var n = filterNodeInfo(config);
-                            delete n.loaded;
                             delete n.err;
                             delete n.file;
                             delete n.id;
@@ -230,13 +226,18 @@ var registry = (function() {
                 if (module) {
                     var config = module.nodes[getNode(id)];
                     if (config) {
-                        return filterNodeInfo(config);
+                        var info = filterNodeInfo(config);
+                        if (config.hasOwnProperty("loaded")) {
+                            info.loaded = config.loaded;
+                        }
+                        info.version = module.version;
+                        return info;
                     }
                 }
             }
             return null;
         },
-        getNodeList: function() {
+        getNodeList: function(filter) {
             var list = [];
             for (var module in moduleConfigs) {
                 /* istanbul ignore else */
@@ -245,7 +246,11 @@ var registry = (function() {
                     for (var node in nodes) {
                         /* istanbul ignore else */
                         if (nodes.hasOwnProperty(node)) {
-                            list.push(filterNodeInfo(nodes[node]));
+                            var nodeInfo = filterNodeInfo(nodes[node]);
+                            nodeInfo.version = moduleConfigs[module].version;
+                            if (!filter || filter(nodes[node])) {
+                                list.push(nodeInfo);
+                            }
                         }
                     }
                 }
@@ -257,16 +262,7 @@ var registry = (function() {
             for (var module in moduleNodes) {
                 /* istanbul ignore else */
                 if (moduleNodes.hasOwnProperty(module)) {
-                    var nodes = moduleNodes[module];
-                    var m = {
-                        name: module,
-                        version: moduleConfigs[module].version,
-                        nodes: []
-                    };
-                    for (var i = 0; i < nodes.length; ++i) {
-                        m.nodes.push(filterNodeInfo(moduleConfigs[module].nodes[nodes[i]]));
-                    }
-                    list.push(m);
+                    list.push(registry.getModuleInfo(module));
                 }
             }
             return list;
@@ -280,15 +276,14 @@ var registry = (function() {
                     nodes: []
                 };
                 for (var i = 0; i < nodes.length; ++i) {
-                    m.nodes.push(filterNodeInfo(moduleConfigs[module].nodes[nodes[i]]));
+                    var nodeInfo = filterNodeInfo(moduleConfigs[module].nodes[nodes[i]]);
+                    nodeInfo.version = m.version;
+                    m.nodes.push(nodeInfo);
                 }
                 return m;
             } else {
                 return null;
             }
-        },
-        getModuleVersion: function(module) {
-            return moduleConfigs[module].version;
         },
         registerNodeConstructor: function(type,constructor) {
             if (nodeConstructors[type]) {
@@ -371,10 +366,6 @@ var registry = (function() {
 
         getTypeId: function(type) {
             return nodeTypeToId[type];
-        },
-
-        getNodeModuleInfo: function(module) {
-            return moduleNodes[module];
         },
 
         enableNodeSet: function(typeOrId) {
@@ -526,7 +517,7 @@ function scanDirForNodesModules(dir,moduleName) {
         var files = fs.readdirSync(dir);
         for (var i=0;i<files.length;i++) {
             var fn = files[i];
-            if (!registry.getNodeModuleInfo(fn)) {
+            if (!registry.getModuleInfo(fn)) {
                 if (!moduleName || fn == moduleName) {
                     var pkgfn = path.join(dir,fn,"package.json");
                     try {
@@ -626,9 +617,7 @@ function loadNodesFromModule(moduleDir,pkg) {
 function loadNodeConfig(file,module,name,version) {
     var id = module + "/" + name;
     var info = registry.getNodeInfo(id);
-
     var isEnabled = true;
-
     if (info) {
         if (info.hasOwnProperty("loaded")) {
             throw new Error(file+" already loaded");
@@ -819,7 +808,7 @@ function addModule(module) {
         throw new Error("Settings unavailable");
     }
     var nodes = [];
-    if (registry.getNodeModuleInfo(module)) {
+    if (registry.getModuleInfo(module)) {
         return when.reject(new Error("Module already loaded"));
     }
     var moduleFiles = scanTreeForNodesModules(module);
@@ -831,7 +820,9 @@ function addModule(module) {
     moduleFiles.forEach(function(moduleFile) {
         nodes = nodes.concat(loadNodesFromModule(moduleFile.dir,moduleFile.package));
     });
-    return loadNodeList(nodes);
+    return loadNodeList(nodes).then(function() {
+        return registry.getModuleInfo(module);
+    });
 }
 
 module.exports = {
@@ -844,11 +835,8 @@ module.exports = {
     getNodeInfo: registry.getNodeInfo,
     getNodeList: registry.getNodeList,
 
-    getNodeModuleInfo: registry.getNodeModuleInfo,
-
     getModuleInfo: registry.getModuleInfo,
     getModuleList: registry.getModuleList,
-    getModuleVersion: registry.getModuleVersion,
 
     getNodeConfigs: registry.getAllNodeConfigs,
     getNodeConfig: registry.getNodeConfig,

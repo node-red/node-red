@@ -219,13 +219,13 @@ describe("red/nodes/index", function() {
                    return randomNodeInfo;
                }
            });
-           sinon.stub(registry,"getNodeModuleInfo",function(module) {
+           sinon.stub(registry,"getModuleInfo",function(module) {
                if (module == "node-red") {
-                  return ["foo"];
+                  return {nodes:[{name:"foo"}]};
                } else if (module == "doesnotexist") {
                    return null;
                } else {
-                  return randomModuleInfo.nodes;
+                  return randomModuleInfo;
                }
            });
            sinon.stub(registry,"removeModule",function(id) {
@@ -234,7 +234,7 @@ describe("red/nodes/index", function() {
        });
        after(function() {
            registry.getNodeInfo.restore();
-           registry.getNodeModuleInfo.restore();
+           registry.getModuleInfo.restore();
            registry.removeModule.restore();
        });
 

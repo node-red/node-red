@@ -105,11 +105,11 @@ describe("red/server", function() {
             commsStart.restore();
         });
         it("reports errored/missing modules",function(done) {
-            redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function() {
+            redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function(cb) {
                 return [
                     {  err:"errored",name:"errName" }, // error
                     {  module:"module",enabled:true,loaded:false,types:["typeA","typeB"]} // missing
-                ];
+                ].filter(cb);
             });
             server.init({},{testSettings: true, httpAdminRoot:"/", load:function() { return when.resolve();}});
             server.start().then(function() {
@@ -132,13 +132,13 @@ describe("red/server", function() {
             });
         });
         it("initiates load of missing modules",function(done) {
-            redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function() {
+            redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function(cb) {
                 return [
                     {  err:"errored",name:"errName" }, // error
                     {  err:"errored",name:"errName" }, // error
                     {  module:"module",enabled:true,loaded:false,types:["typeA","typeB"]}, // missing
                     {  module:"node-red",enabled:true,loaded:false,types:["typeC","typeD"]} // missing
-                ];
+                ].filter(cb);
             });
             var serverInstallModule = sinon.stub(server,"installModule",function(name) { return when.resolve();});
             server.init({},{testSettings: true, autoInstallModules:true, httpAdminRoot:"/", load:function() { return when.resolve();}});
@@ -161,10 +161,10 @@ describe("red/server", function() {
             });
         });
         it("reports errored modules when verbose is enabled",function(done) {
-            redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function() {
+            redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function(cb) {
                 return [
                     {  err:"errored",name:"errName" } // error
-                ];
+                ].filter(cb);
             });
             server.init({},{testSettings: true, verbose:true, httpAdminRoot:"/", load:function() { return when.resolve();}});
             server.start().then(function() {
@@ -240,17 +240,17 @@ describe("red/server", function() {
     });
     
     it("reports added modules", function() {
-        var nodes = [
+        var nodes = {nodes:[
             {types:["a"]},
             {module:"foo",types:["b"]},
             {types:["c"],err:"error"}
-        ];
+        ]};
         var result = server.reportAddedModules(nodes);
         
         result.should.equal(nodes);
         commsMessages.should.have.length(1);
         commsMessages[0].topic.should.equal("node/added");
-        commsMessages[0].msg.should.eql(nodes);
+        commsMessages[0].msg.should.eql(nodes.nodes);
     });
     
     it("reports removed modules", function() {
@@ -305,7 +305,7 @@ describe("red/server", function() {
             });
         });
         it("succeeds when module is found", function(done) {
-            var nodeInfo = {module:"foo",types:["a"]};
+            var nodeInfo = {nodes:{module:"foo",types:["a"]}};
             var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
                 cb(null,"","");
             });
@@ -317,7 +317,7 @@ describe("red/server", function() {
                 info.should.eql(nodeInfo);
                 commsMessages.should.have.length(1);
                 commsMessages[0].topic.should.equal("node/added");
-                commsMessages[0].msg.should.eql(nodeInfo);
+                commsMessages[0].msg.should.eql(nodeInfo.nodes);
                 done();
             }).otherwise(function(err) {
                 done(err);

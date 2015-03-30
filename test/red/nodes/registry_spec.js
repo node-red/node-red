@@ -40,14 +40,50 @@ describe('red/nodes/registry', function() {
     }
     var settings = stubSettings({},false,null);
     var settingsWithStorage = stubSettings({},true,null);
-    var settingsWithStorageAndInitialConfig = stubSettings({},true,{"node-red":{module:"testModule",name:"testName",version:"testVersion"}});
+    var settingsWithStorageAndInitialConfig = stubSettings({},true,{"node-red":{module:"testModule",name:"testName",version:"testVersion",nodes:{"node":{id:"node-red/testName",name:"test",types:["a","b"],enabled:true}}}});
 
     it('loads initial config', function(done) {
         typeRegistry.init(settingsWithStorageAndInitialConfig);
-        var version = typeRegistry.getModuleVersion("node-red");
-        should.exist(version);
-        version.should.eql("testVersion");
+        typeRegistry.getNodeList().should.have.lengthOf(1);
         done();
+    });
+    
+    it('migrates legacy format', function(done) {
+        var settings = {
+            available: function() { return true; },
+            set: sinon.stub().returns(when.resolve()),
+            get: function() { return {
+                "123": {
+                    "name": "72-sentiment.js",
+                    "types": [
+                        "sentiment"
+                    ],
+                    "enabled": true
+                },
+                "456": {
+                    "name": "20-inject.js",
+                    "types": [
+                        "inject"
+                    ],
+                    "enabled": true
+                },
+                "789": {
+                    "name": "testModule:a-module.js",
+                    "types": [
+                        "example"
+                    ],
+                    "enabled":true,
+                    "module":"testModule"
+                }
+             }}
+        };
+        var expected = JSON.parse('{"node-red":{"name":"node-red","nodes":{"sentiment":{"name":"sentiment","types":["sentiment"],"enabled":true,"module":"node-red"},"inject":{"name":"inject","types":["inject"],"enabled":true,"module":"node-red"}}},"testModule":{"name":"testModule","nodes":{"a-module.js":{"name":"a-module.js","types":["example"],"enabled":true,"module":"testModule"}}}}');
+        typeRegistry.init(settings);
+        settings.set.calledOnce.should.be.true;
+        settings.set.args[0][1].should.eql(expected);
+        done();
+
+            
     });
     
     it('handles nodes that export a function', function(done) {
@@ -356,14 +392,18 @@ describe('red/nodes/registry', function() {
             list[0].should.have.property("enabled",true);
             list[0].should.not.have.property("err");
             
-            var id = list[0].id;
-            var type = list[0].types[0];
+            var id = "node-red/TestNode1";
+            var type = "test-node-1";
 
             
             var info = typeRegistry.getNodeInfo(id);
+            info.should.have.property("loaded");
+            delete info.loaded;
             list[0].should.eql(info);
 
             var info2 = typeRegistry.getNodeInfo(type);
+            info2.should.have.property("loaded");
+            delete info2.loaded;
             list[0].should.eql(info2);
 
             done();
@@ -472,13 +512,10 @@ describe('red/nodes/registry', function() {
         typeRegistry.init(settingsWithStorage);
         typeRegistry.load("wontexist",true).then(function(){
 
-            typeRegistry.addModule("TestNodeModule").then(function(nodes) {
-                var list = typeRegistry.getModuleList();
-
-                var module = typeRegistry.getModuleInfo(list[0].name);
-                module.should.have.property("name", list[0].name);
-                module.should.have.property("nodes", nodes);
+            typeRegistry.addModule("TestNodeModule").then(function(modInfo) {
+                var info = typeRegistry.getModuleInfo("TestNodeModule");
                 
+                modInfo.should.eql(info);
                 should.not.exist(typeRegistry.getModuleInfo("does-not-exist"));
                 
                 done();
@@ -597,7 +634,7 @@ describe('red/nodes/registry', function() {
             var list = typeRegistry.getNodeList();
             list.should.be.an.Array.and.be.empty;
 
-            typeRegistry.addModule("TestNodeModule").then(function(node) {
+            typeRegistry.addModule("TestNodeModule").then(function(modInfo) {
                 list = typeRegistry.getNodeList();
                 list.should.be.an.Array.and.have.lengthOf(2);
                 list[0].should.have.property("id","TestNodeModule/TestNodeMod1");
@@ -613,8 +650,6 @@ describe('red/nodes/registry', function() {
                 list[1].should.have.property("types",["test-node-mod-2"]);
                 list[1].should.have.property("enabled",true);
                 list[1].should.have.property("err");
-
-                node.should.eql(list);
 
                 done();
             }).catch(function(e) {
@@ -671,9 +706,6 @@ describe('red/nodes/registry', function() {
                 modules[0].should.have.property("name","TestNodeModule");
                 modules[0].should.have.property("version","0.0.1");
 
-                var version = typeRegistry.getModuleVersion("TestNodeModule");
-                version.should.eql("0.0.1");
-                
                 done();
             }).catch(function(e) {
                 done(e);

@@ -29,7 +29,7 @@ var settings = require("../settings");
 module.exports = {
     getAll: function(req,res) {
         if (req.get("accept") == "application/json") {
-            res.json(redNodes.getNodeList().map(function(n) { delete n.loaded; return n }));
+            res.json(redNodes.getNodeList());
         } else {
             res.send(redNodes.getNodeConfigs());
         }
@@ -43,7 +43,7 @@ module.exports = {
         var node = req.body;
         var promise;
         if (node.module) {
-            var module = redNodes.getNodeModuleInfo(node.module);
+            var module = redNodes.getModuleInfo(node.module);
             if (module) {
                 res.json(400,{message:"Module already loaded"});
                 return;
@@ -72,7 +72,7 @@ module.exports = {
         var mod = req.params.mod;
         try {
             var promise = null;
-            var module = redNodes.getNodeModuleInfo(mod);
+            var module = redNodes.getModuleInfo(mod);
             if (!module) {
                 res.send(404);
                 return;
@@ -83,9 +83,11 @@ module.exports = {
             promise.then(function() {
                 res.send(204);
             }).otherwise(function(err) {
-                res.json(400,{message:err.toString()});
+            console.log(err.stack);
+                    res.json(400,{message:err.toString()});
             });
         } catch(err) {
+            console.log(err.stack);
             res.json(400,{message:err.toString()});
         }
     },
@@ -96,7 +98,7 @@ module.exports = {
         if (req.get("accept") === "application/json") {
             result = redNodes.getNodeInfo(id);
             if (result) {
-                result.version = redNodes.getModuleVersion(req.params.mod);
+                delete result.loaded;
             }
         } else {
             result = redNodes.getNodeConfig(id);
@@ -112,7 +114,7 @@ module.exports = {
         var module = req.params.mod;
         var result = redNodes.getModuleInfo(module);
         if (result) {
-            res.send(result);
+            res.json(result);
         } else {
             res.send(404);
         }
@@ -135,6 +137,7 @@ module.exports = {
             if (!node) {
                 res.send(404);
             } else {
+                delete node.loaded;
                 res.json(putNode(node, body.enabled));
             }
         } catch(err) {
