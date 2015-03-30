@@ -186,13 +186,13 @@
                     }
 
                 };
-                console.log(o);
+                //console.log(o);
                 var name = sanitize(((o.name?o.name:o.id)||"").toString());
                 var topic = sanitize((o.topic||"").toString());
                 var property = sanitize(o.property?o.property:'');
                 var payload = sanitize((o.msg||"").toString());
                 var format = sanitize((o.format||"").toString());
-                
+
                 msg.className = 'debug-message'+(o.level?(' debug-message-level-'+o.level):'');
                 msg.innerHTML = '<span class="debug-message-date">'+
                                 getTimestamp()+'</span>'+
@@ -212,7 +212,7 @@
                     msg.innerHTML += '<span class="debug-message-topic">'+
                                     (o.topic?topic+' : ':'')+
                                     (o.property?'[msg.'+property+']':'[msg]')+" : "+format+
-                                    
+
                                     '</span>';
                 }
                 msg.innerHTML += '<span class="debug-message-payload">'+ payload+ '</span>';
