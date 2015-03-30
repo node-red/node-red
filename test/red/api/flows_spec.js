@@ -82,7 +82,7 @@ describe("flows api", function() {
                 if (err) {
                     throw err;
                 }
-                res.text.should.eql("expected error");
+                res.body.should.have.property("message","expected error");
                 done();
             });
     });

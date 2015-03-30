@@ -31,9 +31,8 @@ var needsPermission = auth.needsPermission;
 var settings = require("../settings");
 
 var errorHandler = function(err,req,res,next) {
-    //TODO: standardize json response
     console.log(err.stack);
-    res.send(400,err.toString());
+    res.json(400,{message:err.toString()});
 };
 
 function init(adminApp,storage) {

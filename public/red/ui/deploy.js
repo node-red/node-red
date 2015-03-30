@@ -148,7 +148,7 @@ RED.deploy = (function() {
             }).fail(function(xhr,textStatus,err) {
                 RED.nodes.dirty(true);
                 if (xhr.responseText) {
-                    RED.notify("<strong>Error</strong>: "+xhr.responseText,"error");
+                    RED.notify("<strong>Error</strong>: "+xhr.responseJSON.message,"error");
                 } else {
                     RED.notify("<strong>Error</strong>: no response from server","error");
                 }

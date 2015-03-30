@@ -292,7 +292,7 @@ describe("nodes api", function() {
                         if (err) {
                             throw err;
                         }
-                        res.text.should.equal("Error: test error");
+                        res.body.should.have.property("message","Error: test error");
                         done();
                     });
             });
@@ -422,7 +422,7 @@ describe("nodes api", function() {
                         if (err) {
                             throw err;
                         }
-                        res.text.should.equal("Error: test error");
+                        res.body.should.have.property("message","Error: test error");
                         done();
                     });
             });
@@ -461,8 +461,7 @@ describe("nodes api", function() {
                     if (err) {
                         throw err;
                     }
-                    res.text.should.equal("Invalid request");
-
+                    res.body.should.have.property("message","Invalid request");
                     done();
                 });
         });
@@ -481,7 +480,7 @@ describe("nodes api", function() {
                     if (err) {
                         throw err;
                     }
-                    res.text.should.equal("Invalid request");
+                    res.body.should.have.property("message","Invalid request");
 
                     done();
                 });

@@ -330,7 +330,7 @@ RED.library = (function() {
             }).done(function(data,textStatus,xhr) {
                 RED.notify("Saved "+options.type,"success");
             }).fail(function(xhr,textStatus,err) {
-                RED.notify("Saved failed: "+xhr.responseText,"error");
+                RED.notify("Saved failed: "+xhr.responseJSON.message,"error");
             });
         }
         $( "#node-dialog-library-save-confirm" ).dialog({

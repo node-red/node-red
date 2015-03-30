@@ -99,7 +99,6 @@ module.exports = {
     authenticateClient: authenticateClient,
     getToken: getToken,
     errorHandler: function(err,req,res,next) {
-        //TODO: standardize json response
         //TODO: audit log statment
         //console.log(err.stack);
         //log.log({level:"audit",type:"auth",msg:err.toString()});

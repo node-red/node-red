@@ -57,7 +57,7 @@ function createLibrary(type) {
                     res.send(403);
                     return;
                 }
-                res.send(500);
+                res.json(500,{message:err.toString()});
             });
         });
     }
@@ -75,6 +75,7 @@ module.exports = {
     },
     get: function(req,res) {
         storage.getFlow(req.params[0]).then(function(data) {
+            // data is already a JSON string
             res.set('Content-Type', 'application/json');
             res.send(data);
         }).otherwise(function(err) {
