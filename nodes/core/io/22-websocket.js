@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013,2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ module.exports = function(RED) {
             if(this.isServer) {
                 for (var i = 0; i < this.server.clients.length; i++) {
                     this.server.clients[i].send(data);
-                }                
+                }
             }
             else {
                 this.server.send(data);
@@ -181,7 +181,7 @@ module.exports = function(RED) {
             if (this.serverConfig.wholemsg) {
                 delete msg._session;
                 payload = JSON.stringify(msg);
-            } else {
+            } else if (msg.hasOwnProperty("payload")) {
                 if (!Buffer.isBuffer(msg.payload)) { // if it's not a buffer make sure it's a string.
                     payload = RED.util.ensureString(msg.payload);
                 }
@@ -189,14 +189,16 @@ module.exports = function(RED) {
                     payload = msg.payload;
                 }
             }
-            if (msg._session && msg._session.type == "websocket") {
-                node.serverConfig.reply(msg._session.id,payload);
-            } else {
-                node.serverConfig.broadcast(payload,function(error){
-                    if (!!error) {
-                        node.warn("An error occurred while sending:" + inspect(error));
-                    }
-                });
+            if (payload) {
+                if (msg._session && msg._session.type == "websocket") {
+                    node.serverConfig.reply(msg._session.id,payload);
+                } else {
+                    node.serverConfig.broadcast(payload,function(error){
+                        if (!!error) {
+                            node.warn("An error occurred while sending:" + inspect(error));
+                        }
+                    });
+                }
             }
         });
     }

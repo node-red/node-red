@@ -55,7 +55,7 @@ function getSocket(listenerid) {
     return node.server;
 }
 
-describe('websocket node', function() {
+describe('websocket Node', function() {
 
     before(function(done) {
         helper.startServer(done);
@@ -149,6 +149,22 @@ describe('websocket node', function() {
             });
         });
 
+        it('should receive wholemsg when data not JSON', function(done) {
+            var flow = [
+                { id: "n1", type: "websocket-listener", path: "/ws", wholemsg: "true" },
+                { id: "n2", type: "websocket in", server: "n1", wires: [["n3"]] },
+                { id: "n3", type: "helper" }];
+            helper.load(websocketNode, flow, function() {
+                createClient("n1").then(function(sock) {
+                    sock.send('hello');
+                    helper.getNode("n3").on("input", function(msg) {
+                        msg.should.have.property("payload", "hello");
+                        done();
+                    });
+                });
+            });
+        });
+
         it('should send', function(done) {
             var flow = [
                 { id: "n1", type: "websocket-listener", path: "/ws" },
@@ -181,6 +197,25 @@ describe('websocket node', function() {
                     helper.getNode("n3").send({
                         text: "hello"
                     });
+                });
+            });
+        });
+
+        it('should do nothing if no payload', function(done) {
+            var flow = [
+                { id: "n1", type: "websocket-listener", path: "/ws" },
+                { id: "n2", type: "helper", wires: [["n3"]] },
+                { id: "n3", type: "websocket out", server: "n1" }];
+            helper.load(websocketNode, flow, function() {
+                createClient("n1").then(function(sock) {
+                    setTimeout(function() {
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == "file";
+                        });
+                        logEvents.should.have.length(0);
+                        done();
+                    },100);
+                    helper.getNode("n2").send({topic: "hello"});
                 });
             });
         });
@@ -333,9 +368,25 @@ describe('websocket node', function() {
                 getSocket('server').on('connection', function(sock) {
                     sock.send('{"text":"hello"}');
                 });
-
                 helper.getNode("n3").on("input", function(msg) {
                     msg.should.have.property("text", "hello");
+                    done();
+                });
+            });
+        });
+
+        it('should receive wholemsg when data not JSON', function(done) {
+            var flow = [
+                { id: "server", type: "websocket-listener", path: "/ws" },
+                { id: "n1", type: "websocket-client", path: getWsUrl("/ws"), wholemsg: "true" },
+                { id: "n2", type: "websocket in", client: "n1", wires: [["n3"]] },
+                { id: "n3", type: "helper" }];
+            helper.load(websocketNode, flow, function() {
+                getSocket('server').on('connection', function(sock) {
+                    sock.send('hello');
+                });
+                helper.getNode("n3").on("input", function(msg) {
+                    msg.should.have.property("payload", "hello");
                     done();
                 });
             });
@@ -357,6 +408,27 @@ describe('websocket node', function() {
                 getSocket("n1").on("open", function() {
                     helper.getNode("n3").send({
                         payload: "hello"
+                    });
+                });
+            });
+        });
+
+        it('should send buffer', function(done) {
+            var flow = [
+                { id: "server", type: "websocket-listener", path: "/ws" },
+                { id: "n1", type: "websocket-client", path: getWsUrl("/ws") },
+                { id: "n2", type: "websocket out", client: "n1" },
+                { id: "n3", type: "helper", wires: [["n2"]] }];
+            helper.load(websocketNode, flow, function() {
+                getSocket('server').on('connection', function(sock) {
+                    sock.on('message', function(msg) {
+                        msg.should.have.length(5).and.be.a.buffer;
+                        done();
+                    });
+                });
+                getSocket("n1").on("open", function() {
+                    helper.getNode("n3").send({
+                        payload: new Buffer("hello")
                     });
                 });
             });
@@ -404,6 +476,37 @@ describe('websocket node', function() {
                         done();
                     }
                 });
+            });
+        });
+    });
+
+    describe('websocket in node', function() {
+        it('should report error if no server config', function(done) {
+            var flow = [{ id: "n1", type: "websocket in", mode: "server" }];
+            helper.load(websocketNode, flow, function() {
+                var logEvents = helper.log().args.filter(function(evt) {
+                    return evt[0].type == "websocket in";
+                });
+                logEvents.should.have.length(1);
+                logEvents[0][0].should.have.a.property('msg');
+                logEvents[0][0].msg.toString().should.startWith("Missing server configuration");
+                done();
+            });
+        });
+    });
+
+    describe('websocket out node', function() {
+        it('should report error if no server config', function(done) {
+            var flow = [{ id: "n1", type: "websocket out", mode: "server" }];
+            helper.load(websocketNode, flow, function() {
+                var logEvents = helper.log().args.filter(function(evt) {
+                    return evt[0].type == "websocket out";
+                });
+                //console.log(logEvents);
+                logEvents.should.have.length(1);
+                logEvents[0][0].should.have.a.property('msg');
+                logEvents[0][0].msg.toString().should.startWith("Missing server configuration");
+                done();
             });
         });
     });

@@ -69,39 +69,42 @@ module.exports = function(RED) {
         });
 
         this.on("input", function(msg) {
-            if (smtpTransport) {
-                node.status({fill:"blue",shape:"dot",text:"sending"});
-                if (msg.to && node.name && (msg.to !== node.name)) {
-                    node.warn("Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props");
-                }
-                var sendopts = { from: node.userid };   // sender address
-                sendopts.to = node.name || msg.to; // comma separated list of addressees
-                sendopts.subject = msg.topic || msg.title || "Message from Node-RED"; // subject line
-                if (Buffer.isBuffer(msg.payload)) { // if it's a buffer in the payload then auto create an attachment instead
-                    sendopts.attachments = [ { content: msg.payload, filename:(msg.filename.replace(/^.*[\\\/]/, '') || "file.bin") } ];
-                    if (msg.hasOwnProperty("headers") && msg.headers.hasOwnProperty("content-type")) {
-                        sendopts.attachments[0].contentType = msg.headers["content-type"];
+            if (msg.hasOwnProperty("payload")) {
+                if (smtpTransport) {
+                    node.status({fill:"blue",shape:"dot",text:"sending"});
+                    if (msg.to && node.name && (msg.to !== node.name)) {
+                        node.warn("Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props");
                     }
-                    // Create some body text..
-                    sendopts.text = "Your file from Node-RED is attached : "+(msg.filename.replace(/^.*[\\\/]/, '') || "file.bin")+ (msg.hasOwnProperty("description") ? "\n\n"+msg.description : "");
-                }
-                else {
-                    var payload = RED.util.ensureString(msg.payload);
-                    sendopts.text =  payload; // plaintext body
-                    if (/<[a-z][\s\S]*>/i.test(payload)) { sendopts.html = payload; } // html body
-                    if (msg.attachments) { sendopts.attachments = msg.attachments; } // add attachments
-                }
-                smtpTransport.sendMail(sendopts, function(error, info) {
-                    if (error) {
-                        node.error(error,msg);
-                        node.status({fill:"red",shape:"ring",text:"send failed"});
-                    } else {
-                        node.log("Message sent: " + info.response);
-                        node.status({});
+                    var sendopts = { from: node.userid };   // sender address
+                    sendopts.to = node.name || msg.to; // comma separated list of addressees
+                    sendopts.subject = msg.topic || msg.title || "Message from Node-RED"; // subject line
+                    if (Buffer.isBuffer(msg.payload)) { // if it's a buffer in the payload then auto create an attachment instead
+                        sendopts.attachments = [ { content: msg.payload, filename:(msg.filename.replace(/^.*[\\\/]/, '') || "file.bin") } ];
+                        if (msg.hasOwnProperty("headers") && msg.headers.hasOwnProperty("content-type")) {
+                            sendopts.attachments[0].contentType = msg.headers["content-type"];
+                        }
+                        // Create some body text..
+                        sendopts.text = "Your file from Node-RED is attached : "+(msg.filename.replace(/^.*[\\\/]/, '') || "file.bin")+ (msg.hasOwnProperty("description") ? "\n\n"+msg.description : "");
                     }
-                });
+                    else {
+                        var payload = RED.util.ensureString(msg.payload);
+                        sendopts.text =  payload; // plaintext body
+                        if (/<[a-z][\s\S]*>/i.test(payload)) { sendopts.html = payload; } // html body
+                        if (msg.attachments) { sendopts.attachments = msg.attachments; } // add attachments
+                    }
+                    smtpTransport.sendMail(sendopts, function(error, info) {
+                        if (error) {
+                            node.error(error,msg);
+                            node.status({fill:"red",shape:"ring",text:"send failed"});
+                        } else {
+                            node.log("Message sent: " + info.response);
+                            node.status({});
+                        }
+                    });
+                }
+                else { node.warn("No Email credentials found. See info panel."); }
             }
-            else { node.warn("No Email credentials found. See info panel."); }
+            else { node.warn("No payload to send");
         });
     }
     RED.nodes.registerType("e-mail",EmailNode,{

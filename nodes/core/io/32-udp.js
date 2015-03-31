@@ -134,7 +134,7 @@ module.exports = function(RED) {
         }
 
         node.on("input", function(msg) {
-            if (msg.payload != null) {
+            if (msg.hasOwnProperty("payload")) {
                 var add = node.addr || msg.ip || "";
                 var por = node.port || msg.port || 0;
                 if (add == "") {

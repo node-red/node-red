@@ -55,23 +55,25 @@ module.exports = function(RED) {
                 node.addCh = this.serialConfig.newline.replace("\\n","\n").replace("\\r","\r").replace("\\t","\t").replace("\\e","\e").replace("\\f","\f").replace("\\0","\0");
             }
             node.on("input",function(msg) {
-                var payload = msg.payload;
-                if (!Buffer.isBuffer(payload)) {
-                    if (typeof payload === "object") {
-                        payload = JSON.stringify(payload);
-                    } else {
-                        payload = payload.toString();
+                if (msg.hasOwnProperty("payload")) {
+                    var payload = msg.payload;
+                    if (!Buffer.isBuffer(payload)) {
+                        if (typeof payload === "object") {
+                            payload = JSON.stringify(payload);
+                        } else {
+                            payload = payload.toString();
+                        }
+                        payload += node.addCh;
+                    } else if (node.addCh !== "") {
+                        payload = Buffer.concat([payload,new Buffer(node.addCh)]);
                     }
-                    payload += node.addCh;
-                } else if (node.addCh !== "") {
-                    payload = Buffer.concat([payload,new Buffer(node.addCh)]);
+                    node.port.write(payload,function(err,res) {
+                        if (err) {
+                            var errmsg = err.toString().replace("Serialport","Serialport "+node.port.serial.path);
+                            node.error(errmsg,msg);
+                        }
+                    });
                 }
-                node.port.write(payload,function(err,res) {
-                    if (err) {
-                        var errmsg = err.toString().replace("Serialport","Serialport "+node.port.serial.path); 
-                        node.error(errmsg,msg);
-                    }
-                });
             });
             node.port.on('ready', function() {
                 node.status({fill:"green",shape:"dot",text:"connected"});
