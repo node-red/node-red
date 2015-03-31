@@ -37,6 +37,22 @@ describe('sentiment Node', function() {
         });
     });
 
+    it('should pass on msg if no payload', function(done) {
+        var flow = [{id:"jn1",type:"sentiment",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(sentimentNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                msg.should.not.have.property('sentiment');
+                msg.topic.should.equal("pass on");
+                done();
+            });
+            var testString = 'good, great, best, brilliant';
+            jn1.receive({topic:"pass on"});
+        });
+    });
+
     it('should add a positive score for good words', function(done) {
         var flow = [{id:"jn1",type:"sentiment",wires:[["jn2"]]},
                     {id:"jn2", type:"helper"}];
