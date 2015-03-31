@@ -74,7 +74,9 @@ function checkTypeInUse(id) {
         });
         if (nodesInUse.length > 0) {
             var msg = nodesInUse.join(", ");
-            throw new Error("Type in use: "+msg);
+            var err = new Error("Type in use: "+msg);
+            err.code = "type_in_use";
+            throw err;
         }
     }
 }

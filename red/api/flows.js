@@ -34,7 +34,7 @@ module.exports = {
         }).otherwise(function(err) {
             log.warn("Error saving flows : "+err.message);
             log.warn(err.stack);
-            res.json(500,{message:err.message});
+            res.json(500,{error:"unexpected_error", message:err.message});
         });
     }
 }

@@ -32,7 +32,7 @@ var settings = require("../settings");
 
 var errorHandler = function(err,req,res,next) {
     console.log(err.stack);
-    res.json(400,{message:err.toString()});
+    res.json(400,{error:"unexpected_error", message:err.toString()});
 };
 
 function init(adminApp,storage) {

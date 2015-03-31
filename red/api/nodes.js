@@ -37,7 +37,7 @@ module.exports = {
 
     post: function(req,res) {
         if (!settings.available()) {
-            res.json(400,{message:"Settings unavailable"});
+            res.json(400,{error:"settings_unavailable", message:"Settings unavailable"});
             return;
         }
         var node = req.body;
@@ -45,12 +45,12 @@ module.exports = {
         if (node.module) {
             var module = redNodes.getModuleInfo(node.module);
             if (module) {
-                res.json(400,{message:"Module already loaded"});
+                res.json(400,{error:"module_already_loaded", message:"Module already loaded"});
                 return;
             }
             promise = server.installModule(node.module);
         } else {
-            res.json(400,{message:"Invalid request"});
+            res.json(400,{error:"invalid_request", message:"Invalid request"});
             return;
         }
         promise.then(function(info) {
@@ -59,14 +59,14 @@ module.exports = {
             if (err.code === 404) {
                 res.send(404);
             } else {
-                res.json(400,{message:err.toString()});
+                res.json(400,{error:err.code||"unexpected_error", message:err.toString()});
             }
         });
     },
 
     delete: function(req,res) {
         if (!settings.available()) {
-            res.json(400,{message:"Settings unavailable"});
+            res.json(400,{error:"settings_unavailable", message:"Settings unavailable"});
             return;
         }
         var mod = req.params.mod;
@@ -83,12 +83,10 @@ module.exports = {
             promise.then(function() {
                 res.send(204);
             }).otherwise(function(err) {
-            console.log(err.stack);
-                    res.json(400,{message:err.toString()});
+                res.json(400,{error:err.code||"unexpected_error", message:err.toString()});
             });
         } catch(err) {
-            console.log(err.stack);
-            res.json(400,{message:err.toString()});
+            res.json(400,{error:err.code||"unexpected_error", message:err.toString()});
         }
     },
 
@@ -122,12 +120,12 @@ module.exports = {
 
     putSet: function(req,res) {
         if (!settings.available()) {
-            res.json(400,{message:"Settings unavailable"});
+            res.json(400,{error:"settings_unavailable", message:"Settings unavailable"});
             return;
         }
         var body = req.body;
         if (!body.hasOwnProperty("enabled")) {
-            res.json(400,{message:"Invalid request"});
+            res.json(400,{error:"invalid_request", message:"Invalid request"});
             return;
         }
         try {
@@ -141,18 +139,18 @@ module.exports = {
                 res.json(putNode(node, body.enabled));
             }
         } catch(err) {
-            res.json(400,{message:err.toString()});
+            res.json(400,{error:err.code||"unexpected_error", message:err.toString()});
         }
     },
 
     putModule: function(req,res) {
         if (!settings.available()) {
-            res.json(400,{message:"Settings unavailable"});
+            res.json(400,{error:"settings_unavailable", message:"Settings unavailable"});
             return;
         }
         var body = req.body;
         if (!body.hasOwnProperty("enabled")) {
-            res.json(400,{message:"Invalid request"});
+            res.json(400,{error:"invalid_request", message:"Invalid request"});
             return;
         }
         try {
@@ -186,7 +184,7 @@ module.exports = {
             }
             res.json(redNodes.getModuleInfo(mod));
         } catch(err) {
-            res.json(400,{message:err.toString()});
+            res.json(400,{error:err.code||"unexpected_error", message:err.toString()});
         }
     }
 };

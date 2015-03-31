@@ -57,7 +57,7 @@ function createLibrary(type) {
                     res.send(403);
                     return;
                 }
-                res.json(500,{message:err.toString()});
+                res.json(500,{error:"unexpected_error", message:err.toString()});
             });
         });
     }
