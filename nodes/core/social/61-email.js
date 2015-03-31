@@ -104,7 +104,7 @@ module.exports = function(RED) {
                 }
                 else { node.warn("No Email credentials found. See info panel."); }
             }
-            else { node.warn("No payload to send");
+            else { node.warn("No payload to send"); }
         });
     }
     RED.nodes.registerType("e-mail",EmailNode,{
