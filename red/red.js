@@ -29,8 +29,20 @@ var events = require("events");
 
 process.env.NODE_RED_HOME = process.env.NODE_RED_HOME || path.resolve(__dirname+"/..");
 
+function checkBuild() {
+    var editorFile = path.resolve(path.join(__dirname,"..","public","red","red.min.js"));
+    try {
+        var stats = fs.statSync(editorFile);
+    } catch(err) {
+        var e = new Error("Node-RED build not run");
+        e.code = "not_built";
+        throw e;
+    }
+}
+
 var RED = {
     init: function(httpServer,userSettings) {
+        checkBuild();
         userSettings.version = this.version();
         log.init(userSettings);
         settings.init(userSettings);

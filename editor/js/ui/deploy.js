@@ -17,9 +17,9 @@
 RED.deploy = (function() {
         
     var deploymentTypes = {
-        "full":{img:"images/deploy-full-o.png"},
-        "nodes":{img:"images/deploy-nodes-o.png"},
-        "flows":{img:"images/deploy-flows-o.png"}
+        "full":{img:"red/images/deploy-full-o.png"},
+        "nodes":{img:"red/images/deploy-nodes-o.png"},
+        "flows":{img:"red/images/deploy-flows-o.png"}
     }
     
     var deploymentType = "full";
@@ -32,7 +32,7 @@ RED.deploy = (function() {
     function init() {
         
         var deployButton = $('<li><span class="deploy-button-group button-group">'+
-          '<a id="btn-deploy" class="action-deploy disabled" href="#"><img id="btn-icn-deploy" src="images/deploy-full-o.png"> <span>Deploy</span></a>'+
+          '<a id="btn-deploy" class="action-deploy disabled" href="#"><img id="btn-icn-deploy" src="red/images/deploy-full-o.png"> <span>Deploy</span></a>'+
           '<a id="btn-deploy-options"  data-toggle="dropdown"  class="" href="#"><i class="fa fa-caret-down"></i></a>'+
           '</span></li>').prependTo(".header-toolbar");
         
@@ -63,9 +63,9 @@ RED.deploy = (function() {
 
         RED.menu.init({id:"btn-deploy-options",
             options: [
-                {id:"btn-deploy-full",toggle:"deploy-type",icon:"images/deploy-full.png",label:"Full",sublabel:"Deploys everything in the workspace",onselect:function(s) { if(s){changeDeploymentType("full")}}},
-                {id:"btn-deploy-flow",toggle:"deploy-type",icon:"images/deploy-flows.png",label:"Modified Flows",sublabel:"Only deploys flows that contain changed nodes", onselect:function(s) {if(s){changeDeploymentType("flows")}}},
-                {id:"btn-deploy-node",toggle:"deploy-type",icon:"images/deploy-nodes.png",label:"Modified Nodes",sublabel:"Only deploys nodes that have changed",onselect:function(s) { if(s){changeDeploymentType("nodes")}}}
+                {id:"btn-deploy-full",toggle:"deploy-type",icon:"red/images/deploy-full.png",label:"Full",sublabel:"Deploys everything in the workspace",onselect:function(s) { if(s){changeDeploymentType("full")}}},
+                {id:"btn-deploy-flow",toggle:"deploy-type",icon:"red/images/deploy-flows.png",label:"Modified Flows",sublabel:"Only deploys flows that contain changed nodes", onselect:function(s) {if(s){changeDeploymentType("flows")}}},
+                {id:"btn-deploy-node",toggle:"deploy-type",icon:"red/images/deploy-nodes.png",label:"Modified Nodes",sublabel:"Only deploys nodes that have changed",onselect:function(s) { if(s){changeDeploymentType("nodes")}}}
             ]
         });
 

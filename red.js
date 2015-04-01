@@ -149,7 +149,21 @@ if (parsedArgs.userDir) {
     settings.userDir = parsedArgs.userDir;
 }
 
-RED.init(server,settings);
+try {
+    RED.init(server,settings);
+} catch(err) {
+    if (err.code == "not_built") {
+        console.log("Node-RED has not been built. See README.md for details");
+    } else {
+        console.log("Failed to start server:");
+        if (err.stack) {
+            console.log(err.stack);
+        } else {
+            console.log(err);
+        }
+    }
+    process.exit(1);
+}
 
 if (settings.httpAdminRoot !== false && settings.httpAdminAuth) {
     RED.log.warn("use of httpAdminAuth is deprecated. Use adminAuth instead");
