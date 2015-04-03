@@ -37,27 +37,6 @@ var libDir;
 var libFlowsDir;
 var globalSettingsFile;
 
-function listFiles(dir) {
-    var dirs = {};
-    var files = [];
-    var dirCount = 0;
-    return nodeFn.call(fs.readdir, dir).then(function (contents) {
-        contents.sort().forEach(function(fn) {
-            var stats = fs.lstatSync(dir+"/"+fn);
-            if (stats.isDirectory()) {
-                dirCount += 1;
-                dirs[fn] = listFiles(dir+"/"+fn)
-            } else {
-                files.push(fn.split(".")[0]);
-            }
-        })
-        var result = {};
-        if (dirCount > 0) { result.d = keys.all(dirs); }
-        if (files.length > 0) { result.f = when.resolve(files); }
-        return keys.all(result);
-    })
-}
-
 function getFileMeta(root,path) {
     var fn = fspath.join(root,path);
     var fd = fs.openSync(fn,"r");
@@ -312,30 +291,6 @@ var localfilesystem = {
         return writeFile(sessionsFile,JSON.stringify(sessions));
     },
     
-    getAllFlows: function() {
-        return listFiles(libFlowsDir);
-    },
-
-    getFlow: function(fn) {
-        var defer = when.defer();
-        var file = fspath.join(libFlowsDir,fn+".json");
-        fs.exists(file, function(exists) {
-            if (exists) {
-                defer.resolve(nodeFn.call(fs.readFile,file,'utf8'));
-            } else {
-                defer.reject();
-            }
-        });
-        return defer.promise;
-    },
-
-    saveFlow: function(fn,data) {
-        var file = fspath.join(libFlowsDir,fn+".json");
-        return promiseDir(fspath.dirname(file)).then(function () {
-            return writeFile(file,data);
-        });
-    },
-
     getLibraryEntry: function(type,path) {
         var root = fspath.join(libDir,type);
         var rootPath = fspath.join(libDir,type,path);
@@ -366,6 +321,15 @@ var localfilesystem = {
                     });
                     return dirs.concat(files);
                 });
+            }).otherwise(function(err) {
+                if (type === "flows" && !/\.json$/.test(path)) {
+                    return localfilesystem.getLibraryEntry(type,path+".json")
+                        .otherwise(function(e) {
+                            throw err;
+                        });
+                } else {
+                    throw err;
+                }
             });
         });
     },

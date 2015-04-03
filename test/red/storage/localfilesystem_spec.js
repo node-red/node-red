@@ -437,72 +437,6 @@ describe('LocalFileSystem', function() {
     });
     
     
-    
-    
-    it('should return an empty list of library flows',function(done) {
-        localfilesystem.init({userDir:userDir}).then(function() {
-            localfilesystem.getAllFlows().then(function(flows) {
-                flows.should.eql({});
-                done();
-            }).otherwise(function(err) {
-                done(err);
-            });
-        }).otherwise(function(err) {
-            done(err);
-        });
-    });
-
-    it('should return a valid list of library flows',function(done) {
-        localfilesystem.init({userDir:userDir}).then(function() {
-            var flowLib = path.join(userDir,"lib","flows");
-            fs.closeSync(fs.openSync(path.join(flowLib,"A.json"),"w"));
-            fs.closeSync(fs.openSync(path.join(flowLib,"B.json"),"w"));
-            fs.mkdirSync(path.join(flowLib,"C"));
-            fs.closeSync(fs.openSync(path.join(flowLib,"C","D.json"),"w"));
-            var testFlowsList = {"d":{"C":{"f":["D"]}},"f":["A","B"]};
-
-            localfilesystem.getAllFlows().then(function(flows) {
-                flows.should.eql(testFlowsList);
-                done();
-            }).otherwise(function(err) {
-                done(err);
-            });
-        }).otherwise(function(err) {
-            done(err);
-        });
-    });
-
-    it('should fail a non-existent flow', function(done) {
-        localfilesystem.init({userDir:userDir}).then(function() {
-            localfilesystem.getFlow("a/b/c.json").then(function(flow) {
-                should.fail(flow,"No flow","Flow found");
-            }).otherwise(function(err) {
-                // err should be null, so this will pass
-                done(err);
-            });
-        }).otherwise(function(err) {
-            done(err);
-        });
-    });
-
-    it('should return a flow',function(done) {
-        localfilesystem.init({userDir:userDir}).then(function() {
-            var testflowString = JSON.stringify(testFlow);
-            localfilesystem.saveFlow("a/b/c/d.json",testflowString).then(function() {
-                localfilesystem.getFlow("a/b/c/d.json").then(function(flow) {
-                    flow.should.eql(testflowString);
-                    done();
-                }).otherwise(function(err) {
-                    done(err);
-                });
-            }).otherwise(function(err) {
-                done(err);
-            });
-        }).otherwise(function(err) {
-            done(err);
-        });
-    });
-
     it('should return an empty list of library objects',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             localfilesystem.getLibraryEntry('object','').then(function(flows) {
@@ -529,14 +463,19 @@ describe('LocalFileSystem', function() {
         });
     });
 
-    function createObjectLibrary() {
-        var objLib = path.join(userDir,"lib","object");
-        fs.mkdirSync(objLib);
+    function createObjectLibrary(type) {
+        type = type ||"object";
+        var objLib = path.join(userDir,"lib",type);
+        try {
+            fs.mkdirSync(objLib);
+        } catch(err) {
+        }
         fs.mkdirSync(path.join(objLib,"A"));
         fs.mkdirSync(path.join(objLib,"B"));
         fs.mkdirSync(path.join(objLib,"B","C"));
         fs.writeFileSync(path.join(objLib,"file1.js"),"// abc: def\n// not a metaline \n\n Hi",'utf8');
         fs.writeFileSync(path.join(objLib,"B","file2.js"),"// ghi: jkl\n// not a metaline \n\n Hi",'utf8');
+        fs.writeFileSync(path.join(objLib,"B","flow.json"),"Hi",'utf8');
     }
 
     it('should return a directory listing of library objects',function(done) {
@@ -546,7 +485,7 @@ describe('LocalFileSystem', function() {
             localfilesystem.getLibraryEntry('object','').then(function(flows) {
                 flows.should.eql([ 'A', 'B', { abc: 'def', fn: 'file1.js' } ]);
                 localfilesystem.getLibraryEntry('object','B').then(function(flows) {
-                    flows.should.eql([ 'C', { ghi: 'jkl', fn: 'file2.js' } ]);
+                    flows.should.eql([ 'C', { ghi: 'jkl', fn: 'file2.js' }, { fn: 'flow.json' } ]);
                     localfilesystem.getLibraryEntry('object','B/C').then(function(flows) {
                         flows.should.eql([]);
                         done();
@@ -564,6 +503,19 @@ describe('LocalFileSystem', function() {
         });
     });
 
+    it('should load a flow library object with .json unspecified', function(done) {
+        localfilesystem.init({userDir:userDir}).then(function() {
+            createObjectLibrary("flows");
+            localfilesystem.getLibraryEntry('flows','B/flow').then(function(flows) {
+                flows.should.eql("Hi");
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+        });
+            
+    });
+    
     it('should return a library object',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             createObjectLibrary();
@@ -582,7 +534,7 @@ describe('LocalFileSystem', function() {
         localfilesystem.init({userDir:userDir}).then(function() {
             createObjectLibrary();
             localfilesystem.getLibraryEntry('object','B').then(function(flows) {
-                flows.should.eql([ 'C', { ghi: 'jkl', fn: 'file2.js' } ]);
+                flows.should.eql([ 'C', { ghi: 'jkl', fn: 'file2.js' }, {fn:'flow.json'} ]);
                 localfilesystem.saveLibraryEntry('object','B/D/file3.js',{mno:'pqr'},"// another non meta line\n\n Hi There").then(function() {
                     localfilesystem.getLibraryEntry('object','B/D').then(function(flows) {
                         flows.should.eql([ { mno: 'pqr', fn: 'file3.js' } ]);

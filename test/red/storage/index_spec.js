@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+var when = require("when");
 var should = require("should");
 var storage = require("../../../red/storage/index");
 
@@ -137,6 +138,81 @@ describe("red/storage/index", function() {
         calledFlagGetFlows.should.be.true;
         calledFlagGetCredentials.should.be.true;
         calledFlagGetAllFlows.should.be.true;
+    });
+    
+    describe('respects deprecated flow library functions', function() {
+        
+        var savePath;
+        var saveContent;
+        var saveMeta;
+        var saveType;
+        
+        var interfaceCheckerModule = {
+                init : function (settings) {
+                    settings.should.be.an.Object;
+                },
+                getLibraryEntry : function(type, path) {
+                    if (type === "flows") {
+                        if (path == "/") {
+                            return when.resolve(["a",{fn:"test.json"}]);
+                        } else if (path == "/a") {
+                            return when.resolve([{fn:"test2.json"}]);
+                        } else if (path == "/a/test2.json") {
+                            return when.resolve("test content");
+                        }
+                    }
+                },
+                saveLibraryEntry : function(type, path, meta, body) {
+                    saveType = type;
+                    savePath = path;
+                    saveContent = body;
+                    saveMeta = meta;
+                    return when.resolve();
+                }
+        };
+        
+        var moduleToLoad = {
+            storageModule : interfaceCheckerModule
+        };
+        before(function() {
+            storage.init(moduleToLoad);
+        });
+        it('getAllFlows',function(done) {
+            storage.getAllFlows().then(function (res) {
+                try {
+                    res.should.eql({ d: { a: { f: ['test2'] } }, f: [ 'test' ] });
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
+        
+        it('getFlow',function(done) {
+            storage.getFlow("/a/test2.json").then(function(res) {
+                try {
+                    res.should.eql("test content");
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
+        
+        it ('saveFlow', function (done) {
+            storage.saveFlow("/a/test2.json","new content").then(function(res) {
+                try {
+                    savePath.should.eql("/a/test2.json");
+                    saveContent.should.eql("new content");
+                    saveMeta.should.eql({});
+                    saveType.should.eql("flows");
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+                
+        });
     });
     
     describe('handles missing settings/sessions interface', function() {
