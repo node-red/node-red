@@ -103,6 +103,7 @@ function start() {
                         redNodes.cleanModuleList();
                     }
                 }
+                log.info("Settings file  : "+settings.settingsFile);
                 redNodes.loadFlows();
             }).otherwise(function(err) {
                 console.log(err);
