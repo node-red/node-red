@@ -74,7 +74,7 @@ module.exports = {
         });
     },
     get: function(req,res) {
-        storage.getFlow(req.params[0]).then(function(data) {
+        storage.getLibraryEntry("flows",req.params[0]).then(function(data) {
             // data is already a JSON string
             res.set('Content-Type', 'application/json');
             res.send(data);
@@ -91,7 +91,7 @@ module.exports = {
     },
     post: function(req,res) {
         var flow = JSON.stringify(req.body);
-        storage.saveFlow(req.params[0],flow).then(function() {
+        storage.saveLibraryEntry("flows",req.params[0],{},flow).then(function() {
             res.send(204);
         }).otherwise(function(err) {
             log.warn("Error loading flow '"+req.params[0]+"' : "+err);
