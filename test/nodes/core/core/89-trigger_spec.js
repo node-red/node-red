@@ -15,10 +15,8 @@
  **/
 
 var should = require("should");
-
-var triggerNode = require("../../../../nodes/core/core/89-trigger.js");
 var helper = require("../../helper.js");
-
+var triggerNode = require("../../../../nodes/core/core/89-trigger.js");
 
 describe('trigger Node', function() {
 
@@ -222,7 +220,7 @@ describe('trigger Node', function() {
                 else {
                     msg.should.have.a.property("payload", "World");
                     //console.log(Date.now() - ss);
-                    (Date.now() - ss).should.be.greaterThan(399);
+                    (Date.now() - ss).should.be.greaterThan(380);
                     done();
                 }
             });
