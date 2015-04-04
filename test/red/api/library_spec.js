@@ -76,7 +76,7 @@ describe("library api", function() {
             app.get(new RegExp("/library/flows\/(.*)"),library.get);                
         });
         it('returns empty result', function(done) {
-            initStorage({});
+            initStorage({},{flows:{}});
             request(app)
                 .get('/library/flows')
                 .expect(200)
@@ -91,7 +91,7 @@ describe("library api", function() {
         });
 
         it('returns 404 for non-existent entry', function(done) {
-            initStorage({});
+            initStorage({},{flows:{}});
             request(app)
                 .get('/library/flows/foo')
                 .expect(404)
@@ -100,7 +100,7 @@ describe("library api", function() {
         
         
         it('can store and retrieve item', function(done) {
-            initStorage({});
+            initStorage({},{flows:{}});
             var flow = '[]';
             request(app)
                 .post('/library/flows/foo')
