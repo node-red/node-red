@@ -13,10 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-var registry = require("./registry");
+var registry;
 var credentials = require("./credentials");
 var flows = require("./flows");
 var Node = require("./Node");
+
+/**
+ * selects registry engine
+ * @param settings - the settings for node-red
+ */
+
+function moduleSelector(aSettings) {
+    var toReturn;
+    if (aSettings.registryModule) {
+        if (typeof aSettings.registryModule === "string") {
+            // TODO: allow storage modules to be specified by absolute path
+            toReturn = require("./"+aSettings.registryModule);
+        } else {
+            toReturn = aSettings.registryModule;
+        }
+    } else {
+        toReturn = require("./registry");
+    }
+    return toReturn;
+}
 
 /**
  * Registers a node constructor
@@ -49,11 +69,85 @@ function createNode(node,def) {
         node.credentials = creds;
     }
 }
+    
+var nodeInterface = {
+    init:function (_settings,storage,app) {
+        registry = moduleSelector(_settings);
+        credentials.init(storage,app);
+        flows.init(storage);
+        return registry.init(_settings);
+    },
 
-function init(_settings,storage,app) {
-    credentials.init(storage,app);
-    flows.init(storage);
-    registry.init(_settings);
+    load: function(defaultNodesDir,disableNodePathScan) {
+        return registry.load(defaultNodesDir,disableNodePathScan)
+    },
+
+    // Node registry
+    createNode: createNode,
+    getNode: flows.get,
+    eachNode: flows.eachNode,
+
+    addModule: function(module) {
+        return registry.addModule(module)
+    },
+
+    removeModule: removeModule,
+
+    enableNode: function(typeOrId) {
+        return registry.enableNode(typeOrId)
+    },
+
+    disableNode: disableNode,
+
+    // Node type registry
+    registerType: registerType,
+    
+    getType: function(type) {
+        return registry.get(type)
+    },
+
+    getNodeInfo: function(typeOrId) {
+        return registry.getNodeInfo(typeOrId)
+    },
+
+    getNodeList: function(filter) {
+        return registry.getNodeList(filter)
+    },
+
+    getModuleInfo: function(module) {
+        return registry.getModuleInfo(module)
+    },
+
+    getModuleList: function() {
+        return registry.getModuleList()
+    },
+
+    getNodeConfigs: function() {
+        return registry.getNodeConfigs()
+    },
+
+    getNodeConfig: function(id) {
+        return registry.getNodeConfig(id)
+    },
+
+    clearRegistry: function() {
+        return registry.clear()
+    },
+
+    cleanModuleList: function() {
+        return registry.cleanModuleList()
+    },
+
+    // Flow handling
+    loadFlows: flows.load,
+    stopFlows: flows.stopFlows,
+    setFlows: flows.setFlows,
+    getFlows: flows.getFlows,
+
+    // Credentials
+    addCredentials: credentials.add,
+    getCredentials: credentials.get,
+    deleteCredentials: credentials.delete
 }
 
 function checkTypeInUse(id) {
@@ -103,47 +197,4 @@ function disableNode(id) {
     return registry.disableNode(id);
 }
 
-module.exports = {
-    // Lifecycle
-    init: init,
-    load: registry.load,
-
-    // Node registry
-    createNode: createNode,
-    getNode: flows.get,
-    eachNode: flows.eachNode,
-
-    addModule: registry.addModule,
-    removeModule: removeModule,
-
-    enableNode: registry.enableNode,
-    disableNode: disableNode,
-
-    // Node type registry
-    registerType: registerType,
-    getType: registry.get,
-
-    getNodeInfo: registry.getNodeInfo,
-    getNodeList: registry.getNodeList,
-
-    getModuleInfo: registry.getModuleInfo,
-    getModuleList: registry.getModuleList,
-
-    getNodeConfigs: registry.getNodeConfigs,
-    getNodeConfig: registry.getNodeConfig,
-
-    clearRegistry: registry.clear,
-    cleanModuleList: registry.cleanModuleList,
-
-    // Flow handling
-    loadFlows: flows.load,
-    stopFlows: flows.stopFlows,
-    setFlows: flows.setFlows,
-    getFlows: flows.getFlows,
-
-    // Credentials
-    addCredentials: credentials.add,
-    getCredentials: credentials.get,
-    deleteCredentials: credentials.delete
-};
-
+module.exports = nodeInterface;
