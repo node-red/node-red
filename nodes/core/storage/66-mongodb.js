@@ -163,6 +163,7 @@ module.exports = function(RED) {
 
         if (this.mongoConfig) {
             var node = this;
+            var selector;
             MongoClient.connect(this.mongoConfig.url, function(err,db) {
                 if (err) {
                     node.error(err);
@@ -183,7 +184,7 @@ module.exports = function(RED) {
                         }
                         if (node.operation === "find") {
                             msg.projection = msg.projection || {};
-                            var selector = ensureValidSelectorObject(msg.payload);
+                            selector = ensureValidSelectorObject(msg.payload);
                             var limit = msg.limit;
                             if (typeof limit === "string" && !isNaN(limit)) {
                                 limit = Number(limit);
@@ -206,7 +207,7 @@ module.exports = function(RED) {
                                 }
                             });
                         } else if (node.operation === "count") {
-                            var selector = ensureValidSelectorObject(msg.payload);
+                            selector = ensureValidSelectorObject(msg.payload);
                             coll.count(selector, function(err, count) {
                                 if (err) {
                                     node.error(err);
