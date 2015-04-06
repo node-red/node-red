@@ -130,7 +130,7 @@ var nodeInterface = {
         return registry.getNodeConfig(id)
     },
 
-    clearRegistry: function() {
+    clear: function() {
         return registry.clear()
     },
 
