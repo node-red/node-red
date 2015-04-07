@@ -36,7 +36,7 @@ function load(defaultNodesDir,disableNodePathScan) {
 }
 
 function loadNodeFiles(nodeFiles) {
-    var nodes = [];
+    var promises = [];
     for (var module in nodeFiles) {
         /* istanbul ignore else */
         if (nodeFiles.hasOwnProperty(module)) {
@@ -45,7 +45,7 @@ function loadNodeFiles(nodeFiles) {
                     /* istanbul ignore else */
                     if (nodeFiles[module].nodes.hasOwnProperty(node)) {
                         try {
-                            nodes.push(loadNodeConfig(nodeFiles[module].nodes[node]))
+                            promises.push(loadNodeConfig(nodeFiles[module].nodes[node]))
                         } catch(err) {
                             //
                         }
@@ -54,68 +54,72 @@ function loadNodeFiles(nodeFiles) {
             }
         }
     }
-    return loadNodeSetList(nodes);
+    return when.settle(promises).then(function(results) {
+        var nodes = results.map(function(r) { return r.value; });
+        return loadNodeSetList(nodes);
+    });
 }
 
 function loadNodeConfig(fileInfo) {
-    var file = fileInfo.file;
-    var module = fileInfo.module;
-    var name = fileInfo.name;
-    var version = fileInfo.version;
-    
-    var id = module + "/" + name;
-    var info = registry.getNodeInfo(id);
-    var isEnabled = true;
-    if (info) {
-        if (info.hasOwnProperty("loaded")) {
-            throw new Error(file+" already loaded");
-        }
-        isEnabled = info.enabled;
-    }
-
-    var node = {
-        id: id,
-        module: module,
-        name: name,
-        file: file,
-        template: file.replace(/\.js$/,".html"),
-        enabled: isEnabled,
-        loaded:false
-    };
-
-    try {
-        var content = fs.readFileSync(node.template,'utf8');
-
-        var types = [];
-
-        var regExp = /<script ([^>]*)data-template-name=['"]([^'"]*)['"]/gi;
-        var match = null;
-
-        while((match = regExp.exec(content)) !== null) {
-            types.push(match[2]);
-        }
-        node.types = types;
-        node.config = content;
-
-        // TODO: parse out the javascript portion of the template
-        //node.script = "";
-        for (var i=0;i<node.types.length;i++) {
-            if (registry.getTypeId(node.types[i])) {
-                node.err = node.types[i]+" already registered";
-                break;
+    return when.promise(function(resolve) {
+        var file = fileInfo.file;
+        var module = fileInfo.module;
+        var name = fileInfo.name;
+        var version = fileInfo.version;
+        
+        var id = module + "/" + name;
+        var info = registry.getNodeInfo(id);
+        var isEnabled = true;
+        if (info) {
+            if (info.hasOwnProperty("loaded")) {
+                throw new Error(file+" already loaded");
             }
+            isEnabled = info.enabled;
         }
-    } catch(err) {
-        node.types = [];
-        if (err.code === 'ENOENT') {
-            node.err = "Error: "+file+" does not exist";
-        } else {
-            node.err = err.toString();
-        }
-    }
-
-    registry.addNodeSet(id,node,version);
-    return node;
+    
+        var node = {
+            id: id,
+            module: module,
+            name: name,
+            file: file,
+            template: file.replace(/\.js$/,".html"),
+            enabled: isEnabled,
+            loaded:false
+        };
+    
+        fs.readFile(node.template,'utf8', function(err,content) {
+            if (err) {
+                node.types = [];
+                if (err.code === 'ENOENT') {
+                    node.err = "Error: "+file+" does not exist";
+                } else {
+                    node.err = err.toString();
+                }
+            } else {                
+                var types = [];
+        
+                var regExp = /<script ([^>]*)data-template-name=['"]([^'"]*)['"]/gi;
+                var match = null;
+        
+                while((match = regExp.exec(content)) !== null) {
+                    types.push(match[2]);
+                }
+                node.types = types;
+                node.config = content;
+        
+                // TODO: parse out the javascript portion of the template
+                //node.script = "";
+                for (var i=0;i<node.types.length;i++) {
+                    if (registry.getTypeId(node.types[i])) {
+                        node.err = node.types[i]+" already registered";
+                        break;
+                    }
+                }
+            }
+            registry.addNodeSet(id,node,version);
+            resolve(node);
+        });
+    });
 }
 
 
