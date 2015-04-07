@@ -64,6 +64,7 @@ function start() {
             log.info("Loading palette nodes");
             redNodes.init(settings,storage,app);
             redNodes.load().then(function() {
+                    
                 var i;
                 var nodeErrors = redNodes.getNodeList(function(n) { return n.err!=null;});
                 var nodeMissing = redNodes.getNodeList(function(n) { return n.module && n.enabled && !n.loaded && !n.err;});

@@ -19,18 +19,17 @@ var sinon = require("sinon");
 var path = require("path");
 var when = require("when");
 
-var RedNodes = require("../../../red/nodes");
-var RedNode = require("../../../red/nodes/Node");
-var typeRegistry = require("../../../red/nodes/registry");
-var events = require("../../../red/events");
+var RedNodes = require("../../../../red/nodes");
+var RedNode = require("../../../../red/nodes/Node");
+var typeRegistry = require("../../../../red/nodes/registry");
+var events = require("../../../../red/events");
 
 afterEach(function() {
     typeRegistry.clear();
 });
 
-describe('red/nodes/registry', function() {
-
-    var resourcesDir = __dirname+ path.sep + "resources" + path.sep;
+describe('red/nodes/registry/index', function() {
+    var resourcesDir = path.join(__dirname,"..","resources",path.sep);
 
     function stubSettings(s,available,initialConfig) {
         s.available =  function() {return available;};
@@ -40,52 +39,7 @@ describe('red/nodes/registry', function() {
     }
     var settings = stubSettings({},false,null);
     var settingsWithStorage = stubSettings({},true,null);
-    var settingsWithStorageAndInitialConfig = stubSettings({},true,{"node-red":{module:"testModule",name:"testName",version:"testVersion",nodes:{"node":{id:"node-red/testName",name:"test",types:["a","b"],enabled:true}}}});
 
-    it('loads initial config', function(done) {
-        typeRegistry.init(settingsWithStorageAndInitialConfig);
-        typeRegistry.getNodeList().should.have.lengthOf(1);
-        done();
-    });
-    
-    it('migrates legacy format', function(done) {
-        var settings = {
-            available: function() { return true; },
-            set: sinon.stub().returns(when.resolve()),
-            get: function() { return {
-                "123": {
-                    "name": "72-sentiment.js",
-                    "types": [
-                        "sentiment"
-                    ],
-                    "enabled": true
-                },
-                "456": {
-                    "name": "20-inject.js",
-                    "types": [
-                        "inject"
-                    ],
-                    "enabled": true
-                },
-                "789": {
-                    "name": "testModule:a-module.js",
-                    "types": [
-                        "example"
-                    ],
-                    "enabled":true,
-                    "module":"testModule"
-                }
-             }}
-        };
-        var expected = JSON.parse('{"node-red":{"name":"node-red","nodes":{"sentiment":{"name":"sentiment","types":["sentiment"],"enabled":true,"module":"node-red"},"inject":{"name":"inject","types":["inject"],"enabled":true,"module":"node-red"}}},"testModule":{"name":"testModule","nodes":{"a-module.js":{"name":"a-module.js","types":["example"],"enabled":true,"module":"testModule"}}}}');
-        typeRegistry.init(settings);
-        settings.set.calledOnce.should.be.true;
-        settings.set.args[0][1].should.eql(expected);
-        done();
-
-            
-    });
-    
     it('handles nodes that export a function', function(done) {
         typeRegistry.init(settings);
         typeRegistry.load(resourcesDir + "TestNode1",true).then(function() {
@@ -376,7 +330,6 @@ describe('red/nodes/registry', function() {
         }).finally(function() {
             settingsSave.restore();
         });
-
     });
 
     it('returns node info by type or id', function(done) {
