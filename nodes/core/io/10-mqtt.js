@@ -39,32 +39,38 @@ module.exports = function(RED) {
     function MQTTInNode(n) {
         RED.nodes.createNode(this,n);
         this.topic = n.topic;
+				this.trigger = n.trigger;
         this.broker = n.broker;
         this.brokerConfig = RED.nodes.getNode(this.broker);
         if (this.brokerConfig) {
             this.status({fill:"red",shape:"ring",text:"disconnected"});
             this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.brokerConfig.clientid,this.brokerConfig.username,this.brokerConfig.password);
             var node = this;
-            if (this.topic) {
-                this.client.subscribe(this.topic,2,function(topic,payload,qos,retain) {
-                    if (isUtf8(payload)) { payload = payload.toString(); }
-                    var msg = {topic:topic,payload:payload,qos:qos,retain:retain};
-                    if ((node.brokerConfig.broker === "localhost")||(node.brokerConfig.broker === "127.0.0.1")) {
-                        msg._topic = topic;
-                    }
-                    node.send(msg);
-                });
-                this.client.on("connectionlost",function() {
-                    node.status({fill:"red",shape:"ring",text:"disconnected"});
-                });
-                this.client.on("connect",function() {
-                    node.status({fill:"green",shape:"dot",text:"connected"});
-                });
-                this.client.connect();
-            }
-            else {
-                this.error("topic not defined");
-            }
+						if (node.trigger === "Topic") {
+								this.client.subscribe(this.topic,2,function(topic,payload,qos,retain) {
+										if (isUtf8(payload)) { payload = payload.toString(); }
+										var msg = {topic:topic,payload:payload,qos:qos,retain:retain};
+										if ((node.brokerConfig.broker === "localhost")||(node.brokerConfig.broker === "127.0.0.1")) {
+												msg._topic = topic;
+										}
+										node.send(msg);
+								});
+						}
+            this.client.on("connectionlost",function() {
+                node.status({fill:"red",shape:"ring",text:"disconnected"});
+								if (node.trigger === "Disconnection") {
+										var msg = {payload:"Disconnected from MQTT Broker"};
+										node.send(msg);
+								}
+            });
+            this.client.on("connect",function() {
+                node.status({fill:"green",shape:"dot",text:"connected"});
+								if (node.trigger === "Connection") {
+										var msg = {payload:"Connected to MQTT Broker"};
+										node.send(msg);
+								}
+            });
+            this.client.connect();
         } else {
             this.error("missing broker configuration");
         }
