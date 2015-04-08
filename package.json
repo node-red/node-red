@@ -40,7 +40,6 @@
         "oauth":"0.9.12",
         "xml2js":"0.4.4",
         "sentiment":"0.2.3",
-        "irc":"0.3.9",
         "follow-redirects":"0.0.3",
         "cors":"2.5.3",
         "mkdirp":"0.5.0",
@@ -51,7 +50,6 @@
         "request":"2.42.0",
         "on-headers":"1.0.0",
         "is-utf8":"0.2.0",
-        "serialport":"1.4.10",
         "feedparser":"0.19.2",
         "fs.notify":"0.0.4",
         "passport":"0.2.1",
@@ -60,6 +58,8 @@
         "oauth2orize":"1.0.1"
     },
     "optionalDependencies": {
+        "irc":"0.3.9",
+        "serialport":"1.4.10",
         "bcrypt":"0.8.1"
     },
     "devDependencies": {
