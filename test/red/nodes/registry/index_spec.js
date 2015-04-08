@@ -307,22 +307,34 @@ describe('red/nodes/registry/index', function() {
         typeRegistry.load("wontexist",true).then(function() {
             var nodeList = typeRegistry.getNodeList();
             var moduleList = typeRegistry.getModuleList();
+            Object.keys(moduleList).should.have.length(1);
+            moduleList.should.have.a.property("node-red");
+            Object.keys(moduleList["node-red"].nodes).should.have.length(3);
+            
             nodeList.should.be.Array.and.have.length(3);
-            moduleList.should.be.Array.and.have.length(1);
 
             settingsSave.callCount.should.equal(1);
             settingsSave.firstCall.args[0].should.be.equal("nodes");
             var savedList = settingsSave.firstCall.args[1];
+     
+            moduleList['node-red'].nodes['TestNode1'].should.have.a.property("id","node-red/TestNode1");
+            moduleList['node-red'].nodes['TestNode1'].should.have.a.property("name","TestNode1");
+            moduleList['node-red'].nodes['TestNode1'].should.have.a.property("module","node-red");
+            moduleList['node-red'].nodes['TestNode1'].should.have.a.property("file");
+            moduleList['node-red'].nodes['TestNode1'].should.have.a.property("enabled",true);
+            moduleList['node-red'].nodes['TestNode1'].should.have.a.property("types");
+            moduleList['node-red'].nodes['TestNode1'].should.have.a.property("config");
+            moduleList['node-red'].nodes['TestNode1'].should.have.a.property("template");
 
-            savedList[moduleList[0].name].name.should.equal(moduleList[0].name);
-
-            savedList[moduleList[0].name].nodes[moduleList[0].nodes[0].name].name.should.equal(moduleList[0].nodes[0].name);
-            savedList[moduleList[0].name].nodes[moduleList[0].nodes[1].name].name.should.equal(moduleList[0].nodes[1].name);
-            savedList[moduleList[0].name].nodes[moduleList[0].nodes[2].name].name.should.equal(moduleList[0].nodes[2].name);
-
-            savedList[moduleList[0].name].nodes[moduleList[0].nodes[0].name].should.not.have.property("err");
-            savedList[moduleList[0].name].nodes[moduleList[0].nodes[1].name].should.not.have.property("err");
-            savedList[moduleList[0].name].nodes[moduleList[0].nodes[2].name].should.not.have.property("err");
+            savedList['node-red'].nodes['TestNode1'].should.not.have.a.property("id");
+            savedList['node-red'].nodes['TestNode1'].should.have.a.property("name",moduleList['node-red'].nodes['TestNode1'].name);
+            savedList['node-red'].nodes['TestNode1'].should.have.a.property("module",moduleList['node-red'].nodes['TestNode1'].module);
+            savedList['node-red'].nodes['TestNode1'].should.have.a.property("file",moduleList['node-red'].nodes['TestNode1'].file);
+            savedList['node-red'].nodes['TestNode1'].should.have.a.property("enabled",moduleList['node-red'].nodes['TestNode1'].enabled);
+            savedList['node-red'].nodes['TestNode1'].should.have.a.property("types",moduleList['node-red'].nodes['TestNode1'].types);
+            savedList['node-red'].nodes['TestNode1'].should.not.have.a.property("config");
+            savedList['node-red'].nodes['TestNode1'].should.not.have.a.property("template");
+            
 
             done();
         }).catch(function(e) {
@@ -415,10 +427,12 @@ describe('red/nodes/registry/index', function() {
 
             typeRegistry.addModule("TestNodeModule").then(function() {
                 var list = typeRegistry.getModuleList();
-                list.should.be.an.Array.and.have.lengthOf(1);
-                list[0].should.have.property("name", "TestNodeModule");
-                list[0].should.have.property("nodes");
-                list[0].nodes.should.be.an.Array.and.have.lengthOf(2);
+                Object.keys(list).should.have.length(1);
+                list.should.have.a.property("TestNodeModule");
+                Object.keys(list["TestNodeModule"].nodes).should.have.length(2);
+
+                list["TestNodeModule"].nodes["TestNodeMod1"].should.have.property("name", "TestNodeMod1");
+                list["TestNodeModule"].nodes["TestNodeMod2"].should.have.property("name", "TestNodeMod2");
 
                 done();
             }).catch(function(e) {
@@ -656,8 +670,8 @@ describe('red/nodes/registry/index', function() {
 
                 var modules = typeRegistry.getModuleList();
 
-                modules[0].should.have.property("name","TestNodeModule");
-                modules[0].should.have.property("version","0.0.1");
+                modules.should.have.property("TestNodeModule");
+                modules["TestNodeModule"].should.have.property("version","0.0.1");
 
                 done();
             }).catch(function(e) {

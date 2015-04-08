@@ -31,6 +31,11 @@ function init(_settings) {
 }
 
 function load(defaultNodesDir,disableNodePathScan) {
+    // To skip node scan, the following line will use the stored node list.
+    // We should expose that as an option at some point, although the
+    // performance gains are minimal.
+    //return loadNodeFiles(registry.getModuleList());
+    
     var nodeFiles = localfilesystem.getNodeFiles(defaultNodesDir,disableNodePathScan);
     return loadNodeFiles(nodeFiles);
 }
@@ -41,9 +46,31 @@ function loadNodeFiles(nodeFiles) {
         /* istanbul ignore else */
         if (nodeFiles.hasOwnProperty(module)) {
             if (!registry.getModuleInfo(module)) {
+                var first = true;
                 for (var node in nodeFiles[module].nodes) {
                     /* istanbul ignore else */
                     if (nodeFiles[module].nodes.hasOwnProperty(node)) {
+                        if (module != "node-red" && first) {
+                            // Check the module directory exists
+                            first = false;
+                            var fn = nodeFiles[module].nodes[node].file;
+                            var parts = fn.split("/");
+                            var i = parts.length-1;
+                            for (;i>=0;i--) {
+                                if (parts[i] == "node_modules") {
+                                    break;
+                                }
+                            }
+                            var moduleFn = parts.slice(0,i+2).join("/");
+                            
+                            try {
+                                var stat = fs.statSync(moduleFn);
+                            } catch(err) {
+                                // Module not found, don't attempt to load its nodes
+                                break;
+                            }
+                        }
+                        
                         try {
                             promises.push(loadNodeConfig(nodeFiles[module].nodes[node]))
                         } catch(err) {
@@ -55,7 +82,10 @@ function loadNodeFiles(nodeFiles) {
         }
     }
     return when.settle(promises).then(function(results) {
-        var nodes = results.map(function(r) { return r.value; });
+        var nodes = results.map(function(r) {
+            registry.addNodeSet(r.value.id,r.value,r.value.version);
+            return r.value;
+        });
         return loadNodeSetList(nodes);
     });
 }
@@ -84,15 +114,23 @@ function loadNodeConfig(fileInfo) {
             file: file,
             template: file.replace(/\.js$/,".html"),
             enabled: isEnabled,
-            loaded:false
+            loaded:false,
+            version: version
         };
+        if (fileInfo.hasOwnProperty("types")) {
+            node.types = fileInfo.types;
+        }
     
         fs.readFile(node.template,'utf8', function(err,content) {
             if (err) {
                 node.types = [];
                 if (err.code === 'ENOENT') {
+                    if (!node.types) {
+                        node.types = [];
+                    }
                     node.err = "Error: "+file+" does not exist";
                 } else {
+                    node.types = [];
                     node.err = err.toString();
                 }
             } else {                
@@ -116,7 +154,6 @@ function loadNodeConfig(fileInfo) {
                     }
                 }
             }
-            registry.addNodeSet(id,node,version);
             resolve(node);
         });
     });

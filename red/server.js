@@ -63,7 +63,7 @@ function start() {
             log.info("Node.js  version: "+process.version);
             log.info("Loading palette nodes");
             redNodes.init(settings,storage,app);
-            redNodes.load().then(function() {
+            return redNodes.load().then(function() {
                     
                 var i;
                 var nodeErrors = redNodes.getNodeList(function(n) { return n.err!=null;});
@@ -106,10 +106,10 @@ function start() {
                 }
                 log.info("Settings file  : "+settings.settingsFile);
                 redNodes.loadFlows();
+                comms.start();
             }).otherwise(function(err) {
                 console.log(err);
             });
-            comms.start();
     });
 }
 

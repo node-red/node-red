@@ -158,7 +158,6 @@ function addNodeSet(id,set,version) {
             nodeTypeToId[t] = id;
         });
     }
-
     moduleNodes[set.module] = moduleNodes[set.module]||[];
     moduleNodes[set.module].push(set.name);
 
@@ -262,14 +261,16 @@ function getNodeList(filter) {
 }
 
 function getModuleList() {
-    var list = [];
-    for (var module in moduleNodes) {
-        /* istanbul ignore else */
-        if (moduleNodes.hasOwnProperty(module)) {
-            list.push(registry.getModuleInfo(module));
-        }
-    }
-    return list;
+    //var list = [];
+    //for (var module in moduleNodes) {
+    //    /* istanbul ignore else */
+    //    if (moduleNodes.hasOwnProperty(module)) {
+    //        list.push(registry.getModuleInfo(module));
+    //    }
+    //}
+    //return list;
+    return moduleConfigs;
+        
 }
 
 function getModuleInfo(module) {
@@ -437,16 +438,18 @@ function cleanModuleList() {
                         }
                     }
                 }
-            } else if (moduleConfigs[mod] && !moduleNodes[mod]) {
-                // For node modules, look for missing ones
-                for (node in nodes) {
-                    /* istanbul ignore else */
-                    if (nodes.hasOwnProperty(node)) {
-                        removeNode(mod+"/"+node);
-                        removed = true;
+            } else {
+                if (moduleConfigs[mod] && !moduleNodes[mod]) {
+                    // For node modules, look for missing ones
+                    for (node in nodes) {
+                        /* istanbul ignore else */
+                        if (nodes.hasOwnProperty(node)) {
+                            removeNode(mod+"/"+node);
+                            removed = true;
+                        }
                     }
+                    delete moduleConfigs[mod];
                 }
-                delete moduleConfigs[mod];
             }
         }
     }

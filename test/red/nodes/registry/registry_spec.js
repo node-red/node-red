@@ -117,12 +117,26 @@ describe("red/nodes/registry/registry",function() {
            typeRegistry.init(settings);
            
            typeRegistry.getNodeList().should.have.lengthOf(0);
-           typeRegistry.getModuleList().should.have.lengthOf(0);
+           typeRegistry.getModuleList().should.eql({});
            
            typeRegistry.addNodeSet("test-module/test-name",testNodeSet1, "0.0.1");
            
            typeRegistry.getNodeList().should.have.lengthOf(1);
-           typeRegistry.getModuleList().should.have.lengthOf(1);
+           var moduleList = typeRegistry.getModuleList();
+           moduleList.should.have.a.property("test-module");
+           moduleList["test-module"].should.have.a.property("name","test-module");
+           moduleList["test-module"].should.have.a.property("version","0.0.1");
+           moduleList["test-module"].should.have.a.property("nodes");
+           moduleList["test-module"].nodes.should.have.a.property("test-name");
+           
+           moduleList["test-module"].nodes["test-name"].should.eql({
+                   id: 'test-module/test-name',
+                   module: 'test-module',
+                   name: 'test-name',
+                   enabled: true,
+                   loaded: false,
+                   types: [ 'test-a', 'test-b' ]
+           });
                
        });
        
@@ -130,20 +144,36 @@ describe("red/nodes/registry/registry",function() {
            
            typeRegistry.init(settings);
            typeRegistry.getNodeList().should.have.lengthOf(0);
-           typeRegistry.getModuleList().should.have.lengthOf(0);
+           typeRegistry.getModuleList().should.eql({});
            
            typeRegistry.addNodeSet("test-module/test-name",testNodeSet1, "0.0.1");
+           
+           typeRegistry.getNodeList().should.have.lengthOf(1);
+           var moduleList = typeRegistry.getModuleList();
+           Object.keys(moduleList).should.have.a.lengthOf(1);
+           moduleList.should.have.a.property("test-module");
+           moduleList["test-module"].should.have.a.property("name","test-module");
+           moduleList["test-module"].should.have.a.property("version","0.0.1");
+           moduleList["test-module"].should.have.a.property("nodes");
+           
+           Object.keys(moduleList["test-module"].nodes).should.have.a.lengthOf(1);
+           moduleList["test-module"].nodes.should.have.a.property("test-name");
+
            
            typeRegistry.addNodeSet("test-module/test-name-2",testNodeSet2);
            
            typeRegistry.getNodeList().should.have.lengthOf(2);
-           typeRegistry.getModuleList().should.have.lengthOf(1);
+           moduleList = typeRegistry.getModuleList();
+           Object.keys(moduleList).should.have.a.lengthOf(1);
+           Object.keys(moduleList["test-module"].nodes).should.have.a.lengthOf(2);
+           moduleList["test-module"].nodes.should.have.a.property("test-name");
+           moduleList["test-module"].nodes.should.have.a.property("test-name-2");
        });
        
        it('doesnt add node set types if node set has an error', function() {
            typeRegistry.init(settings);
            typeRegistry.getNodeList().should.have.lengthOf(0);
-           typeRegistry.getModuleList().should.have.lengthOf(0);
+           typeRegistry.getModuleList().should.eql({});
            
            typeRegistry.addNodeSet("test-module/test-name",testNodeSet1, "0.0.1");
            
