@@ -152,8 +152,24 @@ describe("ui api", function() {
                     done();
                 });
         });
-        
-        
+    });
+    
+    describe("editor ui resource handler", function() {
+        before(function() {
+            app = express();
+            app.use("/",ui.editorResources);
+        });
+        it('serves the editor resources', function(done) {
+            request(app)
+                .get("/favicon.ico")
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    done();
+                });
+        });
     });
 
     

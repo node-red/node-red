@@ -42,9 +42,9 @@ function init(adminApp,storage) {
     // Editor
     if (!settings.disableEditor) {
         var editorApp = express();
-        editorApp.get("/",ui.ensureSlash);
+        editorApp.get("/",ui.ensureSlash,ui.editor);
         editorApp.get("/icons/:icon",ui.icon);
-        editorApp.use("/",ui.editor);
+        editorApp.use("/",ui.editorResources);
         adminApp.use(editorApp);
     }
 

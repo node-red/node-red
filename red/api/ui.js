@@ -55,5 +55,8 @@ module.exports = {
             res.sendfile(defaultIcon);
         }
     },
-    editor: express.static(__dirname + '/../../public')
+    editor: function(req,res) {
+        res.sendfile(path.resolve(__dirname + '/../../public/index.html'));
+    },
+    editorResources: express.static(__dirname + '/../../public')
 };
