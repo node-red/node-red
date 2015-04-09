@@ -187,7 +187,10 @@ module.exports = function(grunt) {
                 script: 'red.js',
                 options: {
                     args:['-v'],
-                    ext: 'js,html'
+                    ext: 'js,html',
+                    watch: [
+                        'red','nodes'
+                    ]
                 }
             }
         },
