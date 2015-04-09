@@ -138,6 +138,18 @@ module.exports = function(grunt) {
                 }]
             }
         },
+        attachCopyright: {
+            js: {
+                src: [
+                    'public/red/red.min.js'
+                ]
+            },
+            css: {
+                src: [
+                    'public/red/style.min.css'
+                ]
+            }
+        },
         clean: {
             build: {
                 src: [
@@ -159,13 +171,13 @@ module.exports = function(grunt) {
                 files: [
                     'editor/js/**/*.js'
                 ],
-                tasks: ['concat','uglify']
+                tasks: ['concat','uglify','attachCopyright:js']
             },
             sass: {
                 files: [
                     'editor/sass/**/*.scss'
                 ],
-                tasks: ['sass']
+                tasks: ['sass','attachCopyright:css']
             }
         },
         
@@ -260,6 +272,46 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-contrib-copy');
     
+    grunt.registerMultiTask('attachCopyright', function() {
+        var files = this.data.src;
+        var copyright = "/**\n"+
+            " * Copyright 2013, 2015 IBM Corp.\n"+
+            " *\n"+
+            " * Licensed under the Apache License, Version 2.0 (the \"License\");\n"+
+            " * you may not use this file except in compliance with the License.\n"+
+            " * You may obtain a copy of the License at\n"+
+            " *\n"+
+            " * http://www.apache.org/licenses/LICENSE-2.0\n"+
+            " *\n"+
+            " * Unless required by applicable law or agreed to in writing, software\n"+
+            " * distributed under the License is distributed on an \"AS IS\" BASIS,\n"+
+            " * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n"+
+            " * See the License for the specific language governing permissions and\n"+
+            " * limitations under the License.\n"+
+            " **/\n";
+        
+        if (files) {
+            for (var i=0;i<files.length;i++) {
+                var file = files[i];
+                if (!grunt.file.exists(file)) {
+                    grunt.log.warn('File '+ file + ' not found');
+                    return false;
+                } else {
+                    var content = grunt.file.read(file);
+                    if (content.indexOf(copyright) == -1) {
+                        content = copyright+content;
+                        if (!grunt.file.write(file, content)) {
+                            return false;
+                        }
+                        grunt.log.writeln("Attached copyright to "+file);
+                    } else {
+                        grunt.log.writeln("Copyright already on "+file);
+                    }
+                }
+            }
+        }
+    });
+    
     grunt.registerTask('default',
         'Builds editor content then runs code style checks and unit tests on all components',
         ['build','test-core','test-editor','test-nodes']);
@@ -278,7 +330,7 @@ module.exports = function(grunt) {
     
     grunt.registerTask('build',
         'Builds editor content',
-        ['clean:build','concat:build','uglify:build','sass:build','copy:build']);
+        ['clean:build','concat:build','uglify:build','sass:build','copy:build','attachCopyright']);
     
     grunt.registerTask('dev',
         'Developer mode: run node-red, watch for source changes and build/restart',
