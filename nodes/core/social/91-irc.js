@@ -22,6 +22,9 @@ module.exports = function(RED) {
     function IRCServerNode(n) {
         RED.nodes.createNode(this,n);
         this.server = n.server;
+        this.port = n.port || 6667;
+        this.ssl = n.ssl || false;
+        this.cert = n.cert || false;
         this.channel = n.channel;
         this.nickname = n.nickname;
         this.lastseen = 0;
@@ -46,7 +49,8 @@ module.exports = function(RED) {
         if (node.serverConfig.ircclient === null) {
             node.log("CONNECT: "+node.serverConfig.server);
             node.status({fill:"grey",shape:"dot",text:"connecting"});
-            node.serverConfig.ircclient = new irc.Client(node.serverConfig.server, node.serverConfig.nickname,{autoConnect:true,autoRejoin:false,floodProtection:true,retryDelay:20000});
+            var options = {autoConnect:true,autoRejoin:false,floodProtection:true,secure:node.serverConfig.ssl,selfSigned:node.serverConfig.cert,port:node.serverConfig.port,retryDelay:20000};
+            node.serverConfig.ircclient = new irc.Client(node.serverConfig.server, node.serverConfig.nickname, options);
             node.serverConfig.ircclient.setMaxListeners(0);
             node.serverConfig.ircclient.addListener('error', function(message) {
                 if (RED.settings.verbose) { node.log("ERR: "+JSON.stringify(message)); }
@@ -180,7 +184,8 @@ module.exports = function(RED) {
         if (node.serverConfig.ircclient === null) {
             node.log("CONNECT: "+node.serverConfig.server);
             node.status({fill:"grey",shape:"dot",text:"connecting"});
-            node.serverConfig.ircclient = new irc.Client(node.serverConfig.server, node.serverConfig.nickname,{autoConnect:true,autoRejoin:false,floodProtection:true,retryDelay:20000});
+            var options = {autoConnect:true,autoRejoin:false,floodProtection:true,secure:node.serverConfig.ssl,selfSigned:node.serverConfig.cert,port:node.serverConfig.port,retryDelay:20000};
+            node.serverConfig.ircclient = new irc.Client(node.serverConfig.server, node.serverConfig.nickname, options);
             node.serverConfig.ircclient.setMaxListeners(0);
             node.serverConfig.ircclient.addListener('error', function(message) {
                 if (RED.settings.verbose) { node.log("ERR: "+JSON.stringify(message)); }

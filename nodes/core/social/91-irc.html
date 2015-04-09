@@ -184,7 +184,19 @@
 <script type="text/x-red" data-template-name="irc-server">
     <div class="form-row">
         <label for="node-config-input-server"><i class="fa fa-globe"></i> IRC Server</label>
-        <input type="text" id="node-config-input-server" placeholder="irc.freenode.net">
+        <input type="text" id="node-config-input-server" placeholder="irc.freenode.net" style="width: 45%;" >
+        <label for="node-config-input-port" style="margin-left: 10px; width: 35px; "> Port</label>
+        <input type="text" id="node-config-input-port" placeholder="Port" style="width:45px">
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-config-input-ssl" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-config-input-ssl" style="width: 70%;">Use Secure SSL connection ?</label>
+    </div>
+        <div class="form-row" id="certrow">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-config-input-cert" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-config-input-cert" style="width: 70%;">Allow self-signed certificates ?</label>
     </div>
     <div class="form-row">
         <label for="node-config-input-nickname"><i class="fa fa-user"></i> Nickname</label>
@@ -197,10 +209,27 @@
         category: 'config',
         defaults: {
             server: {value:"",required:true},
+            port: {value:"6667"},
+            ssl: {value:false},
+            cert: {value:false},
             nickname: {value:"",required:true}
         },
         label: function() {
             return this.server;
+        },
+        oneditprepare: function() {
+            $("#node-config-input-ssl").change(function() {
+                if ($("#node-config-input-ssl").is(":checked")) {
+                    $("#certrow").show();
+                }
+                else {
+                    $("#certrow").hide();
+                }
+            });
+        },
+        oneditsave: function() {
+            this.ssl = $("#node-config-input-ssl").is(":checked");
+            this.cert = $("#node-config-input-cert").is(":checked");
         }
     });
 </script>
