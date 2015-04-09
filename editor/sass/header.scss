@@ -1,0 +1,179 @@
+/**
+ * Copyright 2015 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+#header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: #000;
+    box-sizing: border-box;
+    padding: 0px 0px 0px 20px;
+    color: #C7C7C7;
+    font-size: 14px;
+}
+
+span.logo {
+    pointer-events: none;
+    float: left;
+    margin-top: 5px;
+    font-size: 30px;
+    line-height: 30px;
+    text-decoration: none;
+}
+span.logo span {
+    vertical-align: middle;
+    font-size: 16px !important;
+}
+span.logo img {
+    height: 18px;
+}
+#header ul.header-toolbar {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    float: right;
+}
+
+#header ul.header-toolbar > li {
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+#header ul.header-toolbar > li {
+    display: inline-block;
+}
+
+.button {
+    @include disable-selection;
+}
+
+#header .button {
+    min-width: 20px;
+    text-align: center;
+    line-height: 40px;
+    display: inline-block;
+    font-size: 14px;
+    padding: 0px 12px;
+    text-decoration: none;
+    color: #C7C7C7;
+    margin: auto 5px;
+    vertical-align: middle;
+    border-left: 2px solid #000;
+    border-right: 2px solid #000;
+}
+#header .button:not(.disabled):hover {
+    border-color: #323232;
+}
+
+#btn-deploy {
+    background: #8C101C; /*#d24741;*/
+    color: #eee !important;
+}
+#btn-deploy + a {
+    background: #8C101C; /*#BA403B;*/
+    color: #eee;
+}
+#btn-deploy + a:hover {
+    background: #6E0A1E; /*#AD3C38;*/
+    color: #eee;
+}
+#btn-deploy + a:active {
+    background: #4C0A17; /*#aa1f19;*/
+    color: #ccc;
+}
+span.deploy-button-group.open > #btn-deploy + a {
+    background: #121212 !important;
+}
+
+#btn-deploy:not(.disabled):hover {
+    background: #6E0A1E; /*#ca3f39;*/
+}
+
+
+#btn-deploy:not(.disabled):active {
+    background: #4C0A17 /*#aa1f19*/ !important;
+}
+#btn-deploy:not(.disabled):active {
+    color: #ccc !important;
+}
+
+#btn-deploy.disabled {
+    cursor: default;
+    background: #444;
+    color: #999 !important;
+}
+
+#btn-deploy.disabled + a {
+    background: #444;
+    color: #ddd;
+}
+#btn-deploy.disabled + a:hover {
+    background: #555;
+    color: #ddd;
+}
+#btn-deploy.disabled + a:active {
+    background: #444;
+    color: #ddd;
+}
+span.deploy-button-group.open > #btn-deploy.disabled + a {
+    background: #121212 !important;
+}
+
+
+#btn-deploy img {
+    margin-right: 8px;
+}
+#btn-deploy.disabled img {
+    opacity: 0.3;
+}
+
+.button-group {
+    display: inline-block;
+    margin: auto 15px;
+    vertical-align: middle;
+    background: #555;
+    clear: both;
+}
+.button-group > a {
+    float: left;
+    line-height: 22px;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    padding: 4px 8px;
+    color: #ccc;
+    margin: 0;
+}
+.button-group > a:last-child {
+}
+
+#header .button {
+    font-size: 20px !important;
+}
+#header .button:active, #header .button.active {
+    background: #121212;
+}
+#header .button:focus {
+    outline: none;
+}
+#header li.open .button {
+    background: #121212;
+    border-color: #121212;
+}
+

@@ -1,0 +1,76 @@
+/**
+ * Copyright 2015 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+#workspace {
+   margin-left: 160px;
+   overflow: hidden;
+}
+
+#chart {
+   overflow: auto;
+   background: #e3e3e3;
+   position: absolute;
+   bottom:0px;
+   top: 30px;
+   left:0px;
+   right:0px;
+}
+#chart svg:focus {
+    outline: none;
+}
+
+
+#workspace {
+    position: absolute;
+    margin: 0;
+    top:5px; left:190px; bottom: 10px; right: 330px;
+}
+#chart-zoom-controls {
+    position: absolute;
+    bottom:30px; right: 350px;
+}
+
+#chart-zoom-controls {
+    padding-top: 3px;
+    text-align: right;
+    float: right;
+}
+
+#workspace-tabs {
+    margin-right: 28px;
+}
+#workspace-add-tab {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 29px;
+    width: 28px;
+    border-bottom: 1px solid #999;
+}
+
+#btn-workspace-add-tab {
+    display: inline-block;
+    width: 100%;
+    background: #e3e3e3;
+    height: 100%;
+    line-height: 30px;
+    text-align: center;
+    color: #000;
+}
+#btn-workspace-add-tab:hover {
+    background: #efefef;
+}
+

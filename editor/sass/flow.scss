@@ -1,0 +1,231 @@
+/**
+ * Copyright 2015 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+.hidden {
+    display: none;
+}
+
+.lasso {
+    stroke-width: 2px;
+    stroke: #ff7f0e;
+    fill: rgba(20,125,255,0.1);
+    stroke-dasharray: 10 5;
+}
+
+.group-box {
+    stroke-width: 1px;
+    stroke: #aaaaaa;
+    fill: rgba(208, 211, 238, 0.1);
+    stroke-dasharray: 3 3;
+}
+.group-box-active {
+    fill: #fff;
+    stroke: #ff7f0e;
+}
+
+.group_label {
+    stroke-width: 0;
+    fill: #999;
+    font-size: 11px;
+    pointer-events: none;
+    -webkit-touch-callout: none;
+    @include disable-selection;
+}
+
+.pull-right {
+    margin-left: 20px;
+}
+
+#workspace  {
+    @include component-border;
+}
+
+.node_label_italic {
+    font-style: italic;
+}
+.node_label_unknown {
+    font-style: italic;
+    fill: #e00 !important;
+}
+.node_label_white {
+    fill: #eee !important;
+}
+.node_label {
+    stroke-width: 0;
+    fill: #333;
+    font-size: 14px;
+    pointer-events: none;
+    -webkit-touch-callout: none;
+    @include disable-selection;
+}
+
+.port_label {
+    stroke-width: 0;
+    fill: #888;
+    font-size: 16px;
+    alignment-baseline: middle;
+    text-anchor: middle;
+    pointer-events: none;
+    -webkit-touch-callout: none;
+    @include disable-selection;
+}
+
+
+.function_label {
+    font-size: 12px;
+}
+.node {
+    stroke: #999;
+    cursor: move;
+    stroke-width: 2;
+}
+.node_unknown {
+    stroke-dasharray:10,4;
+    stroke: #f33;
+}
+.tool_arrow {
+    stroke-width: 1;
+    stroke: #999;
+    fill: #999;
+    cursor: pointer;
+}
+.node_tools {
+    fill: #ddd;
+    stroke: #999;
+    cursor: move;
+    stroke-width: 1;
+    cursor: pointer;
+}
+.node_tools_hovered {
+    stroke: #ff7f0e;
+    fill: #eee;
+}
+
+.node_button {
+    fill: inherit;
+    
+}
+.port {
+    stroke: #999;
+    stroke-width: 2;
+    fill: #ddd;
+    cursor: crosshair;
+}
+
+.port_highlight {
+    stroke: #6DA332;
+    stroke-width: 3;
+    fill: #fff;
+    pointer-events:none;
+    fill-opacity: 0.5;
+}
+
+
+.node_error {
+    stroke: #ff0000;
+    stroke-width: 2;
+    fill: #ff7f0e;
+}
+
+.node_badge {
+    stroke: rgb(93, 114, 145);
+    stroke-width: 1;
+    fill: rgb(190, 209, 255);
+}
+.node_badge_label {
+    stroke-width:0;
+    fill: #fff;
+    font-size: 11px;
+    pointer-events: none;
+    -webkit-touch-callout: none;
+    @include disable-selection;
+    
+}
+.node_invalid {
+    stroke: #ff0000;
+}
+.node_selected {
+    stroke: #ff7f0e !important;
+}
+.node_highlighted {
+    stroke: #dd1616;
+    stroke-width: 3;
+    stroke-dasharray: 10, 4;
+}
+.node_hovered {
+}
+
+.port_hovered {
+    stroke: #ff7f0e;
+    fill:  #ff7f0e;
+}
+.subflowport {
+    stroke-dasharray: 5,5;
+    fill: #eee;
+    stroke: #999;
+}
+
+.drag_line {
+    stroke: #ff7f0e;
+    stroke-width: 5;
+    fill: none;
+    pointer-events: none;
+}
+
+.drag_line_hidden {
+    stroke: #ff7f0e;
+    stroke-width: 0;
+    pointer-events: none;
+    fill: none;
+}
+
+.link_line {
+    stroke: #7f7f7f;
+    stroke-width: 4;
+    fill: none;
+    pointer-events: none;
+}
+
+.link_subflow {
+    stroke: #bbb;
+    stroke-dasharray: 10,5;
+    stroke-width: 3;
+}
+
+.link_outline {
+    stroke: #fff;
+    stroke-width: 6;
+    cursor: crosshair;
+    fill: none;
+    pointer-events: none;
+}
+.link_background {
+    stroke: #fff;
+    opacity: 0;
+    stroke-width: 25;
+    cursor: crosshair;
+    fill: none;
+}
+
+g.link_selected path.link_line {
+    stroke: #ff7f0e;
+}
+g.link_unknown path.link_line {
+    stroke: #f00;
+    stroke-width: 2;
+    stroke-dasharray: 10, 4;
+}
+
