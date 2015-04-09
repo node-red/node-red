@@ -127,7 +127,7 @@ MQTTClient.prototype.connect = function(options) {
              client.on('unsuback',function(packet) {
                    self.lastInbound = (new Date()).getTime()
                    var topic = self.pendingSubscriptions[packet.messageId];
-                   self.emit('unsubscribe',topic,packet.granted[0]);
+                   self.emit('unsubscribe',topic);
                    delete self.pendingSubscriptions[packet.messageId];
              });
              client.on('publish',function(packet) {
@@ -201,7 +201,7 @@ MQTTClient.prototype.unsubscribe = function(topic) {
    var self = this;
    if (self.connected) {
       var options = {
-         topic:topic,
+         unsubscriptions:[topic],
          messageId: self._nextMessageId()
       };
       this.pendingSubscriptions[options.messageId] = topic;

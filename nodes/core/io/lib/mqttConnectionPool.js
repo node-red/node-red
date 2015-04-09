@@ -42,7 +42,7 @@ module.exports = {
                 options.password = password;
                 options.will = will;
                 var queue = [];
-                var subscriptions = [];
+                var subscriptions = {};
                 var connecting = false;
                 var obj = {
                     _instances: 0,
@@ -57,15 +57,38 @@ module.exports = {
                             queue.push(msg);
                         }
                     },
-                    subscribe: function(topic,qos,callback) {
-                        subscriptions.push({topic:topic,qos:qos,callback:callback});
-                        client.on('message',function(mtopic,mpayload,mqos,mretain) {
+                    subscribe: function(topic,qos,callback,ref) {
+                        ref = ref||0;
+                        subscriptions[topic] = subscriptions[topic]||{};
+                        
+                        var sub = {
+                            topic:topic,
+                            qos:qos,
+                            handler:function(mtopic,mpayload,mqos,mretain) {
                                 if (matchTopic(topic,mtopic)) {
                                     callback(mtopic,mpayload,mqos,mretain);
                                 }
-                        });
+                            },
+                            ref: ref
+                        };
+                        subscriptions[topic][ref] = sub;
+                        client.on('message',sub.handler);
                         if (client.isConnected()) {
                             client.subscribe(topic,qos);
+                        }
+                    },
+                    unsubscribe: function(topic,ref) {
+                        ref = ref||0;
+                        var sub = subscriptions[topic];
+                        if (sub) {
+                            if (sub[ref]) {
+                                client.removeListener('message',sub[ref].handler);
+                                delete sub[ref];
+                            }
+                            if (Object.keys(sub).length == 0) {
+                                delete subscriptions[topic];
+                                client.unsubscribe(topic);
+                            }
                         }
                     },
                     on: function(a,b){
@@ -80,13 +103,17 @@ module.exports = {
                             client.connect(options);
                         }
                     },
-                    disconnect: function() {
+                    disconnect: function(ref) {
+                        
                         this._instances -= 1;
                         if (this._instances == 0) {
                             client.disconnect();
                             client = null;
                             delete connections[id];
                         }
+                    },
+                    isConnected: function() {
+                        return client.isConnected();
                     }
                 };
                 client.on('connect',function() {
@@ -94,9 +121,11 @@ module.exports = {
                             util.log('[mqtt] ['+uid+'] connected to broker tcp://'+broker+':'+port);
                             connecting = false;
                             for (var s in subscriptions) {
-                                var topic = subscriptions[s].topic;
-                                var qos = subscriptions[s].qos;
-                                var callback = subscriptions[s].callback;
+                                var topic = s;
+                                var qos = 0;
+                                for (var r in subscriptions[s]) {
+                                    qos = Math.max(qos,subscriptions[s][r].qos);
+                                }
                                 client.subscribe(topic,qos);
                             }
                             //console.log("connected - publishing",queue.length,"messages");
