@@ -9,3 +9,4 @@ nodes/node-red-nodes/
 .config.json
 .sessions.json
 public
+.dist
