@@ -177,3 +177,84 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
     border-color: #121212;
 }
 
+
+#header ul.dropdown-menu {
+    background: #121212;
+    width: 250px !important;
+    margin-top: 0;
+}
+
+#header ul.dropdown-menu li a {
+    color: #C7C7C7;
+    padding: 3px 40px;
+}
+
+#header ul.dropdown-menu li a img {
+    margin-right: 10px;
+    padding: 4px;
+    border: 3px solid rgba(0,0,0,0);
+}
+
+#header ul.dropdown-menu li a.active img {
+    border: 3px solid #777677;
+}
+
+#header ul.dropdown-menu li a span.menu-label-container {
+    width: 180px;
+    vertical-align: top;
+    display: inline-block;
+    text-indent: 0px;
+}
+#header ul.dropdown-menu li a span.menu-label {
+    font-size: 14px;
+    display: inline-block;
+    text-indent: 0px;
+}
+#header ul.dropdown-menu li a span.menu-sublabel {
+    color: #aeaeae;
+    font-size: 13px;
+    display: inline-block;
+    text-indent: 0px;
+}
+
+#header ul.dropdown-menu > li:hover > a,
+#header ul.dropdown-menu > li:focus > a {
+    background: #323232 !important;
+}
+
+#header ul.dropdown-menu li.divider {
+    background: #464646;
+    border-bottom-color: #323232;
+}
+#header ul.dropdown-menu li.disabled a {
+    color: #666;
+}
+
+#header ul.dropdown-menu > li.disabled:hover > a,
+#header ul.dropdown-menu > li.disabled:focus > a {
+    background: none !important;
+}
+
+/* Deploy menu customisations */
+#header ul#btn-deploy-options-submenu {
+    width: 300px !important;
+}
+#header ul#btn-deploy-options-submenu li a span.menu-label {
+    font-size: 16px;
+    display: inline-block;
+    text-indent: 0px;
+}
+#header ul#btn-deploy-options-submenu li a {
+    padding: 10px 30px;
+    color: #fff;
+}
+#header ul#btn-deploy-options-submenu li a > i.fa {
+    display: none !important;
+}
+
+/* User menu customisations */
+#header ul#btn-usermenu-submenu li a#btn-username > .menu-label {
+    font-size: 16px;
+    color: #fff;
+}
+
