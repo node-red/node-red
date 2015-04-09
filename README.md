@@ -25,6 +25,31 @@ More documentation can be found [here](http://nodered.org/docs).
 For further help, or general discussion, please use the
 [mailing list](https://groups.google.com/forum/#!forum/node-red).
 
+## Developers
+
+If you want to run the latest code from git, here's how to get started:
+
+1. Install grunt, the build tool
+
+        npm install -g grunt-cli
+
+2. Clone the code:
+
+        git clone git@github.com:node-red/node-red.git
+        cd node-red
+
+3. Install the node-red dependencies
+
+        npm install
+
+4. Build the code
+
+        grunt build
+
+5. Run
+
+        node red.js
+
 ## Contributing
 
 Before raising a pull-request, please read our

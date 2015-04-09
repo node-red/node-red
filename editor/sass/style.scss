@@ -17,7 +17,7 @@
 body {
   font: 13px "Helvetica" !important;
   padding-top: 100px;
-  background: url("pw_maze_white.png");
+  background: url("images/pw_maze_white.png");
 }
 
 #header {
@@ -501,7 +501,7 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
 }
 #sidebar-separator {
     width: 15px;
-    background: url(grip.png) no-repeat 50% 50%;
+    background: url(images/grip.png) no-repeat 50% 50%;
     position: absolute;
     right: 316px; top: 5px; bottom:10px;
     cursor: col-resize;
@@ -902,7 +902,7 @@ div.node-info {
 
 
 .dropdown-menu>li.disabled>a:hover>[class^="icon-"] {
-    background-image: url("bootstrap/img/glyphicons-halflings.png") !important;
+    background-image: url("vendor/bootstrap/img/glyphicons-halflings.png") !important;
 }
 /** Fix for unreachable dropdown menu **/
 .dropdown-menu  {
@@ -1189,7 +1189,7 @@ i.spinner {
     line-height: 14px;
     vertical-align: text-top;
     margin-top: 0px;
-    background: url(spin.svg) no-repeat 50% 50%;
+    background: url(images/spin.svg) no-repeat 50% 50%;
     background-size: contain
 }
 

@@ -8,4 +8,5 @@ nodes/node-red-nodes/
 /coverage
 .config.json
 .sessions.json
-
+public
+.dist
