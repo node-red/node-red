@@ -22,7 +22,7 @@ RED.user = (function() {
         }
         
         var dialog = $('<div id="node-dialog-login" class="hide">'+
-                       '<div style="display: inline-block;width: 250px; vertical-align: top; margin-right: 10px; margin-bottom: 20px;"><img src="node-red-256.png"/></div>'+
+                       '<div style="display: inline-block;width: 250px; vertical-align: top; margin-right: 10px; margin-bottom: 20px;"><img src="red/images/node-red-256.png"/></div>'+
                        '<div style="display: inline-block; width: 250px; vertical-align: bottom; margin-left: 10px; margin-bottom: 20px;">'+
                        '<form id="node-dialog-login-fields" class="form-horizontal" style="margin-bottom: 0px;"></form>'+
                        '</div>'+
@@ -52,7 +52,7 @@ RED.user = (function() {
                         $('<input style="width: 100%" id="node-dialog-login-'+field.id+'" type="'+field.type+'" tabIndex="'+(i+1)+'"/>').appendTo(row);
                         row.appendTo("#node-dialog-login-fields");
                     }
-                    $('<div class="form-row" style="text-align: right; margin-top: 10px;"><span id="node-dialog-login-failed" style="line-height: 2em;float:left;" class="hide">Login failed</span><img src="spin.svg" style="height: 30px; margin-right: 10px; " class="login-spinner hide"/>'+
+                    $('<div class="form-row" style="text-align: right; margin-top: 10px;"><span id="node-dialog-login-failed" style="line-height: 2em;float:left;" class="hide">Login failed</span><img src="red/images/spin.svg" style="height: 30px; margin-right: 10px; " class="login-spinner hide"/>'+
                         (opts.cancelable?'<a href="#" id="node-dialog-login-cancel" style="margin-right: 20px;" tabIndex="'+(i+1)+'">Cancel</a>':'')+
                         '<a href="#" id="node-dialog-login-submit" tabIndex="'+(i+2)+'">Login</a></div>').appendTo("#node-dialog-login-fields");
                     $("#node-dialog-login-submit").button().click(function( event ) {
