@@ -175,69 +175,74 @@ module.exports = function(RED) {
                 node.status({fill:"blue",shape:"dot",text:"fetching"});
                 var pay = {};
                 imap.openBox(node.box, false, function(err, box) {
-                    if (box.messages.total > 0) {
-                        var f = imap.seq.fetch(box.messages.total + ':*', { markSeen:true, bodies: ['HEADER.FIELDS (FROM SUBJECT DATE TO CC BCC)','TEXT'] });
-                        f.on('message', function(msg, seqno) {
-                            node.log('message: #'+ seqno);
-                            var prefix = '(#' + seqno + ') ';
-                            msg.on('body', function(stream, info) {
-                                var buffer = '';
-                                stream.on('data', function(chunk) {
-                                    buffer += chunk.toString('utf8');
-                                });
-                                stream.on('end', function() {
-                                    if (info.which !== 'TEXT') {
-                                        var head = Imap.parseHeader(buffer);
-                                        if (RED.settings.verbose) { node.log(head); }
-                                        pay.from = head.from[0];
-                                        pay.topic = head.subject[0];
-                                        pay.date = head.date[0];
-                                        if (head.hasOwnProperty("to")) { pay.to = head.to; }
-                                        if (head.hasOwnProperty("cc")) { pay.cc = head.cc; }
-                                        if (head.hasOwnProperty("bcc")) { pay.bcc = head.bcc; }
-                                    } else {
-                                        var parts = buffer.split("Content-Type");
-                                        for (var p = 0; p < parts.length; p++) {
-                                            if (parts[p].indexOf("text/plain") >= 0) {
-                                                pay.payload = parts[p].split("\n").slice(1,-2).join("\n").trim();
-                                            }
-                                            else if (parts[p].indexOf("text/html") >= 0) {
-                                                pay.html = parts[p].split("\n").slice(1,-2).join("\n").trim();
-                                            } else {
-                                                pay.payload = parts[0];
-                                            }
-                                        }
-                                        //pay.body = buffer;
-                                    }
-                                });
-                            });
-                            msg.on('end', function() {
-                                //node.log('Finished: '+prefix);
-                            });
-                        });
-                        f.on('error', function(err) {
-                            node.warn('fetch error: ' + err);
-                            node.status({fill:"red",shape:"ring",text:"fetch error"});
-                        });
-                        f.on('end', function() {
-                            delete(pay._msgid);
-                            if (JSON.stringify(pay) !== oldmail) {
-                                oldmail = JSON.stringify(pay);
-                                node.send(pay);
-                                node.log('received new email: '+pay.topic);
-                            }
-                            else { node.log('duplicate not sent: '+pay.topic); }
-                            //node.status({fill:"green",shape:"dot",text:"ok"});
-                            node.status({});
-                            imap.end();
-                        });
+                    if (err) {
+                        node.status({fill:"red",shape:"ring",text:"fetch folder error"});
+                        node.error("Failed to fetch folder "+node.box,err);
                     }
                     else {
-                        node.log("you have achieved inbox zero");
-                        //node.status({fill:"green",shape:"dot",text:"ok"});
-                        node.status({});
-                        imap.end();
+                        if (box.messages.total > 0) {
+                            var f = imap.seq.fetch(box.messages.total + ':*', { markSeen:true, bodies: ['HEADER.FIELDS (FROM SUBJECT DATE TO CC BCC)','TEXT'] });
+                            f.on('message', function(msg, seqno) {
+                                node.log('message: #'+ seqno);
+                                var prefix = '(#' + seqno + ') ';
+                                msg.on('body', function(stream, info) {
+                                    var buffer = '';
+                                    stream.on('data', function(chunk) {
+                                        buffer += chunk.toString('utf8');
+                                    });
+                                    stream.on('end', function() {
+                                        if (info.which !== 'TEXT') {
+                                            var head = Imap.parseHeader(buffer);
+                                            if (RED.settings.verbose) { node.log(head); }
+                                            pay.from = head.from[0];
+                                            pay.topic = head.subject[0];
+                                            pay.date = head.date[0];
+                                            if (head.hasOwnProperty("to")) { pay.to = head.to; }
+                                            if (head.hasOwnProperty("cc")) { pay.cc = head.cc; }
+                                            if (head.hasOwnProperty("bcc")) { pay.bcc = head.bcc; }
+                                        } else {
+                                            var parts = buffer.split("Content-Type");
+                                            for (var p = 0; p < parts.length; p++) {
+                                                if (parts[p].indexOf("text/plain") >= 0) {
+                                                    pay.payload = parts[p].split("\n").slice(1,-2).join("\n").trim();
+                                                }
+                                                else if (parts[p].indexOf("text/html") >= 0) {
+                                                    pay.html = parts[p].split("\n").slice(1,-2).join("\n").trim();
+                                                } else {
+                                                    pay.payload = parts[0];
+                                                }
+                                            }
+                                            //pay.body = buffer;
+                                        }
+                                    });
+                                });
+                                msg.on('end', function() {
+                                    //node.log('Finished: '+prefix);
+                                });
+                            });
+                            f.on('error', function(err) {
+                                node.warn('fetch message error: ' + err);
+                                node.status({fill:"red",shape:"ring",text:"fetch message error"});
+                            });
+                            f.on('end', function() {
+                                delete(pay._msgid);
+                                if (JSON.stringify(pay) !== oldmail) {
+                                    oldmail = JSON.stringify(pay);
+                                    node.send(pay);
+                                    node.log('received new email: '+pay.topic);
+                                }
+                                else { node.log('duplicate not sent: '+pay.topic); }
+                                //node.status({fill:"green",shape:"dot",text:"ok"});
+                                node.status({});
+                            });
+                        }
+                        else {
+                            node.log("you have achieved inbox zero");
+                            //node.status({fill:"green",shape:"dot",text:"ok"});
+                            node.status({});
+                        }
                     }
+                    imap.end();
                 });
             });
             node.status({fill:"grey",shape:"dot",text:"connecting"});
