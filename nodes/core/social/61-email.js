@@ -181,7 +181,8 @@ module.exports = function(RED) {
                     }
                     else {
                         if (box.messages.total > 0) {
-                            var f = imap.seq.fetch(box.messages.total + ':*', { markSeen:true, bodies: ['HEADER.FIELDS (FROM SUBJECT DATE TO CC BCC)','TEXT'] });
+                            //var f = imap.seq.fetch(box.messages.total + ':*', { markSeen:true, bodies: ['HEADER.FIELDS (FROM SUBJECT DATE TO CC BCC)','TEXT'] });
+                            var f = imap.seq.fetch(box.messages.total + ':*', { markSeen:true, bodies: ['HEADER','TEXT'] });
                             f.on('message', function(msg, seqno) {
                                 node.log('message: #'+ seqno);
                                 var prefix = '(#' + seqno + ') ';
@@ -193,13 +194,10 @@ module.exports = function(RED) {
                                     stream.on('end', function() {
                                         if (info.which !== 'TEXT') {
                                             var head = Imap.parseHeader(buffer);
-                                            if (RED.settings.verbose) { node.log(head); }
                                             pay.from = head.from[0];
                                             pay.topic = head.subject[0];
                                             pay.date = head.date[0];
-                                            if (head.hasOwnProperty("to")) { pay.to = head.to; }
-                                            if (head.hasOwnProperty("cc")) { pay.cc = head.cc; }
-                                            if (head.hasOwnProperty("bcc")) { pay.bcc = head.bcc; }
+                                            pay.header = head;
                                         } else {
                                             var parts = buffer.split("Content-Type");
                                             for (var p = 0; p < parts.length; p++) {

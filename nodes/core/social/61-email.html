@@ -155,7 +155,8 @@
     <p>Repeatedly gets a <b>single email</b> from an IMAP server and forwards on as a msg if not already seen.</p>
     <p>The subject is loaded into <b>msg.topic</b> and <b>msg.payload</b> is the plain text body.
        If there is text/html then that is returned in <b>msg.html</b>. <b>msg.from</b> and <b>msg.date</b> are also set if you need them.</p>
-    <p>Additionally <b>msg.to</b>, <b>msg.cc</b>, <b>msg.bcc</b> may exist and contain arrays of relevant email addresses.</p>
+    <p>Additionally <b>msg.header</b> contains the complete header object including
+    <i>to</i>, <i>cc</i> and other potentially useful properties.</p>
     <p>Uses the imap module.</p>
     <p><b>Note:</b> this node <i>only</i> gets the most recent single email from the inbox, so set the repeat (polling) time appropriately.</p>
 </script>
