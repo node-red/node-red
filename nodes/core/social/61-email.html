@@ -135,8 +135,12 @@
         <input type="text" id="node-input-userid">
     </div>
     <div class="form-row">
-        <label for="node-config-input-password"><i class="fa fa-lock"></i> Password</label>
+        <label for="node-input-password"><i class="fa fa-lock"></i> Password</label>
         <input type="password" id="node-input-password">
+    </div>
+    <div class="form-row">
+        <label for="node-input-box"><i class="fa fa-inbox"></i> Folder</label>
+        <input type="text" id="node-input-box">
     </div>
     <br/>
     <div class="form-row">
@@ -151,6 +155,7 @@
     <p>Repeatedly gets a <b>single email</b> from an IMAP server and forwards on as a msg if not already seen.</p>
     <p>The subject is loaded into <b>msg.topic</b> and <b>msg.payload</b> is the plain text body.
        If there is text/html then that is returned in <b>msg.html</b>. <b>msg.from</b> and <b>msg.date</b> are also set if you need them.</p>
+    <p>Additionally <b>msg.to</b>, <b>msg.cc</b>, <b>msg.bcc</b> may exist and contain arrays of relevant email addresses.</p>
     <p>Uses the imap module.</p>
     <p><b>Note:</b> this node <i>only</i> gets the most recent single email from the inbox, so set the repeat (polling) time appropriately.</p>
 </script>
@@ -161,10 +166,11 @@
         category: 'social-input',
         color:"#c7e9c0",
         defaults: {
-            repeat: {value:"300",required:true},
+            name: {value:""},
             server: {value:"imap.gmail.com",required:true},
             port: {value:"993",required:true},
-            name: {value:""}
+            box: {value:"INBOX"},
+            repeat: {value:"300",required:true}
         },
         credentials: {
             userid: {type:"text"},
@@ -186,6 +192,10 @@
             } else {
                 $('#node-tip').hide();
             };
+            if (typeof this.box === 'undefined') {
+                $("#node-input-box").val("INBOX");
+                this.box = "INBOX";
+            }
         }
     });
 })();

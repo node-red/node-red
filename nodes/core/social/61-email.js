@@ -121,6 +121,7 @@ module.exports = function(RED) {
         this.repeat = n.repeat * 1000 || 300000;
         this.inserver = n.server || globalkeys.server || "imap.gmail.com";
         this.inport = n.port || globalkeys.port || "993";
+        this.box = n.box || "INBOX";
         var flag = false;
 
         if (this.credentials && this.credentials.hasOwnProperty("userid")) {
@@ -173,9 +174,9 @@ module.exports = function(RED) {
             imap.once('ready', function() {
                 node.status({fill:"blue",shape:"dot",text:"fetching"});
                 var pay = {};
-                imap.openBox('INBOX', false, function(err, box) {
+                imap.openBox(node.box, false, function(err, box) {
                     if (box.messages.total > 0) {
-                        var f = imap.seq.fetch(box.messages.total + ':*', { markSeen:true, bodies: ['HEADER.FIELDS (FROM SUBJECT DATE)','TEXT'] });
+                        var f = imap.seq.fetch(box.messages.total + ':*', { markSeen:true, bodies: ['HEADER.FIELDS (FROM SUBJECT DATE TO CC BCC)','TEXT'] });
                         f.on('message', function(msg, seqno) {
                             node.log('message: #'+ seqno);
                             var prefix = '(#' + seqno + ') ';
@@ -186,9 +187,14 @@ module.exports = function(RED) {
                                 });
                                 stream.on('end', function() {
                                     if (info.which !== 'TEXT') {
-                                        pay.from = Imap.parseHeader(buffer).from[0];
-                                        pay.topic = Imap.parseHeader(buffer).subject[0];
-                                        pay.date = Imap.parseHeader(buffer).date[0];
+                                        var head = Imap.parseHeader(buffer);
+                                        if (RED.settings.verbose) { node.log(head); }
+                                        pay.from = head.from[0];
+                                        pay.topic = head.subject[0];
+                                        pay.date = head.date[0];
+                                        if (head.hasOwnProperty("to")) { pay.to = head.to; }
+                                        if (head.hasOwnProperty("cc")) { pay.cc = head.cc; }
+                                        if (head.hasOwnProperty("bcc")) { pay.bcc = head.bcc; }
                                     } else {
                                         var parts = buffer.split("Content-Type");
                                         for (var p = 0; p < parts.length; p++) {
@@ -212,9 +218,10 @@ module.exports = function(RED) {
                             node.status({fill:"red",shape:"ring",text:"fetch error"});
                         });
                         f.on('end', function() {
+                            delete(pay._msgid);
                             if (JSON.stringify(pay) !== oldmail) {
-                                node.send(pay);
                                 oldmail = JSON.stringify(pay);
+                                node.send(pay);
                                 node.log('received new email: '+pay.topic);
                             }
                             else { node.log('duplicate not sent: '+pay.topic); }
