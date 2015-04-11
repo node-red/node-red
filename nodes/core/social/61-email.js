@@ -201,8 +201,10 @@ module.exports = function(RED) {
                                             if (parts[p].indexOf("text/plain") >= 0) {
                                                 pay.payload = parts[p].split("\n").slice(1,-2).join("\n").trim();
                                             }
-                                            if (parts[p].indexOf("text/html") >= 0) {
+                                            else if (parts[p].indexOf("text/html") >= 0) {
                                                 pay.html = parts[p].split("\n").slice(1,-2).join("\n").trim();
+                                            } else {
+                                                pay.payload = parts[0];
                                             }
                                         }
                                         //pay.body = buffer;
