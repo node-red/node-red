@@ -14,6 +14,20 @@
  * limitations under the License.
  **/
 
+$activeButton: #121212;
+
+$deployButton: #8C101C;
+$deployButtonHover: #6E0A1E;
+$deployButtonActive: #4C0A17;
+
+$deployDisabledButton: #444;
+$deployDisabledButtonHover: #555;
+$deployDisabledButtonActive: #444;
+
+$headerMenuBackground: #121212;
+$headerMenuItemHover: #323232;
+$headerMenuItemDivider: #464646;
+
 #header {
     position: absolute;
     top: 0;
@@ -68,7 +82,7 @@ span.logo img {
     text-align: center;
     line-height: 40px;
     display: inline-block;
-    font-size: 14px;
+    font-size: 20px;
     padding: 0px 12px;
     text-decoration: none;
     color: #C7C7C7;
@@ -78,36 +92,36 @@ span.logo img {
     border-right: 2px solid #000;
 }
 #header .button:not(.disabled):hover {
-    border-color: #323232;
+    border-color: $headerMenuItemHover;
 }
 
 #btn-deploy {
-    background: #8C101C; /*#d24741;*/
+    background: $deployButton;
     color: #eee !important;
 }
 #btn-deploy + a {
-    background: #8C101C; /*#BA403B;*/
+    background: $deployButton;
     color: #eee;
 }
 #btn-deploy + a:hover {
-    background: #6E0A1E; /*#AD3C38;*/
+    background: $deployButtonHover;
     color: #eee;
 }
 #btn-deploy + a:active {
-    background: #4C0A17; /*#aa1f19;*/
+    background: $deployButtonActive;
     color: #ccc;
 }
 span.deploy-button-group.open > #btn-deploy + a {
-    background: #121212 !important;
+    background: $activeButton !important;
 }
 
 #btn-deploy:not(.disabled):hover {
-    background: #6E0A1E; /*#ca3f39;*/
+    background: $deployButtonHover;
 }
 
 
 #btn-deploy:not(.disabled):active {
-    background: #4C0A17 /*#aa1f19*/ !important;
+    background: $deployButtonActive !important;
 }
 #btn-deploy:not(.disabled):active {
     color: #ccc !important;
@@ -115,26 +129,25 @@ span.deploy-button-group.open > #btn-deploy + a {
 
 #btn-deploy.disabled {
     cursor: default;
-    background: #444;
+    background: $deployDisabledButton;
     color: #999 !important;
 }
 
 #btn-deploy.disabled + a {
-    background: #444;
+    background: $deployDisabledButton;
     color: #ddd;
 }
 #btn-deploy.disabled + a:hover {
-    background: #555;
+    background: $deployDisabledButtonHover;
     color: #ddd;
 }
 #btn-deploy.disabled + a:active {
-    background: #444;
+    background: $deployDisabledButton;
     color: #ddd;
 }
 span.deploy-button-group.open > #btn-deploy.disabled + a {
-    background: #121212 !important;
+    background: $activeButton !important;
 }
-
 
 #btn-deploy img {
     margin-right: 8px;
@@ -147,7 +160,7 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
     display: inline-block;
     margin: auto 15px;
     vertical-align: middle;
-    background: #555;
+    background: $deployDisabledButtonHover;
     clear: both;
 }
 .button-group > a {
@@ -160,26 +173,21 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
     color: #ccc;
     margin: 0;
 }
-.button-group > a:last-child {
-}
 
-#header .button {
-    font-size: 20px !important;
-}
 #header .button:active, #header .button.active {
-    background: #121212;
+    background: $activeButton;
 }
 #header .button:focus {
     outline: none;
 }
 #header li.open .button {
-    background: #121212;
-    border-color: #121212;
+    background: $activeButton;
+    border-color: $activeButton;
 }
 
 
 #header ul.dropdown-menu {
-    background: #121212;
+    background: $headerMenuBackground;
     width: 250px !important;
     margin-top: 0;
 }
@@ -219,12 +227,12 @@ span.deploy-button-group.open > #btn-deploy.disabled + a {
 
 #header ul.dropdown-menu > li:hover > a,
 #header ul.dropdown-menu > li:focus > a {
-    background: #323232 !important;
+    background: $headerMenuItemHover !important;
 }
 
 #header ul.dropdown-menu li.divider {
-    background: #464646;
-    border-bottom-color: #323232;
+    background: $headerMenuItemDivider;
+    border-bottom-color: $headerMenuItemHover;
 }
 #header ul.dropdown-menu li.disabled a {
     color: #666;

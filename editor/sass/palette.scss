@@ -17,7 +17,9 @@
 
 #palette {
     position: absolute;
-    top: 5px; left:10px; bottom: 10px;
+    top: 5px; 
+    bottom: 10px;
+    left:10px; 
     background: #f3f3f3;
     width: 170px;
     text-align: center;
@@ -29,13 +31,12 @@
     display: none;
     position: absolute;
     top: 0;
-    left:0;
     right: 0;
     bottom: 35px;
+    left:0;
     padding: 5px;
     overflow-y: auto;
     box-sizing:border-box;
-    -moz-box-sizing: border-box;
 }
 .palette-spinner {
     padding-top: 40px;
@@ -53,7 +54,6 @@
     padding: 3px;
     border-top: 1px solid #999;
     box-sizing:border-box;
-    -moz-box-sizing: border-box;
 }
 #palette-search i.fa-search {
     position: absolute;
@@ -82,7 +82,6 @@
     margin: 0px;
     height: 30px;
     box-sizing:border-box;
-    -moz-box-sizing: border-box;
 }
 
 #palette-search input:focus {
