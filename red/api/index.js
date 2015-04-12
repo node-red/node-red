@@ -24,6 +24,7 @@ var nodes = require("./nodes");
 var flows = require("./flows");
 var library = require("./library");
 var info = require("./info");
+var theme = require("./theme");
 
 var auth = require("./auth");
 var needsPermission = auth.needsPermission;
@@ -41,9 +42,13 @@ function init(adminApp,storage) {
     
     // Editor
     if (!settings.disableEditor) {
+        ui.init(settings);
         var editorApp = express();
         editorApp.get("/",ui.ensureSlash,ui.editor);
         editorApp.get("/icons/:icon",ui.icon);
+        if (settings.editorTheme) {
+            editorApp.use("/theme",theme.init(settings));
+        }
         editorApp.use("/",ui.editorResources);
         adminApp.use(editorApp);
     }

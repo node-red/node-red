@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<!--
+  Copyright 2013, 2015 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<head>
+<title>{{ page.title }}</title>
+<link rel="icon" type="image/png" href="{{ page.favicon }}">
+<link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="vendor/jquery/css/smoothness/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" media="screen">
+<link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="vendor/vendor.css">
+<link rel="stylesheet" href="red/style.min.css">
+{{#page.css}}
+<link rel="stylesheet" href="{{.}}">
+{{/page.css}}
+
+</head>
+<body spellcheck="false">
+<div id="header">
+    <span class="logo">{{#header.image}}<img src="{{.}}">{{/header.image}} <span>{{ header.title }}</span></span>
+    <ul class="header-toolbar hide">
+        <li><a id="btn-sidemenu" class="button" data-toggle="dropdown" href="#"><i class="fa fa-bars"></i></a></li>
+    <ul>
+</div>
+<div id="main-container" class="sidebar-closed hide">
+    <div id="palette">
+        <img src="red/images/spin.svg" class="palette-spinner hide"/>
+        <div id="palette-container" class="palette-scroll">
+        </div>
+        <div id="palette-search">
+            <i class="fa fa-search"></i><input id="palette-search-input" type="text" placeholder="filter"><a href="#" id="palette-search-clear"><i class="fa fa-times"></i></a></input>
+        </div>
+    </div><!-- /palette -->
+
+    <div id="workspace">
+        <ul id="workspace-tabs"></ul>
+        <div id="workspace-add-tab"><a id="btn-workspace-add-tab" href="#"><i class="fa fa-plus"></i></a></div>
+        <div id="chart"></div>
+        <div id="workspace-toolbar">
+            <a class="button" id="workspace-subflow-edit" href="#"><i class="fa fa-pencil"></i> edit name</a>
+            <a class="button disabled" id="workspace-subflow-add-input" href="#"><i class="fa fa-plus"></i> input</a>
+            <a class="button" id="workspace-subflow-add-output" href="#"><i class="fa fa-plus"></i> output</a>
+            <a class="button" id="workspace-subflow-delete" href="#"><i class="fa fa-trash"></i> delete subflow</a>
+        </div>
+    </div>
+
+    <div id="chart-zoom-controls">
+        <div class="btn-group">
+            <a class="btn btn-mini" id="btn-zoom-out" href="#"><i class="fa fa-search-minus"></i></a>
+            <a class="btn btn-mini" id="btn-zoom-zero" href="#"><i class="fa fa-dot-circle-o"></i></a>
+            <a class="btn btn-mini" id="btn-zoom-in" href="#"><i class="fa fa-search-plus"></i></a>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <ul id="sidebar-tabs"></ul>
+        <div id="sidebar-content"></div>
+    </div>
+
+    <div id="sidebar-separator"></div>
+
+</div>
+
+<div id="notifications"></div>
+<div id="dropTarget"><div>Drop the flow here<br/><i class="fa fa-download"></i></div></div>
+
+<div id="dialog" class="hide"><form id="dialog-form" class="form-horizontal"></form></div>
+<div id="node-config-dialog" class="hide"><form id="dialog-config-form" class="form-horizontal"></form><div class="form-tips" id="node-config-dialog-user-count"></div></div>
+<div id="subflow-dialog" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <label>Name</label><input type="text" id="subflow-input-name">
+        </div>
+    </form>
+    <div class="form-tips" id="subflow-dialog-user-count"></div>
+</div>
+
+<div id="node-dialog-confirm-deploy" class="hide">
+    <form class="form-horizontal">
+        <div id="node-dialog-confirm-deploy-config" style="text-align: center; padding-top: 30px;">
+         Some of the nodes are not properly configured. Are you sure you want to deploy?
+        </div>
+        <div id="node-dialog-confirm-deploy-unknown" style="text-align: center; padding-top: 10px;">
+         The workspace contains some unknown node types:
+         <ul style="width: 300px; margin: auto; text-align: left;" id="node-dialog-confirm-deploy-unknown-list"></ul>
+         Are you sure you want to deploy?
+        </div>
+    </form>
+</div>
+
+<div id="node-dialog-library-save-confirm" class="hide">
+    <form class="form-horizontal">
+        <div style="text-align: center; padding-top: 30px;">
+         A <span id="node-dialog-library-save-type"></span> called <span id="node-dialog-library-save-name"></span> already exists. Overwrite?
+        </div>
+    </form>
+</div>
+
+<div id="node-dialog-library-save" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <label for="node-dialog-library-save-folder"><i class="fa fa-folder-open"></i> Folder</label>
+            <input type="text" id="node-dialog-library-save-folder" placeholder="Folder">
+        </div>
+        <div class="form-row">
+            <label for="node-dialog-library-save-filename"><i class="fa fa-file"></i> Filename</label>
+            <input type="text" id="node-dialog-library-save-filename" placeholder="Filename">
+        </div>
+    </form>
+</div>
+
+<div id="node-dialog-library-lookup" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <ul id="node-dialog-library-breadcrumbs" class="breadcrumb">
+                <li class="active"><a href="#">Library</a></li>
+            </ul>
+        </div>
+        <div class="form-row">
+            <div style="vertical-align: top; display: inline-block; height: 100%; width: 30%; padding-right: 20px;">
+                <div id="node-select-library" style="border: 1px solid #999; width: 100%; height: 100%; overflow:scroll;"><ul></ul></div>
+            </div>
+            <div style="vertical-align: top; display: inline-block;width: 65%; height: 100%;">
+                <div style="height: 100%; width: 95%;" class="node-text-editor" id="node-select-library-text" ></div>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="node-dialog-rename-workspace" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <label for="node-input-workspace-name" ><i class="fa fa-tag"></i> Name:</label>
+            <input type="text" id="node-input-workspace-name">
+        </div>
+    </form>
+</div>
+<div id="node-dialog-delete-workspace" class="hide">
+    <form class="form-horizontal">
+        <div style="text-align: center; padding-top: 30px;">
+         Are you sure you want to delete '<span id="node-dialog-delete-workspace-name"></span>'?
+        </div>
+    </form>
+</div>
+
+<script type="text/x-red" data-template-name="export-library-dialog">
+    <div class="form-row">
+        <label for="node-input-filename" ><i class="fa fa-file"></i> Filename:</label>
+        <input type="text" id="node-input-filename" placeholder="Filename">
+    </div>
+</script>
+
+<script type="text/x-red" data-template-name="subflow">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="name">
+    </div>
+</script>
+
+<script src="vendor/vendor.js"></script>
+<script src="vendor/ace/ace.js"></script>
+<script src="vendor/ace/ext-language_tools.js"></script>
+<script src="red/red.min.js"></script>
+
+</body>
+</html>
