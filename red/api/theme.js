@@ -51,7 +51,7 @@ function serveFile(app,baseUrl,file) {
         app.get(url,function(req, res) {
             res.sendfile(file);
         });
-        return url;
+        return "theme"+url;
     } catch(err) {
         //TODO: log filenotfound
         return null;
@@ -79,7 +79,7 @@ module.exports = {
                     for (i=0;i<styles.length;i++) {
                         url = serveFile(themeApp,"/css/",styles[i]);
                         if (url) {
-                            themeContext.page.css.push("theme"+url);
+                            themeContext.page.css.push(url);
                         }
                     }
                 }
@@ -87,7 +87,7 @@ module.exports = {
                 if (theme.page.favicon) {
                     url = serveFile(themeApp,"/favicon/",theme.page.favicon)
                     if (url) {
-                        themeContext.page.favicon = "theme"+url;
+                        themeContext.page.favicon = url;
                     }
                 }
                 
@@ -101,7 +101,7 @@ module.exports = {
                     if (theme.header.image) {
                         url = serveFile(themeApp,"/header/",theme.header.image);
                         if (url) {
-                            themeContext.header.image = "theme"+url;
+                            themeContext.header.image = url;
                         }
                     } else {
                         themeContext.header.image = null;
@@ -120,7 +120,7 @@ module.exports = {
                     if (theme.deployButton.icon) {
                         url = serveFile(themeApp,"/deploy/",theme.deployButton.icon);
                         if (url) {
-                            themeSettings.deployButton.icon = "theme"+url;
+                            themeSettings.deployButton.icon = url;
                         }
                     }
                 }
@@ -131,6 +131,16 @@ module.exports = {
             }
             //themeSettings.deployButton = theme.deployButton || themeSettings.deployButton;
             
+            if (theme.login) {
+                if (theme.login.image) {
+                    url = serveFile(themeApp,"/login/",theme.login.image);
+                    if (url) {
+                        themeContext.login = {
+                            image: url
+                        }
+                    }
+                }
+            }
             return themeApp;
         }
     },

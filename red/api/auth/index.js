@@ -22,6 +22,8 @@ var Tokens = require("./tokens");
 var Users = require("./users");
 var permissions = require("./permissions");
 
+var theme = require("../theme");
+
 var settings = null;
 var log = require("../../log");
 
@@ -79,6 +81,9 @@ function login(req,res) {
         response = {
             "type":"credentials",
             "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"}]
+        }
+        if (theme.context().login && theme.context().login.image) {
+            response.image = theme.context().login.image;
         }
     }
     res.json(response);
