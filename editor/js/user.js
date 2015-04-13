@@ -144,13 +144,16 @@ RED.user = (function() {
     
     function init() {
         if (RED.settings.user) {
-            $('<li><a id="btn-usermenu" class="button hide" data-toggle="dropdown" href="#"><i class="fa fa-user"></i></a></li>')
-                .prependTo(".header-toolbar");
-
-            RED.menu.init({id:"btn-usermenu",
-                options: []
-            });
-            updateUserMenu();
+            if (!RED.settings.editorTheme || !RED.settings.editorTheme.hasOwnProperty("userMenu")) {
+            
+                $('<li><a id="btn-usermenu" class="button hide" data-toggle="dropdown" href="#"><i class="fa fa-user"></i></a></li>')
+                    .prependTo(".header-toolbar");
+    
+                RED.menu.init({id:"btn-usermenu",
+                    options: []
+                });
+                updateUserMenu();
+            }
         }
         
     }

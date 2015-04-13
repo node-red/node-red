@@ -28,7 +28,17 @@ var themeContext = {
     header: {
         title: "Node-RED",
         image: "red/images/node-red.png"
-    }
+    },
+    //deployButton: {
+    ///**
+    // * options:
+    // *   type: "default" - Button with drop-down options - no further customisation available
+    // *   type: "simple"  - Button without dropdown. Customisations:
+    // *      label: the text to display - default: "Deploy"
+    // *      icon : the icon to use. Null removes the icon. default: "red/images/deploy-full-o.png"
+    // */   
+    //    
+    //}
 };
 
 var themeSettings = null;
@@ -69,7 +79,7 @@ module.exports = {
                     for (i=0;i<styles.length;i++) {
                         url = serveFile(themeApp,"/css/",styles[i]);
                         if (url) {
-                            themeContext.page.css.push("/theme"+url);
+                            themeContext.page.css.push("theme"+url);
                         }
                     }
                 }
@@ -77,7 +87,7 @@ module.exports = {
                 if (theme.page.favicon) {
                     url = serveFile(themeApp,"/favicon/",theme.page.favicon)
                     if (url) {
-                        themeContext.page.favicon = "/theme"+url;
+                        themeContext.page.favicon = "theme"+url;
                     }
                 }
                 
@@ -91,7 +101,7 @@ module.exports = {
                     if (theme.header.image) {
                         url = serveFile(themeApp,"/header/",theme.header.image);
                         if (url) {
-                            themeContext.header.image = "/theme"+url;
+                            themeContext.header.image = "theme"+url;
                         }
                     } else {
                         themeContext.header.image = null;
@@ -99,6 +109,26 @@ module.exports = {
                 }
             }
             
+            if (theme.deployButton) {
+                if (theme.deployButton.type == "simple") {
+                    themeSettings.deployButton = {
+                        type: "simple"
+                    }
+                    if (theme.deployButton.label) {
+                        themeSettings.deployButton.label = theme.deployButton.label;
+                    }
+                    if (theme.deployButton.icon) {
+                        url = serveFile(themeApp,"/deploy/",theme.deployButton.icon);
+                        if (url) {
+                            themeSettings.deployButton.icon = "theme"+url;
+                        }
+                    }
+                }
+            }
+            
+            if (theme.hasOwnProperty("userMenu")) {
+                themeSettings.userMenu = theme.userMenu;
+            }
             //themeSettings.deployButton = theme.deployButton || themeSettings.deployButton;
             
             return themeApp;

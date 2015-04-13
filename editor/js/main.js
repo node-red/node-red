@@ -178,7 +178,8 @@ var RED = (function() {
         RED.workspaces.init();
         RED.clipboard.init();
         RED.view.init();
-        RED.deploy.init();
+        
+        RED.deploy.init(RED.settings.editorTheme?RED.settings.editorTheme.deployButton:null);
         
         RED.keyboard.add(/* ? */ 191,{shift:true},function(){RED.keyboard.showHelp();d3.event.preventDefault();});
         RED.comms.connect();
@@ -192,7 +193,7 @@ var RED = (function() {
     $(function() {
             
         if ((window.location.hostname !== "localhost") && (window.location.hostname !== "127.0.0.1")) {
-            document.title = "Node-RED : "+window.location.hostname;
+            document.title = document.title+" : "+window.location.hostname;
         }
         
         ace.require("ace/ext/language_tools");
