@@ -145,6 +145,11 @@ module.exports = {
             if (theme.help) {
                 themeSettings.help = theme.help;
             }
+            
+            if (theme.hasOwnProperty("menu")) {
+                themeSettings.menu = theme.menu;
+            }
+            
             return themeApp;
         }
     },

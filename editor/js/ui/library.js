@@ -402,7 +402,9 @@ RED.library = (function() {
                 }
             });
             
-            loadFlowLibrary();
+            if (RED.settings.theme("menu.btn-import-library") !== false) { 
+                loadFlowLibrary();
+            }
         },
         create: createUI,
         loadFlowLibrary: loadFlowLibrary,
