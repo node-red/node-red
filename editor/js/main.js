@@ -165,7 +165,10 @@ var RED = (function() {
                 ]},
                 null,
                 {id:"btn-keyboard-shortcuts",label:"Keyboard Shortcuts",onselect:RED.keyboard.showHelp},
-                {id:"btn-help",label:"Node-RED Website", href:"http://nodered.org/docs"}
+                {id:"btn-help",
+                    label: RED.settings.theme("help.label","Node-RED Website"),
+                    href: RED.settings.theme("help.url","http://nodered.org/docs")
+                }
             ]
         });
         
@@ -179,7 +182,7 @@ var RED = (function() {
         RED.clipboard.init();
         RED.view.init();
         
-        RED.deploy.init(RED.settings.editorTheme?RED.settings.editorTheme.deployButton:null);
+        RED.deploy.init(RED.settings.theme("deployButton",null));
         
         RED.keyboard.add(/* ? */ 191,{shift:true},function(){RED.keyboard.showHelp();d3.event.preventDefault();});
         RED.comms.connect();

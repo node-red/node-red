@@ -119,13 +119,30 @@ RED.settings = (function () {
         });
     };
 
+    function theme(property,defaultValue) {
+        if (!RED.settings.editorTheme) {
+            return defaultValue;
+        }
+        var parts = property.split(".");
+        var v = RED.settings.editorTheme;
+        try {
+            for (var i=0;i<parts.length;i++) {
+                v = v[parts[i]];
+            }
+            return v;
+        } catch(err) {
+            return defaultValue;
+        }
+    }
 
     return {
         init: init,
         load: load,
         set: set,
         get: get,
-        remove: remove
+        remove: remove,
+        
+        theme: theme
     }
 })
 ();

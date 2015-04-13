@@ -141,6 +141,10 @@ module.exports = {
                     }
                 }
             }
+            
+            if (theme.help) {
+                themeSettings.help = theme.help;
+            }
             return themeApp;
         }
     },
