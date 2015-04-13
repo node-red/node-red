@@ -17,12 +17,13 @@
  
  
 #sidebar {
-    width: 305px;
     position: absolute;
-    right: 10px; top: 5px; bottom:10px;
+    top: 5px;
+    right: 10px;
+    bottom: 10px;
+    width: 305px;
     background: #fff;
     box-sizing: border-box;
-    -moz-box-sizing: border-box;
     @include component-border;
 }
 
@@ -33,17 +34,22 @@
 }
 
 #sidebar-content {
+    position: absolute;
+    top: 30px;
+    right: 0;
+    bottom: 1px;
+    left: 0px;
     font-size: 1.2em;
     overflow-y: auto;
-    position: absolute;
-    top: 30px; left: 0px; right: 0; bottom: 1px;
 }
 
 #sidebar-separator {
+    position: absolute;
+    top: 5px;
+    right: 316px;
+    bottom:10px;
     width: 15px;
     background: url(images/grip.png) no-repeat 50% 50%;
-    position: absolute;
-    right: 316px; top: 5px; bottom:10px;
     cursor: col-resize;
 }
 

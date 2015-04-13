@@ -23,6 +23,13 @@ RED.menu = (function() {
     function createMenuItem(opt) {
         var item;
 
+        if (opt !== null && opt.id) {
+            var themeSetting = RED.settings.theme("menu."+opt.id);
+            if (themeSetting === false) {
+                return null;
+            }
+        }
+        
         function setState() {
             var savedStateActive = isSavedStateActive(opt.id);
             if (savedStateActive) {
@@ -113,7 +120,10 @@ RED.menu = (function() {
                 var submenu = $('<ul id="'+opt.id+'-submenu" class="dropdown-menu"></ul>').appendTo(item);
 
                 for (var i=0;i<opt.options.length;i++) {
-                    createMenuItem(opt.options[i]).appendTo(submenu);
+                    var li = createMenuItem(opt.options[i]);
+                    if (li) {
+                        li.appendTo(submenu);
+                    }
                 }
             }
             if (opt.disabled) {
@@ -148,9 +158,16 @@ RED.menu = (function() {
         
         var topMenu = $("<ul/>",{id:options.id+"-submenu", class:"dropdown-menu pull-right"}).insertAfter(button);
 
+        var lastAddedSeparator = false;
         for (var i=0;i<options.options.length;i++) {
             var opt = options.options[i];
-            createMenuItem(opt).appendTo(topMenu);
+            if (opt !== null || !lastAddedSeparator) {
+                var li = createMenuItem(opt);
+                if (li) {
+                    li.appendTo(topMenu);
+                    lastAddedSeparator = (opt === null);
+                }
+            }
         }
     }
 
@@ -176,7 +193,7 @@ RED.menu = (function() {
         } else {
             $("#"+id).removeClass("active");
         }
-        if (opt.onselect) {
+        if (opt && opt.onselect) {
             opt.onselect.call(opt,state);
         }
         setSavedState(id, state);
@@ -198,17 +215,20 @@ RED.menu = (function() {
     }
 
     function setAction(id,action) {
-        menuItems[id].onselect = action;
-        $("#"+id).click(function() {
-            if ($(this).parent().hasClass("disabled")) {
-                return;
-            }
-            if (menuItems[id].toggle) {
-                setSelected(id,!isSelected(id));
-            } else {
-                menuItems[id].onselect.call(menuItems[id]);
-            }
-        });
+        var opt = menuItems[id];
+        if (opt) {
+            opt.onselect = action;
+            $("#"+id).click(function() {
+                if ($(this).parent().hasClass("disabled")) {
+                    return;
+                }
+                if (menuItems[id].toggle) {
+                    setSelected(id,!isSelected(id));
+                } else {
+                    menuItems[id].onselect.call(menuItems[id]);
+                }
+            });
+        }
     }
 
     return {

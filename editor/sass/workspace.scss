@@ -14,10 +14,6 @@
  * limitations under the License.
  **/
 
-#workspace {
-   margin-left: 160px;
-   overflow: hidden;
-}
 
 #chart {
    overflow: auto;
@@ -32,12 +28,16 @@
     outline: none;
 }
 
-
 #workspace {
     position: absolute;
     margin: 0;
-    top:5px; left:190px; bottom: 10px; right: 330px;
+    top:5px;
+    left:190px;
+    bottom: 10px;
+    right: 330px;
+    overflow: hidden;
 }
+
 #chart-zoom-controls {
     position: absolute;
     bottom:30px; right: 350px;

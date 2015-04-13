@@ -20,16 +20,21 @@
   limitations under the License.
 -->
 <head>
-<title>Node-RED</title>
+<title>{{ page.title }}</title>
+<link rel="icon" type="image/png" href="{{ page.favicon }}">
 <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 <link href="vendor/jquery/css/smoothness/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" media="screen">
 <link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.min.css">
 <link rel="stylesheet" href="vendor/vendor.css">
 <link rel="stylesheet" href="red/style.min.css">
+{{#page.css}}
+<link rel="stylesheet" href="{{.}}">
+{{/page.css}}
+
 </head>
 <body spellcheck="false">
 <div id="header">
-    <span class="logo"><img src="red/images/node-red.png"> <span>Node-RED</span></span>
+    <span class="logo">{{#header.image}}<img src="{{.}}">{{/header.image}} <span>{{ header.title }}</span></span>
     <ul class="header-toolbar hide">
         <li><a id="btn-sidemenu" class="button" data-toggle="dropdown" href="#"><i class="fa fa-bars"></i></a></li>
     <ul>

@@ -14,6 +14,7 @@
  * limitations under the License.
  **/
 var settings = require('../settings');
+var theme = require("./theme");
 
 var util = require('util');
 
@@ -23,7 +24,12 @@ module.exports = {
             httpNodeRoot: settings.httpNodeRoot,
             version: settings.version,
             user: req.user
-        };
+        }
+        
+        var themeSettings = theme.settings();
+        if (themeSettings) {
+            safeSettings.editorTheme = themeSettings;
+        }
         
         if (util.isArray(settings.paletteCategories)) {
             safeSettings.paletteCategories = settings.paletteCategories;

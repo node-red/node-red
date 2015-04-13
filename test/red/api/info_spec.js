@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ var app = express();
 var settings = require("../../../red/settings");
 var info = require("../../../red/api/info");
 
+var theme = require("../../../red/api/theme");
+
 describe("info api", function() {
     describe("settings handler", function() {
         before(function() {
@@ -34,12 +36,16 @@ describe("info api", function() {
                 paletteCategories :["red","blue","green"]
             }
             settings.init(userSettings);
+            
+            sinon.stub(theme,"settings",function() { return { test: 456 };});
+            
             app = express();
             app.get("/settings",info.settings);
         });
 
         after(function() {
             settings.reset();
+            theme.settings.restore();
         });
 
         it('returns the filtered settings', function(done) {
@@ -53,6 +59,7 @@ describe("info api", function() {
                     res.body.should.have.property("httpNodeRoot","testHttpNodeRoot");
                     res.body.should.have.property("version","testVersion");
                     res.body.should.have.property("paletteCategories",["red","blue","green"]);
+                    res.body.should.have.property("editorTheme",{test:456});
                     res.body.should.not.have.property("foo",123);
                     done();
                 });

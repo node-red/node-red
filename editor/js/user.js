@@ -22,7 +22,7 @@ RED.user = (function() {
         }
         
         var dialog = $('<div id="node-dialog-login" class="hide">'+
-                       '<div style="display: inline-block;width: 250px; vertical-align: top; margin-right: 10px; margin-bottom: 20px;"><img src="red/images/node-red-256.png"/></div>'+
+                       '<div style="display: inline-block;width: 250px; vertical-align: top; margin-right: 10px; margin-bottom: 20px;"><img id="node-dialog-login-image" src=""/></div>'+
                        '<div style="display: inline-block; width: 250px; vertical-align: bottom; margin-left: 10px; margin-bottom: 20px;">'+
                        '<form id="node-dialog-login-fields" class="form-horizontal" style="margin-bottom: 0px;"></form>'+
                        '</div>'+
@@ -45,6 +45,13 @@ RED.user = (function() {
             success: function(data) {
                 if (data.type == "credentials") {
                     var i=0;
+                    
+                    if (data.image) {
+                        $("#node-dialog-login-image").attr("src",data.image);
+                    } else {
+                        $("#node-dialog-login-image").attr("src","red/images/node-red-256.png");
+                    }
+                    
                     for (;i<data.prompts.length;i++) {
                         var field = data.prompts[i];
                         var row = $("<div/>",{class:"form-row"});
@@ -110,10 +117,10 @@ RED.user = (function() {
     }
     
     function updateUserMenu() {
-        $("#btn-usermenu-submenu li").remove();
+        $("#usermenu-submenu li").remove();
         if (RED.settings.user.anonymous) {
             RED.menu.addItem("btn-usermenu",{
-                id:"btn-login",
+                id:"usermenu-item-login",
                 label:"Login",
                 onselect: function() {
                     RED.user.login({cancelable:true},function() {
@@ -126,11 +133,11 @@ RED.user = (function() {
             });
         } else {
             RED.menu.addItem("btn-usermenu",{
-                id:"btn-username",
+                id:"usermenu-item-username",
                 label:"<b>"+RED.settings.user.username+"</b>"
             });
             RED.menu.addItem("btn-usermenu",{
-                id:"btn-logout",
+                id:"usermenu-item-logout",
                 label:"Logout",
                 onselect: function() {
                     RED.user.logout();
@@ -144,13 +151,16 @@ RED.user = (function() {
     
     function init() {
         if (RED.settings.user) {
-            $('<li><a id="btn-usermenu" class="button hide" data-toggle="dropdown" href="#"><i class="fa fa-user"></i></a></li>')
-                .prependTo(".header-toolbar");
-
-            RED.menu.init({id:"btn-usermenu",
-                options: []
-            });
-            updateUserMenu();
+            if (!RED.settings.editorTheme || !RED.settings.editorTheme.hasOwnProperty("userMenu")) {
+            
+                $('<li><a id="btn-usermenu" class="button hide" data-toggle="dropdown" href="#"><i class="fa fa-user"></i></a></li>')
+                    .prependTo(".header-toolbar");
+    
+                RED.menu.init({id:"btn-usermenu",
+                    options: []
+                });
+                updateUserMenu();
+            }
         }
         
     }

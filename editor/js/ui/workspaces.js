@@ -102,18 +102,18 @@ RED.workspaces = (function() {
             }
         },
         onadd: function(tab) {
-            RED.menu.addItem("btn-workspace-menu",{
-                id:"btn-workspace-menu-"+tab.id.replace(".","-"),
+            RED.menu.addItem("menu-item-workspace",{
+                id:"menu-item-workspace-menu-"+tab.id.replace(".","-"),
                 label:tab.label,
                 onselect:function() {
                     workspace_tabs.activateTab(tab.id);
                 }
             });
-            RED.menu.setDisabled("btn-workspace-delete",workspace_tabs.count() == 1);
+            RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() == 1);
         },
         onremove: function(tab) {
-            RED.menu.setDisabled("btn-workspace-delete",workspace_tabs.count() == 1);
-            RED.menu.removeItem("btn-workspace-menu-"+tab.id.replace(".","-"));
+            RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() == 1);
+            RED.menu.removeItem("menu-item-workspace-menu-"+tab.id.replace(".","-"));
         }
     });
     
@@ -141,7 +141,7 @@ RED.workspaces = (function() {
                     if (workspace.label != label) {
                         workspace_tabs.renameTab(workspace.id,label);
                         RED.nodes.dirty(true);
-                        $("#btn-workspace-menu-"+workspace.id.replace(".","-")).text(label);
+                        $("#menu-item-workspace-menu-"+workspace.id.replace(".","-")).text(label);
                         // TODO: update entry in menu
                     }
                     $( this ).dialog( "close" );
@@ -195,7 +195,7 @@ RED.workspaces = (function() {
         $('#btn-workspace-add-tab').on("click",function(e) {addWorkspace(); e.preventDefault()});
         RED.sidebar.on("resize",workspace_tabs.resize);
         
-        RED.menu.setAction('btn-workspace-delete',function() {
+        RED.menu.setAction('menu-item-workspace-delete',function() {
             deleteWorkspace(RED.nodes.workspace(activeWorkspace));
         });
     }

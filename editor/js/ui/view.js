@@ -259,8 +259,8 @@ RED.view = (function() {
                 $("#workspace-subflow-add-input").toggleClass("disabled",activeSubflow.in.length > 0);
             }
             
-            RED.menu.setDisabled("btn-workspace-edit", activeSubflow);
-            RED.menu.setDisabled("btn-workspace-delete",RED.workspaces.count() == 1 || activeSubflow);
+            RED.menu.setDisabled("menu-item-workspace-edit", activeSubflow);
+            RED.menu.setDisabled("menu-item-workspace-delete",RED.workspaces.count() == 1 || activeSubflow);
             
             if (workspaceScrollPositions[event.workspace]) {
                 chart.scrollLeft(workspaceScrollPositions[event.workspace].left);

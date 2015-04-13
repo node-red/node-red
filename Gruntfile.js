@@ -118,6 +118,24 @@ module.exports = function(grunt) {
                   "editor/js/ui/touch/radialMenu.js"
               ],
               dest: "public/red/red.js"
+            },
+            vendor: {
+                files: {
+                    "public/vendor/vendor.js": [
+                        "editor/vendor/jquery/js/jquery-1.11.1.min.js",
+                        "editor/vendor/bootstrap/js/bootstrap.min.js",
+                        "editor/vendor/jquery/js/jquery-ui-1.10.3.custom.min.js",
+                        "editor/vendor/jquery/js/jquery.ui.touch-punch.min.js",
+                        "editor/vendor/marked/marked.min.js",
+                        "editor/vendor/orion/built-editor.min.js",
+                        "editor/vendor/d3/d3.v3.min.js"
+                    ],
+                    "public/vendor/vendor.css": [
+                        "editor/vendor/orion/built-editor.css"
+                        // TODO: resolve relative resource paths in
+                        //       bootstrap/FA/jquery
+                    ]
+                }
             }
         },
         uglify: {
@@ -214,7 +232,13 @@ module.exports = function(grunt) {
                 },
                 {
                     cwd: 'editor/vendor',
-                    src: '**',
+                    src: [
+                        'ace/**',
+                        'bootstrap/css/**',
+                        'bootstrap/img/**',
+                        'jquery/css/**',
+                        'font-awesome/**'
+                    ],
                     expand: true,
                     dest: 'public/vendor/'
                 },
@@ -244,7 +268,8 @@ module.exports = function(grunt) {
                         'nodes/*.demo',
                         'nodes/core/**',
                         'red/**',
-                        'public/**'
+                        'public/**',
+                        'editor/templates/**'
                     ],
                     dest: path.resolve('<%= paths.dist %>/node-red-<%= pkg.version %>')
                 }]
@@ -333,7 +358,7 @@ module.exports = function(grunt) {
     
     grunt.registerTask('build',
         'Builds editor content',
-        ['clean:build','concat:build','uglify:build','sass:build','copy:build','attachCopyright']);
+        ['clean:build','concat:build','concat:vendor','uglify:build','sass:build','copy:build','attachCopyright']);
     
     grunt.registerTask('dev',
         'Developer mode: run node-red, watch for source changes and build/restart',
