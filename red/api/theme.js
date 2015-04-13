@@ -18,8 +18,9 @@ var express = require("express");
 var util = require("util");
 var path = require("path");
 var fs = require("fs");
+var clone = require("clone");
 
-var themeContext = {
+var defaultContext = {
     page: {
         title: "Node-RED",
         favicon: "favicon.ico"
@@ -30,6 +31,7 @@ var themeContext = {
     }
 };
 
+var themeContext = clone(defaultContext);
 var themeSettings = null;
 
 function serveFile(app,baseUrl,file) {
@@ -51,6 +53,9 @@ module.exports = {
     init: function(settings) {
         var i;
         var url;
+        themeContext = clone(defaultContext);
+        themeSettings = null;
+        
         if (settings.editorTheme) {
             var theme = settings.editorTheme;
             themeSettings = {};
