@@ -43,14 +43,14 @@ RED.deploy = (function() {
         
         if (type == "default") {
             $('<li><span class="deploy-button-group button-group">'+
-              '<a id="btn-deploy" class="action-deploy disabled" href="#"><img id="btn-icn-deploy" src="red/images/deploy-full-o.png"> <span>Deploy</span></a>'+
+              '<a id="btn-deploy" class="action-deploy disabled" href="#"><img id="btn-deploy-icon" src="red/images/deploy-full-o.png"> <span>Deploy</span></a>'+
               '<a id="btn-deploy-options"  data-toggle="dropdown"  class="" href="#"><i class="fa fa-caret-down"></i></a>'+
               '</span></li>').prependTo(".header-toolbar");
               RED.menu.init({id:"btn-deploy-options",
                   options: [
-                      {id:"btn-deploy-full",toggle:"deploy-type",icon:"red/images/deploy-full.png",label:"Full",sublabel:"Deploys everything in the workspace",onselect:function(s) { if(s){changeDeploymentType("full")}}},
-                      {id:"btn-deploy-flow",toggle:"deploy-type",icon:"red/images/deploy-flows.png",label:"Modified Flows",sublabel:"Only deploys flows that contain changed nodes", onselect:function(s) {if(s){changeDeploymentType("flows")}}},
-                      {id:"btn-deploy-node",toggle:"deploy-type",icon:"red/images/deploy-nodes.png",label:"Modified Nodes",sublabel:"Only deploys nodes that have changed",onselect:function(s) { if(s){changeDeploymentType("nodes")}}}
+                      {id:"deploymenu-item-full",toggle:"deploy-type",icon:"red/images/deploy-full.png",label:"Full",sublabel:"Deploys everything in the workspace",onselect:function(s) { if(s){changeDeploymentType("full")}}},
+                      {id:"deploymenu-item-flow",toggle:"deploy-type",icon:"red/images/deploy-flows.png",label:"Modified Flows",sublabel:"Only deploys flows that contain changed nodes", onselect:function(s) {if(s){changeDeploymentType("flows")}}},
+                      {id:"deploymenu-item-node",toggle:"deploy-type",icon:"red/images/deploy-nodes.png",label:"Modified Nodes",sublabel:"Only deploys nodes that have changed",onselect:function(s) { if(s){changeDeploymentType("nodes")}}}
                   ]
               });
         } else if (type == "simple") {
@@ -62,7 +62,7 @@ RED.deploy = (function() {
             
             $('<li><span class="deploy-button-group button-group">'+
               '<a id="btn-deploy" class="action-deploy disabled" href="#">'+
-              (icon?'<img id="btn-icn-deploy" src="'+icon+'"> ':'')+
+              (icon?'<img id="btn-deploy-icon" src="'+icon+'"> ':'')+
               '<span>'+label+'</span></a>'+
               '</span></li>').prependTo(".header-toolbar");
         }
@@ -137,8 +137,8 @@ RED.deploy = (function() {
             }
             var nns = RED.nodes.createCompleteNodeSet();
 
-            $("#btn-icn-deploy").removeClass('fa-download');
-            $("#btn-icn-deploy").addClass('spinner');
+            $("#btn-deploy-icon").removeClass('fa-download');
+            $("#btn-deploy-icon").addClass('spinner');
             RED.nodes.dirty(false);
 
             $.ajax({
@@ -176,8 +176,8 @@ RED.deploy = (function() {
                     RED.notify("<strong>Error</strong>: no response from server","error");
                 }
             }).always(function() {
-                $("#btn-icn-deploy").removeClass('spinner');
-                $("#btn-icn-deploy").addClass('fa-download');
+                $("#btn-deploy-icon").removeClass('spinner');
+                $("#btn-deploy-icon").addClass('fa-download');
             });
         }
     }

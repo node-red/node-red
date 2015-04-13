@@ -23,22 +23,11 @@ var themeContext = {
     page: {
         title: "Node-RED",
         favicon: "favicon.ico"
-        //css: [""]
     },
     header: {
         title: "Node-RED",
         image: "red/images/node-red.png"
-    },
-    //deployButton: {
-    ///**
-    // * options:
-    // *   type: "default" - Button with drop-down options - no further customisation available
-    // *   type: "simple"  - Button without dropdown. Customisations:
-    // *      label: the text to display - default: "Deploy"
-    // *      icon : the icon to use. Null removes the icon. default: "red/images/deploy-full-o.png"
-    // */   
-    //    
-    //}
+    }
 };
 
 var themeSettings = null;

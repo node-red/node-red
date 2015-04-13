@@ -138,36 +138,36 @@ var RED = (function() {
     function loadEditor() {
         RED.menu.init({id:"btn-sidemenu",
             options: [
-                {id:"btn-sidebar",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
-                {id:"btn-node-status",label:"Display node status",toggle:true,onselect:toggleStatus, selected: true},
+                {id:"menu-item-sidebar",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
+                {id:"menu-item-status",label:"Display node status",toggle:true,onselect:toggleStatus, selected: true},
                 null,
-                {id:"btn-import-menu",label:"Import",options:[
-                    {id:"btn-import-clipboard",label:"Clipboard",onselect:RED.clipboard.import},
-                    {id:"btn-import-library",label:"Library",options:[]}
+                {id:"menu-item-import",label:"Import",options:[
+                    {id:"menu-item-import-clipboard",label:"Clipboard",onselect:RED.clipboard.import},
+                    {id:"menu-item-import-library",label:"Library",options:[]}
                 ]},
-                {id:"btn-export-menu",label:"Export",disabled:true,options:[
-                    {id:"btn-export-clipboard",label:"Clipboard",disabled:true,onselect:RED.clipboard.export},
-                    {id:"btn-export-library",label:"Library",disabled:true,onselect:RED.library.export}
-                ]},
-                null,
-                {id:"btn-config-nodes",label:"Configuration nodes",onselect:RED.sidebar.config.show},
-                null,
-                {id:"btn-subflow-menu",label:"Subflows", options: [
-                    {id:"btn-create-subflow",label:"Create subflow",onselect:RED.subflow.createSubflow},
-                    {id:"btn-convert-subflow",label:"Selection to subflow",disabled:true,onselect:RED.subflow.convertToSubflow},
+                {id:"menu-item-export",label:"Export",disabled:true,options:[
+                    {id:"menu-item-export-clipboard",label:"Clipboard",disabled:true,onselect:RED.clipboard.export},
+                    {id:"menu-item-export-library",label:"Library",disabled:true,onselect:RED.library.export}
                 ]},
                 null,
-                {id:"btn-workspace-menu",label:"Workspaces",options:[
-                    {id:"btn-workspace-add",label:"Add",onselect:RED.workspaces.add},
-                    {id:"btn-workspace-edit",label:"Rename",onselect:RED.workspaces.edit},
-                    {id:"btn-workspace-delete",label:"Delete",onselect:RED.workspaces.remove},
+                {id:"menu-item-config-nodes",label:"Configuration nodes",onselect:RED.sidebar.config.show},
+                null,
+                {id:"menu-item-subflow",label:"Subflows", options: [
+                    {id:"menu-item-subflow-create",label:"Create subflow",onselect:RED.subflow.createSubflow},
+                    {id:"menu-item-subflow-convert",label:"Selection to subflow",disabled:true,onselect:RED.subflow.convertToSubflow},
+                ]},
+                null,
+                {id:"menu-item-workspace",label:"Workspaces",options:[
+                    {id:"menu-item-workspace-add",label:"Add",onselect:RED.workspaces.add},
+                    {id:"menu-item-workspace-edit",label:"Rename",onselect:RED.workspaces.edit},
+                    {id:"menu-item-workspace-delete",label:"Delete",onselect:RED.workspaces.remove},
                     null
                 ]},
                 null,
-                {id:"btn-keyboard-shortcuts",label:"Keyboard Shortcuts",onselect:RED.keyboard.showHelp},
-                {id:"btn-help",
-                    label: RED.settings.theme("menu.btn-help.label","Node-RED Website"),
-                    href: RED.settings.theme("menu.btn-help.url","http://nodered.org/docs")
+                {id:"menu-item-keyboard-shortcuts",label:"Keyboard Shortcuts",onselect:RED.keyboard.showHelp},
+                {id:"menu-item-help",
+                    label: RED.settings.theme("menu.menu-item-help.label","Node-RED Website"),
+                    href: RED.settings.theme("menu.menu-item-help.url","http://nodered.org/docs")
                 }
             ]
         });

@@ -117,10 +117,10 @@ RED.user = (function() {
     }
     
     function updateUserMenu() {
-        $("#btn-usermenu-submenu li").remove();
+        $("#usermenu-submenu li").remove();
         if (RED.settings.user.anonymous) {
             RED.menu.addItem("btn-usermenu",{
-                id:"btn-login",
+                id:"usermenu-item-login",
                 label:"Login",
                 onselect: function() {
                     RED.user.login({cancelable:true},function() {
@@ -133,11 +133,11 @@ RED.user = (function() {
             });
         } else {
             RED.menu.addItem("btn-usermenu",{
-                id:"btn-username",
+                id:"usermenu-item-username",
                 label:"<b>"+RED.settings.user.username+"</b>"
             });
             RED.menu.addItem("btn-usermenu",{
-                id:"btn-logout",
+                id:"usermenu-item-logout",
                 label:"Logout",
                 onselect: function() {
                     RED.user.logout();

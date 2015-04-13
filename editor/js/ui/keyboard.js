@@ -62,7 +62,7 @@ RED.keyboard = (function() {
     var dialog = null;
     
     function showKeyboardHelp() {
-        if (!RED.settings.theme("menu.btn-keyboard-shortcuts",true)) {
+        if (!RED.settings.theme("menu.menu-item-keyboard-shortcuts",true)) {
             return;
         }
         if (!dialog) {

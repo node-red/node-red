@@ -25,7 +25,7 @@ RED.library = (function() {
                 var li;
                 var a;
                 var ul = document.createElement("ul");
-                ul.id = "btn-import-library-submenu";
+                ul.id = "menu-item-import-library-submenu";
                 ul.className = "dropdown-menu";
                 if (data.d) {
                     for (i in data.d) {
@@ -63,7 +63,7 @@ RED.library = (function() {
             };
             var menu = buildMenu(data,"");
             //TODO: need an api in RED.menu for this
-            $("#btn-import-library-submenu").replaceWith(menu);
+            $("#menu-item-import-library-submenu").replaceWith(menu);
         });
     }
     
@@ -392,17 +392,17 @@ RED.library = (function() {
         init: function() {
             RED.view.on("selection-changed",function(selection) {
                 if (!selection.nodes) {
-                    RED.menu.setDisabled("btn-export-menu",true);
-                    RED.menu.setDisabled("btn-export-clipboard",true);
-                    RED.menu.setDisabled("btn-export-library",true);
+                    RED.menu.setDisabled("menu-item-export",true);
+                    RED.menu.setDisabled("menu-item-export-clipboard",true);
+                    RED.menu.setDisabled("menu-item-export-library",true);
                 } else {
-                    RED.menu.setDisabled("btn-export-menu",false);
-                    RED.menu.setDisabled("btn-export-clipboard",false);
-                    RED.menu.setDisabled("btn-export-library",false);
+                    RED.menu.setDisabled("menu-item-export",false);
+                    RED.menu.setDisabled("menu-item-export-clipboard",false);
+                    RED.menu.setDisabled("menu-item-export-library",false);
                 }
             });
             
-            if (RED.settings.theme("menu.btn-import-library") !== false) { 
+            if (RED.settings.theme("menu.menu-item-import-library") !== false) { 
                 loadFlowLibrary();
             }
         },

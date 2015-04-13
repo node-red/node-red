@@ -129,13 +129,13 @@ RED.clipboard = (function() {
         init: function() {
             RED.view.on("selection-changed",function(selection) {
                 if (!selection.nodes) {
-                    RED.menu.setDisabled("btn-export-menu",true);
-                    RED.menu.setDisabled("btn-export-clipboard",true);
-                    RED.menu.setDisabled("btn-export-library",true);
+                    RED.menu.setDisabled("menu-item-export",true);
+                    RED.menu.setDisabled("menu-item-export-clipboard",true);
+                    RED.menu.setDisabled("menu-item-export-library",true);
                 } else {
-                    RED.menu.setDisabled("btn-export-menu",false);
-                    RED.menu.setDisabled("btn-export-clipboard",false);
-                    RED.menu.setDisabled("btn-export-library",false);
+                    RED.menu.setDisabled("menu-item-export",false);
+                    RED.menu.setDisabled("menu-item-export-clipboard",false);
+                    RED.menu.setDisabled("menu-item-export-library",false);
                 }
             });
             RED.keyboard.add(/* e */ 69,{ctrl:true},function(){exportNodes();d3.event.preventDefault();});

@@ -177,9 +177,9 @@ RED.subflow = (function() {
         
         RED.view.on("selection-changed",function(selection) {
             if (!selection.nodes) {
-                RED.menu.setDisabled("btn-convert-subflow",true);
+                RED.menu.setDisabled("menu-item-subflow-convert",true);
             } else {
-                RED.menu.setDisabled("btn-convert-subflow",false);
+                RED.menu.setDisabled("menu-item-subflow-convert",false);
             }
         });
         

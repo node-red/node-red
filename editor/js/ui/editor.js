@@ -786,7 +786,7 @@ RED.editor = (function() {
                             changes['name'] = editing_node.name;
                             editing_node.name = newName;
                             changed = true;
-                            $("#btn-workspace-menu-"+editing_node.id.replace(".","-")).text("Subflow: "+newName);
+                            $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text("Subflow: "+newName);
                         }
 
                         RED.palette.refresh();
