@@ -166,8 +166,8 @@ var RED = (function() {
                 null,
                 {id:"btn-keyboard-shortcuts",label:"Keyboard Shortcuts",onselect:RED.keyboard.showHelp},
                 {id:"btn-help",
-                    label: RED.settings.theme("help.label","Node-RED Website"),
-                    href: RED.settings.theme("help.url","http://nodered.org/docs")
+                    label: RED.settings.theme("menu.btn-help.label","Node-RED Website"),
+                    href: RED.settings.theme("menu.btn-help.url","http://nodered.org/docs")
                 }
             ]
         });

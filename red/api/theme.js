@@ -129,7 +129,6 @@ module.exports = {
             if (theme.hasOwnProperty("userMenu")) {
                 themeSettings.userMenu = theme.userMenu;
             }
-            //themeSettings.deployButton = theme.deployButton || themeSettings.deployButton;
             
             if (theme.login) {
                 if (theme.login.image) {
@@ -140,10 +139,6 @@ module.exports = {
                         }
                     }
                 }
-            }
-            
-            if (theme.help) {
-                themeSettings.help = theme.help;
             }
             
             if (theme.hasOwnProperty("menu")) {
