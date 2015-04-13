@@ -43,8 +43,8 @@ RED.deploy = (function() {
         
         if (type == "default") {
             $('<li><span class="deploy-button-group button-group">'+
-              '<a id="btn-deploy" class="action-deploy disabled" href="#"><img id="btn-deploy-icon" src="red/images/deploy-full-o.png"> <span>Deploy</span></a>'+
-              '<a id="btn-deploy-options"  data-toggle="dropdown"  class="" href="#"><i class="fa fa-caret-down"></i></a>'+
+              '<a id="btn-deploy" class="deploy-button disabled" href="#"><img id="btn-deploy-icon" src="red/images/deploy-full-o.png"> <span>Deploy</span></a>'+
+              '<a id="btn-deploy-options" data-toggle="dropdown" class="deploy-button" href="#"><i class="fa fa-caret-down"></i></a>'+
               '</span></li>').prependTo(".header-toolbar");
               RED.menu.init({id:"btn-deploy-options",
                   options: [
@@ -61,7 +61,7 @@ RED.deploy = (function() {
             }
             
             $('<li><span class="deploy-button-group button-group">'+
-              '<a id="btn-deploy" class="action-deploy disabled" href="#">'+
+              '<a id="btn-deploy" class="deploy-button disabled" href="#">'+
               (icon?'<img id="btn-deploy-icon" src="'+icon+'"> ':'')+
               '<span>'+label+'</span></a>'+
               '</span></li>').prependTo(".header-toolbar");
