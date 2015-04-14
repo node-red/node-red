@@ -121,10 +121,10 @@ module.exports = function(RED) {
                 node.board.pinMode(node.pin, node.state);
                 node.on("input", function(msg) {
                     if (node.state === "OUTPUT") {
-                        if ((msg.payload == true)||(msg.payload == 1)||(msg.payload.toString().toLowerCase() == "on")) {
+                        if ((msg.payload === true)||(msg.payload == 1)||(msg.payload.toString().toLowerCase() == "on")) {
                             node.board.digitalWrite(node.pin, true);
                         }
-                        if ((msg.payload == false)||(msg.payload == 0)||(msg.payload.toString().toLowerCase() == "off")) {
+                        if ((msg.payload === false)||(msg.payload === 0)||(msg.payload.toString().toLowerCase() == "off")) {
                             node.board.digitalWrite(node.pin, false);
                         }
                     }
