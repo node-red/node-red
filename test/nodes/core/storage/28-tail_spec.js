@@ -17,9 +17,7 @@
 var should = require("should");
 var path = require('path');
 var fs = require('fs-extra');
-var mkdirp = require('mkdirp');
 var sinon = require('sinon');
-
 var tailNode = require("../../../../nodes/core/storage/28-tail.js");
 var helper = require("../../helper.js");
 

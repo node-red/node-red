@@ -14,12 +14,12 @@
  * limitations under the License.
  **/
 
-var fs = require('fs');
+var fs = require('fs-extra');
 var when = require('when');
 var nodeFn = require('when/node/function');
 var keys = require('when/keys');
 var fspath = require("path");
-var mkdirp = require("mkdirp");
+var mkdirp = fs.mkdirs;
 
 var log = require("../log");
 
@@ -102,7 +102,7 @@ function getFileBody(root,path) {
     return body;
 }
 
-/** 
+/**
  * Write content to a file using UTF8 encoding.
  * This forces a fsync before completing to ensure
  * the write hits disk.
@@ -124,9 +124,9 @@ function writeFile(path,content) {
 var localfilesystem = {
     init: function(_settings) {
         settings = _settings;
-        
+
         var promises = [];
-        
+
         if (!settings.userDir) {
             if (fs.existsSync(fspath.join(process.env.NODE_RED_HOME,".config.json"))) {
                 settings.userDir = process.env.NODE_RED_HOME;
@@ -135,10 +135,10 @@ var localfilesystem = {
                 promises.push(promiseDir(settings.userDir));
             }
         }
-        
+
         if (settings.flowFile) {
             flowsFile = settings.flowFile;
-            
+
             if (flowsFile[0] == "/") {
                 // Absolute path
                 flowsFullPath = flowsFile;
@@ -154,7 +154,7 @@ var localfilesystem = {
                     flowsFullPath = fspath.join(settings.userDir,flowsFile);
                 }
             }
-                
+
         } else {
             flowsFile = 'flows_'+require('os').hostname()+'.json';
             flowsFullPath = fspath.join(settings.userDir,flowsFile);
@@ -163,23 +163,23 @@ var localfilesystem = {
         var ffName = fspath.basename(flowsFullPath);
         var ffBase = fspath.basename(flowsFullPath,ffExt);
         var ffDir = fspath.dirname(flowsFullPath);
-        
+
         credentialsFile = fspath.join(settings.userDir,ffBase+"_cred"+ffExt);
         credentialsFileBackup = fspath.join(settings.userDir,"."+ffBase+"_cred"+ffExt+".backup");
 
         oldCredentialsFile = fspath.join(settings.userDir,"credentials.json");
-        
+
         flowsFileBackup = fspath.join(ffDir,"."+ffName+".backup");
 
         sessionsFile = fspath.join(settings.userDir,".sessions.json");
 
         libDir = fspath.join(settings.userDir,"lib");
         libFlowsDir = fspath.join(libDir,"flows");
-        
+
         globalSettingsFile = fspath.join(settings.userDir,".config.json");
-        
+
         promises.push(promiseDir(libFlowsDir));
-        
+
         return when.all(promises);
     },
 
@@ -204,9 +204,9 @@ var localfilesystem = {
         if (fs.existsSync(flowsFullPath)) {
             fs.renameSync(flowsFullPath,flowsFileBackup);
         }
-        
+
         var flowData;
-        
+
         if (settings.flowFilePretty) {
             flowData = JSON.stringify(flows,null,4);
         } else {
@@ -249,7 +249,7 @@ var localfilesystem = {
         }
         return writeFile(credentialsFile, credentialData);
     },
-    
+
     getSettings: function() {
         if (fs.existsSync(globalSettingsFile)) {
             return nodeFn.call(fs.readFile,globalSettingsFile,'utf8').then(function(data) {
@@ -290,7 +290,7 @@ var localfilesystem = {
     saveSessions: function(sessions) {
         return writeFile(sessionsFile,JSON.stringify(sessions));
     },
-    
+
     getLibraryEntry: function(type,path) {
         var root = fspath.join(libDir,type);
         var rootPath = fspath.join(libDir,type,path);
