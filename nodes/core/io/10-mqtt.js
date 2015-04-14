@@ -106,10 +106,12 @@ module.exports = function(RED) {
                 if (node.topic) {
                     msg.topic = node.topic;
                 }
-                if (msg.hasOwnProperty("payload") && (msg.hasOwnProperty("topic")) && (typeof msg.topic === "string") && (msg.topic !== "")) { // topic must exist
-                    this.client.publish(msg);  // send the message
+                if ( msg.hasOwnProperty("payload")) {
+                    if (msg.hasOwnProperty("topic") && (typeof msg.topic === "string") && (msg.topic !== "")) { // topic must exist
+                        this.client.publish(msg);  // send the message
+                    }
+                    else { node.warn("Invalid topic specified"); }
                 }
-                else { node.warn("Invalid topic specified"); }
             });
             this.client.on("connectionlost",function() {
                 node.status({fill:"red",shape:"ring",text:"disconnected"});
