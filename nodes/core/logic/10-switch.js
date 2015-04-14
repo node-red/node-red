@@ -28,8 +28,8 @@ module.exports = function(RED) {
         'regex': function(a, b) { return (a + "").match(new RegExp(b)); },
         'true': function(a) { return a === true; },
         'false': function(a) { return a === false; },
-        'null': function(a) { return typeof a == "undefined"; },
-        'nnull': function(a) { return typeof a != "undefined"; },
+        'null': function(a) { return (typeof a == "undefined" || a === null); },
+        'nnull': function(a) { return (typeof a != "undefined" && a !== null); },
         'else': function(a) { return a === true; }
     };
 
