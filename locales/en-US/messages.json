@@ -1,0 +1,37 @@
+{
+    "runtime": {
+        "welcome": "Welcome to Node-RED",
+        "version": "__component__ version: __version__",
+        "paths": {
+            "settings": "Settings file  : __path__"
+        }
+    },
+        
+    "nodes": {
+        "loading": "Loading palette nodes",
+        "errors": "Failed to register __count__ node type",
+        "errors_plural": "Failed to register __count__ node types",
+        "errors-help": "Run with -v for details",
+        "missing-modules": "Missing node modules:",
+        "removing-modules": "Removing modules from config",
+        "added-types": "Added node types:",
+        "removed-types": "Removed node types:",
+        "install": {
+            "invalid": "Invalid module name",
+            "installing": "Installing module: __name__",
+            "installed": "Installed module: __name__",
+            "install-failed": "Install failed",
+            "install-failed-long": "Installation of module __name__ failed:",
+            "install-failed-not-found": "$t(install-failed-long) module not found",
+            
+            "uninstalling": "Uninstalling module: __name__",
+            "uninstall-failed": "Uninstall failed",
+            "uninstall-failed-long": "Uninstall of module __name__ failed:",
+            "uninstalled": "Uninstalled module: __name__"
+            
+            
+            
+        }
+    }
+    
+}

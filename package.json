@@ -49,6 +49,7 @@
         "passport-http-bearer":"1.0.1",
         "passport-oauth2-client-password":"0.1.2",
         "oauth2orize":"1.0.1",
+        "i18next":"1.7.10",
         "node-red-node-feedparser":"0.0.*",
         "node-red-node-email":"0.0.*",
         "node-red-node-twitter":"0.0.*"
