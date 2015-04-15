@@ -54,7 +54,8 @@
         "passport":"0.2.1",
         "passport-http-bearer":"1.0.1",
         "passport-oauth2-client-password":"0.1.2",
-        "oauth2orize":"1.0.1"
+        "oauth2orize":"1.0.1",
+        "i18next":"1.7.10"
     },
     "optionalDependencies": {
         "irc":"0.3.9",
