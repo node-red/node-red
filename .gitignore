@@ -1,7 +1,6 @@
 .config.json
 .dist
 .jshintignore
-.jshintrc
 .npm
 .project
 .sessions.json
