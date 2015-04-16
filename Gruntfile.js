@@ -15,9 +15,9 @@
  **/
 
 var path = require("path");
- 
+
 module.exports = function(grunt) {
-    
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         paths: {
@@ -37,16 +37,17 @@ module.exports = function(grunt) {
         },
         jshint: {
             options: {
+                jshintrc:true
                 // http://www.jshint.com/docs/options/
-                "asi": true,      // allow missing semicolons
-                "curly": true,    // require braces
-                "eqnull": true,   // ignore ==null
-                "forin": true,    // require property filtering in "for in" loops
-                "immed": true,    // require immediate functions to be wrapped in ( )
-                "nonbsp": true,   // warn on unexpected whitespace breaking chars
-                //"strict": true, // commented out for now as it causes 100s of warnings, but want to get there eventually
-                "loopfunc": true, // allow functions to be defined in loops
-                "sub": true       // don't warn that foo['bar'] should be written as foo.bar
+                //"asi": true,      // allow missing semicolons
+                //"curly": true,    // require braces
+                //"eqnull": true,   // ignore ==null
+                //"forin": true,    // require property filtering in "for in" loops
+                //"immed": true,    // require immediate functions to be wrapped in ( )
+                //"nonbsp": true,   // warn on unexpected whitespace breaking chars
+                ////"strict": true, // commented out for now as it causes 100s of warnings, but want to get there eventually
+                //"loopfunc": true, // allow functions to be defined in loops
+                //"sub": true       // don't warn that foo['bar'] should be written as foo.bar
             },
             all: [
                 'Gruntfile.js',
@@ -55,7 +56,7 @@ module.exports = function(grunt) {
                 'nodes/**/*.js',
                 'editor/js/**/*.js'
             ],
-            
+
             core: {
                 files: {
                     src: [
@@ -198,7 +199,7 @@ module.exports = function(grunt) {
                 tasks: ['sass','attachCopyright:css']
             }
         },
-        
+
         nodemon: {
             /* uses .nodemonignore */
             dev: {
@@ -212,7 +213,7 @@ module.exports = function(grunt) {
                 }
             }
         },
-        
+
         concurrent: {
             dev: {
                 tasks: ['nodemon', 'watch'],
@@ -221,7 +222,7 @@ module.exports = function(grunt) {
                 }
             }
         },
-        
+
         copy: {
             build: {
                 files:[{
@@ -275,7 +276,7 @@ module.exports = function(grunt) {
                 }]
             }
         },
-                
+
         compress: {
             release: {
                 options: {
@@ -287,7 +288,7 @@ module.exports = function(grunt) {
             }
         }
     });
-    
+
     grunt.loadNpmTasks('grunt-simple-mocha');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-concat');
@@ -317,7 +318,7 @@ module.exports = function(grunt) {
             " * See the License for the specific language governing permissions and\n"+
             " * limitations under the License.\n"+
             " **/\n";
-        
+
         if (files) {
             for (var i=0;i<files.length;i++) {
                 var file = files[i];
@@ -339,34 +340,34 @@ module.exports = function(grunt) {
             }
         }
     });
-    
+
     grunt.registerTask('default',
         'Builds editor content then runs code style checks and unit tests on all components',
         ['build','test-core','test-editor','test-nodes']);
-    
+
     grunt.registerTask('test-core',
         'Runs code style check and unit tests on core runtime code',
         ['jshint:core','simplemocha:core']);
-    
+
     grunt.registerTask('test-editor',
         'Runs code style check on editor code',
         ['jshint:editor']);
-    
+
     grunt.registerTask('test-nodes',
         'Runs unit tests on core nodes',
         ['simplemocha:nodes']);
-    
+
     grunt.registerTask('build',
         'Builds editor content',
         ['clean:build','concat:build','concat:vendor','uglify:build','sass:build','copy:build','attachCopyright']);
-    
+
     grunt.registerTask('dev',
         'Developer mode: run node-red, watch for source changes and build/restart',
         ['build','concurrent:dev']);
-    
+
     grunt.registerTask('release',
         'Create distribution zip file',
         ['build','clean:release','copy:release','compress:release']);
 
-    
+
 };
