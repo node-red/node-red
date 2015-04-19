@@ -59,17 +59,18 @@ module.exports = function(RED) {
                         data = data.toString(node.datatype);
                     }
                     if (node.stream) {
-                        if ((node.datatype) === "utf8" && node.newline != "") {
+                        var msg;
+                        if ((node.datatype) === "utf8" && node.newline !== "") {
                             buffer = buffer+data;
                             var parts = buffer.split(node.newline);
                             for (var i = 0;i<parts.length-1;i+=1) {
-                                var msg = {topic:node.topic, payload:parts[i]};
+                                msg = {topic:node.topic, payload:parts[i]};
                                 msg._session = {type:"tcp",id:id};
                                 node.send(msg);
                             }
                             buffer = parts[parts.length-1];
                         } else {
-                            var msg = {topic:node.topic, payload:data};
+                            msg = {topic:node.topic, payload:data};
                             msg._session = {type:"tcp",id:id};
                             node.send(msg);
                         }
@@ -118,7 +119,7 @@ module.exports = function(RED) {
             this.on('close', function(done) {
                 node.done = done;
                 this.closing = true;
-                client.end();
+                if (client) { client.end(); }
                 clearTimeout(reconnectTimeout);
                 if (!node.connected) { done(); }
             });
@@ -135,17 +136,18 @@ module.exports = function(RED) {
                         data = data.toString(node.datatype);
                     }
                     if (node.stream) {
-                        if ((typeof data) === "string" && node.newline != "") {
+                        var msg;
+                        if ((typeof data) === "string" && node.newline !== "") {
                             buffer = buffer+data;
                             var parts = buffer.split(node.newline);
-                            for (var i = 0;i<parts.length-1;i+=1) {
-                                var msg = {topic:node.topic, payload:parts[i],ip:socket.remoteAddress,port:socket.remotePort};
+                            for (var i = 0; i<parts.length-1; i+=1) {
+                                msg = {topic:node.topic, payload:parts[i],ip:socket.remoteAddress,port:socket.remotePort,connected:true};
                                 msg._session = {type:"tcp",id:id};
                                 node.send(msg);
                             }
                             buffer = parts[parts.length-1];
                         } else {
-                            var msg = {topic:node.topic, payload:data};
+                            msg = {topic:node.topic, payload:data, connected:true};
                             msg._session = {type:"tcp",id:id};
                             node.send(msg);
                         }
@@ -184,6 +186,7 @@ module.exports = function(RED) {
                     node.error('unable to listen on port '+node.port+' : '+err);
                 }
             });
+
             server.listen(node.port, function(err) {
                 if (err) {
                     node.error('unable to listen on port '+node.port+' : '+err);
@@ -191,8 +194,10 @@ module.exports = function(RED) {
                     node.log('listening on port '+node.port);
                     node.on('close', function() {
                         for (var c in connectionPool) {
-                            connectionPool[c].end();
-                            connectionPool[c].unref();
+                            if (connectionPool.hasOwnProperty(c)) {
+                                connectionPool[c].end();
+                                connectionPool[c].unref();
+                            }
                         }
                         node.closing = true;
                         server.close();
@@ -266,7 +271,7 @@ module.exports = function(RED) {
                     }
                     if (node.doend === true) {
                         end = true;
-                        client.end();
+                        if (client) { client.end(); }
                     }
                 }
             });
@@ -274,7 +279,7 @@ module.exports = function(RED) {
             node.on("close", function(done) {
                 node.done = done;
                 this.closing = true;
-                client.end();
+                if (client) { client.end(); }
                 clearTimeout(reconnectTimeout);
                 if (!node.connected) { done(); }
             });
@@ -349,8 +354,10 @@ module.exports = function(RED) {
                     node.log('listening on port '+node.port);
                     node.on('close', function() {
                         for (var c in connectedSockets) {
-                            connectedSockets[c].end();
-                            connectedSockets[c].unref();
+                            if (connectedSockets.hasOwnProperty(c)) {
+                                connectedSockets[c].end();
+                                connectedSockets[c].unref();
+                            }
                         }
                         server.close();
                         node.log('stopped listening on port '+node.port);
@@ -369,7 +376,7 @@ module.exports = function(RED) {
         this.splitc = n.splitc;
 
         if (this.out != "char") { this.splitc = Number(this.splitc); }
-        else { this.splitc.replace("\\n","\n").replace("\\r","\r").replace("\\t","\t").replace("\\e","\e").replace("\\f","\f").replace("\\0","\0"); }
+        else { this.splitc.replace("\\n","\n").replace("\\r","\r").replace("\\t","\t").replace("\\e","\e").replace("\\f","\f").replace("\\0","\0"); } // jshint ignore:line
 
         var buf;
         if (this.out == "count") { buf = new Buffer(this.splitc); }
@@ -424,7 +431,7 @@ module.exports = function(RED) {
                                         var m = new Buffer(i+1);
                                         buf.copy(m,0,0,i+1);
                                         node.send({"payload": m});
-                                        client.end();
+                                        if (client) { client.end(); }
                                         m = null;
                                     }, node.splitc);
                                     i = 0;
@@ -437,7 +444,7 @@ module.exports = function(RED) {
                                 i += 1;
                                 if ( i >= node.serialConfig.count) {
                                     node.send({"payload": buf});
-                                    client.end();
+                                    if (client) { client.end(); }
                                     i = 0;
                                 }
                             }
@@ -449,7 +456,7 @@ module.exports = function(RED) {
                                     var m = new Buffer(i);
                                     buf.copy(m,0,0,i);
                                     node.send({"payload": m});
-                                    client.end();
+                                    if (client) { client.end(); }
                                     m = null;
                                     i = 0;
                                 }
