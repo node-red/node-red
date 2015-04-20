@@ -30,7 +30,7 @@ RED.menu = (function() {
             }
         }
         
-        function setState() {
+        function setInitialState() {
             var savedStateActive = isSavedStateActive(opt.id);
             if (savedStateActive) {
                 link.addClass("active");
@@ -106,7 +106,7 @@ RED.menu = (function() {
                         opt.onselect.call(opt);
                     }
                 });
-                setState();
+                setInitialState();
             } else if (opt.href) {
                 link.attr("target","_blank").attr("href",opt.href);
             } else if (!opt.options) {
