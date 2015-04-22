@@ -789,10 +789,10 @@ RED.nodes = (function() {
         
         for (var n=0;n<nodes.length;n++) {
             var node = nodes[n];
-            if (filter.z && node.z !== filter.z) {
+            if (filter.hasOwnProperty("z") && node.z !== filter.z) {
                 continue;
             }
-            if (filter.type && node.type !== filter.type) {
+            if (filter.hasOwnProperty("type") && node.type !== filter.type) {
                 continue;
             }
             result.push(node);
@@ -805,22 +805,22 @@ RED.nodes = (function() {
         for (var n=0;n<links.length;n++) {
             var link = links[n];
             if (filter.source) {
-                if (filter.source.id && link.source.id !== filter.source.id) {
+                if (filter.source.hasOwnProperty("id") && link.source.id !== filter.source.id) {
                     continue;
                 }
-                if (filter.source.z && link.source.z !== filter.source.z) {
+                if (filter.source.hasOwnProperty("z") && link.source.z !== filter.source.z) {
                     continue;
                 }
             }
             if (filter.target) {
-                if (filter.target.id && link.target.id !== filter.target.id) {
+                if (filter.target.hasOwnProperty("id") && link.target.id !== filter.target.id) {
                     continue;
                 }
-                if (filter.target.z && link.target.z !== filter.target.z) {
+                if (filter.target.hasOwnProperty("z") && link.target.z !== filter.target.z) {
                     continue;
                 }
             }
-            if (filter.sourcePort && link.sourcePort !== filter.sourcePort) {
+            if (filter.hasOwnProperty("sourcePort") && link.sourcePort !== filter.sourcePort) {
                 continue;
             }
             result.push(link);
