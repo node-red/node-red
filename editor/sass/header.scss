@@ -42,7 +42,6 @@ $headerMenuItemDivider: #464646;
 }
 
 span.logo {
-    pointer-events: none;
     float: left;
     margin-top: 5px;
     font-size: 30px;
@@ -56,6 +55,14 @@ span.logo {
     img {
         height: 18px;
     }
+    
+    a {
+        color: inherit;
+        &:hover {
+            text-decoration: none;
+        }
+    }
+    
 }
 
 .header-toolbar {

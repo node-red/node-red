@@ -91,6 +91,11 @@ module.exports = {
             if (theme.header) {
                 
                 themeContext.header.title = theme.header.title || themeContext.header.title;
+                
+                if (theme.header.hasOwnProperty("url")) {
+                    themeContext.header.url = theme.header.url;
+                }
+                
                 if (theme.header.hasOwnProperty("image")) {
                     if (theme.header.image) {
                         url = serveFile(themeApp,"/header/",theme.header.image);
