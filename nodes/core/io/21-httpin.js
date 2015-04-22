@@ -59,7 +59,7 @@ module.exports = function(RED) {
             };
 
             this.callback = function(req,res) {
-                if (node.method == "post") {
+                if ( node.method.match(/(^post$|^delete$|^put$|^options$)/) ) {
                     node.send({req:req,res:res,payload:req.body});
                 } else if (node.method == "get") {
                     node.send({req:req,res:res,payload:req.query});
@@ -102,7 +102,7 @@ module.exports = function(RED) {
             } else if (this.method == "put") {
                 RED.httpNode.put(this.url,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "delete") {
-                RED.httpNode.delete(this.url,corsHandler,metricsHandler,this.callback,this.errorHandler);
+                RED.httpNode.delete(this.url,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             }
 
             this.on("close",function() {
