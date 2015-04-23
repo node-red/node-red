@@ -194,7 +194,10 @@ module.exports = function(RED) {
                                 skip = Number(skip);
                             }
 
+                            var reserved = {}; for( var k in msg ) reserved[k] = msg[k];
+
                             coll.find(selector,msg.projection).sort(msg.sort).limit(limit).skip(skip).toArray(function(err, items) {
+                                for( var k in reserved ) msg[k] = reserved[k]
                                 if (err) {
                                     node.error(err);
                                 } else {
