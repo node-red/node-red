@@ -103,7 +103,13 @@ module.exports = function(RED) {
         var node = this;
 
         var sock = dgram.createSocket(node.ipv);  // default to ipv4
-
+        
+        sock.on("error", function(err) {
+            // Any async error will also get reported in the sock.send call.
+            // This handler is needed to ensure the error marked as handled to
+            // prevent it going to the global error handler and shutting node-red
+            // down.
+        });
         if (node.multicast != "false") {
             if (node.outport == "") { node.outport = node.port; }
             sock.bind(node.outport, function() {    // have to bind before you can enable broadcast...
