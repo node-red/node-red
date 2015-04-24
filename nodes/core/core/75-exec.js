@@ -23,7 +23,7 @@ module.exports = function(RED) {
     function ExecNode(n) {
         RED.nodes.createNode(this,n);
         this.cmd = (n.command || "").trim();
-        if (n.addpay == undefined) { n.addpay = true; }
+        if (n.addpay === undefined) { n.addpay = true; }
         this.addpay = n.addpay;
         this.append = (n.append || "").trim();
         this.useSpawn = n.useSpawn;
@@ -72,7 +72,11 @@ module.exports = function(RED) {
                 if (RED.settings.verbose) { node.log(cl); }
                 var child = exec(cl, {encoding: 'binary', maxBuffer:10000000}, function (error, stdout, stderr) {
                     msg.payload = new Buffer(stdout,"binary");
-                    if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
+                    try {
+                        if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
+                    } catch(e) {
+                        node.log("Bad STDOUT");
+                    }
                     var msg2 = {payload:stderr};
                     var msg3 = null;
                     //console.log('[exec] stdout: ' + stdout);
