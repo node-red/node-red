@@ -87,7 +87,7 @@ function getLocalNodeFiles(dir) {
             }
         } else if (stats.isDirectory()) {
             // Ignore /.dirs/, /lib/ /node_modules/
-            if (!/^(\..*|lib|icons|node_modules|test)$/.test(fn)) {
+            if (!/^(\..*|lib|icons|node_modules|test|locales)$/.test(fn)) {
                 result = result.concat(getLocalNodeFiles(path.join(dir,fn)));
             } else if (fn === "icons") {
                 events.emit("node-icon-dir",path.join(dir,fn));
@@ -195,6 +195,13 @@ function getNodeFiles(_defaultNodesDir,disableNodePathScan) {
     //console.log(defaultNodesDir);
     var nodeFiles = getLocalNodeFiles(path.resolve(defaultNodesDir));
     //console.log(nodeFiles);
+    
+    var defaultLocalesPath = path.resolve(path.join(defaultNodesDir,"core","locales"));
+    events.emit("node-locales-dir", {
+        namespace:"node-red",
+        dir: defaultLocalesPath,
+        file: "messages.json"
+    });
     
     if (settings.userDir) {
         dir = path.join(settings.userDir,"nodes");

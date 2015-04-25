@@ -26,8 +26,8 @@ var settings;
 
 function init(_settings) {
     settings = _settings;
-    registry.init(settings);
     loader.init(settings);
+    registry.init(settings,loader);
 }
 //TODO: defaultNodesDir/disableNodePathScan are to make testing easier.
 //      When the tests are componentized to match the new registry structure,

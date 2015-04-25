@@ -160,14 +160,16 @@ describe('red/nodes/registry/index', function() {
             list[0].should.have.property("enabled",true);
             list[0].should.not.have.property("err");
 
-            eventEmitSpy.callCount.should.equal(2);
+            eventEmitSpy.callCount.should.equal(3);
 
             eventEmitSpy.firstCall.args[0].should.be.equal("node-icon-dir");
             eventEmitSpy.firstCall.args[1].should.be.equal(
                     resourcesDir + "NestedDirectoryNode" + path.sep + "NestedNode" + path.sep + "icons");
 
-            eventEmitSpy.secondCall.args[0].should.be.equal("type-registered");
-            eventEmitSpy.secondCall.args[1].should.be.equal("nested-node-1");
+            eventEmitSpy.secondCall.args[0].should.be.equal("node-locales-dir");
+            
+            eventEmitSpy.thirdCall.args[0].should.be.equal("type-registered");
+            eventEmitSpy.thirdCall.args[1].should.be.equal("nested-node-1");
 
             done();
         }).catch(function(e) {
@@ -284,11 +286,11 @@ describe('red/nodes/registry/index', function() {
             var nodeConfigs = typeRegistry.getNodeConfigs();
 
             // TODO: this is brittle...
-            nodeConfigs.should.equal("<script type=\"text/x-red\" data-template-name=\"test-node-1\"></script>\n<script type=\"text/x-red\" data-help-name=\"test-node-1\"></script>\n<script type=\"text/javascript\">RED.nodes.registerType('test-node-1',{});</script>\n<style></style>\n<p>this should be filtered out</p>\n<script type=\"text/x-red\" data-template-name=\"test-node-2\"></script>\n<script type=\"text/x-red\" data-help-name=\"test-node-2\"></script>\n<script type=\"text/javascript\">RED.nodes.registerType('test-node-2',{});</script>\n<style></style>\n");
+            nodeConfigs.should.equal("<script type=\"text/x-red\" data-template-name=\"test-node-1\"></script>\n\n<script type=\"text/javascript\">RED.nodes.registerType('test-node-1',{});</script>\n<style></style>\n<p>this should be filtered out</p>\n<script type=\"text/x-red\" data-help-name=\"test-node-1\"></script><script type=\"text/x-red\" data-template-name=\"test-node-2\"></script>\n\n<script type=\"text/javascript\">RED.nodes.registerType('test-node-2',{});</script>\n<style></style>\n<script type=\"text/x-red\" data-help-name=\"test-node-2\"></script>");
 
             var nodeId = list[0].id;
             var nodeConfig = typeRegistry.getNodeConfig(nodeId);
-            nodeConfig.should.equal("<script type=\"text/x-red\" data-template-name=\"test-node-1\"></script>\n<script type=\"text/x-red\" data-help-name=\"test-node-1\"></script>\n<script type=\"text/javascript\">RED.nodes.registerType('test-node-1',{});</script>\n<style></style>\n<p>this should be filtered out</p>\n");
+            nodeConfig.should.equal("<script type=\"text/x-red\" data-template-name=\"test-node-1\"></script>\n\n<script type=\"text/javascript\">RED.nodes.registerType('test-node-1',{});</script>\n<style></style>\n<p>this should be filtered out</p>\n<script type=\"text/x-red\" data-help-name=\"test-node-1\"></script>");
             done();
         }).catch(function(e) {
             done(e);
@@ -548,14 +550,18 @@ describe('red/nodes/registry/index', function() {
             list[1].should.have.property("err");
 
 
-            eventEmitSpy.callCount.should.equal(2);
+            eventEmitSpy.callCount.should.equal(3);
+            
+            eventEmitSpy.firstCall.args[0].should.be.equal("node-locales-dir");
 
-            eventEmitSpy.firstCall.args[0].should.be.equal("node-icon-dir");
-            eventEmitSpy.firstCall.args[1].should.be.equal(
+            
+            eventEmitSpy.secondCall.args[0].should.be.equal("node-icon-dir");
+            eventEmitSpy.secondCall.args[1].should.be.equal(
                     resourcesDir + "TestNodeModule" + path.sep+ "node_modules" + path.sep + "TestNodeModule" + path.sep + "icons");
 
-            eventEmitSpy.secondCall.args[0].should.be.equal("type-registered");
-            eventEmitSpy.secondCall.args[1].should.be.equal("test-node-mod-1");
+            
+            eventEmitSpy.thirdCall.args[0].should.be.equal("type-registered");
+            eventEmitSpy.thirdCall.args[1].should.be.equal("test-node-mod-1");
 
             done();
         }).catch(function(e) {
