@@ -22,9 +22,13 @@ var fs = require("fs");
 var defaultLang = "en-US";
 
 var resourceMap = {
-    "messages":  {
+    "runtime":  {
         basedir: path.resolve(__dirname+"/../locales"),
-        file:"messages.json"
+        file:"runtime.json"
+    },
+    "editor": {
+        basedir: path.resolve(__dirname+"/../locales"),
+        file: "editor.json"
     }
 }
 var resourceCache = {}
@@ -69,8 +73,8 @@ function init() {
         i18n.backend(MessageFileLoader);
         i18n.init({
             ns: {
-                namespaces: ["messages"],
-                defaultNs: "messages"
+                namespaces: ["runtime","editor"],
+                defaultNs: "runtime"
             },
             fallbackLng: ['en-US']
         },function() {

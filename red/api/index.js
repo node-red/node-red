@@ -86,7 +86,7 @@ function init(adminApp,storage) {
     adminApp.get("/nodes/:mod/:set",needsPermission("nodes.read"),nodes.getSet);
     adminApp.put("/nodes/:mod/:set",needsPermission("nodes.write"),nodes.putSet);
 
-    adminApp.get(/^\/locales\/(.+?)\/(.*)$/,needsPermission("nodes.read"),locales.get);
+    adminApp.get(/^\/locales\/(.+?)\/(.*).json$/,needsPermission("nodes.read"),locales.get);
 
     // Library
     library.init(adminApp);
