@@ -134,6 +134,21 @@ var RED = (function() {
         statusEnabled = state;
         RED.view.status(statusEnabled);
     }
+    
+    function loadLocales() {
+        i18n.init({
+            ns: {
+                namespaces: ["editor"],
+                defaultNs: "editor"
+            },
+            fallbackLng: ['en-US']
+        },function() {
+            RED["_"] = function() {
+                return i18n.t.apply(null,arguments);
+            }
+            loadEditor();
+        });
+    }
 
     function loadEditor() {
         RED.menu.init({id:"btn-sidemenu",
@@ -201,7 +216,7 @@ var RED = (function() {
         
         ace.require("ace/ext/language_tools");
 
-        RED.settings.init(loadEditor);
+        RED.settings.init(loadLocales);
     });
 
 
