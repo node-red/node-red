@@ -184,6 +184,10 @@ module.exports = function(RED) {
             if (isTemplatedUrl) {
                 url = mustache.render(nodeUrl,msg);
             }
+            if (!url) {
+                node.error("No url specified",msg);
+                return;
+            }
             // url must start http:// or https:// so assume http:// if not set
             if (!((url.indexOf("http://")===0) || (url.indexOf("https://")===0))) {
                 url = "http://"+url;
