@@ -25,6 +25,7 @@ var flows = require("./flows");
 var library = require("./library");
 var info = require("./info");
 var theme = require("./theme");
+var locales = require("./locales");
 
 var auth = require("./auth");
 var needsPermission = auth.needsPermission;
@@ -84,6 +85,8 @@ function init(adminApp,storage) {
     
     adminApp.get("/nodes/:mod/:set",needsPermission("nodes.read"),nodes.getSet);
     adminApp.put("/nodes/:mod/:set",needsPermission("nodes.write"),nodes.putSet);
+
+    adminApp.get(/^\/locales\/(.+?)\/(.*)$/,needsPermission("nodes.read"),locales.get);
 
     // Library
     library.init(adminApp);

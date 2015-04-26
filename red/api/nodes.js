@@ -13,12 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-var express = require('express');
-var fs = require("fs");
-var path = require("path");
-var when = require('when');
-
-var events = require("../events");
 var redNodes = require("../nodes");
 var comms = require("../comms");
 var server = require("../server");
