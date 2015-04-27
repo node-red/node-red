@@ -119,7 +119,11 @@ module.exports = function(RED) {
             this.client.on("connect",function() {
                 node.status({fill:"green",shape:"dot",text:"connected"});
             });
-            this.client.connect();
+            if (this.client.isConnected()) {
+                node.status({fill:"green",shape:"dot",text:"connected"});
+            } else {
+                this.client.connect();
+            }
         } else {
             this.error("missing broker configuration");
         }
