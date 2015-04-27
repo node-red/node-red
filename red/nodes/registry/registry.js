@@ -335,7 +335,7 @@ function getAllNodeConfigs(lang) {
             var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
             if (config.enabled && !config.err) {
                 result += config.config;
-                result += loader.getNodeHelp(config,lang||"en-US")
+                result += loader.getNodeHelp(config,lang||"en-US")||"";
                 //script += config.script;
             }
         }
