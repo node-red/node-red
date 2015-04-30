@@ -144,4 +144,20 @@ describe("red/log", function() {
         sinon.assert.neverCalledWithMatch(util.log,"[trace] This is a trace");
         sinon.assert.neverCalledWithMatch(util.log,"[metric] ");
     });
+    it('uses console logger if custom logger handler does not exist', function() {
+        var settings = {logging: { customLogger: { level: 'trace', metrics: true } } };
+        log.init(settings);
+        log.error("This is an error");
+        log.warn("This is a warn");
+        log.info("This is an info");
+        log.debug("This is a debug");
+        log.trace("This is a trace");
+        log.log({level:log.METRIC,msg:"testMetric"});
+        sinon.assert.calledWithMatch(util.log,"[error] This is an error");
+        sinon.assert.calledWithMatch(util.log,"[warn] This is a warn");
+        sinon.assert.calledWithMatch(util.log,"[info] This is an info");
+        sinon.assert.calledWithMatch(util.log,"[debug] This is a debug");
+        sinon.assert.calledWithMatch(util.log,"[trace] This is a trace");
+        sinon.assert.calledWithMatch(util.log,"[metric] ");
+    });
 });
