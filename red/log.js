@@ -47,11 +47,6 @@ var LogHandler = function(settings) {
     this.metricsOn = settings ? settings.metrics||false : false;
     metricsEnabled = this.metricsOn;
     this.handler   = (settings && settings.handler) ? settings.handler(settings) : consoleLogger;
-    //if (settings && settings.handler) {
-        //this.handler   = settings.handler(settings);
-    //} else {
-        //this.handler   = consoleLogger;
-    //}
     this.on("log",function(msg) {
         if (this.shouldReportMessage(msg.level)) {
             this.handler(msg);
@@ -84,17 +79,21 @@ var log = module.exports = {
     init: function(settings) {
         logHandlers = [];
         var loggerSettings = {};
-        var keys = Object.keys(settings.logging);
-        if (keys.length === 0) {
-            log.addHandler(new LogHandler());
-        } else {
-            for (var i=0, l=keys.length; i<l; i++) {
-                var config = settings.logging[keys[i]];
-                loggerSettings = config || {};
-                //if ((keys[i] === "console") || config.handler) {
-                    log.addHandler(new LogHandler(loggerSettings));
-                //}
+        if (settings.logging) {
+            var keys = Object.keys(settings.logging);
+            if (keys.length === 0) {
+                log.addHandler(new LogHandler());
+            } else {
+                for (var i=0, l=keys.length; i<l; i++) {
+                    var config = settings.logging[keys[i]];
+                    loggerSettings = config || {};
+                    if ((keys[i] === "console") || config.handler) {
+                        log.addHandler(new LogHandler(loggerSettings));
+                    }
+                }
             }
+        } else {
+            log.addHandler(new LogHandler());
         }
     },
     addHandler: function(func) {
