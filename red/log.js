@@ -42,24 +42,29 @@ var logHandlers = [];
 
 var metricsEnabled = false;
 
-var ConsoleLogHandler = function(settings) {
-    this.logLevel = levels[settings.level]||levels.info;
-    this.metricsOn = settings.metrics||false;
+var LogHandler = function(settings) {
+    this.logLevel  = settings ? levels[settings.level]||levels.info : levels.info;
+    this.metricsOn = settings ? settings.metrics||false : false;
     metricsEnabled = this.metricsOn;
+    this.handler   = (settings && settings.handler) ? settings.handler(settings) : consoleLogger;
     this.on("log",function(msg) {
         if (this.shouldReportMessage(msg.level)) {
-            if (msg.level == log.METRIC) {
-                util.log("[metric] "+JSON.stringify(msg));
-            } else {
-                util.log("["+levelNames[msg.level]+"] "+(msg.type?"["+msg.type+":"+(msg.name||msg.id)+"] ":"")+msg.msg);
-            }
+            this.handler(msg);
         }
     });
 }
-util.inherits(ConsoleLogHandler, EventEmitter);
+util.inherits(LogHandler, EventEmitter);
 
-ConsoleLogHandler.prototype.shouldReportMessage = function(msglevel) {
+LogHandler.prototype.shouldReportMessage = function(msglevel) {
     return msglevel <= this.logLevel || (msglevel == log.METRIC && this.metricsOn);
+}
+
+var consoleLogger = function(msg) {
+    if (msg.level == log.METRIC) {
+        util.log("[metric] "+JSON.stringify(msg));
+    } else {
+        util.log("["+levelNames[msg.level]+"] "+(msg.type?"["+msg.type+":"+(msg.name||msg.id)+"] ":"")+msg.msg);
+    }
 }
 
 var log = module.exports = {
@@ -73,11 +78,23 @@ var log = module.exports = {
 
     init: function(settings) {
         logHandlers = [];
-        var consoleSettings = {};
+        var loggerSettings = {};
         if (settings.logging) {
-            consoleSettings = settings.logging.console || {};
+            var keys = Object.keys(settings.logging);
+            if (keys.length === 0) {
+                log.addHandler(new LogHandler());
+            } else {
+                for (var i=0, l=keys.length; i<l; i++) {
+                    var config = settings.logging[keys[i]];
+                    loggerSettings = config || {};
+                    if ((keys[i] === "console") || config.handler) {
+                        log.addHandler(new LogHandler(loggerSettings));
+                    }
+                }
+            }
+        } else {
+            log.addHandler(new LogHandler());
         }
-        log.addHandler(new ConsoleLogHandler(consoleSettings));
     },
     addHandler: function(func) {
         logHandlers.push(func);
