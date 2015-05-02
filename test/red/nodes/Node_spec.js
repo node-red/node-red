@@ -133,6 +133,20 @@ describe('Node', function() {
             });
             n.receive(null);
         });
+        
+        it('handles thrown errors', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            sinon.stub(n,"error",function(err,msg) {});
+            var message = {payload:"hello world"};
+            n.on('input',function(msg) {
+                throw new Error("test error");
+            });
+            n.receive(message);
+            n.error.called.should.be.true;
+            n.error.firstCall.args[1].should.equal(message);
+            done();
+            
+        });
     });
 
     describe('#send', function() {

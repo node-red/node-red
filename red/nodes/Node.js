@@ -193,7 +193,11 @@ Node.prototype.receive = function(msg) {
         msg._msgid = constructUniqueIdentifier();
     }
     this.metric("receive",msg);
-    this.emit("input", msg);
+    try { 
+        this.emit("input", msg);
+    } catch(err) {
+        this.error(err,msg);
+    }
 };
 
 function log_helper(self, level, msg) {
