@@ -51,18 +51,33 @@ RED.user = (function() {
                     } else {
                         $("#node-dialog-login-image").attr("src","red/images/node-red-256.png");
                     }
-                    
                     for (;i<data.prompts.length;i++) {
                         var field = data.prompts[i];
-                        var row = $("<div/>",{class:"form-row"});
+                        var row = $("<div/>",{id:"rrr"+i,class:"form-row"});
                         $('<label for="node-dialog-login-'+field.id+'">'+field.label+':</label><br/>').appendTo(row);
-                        $('<input style="width: 100%" id="node-dialog-login-'+field.id+'" type="'+field.type+'" tabIndex="'+(i+1)+'"/>').appendTo(row);
+                        var input = $('<input style="width: 100%" id="node-dialog-login-'+field.id+'" type="'+field.type+'" tabIndex="'+(i+1)+'"/>').appendTo(row);
+                        
+                        if (i<data.prompts.length-1) {
+                            input.keypress(
+                                (function() {
+                                    var r = row;
+                                    return function(event) {
+                                        if (event.keyCode == 13) {
+                                            r.next("div").find("input").focus();
+                                            event.preventDefault();
+                                        }
+                                    }
+                                })()
+                            );
+                        }
                         row.appendTo("#node-dialog-login-fields");
                     }
                     $('<div class="form-row" style="text-align: right; margin-top: 10px;"><span id="node-dialog-login-failed" style="line-height: 2em;float:left;" class="hide">Login failed</span><img src="red/images/spin.svg" style="height: 30px; margin-right: 10px; " class="login-spinner hide"/>'+
                         (opts.cancelable?'<a href="#" id="node-dialog-login-cancel" style="margin-right: 20px;" tabIndex="'+(i+1)+'">Cancel</a>':'')+
-                        '<a href="#" id="node-dialog-login-submit" tabIndex="'+(i+2)+'">Login</a></div>').appendTo("#node-dialog-login-fields");
-                    $("#node-dialog-login-submit").button().click(function( event ) {
+                        '<input type="submit" id="node-dialog-login-submit" style="width: auto;" tabIndex="'+(i+2)+'" value="Login"></div>').appendTo("#node-dialog-login-fields");
+                        
+                                
+                    function submitLogin(event) {
                         $("#node-dialog-login-submit").button("option","disabled",true);
                         $("#node-dialog-login-failed").hide();
                         $(".login-spinner").show();
@@ -92,7 +107,10 @@ RED.user = (function() {
                             $(".login-spinner").hide();
                         });
                         event.preventDefault();
-                    });
+                    }
+                        
+                    $("#node-dialog-login-submit").button();
+                    $("#node-dialog-login-fields").submit(submitLogin);
                     if (opts.cancelable) {
                         $("#node-dialog-login-cancel").button().click(function( event ) {
                             $("#node-dialog-login").dialog('destroy').remove();
