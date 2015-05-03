@@ -77,7 +77,8 @@ RED.user = (function() {
                         '<input type="submit" id="node-dialog-login-submit" style="width: auto;" tabIndex="'+(i+2)+'" value="Login"></div>').appendTo("#node-dialog-login-fields");
                         
                                 
-                    function submitLogin(event) {
+                    $("#node-dialog-login-submit").button();
+                    $("#node-dialog-login-fields").submit(function(event) {
                         $("#node-dialog-login-submit").button("option","disabled",true);
                         $("#node-dialog-login-failed").hide();
                         $(".login-spinner").show();
@@ -107,10 +108,7 @@ RED.user = (function() {
                             $(".login-spinner").hide();
                         });
                         event.preventDefault();
-                    }
-                        
-                    $("#node-dialog-login-submit").button();
-                    $("#node-dialog-login-fields").submit(submitLogin);
+                    });
                     if (opts.cancelable) {
                         $("#node-dialog-login-cancel").button().click(function( event ) {
                             $("#node-dialog-login").dialog('destroy').remove();
