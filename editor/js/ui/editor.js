@@ -673,12 +673,18 @@ RED.editor = (function() {
                         var configTypeDef = RED.nodes.getType(configType);
                         var configNode;
                         var d;
+                        var input;
                         
                         if (configAdding) {
                             configNode = {type:configType,id:configId,users:[]};
                             for (d in configTypeDef.defaults) {
                                 if (configTypeDef.defaults.hasOwnProperty(d)) {
-                                    configNode[d] = $("#node-config-input-"+d).val();
+                                    input = $("#node-config-input-"+d);
+                                    if (input.attr('type') === "checkbox") {
+                                      configNode[d] = input.prop('checked');
+                                    } else {
+                                      configNode[d] = input.val();
+                                    }
                                 }
                             }
                             configNode.label = configTypeDef.label;
@@ -689,7 +695,7 @@ RED.editor = (function() {
                             configNode = RED.nodes.node(configId);
                             for (d in configTypeDef.defaults) {
                                 if (configTypeDef.defaults.hasOwnProperty(d)) {
-                                    var input = $("#node-config-input-"+d);
+                                    input = $("#node-config-input-"+d);
                                     if (input.attr('type') === "checkbox") {
                                       configNode[d] = input.prop('checked');
                                     } else {
