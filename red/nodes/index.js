@@ -47,6 +47,8 @@ function createNode(node,def) {
     if (creds) {
         //console.log("Attaching credentials to ",node.id);
         node.credentials = creds;
+    } else if (credentials.getDefinition(node.type)) {
+        node.credentials = {};
     }
 }
 
