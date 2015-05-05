@@ -182,7 +182,7 @@
                 msg.onclick = function() {
                     var node = RED.nodes.node(o.id);
                     if (node) {
-                        RED.view.showWorkspace(node.z);
+                        RED.workspaces.show(node.z);
                     }
 
                 };
