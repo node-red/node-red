@@ -17,13 +17,10 @@ var i18n = require("../i18n");
 
 module.exports = {
     get: function(req,res) {
-        var lang = req.params[0];
-        var namespace = req.params[1];
+        var namespace = req.params[0];
+        namespace = namespace.replace(/\.json$/,"");
+        var lang = "en-US"; // TODO: determine requested lang
         var catalog = i18n.catalog(namespace,lang);
-        if (catalog) {
-            res.json(catalog);
-        } else {
-            res.send(404);
-        }
+        res.json(catalog||{});
     }
 }

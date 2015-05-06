@@ -1,3 +1,7 @@
 {
-    "foo": "fred"
+    "workspace": {
+        "label": {
+            "name": "Name"
+        }
+    }
 }

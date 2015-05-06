@@ -3,6 +3,8 @@
         "repeat": "repeat = __repeat__",
         "crontab": "crontab = __crontab__",
         "stopped": "stopped",
-        "failed": "Inject failed: __error__"
+        "failed": "Inject failed: __error__",
+        
+        "payload": "Payload"
     }
 }

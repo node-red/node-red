@@ -37,7 +37,6 @@ function registerMessageCatalog(namespace,dir,file) {
     return when.promise(function(resolve,reject) {
         resourceMap[namespace] = { basedir:dir, file:file};
         i18n.loadNamespace(namespace,function() {
-            //console.log(namespace,dir);
             resolve();
         });
     });
@@ -47,14 +46,16 @@ var MessageFileLoader = {
     fetchOne: function(lng, ns, callback) {
         if (resourceMap[ns]) {
             var file = path.join(resourceMap[ns].basedir,lng,resourceMap[ns].file);
+            //console.log(file);
             fs.readFile(file,"utf8",function(err,content) {
                 if (err) {
                     callback(err);
                 } else {
                     try {
-                        //console.log(">>",ns,file);
+                        //console.log(">>",ns,file,lng);
                         resourceCache[ns] = resourceCache[ns]||{};
                         resourceCache[ns][lng] = JSON.parse(content.replace(/^\uFEFF/, ''));
+                        //console.log(resourceCache[ns][lng]);
                         callback(null, resourceCache[ns][lng]);
                     } catch(e) {
                         callback(e);
@@ -84,6 +85,8 @@ function init() {
 }
 
 function getCatalog(namespace,lang) {
+    //console.log("+",namespace,lang);
+    //console.log(resourceCache[namespace][lang]);
     var result = null;
     if (resourceCache.hasOwnProperty(namespace)) {
         result = resourceCache[namespace][lang];
@@ -94,6 +97,7 @@ function getCatalog(namespace,lang) {
             }
         }
     }
+    //console.log(result);
     return result;
 }
 
