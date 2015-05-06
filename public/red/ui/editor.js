@@ -168,7 +168,7 @@ RED.editor = (function() {
                                         } else {
                                             if (JSON.stringify(oldValues[d]) !== JSON.stringify(editing_node[d])) {
                                                 changes[d] = oldValues[d];
-                                                changed = true;
+                                                if(d!='valid')changed = true;
                                             }
                                         }
                                     }
@@ -207,7 +207,7 @@ RED.editor = (function() {
     
                                                 changes[d] = editing_node[d];
                                                 editing_node[d] = newValue;
-                                                changed = true;
+                                                if(d!='valid')changed = true;
                                             }
                                         }
                                     }
