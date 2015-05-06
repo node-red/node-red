@@ -93,6 +93,7 @@ module.exports = function(grunt) {
                   // Ensure editor source files are concatenated in
                   // the right order
                   "editor/js/main.js",
+                  "editor/js/i18n.js",
                   "editor/js/settings.js",
                   "editor/js/user.js",
                   "editor/js/comms.js",

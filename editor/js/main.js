@@ -16,10 +16,10 @@
 var RED = (function() {
 
 
-    function loadSettings() {
-        RED.settings.init(loadNodeList);
+    function loadLocales() {
+        RED.i18n.init(loadEditor);
     }
-
+    
     function loadNodeList() {
         $.ajax({
             headers: {
@@ -29,7 +29,23 @@ var RED = (function() {
             url: 'nodes',
             success: function(data) {
                 RED.nodes.setNodeList(data);
-                loadNodes();
+                
+                var nsCount = 0;
+                for(var i=0;i<data.length;i++) {
+                    var ns = data[i];
+                    if (ns.module != "node-red") {
+                        nsCount++;
+                        RED.i18n.loadCatalog(ns.id, function() {
+                            nsCount--;
+                            if (nsCount === 0) {
+                                loadNodes();
+                            }
+                        });
+                    }
+                }
+                if (nsCount === 0) {
+                    loadNodes();
+                }
             }
         });
     }
@@ -43,6 +59,9 @@ var RED = (function() {
             url: 'nodes',
             success: function(data) {
                 $("body").append(data);
+                $("body").i18n();
+                
+                
                 $(".palette-spinner").hide();
                 $(".palette-scroll").show();
                 $("#palette-search").show();
@@ -135,21 +154,6 @@ var RED = (function() {
         RED.view.status(statusEnabled);
     }
     
-    function loadLocales() {
-        i18n.init({
-            ns: {
-                namespaces: ["editor"],
-                defaultNs: "editor"
-            },
-            fallbackLng: ['en-US']
-        },function() {
-            RED["_"] = function() {
-                return i18n.t.apply(null,arguments);
-            }
-            loadEditor();
-        });
-    }
-
     function loadEditor() {
         RED.menu.init({id:"btn-sidemenu",
             options: [
