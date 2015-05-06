@@ -574,13 +574,21 @@ RED.editor = (function() {
             $( "#dialog" ).dialog("option","buttons",buttons);
         }
         $("#dialog-form").html($("script[data-template-name='"+type+"']").html());
+        var ns;
+        if (node._def.set.module === "node-red") {
+            ns = "node-red";
+        } else {
+            ns = node._def.set.id;
+        }
+        $("#dialog-form").find('[data-i18n]').each(function() {
+            var current = $(this).attr("data-i18n");
+            if (current.indexOf(":") === -1) {
+                 $(this).attr("data-i18n",ns+":"+current);
+            }
+        });
         $('<input type="text" style="display: none;" />').appendTo("#dialog-form");
         prepareEditDialog(node,node._def,"node-input");
-
-
-
-
-
+        $("#dialog").i18n();
         $( "#dialog" ).dialog("option","title","Edit "+type+" node").dialog( "open" );
     }
 
@@ -603,6 +611,21 @@ RED.editor = (function() {
         }
 
         $("#dialog-config-form").html($("script[data-template-name='"+type+"']").html());
+
+        var ns;
+        if (node_def.set.module === "node-red") {
+            ns = "node-red";
+        } else {
+            ns = node_def.set.id;
+        }
+        $("#dialog-config-form").find('[data-i18n]').each(function() {
+            var current = $(this).attr("data-i18n");
+            if (current.indexOf(":") === -1) {
+                 $(this).attr("data-i18n",ns+":"+current);
+            }
+        });
+
+
         prepareEditDialog(configNode,node_def,"node-config-input");
 
         var buttons = $( "#node-config-dialog" ).dialog("option","buttons");
@@ -651,6 +674,8 @@ RED.editor = (function() {
             $("#node-config-dialog-user-count").html(configNode.users.length+" node"+(configNode.users.length==1?" uses":"s use")+" this config").show();
         }
         $( "#node-config-dialog" ).dialog("option","buttons",buttons);
+
+        $("#node-config-dialog").i18n();
 
         $( "#node-config-dialog" )
             .dialog("option","node-adding",adding)

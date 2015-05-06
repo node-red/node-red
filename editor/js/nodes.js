@@ -107,6 +107,7 @@ RED.nodes = (function() {
             registerNodeType: function(nt,def) {
                 nodeDefinitions[nt] = def;
                 if (def.category != "subflows") {
+                    def.set = nodeSets[typeToId[nt]];
                     nodeSets[typeToId[nt]].added = true;
                     // TODO: too tightly coupled into palette UI
                 }
@@ -134,6 +135,19 @@ RED.nodes = (function() {
     }
 
     function addNode(n) {
+        var ns;
+        if (n._def.set.module === "node-red") {
+            ns = "node-red";
+        } else {
+            ns = n._def.set.id;
+        }
+        n["_"] = function() {
+            var args = Array.prototype.slice.call(arguments, 0);
+            if (args[0].indexOf(":") === -1) {
+                args[0] = ns+":"+args[0];
+            }
+            return RED._.apply(null,args);
+        }
         if (n._def.category == "config") {
             configNodes[n.id] = n;
             RED.sidebar.config.refresh();
