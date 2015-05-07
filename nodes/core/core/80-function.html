@@ -98,7 +98,7 @@
                 height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
                 $(".node-text-editor").css("height",height+"px");
                 that.editor.resize();
-            };
+            }
             $( "#dialog" ).on("dialogresize", functionDialogResize);
             $( "#dialog" ).one("dialogopen", function(ev) {
                 var size = $( "#dialog" ).dialog('option','sizeCache-function');
@@ -118,7 +118,7 @@
                 mode: 'ace/mode/javascript',
                 value: $("#node-input-func").val()
             });
-            
+
             RED.library.create({
                 url:"functions", // where to get the data from
                 type:"function", // the type of object the library is for
@@ -134,8 +134,8 @@
             for (var k=0; k < annot.length; k++) {
                 //console.log(annot[k].type,":",annot[k].text, "on line", annot[k].row);
                 if (annot[k].type === "error") {
-                    $("#node-input-valid").val(null);
-                    delete this.valid;
+                    $("#node-input-valid").val(false);
+                    this.valid = false;
                 }
             }
             $("#node-input-func").val(this.editor.getValue());
