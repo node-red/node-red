@@ -22,7 +22,7 @@ RED.editor = (function() {
     }
 
     /**
-     * Validate a node 
+     * Validate a node
      * @param node - the node being validated
      * @returns {boolean} whether the node is valid. Sets node.dirty if needed
      */
@@ -33,7 +33,7 @@ RED.editor = (function() {
         var subflow;
         var isValid;
         var hasChanged;
-        
+
         if (node.type.indexOf("subflow:")===0) {
             subflow = RED.nodes.subflow(node.type.substring(8));
             isValid = subflow.valid;
@@ -85,7 +85,7 @@ RED.editor = (function() {
         }
         return node.valid;
     }
-    
+
     /**
      * Validate a node's properties for the given set of property definitions
      * @param node - the node being validated
@@ -168,8 +168,6 @@ RED.editor = (function() {
         return removedLinks;
     }
 
-
-
     $( "#dialog" ).dialog({
             modal: true,
             autoOpen: false,
@@ -219,8 +217,6 @@ RED.editor = (function() {
                                         }
                                     }
                                 }
-
-
                             }
 
                             if (editing_node._def.defaults) {
@@ -250,10 +246,9 @@ RED.editor = (function() {
                                                         configNode.users.push(editing_node);
                                                     }
                                                 }
-    
                                                 changes[d] = editing_node[d];
                                                 editing_node[d] = newValue;
-                                                changed = true;
+                                                if (d !== 'valid') { changed = true; }
                                             }
                                         }
                                     }
@@ -265,7 +260,6 @@ RED.editor = (function() {
                                 var credsChanged = updateNodeCredentials(editing_node,credDefinition,prefix);
                                 changed = changed || credsChanged;
                             }
-
 
                             var removedLinks = updateNodeProperties(editing_node);
                             if (changed) {
@@ -341,7 +335,7 @@ RED.editor = (function() {
                     RED.sidebar.info.refresh(editing_node);
                 }
                 RED.sidebar.config.refresh();
-                
+
                 var buttons = $( this ).dialog("option","buttons");
                 if (buttons.length == 3) {
                     $( this ).dialog("option","buttons",buttons.splice(1));
@@ -379,7 +373,7 @@ RED.editor = (function() {
         }
         input.val(label);
     }
-    
+
     /**
      * Create a config-node button for this property
      * @param node - the node being edited
@@ -390,19 +384,19 @@ RED.editor = (function() {
         var input = $("#node-input-"+property);
         input.val(node[property]);
         input.attr("type","hidden");
-        
+
         var button = $("<a>",{id:"node-input-edit-"+property, class:"btn"});
         input.after(button);
-        
+
         if (node[property]) {
             button.text("edit");
         } else {
             button.text("add");
         }
-        
+
         button.click(function(e) {
             showEditConfigNodeDialog(property,type,input.val()||"_ADD_");
-            e.preventDefault();     
+            e.preventDefault();
         });
     }
 
@@ -474,7 +468,7 @@ RED.editor = (function() {
             }
         }
     }
-    
+
     /**
      * Update the node credentials from the edit form
      * @param node - the node containing the credentials
@@ -498,7 +492,7 @@ RED.editor = (function() {
                         continue;
                     }
                     changed = true;
-                    
+
                 }
                 node.credentials[cred] = value;
                 if (value != node.credentials._[cred]) {
@@ -540,7 +534,7 @@ RED.editor = (function() {
                 }
             }
         }
-        
+
         if (definition.credentials) {
             if (node.credentials) {
                 populateCredentialsInputs(node, definition.credentials, node.credentials, prefix);
@@ -579,11 +573,11 @@ RED.editor = (function() {
         $("#dialog-form").html($("script[data-template-name='"+type+"']").html());
         $('<input type="text" style="display: none;" />').appendTo("#dialog-form");
         prepareEditDialog(node,node._def,"node-input");
-        
 
-        
-        
-        
+
+
+
+
         $( "#dialog" ).dialog("option","title","Edit "+type+" node").dialog( "open" );
     }
 
@@ -663,7 +657,7 @@ RED.editor = (function() {
             .dialog("option","title",(adding?"Add new ":"Edit ")+type+" config node")
             .dialog( "open" );
     }
-    
+
     function updateConfigNodeSelect(name,type,value) {
         var button = $("#node-input-edit-"+name);
         if (button.length) {
@@ -674,7 +668,7 @@ RED.editor = (function() {
             }
             $("#node-input-"+name).val(value);
         } else {
-            
+
             var select = $("#node-input-"+name);
             var node_def = RED.nodes.getType(type);
             select.children().remove();
@@ -689,7 +683,7 @@ RED.editor = (function() {
                     select.append('<option value="'+config.id+'"'+(value==config.id?" selected":"")+'>'+label+'</option>');
                 }
             });
-    
+
             select.append('<option value="_ADD_"'+(value===""?" selected":"")+'>Add new '+type+'...</option>');
             window.setTimeout(function() { select.change();},50);
         }
@@ -715,7 +709,7 @@ RED.editor = (function() {
                         var configNode;
                         var d;
                         var input;
-                        
+
                         if (configAdding) {
                             configNode = {type:configType,id:configId,users:[]};
                             for (d in configTypeDef.defaults) {
@@ -826,7 +820,7 @@ RED.editor = (function() {
                         var changes = {};
                         var changed = false;
                         var wasDirty = RED.nodes.dirty();
-                        
+
                         var newName = $("#subflow-input-name").val();
 
                         if (newName != editing_node.name) {
@@ -837,7 +831,7 @@ RED.editor = (function() {
                         }
 
                         RED.palette.refresh();
-                        
+
                         if (changed) {
                             RED.nodes.eachNode(function(n) {
                                 if (n.type == "subflow:"+editing_node.id) {
@@ -855,7 +849,7 @@ RED.editor = (function() {
                                 dirty:wasDirty,
                                 changed:wasChanged
                             };
-                            
+
                             RED.history.push(historyEvent);
                         }
                         editing_node.dirty = true;
@@ -892,33 +886,33 @@ RED.editor = (function() {
     });
     $("#subflow-dialog form" ).submit(function(e) { e.preventDefault();});
 
-    
+
     function showEditSubflowDialog(subflow) {
         editing_node = subflow;
         RED.view.state(RED.state.EDITING);
         $("#subflow-input-name").val(subflow.name);
         var userCount = 0;
         var subflowType = "subflow:"+editing_node.id;
-        
+
         RED.nodes.eachNode(function(n) {
             if (n.type === subflowType) {
                 userCount++;
             }
         });
-        
+
         $("#subflow-dialog-user-count").html("There "+(userCount==1?"is":"are")+" "+userCount+" instance"+(userCount==1?" ":"s")+" of this subflow").show();
         $("#subflow-dialog").dialog("option","title","Edit flow "+subflow.name).dialog( "open" );
     }
 
-    
-    
+
+
     return {
         edit: showEditDialog,
         editConfig: showEditConfigNodeDialog,
         editSubflow: showEditSubflowDialog,
         validateNode: validateNode,
         updateNodeProperties: updateNodeProperties, // TODO: only exposed for edit-undo
-        
+
         createEditor: function(options) {
             var editor = ace.edit(options.id);
             editor.setTheme("ace/theme/tomorrow");
