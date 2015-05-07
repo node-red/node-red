@@ -916,13 +916,14 @@ RED.editor = (function() {
         createEditor: function(options) {
             var editor = ace.edit(options.id);
             editor.setTheme("ace/theme/tomorrow");
+            var session = editor.getSession();
             if (options.mode) {
-                editor.getSession().setMode(options.mode);
+                session.setMode(options.mode);
             }
             if (options.foldStyle) {
-                editor.getSession().setFoldStyle(options.foldStyle);
+                session.setFoldStyle(options.foldStyle);
             } else {
-                editor.getSession().setFoldStyle('markbeginend');
+                session.setFoldStyle('markbeginend');
             }
             if (options.options) {
                 editor.setOptions(options.options);
@@ -933,6 +934,9 @@ RED.editor = (function() {
                 });
             }
             editor.$blockScrolling = Infinity;
+            if (options.value) {
+                session.setValue(options.value,-1);
+            }
             return editor;
         }
     }

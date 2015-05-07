@@ -86,9 +86,9 @@
             });
             this.editor = RED.editor.createEditor({
                 id: 'node-input-info-editor',
-                mode: 'ace/mode/markdown'
+                mode: 'ace/mode/markdown',
+                value: $("#node-input-info").val()
             });
-            this.editor.setValue($("#node-input-info").val(),-1);
             this.editor.focus();
         },
         oneditsave: function() {

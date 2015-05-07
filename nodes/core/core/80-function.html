@@ -115,9 +115,9 @@
 
             this.editor = RED.editor.createEditor({
                 id: 'node-input-func-editor',
-                mode: 'ace/mode/javascript'
+                mode: 'ace/mode/javascript',
+                value: $("#node-input-func").val()
             });
-            this.editor.setValue($("#node-input-func").val(),-1);
             
             RED.library.create({
                 url:"functions", // where to get the data from

@@ -98,9 +98,9 @@
             });
             this.editor = RED.editor.createEditor({
                 id: 'node-input-template-editor',
-                mode: 'ace/mode/html'
+                mode: 'ace/mode/html',
+                value: $("#node-input-template").val()
             });
-            this.editor.setValue($("#node-input-template").val(),-1);
             RED.library.create({
                 url:"functions", // where to get the data from
                 type:"function", // the type of object the library is for
