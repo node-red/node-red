@@ -230,7 +230,7 @@ RED.editor = (function() {
                                             newValue = input.val();
                                         }
                                         if (newValue != null) {
-                                            if (editing_node[d] != newValue) {
+                                            if (editing_node[d].toString() != newValue.toString()) {
                                                 if (editing_node._def.defaults[d].type) {
                                                     if (newValue == "_ADD_") {
                                                         newValue = "";
@@ -248,7 +248,7 @@ RED.editor = (function() {
                                                 }
                                                 changes[d] = editing_node[d];
                                                 editing_node[d] = newValue;
-                                                if (d !== 'valid') { changed = true; }
+                                                changed = true;
                                             }
                                         }
                                     }
