@@ -17,6 +17,8 @@
 var util = require("util");
 var EventEmitter = require("events").EventEmitter;
 
+var i18n = require("./i18n");
+
 var levels = {
     off:    1,
     fatal:  10,
@@ -124,3 +126,5 @@ var log = module.exports = {
         return metricsEnabled;
     }
 }
+
+log["_"] = i18n._;

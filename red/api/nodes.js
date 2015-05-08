@@ -166,12 +166,12 @@ module.exports = {
                     }
                     if (info.enabled === body.enabled && !info.err) {
                         comms.publish("node/"+(body.enabled?"enabled":"disabled"),info,false);
-                        log.info(" "+(body.enabled?"Enabled":"Disabled")+" node types:");
+                        log.info(" "+log._("api.nodes."+(body.enabled?"enabled":"disabled")));
                         for (var j = 0; j < info.types.length; j++) {
                             log.info(" - " + info.types[j]);
                         }
                     } else if (body.enabled && info.err) {
-                        log.warn("Failed to enable node:");
+                        log.warn(log._("api.nodes.error-enable"));
                         log.warn(" - "+info.name+" : "+info.err);
                     }
                 }
@@ -197,12 +197,12 @@ function putNode(node, enabled) {
 
         if (info.enabled === enabled && !info.err) {
             comms.publish("node/"+(enabled?"enabled":"disabled"),info,false);
-            log.info(" "+(enabled?"Enabled":"Disabled")+" node types:");
+            log.info(" "+log._("api.nodes."+(enabled?"enabled":"disabled")));
             for (var i=0;i<info.types.length;i++) {
                 log.info(" - "+info.types[i]);
             }
         } else if (enabled && info.err) {
-            log.warn("Failed to enable node:");
+            log.warn(log._("api.nodes.error-enable"));
             log.warn(" - "+info.name+" : "+info.err);
         }
     }

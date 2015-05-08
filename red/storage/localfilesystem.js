@@ -185,15 +185,15 @@ var localfilesystem = {
 
     getFlows: function() {
         return when.promise(function(resolve) {
-            log.info("User Directory : "+settings.userDir);
-            log.info("Flows file     : "+flowsFullPath);
+            log.info(log._("storage.localfilesystem.user-dir",{path:settings.userDir}));
+            log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));
             fs.exists(flowsFullPath, function(exists) {
                 if (exists) {
                     resolve(nodeFn.call(fs.readFile,flowsFullPath,'utf8').then(function(data) {
                         return JSON.parse(data);
                     }));
                 } else {
-                    log.info("Creating new flows file");
+                    log.info(log._("storage.localfilesystem.create"));
                     resolve([]);
                 }
             });
@@ -257,7 +257,7 @@ var localfilesystem = {
                     try {
                         return JSON.parse(data);
                     } catch(err) {
-                        log.info("Corrupted config detected - resetting");
+                        log.trace("Corrupted config detected - resetting");
                         return {};
                     }
                 } else {
@@ -277,7 +277,7 @@ var localfilesystem = {
                     try {
                         return JSON.parse(data);
                     } catch(err) {
-                        log.info("Corrupted sessions file - resetting");
+                        log.trace("Corrupted sessions file - resetting");
                         return {};
                     }
                 } else {

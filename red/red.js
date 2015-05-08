@@ -57,7 +57,6 @@ var RED = {
     credentials: credentials,
     events: events,
     log: log,
-    i18n: i18n,
     comms: comms,
     settings:settings,
     util: util,
@@ -77,7 +76,5 @@ var RED = {
     get httpNode() { return server.nodeApp },
     get server() { return server.server }
 };
-
-//RED["_"] = i18n._;
 
 module.exports = RED;
