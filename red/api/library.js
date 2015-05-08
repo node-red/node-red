@@ -17,6 +17,7 @@
 var redApp = null;
 var storage = require("../storage");
 var log = require("../log");
+
 var needsPermission = require("./auth").needsPermission;
 
 function createLibrary(type) {
@@ -34,7 +35,7 @@ function createLibrary(type) {
                 }
             }).otherwise(function(err) {
                 if (err) {
-                    log.warn("Error loading library entry '"+path+"' : "+err);
+                    log.warn(log._("api.library.error-load-entry",{path:path,message:err}));
                     if (err.message.indexOf('forbidden') === 0) {
                         log.audit({event: "library.get",type:type,error:"forbidden"},req);
                         res.send(403);
@@ -56,7 +57,7 @@ function createLibrary(type) {
                 log.audit({event: "library.set",type:type},req);
                 res.send(204);
             }).otherwise(function(err) {
-                log.warn("Error saving library entry '"+path+"' : "+err);
+                log.warn(log._("api.library.error-save-entry",{path:path,message:err}));
                 if (err.message.indexOf('forbidden') === 0) {
                     log.audit({event: "library.set",type:type,error:"forbidden"},req);
                     res.send(403);
@@ -88,7 +89,7 @@ module.exports = {
             res.send(data);
         }).otherwise(function(err) {
             if (err) {
-                log.warn("Error loading flow '"+req.params[0]+"' : "+err);
+                log.warn(log._("api.library.error-load-flow",{path:req.params[0],message:err}));
                 if (err.message.indexOf('forbidden') === 0) {
                     log.audit({event: "library.get",type:"flow",path:req.params[0],error:"forbidden"},req);
                     res.send(403);
@@ -105,7 +106,7 @@ module.exports = {
             log.audit({event: "library.set",type:"flow",path:req.params[0]},req);
             res.send(204);
         }).otherwise(function(err) {
-            log.warn("Error loading flow '"+req.params[0]+"' : "+err);
+            log.warn(log._("api.library.error-save-flow",{path:req.params[0],message:err}));
             if (err.message.indexOf('forbidden') === 0) {
                 log.audit({event: "library.set",type:"flow",path:req.params[0],error:"forbidden"},req);
                 res.send(403);

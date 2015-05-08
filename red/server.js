@@ -58,12 +58,12 @@ function start() {
                     reportMetrics();
                 }, settings.runtimeMetricInterval||15000);
             }
-            console.log("\n\n"+i18n._("runtime.welcome")+"\n===================\n");
+            console.log("\n\n"+log._("runtime.welcome")+"\n===================\n");
             if (settings.version) {
-                log.info(i18n._("runtime.version",{component:"Node-RED",version:"v"+settings.version}));
+                log.info(log._("runtime.version",{component:"Node-RED",version:"v"+settings.version}));
             }
-            log.info(i18n._("runtime.version",{component:"Node.js ",version:process.version}));
-            log.info(i18n._("nodes.loading"));
+            log.info(log._("runtime.version",{component:"Node.js ",version:process.version}));
+            log.info(log._("server.loading"));
             redNodes.init(settings,storage,app);
             return redNodes.load().then(function() {
                     
@@ -77,13 +77,13 @@ function start() {
                             log.warn("["+nodeErrors[i].name+"] "+nodeErrors[i].err);
                         }
                     } else {
-                        log.warn(i18n._("nodes.errors",{count:nodeErrors.length}));
-                        log.warn(i18n._("nodes.errors-help"));
+                        log.warn(log._("server.errors",{count:nodeErrors.length}));
+                        log.warn(log._("server.errors-help"));
                     }
                     log.warn("------------------------------------------");
                 }
                 if (nodeMissing.length > 0) {
-                    log.warn(i18n._("nodes.missing-modules"));
+                    log.warn(log._("server.missing-modules"));
                     var missingModules = {};
                     for (i=0;i<nodeMissing.length;i++) {
                         var missing = nodeMissing[i];
@@ -102,11 +102,11 @@ function start() {
                         }
                     }
                     if (!settings.autoInstallModules) {
-                        log.info(i18n._("nodes.removing-modules"));
+                        log.info(log._("server.removing-modules"));
                         redNodes.cleanModuleList();
                     }
                 }
-                log.info(i18n._("runtime.paths.settings",{path:settings.settingsFile}));
+                log.info(log._("runtime.paths.settings",{path:settings.settingsFile}));
                 redNodes.loadFlows();
                 comms.start();
             }).otherwise(function(err) {
@@ -119,7 +119,7 @@ function start() {
 function reportAddedModules(info) {
     comms.publish("node/added",info.nodes,false);
     if (info.nodes.length > 0) {
-        log.info(i18n._("nodes.added-types"));
+        log.info(log._("server.added-types"));
         for (var i=0;i<info.nodes.length;i++) {
             for (var j=0;j<info.nodes[i].types.length;j++) {
                 log.info(" - "+
@@ -135,7 +135,7 @@ function reportAddedModules(info) {
 
 function reportRemovedModules(removedNodes) {
     comms.publish("node/removed",removedNodes,false);
-    log.info(i18n._("nodes.removed-types"));
+    log.info(log._("server.removed-types"));
     for (var j=0;j<removedNodes.length;j++) {
         for (var i=0;i<removedNodes[j].types.length;i++) {
             log.info(" - "+(removedNodes[j].module?removedNodes[j].module+":":"")+removedNodes[j].types[i]);
@@ -161,7 +161,7 @@ function installModule(module) {
     //TODO: ensure module is 'safe'
     return when.promise(function(resolve,reject) {
         if (/[\s;]/.test(module)) {
-            reject(new Error(i18n._("nodes.install.invalid")));
+            reject(new Error(log._("server.install.invalid")));
             return;
         }
         if (redNodes.getModuleInfo(module)) {
@@ -182,19 +182,19 @@ function installModule(module) {
                 if (err) {
                     var lookFor404 = new RegExp(" 404 .*"+module+"$","m");
                     if (lookFor404.test(stdout)) {
-                        log.warn(i18n._("nodes.install.install-failed-not-found",{name:module}));
+                        log.warn(log._("server.install.install-failed-not-found",{name:module}));
                         var e = new Error();
                         e.code = 404;
                         reject(e);
                     } else {
-                        log.warn(i18n._("nodes.install.install-failed-long",{name:module}));
+                        log.warn(log._("server.install.install-failed-long",{name:module}));
                         log.warn("------------------------------------------");
                         log.warn(err.toString());
                         log.warn("------------------------------------------");
-                        reject(new Error(i18n._("nodes.install.install-failed")));
+                        reject(new Error(log._("server.install.install-failed")));
                     }
                 } else {
-                    log.info(i18n._("nodes.install.installed",{name:module}));
+                    log.info(log._("server.install.installed",{name:module}));
                     resolve(redNodes.addModule(module).then(reportAddedModules));
                 }
             }
@@ -205,30 +205,30 @@ function installModule(module) {
 function uninstallModule(module) {
     return when.promise(function(resolve,reject) {
         if (/[\s;]/.test(module)) {
-            reject(new Error(i18n._("nodes.install.invalid")));
+            reject(new Error(log._("server.install.invalid")));
             return;
         }
         var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
         var moduleDir = path.join(installDir,"node_modules",module);
         if (!fs.existsSync(moduleDir)) {
-            return reject(new Error(i18n._("nodes.install.uninstall-failed",{name:module})));
+            return reject(new Error(log._("server.install.uninstall-failed",{name:module})));
         }
 
         var list = redNodes.removeModule(module);
-        log.info(i18n._("nodes.install.uninstalling",{name:module}));
+        log.info(log._("server.install.uninstalling",{name:module}));
         var child = child_process.exec('npm remove '+module,
             {
                 cwd: installDir
             },
             function(err, stdin, stdout) {
                 if (err) {
-                    log.warn(i18n._("nodes.install.uninstall-failed-long",{name:module}));
+                    log.warn(log._("server.install.uninstall-failed-long",{name:module}));
                     log.warn("------------------------------------------");
                     log.warn(err.toString());
                     log.warn("------------------------------------------");
-                    reject(new Error(i18n._("nodes.install.uninstall-failed",{name:module})));
+                    reject(new Error(log._("server.install.uninstall-failed",{name:module})));
                 } else {
-                    log.info(i18n._("nodes.install.uninstalled",{name:module}));
+                    log.info(log._("server.install.uninstalled",{name:module}));
                     reportRemovedModules(list);
                     resolve(list);
                 }

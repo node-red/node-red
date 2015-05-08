@@ -21,6 +21,7 @@ var typeRegistry = require("./registry");
 var credentials = require("./credentials");
 var Flow = require("./Flow");
 var log = require("../log");
+
 var events = require("../events");
 var redUtil = require("../util");
 var storage = null;
@@ -36,7 +37,7 @@ var activeConfigNodes = {};
 
 events.on('type-registered',function(type) {
     if (activeFlow && activeFlow.typeRegistered(type)) {
-        log.info("Missing type registered: "+type);
+        log.info(log._("nodes.flows.registered-missing", {type:type}));
     }
 });
 
@@ -57,7 +58,7 @@ var flowNodes = module.exports = {
                 flowNodes.startFlows();
             });
         }).otherwise(function(err) {
-            log.warn("Error loading flows : "+err);
+            log.warn(log._("nodes.flows.error",{err:err}));
             console.log(err.stack);
         });
     },
@@ -132,21 +133,21 @@ var flowNodes = module.exports = {
     },
     startFlows: function(configDiff) {
         if (configDiff) {
-            log.info("Starting modified "+configDiff.type);
+            log.info(log._("nodes.flows.starting-modified-"+configDiff.type));
         } else {
-            log.info("Starting flows");
+            log.info(log._("nodes.flows.starting-flows"));
         }
         try {
             activeFlow.start(configDiff);
             if (configDiff) {
-                log.info("Started modified "+configDiff.type);
+                log.info(log._("nodes.flows.started-modified-"+configDiff.type));
             } else {
-                log.info("Started flows");
+                log.info(log._("nodes.flows.started-flows"));
             }
         } catch(err) {
             var missingTypes = activeFlow.getMissingTypes();
             if (missingTypes.length > 0) {
-                log.info("Waiting for missing types to be registered:");
+                log.info(log._("nodes.flows.missing-types"));
                 var knownUnknowns = 0;
                 for (var i=0;i<missingTypes.length;i++) {
                     var type = missingTypes[i];
@@ -169,21 +170,21 @@ var flowNodes = module.exports = {
     },
     stopFlows: function(configDiff) {
         if (configDiff) {
-            log.info("Stopping modified "+configDiff.type);
+            log.info(log._("nodes.flows.stopping-modified-"+configDiff.type));
         } else {
-            log.info("Stopping flows");
+            log.info(log._("nodes.flows.stopping-flows"));
         }
         if (activeFlow) {
             return activeFlow.stop(configDiff).then(function() {
                 if (configDiff) {
-                    log.info("Stopped modified "+configDiff.type);
+                    log.info(log._("nodes.flows.stopped-modified-"+configDiff.type));
                 } else {
-                    log.info("Stopped flows");
+                    log.info(log._("nodes.flows.stopped-flows"));
                 }
                 return;
             });
         } else {
-            log.info("Stopped");
+            log.info(log._("nodes.flows.stopped"));
             return;
         }
     },
