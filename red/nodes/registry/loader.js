@@ -251,7 +251,7 @@ function loadNodeSet(node) {
             red["_"] = function() {
                 var args = Array.prototype.slice.call(arguments, 0);
                 args[0] = node.namespace+":"+args[0];
-                return red.i18n._.apply(null,args);
+                return i18n._.apply(null,args);
             }
             var promise = r(red);
             if (promise != null && typeof promise.then === "function") {

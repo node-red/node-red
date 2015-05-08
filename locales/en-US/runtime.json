@@ -6,8 +6,8 @@
             "settings": "Settings file  : __path__"
         }
     },
-        
-    "nodes": {
+    
+    "server": {
         "loading": "Loading palette nodes",
         "errors": "Failed to register __count__ node type",
         "errors_plural": "Failed to register __count__ node types",
@@ -28,10 +28,64 @@
             "uninstall-failed": "Uninstall failed",
             "uninstall-failed-long": "Uninstall of module __name__ failed:",
             "uninstalled": "Uninstalled module: __name__"
-            
-            
+        }
+    },
+    
+    "api": {
+        "flows": {
+            "error-save": "Error saving flows: __message__"
+        },
+        "library": {
+            "error-load-entry": "Error loading library entry '__path__': __message__",
+            "error-save-entry": "Error saving library entry '__path__': __message__",
+            "error-load-flow": "Error loading flow '__path__': __message__",
+            "error-save-flow": "Error saving flow '__path__': __message__"
+        },
+        "nodes": {
+            "enabled": "Enabled node types:",
+            "disabled": "Disabled node types:",
+            "error-enable": "Failed to enable node:"
+        }
+    },
+    
+    "comms": {
+        "error": "Communication channel error: __message__",
+        "error-server": "Communication server error: __message__",
+        "error-send": "Communication send error: __message__"
+    },
+    
+    "nodes": {
+        "credentials": {
+            "error":"Error loading credentials: __message__",
+            "not-registered": "Credential type '__type__' is not registered"
+        },
+        "flows": {
+            "registered-missing": "Missing type registered: __type__",
+            "error": "Error loading flows: __message__",
+            "starting-modified-nodes": "Starting modified nodes",
+            "starting-modified-flows": "Starting modified flows",
+            "starting-flows": "Starting flows",
+            "started-modified-nodes": "Started modified nodes",
+            "started-modified-flows": "Started modified flows",
+            "started-flows": "Started flows",
+            "stopping-modified-nodes": "Stopping modified nodes",
+            "stopping-modified-flows": "Stopping modified flows",
+            "stopping-flows": "Stopping flows",
+            "stopped-modified-nodes": "Stopped modified nodes",
+            "stopped-modified-flows": "Stopped modified flows",
+            "stopped-flows": "Stopped flows",
+            "stopped": "Stopped",
+            "missing-types": "Waiting for missing types to be registered:"
             
         }
-    }
+    },
     
+    "storage": {
+        "localfilesystem": {
+            "user-dir": "User directory : __path__",
+            "flows-file": "Flows file : __path__",
+            "create": "Creating new flow file"
+        }
+    }
+
 }

@@ -29,7 +29,7 @@ var auth = require("../../../red/api/auth");
 
 
 describe('Credentials', function() {
-    
+        
     afterEach(function() {
         index.clearRegistry();
     });
@@ -156,7 +156,7 @@ describe('Credentials', function() {
         
         credentials.init(storage);
         credentials.load().then(function() {
-            logmsg.should.equal("Error loading credentials : test forcing failure");
+            log.warn.calledOnce.should.be.true;
             log.warn.restore();
             done();
         }).otherwise(function(err){
@@ -218,7 +218,7 @@ describe('Credentials', function() {
         index.loadFlows().then(function() {
             var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});   
             credentials.extract(testnode);
-            should.equal(logmsg, 'Credential Type test is not registered.');
+            log.warn.calledOnce.should.be.true;
             log.warn.restore();
             done();
         }).otherwise(function(err){

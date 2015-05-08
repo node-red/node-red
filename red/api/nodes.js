@@ -226,12 +226,12 @@ function putNode(node, enabled) {
         return promise.then(function(info) {
             if (info.enabled === enabled && !info.err) {
                 comms.publish("node/"+(enabled?"enabled":"disabled"),info,false);
-                log.info(" "+(enabled?"Enabled":"Disabled")+" node types:");
+                log.info(" "+log._("api.nodes."+(enabled?"enabled":"disabled")));
                 for (var i=0;i<info.types.length;i++) {
                     log.info(" - "+info.types[i]);
                 }
             } else if (enabled && info.err) {
-                log.warn("Failed to enable node:");
+            log.warn(log._("api.nodes.error-enable"));
                 log.warn(" - "+info.name+" : "+info.err);
             }
             return info;

@@ -65,7 +65,7 @@ function start() {
                     try {
                         msg = JSON.parse(data);
                     } catch(err) {
-                        log.warn("comms received malformed message : "+err.toString());
+                        log.trace("comms received malformed message : "+err.toString());
                         return;
                     }
                     if (!pendingAuth) {
@@ -119,12 +119,12 @@ function start() {
                     }
                 });
                 ws.on('error', function(err) {
-                    log.warn("comms error : "+err.toString());
+                    log.warn(log._("comms.error",{message:err.toString()}));
                 });
             });
             
             wsServer.on('error', function(err) {
-                log.warn("comms server error : "+err.toString());
+                log.warn(log._("comms.error-server",{message:err.toString()}));
             });
              
             lastSentTime = Date.now();
@@ -167,7 +167,7 @@ function publishTo(ws,topic,data) {
     try {
         ws.send(msg);
     } catch(err) {
-        log.warn("comms send error : "+err.toString());
+        log.warn(log._("comms.error-send",{message:err.toString()}));
     }
 }
 

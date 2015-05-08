@@ -15,6 +15,7 @@
  **/
 
 var log = require("../log");
+
 var redNodes = require("../nodes");
 var settings = require("../settings");
 
@@ -30,7 +31,7 @@ module.exports = {
         redNodes.setFlows(flows,deploymentType).then(function() {
             res.send(204);
         }).otherwise(function(err) {
-            log.warn("Error saving flows : "+err.message);
+            log.warn(log._("api.flows.error-save",{message:err.message}));
             log.warn(err.stack);
             res.json(500,{error:"unexpected_error", message:err.message});
         });
