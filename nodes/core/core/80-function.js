@@ -19,7 +19,6 @@ module.exports = function(RED) {
     var util = require("util");
     var vm = require("vm");
 
-    
     function sendResults(node,_msgid,msgs) {
         if (msgs == null) {
             return;
@@ -43,9 +42,8 @@ module.exports = function(RED) {
         if (msgCount>0) {
             node.send(msgs);
         }
-                            
     }
-    
+
     function FunctionNode(n) {
         RED.nodes.createNode(this,n);
         var node = this;
@@ -99,7 +97,7 @@ module.exports = function(RED) {
                     context.msg = msg;
                     this.script.runInContext(context);
                     sendResults(this,msg._msgid,context.results);
-                    
+
                     var duration = process.hrtime(start);
                     var converted = Math.floor((duration[0]* 1e9 +  duration[1])/10000)/100;
                     this.metric("duration", msg, converted);
@@ -126,7 +124,6 @@ module.exports = function(RED) {
             this.error(err);
         }
     }
-
     RED.nodes.registerType("function",FunctionNode);
     RED.library.register("functions");
 }
