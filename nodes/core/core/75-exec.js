@@ -63,7 +63,7 @@ module.exports = function(RED) {
                         node.error(code,msg);
                     });
                 }
-                else { node.error("Spawn command must be just the command - no spaces or extra parameters"); }
+                else { node.error(RED._("exec.spawnerr")); }
             }
             else {
                 var cl = node.cmd;
@@ -75,7 +75,7 @@ module.exports = function(RED) {
                     try {
                         if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
                     } catch(e) {
-                        node.log("Bad STDOUT");
+                        node.log(RED._("exec.badstdout"));
                     }
                     var msg2 = {payload:stderr};
                     var msg3 = null;

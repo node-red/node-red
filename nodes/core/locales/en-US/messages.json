@@ -1,37 +1,65 @@
 {
-    
     "common": {
         "label": {
             "payload": "Payload",
             "topic": "Topic",
-            "name":"Name"
+            "topicph": "topic",
+            "name": "Name",
+            "nameph": "name",
+            "username": "Username",
+            "password": "Password"
+        },
+        "status": {
+            "connected": "connected",
+            "not-connected": "not connected",
+            "disconnected": "disconnected",
+            "connecting": "connecting",
+            "connections": "connections",
+            "requesting": "requesting",
+            "unknown": "unknown",
+            "error": "error",
+            "ok": "OK",
+            "closed": "closed",
+            "stopped": "stopped",
+            "close": "close",
+            "not-running": "not running",
+            "sending": "sending",
+            "sendfail": "send failed",
+            "fetching": "fetching",
+            "foldererror": "fetch folder error",
+            "messageerror": "fetch message error",
+            "connecterror": "connect error",
+            "neterror": "net error",
+            "joined": "joined",
+            "quit": "quit",
+            "noconnection": "no connection",
+            "tweeting": "tweeting",
+            "failed": "failed"
         }
     },
-    
     "inject": {
-        "inject":"inject",
+        "inject": "inject",
         "repeat": "repeat = __repeat__",
         "crontab": "crontab = __crontab__",
         "stopped": "stopped",
         "failed": "Inject failed: __error__",
-        
         "label": {
             "repeat": "Repeat"
         },
         "timestamp": "timestamp",
         "string": "string",
         "blank": "blank",
-        "none":"none",
-        "interval":"interval",
-        "interval-time":"interval between times",
-        "time":"at a specific time",
-        "seconds":"seconds",
-        "minutes":"minutes",
-        "hours":"hours",
-        "between":"between",
-        "at":"at",
-        "and":"and",
-        "every":"every",
+        "none": "none",
+        "interval": "interval",
+        "interval-time": "interval between times",
+        "time": "at a specific time",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "between": "between",
+        "at": "at",
+        "and": "and",
+        "every": "every",
         "days": [
             "Monday",
             "Tuesday",
@@ -41,8 +69,8 @@
             "Saturday",
             "Sunday"
         ],
-        "on":"on",
-        "onstart":"Inject once at start?",
+        "on": "on",
+        "onstart": "Inject once at start?",
         "tip": "<b>Note:</b> \"interval between times\" and \"at a specific time\" will use cron.<br/>See info box for details.",
         "success": "Successfully injected: __label__",
         "error": "<strong>Error</strong>: __message__",
@@ -51,6 +79,733 @@
             "failed": "inject failed, see log for details",
             "no-response": "no response from server",
             "unexpected": "unexpected error (__status__) __message__"
+        }
+    },
+    "catch": {
+        "catch": "catch"
+    },
+    "debug": {
+        "debug": "debug",
+        "output": "Output",
+        "msgprop": "message property",
+        "msgobj": "complete msg object",
+        "to": "to",
+        "debtab": "debug tab",
+        "tabcon": "debug tab and console"
+    },
+    "exec": {
+        "exec": "exec",
+        "spawnerr": "Spawn command must be just the command - no spaces or extra parameters",
+        "badstdout": "Bad STDOUT",
+        "command": "Command",
+        "commandph": "command",
+        "append": "Append",
+        "extraparams": "extra input parameters",
+        "spawn": "Use spawn() instead of exec() ?",
+        "tip": "Tip: <i>spawn</i> expects only one command word - and appended args to be comma separated."
+    },
+    "function": {
+        "function": "function",
+        "functionlabel": "Function",
+        "outputs": "Outputs",
+        "tip": "See the Info tab for help writing functions."
+    },
+    "template": {
+        "template": "template",
+        "templatelabel": "Template",
+        "property": "Property",
+        "templatevalue": "This is the payload: {{payload}} !"
+    },
+    "delay": {
+        "delay": "delay",
+        "action": "Action",
+        "for": "For",
+        "delaymsg": "Delay message",
+        "ramdomdelay": "Random delay",
+        "limitrate": "Limit rate to",
+        "fairqueue": "Topic based fair queue",
+        "milisecs": "Miliseconds",
+        "secs": "Seconds",
+        "sec": "Second",
+        "mins": "Minutes",
+        "min": "Minute",
+        "hours": "Hours",
+        "hour": "Hour",
+        "days": "Days",
+        "day": "Day",
+        "between": "Between",
+        "rate": "Rate",
+        "msgper": "msg(s) per",
+        "dropmsg": "drop intermediate messages",
+        "delaylabel": "delay",
+        "limitlabel": "limit",
+        "randomlabel": "ramdom",
+        "queuelabel": "queue",
+        "msgperlabel": "msg/",
+        "buffererr": "buffer exceeded 1000 messages"
+    },
+    "trigger": {
+        "trigger": "trigger",
+        "output1": "Output",
+        "wait": "then wait",
+        "output2": "output",
+        "and": "and",
+        "below": "the value below",
+        "payload": "the existing payload",
+        "nothing": "nothing (no output)",
+        "milisecs": "Miliseconds",
+        "secs": "Seconds",
+        "mins": "Minutes",
+        "hours": "Hours",
+        "notext": "don't extend the timer if retriggered",
+        "extend": "extend the timer if retriggered",
+        "tip": "Setting the timeout to 0 sets an infinite timeout = single shot.",
+        "triggerlabel": "trigger",
+        "triggeroncelabel": "trigger once & infinite"
+    },
+    "comment": {
+        "comment": "comment",
+        "title": "Title",
+        "body": "Body - will be rendered in info tab.",
+        "tip1": "Tip: The text here can be styled as ",
+        "tip2": "Github flavoured Markdown",
+        "commentph": "comment",
+        "commentnode": "Comment node",
+        "commentinfo": "Use this node to add simple documentation.\n\nAnything you add will be rendered in this info panel.\n\nYou may use Markdown syntax to **enhance** the *presentation*."
+    },
+    "unknown": {
+        "unknown": "unknown",
+        "label": {
+            "unknownlabel": "unknown"
+        },
+        "tip": "<p>This node is a type unknown to your installation of Node-RED.</p><p><i>If you deploy with the node in this state, it's configuration will be preserved, but the flow will not start until the missing type is installed.</i></p><p>See the Info side bar for more help</p>"
+    }
+    "mqtt": {
+        "mqtt": "mqtt",
+        "label": {
+            "broker": "Broker",
+            "qos": "QoS",
+            "clientid": "Client ID",
+            "clientidph": "Leave blank for auto generated"
+        },
+        "retain": "Retain",
+        "true": "true",
+        "false": "false",
+        "tip": "Tip: Leave topic, qos or retain blank if you want to set them via msg properties.",
+        "port": "Port",
+        "portph": "port",
+        "errors": {
+            "not-defined": "topic not defined",
+            "missing-config": "missing broker configuration",
+            "invalid-topic": "Invalid topic specified"
+        }
+    },
+    "httpin": {
+        "httpin": "httpin",
+        "label": {
+            "method": "Method",
+            "url": "URL",
+            "urlph": "/url",
+            "httpph": "http://",
+            "doc": "Doc",
+            "return": "Return"
+        },
+        "setby": "- set by msg.method -",
+        "basicauth": "Use basic authentication ?",
+        "utf8": "a UTF-8 string",
+        "binary": "a binary buffer",
+        "json": "a parsed JSON object",
+        "in-tip": "The url will be relative to ",
+        "res-tip": "The messages sent to this node <b>must</b> originate from an <i>http input</i> node",
+        "req-tip": "Tip: If the JSON parse fails the fetched string is returned as-is.",
+        "httpreq": "http request",
+        "errors": {
+            "not-created": "Cannot create http-in node when httpNodeRoot set to false",
+            "no-response": "No response object",
+            "not-overridden": "Warning: msg properties can no longer override fixed node properties. Use explicit override option. See bit.ly/nr-override-msg-props",
+            "json-error": "JSON parse error",
+            "no-url": "No url specified"
+        }
+    },
+    "websocket": {
+        "websocket": "websocket",
+        "label": {
+            "type": "Type",
+            "path": "Path",
+            "url": "URL",
+            "pathph": "/ws/example",
+            "urlph": "ws://example.com/ws"
+        },
+        "listenon": "Listen on",
+        "connectto": "Connect to",
+        "payload": "Send/Receive payload",
+        "message": "Send/Receive entire message",
+        "path-tip1": "By default, <code>payload</code> will contain the data to be sent over, or received from a websocket. The listener can be configured to send or receive the entire message object as a JSON formatted string.",
+        "path-tip2": "This path will be relative to ",
+        "url-tip1": "URL should use ws:&#47;&#47; or wss:&#47;&#47; scheme and point to an existing websocket listener.",
+        "url-tip2": "By default, <code>payload</code> will contain the data to be sent over, or received from a websocket. The client can be configured to send or receive the entire message object as a JSON formatted string.",
+        "errors": {
+            "connect-error": "An error occured on the ws connection: ",
+            "send-error": "An error occurred while sending: ",
+            "missing-conf": "Missing server configuration"
+        }
+    },
+    "watch": {
+        "watch": "watch",
+        "label": {
+            "files": "File(s)",
+            "filesph": "File(s) or Directory"
+        },
+        "tip": "On Windows you must use double back-slashes \\\\ in any directory names."
+    },
+    "serial": {
+        "serial": "serial",
+        "label": {
+            "serialport": "Serial Port",
+            "serialportph": "/dev/ttyUSB0/",
+            "settings": "Settings",
+            "baudrate": "Baud Rate",
+            "databits": "Data Bits",
+            "parity": "Parity",
+            "stopbits": "Stop Bits",
+            "input": "Input",
+            "split": "Split input",
+            "deliver": "and deliver",
+            "output": "Output",
+            "serial": "serial",
+            "none": "none"
+        },
+        "none": "None",
+        "even": "Even",
+        "mark": "Mark",
+        "odd": "Odd",
+        "space": "Space",
+        "character": "on the character",
+        "timeout": "after a timeout of",
+        "length": "into fixed lengths of",
+        "ascii": "ascii strings",
+        "binary": "binary buffers",
+        "addsplit": "add split character to output messages",
+        "split-tip": "Tip: the \"Split on\" character is used to split the input into separate messages. It can also be added to every message sent out to the serial port.",
+        "timeout-tip": "Tip: In timeout mode timeout starts from arrival of first character.",
+        "errors": {
+            "missing-conf": "missing serial config",
+            "never-get": "should never get here",
+            "serial-port": "serial port",
+            "error": "error",
+            "unexpected-close": "closed unexpectedly",
+            "opened": "opened at",
+            "baud": "baud",
+            "gone-away": "gone away",
+            "closed": "closed"
+        }
+    },
+    "tcpin": {
+        "tcpin": "tcpin",
+        "label": {
+            "type": "Type",
+            "output": "Output",
+            "port": "port",
+            "host": "at host",
+            "a": "a",
+            "payload": "payload(s)",
+            "delimited": "delimited by",
+            "close-connection": "Close connection after each message is sent ?",
+            "decode-base64": "Decode Base64 message ?",
+            "server": "Server",
+            "return": "Return",
+            "numberph": "number"
+        },
+        "listen": "Listen on",
+        "connect": "Connect to",
+        "reply": "Reply to TCP",
+        "stream": "stream of",
+        "single": "single",
+        "buffer": "Buffer",
+        "string": "String",
+        "base64": "Base64 String",
+        "timeout": "after a fixed timeout of",
+        "character": "when character received is",
+        "number": "a fixed number of characters",
+        "never": "never. Keep connection open",
+        "out-tip1": "Closing the connection after each message is generally not a good thing - but is useful to indicate an end-of-file for example.",
+        "out-tip2": "Closing the connection after each message is generally not a good thing - but is useful to indicate an end-of-file for example. The receiving client will need to reconnect.",
+        "req-tip": "<b>Tip:</b> Outputs a binary <b>Buffer</b>, so you may want to .toString() it.</br/><b>Tip:</b> Leave host and port blank if you want to overide with msg.host and msg.port properties.",
+        "errors": {
+            "connecting-to": "connecting to",
+            "connected-to": "connected to",
+            "connection-lost": "connection lost to",
+            "timeout": "timeout closed socket port",
+            "listening-port": "listening on port",
+            "stopped-listening": "stopped listening on port",
+            "error": "error",
+            "connection-from": "connection from",
+            "connection-closed": "connection closed from",
+            "socket-error": "socket error from",
+            "client-connected": "client connected",
+            "data": "data:",
+            "client-disconnected": "client disconnected",
+            "no-host": "Host and/or port not set",
+            "timeout": "connect timeout",
+            "cannot-listen": "unable to listen on port",
+            "connect-fail": "connect failed"
+        }
+    },
+    "udp": {
+        "udp": "udp",
+        "label": {
+            "listen": "Listen for",
+            "onport": "on Port",
+            "using": "using",
+            "output": "Output",
+            "onportph": "port",
+            "group": "Group",
+            "interface": "Interface",
+            "interfaceph": "(optional) ip address of eth0",
+            "send": "Send a",
+            "toport": "to port",
+            "toportph": "port",
+            "address": "Address",
+            "addressph": "destination ip",
+            "decode-base64": "Decode Base64 encoded payload ?",
+            "outportph": "port"
+        },
+        "udpmsgs": "udp messages",
+        "mcmsgs": "multicast messages",
+        "udpmsg": "udp message",
+        "bcmsg": "broadcast message",
+        "mcmsg": "multicast message",
+        "buffer": "a Buffer",
+        "string": "a String",
+        "base64": "a Base64 encoded string",
+        "bindrandom": "bind to random local port",
+        "bindlocal": "bind to local port",
+        "bindtarget": "bind to target port",
+        "in-tip": "Tip: Make sure your firewall will allow the data in.",
+        "out-tip": "Tip: leave address and port blank if you want to set using <b>msg.ip</b> and <b>msg.port</b>.",
+        "errors": {
+            "listener-at": "udp listener at",
+            "mc-group": "udp multicast group",
+            "listener-stopped": "udp listener stopped",
+            "mc-ready": "udp multicast ready",
+            "bc-ready": "udp broadcast ready",
+            "ready": "udp ready",
+            "output-stopped": "udp output stopped",
+            "ip-notset": "udp: ip address not set",
+            "port-notset": "udp: port not set",
+            "port-invalid": "udp: port number not valid",
+            "access-error": "UDP access error, you may need root access for ports below 1024",
+            "udp-error": "UDP error",
+            "bad-mcaddress": "Bad Multicast Address",
+            "interface": "Must be ip address of the required interface",
+            "error": "Error"
+        }
+    },
+    "switch": {
+        "switch": "switch",
+        "label": {
+            "rule": "rule",
+            "switchlabel": "switch"
+        },
+        "checkall": "checking all rules",
+        "stopfirst": "stopping after first match"
+    },
+    "change": {
+        "change": "change",
+        "label": {
+            "rules": "Rules",
+            "rule": "rule"
+        },
+        "set": "Set",
+        "change": "Change",
+        "delete": "Delete",
+        "to": "to",
+        "search": "Search for",
+        "replace": "Replace with",
+        "regex": "Use regular expressions",
+        "errors": {
+            "invalid-from": "Invalid 'from' property:"
+        }
+    },
+    "range": {
+        "range": "range",
+        "label": {
+            "action": "Action",
+            "inputrange": "Map the input range",
+            "resultrange": "to the result range",
+            "from": "from",
+            "to": "to",
+            "eg0ph": "e.g. 0",
+            "eg99ph": "e.g. 99",
+            "eg255ph": "e.g. 255",
+            "roundresult": "Round result to the nearest integer?",
+            "rangelabel": "range"
+        },
+        "scale-payload": "Scale msg.payload",
+        "scale-limit": "Scale and limit to the target range",
+        "scale-wrap": "Scale and wrap within the target range",
+        "tip": "Tip: This node ONLY works with numbers.",
+        "errors": {
+            "notnumber": "Not a number"
+        }
+    },
+    "csv": {
+        "csv": "csv",
+        "label": {
+            "columns": "Columns",
+            "columnsph": "comma-separated column names",
+            "separator": "Separator",
+            "c2o": "CSV-to-Object options",
+            "o2c": "Object-to-CSV options",
+            "input": "Input",
+            "firstrow": "first row contains column names",
+            "output": "Output",
+            "includerow": "include column name row",
+            "newline": "Newline"
+        },
+        "comma": "comma",
+        "tab": "tab",
+        "space": "space",
+        "semicolon": "semicolon",
+        "colon": "colon",
+        "hashtag": "hashtag",
+        "other": "other...",
+        "row": "a message per row",
+        "array": "a single message [array]",
+        "linux": "Linux (\\n)",
+        "mac": "Mac (\\r)",
+        "windows": "Windows (\\r\\n)",
+        "errors": {
+            "csv_js": "This node only handles csv strings or js objects."
+        }
+    },
+    "html": {
+        "html": "html",
+        "label": {
+            "select": "Select",
+            "output": "Output"
+        },
+        "htmlcontent": "the html content of the elements",
+        "textcontent": "only the text content of the elements",
+        "single": "as a single message containing an array",
+        "multi": "as multiple messages, one for each element",
+        "tip": "Tip: The <b>Select</b> value is a <a href=\"https://github.com/fb55/CSSselect#user-content-supported-selectors\" target=\"_new\"><i><u>CSS Selector</u></i></a>, similar to a jQuery selector."
+    },
+    "json": {
+        "json": "json",
+        "errors": {
+            "dropped": "Dropped"
+        }
+    },
+    "xml": {
+        "xml": "xml",
+        "label": {
+            "represent": "Represent XML tag attributes as a property named",
+            "prefix": "Prefix to access character content",
+            "advanced": "Advanced options"
+        },
+        "tip": "There is no simple way to convert XML attributes to JSON so the approach taken here is to add a property, named $ by default, to the JSON structure.",
+        "errors": {
+            "xml_js": "This node only handles xml strings or js objects."
+        }
+    },
+    "sentiment": {
+        "sentiment": "sentiment",
+        "label": {
+            "sentimentlabel": "sentiment"
+        }
+    },
+    "arduino": {
+        "arduino": "arduino",
+        "label": {
+            "arduino": "Arduino",
+            "pin": "Pin",
+            "type": "Type",
+            "port": "Port",
+            "portph": "e.g. /dev/ttyUSB0  COM1"
+        },
+        "digitalpin": "Digital pin",
+        "analoguepin": "Analogue pin",
+        "digital": "Digital (0/1)",
+        "analogue": "Analogue (0-255)",
+        "servo": "Servo (0-180)",
+        "io-tip": "<b>Note:</b> You cannot use the same pin for both output and input.",
+        "conf-tip": "<b>Tip:</b> Use search to list serial ports, or leave blank to connect to first device found.",
+        "status": {
+            "connectfirst": "connecting to first board found",
+            "connect": "connecting to __device__",
+            "connected": "connected to __device__",
+            "version": "version: __version__",
+            "portclosed": "port closed"
+        },
+        "errors": {
+            "portnotconf": "port not configured",
+            "devnotfound": "device __dev__ not found. Trying to find board."
+        }
+    },
+    "rpi-gpio": {
+        "rpi-gpio": "rpi-gpio",
+        "label": {
+            "gpiopin": "GPIO Pin",
+            "selectpin": "select pin",
+            "registor": "Registor ?",
+            "readinitial": "Read initial state of pin on deploy/restart ?",
+            "type": "Type",
+            "initpin": "Initialise pin state ?",
+            "button": "Button",
+            "pimouse": "Pi Mouse",
+            "left": "Left",
+            "right": "Right",
+            "middle": "Middle"
+        },
+        "none": "none",
+        "pullup": "pullup",
+        "pulldown": "pulldown",
+        "digout": "Digital output",
+        "pwmout": "PWM output",
+        "initpin0": "initial level of pin - low (0)",
+        "initpin1": "initial level of pin - high (1)",
+        "left": "left",
+        "right": "right",
+        "middle": "middle",
+        "any": "any",
+        "pinname": "Pin",
+        "alreadyuse": "already in use",
+        "alreadyset": "already set as",
+        "pin-tip": "<b>Pins in Use</b>: ",
+        "in-tip": "Tip: Only Digital Input is supported - input must be 0 or 1.",
+        "dig-tip": "<b>Tip</b>: For digital output - input must be 0 or 1.",
+        "pwm-tip": "<b>Tip</b>: For PWM output - input must be between 0 and 100.",
+        "errors": {
+            "digout": "digital output",
+            "input": "input",
+            "pullup": "input with pull up",
+            "pulldown": "input with pull down",
+            "pwmout": "PWM output",
+            "ignorenode": "Ignoring Raspberry Pi specific node.",
+            "closed": "closed",
+            "version": "Version command failed for some reason.",
+            "sawpitype": "Saw Pi Type",
+            "libnotfound": "Can't find Pi RPi.GPIO python library.",
+            "gpiopin": "GPIO pin",
+            "alreadyset": "already set as",
+            "invalidpin": "Invalid GPIO pin",
+            "invalidinput": "Invalid input",
+            "needtobeexecutable": "needs to be executable.",
+            "mustbeexecutable": "nrgpio must to be executable.",
+            "commandnotfound": "nrgpio command not found",
+            "commandnotexecutable": "nrgpio command not executable",
+            "error": "error",
+            "pythoncommandnotfound": "nrpgio python command not running"
+        }
+    },
+    "tail": {
+        "tail": "tail",
+        "label": {
+            "filename": "Filename",
+            "filenameph": "filename",
+            "splitlines": "Split lines if we see \\n ?"
+        },
+        "errors": {
+            "windowsnotsupport": "Info : Currently not supported on Windows."
+        }
+    },
+    "file": {
+        "file": "file",
+        "label": {
+            "filename": "Filename",
+            "filenameph": "filename",
+            "action": "Action",
+            "addnewline": "Add newline (\\n) to each payload ?",
+            "outputas": "Ourput as",
+            "filelabel": "file",
+            "deletelabel": "delete"
+        },
+        "append": "append to file",
+        "overwrite": "overwrite file",
+        "delete": "delete file",
+        "utf8": "a utf8 string",
+        "buffer": "a Buffer",
+        "errors": {
+            "wrotefile": "wrote to file",
+            "deletedfile": "deleted file",
+            "appendedfile": "appended to file",
+            "nooverride": "Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props",
+            "nofilename": "No filename specified",
+            "invaliddelete": "Warning: Invalid delete. Please use specific delete option in config dialog.",
+            "deletefail": "failed to delete file",
+            "writefail": "failed to write to file",
+            "appendfail": "failed to append to file"
+        }
+    },
+    "redisout": {
+        "redis": "redis",
+        "label": {
+            "host": "Host",
+            "port": "Port",
+            "key": "Key",
+            "keyph": "Redis Key",
+            "type": "Type"
+        },
+        "string": "String",
+        "hash": "Hash",
+        "set": "Set",
+        "list": "List",
+        "tip": "If key is blank, the topic will be used as the key.<br>If type is hash, payload should be an object or field=value string.",
+        "errors": {
+            "connectedto": "connected to",
+            "invalidpayload": "Invalid payload for redis hash",
+            "nokey": "No key or topic set"
+        }
+    },
+    "mongodb": {
+        "mongodb": "mongodb",
+        "label": {
+            "host": "Host",
+            "port": "Port",
+            "database": "Database",
+            "username": "Username",
+            "password": "Password",
+            "server": "Server",
+            "collection": "Collection",
+            "collectionph": "collection",
+            "operation": "Operation",
+            "onlystore": "Only store msg.payload object",
+            "createnew": "Create a new document if no match found",
+            "updateall": "Update all matching documents"
+        },
+        "save": "save",
+        "insert": "insert",
+        "update": "update",
+        "remove": "remove",
+        "find": "find",
+        "count": "count",
+        "aggregate": "aggregate",
+        "tip": "<b> Tip:</b> If no collection is set, ensure <b>msg.collection</b> will contain the collection name",
+        "errors": {
+            "nocollection": "No collection defined",
+            "missingconfig": "missing mongodb configuration"
+        }
+    },
+    "feedparse": {
+        "feedparse": "feedparse",
+        "label": {
+            "feedurl": "Feed url",
+            "repeat": "Repeat",
+            "repeatph": "minutes",
+            "min": "(M)"
+        },
+        "errors": {
+            "badstatuscode": "error - Bad status code",
+            "invalidurl": "Invalid url"
+        }
+    },
+    "email": {
+        "email": "email",
+        "label": {
+            "to": "To",
+            "server": "Server",
+            "port": "Port",
+            "userid": "Userid",
+            "password": "Password",
+            "repeat": "Check Repeat (S)",
+            "folder": "Folder"
+        },
+        "inbox": "IIINBOX",
+        "cred-tip": "<b>Note:</b> Copied credentials from global emailkeys.js file.",
+        "recent-tip": "Tip: <b>ONLY</b> retrieves the single most recent email.",
+        "errors": {
+            "messagesent": "Message sent",
+            "repeat": "repeat",
+            "message": "message",
+            "finished": "Finished",
+            "newemail": "received new email",
+            "duplicate": "duplicate not sent",
+            "inboxzero": "you have achieved inbox zero",
+            "error": "error",
+            "nooverride": "Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props",
+            "nocredentials": "No Email credentials found. See info panel.",
+            "nopayload": "No payload to send",
+            "messageerror": "fetch message error",
+            "nouserid": "No e-mail userid set",
+            "nopassword": "No e-mail password set",
+            "fetchfail": "Failed to fetch folder",
+            "yourfile": "Your file from Node-RED is attached"
+        }
+    },
+    "irc": {
+        "irc": "irc",
+        "label": {
+            "ircserver": "IRC Server",
+            "channel": "Channel",
+            "action": "Action",
+            "port": "Port",
+            "portph": "port",
+            "ssl": "Use Secure SSL connection ?",
+            "self": "Allow self-signed certificates ?",
+            "nickname": "Nickname"
+        },
+        "payload": "Send payload to channel(s)",
+        "topic": "Use msg.topic to set nickname or channel(s)",
+        "msg": "Send complete msg object to channel(s)",
+        "in-tip": "The channel to join must start with a # (as per normal irc rules...)<br/>You may join multiple channels by comma separating a list - #chan1,#chan2,etc.",
+        "out-tip": "The channel to join must start with a # (as per normal irc rules...)<br/>Sending the complete object will stringify the whole msg object before sending.",
+        "errors": {
+            "connect": "CONNECT",
+            "err": "ERR",
+            "net": "NET",
+            "connected": "CONNECTED",
+            "online": "ONLINE",
+            "joined": "JOINED",
+            "ping": "PING from",
+            "quit": "QUIT",
+            "restart": "restart",
+            "connectionlost": "CONNECTION LOST ?",
+            "hasjoined": "has joined",
+            "sentinvite": "sent invite to",
+            "hasleft": "has left",
+            "hasquit": "has quit",
+            "kickedfrom": "was kicked from",
+            "rawcommand": "RAW command",
+            "topicnotset": "msg.topic not set"
+        }
+    },
+    "twitter": {
+        "twitter": "twitter",
+        "label": {
+            "loginas": "Log in as",
+            "search": "Search",
+            "for": "for",
+            "forph": "comma-separated words, @ids, #tags",
+            "user": "User",
+            "userph": "comma-separated @twitter handles",
+            "dmslabel": "DMs",
+            "tweetslabel": "tweets",
+            "twitter": "Twitter",
+            "clickhere": "Click here to authenticate with Twitter.",
+            "twitterid": "Twitter ID"
+        },
+        "public": "all public tweets",
+        "follow": "the tweets of who you follow",
+        "user": "the tweets of specific users",
+        "direct": "your direct messages",
+        "tip": "Tip: Use commas without spaces between multiple search terms. Comma = OR, Space = AND.<br/>The Twitter API WILL NOT deliver 100% of all tweets.<br/>Tweets of who you follow will include their retweets and favourites.",
+        "errors": {
+            "badgeo":"possible bad geo area format. Should be lower-left lon, lat, upper-right lon, lat",
+            "oauthbroke":"something in twitter oauth broke.",
+            "ratelimit":"tweet rate limit hit",
+            "streamerror":"Stream error",
+            "enexpectedend":"twitter ended unexpectedly",
+            "truncated":"Tweet greater than 140 : truncated",
+            "nopayload":"No payload to tweet",
+            "invalidtag":"Invalid tag property",
+            "missingcredentials":"missing twitter credentials",
+            "sendfail":"Send tweet failed",
+            "oautherror1": "<h2>Oh no!</h2>",
+            "oautherror2": "<p>Something went wrong with the authentication process. The following error was returned:</p>",
+            "oautherror3": "<p><b>__statusCode__</b>: __errorData__</p>",
+            "oautherror4": "<p>One known cause of this type of failure is if the clock is wrong on system running Node-RED.",
+            "authorized": "<html><head></head><body>Authorised - you can close this window and return to Node-RED</body></html>"
         }
     }
 }

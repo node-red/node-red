@@ -16,8 +16,8 @@
 
 <script type="text/x-red" data-template-name="catch">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
 </script>
 <script type="text/x-red" data-help-name="catch">
@@ -53,7 +53,7 @@
         outputs:1,
         icon: "alert.png",
         label: function() {
-            return this.name||"catch";
+            return this.name||this._("catch.catch");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";

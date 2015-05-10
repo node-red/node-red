@@ -73,23 +73,23 @@ function ws_validateclient() {
 <!-- WebSocket Input Node -->
 <script type="text/x-red" data-template-name="websocket in">
     <div class="form-row">
-        <label for="node-input-mode"><i class="fa fa-dot-circle-o"></i> Type</label>
+        <label for="node-input-mode"><i class="fa fa-dot-circle-o"></i> <span data-i18n="websocket.label.type"></span></label>
         <select id="node-input-mode">
-            <option value="server">Listen on</option>
-            <option value="client">Connect to</option>
+            <option value="server" data-i18n="websocket.listenon"></option>
+            <option value="client" data-i18n="websocket.connectto"></option>
         </select>
     </div>
     <div class="form-row" id="websocket-server-row">
-        <label for="node-input-server"><i class="fa fa-bookmark"></i> Path</label>
+        <label for="node-input-server"><i class="fa fa-bookmark"></i> <span data-i18n="websocket.label.path"></span></label>
         <input type="text" id="node-input-server">
     </div>
     <div class="form-row" id="websocket-client-row">
-        <label for="node-input-client"><i class="fa fa-bookmark"></i> URL</label>
+        <label for="node-input-client"><i class="fa fa-bookmark"></i> <span data-i18n="websocket.label.url"></span></label>
         <input type="text" id="node-input-client">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
 </script>
 
@@ -124,23 +124,23 @@ function ws_validateclient() {
 <!-- WebSocket out Node -->
 <script type="text/x-red" data-template-name="websocket out">
     <div class="form-row">
-        <label for="node-input-mode"><i class="fa fa-dot-circle-o"></i> Type</label>
+        <label for="node-input-mode"><i class="fa fa-dot-circle-o"></i> <span data-i18n="websocket.label.type"></span></label>
         <select id="node-input-mode">
-            <option value="server">Listen on</option>
-            <option value="client">Connect to</option>
+            <option value="server" data-i18n="websocket.listenon"></option>
+            <option value="client" data-i18n="websocket.connectto"></option>
         </select>
     </div>
     <div class="form-row" id="websocket-server-row">
-        <label for="node-input-server"><i class="fa fa-bookmark"></i> Path</label>
+        <label for="node-input-server"><i class="fa fa-bookmark"></i> <span data-i18n="websocket.label.path"></span></label>
         <input type="text" id="node-input-server">
     </div>
     <div class="form-row" id="websocket-client-row">
-        <label for="node-input-client"><i class="fa fa-bookmark"></i> URL</label>
+        <label for="node-input-client"><i class="fa fa-bookmark"></i> <span data-i18n="websocket.label.url"></span></label>
         <input type="text" id="node-input-client">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
 </script>
 
@@ -182,20 +182,19 @@ function ws_validateclient() {
 <!-- WebSocket Server configuration node -->
 <script type="text/x-red" data-template-name="websocket-listener">
     <div class="form-row">
-        <label for="node-config-input-path"><i class="fa fa-bookmark"></i> Path</label>
-        <input type="text" id="node-config-input-path" placeholder="/ws/example">
+        <label for="node-config-input-path"><i class="fa fa-bookmark"></i> <span data-i18n="websocket.label.path"></span></label>
+        <input type="text" id="node-config-input-path" data-i18n="[placeholder]websocket.label.pathph">
     </div>
     <div class="form-row">
         <label for="node-config-input-wholemsg">&nbsp;</label>
         <select type="text" id="node-config-input-wholemsg" style="width: 70%;">
-            <option value="false">Send/Receive payload</option>
-            <option value="true">Send/Receive entire message</option>
+            <option value="false" data-i18n="websocket.payload"></option>
+            <option value="true" data-i18n="websocket.message"></option>
         </select>
     </div>
     <div class="form-tips">
-    By default, <code>payload</code> will contain the data to be sent over, or received from a websocket.
-    The listener can be configured to send or receive the entire message object as a JSON formatted string.
-    <p id="node-config-ws-tip">This path will be relative to <code><span id="node-config-ws-path"></span></code>.</p>
+        <span data-i18n="[html]websocket.path-tip1"></span>
+        <p id="node-config-ws-tip"><span data-i18n="[html]websocket.path-tip2"></span><code><span id="node-config-ws-path"></span></code>.</p>
     </div>
 </script>
 
@@ -242,20 +241,19 @@ function ws_validateclient() {
 <!-- WebSocket Client configuration node -->
 <script type="text/x-red" data-template-name="websocket-client">
     <div class="form-row">
-        <label for="node-config-input-path"><i class="fa fa-bookmark"></i> URL</label>
-        <input type="text" id="node-config-input-path" placeholder="ws://example.com/ws">
+        <label for="node-config-input-path"><i class="fa fa-bookmark"></i> <span data-i18n="websocket.label.url"></span></label>
+        <input type="text" id="node-config-input-path" data-i18n="[placeholder]websocket.label.urlph">
     </div>
     <div class="form-row">
         <label for="node-config-input-wholemsg">&nbsp;</label>
         <select type="text" id="node-config-input-wholemsg" style="width: 70%;">
-            <option value="false">Send/Receive payload</option>
-            <option value="true">Send/Receive entire message</option>
+            <option value="false" data-i18n="websocket.payload"></option>
+            <option value="true" data-i18n="websocket.message"></option>
         </select>
     </div>
     <div class="form-tips">
-    <p>URL should use ws:&#47;&#47; or wss:&#47;&#47; scheme and point to an existing websocket listener.</p>
-    By default, <code>payload</code> will contain the data to be sent over, or received from a websocket.
-    The client can be configured to send or receive the entire message object as a JSON formatted string.
+        <p><span data-i18n="[html]websocket.url-tip1"></span></p>
+        <span data-i18n="[html]websocket.url-tip2"></span>
     </div>
 </script>
 
