@@ -180,12 +180,12 @@ module.exports = function(RED) {
         this.serverConfig = RED.nodes.getNode(this.server);
         if (this.serverConfig) {
             this.serverConfig.registerInputNode(this);
+            this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:"connected "+n}); });
+            this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"error"}); });
+            this.serverConfig.on('closed', function() { node.status({fill:"red",shape:"ring",text:"disconnected"}); });
         } else {
             this.error("Missing server configuration");
         }
-        this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:"connected "+n}); });
-        this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"error"}); });
-        this.serverConfig.on('closed', function() { node.status({fill:"red",shape:"ring",text:"disconnected"}); });
     }
     RED.nodes.registerType("websocket in",WebSocketInNode);
 
@@ -197,9 +197,11 @@ module.exports = function(RED) {
         if (!this.serverConfig) {
             this.error("Missing server configuration");
         }
-        this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:"connected "+n}); });
-        this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"error"}); });
-        this.serverConfig.on('closed', function() { node.status({fill:"red",shape:"ring",text:"disconnected"}); });
+        else {
+            this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:"connected "+n}); });
+            this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"error"}); });
+            this.serverConfig.on('closed', function() { node.status({fill:"red",shape:"ring",text:"disconnected"}); });
+        }
         this.on("input", function(msg) {
             var payload;
             if (this.serverConfig.wholemsg) {
