@@ -52,5 +52,19 @@
             "no-response": "no response from server",
             "unexpected": "unexpected error (__status__) __message__"
         }
+    },
+    
+    "catch": {
+        "catch": "catch"
+    },
+    
+    "debug": {
+        "debug": "debug",
+        "output": "Output",
+        "msgprop": "message property",
+        "msgobj": "complete msg object",
+        "to": "to",
+        "debtab": "debug tab",
+        "tabcon": "debug tab and console"
     }
 }
