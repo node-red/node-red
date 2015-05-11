@@ -177,7 +177,7 @@
 <script src="vendor/vendor.js"></script>
 <script src="vendor/ace/ace.js"></script>
 <script src="vendor/ace/ext-language_tools.js"></script>
-<script src="red/red.min.js"></script>
+<script src="{{ asset.red }}"></script>
 
 </body>
 </html>
