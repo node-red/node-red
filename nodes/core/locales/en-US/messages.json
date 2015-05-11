@@ -7,7 +7,6 @@
             "name":"Name"
         }
     },
-    
     "inject": {
         "inject":"inject",
         "repeat": "repeat = __repeat__",
@@ -53,11 +52,9 @@
             "unexpected": "unexpected error (__status__) __message__"
         }
     },
-    
     "catch": {
         "catch": "catch"
     },
-    
     "debug": {
         "debug": "debug",
         "output": "Output",
@@ -66,5 +63,15 @@
         "to": "to",
         "debtab": "debug tab",
         "tabcon": "debug tab and console"
+    },
+    "exec": {
+        "exec": "exec",
+        "spawnerr": "SSpawn command must be just the command - no spaces or extra parameters",
+        "badstdout": "BBad STDOUT",
+        "command": "Command",
+        "append": "Append",
+        "extraparams": "eextra input parameters",
+        "spawn": "Use spawn() instead of exec() ?",
+        "tip": "Tip: <i>spawn</i> expects only one command word - and appended args to be comma separated."
     }
 }
