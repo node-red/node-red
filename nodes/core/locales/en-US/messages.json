@@ -72,6 +72,46 @@
         "append": "Append",
         "extraparams": "eextra input parameters",
         "spawn": "Use spawn() instead of exec() ?",
-        "tip": "Tip: <i>spawn</i> expects only one command word - and appended args to be comma separated."
+        "tips": "Tip: <i>spawn</i> expects only one command word - and appended args to be comma separated."
+    },
+    "function": {
+        "function": "function",
+        "functionlabel": "Function",
+        "outputs": "Outputs",
+        "tips": "See the Info tab for help writing functions."
+    },
+    "template": {
+        "template": "template",
+        "templatelabel": "Template",
+        "property": "Property",
+        "templatevalue": "This is the payload: {{payload}} !"
+    },
+    "delay": {
+        "delay": "delay",
+        "action": "Action",
+        "for": "For",
+        "delaymsg": "Delay message",
+        "ramdomdelay": "Random delay",
+        "limitrate": "Limit rate to",
+        "fairqueue": "Topic based fair queue",
+        "milisecs": "Miliseconds",
+        "secs": "Seconds",
+        "sec": "Second",
+        "mins": "Minutes",
+        "min": "Minute",
+        "hours": "Hours",
+        "hour": "Hour",
+        "days": "Days",
+        "day": "Day",
+        "between": "Between",
+        "rate": "Rate",
+        "msgper": "msg(s) per",
+        "dropmsg": "drop intermediate messages",
+        "delaylabel": "delay",
+        "limitlabel": "limit",
+        "randomlabel": "ramdom",
+        "queuelabel": "queue",
+        "msgperlabel": "msg/",
+        "buffererr": "buffer exceeded 1000 messages"
     }
 }
