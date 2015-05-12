@@ -4,7 +4,8 @@
         "label": {
             "payload": "Payload",
             "topic": "Topic",
-            "name":"Name"
+            "name":"Name",
+            "nameph": "name"
         }
     },
     "inject": {
@@ -66,19 +67,20 @@
     },
     "exec": {
         "exec": "exec",
-        "spawnerr": "SSpawn command must be just the command - no spaces or extra parameters",
-        "badstdout": "BBad STDOUT",
+        "spawnerr": "Spawn command must be just the command - no spaces or extra parameters",
+        "badstdout": "Bad STDOUT",
         "command": "Command",
+        "commandph": "command",
         "append": "Append",
-        "extraparams": "eextra input parameters",
+        "extraparams": "extra input parameters",
         "spawn": "Use spawn() instead of exec() ?",
-        "tips": "Tip: <i>spawn</i> expects only one command word - and appended args to be comma separated."
+        "tip": "Tip: <i>spawn</i> expects only one command word - and appended args to be comma separated."
     },
     "function": {
         "function": "function",
         "functionlabel": "Function",
         "outputs": "Outputs",
-        "tips": "See the Info tab for help writing functions."
+        "tip": "See the Info tab for help writing functions."
     },
     "template": {
         "template": "template",
@@ -113,5 +115,34 @@
         "queuelabel": "queue",
         "msgperlabel": "msg/",
         "buffererr": "buffer exceeded 1000 messages"
+    },
+    "trigger": {
+        "trigger": "trigger",
+        "output1": "Output",
+        "wait": "then wait",
+        "output2": "output",
+        "and": "and",
+        "below": "the value below",
+        "payload": "the existing payload",
+        "nothing": "nothing (no output)",
+        "milisecs": "Miliseconds",
+        "secs": "Seconds",
+        "mins": "Minutes",
+        "hours": "Hours",
+        "notext": "don't extend the timer if retriggered",
+        "extend": "extend the timer if retriggered",
+        "tip": "Setting the timeout to 0 sets an infinite timeout = single shot.",
+        "triggerlabel": "trigger",
+        "triggeroncelabel": "trigger once & infinite"
+    },
+    "comment": {
+        "comment": "comment",
+        "title": "Title",
+        "body": "Body - will be rendered in info tab.",
+        "tip1": "Tip: The text here can be styled as ",
+        "tip2": "Github flavoured Markdown",
+        "commentph": "comment",
+        "commentnode": "Comment node",
+        "commentinfo": "Use this node to add simple documentation.\n\nAnything you add will be rendered in this info panel.\n\nYou may use Markdown syntax to **enhance** the *presentation*."
     }
 }
