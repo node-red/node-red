@@ -16,17 +16,17 @@
 
 <script type="text/x-red" data-template-name="comment">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-comment"></i> Title</label>
-        <input type="text" id="node-input-name" placeholder="Comment">
+        <label for="node-input-name"><i class="fa fa-comment"></i> <span data-i18n="comment.title"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]comment.commentph">
     </div>
     <div class="form-row" style="margin-bottom: 0px;">
-        <label for="node-input-info" style="width: 100% !important;"><i class="fa fa-comments"></i> Body - will be rendered in info tab.</label>
+        <label for="node-input-info" style="width: 100% !important;"><i class="fa fa-comments"></i> <span data-i18n="comment.body"></span></label>
         <input type="hidden" id="node-input-info" autofocus="autofocus">
     </div>
     <div class="form-row node-text-editor-row">
         <div style="height: 250px;" class="node-text-editor" id="node-input-info-editor" ></div>
     </div>
-    <div class="form-tips">Tip: The text here can be styled as <i><a href="https://help.github.com/articles/markdown-basics/" target="_new">Github flavoured Markdown</a></i></div>
+    <div class="form-tips"><span data-i18n="comment.tip1"></span><i><a href="https://help.github.com/articles/markdown-basics/" target="_new"><span data-i18n="comment.tip2"></span></a></i></div>
 </script>
 
 <script type="text/x-red" data-help-name="comment">
@@ -51,8 +51,8 @@
             return this.name?"node_label_italic":"";
         },
         info: function() {
-            var t = this.name || "Comment node";
-            var b = this.info || "Use this node to add simple documentation.\n\nAnything you add will be rendered in this info panel.\n\nYou may use Markdown syntax to **enhance** the *presentation*.";
+            var t = this.name || this._("comment.commentnode");
+            var b = this.info || this._("comment.commentinfo");
             return "### "+t+"\n"+b;
         },
         oneditprepare: function() {
