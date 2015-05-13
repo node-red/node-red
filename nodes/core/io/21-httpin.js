@@ -76,6 +76,14 @@ module.exports = function(RED) {
                 RED.httpNode.options(this.url,corsHandler);
             }
 
+            var httpMiddleware = function(req,res,next) { next(); }
+            
+            if (RED.settings.httpNodeMiddleware) {
+                if (typeof RED.settings.httpNodeMiddleware === "function") {
+                    httpMiddleware = RED.settings.httpNodeMiddleware;
+                }
+            }
+            
             var metricsHandler = function(req,res,next) { next(); }
 
             if (this.metric()) {
@@ -97,13 +105,13 @@ module.exports = function(RED) {
             }
 
             if (this.method == "get") {
-                RED.httpNode.get(this.url,corsHandler,metricsHandler,this.callback,this.errorHandler);
+                RED.httpNode.get(this.url,httpMiddleware,corsHandler,metricsHandler,this.callback,this.errorHandler);
             } else if (this.method == "post") {
-                RED.httpNode.post(this.url,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+                RED.httpNode.post(this.url,httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "put") {
-                RED.httpNode.put(this.url,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+                RED.httpNode.put(this.url,httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "delete") {
-                RED.httpNode.delete(this.url,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+                RED.httpNode.delete(this.url,httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             }
 
             this.on("close",function() {
