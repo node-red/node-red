@@ -192,7 +192,7 @@ module.exports = function(RED) {
                 return;
             }
             // url must start http:// or https:// so assume http:// if not set
-            if (!((url.indexOf("http://")===0) || (url.indexOf("https://")===0))) {
+            if (!((url.indexOf("http://") === 0) || (url.indexOf("https://") === 0))) {
                 url = "http://"+url;
             }
 
@@ -243,7 +243,18 @@ module.exports = function(RED) {
                     opts.headers['content-length'] = Buffer.byteLength(payload);
                 }
             }
-            var req = ((/^https/.test(url))?https:http).request(opts,function(res) {
+            var urltotest = url;
+            if (RED.settings.httpNodeProxy) {
+                var proxy = RED.settings.httpNodeProxy.host;
+                opts.protocol = "http:";
+                opts.headers['Host'] = opts.host;
+                opts.host = opts.hostname = proxy;
+                opts.port = RED.settings.httpNodeProxy.port || opts.port;
+                if (opts.port) { opts.host = opts.host+":"+opts.port; }
+                opts.path = opts.pathname = opts.href;
+                urltotest = proxy;
+            }
+            var req = ((/^https/.test(urltotest))?https:http).request(opts,function(res) {
                 (node.ret === "bin") ? res.setEncoding('binary') : res.setEncoding('utf8');
                 msg.statusCode = res.statusCode;
                 msg.headers = res.headers;

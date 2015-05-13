@@ -152,6 +152,7 @@
         <li><code>statusCode</code> is the status code of the response, or the error code if the request could not be completed</li>
         <li><code>headers</code> is an object containing the response headers</li>
     </ul>
+    <p><b>Note</b>: See the <i>settings.js</i> file if you need to configure a proxy.</p>
 </script>
 
 <script type="text/javascript">
@@ -199,9 +200,9 @@
                 $("#node-input-path").html(root);
                 $("#node-input-tip").show();
             }
-			if(!RED.nodes.getType("swagger-doc")){
-				$('.row-swagger-doc').hide();
-			}
+            if(!RED.nodes.getType("swagger-doc")){
+                $('.row-swagger-doc').hide();
+            }
         }
 
     });

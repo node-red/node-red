@@ -120,7 +120,11 @@ module.exports = {
     //    origin: "*",
     //    methods: "GET,PUT,POST,DELETE"
     //},
-    
+
+    // The following property can be used to configure a proxy for use by the
+    // http request node.
+    //httpNodeProxy : { host:"myproxy.acme.com", port:8080 },
+
     // Anything in this hash is globally available to all functions.
     // It is accessed as context.global.
     // eg:
