@@ -28,15 +28,23 @@ module.exports = function(RED) {
         var node = this;
         node.board = new ArduinoFirmata();
         ArduinoFirmata.list(function (err, ports) {
-            if (ports.indexOf(node.device) === -1) {
+            if (!node.device) {
+                node.log("connecting to first board found.");
                 node.board.connect();
-                node.log("connecting to first device found.");
             }
             else {
-                node.board.connect(node.device);
+                if (ports.indexOf(node.device) === -1) {
+                    node.warn(node.device + " not found. Trying to find board.");
+                    node.board.connect();
+                }
+                else {
+                    node.log("connecting to "+node.device);
+                    node.board.connect(node.device);
+                }
             }
 
             node.board.on('boardReady', function() {
+                node.log("connected to "+node.board.serialport_name);
                 if (RED.settings.verbose) { node.log("version "+node.board.boardVersion); }
             });
         });
