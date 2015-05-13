@@ -13,8 +13,11 @@
             "connected": "connected",
             "not-connected": "not connected",
             "disconnected": "disconnected",
+            "connecting": "connecting",
+            "connections": "connections",
             "requesting": "requesting",
-            "unknown": "unknown"
+            "unknown": "unknown",
+            "error": "error"
         }
     },
     "inject": {
@@ -272,6 +275,56 @@
             "baud": "baud",
             "gone-away": "gone away",
             "closed": "closed"
+        }
+    },
+    "tcpin": {
+        "tcpin": "tcpin",
+        "label": {
+            "type": "Type",
+            "output": "Output",
+            "port": "port",
+            "host": "at host",
+            "a": "a",
+            "payload": "payload(s)",
+            "delimited": "delimited by",
+            "close-connection": "Close connection after each message is sent ?",
+            "decode-base64": "Decode Base64 message ?",
+            "server": "Server",
+            "return": "Return"
+        },
+        "listen": "Listen on",
+        "connect": "Connect to",
+        "reply": "Reply to TCP",
+        "stream": "stream of",
+        "single": "single",
+        "buffer": "Buffer",
+        "string": "String",
+        "base64": "Base64 String",
+        "timeout": "after a fixed timeout of",
+        "character": "when character received is",
+        "number": "a fixed number of characters",
+        "never": "never. Keep connection open",
+        "out-tip1": "Closing the connection after each message is generally not a good thing - but is useful to indicate an end-of-file for example.",
+        "out-tip2": "Closing the connection after each message is generally not a good thing - but is useful to indicate an end-of-file for example. The receiving client will need to reconnect.",
+        "req-tip": "<b>Tip:</b> Outputs a binary <b>Buffer</b>, so you may want to .toString() it.</br/><b>Tip:</b> Leave host and port blank if you want to overide with msg.host and msg.port properties.",
+        "errors": {
+            "": "connecting to",
+            "": "connected to",
+            "": "connection lost to",
+            "": "timeout closed socket port",
+            "": "listening on port",
+            "": "stopped listening on port",
+            "": "error",
+            "": "connection from",
+            "": "connection closed from",
+            "": "socket error from",
+            "": "client connected",
+            "": "data:",
+            "": "client disconnected",
+            "no-host": "Host and/or port not set",
+            "timeout": "connect timeout",
+            "cannot-listen": "unable to listen on port",
+            "connect-fail": "connect failed"
         }
     }
 }
