@@ -628,7 +628,13 @@ RED.editor = (function() {
         $("#dialog-config-form").find('[data-i18n]').each(function() {
             var current = $(this).attr("data-i18n");
             if (current.indexOf(":") === -1) {
-                 $(this).attr("data-i18n",ns+":"+current);
+                var prefix = "";
+                if (current.indexOf("[")===0) {
+                    var parts = current.split("]");
+                    prefix = parts[0]+"]";
+                    current = parts[1];
+                }
+                $(this).attr("data-i18n",prefix+ns+":"+current);
             }
         });
 
