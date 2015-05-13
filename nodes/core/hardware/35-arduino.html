@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013,2014 IBM Corp.
+  Copyright 2013,2015 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@
         icon: "arduino.png",
         label: function() {
             var a = "";
-            if (this.state == "ANALOG") a = "A";
+            if (this.state === "ANALOG") { a = "A"; }
             return this.name||"Pin: "+a+this.pin;
         },
         labelStyle: function() {
@@ -128,14 +128,14 @@
         <input type="text" id="node-config-input-device" style="width:60%;" placeholder="e.g. /dev/ttyUSB0  COM1"/>
         <a id="node-config-lookup-serial" class="btn"><i id="node-config-lookup-serial-icon" class="fa fa-search"></i></a>
     </div>
-    <div class="form-tips"><b>Tip:</b> Use search to try to auto-detect serial port.</div>
+    <div class="form-tips"><b>Tip:</b> Use search to list serial ports, or leave blank to connect to first device found.</div>
 </script>
 
 <script type="text/javascript">
     RED.nodes.registerType('arduino-board',{
         category: 'config',
         defaults: {
-            device: {value:"",required:true}
+            device: {value:""}
         },
         label: function() {
             return this.device||"arduino";
