@@ -16,12 +16,12 @@
 
 <script type="text/x-red" data-template-name="serial in">
     <div class="form-row node-input-serial">
-        <label for="node-input-serial"><i class="fa fa-random"></i> Serial Port</label>
+        <label for="node-input-serial"><i class="fa fa-random"></i> <span data-i18n="serial.label.serialport"></span></label>
         <input type="text" id="node-input-serial">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
 </script>
 
@@ -47,7 +47,7 @@
         icon: "serial.png",
         label: function() {
             var serialNode = RED.nodes.node(this.serial);
-            return this.name||(serialNode?serialNode.label().split(":")[0]:"serial");
+            return this.name||(serialNode?serialNode.label().split(":")[0]:this._("serial.label.serial"));
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -57,12 +57,12 @@
 
 <script type="text/x-red" data-template-name="serial out">
     <div class="form-row node-input-serial">
-        <label for="node-input-serial"><i class="fa fa-random"></i> Serial Port</label>
+        <label for="node-input-serial"><i class="fa fa-random"></i> <span data-i18n="serial.label.serialport"></span></label>
         <input type="text" id="node-input-serial">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
 </script>
 
@@ -86,7 +86,7 @@
         align: "right",
         label: function() {
             var serialNode = RED.nodes.node(this.serial);
-            return this.name||(serialNode?serialNode.label().split(":")[0]:"serial");
+            return this.name||(serialNode?serialNode.label().split(":")[0]:this._("serial.label.serial"));
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -97,17 +97,17 @@
 
 <script type="text/x-red" data-template-name="serial-port">
     <div class="form-row">
-        <label for="node-config-input-serialport"><i class="fa fa-random"></i> Serial Port</label>
-        <input type="text" id="node-config-input-serialport" style="width:60%;" placeholder="/dev/ttyUSB0"/>
+        <label for="node-config-input-serialport"><i class="fa fa-random"></i> <span data-i18n="serial.label.serialport"></span></label>
+        <input type="text" id="node-config-input-serialport" style="width:60%;" data-i18n="[placeholder]serial.label.serialportph">
         <a id="node-config-lookup-serial" class="btn"><i id="node-config-lookup-serial-icon" class="fa fa-search"></i></a>
     </div>
     <div class="form-row">
         <table><tr>
-            <td width="102px"><i class="fa fa-wrench"></i> Settings</td>
-            <td width="100px">Baud Rate</td>
-            <td width="80px">Data Bits</td>
-            <td width="80px">Parity</td>
-            <td width="80px">Stop Bits</td>
+            <td width="102px"><i class="fa fa-wrench"></i> <span data-i18n="serial.label.settings"></span></td>
+            <td width="100px" data-i18n="serial.label.baudrate"></td>
+            <td width="80px" data-i18n="serial.label.databits"></td>
+            <td width="80px" data-i18n="serial.label.parity"></td>
+            <td width="80px" data-i18n="serial.label.stopbits"></td>
         </tr><tr><td>&nbsp;</td>
         <td>
         <select type="text" id="node-config-input-serialbaud" style="width: 100px;">
@@ -138,11 +138,11 @@
         </select>
         </td><td>
         <select type="text" id="node-config-input-parity" style="width: 80px;">
-            <option value="none">None</option>
-            <option value="even">Even</option>
-            <option value="mark">Mark</option>
-            <option value="odd">Odd</option>
-            <option value="space">Space</option>
+            <option value="none" data-i18n="serial.none"></option>
+            <option value="even" data-i18n="serial.even"></option>
+            <option value="mark" data-i18n="serial.mark"></option>
+            <option value="odd" data-i18n="serial.odd"></option>
+            <option value="space" data-i18n="serial.space"></option>
         </select>
         </td><td>
         <select type="text" id="node-config-input-stopbits" style="width: 80px;">
@@ -153,36 +153,36 @@
     </tr></table><br/>
 
     <div class="form-row">
-        <label><i class="fa fa-sign-in"></i> Input</label>
+        <label><i class="fa fa-sign-in"></i> <span data-i18n="serial.label.input"></span></label>
     </div>
     <div class="form-row" style="padding-left: 10px;">
-        Split input
+        <span data-i18n="serial.label.split"></span>
         <select type="text" id="node-config-input-out" style="margin-left: 5px; width:200px;">
-            <option value="char">on the character</option>
-            <option value="time">after a timeout of</option>
-            <option value="count">into fixed lengths of</option>
+            <option value="char" data-i18n="serial.character"></option>
+            <option value="time" data-i18n="serial.timeout"></option>
+            <option value="count" data-i18n="serial.lengths"></option>
         </select>
         <input type="text" id="node-config-input-newline"  style="width:50px;">
         <span id="node-units"></span>
     </div>
     <div class="form-row" style="padding-left: 10px;">
-        and deliver
+        <span data-i18n="serial.label.deliver"></span>
         <select type="text" id="node-config-input-bin" style="margin-left: 5px; width: 150px;">
-            <option value="false">ascii strings</option>
-            <option value="bin">binary buffers</option>
+            <option value="false" data-i18n="serial.ascii"></option>
+            <option value="bin" data-i18n="serial.binary"></option>
         </select>
     </div>
     <br/>
     <div id="node-config-addchar">
         <div class="form-row">
-            <label><i class="fa fa-sign-out"></i> Output</label>
+            <label><i class="fa fa-sign-out"></i> <span data-i18n="serial.label.output"></span></label>
         </div>
         <div class="form-row">
-            <input style="width: 30px;margin-left: 10px; vertical-align: top;" type="checkbox" id="node-config-input-addchar"><label style="width: auto;" for="node-config-input-addchar">add split character to output messages</label>
+            <input style="width: 30px;margin-left: 10px; vertical-align: top;" type="checkbox" id="node-config-input-addchar"><label style="width: auto;" for="node-config-input-addchar"><span data-i18n="serial.addsplit"></span></label>
         </div>
     </div>
-    <div class="form-tips" id="tip-split">Tip: the "Split on" character is used to split the input into separate messages. It can also be added to every message sent out to the serial port.</div>
-    <div class="form-tips" id="tip-bin" hidden>Tip: In timeout mode timeout starts from arrival of first character.</div>
+    <div class="form-tips" id="tip-split"><span data-i18n="serial.split-tip"></span></div>
+    <div class="form-tips" id="tip-bin" hidden><span data-i18n="serial.timeout-tip"></span></div>
 </script>
 
 <script type="text/javascript">
@@ -203,7 +203,7 @@
         label: function() {
             this.serialbaud = this.serialbaud || 57600;
             this.databits = this.databits || 8;
-            this.parity = this.parity || 'none';
+            this.parity = this.parity || this._("serial.label.none");
             this.stopbits = this.stopbits || 1;
             return this.serialport+":"+this.serialbaud+"-"+this.databits+this.parity.charAt(0).toUpperCase()+this.stopbits;
         },
