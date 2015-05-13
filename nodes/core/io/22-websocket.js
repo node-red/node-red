@@ -180,11 +180,12 @@ module.exports = function(RED) {
         this.serverConfig = RED.nodes.getNode(this.server);
         if (this.serverConfig) {
             this.serverConfig.registerInputNode(this);
+            // TODO: nls
             this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:"connected "+n}); });
             this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"error"}); });
             this.serverConfig.on('closed', function() { node.status({fill:"red",shape:"ring",text:"disconnected"}); });
         } else {
-            this.error("Missing server configuration");
+            this.error(RED._("websocket.errors.missing-conf"));
         }
     }
     RED.nodes.registerType("websocket in",WebSocketInNode);
@@ -195,9 +196,10 @@ module.exports = function(RED) {
         this.server = (n.client)?n.client:n.server;
         this.serverConfig = RED.nodes.getNode(this.server);
         if (!this.serverConfig) {
-            this.error("Missing server configuration");
+            this.error(RED._("websocket.errors.missing-conf"));
         }
         else {
+            // TODO: nls
             this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:"connected "+n}); });
             this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"error"}); });
             this.serverConfig.on('closed', function() { node.status({fill:"red",shape:"ring",text:"disconnected"}); });
@@ -221,7 +223,7 @@ module.exports = function(RED) {
                 } else {
                     node.serverConfig.broadcast(payload,function(error){
                         if (!!error) {
-                            node.warn("An error occurred while sending:" + inspect(error));
+                            node.warn(RED._("websocket.errors.send-error")+inspect(error));
                         }
                     });
                 }

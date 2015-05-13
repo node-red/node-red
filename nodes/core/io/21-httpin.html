@@ -16,7 +16,7 @@
 
 <script type="text/x-red" data-template-name="http in">
     <div class="form-row">
-        <label for="node-input-method"><i class="fa fa-tasks"></i> Method</label>
+        <label for="node-input-method"><i class="fa fa-tasks"></i> <span data-i18n="httpin.label.method"></span></label>
         <select type="text" id="node-input-method" style="width:72%;">
         <option value="get">GET</option>
         <option value="post">POST</option>
@@ -25,18 +25,18 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-url"><i class="fa fa-globe"></i> url</label>
-        <input type="text" id="node-input-url" placeholder="/url">
+        <label for="node-input-url"><i class="fa fa-globe"></i> <span data-i18n="httpin.label.url"></span></label>
+        <input type="text" id="node-input-url" data-i18n="[placeholder]httpin.label.urlph">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
     <div class="form-row row-swagger-doc">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Doc</label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="httpin.label.doc"></span></label>
         <input type="text" id="node-input-swaggerDoc">
     </div>
-    <div id="node-input-tip" class="form-tips">The url will be relative to <code><span id="node-input-path"></span></code>.</div>
+    <div id="node-input-tip" class="form-tips"><span data-i18n="httpin.in-tip"></span><code><span id="node-input-path"></span></code>.</div>
 </script>
 
 <script type="text/x-red" data-help-name="http in">
@@ -67,10 +67,10 @@
 
 <script type="text/x-red" data-template-name="http response">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
-    <div class="form-tips">The messages sent to this node <b>must</b> originate from an <i>http input</i> node</div>
+    <div class="form-tips"><span data-i18n="[html]httpin.res-tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="http response">
@@ -86,45 +86,45 @@
 
 <script type="text/x-red" data-template-name="http request">
     <div class="form-row">
-        <label for="node-input-method"><i class="fa fa-tasks"></i> Method</label>
+        <label for="node-input-method"><i class="fa fa-tasks"></i> <span data-i18n="httpin.label.method"></span></label>
         <select type="text" id="node-input-method" style="width:72%;">
         <option value="GET">GET</option>
         <option value="POST">POST</option>
         <option value="PUT">PUT</option>
         <option value="DELETE">DELETE</option>
-        <option value="use">- set by msg.method -</option>
+        <option value="use" data-i18n="httpin.setby"></option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-url"><i class="fa fa-globe"></i> URL</label>
-        <input type="text" id="node-input-url" placeholder="http://">
+        <label for="node-input-url"><i class="fa fa-globe"></i> <span data-i18n="httpin.label.url"></span></label>
+        <input type="text" id="node-input-url" data-i18n="[placeholder]httpin.label.httpph">
     </div>
     <div class="form-row">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-useAuth" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-useAuth" style="width: 70%;">Use basic authentication ?</label>
+        <label for="node-input-useAuth" style="width: 70%;"><span data-i18n="httpin.basicauth"></span></label>
     </div>
     <div class="form-row node-input-useAuth-row">
-        <label for="node-input-user"><i class="fa fa-user"></i> Username</label>
+        <label for="node-input-user"><i class="fa fa-user"></i> <span data-i18n="common.label.username"></span></label>
         <input type="text" id="node-input-user">
     </div>
     <div class="form-row node-input-useAuth-row">
-        <label for="node-input-password"><i class="fa fa-lock"></i> Password</label>
+        <label for="node-input-password"><i class="fa fa-lock"></i> <span data-i18n="common.label.password"></span></label>
         <input type="password" id="node-input-password">
     </div>
     <div class="form-row">
-        <label for="node-input-ret"><i class="fa fa-arrow-left"></i> Return</label>
+        <label for="node-input-ret"><i class="fa fa-arrow-left"></i> <span data-i18n="httpin.label.return"></span></label>
         <select type="text" id="node-input-ret" style="width:72%;">
-        <option value="txt">a UTF-8 string</option>
-        <option value="bin">a binary buffer</option>
-        <option value="obj">a parsed JSON object</option>
+        <option value="txt" data-i18n="httpin.utf8"></option>
+        <option value="bin" data-i18n="httpin.binary"></option>
+        <option value="obj" data-i18n="httpin.json"></option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
-    <div class="form-tips" id="tip-json" hidden>Tip: If the JSON parse fails the fetched string is returned as-is.</div>
+    <div class="form-tips" id="tip-json" hidden><span data-i18n="httpin.req-tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="http request">
@@ -241,7 +241,7 @@
         outputs:1,
         icon: "white-globe.png",
         label: function() {
-            return this.name||"http request";
+            return this.name||this._("httpin.httpreq");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";

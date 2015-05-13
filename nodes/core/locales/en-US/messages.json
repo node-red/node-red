@@ -1,11 +1,20 @@
 {
-    
     "common": {
         "label": {
             "payload": "Payload",
             "topic": "Topic",
-            "name":"Name",
-            "nameph": "name"
+            "topicph": "topic",
+            "name": "Name",
+            "nameph": "name",
+            "username": "Username",
+            "password": "Password"
+        },
+        "status": {
+            "connected": "connected",
+            "not-connected": "not connected",
+            "disconnected": "disconnected",
+            "requesting": "requesting",
+            "unknown": "unknown"
         }
     },
     "inject": {
@@ -144,5 +153,125 @@
         "commentph": "comment",
         "commentnode": "Comment node",
         "commentinfo": "Use this node to add simple documentation.\n\nAnything you add will be rendered in this info panel.\n\nYou may use Markdown syntax to **enhance** the *presentation*."
+    },
+    "mqtt": {
+        "mqtt": "mqtt",
+        "label": {
+            "broker": "Broker",
+            "qos": "QoS",
+            "clientid": "Client ID",
+            "clientidph": "Leave blank for auto generated"
+        },
+        "retain": "Retain",
+        "true": "true",
+        "false": "false",
+        "tip": "Tip: Leave topic, qos or retain blank if you want to set them via msg properties.",
+        "port": "Port",
+        "portph": "port",
+        "errors": {
+            "not-defined": "topic not defined",
+            "missing-config": "missing broker configuration",
+            "invalid-topic": "Invalid topic specified"
+        }
+    },
+    "httpin": {
+        "httpin": "httpin",
+        "label": {
+            "method": "Method",
+            "url": "URL",
+            "urlph": "/url",
+            "httpph": "http://",
+            "doc": "Doc",
+            "return": "Return"
+        },
+        "setby": "- set by msg.method -",
+        "basicauth": "Use basic authentication ?",
+        "utf8": "a UTF-8 string",
+        "binary": "a binary buffer",
+        "json": "a parsed JSON object",
+        "in-tip": "The url will be relative to ",
+        "res-tip": "The messages sent to this node <b>must</b> originate from an <i>http input</i> node",
+        "req-tip": "Tip: If the JSON parse fails the fetched string is returned as-is.",
+        "httpreq": "http request",
+        "errors": {
+            "not-created": "Cannot create http-in node when httpNodeRoot set to false",
+            "no-response": "No response object",
+            "not-overridden": "Warning: msg properties can no longer override fixed node properties. Use explicit override option. See bit.ly/nr-override-msg-props",
+            "json-error": "JSON parse error",
+            "no-url": "No url specified"
+        }
+    },
+    "websocket": {
+        "websocket": "websocket",
+        "label": {
+            "type": "Type",
+            "path": "Path",
+            "url": "URL",
+            "pathph": "/ws/example",
+            "urlph": "ws://example.com/ws"
+        },
+        "listenon": "Listen on",
+        "connectto": "Connect to",
+        "payload": "Send/Receive payload",
+        "message": "Send/Receive entire message",
+        "path-tip1": "By default, <code>payload</code> will contain the data to be sent over, or received from a websocket. The listener can be configured to send or receive the entire message object as a JSON formatted string.",
+        "path-tip2": "This path will be relative to ",
+        "url-tip1": "URL should use ws:&#47;&#47; or wss:&#47;&#47; scheme and point to an existing websocket listener.",
+        "url-tip2": "By default, <code>payload</code> will contain the data to be sent over, or received from a websocket. The client can be configured to send or receive the entire message object as a JSON formatted string.",
+        "errors": {
+            "connect-error": "An error occured on the ws connection: ",
+            "send-error": "An error occurred while sending: ",
+            "missing-conf": "Missing server configuration"
+        }
+    },
+    "watch": {
+        "watch": "watch",
+        "label": {
+            "files": "File(s)",
+            "filesph": "File(s) or Directory"
+        },
+        "tip": "On Windows you must use double back-slashes \\\\ in any directory names."
+    },
+    "serial": {
+        "serial": "serial",
+        "label": {
+            "serialport": "Serial Port",
+            "serialportph": "/dev/ttyUSB0/",
+            "settings": "Settings",
+            "baudrate": "Baud Rate",
+            "databits": "Data Bits",
+            "parity": "Parity",
+            "stopbits": "Stop Bits",
+            "input": "Input",
+            "split": "Split input",
+            "deliver": "and deliver",
+            "output": "Output",
+            "serial": "serial",
+            "none": "none"
+        },
+        "none": "None",
+        "even": "Even",
+        "mark": "Mark",
+        "odd": "Odd",
+        "space": "Space",
+        "character": "on the character",
+        "timeout": "after a timeout of",
+        "length": "into fixed lengths of",
+        "ascii": "ascii strings",
+        "binary": "binary buffers",
+        "addsplit": "add split character to output messages",
+        "split-tip": "Tip: the \"Split on\" character is used to split the input into separate messages. It can also be added to every message sent out to the serial port.",
+        "timeout-tip": "Tip: In timeout mode timeout starts from arrival of first character.",
+        "errors": {
+            "missing-conf": "missing serial config",
+            "never-get": "should never get here",
+            "serial-port": "serial port",
+            "error": "error",
+            "unexpected-close": "closed unexpectedly",
+            "opened": "opened at",
+            "baud": "baud",
+            "gone-away": "gone away",
+            "closed": "closed"
+        }
     }
 }
