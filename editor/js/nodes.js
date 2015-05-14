@@ -136,7 +136,7 @@ RED.nodes = (function() {
 
     function addNode(n) {
         var ns;
-        if (n.type.indexOf("subflow") != 0) {
+        if (n.type.indexOf("subflow") !== 0) {
             if (n._def.set.module === "node-red") {
                 ns = "node-red";
             } else {
