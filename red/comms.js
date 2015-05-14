@@ -48,6 +48,7 @@ function start() {
             wsServer = new ws.Server({server:server,path:path});
             
             wsServer.on('connection',function(ws) {
+                log.audit({event: "comms.open"});
                 var pendingAuth = (settings.adminAuth != null);
                 if (!pendingAuth) {
                     activeConnections.push(ws);
@@ -55,6 +56,7 @@ function start() {
                     pendingConnections.push(ws);
                 }
                 ws.on('close',function() {
+                    log.audit({event: "comms.close",user:ws.user});
                     removeActiveConnection(ws);
                     removePendingConnection(ws);
                 });
@@ -88,19 +90,25 @@ function start() {
                                 if (client) {
                                     Users.get(client.user).then(function(user) {
                                         if (user) {
+                                            ws.user = user;
+                                            log.audit({event: "comms.auth",user:ws.user});
                                             completeConnection(client.scope,true);
                                         } else {
+                                            log.audit({event: "comms.auth.fail"});
                                             completeConnection(null,false);
                                         }
                                     });
                                 } else {
+                                    log.audit({event: "comms.auth.fail"});
                                     completeConnection(null,false);
                                 }
                             });
                         } else {
                             if (anonymousUser) {
+                                log.audit({event: "comms.auth",user:anonymousUser});
                                 completeConnection(anonymousUser.permissions,false);
                             } else {
+                                log.audit({event: "comms.auth.fail"});
                                 completeConnection(null,false);
                             }
                             //TODO: duplicated code - pull non-auth message handling out

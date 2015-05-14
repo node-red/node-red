@@ -26,6 +26,8 @@ var Users = require("./users");
 var Clients = require("./clients");
 var permissions = require("./permissions");
 
+var log = require("../../log");
+
 var bearerStrategy = function (accessToken, done) {
     // is this a valid token?
     Tokens.get(accessToken).then(function(token) {
@@ -34,10 +36,12 @@ var bearerStrategy = function (accessToken, done) {
                 if (user) {
                     done(null,user,{scope:token.scope});
                 } else {
+                    log.audit({event: "auth.invalid-token"});
                     done(null,false);
                 }
             });
         } else {
+            log.audit({event: "auth.invalid-token"});
             done(null,false);
         }
     });
@@ -49,6 +53,7 @@ var clientPasswordStrategy = function(clientId, clientSecret, done) {
         if (client && client.secret == clientSecret) {
             done(null,client);
         } else {
+            log.audit({event: "auth.invalid-client",client:clientId});
             done(null,false);
         }
     });
@@ -73,7 +78,7 @@ var passwordTokenExchange = function(client, username, password, scope, done) {
         }
     });
     if (attemptCount > 5) {
-        // TODO: audit log
+        log.audit({event: "auth.login.fail.too-many-attempts",username:username,client:client.id});
         done(new Error("Too many login attempts. Wait 10 minutes and try again"),false);
         return;
     }
@@ -85,14 +90,15 @@ var passwordTokenExchange = function(client, username, password, scope, done) {
                     return logEntry.user !== username;
                 });
                 Tokens.create(username,client.id,scope).then(function(tokens) {
-                    // TODO: audit log
+                    log.audit({event: "auth.login",username:username,client:client.id,scope:scope});
                     done(null,tokens.accessToken,null,{expires_in:tokens.expires_in});
                 });
             } else {
+                log.audit({event: "auth.login.fail.permissions",username:username,client:client.id,scope:scope});
                 done(null,false);
             }
         } else {
-            // TODO: audit log
+            log.audit({event: "auth.login.fail.credentials",username:username,client:client.id,scope:scope});
             done(null,false);
         }
     });

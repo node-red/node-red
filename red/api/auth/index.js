@@ -54,6 +54,7 @@ function needsPermission(permission) {
                 if (permissions.hasPermission(req.authInfo.scope,permission)) {
                     return next();
                 }
+                log.audit({event: "permission.fail"},req);
                 return res.send(401);
             });
         } else {
@@ -93,6 +94,7 @@ function revoke(req,res) {
     var token = req.body.token;
     // TODO: audit log
     Tokens.revoke(token).then(function() {
+        log.audit({event: "auth.login.revoke"},req);
         res.send(200);
     });
 }

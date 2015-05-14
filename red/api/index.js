@@ -67,7 +67,7 @@ function init(adminApp,storage) {
             auth.getToken,
             auth.errorHandler
         );
-        adminApp.post("/auth/revoke",auth.revoke);
+        adminApp.post("/auth/revoke",needsPermission(""),auth.revoke);
     }
 
     // Flows

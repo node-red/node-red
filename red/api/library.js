@@ -24,6 +24,7 @@ function createLibrary(type) {
         redApp.get(new RegExp("/library/"+type+"($|\/(.*))"),needsPermission("library.read"),function(req,res) {
             var path = req.params[1]||"";
             storage.getLibraryEntry(type,path).then(function(result) {
+                log.audit({event: "library.get",type:type},req);
                 if (typeof result === "string") {
                     res.writeHead(200, {'Content-Type': 'text/plain'});
                     res.write(result);
@@ -35,10 +36,12 @@ function createLibrary(type) {
                 if (err) {
                     log.warn("Error loading library entry '"+path+"' : "+err);
                     if (err.message.indexOf('forbidden') === 0) {
+                        log.audit({event: "library.get",type:type,error:"forbidden"},req);
                         res.send(403);
                         return;
                     }
                 }
+                log.audit({event: "library.get",type:type,error:"not_found"},req);
                 res.send(404);
             });
         });
@@ -50,13 +53,16 @@ function createLibrary(type) {
             delete meta.text;
             
             storage.saveLibraryEntry(type,path,meta,text).then(function() {
+                log.audit({event: "library.set",type:type},req);
                 res.send(204);
             }).otherwise(function(err) {
                 log.warn("Error saving library entry '"+path+"' : "+err);
                 if (err.message.indexOf('forbidden') === 0) {
+                    log.audit({event: "library.set",type:type,error:"forbidden"},req);
                     res.send(403);
                     return;
                 }
+                log.audit({event: "library.set",type:type,error:"unexpected_error",message:err.toString()},req);
                 res.json(500,{error:"unexpected_error", message:err.toString()});
             });
         });
@@ -70,36 +76,43 @@ module.exports = {
     
     getAll: function(req,res) {
         storage.getAllFlows().then(function(flows) {
+            log.audit({event: "library.get.all",type:"flow"},req);
             res.json(flows);
         });
     },
     get: function(req,res) {
         storage.getFlow(req.params[0]).then(function(data) {
             // data is already a JSON string
+            log.audit({event: "library.get",type:"flow",path:req.params[0]},req);
             res.set('Content-Type', 'application/json');
             res.send(data);
         }).otherwise(function(err) {
             if (err) {
                 log.warn("Error loading flow '"+req.params[0]+"' : "+err);
                 if (err.message.indexOf('forbidden') === 0) {
+                    log.audit({event: "library.get",type:"flow",path:req.params[0],error:"forbidden"},req);
                     res.send(403);
                     return;
                 }
             }
+            log.audit({event: "library.get",type:"flow",path:req.params[0],error:"not_found"},req);
             res.send(404);
         });
     },
     post: function(req,res) {
         var flow = JSON.stringify(req.body);
         storage.saveFlow(req.params[0],flow).then(function() {
+            log.audit({event: "library.set",type:"flow",path:req.params[0]},req);
             res.send(204);
         }).otherwise(function(err) {
             log.warn("Error loading flow '"+req.params[0]+"' : "+err);
             if (err.message.indexOf('forbidden') === 0) {
+                log.audit({event: "library.set",type:"flow",path:req.params[0],error:"forbidden"},req);
                 res.send(403);
                 return;
             }
-            res.send(500);
+            log.audit({event: "library.set",type:"flow",path:req.params[0],error:"unexpected_error",message:err.toString()},req);
+            res.send(500,{error:"unexpected_error", message:err.toString()});
         });
     }
 }

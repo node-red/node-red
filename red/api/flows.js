@@ -24,11 +24,13 @@ var settings = require("../settings");
 
 module.exports = {
     get: function(req,res) {
+        log.audit({event: "flows.get"},req);
         res.json(redNodes.getFlows());
     },
     post: function(req,res) {
         var flows = req.body;
         var deploymentType = req.get("Node-RED-Deployment-Type")||"full";
+        log.audit({event: "flows.set",type:deploymentType},req);
         redNodes.setFlows(flows,deploymentType).then(function() {
             res.send(204);
         }).otherwise(function(err) {

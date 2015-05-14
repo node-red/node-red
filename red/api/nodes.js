@@ -29,14 +29,17 @@ var settings = require("../settings");
 module.exports = {
     getAll: function(req,res) {
         if (req.get("accept") == "application/json") {
+            log.audit({event: "nodes.list.get"},req);
             res.json(redNodes.getNodeList());
         } else {
+            log.audit({event: "nodes.configs.get"},req);
             res.send(redNodes.getNodeConfigs());
         }
     },
 
     post: function(req,res) {
         if (!settings.available()) {
+            log.audit({event: "nodes.install",error:"settings_unavailable"},req);
             res.json(400,{error:"settings_unavailable", message:"Settings unavailable"});
             return;
         }
@@ -45,20 +48,25 @@ module.exports = {
         if (node.module) {
             var module = redNodes.getModuleInfo(node.module);
             if (module) {
+                log.audit({event: "nodes.install",module:node.module,error:"module_already_loaded"},req);
                 res.json(400,{error:"module_already_loaded", message:"Module already loaded"});
                 return;
             }
             promise = server.installModule(node.module);
         } else {
+            log.audit({event: "nodes.install",module:node.module,error:"invalid_request"},req);
             res.json(400,{error:"invalid_request", message:"Invalid request"});
             return;
         }
         promise.then(function(info) {
+            log.audit({event: "nodes.install",module:node.module},req);
             res.json(redNodes.getModuleInfo(node.module));
         }).otherwise(function(err) {
             if (err.code === 404) {
+                log.audit({event: "nodes.install",module:node.module,error:"not_found"},req);
                 res.send(404);
             } else {
+                log.audit({event: "nodes.install",module:node.module,error:err.code||"unexpected_error",message:err.toString()},req);
                 res.json(400,{error:err.code||"unexpected_error", message:err.toString()});
             }
         });
@@ -66,6 +74,7 @@ module.exports = {
 
     delete: function(req,res) {
         if (!settings.available()) {
+            log.audit({event: "nodes.remove",error:"settings_unavailable"},req);
             res.json(400,{error:"settings_unavailable", message:"Settings unavailable"});
             return;
         }
@@ -74,6 +83,7 @@ module.exports = {
             var promise = null;
             var module = redNodes.getModuleInfo(mod);
             if (!module) {
+                log.audit({event: "nodes.remove",module:mod,error:"not_found"},req);
                 res.send(404);
                 return;
             } else {
@@ -81,11 +91,14 @@ module.exports = {
             }
 
             promise.then(function() {
+                log.audit({event: "nodes.remove",module:mod},req);
                 res.send(204);
             }).otherwise(function(err) {
+                log.audit({event: "nodes.remove",module:mod,error:err.code||"unexpected_error",message:err.toString()},req);
                 res.json(400,{error:err.code||"unexpected_error", message:err.toString()});
             });
         } catch(err) {
+            log.audit({event: "nodes.remove",module:mod,error:err.code||"unexpected_error",message:err.toString()},req);
             res.json(400,{error:err.code||"unexpected_error", message:err.toString()});
         }
     },
@@ -96,15 +109,22 @@ module.exports = {
         if (req.get("accept") === "application/json") {
             result = redNodes.getNodeInfo(id);
             if (result) {
+                log.audit({event: "nodes.info.get",id:id},req);
                 delete result.loaded;
+                res.send(result);
+            } else {
+                log.audit({event: "nodes.info.get",id:id,error:"not_found"},req);
+                res.send(404);
             }
         } else {
             result = redNodes.getNodeConfig(id);
-        }
-        if (result) {
-            res.send(result);
-        } else {
-            res.send(404);
+            if (result) {
+                log.audit({event: "nodes.config.get",id:id},req);
+                res.send(result);
+            } else {
+                log.audit({event: "nodes.config.get",id:id,error:"not_found"},req);
+                res.send(404);
+            }
         }
     },
 
@@ -112,19 +132,23 @@ module.exports = {
         var module = req.params.mod;
         var result = redNodes.getModuleInfo(module);
         if (result) {
+            log.audit({event: "nodes.module.get",module:module},req);
             res.json(result);
         } else {
+            log.audit({event: "nodes.module.get",module:module,error:"not_found"},req);
             res.send(404);
         }
     },
 
     putSet: function(req,res) {
         if (!settings.available()) {
+            log.audit({event: "nodes.info.set",error:"settings_unavailable"},req);
             res.json(400,{error:"settings_unavailable", message:"Settings unavailable"});
             return;
         }
         var body = req.body;
         if (!body.hasOwnProperty("enabled")) {
+            log.audit({event: "nodes.info.set",error:"invalid_request"},req);
             res.json(400,{error:"invalid_request", message:"Invalid request"});
             return;
         }
@@ -133,23 +157,29 @@ module.exports = {
             var node = redNodes.getNodeInfo(id);
             var info;
             if (!node) {
+                log.audit({event: "nodes.info.set",id:id,error:"not_found"},req);
                 res.send(404);
             } else {
                 delete node.loaded;
-                res.json(putNode(node, body.enabled));
+                var result = putNode(node, body.enabled);
+                log.audit({event: "nodes.info.set",id:id,enabled:body.enabled},req);
+                res.json(result);
             }
         } catch(err) {
+            log.audit({event: "nodes.info.set",id:id,enabled:body.enabled,error:err.code||"unexpected_error",message:err.toString()},req);
             res.json(400,{error:err.code||"unexpected_error", message:err.toString()});
         }
     },
 
     putModule: function(req,res) {
         if (!settings.available()) {
+            log.audit({event: "nodes.module.set",error:"settings_unavailable"},req);
             res.json(400,{error:"settings_unavailable", message:"Settings unavailable"});
             return;
         }
         var body = req.body;
         if (!body.hasOwnProperty("enabled")) {
+            log.audit({event: "nodes.module.set",error:"invalid_request"},req);
             res.json(400,{error:"invalid_request", message:"Invalid request"});
             return;
         }
@@ -157,6 +187,7 @@ module.exports = {
             var mod = req.params.mod;
             var module = redNodes.getModuleInfo(mod);
             if (!module) {
+                log.audit({event: "nodes.module.set",module:mod,error:"not_found"},req);
                 return res.send(404);
             }
 
@@ -184,6 +215,7 @@ module.exports = {
             }
             res.json(redNodes.getModuleInfo(mod));
         } catch(err) {
+            log.audit({event: "nodes.module.set",module:mod,enabled:body.enabled,error:err.code||"unexpected_error",message:err.toString()},req);
             res.json(400,{error:err.code||"unexpected_error", message:err.toString()});
         }
     }
