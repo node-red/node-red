@@ -52,19 +52,6 @@
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
     <div class="form-tips"><span data-i18n="udp.in-tip"></span></div>
-    <script>
-        $("#node-input-multicast").change(function() {
-            var id = $("#node-input-multicast option:selected").val();
-            if (id == "false") {
-                $(".node-input-group").hide();
-                $(".node-input-iface").hide();
-            }
-            else {
-                $(".node-input-group").show();
-                $(".node-input-iface").show();
-            }
-        });
-    </script>
 </script>
 
 <script type="text/x-red" data-help-name="udp in">
@@ -97,6 +84,20 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            $("#node-input-multicast").change(function() {
+                var id = $("#node-input-multicast option:selected").val();
+                if (id == "false") {
+                    $(".node-input-group").hide();
+                    $(".node-input-iface").hide();
+                }
+                else {
+                    $(".node-input-group").show();
+                    $(".node-input-iface").show();
+                }
+            });
+            $("#node-input-multicast").change();
         }
     });
 </script>
@@ -128,7 +129,7 @@
     <div class="form-row">
         <label for="node-input-outport-type">&nbsp;</label>
         <select id="node-input-outport-type">
-          <option id="node-input-outport-type-random" value="random" data-i18n="udp.userandom"></option>
+          <option id="node-input-outport-type-random" value="random" data-i18n="udp.bindrandom"></option>
           <option value="fixed" data-i18n="udp.bindlocal"></option>
         </select>
         <input type="text" id="node-input-outport"  style="width: 70px;" data-i18n="[placeholder]udp.label.outportph">
@@ -143,27 +144,6 @@
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
     <div class="form-tips"><span data-i18n="[html]udp.out-tip"></span></div>
-    <script>
-        $("#node-input-multicast").change(function() {
-            var id = $("#node-input-multicast option:selected").val();
-            if (id !== "multi") {
-                $(".node-input-iface").hide();
-                //$("#node-input-addr-label").html('<i class="fa fa-list"></i> '+this._("udp.label.address"));
-                $("#node-input-addr-label").html('<i class="fa fa-list"></i> Address');
-                //$("#node-input-addr")[0].placeholder = this._("udp.label.addressph");
-                $("#node-input-addr")[0].placeholder = "destination ip";
-            }
-            else {
-                $(".node-input-iface").show();
-                //$("#node-input-addr-label").html('<i class="fa fa-list"></i> '+this._("udp.label.group"));
-                $("#node-input-addr-label").html('<i class="fa fa-list"></i> Group');
-                $("#node-input-addr")[0].placeholder = '225.0.18.83';
-            }
-            if (id === "broad") {
-                $("#node-input-addr")[0].placeholder = '255.255.255.255';
-            }
-        });
-    </script>
 </script>
 
 <script type="text/x-red" data-help-name="udp out">
@@ -198,6 +178,12 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+            var addresslabel = this._("udp.label.address");
+            var addressph = this._("udp.label.addressph");
+            var grouplabel = this._("udp.label.group");
+            var bindrandom = this._("udp.bindrandom");
+            var bindtarget = this._("udp.bindtarget");
+
             var type = this.outport==""?"random":"fixed";
             $("#node-input-outport-type option").filter(function() {
                 return $(this).val() == type;
@@ -211,17 +197,30 @@
                     $("#node-input-outport").show();
                 }
             });
-
             $("#node-input-outport-type").change();
 
             $("#node-input-multicast").change(function() {
+                var id = $("#node-input-multicast option:selected").val();
+                if (id === "multi") {
+                    $(".node-input-iface").show();
+                    $("#node-input-addr-label").html('<i class="fa fa-list"></i> ' + grouplabel);
+                    $("#node-input-addr")[0].placeholder = '225.0.18.83';
+                }
+                else if (id === "broad") {
+                    $(".node-input-iface").hide();
+                    $("#node-input-addr-label").html('<i class="fa fa-list"></i> ' + addresslabel);
+                    $("#node-input-addr")[0].placeholder = '255.255.255.255';
+                }
+                else {
+                    $(".node-input-iface").hide();
+                    $("#node-input-addr-label").html('<i class="fa fa-list"></i> ' + addresslabel);
+                    $("#node-input-addr")[0].placeholder = addressph;
+                }
                 var type = $(this).children("option:selected").val();
                 if (type == "false") {
-                    //$("#node-input-outport-type-random").html(message);
-                    $("#node-input-outport-type-random").html("bind to random local port");
+                    $("#node-input-outport-type-random").html(bindrandom);
                 } else {
-                    //$("#node-input-outport-type-random").html(this._("udp.bindtarget"));
-                    $("#node-input-outport-type-random").html("bind to target port");
+                    $("#node-input-outport-type-random").html(bindtarget);
                 }
             });
             $("#node-input-multicast").change();
