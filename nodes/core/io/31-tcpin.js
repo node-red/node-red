@@ -43,14 +43,14 @@ module.exports = function(RED) {
             var reconnectTimeout;
             var end = false;
             var setupTcpClient = function() {
-                node.log("connecting to "+node.host+":"+node.port);
-                node.status({fill:"grey",shape:"dot",text:"connecting"});
+                node.log(RED._("tcpin.errors.connecting-to")+" "+node.host+":"+node.port);
+                node.status({fill:"grey",shape:"dot",text:RED._("common.status.connecting")});
                 var id = (1+Math.random()*4294967295).toString(16);
                 client = net.connect(node.port, node.host, function() {
                     buffer = (node.datatype == 'buffer')? new Buffer(0):"";
                     node.connected = true;
-                    node.log("connected to "+node.host+":"+node.port);
-                    node.status({fill:"green",shape:"dot",text:"connected"});
+                    node.log(RED._("tcpin.errors.connected-to")+" "+node.host+":"+node.port);
+                    node.status({fill:"green",shape:"dot",text:RED._("common.status.connected")});
                 });
                 connectionPool[id] = client;
 
@@ -96,14 +96,14 @@ module.exports = function(RED) {
                 client.on('close', function() {
                     delete connectionPool[id];
                     node.connected = false;
-                    node.status({fill:"red",shape:"ring",text:"disconnected"});
+                    node.status({fill:"red",shape:"ring",text:RED._("common.status.disconnected")});
                     if (!node.closing) {
                         if (end) { // if we were asked to close then try to reconnect once very quick.
                             end = false;
                             reconnectTimeout = setTimeout(setupTcpClient, 20);
                         }
                         else {
-                            node.log("connection lost to "+node.host+":"+node.port);
+                            node.log(RED._("tcpin.errors.connection-lost")+" "+node.host+":"+node.port);
                             reconnectTimeout = setTimeout(setupTcpClient, reconnectTime);
                         }
                     } else {
@@ -128,7 +128,7 @@ module.exports = function(RED) {
                 if (socketTimeout !== null) { socket.setTimeout(socketTimeout); }
                 var id = (1+Math.random()*4294967295).toString(16);
                 connectionPool[id] = socket;
-                node.status({text:++count+" connections"});
+                node.status({text:++count+" "+RED._("common.status.connections")});
 
                 var buffer = (node.datatype == 'buffer')? new Buffer(0):"";
                 socket.on('data', function (data) {
@@ -170,12 +170,12 @@ module.exports = function(RED) {
                     }
                 });
                 socket.on('timeout', function() {
-                    node.log('timeout closed socket port '+node.port);
+                    node.log(RED._("tcpin.errors.timeout")+' '+node.port);
                     socket.end();
                 });
                 socket.on('close', function() {
                     delete connectionPool[id];
-                    node.status({text:--count+" connections"});
+                    node.status({text:--count+" "+RED._("common.status.connections")});
                 });
                 socket.on('error',function(err) {
                     node.log(err);
@@ -183,15 +183,15 @@ module.exports = function(RED) {
             });
             server.on('error', function(err) {
                 if (err) {
-                    node.error('unable to listen on port '+node.port+' : '+err);
+                    node.error(RED._("tcpin.errors.cannot-listen")+' '+node.port+' : '+err);
                 }
             });
 
             server.listen(node.port, function(err) {
                 if (err) {
-                    node.error('unable to listen on port '+node.port+' : '+err);
+                    node.error(RED._("tcpin.errors.cannot-listen")+' '+node.port+' : '+err);
                 } else {
-                    node.log('listening on port '+node.port);
+                    node.log(RED._("tcpin.errors.listening-port")+' '+node.port);
                     node.on('close', function() {
                         for (var c in connectionPool) {
                             if (connectionPool.hasOwnProperty(c)) {
@@ -201,7 +201,7 @@ module.exports = function(RED) {
                         }
                         node.closing = true;
                         server.close();
-                        node.log('stopped listening on port '+node.port);
+                        node.log(RED._("tcpin.errors.stopped-listening")+' '+node.port);
                     });
                 }
             });
@@ -228,20 +228,20 @@ module.exports = function(RED) {
             var end = false;
 
             var setupTcpClient = function() {
-                node.log("connecting to "+node.host+":"+node.port);
-                node.status({fill:"grey",shape:"dot",text:"connecting"});
+                node.log(RED._("tcpin.errors.connecting-to")+" "+node.host+":"+node.port);
+                node.status({fill:"grey",shape:"dot",text:RED._("common.status.connecting")});
                 client = net.connect(node.port, node.host, function() {
                     node.connected = true;
-                    node.log("connected to "+node.host+":"+node.port);
-                    node.status({fill:"green",shape:"dot",text:"connected"});
+                    node.log(RED._("tcpin.errors.connected-to")+" "+node.host+":"+node.port);
+                    node.status({fill:"green",shape:"dot",text:RED._("common.status.connected")});
                 });
                 client.on('error', function (err) {
-                    node.log(err);
+                    node.log(RED._("tcpin.errors.error")+' : '+err);
                 });
                 client.on('end', function (err) {
                 });
                 client.on('close', function() {
-                    node.status({fill:"red",shape:"ring",text:"disconnected"});
+                    node.status({fill:"red",shape:"ring",text:RED._("common.status.disconnected")});
                     node.connected = false;
                     client.destroy();
                     if (!node.closing) {
@@ -250,7 +250,7 @@ module.exports = function(RED) {
                             reconnectTimeout = setTimeout(setupTcpClient,20);
                         }
                         else {
-                            node.log("connection lost to "+node.host+":"+node.port);
+                            node.log(RED._("tcpin.errors.connection-lost")+" "+node.host+":"+node.port);
                             reconnectTimeout = setTimeout(setupTcpClient,reconnectTime);
                         }
                     } else {
@@ -301,26 +301,26 @@ module.exports = function(RED) {
             });
         } else {
             var connectedSockets = [];
-            node.status({text:"0 connections"});
+            node.status({text:"0 "+RED._("common.status.connections")});
             var server = net.createServer(function (socket) {
                 if (socketTimeout !== null) { socket.setTimeout(socketTimeout); }
                 var remoteDetails = socket.remoteAddress+":"+socket.remotePort;
-                node.log("connection from "+remoteDetails);
+                node.log(RED._("tcpin.errors.connection-from")+" "+remoteDetails);
                 connectedSockets.push(socket);
-                node.status({text:connectedSockets.length+" connections"});
+                node.status({text:connectedSockets.length+" "+RED._("common.status.connections")});
                 socket.on('timeout', function() {
-                    node.log('timeout closed socket port '+node.port);
+                    node.log(RED._("tcpin.errors.timeout")+' '+node.port);
                     socket.end();
                 });
                 socket.on('close',function() {
-                    node.log("connection closed from "+remoteDetails);
+                    node.log(RED._("tcpin.errors.connection-closed")+" "+remoteDetails);
                     connectedSockets.splice(connectedSockets.indexOf(socket),1);
-                    node.status({text:connectedSockets.length+" connections"});
+                    node.status({text:connectedSockets.length+" "+RED._("common.status.connections")});
                 });
                 socket.on('error',function() {
-                    node.log("socket error from "+remoteDetails);
+                    node.log(RED._("tcpin.errors.socket-error")+" "+remoteDetails);
                     connectedSockets.splice(connectedSockets.indexOf(socket),1);
-                    node.status({text:connectedSockets.length+" connections"});
+                    node.status({text:connectedSockets.length+" "+RED._("common.status.connections")});
                 });
             });
 
@@ -343,15 +343,15 @@ module.exports = function(RED) {
 
             server.on('error', function(err) {
                 if (err) {
-                    node.error('unable to listen on port '+node.port+' : '+err);
+                    node.error(RED._("tcpin.errors.cannot-listen")+' '+node.port+' : '+err);
                 }
             });
 
             server.listen(node.port, function(err) {
                 if (err) {
-                    node.error('unable to listen on port '+node.port+' : '+err);
+                    node.error(RED._("tcpin.errors.cannot-listen")+' '+node.port+' : '+err);
                 } else {
-                    node.log('listening on port '+node.port);
+                    node.log(RED._("tcpin.errors.listening-port")+' '+node.port);
                     node.on('close', function() {
                         for (var c in connectedSockets) {
                             if (connectedSockets.hasOwnProperty(c)) {
@@ -360,7 +360,7 @@ module.exports = function(RED) {
                             }
                         }
                         server.close();
-                        node.log('stopped listening on port '+node.port);
+                        node.log(RED._("tcpin.errors.stopped-listening")+' '+node.port);
                     });
                 }
             });
@@ -401,18 +401,17 @@ module.exports = function(RED) {
 
                 if (host && port) {
                     client.connect(port, host, function() {
-                        //node.log('client connected');
-                        node.status({fill:"green",shape:"dot",text:"connected"});
+                        //node.log(RED._("tcpin.errors.client-connected"));
+                        node.status({fill:"green",shape:"dot",text:RED._("common.status.connected")});
                         node.connected = true;
                         client.write(msg.payload);
                     });
                 }
                 else {
-                    node.warn("Host and/or port not set");
+                    node.warn(RED._("tcpin.errors.no-host"));
                 }
 
                 client.on('data', function(data) {
-                    //node.log("data:"+ data.length+":"+ data);
                     if (node.out == "sit") { // if we are staying connected just send the buffer
                         node.send({"payload": data});
                     }
@@ -477,18 +476,17 @@ module.exports = function(RED) {
                 });
 
                 client.on('error', function() {
-                    node.error('connect failed',msg);
-                    node.status({fill:"red",shape:"ring",text:"error"});
+                    node.error(RED._("tcpin.errors.connect-fail"),msg);
+                    node.status({fill:"red",shape:"ring",text:RED._("common.status.error")});
                     if (client) { client.end(); }
                 });
 
                 client.on('timeout',function() {
-                    node.warn('connect timeout');
+                    node.warn(RED._("tcpin.errors.timeout"));
                     if (client) {
                         client.end();
                         setTimeout(function() {
                             client.connect(port, host, function() {
-                                //node.log('client connected');
                                 node.connected = true;
                                 client.write(msg.payload);
                             });
