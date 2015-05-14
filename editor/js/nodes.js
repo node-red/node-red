@@ -136,17 +136,19 @@ RED.nodes = (function() {
 
     function addNode(n) {
         var ns;
-        if (n._def.set.module === "node-red") {
-            ns = "node-red";
-        } else {
-            ns = n._def.set.id;
-        }
-        n["_"] = function() {
-            var args = Array.prototype.slice.call(arguments, 0);
-            if (args[0].indexOf(":") === -1) {
-                args[0] = ns+":"+args[0];
+        if (n.type.indexOf("subflow") != 0) {
+            if (n._def.set.module === "node-red") {
+                ns = "node-red";
+            } else {
+                ns = n._def.set.id;
             }
-            return RED._.apply(null,args);
+            n["_"] = function() {
+                var args = Array.prototype.slice.call(arguments, 0);
+                if (args[0].indexOf(":") === -1) {
+                    args[0] = ns+":"+args[0];
+                }
+                return RED._.apply(null,args);
+            }
         }
         if (n._def.category == "config") {
             configNodes[n.id] = n;
