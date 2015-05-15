@@ -163,7 +163,7 @@ module.exports = function(RED) {
                     }
                     catch(e) { node.error(e,msg); }
                 }
-                else { node.warn("This node only handles csv strings or js objects."); }
+                else { node.warn(RED._("csv.errors.csv_js")); }
             }
             else { node.send(msg); } // If no payload - just pass it on.
         });

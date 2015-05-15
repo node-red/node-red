@@ -403,5 +403,69 @@
         "errors": {
             "invalid-from": "Invalid 'from' property:"
         }
+    },
+    "range": {
+        "range": "range",
+        "label": {
+            "action": "Action",
+            "inputrange": "Map the input range",
+            "resultrange": "to the result range",
+            "from": "from",
+            "to": "to",
+            "eg0ph": "e.g. 0",
+            "eg99ph": "e.g. 99",
+            "eg255ph": "e.g. 255",
+            "roundresult": "Round result to the nearest integer?",
+            "rangelabel": "range"
+        },
+        "scale-payload": "Scale msg.payload",
+        "scale-limit": "Scale and limit to the target range",
+        "scale-wrap": "Scale and wrap within the target range",
+        "tip": "Tip: This node ONLY works with numbers.",
+        "errors": {
+            "notnumber": "Not a number"
+        }
+    },
+    "csv": {
+        "csv": "csv",
+        "label": {
+            "columns": "Columns",
+            "columnsph": "comma-separated column names",
+            "separator": "Separator",
+            "c2o": "CSV-to-Object options",
+            "o2c": "Object-to-CSV options",
+            "input": "Input",
+            "firstrow": "first row contains column names",
+            "output": "Output",
+            "includerow": "include column name row",
+            "newline": "Newline"
+        },
+        "comma": "comma",
+        "tab": "tab",
+        "space": "space",
+        "semicolon": "semicolon",
+        "colon": "colon",
+        "hashtag": "hashtag",
+        "other": "other...",
+        "row": "a message per row",
+        "array": "a single message [array]",
+        "linux": "Linux (\\n)",
+        "mac": "Mac (\\r)",
+        "windows": "Windows (\\r\\n)",
+        "errors": {
+            "csv_js": "This node only handles csv strings or js objects."
+        }
+    },
+    "html": {
+        "html": "html",
+        "label": {
+            "select": "Select",
+            "output": "Output"
+        },
+        "htmlcontent": "the html content of the elements",
+        "textcontent": "only the text content of the elements",
+        "single": "as a single message containing an array",
+        "multi": "as multiple messages, one for each element",
+        "tip": "Tip: The <b>Select</b> value is a <a href=\"https://github.com/fb55/CSSselect#user-content-supported-selectors\" target=\"_new\"><i><u>CSS Selector</u></i></a>, similar to a jQuery selector."
     }
 }

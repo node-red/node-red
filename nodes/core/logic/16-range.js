@@ -42,7 +42,7 @@ module.exports = function(RED) {
                     if (node.round) { msg.payload = Math.round(msg.payload); }
                     node.send(msg);
                 }
-                else { node.log("Not a number: "+msg.payload); }
+                else { node.log(RED._("range.errors.notnumber")+": "+msg.payload); }
             }
             else { node.send(msg); } // If no payload - just pass it on.
         });
