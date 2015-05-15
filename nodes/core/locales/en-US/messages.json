@@ -467,5 +467,23 @@
         "single": "as a single message containing an array",
         "multi": "as multiple messages, one for each element",
         "tip": "Tip: The <b>Select</b> value is a <a href=\"https://github.com/fb55/CSSselect#user-content-supported-selectors\" target=\"_new\"><i><u>CSS Selector</u></i></a>, similar to a jQuery selector."
+    },
+    "json": {
+        "json": "json",
+        "errors": {
+            "dropped": "Dropped"
+        }
+    },
+    "xml": {
+        "xml": "xml",
+        "label": {
+            "represent": "Represent XML tag attributes as a property named",
+            "prefix": "Prefix to access character content",
+            "advanced": "Advanced options"
+        },
+        "tip": "There is no simple way to convert XML attributes to JSON so the approach taken here is to add a property, named $ by default, to the JSON structure.",
+        "errors": {
+            "xml_js": "This node only handles xml strings or js objects."
+        }
     }
 }
