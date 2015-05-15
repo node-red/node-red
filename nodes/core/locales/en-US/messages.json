@@ -377,5 +377,31 @@
             "interface": "Must be ip address of the required interface",
             "error": "Error"
         }
+    },
+    "switch": {
+        "switch": "switch",
+        "label": {
+            "rule": "rule",
+            "switchlabel": "switch"
+        },
+        "checkall": "checking all rules",
+        "stopfirst": "stopping after first match"
+    },
+    "change": {
+        "change": "change",
+        "label": {
+            "rules": "Rules",
+            "rule": "rule"
+        },
+        "set": "Set",
+        "change": "Change",
+        "delete": "Delete",
+        "to": "to",
+        "search": "Search for",
+        "replace": "Replace with",
+        "regex": "Use regular expressions",
+        "errors": {
+            "invalid-from": "Invalid 'from' property:"
+        }
     }
 }

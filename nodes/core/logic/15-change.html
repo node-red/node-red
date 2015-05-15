@@ -16,11 +16,11 @@
 
 <script type="text/x-red" data-template-name="change">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
     <div class="form-row" style="margin-bottom:0;">
-        <label><i class="fa fa-list"></i> Rules</label>
+        <label><i class="fa fa-list"></i> <span data-i18n="change.label.rules"></span></label>
     </div>
     <div class="form-row node-input-rule-container-row" style="margin-bottom: 0px;">
         <div id="node-input-rule-container-div" style="box-sizing: border-box; border-radius: 5px; height: 300px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
@@ -28,7 +28,7 @@
         </div>
     </div>
     <div class="form-row">
-        <a href="#" class="btn btn-mini" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> rule</a>
+        <a href="#" class="btn btn-mini" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="change.label.rule"></span></a>
     </div>
 </script>
 
@@ -92,6 +92,13 @@
             return this.name ? "node_label_italic" : "";
         },
         oneditprepare: function() {
+            var set = this._("change.set");
+            var change = this._("change.change");
+            var del = this._("change.delete");
+            var to = this._("change.to");
+            var search = this._("change.search");
+            var replace = this._("change.replace");
+            var regex = this._("change.regex");
             if (this.reg === null) { $("#node-input-reg").prop('checked', true); }
             $("#node-input-action").change();
             
@@ -104,7 +111,7 @@
                 var row3 = $('<div/>',{style:"margin-top:8px;"}).appendTo(container);
 
                 var selectField = $('<select/>',{class:"node-input-rule-type",style:"width: 100px"}).appendTo(row1);
-                var selectOptions = [{v:"set",l:"Set"},{v:"change",l:"Change"},{v:"delete",l:"Delete"}];
+                var selectOptions = [{v:"set",l:set},{v:"change",l:change},{v:"delete",l:del}];
                 for (var i=0;i<3;i++) {
                     selectField.append($("<option></option>").val(selectOptions[i].v).text(selectOptions[i].l));
                 }
@@ -118,21 +125,21 @@
                 $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
 
                 
-                $('<div/>',{style:"display: inline-block;text-align:right; width:150px;padding-right: 10px; box-sizing: border-box;"}).text("to").appendTo(row2);
+                $('<div/>',{style:"display: inline-block;text-align:right; width:150px;padding-right: 10px; box-sizing: border-box;"}).text(to).appendTo(row2);
                 var propertyValue = $('<input/>',{style:"width: 220px",class:"node-input-rule-property-value",type:"text"}).appendTo(row2);
                 
                 var row3_1 = $('<div/>').appendTo(row3);
-                $('<div/>',{style:"display: inline-block;text-align:right; width:150px;padding-right: 10px; box-sizing: border-box;"}).text("Search for").appendTo(row3_1);
+                $('<div/>',{style:"display: inline-block;text-align:right; width:150px;padding-right: 10px; box-sizing: border-box;"}).text(search).appendTo(row3_1);
                 var fromValue = $('<input/>',{style:"width: 220px",class:"node-input-rule-property-search-value",type:"text"}).appendTo(row3_1);
                 
                 var row3_2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(row3);
-                $('<div/>',{style:"display: inline-block;text-align:right; width:150px;padding-right: 10px; box-sizing: border-box;"}).text("replace with").appendTo(row3_2);
+                $('<div/>',{style:"display: inline-block;text-align:right; width:150px;padding-right: 10px; box-sizing: border-box;"}).text(replace).appendTo(row3_2);
                 var toValue = $('<input/>',{style:"width: 220px",class:"node-input-rule-property-replace-value",type:"text"}).appendTo(row3_2);
                 
                 var row3_3 = $('<div/>',{style:"margin-top:8px;"}).appendTo(row3);
                 var id = "node-input-rule-property-regex-"+Math.floor(Math.random()*10000);
                 var useRegExp = $('<input/>',{id:id,class:"node-input-rule-property-re",type:"checkbox", style:"margin-left: 150px; margin-right: 10px; display: inline-block; width: auto; vertical-align: top;"}).appendTo(row3_3);
-                $('<label/>',{for:id,style:"width: auto;"}).text("Use regular expressions").appendTo(row3_3);
+                $('<label/>',{for:id,style:"width: auto;"}).text(regex).appendTo(row3_3);
                 
 
                 selectField.change(function() {
