@@ -15,25 +15,25 @@
 -->
 <script type="text/x-red" data-template-name="arduino in">
     <div class="form-row">
-        <label for="node-input-arduino"><i class="fa fa-tasks"></i> Arduino</label>
+        <label for="node-input-arduino"><i class="fa fa-tasks"></i> <span data-i18n="arduino.label.arduino"></span></label>
         <input type="text" id="node-input-arduino">
     </div>
     <div class="form-row">
-        <label for="node-input-pin"><i class="fa fa-circle"></i> Pin</label>
+        <label for="node-input-pin"><i class="fa fa-circle"></i> <span data-i18n="arduino.label.pin"></span></label>
         <input type="text" id="node-input-pin" placeholder="2">
     </div>
     <div class="form-row">
-        <label for="node-input-state"><i class="fa fa-wrench"></i> Type</label>
+        <label for="node-input-state"><i class="fa fa-wrench"></i> <span data-i18n="arduino.label.type"></span></label>
         <select type="text" id="node-input-state" style="width: 150px;">
-            <option value="INPUT">Digital pin</option>
-            <option value="ANALOG">Analogue pin</option>
+            <option value="INPUT" data-i18n="arduino.digitalpin"></option>
+            <option value="ANALOG" data-i18n="arduino.analoguepin"></option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
-    <div class="form-tips"><b>Note:</b> You cannot use the same pin for both output and input.</div>
+    <div class="form-tips"><span data-i18n="[html]arduino.io-tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="arduino in">
@@ -70,26 +70,26 @@
 
 <script type="text/x-red" data-template-name="arduino out">
     <div class="form-row">
-        <label for="node-input-arduino"><i class="fa fa-tasks"></i> Arduino</label>
+        <label for="node-input-arduino"><i class="fa fa-tasks"></i> <span data-i18n="arduino.label.arduino"></span></label>
         <input type="text" id="node-input-arduino">
     </div>
     <div class="form-row">
-        <label for="node-input-pin"><i class="fa fa-circle"></i> Pin</label>
+        <label for="node-input-pin"><i class="fa fa-circle"></i> <span data-i18n="arduino.label.pin"></span></label>
         <input type="text" id="node-input-pin" placeholder="13">
     </div>
     <div class="form-row">
-        <label for="node-input-state"><i class="fa fa-wrench"></i> Type</label>
+        <label for="node-input-state"><i class="fa fa-wrench"></i> <span data-i18n="arduino.label.type"></span></label>
         <select type="text" id="node-input-state" style="width: 200px;">
-            <option value="OUTPUT">Digital (0/1)</option>
-            <option value="PWM">Analogue (0-255)</option>
-            <option value="SERVO">Servo (0-180)</option>
+            <option value="OUTPUT" data-i18n="arduino.digital"></option>
+            <option value="PWM" data-i18n="arduino.analogue"></option>
+            <option value="SERVO" data-i18n="arduino.servo"></option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
-    <div class="form-tips"><b>Note:</b> You cannot use the same pin for both output and input.</div>
+    <div class="form-tips"><span data-i18n="[html]arduino.io-tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="arduino out">
@@ -124,11 +124,11 @@
 
 <script type="text/x-red" data-template-name="arduino-board">
     <div class="form-row">
-        <label for="node-config-input-device"><i class="fa fa-random"></i> Port</label>
-        <input type="text" id="node-config-input-device" style="width:60%;" placeholder="e.g. /dev/ttyUSB0  COM1"/>
+        <label for="node-config-input-device"><i class="fa fa-random"></i> <span data-i18n="arduino.label.port"></span></label>
+        <input type="text" id="node-config-input-device" style="width:60%;" data-i18n="[placeholder]arduino.label.portph"/>
         <a id="node-config-lookup-serial" class="btn"><i id="node-config-lookup-serial-icon" class="fa fa-search"></i></a>
     </div>
-    <div class="form-tips"><b>Tip:</b> Use search to try to auto-detect serial port.</div>
+    <div class="form-tips"><span data-i18n="[html]arduino.conf-tip"></span></div>
 </script>
 
 <script type="text/javascript">
