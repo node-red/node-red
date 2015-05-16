@@ -17,7 +17,12 @@
             "connections": "connections",
             "requesting": "requesting",
             "unknown": "unknown",
-            "error": "error"
+            "error": "error",
+            "ok": "OK",
+            "closed": "closed",
+            "stopped": "stopped",
+            "close": "close",
+            "not-running": "not running"
         }
     },
     "inject": {
@@ -484,6 +489,96 @@
         "tip": "There is no simple way to convert XML attributes to JSON so the approach taken here is to add a property, named $ by default, to the JSON structure.",
         "errors": {
             "xml_js": "This node only handles xml strings or js objects."
+        }
+    },
+    "sentiment": {
+        "sentiment": "sentiment",
+        "label": {
+            "sentimentlabel": "sentiment"
+        }
+    },
+    "arduino": {
+        "arduino": "arduino",
+        "label": {
+            "arduino": "Arduino",
+            "pin": "Pin",
+            "type": "Type",
+            "port": "Port",
+            "portph": "e.g. /dev/ttyUSB0  COM1"
+        },
+        "digitalpin": "Digital pin",
+        "analoguepin": "Analogue pin",
+        "digital": "Digital (0/1)",
+        "analogue": "Analogue (0-255)",
+        "servo": "Servo (0-180)",
+        "io-tip": "<b>Note:</b> You cannot use the same pin for both output and input.",
+        "conf-tip": "<b>Tip:</b> Use search to list serial ports, or leave blank to connect to first device found.",
+        "status": {
+            "connectfirst": "connecting to first board found",
+            "connect": "connecting to __device__",
+            "connected": "connected to __device__",
+            "version": "version: __version__",
+            "portclosed": "port closed"
+        },
+        "errors": {
+            "portnotconf": "port not configured",
+            "devnotfound": "device __dev__ not found. Trying to find board."
+        }
+    },
+    "rpi-gpio": {
+        "rpi-gpio": "rpi-gpio",
+        "label": {
+            "gpiopin": "GPIO Pin",
+            "selectpin": "select pin",
+            "registor": "Registor ?",
+            "readinitial": "Read initial state of pin on deploy/restart ?",
+            "type": "Type",
+            "initpin": "Initialise pin state ?",
+            "button": "Button",
+            "pimouse": "Pi Mouse",
+            "left": "Left",
+            "right": "Right",
+            "middle": "Middle"
+        },
+        "none": "none",
+        "pullup": "pullup",
+        "pulldown": "pulldown",
+        "digout": "Digital output",
+        "pwmout": "PWM output",
+        "initpin0": "initial level of pin - low (0)",
+        "initpin1": "initial level of pin - high (1)",
+        "left": "left",
+        "right": "right",
+        "middle": "middle",
+        "any": "any",
+        "pinname": "Pin",
+        "alreadyuse": "already in use",
+        "alreadyset": "already set as",
+        "pin-tip": "<b>Pins in Use</b>: ",
+        "in-tip": "Tip: Only Digital Input is supported - input must be 0 or 1.",
+        "dig-tip": "<b>Tip</b>: For digital output - input must be 0 or 1.",
+        "pwm-tip": "<b>Tip</b>: For PWM output - input must be between 0 and 100.",
+        "errors": {
+            "digout": "digital output",
+            "input": "input",
+            "pullup": "input with pull up",
+            "pulldown": "input with pull down",
+            "pwmout": "PWM output",
+            "ignorenode": "Ignoring Raspberry Pi specific node.",
+            "closed": "closed",
+            "version": "Version command failed for some reason.",
+            "sawpitype": "Saw Pi Type",
+            "libnotfound": "Can't find Pi RPi.GPIO python library.",
+            "gpiopin": "GPIO pin",
+            "alreadyset": "already set as",
+            "invalidpin": "Invalid GPIO pin",
+            "invalidinput": "Invalid input",
+            "needtobeexecutable": "needs to be executable.",
+            "mustbeexecutable": "nrgpio must to be executable.",
+            "commandnotfound": "nrgpio command not found",
+            "commandnotexecutable": "nrgpio command not executable",
+            "error": "error",
+            "pythoncommandnotfound": "nrpgio python command not running"
         }
     }
 }
