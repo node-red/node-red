@@ -16,26 +16,26 @@
 
 <script type="text/x-red" data-template-name="mongodb">
     <div class="form-row">
-        <label for="node-config-input-hostname"><i class="fa fa-bookmark"></i> Host</label>
+        <label for="node-config-input-hostname"><i class="fa fa-bookmark"></i> <span data-i18n="mongodb.label.host"></span></label>
         <input class="input-append-left" type="text" id="node-config-input-hostname" placeholder="localhost" style="width: 40%;" >
-        <label for="node-config-input-port" style="margin-left: 10px; width: 35px; "> Port</label>
+        <label for="node-config-input-port" style="margin-left: 10px; width: 35px; "> <span data-i18n="mongodb.label.port"></span></label>
         <input type="text" id="node-config-input-port" placeholder="27017" style="width:45px">
     </div>
     <div class="form-row">
-        <label for="node-config-input-db"><i class="fa fa-database"></i> Database</label>
+        <label for="node-config-input-db"><i class="fa fa-database"></i> <span data-i18n="mongodb.label.database"></span></label>
         <input type="text" id="node-config-input-db" placeholder="test">
     </div>
     <div class="form-row">
-        <label for="node-config-input-user"><i class="fa fa-user"></i> Username</label>
+        <label for="node-config-input-user"><i class="fa fa-user"></i> <span data-i18n="mongodb.label.username"></span></label>
         <input type="text" id="node-config-input-user">
     </div>
     <div class="form-row">
-        <label for="node-config-input-password"><i class="fa fa-lock"></i> Password</label>
+        <label for="node-config-input-password"><i class="fa fa-lock"></i> <span data-i18n="mongodb.label.password"></span></label>
         <input type="password" id="node-config-input-password">
     </div>
     <div class="form-row">
-        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-config-input-name" placeholder="Name">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-config-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
 </script>
 
@@ -62,43 +62,42 @@
 
 <script type="text/x-red" data-template-name="mongodb out">
     <div class="form-row">
-        <label for="node-input-mongodb"><i class="fa fa-bookmark"></i> Server</label>
+        <label for="node-input-mongodb"><i class="fa fa-bookmark"></i> <span data-i18n="mongodb.label.server"></span></label>
         <input type="text" id="node-input-mongodb">
     </div>
     <div class="form-row">
-        <label for="node-input-collection"><i class="fa fa-briefcase"></i> Collection</label>
-        <input type="text" id="node-input-collection" placeholder="collection">
+        <label for="node-input-collection"><i class="fa fa-briefcase"></i> <span data-i18n="mongodb.label.collection"></span></label>
+        <input type="text" id="node-input-collection" data-i18n="[placeholder]mongodb.label.collectionph">
     </div>
     <div class="form-row">
-        <label for="node-input-operation"><i class="fa fa-wrench"></i> Operation</label>
+        <label for="node-input-operation"><i class="fa fa-wrench"></i> <span data-i18n="mongodb.label.operation"></span></label>
         <select type="text" id="node-input-operation" style="display: inline-block; vertical-align: top;">
-            <option value="store">save</option>
-            <option value="insert">insert</option>
-            <option value="update">update</option>
-            <option value="delete">remove</option>
+            <option value="store" data-i18n="mongodb.save"></option>
+            <option value="insert" data-i18n="mongodb.insert"></option>
+            <option value="update" data-i18n="mongodb.update"></option>
+            <option value="delete" data-i18n="mongodb.remove"></option>
         </select>
     </div>
     <div class="form-row node-input-payonly">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-payonly" placeholder="Only" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-payonly" style="width: 70%;">Only store msg.payload object</label>
+        <label for="node-input-payonly" style="width: 70%;"><span data-i18n="mongodb.label.onlystore"></span></label>
     </div>
     <div class="form-row node-input-upsert">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-upsert" placeholder="Only" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-upsert" style="width: 70%;">Create a new document if no match found</label>
+        <label for="node-input-upsert" style="width: 70%;"><span data-i18n="mongodb.label.createnew"></span></label>
     </div>
     <div class="form-row node-input-multi">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-multi" placeholder="Only" style="display: inline-block; width: auto; vertical-align: top;;">
-        <label for="node-input-multi" style="width: 70%;">Update all matching documents</label>
+        <label for="node-input-multi" style="width: 70%;"><span data-i18n="mongodb.label.updateall"></span></label>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
-    <div class="form-tips" id="node-warning" style="display: none"><b> Tip:</b> If no collection is set, ensure <b>msg.collection</b> will contain the collection name
-    </div>
+    <div class="form-tips" id="node-warning" style="display: none"><span data-i18n="[html]mongodb.tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="mongodb out">
@@ -172,27 +171,26 @@
 
 <script type="text/x-red" data-template-name="mongodb in">
     <div class="form-row">
-        <label for="node-input-mongodb"><i class="fa fa-bookmark"></i> Server</label>
+        <label for="node-input-mongodb"><i class="fa fa-bookmark"></i> <span data-i18n="mongodb.label.server"></span></label>
         <input type="text" id="node-input-mongodb">
     </div>
     <div class="form-row">
-        <label for="node-input-collection"><i class="fa fa-briefcase"></i> Collection</label>
-        <input type="text" id="node-input-collection" placeholder="collection">
+        <label for="node-input-collection"><i class="fa fa-briefcase"></i> <span data-i18n="mongodb.label.collection"></span></label>
+        <input type="text" id="node-input-collection" data-i18n="[placeholder]mongodb.label.collectionph">
     </div>
     <div class="form-row">
-        <label for="node-input-operation"><i class="fa fa-wrench"></i> Operation</label>
+        <label for="node-input-operation"><i class="fa fa-wrench"></i> <span data-i18n="mongodb.label.operation"></span></label>
         <select type="text" id="node-input-operation" style="display: inline-block; vertical-align: top;">
-            <option value="find">find</option>
-            <option value="count">count</option>
-            <option value="aggregate">aggregate</option>
+            <option value="find" data-i18n="mongodb.find"></option>
+            <option value="count" data-i18n="mongodb.count"></option>
+            <option value="aggregate" data-i18n="mongodb.aggregate"></option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
-    <div class="form-tips" id="node-warning" style="display: none"><b> Tip:</b> If no collection is set, ensure <b>msg.collection</b> will contain the collection name
-    </div>
+    <div class="form-tips" id="node-warning" style="display: none"><span data-i18n="[html]mongodb.tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="mongodb in">
