@@ -580,5 +580,82 @@
             "error": "error",
             "pythoncommandnotfound": "nrpgio python command not running"
         }
+    },
+    "file": {
+        "file": "file",
+        "label": {
+            "filename": "Filename",
+            "filenameph": "filename",
+            "action": "Action",
+            "addnewline": "Add newline (\\n) to each payload ?",
+            "outputas": "Ourput as",
+            "filelabel": "file",
+            "deletelabel": "delete"
+        },
+        "append": "append to file",
+        "overwrite": "overwrite file",
+        "delete": "delete file",
+        "utf8": "a utf8 string",
+        "buffer": "a Buffer",
+        "errors": {
+            "wrotefile": "wrote to file",
+            "deletedfile": "deleted file",
+            "appendedfile": "appended to file",
+            "nooverride": "Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props",
+            "nofilename": "No filename specified",
+            "invaliddelete": "Warning: Invalid delete. Please use specific delete option in config dialog.",
+            "deletefail": "failed to delete file",
+            "writefail": "failed to write to file",
+            "appendfail": "failed to append to file"
+        }
+    },
+    "redisout": {
+        "redis": "redis",
+        "label": {
+            "host": "Host",
+            "port": "Port",
+            "key": "Key",
+            "keyph": "Redis Key",
+            "type": "Type"
+        },
+        "string": "String",
+        "hash": "Hash",
+        "set": "Set",
+        "list": "List",
+        "tip": "If key is blank, the topic will be used as the key.<br>If type is hash, payload should be an object or field=value string.",
+        "errors": {
+            "connectedto": "connected to",
+            "invalidpayload": "Invalid payload for redis hash",
+            "nokey": "No key or topic set"
+        }
+    },
+    "mongodb": {
+        "mongodb": "mongodb",
+        "label": {
+            "host": "Host",
+            "port": "Port",
+            "database": "Database",
+            "username": "Username",
+            "password": "Password",
+            "server": "Server",
+            "collection": "Collection",
+            "collectionph": "collection",
+            "operation": "Operation",
+            "onlystore": "Only store msg.payload object",
+            "createnew": "Create a new document if no match found",
+            "updateall": "Update all matching documents"
+        },
+        "save": "save",
+        "insert": "insert",
+        "update": "update",
+        "remove": "remove",
+        "find": "find",
+        "count": "count",
+        "aggregate": "aggregate",
+        "tip": "<b> Tip:</b> If no collection is set, ensure <b>msg.collection</b> will contain the collection name",
+        "errors": {
+            "nocollection": "No collection defined",
+            "missingconfig": "missing mongodb configuration"
+        }
     }
 }

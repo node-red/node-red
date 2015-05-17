@@ -27,17 +27,17 @@ module.exports = function(RED) {
         this.on("input",function(msg) {
             var filename = this.filename || msg.filename || "";
             if (msg.filename && n.filename && (n.filename !== msg.filename)) {
-                node.warn("Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props");
+                node.warn(RED._("file.errors.nooverride"));
             }
             if (!this.filename) {
                 node.status({fill:"grey",shape:"dot",text:filename});
             }
             if (filename === "") {
-                node.warn('No filename specified');
+                node.warn(RED._("file.errors.nofilename"));
             } else if (msg.hasOwnProperty('delete')) { // remove warning at some point in future
-                node.warn("Warning: Invalid delete. Please use specific delete option in config dialog.");
+                node.warn(RED._("file.errors.invaliddelete"));
                 //fs.unlink(filename, function (err) {
-                    //if (err) { node.error('failed to delete file : '+err,msg); }
+                    //if (err) { node.error(RED._("file.errors.deletefail")+' : '+err,msg); }
                 //});
             } else if (msg.payload && (typeof msg.payload != "undefined")) {
                 var data = msg.payload;
@@ -50,22 +50,22 @@ module.exports = function(RED) {
                     // using "binary" not {encoding:"binary"} to be 0.8 compatible for a while
                     //fs.writeFile(filename, data, {encoding:"binary"}, function (err) {
                     fs.writeFile(filename, data, "binary", function (err) {
-                        if (err) { node.error('failed to write to file : '+err,msg); }
-                        else if (RED.settings.verbose) { node.log('wrote to file: '+filename); }
+                        if (err) { node.error(RED._("file.errors.writefail")+' : '+err,msg); }
+                        else if (RED.settings.verbose) { node.log(RED._("file.errors.wrotefile")+': '+filename); }
                     });
                 }
                 else if (this.overwriteFile === "delete") {
                     fs.unlink(filename, function (err) {
-                        if (err) { node.error('failed to delete file : '+err,msg); }
-                        else if (RED.settings.verbose) { node.log("deleted file: "+filename); }
+                        if (err) { node.error(RED._("file.errors.deletefail")+' : '+err,msg); }
+                        else if (RED.settings.verbose) { node.log(RED._("file.errors.deletedfile")+": "+filename); }
                     });
                 }
                 else {
                     // using "binary" not {encoding:"binary"} to be 0.8 compatible for a while longer
                     //fs.appendFile(filename, data, {encoding:"binary"}, function (err) {
                     fs.appendFile(filename, data, "binary", function (err) {
-                        if (err) { node.error('failed to append to file : '+err,msg); }
-                        else if (RED.settings.verbose) { node.log('appended to file: '+filename); }
+                        if (err) { node.error(RED._("file.errors.appendfail")+' : '+err,msg); }
+                        else if (RED.settings.verbose) { node.log(RED._("file.errors.appendedfile")+': '+filename); }
                     });
                 }
             }
@@ -87,13 +87,13 @@ module.exports = function(RED) {
         this.on("input",function(msg) {
             var filename = this.filename || msg.filename || "";
             if (msg.filename && n.filename && (n.filename !== msg.filename)) {
-                node.warn("Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props");
+                node.warn(RED._("file.errors.nooverride"));
             }
             if (!this.filename) {
                 node.status({fill:"grey",shape:"dot",text:filename});
             }
             if (filename === "") {
-                node.warn('No filename specified');
+                node.warn(RED._("file.errors.nofilename"));
             } else {
                 msg.filename = filename;
                 fs.readFile(filename,options,function(err,data) {
