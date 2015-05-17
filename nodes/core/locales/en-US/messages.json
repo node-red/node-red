@@ -581,6 +581,17 @@
             "pythoncommandnotfound": "nrpgio python command not running"
         }
     },
+    "tail": {
+        "tail": "tail",
+        "label": {
+            "filename": "Filename",
+            "filenameph": "filename",
+            "splitlines": "Split lines if we see \\n ?"
+        },
+        "errors": {
+            "windowsnotsupport": "Info : Currently not supported on Windows."
+        }
+    },
     "file": {
         "file": "file",
         "label": {
