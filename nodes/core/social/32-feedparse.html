@@ -16,16 +16,16 @@
 
 <script type="text/x-red" data-template-name="feedparse">
     <div class="form-row">
-        <label for="node-input-url"><i class="fa fa-globe"></i> Feed url</label>
+        <label for="node-input-url"><i class="fa fa-globe"></i> <span data-i18n="feedparse.label.feedurl"></span></label>
         <input type="text" id="node-input-url">
     </div>
     <div class="form-row">
-        <label for="node-input-interval"><i class="fa fa-repeat"></i> Repeat <span style="font-size: 0.9em;">(M)</span></label>
-        <input type="text" id="node-input-interval" placeholder="minutes">
+        <label for="node-input-interval"><i class="fa fa-repeat"></i> <span data-i18n="feedparse.label.repeat"></span> <span style="font-size: 0.9em;" data-i18n="feedparse.label.min"></span></label>
+        <input type="text" id="node-input-interval" data-i18n="[placeholder]feedparse.label.repeatph">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
     <!-- <div class="form-tips"></div> -->
 </script>

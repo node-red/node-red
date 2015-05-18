@@ -22,7 +22,17 @@
             "closed": "closed",
             "stopped": "stopped",
             "close": "close",
-            "not-running": "not running"
+            "not-running": "not running",
+            "sending": "sending",
+            "sendfail": "send failed",
+            "fetching": "fetching",
+            "foldererror": "fetch folder error",
+            "messageerror": "fetch message error",
+            "connecterror": "connect error",
+            "neterror": "net error",
+            "joined": "joined",
+            "quit": "quit",
+            "noconnection": "no connection"
         }
     },
     "inject": {
@@ -663,6 +673,89 @@
         "errors": {
             "nocollection": "No collection defined",
             "missingconfig": "missing mongodb configuration"
+        }
+    },
+    "feedparse": {
+        "feedparse": "feedparse",
+        "label": {
+            "feedurl": "Feed url",
+            "repeat": "Repeat",
+            "repeatph": "minutes",
+            "min": "(M)"
+        },
+        "errors": {
+            "badstatuscode": "error - Bad status code",
+            "invalidurl": "Invalid url"
+        }
+    },
+    "email": {
+        "email": "email",
+        "label": {
+            "to": "To",
+            "server": "Server",
+            "port": "Port",
+            "userid": "Userid",
+            "password": "Password",
+            "repeat": "Check Repeat (S)",
+            "folder": "Folder"
+        },
+        "inbox": "IIINBOX",
+        "cred-tip": "<b>Note:</b> Copied credentials from global emailkeys.js file.",
+        "recent-tip": "Tip: <b>ONLY</b> retrieves the single most recent email.",
+        "errors": {
+            "messagesent": "Message sent",
+            "repeat": "repeat",
+            "message": "message",
+            "finished": "Finished",
+            "newemail": "received new email",
+            "duplicate": "duplicate not sent",
+            "inboxzero": "you have achieved inbox zero",
+            "error": "error",
+            "nooverride": "Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props",
+            "nocredentials": "No Email credentials found. See info panel.",
+            "nopayload": "No payload to send",
+            "messageerror": "fetch message error",
+            "nouserid": "No e-mail userid set",
+            "nopassword": "No e-mail password set",
+            "fetchfail": "Failed to fetch folder",
+            "yourfile": "Your file from Node-RED is attached"
+        }
+    },
+    "irc": {
+        "irc": "irc",
+        "label": {
+            "ircserver": "IRC Server",
+            "channel": "Channel",
+            "action": "Action",
+            "port": "Port",
+            "portph": "port",
+            "ssl": "Use Secure SSL connection ?",
+            "self": "Allow self-signed certificates ?",
+            "nickname": "Nickname"
+        },
+        "payload": "Send payload to channel(s)",
+        "topic": "Use msg.topic to set nickname or channel(s)",
+        "msg": "Send complete msg object to channel(s)",
+        "in-tip": "The channel to join must start with a # (as per normal irc rules...)<br/>You may join multiple channels by comma separating a list - #chan1,#chan2,etc.",
+        "out-tip": "The channel to join must start with a # (as per normal irc rules...)<br/>Sending the complete object will stringify the whole msg object before sending.",
+        "errors": {
+            "connect": "CONNECT",
+            "err": "ERR",
+            "net": "NET",
+            "connected": "CONNECTED",
+            "online": "ONLINE",
+            "joined": "JOINED",
+            "ping": "PING from",
+            "quit": "QUIT",
+            "restart": "restart",
+            "connectionlost": "CONNECTION LOST ?",
+            "hasjoined": "has joined",
+            "sentinvite": "sent invite to",
+            "hasleft": "has left",
+            "hasquit": "has quit",
+            "kickedfrom": "was kicked from",
+            "rawcommand": "RAW command",
+            "topicnotset": "msg.topic not set"
         }
     }
 }

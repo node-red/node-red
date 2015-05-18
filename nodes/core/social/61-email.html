@@ -16,7 +16,7 @@
 
 <script type="text/x-red" data-template-name="e-mail">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-envelope"></i> To</label>
+        <label for="node-input-name"><i class="fa fa-envelope"></i> <span data-i18n="email.label.to"></span></label>
         <input type="text" id="node-input-name" placeholder="email@address.com">
     </div>
     <!-- <div class="form-row">
@@ -45,27 +45,27 @@
          </select>
     </div> -->
     <div class="form-row">
-        <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
+        <label for="node-input-server"><i class="fa fa-globe"></i> <span data-i18n="email.label.server"></span></label>
         <input type="text" id="node-input-server" placeholder="smtp.gmail.com">
     </div>
     <div class="form-row">
-        <label for="node-input-port"><i class="fa fa-random"></i> Port</label>
+        <label for="node-input-port"><i class="fa fa-random"></i> <span data-i18n="email.label.port"></span></label>
         <input type="text" id="node-input-port" placeholder="465">
     </div>
     <div class="form-row">
-        <label for="node-input-userid"><i class="fa fa-user"></i> Userid</label>
+        <label for="node-input-userid"><i class="fa fa-user"></i> <span data-i18n="email.label.userid"></span></label>
         <input type="text" id="node-input-userid">
     </div>
     <div class="form-row">
-        <label for="node-input-password"><i class="fa fa-lock"></i> Password</label>
+        <label for="node-input-password"><i class="fa fa-lock"></i> <span data-i18n="email.label.password"></span></label>
         <input type="password" id="node-input-password">
     </div>
     <br/>
     <div class="form-row">
-        <label for="node-input-dname"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-dname" placeholder="Name">
+        <label for="node-input-dname"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-dname" data-i18n="[placeholder]common.label.nameph">
     </div>
-    <div class="form-tips" id="node-tip"><b>Note:</b> Copied credentials from global emailkeys.js file.</div>
+    <div class="form-tips" id="node-tip"><span data-i18n="[html]email.cred-tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="e-mail">
@@ -119,36 +119,36 @@
 
 <script type="text/x-red" data-template-name="e-mail in">
     <div class="form-row node-input-repeat">
-        <label for="node-input-repeat"><i class="fa fa-repeat"></i> Check Repeat (S)</label>
+        <label for="node-input-repeat"><i class="fa fa-repeat"></i> <span data-i18n="email.label.repeat"></span></label>
         <input type="text" id="node-input-repeat" placeholder="300">
     </div>
     <div class="form-row">
-        <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
+        <label for="node-input-server"><i class="fa fa-globe"></i> <span data-i18n="email.label.server"></span></label>
         <input type="text" id="node-input-server" placeholder="imap.gmail.com">
     </div>
     <div class="form-row">
-        <label for="node-input-port"><i class="fa fa-random"></i> Port</label>
+        <label for="node-input-port"><i class="fa fa-random"></i> <span data-i18n="email.label.port"></span></label>
         <input type="text" id="node-input-port" placeholder="993">
     </div>
     <div class="form-row">
-        <label for="node-input-userid"><i class="fa fa-user"></i> Userid</label>
+        <label for="node-input-userid"><i class="fa fa-user"></i> <span data-i18n="email.label.userid"></span></label>
         <input type="text" id="node-input-userid">
     </div>
     <div class="form-row">
-        <label for="node-input-password"><i class="fa fa-lock"></i> Password</label>
+        <label for="node-input-password"><i class="fa fa-lock"></i> <span data-i18n="email.label.password"></span></label>
         <input type="password" id="node-input-password">
     </div>
     <div class="form-row">
-        <label for="node-input-box"><i class="fa fa-inbox"></i> Folder</label>
+        <label for="node-input-box"><i class="fa fa-inbox"></i> <span data-i18n="email.label.folder"></span></label>
         <input type="text" id="node-input-box">
     </div>
     <br/>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
-    <div class="form-tips" id="node-tip"><b>Note:</b> Copied credentials from global emailkeys.js file.</div>
-    <div id="node-input-tip" class="form-tips">Tip: <b>ONLY</b> retrieves the single most recent email.</div>
+    <div class="form-tips" id="node-tip"><span data-i18n="[html]email.cred-tip"></span></div>
+    <div id="node-input-tip" class="form-tips"><span data-i18n="[html]email.recent-tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="e-mail in">
