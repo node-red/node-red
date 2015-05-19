@@ -17,7 +17,6 @@
 module.exports = function(RED) {
     "use strict";
     var ArduinoFirmata = require('arduino-firmata');
-    var fs = require('fs');
 
     // The Board Definition - this opens (and closes) the connection
     function ArduinoNode(n) {
