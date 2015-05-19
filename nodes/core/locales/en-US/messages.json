@@ -32,7 +32,9 @@
             "neterror": "net error",
             "joined": "joined",
             "quit": "quit",
-            "noconnection": "no connection"
+            "noconnection": "no connection",
+            "tweeting": "tweeting",
+            "failed": "failed"
         }
     },
     "inject": {
@@ -756,6 +758,43 @@
             "kickedfrom": "was kicked from",
             "rawcommand": "RAW command",
             "topicnotset": "msg.topic not set"
+        }
+    },
+    "twitter": {
+        "twitter": "twitter",
+        "label": {
+            "loginas": "Log in as",
+            "search": "Search",
+            "for": "for",
+            "forph": "comma-separated words, @ids, #tags",
+            "user": "User",
+            "userph": "comma-separated @twitter handles",
+            "dmslabel": "DMs",
+            "tweetslabel": "tweets",
+            "twitter": "Twitter",
+            "clickhere": "Click here to authenticate with Twitter.",
+            "twitterid": "Twitter ID"
+        },
+        "public": "all public tweets",
+        "follow": "the tweets of who you follow",
+        "user": "the tweets of specific users",
+        "direct": "your direct messages",
+        "tip": "Tip: Use commas without spaces between multiple search terms. Comma = OR, Space = AND.<br/>The Twitter API WILL NOT deliver 100% of all tweets.<br/>Tweets of who you follow will include their retweets and favourites.",
+        "errors": {
+            "badgeo":"possible bad geo area format. Should be lower-left lon, lat, upper-right lon, lat",
+            "oauthbroke":"something in twitter oauth broke.",
+            "ratelimit":"tweet rate limit hit",
+            "streamerror":"Stream error",
+            "enexpectedend":"twitter ended unexpectedly",
+            "truncated":"Tweet greater than 140 : truncated",
+            "nopayload":"No payload to tweet",
+            "invalidtag":"Invalid tag property",
+            "missingcredentials":"missing twitter credentials",
+            "sendfail":"Send tweet failed",
+            "oautherror1": "<h2>Oh no!</h2>",
+            "oautherror2": "<p>Something went wrong with the authentication process. The following error was returned:</p>",
+            "oautherror3": "<p><b>'+error.statusCode+'</b>: '+error.data+'</p>",
+            "oautherror4": "<p>One known cause of this type of failure is if the clock is wrong on system running Node-RED."
         }
     }
 }
