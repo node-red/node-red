@@ -248,19 +248,25 @@ module.exports = function(RED) {
                     }
                 }
                 if (opts.headers['content-length'] == null) {
-                    opts.headers['content-length'] = Buffer.byteLength(payload);
+                    if (Buffer.isBuffer(payload)) {
+                        opts.headers['content-length'] = payload.length;
+                    } else {
+                        opts.headers['content-length'] = Buffer.byteLength(payload);
+                    }
                 }
             }
             var urltotest = url;
-            if (RED.settings.httpNodeProxy) {
-                var proxy = RED.settings.httpNodeProxy.host;
-                opts.protocol = "http:";
-                opts.headers['Host'] = opts.host;
-                opts.host = opts.hostname = proxy;
-                opts.port = RED.settings.httpNodeProxy.port || opts.port;
-                if (opts.port) { opts.host = opts.host+":"+opts.port; }
-                opts.path = opts.pathname = opts.href;
-                urltotest = proxy;
+            if (process.env.http_proxy != null) {
+                var match = process.env.http_proxy.match(/^(http:\/\/)?([^:\/]+)(:([0-9]+))?/i);
+                if (match) {
+                    opts.protocol = "http:";
+                    opts.headers['Host'] = opts.host;
+                    opts.host = opts.hostname = match[2],
+                    opts.port = (match[4] != null ? match[4] : 80),
+                    opts.path = opts.pathname = opts.href;
+                    urltotest = match[2];
+                }
+                else { node.warn("Bad proxy url: "+process.env.http_proxy); }
             }
             var req = ((/^https/.test(urltotest))?https:http).request(opts,function(res) {
                 (node.ret === "bin") ? res.setEncoding('binary') : res.setEncoding('utf8');
