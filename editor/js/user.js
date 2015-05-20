@@ -72,9 +72,9 @@ RED.user = (function() {
                         }
                         row.appendTo("#node-dialog-login-fields");
                     }
-                    $('<div class="form-row" style="text-align: right; margin-top: 10px;"><span id="node-dialog-login-failed" style="line-height: 2em;float:left;" class="hide">Login failed</span><img src="red/images/spin.svg" style="height: 30px; margin-right: 10px; " class="login-spinner hide"/>'+
-                        (opts.cancelable?'<a href="#" id="node-dialog-login-cancel" style="margin-right: 20px;" tabIndex="'+(i+1)+'">Cancel</a>':'')+
-                        '<input type="submit" id="node-dialog-login-submit" style="width: auto;" tabIndex="'+(i+2)+'" value="Login"></div>').appendTo("#node-dialog-login-fields");
+                    $('<div class="form-row" style="text-align: right; margin-top: 10px;"><span id="node-dialog-login-failed" style="line-height: 2em;float:left;" class="hide">'+RED._("dialog.loginFailed")+'</span><img src="red/images/spin.svg" style="height: 30px; margin-right: 10px; " class="login-spinner hide"/>'+
+                        (opts.cancelable?'<a href="#" id="node-dialog-login-cancel" style="margin-right: 20px;" tabIndex="'+(i+1)+'">'+RED._("dialog.cancel")+'</a>':'')+
+                        '<input type="submit" id="node-dialog-login-submit" style="width: auto;" tabIndex="'+(i+2)+'" value="'+RED._("dialog.login")+'"></div>').appendTo("#node-dialog-login-fields");
                         
                                 
                     $("#node-dialog-login-submit").button();
@@ -137,11 +137,11 @@ RED.user = (function() {
         if (RED.settings.user.anonymous) {
             RED.menu.addItem("btn-usermenu",{
                 id:"usermenu-item-login",
-                label:"Login",
+                label:RED._("menu.label.login"),
                 onselect: function() {
                     RED.user.login({cancelable:true},function() {
                         RED.settings.load(function() {
-                            RED.notify("Logged in as "+RED.settings.user.username,"success");
+                            RED.notify(RED._("notification.loggedInAs")+RED.settings.user.username,"success");
                             updateUserMenu();
                         });
                     });
@@ -154,7 +154,7 @@ RED.user = (function() {
             });
             RED.menu.addItem("btn-usermenu",{
                 id:"usermenu-item-logout",
-                label:"Logout",
+                label:RED._("menu.label.logout"),
                 onselect: function() {
                     RED.user.logout();
                 }
