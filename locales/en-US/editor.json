@@ -3,5 +3,34 @@
         "label": {
             "name": "Name"
         }
-    }
+    },
+	"menu": {
+		"label": {
+			"sidebar": "Sidebar",
+			"displayStatus": "Display node status",
+			"import": "Import",
+			"export": "Export",
+			"clipboard": "Clipboard",
+			"library": "Library",
+			"configurationNodes": "Configuration nodes",
+			"subflows": "Subflows",
+			"createSubflow": "Create subflow",
+			"selectionToSubflow": "Selection to subflow",
+			"workspaces": "Workspaces",
+			"add": "Add",
+			"rename": "Rename",
+			"delete": "Delete",
+			"keyboardShortcuts": "Keyboard Shortcuts"
+		}
+	},
+	"notification": {
+		"nodeAdded": "Node added to palette:",
+		"nodeAdded_plural": "Nodes added to palette",
+		"nodeRemoved": "Node removed from palette:",
+		"nodeRemoved_plural": "Nodes removed from palette:",
+		"nodeEnabled": "Node enabled:",
+		"nodeEnabled_plural": "Nodes enabled:",
+		"nodeDisabled": "Node disabled:",
+		"nodeDisabled_plural": "Nodes disabled:"
+	}
 }

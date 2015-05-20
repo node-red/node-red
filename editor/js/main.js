@@ -110,7 +110,7 @@ var RED = (function() {
                         }
                         if (addedTypes.length) {
                             typeList = "<ul><li>"+addedTypes.join("</li><li>")+"</li></ul>";
-                            RED.notify("Node"+(addedTypes.length!=1 ? "s":"")+" added to palette:"+typeList,"success");
+                            RED.notify(RED._("notification.nodeAdded", {count:addedTypes.length})+typeList,"success");
                         }
                     } else if (topic == "node/removed") {
                         for (i=0;i<msg.length;i++) {
@@ -118,7 +118,7 @@ var RED = (function() {
                             info = RED.nodes.removeNodeSet(m.id);
                             if (info.added) {
                                 typeList = "<ul><li>"+m.types.join("</li><li>")+"</li></ul>";
-                                RED.notify("Node"+(m.types.length!=1 ? "s":"")+" removed from palette:"+typeList,"success");
+                                RED.notify(RED._("notification.nodeRemoved", {count:m.types.length})+typeList,"success");
                             }
                         }
                     } else if (topic == "node/enabled") {
@@ -127,12 +127,12 @@ var RED = (function() {
                             if (info.added) {
                                 RED.nodes.enableNodeSet(msg.id);
                                 typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
-                                RED.notify("Node"+(msg.types.length!=1 ? "s":"")+" enabled:"+typeList,"success");
+                                RED.notify(RED._("notification.nodeEnabled", {count:msg.types.length})+typeList,"success");
                             } else {
                                 $.get('nodes/'+msg.id, function(data) {
                                     $("body").append(data);
                                     typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
-                                    RED.notify("Node"+(msg.types.length!=1 ? "s":"")+" added to palette:"+typeList,"success");
+                                    RED.notify(RED._("notification.nodeAdded", {count:msg.types.length})+typeList,"success");
                                 });
                             }
                         }
@@ -140,7 +140,7 @@ var RED = (function() {
                         if (msg.types) {
                             RED.nodes.disableNodeSet(msg.id);
                             typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
-                            RED.notify("Node"+(msg.types.length!=1 ? "s":"")+" disabled:"+typeList,"success");
+                            RED.notify(RED._("notfication.nodeDisabled", {count:msg.types.length})+typeList,"success");
                         }
                     }
                 });
@@ -157,33 +157,33 @@ var RED = (function() {
     function loadEditor() {
         RED.menu.init({id:"btn-sidemenu",
             options: [
-                {id:"menu-item-sidebar",label:"Sidebar",toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
-                {id:"menu-item-status",label:"Display node status",toggle:true,onselect:toggleStatus, selected: true},
+                {id:"menu-item-sidebar",label:RED._("menu.label.sidebar"),toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
+                {id:"menu-item-status",label:RED._("menu.label.displayStatus"),toggle:true,onselect:toggleStatus, selected: true},
                 null,
-                {id:"menu-item-import",label:"Import",options:[
-                    {id:"menu-item-import-clipboard",label:"Clipboard",onselect:RED.clipboard.import},
-                    {id:"menu-item-import-library",label:"Library",options:[]}
+                {id:"menu-item-import",label:RED._("menu.label.import"),options:[
+                    {id:"menu-item-import-clipboard",label:RED._("menu.label.clipboard"),onselect:RED.clipboard.import},
+                    {id:"menu-item-import-library",label:RED._("menu.label.library"),options:[]}
                 ]},
-                {id:"menu-item-export",label:"Export",disabled:true,options:[
-                    {id:"menu-item-export-clipboard",label:"Clipboard",disabled:true,onselect:RED.clipboard.export},
-                    {id:"menu-item-export-library",label:"Library",disabled:true,onselect:RED.library.export}
-                ]},
-                null,
-                {id:"menu-item-config-nodes",label:"Configuration nodes",onselect:RED.sidebar.config.show},
-                null,
-                {id:"menu-item-subflow",label:"Subflows", options: [
-                    {id:"menu-item-subflow-create",label:"Create subflow",onselect:RED.subflow.createSubflow},
-                    {id:"menu-item-subflow-convert",label:"Selection to subflow",disabled:true,onselect:RED.subflow.convertToSubflow},
+                {id:"menu-item-export",label:RED._("menu.label.export"),disabled:true,options:[
+                    {id:"menu-item-export-clipboard",label:RED._("menu.label.clipboard"),disabled:true,onselect:RED.clipboard.export},
+                    {id:"menu-item-export-library",label:RED._("menu.label.library"),disabled:true,onselect:RED.library.export}
                 ]},
                 null,
-                {id:"menu-item-workspace",label:"Workspaces",options:[
-                    {id:"menu-item-workspace-add",label:"Add",onselect:RED.workspaces.add},
-                    {id:"menu-item-workspace-edit",label:"Rename",onselect:RED.workspaces.edit},
-                    {id:"menu-item-workspace-delete",label:"Delete",onselect:RED.workspaces.remove},
+                {id:"menu-item-config-nodes",label:RED._("menu.label.configurationNodes"),onselect:RED.sidebar.config.show},
+                null,
+                {id:"menu-item-subflow",label:RED._("menu.label.subflows"), options: [
+                    {id:"menu-item-subflow-create",label:RED._("menu.label.createSubflow"),onselect:RED.subflow.createSubflow},
+                    {id:"menu-item-subflow-convert",label:RED._("menu.label.selectionToSubflow"),disabled:true,onselect:RED.subflow.convertToSubflow},
+                ]},
+                null,
+                {id:"menu-item-workspace",label:RED._("menu.label.workspaces"),options:[
+                    {id:"menu-item-workspace-add",label:RED._("menu.label.add"),onselect:RED.workspaces.add},
+                    {id:"menu-item-workspace-edit",label:RED._("menu.label.rename"),onselect:RED.workspaces.edit},
+                    {id:"menu-item-workspace-delete",label:RED._("menu.label.delete"),onselect:RED.workspaces.remove},
                     null
                 ]},
                 null,
-                {id:"menu-item-keyboard-shortcuts",label:"Keyboard Shortcuts",onselect:RED.keyboard.showHelp},
+                {id:"menu-item-keyboard-shortcuts",label:RED._("menu.label.keyboardShortcuts"),onselect:RED.keyboard.showHelp},
                 {id:"menu-item-help",
                     label: RED.settings.theme("menu.menu-item-help.label","Node-RED Website"),
                     href: RED.settings.theme("menu.menu-item-help.url","http://nodered.org/docs")
