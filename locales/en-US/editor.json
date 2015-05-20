@@ -20,7 +20,9 @@
 			"add": "Add",
 			"rename": "Rename",
 			"delete": "Delete",
-			"keyboardShortcuts": "Keyboard Shortcuts"
+			"keyboardShortcuts": "Keyboard Shortcuts",
+			"login": "Login",
+			"logout": "Logout"
 		}
 	},
 	"notification": {
@@ -31,6 +33,20 @@
 		"nodeEnabled": "Node enabled:",
 		"nodeEnabled_plural": "Nodes enabled:",
 		"nodeDisabled": "Node disabled:",
-		"nodeDisabled_plural": "Nodes disabled:"
+		"nodeDisabled_plural": "Nodes disabled:",
+		"lostConnectionError": "<b>Error</b>: Lost connection to server",
+		"importUnrecognised": "Imported unrecognised ",
+		"loggedInAs": "Logged in as "
+	},
+	"error": {
+		"apiSubflowOnly": "this api is subflow only. called with:",
+		"invalidFlow": "Invalid flow: ",
+		"cannotAddSubflowToItself": "Cannot add subflow to itself",
+		"cannotAddCircularReference": "Cannot add subflow - circular reference detected"
+	},
+	"dialog": {
+		"cancel": "Cancel",
+		"login": "Login",
+		"loginFailed": "Login failed"
 	}
 }

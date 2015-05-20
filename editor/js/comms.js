@@ -81,7 +81,7 @@ RED.comms = (function() {
         };
         ws.onclose = function() {
             if (errornotification == null) {
-                errornotification = RED.notify("<b>Error</b>: Lost connection to server","error",true);
+                errornotification = RED.notify(RED._("notification.lostConnectionError"),"error",true);
             } else if (clearErrorTimer) {
                 clearTimeout(clearErrorTimer);
                 clearErrorTimer = null;
