@@ -20,9 +20,9 @@
 </script>
 
 <script type="text/javascript">
-//(function() {
-    //var twitterConfigNodeId = null;
-    //var twitterConfigNodeIntervalId = null;
+(function() {
+    var twitterConfigNodeId = null;
+    var twitterConfigNodeIntervalId = null;
     
     RED.nodes.registerType('twitter-credentials',{
         category: 'config',
@@ -35,15 +35,14 @@
             access_token_secret: {type:"password"}
         },
         label: function() {
-            var clickhere = this._("twitter.label.clickhere");
             return this.screen_name;
         },
         exportable: false,
         oneditprepare: function() {
-            var clickhere = this._("twitter.label.clickhere");
-            console.log(clickhere);
-            var twitterid = this._("twitter.label.twitterid");
-            console.log(twitterid);
+            //var clickhere = this._("twitter.label.clickhere");
+            var clickhere = "Click here to authenticate with Twitter.";
+            //var twitterid = this._("twitter.label.twitterid");
+            var twitterid = "Twitter ID";
             function showTwitterAuthStart() {
                 var pathname = document.location.pathname;
                 if (pathname.slice(-1) != "/") {
@@ -92,7 +91,7 @@
             }
         }
     });
-//})();
+})();
 </script>
 
 <script type="text/x-red" data-template-name="twitter in">
