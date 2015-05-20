@@ -43,7 +43,7 @@ function createNode(type,config) {
             });
         }
     } else {
-        Log.error("Unknown type: "+type);
+        Log.error(Log._("nodes.Flow.unknown-type", {type:type}));
     }
     return nn;
 }
@@ -368,7 +368,7 @@ Flow.prototype.start = function(configDiff) {
     
     this.started = true;
     if (this.missingTypes.length > 0) {
-        throw new Error("missing types");
+        throw new Error(Log._("nodes.Flow.missing-types"));
     }
     events.emit("nodes-starting");
     
