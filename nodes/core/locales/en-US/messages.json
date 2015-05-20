@@ -38,29 +38,28 @@
         }
     },
     "inject": {
-        "inject":"inject",
+        "inject": "inject",
         "repeat": "repeat = __repeat__",
         "crontab": "crontab = __crontab__",
         "stopped": "stopped",
         "failed": "Inject failed: __error__",
-        
         "label": {
             "repeat": "Repeat"
         },
         "timestamp": "timestamp",
         "string": "string",
         "blank": "blank",
-        "none":"none",
-        "interval":"interval",
-        "interval-time":"interval between times",
-        "time":"at a specific time",
-        "seconds":"seconds",
-        "minutes":"minutes",
-        "hours":"hours",
-        "between":"between",
-        "at":"at",
-        "and":"and",
-        "every":"every",
+        "none": "none",
+        "interval": "interval",
+        "interval-time": "interval between times",
+        "time": "at a specific time",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "between": "between",
+        "at": "at",
+        "and": "and",
+        "every": "every",
         "days": [
             "Monday",
             "Tuesday",
@@ -70,8 +69,8 @@
             "Saturday",
             "Sunday"
         ],
-        "on":"on",
-        "onstart":"Inject once at start?",
+        "on": "on",
+        "onstart": "Inject once at start?",
         "tip": "<b>Note:</b> \"interval between times\" and \"at a specific time\" will use cron.<br/>See info box for details.",
         "success": "Successfully injected: __label__",
         "error": "<strong>Error</strong>: __message__",
@@ -174,6 +173,13 @@
         "commentnode": "Comment node",
         "commentinfo": "Use this node to add simple documentation.\n\nAnything you add will be rendered in this info panel.\n\nYou may use Markdown syntax to **enhance** the *presentation*."
     },
+    "unknown": {
+        "unknown": "unknown",
+        "label": {
+            "unknownlabel": "unknown"
+        },
+        "tip": "<p>This node is a type unknown to your installation of Node-RED.</p><p><i>If you deploy with the node in this state, it's configuration will be preserved, but the flow will not start until the missing type is installed.</i></p><p>See the Info side bar for more help</p>"
+    }
     "mqtt": {
         "mqtt": "mqtt",
         "label": {
@@ -797,8 +803,9 @@
             "sendfail":"Send tweet failed",
             "oautherror1": "<h2>Oh no!</h2>",
             "oautherror2": "<p>Something went wrong with the authentication process. The following error was returned:</p>",
-            "oautherror3": "<p><b>'+error.statusCode+'</b>: '+error.data+'</p>",
-            "oautherror4": "<p>One known cause of this type of failure is if the clock is wrong on system running Node-RED."
+            "oautherror3": "<p><b>__statusCode__</b>: __errorData__</p>",
+            "oautherror4": "<p>One known cause of this type of failure is if the clock is wrong on system running Node-RED.",
+            "authorized": "<html><head></head><body>Authorised - you can close this window and return to Node-RED</body></html>"
         }
     }
 }
