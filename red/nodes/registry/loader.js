@@ -19,6 +19,7 @@ var fs = require("fs");
 var path = require("path");
 
 var events = require("../../events");
+var log = require("../../log");
 
 var localfilesystem = require("./localfilesystem");
 var registry = require("./registry");
@@ -112,7 +113,7 @@ function loadNodeConfig(fileInfo) {
         var isEnabled = true;
         if (info) {
             if (info.hasOwnProperty("loaded")) {
-                throw new Error(file+" already loaded");
+                throw new Error(log._("nodes.registry.loader.already-loaded", {file:file}));
             }
             isEnabled = info.enabled;
         }
@@ -138,7 +139,7 @@ function loadNodeConfig(fileInfo) {
                     if (!node.types) {
                         node.types = [];
                     }
-                    node.err = "Error: "+file+" does not exist";
+                    node.err = log._("nodes.registry.loader.file-not-exist", {file:file});
                 } else {
                     node.types = [];
                     node.err = err.toString();
@@ -184,7 +185,7 @@ function loadNodeConfig(fileInfo) {
                 //node.script = "";
                 for (var i=0;i<node.types.length;i++) {
                     if (registry.getTypeId(node.types[i])) {
-                        node.err = node.types[i]+" already registered";
+                        node.err = log._("nodes.registry.loader.already-registered", {type:node.types[i]});
                         break;
                     }
                 }
@@ -298,11 +299,11 @@ function loadNodeSetList(nodes) {
 
 function addModule(module) {
     if (!settings.available()) {
-        throw new Error("Settings unavailable");
+        throw new Error(log._("nodes.registry.loader.settings-unavailable"));
     }
     var nodes = [];
     if (registry.getModuleInfo(module)) {
-        var e = new Error("Module already loaded");
+        var e = new Error(log._("nodes.registry.loader.module-already-loaded"));
         e.code = "module_already_loaded";
         return when.reject(e);
     }
