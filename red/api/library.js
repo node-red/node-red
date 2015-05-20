@@ -36,7 +36,7 @@ function createLibrary(type) {
             }).otherwise(function(err) {
                 if (err) {
                     log.warn(log._("api.library.error-load-entry",{path:path,message:err}));
-                    if (err.message.indexOf('forbidden') === 0) {
+                    if (err.code === 'forbidden') {
                         log.audit({event: "library.get",type:type,error:"forbidden"},req);
                         res.send(403);
                         return;
@@ -58,7 +58,7 @@ function createLibrary(type) {
                 res.send(204);
             }).otherwise(function(err) {
                 log.warn(log._("api.library.error-save-entry",{path:path,message:err}));
-                if (err.message.indexOf('forbidden') === 0) {
+                    if (err.code === 'forbidden') {
                     log.audit({event: "library.set",type:type,error:"forbidden"},req);
                     res.send(403);
                     return;
@@ -90,7 +90,7 @@ module.exports = {
         }).otherwise(function(err) {
             if (err) {
                 log.warn(log._("api.library.error-load-flow",{path:req.params[0],message:err}));
-                if (err.message.indexOf('forbidden') === 0) {
+                    if (err.code === 'forbidden') {
                     log.audit({event: "library.get",type:"flow",path:req.params[0],error:"forbidden"},req);
                     res.send(403);
                     return;
@@ -107,7 +107,7 @@ module.exports = {
             res.send(204);
         }).otherwise(function(err) {
             log.warn(log._("api.library.error-save-flow",{path:req.params[0],message:err}));
-            if (err.message.indexOf('forbidden') === 0) {
+            if (err.code === 'forbidden') {
                 log.audit({event: "library.set",type:"flow",path:req.params[0],error:"forbidden"},req);
                 res.send(403);
                 return;

@@ -302,7 +302,8 @@ function addModule(module) {
     }
     var nodes = [];
     if (registry.getModuleInfo(module)) {
-        var e = new Error("Module already loaded");
+        // TODO: nls
+        var e = new Error("module_already_loaded");
         e.code = "module_already_loaded";
         return when.reject(e);
     }

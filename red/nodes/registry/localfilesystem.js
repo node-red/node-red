@@ -19,6 +19,7 @@ var fs = require("fs");
 var path = require("path");
 
 var events = require("../../events");
+var log = require("../../log");
 
 var settings;
 var defaultNodesDir = path.resolve(path.join(__dirname,"..","..","..","nodes"));
@@ -251,7 +252,7 @@ function getModuleFiles(module) {
     
     var moduleFiles = scanTreeForNodesModules(module);
     if (moduleFiles.length === 0) {
-        var err = new Error("Cannot find module '" + module + "'");
+        var err = new Error(log._("nodes.registry.localfilesystem.module-not-found", {module:module}));
         err.code = 'MODULE_NOT_FOUND';
         throw err;
     }

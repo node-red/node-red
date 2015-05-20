@@ -54,6 +54,11 @@
         "error-send": "Communication send error: __message__"
     },
     
+    "settings": {
+        "not-available": "Settings not available",
+        "property-read-only": "Property '__prop__' is read-only"
+    },
+    
     "nodes": {
         "credentials": {
             "error":"Error loading credentials: __message__",
@@ -77,15 +82,39 @@
             "stopped": "Stopped",
             "missing-types": "Waiting for missing types to be registered:"
             
+        },
+        "flow": {
+            "unknown-type": "Unknown type: __type__",
+            "missing-types": "missing types"
+        },
+        "index": {
+            "unrecognised-id": "Unrecognised id: __id__",
+            "type-in-use": "Type in use: __msg__",
+            "unrecognised-module": "Unrecognised module: __module__"
+        },
+        "registry": {
+            "localfilesystem": {
+                "module-not-found": "Cannot find module '__module__'"
+            }
         }
     },
     
     "storage": {
+        "index": {
+            "forbidden-flow-name": "forbidden flow name"
+        },
         "localfilesystem": {
             "user-dir": "User directory : __path__",
             "flows-file": "Flows file : __path__",
             "create": "Creating new flow file"
         }
-    }
-
+    },
+    
+    "httpadminauth-deprecated": "use of httpAdminAuth is deprecated. Use adminAuth instead",
+    "unable-to-listen": "Unable to listen on __listenpath__",
+    "port-in-use": "Error: port in use",
+    "uncaught-exception": "Uncaught Exception:",
+    "admin-ui-disabled": "Admin UI disabled",
+    "server-now-running": "Server now running at __listenpath__",
+    "failed-to-start-server": "Failed to start server:"
 }
