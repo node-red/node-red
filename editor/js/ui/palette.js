@@ -78,15 +78,15 @@ RED.palette = (function() {
                 l = "<p><b>"+label+"</b><br/><i>"+type+"</i></p>";
             }
             
-            popOverContent = $(l+($("script[data-help-name|='"+type+"']").html()||"<p>no information available</p>").trim())
+            popOverContent = $(l+($("script[data-help-name|='"+type+"']").html()||"<p>"+RED._("palette.noInfo")+"</p>").trim())
                                 .filter(function(n) {
                                     return this.nodeType == 1 || (this.nodeType == 3 && this.textContent.trim().length > 0)
                                 }).slice(0,2);
         } catch(err) {
             // Malformed HTML may cause errors. TODO: need to understand what can break
-            console.log("Error generating pop-over label for '"+type+"'.");
+            console.log(RED._("palette.popOverError",{type:type}));
             console.log(err.toString());
-            popOverContent = "<p><b>"+label+"</b></p><p>no information available</p>";
+            popOverContent = "<p><b>"+label+"</b></p><p>"+RED._("palette.noInfo")+"</p>";
         }
 
 

@@ -309,11 +309,11 @@ RED.view = (function() {
                 if (activeSubflow && m) {
                     var subflowId = m[1];
                     if (subflowId === activeSubflow.id) {
-                        RED.notify("<strong>Error</strong>: Cannot add subflow to itself","error");
+                        RED.notify(RED._("notification.cannotAddSubflowToItself"),"error");
                         return;
                     }
                     if (RED.nodes.subflowContains(m[1],activeSubflow.id)) {
-                        RED.notify("<strong>Error</strong>: Cannot add subflow - circular reference detected","error");
+                        RED.notify(RED._("notification.cannotAddCircularReference"),"error");
                         return;
                     }
                     
@@ -856,7 +856,7 @@ RED.view = (function() {
                 }
             }
             clipboard = JSON.stringify(nns);
-            RED.notify(nns.length+" node"+(nns.length>1?"s":"")+" copied");
+            RED.notify(RED._("notification.nodeCopied",{count:nns.length}));
         }
     }
 
@@ -1043,9 +1043,9 @@ RED.view = (function() {
                 redraw();
             }
         } else if (d.changed) {
-            RED.notify("<strong>Warning</strong>: node has undeployed changes","warning");
+            RED.notify(RED._("notification.undeployedChanges"),"warning");
         } else {
-            RED.notify("<strong>Warning</strong>: node actions disabled within subflow","warning");
+            RED.notify(RED._("notification.nodeActionDisabled"),"warning");
         }
         d3.event.preventDefault();
     }
@@ -1754,9 +1754,9 @@ RED.view = (function() {
         } catch(error) {
             if (error.code != "NODE_RED") {
                 console.log(error.stack);
-                RED.notify("<strong>Error</strong>: "+error,"error");
+                RED.notify(RED._("notification.error")+error,"error");
             } else {
-                RED.notify("<strong>Error</strong>: "+error.message,"error");
+                RED.notify(RED._("notification.error")+error.message,"error");
             }
         }
     }

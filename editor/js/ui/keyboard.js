@@ -69,24 +69,24 @@ RED.keyboard = (function() {
             dialog = $('<div id="keyboard-help-dialog" class="hide">'+
                 '<div style="vertical-align: top;display:inline-block; box-sizing: border-box; width:50%; padding: 10px;">'+
                     '<table class="keyboard-shortcuts">'+
-                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">a</span></td><td>Select all nodes</td></tr>'+
-                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key">Click</span></td><td>Select all connected nodes</td></tr>'+
-                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">Click</span></td><td>Add/remove node from selection</td></tr>'+
-                        '<tr><td><span class="help-key">Delete</span></td><td>Delete selected nodes or link</td></tr>'+
+                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">a</span></td><td>'+RED._("keyboard.selectAll")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key">Click</span></td><td>'+RED._("keyboard.selectAllConnected")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">Click</span></td><td>'+RED._("keyboard.addRemoveNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Delete</span></td><td>'+RED._("keyboard.deleteSelected")+'</td></tr>'+
                         '<tr><td>&nbsp;</td><td></td></tr>'+
-                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">i</span></td><td>Import nodes</td></tr>'+
-                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">e</span></td><td>Export selected nodes</td></tr>'+
+                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">i</span></td><td>'+RED._("keyboard.importNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">e</span></td><td>'+RED._("keyboard.exportNode")+'</td></tr>'+
                     '</table>'+
                 '</div>'+
                 '<div style="vertical-align: top;display:inline-block; box-sizing: border-box; width:50%; padding: 10px;">'+
                     '<table class="keyboard-shortcuts">'+
-                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">Space</span></td><td>Toggle sidebar</td></tr>'+
+                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">Space</span></td><td>'+RED._("keyboard.toggleSidebar")+'</td></tr>'+
                         '<tr><td></td><td></td></tr>'+
-                        '<tr><td><span class="help-key">Delete</span></td><td>Delete selected nodes or link</td></tr>'+
+                        '<tr><td><span class="help-key">Delete</span></td><td>'+RED._("keyboard.deleteNode")+'</td></tr>'+
                         '<tr><td></td><td></td></tr>'+
-                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">c</span></td><td>Copy selected nodes</td></tr>'+
-                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">x</span></td><td>Cut selected nodes</td></tr>'+
-                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">v</span></td><td>Paste nodes</td></tr>'+
+                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">c</span></td><td>'+RED._("keyboard.copyNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">x</span></td><td>'+RED._("keyboard.cutNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">v</span></td><td>'+RED._("keyboard.pasteNode")+'</td></tr>'+
                     '</table>'+
                 '</div>'+
                 '</div>')
