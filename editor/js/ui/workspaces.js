@@ -122,11 +122,11 @@ RED.workspaces = (function() {
         modal: true,
         autoOpen: false,
         width: 500,
-        title: "Rename sheet",
+        title: "Rename sheet", // RED._("dialog.renameSheet"),
         buttons: [
             {
                 class: 'leftButton',
-                text: "Delete",
+                text: "Delete", // RED._("dialog.delete"),
                 click: function() {
                     var workspace = $(this).dialog('option','workspace');
                     $( this ).dialog( "close" );
@@ -134,7 +134,7 @@ RED.workspaces = (function() {
                 }
             },
             {
-                text: "Ok",
+                text: "Ok", // RED._("dialog.ok"),
                 click: function() {
                     var workspace = $(this).dialog('option','workspace');
                     var label = $( "#node-input-workspace-name" ).val();
@@ -148,7 +148,7 @@ RED.workspaces = (function() {
                 }
             },
             {
-                text: "Cancel",
+                text: "Cancel", // RED._("dialog.cancel"),
                 click: function() {
                     $( this ).dialog( "close" );
                 }
@@ -165,10 +165,10 @@ RED.workspaces = (function() {
         modal: true,
         autoOpen: false,
         width: 500,
-        title: "Confirm delete",
+        title: "Confirm delete", // RED._("dialog.confirmDelete"),
         buttons: [
             {
-                text: "Ok",
+                text: "Ok", // RED._("dialog.ok"),
                 click: function() {
                     var workspace = $(this).dialog('option','workspace');
                     deleteWorkspace(workspace,true);
@@ -176,7 +176,7 @@ RED.workspaces = (function() {
                 }
             },
             {
-                text: "Cancel",
+                text: "Cancel", // RED._("dialog.cancel"),
                 click: function() {
                     $( this ).dialog( "close" );
                 }
@@ -251,7 +251,7 @@ RED.workspaces = (function() {
             if (!workspace_tabs.contains(id)) {
                 var sf = RED.nodes.subflow(id);
                 if (sf) {
-                    addWorkspace({type:"subflow",id:id,label:"Subflow: "+sf.name, closeable: true});
+                    addWorkspace({type:"subflow",id:id,label:RED._("workspaces.subflow")+sf.name, closeable: true});
                 }
             } 
             workspace_tabs.activateTab(id);
@@ -259,7 +259,7 @@ RED.workspaces = (function() {
         refresh: function() {
             RED.nodes.eachSubflow(function(sf) {
                 if (workspace_tabs.contains(sf.id)) {
-                    workspace_tabs.renameTab(sf.id,"Subflow: "+sf.name);
+                    workspace_tabs.renameTab(sf.id,RED._("workspaces.subflow")+sf.name);
                 }
             });
         },

@@ -60,12 +60,12 @@ RED.sidebar.info = (function() {
 
     function refresh(node) {
         var table = '<table class="node-info"><tbody>';
-        table += '<tr class="blank"><td colspan="2">Node</td></tr>';
+        table += '<tr class="blank"><td colspan="2">'+RED._("tabInfo.node")+'</td></tr>';
         if (node.type != "subflow" && node.name) {
             table += "<tr><td>Name</td><td>&nbsp;"+node.name+"</td></tr>";
         }
-        table += "<tr><td>Type</td><td>&nbsp;"+node.type+"</td></tr>";
-        table += "<tr><td>ID</td><td>&nbsp;"+node.id+"</td></tr>";
+        table += "<tr><td>"+RED._("tabInfo.type")+"</td><td>&nbsp;"+node.type+"</td></tr>";
+        table += "<tr><td>"+RED._("tabInfo.id")+"</td><td>&nbsp;"+node.id+"</td></tr>";
         
         var m = /^subflow(:(.+))?$/.exec(node.type);
         if (m) {
@@ -76,7 +76,7 @@ RED.sidebar.info = (function() {
                 subflowNode = node;
             }
             
-            table += '<tr class="blank"><td colspan="2">Subflow</td></tr>';
+            table += '<tr class="blank"><td colspan="2">'+RED._("tabInfo.subflow")+'</td></tr>';
             
             var userCount = 0;
             var subflowType = "subflow:"+subflowNode.id;
@@ -85,12 +85,12 @@ RED.sidebar.info = (function() {
                     userCount++;
                 }
             });
-            table += "<tr><td>name</td><td>"+subflowNode.name+"</td></tr>";
-            table += "<tr><td>instances</td><td>"+userCount+"</td></tr>";
+            table += "<tr><td>"+RED._("tabInfo.name")+"</td><td>"+subflowNode.name+"</td></tr>";
+            table += "<tr><td>"+RED._("tabInfo.instances")+"</td><td>"+userCount+"</td></tr>";
         }
         
         if (!m && node.type != "subflow" && node.type != "comment") {
-            table += '<tr class="blank"><td colspan="2"><a href="#" class="node-info-property-header"><i style="width: 10px; text-align: center;" class="fa fa-caret-'+(propertiesExpanded?"down":"right")+'"></i> Properties</a></td></tr>';
+            table += '<tr class="blank"><td colspan="2"><a href="#" class="node-info-property-header"><i style="width: 10px; text-align: center;" class="fa fa-caret-'+(propertiesExpanded?"down":"right")+'"></i> '+RED._("tabInfo.properties")+'</a></td></tr>';
             if (node._def) {
                 for (var n in node._def.defaults) {
                     if (n != "name" && node._def.defaults.hasOwnProperty(n)) {
@@ -98,7 +98,7 @@ RED.sidebar.info = (function() {
                         var type = typeof val;
                         if (type === "string") {
                             if (val.length === 0) {
-                                val += '<span style="font-style: italic; color: #ccc;">blank</span>';
+                                val += '<span style="font-style: italic; color: #ccc;">'+RED._("tabInfo.blank")+'</span>';
                             } else {
                                 if (val.length > 30) {
                                     val = val.substring(0,30)+" ...";
