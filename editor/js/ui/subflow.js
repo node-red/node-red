@@ -216,7 +216,7 @@ RED.subflow = (function() {
     function convertToSubflow() {
         var selection = RED.view.selection();
         if (!selection.nodes) {
-            RED.notify("<strong>Cannot create subflow</strong>: no nodes selected","error");
+            RED.notify(RED._("notification.noNodesSelected"),"error");
             return;
         }
         var i;
@@ -276,7 +276,7 @@ RED.subflow = (function() {
         candidateOutputs.sort(function(a,b) { return a.source.y-b.source.y});
         
         if (candidateInputs.length > 1) {
-             RED.notify("<strong>Cannot create subflow</strong>: multiple inputs to selection","error");
+             RED.notify(RED._("notification.multipleInputsToSelection"),"error");
              return;
         }
         //if (candidateInputs.length == 0) {

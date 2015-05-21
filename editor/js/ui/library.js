@@ -146,8 +146,8 @@ RED.library = (function() {
             '<div class="btn-group" style="margin-left: 0px;">'+
             '<button id="node-input-'+options.type+'-lookup" class="btn input-append-right" data-toggle="dropdown"><i class="fa fa-book"></i> <i class="fa fa-caret-down"></i></button>'+
             '<ul class="dropdown-menu pull-right" role="menu">'+
-            '<li><a id="node-input-'+options.type+'-menu-open-library" tabindex="-1" href="#">Open Library...</a></li>'+
-            '<li><a id="node-input-'+options.type+'-menu-save-library" tabindex="-1" href="#">Save to Library...</a></li>'+
+            '<li><a id="node-input-'+options.type+'-menu-open-library" tabindex="-1" href="#">'+RED._("library.openLibrary")+'</a></li>'+
+            '<li><a id="node-input-'+options.type+'-menu-save-library" tabindex="-1" href="#">'+RED._("library.saveToLibrary")+'</a></li>'+
             '</ul></div>'
         );
     
@@ -232,14 +232,14 @@ RED.library = (function() {
         libraryEditor.$blockScrolling = Infinity;
         
         $( "#node-dialog-library-lookup" ).dialog({
-            title: options.type+" library",
+            title: RED._("library.typeLibrary", {type:options.type}),
             modal: true,
             autoOpen: false,
             width: 800,
             height: 450,
             buttons: [
                 {
-                    text: "Ok",
+                    text: RED._("dialog.ok"),
                     click: function() {
                         if (selectedLibraryItem) {
                             for (var i=0;i<options.fields.length;i++) {
@@ -252,7 +252,7 @@ RED.library = (function() {
                     }
                 },
                 {
-                    text: "Cancel",
+                    text: RED._("dialog.cancel"),
                     click: function() {
                         $( this ).dialog( "close" );
                     }
@@ -274,12 +274,12 @@ RED.library = (function() {
         function saveToLibrary(overwrite) {
             var name = $("#node-input-name").val().replace(/(^\s*)|(\s*$)/g,"");
             if (name === "") {
-                name = "Unnamed "+options.type;
+                name = RED._("library.unnamedType",{type:options.type});
             }
             var filename = $("#node-dialog-library-save-filename").val().replace(/(^\s*)|(\s*$)/g,"");
             var pathname = $("#node-dialog-library-save-folder").val().replace(/(^\s*)|(\s*$)/g,"");
             if (filename === "" || !/.+\.js$/.test(filename)) {
-                RED.notify("Invalid filename","warning");
+                RED.notify(RED._("notification.invalidFilename"),"warning");
                 return;
             }
             var fullpath = pathname+(pathname===""?"":"/")+filename;
@@ -328,27 +328,27 @@ RED.library = (function() {
                 data: JSON.stringify(data),
                 contentType: "application/json; charset=utf-8"
             }).done(function(data,textStatus,xhr) {
-                RED.notify("Saved "+options.type,"success");
+                RED.notify(RED._("notification.savedType", {type:options.type}),"success");
             }).fail(function(xhr,textStatus,err) {
-                RED.notify("Saved failed: "+xhr.responseJSON.message,"error");
+                RED.notify(RED._("notification.saveFailed")+xhr.responseJSON.message,"error");
             });
         }
         $( "#node-dialog-library-save-confirm" ).dialog({
-            title: "Save to library",
+            title: RED._("library.saveToLibrary"),
             modal: true,
             autoOpen: false,
             width: 530,
             height: 230,
             buttons: [
                 {
-                    text: "Ok",
+                    text: RED._("dialog.ok"),
                     click: function() {
                         saveToLibrary(true);
                         $( this ).dialog( "close" );
                     }
                 },
                 {
-                    text: "Cancel",
+                    text: RED._("dialog.cancel"),
                     click: function() {
                         $( this ).dialog( "close" );
                     }
@@ -356,21 +356,21 @@ RED.library = (function() {
             ]
         });
         $( "#node-dialog-library-save" ).dialog({
-            title: "Save to library",
+            title: RED._("library.saveToLibrary"),
             modal: true,
             autoOpen: false,
             width: 530,
             height: 230,
             buttons: [
                 {
-                    text: "Ok",
+                    text: RED._("dialog.ok"),
                     click: function() {
                         saveToLibrary(false);
                         $( this ).dialog( "close" );
                     }
                 },
                 {
-                    text: "Cancel",
+                    text: RED._("dialog.cancel"),
                     click: function() {
                         $( this ).dialog( "close" );
                     }
@@ -385,7 +385,7 @@ RED.library = (function() {
         var nns = RED.nodes.createExportableNodeSet(RED.view.selection().nodes);
         $("#dialog-form").html($("script[data-template-name='export-library-dialog']").html());
         $("#node-input-filename").attr('nodes',JSON.stringify(nns));
-        $( "#dialog" ).dialog("option","title","Export nodes to library").dialog( "open" );
+        $( "#dialog" ).dialog("option","title",RED._("library.exportToLibrary")).dialog( "open" );
     }
     
     return {

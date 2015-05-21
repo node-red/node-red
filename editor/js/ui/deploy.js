@@ -49,18 +49,18 @@ RED.deploy = (function() {
         
         if (type == "default") {
             $('<li><span class="deploy-button-group button-group">'+
-              '<a id="btn-deploy" class="deploy-button disabled" href="#"><img id="btn-deploy-icon" src="red/images/deploy-full-o.png"> <span>Deploy</span></a>'+
+              '<a id="btn-deploy" class="deploy-button disabled" href="#"><img id="btn-deploy-icon" src="red/images/deploy-full-o.png"> <span>'+RED._("deploy.deploy")+'</span></a>'+
               '<a id="btn-deploy-options" data-toggle="dropdown" class="deploy-button" href="#"><i class="fa fa-caret-down"></i></a>'+
               '</span></li>').prependTo(".header-toolbar");
               RED.menu.init({id:"btn-deploy-options",
                   options: [
-                      {id:"deploymenu-item-full",toggle:"deploy-type",icon:"red/images/deploy-full.png",label:"Full",sublabel:"Deploys everything in the workspace",selected: true, onselect:function(s) { if(s){changeDeploymentType("full")}}},
-                      {id:"deploymenu-item-flow",toggle:"deploy-type",icon:"red/images/deploy-flows.png",label:"Modified Flows",sublabel:"Only deploys flows that contain changed nodes", onselect:function(s) {if(s){changeDeploymentType("flows")}}},
-                      {id:"deploymenu-item-node",toggle:"deploy-type",icon:"red/images/deploy-nodes.png",label:"Modified Nodes",sublabel:"Only deploys nodes that have changed",onselect:function(s) { if(s){changeDeploymentType("nodes")}}}
+                      {id:"deploymenu-item-full",toggle:"deploy-type",icon:"red/images/deploy-full.png",label:RED._("deploy.full"),sublabel:RED._("deploy.fullDesc"),selected: true, onselect:function(s) { if(s){changeDeploymentType("full")}}},
+                      {id:"deploymenu-item-flow",toggle:"deploy-type",icon:"red/images/deploy-flows.png",label:RED._("deploy.modifiedFlows"),sublabel:RED._("deploy.modifiedFlowsDesc"), onselect:function(s) {if(s){changeDeploymentType("flows")}}},
+                      {id:"deploymenu-item-node",toggle:"deploy-type",icon:"red/images/deploy-nodes.png",label:RED._("deploy.modifiedNodes"),sublabel:RED._("deploy.modifiedNodesDesc"),onselect:function(s) { if(s){changeDeploymentType("nodes")}}}
                   ]
               });
         } else if (type == "simple") {
-            var label = options.label || "Deploy";
+            var label = options.label || RED._("deploy.deploy");
             var icon = 'red/images/deploy-full-o.png';
             if (options.hasOwnProperty('icon')) {
                 icon = options.icon;
@@ -83,7 +83,7 @@ RED.deploy = (function() {
                 height: "auto",
                 buttons: [
                     {
-                        text: "Confirm deploy",
+                        text: RED._("deploy.confirmDeploy"),
                         click: function() {
                             
                             var ignoreChecked = $( "#node-dialog-confirm-deploy-hide" ).prop("checked");
@@ -95,7 +95,7 @@ RED.deploy = (function() {
                         }
                     },
                     {
-                        text: "Cancel",
+                        text: RED._("deploy.cancelDeploy"),
                         click: function() {
                             $( this ).dialog( "close" );
                         }
@@ -114,7 +114,7 @@ RED.deploy = (function() {
         RED.nodes.on('change',function(state) {
             if (state.dirty) {
                 window.onbeforeunload = function() {
-                    return "You have undeployed changes.\n\nLeaving this page will lose these changes.";
+                    return RED._("deploy.undeployedChanges");
                 }
                 $("#btn-deploy").removeClass("disabled");
             } else {
@@ -215,7 +215,7 @@ RED.deploy = (function() {
                     "Node-RED-Deployment-Type":deploymentType
                 }
             }).done(function(data,textStatus,xhr) {
-                RED.notify("Successfully deployed","success");
+                RED.notify(RED._("deploy.successfulDeploy"),"success");
                 RED.nodes.eachNode(function(node) {
                     if (node.changed) {
                         node.dirty = true;
@@ -236,9 +236,9 @@ RED.deploy = (function() {
             }).fail(function(xhr,textStatus,err) {
                 RED.nodes.dirty(true);
                 if (xhr.responseText) {
-                    RED.notify("<strong>Error</strong>: "+xhr.responseJSON.message,"error");
+                    RED.notify(RED._("deploy.error")+xhr.responseJSON.message,"error");
                 } else {
-                    RED.notify("<strong>Error</strong>: no response from server","error");
+                    RED.notify(RED._("deploy.error")+RED._("deploy.noResponseError"),"error");
                 }
             }).always(function() {
                 $("#btn-deploy-icon").removeClass('spinner');
