@@ -121,10 +121,11 @@ module.exports = {
     //},
 
     // If you need to set an http proxy please set an environment variable
-    // called http_proxy outside of Node-RED in the operating system.
+    // called http_proxy (or HTTP_PROXY) outside of Node-RED in the operating system.
     // For example - http_proxy=http://myproxy.com:8080
     // (Setting it here will have no effect)
-
+    // You may also specify no_proxy (or NO_PROXY) to supply a comma separated
+    // list of domains to not proxy, eg - no_proxy=.acme.co,.acme.co.uk
 
     // The following property can be used to add a custom middleware function
     // in front of all http in nodes. This allows custom authentication to be

@@ -270,12 +270,13 @@ module.exports = function(RED) {
                 }
             }
             if (prox && !noproxy) {
-                var match = prox.match(/^(http:\/\/)?([^:\/]+)(:([0-9]+))?/i);
+                var match = prox.match(/^(http:\/\/)?(.+)?:([0-9]+)?/i);
+                console.log("MATCH",match);
                 if (match) {
                     opts.protocol = "http:";
                     opts.headers['Host'] = opts.host;
                     opts.host = opts.hostname = match[2],
-                    opts.port = (match[4] != null ? match[4] : 80),
+                    opts.port = (match[3] != null ? match[3] : 80),
                     opts.path = opts.pathname = opts.href;
                     urltotest = match[2];
                 }
