@@ -15,6 +15,7 @@
  **/
 
 var when = require('when');
+var log = require("../log");
 
 var storageModule;
 var settingsAvailable;
@@ -95,13 +96,13 @@ var storageModuleInterface = {
         
         getLibraryEntry: function(type, path) {
             if (is_malicious(path)) {
-                return when.reject(new Error('forbidden flow name'));
+                return when.reject(new Error(log._("storage.index.forbidden-flow-name")));
             }
             return storageModule.getLibraryEntry(type, path);
         },
         saveLibraryEntry: function(type, path, meta, body) {
             if (is_malicious(path)) {
-                return when.reject(new Error('forbidden flow name'));
+                return when.reject(new Error(log._("storage.index.forbidden-flow-name")));
             }
             return storageModule.saveLibraryEntry(type, path, meta, body);
         },
@@ -116,7 +117,7 @@ var storageModuleInterface = {
         },
         getFlow: function(fn) {
             if (is_malicious(fn)) {
-                return when.reject(new Error('forbidden flow name'));
+                return when.reject(new Error(log._("storage.index.forbidden-flow-name")));
             }
             if (storageModule.hasOwnProperty("getFlow")) {
                 return storageModule.getFlow(fn);
@@ -127,7 +128,7 @@ var storageModuleInterface = {
         },
         saveFlow: function(fn, data) {
             if (is_malicious(fn)) {
-                return when.reject(new Error('forbidden flow name'));
+                return when.reject(new Error(log._("storage.index.forbidden-flow-name")));
             }
             if (storageModule.hasOwnProperty("saveFlow")) {
                 return storageModule.saveFlow(fn, data);
