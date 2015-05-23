@@ -271,14 +271,18 @@ module.exports = function(RED) {
             }
             if (prox && !noproxy) {
                 var match = prox.match(/^(http:\/\/)?(.+)?:([0-9]+)?/i);
-                console.log("MATCH",match);
                 if (match) {
-                    opts.protocol = "http:";
+                    //opts.protocol = "http:";
+                    //opts.host = opts.hostname = match[2];
+                    //opts.port = (match[3] != null ? match[3] : 80);
                     opts.headers['Host'] = opts.host;
-                    opts.host = opts.hostname = match[2],
-                    opts.port = (match[3] != null ? match[3] : 80),
-                    opts.path = opts.pathname = opts.href;
-                    urltotest = match[2];
+                    var heads = opts.headers;
+                    var path = opts.pathname = opts.href;
+                    opts = urllib.parse(prox);
+                    opts.path = opts.pathname = path;
+                    opts.headers = heads;
+                    //console.log(opts);
+                    urltotest = match[0];
                 }
                 else { node.warn("Bad proxy url: "+process.env.http_proxy); }
             }
