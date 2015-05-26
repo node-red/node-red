@@ -16,64 +16,70 @@
 
 
 RED.clipboard = (function() {
-    // TODO: Fix issue where text outside an inner function cannot be NLS-enabled since RED._ is not available yet when that code is run
-    var dialog = $('<div id="clipboard-dialog" class="hide"><form class="dialog-form form-horizontal"></form></div>')
-        .appendTo("body")
-        .dialog({
-            modal: true,
-            autoOpen: false,
-            width: 500,
-            resizable: false,
-            buttons: [
-                {
-                    id: "clipboard-dialog-ok",
-                    text: "Ok", //RED._("dialog.ok"),
-                    click: function() {
-                        if (/Import/.test(dialog.dialog("option","title"))) {
-                            RED.view.importNodes($("#clipboard-import").val());
-                        }
-                        $( this ).dialog( "close" );
-                    }
-                },
-                {
-                    id: "clipboard-dialog-cancel",
-                    text: "Cancel", //RED._("dialog.cancel"),
-                    click: function() {
-                        $( this ).dialog( "close" );
-                    }
-                },
-                {
-                    id: "clipboard-dialog-close",
-                    text: "Close", //RED._("dialog.close"),
-                    click: function() {
-                        $( this ).dialog( "close" );
-                    }
-                }
-            ],
-            open: function(e) {
-                $(this).parent().find(".ui-dialog-titlebar-close").hide();
-                RED.keyboard.disable();
-            },
-            close: function(e) {
-                RED.keyboard.enable();
-            }
-    });
 
-    var dialogContainer = dialog.children(".dialog-form");
+    var dialog;
+    var dialogContainer;
+    var exportNodesDialog;
+    var importNodesDialog;
     
-    var exportNodesDialog = '<div class="form-row">'+
-        '<label for="node-input-export" style="display: block; width:100%;"><i class="fa fa-clipboard"></i>'+'Nodes:' /*RED._("dialog.nodes")*/+'</label>'+
-        '<textarea readonly style="resize: none; width: 100%; border-radius: 0px;font-family: monospace; font-size: 12px; background:#eee; padding-left: 0.5em; box-sizing:border-box;" id="clipboard-export" rows="5"></textarea>'+
-        '</div>'+
-        '<div class="form-tips">'+
-		'Select the text above and copy to the clipboard with Ctrl-C.'+
-        //RED._("dialog.selectToCopy")+
-        '</div>';
-        
-    var importNodesDialog = '<div class="form-row">'+
-        '<textarea style="resize: none; width: 100%; border-radius: 0px;font-family: monospace; font-size: 12px; background:#eee; padding-left: 0.5em; box-sizing:border-box;" id="clipboard-import" rows="5" placeholder="'+'Paste nodes here' /*RED._("dialog.pasteNodesHere")*/+'"></textarea>'+
-        '</div>';
+    function setupDialogs(){
+        dialog = $('<div id="clipboard-dialog" class="hide"><form class="dialog-form form-horizontal"></form></div>')
+            .appendTo("body")
+            .dialog({
+                modal: true,
+                autoOpen: false,
+                width: 500,
+                resizable: false,
+                buttons: [
+                    {
+                        id: "clipboard-dialog-ok",
+                        text: RED._("dialog.ok"),
+                        click: function() {
+                            if (/Import/.test(dialog.dialog("option","title"))) {
+                                RED.view.importNodes($("#clipboard-import").val());
+                            }
+                            $( this ).dialog( "close" );
+                        }
+                    },
+                    {
+                        id: "clipboard-dialog-cancel",
+                        text: RED._("dialog.cancel"),
+                        click: function() {
+                            $( this ).dialog( "close" );
+                        }
+                    },
+                    {
+                        id: "clipboard-dialog-close",
+                        text: RED._("dialog.close"),
+                        click: function() {
+                            $( this ).dialog( "close" );
+                        }
+                    }
+                ],
+                open: function(e) {
+                    $(this).parent().find(".ui-dialog-titlebar-close").hide();
+                    RED.keyboard.disable();
+                },
+                close: function(e) {
+                    RED.keyboard.enable();
+                }
+        });
 
+        dialogContainer = dialog.children(".dialog-form");
+        
+        exportNodesDialog = '<div class="form-row">'+
+            '<label for="node-input-export" style="display: block; width:100%;"><i class="fa fa-clipboard"></i>'+RED._("dialog.nodes")+'</label>'+
+            '<textarea readonly style="resize: none; width: 100%; border-radius: 0px;font-family: monospace; font-size: 12px; background:#eee; padding-left: 0.5em; box-sizing:border-box;" id="clipboard-export" rows="5"></textarea>'+
+            '</div>'+
+            '<div class="form-tips">'+
+            RED._("dialog.selectToCopy")+
+            '</div>';
+            
+        importNodesDialog = '<div class="form-row">'+
+            '<textarea style="resize: none; width: 100%; border-radius: 0px;font-family: monospace; font-size: 12px; background:#eee; padding-left: 0.5em; box-sizing:border-box;" id="clipboard-import" rows="5" placeholder="'+RED._("dialog.pasteNodesHere")+'"></textarea>'+
+            '</div>';
+    }
+       
     function validateImport() {
         var importInput = $("#clipboard-import");
         var v = importInput.val();
@@ -88,7 +94,7 @@ RED.clipboard = (function() {
             $("#clipboard-dialog-ok").button("disable");
         }
     }
-    
+
     function importNodes() {
         dialogContainer.empty();
         dialogContainer.append($(importNodesDialog));
@@ -132,6 +138,7 @@ RED.clipboard = (function() {
     
     return {
         init: function() {
+            setupDialogs();
             RED.view.on("selection-changed",function(selection) {
                 if (!selection.nodes) {
                     RED.menu.setDisabled("menu-item-export",true);
