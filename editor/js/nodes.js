@@ -118,7 +118,7 @@ RED.nodes = (function() {
             },
             removeNodeType: function(nt) {
                 if (nt.substring(0,8) != "subflow:") {
-                    throw new Error("this api is subflow only. called with:",nt);
+                    throw new Error(RED._("error.apiSubflowOnly"),nt);
                 }
                 delete nodeDefinitions[nt];
                 RED.palette.remove(nt);
@@ -543,7 +543,7 @@ RED.nodes = (function() {
             try {
                 newNodes = JSON.parse(newNodesObj);
             } catch(err) {
-                var e = new Error("Invalid flow: "+err.message);
+                var e = new Error(RED._("error.invalidFlow")+err.message);
                 e.code = "NODE_RED";
                 throw e;
             }
@@ -571,7 +571,7 @@ RED.nodes = (function() {
         if (unknownTypes.length > 0) {
             var typeList = "<ul><li>"+unknownTypes.join("</li><li>")+"</li></ul>";
             var type = "type"+(unknownTypes.length > 1?"s":"");
-            RED.notify("<strong>Imported unrecognised "+type+":</strong>"+typeList,"error",false,10000);
+            RED.notify("<strong>"+RED._("notification.importUnrecognised")+type+":</strong>"+typeList,"error",false,10000);
             //"DO NOT DEPLOY while in this state.<br/>Either, add missing types to Node-RED, restart and then reload page,<br/>or delete unknown "+n.name+", rewire as required, and then deploy.","error");
         }
 
@@ -584,10 +584,10 @@ RED.nodes = (function() {
                     var subflowId = m[1];
                     var err;
                     if (subflowId === activeSubflow.id) {
-                        err = new Error("Cannot add subflow to itself");
+                        err = new Error(RED._("error.cannotAddSubflowToItself"));
                     }
                     if (subflowContains(m[1],activeSubflow.id)) {
-                        err = new Error("Cannot add subflow - circular reference detected");
+                        err = new Error(RED._("error.cannotAddCircularReference"));
                     }
                     if (err) {
                         // TODO: standardise error codes
