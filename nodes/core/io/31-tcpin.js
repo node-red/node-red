@@ -1,5 +1,5 @@
 /**
- * Copyright 2013,2014 IBM Corp.
+ * Copyright 2013,2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ module.exports = function(RED) {
                 });
                 client.on('end', function() {
                     if (!node.stream || (node.datatype == "utf8" && node.newline != "" && buffer.length > 0)) {
-                        var msg = {topic:node.topic,payload:buffer};
+                        var msg = {topic:node.topic, payload:buffer};
                         msg._session = {type:"tcp",id:id};
                         if (buffer.length !== 0) {
                             end = true; // only ask for fast re-connect if we actually got something
@@ -141,13 +141,13 @@ module.exports = function(RED) {
                             buffer = buffer+data;
                             var parts = buffer.split(node.newline);
                             for (var i = 0; i<parts.length-1; i+=1) {
-                                msg = {topic:node.topic, payload:parts[i],ip:socket.remoteAddress,port:socket.remotePort,connected:true};
+                                msg = {topic:node.topic, payload:parts[i],ip:socket.remoteAddress,port:socket.remotePort};
                                 msg._session = {type:"tcp",id:id};
                                 node.send(msg);
                             }
                             buffer = parts[parts.length-1];
                         } else {
-                            msg = {topic:node.topic, payload:data, connected:true};
+                            msg = {topic:node.topic, payload:data};
                             msg._session = {type:"tcp",id:id};
                             node.send(msg);
                         }
@@ -162,7 +162,7 @@ module.exports = function(RED) {
                 socket.on('end', function() {
                     if (!node.stream || (node.datatype === "utf8" && node.newline !== "")) {
                         if (buffer.length > 0) {
-                            var msg = {topic:node.topic,payload:buffer};
+                            var msg = {topic:node.topic, payload:buffer};
                             msg._session = {type:"tcp",id:id};
                             node.send(msg);
                         }
@@ -236,7 +236,7 @@ module.exports = function(RED) {
                     node.status({fill:"green",shape:"dot",text:"connected"});
                 });
                 client.on('error', function (err) {
-                    node.log('error : '+err);
+                    node.log(err);
                 });
                 client.on('end', function (err) {
                 });
@@ -334,7 +334,7 @@ module.exports = function(RED) {
                     } else {
                         buffer = new Buffer(""+msg.payload);
                     }
-                    for (var i = 0; i<connectedSockets.length;i+=1) {
+                    for (var i = 0; i < connectedSockets.length; i += 1) {
                         if (node.doend === true) { connectedSockets[i].end(buffer); }
                         else { connectedSockets[i].write(buffer); }
                     }
@@ -376,11 +376,11 @@ module.exports = function(RED) {
         this.splitc = n.splitc;
 
         if (this.out != "char") { this.splitc = Number(this.splitc); }
-        else { this.splitc.replace("\\n","\n").replace("\\r","\r").replace("\\t","\t").replace("\\e","\e").replace("\\f","\f").replace("\\0","\0"); } // jshint ignore:line
+        else { this.splitc = this.splitc.replace("\\n",0x0A).replace("\\r",0x0D).replace("\\t",0x09).replace("\\e",0x1B).replace("\\f",0x0C).replace("\\0",0x00); } // jshint ignore:line
 
         var buf;
         if (this.out == "count") { buf = new Buffer(this.splitc); }
-        else { buf = new Buffer(32768); } // set it to 32k... hopefully big enough for most.... but only hopefully
+        else { buf = new Buffer(65536); } // set it to 64k... hopefully big enough for most TCP packets.... but only hopefully
 
         this.connected = false;
         var node = this;
@@ -394,9 +394,11 @@ module.exports = function(RED) {
             if (!node.connected) {
                 client = net.Socket();
                 client.setTimeout(socketTimeout);
-                node.status({});
+                //node.status({});
                 var host = node.server || msg.host;
                 var port = node.port || msg.port;
+                var m;
+
                 if (host && port) {
                     client.connect(port, host, function() {
                         //node.log('client connected');
@@ -411,10 +413,10 @@ module.exports = function(RED) {
 
                 client.on('data', function(data) {
                     //node.log("data:"+ data.length+":"+ data);
-                    if (node.splitc === 0) {
+                    if (node.out == "sit") { // if we are staying connected just send the buffer
                         node.send({"payload": data});
                     }
-                    else if (node.out === "sit") { // if we are staying connected just send the buffer
+                    else if (node.splitc === 0) {
                         node.send({"payload": data});
                     }
                     else {
@@ -428,11 +430,10 @@ module.exports = function(RED) {
                                 else {
                                     node.tout = setTimeout(function () {
                                         node.tout = null;
-                                        var m = new Buffer(i+1);
+                                        m = new Buffer(i+1);
                                         buf.copy(m,0,0,i+1);
-                                        node.send({"payload": m});
+                                        node.send({"payload":m});
                                         if (client) { client.end(); }
-                                        m = null;
                                     }, node.splitc);
                                     i = 0;
                                     buf[0] = data[j];
@@ -442,8 +443,9 @@ module.exports = function(RED) {
                             else if (node.out == "count") {
                                 buf[i] = data[j];
                                 i += 1;
-                                if ( i >= node.serialConfig.count) {
-                                    node.send({"payload": buf});
+                                if ( i >= node.splitc) {
+                                    m = new Buffer(i);
+                                    buf.copy(m,0,0,i);
                                     if (client) { client.end(); }
                                     i = 0;
                                 }
@@ -453,11 +455,9 @@ module.exports = function(RED) {
                                 buf[i] = data[j];
                                 i += 1;
                                 if (data[j] == node.splitc) {
-                                    var m = new Buffer(i);
+                                    m = new Buffer(i);
                                     buf.copy(m,0,0,i);
-                                    node.send({"payload": m});
                                     if (client) { client.end(); }
-                                    m = null;
                                     i = 0;
                                 }
                             }
@@ -466,9 +466,9 @@ module.exports = function(RED) {
                 });
 
                 client.on('end', function() {
-                    //node.log('client disconnected');
                     node.connected = false;
                     node.status({});
+                    node.send({"payload":m});
                     client = null;
                 });
 

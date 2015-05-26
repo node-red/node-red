@@ -66,6 +66,7 @@
         category: 'input',
         color:"Silver",
         defaults: {
+            name: {value:""},
             server: {value:"server",required:true},
             host: {value:"",validate:function(v) { return (this.server == "server")||v.length > 0;} },
             port: {value:"",required:true,validate:RED.validators.number()},
@@ -73,7 +74,6 @@
             datatype:{value:"buffer"},
             newline:{value:""},
             topic: {value:""},
-            name: {value:""},
             base64: {/*deprecated*/ value:false,required:true}
         },
         inputs:0,
@@ -229,7 +229,7 @@
     </div>
     <div class="form-row">
         <label for="node-input-out"><i class="fa fa-sign-out"></i> Return</label>
-        <select type="text" id="node-input-out" style="width:52%;">
+        <select type="text" id="node-input-out" style="width:56%;">
             <option value="time">after a fixed timeout of</option>
             <option value="char">when character received is</option>
             <option value="count">a fixed number of characters</option>
