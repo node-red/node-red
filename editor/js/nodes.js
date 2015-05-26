@@ -720,11 +720,13 @@ RED.nodes = (function() {
                                     defaults: {},
                                     label: "unknown: "+n.type,
                                     labelStyle: "node_label_italic",
-                                    outputs: n.outputs||n.wires.length
+                                    outputs: n.outputs||n.wires.length,
+                                    set: registry.getNodeSet("node-red/unknown")
                                 }
                             } else {
                                 node._def = {
-                                    category:"config"
+                                    category:"config",
+                                    set: registry.getNodeSet("node-red/unknown")
                                 };
                                 node.users = [];
                             }
