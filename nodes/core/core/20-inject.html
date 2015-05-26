@@ -122,7 +122,7 @@
 
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
 
     <div class="form-tips" data-i18n="[html]inject.tip"></div>
@@ -494,13 +494,13 @@
                     },
                     error: function(jqXHR,textStatus,errorThrown) {
                         if (jqXHR.status == 404) {
-                            RED.notify(node._("inject.error",{message:node._("inject.errors.not-deployed")}),"error");
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.not-deployed")}),"error");
                         } else if (jqXHR.status == 500) {
-                            RED.notify(node._("inject.error",{message:node._("inject.errors.failed")}),"error");
+                            RED.notify(node._("common.notification.error",{message:node._("inject.errors.failed")}),"error");
                         } else if (jqXHR.status == 0) {
-                            RED.notify(node._("inject.error",{message:node._("inject.errors.no-response")}),"error");
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.no-response")}),"error");
                         } else {
-                            RED.notify(node._("inject.error",{message:node._("inject.errors.not-deployed",{status:jqXHR.status,message:textStatus})}),"error");
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.unexpected",{status:jqXHR.status,message:textStatus})}),"error");
                         }
                     }
                 });
