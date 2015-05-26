@@ -19,7 +19,7 @@ module.exports = {
     get: function(req,res) {
         var namespace = req.params[0];
         namespace = namespace.replace(/\.json$/,"");
-        var lang = "en-US"; // TODO: determine requested lang
+        var lang = req.query["lang"]||"en-US"; // TODO: determine requested lang
         var catalog = i18n.catalog(namespace,lang);
         res.json(catalog||{});
     }
