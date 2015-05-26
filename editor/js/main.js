@@ -200,6 +200,7 @@ var RED = (function() {
         RED.workspaces.init();
         RED.clipboard.init();
         RED.view.init();
+        RED.editor.init();
         
         RED.deploy.init(RED.settings.theme("deployButton",null));
         
