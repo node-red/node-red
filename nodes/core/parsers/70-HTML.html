@@ -16,31 +16,31 @@
 
 <script type="text/x-red" data-template-name="html">
     <div class="form-row">
-        <label for="node-input-tag"><i class="fa fa-filter"></i> Select</label>
-        <input type="text" id="node-input-tag" placeholder="h1">
+        <label for="node-input-tag"><i class="fa fa-filter"></i> <span data-i18n="html.label.select"></span></label>
+        <input type="text" id="node-input-tag" style="width:73% !important" placeholder="h1">
     </div>
     <div class="form-row">
-        <label for="node-input-ret"><i class="fa fa-sign-out"></i> Output</label>
-        <select id="node-input-ret" style="width:73% !important">
-            <option value="html">the html content of the elements</option>
-            <option value="text">only the text content of the elements</option>
+        <label for="node-input-ret"><i class="fa fa-sign-out"></i> <span data-i18n="html.label.output"></span></label>
+        <select id="node-input-ret" style="width:76% !important">
+            <option value="html" data-i18n="html.htmlcontent"></option>
+            <option value="text"data-i18n="html.textcontent"></option>
             <!-- <option value="attr">an object of any attributes</option> -->
             <!-- <option value="val">return the value from a form element</option> -->
         </select>
     </div>
     <div class="form-row">
         <label for="node-input-as">&nbsp;</label>
-        <select id="node-input-as" style="width:73% !important">
-            <option value="single">as a single message containing an array</option>
-            <option value="multi">as multiple messages, one for each element</option>
+        <select id="node-input-as" style="width:76% !important">
+            <option value="single" data-i18n="html.single"></option>
+            <option value="multi" data-i18n="html.multi"></option>
         </select>
     </div>
     <br/>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" style="width:73% !important" data-i18n="[placeholder]common.label.nameph">
     </div>
-    <div class="form-tips">Tip: The <b>Select</b> value is a <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_new"><i><u>CSS Selector</u></i></a>, similar to a jQuery selector.</div>
+    <div class="form-tips"><span data-i18n="[html]html.tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="html">

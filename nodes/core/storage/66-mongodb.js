@@ -76,7 +76,7 @@ module.exports = function(RED) {
                             if (msg.collection) {
                                 coll = db.collection(msg.collection);
                             } else {
-                                node.error("No collection defined",msg);
+                                node.error(RED._("mongodb.errors.nocollection"),msg);
                                 return;
                             }
                         }
@@ -143,7 +143,7 @@ module.exports = function(RED) {
                 }
             });
         } else {
-            this.error("missing mongodb configuration");
+            this.error(RED._("mongodb.errors.missingconfig"));
         }
 
         this.on("close", function() {
@@ -178,7 +178,7 @@ module.exports = function(RED) {
                             if (msg.collection) {
                                 coll = db.collection(msg.collection);
                             } else {
-                                node.error("No collection defined");
+                                node.error(RED._("mongodb.errors.nocollection"));
                                 return;
                             }
                         }
@@ -231,7 +231,7 @@ module.exports = function(RED) {
                 }
             });
         } else {
-            this.error("missing mongodb configuration");
+            this.error(RED._("mongodb.errors.missingconfig"));
         }
 
         this.on("close", function() {

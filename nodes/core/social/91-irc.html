@@ -16,19 +16,18 @@
 
 <script type="text/x-red" data-template-name="irc in">
     <div class="form-row">
-        <label for="node-input-ircserver"><i class="fa fa-globe"></i> IRC Server</label>
+        <label for="node-input-ircserver"><i class="fa fa-globe"></i> <span data-i18n="irc.label.ircserver"></span></label>
         <input type="text" id="node-input-ircserver">
     </div>
     <div class="form-row">
-        <label for="node-input-channel"><i class="fa fa-random"></i> Channel</label>
+        <label for="node-input-channel"><i class="fa fa-random"></i> <span data-i18n="irc.label.channel"></span></label>
         <input type="text" id="node-input-channel" placeholder="#nodered">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
-    <div class="form-tips">The channel to join must start with a # (as per normal irc rules...)<br/>
-    You may join multiple channels by comma separating a list - #chan1,#chan2,etc.</div>
+    <div class="form-tips"><span data-i18n="[html]irc.in-tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="irc in">
@@ -118,27 +117,26 @@
 
 <script type="text/x-red" data-template-name="irc out">
     <div class="form-row">
-        <label for="node-input-ircserver"><i class="fa fa-globe"></i> IRC Server</label>
+        <label for="node-input-ircserver"><i class="fa fa-globe"></i> <span data-i18n="irc.label.ircserver"></span></label>
         <input type="text" id="node-input-ircserver">
     </div>
     <div class="form-row">
-        <label for="node-input-channel"><i class="fa fa-random"></i> Channel</label>
+        <label for="node-input-channel"><i class="fa fa-random"></i> <span data-i18n="irc.label.channel"></span></label>
         <input type="text" id="node-input-channel" placeholder="#nodered">
     </div>
     <div class="form-row">
-        <label for="node-input-sendObject"><i class="fa fa-arrows"></i> Action</label>
+        <label for="node-input-sendObject"><i class="fa fa-arrows"></i> <span data-i18n="irc.label.action"></span></label>
         <select type="text" id="node-input-sendObject" style="display: inline-block; vertical-align: middle; width:70%;">
-            <option value="pay">Send payload to channel(s)</option>
-            <option value="true">Use msg.topic to set nickname or channel(s)</option>
-            <option value="false">Send complete msg object to channel(s)</option>
+            <option value="pay" data-i18n="irc.payload"></option>
+            <option value="true" data-i18n="irc.topic"></option>
+            <option value="false" data-i18n="irc.msg"></option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
-    <div class="form-tips">The channel to join must start with a # (as per normal irc rules...)<br/>
-    Sending the complete object will stringify the whole msg object before sending.</div>
+    <div class="form-tips"><span data-i18n="[html]irc.out-tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="irc out">
@@ -183,23 +181,23 @@
 
 <script type="text/x-red" data-template-name="irc-server">
     <div class="form-row">
-        <label for="node-config-input-server"><i class="fa fa-globe"></i> IRC Server</label>
+        <label for="node-config-input-server"><i class="fa fa-globe"></i> <span data-i18n="irc.label.ircserver"></span></label>
         <input type="text" id="node-config-input-server" placeholder="irc.freenode.net" style="width: 45%;" >
-        <label for="node-config-input-port" style="margin-left: 10px; width: 35px; "> Port</label>
-        <input type="text" id="node-config-input-port" placeholder="Port" style="width:45px">
+        <label for="node-config-input-port" style="margin-left: 10px; width: 35px; "> <span data-i18n="irc.label.port"></span></label>
+        <input type="text" id="node-config-input-port" data-i18n="[placeholder]irc.label.portph" style="width:45px">
     </div>
     <div class="form-row">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-config-input-ssl" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-config-input-ssl" style="width: 70%;">Use Secure SSL connection ?</label>
+        <label for="node-config-input-ssl" style="width: 70%;"><span data-i18n="irc.label.ssl"></span></label>
     </div>
         <div class="form-row" id="certrow">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-config-input-cert" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-config-input-cert" style="width: 70%;">Allow self-signed certificates ?</label>
+        <label for="node-config-input-cert" style="width: 70%;"><span data-i18n="irc.label.self"></span></label>
     </div>
     <div class="form-row">
-        <label for="node-config-input-nickname"><i class="fa fa-user"></i> Nickname</label>
+        <label for="node-config-input-nickname"><i class="fa fa-user"></i> <span data-i18n="irc.label.nickname"></span></label>
         <input type="text" id="node-config-input-nickname" placeholder="joe123">
     </div>
 </script>

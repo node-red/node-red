@@ -111,7 +111,7 @@ describe('XML node', function() {
                         return evt[0].type == "xml";
                     });
                     logEvents.should.have.length(1);
-                    logEvents[0][0].should.have.a.property('msg',"This node only handles xml strings or js objects.");
+                    logEvents[0][0].should.have.a.property('msg',"xml.errors.xml_js");
                     done();
                 } catch(err) {
                     done(err);

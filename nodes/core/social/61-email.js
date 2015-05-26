@@ -40,7 +40,7 @@ module.exports = function(RED) {
                 this.userid = globalkeys.user;
                 flag = true;
             } else {
-                this.error("No e-mail userid set");
+                this.error(RED._("email.errors.nouserid"));
             }
         }
         if (this.credentials && this.credentials.hasOwnProperty("password")) {
@@ -50,7 +50,7 @@ module.exports = function(RED) {
                 this.password = globalkeys.pass;
                 flag = true;
             } else {
-                this.error("No e-mail password set");
+                this.error(RED._("email.errors.nopassword"));
             }
         }
         if (flag) {
@@ -71,9 +71,9 @@ module.exports = function(RED) {
         this.on("input", function(msg) {
             if (msg.hasOwnProperty("payload")) {
                 if (smtpTransport) {
-                    node.status({fill:"blue",shape:"dot",text:"sending"});
+                    node.status({fill:"blue",shape:"dot",text:RED._("common.status.sending")});
                     if (msg.to && node.name && (msg.to !== node.name)) {
-                        node.warn("Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props");
+                        node.warn(RED._("email.errors.nooverride"));
                     }
                     var sendopts = { from: node.userid };   // sender address
                     sendopts.to = node.name || msg.to; // comma separated list of addressees
@@ -84,7 +84,7 @@ module.exports = function(RED) {
                             sendopts.attachments[0].contentType = msg.headers["content-type"];
                         }
                         // Create some body text..
-                        sendopts.text = "Your file from Node-RED is attached : "+(msg.filename.replace(/^.*[\\\/]/, '') || "file.bin")+ (msg.hasOwnProperty("description") ? "\n\n"+msg.description : "");
+                        sendopts.text = RED._("email.errors.yourfile")+" : "+(msg.filename.replace(/^.*[\\\/]/, '') || "file.bin")+ (msg.hasOwnProperty("description") ? "\n\n"+msg.description : "");
                     }
                     else {
                         var payload = RED.util.ensureString(msg.payload);
@@ -95,16 +95,16 @@ module.exports = function(RED) {
                     smtpTransport.sendMail(sendopts, function(error, info) {
                         if (error) {
                             node.error(error,msg);
-                            node.status({fill:"red",shape:"ring",text:"send failed"});
+                            node.status({fill:"red",shape:"ring",text:RED._("common.status.sendfail")});
                         } else {
-                            node.log("Message sent: " + info.response);
+                            node.log(RED._("email.errors.messagesent")+": " + info.response);
                             node.status({});
                         }
                     });
                 }
-                else { node.warn("No Email credentials found. See info panel."); }
+                else { node.warn(RED._("email.errors.nocredentials")); }
             }
-            else { node.warn("No payload to send"); }
+            else { node.warn(RED._("email.errors.nopayload")); }
         });
     }
     RED.nodes.registerType("e-mail",EmailNode,{
@@ -131,7 +131,7 @@ module.exports = function(RED) {
                 this.userid = globalkeys.user;
                 flag = true;
             } else {
-                this.error("No e-mail userid set");
+                this.error(RED._("email.errors.nouserid"));
             }
         }
         if (this.credentials && this.credentials.hasOwnProperty("password")) {
@@ -141,7 +141,7 @@ module.exports = function(RED) {
                 this.password = globalkeys.pass;
                 flag = true;
             } else {
-                this.error("No e-mail password set");
+                this.error(RED._("email.errors.nopassword"));
             }
         }
         if (flag) {
@@ -164,7 +164,7 @@ module.exports = function(RED) {
         });
 
         if (!isNaN(this.repeat) && this.repeat > 0) {
-            node.log("repeat = "+this.repeat);
+            node.log(RED._("email.errors.repeat")+" = "+this.repeat);
             this.interval_id = setInterval( function() {
                 node.emit("input",{});
             }, this.repeat );
@@ -172,19 +172,19 @@ module.exports = function(RED) {
 
         this.on("input", function(msg) {
             imap.once('ready', function() {
-                node.status({fill:"blue",shape:"dot",text:"fetching"});
+                node.status({fill:"blue",shape:"dot",text:RED._("common.status.fetching")});
                 var pay = {};
                 imap.openBox(node.box, false, function(err, box) {
                     if (err) {
-                        node.status({fill:"red",shape:"ring",text:"fetch folder error"});
-                        node.error("Failed to fetch folder "+node.box,err);
+                        node.status({fill:"red",shape:"ring",text:RED._("common.status.foldererror")});
+                        node.error(RED._("email.errors.fetchfail")+" "+node.box,err);
                     }
                     else {
                         if (box.messages.total > 0) {
                             //var f = imap.seq.fetch(box.messages.total + ':*', { markSeen:true, bodies: ['HEADER.FIELDS (FROM SUBJECT DATE TO CC BCC)','TEXT'] });
                             var f = imap.seq.fetch(box.messages.total + ':*', { markSeen:true, bodies: ['HEADER','TEXT'] });
                             f.on('message', function(msg, seqno) {
-                                node.log('message: #'+ seqno);
+                                node.log(RED._("email.errors.message")+': #'+ seqno);
                                 var prefix = '(#' + seqno + ') ';
                                 msg.on('body', function(stream, info) {
                                     var buffer = '';
@@ -215,45 +215,45 @@ module.exports = function(RED) {
                                     });
                                 });
                                 msg.on('end', function() {
-                                    //node.log('Finished: '+prefix);
+                                    //node.log(RED._("email.errors.finished")+': '+prefix);
                                 });
                             });
                             f.on('error', function(err) {
-                                node.warn('fetch message error: ' + err);
-                                node.status({fill:"red",shape:"ring",text:"fetch message error"});
+                                node.warn(RED._("email.errors.messageerror")+': ' + err);
+                                node.status({fill:"red",shape:"ring",text:RED._("common.status.messageerror")});
                             });
                             f.on('end', function() {
                                 delete(pay._msgid);
                                 if (JSON.stringify(pay) !== oldmail) {
                                     oldmail = JSON.stringify(pay);
                                     node.send(pay);
-                                    node.log('received new email: '+pay.topic);
+                                    node.log(RED._("email.errors.newemail")+': '+pay.topic);
                                 }
-                                else { node.log('duplicate not sent: '+pay.topic); }
-                                //node.status({fill:"green",shape:"dot",text:"ok"});
+                                else { node.log(RED._("email.errors.duplicate")+': '+pay.topic); }
+                                //node.status({fill:"green",shape:"dot",text:RED._("common.status.ok")});
                                 node.status({});
                             });
                         }
                         else {
-                            node.log("you have achieved inbox zero");
-                            //node.status({fill:"green",shape:"dot",text:"ok"});
+                            node.log(RED._("email.errors.inboxzero"));
+                            //node.status({fill:"green",shape:"dot",text:RED._("common.status.ok")});
                             node.status({});
                         }
                     }
                     imap.end();
                 });
             });
-            node.status({fill:"grey",shape:"dot",text:"connecting"});
+            node.status({fill:"grey",shape:"dot",text:RED._("common.status.connecting")});
             imap.connect();
         });
 
         imap.on('error', function(err) {
             node.log(err);
-            node.status({fill:"red",shape:"ring",text:"connect error"});
+            node.status({fill:"red",shape:"ring",text:RED._("common.status.connecterror")});
         });
 
         this.on("error", function(err) {
-            node.log("error: ",err);
+            node.log(RED._("email.errors.error")+": ",err);
         });
 
         this.on("close", function() {

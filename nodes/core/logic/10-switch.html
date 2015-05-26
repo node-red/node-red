@@ -16,8 +16,8 @@
 
 <script type="text/x-red" data-template-name="switch">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
     <div class="form-row">
         If msg.<input type="text" id="node-input-property" style="width: 200px;"/>
@@ -28,12 +28,12 @@
         </div>
     </div>
     <div class="form-row">
-        <a href="#" class="btn btn-mini" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> rule</a>
+        <a href="#" class="btn btn-mini" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="switch.label.rule"></span></a>
     </div>
     <div class="form-row">
         <select id="node-input-checkall" style="width:100%; margin-right:5px;">
-            <option value="true">checking all rules</option>
-            <option value="false">stopping after first match</option>
+            <option value="true" data-i18n="switch.checkall"></option>
+            <option value="false" data-i18n="switch.stopfirst"></option>
         </select>
     </div>
 </script>
@@ -61,7 +61,7 @@
         outputs: 1,
         icon: "switch.png",
         label: function() {
-            return this.name||"switch";
+            return this.name||this._("switch.label.switchlabel");
         },
         oneditprepare: function() {
 

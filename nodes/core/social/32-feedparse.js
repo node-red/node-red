@@ -38,7 +38,7 @@ module.exports = function(RED) {
                 req.on('error', function(err) { node.error(err); });
 
                 req.on('response', function(res) {
-                    if (res.statusCode != 200) { node.warn('error - Bad status code'); }
+                    if (res.statusCode != 200) { node.warn(RED._("feedparse.errors.badstatuscode")); }
                     else { res.pipe(feedparser); }
                 });
 
@@ -65,7 +65,7 @@ module.exports = function(RED) {
             this.interval_id = setInterval(function() { getFeed(); }, node.interval);
             getFeed();
         } else {
-            this.error("Invalid url");
+            this.error(RED._("feedparse.errors.invalidurl"));
         }
 
         this.on("close", function() {

@@ -104,7 +104,7 @@ module.exports = function(RED) {
                             node.status({text:node.buffer.length});
                         }
                         if (node.buffer.length > 1000) {
-                            node.warn(this.name + " buffer exceeded 1000 messages");
+                            node.warn(this.name + " " + RED._("delay.buffererr"));
                         }
                     } else {
                         node.send(msg);

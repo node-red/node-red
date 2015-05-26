@@ -16,11 +16,11 @@
 
 <script type="text/x-red" data-template-name="trigger">
     <div class="form-row">
-        <label for="node-input-op1type"><i class="fa fa-arrow-up"></i> Output</label>
+        <label for="node-input-op1type"><i class="fa fa-arrow-up"></i> <span data-i18n="trigger.output1"></span></label>
         <select id="node-input-op1type" style="width:73% !important">
-            <option value="val">the value below</option>
-            <option value="pay">the existing payload</option>
-            <option value="nul">nothing (no output)</option>
+            <option value="val" data-i18n="trigger.below"></option>
+            <option value="pay" data-i18n="trigger.payload"></option>
+            <option value="nul" data-i18n="trigger.nothing"></option>
         </select>
     </div>
     <div class="form-row" id="node-op1">
@@ -28,21 +28,21 @@
         <input type="text" id="node-input-op1">
     </div>
     <div class="form-row">
-        <label for="node-input-duration"><i class="fa fa-clock-o"></i> then wait</label>
+        <label for="node-input-duration"><i class="fa fa-clock-o"></i> <span data-i18n="trigger.wait"></span></label>
         <input type="text" id="node-input-duration" placeholder="250" style="direction:rtl; width:70px !important">
         <select id="node-input-units" style="width:140px !important">
-            <option value="ms">Milliseconds</option>
-            <option value="s">Seconds</option>
-            <option value="min">Minutes</option>
-            <option value="hr">Hours</option>
+            <option value="ms" data-i18n="trigger.milisecs"></option>
+            <option value="s" data-i18n="trigger.secs"></option>
+            <option value="min" data-i18n="trigger.mins"></option>
+            <option value="hr" data-i18n="trigger.hours"></option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-op2type"><i class="fa fa-arrow-down"></i> output</label>
+        <label for="node-input-op2type"><i class="fa fa-arrow-down"></i> <span data-i18n="trigger.output2"></span></label>
         <select id="node-input-op2type" style="width:73% !important">
-            <option value="val">the value below</option>
-            <option value="pay">the existing payload</option>
-            <option value="nul">nothing (no output)</option>
+            <option value="val" data-i18n="trigger.below"></option>
+            <option value="pay" data-i18n="trigger.payload"></option>
+            <option value="nul" data-i18n="trigger.nothing"></option>
         </select>
     </div>
     <div class="form-row" id="node-op2">
@@ -50,18 +50,18 @@
         <input type="text" id="node-input-op2">
     </div>
     <div class="form-row">
-        <label for="node-input-extend"><i class="fa fa-repeat"></i> and</label>
+        <label for="node-input-extend"><i class="fa fa-repeat"></i> <span data-i18n="trigger.and"></span></label>
         <select id="node-input-extend" style="width:73% !important">
-            <option value="false">don't extend the timer if retriggered</option>
-            <option value="true">extend the timer if retriggered</option>
+            <option value="false" data-i18n="trigger.notext"></option>
+            <option value="true" data-i18n="trigger.extend"></option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
     <!-- <div class="form-tips">Tip: Outputs can be values, null, {{templated}} or msg.payload<br/> -->
-    <div class="form-tips">Setting the timeout to 0 sets an infinite timeout = single shot.</div>
+    <div class="form-tips"><span data-i18n="trigger.tip"></span></div>
     <script>
     {
         $("#node-input-op1type").change(function() {
@@ -111,10 +111,10 @@
         icon: "trigger.png",
         label: function() {
             if (this.duration > 0) {
-                return this.name||"trigger "+this.duration+this.units;
+                return this.name|| this._("trigger.triggerlabel")+" "+this.duration+this.units;
             }
             else {
-                return this.name||"trigger once &infin;";
+                return this.name|| this._("trigger.triggeroncelabel");
             }
         },
         labelStyle: function() {

@@ -43,7 +43,7 @@ module.exports = function(RED) {
                 node.handleEvent(id,socket,'message',data,flags);
             });
             socket.on('error', function(err) {
-                node.warn("An error occured on the ws connection: "+inspect(err));
+                node.warn(RED._("websocket.errors.connect-error")+inspect(err));
             });
         }
 
@@ -163,7 +163,7 @@ module.exports = function(RED) {
         if (this.serverConfig) {
             this.serverConfig.registerInputNode(this);
         } else {
-            this.error("Missing server configuration");
+            this.error(RED._("websocket.errors.missing-conf"));
         }
     }
     RED.nodes.registerType("websocket in",WebSocketInNode);
@@ -174,7 +174,7 @@ module.exports = function(RED) {
         this.server = (n.client)?n.client:n.server;
         this.serverConfig = RED.nodes.getNode(this.server);
         if (!this.serverConfig) {
-            this.error("Missing server configuration");
+            this.error(RED._("websocket.errors.missing-conf"));
         }
         this.on("input", function(msg) {
             var payload;
@@ -195,7 +195,7 @@ module.exports = function(RED) {
                 } else {
                     node.serverConfig.broadcast(payload,function(error){
                         if (!!error) {
-                            node.warn("An error occurred while sending:" + inspect(error));
+                            node.warn(RED._("websocket.errors.send-error")+inspect(error));
                         }
                     });
                 }

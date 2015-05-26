@@ -16,25 +16,25 @@
 
 <script type="text/x-red" data-template-name="debug">
     <div class="form-row">
-        <label for="node-input-select-complete"><i class="fa fa-list"></i> Output</label>
+        <label for="node-input-select-complete"><i class="fa fa-list"></i> <span data-i18n="debug.output"></span></label>
         <select type="text" id="node-input-select-complete" style="display: inline-block; width: 250px; vertical-align: top;">
-            <option value="false">message property</option>
-            <option value="true">complete msg object</option>
+            <option value="false" data-i18n="debug.msgprop"></option>
+            <option value="true" data-i18n="debug.msgobj"></option>
         </select>
     </div>
     <div class="form-row" id="node-prop-row">
         <label for="node-input-complete">&nbsp;</label>msg.<input type="text" style="width:208px" id="node-input-complete">
     </div>
     <div class="form-row">
-        <label for="node-input-console"><i class="fa fa-random"></i> to</label>
+        <label for="node-input-console"><i class="fa fa-random"></i> <span data-i18n="debug.to"></span></label>
         <select type="text" id="node-input-console" style="display: inline-block; width: 250px; vertical-align: top;">
-            <option value="false">debug tab</option>
-            <option value="true">debug tab and console</option>
+            <option value="false" data-i18n="debug.debtab"></option>
+            <option value="true" data-i18n="debug.tabcon"></option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.nameph">
     </div>
 </script>
 
