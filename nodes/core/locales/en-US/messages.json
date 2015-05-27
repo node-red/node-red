@@ -79,7 +79,6 @@
         "onstart": "Inject once at start?",
         "tip": "<b>Note:</b> \"interval between times\" and \"at a specific time\" will use cron.<br/>See info box for details.",
         "success": "Successfully injected: __label__",
-        "error": "<strong>Error</strong>: __message__",
         "errors": {
             "failed": "inject failed, see log for details"
         }
@@ -110,7 +109,7 @@
         "placeholder": {
             "extraparams": "extra input parameters"
         },
-        "spawn": "Use spawn() instead of exec() ?",
+        "spawn": "Use spawn() instead of exec()?",
         "tip": "Tip: <i>spawn</i> expects only one command word - and appended args to be comma separated."
     },
     "function": {
@@ -148,15 +147,17 @@
         "rate": "Rate",
         "msgper": "msg(s) per",
         "dropmsg": "drop intermediate messages",
-        "delaylabel": "delay",
-        "limitlabel": "limit",
-        "randomlabel": "ramdom",
-        "queuelabel": "queue",
-        "msgperlabel": "msg/",
-        "buffererr": "buffer exceeded 1000 messages"
+        "label": {
+            "delay": "delay",
+            "limitlabel": "limit",
+            "randomlabel": "ramdom",
+            "queuelabel": "queue"
+        },
+        "error": {
+            "buffer": "buffer exceeded 1000 messages"
+        }
     },
     "trigger": {
-        "trigger": "trigger",
         "output1": "Output",
         "wait": "then wait",
         "output2": "output",
@@ -175,18 +176,17 @@
         "triggeroncelabel": "trigger once & infinite"
     },
     "comment": {
-        "comment": "comment",
-        "title": "Title",
-        "body": "Body - will be rendered in info tab.",
-        "tip1": "Tip: The text here can be styled as ",
-        "tip2": "Github flavoured Markdown",
-        "commentnode": "Comment node",
-        "commentinfo": "Use this node to add simple documentation.\n\nAnything you add will be rendered in this info panel.\n\nYou may use Markdown syntax to **enhance** the *presentation*."
+        "label": {
+            "title": "Title",
+            "body": "Body" 
+        },
+        "tip": "Tip: The text can be styled as <a href=\"https://help.github.com/articles/markdown-basics/\" target=\"_new\">Github flavoured Markdown</a>",
+        "defaulttitle": "Comment node",
+        "defaultinfo": "Use this node to add simple documentation.\n\nAnything you add will be rendered in this info panel.\n\nYou may use Markdown syntax to **enhance** the *presentation*."
     },
     "unknown": {
-        "unknown": "unknown",
         "label": {
-            "unknownlabel": "unknown"
+            "unknown": "unknown"
         },
         "tip": "<p>This node is a type unknown to your installation of Node-RED.</p><p><i>If you deploy with the node in this state, it's configuration will be preserved, but the flow will not start until the missing type is installed.</i></p><p>See the Info side bar for more help</p>"
     },
@@ -219,7 +219,7 @@
             "return": "Return"
         },
         "setby": "- set by msg.method -",
-        "basicauth": "Use basic authentication ?",
+        "basicauth": "Use basic authentication?",
         "utf8": "a UTF-8 string",
         "binary": "a binary buffer",
         "json": "a parsed JSON object",
@@ -238,7 +238,6 @@
         }
     },
     "websocket": {
-        "websocket": "websocket",
         "label": {
             "type": "Type",
             "path": "Path",
@@ -261,18 +260,17 @@
         }
     },
     "watch": {
-        "watch": "watch",
         "label": {
-            "files": "File(s)",
-            "filesph": "File(s) or Directory"
+            "files": "File(s)"
+        },
+        "placeholder": {
+            "files": "Comma-separated list of files and/or directories"
         },
         "tip": "On Windows you must use double back-slashes \\\\ in any directory names."
     },
     "serial": {
-        "serial": "serial",
         "label": {
             "serialport": "Serial Port",
-            "serialportph": "/dev/ttyUSB0/",
             "settings": "Settings",
             "baudrate": "Baud Rate",
             "databits": "Data Bits",
@@ -285,29 +283,38 @@
             "serial": "serial",
             "none": "none"
         },
-        "none": "None",
-        "even": "Even",
-        "mark": "Mark",
-        "odd": "Odd",
-        "space": "Space",
-        "character": "on the character",
-        "timeout": "after a timeout of",
-        "length": "into fixed lengths of",
-        "ascii": "ascii strings",
-        "binary": "binary buffers",
+        "placeholder": {
+            "serialport": "for example: /dev/ttyUSB0/"
+        },
+        "parity": {
+            "none": "None",
+            "even": "Even",
+            "mark": "Mark",
+            "odd": "Odd",
+            "space": "Space"
+        },
+        "split": {
+            "character": "on the character",
+            "timeout": "after a timeout of",
+            "length": "into fixed lengths of"
+        },
+        "output": {
+            "ascii": "ascii strings",
+            "binary": "binary buffers"
+        },
         "addsplit": "add split character to output messages",
-        "split-tip": "Tip: the \"Split on\" character is used to split the input into separate messages. It can also be added to every message sent out to the serial port.",
-        "timeout-tip": "Tip: In timeout mode timeout starts from arrival of first character.",
+        "tip": {
+            "split": "Tip: the \"Split on\" character is used to split the input into separate messages. It can also be added to every message sent out to the serial port.",
+            "timeout": "Tip: In timeout mode timeout starts from arrival of first character."
+        },
+        "onopen": "serial port __port__ opened at __baud__ baud __config__",
         "errors": {
             "missing-conf": "missing serial config",
-            "never-get": "should never get here",
             "serial-port": "serial port",
-            "error": "error",
-            "unexpected-close": "closed unexpectedly",
-            "opened": "opened at",
-            "baud": "baud",
-            "gone-away": "gone away",
-            "closed": "closed"
+            "error": "serial port __port__ error: __error__",
+            "unexpected-close": "serial port __port__ closed unexpectedly",
+            "disconnected": "serial port __port__ disconnected",
+            "closed": "serial port __port__ closed"
         }
     },
     "tcpin": {
@@ -317,52 +324,52 @@
             "output": "Output",
             "port": "port",
             "host": "at host",
-            "a": "a",
             "payload": "payload(s)",
             "delimited": "delimited by",
-            "close-connection": "Close connection after each message is sent ?",
-            "decode-base64": "Decode Base64 message ?",
+            "close-connection": "Close connection after each message is sent?",
+            "decode-base64": "Decode Base64 message?",
             "server": "Server",
-            "return": "Return",
-            "numberph": "number"
+            "return": "Return"
         },
-        "listen": "Listen on",
-        "connect": "Connect to",
-        "reply": "Reply to TCP",
-        "stream": "stream of",
-        "single": "single",
-        "buffer": "Buffer",
-        "string": "String",
-        "base64": "Base64 String",
-        "timeout": "after a fixed timeout of",
-        "character": "when character received is",
-        "number": "a fixed number of characters",
-        "never": "never. Keep connection open",
-        "out-tip1": "Closing the connection after each message is generally not a good thing - but is useful to indicate an end-of-file for example.",
-        "out-tip2": "Closing the connection after each message is generally not a good thing - but is useful to indicate an end-of-file for example. The receiving client will need to reconnect.",
-        "req-tip": "<b>Tip:</b> Outputs a binary <b>Buffer</b>, so you may want to .toString() it.</br/><b>Tip:</b> Leave host and port blank if you want to overide with msg.host and msg.port properties.",
-        "errors": {
-            "connecting-to": "connecting to",
-            "connected-to": "connected to",
-            "connection-lost": "connection lost to",
-            "timeout": "timeout closed socket port",
-            "listening-port": "listening on port",
+        "type": {
+            "listen": "Listen on",
+            "connect": "Connect to",
+            "reply": "Reply to TCP"
+        },
+        "output": {
+            "stream": "stream of",
+            "single": "single",
+            "buffer": "Buffer",
+            "string": "String",
+            "base64": "Base64 String"
+        },
+        "return": {
+            "timeout": "after a fixed timeout of",
+            "character": "when character received is",
+            "number": "a fixed number of chars:",
+            "never": "keep connection open"
+        },
+        "status": {
+            "connecting": "connecting to __host__:__port__",
+            "connected": "connected to __host__:__port__",
+            "listening-port": "listening on port __port__",
             "stopped-listening": "stopped listening on port",
-            "error": "error",
-            "connection-from": "connection from",
-            "connection-closed": "connection closed from",
-            "socket-error": "socket error from",
-            "client-connected": "client connected",
-            "data": "data:",
-            "client-disconnected": "client disconnected",
+            "connection-from": "connection from __host__:__port__",
+            "connection-closed": "connection closed from __host__:__port__"
+        },
+        "errors": {
+            "connection-lost": "connection lost to __host__:__port__",
+            "timeout": "timeout closed socket port __port__",
+            "cannot-listen": "unable to listen on port __port__, error: __error__",
+            "error": "error: __error__",
+            
+            "socket-error": "socket error from __host__:__port__",
             "no-host": "Host and/or port not set",
-            "timeout": "connect timeout",
-            "cannot-listen": "unable to listen on port",
+            "connect-timeout": "connect timeout",
             "connect-fail": "connect failed"
         }
     },
     "udp": {
-        "udp": "udp",
         "label": {
             "listen": "Listen for",
             "onport": "on Port",
@@ -377,7 +384,7 @@
             "toportph": "port",
             "address": "Address",
             "addressph": "destination ip",
-            "decode-base64": "Decode Base64 encoded payload ?",
+            "decode-base64": "Decode Base64 encoded payload?",
             "outportph": "port"
         },
         "udpmsgs": "udp messages",
@@ -412,19 +419,32 @@
         }
     },
     "switch": {
-        "switch": "switch",
         "label": {
-            "rule": "rule",
-            "switchlabel": "switch"
+            "property": "Property",
+            "rule": "rule"
         },
         "checkall": "checking all rules",
-        "stopfirst": "stopping after first match"
+        "stopfirst": "stopping after first match",
+        "rules": {
+            "btwn":"is between",
+            "cont":"contains",
+            "regex":"matches regex",
+            "true":"is true",
+            "false":"is false",
+            "null":"is null",
+            "nnull":"is not null",
+            "else":"otherwise"
+        }
     },
     "change": {
         "change": "change",
         "label": {
             "rules": "Rules",
-            "rule": "rule"
+            "rule": "rule",
+            "set": "set __property__",
+            "change": "change __property__",
+            "delete": "delete __property__",
+            "changeCount": "change: __count__ rules"
         },
         "set": "Set",
         "change": "Change",
@@ -434,26 +454,28 @@
         "replace": "Replace with",
         "regex": "Use regular expressions",
         "errors": {
-            "invalid-from": "Invalid 'from' property:"
+            "invalid-from": "Invalid 'from' property: __error__"
         }
     },
     "range": {
-        "range": "range",
         "label": {
             "action": "Action",
             "inputrange": "Map the input range",
             "resultrange": "to the result range",
             "from": "from",
             "to": "to",
-            "eg0ph": "e.g. 0",
-            "eg99ph": "e.g. 99",
-            "eg255ph": "e.g. 255",
-            "roundresult": "Round result to the nearest integer?",
-            "rangelabel": "range"
+            "roundresult": "Round result to the nearest integer?"
         },
-        "scale-payload": "Scale msg.payload",
-        "scale-limit": "Scale and limit to the target range",
-        "scale-wrap": "Scale and wrap within the target range",
+        "placeholder": {
+            "min": "e.g. 0",
+            "maxin": "e.g. 99",
+            "maxout": "e.g. 255"
+        },
+        "scale": {
+            "payload": "Scale msg.payload",
+            "limit": "Scale and limit to the target range",
+            "wrap": "Scale and wrap within the target range"
+        },
         "tip": "Tip: This node ONLY works with numbers.",
         "errors": {
             "notnumber": "Not a number"
@@ -463,7 +485,6 @@
         "csv": "csv",
         "label": {
             "columns": "Columns",
-            "columnsph": "comma-separated column names",
             "separator": "Separator",
             "c2o": "CSV-to-Object options",
             "o2c": "Object-to-CSV options",
@@ -473,42 +494,53 @@
             "includerow": "include column name row",
             "newline": "Newline"
         },
-        "comma": "comma",
-        "tab": "tab",
-        "space": "space",
-        "semicolon": "semicolon",
-        "colon": "colon",
-        "hashtag": "hashtag",
-        "other": "other...",
-        "row": "a message per row",
-        "array": "a single message [array]",
-        "linux": "Linux (\\n)",
-        "mac": "Mac (\\r)",
-        "windows": "Windows (\\r\\n)",
+        "placeholder": {
+            "columns": "comma-separated column names"
+        },
+        "separator": {
+            "comma": "comma",
+            "tab": "tab",
+            "space": "space",
+            "semicolon": "semicolon",
+            "colon": "colon",
+            "hashtag": "hashtag",
+            "other": "other..."
+        },
+        "output": {
+            "row": "a message per row",
+            "array": "a single message [array]"
+        },
+        "newline": {
+            "linux": "Linux (\\n)",
+            "mac": "Mac (\\r)",
+            "windows": "Windows (\\r\\n)"
+        },
         "errors": {
             "csv_js": "This node only handles csv strings or js objects."
         }
     },
     "html": {
-        "html": "html",
         "label": {
             "select": "Select",
             "output": "Output"
         },
-        "htmlcontent": "the html content of the elements",
-        "textcontent": "only the text content of the elements",
-        "single": "as a single message containing an array",
-        "multi": "as multiple messages, one for each element",
+        "output": {
+            "html": "the html content of the elements",
+            "text": "only the text content of the elements"
+        },
+        "format": {
+            "single": "as a single message containing an array",
+            "multi": "as multiple messages, one for each element"
+        },
         "tip": "Tip: The <b>Select</b> value is a <a href=\"https://github.com/fb55/CSSselect#user-content-supported-selectors\" target=\"_new\"><i><u>CSS Selector</u></i></a>, similar to a jQuery selector."
     },
     "json": {
-        "json": "json",
         "errors": {
-            "dropped": "Dropped"
+            "dropped-object": "Ignored non-object payload",
+            "dropped": "Ignored unsupported payload type"
         }
     },
     "xml": {
-        "xml": "xml",
         "label": {
             "represent": "Represent XML tag attributes as a property named",
             "prefix": "Prefix to access character content",
@@ -518,9 +550,6 @@
         "errors": {
             "xml_js": "This node only handles xml strings or js objects."
         }
-    },
-    "sentiment": {
-        "sentiment": "sentiment"
     },
     "arduino": {
         "arduino": "arduino",
@@ -557,10 +586,10 @@
         "label": {
             "gpiopin": "GPIO Pin",
             "selectpin": "select pin",
-            "registor": "Registor ?",
-            "readinitial": "Read initial state of pin on deploy/restart ?",
+            "registor": "Registor?",
+            "readinitial": "Read initial state of pin on deploy/restart?",
             "type": "Type",
-            "initpin": "Initialise pin state ?",
+            "initpin": "Initialise pin state?",
             "button": "Button",
             "pimouse": "Pi Mouse",
             "left": "Left",
@@ -613,7 +642,7 @@
         "label": {
             "filename": "Filename",
             "filenameph": "filename",
-            "splitlines": "Split lines if we see \\n ?"
+            "splitlines": "Split lines if we see \\n?"
         },
         "errors": {
             "windowsnotsupport": "Info : Currently not supported on Windows."
@@ -625,7 +654,7 @@
             "filename": "Filename",
             "filenameph": "filename",
             "action": "Action",
-            "addnewline": "Add newline (\\n) to each payload ?",
+            "addnewline": "Add newline (\\n) to each payload?",
             "outputas": "Ourput as",
             "filelabel": "file",
             "deletelabel": "delete"
@@ -750,8 +779,8 @@
             "action": "Action",
             "port": "Port",
             "portph": "port",
-            "ssl": "Use Secure SSL connection ?",
-            "self": "Allow self-signed certificates ?",
+            "ssl": "Use Secure SSL connection?",
+            "self": "Allow self-signed certificates?",
             "nickname": "Nickname"
         },
         "payload": "Send payload to channel(s)",
@@ -769,7 +798,7 @@
             "ping": "PING from",
             "quit": "QUIT",
             "restart": "restart",
-            "connectionlost": "CONNECTION LOST ?",
+            "connectionlost": "CONNECTION LOST?",
             "hasjoined": "has joined",
             "sentinvite": "sent invite to",
             "hasleft": "has left",
