@@ -35,9 +35,9 @@ module.exports = function(RED) {
                         msg.payload = JSON.stringify(msg.payload);
                         node.send(msg);
                     }
-                    else { node.warn(RED._("json.errors.dropped")+": "+msg.payload); }
+                    else { node.warn(RED._("json.errors.dropped-object")); }
                 }
-                else { node.warn(RED._("json.errors.dropped")+": "+msg.payload); }
+                else { node.warn(RED._("json.errors.dropped")); }
             }
             else { node.send(msg); } // If no payload - just pass it on.
         });

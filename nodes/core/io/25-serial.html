@@ -98,7 +98,7 @@
 <script type="text/x-red" data-template-name="serial-port">
     <div class="form-row">
         <label for="node-config-input-serialport"><i class="fa fa-random"></i> <span data-i18n="serial.label.serialport"></span></label>
-        <input type="text" id="node-config-input-serialport" style="width:60%;" data-i18n="[placeholder]serial.label.serialportph">
+        <input type="text" id="node-config-input-serialport" style="width:60%;" data-i18n="[placeholder]serial.placeholder.serialport">
         <a id="node-config-lookup-serial" class="btn"><i id="node-config-lookup-serial-icon" class="fa fa-search"></i></a>
     </div>
     <div class="form-row">
@@ -138,11 +138,11 @@
         </select>
         </td><td>
         <select type="text" id="node-config-input-parity" style="width: 80px;">
-            <option value="none" data-i18n="serial.none"></option>
-            <option value="even" data-i18n="serial.even"></option>
-            <option value="mark" data-i18n="serial.mark"></option>
-            <option value="odd" data-i18n="serial.odd"></option>
-            <option value="space" data-i18n="serial.space"></option>
+            <option value="none" data-i18n="serial.parity.none"></option>
+            <option value="even" data-i18n="serial.parity.even"></option>
+            <option value="mark" data-i18n="serial.parity.mark"></option>
+            <option value="odd" data-i18n="serial.parity.odd"></option>
+            <option value="space" data-i18n="serial.parity.space"></option>
         </select>
         </td><td>
         <select type="text" id="node-config-input-stopbits" style="width: 80px;">
@@ -158,9 +158,9 @@
     <div class="form-row" style="padding-left: 10px;">
         <span data-i18n="serial.label.split"></span>
         <select type="text" id="node-config-input-out" style="margin-left: 5px; width:200px;">
-            <option value="char" data-i18n="serial.character"></option>
-            <option value="time" data-i18n="serial.timeout"></option>
-            <option value="count" data-i18n="serial.lengths"></option>
+            <option value="char" data-i18n="serial.split.character"></option>
+            <option value="time" data-i18n="serial.split.timeout"></option>
+            <option value="count" data-i18n="serial.split.lengths"></option>
         </select>
         <input type="text" id="node-config-input-newline"  style="width:50px;">
         <span id="node-units"></span>
@@ -168,8 +168,8 @@
     <div class="form-row" style="padding-left: 10px;">
         <span data-i18n="serial.label.deliver"></span>
         <select type="text" id="node-config-input-bin" style="margin-left: 5px; width: 150px;">
-            <option value="false" data-i18n="serial.ascii"></option>
-            <option value="bin" data-i18n="serial.binary"></option>
+            <option value="false" data-i18n="serial.output.ascii"></option>
+            <option value="bin" data-i18n="serial.output.binary"></option>
         </select>
     </div>
     <br/>
@@ -181,8 +181,8 @@
             <input style="width: 30px;margin-left: 10px; vertical-align: top;" type="checkbox" id="node-config-input-addchar"><label style="width: auto;" for="node-config-input-addchar"><span data-i18n="serial.addsplit"></span></label>
         </div>
     </div>
-    <div class="form-tips" id="tip-split"><span data-i18n="serial.split-tip"></span></div>
-    <div class="form-tips" id="tip-bin" hidden><span data-i18n="serial.timeout-tip"></span></div>
+    <div class="form-tips" id="tip-split"><span data-i18n="serial.tip.split"></span></div>
+    <div class="form-tips" id="tip-bin" hidden><span data-i18n="serial.tip.timeout"></span></div>
 </script>
 
 <script type="text/javascript">

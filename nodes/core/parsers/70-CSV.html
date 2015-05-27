@@ -18,18 +18,18 @@
 <script type="text/x-red" data-template-name="csv">
     <div class="form-row">
         <label for="node-input-temp"><i class="fa fa-list"></i> <span data-i18n="csv.label.columns"></span></label>
-        <input type="text" id="node-input-temp" data-i18n="[placeholder]csv.label.columnsph">
+        <input type="text" id="node-input-temp" data-i18n="[placeholder]csv.placeholder.columns">
     </div>
     <div class="form-row">
         <label for="node-input-select-sep"><i class="fa fa-text-width"></i> <span data-i18n="csv.label.separator"></span></label>
             <select style="width: 150px" id="node-input-select-sep">
-                <option value="," data-i18n="csv.comma"></option>
-                <option value="\t" data-i18n="csv.tab"></option>
-                <option value=" " data-i18n="csv.space"></option>
-                <option value=";" data-i18n="csv.semicolon"></option>
-                <option value=":" data-i18n="csv.colon"></option>
-                <option value="#" data-i18n="csv.hashtag"></option>
-                <option value="" data-i18n="csv.other"></option>
+                <option value="," data-i18n="csv.separator.comma"></option>
+                <option value="\t" data-i18n="csv.separator.tab"></option>
+                <option value=" " data-i18n="csv.separator.space"></option>
+                <option value=";" data-i18n="csv.separator.semicolon"></option>
+                <option value=":" data-i18n="csv.separator.colon"></option>
+                <option value="#" data-i18n="csv.separator.hashtag"></option>
+                <option value="" data-i18n="csv.separator.other"></option>
            </select>
            <input style="width: 40px;" type="text" id="node-input-sep" pattern=".">
     </div>
@@ -47,8 +47,8 @@
     <div class="form-row">
         <label style="margin-left: 10px; margin-right: -10px;"><i class="fa fa-sign-out"></i> <span data-i18n="csv.label.output"></span></label>
         <select type="text" id="node-input-multi" style="width: 250px;">
-            <option value="one" data-i18n="csv.row"></option>
-            <option value="mult" data-i18n="csv.array"></option>
+            <option value="one" data-i18n="csv.output.row"></option>
+            <option value="mult" data-i18n="csv.output.array"></option>
         </select>
     </div>
     <hr align="middle"/>
@@ -60,9 +60,9 @@
     <div class="form-row">
         <label style="margin-left: 10px; margin-right: -10px;"><i class="fa fa-align-left"></i> <span data-i18n="csv.label.newline"></span></label>
         <select style="width: 150px" id="node-input-ret">
-            <option value='\n' data-i18n="csv.linux"></option>
-            <option value='\r' data-i18n="csv.mac"></option>
-            <option value='\r\n' data-i18n="csv.windows"></option>
+            <option value='\n' data-i18n="csv.newline.linux"></option>
+            <option value='\r' data-i18n="csv.newline.mac"></option>
+            <option value='\r\n' data-i18n="csv.newline.windows"></option>
        </select>
     </div>
 </script>
