@@ -115,6 +115,7 @@ module.exports = {
     getNode: flows.get,
     eachNode: flows.eachNode,
 
+    addFile: registry.addFile,
     addModule: registry.addModule,
     removeModule: removeModule,
 

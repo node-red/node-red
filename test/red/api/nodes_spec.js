@@ -528,7 +528,7 @@ describe("nodes api", function() {
                 return {id:"123",enabled: false};
             });
             var enableNode = sinon.stub(redNodes,'enableNode',function(id) {
-                return {id:"123",enabled: true,types:['a']};
+                return when.resolve({id:"123",enabled: true,types:['a']});
             });
 
             request(app)
@@ -557,7 +557,7 @@ describe("nodes api", function() {
                 return {id:"123",enabled: true};
             });
             var disableNode = sinon.stub(redNodes,'disableNode',function(id) {
-                return {id:"123",enabled: false,types:['a']};
+                return when.resolve({id:"123",enabled: false,types:['a']});
             });
 
             request(app)
@@ -587,11 +587,11 @@ describe("nodes api", function() {
                     return {id:"123",enabled: state};
                 });
                 var enableNode = sinon.stub(redNodes,'enableNode',function(id) {
-                    return {id:"123",enabled: true,types:['a']};
+                    return when.resolve({id:"123",enabled: true,types:['a']});
                 });
 
                 var disableNode = sinon.stub(redNodes,'disableNode',function(id) {
-                    return {id:"123",enabled: false,types:['a']};
+                    return when.resolve({id:"123",enabled: false,types:['a']});
                 });
 
                 request(app)
@@ -633,11 +633,11 @@ describe("nodes api", function() {
                     return {id:"123",enabled: state, err:"foo" };
                 });
                 var enableNode = sinon.stub(redNodes,'enableNode',function(id) {
-                    return {id:"123",enabled: true,types:['a']};
+                    return when.resolve({id:"123",enabled: true,types:['a']});
                 });
 
                 var disableNode = sinon.stub(redNodes,'disableNode',function(id) {
-                    return {id:"123",enabled: false,types:['a']};
+                    return when.resolve({id:"123",enabled: false,types:['a']});
                 });
 
                 request(app)
@@ -683,11 +683,11 @@ describe("nodes api", function() {
             var enableNode = sinon.stub(redNodes,'enableNode');
             enableNode.onFirstCall().returns((function() {
                 n1.enabled = true;
-                return n1;
+                return when.resolve(n1);
             })());
             enableNode.onSecondCall().returns((function() {
                 n2.enabled = true;
-                return n2;
+                return when.resolve(n2);
             })());
             enableNode.returns(null);
 
@@ -724,11 +724,11 @@ describe("nodes api", function() {
             var disableNode = sinon.stub(redNodes,'disableNode');
             disableNode.onFirstCall().returns((function() {
                 n1.enabled = false;
-                return n1;
+                return when.resolve(n1);
             })());
             disableNode.onSecondCall().returns((function() {
                 n2.enabled = false;
-                return n2;
+                return when.resolve(n2);
             })());
             disableNode.returns(null);
 
@@ -763,11 +763,11 @@ describe("nodes api", function() {
                 });
                 var enableNode = sinon.stub(redNodes,'enableNode',function(id) {
                     node.enabled = true;
-                    return node;
+                    return when.resolve(node);
                 });
                 var disableNode = sinon.stub(redNodes,'disableNode',function(id) {
                     node.enabled = false;
-                    return node;
+                    return when.resolve(node);
                 });
 
                 request(app)
@@ -812,11 +812,11 @@ describe("nodes api", function() {
                 });
                 var enableNode = sinon.stub(redNodes,'enableNode',function(id) {
                     node.enabled = true;
-                    return node;
+                    return when.resolve(node);
                 });
                 var disableNode = sinon.stub(redNodes,'disableNode',function(id) {
                     node.enabled = false;
-                    return node;
+                    return when.resolve(node);
                 });
 
                 request(app)

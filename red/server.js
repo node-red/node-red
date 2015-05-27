@@ -142,6 +142,19 @@ function reportRemovedModules(removedNodes) {
     return removedNodes;
 }
 
+function installNode(file) {
+    return when.promise(function(resolve,reject) {
+        resolve(redNodes.addFile(file).then(function(info) {
+            var module = redNodes.getModuleInfo(info.module);
+            module.nodes = module.nodes.filter(function(d) {
+                return d.id==info.id;
+            });
+            return reportAddedModules(module);
+        }));
+    });
+}
+
+
 function installModule(module) {
     //TODO: ensure module is 'safe'
     return when.promise(function(resolve,reject) {
@@ -149,6 +162,14 @@ function installModule(module) {
             reject(new Error("Invalid module name"));
             return;
         }
+        if (redNodes.getModuleInfo(module)) {
+            var err = new Error("Module already loaded");
+            err.code = "module_already_loaded";
+            reject(err);
+            return;
+        }
+        
+        
         log.info("Installing module: "+module);
         var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
         var child = child_process.exec('npm install --production '+module,
@@ -252,6 +273,7 @@ var serverAPI = module.exports = {
     reportRemovedModules: reportRemovedModules,
     installModule: installModule,
     uninstallModule: uninstallModule,
+    installNode: installNode,
 
     get app() { return app },
     get nodeApp() { return nodeApp },

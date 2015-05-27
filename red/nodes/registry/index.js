@@ -36,6 +36,12 @@ function load(defaultNodesDir,disableNodePathScan) {
     return loader.load(defaultNodesDir,disableNodePathScan);
 }
 
+function addFile(file) {
+    var info = "node-red/"+path.basename(file).replace(/^\d+-/,"").replace(/\.js$/,"");
+    return loader.addFile(file).then(function() {
+        return registry.getNodeInfo(info);
+    });
+}
 function addModule(module) {
     return loader.addModule(module).then(function() {
         return registry.getModuleInfo(module);
@@ -43,13 +49,15 @@ function addModule(module) {
 }
 
 function enableNodeSet(typeOrId) {
-    registry.enableNodeSet(typeOrId);
-    var nodeSet = registry.getNodeInfo(typeOrId);
-    if (!nodeSet.loaded) {
-        loader.loadNodeSet(nodeSet);
-        return registry.getNodeInfo(typeOrId);
-    }
-    return nodeSet;
+    return registry.enableNodeSet(typeOrId).then(function() {
+        var nodeSet = registry.getNodeInfo(typeOrId);
+        if (!nodeSet.loaded) {
+            return loader.loadNodeSet(registry.getFullNodeInfo(typeOrId)).then(function() {
+                return registry.getNodeInfo(typeOrId);
+            });
+        }
+        return when.resolve(nodeSet);
+    });
 }
 
 module.exports = {
@@ -71,6 +79,7 @@ module.exports = {
     enableNode: enableNodeSet,
     disableNode: registry.disableNodeSet,
 
+    addFile: addFile,
     addModule: addModule,
     removeModule: registry.removeModule,
     

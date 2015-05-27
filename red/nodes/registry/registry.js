@@ -47,7 +47,7 @@ function init(_settings) {
 
 function filterNodeInfo(n) {
     var r = {
-        id: n.id,
+        id: n.id||n.module+"/"+n.name,
         name: n.name,
         types: n.types,
         enabled: n.enabled
@@ -220,7 +220,6 @@ function getNodeInfo(typeOrId) {
     if (nodeTypeToId[typeOrId]) {
         id = nodeTypeToId[typeOrId];
     }
-    
     /* istanbul ignore else */
     if (id) {
         var module = moduleConfigs[getModule(id)];
@@ -235,6 +234,23 @@ function getNodeInfo(typeOrId) {
                 return info;
             }
         }
+    }
+    return null;
+}
+
+function getFullNodeInfo(typeOrId) {
+    // Used by index.enableNodeSet so that .file can be retrieved to pass
+    // to loader.loadNodeSet
+    var id = typeOrId;
+    if (nodeTypeToId[typeOrId]) {
+        id = nodeTypeToId[typeOrId];
+    }
+    /* istanbul ignore else */
+    if (id) {
+        var module = moduleConfigs[getModule(id)];
+        if (module) {
+            return module.nodes[getNode(id)];
+        }        
     }
     return null;
 }
@@ -380,22 +396,18 @@ function enableNodeSet(typeOrId) {
     if (nodeTypeToId[typeOrId]) {
         id = nodeTypeToId[typeOrId];
     }
-
     var config;
     try {
         config = moduleConfigs[getModule(id)].nodes[getNode(id)];
         delete config.err;
         config.enabled = true;
-        //if (!config.loaded) {
-        //    // TODO: honour the promise this returns
-        //    loadNodeModule(config);
-        //}
         nodeConfigCache = null;
-        saveNodeList();
+        return saveNodeList().then(function() {
+            return filterNodeInfo(config);
+        });
     } catch (err) {
         throw new Error("Unrecognised id: "+typeOrId);
     }
-    return filterNodeInfo(config);
 }
 
 function disableNodeSet(typeOrId) {
@@ -412,11 +424,12 @@ function disableNodeSet(typeOrId) {
         // TODO: persist setting
         config.enabled = false;
         nodeConfigCache = null;
-        saveNodeList();
+        return saveNodeList().then(function() {
+            return filterNodeInfo(config);
+        });
     } catch (err) {
         throw new Error("Unrecognised id: "+id);
     }
-    return filterNodeInfo(config);
 }
 
 function cleanModuleList() {
@@ -472,6 +485,7 @@ var registry = module.exports = {
     removeModule: removeModule,
     
     getNodeInfo: getNodeInfo,
+    getFullNodeInfo: getFullNodeInfo,
     getNodeList: getNodeList,
     getModuleList: getModuleList,
     getModuleInfo: getModuleInfo,

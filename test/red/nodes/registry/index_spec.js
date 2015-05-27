@@ -837,28 +837,30 @@ describe('red/nodes/registry/index', function() {
             var nodeConfig = typeRegistry.getNodeConfigs();
             nodeConfig.length.should.be.greaterThan(0);
 
-            var info = typeRegistry.disableNode(list[0].id);
-            info.should.have.property("id",list[0].id);
-            info.should.have.property("enabled",false);
-
-            var list2 = typeRegistry.getNodeList();
-            list2.should.be.an.Array.and.have.lengthOf(1);
-            list2[0].should.have.property("enabled",false);
-
-            typeRegistry.getNodeConfigs().length.should.equal(0);
-
-            var info2 = typeRegistry.enableNode(list[0].id);
-            info2.should.have.property("id",list[0].id);
-            info2.should.have.property("enabled",true);
-
-            var list3 = typeRegistry.getNodeList();
-            list3.should.be.an.Array.and.have.lengthOf(1);
-            list3[0].should.have.property("enabled",true);
-
-            var nodeConfig2 = typeRegistry.getNodeConfigs();
-            nodeConfig2.should.eql(nodeConfig);
-
-            done();
+            typeRegistry.disableNode(list[0].id).then(function(info) {
+                info.should.have.property("id",list[0].id);
+                info.should.have.property("enabled",false);
+    
+                var list2 = typeRegistry.getNodeList();
+                list2.should.be.an.Array.and.have.lengthOf(1);
+                list2[0].should.have.property("enabled",false);
+    
+                typeRegistry.getNodeConfigs().length.should.equal(0);
+    
+                typeRegistry.enableNode(list[0].id).then(function(info2) {
+                    info2.should.have.property("id",list[0].id);
+                    info2.should.have.property("enabled",true);
+        
+                    var list3 = typeRegistry.getNodeList();
+                    list3.should.be.an.Array.and.have.lengthOf(1);
+                    list3[0].should.have.property("enabled",true);
+        
+                    var nodeConfig2 = typeRegistry.getNodeConfigs();
+                    nodeConfig2.should.eql(nodeConfig);
+        
+                    done();
+                });
+            });
         }).catch(function(e) {
             done(e);
         });
@@ -879,30 +881,32 @@ describe('red/nodes/registry/index', function() {
             var nodeConfig = typeRegistry.getNodeConfigs();
             nodeConfig.length.should.be.greaterThan(0);
 
-            var info = typeRegistry.disableNode(list[0].types[0]);
-            info.should.have.property("id",list[0].id);
-            info.should.have.property("types",list[0].types);
-            info.should.have.property("enabled",false);
-
-            var list2 = typeRegistry.getNodeList();
-            list2.should.be.an.Array.and.have.lengthOf(1);
-            list2[0].should.have.property("enabled",false);
-
-            typeRegistry.getNodeConfigs().length.should.equal(0);
-
-            var info2 = typeRegistry.enableNode(list[0].types[0]);
-            info2.should.have.property("id",list[0].id);
-            info2.should.have.property("types",list[0].types);
-            info2.should.have.property("enabled",true);
-
-            var list3 = typeRegistry.getNodeList();
-            list3.should.be.an.Array.and.have.lengthOf(1);
-            list3[0].should.have.property("enabled",true);
-
-            var nodeConfig2 = typeRegistry.getNodeConfigs();
-            nodeConfig2.should.eql(nodeConfig);
-
-            done();
+            typeRegistry.disableNode(list[0].types[0]).then(function(info) {;
+                info.should.have.property("id",list[0].id);
+                info.should.have.property("types",list[0].types);
+                info.should.have.property("enabled",false);
+    
+                var list2 = typeRegistry.getNodeList();
+                list2.should.be.an.Array.and.have.lengthOf(1);
+                list2[0].should.have.property("enabled",false);
+    
+                typeRegistry.getNodeConfigs().length.should.equal(0);
+    
+                typeRegistry.enableNode(list[0].types[0]).then(function(info2) {
+                    info2.should.have.property("id",list[0].id);
+                    info2.should.have.property("types",list[0].types);
+                    info2.should.have.property("enabled",true);
+        
+                    var list3 = typeRegistry.getNodeList();
+                    list3.should.be.an.Array.and.have.lengthOf(1);
+                    list3[0].should.have.property("enabled",true);
+        
+                    var nodeConfig2 = typeRegistry.getNodeConfigs();
+                    nodeConfig2.should.eql(nodeConfig);
+                    
+                    done();
+                });
+            });
         }).catch(function(e) {
             done(e);
         });

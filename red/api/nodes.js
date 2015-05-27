@@ -53,20 +53,30 @@ module.exports = {
                 return;
             }
             promise = server.installModule(node.module);
+        } else if (node.file) {
+            promise = server.installNode(node.file);
         } else {
             log.audit({event: "nodes.install",module:node.module,error:"invalid_request"},req);
             res.json(400,{error:"invalid_request", message:"Invalid request"});
             return;
         }
         promise.then(function(info) {
-            log.audit({event: "nodes.install",module:node.module},req);
-            res.json(redNodes.getModuleInfo(node.module));
+            if (node.module) {
+                log.audit({event: "nodes.install",module:node.module},req);
+                res.json(redNodes.getModuleInfo(node.module));
+            } else if (node.file) {
+                log.audit({event: "nodes.install",file:node.file},req);
+                res.json(info.nodes[0]);
+            }
         }).otherwise(function(err) {
             if (err.code === 404) {
-                log.audit({event: "nodes.install",module:node.module,error:"not_found"},req);
+                log.audit({event: "nodes.install",module:node.module,file:node.file,error:"not_found"},req);
                 res.send(404);
-            } else {
-                log.audit({event: "nodes.install",module:node.module,error:err.code||"unexpected_error",message:err.toString()},req);
+            } else if (err.code) {
+                log.audit({event: "nodes.install",module:node.module,error:err.code},req);
+                res.json(400,{error:err.code, message:err.message});
+            } else {                
+                log.audit({event: "nodes.install",module:node.module,file:node.file,error:err.code||"unexpected_error",message:err.toString()},req);
                 res.json(400,{error:err.code||"unexpected_error", message:err.toString()});
             }
         });
@@ -161,9 +171,10 @@ module.exports = {
                 res.send(404);
             } else {
                 delete node.loaded;
-                var result = putNode(node, body.enabled);
-                log.audit({event: "nodes.info.set",id:id,enabled:body.enabled},req);
-                res.json(result);
+                putNode(node, body.enabled).then(function(result) {
+                    log.audit({event: "nodes.info.set",id:id,enabled:body.enabled},req);
+                    res.json(result);
+                });
             }
         } catch(err) {
             log.audit({event: "nodes.info.set",id:id,enabled:body.enabled,error:err.code||"unexpected_error",message:err.toString()},req);
@@ -192,28 +203,13 @@ module.exports = {
             }
 
             var nodes = module.nodes;
+            var promises = [];
             for (var i = 0; i < nodes.length; ++i) {
-                var node = nodes[i];
-                var info;
-                if (node.err || node.enabled !== body.enabled) {
-                    if (body.enabled) {
-                        info = redNodes.enableNode(node.id);
-                    } else {
-                        info = redNodes.disableNode(node.id);
-                    }
-                    if (info.enabled === body.enabled && !info.err) {
-                        comms.publish("node/"+(body.enabled?"enabled":"disabled"),info,false);
-                        log.info(" "+(body.enabled?"Enabled":"Disabled")+" node types:");
-                        for (var j = 0; j < info.types.length; j++) {
-                            log.info(" - " + info.types[j]);
-                        }
-                    } else if (body.enabled && info.err) {
-                        log.warn("Failed to enable node:");
-                        log.warn(" - "+info.name+" : "+info.err);
-                    }
-                }
+                promises.push(putNode(nodes[i],body.enabled));
             }
-            res.json(redNodes.getModuleInfo(mod));
+            when.settle(promises).then(function() {
+                res.json(redNodes.getModuleInfo(mod));
+            });
         } catch(err) {
             log.audit({event: "nodes.module.set",module:mod,enabled:body.enabled,error:err.code||"unexpected_error",message:err.toString()},req);
             res.json(400,{error:err.code||"unexpected_error", message:err.toString()});
@@ -223,27 +219,30 @@ module.exports = {
 
 function putNode(node, enabled) {
     var info;
-
+    var promise;
     if (!node.err && node.enabled === enabled) {
-        info = node;
+        promise = when.resolve(node);
     } else {
         if (enabled) {
-            info = redNodes.enableNode(node.id);
+            promise = redNodes.enableNode(node.id);
         } else {
-            info = redNodes.disableNode(node.id);
+            promise = redNodes.disableNode(node.id);
         }
-
-        if (info.enabled === enabled && !info.err) {
-            comms.publish("node/"+(enabled?"enabled":"disabled"),info,false);
-            log.info(" "+(enabled?"Enabled":"Disabled")+" node types:");
-            for (var i=0;i<info.types.length;i++) {
-                log.info(" - "+info.types[i]);
+        
+        return promise.then(function(info) {
+            if (info.enabled === enabled && !info.err) {
+                comms.publish("node/"+(enabled?"enabled":"disabled"),info,false);
+                log.info(" "+(enabled?"Enabled":"Disabled")+" node types:");
+                for (var i=0;i<info.types.length;i++) {
+                    log.info(" - "+info.types[i]);
+                }
+            } else if (enabled && info.err) {
+                log.warn("Failed to enable node:");
+                log.warn(" - "+info.name+" : "+info.err);
             }
-        } else if (enabled && info.err) {
-            log.warn("Failed to enable node:");
-            log.warn(" - "+info.name+" : "+info.err);
-        }
+            return info;
+        });
     }
 
-    return info;
+    return promise;
 }

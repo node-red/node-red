@@ -34,6 +34,26 @@ function init(_settings,_defaultNodesDir,_disableNodePathScan) {
     }
 }
 
+function getLocalFile(file) {
+    if (settings.nodesExcludes) {
+        for (var i=0;i<settings.nodesExcludes.length;i++) {
+            if (settings.nodesExcludes[i] == path.basename(file)) {
+                return null;
+            }
+        }
+    }
+    if (fs.existsSync(file.replace(/\.js$/,".html"))) {
+        return {
+            file:    file,
+            module:  "node-red",
+            name:    path.basename(file).replace(/^\d+-/,"").replace(/\.js$/,""),
+            version: settings.version
+        };
+    }
+    return null;
+    
+}
+
 
 /**
  * Synchronously walks the directory looking for node files.
@@ -54,24 +74,9 @@ function getLocalNodeFiles(dir) {
         var stats = fs.statSync(path.join(dir,fn));
         if (stats.isFile()) {
             if (/\.js$/.test(fn)) {
-                var valid = true;
-                if (settings.nodesExcludes) {
-                    for (var i=0;i<settings.nodesExcludes.length;i++) {
-                        if (settings.nodesExcludes[i] == fn) {
-                            valid = false;
-                            break;
-                        }
-                    }
-                }
-                valid = valid && fs.existsSync(path.join(dir,fn.replace(/\.js$/,".html")));
-
-                if (valid) {
-                    result.push({
-                        file:    path.join(dir,fn),
-                        module:  "node-red",
-                        name:    path.basename(fn).replace(/^\d+-/,"").replace(/\.js$/,""),
-                        version: settings.version
-                    });
+                var info = getLocalFile(path.join(dir,fn));
+                if (info) {
+                    result.push(info);
                 }
             }
         } else if (stats.isDirectory()) {
@@ -256,5 +261,6 @@ function getModuleFiles(module) {
 module.exports = {
     init: init,
     getNodeFiles: getNodeFiles,
+    getLocalFile: getLocalFile,
     getModuleFiles: getModuleFiles
 }
