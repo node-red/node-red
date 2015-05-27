@@ -350,7 +350,6 @@ describe('file Nodes', function() {
                     var logEvents = helper.log().args.filter(function(evt) {
                         return evt[0].type == "file in";
                     });
-                    console.log(logEvents[0][0].msg);
                     logEvents.should.have.length(1);
                     logEvents[0][0].should.have.a.property('msg');
                     //logEvents[0][0].msg.toString().should.equal("Error: ENOENT, open 'badfile'");

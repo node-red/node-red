@@ -109,16 +109,16 @@
             if (this.pauseType == "delay") {
               var units = this.timeoutUnits ? this.timeoutUnits.charAt(0) : "s";
               if (this.timeoutUnits == "milliseconds") { units = "ms"; }
-              return this.name||this._("delay.delaylabel")+" "+this.timeout+" " + units;
+              return this.name||this._("delay.label.delay")+" "+this.timeout+" " + units;
             } else if (this.pauseType == "rate") {
               var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
-              return this.name||this._("delay.limitlabel")+" "+this.rate+" "+this._("delay.msgperlabel")+ units;
+              return this.name||this._("delay.label.limit")+" "+this.rate+" msg/"+ units;
             } else if (this.pauseType == "random") {
-              return this.name || this._("delay.randomlabel");
+              return this.name || this._("delay.label.random");
             }
             else {
                 var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
-                return this.name || this._("delay.queuelabel") +this.rate+" "+this._("delay.msgperlabel")+ units;
+                return this.name || this._("delay.label.queue") +this.rate+" msg/"+ units;
             }
         },
         labelStyle: function() { // sets the class to apply to the label

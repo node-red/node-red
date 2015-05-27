@@ -68,23 +68,23 @@
             }
             if (!this.rules) {
                 if (this.action === "replace") {
-                    return "set msg."+this.property;
+                    return this._("change.label.set",{property:"msg."+this.property});
                 } else if (this.action === "change") {
-                    return "change msg."+this.property;
+                    return this._("change.label.change",{property:"msg."+this.property});
                 } else {
-                    return this.action+" msg."+this.property
+                    return this._("change.label.delete",{property:"msg."+this.property});
                 }
             } else {
                 if (this.rules.length == 1) {
                     if (this.rules[0].t === "set") {
-                        return "set msg."+this.rules[0].p;
+                        return this._("change.label.set",{property:"msg."+this.rules[0].p});
                     } else if (this.rules[0].t === "change") {
-                        return "change msg."+this.rules[0].p;
+                        return this._("change.label.change",{property:"msg."+this.rules[0].p});
                     } else {
-                        return "delete msg."+this.rules[0].p;
+                        return this._("change.label.delete",{property:"msg."+this.rules[0].p});
                     }
                 } else {
-                    return "change: "+(this.rules.length||"no")+" rules";
+                    return this._("change.label.changeCount",{count:this.rules.length});
                 }
             }
         },
@@ -154,7 +154,6 @@
                     } else if (type == "delete") {
                         row2.hide();
                         row3.hide();
-                        $("#node-tip").hide();
                     }
                 });
                 deleteButton.click(function() {

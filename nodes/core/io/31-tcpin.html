@@ -18,8 +18,8 @@
     <div class="form-row">
         <label for="node-input-server"><i class="fa fa-dot-circle-o"></i> <span data-i18n="tcpin.label.type"></span></label>
         <select id="node-input-server" style="width:120px; margin-right:5px;">
-            <option value="server" data-i18n="tcpin.listen"></option>
-            <option value="client" data-i18n="tcpin.connect"></option>
+            <option value="server" data-i18n="tcpin.type.listen"></option>
+            <option value="client" data-i18n="tcpin.type.connect"></option>
         </select>
         <span data-i18n="tcpin.label.port"></span> <input type="text" id="node-input-port" style="width: 50px">
     </div>
@@ -29,15 +29,14 @@
 
     <div class="form-row">
         <label><i class="fa fa-sign-out"></i> <span data-i18n="tcpin.label.output"></span></label>
-        <span data-i18n="tcpin.label.a"></span>
         <select id="node-input-datamode" style="width:110px;">
-            <option value="stream" data-i18n="tcpin.stream"></option>
-            <option value="single" data-i18n="tcpin.single"></option>
+            <option value="stream" data-i18n="tcpin.output.stream"></option>
+            <option value="single" data-i18n="tcpin.output.single"></option>
         </select>
         <select id="node-input-datatype" style="width:140px;">
-            <option value="buffer" data-i18n="tcpin.buffer"></option>
-            <option value="utf8" data-i18n="tcpin.string"></option>
-            <option value="base64" data-i18n="tcpin.base64"></option>
+            <option value="buffer" data-i18n="tcpin.output.buffer"></option>
+            <option value="utf8" data-i18n="tcpin.output.string"></option>
+            <option value="base64" data-i18n="tcpin.output.base64"></option>
         </select>
         <span data-i18n="tcpin.label.payload"></span>
     </div>
@@ -118,15 +117,15 @@
     <div class="form-row">
         <label for="node-input-beserver"><i class="fa fa-dot-circle-o"></i> <span data-i18n="tcpin.label.type"></span></label>
         <select id="node-input-beserver" style="width:150px; margin-right:5px;">
-            <option value="server" data-i18n="tcpin.listen"></option>
-            <option value="client" data-i18n="tcpin.connect"></option>
-            <option value="reply" data-i18n="tcpin.reply"></option>
+            <option value="server" data-i18n="tcpin.type.listen"></option>
+            <option value="client" data-i18n="tcpin.type.connect"></option>
+            <option value="reply" data-i18n="tcpin.type.reply"></option>
         </select>
         <span id="node-input-port-row"><span data-i18n="tcpin.label.port"></span> <input type="text" id="node-input-port" style="width: 50px"></span>
     </div>
 
     <div class="form-row hidden" id="node-input-host-row" style="padding-left: 110px;">
-        <span data-i18n="tcpin.label.host"></span> <input type="text" id="node-input-host" placeholder="localhost" style="width: 60%;">
+        <span data-i18n="tcpin.label.host"></span> <input type="text" id="node-input-host" style="width: 60%;">
     </div>
 
     <div class="form-row hidden" id="node-input-end-row">
@@ -144,13 +143,6 @@
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
-    </div>
-
-    <div class="form-tips hidden" id="fin-tip">
-        <span data-i18n="[html]tcpin.out-tip1"></span>
-    </div>
-    <div class="form-tips hidden" id="fin-tip2">
-        <span data-i18n="[html]tcpin.out-tip2"></span>
     </div>
 </script>
 
@@ -199,17 +191,8 @@
 
                 if (sockettype == "client") {
                     $("#node-input-host-row").show();
-                    $("#fin-tip").show();
                 } else {
                     $("#node-input-host-row").hide();
-                    $("#fin-tip").hide();
-                }
-
-                if (sockettype == "server") {
-                    $("#fin-tip2").show();
-                }
-                else {
-                    $("#fin-tip2").hide();
                 }
             };
             updateOptions();
@@ -223,15 +206,15 @@
     <div class="form-row">
         <label for="node-input-server"><i class="fa fa-globe"></i> <span data-i18n="tcpin.label.server"></span></label>
         <input type="text" id="node-input-server" placeholder="ip.address" style="width:45%">
-        &nbsp;port <input type="text" id="node-input-port" data-i18n="[placeholder]tcpin.label.numberph" style="width:60px">
+        &nbsp;port <input type="text" id="node-input-port" style="width:60px">
     </div>
     <div class="form-row">
         <label for="node-input-out"><i class="fa fa-sign-out"></i> <span data-i18n="tcpin.label.return"></span></label>
         <select type="text" id="node-input-out" style="width:56%;">
-            <option value="time" data-i18n="tcpin.timeout"></option>
-            <option value="char" data-i18n="tcpin.character"></option>
-            <option value="count" data-i18n="tcpin.number"></option>
-            <option value="sit" data-i18n="tcpin.never"></option>
+            <option value="time" data-i18n="tcpin.return.timeout"></option>
+            <option value="char" data-i18n="tcpin.return.character"></option>
+            <option value="count" data-i18n="tcpin.return.number"></option>
+            <option value="sit" data-i18n="tcpin.return.never"></option>
         </select>
         <input type="text" id="node-input-splitc"  style="width:50px;">
         <span id="node-units"></span>
@@ -240,7 +223,6 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-tips"><span data-i18n="[html]tcpin.req-tip"></span></div>
     <script>
         var previous = null;
         $("#node-input-out").on('focus', function () { previous = this.value; }).change(function() {
