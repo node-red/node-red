@@ -39,7 +39,7 @@ module.exports = function(RED) {
         }
 
         node.board.on('boardReady', function(){
-            if (RED.settings.verbose) { node.log(RED._("arduino.errors.version")+" "+node.board.boardVersion); }
+            if (RED.settings.verbose) { node.log(RED._("arduino.errors.version",{version:node.board.boardVersion})); }
         });
 
         node.on('close', function(done) {

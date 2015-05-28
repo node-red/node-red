@@ -27,7 +27,7 @@ module.exports = function(RED) {
         this.on("input",function(msg) {
             var filename = this.filename || msg.filename || "";
             if (msg.filename && n.filename && (n.filename !== msg.filename)) {
-                node.warn(RED._("file.errors.nooverride"));
+                node.warn(RED._("common.errors.nooverride"));
             }
             if (!this.filename) {
                 node.status({fill:"grey",shape:"dot",text:filename});
@@ -36,9 +36,6 @@ module.exports = function(RED) {
                 node.warn(RED._("file.errors.nofilename"));
             } else if (msg.hasOwnProperty('delete')) { // remove warning at some point in future
                 node.warn(RED._("file.errors.invaliddelete"));
-                //fs.unlink(filename, function (err) {
-                    //if (err) { node.error(RED._("file.errors.deletefail")+' : '+err,msg); }
-                //});
             } else if (msg.payload && (typeof msg.payload != "undefined")) {
                 var data = msg.payload;
                 if ((typeof data === "object")&&(!Buffer.isBuffer(data))) {
@@ -50,22 +47,22 @@ module.exports = function(RED) {
                     // using "binary" not {encoding:"binary"} to be 0.8 compatible for a while
                     //fs.writeFile(filename, data, {encoding:"binary"}, function (err) {
                     fs.writeFile(filename, data, "binary", function (err) {
-                        if (err) { node.error(RED._("file.errors.writefail")+' : '+err,msg); }
-                        else if (RED.settings.verbose) { node.log(RED._("file.errors.wrotefile")+': '+filename); }
+                        if (err) { node.error(RED._("file.errors.writefail",{error:err}),msg); }
+                        else if (RED.settings.verbose) { node.log(RED._("file.status.wrotefile",{file:filename})); }
                     });
                 }
                 else if (this.overwriteFile === "delete") {
                     fs.unlink(filename, function (err) {
-                        if (err) { node.error(RED._("file.errors.deletefail")+' : '+err,msg); }
-                        else if (RED.settings.verbose) { node.log(RED._("file.errors.deletedfile")+": "+filename); }
+                        if (err) { node.error(RED._("file.errors.deletefail",{error:err}),msg); }
+                        else if (RED.settings.verbose) { node.log(RED._("file.status.deletedfile",{file:filename})); }
                     });
                 }
                 else {
                     // using "binary" not {encoding:"binary"} to be 0.8 compatible for a while longer
                     //fs.appendFile(filename, data, {encoding:"binary"}, function (err) {
                     fs.appendFile(filename, data, "binary", function (err) {
-                        if (err) { node.error(RED._("file.errors.appendfail")+' : '+err,msg); }
-                        else if (RED.settings.verbose) { node.log(RED._("file.errors.appendedfile")+': '+filename); }
+                        if (err) { node.error(RED._("file.errors.appendfail",{error:err}),msg); }
+                        else if (RED.settings.verbose) { node.log(RED._("file.status.appendedfile",{file:filename})); }
                     });
                 }
             }

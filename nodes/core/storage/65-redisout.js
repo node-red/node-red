@@ -30,9 +30,6 @@ module.exports = function(RED) {
                     connections[id].on("error",function(err) {
                         RED.log.error(err);
                     });
-                    connections[id].on("connect",function() {
-                        if (RED.settings.verbose) { RED.log.info(RED._("redisout.errors.connectedto")+" "+host+":"+port); }
-                    });
                     connections[id]._id = id;
                     connections[id]._nodeCount = 0;
                 }

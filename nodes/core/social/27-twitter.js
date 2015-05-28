@@ -191,9 +191,7 @@ module.exports = function(RED) {
                     if (bits.length == 4) {
                         if ((Number(bits[0]) < Number(bits[2])) && (Number(bits[1]) < Number(bits[3]))) {
                             st = { locations: node.tags };
-                        }
-                        else {
-                            node.log(RED._("twitter.errors.badgeo"));
+                            node.log(RED._("twitter.status.usering-geo",{location:node.tags.toString()}));
                         }
                     }
 
@@ -224,13 +222,13 @@ module.exports = function(RED) {
                                     if (rc == 420) {
                                         node.warn(RED._("twitter.errors.ratelimit"));
                                     } else {
-                                        node.warn(RED._("twitter.errors.streamerror")+":"+tweet.toString()+" ("+rc+")");
+                                        node.warn(RED._("twitter.errors.streamerror",{error:tweet.toString(),rc:rc}));
                                     }
                                     setTimeout(setupStream,10000);
                                 });
                                 stream.on('destroy', function (response) {
                                     if (this.active) {
-                                        node.warn(RED._("twitter.errors.enexpectedend"));
+                                        node.warn(RED._("twitter.errors.unexpectedend"));
                                         setTimeout(setupStream,10000);
                                     }
                                 });
@@ -303,7 +301,7 @@ module.exports = function(RED) {
                                 var response = JSON.parse(body);
                                 if (response.errors) {
                                     var errorList = response.errors.map(function(er) { return er.code+": "+er.message }).join(", ");
-                                    node.error(RED._("twitter.errors.sendfail")+": "+errorList,msg);
+                                    node.error(RED._("twitter.errors.sendfail",{error:errorList}),msg);
                                     node.status({fill:"red",shape:"ring",text:RED._("twitter.status.failed")});
                                 } else {
                                     node.status({});
@@ -347,10 +345,7 @@ module.exports = function(RED) {
         },function(error, oauth_token, oauth_token_secret, results){
             if (error) {
                 var error = {statusCode: 401, data: "dummy error"};
-                var resp = RED._("twitter.errors.oautherror1")+
-                RED._("twitter.errors.oautherror2")+
-                RED._("twitter.errors.oautherror3", {statusCode: error.statusCode, errorData: error.data})+
-                RED._("twitter.errors.oautherror4");
+                var resp = RED._("twitter.errors.oautherror",{statusCode: error.statusCode, errorData: error.data});
                 res.send(resp)
             } else {
                 credentials.oauth_token = oauth_token;

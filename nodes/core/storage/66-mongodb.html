@@ -19,11 +19,11 @@
         <label for="node-config-input-hostname"><i class="fa fa-bookmark"></i> <span data-i18n="mongodb.label.host"></span></label>
         <input class="input-append-left" type="text" id="node-config-input-hostname" placeholder="localhost" style="width: 40%;" >
         <label for="node-config-input-port" style="margin-left: 10px; width: 35px; "> <span data-i18n="mongodb.label.port"></span></label>
-        <input type="text" id="node-config-input-port" placeholder="27017" style="width:45px">
+        <input type="text" id="node-config-input-port" style="width:45px">
     </div>
     <div class="form-row">
         <label for="node-config-input-db"><i class="fa fa-database"></i> <span data-i18n="mongodb.label.database"></span></label>
-        <input type="text" id="node-config-input-db" placeholder="test">
+        <input type="text" id="node-config-input-db">
     </div>
     <div class="form-row">
         <label for="node-config-input-user"><i class="fa fa-user"></i> <span data-i18n="mongodb.label.username"></span></label>
@@ -67,30 +67,30 @@
     </div>
     <div class="form-row">
         <label for="node-input-collection"><i class="fa fa-briefcase"></i> <span data-i18n="mongodb.label.collection"></span></label>
-        <input type="text" id="node-input-collection" data-i18n="[placeholder]mongodb.label.collectionph">
+        <input type="text" id="node-input-collection">
     </div>
     <div class="form-row">
         <label for="node-input-operation"><i class="fa fa-wrench"></i> <span data-i18n="mongodb.label.operation"></span></label>
         <select type="text" id="node-input-operation" style="display: inline-block; vertical-align: top;">
-            <option value="store" data-i18n="mongodb.save"></option>
-            <option value="insert" data-i18n="mongodb.insert"></option>
-            <option value="update" data-i18n="mongodb.update"></option>
-            <option value="delete" data-i18n="mongodb.remove"></option>
+            <option value="store" data-i18n="mongodb.operation.save"></option>
+            <option value="insert" data-i18n="mongodb.operation.insert"></option>
+            <option value="update" data-i18n="mongodb.operation.update"></option>
+            <option value="delete" data-i18n="mongodb.operation.remove"></option>
         </select>
     </div>
     <div class="form-row node-input-payonly">
         <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-payonly" placeholder="Only" style="display: inline-block; width: auto; vertical-align: top;">
+        <input type="checkbox" id="node-input-payonly" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-payonly" style="width: 70%;"><span data-i18n="mongodb.label.onlystore"></span></label>
     </div>
     <div class="form-row node-input-upsert">
         <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-upsert" placeholder="Only" style="display: inline-block; width: auto; vertical-align: top;">
+        <input type="checkbox" id="node-input-upsert" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-upsert" style="width: 70%;"><span data-i18n="mongodb.label.createnew"></span></label>
     </div>
     <div class="form-row node-input-multi">
         <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-multi" placeholder="Only" style="display: inline-block; width: auto; vertical-align: top;;">
+        <input type="checkbox" id="node-input-multi" style="display: inline-block; width: auto; vertical-align: top;;">
         <label for="node-input-multi" style="width: 70%;"><span data-i18n="mongodb.label.updateall"></span></label>
     </div>
     <div class="form-row">
@@ -176,14 +176,14 @@
     </div>
     <div class="form-row">
         <label for="node-input-collection"><i class="fa fa-briefcase"></i> <span data-i18n="mongodb.label.collection"></span></label>
-        <input type="text" id="node-input-collection" data-i18n="[placeholder]mongodb.label.collectionph">
+        <input type="text" id="node-input-collection">
     </div>
     <div class="form-row">
         <label for="node-input-operation"><i class="fa fa-wrench"></i> <span data-i18n="mongodb.label.operation"></span></label>
         <select type="text" id="node-input-operation" style="display: inline-block; vertical-align: top;">
-            <option value="find" data-i18n="mongodb.find"></option>
-            <option value="count" data-i18n="mongodb.count"></option>
-            <option value="aggregate" data-i18n="mongodb.aggregate"></option>
+            <option value="find" data-i18n="mongodb.operation.find"></option>
+            <option value="count" data-i18n="mongodb.operation.count"></option>
+            <option value="aggregate" data-i18n="mongodb.operation.aggregate"></option>
         </select>
     </div>
     <div class="form-row">

@@ -39,10 +39,8 @@
         },
         exportable: false,
         oneditprepare: function() {
-            //var clickhere = this._("twitter.label.clickhere");
-            var clickhere = "Click here to authenticate with Twitter.";
-            //var twitterid = this._("twitter.label.twitterid");
-            var twitterid = "Twitter ID";
+            var clickhere = this._("twitter.label.clickhere");
+            var twitterID = this._("twitter.label.twitter-id");
             function showTwitterAuthStart() {
                 var pathname = document.location.pathname;
                 if (pathname.slice(-1) != "/") {
@@ -57,7 +55,7 @@
             }
             function updateTwitterScreenName(sn) {
                 $("#node-config-input-screen_name").val(sn);
-                $("#node-config-twitter-row").html('<label><i class="fa fa-user"></i> '+twitterid+'</label><span class="input-xlarge uneditable-input">'+sn+'</span>');
+                $("#node-config-twitter-row").html('<label><i class="fa fa-user"></i> '+twitterID+'</label><span class="input-xlarge uneditable-input">'+sn+'</span>');
             }
             function pollTwitterCredentials(e) {
                 $.getJSON('credentials/twitter-credentials/'+twitterConfigNodeId,function(data) {
@@ -96,21 +94,21 @@
 
 <script type="text/x-red" data-template-name="twitter in">
     <div class="form-row">
-        <label for="node-input-twitter"><i class="fa fa-user"></i> <span data-i18n="twitter.label.loginas"></span></label>
+        <label for="node-input-twitter"><i class="fa fa-user"></i> <span data-i18n="twitter.label.twitter-id"></span></label>
         <input type="text" id="node-input-twitter">
     </div>
     <div class="form-row">
         <label for="node-input-user"><i class="fa fa-search"></i> <span data-i18n="twitter.label.search"></span></label>
         <select type="text" id="node-input-user" style="display: inline-block; vertical-align: middle; width:60%;">
-            <option value="false" data-i18n="twitter.public"></option>
-            <option value="true" data-i18n="twitter.follow"></option>
-            <option value="user" data-i18n="twitter.user"></option>
-            <option value="dm" data-i18n="twitter.direct"></option>
+            <option value="false" data-i18n="twitter.search.public"></option>
+            <option value="true" data-i18n="twitter.search.follow"></option>
+            <option value="user" data-i18n="twitter.search.user"></option>
+            <option value="dm" data-i18n="twitter.search.direct"></option>
         </select>
     </div>
     <div class="form-row" id="node-input-tags-row">
         <label for="node-input-tags"><i class="fa fa-tags"></i> <span id="node-input-tags-label" data-i18n="twitter.label.for"></span></label>
-        <input type="text" id="node-input-tags" data-i18n="[placeholder]twitter.label.forph">
+        <input type="text" id="node-input-tags" data-i18n="[placeholder]twitter.placeholder.for">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
@@ -166,9 +164,9 @@
         },
         oneditprepare: function() {
             var userlabel = this._("twitter.label.user");
-            var userph = this._("twitter.label.userph");
+            var userph = this._("twitter.placeholder.user");
             var forlabel = this._("twitter.label.for");
-            var forph = this._("twitter.label.forph");
+            var forph = this._("twitter.placeholder.for");
             $("#node-input-user").change(function() {
                 var type = $("#node-input-user option:selected").val();
                 if (type == "user") {
@@ -192,7 +190,7 @@
 
 <script type="text/x-red" data-template-name="twitter out">
     <div class="form-row">
-        <label for="node-input-twitter"><i class="fa fa-user"></i> <span data-i18n="twitter.label.twitter"></span></label>
+        <label for="node-input-twitter"><i class="fa fa-user"></i> <span data-i18n="twitter.label.twitter-id"></span></label>
         <input type="text" id="node-input-twitter">
     </div>
     <div class="form-row">

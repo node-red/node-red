@@ -73,7 +73,7 @@ module.exports = function(RED) {
                 if (smtpTransport) {
                     node.status({fill:"blue",shape:"dot",text:RED._("common.status.sending")});
                     if (msg.to && node.name && (msg.to !== node.name)) {
-                        node.warn(RED._("email.errors.nooverride"));
+                        node.warn(RED._("common.errors.nooverride"));
                     }
                     var sendopts = { from: node.userid };   // sender address
                     sendopts.to = node.name || msg.to; // comma separated list of addressees
@@ -84,7 +84,7 @@ module.exports = function(RED) {
                             sendopts.attachments[0].contentType = msg.headers["content-type"];
                         }
                         // Create some body text..
-                        sendopts.text = RED._("email.errors.yourfile")+" : "+(msg.filename.replace(/^.*[\\\/]/, '') || "file.bin")+ (msg.hasOwnProperty("description") ? "\n\n"+msg.description : "");
+                        sendopts.text = RED._("email.default-message",{filename:(msg.filename.replace(/^.*[\\\/]/, '') || "file.bin"),description:(msg.hasOwnProperty("description") ? "\n\n"+msg.description : "")});
                     }
                     else {
                         var payload = RED.util.ensureString(msg.payload);
@@ -97,7 +97,7 @@ module.exports = function(RED) {
                             node.error(error,msg);
                             node.status({fill:"red",shape:"ring",text:RED._("common.status.sendfail")});
                         } else {
-                            node.log(RED._("email.errors.messagesent")+": " + info.response);
+                            node.log(RED._("email.errors.messagesent",{response:info.response}));
                             node.status({});
                         }
                     });
@@ -164,7 +164,6 @@ module.exports = function(RED) {
         });
 
         if (!isNaN(this.repeat) && this.repeat > 0) {
-            node.log(RED._("email.errors.repeat")+" = "+this.repeat);
             this.interval_id = setInterval( function() {
                 node.emit("input",{});
             }, this.repeat );
@@ -172,19 +171,19 @@ module.exports = function(RED) {
 
         this.on("input", function(msg) {
             imap.once('ready', function() {
-                node.status({fill:"blue",shape:"dot",text:RED._("common.status.fetching")});
+                node.status({fill:"blue",shape:"dot",text:RED._("email.status.fetching")});
                 var pay = {};
                 imap.openBox(node.box, false, function(err, box) {
                     if (err) {
-                        node.status({fill:"red",shape:"ring",text:RED._("common.status.foldererror")});
-                        node.error(RED._("email.errors.fetchfail")+" "+node.box,err);
+                        node.status({fill:"red",shape:"ring",text:RED._("email.status.foldererror")});
+                        node.error(RED._("email.errors.fetchfail",{folder:node.box}),err);
                     }
                     else {
                         if (box.messages.total > 0) {
                             //var f = imap.seq.fetch(box.messages.total + ':*', { markSeen:true, bodies: ['HEADER.FIELDS (FROM SUBJECT DATE TO CC BCC)','TEXT'] });
                             var f = imap.seq.fetch(box.messages.total + ':*', { markSeen:true, bodies: ['HEADER','TEXT'] });
                             f.on('message', function(msg, seqno) {
-                                node.log(RED._("email.errors.message")+': #'+ seqno);
+                                node.log(RED._("email.status.message",{number:seqno}));
                                 var prefix = '(#' + seqno + ') ';
                                 msg.on('body', function(stream, info) {
                                     var buffer = '';
@@ -215,27 +214,27 @@ module.exports = function(RED) {
                                     });
                                 });
                                 msg.on('end', function() {
-                                    //node.log(RED._("email.errors.finished")+': '+prefix);
+                                    //node.log('finished: '+prefix);
                                 });
                             });
                             f.on('error', function(err) {
-                                node.warn(RED._("email.errors.messageerror")+': ' + err);
-                                node.status({fill:"red",shape:"ring",text:RED._("common.status.messageerror")});
+                                node.warn(RED._("email.errors.messageerror",{error:err}));
+                                node.status({fill:"red",shape:"ring",text:RED._("email.status.messageerror")});
                             });
                             f.on('end', function() {
                                 delete(pay._msgid);
                                 if (JSON.stringify(pay) !== oldmail) {
                                     oldmail = JSON.stringify(pay);
                                     node.send(pay);
-                                    node.log(RED._("email.errors.newemail")+': '+pay.topic);
+                                    node.log(RED._("email.status.newemail",{topic:pay.topic}));
                                 }
-                                else { node.log(RED._("email.errors.duplicate")+': '+pay.topic); }
+                                else { node.log(RED._("email.status.duplicate",{topic:pay.topic})); }
                                 //node.status({fill:"green",shape:"dot",text:RED._("common.status.ok")});
                                 node.status({});
                             });
                         }
                         else {
-                            node.log(RED._("email.errors.inboxzero"));
+                            node.log(RED._("email.status.inboxzero"));
                             //node.status({fill:"green",shape:"dot",text:RED._("common.status.ok")});
                             node.status({});
                         }
@@ -250,10 +249,6 @@ module.exports = function(RED) {
         imap.on('error', function(err) {
             node.log(err);
             node.status({fill:"red",shape:"ring",text:RED._("common.status.connecterror")});
-        });
-
-        this.on("error", function(err) {
-            node.log(RED._("email.errors.error")+": ",err);
         });
 
         this.on("close", function() {
