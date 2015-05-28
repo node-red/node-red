@@ -198,7 +198,7 @@ module.exports = function(RED) {
             node.status({fill:"blue",shape:"dot",text:RED._("common.status.requesting")});
             var url = nodeUrl || msg.url;
             if (msg.url && nodeUrl && (nodeUrl !== msg.url)) {  // revert change below when warning is finally removed
-                node.warn(RED._("httpin.errors.not-overridden"));
+                node.warn(RED._("common.errors.nooverride"));
             }
             if (isTemplatedUrl) {
                 url = mustache.render(nodeUrl,msg);

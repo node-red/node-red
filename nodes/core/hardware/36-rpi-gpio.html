@@ -42,9 +42,9 @@
     <div class="form-row">
         <label for="node-input-intype"><i class="fa fa-level-up"></i> <span data-i18n="rpi-gpio.label.registor"></span></label>
         <select type="text" id="node-input-intype" style="width: 150px;">
-        <option value="tri" data-i18n="rpi-gpio.none"></option>
-        <option value="up" data-i18n="rpi-gpio.pullup"></option>
-        <option value="down" data-i18n="rpi-gpio.pulldown"></option>
+        <option value="tri" data-i18n="rpi-gpio.registor.none"></option>
+        <option value="up" data-i18n="rpi-gpio.registor.pullup"></option>
+        <option value="down" data-i18n="rpi-gpio.registor.pulldown"></option>
         </select>
     </div>
     <div class="form-row">
@@ -57,8 +57,8 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-tips" id="pin-tip"><span data-i18n="[html]rpi-gpio.pin-tip"></span></div>
-    <div class="form-tips"><span data-i18n="[html]rpi-gpio.in-tip"></span></div>
+    <div class="form-tips" id="pin-tip"><span data-i18n="[html]rpi-gpio.tip.pin"></span></div>
+    <div class="form-tips"><span data-i18n="[html]rpi-gpio.tip.in"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="rpi-gpio in">
@@ -97,7 +97,7 @@
         },
         oneditprepare: function() {
             var pinnow = this.pin;
-            var pintip = this._("rpi-gpio.pin-tip");
+            var pintip = this._("rpi-gpio.tip.pin");
             var pinname = this._("rpi-gpio.pinname");
             var alreadyuse = this._("rpi-gpio.alreadyuse");
             var alreadyset = this._("rpi-gpio.alreadyset");
@@ -193,9 +193,9 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-tips" id="pin-tip"><span data-i18n="[html]rpi-gpio.pin-tip"></span></div>
-    <div class="form-tips" id="dig-tip"><span data-i18n="[html]rpi-gpio.dig-tip"></span></div>
-    <div class="form-tips" id="pwm-tip"><span data-i18n="[html]rpi-gpio.pwm-tip"></span></div>
+    <div class="form-tips" id="pin-tip"><span data-i18n="[html]rpi-gpio.tip.pin"></span></div>
+    <div class="form-tips" id="dig-tip"><span data-i18n="[html]rpi-gpio.tip.dig"></span></div>
+    <div class="form-tips" id="pwm-tip"><span data-i18n="[html]rpi-gpio.tip.pwm"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="rpi-gpio out">
@@ -238,7 +238,7 @@
         },
         oneditprepare: function() {
             var pinnow = this.pin;
-            var pintip = this._("rpi-gpio.pin-tip");
+            var pintip = this._("rpi-gpio.tip.pin");
             var pinname = this._("rpi-gpio.pinname");
             var alreadyuse = this._("rpi-gpio.alreadyuse");
             var alreadyset = this._("rpi-gpio.alreadyset");

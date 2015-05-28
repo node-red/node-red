@@ -33,7 +33,7 @@ module.exports = function(RED) {
     }
 
     if ( !(1 & parseInt ((fs.statSync(gpioCommand).mode & parseInt ("777", 8)).toString (8)[0]) )) {
-        RED.log.error(gpioCommand+" "+RED._("rpi-gpio.errors.needtobeexecutable"));
+        RED.log.error(RED._("rpi-gpio.errors.needtobeexecutable",{command:gpioCommand}));
         throw "Error : "+RED._("rpi-gpio.errors.mustbeexecutable");
     }
 
@@ -41,7 +41,7 @@ module.exports = function(RED) {
     process.env.PYTHONUNBUFFERED = 1;
 
     var pinsInUse = {};
-    var pinTypes = {"out":RED._("rpi-gpio.errors.digout"), "tri":RED._("rpi-gpio.errors.input"), "up":RED._("rpi-gpio.errors.pullup"), "down":RED._("rpi-gpio.errors.pulldown"), "pwm":RED._("rpi-gpio.errors.pwmout")};
+    var pinTypes = {"out":RED._("rpi-gpio.types.digout"), "tri":RED._("rpi-gpio.types.input"), "up":RED._("rpi-gpio.types.pullup"), "down":RED._("rpi-gpio.types.pulldown"), "pwm":RED._("rpi-gpio.types.pwmout")};
 
     function GPIOInNode(n) {
         RED.nodes.createNode(this,n);
@@ -56,7 +56,7 @@ module.exports = function(RED) {
         }
         else {
             if ((pinsInUse[this.pin] !== this.intype)||(pinsInUse[this.pin] === "pwm")) {
-                node.warn(RED._("rpi-gpio.errors.gpiopin")+" "+this.pin+" "+RED._("rpi-gpio.errors.alreadyset")+" "+pinTypes[pinsInUse[this.pin]]);
+                node.warn(RED._("rpi-gpio.errors.alreadyset",{pin:this.pin,type:pinTypes[pinsInUse[this.pin]]}));
             }
         }
 
@@ -99,7 +99,7 @@ module.exports = function(RED) {
             node.child.on('error', function (err) {
                 if (err.errno === "ENOENT") { node.error(RED._("rpi-gpio.errors.commandnotfound")); }
                 else if (err.errno === "EACCES") { node.error(RED._("rpi-gpio.errors.commandnotexecutable")); }
-                else { node.error(RED._("rpi-gpio.errors.error")+': ' + err.errno); }
+                else { node.error(RED._("rpi-gpio.errors.error",{error:err.errnp})) }
             });
 
         }
@@ -133,7 +133,7 @@ module.exports = function(RED) {
         }
         else {
             if ((pinsInUse[this.pin] !== this.out)||(pinsInUse[this.pin] === "pwm")) {
-                node.warn(RED._("rpi-gpio.errors.gpiopin")+" "+this.pin+" "+RED._("rpi-gpio.errors.alreadyset")+" "+pinTypes[pinsInUse[this.pin]]);
+                node.warn(RED._("rpi-gpio.errors.alreadyset",{pin:this.pin,type:pinTypes[pinsInUse[this.pin]]}));
             }
         }
 
