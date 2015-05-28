@@ -17,14 +17,14 @@
 <script type="text/x-red" data-template-name="file">
     <div class="form-row node-input-filename">
          <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="file.label.filename"></span></label>
-         <input type="text" id="node-input-filename" data-i18n="[placeholder]file.label.filename">
+         <input type="text" id="node-input-filename">
     </div>
     <div class="form-row">
         <label for="node-input-overwriteFile"><i class="fa fa-random"></i> <span data-i18n="file.label.action"></span></label>
         <select type="text" id="node-input-overwriteFile" style="display: inline-block; width: 250px; vertical-align: top;">
-            <option value="false" data-i18n="file.append"></option>
-            <option value="true" data-i18n="file.overwrite"></option>
-            <option value="delete" data-i18n="file.delete"></option>
+            <option value="false" data-i18n="file.action.append"></option>
+            <option value="true" data-i18n="file.action.overwrite"></option>
+            <option value="delete" data-i18n="file.action.delete"></option>
         </select>
     </div>
     <div class="form-row" id="node-appline">
@@ -54,8 +54,8 @@
     <div class="form-row">
         <label for="node-input-format"><i class="fa fa-sign-out"></i> <span data-i18n="file.label.outputas"></span></label>
         <select id="node-input-format">
-            <option value="utf8" data-i18n="file.utf8"></option>
-            <option value="" data-i18n="file.buffer"></option>
+            <option value="utf8" data-i18n="file.output.utf8"></option>
+            <option value="" data-i18n="file.output.buffer"></option>
         </select>
     </div>
     <div class="form-row">
@@ -84,8 +84,11 @@
         icon: "file.png",
         align: "right",
         label: function() {
-            if (this.overwriteFile === this._("file.label.deletelabel")) { return this.name||this._("file.label.deletelabel")+" "+this.filename; }
-            else { return this.name||this.filename||this._("file.label.filelabel"); }
+            if (this.overwriteFile === "delete") {
+                return this.name||this._("file.label.deletelabel",{file:this.filename})
+            } else {
+                return this.name||this.filename||this._("file.label.filelabel");
+            }
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
