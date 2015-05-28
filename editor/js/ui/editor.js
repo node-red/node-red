@@ -602,8 +602,16 @@ RED.editor = (function() {
     function showEditConfigNodeDialog(name,type,id) {
         var adding = (id == "_ADD_");
         var node_def = RED.nodes.getType(type);
-
         var configNode = RED.nodes.node(id);
+        
+        var ns;
+        if (node_def.set.module === "node-red") {
+            ns = "node-red";
+        } else {
+            ns = node_def.set.id;
+        }
+
+        
         if (configNode == null) {
             configNode = {
                 id: (1+Math.random()*4294967295).toString(16),
@@ -615,16 +623,19 @@ RED.editor = (function() {
                     configNode[d] = node_def.defaults[d].value;
                 }
             }
+            configNode["_"] = function() {
+                var args = Array.prototype.slice.call(arguments, 0);
+                if (args[0].indexOf(":") === -1) {
+                    args[0] = ns+":"+args[0];
+                }
+                return RED._.apply(null,args);
+            }
+            
+            
         }
 
         $("#dialog-config-form").html($("script[data-template-name='"+type+"']").html());
 
-        var ns;
-        if (node_def.set.module === "node-red") {
-            ns = "node-red";
-        } else {
-            ns = node_def.set.id;
-        }
         $("#dialog-config-form").find('[data-i18n]').each(function() {
             var current = $(this).attr("data-i18n");
             if (current.indexOf(":") === -1) {
