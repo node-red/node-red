@@ -71,7 +71,7 @@ module.exports = function(RED) {
         this.on("input", function(msg) {
             if (msg.hasOwnProperty("payload")) {
                 if (smtpTransport) {
-                    node.status({fill:"blue",shape:"dot",text:RED._("common.status.sending")});
+                    node.status({fill:"blue",shape:"dot",text:RED._("email.status.sending")});
                     if (msg.to && node.name && (msg.to !== node.name)) {
                         node.warn(RED._("common.errors.nooverride"));
                     }
@@ -95,9 +95,9 @@ module.exports = function(RED) {
                     smtpTransport.sendMail(sendopts, function(error, info) {
                         if (error) {
                             node.error(error,msg);
-                            node.status({fill:"red",shape:"ring",text:RED._("common.status.sendfail")});
+                            node.status({fill:"red",shape:"ring",text:RED._("email.status.sendfail")});
                         } else {
-                            node.log(RED._("email.errors.messagesent",{response:info.response}));
+                            node.log(RED._("email.status.messagesent",{response:info.response}));
                             node.status({});
                         }
                     });
@@ -248,7 +248,7 @@ module.exports = function(RED) {
 
         imap.on('error', function(err) {
             node.log(err);
-            node.status({fill:"red",shape:"ring",text:RED._("common.status.connecterror")});
+            node.status({fill:"red",shape:"ring",text:RED._("email.status.connecterror")});
         });
 
         this.on("close", function() {

@@ -191,7 +191,7 @@ module.exports = function(RED) {
                     if (bits.length == 4) {
                         if ((Number(bits[0]) < Number(bits[2])) && (Number(bits[1]) < Number(bits[3]))) {
                             st = { locations: node.tags };
-                            node.log(RED._("twitter.status.usering-geo",{location:node.tags.toString()}));
+                            node.log(RED._("twitter.status.using-geo",{location:node.tags.toString()}));
                         }
                     }
 

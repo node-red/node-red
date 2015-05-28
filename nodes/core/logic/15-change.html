@@ -92,13 +92,13 @@
             return this.name ? "node_label_italic" : "";
         },
         oneditprepare: function() {
-            var set = this._("change.set");
-            var change = this._("change.change");
-            var del = this._("change.delete");
-            var to = this._("change.to");
-            var search = this._("change.search");
-            var replace = this._("change.replace");
-            var regex = this._("change.regex");
+            var set = this._("change.action.set");
+            var change = this._("change.action.change");
+            var del = this._("change.action.delete");
+            var to = this._("change.action.to");
+            var search = this._("change.action.search");
+            var replace = this._("change.action.replace");
+            var regex = this._("change.label.regex");
             if (this.reg === null) { $("#node-input-reg").prop('checked', true); }
             $("#node-input-action").change();
             

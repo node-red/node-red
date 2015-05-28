@@ -35,7 +35,7 @@ module.exports = function(RED) {
             if ((err.code == "EACCES") && (node.port < 1024)) {
                 node.error(RED._("udp.errors.access-error"));
             } else {
-                node.error(RED._("udp.errors.udp-error")+" : "+err.code);
+                node.error(RED._("udp.errors.error",{error:err.code}));
             }
             server.close();
         });
@@ -54,20 +54,20 @@ module.exports = function(RED) {
 
         server.on('listening', function () {
             var address = server.address();
-            node.log(RED._("udp.errors.listener-at") + ' ' + address.address + ":" + address.port);
+            node.log(RED._("udp.status.listener-at",{host:address.address,port:address.port}));
             if (node.multicast == "true") {
                 server.setBroadcast(true);
                 try {
                     server.setMulticastTTL(128);
                     server.addMembership(node.group,node.iface);
-                    node.log(RED._("udp.errors.mc-group")+" "+node.group);
+                    node.log(RED._("udp.status.mc-group",{group:node.group}));
                 } catch (e) {
                     if (e.errno == "EINVAL") {
                         node.error(RED._("udp.errors.bad-mcaddress"));
                     } else if (e.errno == "ENODEV") {
                         node.error(RED._("udp.errors.interface"));
                     } else {
-                        node.error(RED._("udp.errors.error")+" :"+e.errno);
+                        node.error(RED._("udp.errors.error",{error:e.errno}));
                     }
                 }
             }
@@ -76,7 +76,7 @@ module.exports = function(RED) {
         node.on("close", function() {
             try {
                 server.close();
-                node.log(RED._("udp.errors.listener-stopped"));
+                node.log(RED._("udp.status.listener-stopped"));
             } catch (err) {
                 node.error(err);
             }
@@ -118,25 +118,25 @@ module.exports = function(RED) {
                     try {
                         sock.setMulticastTTL(128);
                         sock.addMembership(node.addr,node.iface);   // Add to the multicast group
-                        node.log(RED._("udp.errors.mc-ready")+' : '+node.outport+' -> '+node.addr+":"+node.port);
+                        node.log(RED._("udp.status.mc-ready",{outport:node.outport,host:node.addr,port:node.port}));
                     } catch (e) {
                         if (e.errno == "EINVAL") {
                             node.error(RED._("udp.errors.bad-mcaddress"));
                         } else if (e.errno == "ENODEV") {
                             node.error(RED._("udp.errors.interface"));
                         } else {
-                            node.error(RED._("udp.errors.error")+" :"+e.errno);
+                            node.error(RED._("udp.errors.error",{error:e.errno}));
                         }
                     }
                 } else {
-                    node.log(RED._("udp.errors.bc-ready")+' : '+node.outport+' -> '+node.addr+":"+node.port);
+                    node.log(RED._("udp.status.bc-ready",{outport:node.outport,host:node.addr,port:node.port}));
                 }
             });
         } else if (node.outport != "") {
             sock.bind(node.outport);
-            node.log(RED._("udp.errors.ready")+' : '+node.outport+' -> '+node.addr+":"+node.port);
+            node.log(RED._("udp.errors.ready",{outport:node.outport,host:node.addr,port:node.port}));
         } else {
-            node.log(RED._("udp.errors.ready")+' : '+node.addr+":"+node.port);
+            node.log(RED._("udp.errors.ready-nolocal",{host:node.addr,port:node.port}));
         }
 
         node.on("input", function(msg) {
@@ -171,7 +171,7 @@ module.exports = function(RED) {
         node.on("close", function() {
             try {
                 sock.close();
-                node.log(RED._("udp.errors.output-stopped"));
+                node.log(RED._("udp.status.output-stopped"));
             } catch (err) {
                 node.error(err);
             }

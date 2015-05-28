@@ -108,7 +108,7 @@ module.exports = function(RED) {
             if (node.serialConfig.out != "count") { buf = new Buffer(bufMaxSize); }
             else { buf = new Buffer(Number(node.serialConfig.newline)); }
             var i = 0;
-            node.status({fill:"grey",shape:"dot",text:RED._("common.status.unknown")});
+            node.status({fill:"grey",shape:"dot",text:RED._("common.status.not-connected")});
             node.port = serialPool.get(this.serialConfig.serialport,
                 this.serialConfig.serialbaud,
                 this.serialConfig.databits,
