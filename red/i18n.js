@@ -101,12 +101,29 @@ function getCatalog(namespace,lang) {
     return result;
 }
 
+function determineLangFromHeaders(acceptedLanguages){
+    var lang = "en-US";
+    
+    var supportedLanguages = ['en-US', 'es', 'fr', 'it', 'de', 'pt-BR', 'zh', 'zh-TW', 'ko', 'ja', 'zz-ZZ']; // TODO: pull this value from settings
+    for (var i=0;i<acceptedLanguages.length;i++){
+        if (supportedLanguages.indexOf(acceptedLanguages[i]) !== -1){
+            lang = acceptedLanguages[i];
+            break;
+        // check the language without the country code
+        } else if (supportedLanguages.indexOf(acceptedLanguages[i].split("-")[0]) !== -1) {
+            lang = acceptedLanguages[i].split("-")[0];
+            break;
+        }
+    }
+    return lang;
+}
 
 var obj = module.exports = {
     init: init,
     registerMessageCatalog: registerMessageCatalog,
     catalog: getCatalog,
-    i: i18n
+    i: i18n,
+    determineLangFromHeaders: determineLangFromHeaders
 }
 
 obj['_'] = function() {
