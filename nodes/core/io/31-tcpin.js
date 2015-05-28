@@ -128,7 +128,7 @@ module.exports = function(RED) {
                 if (socketTimeout !== null) { socket.setTimeout(socketTimeout); }
                 var id = (1+Math.random()*4294967295).toString(16);
                 connectionPool[id] = socket;
-                node.status({text:++count+" "+RED._("common.status.connections")});
+                node.status({text:RED._("tcpin.status.connections",{count:++count})});
 
                 var buffer = (node.datatype == 'buffer')? new Buffer(0):"";
                 socket.on('data', function (data) {
@@ -175,7 +175,7 @@ module.exports = function(RED) {
                 });
                 socket.on('close', function() {
                     delete connectionPool[id];
-                    node.status({text:--count+" "+RED._("common.status.connections")});
+                    node.status({text:RED._("tcpin.status.connections",{count:--count})});
                 });
                 socket.on('error',function(err) {
                     node.log(err);
@@ -301,13 +301,13 @@ module.exports = function(RED) {
             });
         } else {
             var connectedSockets = [];
-            node.status({text:"0 "+RED._("common.status.connections")});
+            node.status({text:RED._("tcpin.status.connections",{count:0})});
             var server = net.createServer(function (socket) {
                 if (socketTimeout !== null) { socket.setTimeout(socketTimeout); }
                 var remoteDetails = socket.remoteAddress+":"+socket.remotePort;
                 node.log(RED._("tcpin.status.connection-from",{host:socket.remoteAddress, port:socket.remotePort}));
                 connectedSockets.push(socket);
-                node.status({text:connectedSockets.length+" "+RED._("common.status.connections")});
+                node.status({text:connectedSockets.length+" "+RED._("tcpin.status.connections")});
                 socket.on('timeout', function() {
                     node.log(RED._("tcpin.errors.timeout",{port:node.port}));
                     socket.end();
@@ -315,12 +315,12 @@ module.exports = function(RED) {
                 socket.on('close',function() {
                     node.log(RED._("tcpin.status.connection-closed",{host:socket.remoteAddress, port:socket.remotePort}));
                     connectedSockets.splice(connectedSockets.indexOf(socket),1);
-                    node.status({text:connectedSockets.length+" "+RED._("common.status.connections")});
+                    node.status({text:RED._("common.status.connections",{count:connectedSockets.length})});
                 });
                 socket.on('error',function() {
                     node.log(RED._("tcpin.errors.socket-error",{host:socket.remoteAddress, port:socket.remotePort}));
                     connectedSockets.splice(connectedSockets.indexOf(socket),1);
-                    node.status({text:connectedSockets.length+" "+RED._("common.status.connections")});
+                    node.status({text:RED._("common.status.connections",{count:connectedSockets.length})});
                 });
             });
 

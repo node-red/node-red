@@ -88,12 +88,12 @@ module.exports = function(RED) {
             node.child.on('close', function (code) {
                 node.child = null;
                 node.running = false;
-                if (RED.settings.verbose) { node.log(RED._("rpi-gpio.errors.closed")); }
+                if (RED.settings.verbose) { node.log(RED._("rpi-gpio.status.closed")); }
                 if (node.done) {
-                    node.status({fill:"grey",shape:"ring",text:RED._("common.status.closed")});
+                    node.status({fill:"grey",shape:"ring",text:RED._("rpi-gpio.status.closed")});
                     node.done();
                 }
-                else { node.status({fill:"red",shape:"ring",text:RED._("common.status.stopped")}); }
+                else { node.status({fill:"red",shape:"ring",text:RED._("rpi-gpio.status.stopped")}); }
             });
 
             node.child.on('error', function (err) {
@@ -108,7 +108,7 @@ module.exports = function(RED) {
         }
 
         node.on("close", function(done) {
-            node.status({fill:"grey",shape:"ring",text:RED._("common.status.close")});
+            node.status({fill:"grey",shape:"ring",text:RED._("rpi-gpio.status.closed")});
             delete pinsInUse[node.pin];
             if (node.child != null) {
                 node.done = done;
@@ -151,7 +151,7 @@ module.exports = function(RED) {
                 }
                 else {
                     node.error(RED._("rpi-gpio.errors.pythoncommandnotfound"),msg);
-                    node.status({fill:"red",shape:"ring",text:RED._("common.status.not-running")});
+                    node.status({fill:"red",shape:"ring",text:RED._("rpi-gpio.status.not-running")});
                 }
             }
             else { node.warn(RED._("rpi-gpio.errors.invalidinput")+": "+out); }
@@ -179,12 +179,12 @@ module.exports = function(RED) {
             node.child.on('close', function (code) {
                 node.child = null;
                 node.running = false;
-                if (RED.settings.verbose) { node.log(RED._("rpi-gpio.errors.closed")); }
+                if (RED.settings.verbose) { node.log(RED._("rpi-gpio.status.closed")); }
                 if (node.done) {
-                    node.status({fill:"grey",shape:"ring",text:RED._("common.status.closed")});
+                    node.status({fill:"grey",shape:"ring",text:RED._("rpi-gpio.status.closed")});
                     node.done();
                 }
-                else { node.status({fill:"red",shape:"ring",text:RED._("common.status.stopped")}); }
+                else { node.status({fill:"red",shape:"ring",text:RED._("rpi-gpio.status.stopped")}); }
             });
 
             node.child.on('error', function (err) {
@@ -199,7 +199,7 @@ module.exports = function(RED) {
         }
 
         node.on("close", function(done) {
-            node.status({fill:"grey",shape:"ring",text:RED._("common.status.close")});
+            node.status({fill:"grey",shape:"ring",text:RED._("rpi-gpio.status.closed")});
             delete pinsInUse[node.pin];
             if (node.child != null) {
                 node.done = done;
@@ -247,12 +247,12 @@ module.exports = function(RED) {
         node.child.on('close', function (code) {
             node.child = null;
             node.running = false;
-            if (RED.settings.verbose) { node.log(RED._("rpi-gpio.errors.closed")); }
+            if (RED.settings.verbose) { node.log(RED._("rpi-gpio.status.closed")); }
             if (node.done) {
-                node.status({fill:"grey",shape:"ring",text:RED._("common.status.closed")});
+                node.status({fill:"grey",shape:"ring",text:RED._("rpi-gpio.status.closed")});
                 node.done();
             }
-            else { node.status({fill:"red",shape:"ring",text:RED._("common.status.stopped")}); }
+            else { node.status({fill:"red",shape:"ring",text:RED._("rpi-gpio.status.stopped")}); }
         });
 
         node.child.on('error', function (err) {
@@ -262,7 +262,7 @@ module.exports = function(RED) {
         });
 
         node.on("close", function(done) {
-            node.status({fill:"grey",shape:"ring",text:RED._("common.status.close")});
+            node.status({fill:"grey",shape:"ring",text:RED._("rpi-gpio.status.closed")});
             if (node.child != null) {
                 node.done = done;
                 node.child.kill('SIGINT');
