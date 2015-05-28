@@ -29,11 +29,11 @@
     </div>
     <div class="form-row node-input-iface">
         <label for="node-input-iface"><i class="fa fa-random"></i> <span data-i18n="udp.label.interface"></span></label>
-        <input type="text" id="node-input-iface" data-i18n="[placeholder]udp.label.interfaceph">
+        <input type="text" id="node-input-iface" data-i18n="[placeholder]udp.label.interface">
     </div>
     <div class="form-row">
         <label for="node-input-port"><i class="fa fa-sign-in"></i> <span data-i18n="udp.label.onport"></span></label>
-        <input type="text" id="node-input-port" data-i18n="[placeholder]udp.label.onportph" style="width: 80px">
+        <input type="text" id="node-input-port" style="width: 80px">
         &nbsp;&nbsp;<span data-i18n="udp.label.using"></span> <select id="node-input-ipv" style="width:80px">
           <option value="udp4">ipv4</option>
           <option value="udp6">ipv6</option>
@@ -42,16 +42,16 @@
     <div class="form-row">
         <label for="node-input-datatype"><i class="fa fa-sign-out"></i> <span data-i18n="udp.label.output"></span></label>
         <select id="node-input-datatype" style="width: 70%;">
-            <option value="buffer" data-i18n="udp.buffer"></option>
-            <option value="utf8" data-i18n="udp.string"></option>
-            <option value="base64" data-i18n="udp.base64"></option>
+            <option value="buffer" data-i18n="udp.output.buffer"></option>
+            <option value="utf8" data-i18n="udp.output.string"></option>
+            <option value="base64" data-i18n="udp.output.base64"></option>
         </select>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-tips"><span data-i18n="udp.in-tip"></span></div>
+    <div class="form-tips"><span data-i18n="udp.tip.in"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="udp in">
@@ -112,11 +112,11 @@
           <option value="broad" data-i18n="udp.bcmsg"></option>
           <option value="multi" data-i18n="udp.mcmsg"></option>
         </select>
-        <span data-i18n="udp.label.toport"></span> <input type="text" id="node-input-port" data-i18n="[placeholder]udp.label.toportph" style="width: 70px">
+        <span data-i18n="udp.label.toport"></span> <input type="text" id="node-input-port" style="width: 70px">
     </div>
     <div class="form-row node-input-addr">
         <label for="node-input-addr" id="node-input-addr-label"><i class="fa fa-list"></i> <span data-i18n="udp.label.address"></span></label>
-        <input type="text" id="node-input-addr" data-i18n="[placeholder]udp.label.addressph" style="width: 50%;">
+        <input type="text" id="node-input-addr" data-i18n="[placeholder]udp.placeholder.address" style="width: 50%;">
         <select id="node-input-ipv" style="width:70px">
           <option value="udp4">ipv4</option>
           <option value="udp6">ipv6</option>
@@ -124,15 +124,15 @@
     </div>
     <div class="form-row node-input-iface">
         <label for="node-input-iface"><i class="fa fa-random"></i> <span data-i18n="udp.label.interface"></span></label>
-        <input type="text" id="node-input-iface" data-i18n="[placeholder]udp.label.interfaceph">
+        <input type="text" id="node-input-iface" data-i18n="[placeholder]udp.placeholder.interface">
     </div>
     <div class="form-row">
         <label for="node-input-outport-type">&nbsp;</label>
         <select id="node-input-outport-type">
-          <option id="node-input-outport-type-random" value="random" data-i18n="udp.bindrandom"></option>
-          <option value="fixed" data-i18n="udp.bindlocal"></option>
+          <option id="node-input-outport-type-random" value="random" data-i18n="udp.bind.random"></option>
+          <option value="fixed" data-i18n="udp.bind.local"></option>
         </select>
-        <input type="text" id="node-input-outport"  style="width: 70px;" data-i18n="[placeholder]udp.label.outportph">
+        <input type="text" id="node-input-outport"  style="width: 70px;">
     </div>
     <div class="form-row">
         <label>&nbsp;</label>
@@ -143,7 +143,7 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-tips"><span data-i18n="[html]udp.out-tip"></span></div>
+    <div class="form-tips"><span data-i18n="[html]udp.tip.out"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="udp out">
@@ -179,10 +179,10 @@
         },
         oneditprepare: function() {
             var addresslabel = this._("udp.label.address");
-            var addressph = this._("udp.label.addressph");
+            var addressph = this._("udp.placeholder.address");
             var grouplabel = this._("udp.label.group");
-            var bindrandom = this._("udp.bindrandom");
-            var bindtarget = this._("udp.bindtarget");
+            var bindrandom = this._("udp.bind.random");
+            var bindtarget = this._("udp.bind.target");
 
             var type = this.outport==""?"random":"fixed";
             $("#node-input-outport-type option").filter(function() {

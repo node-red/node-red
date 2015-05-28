@@ -12,23 +12,8 @@
             "not-connected": "not connected",
             "disconnected": "disconnected",
             "connecting": "connecting",
-            "connections": "connections",
-            "requesting": "requesting",
-            "unknown": "unknown",
             "error": "error",
-            "ok": "OK",
-            "closed": "closed",
-            "stopped": "stopped",
-            "close": "close",
-            "not-running": "not running",
-            "sending": "sending",
-            "sendfail": "send failed",
-            "connecterror": "connect error",
-            "neterror": "net error",
-            "joined": "joined",
-            "quit": "quit",
-            "noconnection": "no connection",
-            "failed": "failed"
+            "ok": "OK"
         },
         "notification": {
             "error": "<strong>Error</strong>: __message__",
@@ -86,7 +71,6 @@
         "catch": "catch"
     },
     "debug": {
-        "debug": "debug",
         "output": "Output",
         "msgprop": "message property",
         "msgobj": "complete msg object",
@@ -126,7 +110,6 @@
         "templatevalue": "This is the payload: {{payload}} !"
     },
     "delay": {
-        "delay": "delay",
         "action": "Action",
         "for": "For",
         "delaymsg": "Delay message",
@@ -190,7 +173,6 @@
         "tip": "<p>This node is a type unknown to your installation of Node-RED.</p><p><i>If you deploy with the node in this state, it's configuration will be preserved, but the flow will not start until the missing type is installed.</i></p><p>See the Info side bar for more help</p>"
     },
     "mqtt": {
-        "mqtt": "mqtt",
         "label": {
             "broker": "Broker",
             "qos": "QoS",
@@ -214,7 +196,7 @@
         "label": {
             "method": "Method",
             "url": "URL",
-            "doc": "Documentation",
+            "doc": "Docs",
             "return": "Return"
         },
         "setby": "- set by msg.method -",
@@ -233,6 +215,9 @@
             "no-response": "No response object",
             "json-error": "JSON parse error",
             "no-url": "No url specified"
+        },
+        "status": {
+            "requesting": "requesting"
         }
     },
     "websocket": {
@@ -316,7 +301,6 @@
         }
     },
     "tcpin": {
-        "tcpin": "tcpin",
         "label": {
             "type": "Type",
             "output": "Output",
@@ -353,7 +337,10 @@
             "listening-port": "listening on port __port__",
             "stopped-listening": "stopped listening on port",
             "connection-from": "connection from __host__:__port__",
-            "connection-closed": "connection closed from __host__:__port__"
+            "connection-closed": "connection closed from __host__:__port__",
+            "connections": "__count__ connection",
+            "connections_plural": "__count__ connections"
+            
         },
         "errors": {
             "connection-lost": "connection lost to __host__:__port__",
@@ -373,47 +360,54 @@
             "onport": "on Port",
             "using": "using",
             "output": "Output",
-            "onportph": "port",
             "group": "Group",
             "interface": "Interface",
-            "interfaceph": "(optional) ip address of eth0",
             "send": "Send a",
             "toport": "to port",
-            "toportph": "port",
             "address": "Address",
-            "addressph": "destination ip",
-            "decode-base64": "Decode Base64 encoded payload?",
-            "outportph": "port"
+            "decode-base64": "Decode Base64 encoded payload?"
+        },
+        "placeholder": {
+            "interface": "(optional) ip address of eth0",
+            "address": "destination ip"
         },
         "udpmsgs": "udp messages",
         "mcmsgs": "multicast messages",
         "udpmsg": "udp message",
         "bcmsg": "broadcast message",
         "mcmsg": "multicast message",
-        "buffer": "a Buffer",
-        "string": "a String",
-        "base64": "a Base64 encoded string",
-        "bindrandom": "bind to random local port",
-        "bindlocal": "bind to local port",
-        "bindtarget": "bind to target port",
-        "in-tip": "Tip: Make sure your firewall will allow the data in.",
-        "out-tip": "Tip: leave address and port blank if you want to set using <b>msg.ip</b> and <b>msg.port</b>.",
-        "errors": {
-            "listener-at": "udp listener at",
-            "mc-group": "udp multicast group",
+        "output": {
+            "buffer": "a Buffer",
+            "string": "a String",
+            "base64": "a Base64 encoded string"
+        },
+        "bind": {
+            "random": "bind to random local port",
+            "local": "bind to local port",
+            "target": "bind to target port"
+        },
+        "tip": {
+            "in": "Tip: Make sure your firewall will allow the data in.",
+            "out": "Tip: leave address and port blank if you want to set using <b>msg.ip</b> and <b>msg.port</b>."
+        },
+        "status": {
+            "listener-at": "udp listener at __host__:__port__",
+            "mc-group": "udp multicast group __group__",
             "listener-stopped": "udp listener stopped",
-            "mc-ready": "udp multicast ready",
-            "bc-ready": "udp broadcast ready",
-            "ready": "udp ready",
             "output-stopped": "udp output stopped",
-            "ip-notset": "udp: ip address not set",
-            "port-notset": "udp: port not set",
-            "port-invalid": "udp: port number not valid",
+            "mc-ready": "udp multicast ready: __outport__ -> __host__:__port__",
+            "bc-ready": "udp broadcast ready: __outport__ -> __host__:__port__",
+            "ready": "udp ready: __outport__ -> __host__:__port__",
+            "ready-nolocal": "udp ready: __host__:__port__"
+        },
+        "errors": {
             "access-error": "UDP access error, you may need root access for ports below 1024",
-            "udp-error": "UDP error",
+            "error": "error: __error_",
             "bad-mcaddress": "Bad Multicast Address",
             "interface": "Must be ip address of the required interface",
-            "error": "Error"
+            "ip-notset": "udp: ip address not set",
+            "port-notset": "udp: port not set",
+            "port-invalid": "udp: port number not valid"
         }
     },
     "switch": {
@@ -435,22 +429,23 @@
         }
     },
     "change": {
-        "change": "change",
         "label": {
             "rules": "Rules",
             "rule": "rule",
             "set": "set __property__",
             "change": "change __property__",
             "delete": "delete __property__",
-            "changeCount": "change: __count__ rules"
+            "changeCount": "change: __count__ rules",
+            "regex": "Use regular expressions"
         },
-        "set": "Set",
-        "change": "Change",
-        "delete": "Delete",
-        "to": "to",
-        "search": "Search for",
-        "replace": "Replace with",
-        "regex": "Use regular expressions",
+        "action": {
+            "set": "Set",
+            "change": "Change",
+            "delete": "Delete",
+            "to": "to",
+            "search": "Search for",
+            "replace": "Replace with"
+        },
         "errors": {
             "invalid-from": "Invalid 'from' property: __error__"
         }
@@ -480,7 +475,6 @@
         }
     },
     "csv": {
-        "csv": "csv",
         "label": {
             "columns": "Columns",
             "separator": "Separator",
@@ -628,9 +622,13 @@
             "pulldown": "input with pull down",
             "pwmout": "PWM output"
         },
+        "status": {
+            "stopped": "stopped",
+            "closed": "closed",
+            "not-running": "not running"
+        },
         "errors": {
             "ignorenode": "Ignoring Raspberry Pi specific node",
-            "closed": "closed",
             "version": "Version command failed",
             "sawpitype": "Saw Pi Type",
             "libnotfound": "Cannot find Pi RPi.GPIO python library",
@@ -646,7 +644,6 @@
         }
     },
     "tail": {
-        "tail": "tail",
         "label": {
             "filename": "Filename",
             "splitlines": "Split lines on \\n?"
@@ -656,7 +653,6 @@
         }
     },
     "file": {
-        "file": "file",
         "label": {
             "filename": "Filename",
             "action": "Action",
@@ -688,7 +684,6 @@
         }
     },
     "redisout": {
-        "redis": "redis",
         "label": {
             "host": "Host",
             "port": "Port",
@@ -708,7 +703,6 @@
         }
     },
     "mongodb": {
-        "mongodb": "mongodb",
         "label": {
             "host": "Host",
             "port": "Port",
@@ -738,7 +732,6 @@
         }
     },
     "feedparse": {
-        "feedparse": "feedparse",
         "label": {
             "feedurl": "Feed url",
             "refresh": "Refresh",
@@ -776,7 +769,10 @@
             "message": "message #__number__",
             "newemail": "received new email: __topic__",
             "duplicate": "duplicate not sent: __topic__",
-            "inboxzero": "you have achieved Inbox Zero"
+            "inboxzero": "you have achieved Inbox Zero",
+            "sending": "sending",
+            "sendfail": "send failed",
+            "connecterror": "connect error"
         },
         "errors": {
             "nouserid": "No e-mail userid set",
@@ -825,7 +821,6 @@
         }
     },
     "twitter": {
-        "twitter": "twitter",
         "label": {
             "twitter-id":"Twitter ID",
             "search": "Search",
