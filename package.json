@@ -10,8 +10,9 @@
     },
     "main"         : "red/red.js",
     "scripts"      : {
+        "build": "grunt build",
         "start": "node red.js",
-        "test": "./node_modules/.bin/grunt"
+        "test": "grunt"
     },
     "bin"          : {
         "node-red": "./red.js",
