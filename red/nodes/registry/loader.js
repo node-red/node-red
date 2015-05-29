@@ -19,7 +19,6 @@ var fs = require("fs");
 var path = require("path");
 
 var events = require("../../events");
-var log = require("../../log");
 
 var localfilesystem = require("./localfilesystem");
 var registry = require("./registry");
@@ -113,7 +112,7 @@ function loadNodeConfig(fileInfo) {
         var isEnabled = true;
         if (info) {
             if (info.hasOwnProperty("loaded")) {
-                throw new Error(log._("nodes.registry.loader.already-loaded", {file:file}));
+                throw new Error(file+" already loaded");
             }
             isEnabled = info.enabled;
         }
@@ -139,7 +138,7 @@ function loadNodeConfig(fileInfo) {
                     if (!node.types) {
                         node.types = [];
                     }
-                    node.err = log._("nodes.registry.loader.file-not-exist", {file:file});
+                    node.err = "Error: "+file+" does not exist";
                 } else {
                     node.types = [];
                     node.err = err.toString();
@@ -185,7 +184,7 @@ function loadNodeConfig(fileInfo) {
                 //node.script = "";
                 for (var i=0;i<node.types.length;i++) {
                     if (registry.getTypeId(node.types[i])) {
-                        node.err = log._("nodes.registry.loader.already-registered", {type:node.types[i]});
+                        node.err = node.types[i]+" already registered";
                         break;
                     }
                 }
@@ -299,11 +298,12 @@ function loadNodeSetList(nodes) {
 
 function addModule(module) {
     if (!settings.available()) {
-        throw new Error(log._("nodes.registry.loader.settings-unavailable"));
+        throw new Error("Settings unavailable");
     }
     var nodes = [];
     if (registry.getModuleInfo(module)) {
-        var e = new Error(log._("nodes.registry.loader.module-already-loaded"));
+        // TODO: nls
+        var e = new Error("module_already_loaded");
         e.code = "module_already_loaded";
         return when.reject(e);
     }
