@@ -223,7 +223,7 @@
                     $(this).append($("<option></option>").val(i).text(l));
                 }
             });
-
+            $("<option></option>").val(24).text("00:00").appendTo("#inject-time-interval-time-end");
             $("#inject-time-interval-time-start").change(function() {
                 var start = Number($("#inject-time-interval-time-start option:selected").val());
                 var end = Number($("#inject-time-interval-time-end option:selected").val());
@@ -337,7 +337,7 @@
                             }
                         } else {
                             start = hours[0];
-                            end = (Number(hours[1])+1)%24;
+                            end = Number(hours[1])+1;
                         }
                     } else {
                         // 23,0 or 17-23,0-10 or 23,0-2 or 17-23,0
@@ -351,8 +351,8 @@
                             end = Number(endparts[1])+1;
                         }
                     }
-                    $("#inject-time-interval-time-start option").filter(function() {return $(this).val() == start;}).attr('selected',true);
                     $("#inject-time-interval-time-end option").filter(function() {return $(this).val() == end;}).attr('selected',true);
+                    $("#inject-time-interval-time-start option").filter(function() {return $(this).val() == start;}).attr('selected',true);
 
                 }
             } else {
