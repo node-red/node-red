@@ -18,7 +18,6 @@
 var util = require("util");
 var when = require("when");
 var events = require("../../events");
-var log = require("../../log");
 
 var settings;
 
@@ -108,7 +107,7 @@ function saveNodeList() {
     if (settings.available()) {
         return settings.set("nodes",moduleList);
     } else {
-        return when.reject(log._("nodes.registry.registry.settings-unavailable"));
+        return when.reject("Settings unavailable");
     }
 }
 
@@ -184,7 +183,7 @@ function addNodeSet(id,set,version) {
 function removeNode(id) {
     var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
     if (!config) {
-        throw new Error(log._("nodes.registry.registry.unrecognised-id", {id:id}));
+        throw new Error("Unrecognised id: "+id);
     }
     delete moduleConfigs[getModule(id)].nodes[getNode(id)];
     var i = nodeList.indexOf(id);
@@ -203,11 +202,11 @@ function removeNode(id) {
 
 function removeModule(module) {
     if (!settings.available()) {
-        throw new Error(log._("nodes.registry.registry.settings-unavailable"));
+        throw new Error("Settings unavailable");
     }
     var nodes = moduleNodes[module];
     if (!nodes) {
-        throw new Error(log._("nodes.registry.registry.unrecognised-module", {module:module}));
+        throw new Error("Unrecognised module: "+module);
     }
     var infoList = [];
     for (var i=0;i<nodes.length;i++) {
@@ -298,7 +297,7 @@ function getModuleInfo(module) {
 
 function registerNodeConstructor(type,constructor) {
     if (nodeConstructors[type]) {
-        throw new Error(log._("nodes.registry.registry.already-registered", {type:type}));
+        throw new Error(type+" already registered");
     }
     //TODO: Ensure type is known - but doing so will break some tests
     //      that don't have a way to register a node template ahead
@@ -380,7 +379,7 @@ function getTypeId(type) {
 
 function enableNodeSet(typeOrId) {
     if (!settings.available()) {
-        throw new Error(log._("nodes.registry.registry.settings-unavailable"));
+        throw new Error("Settings unavailable");
     }
 
     var id = typeOrId;
@@ -400,14 +399,14 @@ function enableNodeSet(typeOrId) {
         nodeConfigCache = null;
         saveNodeList();
     } catch (err) {
-        throw new Error(log._("nodes.registry.registry.unrecognised-id", {id:typeOrId}));
+        throw new Error("Unrecognised id: "+typeOrId);
     }
     return filterNodeInfo(config);
 }
 
 function disableNodeSet(typeOrId) {
     if (!settings.available()) {
-        throw new Error(log._("nodes.registry.registry.settings-unavailable"));
+        throw new Error("Settings unavailable");
     }
     var id = typeOrId;
     if (nodeTypeToId[typeOrId]) {
@@ -421,7 +420,7 @@ function disableNodeSet(typeOrId) {
         nodeConfigCache = null;
         saveNodeList();
     } catch (err) {
-        throw new Error(log._("nodes.registry.registry.unrecognised-id", {id:id}));
+        throw new Error("Unrecognised id: "+id);
     }
     return filterNodeInfo(config);
 }

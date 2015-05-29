@@ -55,7 +55,7 @@
     },
     
     "settings": {
-        "settings-not-available": "Settings not available",
+        "not-available": "Settings not available",
         "property-read-only": "Property '__prop__' is read-only"
     },
     
@@ -83,7 +83,7 @@
             "missing-types": "Waiting for missing types to be registered:"
             
         },
-        "Flow": {
+        "flow": {
             "unknown-type": "Unknown type: __type__",
             "missing-types": "missing types"
         },
@@ -93,21 +93,8 @@
             "unrecognised-module": "Unrecognised module: __module__"
         },
         "registry": {
-            "loader": {
-                "already-loaded": "__file__ already loaded",
-                "file-not-exist": "Error: __file__ does not exist",
-                "already-registered": "__type__ already registered",
-                "settings-unavailable": "Settings unavailable",
-                "module-already-loaded": "Module already loaded"
-            },
             "localfilesystem": {
                 "module-not-found": "Cannot find module '__module__'"
-            },
-            "registry": {
-                "settings-unavailable": "Settings unavailable",
-                "unrecognised-id": "Unrecognised id: __id__",
-                "unrecognised-module": "Unrecognised module: __module__",
-                "already-registered": "__type__ already registered"
             }
         }
     },

@@ -49,7 +49,7 @@ var persistentSettings = {
             return clone(userSettings[prop]);
         }
         if (globalSettings === null) {
-            throw new Error(log._("settings.settings-not-available"));
+            throw new Error(log._("settings.not-available"));
         }
         return clone(globalSettings[prop]);
     },
@@ -59,7 +59,7 @@ var persistentSettings = {
             throw new Error(log._("settings.property-read-only", {prop:prop}));
         }
         if (globalSettings === null) {
-            throw new Error(log._("settings.settings-not-available"));
+            throw new Error(log._("settings.not-available"));
         }
         var current = globalSettings[prop];
         globalSettings[prop] = value;
