@@ -19,13 +19,14 @@ RED.i18n = (function() {
     return {
         init: function(done) {
             i18n.init({
-                resGetPath: 'locales/__ns__?lang=__lng__',
+                resGetPath: 'locales/__ns__',
                 dynamicLoad: false,
+                load:'current',
                 ns: {
                     namespaces: ["editor","node-red"],
                     defaultNs: "editor"
                 },
-                fallbackLng: ['en']
+                fallbackLng: ['en-US']
             },function() {
                 done();
             });
