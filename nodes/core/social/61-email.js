@@ -79,6 +79,14 @@ module.exports = function(RED) {
                     sendopts.to = node.name || msg.to; // comma separated list of addressees
                     sendopts.subject = msg.topic || msg.title || "Message from Node-RED"; // subject line
                     if (Buffer.isBuffer(msg.payload)) { // if it's a buffer in the payload then auto create an attachment instead
+                        if (!msg.filename) {
+                            var fe = "bin";
+                            if ((msg.payload[0] === 0xFF)&&(msg.payload[1] === 0xD8)) { fe = "jpg"; }
+                            if ((msg.payload[0] === 0x47)&&(msg.payload[1] === 0x49)) { fe = "gif"; } //46
+                            if ((msg.payload[0] === 0x42)&&(msg.payload[1] === 0x4D)) { fe = "bmp"; }
+                            if ((msg.payload[0] === 0x89)&&(msg.payload[1] === 0x50)) { fe = "png"; } //4E
+                            msg.filename = "attachment."+fe;
+                        }
                         sendopts.attachments = [ { content: msg.payload, filename:(msg.filename.replace(/^.*[\\\/]/, '') || "file.bin") } ];
                         if (msg.hasOwnProperty("headers") && msg.headers.hasOwnProperty("content-type")) {
                             sendopts.attachments[0].contentType = msg.headers["content-type"];
