@@ -1,5 +1,5 @@
 <!--
-  Copyright 2014 IBM Corp.
+  Copyright 2014, 2015 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -16,64 +16,48 @@
 
 <script type="text/x-red" data-template-name="trigger">
     <div class="form-row">
-        <label for="node-input-op1type"><i class="fa fa-arrow-up"></i> Output</label>
-        <select id="node-input-op1type" style="width:73% !important">
-            <option value="val">the value below</option>
-            <option value="pay">the existing payload</option>
-            <option value="nul">nothing (no output)</option>
+        Send
+        <select id="node-input-op1type" style="width:200px !important">
+            <option value="val">the string payload</option>
+            <option value="pay">the existing message</option>
+            <option value="nul">nothing</option>
         </select>
-    </div>
-    <div class="form-row" id="node-op1">
-        <label for="node-input-op1">&nbsp;</label>
-        <input type="text" id="node-input-op1">
+        <input style="width: 180px !important" type="text" id="node-input-op1">
     </div>
     <div class="form-row">
-        <label for="node-input-duration"><i class="fa fa-clock-o"></i> then wait</label>
-        <input type="text" id="node-input-duration" placeholder="250" style="direction:rtl; width:70px !important">
-        <select id="node-input-units" style="width:140px !important">
-            <option value="ms">Milliseconds</option>
-            <option value="s">Seconds</option>
-            <option value="min">Minutes</option>
-            <option value="hr">Hours</option>
+        then
+        <select id="node-then-type" style="width:150px;">
+            <option value="block">wait to be reset</option>
+            <option value="wait">wait for</option>
         </select>
+        <span class="node-type-wait">
+            <input type="text" id="node-input-duration" style="width:70px !important">
+            <select id="node-input-units" style="width:140px !important">
+                <option value="ms">Milliseconds</option>
+                <option value="s">Seconds</option>
+                <option value="min">Minutes</option>
+                <option value="hr">Hours</option>
+            </select>
+       </span>
     </div>
-    <div class="form-row">
-        <label for="node-input-op2type"><i class="fa fa-arrow-down"></i> output</label>
-        <select id="node-input-op2type" style="width:73% !important">
-            <option value="val">the value below</option>
-            <option value="pay">the existing payload</option>
-            <option value="nul">nothing (no output)</option>
+    <div class="form-row node-type-wait">
+        then send
+        <select id="node-input-op2type" style="width:200px !important">
+            <option value="val">the string payload</option>
+            <option value="pay">the existing message</option>
+            <option value="nul">nothing</option>
         </select>
+        <input style="width: 145px !important" type="text" id="node-input-op2">
     </div>
-    <div class="form-row" id="node-op2">
-        <label for="node-input-op2">&nbsp;</label>
-        <input type="text" id="node-input-op2">
+    <div class="form-row node-type-wait">
+        <input type="checkbox" id="node-input-extend" style="margin-left: 5px; vertical-align: top; width: auto !important;"> <label style="width:auto !important;" for="node-input-extend">extend delay if new message arrives</label>
     </div>
-    <div class="form-row">
-        <label for="node-input-extend"><i class="fa fa-repeat"></i> and</label>
-        <select id="node-input-extend" style="width:73% !important">
-            <option value="false">don't extend the timer if retriggered</option>
-            <option value="true">extend the timer if retriggered</option>
-        </select>
-    </div>
+    <br/>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <input type="text" id="node-input-name" placeholder="name">
     </div>
-    <!-- <div class="form-tips">Tip: Outputs can be values, null, {{templated}} or msg.payload<br/> -->
-    <div class="form-tips">Setting the timeout to 0 sets an infinite timeout = single shot.</div>
-    <script>
-    {
-        $("#node-input-op1type").change(function() {
-            if ($("#node-input-op1type").val() == "val") { $("#node-op1").show(); }
-            else { $("#node-op1").hide(); }
-        });
-        $("#node-input-op2type").change(function() {
-            if ($("#node-input-op2type").val() == "val") { $("#node-op2").show(); }
-            else { $("#node-op2").hide(); }
-        });
-    }
-    </script>
+    <div class="form-tips">The node can be reset by sending a message with the <b>msg.reset</b> property set</div>
 </script>
 
 <script type="text/x-red" data-help-name="trigger">
@@ -111,20 +95,60 @@
         icon: "trigger.png",
         label: function() {
             if (this.duration > 0) {
-                return this.name||"trigger "+this.duration+this.units;
+                return this.name|| "trigger"+" "+this.duration+this.units;
             }
             else {
-                return this.name||"trigger once &infin;";
+                return this.name|| "trigger & block";
             }
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
-            $( "#node-input-duration" ).spinner({
-                min:1,
-                increment:25
+            $("#node-then-type").change(function() {
+                if ($(this).val() == "block") {
+                    $(".node-type-wait").hide();
+                    $(".form-tips").show();
+                } else {
+                    $(".node-type-wait").show();
+                    $(".form-tips").hide();
+                }
             });
+            $("#node-input-op1type").change(function() {
+                if ($(this).val() == "val") {
+                    $("#node-input-op1").show();
+                } else {
+                    $("#node-input-op1").hide();
+                }
+            });
+            $("#node-input-op2type").change(function() {
+                if ($(this).val() == "val") {
+                    $("#node-input-op2").show();
+                } else {
+                    $("#node-input-op2").hide();
+                }
+            });
+            if (this.duration == "0") {
+                $("#node-then-type").val("block");
+            } else {
+                $("#node-then-type").val("wait");
+            }
+            $("#node-then-type").change();
+            $("#node-input-op1type").change();
+            $("#node-input-op2type").change();
+            
+            if (this.extend === "true" || this.extend === true) {
+                $("#node-input-extend").prop("checked",true);
+            } else {
+                $("#node-input-extend").prop("checked",false);
+            }
+            
+        },
+        oneditsave: function() {
+            if ($("#node-then-type").val() == "block") {
+                $("#node-input-duration").val("0");
+            }
+        
         }
     });
 </script>
