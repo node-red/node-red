@@ -20,6 +20,7 @@ var path = require("path");
 var fs = require("fs");
 
 var defaultLang = "en-US";
+var supportedLangs = null;
 
 var resourceMap = {
     "runtime":  {
@@ -38,6 +39,19 @@ function registerMessageCatalog(namespace,dir,file) {
         resourceMap[namespace] = { basedir:dir, file:file};
         i18n.loadNamespace(namespace,function() {
             resolve();
+        });
+    });
+}
+
+var initSupportedLangs = function() {
+    return when.promise(function(resolve,reject) {
+        fs.readdir(resourceMap.editor.basedir, function(err,files) {
+            if(err) {
+                reject(err);
+            } else {
+                supportedLangs = files;
+                resolve();
+            }
         });
     });
 }
@@ -79,7 +93,9 @@ function init() {
             },
             fallbackLng: ['en-US']
         },function() {
-            resolve();
+            initSupportedLangs().then(function() {
+                resolve();
+            });
         });
     });
 }
@@ -104,13 +120,12 @@ function getCatalog(namespace,lang) {
 function determineLangFromHeaders(acceptedLanguages){
     var lang = "en-US";
     
-    var supportedLanguages = ['en-US', 'es', 'fr', 'it', 'de', 'pt-BR', 'zh', 'zh-TW', 'ko', 'ja', 'zz-ZZ']; // TODO: pull this value from settings
     for (var i=0;i<acceptedLanguages.length;i++){
-        if (supportedLanguages.indexOf(acceptedLanguages[i]) !== -1){
+        if (supportedLangs.indexOf(acceptedLanguages[i]) !== -1){
             lang = acceptedLanguages[i];
             break;
         // check the language without the country code
-        } else if (supportedLanguages.indexOf(acceptedLanguages[i].split("-")[0]) !== -1) {
+        } else if (supportedLangs.indexOf(acceptedLangs[i].split("-")[0]) !== -1) {
             lang = acceptedLanguages[i].split("-")[0];
             break;
         }
