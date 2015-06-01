@@ -114,6 +114,7 @@
     <p>If this is NOT the desired behaviour - ie. you want repeated entries to overwrite, then you must set the <b>msg._id</b> property to be a constant by the use of a previous function node.</p>
     <p>This could be a unique constant or you could create one based on some other msg property.</p>
     <p>Currently we do not limit or cap the collection size at all... this may well change.</p>
+    <p><b>NOTE:</b> on low-spec systems pass env-variable <code>MONGODB_SINGLETON=1</code> to limit mongod to 1 threadpool</p>
 </script>
 
 <script type="text/javascript">
@@ -203,6 +204,7 @@
     <p>You can either set the collection method in the node config or on <b>msg.collection</b>. Setting it in the node will override <b>msg.collection</b>.</p>
     <p>See the <a href="http://docs.mongodb.org/manual/reference/method/db.collection.find/" target="new"><i>MongoDB collection methods docs</i></a> for examples.</p>
     <p>The result is returned in <b>msg.payload</b>.</p>
+    <p><b>NOTE:</b> on low-spec systems pass env-variable <code>MONGODB_SINGLETON=1</code> to limit mongod to 1 threadpool</p>
 </script>
 
 <script type="text/javascript">

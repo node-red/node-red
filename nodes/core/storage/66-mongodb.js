@@ -49,6 +49,41 @@ module.exports = function(RED) {
         return selector;
     }
 
+    function MongoClose( db ){
+      if( ! process.env.MONGODB_SINGLETON ) db.close();
+    }
+    
+    function MongoCleanup(node,RED){
+      if ( config.instance != undefined ){
+        for( var i in config.instance ){
+          config.instance[i].close()
+          if (RED.settings.verbose) 
+            node.log("mongodb: closing mongod connectionpool "+i)
+        }
+        delete config.instance
+      }
+      if (node.clientDb) node.clientDb.close();
+    } 
+
+    function MongoConnect( node, config, cb ) {
+        if ( config ){
+          // lets store our db instances to prevent spawning zillions of mongodb threads
+          if( config.instance == undefined || config.instance[ config.url ] == undefined ){ 
+            if( config.instance == undefined ) config.instance = {};
+            MongoClient.connect(config.url, function(err, db) { 
+              if (RED.settings.verbose) console.info("connecting mongo client")
+              if (err){
+                node.error(err);
+              }else {
+                if( process.env.MONGODB_SINGLETON ) config.instance[ config.url ] = db;
+                cb(db);
+              }
+            });
+          }else cb( config.instance[ config.url ] ); // reuse db instance
+        } else {
+            this.error("missing mongodb configuration");
+        }
+    }
 
     function MongoOutNode(n) {
         RED.nodes.createNode(this,n);
@@ -59,100 +94,96 @@ module.exports = function(RED) {
         this.multi = n.multi || false;
         this.operation = n.operation;
         this.mongoConfig = RED.nodes.getNode(this.mongodb);
+        var node = this;
+        
+        node.on("close", function(){ 
+          MongoCleanup(node,RED); 
+        });
 
-        if (this.mongoConfig) {
-            var node = this;
-            MongoClient.connect(this.mongoConfig.url, function(err, db) {
-                if (err) {
-                    node.error(err);
+        node.on("input",function(msg) {
+          MongoConnect( node, this.mongoConfig, function(db){
+            node.clientDb = db;
+            var coll;
+            if (node.collection) {
+                coll = db.collection(node.collection);
+            }
+            if (!node.collection) {
+                if (msg.collection) {
+                    coll = db.collection(msg.collection);
                 } else {
-                    node.clientDb = db;
-                    var coll;
-                    if (node.collection) {
-                        coll = db.collection(node.collection);
+                    node.error("No collection defined",msg);
+                    return;
+                }
+            }
+            delete msg._topic;
+            delete msg.collection;
+            if (node.operation === "store") {
+                if (node.payonly) {
+                    if (typeof msg.payload !== "object") {
+                        msg.payload = {"payload": msg.payload};
                     }
-                    node.on("input",function(msg) {
-                        if (!node.collection) {
-                            if (msg.collection) {
-                                coll = db.collection(msg.collection);
-                            } else {
-                                node.error("No collection defined",msg);
-                                return;
-                            }
+                    coll.save(msg.payload,function(err, item) {
+                        MongoClose(db);
+                        if (err) {
+                            node.error(err,msg);
                         }
-                        delete msg._topic;
-                        delete msg.collection;
-                        if (node.operation === "store") {
-                            if (node.payonly) {
-                                if (typeof msg.payload !== "object") {
-                                    msg.payload = {"payload": msg.payload};
-                                }
-                                coll.save(msg.payload,function(err, item) {
-                                    if (err) {
-                                        node.error(err,msg);
-                                    }
-                                });
-                            } else {
-                                coll.save(msg,function(err, item) {
-                                    if (err) {
-                                        node.error(err,msg);
-                                    }
-                                });
-                            }
-                        } else if (node.operation === "insert") {
-                            if (node.payonly) {
-                                if (typeof msg.payload !== "object") {
-                                    msg.payload = {"payload": msg.payload};
-                                }
-                                coll.insert(msg.payload, function(err, item) {
-                                    if (err) {
-                                        node.error(err,msg);
-                                    }
-                                });
-                            } else {
-                                coll.insert(msg, function(err,item) {
-                                    if (err) {
-                                        node.error(err,msg);
-                                    }
-                                });
-                            }
-                        } else if (node.operation === "update") {
-                            if (typeof msg.payload !== "object") {
-                                msg.payload = {"payload": msg.payload};
-                            }
-                            var query = msg.query || {};
-                            var payload = msg.payload || {};
-                            var options = {
-                                upsert: node.upsert,
-                                multi: node.multi
-                            };
-
-                            coll.update(query, payload, options, function(err, item) {
-                                if (err) {
-                                    node.error(err,msg);
-                                }
-                            });
-                        } else if (node.operation === "delete") {
-                            coll.remove(msg.payload, function(err, items) {
-                                if (err) {
-                                    node.error(err,msg);
-                                }
-                            });
+                    });
+                } else {
+                    coll.save(msg,function(err, item) {
+                        MongoClose(db);
+                        if (err) {
+                            node.error(err,msg);
                         }
                     });
                 }
-            });
-        } else {
-            this.error("missing mongodb configuration");
-        }
+            } else if (node.operation === "insert") {
+                if (node.payonly) {
+                    if (typeof msg.payload !== "object") {
+                        msg.payload = {"payload": msg.payload};
+                    }
+                    coll.insert(msg.payload, function(err, item) {
+                        MongoClose(db);
+                        if (err) {
+                            node.error(err,msg);
+                        }
+                    });
+                } else {
+                    coll.insert(msg, function(err,item) {
+                        MongoClose(db);
+                        if (err) {
+                            node.error(err,msg);
+                        }
+                    });
+                }
+            } else if (node.operation === "update") {
+                if (typeof msg.payload !== "object") {
+                    msg.payload = {"payload": msg.payload};
+                }
+                var query = msg.query || {};
+                var payload = msg.payload || {};
+                var options = {
+                    upsert: node.upsert,
+                    multi: node.multi
+                };
 
-        this.on("close", function() {
-            if (this.clientDb) {
-                this.clientDb.close();
+                coll.update(query, payload, options, function(err, item) {
+                    MongoClose(db);
+                    if (err) {
+                        node.error(err,msg);
+                    }
+                });
+            } else if (node.operation === "delete") {
+                coll.remove(msg.payload, function(err, items) {
+                    MongoClose(db);
+                    if (err) {
+                        node.error(err,msg);
+                    }
+                });
             }
+          });
         });
+    
     }
-    RED.nodes.registerType("mongodb out",MongoOutNode);
 
     function MongoInNode(n) {
         RED.nodes.createNode(this,n);
@@ -160,85 +191,91 @@ module.exports = function(RED) {
         this.mongodb = n.mongodb;
         this.operation = n.operation || "find";
         this.mongoConfig = RED.nodes.getNode(this.mongodb);
-
-        if (this.mongoConfig) {
-            var node = this;
-            var selector;
-            MongoClient.connect(this.mongoConfig.url, function(err,db) {
-                if (err) {
-                    node.error(err);
-                } else {
-                    node.clientDb = db;
-                    var coll;
-                    if (node.collection) {
-                        coll = db.collection(node.collection);
-                    }
-                    node.on("input", function(msg) {
-                        if (!node.collection) {
-                            if (msg.collection) {
-                                coll = db.collection(msg.collection);
-                            } else {
-                                node.error("No collection defined");
-                                return;
-                            }
-                        }
-                        if (node.operation === "find") {
-                            msg.projection = msg.projection || {};
-                            selector = ensureValidSelectorObject(msg.payload);
-                            var limit = msg.limit;
-                            if (typeof limit === "string" && !isNaN(limit)) {
-                                limit = Number(limit);
-                            }
-                            var skip = msg.skip;
-                            if (typeof skip === "string" && !isNaN(skip)) {
-                                skip = Number(skip);
-                            }
-
-                            coll.find(selector,msg.projection).sort(msg.sort).limit(limit).skip(skip).toArray(function(err, items) {
-                                if (err) {
-                                    node.error(err);
-                                } else {
-                                    msg.payload = items;
-                                    delete msg.projection;
-                                    delete msg.sort;
-                                    delete msg.limit;
-                                    delete msg.skip;
-                                    node.send(msg);
-                                }
-                            });
-                        } else if (node.operation === "count") {
-                            selector = ensureValidSelectorObject(msg.payload);
-                            coll.count(selector, function(err, count) {
-                                if (err) {
-                                    node.error(err);
-                                } else {
-                                    msg.payload = count;
-                                    node.send(msg);
-                                }
-                            });
-                        } else if (node.operation === "aggregate") {
-                            msg.payload = (Array.isArray(msg.payload)) ? msg.payload : [];
-                            coll.aggregate(msg.payload, function(err, result) {
-                                if (err) {
-                                    node.error(err);
-                                } else {
-                                    msg.payload = result;
-                                    node.send(msg);
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        } else {
-            this.error("missing mongodb configuration");
-        }
-
-        this.on("close", function() {
-            if (this.clientDb) {
-                this.clientDb.close();
-            }
+        var node = this;
+        
+        node.on("close", function(){ 
+          MongoCleanup(node,RED); 
         });
+        
+        node.on("input", function(msg) {
+          MongoConnect( node, this.mongoConfig, function(db){
+            var selector;
+            node.clientDb = db;
+            var coll;
+            if (node.collection) {
+                coll = db.collection(node.collection);
+            }
+            if (!node.collection) {
+                if (msg.collection) {
+                    coll = db.collection(msg.collection);
+                } else {
+                    node.error("No collection defined");
+                    return;
+                }
+            }
+            if (node.operation === "find") {
+                msg.projection = msg.projection || {};
+                selector = ensureValidSelectorObject(msg.payload);
+                var limit = msg.limit;
+                if (typeof limit === "string" && !isNaN(limit)) {
+                    limit = Number(limit);
+                }
+                var skip = msg.skip || 0;
+                if (typeof skip === "string" && !isNaN(skip)) {
+                    skip = Number(skip);
+                }
+
+                var reserved = {}; for( var k in msg ) reserved[k] = msg[k];
+
+                coll.find(selector,msg.projection).sort(msg.sort).limit(limit).skip(skip).toArray(function(err, items) {
+                    MongoClose(db);
+                    for( var k in reserved ) msg[k] = reserved[k]
+                    if (err) {
+                        msg.error = err
+                        node.send(msg); // always output
+                        node.error(err);
+                    } else {
+                        msg.payload = items;
+                        delete msg.projection;
+                        delete msg.sort;
+                        delete msg.limit;
+                        delete msg.skip;
+                        node.send(msg); // always output
+                    }
+                });
+            } else if (node.operation === "count") {
+                selector = ensureValidSelectorObject(msg.payload);
+                coll.count(selector, function(err, count) {
+                    MongoClose(db);
+                    if (err) {
+                        msg.error = err
+                        node.send(msg); // always output
+                        node.error(err);
+                    } else {
+                        msg.payload = count;
+                        node.send(msg); // always output
+                    }
+                });
+            } else if (node.operation === "aggregate") {
+                msg.payload = (Array.isArray(msg.payload)) ? msg.payload : [];
+                coll.aggregate(msg.payload, function(err, result) {
+                    MongoClose(db);
+                    if (err) {
+                        msg.error = err
+                        node.send(msg); // always output
+                        node.error(err);
+                    } else {
+                        msg.payload = result;
+                        node.send(msg);
+                    }
+                });
+            }
+          });
+        });
+
     }
+    
+    RED.nodes.registerType("mongodb out",MongoOutNode);
     RED.nodes.registerType("mongodb in",MongoInNode);
+
 }
