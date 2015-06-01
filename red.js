@@ -23,6 +23,7 @@ var nopt = require("nopt");
 var path = require("path");
 var fs = require("fs");
 var RED = require("./red/red.js");
+var log = require("./red/log");
 
 var server;
 var app = express();
