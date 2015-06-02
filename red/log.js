@@ -61,9 +61,9 @@ var LogHandler = function(settings) {
 util.inherits(LogHandler, EventEmitter);
 
 LogHandler.prototype.shouldReportMessage = function(msglevel) {
-    return msglevel <= this.logLevel || 
-        (msglevel == log.METRIC && this.metricsOn) ||
-        (msglevel == log.AUDIT && this.auditOn);
+    return (msglevel == log.METRIC && this.metricsOn) ||
+           (msglevel == log.AUDIT && this.auditOn) ||
+           msglevel <= this.logLevel;
 }
 
 var consoleLogger = function(msg) {
