@@ -17,6 +17,7 @@
 var when = require("when");
 var clone = require("clone");
 var assert = require("assert");
+var log = require("./log");
 
 var userSettings = null;
 var globalSettings = null;
@@ -48,17 +49,17 @@ var persistentSettings = {
             return clone(userSettings[prop]);
         }
         if (globalSettings === null) {
-            throw new Error("Settings not available");
+            throw new Error(log._("settings.not-available"));
         }
         return clone(globalSettings[prop]);
     },
 
     set: function(prop,value) {
         if (userSettings.hasOwnProperty(prop)) {
-            throw new Error("Property '"+prop+"' is read-only");
+            throw new Error(log._("settings.property-read-only", {prop:prop}));
         }
         if (globalSettings === null) {
-            throw new Error("Settings not available");
+            throw new Error(log._("settings.not-available"));
         }
         var current = globalSettings[prop];
         globalSettings[prop] = value;
