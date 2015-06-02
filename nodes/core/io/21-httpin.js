@@ -60,12 +60,14 @@ module.exports = function(RED) {
             };
 
             this.callback = function(req,res) {
+                var msgid = RED.util.generateId();
+                res._msgid = msgid;
                 if (node.method.match(/(^post$|^delete$|^put$|^options$)/)) {
-                    node.send({req:req,res:res,payload:req.body});
+                    node.send({_msgid:msgid,req:req,res:res,payload:req.body});
                 } else if (node.method == "get") {
-                    node.send({req:req,res:res,payload:req.query});
+                    node.send({_msgid:msgid,req:req,res:res,payload:req.query});
                 } else {
-                    node.send({req:req,res:res});
+                    node.send({_msgid:msgid,req:req,res:res});
                 }
             };
 
@@ -90,14 +92,14 @@ module.exports = function(RED) {
                 metricsHandler = function(req, res, next) {
                     var startAt = process.hrtime();
                     onHeaders(res, function() {
-                        if (res._msgId) {
+                        if (res._msgid) {
                             var diff = process.hrtime(startAt);
                             var ms = diff[0] * 1e3 + diff[1] * 1e-6;
                             var metricResponseTime = ms.toFixed(3);
                             var metricContentLength = res._headers["content-length"];
                             //assuming that _id has been set for res._metrics in HttpOut node!
-                            node.metric("response.time.millis", {_id:res._msgId} , metricResponseTime);
-                            node.metric("response.content-length.bytes", {_id:res._msgId} , metricContentLength);
+                            node.metric("response.time.millis", {_msgid:res._msgid} , metricResponseTime);
+                            node.metric("response.content-length.bytes", {_msgid:res._msgid} , metricContentLength);
                         }
                     });
                     next();
@@ -167,7 +169,6 @@ module.exports = function(RED) {
                         msg.res.set('content-length', len);
                     }
 
-                    msg.res._msgId = msg._id;
                     msg.res.send(statusCode,msg.payload);
                 }
             } else {

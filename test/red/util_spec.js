@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,13 @@ var should = require("should");
 var util = require("../../red/util");
 
 describe("red/util", function() {
-    // only test for things not tested by overall grunt
+    describe('generateId', function() {
+        it('generates an id', function() {
+            var id = util.generateId();
+            var id2 = util.generateId();
+            id.should.not.eql(id2);
+        });
+    });
     describe('compareObjects', function() {
         it('unequal arrays are unequal', function() {
             util.compareObjects(["a"],"a").should.equal(false);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
  **/
 
 var clone = require("clone");
+
+function generateId() {
+    return (1+Math.random()*4294967295).toString(16);
+}
 
 function ensureString(o) {
     if (Buffer.isBuffer(o)) {
@@ -103,5 +107,6 @@ module.exports = {
     ensureString: ensureString,
     ensureBuffer: ensureBuffer,
     cloneMessage: cloneMessage,
-    compareObjects: compareObjects
+    compareObjects: compareObjects,
+    generateId: generateId
 };

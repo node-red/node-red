@@ -96,10 +96,6 @@ Node.prototype.close = function() {
     }
 };
 
-function constructUniqueIdentifier() {
-    return (1+Math.random()*4294967295).toString(16);
-}
-
 Node.prototype.send = function(msg) {
     var msgSent = false;
     var node;
@@ -112,7 +108,7 @@ Node.prototype.send = function(msg) {
             // TODO: pre-load flows.get calls - cannot do in constructor
             //       as not all nodes are defined at that point
             if (!msg._msgid) {
-                msg._msgid = constructUniqueIdentifier();
+                msg._msgid = redUtil.generateId();
             }
             this.metric("send",msg);
             node = flows.get(this._wire);
@@ -171,7 +167,7 @@ Node.prototype.send = function(msg) {
     }
     /* istanbul ignore else */
     if (!sentMessageId) {
-        sentMessageId = constructUniqueIdentifier();
+        sentMessageId = redUtil.generateId();
     }
     this.metric("send",{_msgid:sentMessageId});
 
@@ -190,7 +186,7 @@ Node.prototype.receive = function(msg) {
         msg = {};
     }
     if (!msg._msgid) {
-        msg._msgid = constructUniqueIdentifier();
+        msg._msgid = redUtil.generateId();
     }
     this.metric("receive",msg);
     try { 
