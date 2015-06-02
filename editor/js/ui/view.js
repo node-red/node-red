@@ -1459,6 +1459,29 @@ RED.view = (function() {
                                 (d._def.align?' node_label_'+d._def.align:'')+
                                 (d._def.labelStyle?' '+(typeof d._def.labelStyle == "function" ? d._def.labelStyle.call(d):d._def.labelStyle):'') ;
                         });
+                        
+                        if (d._def.icon) {
+                            icon = thisNode.select(".node_icon");
+                            var current_url = icon.attr("xlink:href");
+                            var icon_url;
+                            if (typeof d._def.icon == "function") {
+                                icon_url = d._def.icon.call(d);
+                            } else {
+                                icon_url = d._def.icon;
+                            }
+                            if ("icons/"+icon_url != current_url) {
+                                icon.attr("xlink:href","icons/"+icon_url);
+                                var img = new Image();
+                                img.src = "icons/"+d._def.icon;
+                                img.onload = function() {
+                                    icon.attr("width",Math.min(img.width,30));
+                                    icon.attr("height",Math.min(img.height,30));
+                                    icon.attr("x",15-Math.min(img.width,30)/2);
+                                }
+                            }
+                        }
+                            
+                            
                         thisNode.selectAll(".node_tools").attr("x",function(d){return d.w-35;}).attr("y",function(d){return d.h-20;});
 
                         thisNode.selectAll(".node_changed")
