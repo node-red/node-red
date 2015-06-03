@@ -17,6 +17,7 @@ var redNodes = require("../nodes");
 var comms = require("../comms");
 var server = require("../server");
 var log = require("../log");
+var i18n = require("../i18n");
 
 var settings = require("../settings");
 
@@ -25,7 +26,8 @@ module.exports = {
         if (req.get("accept") == "application/json") {
             res.json(redNodes.getNodeList());
         } else {
-            res.send(redNodes.getNodeConfigs());
+            var lang = i18n.determineLangFromHeaders(req.acceptedLanguages);
+            res.send(redNodes.getNodeConfigs(lang));
         }
     },
 
@@ -93,7 +95,8 @@ module.exports = {
                 delete result.loaded;
             }
         } else {
-            result = redNodes.getNodeConfig(id);
+            var lang = i18n.determineLangFromHeaders(req.acceptedLanguages);
+            result = redNodes.getNodeConfig(id,lang);
         }
         if (result) {
             res.send(result);
