@@ -1,12 +1,9 @@
 <!--
-  Copyright 2013,2014 IBM Corp.
-
+  Copyright 2013,2015 IBM Corp.
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-
   http://www.apache.org/licenses/LICENSE-2.0
-
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,6 +30,8 @@
     <p>MQTT input node. Connects to a broker and subscribes to the specified topic. The topic may contain MQTT wildcards.</p>
     <p>Outputs an object called <b>msg</b> containing <b>msg.topic, msg.payload, msg.qos</b> and <b>msg.retain</b>.</p>
     <p><b>msg.payload</b> is usually a string, but can also be a binary buffer.</p>
+    <p>If a secure connection is being used, certificate checking can be disabled to allow connections to brokers using a self signed or non-trusted CA certificate.</p>
+    <p>Compatibility mode allows connections to brokers which do not support the MQTT V3.1.1 standard.</p>
 </script>
 
 <script type="text/javascript">
@@ -90,6 +89,9 @@
     <p>Connects to a MQTT broker and publishes <b>msg.payload</b> either to the <b>msg.topic</b> or to the topic specified in the edit window. The value in the edit window has precedence.</p>
     <p>Likewise QoS and/or retain values in the edit panel will overwrite any <b>msg.qos</b> and <b>msg.retain</b> properties. If nothing is set they default to <i>0</i> and <i>false</i> respectively.</p>
     <p>If <b>msg.payload</b> contains an object it will be stringified before being sent.</p>
+    <p>If a secure connection is being used, certificate checking can be disabled to allow connections to brokers using a self signed or non-trusted CA certificate.</p>
+    <p>Compatibility mode allows connections to brokers which do not support the MQTT V3.1.1 standard.</p>
+
 </script>
 
 <script type="text/javascript">
@@ -124,8 +126,23 @@
         <input type="text" id="node-config-input-port" data-i18n="[placeholder]mqtt.label.port" style="width:45px">
     </div>
     <div class="form-row">
-        <label for="node-config-input-clientid"><i class="fa fa-tag"></i> <span data-i18n="mqtt.label.clientid"></span></label>
-        <input type="text" id="node-config-input-clientid" data-i18n="[placeholder]mqtt.placeholder.clientid">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-config-input-secureconn" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-config-input-secureconn" style="width: 70%;">Enable secure (SSL/TLS) connection</label>
+    </div>
+    <div class="form-row" id="row-disablecertauth">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-config-input-disablecertauth" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-config-input-disablecertauth" style="width: 70%;">Disable certificate authentication (secure connections only)</label>
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-config-input-compatmode" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-config-input-compatmode" style="width: 70%;">Compatibility for brokers not supporting MQTT v3.1.1</label>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-clientid"><i class="fa fa-tag"></i> Client ID</label>
+        <input type="text" id="node-config-input-clientid" placeholder="Leave blank for auto generated">
     </div>
     <div class="form-row">
         <label for="node-config-input-user"><i class="fa fa-user"></i> <span data-i18n="common.label.username"></span></label>
@@ -143,7 +160,11 @@
         defaults: {
             broker: {value:"",required:true},
             port: {value:1883,required:true,validate:RED.validators.number()},
-            clientid: { value:"" }
+            clientid: { value:"" },
+            secureconn: {value: false},
+            disablecertauth: { value: false},
+            compatmode: { value: true},
+            mqttkeepalive: {value:15}
         },
         credentials: {
             user: {type:"text"},
@@ -152,6 +173,35 @@
         label: function() {
             if (this.broker == "") { this.broker = "localhost"; }
             return (this.clientid?this.clientid+"@":"")+this.broker+":"+this.port;
+        },
+        oneditprepare: function () {
+            if (this.broker && typeof this.secureconn  === 'undefined'){
+                this.secureconn = false;
+            }
+            if (this.broker && typeof this.disablecertauth  === 'undefined'){
+                this.disablecertauth = false;
+            }
+            if (this.broker && typeof this.compatmode  === 'undefined'){
+                this.compatmode = true;
+                $("#node-config-input-compatmode").prop('checked', true);
+            }
+            if (this.broker && typeof this.mqttkeepalive  === 'undefined'){
+                this.mqttkeepalive = 15;
+            }
+
+            if (this.secureconn == true) {
+                $("#row-disablecertauth").show();
+            } else {
+                $("#row-disablecertauth").hide();
+            }
+
+            $("#node-config-input-secureconn").on("click",function() {
+                if($(this).is(':checked')) {
+                    $("#row-disablecertauth").show();
+                } else {
+                    $("#row-disablecertauth").hide();
+                }
+            });
         }
     });
 </script>
