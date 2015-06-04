@@ -1,7 +1,7 @@
 {
     "workspace": {
         "label": {
-            "name": "Name"
+            "name": "Name:"
         }
     },
 	"menu": {
@@ -120,11 +120,13 @@
 		"typeLibrary": "__type__ library",
 		"unnamedType": "Unnamed __type__",
 		"saveToLibrary": "Save to Library",
-		"exportToLibrary": "Export nodes to library"
+		"exportToLibrary": "Export nodes to library",
+        "dialogSaveOverwrite": "A __libraryType__ called __libraryName__ already exists. Overwrite?"
 	},
 	"palette": {
 		"noInfo": "no information available",
-		"popOverError": "Error generating pop-over label for '__type__'."
+		"popOverError": "Error generating pop-over label for '__type__'.",
+        "filter": "filter"
 	},
 	"tabInfo": {
 		"node": "Node",
@@ -136,7 +138,31 @@
 		"properties": "Properties",
 		"blank": "blank"
 	},
+    "sidebar": {
+        "info": "info",
+        "config": "config"
+    },
 	"workspaces": {
-		"subflow": "Subflow: "
-	}
+		"subflow": "Subflow: ",
+        "editSubflowName": "edit name",
+        "input": "input",
+        "output": "output",
+        "deleteSubflow": "delete subflow",
+        "dropFlowHere": "Drop the flow here",
+        "subflowName": "Name",
+        "folderPlaceholder": "Folder",
+        "filenamePlaceholder": "Filename",
+        "folderLabel": "Folder",
+        "filenameLabel": "Filename",
+        "libraryBreadcrumb": "Library",
+        "libraryFilenamePlaceholder": "Filename",
+        "libraryFilenameLabel": "Filename:",
+        "libraryNamePlaceholder": "Name",
+        "libraryNameLabel": "Name",
+        "confirmDeployImproperlyConfigured": "Some of the nodes are not properly configured. Are you sure you want to deploy?",
+        "confirmDeployUnknown": "The workspace contains some unknown node types:",
+        "confirmDeployUnusedConfig": "The workspace contains some unused configuration nodes:",
+        "confirmDeploy": "Are you sure you want to deploy?",
+        "deleteDialog": "Are you sure you want to delete '__label__'?"
+    }
 }

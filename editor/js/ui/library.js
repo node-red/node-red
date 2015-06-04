@@ -304,8 +304,7 @@ RED.library = (function() {
                 //    }
                 //}
                 //if (exists) {
-                //    $("#node-dialog-library-save-type").html(options.type);
-                //    $("#node-dialog-library-save-name").html(fullpath);
+                //    $("#node-dialog-library-save-content").html(RED._("library.dialogSaveOverwrite",{libraryType:options.type,libraryName:fullpath}));
                 //    $("#node-dialog-library-save-confirm").dialog( "open" );
                 //    return;
                 //}

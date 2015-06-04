@@ -56,7 +56,7 @@ RED.workspaces = (function() {
             RED.nodes.dirty(true);
         } else {
             $( "#node-dialog-delete-workspace" ).dialog('option','workspace',ws);
-            $( "#node-dialog-delete-workspace-name" ).text(ws.label);
+            $( "#node-dialog-delete-workspace-content" ).text(RED._("workspaces.deleteDialog",{label:ws.label}));
             $( "#node-dialog-delete-workspace" ).dialog('open');
         }
     }  
