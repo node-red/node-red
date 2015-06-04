@@ -140,7 +140,7 @@
             messages.id = "debug-content";
             content.appendChild(messages);
 
-            RED.sidebar.addTab("debug",content);
+            RED.sidebar.addTab(this._("debug.sidebarTitle"),content);
 
             function getTimestamp() {
                 var d = new Date();

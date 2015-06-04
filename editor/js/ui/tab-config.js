@@ -25,7 +25,7 @@ RED.sidebar.config = (function() {
     
     function show() {
         if (!RED.sidebar.containsTab("config")) {
-            RED.sidebar.addTab("config",content,true);
+            RED.sidebar.addTab(RED._("sidebar.config"),content,true);
         }
         refresh();
         RED.sidebar.show("config");
