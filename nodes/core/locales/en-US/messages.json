@@ -80,7 +80,8 @@
         "notification": {
             "activated": "Successfully activated: __label__",
             "deactivated": "Successfully deactivated: __label__"
-        }
+        },
+        "sidebarTitle": "debug"
     },
     "exec": {
         "spawnerr": "Spawn command must be just the command - no spaces or extra parameters",

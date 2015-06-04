@@ -36,7 +36,7 @@ RED.sidebar.info = (function() {
     
     function show() {
         if (!RED.sidebar.containsTab("info")) {
-            RED.sidebar.addTab("info",content,false);
+            RED.sidebar.addTab(RED._("sidebar.info"),content,false);
         }
         RED.sidebar.show("info");
     }
