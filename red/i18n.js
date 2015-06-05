@@ -125,7 +125,7 @@ function determineLangFromHeaders(acceptedLanguages){
             lang = acceptedLanguages[i];
             break;
         // check the language without the country code
-        } else if (supportedLangs.indexOf(acceptedLangs[i].split("-")[0]) !== -1) {
+        } else if (supportedLangs.indexOf(acceptedLanguages[i].split("-")[0]) !== -1) {
             lang = acceptedLanguages[i].split("-")[0];
             break;
         }
