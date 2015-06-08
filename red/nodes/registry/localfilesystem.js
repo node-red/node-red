@@ -34,13 +34,19 @@ function init(_settings,_defaultNodesDir,_disableNodePathScan) {
     }
 }
 
-function getLocalFile(file) {
-    if (settings.nodesExcludes) {
+function isExcluded(name) {
+     if (settings.nodesExcludes) {
         for (var i=0;i<settings.nodesExcludes.length;i++) {
-            if (settings.nodesExcludes[i] == path.basename(file)) {
-                return null;
+            if (settings.nodesExcludes[i] == name) {
+                return true;
             }
         }
+    }
+    return false;
+}
+function getLocalFile(file) {
+    if (isExcluded(path.basename(file))) {
+        return null;
     }
     if (fs.existsSync(file.replace(/\.js$/,".html"))) {
         return {
@@ -97,7 +103,7 @@ function scanDirForNodesModules(dir,moduleName) {
         var files = fs.readdirSync(dir);
         for (var i=0;i<files.length;i++) {
             var fn = files[i];
-            if (!moduleName || fn == moduleName) {
+            if (!isExcluded(fn) && (!moduleName || fn == moduleName)) {
                 var pkgfn = path.join(dir,fn,"package.json");
                 try {
                     var pkg = require(pkgfn);
