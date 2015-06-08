@@ -188,8 +188,11 @@ function removeNode(id) {
         nodeList.splice(i,1);
     }
     config.types.forEach(function(t) {
-        delete nodeConstructors[t];
-        delete nodeTypeToId[t];
+        var typeId = nodeTypeToId[t];
+        if (typeId === id) {
+            delete nodeConstructors[t];
+            delete nodeTypeToId[t];
+        }
     });
     config.enabled = false;
     config.loaded = false;
