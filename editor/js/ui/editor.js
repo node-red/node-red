@@ -627,14 +627,8 @@ RED.editor = (function() {
                     configNode[d] = node_def.defaults[d].value;
                 }
             }
-            configNode["_"] = function() {
-                var args = Array.prototype.slice.call(arguments, 0);
-                if (args[0].indexOf(":") === -1) {
-                    args[0] = ns+":"+args[0];
-                }
-                return RED._.apply(null,args);
-            }
             
+            configNode["_"] = node_def._;
             
         }
 
