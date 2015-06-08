@@ -30,7 +30,8 @@ RED.sidebar = (function() {
     function addTab(title,content,closeable) {
         $("#sidebar-content").append(content);
         $(content).hide();
-        sidebar_tabs.addTab({id:"tab-"+title,label:title,closeable:closeable});
+        var id = content.id || "tab-"+title.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\|])/g, "\\$1" );
+        sidebar_tabs.addTab({id:id,label:title,closeable:closeable});
         //content.style.position = "absolute";
         //$('#sidebar').tabs("refresh");
     }
