@@ -19,10 +19,10 @@ RED.palette = (function() {
     var exclusion = ['config','unknown','deprecated'];
     var core = ['subflows', 'input', 'output', 'function', 'social', 'storage', 'analysis', 'advanced'];
 
-    function createCategoryContainer(category){
-        var escapedCategory = category.replace(" ","_");
+    function createCategoryContainer(category, label){
+        label = label || category.replace("_", " ");
         var catDiv = $("#palette-container").append('<div id="palette-container-'+category+'" class="palette-category hide">'+
-            '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-caret-down"></i><span>'+category.replace("_"," ")+'</span></div>'+
+            '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-caret-down"></i><span>'+label+'</span></div>'+
             '<div class="palette-content" id="palette-base-category-'+category+'">'+
             '<div id="palette-'+category+'-input"></div>'+
             '<div id="palette-'+category+'-output"></div>'+
@@ -268,9 +268,13 @@ RED.palette = (function() {
     function init() {
         $(".palette-spinner").show();
         if (RED.settings.paletteCategories) {
-            RED.settings.paletteCategories.forEach(createCategoryContainer);
+            RED.settings.paletteCategories.forEach(function(category){
+                createCategoryContainer(category, category); // TODO NLS enable categories from settings
+            });
         } else {
-            core.forEach(createCategoryContainer);
+            core.forEach(function(category){
+                createCategoryContainer(category, RED._("palette.core."+category));
+            });
         }
         
         $("#palette-search-input").focus(function(e) {

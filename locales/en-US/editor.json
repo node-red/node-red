@@ -126,7 +126,17 @@
 	"palette": {
 		"noInfo": "no information available",
 		"popOverError": "Error generating pop-over label for '__type__'.",
-        "filter": "filter"
+        "filter": "filter",
+        "core": {
+            "subflows": "subflows",
+            "input": "input",
+            "output": "output", 
+            "function": "function", 
+            "social": "social",
+            "storage": "storage",
+            "analysis": "analysis",
+            "advanced": "advanced"
+        }
 	},
 	"tabInfo": {
 		"node": "Node",
