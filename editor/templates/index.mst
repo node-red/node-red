@@ -95,12 +95,17 @@
 
 <div id="node-dialog-confirm-deploy" class="hide">
     <form class="form-horizontal">
-        <div id="node-dialog-confirm-deploy-config" style="text-align: center; padding-top: 30px;">
+        <div id="node-dialog-confirm-deploy-config" style="text-align: left; padding-top: 30px;">
          Some of the nodes are not properly configured. Are you sure you want to deploy?
         </div>
-        <div id="node-dialog-confirm-deploy-unknown" style="text-align: center; padding-top: 10px;">
+        <div id="node-dialog-confirm-deploy-unknown" style="text-align: left; padding-top: 10px;">
          The workspace contains some unknown node types:
-         <ul style="width: 300px; margin: auto; text-align: left;" id="node-dialog-confirm-deploy-unknown-list"></ul>
+         <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-unknown-list"></ul>
+         Are you sure you want to deploy?
+        </div>
+        <div id="node-dialog-confirm-deploy-unused" style="text-align: left; padding-top: 10px;">
+         The workspace contains some unused configuration nodes:
+         <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-unused-list"></ul>
          Are you sure you want to deploy?
         </div>
     </form>

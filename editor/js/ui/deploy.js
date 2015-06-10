@@ -22,6 +22,12 @@ RED.deploy = (function() {
         "flows":{img:"red/images/deploy-flows-o.png"}
     }
     
+    var ignoreDeployWarnings = {
+        unknown: false,
+        unusedConfig: false,
+        invalid: false
+    }
+    
     var deploymentType = "full";
     
     function changeDeploymentType(type) {
@@ -73,12 +79,17 @@ RED.deploy = (function() {
                 title: "Confirm deploy",
                 modal: true,
                 autoOpen: false,
-                width: 530,
-                height: 230,
+                width: 550,
+                height: "auto",
                 buttons: [
                     {
                         text: "Confirm deploy",
                         click: function() {
+                            
+                            var ignoreChecked = $( "#node-dialog-confirm-deploy-hide" ).prop("checked");
+                            if (ignoreChecked) {
+                                ignoreDeployWarnings[$( "#node-dialog-confirm-deploy-type" ).val()] = true;
+                            }
                             save(true);
                             $( this ).dialog( "close" );
                         }
@@ -89,7 +100,15 @@ RED.deploy = (function() {
                             $( this ).dialog( "close" );
                         }
                     }
-                ]
+                ],
+                create: function() {
+                    $("#node-dialog-confirm-deploy").parent().find("div.ui-dialog-buttonpane")
+                        .append('<div style="height:0; vertical-align: middle; display:inline-block;">'+
+                                   '<input style="vertical-align:top;" type="checkbox" id="node-dialog-confirm-deploy-hide">'+
+                                   '<label style="display:inline;" for="node-dialog-confirm-deploy-hide"> do not warn about this again</label>'+
+                                   '<input type="hidden" id="node-dialog-confirm-deploy-type">'+
+                                   '</div>');
+                }
         });
 
         RED.nodes.on('change',function(state) {
@@ -110,31 +129,77 @@ RED.deploy = (function() {
             //$("#debug-tab-clear").click();  // uncomment this to auto clear debug on deploy
 
             if (!force) {
-                var invalid = false;
+                var hasUnknown = false;
+                var hasInvalid = false;
+                var hasUnusedConfig = false;
+                
                 var unknownNodes = [];
                 RED.nodes.eachNode(function(node) {
-                    invalid = invalid || !node.valid;
+                    hasInvalid = hasInvalid || !node.valid;
                     if (node.type === "unknown") {
                         if (unknownNodes.indexOf(node.name) == -1) {
                             unknownNodes.push(node.name);
                         }
-                        invalid = true;
                     }
                 });
-                if (invalid) {
-                    if (unknownNodes.length > 0) {
-                        $( "#node-dialog-confirm-deploy-config" ).hide();
-                        $( "#node-dialog-confirm-deploy-unknown" ).show();
-                        var list = "<li>"+unknownNodes.join("</li><li>")+"</li>";
-                        $( "#node-dialog-confirm-deploy-unknown-list" ).html(list);
-                    } else {
-                        $( "#node-dialog-confirm-deploy-config" ).show();
-                        $( "#node-dialog-confirm-deploy-unknown" ).hide();
+                hasUnknown = unknownNodes.length > 0;
+                
+                var unusedConfigNodes = {};
+                RED.nodes.eachConfig(function(node) {
+                    if (node.users.length === 0) {
+                        var label = "";
+                        if (typeof node._def.label == "function") {
+                            label = node._def.label.call(node);
+                        } else {
+                            label = node._def.label;
+                        }
+                        label = label || node.id;
+                        unusedConfigNodes[node.type] = unusedConfigNodes[node.type]  || [];
+                        unusedConfigNodes[node.type].push(label);
+                        hasUnusedConfig = true;
                     }
+                });
+                
+                $( "#node-dialog-confirm-deploy-config" ).hide();
+                $( "#node-dialog-confirm-deploy-unknown" ).hide();
+                $( "#node-dialog-confirm-deploy-unused" ).hide();
+                
+                var showWarning = false;
+                
+                if (hasUnknown && !ignoreDeployWarnings.unknown) {
+                    showWarning = true;
+                    $( "#node-dialog-confirm-deploy-type" ).val("unknown");
+                    $( "#node-dialog-confirm-deploy-unknown" ).show();
+                    $( "#node-dialog-confirm-deploy-unknown-list" )
+                        .html("<li>"+unknownNodes.join("</li><li>")+"</li>");
+                } else if (hasInvalid && !ignoreDeployWarnings.invalid) {
+                    showWarning = true;
+                    $( "#node-dialog-confirm-deploy-type" ).val("invalid");
+                    $( "#node-dialog-confirm-deploy-config" ).show();
+                } else if (hasUnusedConfig && !ignoreDeployWarnings.unusedConfig) {
+                    showWarning = true;
+                    $( "#node-dialog-confirm-deploy-type" ).val("unusedConfig");
+                    $( "#node-dialog-confirm-deploy-unused" ).show();
+                    var unusedNodeLabels = [];
+                    var unusedTypes = Object.keys(unusedConfigNodes).sort();
+                    unusedTypes.forEach(function(type) {
+                        unusedConfigNodes[type].forEach(function(label) {
+                                unusedNodeLabels.push(type+": "+label);
+                        });
+                    });                    
+                    $( "#node-dialog-confirm-deploy-unused-list" )
+                        .html("<li>"+unusedNodeLabels.join("</li><li>")+"</li>");
+                }
+                if (showWarning) {
+                    $( "#node-dialog-confirm-deploy-hide" ).prop("checked",false);
                     $( "#node-dialog-confirm-deploy" ).dialog( "open" );
                     return;
                 }
             }
+            
+            
+            
+            
             var nns = RED.nodes.createCompleteNodeSet();
 
             $("#btn-deploy-icon").removeClass('fa-download');
