@@ -69,7 +69,9 @@
                 var editorRow = $("#dialog-form>div.node-text-editor-row");
                 height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
                 $(".node-text-editor").css("height",height+"px");
-                that.editor.resize();
+                if(that.editorView && that.editorView.editor) {
+                	that.editorView.editor.focus();
+                }
             };
             $( "#dialog" ).on("dialogresize", functionDialogResize);
             $( "#dialog" ).one("dialogopen", function(ev) {
@@ -84,16 +86,19 @@
                 var height = $( "#dialog" ).dialog('option','height');
                 $( "#dialog" ).off("dialogresize",functionDialogResize);
             });
-            this.editor = RED.editor.createEditor({
-                id: 'node-input-info-editor',
-                mode: 'ace/mode/markdown',
-                value: $("#node-input-info").val()
-            });
-            this.editor.focus();
+            RED.editor.createEditor({
+                id: 'node-input-info-editor'
+            }, function(editorView) {
+            	that.editorView = editorView;
+				var contents = $("#node-input-info").val();  	           	
+				that.editorView.setContents(contents, 'text/x-markdown');
+	            that.editorView.editor.focus();
+             });
         },
         oneditsave: function() {
-            $("#node-input-info").val(this.editor.getValue());
-            delete this.editor;
+            $("#node-input-info").val(this.editorView.editor.getText());
+            this.editorView.destroy();
+            delete this.editorView;
         }
     });
 </script>

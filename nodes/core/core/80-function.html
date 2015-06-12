@@ -97,7 +97,9 @@
                 var editorRow = $("#dialog-form>div.node-text-editor-row");
                 height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
                 $(".node-text-editor").css("height",height+"px");
-                that.editor.resize();
+                if(that.editorView && that.editorView.editor) {
+                	that.editorView.editor.focus();
+                }
             }
             $( "#dialog" ).on("dialogresize", functionDialogResize);
             $( "#dialog" ).one("dialogopen", function(ev) {
@@ -112,35 +114,38 @@
                 var height = $( "#dialog" ).dialog('option','height');
                 $( "#dialog" ).off("dialogresize",functionDialogResize);
             });
-
-            this.editor = RED.editor.createEditor({
-                id: 'node-input-func-editor',
-                mode: 'ace/mode/javascript',
-                value: $("#node-input-func").val()
-            });
-
-            RED.library.create({
-                url:"functions", // where to get the data from
-                type:"function", // the type of object the library is for
-                editor:this.editor, // the field name the main text body goes to
-                mode:"ace/mode/javascript",
-                fields:['name','outputs']
-            });
-            this.editor.focus();
+            RED.editor.createEditor({
+                id: 'node-input-func-editor'
+            }, function(editorView) {
+            	that.editorView = editorView;
+	            RED.library.create({
+	                url:"functions", // where to get the data from
+	                type:"function", // the type of object the library is for
+	                editor:that.editorView.editor, // the field name the main text body goes to
+	                mode:"ace/mode/javascript",
+	                fields:['name','outputs']
+	            });
+				var contents = $("#node-input-func").val();  	           	
+				that.editorView.setContents(contents, 'application/javascript');
+	            that.editorView.editor.focus();
+             });
         },
         oneditsave: function() {
-            var annot = this.editor.getSession().getAnnotations();
+ 			var annotationModel = this.editorView.editor.getAnnotationModel();
+			var annotations = annotationModel.getAnnotations();
             this.noerr = 0;
             $("#node-input-noerr").val(0);
-            for (var k=0; k < annot.length; k++) {
-                //console.log(annot[k].type,":",annot[k].text, "on line", annot[k].row);
-                if (annot[k].type === "error") {
-                    $("#node-input-noerr").val(annot.length);
-                    this.noerr = annot.length;
-                }
+            while(annotations.hasNext()) {
+            	var annotaion = annotations.next();
+            	if(annotaion.type === "orion.annotation.error") {
+                    $("#node-input-noerr").val(1);
+                    this.noerr = 1;
+                    break;
+            	}
             }
-            $("#node-input-func").val(this.editor.getValue());
-            delete this.editor;
+            $("#node-input-func").val(this.editorView.editor.getValue());
+            this.editorView.destroy();
+            delete this.editorView;
         }
     });
 </script>

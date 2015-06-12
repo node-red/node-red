@@ -1,0 +1,13 @@
+.textview {
+	background-color: white;
+	font-family: "Consolas", "Monaco", "Vera Mono", monospace;
+	font-size: 14px;
+}
+
+.textviewTooltip .commandButton {
+    font-size: 13px;
+}
+
+.textviewTooltip {
+    font-size: 13px;
+}
