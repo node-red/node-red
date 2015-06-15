@@ -758,7 +758,7 @@ Flow.prototype.handleError = function(node,logMessage,msg) {
                 if (msg.error.source.id === node.id) {
                     count = msg.error.source.count+1;
                     if (count === 10) {
-                        node.warn("Message exceeded maximum number of catches"); 
+                        node.warn(Log._("nodes.flow.error-loop")); 
                         return;
                     }
                 }
