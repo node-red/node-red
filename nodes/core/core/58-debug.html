@@ -204,7 +204,7 @@
                     var errorLvl = 20;
                     if (o.hasOwnProperty("level") && o.level === 30) {
                         errorLvl = 30;
-                        errorLvlType = 'warn'
+                        errorLvlType = 'warn';
                     }
                     msg.className = 'debug-message debug-message-level-' + errorLvl;
                     msg.innerHTML += '<span class="debug-message-topic">[function] : (' + errorLvlType + ')</span>';
