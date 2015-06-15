@@ -53,10 +53,9 @@ module.exports = function(grunt) {
                 'Gruntfile.js',
                 'red.js',
                 'red/**/*.js',
-                'nodes/**/*.js',
+                'nodes/core/*/*.js',
                 'editor/js/**/*.js'
             ],
-
             core: {
                 files: {
                     src: [
@@ -68,7 +67,7 @@ module.exports = function(grunt) {
             },
             nodes: {
                 files: {
-                    src: [ 'nodes/**/*.js' ]
+                    src: [ 'nodes/core/*/*.js' ]
                 }
             },
             editor: {
@@ -81,7 +80,7 @@ module.exports = function(grunt) {
                     src: ['test/**/*.js']
                 },
                 options: {
-                    "expr": true
+					"expr": true
                 }
             }
         },
@@ -340,13 +339,12 @@ module.exports = function(grunt) {
             }
         }
     });
-    
+
     grunt.registerTask('setDevEnv',
-        'Sets NODE_ENV=development to non-minified assets are used',
+        'Sets NODE_ENV=development so non-minified assets are used',
             function () {
                 process.env.NODE_ENV = 'development';
             });
-
 
     grunt.registerTask('default',
         'Builds editor content then runs code style checks and unit tests on all components',
@@ -375,6 +373,5 @@ module.exports = function(grunt) {
     grunt.registerTask('release',
         'Create distribution zip file',
         ['build','clean:release','copy:release','compress:release']);
-
 
 };
