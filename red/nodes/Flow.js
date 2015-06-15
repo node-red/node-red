@@ -753,7 +753,7 @@ Flow.prototype.handleError = function(node,logMessage,msg) {
     
     if (targetCatchNode) {
         var count = 1;
-        if (msg.hasOwnProperty("error")) {
+        if (msg && msg.hasOwnProperty("error")) {
             if (msg.error.hasOwnProperty("source")) {
                 if (msg.error.source.id === node.id) {
                     count = msg.error.source.count+1;
