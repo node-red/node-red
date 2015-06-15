@@ -744,28 +744,45 @@ function diffFlow(flow,config) {
 
 
 Flow.prototype.handleError = function(node,logMessage,msg) {
-    var errorMessage;
-    if (msg) {
-        errorMessage = redUtil.cloneMessage(msg);
-    } else {
-        errorMessage = {};
-    }
-    if (errorMessage.hasOwnProperty("error")) {
-        errorMessage._error = errorMessage.error;
-    }
-    errorMessage.error = {
-        message: logMessage.toString(),
-        source: {
-            id: node.id,
-            type: node.type
-        }
-    };
+    var targetCatchNode = null; 
     if (this.catchNodeMap[node.z]) {
-        this.catchNodeMap[node.z].receive(errorMessage);
-    } else {
-        if (this.activeNodes[node.z] && this.catchNodeMap[this.activeNodes[node.z].z]) {
-            this.catchNodeMap[this.activeNodes[node.z].z].receive(errorMessage);
+        targetCatchNode = this.catchNodeMap[node.z];
+    } else if (this.activeNodes[node.z] && this.catchNodeMap[this.activeNodes[node.z].z]) {
+        targetCatchNode = this.catchNodeMap[this.activeNodes[node.z].z];
+    }
+    
+    if (targetCatchNode) {
+        var count = 1;
+        if (msg.hasOwnProperty("error")) {
+            if (msg.error.hasOwnProperty("source")) {
+                if (msg.error.source.id === node.id) {
+                    count = msg.error.source.count+1;
+                    if (count === 10) {
+                        node.warn("Message exceeded maximum number of catches"); 
+                        return;
+                    }
+                }
+            }
         }
+        
+        var errorMessage;
+        if (msg) {
+            errorMessage = redUtil.cloneMessage(msg);
+        } else {
+            errorMessage = {};
+        }
+        if (errorMessage.hasOwnProperty("error")) { 
+            errorMessage._error = errorMessage.error;
+        }
+        errorMessage.error = {
+            message: logMessage.toString(),
+            source: {
+                id: node.id,
+                type: node.type,
+                count: count
+            }
+        };
+        targetCatchNode.receive(errorMessage);
     }
 }
 
