@@ -49,12 +49,12 @@
         "passport-http-bearer":"1.0.1",
         "passport-oauth2-client-password":"0.1.2",
         "oauth2orize":"1.0.1",
-        "node-red-node-feedparser":"0.0.2",
-        "node-red-node-email":"0.0.1",
-        "node-red-node-twitter":"0.0.4"
+        "node-red-node-feedparser":"0.0.*",
+        "node-red-node-email":"0.0.*",
+        "node-red-node-twitter":"0.0.*"
     },
     "optionalDependencies": {
-        "node-red-node-serialport":"0.0.1",
+        "node-red-node-serialport":"0.0.*",
         "bcrypt":"0.8.1"
     },
     "devDependencies": {
