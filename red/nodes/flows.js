@@ -153,16 +153,16 @@ var flowNodes = module.exports = {
                     var type = missingTypes[i];
                     var info = deprecated.get(type);
                     if (info) {
-                        log.info(" - "+missingTypes[i]+" (provided by npm module "+info.module+")");
+                        log.info(log._("nodes.flows.missing-type-provided",{type:missingTypes[i],module:info.module}));
                         knownUnknowns += 1;
                     } else {
                         log.info(" - "+missingTypes[i]);
                     }
                 }
                 if (knownUnknowns > 0) {
-                    log.info("To install any of these missing modules, run:");
+                    log.info(log._("nodes.flows.missing-type-install-1"));
                     log.info("  npm install <module name>");
-                    log.info("in the directory:");
+                    log.info(log._("nodes.flows.missing-type-install-2"));
                     log.info("  "+settings.userDir);
                 }
             }
