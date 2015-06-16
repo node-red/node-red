@@ -183,13 +183,13 @@ module.exports = function(RED) {
             });
             server.on('error', function(err) {
                 if (err) {
-                    node.error(RED._("tcpin.errors.cannot-listen",{port:node.port,error:err}));
+                    node.error(RED._("tcpin.errors.cannot-listen",{port:node.port,error:err.toString()}));
                 }
             });
 
             server.listen(node.port, function(err) {
                 if (err) {
-                    node.error(RED._("tcpin.errors.cannot-listen",{port:node.port,error:err}));
+                    node.error(RED._("tcpin.errors.cannot-listen",{port:node.port,error:err.toString()}));
                 } else {
                     node.log(RED._("tcpin.status.listening-port",{port:node.port}));
                     node.on('close', function() {
@@ -236,7 +236,7 @@ module.exports = function(RED) {
                     node.status({fill:"green",shape:"dot",text:RED._("common.status.connected")});
                 });
                 client.on('error', function (err) {
-                    node.log(RED._("tcpin.errors.error",{error:err}));
+                    node.log(RED._("tcpin.errors.error",{error:err.toString()}));
                 });
                 client.on('end', function (err) {
                 });
@@ -343,13 +343,13 @@ module.exports = function(RED) {
 
             server.on('error', function(err) {
                 if (err) {
-                    node.error(RED._("tcpin.errors.cannot-listen",{port:node.port,error:err}));
+                    node.error(RED._("tcpin.errors.cannot-listen",{port:node.port,error:err.toString()}));
                 }
             });
 
             server.listen(node.port, function(err) {
                 if (err) {
-                    node.error(RED._("tcpin.errors.cannot-listen",{port:node.port,error:err}));
+                    node.error(RED._("tcpin.errors.cannot-listen",{port:node.port,error:err.toString()}));
                 } else {
                     node.log(RED._("tcpin.status.listening-port",{port:node.port}));
                     node.on('close', function() {

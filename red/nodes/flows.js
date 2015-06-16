@@ -58,7 +58,7 @@ var flowNodes = module.exports = {
                 flowNodes.startFlows();
             });
         }).otherwise(function(err) {
-            log.warn(log._("nodes.flows.error",{err:err}));
+            log.warn(log._("nodes.flows.error",{message:err.toString()}));
             console.log(err.stack);
         });
     },

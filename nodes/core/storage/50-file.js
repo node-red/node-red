@@ -47,13 +47,13 @@ module.exports = function(RED) {
                     // using "binary" not {encoding:"binary"} to be 0.8 compatible for a while
                     //fs.writeFile(filename, data, {encoding:"binary"}, function (err) {
                     fs.writeFile(filename, data, "binary", function (err) {
-                        if (err) { node.error(RED._("file.errors.writefail",{error:err}),msg); }
+                        if (err) { node.error(RED._("file.errors.writefail",{error:err.toString()}),msg); }
                         else if (RED.settings.verbose) { node.log(RED._("file.status.wrotefile",{file:filename})); }
                     });
                 }
                 else if (this.overwriteFile === "delete") {
                     fs.unlink(filename, function (err) {
-                        if (err) { node.error(RED._("file.errors.deletefail",{error:err}),msg); }
+                        if (err) { node.error(RED._("file.errors.deletefail",{error:err.toString()}),msg); }
                         else if (RED.settings.verbose) { node.log(RED._("file.status.deletedfile",{file:filename})); }
                     });
                 }
@@ -61,7 +61,7 @@ module.exports = function(RED) {
                     // using "binary" not {encoding:"binary"} to be 0.8 compatible for a while longer
                     //fs.appendFile(filename, data, {encoding:"binary"}, function (err) {
                     fs.appendFile(filename, data, "binary", function (err) {
-                        if (err) { node.error(RED._("file.errors.appendfail",{error:err}),msg); }
+                        if (err) { node.error(RED._("file.errors.appendfail",{error:err.toString()}),msg); }
                         else if (RED.settings.verbose) { node.log(RED._("file.status.appendedfile",{file:filename})); }
                     });
                 }
