@@ -24,7 +24,7 @@ var log = require("../log");
 var events = require("../events");
 var redUtil = require("../util");
 var storage = null;
-
+var deprecated = require("./deprecated");
 
 var activeFlow = null;
 
@@ -146,7 +146,13 @@ var flowNodes = module.exports = {
             if (missingTypes.length > 0) {
                 log.info("Waiting for missing types to be registered:");
                 for (var i=0;i<missingTypes.length;i++) {
-                    log.info(" - "+missingTypes[i]);
+                    var type = missingTypes[i];
+                    var info = deprecated.get(type);
+                    if (info) {
+                        log.info(" - "+missingTypes[i]+" (provided by npm module "+info.module+")")
+                    } else {
+                        log.info(" - "+missingTypes[i]);
+                    }
                 }
             }
         }
