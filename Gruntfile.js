@@ -269,7 +269,8 @@ module.exports = function(grunt) {
                         'nodes/core/**',
                         'red/**',
                         'public/**',
-                        'editor/templates/**'
+                        'editor/templates/**',
+                        'bin/**'
                     ],
                     dest: path.resolve('<%= paths.dist %>/node-red-<%= pkg.version %>')
                 }]
