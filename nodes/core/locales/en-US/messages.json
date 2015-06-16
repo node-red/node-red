@@ -280,8 +280,8 @@
         "return": {
             "timeout": "after a fixed timeout of",
             "character": "when character received is",
-            "number": "a fixed number of chars:",
-            "never": "keep connection open"
+            "number": "a fixed number of chars",
+            "never": "never - keep connection open"
         },
         "status": {
             "connecting": "connecting to __host__:__port__",
@@ -499,7 +499,7 @@
         "label": {
             "gpiopin": "GPIO Pin",
             "selectpin": "select pin",
-            "registor": "Registor?",
+            "resistor": "Resistor?",
             "readinitial": "Read initial state of pin on deploy/restart?",
             "type": "Type",
             "initpin": "Initialise pin state?",
@@ -509,7 +509,7 @@
             "right": "Right",
             "middle": "Middle"
         },
-        "registor": {
+        "resistor": {
             "none": "none",
             "pullup": "pullup",
             "pulldown": "pulldown"

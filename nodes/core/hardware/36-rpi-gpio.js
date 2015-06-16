@@ -99,7 +99,7 @@ module.exports = function(RED) {
             node.child.on('error', function (err) {
                 if (err.errno === "ENOENT") { node.error(RED._("rpi-gpio.errors.commandnotfound")); }
                 else if (err.errno === "EACCES") { node.error(RED._("rpi-gpio.errors.commandnotexecutable")); }
-                else { node.error(RED._("rpi-gpio.errors.error",{error:err.errnp})) }
+                else { node.error(RED._("rpi-gpio.errors.error",{error:err.errno})) }
             });
 
         }

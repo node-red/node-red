@@ -84,7 +84,7 @@ module.exports = function(RED) {
                 res.send(200);
             } catch(err) {
                 res.send(500);
-                node.error(RED._("inject.failed",{error:err}));
+                node.error(RED._("inject.failed",{error:err.toString()}));
             }
         } else {
             res.send(404);
