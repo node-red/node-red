@@ -257,6 +257,7 @@ module.exports = function(grunt) {
             },
             release: {
                 files: [{
+                    mode: true,
                     expand: true,
                     src: [
                         '*.md',
@@ -276,7 +277,17 @@ module.exports = function(grunt) {
                 }]
             }
         },
-
+        chmod: {
+            options: {
+                mode: '755'
+            },
+            release: {
+                // Target-specific file/dir lists and/or options go here. 
+                src: [
+                    path.resolve('<%= paths.dist %>/node-red-<%= pkg.version %>/nodes/core/hardware/nrgpio*')
+                ]
+            }
+        },
         compress: {
             release: {
                 options: {
@@ -300,6 +311,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-nodemon');
     grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-chmod');
     
     grunt.registerMultiTask('attachCopyright', function() {
         var files = this.data.src;
@@ -373,6 +385,6 @@ module.exports = function(grunt) {
 
     grunt.registerTask('release',
         'Create distribution zip file',
-        ['build','clean:release','copy:release','compress:release']);
+        ['build','clean:release','copy:release','chmod:release','compress:release']);
 
 };

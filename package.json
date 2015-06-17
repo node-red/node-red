@@ -1,6 +1,6 @@
 {
     "name"         : "node-red",
-    "version"      : "0.10.9",
+    "version"      : "0.10.10",
     "description"  : "A visual tool for wiring the Internet of Things",
     "homepage"     : "http://nodered.org",
     "license"      : "Apache-2.0",
@@ -59,6 +59,7 @@
     },
     "devDependencies": {
         "grunt": "0.4.5",
+        "grunt-chmod": "1.0.3",
         "grunt-cli": "0.1.13",
         "grunt-concurrent":"1.0.1",
         "grunt-contrib-clean":"0.6.0",
