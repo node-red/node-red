@@ -147,10 +147,10 @@ var flowNodes = module.exports = {
             var missingTypes = activeFlow.getMissingTypes();
             if (missingTypes.length > 0) {
                 log.info("Waiting for missing types to be registered:");
+                var knownUnknowns = 0;
                 for (var i=0;i<missingTypes.length;i++) {
                     var type = missingTypes[i];
                     var info = deprecated.get(type);
-                    var knownUnknowns = 0;
                     if (info) {
                         log.info(" - "+missingTypes[i]+" (provided by npm module "+info.module+")");
                         knownUnknowns += 1;
