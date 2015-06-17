@@ -89,7 +89,7 @@ describe('tail Node', function() {
     });
 
     it('should handle a non-existent file', function(done) {
-        fs.unlinkSync(fileToTail);
+        fs.writeFileSync(fileToTail, "Tail message line.\n");
         var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail, "wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(tailNode, flow, function() {
@@ -100,9 +100,12 @@ describe('tail Node', function() {
                 msg.payload.should.equal("Tail message line");
                 done();
             });
+            setTimeout(function(){
+                fs.unlinkSync(fileToTail);
+            },500);
             setTimeout( function() {
                 fs.writeFile(fileToTail, "Tail message line\n");
-            },wait);
+            },1000);
         });
     });
 
