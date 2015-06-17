@@ -269,11 +269,11 @@ RED.palette = (function() {
         $(".palette-spinner").show();
         if (RED.settings.paletteCategories) {
             RED.settings.paletteCategories.forEach(function(category){
-                createCategoryContainer(category, category); // TODO NLS enable categories from settings
+                createCategoryContainer(category, RED._("palette.label."+category,{defaultValue:category}));
             });
         } else {
             core.forEach(function(category){
-                createCategoryContainer(category, RED._("palette.core."+category));
+                createCategoryContainer(category, RED._("palette.label."+category,{defaultValue:category}));
             });
         }
         
