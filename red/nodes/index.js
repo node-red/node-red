@@ -54,7 +54,7 @@ function createNode(node,def) {
 
 function init(_settings,storage,app) {
     credentials.init(storage,app);
-    flows.init(storage);
+    flows.init(_settings,storage);
     registry.init(_settings);
 }
 

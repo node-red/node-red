@@ -26,7 +26,20 @@ var nodes = {
     "redis out": {module:"node-red-node-redis"},
     
     "mongodb": {module:"node-red-node-mongodb"},
-    "mongodb out": {module:"node-red-node-mongodb"}
+    "mongodb out": {module:"node-red-node-mongodb"},
+    
+    "serial in": {module:"node-red-node-serialport"},
+    "serial out": {module:"node-red-node-serialport"},
+    "serial-port": {module:"node-red-node-serialport"},
+    
+    "twitter-credentials": {module:"node-red-node-twitter"},
+    "twitter in": {module:"node-red-node-twitter"},
+    "twitter out": {module:"node-red-node-twitter"},
+    
+    "e-mail": {module:"node-red-node-email"},
+    "e-mail in": {module:"node-red-node-email"},
+    
+    "feedparse": {module:"node-red-node-feedparser"}
 }
 
 module.exports = {

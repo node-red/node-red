@@ -166,7 +166,7 @@ describe('flows', function() {
             var testFlow = [{"type":"testNode","credentials":{"a":1}},{"type":"testNode2"}];
             var resultFlow = clone(testFlow);
             var storage = { saveFlows: sinon.spy() };
-            flows.init(storage);
+            flows.init({},storage);
             flows.setFlows(testFlow,"full").then(function() {
                 try {
                     credentialsExtact.calledOnce.should.be.true;
@@ -194,7 +194,7 @@ describe('flows', function() {
             var testFlow = [{"type":"testNode"},{"type":"testNode2"}];
             var testFlow2 = [{"type":"testNode3"},{"type":"testNode4"}];
             var storage = { saveFlows: sinon.spy() };
-            flows.init(storage);
+            flows.init({},storage);
             
             flows.setFlows(testFlow,"full").then(function() {
                 flows.setFlows(testFlow2,"nodes").then(function() {
