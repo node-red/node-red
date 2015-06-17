@@ -19,6 +19,8 @@ var server = require("../server");
 var log = require("../log");
 var i18n = require("../i18n");
 
+var when = require("when");
+
 var settings = require("../settings");
 
 module.exports = {
