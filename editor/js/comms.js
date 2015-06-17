@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,15 @@ RED.comms = (function() {
     var pendingAuth = false;
     
     function connectWS() {
-        var path = location.hostname+":"+location.port+document.location.pathname;
+        var path = location.hostname;
+        var port = location.port;
+        if (port.length !== 0) {
+            path = path+":"+port;
+        }
+        path = path+document.location.pathname;
         path = path+(path.slice(-1) == "/"?"":"/")+"comms";
         path = "ws"+(document.location.protocol=="https:"?"s":"")+"://"+path;
+        
         var auth_tokens = RED.settings.get("auth-tokens");
         pendingAuth = (auth_tokens!=null);
         
