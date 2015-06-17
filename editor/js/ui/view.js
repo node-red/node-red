@@ -71,7 +71,7 @@ RED.view = (function() {
         .attr("pointer-events", "all")
         .style("cursor","crosshair")
         .on("mousedown", function() {
-            this.focus();
+            $(this).focus();
         });
         
     var vis = outer
