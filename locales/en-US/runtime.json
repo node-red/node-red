@@ -81,7 +81,10 @@
             "stopped-flows": "Stopped flows",
             "stopped": "Stopped",
             "missing-types": "Waiting for missing types to be registered:",
-            "missing-type-provided": " - __type__ (provided by npm module __module__)"
+            "missing-type-provided": " - __type__ (provided by npm module __module__)",
+            
+            "missing-type-install-1": "To install any of these missing modules, run:",
+            "missing-type-install-2": "in the directory:"
         },
         "flow": {
             "unknown-type": "Unknown type: __type__",
