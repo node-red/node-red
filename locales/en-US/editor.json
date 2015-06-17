@@ -127,7 +127,7 @@
 		"noInfo": "no information available",
 		"popOverError": "Error generating pop-over label for '__type__'.",
         "filter": "filter",
-        "core": {
+        "label": {
             "subflows": "subflows",
             "input": "input",
             "output": "output", 
