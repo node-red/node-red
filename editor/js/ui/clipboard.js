@@ -72,8 +72,22 @@ RED.clipboard = (function() {
     var importNodesDialog = '<div class="form-row">'+
         '<textarea style="resize: none; width: 100%; border-radius: 0px;font-family: monospace; font-size: 12px; background:#eee; padding-left: 0.5em; box-sizing:border-box;" id="clipboard-import" rows="5" placeholder="Paste nodes here"></textarea>'+
         '</div>';
-        
-       
+
+    function validateImport() {
+        var importInput = $("#clipboard-import");
+        var v = importInput.val();
+        try {
+            JSON.parse(v);
+            importInput.removeClass("input-error");
+            $("#clipboard-dialog-ok").button("enable");
+        } catch(err) {
+            if (v !== "") {
+                importInput.addClass("input-error");
+            }
+            $("#clipboard-dialog-ok").button("disable");
+        }
+    }
+    
     function importNodes() {
         dialogContainer.empty();
         dialogContainer.append($(importNodesDialog));
@@ -81,22 +95,12 @@ RED.clipboard = (function() {
         $("#clipboard-dialog-cancel").show();
         $("#clipboard-dialog-close").hide();
         $("#clipboard-dialog-ok").button("disable");
-        $("#clipboard-import").keyup(function() {
-            var v = $(this).val();
-            try {
-                JSON.parse(v);
-                $(this).removeClass("input-error");
-                $("#clipboard-dialog-ok").button("enable");
-            } catch(err) {
-                if (v !== "") {
-                    $(this).addClass("input-error");
-                }
-                $("#clipboard-dialog-ok").button("disable");
-            }
-        });
+        $("#clipboard-import").keyup(validateImport);
+        $("#clipboard-import").on('paste',function() { setTimeout(validateImport,10)});
+        
         dialog.dialog("option","title","Import nodes").dialog("open");
     }
-    
+
     function exportNodes() {
         dialogContainer.empty();
         dialogContainer.append($(exportNodesDialog));
