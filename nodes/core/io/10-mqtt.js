@@ -18,6 +18,7 @@ module.exports = function(RED) {
     "use strict";
     var connectionPool = require("./lib/mqttConnectionPool");
     var isUtf8 = require('is-utf8');
+    var named = require('named-regexp').named;
 
     function MQTTBrokerNode(n) {
         RED.nodes.createNode(this,n);
@@ -38,17 +39,41 @@ module.exports = function(RED) {
 
     function MQTTInNode(n) {
         RED.nodes.createNode(this,n);
+
         this.topic = n.topic;
+        if (n.topic.match(/\</)) {
+            this.topic = n.topic
+                .replace(/\/\w+\:\<\w+\>$/gi, "\/+")
+                .replace(/\:\<\w+\>$/gi, "+")
+                .replace(/\<\w+\>/gi, "");
+        }
+
         this.broker = n.broker;
+
+        this.path = n.topic.replace(/\:<(\w+)>/gi, "\\:(:<$1>.*)").replace(/\+\<(\w+)>/gi, "(:<$1>.+)").replace(/#\<(\w+)>/gi, "(:<$1>.*)").replace(/\//g,"\\\/");
+        this.regexp = named(new RegExp(this.path));
+
+
         this.brokerConfig = RED.nodes.getNode(this.broker);
+
         if (this.brokerConfig) {
+
+
             this.status({fill:"red",shape:"ring",text:"disconnected"});
             this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.brokerConfig.clientid,this.brokerConfig.username,this.brokerConfig.password);
             var node = this;
             if (this.topic) {
                 this.client.subscribe(this.topic,2,function(topic,payload,qos,retain) {
                     if (isUtf8(payload)) { payload = payload.toString(); }
+
                     var msg = {topic:topic,payload:payload,qos:qos,retain:retain};
+                    var result = node.regexp.exec(topic)
+                    if (result) {
+                        var captures = result.captures
+                        for (var key in captures) { msg[key] = captures[key].join('') }
+                    }
+
+
                     if ((node.brokerConfig.broker === "localhost")||(node.brokerConfig.broker === "127.0.0.1")) {
                         msg._topic = topic;
                     }
