@@ -41,7 +41,7 @@ function start() {
     var Users = require("./api/auth/users");
     var Permissions = require("./api/auth/permissions");
     if (!settings.disableEditor) {
-        Users.default().then(function(anonymousUser) {
+        return Users.default().then(function(anonymousUser) {
             var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
             var path = settings.httpAdminRoot || "/";
             path = (path.slice(0,1) != "/" ? "/":"") + path + (path.slice(-1) == "/" ? "":"/") + "comms";

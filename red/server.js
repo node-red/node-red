@@ -105,8 +105,9 @@ function start() {
                     }
                 }
                 log.info("Settings file  : "+settings.settingsFile);
-                redNodes.loadFlows();
-                comms.start();
+                return redNodes.loadFlows();
+            }).then(function () {
+                return comms.start();
             }).otherwise(function(err) {
                 console.log(err);
             });
