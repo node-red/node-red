@@ -231,6 +231,9 @@ RED.editor = (function() {
                                         }
                                         if (newValue != null) {
                                             if (editing_node[d] != newValue) {
+                                                if (d === "outputs" && (newValue.trim() === "" || isNaN(newValue))) {
+                                                    continue;
+                                                }
                                                 if (editing_node._def.defaults[d].type) {
                                                     if (newValue == "_ADD_") {
                                                         newValue = "";
