@@ -86,7 +86,8 @@ module.exports = function(RED) {
             context: {
                 global:RED.settings.functionGlobalContext || {}
             },
-            setTimeout: setTimeout
+            setTimeout: setTimeout,
+            clearTimeout: clearTimeout
         };
         var context = vm.createContext(sandbox);
         try {
