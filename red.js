@@ -75,13 +75,13 @@ if (parsedArgs.settings) {
         // NODE_RED_HOME contains user data - use its settings.js
         settingsFile = path.join(process.env.NODE_RED_HOME,"settings.js");
     } else {
-        var userSettingsFile = path.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE,".node-red","settings.js");    
+        var userSettingsFile = path.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE,".node-red","settings.js");
         if (fs.existsSync(userSettingsFile)) {
             // $HOME/.node-red/settings.js exists
             settingsFile = userSettingsFile;
         } else {
             // Use default settings.js
-            settingsFile = "./settings";
+            settingsFile = __dirname+"/settings.js";
         }
     }
 }
@@ -261,6 +261,6 @@ process.on('uncaughtException',function(err) {
 process.on('SIGINT', function () {
     RED.stop();
     // TODO: need to allow nodes to close asynchronously before terminating the
-    // process - ie, promises 
+    // process - ie, promises
     process.exit();
 });
