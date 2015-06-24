@@ -19,23 +19,23 @@
         <label for="node-input-pin"><i class="fa fa-circle"></i> GPIO Pin</label>
         <select type="text" id="node-input-pin" style="width: 250px;">
             <option value='' disabled selected style='display:none;'>select pin</option>
-            <option value="3">3 - SDA1 </option>
-            <option value="5">5 - SCL1 </option>
-            <option value="7">7 - GPIO7</option>
-            <option value="8">8 - TxD </option>
-            <option value="10">10 - RxD </option>
-            <option value="11">11 - GPIO0</option>
-            <option value="12">12 - GPIO1</option>
-            <option value="13">13 - GPIO2</option>
-            <option value="15">15 - GPIO3</option>
-            <option value="16">16 - GPIO4</option>
-            <option value="18">18 - GPIO5</option>
-            <option value="19">19 - MOSI </option>
-            <option value="21">21 - MISO </option>
-            <option value="22">22 - GPIO6</option>
-            <option value="23">23 - SCLK </option>
-            <option value="24">24 - CE0 </option>
-            <option value="26">26 - CE1 </option>
+            <option value="3">3 - SDA1 - BCM2</option>
+            <option value="5">5 - SCL1 - BCM3</option>
+            <option value="7">7 - GPIO7 - BCM4</option>
+            <option value="8">8 - TxD - BCM14</option>
+            <option value="10">10 - RxD - BCM15</option>
+            <option value="11">11 - GPIO0 - BCM17</option>
+            <option value="12">12 - GPIO1 - BCM18</option>
+            <option value="13">13 - GPIO2 - BCM27</option>
+            <option value="15">15 - GPIO3 - BCM22</option>
+            <option value="16">16 - GPIO4 - BCM23</option>
+            <option value="18">18 - GPIO5 - BCM24</option>
+            <option value="19">19 - MOSI - BCM10</option>
+            <option value="21">21 - MISO - BCM9</option>
+            <option value="22">22 - GPIO6 - BCM25</option>
+            <option value="23">23 - SCLK - BCM11</option>
+            <option value="24">24 - CE0 - BCM8</option>
+            <option value="26">26 - CE1 - BCM7</option>
          </select>
          &nbsp;<span id="pitype"></span>
     </div>
@@ -100,17 +100,17 @@
             $.getJSON('rpi-gpio/'+this.id,function(data) {
                 $('#pitype').text(data.type);
                 if ((data.type === "Model B+") || (data.type === "Model A+")) {
-                    $('#node-input-pin').append($("<option></option>").attr("value",27).text("27 - SDA0"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",28).text("28 - SCL0"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",29).text("29 - GPIO5"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",31).text("31 - GPIO6"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",32).text("32 - GPIO12"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",33).text("33 - GPIO13"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",35).text("35 - GPIO19"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",36).text("36 - GPIO16"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",37).text("37 - GPIO26"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",38).text("38 - GPIO20"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",40).text("40 - GPIO21"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",27).text("27 - SDA0 - BCM0"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",28).text("28 - SCL0 - BCM1"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",29).text("29 - GPIO21 - BCM5"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",31).text("31 - GPIO22 - BCM6"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",32).text("32 - GPIO26 - BCM12"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",33).text("33 - GPIO23 - BCM13"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",35).text("35 - GPIO24 - BCM19"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",36).text("36 - GPIO27 - BCM16"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",37).text("37 - GPIO25 - BCM26"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",38).text("38 - GPIO28 - BCM20"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",40).text("40 - GPIO29 - BCM21"));
                     $('#node-input-pin').val(pinnow);
                 }
             });
@@ -145,23 +145,23 @@
         <label for="node-input-pin"><i class="fa fa-circle"></i> GPIO Pin</label>
         <select type="text" id="node-input-pin" style="width: 250px;">
             <option value='' disabled selected style='display:none;'>select pin</option>
-            <option value="3">3 - SDA1 </option>
-            <option value="5">5 - SCL1 </option>
-            <option value="7">7 - GPIO7</option>
-            <option value="8">8 - TxD </option>
-            <option value="10">10 - RxD </option>
-            <option value="11">11 - GPIO0</option>
-            <option value="12">12 - GPIO1</option>
-            <option value="13">13 - GPIO2</option>
-            <option value="15">15 - GPIO3</option>
-            <option value="16">16 - GPIO4</option>
-            <option value="18">18 - GPIO5</option>
-            <option value="19">19 - MOSI </option>
-            <option value="21">21 - MISO </option>
-            <option value="22">22 - GPIO6</option>
-            <option value="23">23 - SCLK </option>
-            <option value="24">24 - CE0 </option>
-            <option value="26">26 - CE1 </option>
+            <option value="3">3 - SDA1 - BCM2</option>
+            <option value="5">5 - SCL1 - BCM3</option>
+            <option value="7">7 - GPIO7 - BCM4</option>
+            <option value="8">8 - TxD - BCM14</option>
+            <option value="10">10 - RxD - BCM15</option>
+            <option value="11">11 - GPIO0 - BCM17</option>
+            <option value="12">12 - GPIO1 - BCM18</option>
+            <option value="13">13 - GPIO2 - BCM27</option>
+            <option value="15">15 - GPIO3 - BCM22</option>
+            <option value="16">16 - GPIO4 - BCM23</option>
+            <option value="18">18 - GPIO5 - BCM24</option>
+            <option value="19">19 - MOSI - BCM10</option>
+            <option value="21">21 - MISO - BCM9</option>
+            <option value="22">22 - GPIO6 - BCM25</option>
+            <option value="23">23 - SCLK - BCM11</option>
+            <option value="24">24 - CE0 - BCM8</option>
+            <option value="26">26 - CE1 - BCM7</option>
          </select>
          &nbsp;<span id="pitype"></span>
     </div>
@@ -238,17 +238,17 @@
             $.getJSON('rpi-gpio/'+this.id,function(data) {
                 $('#pitype').text(data.type);
                 if ((data.type === "Model B+") || (data.type === "Model A+")) {
-                    $('#node-input-pin').append($("<option></option>").attr("value",27).text("27 - SDA0"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",28).text("28 - SCL0"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",29).text("29 - GPIO5"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",31).text("31 - GPIO6"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",32).text("32 - GPIO12"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",33).text("33 - GPIO13"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",35).text("35 - GPIO19"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",36).text("36 - GPIO16"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",37).text("37 - GPIO26"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",38).text("38 - GPIO20"));
-                    $('#node-input-pin').append($("<option></option>").attr("value",40).text("40 - GPIO21"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",27).text("27 - SDA0 - BCM0"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",28).text("28 - SCL0 - BCM1"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",29).text("29 - GPIO21 - BCM5"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",31).text("31 - GPIO22 - BCM6"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",32).text("32 - GPIO26 - BCM12"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",33).text("33 - GPIO23 - BCM13"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",35).text("35 - GPIO24 - BCM19"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",36).text("36 - GPIO27 - BCM16"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",37).text("37 - GPIO25 - BCM26"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",38).text("38 - GPIO28 - BCM20"));
+                    $('#node-input-pin').append($("<option></option>").attr("value",40).text("40 - GPIO29 - BCM21"));
                     $('#node-input-pin').val(pinnow);
                 }
             });
