@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,9 @@ module.exports = function(RED) {
         this.op2 = n.op2 || "0";
         this.op1type = n.op1type || "val";
         this.op2type = n.op2type || "val";
+        console.log(n.extend,typeof n.extend);
         this.extend = n.extend || "false";
+        console.log(this.extend);
         this.units = n.units || "ms";
         this.duration = n.duration || 250;
         if (this.duration <= 0) { this.duration = 0; }
@@ -73,7 +75,7 @@ module.exports = function(RED) {
                         },node.duration);
                     }
                 }
-                else if ((node.extend == "true") && (node.duration > 0)) {
+                else if ((node.extend === "true" || node.extend === true) && (node.duration > 0)) {
                     clearTimeout(tout);
                     tout = setTimeout(function() {
                         msg.payload = m2;
