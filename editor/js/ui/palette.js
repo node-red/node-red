@@ -147,7 +147,8 @@ RED.palette = (function() {
             }
 
             if ($("#palette-base-category-"+rootCategory).length === 0) {
-                createCategoryContainer(rootCategory);
+                var ns = def.set.id;
+                createCategoryContainer(rootCategory, RED._(ns+":"+"palette.label."+rootCategory, {defaultValue:rootCategory}));
             }
             $("#palette-container-"+rootCategory).show();
 
