@@ -147,8 +147,12 @@ RED.palette = (function() {
             }
 
             if ($("#palette-base-category-"+rootCategory).length === 0) {
-                var ns = def.set.id;
-                createCategoryContainer(rootCategory, RED._(ns+":"+"palette.label."+rootCategory, {defaultValue:rootCategory}));
+                if(core.indexOf(rootCategory) !== -1){
+                    createCategoryContainer(rootCategory, RED._("node-red:palette.label."+rootCategory, {defaultValue:rootCategory}));
+                } else { 
+                    var ns = def.set.id;
+                    createCategoryContainer(rootCategory, RED._(ns+":palette.label."+rootCategory, {defaultValue:rootCategory}));
+                }
             }
             $("#palette-container-"+rootCategory).show();
 
