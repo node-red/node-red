@@ -15,6 +15,7 @@
  **/
 
 var when = require('when');
+var Path = require('path');
 
 var storageModule;
 var settingsAvailable;
@@ -90,9 +91,9 @@ var storageModuleInterface = {
                 return when.resolve();
             }
         },
-        
+
         /* Library Functions */
-        
+
         getLibraryEntry: function(type, path) {
             if (is_malicious(path)) {
                 return when.reject(new Error('forbidden flow name'));
@@ -105,7 +106,7 @@ var storageModuleInterface = {
             }
             return storageModule.saveLibraryEntry(type, path, meta, body);
         },
-        
+
 /* Deprecated functions */
         getAllFlows: function() {
             if (storageModule.hasOwnProperty("getAllFlows")) {
@@ -123,7 +124,7 @@ var storageModuleInterface = {
             } else {
                 return storageModule.getLibraryEntry("flows",fn);
             }
-            
+
         },
         saveFlow: function(fn, data) {
             if (is_malicious(fn)) {
@@ -136,7 +137,7 @@ var storageModuleInterface = {
             }
         }
 /* End deprecated functions */
-        
+
 }
 
 
@@ -146,7 +147,7 @@ function listFlows(path) {
             var promises = [];
             res.forEach(function(r) {
                 if (typeof r === "string") {
-                    promises.push(listFlows(path+r));
+                    promises.push(listFlows(Path.join(path,r)));
                 } else {
                     promises.push(when.resolve(r));
                 }
