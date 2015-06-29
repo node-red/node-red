@@ -1,3 +1,4 @@
+.DS_store
 .config.json
 .dist
 .jshintignore
