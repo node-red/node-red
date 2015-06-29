@@ -159,15 +159,15 @@
 
 <script type="text/x-red" data-template-name="export-library-dialog">
     <div class="form-row">
-        <label for="node-input-filename" data-i18n="[append]workspaces.libraryFilenamePlaceholder"><i class="fa fa-file"></i> </label>
-        <input type="text" id="node-input-filename" data-i18n="[placeholder]libraryFilenameLabel">
+        <label for="node-input-filename" data-i18n="[append]editor:workspaces.libraryFilenameLabel"><i class="fa fa-file"></i> </label>
+        <input type="text" id="node-input-filename" data-i18n="[placeholder]editor:workspaces.libraryFilenamePlaceholder">
     </div>
 </script>
 
 <script type="text/x-red" data-template-name="subflow">
     <div class="form-row">
-        <label for="node-input-name" data-i18n="[append]workspaces.libraryNameLabel"><i class="fa fa-tag"></i> </label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]workspaces.libraryNamePlaceholder">
+        <label for="node-input-name" data-i18n="[append]editor:workspaces.libraryNameLabel"><i class="fa fa-tag"></i> </label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]editor:workspaces.libraryNamePlaceholder">
     </div>
 </script>
 

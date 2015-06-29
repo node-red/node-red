@@ -624,7 +624,7 @@ RED.editor = (function() {
                 if (node_def.defaults[d].value) {
                     configNode[d] = node_def.defaults[d].value;
                 }
-            }            
+            }
             configNode["_"] = node_def._;
         }
 
