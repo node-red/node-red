@@ -19,7 +19,7 @@ var RED = (function() {
     function loadLocales() {
         RED.i18n.init(loadEditor);
     }
-    
+
     function loadNodeList() {
         $.ajax({
             headers: {
@@ -29,7 +29,7 @@ var RED = (function() {
             url: 'nodes',
             success: function(data) {
                 RED.nodes.setNodeList(data);
-                
+
                 var nsCount = 0;
                 for(var i=0;i<data.length;i++) {
                     var ns = data[i];
@@ -60,8 +60,8 @@ var RED = (function() {
             success: function(data) {
                 $("body").append(data);
                 $("body").i18n();
-                
-                
+
+
                 $(".palette-spinner").hide();
                 $(".palette-scroll").show();
                 $("#palette-search").show();
@@ -110,7 +110,7 @@ var RED = (function() {
                         }
                         if (addedTypes.length) {
                             typeList = "<ul><li>"+addedTypes.join("</li><li>")+"</li></ul>";
-                            RED.notify(RED._("notification.nodeAdded", {count:addedTypes.length})+typeList,"success");
+                            RED.notify(RED._("palette.event.nodeAdded", {count:addedTypes.length})+typeList,"success");
                         }
                     } else if (topic == "node/removed") {
                         for (i=0;i<msg.length;i++) {
@@ -118,7 +118,7 @@ var RED = (function() {
                             info = RED.nodes.removeNodeSet(m.id);
                             if (info.added) {
                                 typeList = "<ul><li>"+m.types.join("</li><li>")+"</li></ul>";
-                                RED.notify(RED._("notification.nodeRemoved", {count:m.types.length})+typeList,"success");
+                                RED.notify(RED._("palette.event.nodeRemoved", {count:m.types.length})+typeList,"success");
                             }
                         }
                     } else if (topic == "node/enabled") {
@@ -127,12 +127,12 @@ var RED = (function() {
                             if (info.added) {
                                 RED.nodes.enableNodeSet(msg.id);
                                 typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
-                                RED.notify(RED._("notification.nodeEnabled", {count:msg.types.length})+typeList,"success");
+                                RED.notify(RED._("palette.event.nodeEnabled", {count:msg.types.length})+typeList,"success");
                             } else {
                                 $.get('nodes/'+msg.id, function(data) {
                                     $("body").append(data);
                                     typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
-                                    RED.notify(RED._("notification.nodeAdded", {count:msg.types.length})+typeList,"success");
+                                    RED.notify(RED._("palette.event.nodeAdded", {count:msg.types.length})+typeList,"success");
                                 });
                             }
                         }
@@ -140,7 +140,7 @@ var RED = (function() {
                         if (msg.types) {
                             RED.nodes.disableNodeSet(msg.id);
                             typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
-                            RED.notify(RED._("notfication.nodeDisabled", {count:msg.types.length})+typeList,"success");
+                            RED.notify(RED._("palette.event.nodeDisabled", {count:msg.types.length})+typeList,"success");
                         }
                     }
                 });
@@ -153,7 +153,7 @@ var RED = (function() {
         statusEnabled = state;
         RED.view.status(statusEnabled);
     }
-    
+
     function loadEditor() {
         RED.menu.init({id:"btn-sidemenu",
             options: [
@@ -190,9 +190,9 @@ var RED = (function() {
                 }
             ]
         });
-        
+
         RED.user.init();
-        
+
         RED.library.init();
         RED.palette.init();
         RED.sidebar.init();
@@ -201,9 +201,9 @@ var RED = (function() {
         RED.clipboard.init();
         RED.view.init();
         RED.editor.init();
-        
+
         RED.deploy.init(RED.settings.theme("deployButton",null));
-        
+
         RED.keyboard.add(/* ? */ 191,{shift:true},function(){RED.keyboard.showHelp();d3.event.preventDefault();});
         RED.comms.connect();
 
@@ -214,11 +214,11 @@ var RED = (function() {
     }
 
     $(function() {
-            
+
         if ((window.location.hostname !== "localhost") && (window.location.hostname !== "127.0.0.1")) {
             document.title = document.title+" : "+window.location.hostname;
         }
-        
+
         ace.require("ace/ext/language_tools");
 
         RED.settings.init(loadLocales);

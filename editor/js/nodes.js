@@ -133,7 +133,8 @@ RED.nodes = (function() {
             },
             removeNodeType: function(nt) {
                 if (nt.substring(0,8) != "subflow:") {
-                    throw new Error(RED._("error.apiSubflowOnly"),nt);
+                    // NON-NLS - internal debug message
+                    throw new Error("this api is subflow only. called with:",nt);
                 }
                 delete nodeDefinitions[nt];
                 RED.palette.remove(nt);
@@ -549,7 +550,7 @@ RED.nodes = (function() {
             try {
                 newNodes = JSON.parse(newNodesObj);
             } catch(err) {
-                var e = new Error(RED._("error.invalidFlow")+err.message);
+                var e = new Error(RED._("clipboard.invalidFlow",{message:err.message}));
                 e.code = "NODE_RED";
                 throw e;
             }
@@ -576,8 +577,7 @@ RED.nodes = (function() {
         if (unknownTypes.length > 0) {
             var typeList = "<ul><li>"+unknownTypes.join("</li><li>")+"</li></ul>";
             var type = "type"+(unknownTypes.length > 1?"s":"");
-            RED.notify("<strong>"+RED._("notification.importUnrecognised")+type+":</strong>"+typeList,"error",false,10000);
-            //"DO NOT DEPLOY while in this state.<br/>Either, add missing types to Node-RED, restart and then reload page,<br/>or delete unknown "+n.name+", rewire as required, and then deploy.","error");
+            RED.notify("<strong>"+RED._("clipboard.importUnrecognised",{count:unknownTypes.length})+"</strong>"+typeList,"error",false,10000);
         }
 
         var activeWorkspace = RED.workspaces.active();
@@ -589,17 +589,16 @@ RED.nodes = (function() {
                     var subflowId = m[1];
                     var err;
                     if (subflowId === activeSubflow.id) {
-                        err = new Error(RED._("error.cannotAddSubflowToItself"));
+                        err = new Error(RED._("notification.errors.cannotAddSubflowToItself"));
                     }
                     if (subflowContains(m[1],activeSubflow.id)) {
-                        err = new Error(RED._("error.cannotAddCircularReference"));
+                        err = new Error(RED._("notification.errors.cannotAddCircularReference"));
                     }
                     if (err) {
                         // TODO: standardise error codes
                         err.code = "NODE_RED";
                         throw err;
                     }
-
                 }
             }
         }

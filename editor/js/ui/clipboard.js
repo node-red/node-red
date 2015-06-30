@@ -21,7 +21,7 @@ RED.clipboard = (function() {
     var dialogContainer;
     var exportNodesDialog;
     var importNodesDialog;
-    
+
     function setupDialogs(){
         dialog = $('<div id="clipboard-dialog" class="hide"><form class="dialog-form form-horizontal"></form></div>')
             .appendTo("body")
@@ -33,7 +33,7 @@ RED.clipboard = (function() {
                 buttons: [
                     {
                         id: "clipboard-dialog-ok",
-                        text: RED._("dialog.ok"),
+                        text: RED._("common.label.ok"),
                         click: function() {
                             if (/Import/.test(dialog.dialog("option","title"))) {
                                 RED.view.importNodes($("#clipboard-import").val());
@@ -43,14 +43,14 @@ RED.clipboard = (function() {
                     },
                     {
                         id: "clipboard-dialog-cancel",
-                        text: RED._("dialog.cancel"),
+                        text: RED._("common.label.cancel"),
                         click: function() {
                             $( this ).dialog( "close" );
                         }
                     },
                     {
                         id: "clipboard-dialog-close",
-                        text: RED._("dialog.close"),
+                        text: RED._("common.label.close"),
                         click: function() {
                             $( this ).dialog( "close" );
                         }
@@ -66,20 +66,22 @@ RED.clipboard = (function() {
         });
 
         dialogContainer = dialog.children(".dialog-form");
-        
+
         exportNodesDialog = '<div class="form-row">'+
-            '<label for="node-input-export" style="display: block; width:100%;"><i class="fa fa-clipboard"></i>'+RED._("dialog.nodes")+'</label>'+
+            '<label for="node-input-export" style="display: block; width:100%;"><i class="fa fa-clipboard"></i> '+RED._("clipboard.nodes")+'</label>'+
             '<textarea readonly style="resize: none; width: 100%; border-radius: 0px;font-family: monospace; font-size: 12px; background:#eee; padding-left: 0.5em; box-sizing:border-box;" id="clipboard-export" rows="5"></textarea>'+
             '</div>'+
             '<div class="form-tips">'+
-            RED._("dialog.selectToCopy")+
+            RED._("clipboard.selectNodes")+
             '</div>';
-            
+
         importNodesDialog = '<div class="form-row">'+
-            '<textarea style="resize: none; width: 100%; border-radius: 0px;font-family: monospace; font-size: 12px; background:#eee; padding-left: 0.5em; box-sizing:border-box;" id="clipboard-import" rows="5" placeholder="'+RED._("dialog.pasteNodesHere")+'"></textarea>'+
+            '<textarea style="resize: none; width: 100%; border-radius: 0px;font-family: monospace; font-size: 12px; background:#eee; padding-left: 0.5em; box-sizing:border-box;" id="clipboard-import" rows="5" placeholder="'+
+            RED._("clipboard.pasteNodes")+
+            '"></textarea>'+
             '</div>';
     }
-       
+
     function validateImport() {
         var importInput = $("#clipboard-import");
         var v = importInput.val();
@@ -104,8 +106,8 @@ RED.clipboard = (function() {
         $("#clipboard-dialog-ok").button("disable");
         $("#clipboard-import").keyup(validateImport);
         $("#clipboard-import").on('paste',function() { setTimeout(validateImport,10)});
-        
-        dialog.dialog("option","title",RED._("dialog.importNodes")).dialog("open");
+
+        dialog.dialog("option","title",RED._("clipboard.importNodes")).dialog("open");
     }
 
     function exportNodes() {
@@ -127,15 +129,15 @@ RED.clipboard = (function() {
                         return false;
                     })
                 });
-            dialog.dialog("option","title",RED._("dialog.exportNodesClipboard")).dialog( "open" );
+            dialog.dialog("option","title",RED._("clipboard.exportNodes")).dialog( "open" );
         }
     }
-    
+
     function hideDropTarget() {
         $("#dropTarget").hide();
         RED.keyboard.remove(/* ESCAPE */ 27);
     }
-    
+
     return {
         init: function() {
             setupDialogs();
@@ -152,16 +154,16 @@ RED.clipboard = (function() {
             });
             RED.keyboard.add(/* e */ 69,{ctrl:true},function(){exportNodes();d3.event.preventDefault();});
             RED.keyboard.add(/* i */ 73,{ctrl:true},function(){importNodes();d3.event.preventDefault();});
-            
-            
-            
+
+
+
             $('#chart').on("dragenter",function(event) {
                 if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
                     $("#dropTarget").css({display:'table'});
                     RED.keyboard.add(/* ESCAPE */ 27,hideDropTarget);
                 }
             });
-            
+
             $('#dropTarget').on("dragover",function(event) {
                 if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
                     event.preventDefault();
@@ -176,15 +178,15 @@ RED.clipboard = (function() {
                 RED.view.importNodes(data);
                 event.preventDefault();
             });
-            
-            
+
+
         },
         import: importNodes,
         export: exportNodes
     }
-        
-        
-        
-        
-        
+
+
+
+
+
 })();

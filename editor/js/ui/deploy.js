@@ -13,29 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 RED.deploy = (function() {
-        
+
     var deploymentTypes = {
         "full":{img:"red/images/deploy-full-o.png"},
         "nodes":{img:"red/images/deploy-nodes-o.png"},
         "flows":{img:"red/images/deploy-flows-o.png"}
     }
-    
+
     var ignoreDeployWarnings = {
         unknown: false,
         unusedConfig: false,
         invalid: false
     }
-    
+
     var deploymentType = "full";
-    
+
     function changeDeploymentType(type) {
         deploymentType = type;
         $("#btn-deploy img").attr("src",deploymentTypes[type].img);
     }
-    
-    
+
+
     /**
      * options:
      *   type: "default" - Button with drop-down options - no further customisation available
@@ -46,7 +46,7 @@ RED.deploy = (function() {
     function init(options) {
         options = options || {};
         var type = options.type || "default";
-        
+
         if (type == "default") {
             $('<li><span class="deploy-button-group button-group">'+
               '<a id="btn-deploy" class="deploy-button disabled" href="#"><img id="btn-deploy-icon" src="red/images/deploy-full-o.png"> <span>'+RED._("deploy.deploy")+'</span></a>'+
@@ -65,16 +65,16 @@ RED.deploy = (function() {
             if (options.hasOwnProperty('icon')) {
                 icon = options.icon;
             }
-            
+
             $('<li><span class="deploy-button-group button-group">'+
               '<a id="btn-deploy" class="deploy-button disabled" href="#">'+
               (icon?'<img id="btn-deploy-icon" src="'+icon+'"> ':'')+
               '<span>'+label+'</span></a>'+
               '</span></li>').prependTo(".header-toolbar");
         }
-        
+
         $('#btn-deploy').click(function() { save(); });
-        
+
         $( "#node-dialog-confirm-deploy" ).dialog({
                 title: "Confirm deploy",
                 modal: true,
@@ -83,9 +83,9 @@ RED.deploy = (function() {
                 height: "auto",
                 buttons: [
                     {
-                        text: RED._("deploy.confirmDeploy"),
+                        text: RED._("deploy.confirm.button.confirm"),
                         click: function() {
-                            
+
                             var ignoreChecked = $( "#node-dialog-confirm-deploy-hide" ).prop("checked");
                             if (ignoreChecked) {
                                 ignoreDeployWarnings[$( "#node-dialog-confirm-deploy-type" ).val()] = true;
@@ -95,7 +95,7 @@ RED.deploy = (function() {
                         }
                     },
                     {
-                        text: RED._("deploy.cancelDeploy"),
+                        text: RED._("deploy.confirm.button.cancel"),
                         click: function() {
                             $( this ).dialog( "close" );
                         }
@@ -114,7 +114,7 @@ RED.deploy = (function() {
         RED.nodes.on('change',function(state) {
             if (state.dirty) {
                 window.onbeforeunload = function() {
-                    return RED._("deploy.undeployedChanges");
+                    return RED._("deploy.confirm.undeployedChanges");
                 }
                 $("#btn-deploy").removeClass("disabled");
             } else {
@@ -132,7 +132,7 @@ RED.deploy = (function() {
                 var hasUnknown = false;
                 var hasInvalid = false;
                 var hasUnusedConfig = false;
-                
+
                 var unknownNodes = [];
                 RED.nodes.eachNode(function(node) {
                     hasInvalid = hasInvalid || !node.valid;
@@ -143,7 +143,7 @@ RED.deploy = (function() {
                     }
                 });
                 hasUnknown = unknownNodes.length > 0;
-                
+
                 var unusedConfigNodes = {};
                 RED.nodes.eachConfig(function(node) {
                     if (node.users.length === 0) {
@@ -159,13 +159,13 @@ RED.deploy = (function() {
                         hasUnusedConfig = true;
                     }
                 });
-                
+
                 $( "#node-dialog-confirm-deploy-config" ).hide();
                 $( "#node-dialog-confirm-deploy-unknown" ).hide();
                 $( "#node-dialog-confirm-deploy-unused" ).hide();
-                
+
                 var showWarning = false;
-                
+
                 if (hasUnknown && !ignoreDeployWarnings.unknown) {
                     showWarning = true;
                     $( "#node-dialog-confirm-deploy-type" ).val("unknown");
@@ -186,7 +186,7 @@ RED.deploy = (function() {
                         unusedConfigNodes[type].forEach(function(label) {
                                 unusedNodeLabels.push(type+": "+label);
                         });
-                    });                    
+                    });
                     $( "#node-dialog-confirm-deploy-unused-list" )
                         .html("<li>"+unusedNodeLabels.join("</li><li>")+"</li>");
                 }
@@ -196,10 +196,10 @@ RED.deploy = (function() {
                     return;
                 }
             }
-            
-            
-            
-            
+
+
+
+
             var nns = RED.nodes.createCompleteNodeSet();
 
             $("#btn-deploy-icon").removeClass('fa-download');
@@ -236,9 +236,9 @@ RED.deploy = (function() {
             }).fail(function(xhr,textStatus,err) {
                 RED.nodes.dirty(true);
                 if (xhr.responseText) {
-                    RED.notify(RED._("deploy.error")+xhr.responseJSON.message,"error");
+                    RED.notify(RED._("notification.error",{message:xhr.responseJSON.message}),"error");
                 } else {
-                    RED.notify(RED._("deploy.error")+RED._("deploy.noResponseError"),"error");
+                    RED.notify(RED._("notification.error",{message:RED._("deploy.errors.noResponse")}),"error");
                 }
             }).always(function() {
                 $("#btn-deploy-icon").removeClass('spinner');

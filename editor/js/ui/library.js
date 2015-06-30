@@ -239,7 +239,7 @@ RED.library = (function() {
             height: 450,
             buttons: [
                 {
-                    text: RED._("dialog.ok"),
+                    text: RED._("common.label.ok"),
                     click: function() {
                         if (selectedLibraryItem) {
                             for (var i=0;i<options.fields.length;i++) {
@@ -252,7 +252,7 @@ RED.library = (function() {
                     }
                 },
                 {
-                    text: RED._("dialog.cancel"),
+                    text: RED._("common.label.cancel"),
                     click: function() {
                         $( this ).dialog( "close" );
                     }
@@ -279,7 +279,7 @@ RED.library = (function() {
             var filename = $("#node-dialog-library-save-filename").val().replace(/(^\s*)|(\s*$)/g,"");
             var pathname = $("#node-dialog-library-save-folder").val().replace(/(^\s*)|(\s*$)/g,"");
             if (filename === "" || !/.+\.js$/.test(filename)) {
-                RED.notify(RED._("notification.invalidFilename"),"warning");
+                RED.notify(RED._("library.invalidFilename"),"warning");
                 return;
             }
             var fullpath = pathname+(pathname===""?"":"/")+filename;
@@ -327,9 +327,9 @@ RED.library = (function() {
                 data: JSON.stringify(data),
                 contentType: "application/json; charset=utf-8"
             }).done(function(data,textStatus,xhr) {
-                RED.notify(RED._("notification.savedType", {type:options.type}),"success");
+                RED.notify(RED._("library.savedType", {type:options.type}),"success");
             }).fail(function(xhr,textStatus,err) {
-                RED.notify(RED._("notification.saveFailed")+xhr.responseJSON.message,"error");
+                RED.notify(RED._("library.saveFailed",{message:xhr.responseJSON.message}),"error");
             });
         }
         $( "#node-dialog-library-save-confirm" ).dialog({
@@ -340,14 +340,14 @@ RED.library = (function() {
             height: 230,
             buttons: [
                 {
-                    text: RED._("dialog.ok"),
+                    text: RED._("common.label.ok"),
                     click: function() {
                         saveToLibrary(true);
                         $( this ).dialog( "close" );
                     }
                 },
                 {
-                    text: RED._("dialog.cancel"),
+                    text: RED._("common.label.cancel"),
                     click: function() {
                         $( this ).dialog( "close" );
                     }
@@ -362,14 +362,14 @@ RED.library = (function() {
             height: 230,
             buttons: [
                 {
-                    text: RED._("dialog.ok"),
+                    text: RED._("common.label.ok"),
                     click: function() {
                         saveToLibrary(false);
                         $( this ).dialog( "close" );
                     }
                 },
                 {
-                    text: RED._("dialog.cancel"),
+                    text: RED._("common.label.cancel"),
                     click: function() {
                         $( this ).dialog( "close" );
                     }

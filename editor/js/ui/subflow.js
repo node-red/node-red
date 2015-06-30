@@ -15,12 +15,12 @@
  **/
 
 RED.subflow = (function() {
-        
+
 
     function getSubflow() {
         return RED.nodes.subflow(RED.workspaces.active());
     }
-    
+
     function findAvailableSubflowIOPosition(subflow) {
         var pos = {x:70,y:70};
         for (var i=0;i<subflow.out.length+subflow.in.length;i++) {
@@ -37,7 +37,7 @@ RED.subflow = (function() {
         }
         return pos;
     }
-    
+
     function addSubflowInput() {
         var subflow = RED.nodes.subflow(RED.workspaces.active());
         var position = findAvailableSubflowIOPosition(subflow);
@@ -56,7 +56,7 @@ RED.subflow = (function() {
         var wasDirty = RED.nodes.dirty();
         var wasChanged = subflow.changed;
         subflow.changed = true;
-        
+
         RED.nodes.eachNode(function(n) {
             if (n.type == "subflow:"+subflow.id) {
                 n.changed = true;
@@ -77,11 +77,11 @@ RED.subflow = (function() {
         $("#workspace-subflow-add-input").toggleClass("disabled",true);
         RED.view.select();
     }
-    
+
     function addSubflowOutput(id) {
         var subflow = RED.nodes.subflow(RED.workspaces.active());
         var position = findAvailableSubflowIOPosition(subflow);
-        
+
         var newOutput = {
             type:"subflow",
             direction:"out",
@@ -97,7 +97,7 @@ RED.subflow = (function() {
         var wasDirty = RED.nodes.dirty();
         var wasChanged = subflow.changed;
         subflow.changed = true;
-        
+
         RED.nodes.eachNode(function(n) {
             if (n.type == "subflow:"+subflow.id) {
                 n.changed = true;
@@ -117,7 +117,7 @@ RED.subflow = (function() {
         RED.history.push(historyEvent);
         RED.view.select();
     }
-    
+
     function init() {
         $("#workspace-subflow-edit").click(function(event) {
             RED.editor.editSubflow(RED.nodes.subflow(RED.workspaces.active()));
@@ -137,13 +137,13 @@ RED.subflow = (function() {
             }
             addSubflowOutput();
         });
-        
+
         $("#workspace-subflow-delete").click(function(event) {
             event.preventDefault();
             var removedNodes = [];
             var removedLinks = [];
             var startDirty = RED.nodes.dirty();
-            
+
             RED.nodes.eachNode(function(n) {
                 if (n.type == "subflow:"+getSubflow().id) {
                     removedNodes.push(n);
@@ -152,16 +152,16 @@ RED.subflow = (function() {
                     removedNodes.push(n);
                 }
             });
-            
+
             for (var i=0;i<removedNodes.length;i++) {
                 var rmlinks = RED.nodes.remove(removedNodes[i].id);
                 removedLinks = removedLinks.concat(rmlinks);
             }
-            
+
             var activeSubflow = getSubflow();
-            
+
             RED.nodes.removeSubflow(activeSubflow);
-            
+
             RED.history.push({
                     t:'delete',
                     nodes:removedNodes,
@@ -169,12 +169,12 @@ RED.subflow = (function() {
                     subflow: activeSubflow,
                     dirty:startDirty
             });
-            
+
             RED.workspaces.remove(activeSubflow);
             RED.nodes.dirty(true);
             RED.view.redraw();
         });
-        
+
         RED.view.on("selection-changed",function(selection) {
             if (!selection.nodes) {
                 RED.menu.setDisabled("menu-item-subflow-convert",true);
@@ -182,9 +182,9 @@ RED.subflow = (function() {
                 RED.menu.setDisabled("menu-item-subflow-convert",false);
             }
         });
-        
+
     }
-        
+
     function createSubflow() {
         var lastIndex = 0;
         RED.nodes.eachSubflow(function(sf) {
@@ -193,9 +193,9 @@ RED.subflow = (function() {
                lastIndex = Math.max(lastIndex,m[1]);
            }
         });
-        
+
         var name = "Subflow "+(lastIndex+1);
-           
+
         var subflowId = RED.nodes.id();
         var subflow = {
             type:"subflow",
@@ -212,26 +212,26 @@ RED.subflow = (function() {
         });
         RED.workspaces.show(subflowId);
     }
-        
+
     function convertToSubflow() {
         var selection = RED.view.selection();
         if (!selection.nodes) {
-            RED.notify(RED._("notification.noNodesSelected"),"error");
+            RED.notify(RED._("subflow.errors.noNodesSelected"),"error");
             return;
         }
         var i;
         var nodes = {};
         var new_links = [];
         var removedLinks = [];
-        
+
         var candidateInputs = [];
         var candidateOutputs = [];
-        
+
         var boundingBox = [selection.nodes[0].x,
             selection.nodes[0].y,
             selection.nodes[0].x,
             selection.nodes[0].y];
-        
+
         for (i=0;i<selection.nodes.length;i++) {
             var n = selection.nodes[i];
             nodes[n.id] = {n:n,outputs:{}};
@@ -242,14 +242,14 @@ RED.subflow = (function() {
                 Math.max(boundingBox[3],n.y)
             ]
         }
-        
+
         var center = [(boundingBox[2]+boundingBox[0]) / 2,(boundingBox[3]+boundingBox[1]) / 2];
-        
+
         RED.nodes.eachLink(function(link) {
             if (nodes[link.source.id] && nodes[link.target.id]) {
                 // A link wholely within the selection
             }
-            
+
             if (nodes[link.source.id] && !nodes[link.target.id]) {
                 // An outbound link from the selection
                 candidateOutputs.push(link);
@@ -261,7 +261,7 @@ RED.subflow = (function() {
                 removedLinks.push(link);
             }
         });
-        
+
         var outputs = {};
         candidateOutputs = candidateOutputs.filter(function(v) {
              if (outputs[v.source.id+":"+v.sourcePort]) {
@@ -274,17 +274,17 @@ RED.subflow = (function() {
              return true;
         });
         candidateOutputs.sort(function(a,b) { return a.source.y-b.source.y});
-        
+
         if (candidateInputs.length > 1) {
-             RED.notify(RED._("notification.multipleInputsToSelection"),"error");
+             RED.notify(RED._("subflow.errors.multipleInputsToSelection"),"error");
              return;
         }
         //if (candidateInputs.length == 0) {
         //     RED.notify("<strong>Cannot create subflow</strong>: no input to selection","error");
         //     return;
         //}
-        
-        
+
+
         var lastIndex = 0;
         RED.nodes.eachSubflow(function(sf) {
            var m = (new RegExp("^Subflow (\\d+)$")).exec(sf.name);
@@ -292,9 +292,9 @@ RED.subflow = (function() {
                lastIndex = Math.max(lastIndex,m[1]);
            }
         });
-        
+
         var name = "Subflow "+(lastIndex+1);
-           
+
         var subflowId = RED.nodes.id();
         var subflow = {
             type:"subflow",
@@ -322,7 +322,7 @@ RED.subflow = (function() {
             }})
         };
         RED.nodes.addSubflow(subflow);
-    
+
         var subflowInstance = {
             id:RED.nodes.id(),
             type:"subflow:"+subflow.id,
@@ -337,13 +337,13 @@ RED.subflow = (function() {
         subflowInstance._def = RED.nodes.getType(subflowInstance.type);
         RED.editor.validateNode(subflowInstance);
         RED.nodes.add(subflowInstance);
-        
+
         candidateInputs.forEach(function(l) {
             var link = {source:l.source, sourcePort:l.sourcePort, target: subflowInstance};
             new_links.push(link);
             RED.nodes.addLink(link);
         });
-        
+
         candidateOutputs.forEach(function(output,i) {
             output.targets.forEach(function(target) {
                 var link = {source:subflowInstance, sourcePort:i, target: target};
@@ -351,7 +351,7 @@ RED.subflow = (function() {
                 RED.nodes.addLink(link);
             });
         });
-        
+
         subflow.in.forEach(function(input) {
             input.wires.forEach(function(wire) {
                 var link = {source: input, sourcePort: 0, target: RED.nodes.node(wire.id) }
@@ -366,34 +366,34 @@ RED.subflow = (function() {
                 RED.nodes.addLink(link);
             });
         });
-        
+
         for (i=0;i<removedLinks.length;i++) {
             RED.nodes.removeLink(removedLinks[i]);
         }
-        
+
         for (i=0;i<selection.nodes.length;i++) {
             selection.nodes[i].z = subflow.id;
         }
-    
+
         RED.history.push({
             t:'createSubflow',
             nodes:[subflowInstance.id],
             links:new_links,
             subflow: subflow,
-    
+
             activeWorkspace: RED.workspaces.active(),
             removedLinks: removedLinks,
-            
+
             dirty:RED.nodes.dirty()
         });
-        
+
         RED.editor.validateNode(subflow);
         RED.nodes.dirty(true);
         RED.view.redraw(true);
     }
-    
-    
-    
+
+
+
     return {
         init: init,
         createSubflow: createSubflow,

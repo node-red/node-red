@@ -16,7 +16,7 @@
 
 
 RED.workspaces = (function() {
-    
+
     var activeWorkspace = 0;
     var workspaceIndex = 0;
 
@@ -29,7 +29,7 @@ RED.workspaces = (function() {
             do {
                 workspaceIndex += 1;
             } while($("#workspace-tabs a[title='Sheet "+workspaceIndex+"']").size() !== 0);
-    
+
             ws = {type:"tab",id:tabId,label:"Sheet "+workspaceIndex};
             RED.nodes.addWorkspace(ws);
             workspace_tabs.addTab(ws);
@@ -56,10 +56,10 @@ RED.workspaces = (function() {
             RED.nodes.dirty(true);
         } else {
             $( "#node-dialog-delete-workspace" ).dialog('option','workspace',ws);
-            $( "#node-dialog-delete-workspace-content" ).text(RED._("workspaces.deleteDialog",{label:ws.label}));
+            $( "#node-dialog-delete-workspace-content" ).text(RED._("workspace.delete",{label:ws.label}));
             $( "#node-dialog-delete-workspace" ).dialog('open');
         }
-    }  
+    }
     function showRenameWorkspaceDialog(id) {
         var ws = RED.nodes.workspace(id);
         $( "#node-dialog-rename-workspace" ).dialog("option","workspace",ws);
@@ -77,7 +77,7 @@ RED.workspaces = (function() {
         $( "#node-input-workspace-name" ).val(ws.label);
         $( "#node-dialog-rename-workspace" ).dialog("open");
     }
-    
+
     var workspace_tabs;
     function createWorkspaceTabs(){
         workspace_tabs = RED.tabs.create({
@@ -93,7 +93,7 @@ RED.workspaces = (function() {
                 }
                 activeWorkspace = tab.id;
                 event.workspace = activeWorkspace;
-                
+
                 eventHandler.emit("change",event);
             },
             ondblclick: function(tab) {
@@ -118,18 +118,18 @@ RED.workspaces = (function() {
                 RED.menu.removeItem("menu-item-workspace-menu-"+tab.id.replace(".","-"));
             }
         });
-        
-        
+
+
         $("#node-dialog-rename-workspace form" ).submit(function(e) { e.preventDefault();});
         $( "#node-dialog-rename-workspace" ).dialog({
             modal: true,
             autoOpen: false,
             width: 500,
-            title: RED._("dialog.renameSheet"),
+            title: RED._("workspace.renameSheet"),
             buttons: [
                 {
                     class: 'leftButton',
-                    text: RED._("dialog.delete"),
+                    text: RED._("common.label.delete"),
                     click: function() {
                         var workspace = $(this).dialog('option','workspace');
                         $( this ).dialog( "close" );
@@ -137,7 +137,7 @@ RED.workspaces = (function() {
                     }
                 },
                 {
-                    text: RED._("dialog.ok"),
+                    text: RED._("common.label.ok"),
                     click: function() {
                         var workspace = $(this).dialog('option','workspace');
                         var label = $( "#node-input-workspace-name" ).val();
@@ -151,7 +151,7 @@ RED.workspaces = (function() {
                     }
                 },
                 {
-                    text: RED._("dialog.cancel"),
+                    text: RED._("common.label.cancel"),
                     click: function() {
                         $( this ).dialog( "close" );
                     }
@@ -168,10 +168,10 @@ RED.workspaces = (function() {
             modal: true,
             autoOpen: false,
             width: 500,
-            title: RED._("dialog.confirmDelete"),
+            title: RED._("workspace.confirmDelete"),
             buttons: [
                 {
-                    text: RED._("dialog.ok"),
+                    text: RED._("common.label.ok"),
                     click: function() {
                         var workspace = $(this).dialog('option','workspace');
                         deleteWorkspace(workspace,true);
@@ -179,7 +179,7 @@ RED.workspaces = (function() {
                     }
                 },
                 {
-                    text: RED._("dialog.cancel"),
+                    text: RED._("common.label.cancel"),
                     click: function() {
                         $( this ).dialog( "close" );
                     }
@@ -194,21 +194,21 @@ RED.workspaces = (function() {
 
         });
     }
-    
+
     function init() {
         createWorkspaceTabs();
         $('#btn-workspace-add-tab').on("click",function(e) {addWorkspace(); e.preventDefault()});
         RED.sidebar.on("resize",workspace_tabs.resize);
-        
+
         RED.menu.setAction('menu-item-workspace-delete',function() {
             deleteWorkspace(RED.nodes.workspace(activeWorkspace));
         });
     }
-    
+
     // TODO: DRY
     var eventHandler = (function() {
         var handlers = {};
-        
+
         return {
             on: function(evt,func) {
                 handlers[evt] = handlers[evt]||[];
@@ -219,12 +219,12 @@ RED.workspaces = (function() {
                     for (var i=0;i<handlers[evt].length;i++) {
                         handlers[evt][i](arg);
                     }
-                    
+
                 }
             }
         }
     })();
-    
+
     function removeWorkspace(ws) {
         if (!ws) {
             deleteWorkspace(RED.nodes.workspace(activeWorkspace));
@@ -239,7 +239,7 @@ RED.workspaces = (function() {
         on: eventHandler.on,
         add: addWorkspace,
         remove: removeWorkspace,
-        
+
         edit: function(id) {
             showRenameWorkspaceDialog(id||activeWorkspace);
         },
@@ -256,15 +256,15 @@ RED.workspaces = (function() {
             if (!workspace_tabs.contains(id)) {
                 var sf = RED.nodes.subflow(id);
                 if (sf) {
-                    addWorkspace({type:"subflow",id:id,label:RED._("workspaces.subflow")+sf.name, closeable: true});
+                    addWorkspace({type:"subflow",id:id,label:RED._("subflow.tabLabel",{name:sf.name}), closeable: true});
                 }
-            } 
+            }
             workspace_tabs.activateTab(id);
         },
         refresh: function() {
             RED.nodes.eachSubflow(function(sf) {
                 if (workspace_tabs.contains(sf.id)) {
-                    workspace_tabs.renameTab(sf.id,RED._("workspaces.subflow")+sf.name);
+                    workspace_tabs.renameTab(sf.id,RED._("subflow.tabLabel",{name:sf.name}));
                 }
             });
         },

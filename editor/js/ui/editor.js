@@ -179,7 +179,7 @@ RED.editor = (function() {
                 buttons: [
                     {
                         id: "node-dialog-ok",
-                        text: RED._("dialog.ok"),
+                        text: RED._("common.label.ok"),
                         click: function() {
                             if (editing_node) {
                                 var changes = {};
@@ -286,7 +286,7 @@ RED.editor = (function() {
                                         contentType: "application/json; charset=utf-8"
                                     }).done(function() {
                                             RED.library.loadFlowLibrary();
-                                            RED.notify(RED._("editor.savedNodes"),"success");
+                                            RED.notify(RED._("library.savedNodes"),"success");
                                     });
                                 }
                             }
@@ -295,7 +295,7 @@ RED.editor = (function() {
                     },
                     {
                         id: "node-dialog-cancel",
-                        text: RED._("dialog.cancel"),
+                        text: RED._("common.label.cancel"),
                         click: function() {
                             if (editing_node && editing_node._def) {
                                 if (editing_node._def.oneditcancel) {
@@ -567,7 +567,7 @@ RED.editor = (function() {
             var buttons = $( "#dialog" ).dialog("option","buttons");
             buttons.unshift({
                 class: 'leftButton',
-                text: RED._("editor.editFlow"),
+                text: RED._("subflow.edit"),
                 click: function() {
                     RED.workspaces.show(id);
                     $("#node-dialog-ok").click();
@@ -745,7 +745,7 @@ RED.editor = (function() {
                 buttons: [
                     {
                         id: "node-config-dialog-ok",
-                        text: RED._("dialog.ok"),
+                        text: RED._("common.label.ok"),
                         click: function() {
                             var configProperty = $(this).dialog('option','node-property');
                             var configId = $(this).dialog('option','node-id');
@@ -805,7 +805,7 @@ RED.editor = (function() {
                     },
                     {
                         id: "node-config-dialog-cancel",
-                        text: RED._("dialog.cancel"),
+                        text: RED._("common.label.cancel"),
                         click: function() {
                             var configType = $(this).dialog('option','node-type');
                             var configId = $(this).dialog('option','node-id');
@@ -861,7 +861,7 @@ RED.editor = (function() {
             buttons: [
                 {
                     id: "subflow-dialog-ok",
-                    text: RED._("dialog.ok"),
+                    text: RED._("common.label.ok"),
                     click: function() {
                         if (editing_node) {
                             var i;
@@ -875,7 +875,7 @@ RED.editor = (function() {
                                 changes['name'] = editing_node.name;
                                 editing_node.name = newName;
                                 changed = true;
-                                $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text(RED._("editor.subflow")+newName);
+                                $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text(RED._("subflow.tabLabel",{name:newName}));
                             }
 
                             RED.palette.refresh();
@@ -908,7 +908,7 @@ RED.editor = (function() {
                 },
                 {
                     id: "subflow-dialog-cancel",
-                    text: RED._("dialog.cancel"),
+                    text: RED._("common.label.cancel"),
                     click: function() {
                         $( this ).dialog( "close" );
                         editing_node = null;
@@ -949,8 +949,8 @@ RED.editor = (function() {
             }
         });
 
-        $("#subflow-dialog-user-count").html(RED._("editor.subflowInstances", {count:userCount})).show();
-        $("#subflow-dialog").dialog("option","title",RED._("editor.editFlow")+subflow.name).dialog( "open" );
+        $("#subflow-dialog-user-count").html(RED._("subflow.subflowInstances", {count:userCount})).show();
+        $("#subflow-dialog").dialog("option","title",RED._("subflow.editSubflow",{name:subflow.name})).dialog( "open" );
     }
 
 

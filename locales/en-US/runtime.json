@@ -6,7 +6,7 @@
             "settings": "Settings file  : __path__"
         }
     },
-    
+
     "server": {
         "loading": "Loading palette nodes",
         "errors": "Failed to register __count__ node type",
@@ -23,14 +23,14 @@
             "install-failed": "Install failed",
             "install-failed-long": "Installation of module __name__ failed:",
             "install-failed-not-found": "$t(install-failed-long) module not found",
-            
+
             "uninstalling": "Uninstalling module: __name__",
             "uninstall-failed": "Uninstall failed",
             "uninstall-failed-long": "Uninstall of module __name__ failed:",
             "uninstalled": "Uninstalled module: __name__"
         }
     },
-    
+
     "api": {
         "flows": {
             "error-save": "Error saving flows: __message__"
@@ -47,18 +47,18 @@
             "error-enable": "Failed to enable node:"
         }
     },
-    
+
     "comms": {
         "error": "Communication channel error: __message__",
         "error-server": "Communication server error: __message__",
         "error-send": "Communication send error: __message__"
     },
-    
+
     "settings": {
         "not-available": "Settings not available",
         "property-read-only": "Property '__prop__' is read-only"
     },
-    
+
     "nodes": {
         "credentials": {
             "error":"Error loading credentials: __message__",
@@ -82,7 +82,6 @@
             "stopped": "Stopped",
             "missing-types": "Waiting for missing types to be registered:",
             "missing-type-provided": " - __type__ (provided by npm module __module__)",
-            
             "missing-type-install-1": "To install any of these missing modules, run:",
             "missing-type-install-2": "in the directory:"
         },
@@ -102,7 +101,7 @@
             }
         }
     },
-    
+
     "storage": {
         "index": {
             "forbidden-flow-name": "forbidden flow name"
@@ -113,7 +112,7 @@
             "create": "Creating new flow file"
         }
     },
-    
+
     "httpadminauth-deprecated": "use of httpAdminAuth is deprecated. Use adminAuth instead",
     "unable-to-listen": "Unable to listen on __listenpath__",
     "port-in-use": "Error: port in use",
