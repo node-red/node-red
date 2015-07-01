@@ -64,18 +64,22 @@ function start() {
             log.info("Loading palette nodes");
             redNodes.init(settings,storage,app);
             return redNodes.load().then(function() {
-                    
+
                 var i;
-                var nodeErrors = redNodes.getNodeList(function(n) { return n.err!=null;});
-                var nodeMissing = redNodes.getNodeList(function(n) { return n.module && n.enabled && !n.loaded && !n.err;});
+                var nodeErrors = redNodes.getNodeList(function (n) {
+                    return n.err != null;
+                });
+                var nodeMissing = redNodes.getNodeList(function (n) {
+                    return n.module && n.enabled && !n.loaded && !n.err;
+                });
                 if (nodeErrors.length > 0) {
                     log.warn("------------------------------------------");
                     if (settings.verbose) {
-                        for (i=0;i<nodeErrors.length;i+=1) {
-                            log.warn("["+nodeErrors[i].name+"] "+nodeErrors[i].err);
+                        for (i = 0; i < nodeErrors.length; i += 1) {
+                            log.warn("[" + nodeErrors[i].name + "] " + nodeErrors[i].err);
                         }
                     } else {
-                        log.warn("Failed to register "+nodeErrors.length+" node type"+(nodeErrors.length==1?"":"s"));
+                        log.warn("Failed to register " + nodeErrors.length + " node type" + (nodeErrors.length == 1 ? "" : "s"));
                         log.warn("Run with -v for details");
                     }
                     log.warn("------------------------------------------");
@@ -83,16 +87,15 @@ function start() {
                 if (nodeMissing.length > 0) {
                     log.warn("Missing node modules:");
                     var missingModules = {};
-                    for (i=0;i<nodeMissing.length;i++) {
+                    for (i = 0; i < nodeMissing.length; i++) {
                         var missing = nodeMissing[i];
-                        missingModules[missing.module] = (missingModules[missing.module]||[]).concat(missing.types);
+                        missingModules[missing.module] = (missingModules[missing.module] || []).concat(missing.types);
                     }
-                    var promises = [];
                     for (i in missingModules) {
                         if (missingModules.hasOwnProperty(i)) {
-                            log.warn(" - "+i+": "+missingModules[i].join(", "));
+                            log.warn(" - " + i + ": " + missingModules[i].join(", "));
                             if (settings.autoInstallModules && i != "node-red") {
-                                serverAPI.installModule(i).otherwise(function(err) {
+                                serverAPI.installModule(i).otherwise(function (err) {
                                     // Error already reported. Need the otherwise handler
                                     // to stop the error propagating any further
                                 });
@@ -104,8 +107,9 @@ function start() {
                         redNodes.cleanModuleList();
                     }
                 }
-                log.info("Settings file  : "+settings.settingsFile);
-                redNodes.loadFlows();
+                log.info("Settings file  : " + settings.settingsFile);
+                return redNodes.loadFlows();
+            }).then(function () {
                 comms.start();
             }).otherwise(function(err) {
                 console.log(err);
