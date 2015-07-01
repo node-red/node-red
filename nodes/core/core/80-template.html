@@ -24,10 +24,10 @@
         <input type="hidden" id="node-input-template" autofocus="autofocus">
         <select id="node-input-format" style=" font-size: 0.8em; margin-bottom: 3px; width:110px; float:right;">
             <option value="handlebars">mustache</option>
-            <option value="html">HTML</option>
-            <option value="json">JSON</option>
-            <option value="markdown">Markdown</option>
-            <option value="text">none</option>
+            <option value="text/html">HTML</option>
+            <option value="application/json">JSON</option>
+            <option value="text/x-markdown">Markdown</option>
+            <option value="text/plain">none</option>
         </select>
     </div>
     <div class="form-row node-text-editor-row">
@@ -81,7 +81,7 @@
                 var editorRow = $("#dialog-form>div.node-text-editor-row");
                 height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
                 $(".node-text-editor").css("height",height+"px");
-                that.editor.resize();
+                that.editorView.editor.resize();
             };
             $( "#dialog" ).on("dialogresize", templateDialogResize);
             $( "#dialog" ).one("dialogopen", function(ev) {
@@ -96,30 +96,42 @@
                 var height = $( "#dialog" ).dialog('option','height');
                 $( "#dialog" ).off("dialogresize",templateDialogResize);
             });
-            this.editor = RED.editor.createEditor({
-                id: 'node-input-template-editor',
-                mode: 'ace/mode/html',
-                value: $("#node-input-template").val()
-            });
-            RED.library.create({
-                url:"functions", // where to get the data from
-                type:"function", // the type of object the library is for
-                editor:that.editor, // the field name the main text body goes to
-                fields:['name','outputs']
-            });
-            this.editor.focus();
-            
-            $("#node-input-format").change(function() {
-                var mod = "ace/mode/"+$("#node-input-format").val();
-                that.editor.getSession().setMode({
-                   path: mod,
-                   v: Date.now()
-                })
-            });
-        },
+            function getContentType() {
+				var cType = $("#node-input-format").val();
+				if(cType === "handlebars") {
+					cType = "text/html";
+				}
+				return cType;
+            };
+            RED.editor.createEditor({
+                id: 'node-input-template-editor'
+            }, function(editorView) {
+            	that.editorView = editorView;
+	            RED.library.create({
+	                url:"functions", // where to get the data from
+	                type:"function", // the type of object the library is for
+	                editor:that.editorView.editor, // the field name the main text body goes to
+	                mode:"ace/mode/html",
+	                fields:['name','outputs']
+	            });
+				var contentType = getContentType();
+				var contents = $("#node-input-template").val();  	           	
+				that.editorView.setContents(contents, contentType);
+                that.editorView.editor.focus();
+             });
+ 	         $("#node-input-format").change(function() {
+           		if(!that.editorView) {
+           			return;
+           		}
+           		var contentType = getContentType();
+           		var contents = that.editorView.editor.getValue();
+           		that.editorView.setContents(contents, contentType);
+	        });
+       },
         oneditsave: function() {
-            $("#node-input-template").val(this.editor.getValue())
-            delete this.editor;
+            $("#node-input-template").val(this.editorView.editor.getValue());
+            this.editorView.destroy();
+            delete this.editorView;
         }
     });
 </script>

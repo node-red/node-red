@@ -234,6 +234,7 @@ module.exports = function(grunt) {
                     cwd: 'editor/vendor',
                     src: [
                         'ace/**',
+                        'orion/**',
                         'bootstrap/css/**',
                         'bootstrap/img/**',
                         'jquery/css/**',
