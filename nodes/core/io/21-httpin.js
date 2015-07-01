@@ -195,7 +195,7 @@ module.exports = function(RED) {
 
         this.on("input",function(msg) {
             var preRequestTimestamp = process.hrtime();
-            node.status({fill:"blue",shape:"dot",text:RED._("httpin.status.requesting")});
+            node.status({fill:"blue",shape:"dot",text:"httpin.status.requesting"});
             var url = nodeUrl || msg.url;
             if (msg.url && nodeUrl && (nodeUrl !== msg.url)) {  // revert change below when warning is finally removed
                 node.warn(RED._("common.errors.nooverride"));

@@ -85,6 +85,9 @@ var RED = (function() {
                     var parts = topic.split("/");
                     var node = RED.nodes.node(parts[1]);
                     if (node) {
+                        if (msg.text) {
+                            msg.text = node._(msg.text,{defaultValue:msg.text});
+                        }
                         node.status = msg;
                         if (statusEnabled) {
                             node.dirty = true;

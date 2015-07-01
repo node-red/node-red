@@ -42,7 +42,7 @@ module.exports = function(RED) {
         this.broker = n.broker;
         this.brokerConfig = RED.nodes.getNode(this.broker);
         if (this.brokerConfig) {
-            this.status({fill:"red",shape:"ring",text:RED._("common.status.disconnected")});
+            this.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
             this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.brokerConfig.clientid,this.brokerConfig.username,this.brokerConfig.password);
             var node = this;
             if (this.topic) {
@@ -55,13 +55,13 @@ module.exports = function(RED) {
                     node.send(msg);
                 }, this.id);
                 this.client.on("connectionlost",function() {
-                    node.status({fill:"red",shape:"ring",text:RED._("common.status.disconnected")});
+                    node.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
                 });
                 this.client.on("connect",function() {
-                    node.status({fill:"green",shape:"dot",text:RED._("common.status.connected")});
+                    node.status({fill:"green",shape:"dot",text:"common.status.connected"});
                 });
                 if (this.client.isConnected()) {
-                    node.status({fill:"green",shape:"dot",text:RED._("common.status.connected")});
+                    node.status({fill:"green",shape:"dot",text:"common.status.connected"});
                 } else {
                     this.client.connect();
                 }
@@ -90,7 +90,7 @@ module.exports = function(RED) {
         this.brokerConfig = RED.nodes.getNode(this.broker);
 
         if (this.brokerConfig) {
-            this.status({fill:"red",shape:"ring",text:RED._("common.status.disconnected")});
+            this.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
             this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.brokerConfig.clientid,this.brokerConfig.username,this.brokerConfig.password);
             var node = this;
             this.on("input",function(msg) {
@@ -114,13 +114,13 @@ module.exports = function(RED) {
                 }
             });
             this.client.on("connectionlost",function() {
-                node.status({fill:"red",shape:"ring",text:RED._("common.status.disconnected")});
+                node.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
             });
             this.client.on("connect",function() {
-                node.status({fill:"green",shape:"dot",text:RED._("common.status.connected")});
+                node.status({fill:"green",shape:"dot",text:"common.status.connected"});
             });
             if (this.client.isConnected()) {
-                node.status({fill:"green",shape:"dot",text:RED._("common.status.connected")});
+                node.status({fill:"green",shape:"dot",text:"common.status.connected"});
             } else {
                 this.client.connect();
             }
