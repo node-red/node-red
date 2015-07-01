@@ -141,27 +141,33 @@
         }
     },
     "trigger": {
-        "output1": "Output",
-        "wait": "then wait",
-        "output2": "output",
-        "and": "and",
-        "below": "the value below",
-        "payload": "the existing payload",
-        "nothing": "nothing (no output)",
-        "milisecs": "Miliseconds",
-        "secs": "Seconds",
-        "mins": "Minutes",
-        "hours": "Hours",
-        "notext": "don't extend the timer if retriggered",
-        "extend": "extend the timer if retriggered",
-        "tip": "Setting the timeout to 0 sets an infinite timeout = single shot.",
-        "triggerlabel": "trigger",
-        "triggeroncelabel": "trigger once & infinite"
+        "send": "Send",
+        "then": "then",
+        "then-send": "then send",
+        "output": {
+            "string": "the string payload",
+            "existing": "the existing message",
+            "nothing": "nothing"
+        },
+        "wait-reset": "wait to be reset",
+        "wait-for": "wait for",
+        "duration": {
+            "ms": "Milliseconds",
+            "s": "Seconds",
+            "m": "Minutes",
+            "h": "Hours"
+        },
+        "extend": "extend delay if new message arrives",
+        "tip": "The node can be reset by sending a message with the <b>msg.reset</b> property set",
+        "label": {
+            "trigger": "trigger",
+            "trigger-block": "trigger & block"
+        }
     },
     "comment": {
         "label": {
             "title": "Title",
-            "body": "Body" 
+            "body": "Body"
         },
         "tip": "Tip: The text can be styled as <a href=\"https://help.github.com/articles/markdown-basics/\" target=\"_new\">Github flavoured Markdown</a>",
         "defaulttitle": "Comment node",
@@ -292,14 +298,14 @@
             "connection-closed": "connection closed from __host__:__port__",
             "connections": "__count__ connection",
             "connections_plural": "__count__ connections"
-            
+
         },
         "errors": {
             "connection-lost": "connection lost to __host__:__port__",
             "timeout": "timeout closed socket port __port__",
             "cannot-listen": "unable to listen on port __port__, error: __error__",
             "error": "error: __error__",
-            
+
             "socket-error": "socket error from __host__:__port__",
             "no-host": "Host and/or port not set",
             "connect-timeout": "connect timeout",
