@@ -167,7 +167,7 @@ try {
 }
 
 if (settings.httpAdminRoot !== false && settings.httpAdminAuth) {
-    RED.log.warn(log._("httpadminauth-deprecated"));
+    RED.log.warn(log._("server.httpadminauth-deprecated"));
     app.use(settings.httpAdminRoot,
         express.basicAuth(function(user, pass) {
             return user === settings.httpAdminAuth.user && crypto.createHash('md5').update(pass,'utf8').digest('hex') === settings.httpAdminAuth.pass;
@@ -217,10 +217,10 @@ RED.start().then(function() {
     if (settings.httpAdminRoot !== false || settings.httpNodeRoot !== false || settings.httpStatic) {
         server.on('error', function(err) {
             if (err.errno === "EADDRINUSE") {
-                RED.log.error(log._("unable-to-listen", {listenpath:getListenPath()}));
-                RED.log.error(log._("port-in-use"));
+                RED.log.error(log._("server.unable-to-listen", {listenpath:getListenPath()}));
+                RED.log.error(log._("server.port-in-use"));
             } else {
-                RED.log.error(log._("uncaught-exception"));
+                RED.log.error(log._("server.uncaught-exception"));
                 if (err.stack) {
                     RED.log.error(err.stack);
                 } else {
@@ -231,16 +231,16 @@ RED.start().then(function() {
         });
         server.listen(settings.uiPort,settings.uiHost,function() {
             if (settings.httpAdminRoot === false) {
-                RED.log.info(log._("admin-ui-disabled"));
+                RED.log.info(log._("server.admin-ui-disabled"));
             }
             process.title = 'node-red';
-            RED.log.info(log._("server-now-running", {listenpath:getListenPath()}));
+            RED.log.info(log._("server.now-running", {listenpath:getListenPath()}));
         });
     } else {
-        util.log('[red] Running in headless mode');
+        RED.log.info(log._("server.headless-mode"));
     }
 }).otherwise(function(err) {
-    RED.log.error(log._("failed-to-start-server"));
+    RED.log.error(log._("server.failed-to-start"));
     if (err.stack) {
         RED.log.error(err.stack);
     } else {

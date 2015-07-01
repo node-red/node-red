@@ -28,7 +28,15 @@
             "uninstall-failed": "Uninstall failed",
             "uninstall-failed-long": "Uninstall of module __name__ failed:",
             "uninstalled": "Uninstalled module: __name__"
-        }
+        },
+        "unable-to-listen": "Unable to listen on __listenpath__",
+        "port-in-use": "Error: port in use",
+        "uncaught-exception": "Uncaught Exception:",
+        "admin-ui-disabled": "Admin UI disabled",
+        "now-running": "Server now running at __listenpath__",
+        "failed-to-start": "Failed to start server:",
+        "headless-mode": "Running in headless mode",
+        "httpadminauth-deprecated": "use of httpAdminAuth is deprecated. Use adminAuth instead"
     },
 
     "api": {
@@ -111,13 +119,5 @@
             "flows-file": "Flows file : __path__",
             "create": "Creating new flow file"
         }
-    },
-
-    "httpadminauth-deprecated": "use of httpAdminAuth is deprecated. Use adminAuth instead",
-    "unable-to-listen": "Unable to listen on __listenpath__",
-    "port-in-use": "Error: port in use",
-    "uncaught-exception": "Uncaught Exception:",
-    "admin-ui-disabled": "Admin UI disabled",
-    "server-now-running": "Server now running at __listenpath__",
-    "failed-to-start-server": "Failed to start server:"
+    }
 }
