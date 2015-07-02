@@ -52,7 +52,7 @@ function start() {
             if (settings.httpAdminRoot !== false) {
                 require("./api").init(app,storage);
             }
-            
+
             if (log.metric()) {
                 runtimeMetricInterval = setInterval(function() {
                     reportMetrics();
@@ -66,7 +66,7 @@ function start() {
             log.info(log._("server.loading"));
             redNodes.init(settings,storage,app);
             return redNodes.load().then(function() {
-                    
+
                 var i;
                 var nodeErrors = redNodes.getNodeList(function(n) { return n.err!=null;});
                 var nodeMissing = redNodes.getNodeList(function(n) { return n.module && n.enabled && !n.loaded && !n.err;});
@@ -171,8 +171,8 @@ function installModule(module) {
             reject(err);
             return;
         }
-        log.info(i18n._("nodes.install.installing",{name: module}));
-        
+        log.info(i18n._("server.install.installing",{name: module}));
+
         var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
         var child = child_process.exec('npm install --production '+module,
             {
