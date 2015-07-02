@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 RED.comms = (function() {
-    
+
     var errornotification = null;
     var clearErrorTimer = null;
-    
+
     var subscriptions = {};
     var ws;
     var pendingAuth = false;
-    
+
     function connectWS() {
         var path = location.hostname;
         var port = location.port;
@@ -32,10 +32,10 @@ RED.comms = (function() {
         path = path+document.location.pathname;
         path = path+(path.slice(-1) == "/"?"":"/")+"comms";
         path = "ws"+(document.location.protocol=="https:"?"s":"")+"://"+path;
-        
+
         var auth_tokens = RED.settings.get("auth-tokens");
         pendingAuth = (auth_tokens!=null);
-        
+
         function completeConnection() {
             for (var t in subscriptions) {
                 if (subscriptions.hasOwnProperty(t)) {
@@ -43,7 +43,7 @@ RED.comms = (function() {
                 }
             }
         }
-        
+
         ws = new WebSocket(path);
         ws.onopen = function() {
             if (errornotification) {
@@ -81,7 +81,7 @@ RED.comms = (function() {
         };
         ws.onclose = function() {
             if (errornotification == null) {
-                errornotification = RED.notify("<b>Error</b>: Lost connection to server","error",true);
+                errornotification = RED.notify(RED._("notification.error",{message:RED._("notification.errors.lostConnection")}),"error",true);
             } else if (clearErrorTimer) {
                 clearTimeout(clearErrorTimer);
                 clearErrorTimer = null;
@@ -89,7 +89,7 @@ RED.comms = (function() {
             setTimeout(connectWS,1000);
         }
     }
-    
+
     function subscribe(topic,callback) {
         if (subscriptions[topic] == null) {
             subscriptions[topic] = [];
@@ -99,7 +99,7 @@ RED.comms = (function() {
             ws.send(JSON.stringify({subscribe:topic}));
         }
     }
-    
+
     function unsubscribe(topic,callback) {
         if (subscriptions[topic]) {
             for (var i=0;i<subscriptions[topic].length;i++) {
@@ -113,7 +113,7 @@ RED.comms = (function() {
             }
         }
     }
-    
+
     return {
         connect: connectWS,
         subscribe: subscribe,

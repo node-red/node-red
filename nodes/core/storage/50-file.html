@@ -16,25 +16,25 @@
 
 <script type="text/x-red" data-template-name="file">
     <div class="form-row node-input-filename">
-         <label for="node-input-filename"><i class="fa fa-file"></i> Filename</label>
-         <input type="text" id="node-input-filename" placeholder="Filename">
+         <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="file.label.filename"></span></label>
+         <input type="text" id="node-input-filename">
     </div>
     <div class="form-row">
-        <label for="node-input-overwriteFile"><i class="fa fa-random"></i> Action</label>
+        <label for="node-input-overwriteFile"><i class="fa fa-random"></i> <span data-i18n="file.label.action"></span></label>
         <select type="text" id="node-input-overwriteFile" style="display: inline-block; width: 250px; vertical-align: top;">
-            <option value="false">append to file</option>
-            <option value="true">overwrite file</option>
-            <option value="delete">delete file</option>
+            <option value="false" data-i18n="file.action.append"></option>
+            <option value="true" data-i18n="file.action.overwrite"></option>
+            <option value="delete" data-i18n="file.action.delete"></option>
         </select>
     </div>
     <div class="form-row" id="node-appline">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-appendNewline" placeholder="Name" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-appendNewline" style="width: 70%;">Add newline (\n) to each payload ?</label>
+        <label for="node-input-appendNewline" style="width: 70%;"><span data-i18n="file.label.addnewline"></span></label>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
 </script>
 
@@ -48,19 +48,19 @@
 
 <script type="text/x-red" data-template-name="file in">
     <div class="form-row">
-         <label for="node-input-filename"><i class="fa fa-file"></i> Filename</label>
-         <input type="text" id="node-input-filename" placeholder="Filename">
+         <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="file.label.filename"></span></label>
+         <input type="text" id="node-input-filename" data-i18n="[placeholder]file.label.filename">
     </div>
     <div class="form-row">
-        <label for="node-input-format"><i class="fa fa-sign-out"></i> Output as</label>
+        <label for="node-input-format"><i class="fa fa-sign-out"></i> <span data-i18n="file.label.outputas"></span></label>
         <select id="node-input-format">
-            <option value="utf8">a utf8 string</option>
-            <option value="">a Buffer</option>
+            <option value="utf8" data-i18n="file.output.utf8"></option>
+            <option value="" data-i18n="file.output.buffer"></option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
 </script>
 
@@ -84,8 +84,11 @@
         icon: "file.png",
         align: "right",
         label: function() {
-            if (this.overwriteFile === "delete") { return this.name||"delete "+this.filename; }
-            else { return this.name||this.filename||"file"; }
+            if (this.overwriteFile === "delete") {
+                return this.name||this._("file.label.deletelabel",{file:this.filename})
+            } else {
+                return this.name||this.filename||this._("file.label.filelabel");
+            }
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -110,7 +113,7 @@
         outputs:1,
         icon: "file.png",
         label: function() {
-            return this.name||this.filename||"file";
+            return this.name||this.filename||this._("file.label.filelabel");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";

@@ -105,13 +105,13 @@ describe('JSON node', function() {
                     //console.log(logEvents);
                     logEvents.should.have.length(4);
                     logEvents[0][0].should.have.a.property('msg');
-                    logEvents[0][0].msg.toString().should.startWith('Dropped: ');
+                    logEvents[0][0].msg.toString().should.eql('json.errors.dropped');
                     logEvents[1][0].should.have.a.property('msg');
-                    logEvents[1][0].msg.toString().should.startWith('Dropped: ');
+                    logEvents[1][0].msg.toString().should.eql('json.errors.dropped');
                     logEvents[2][0].should.have.a.property('msg');
-                    logEvents[2][0].msg.toString().should.startWith('Dropped: ');
+                    logEvents[2][0].msg.toString().should.eql('json.errors.dropped-object');
                     logEvents[3][0].should.have.a.property('msg');
-                    logEvents[3][0].msg.toString().should.startWith('Dropped: ');
+                    logEvents[3][0].msg.toString().should.eql('json.errors.dropped-object');
                     done();
                 } catch(err) {
                     done(err);

@@ -16,25 +16,25 @@
 
 <script type="text/x-red" data-template-name="debug">
     <div class="form-row">
-        <label for="node-input-select-complete"><i class="fa fa-list"></i> Output</label>
+        <label for="node-input-select-complete"><i class="fa fa-list"></i> <span data-i18n="debug.output"></span></label>
         <select type="text" id="node-input-select-complete" style="display: inline-block; width: 250px; vertical-align: top;">
-            <option value="false">message property</option>
-            <option value="true">complete msg object</option>
+            <option value="false" data-i18n="debug.msgprop"></option>
+            <option value="true" data-i18n="debug.msgobj"></option>
         </select>
     </div>
     <div class="form-row" id="node-prop-row">
         <label for="node-input-complete">&nbsp;</label>msg.<input type="text" style="width:208px" id="node-input-complete">
     </div>
     <div class="form-row">
-        <label for="node-input-console"><i class="fa fa-random"></i> to</label>
+        <label for="node-input-console"><i class="fa fa-random"></i> <span data-i18n="debug.to"></span></label>
         <select type="text" id="node-input-console" style="display: inline-block; width: 250px; vertical-align: top;">
-            <option value="false">debug tab</option>
-            <option value="true">debug tab and console</option>
+            <option value="false" data-i18n="debug.debtab"></option>
+            <option value="true" data-i18n="debug.tabcon"></option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
 </script>
 
@@ -103,23 +103,24 @@
             toggle: "active",
             onclick: function() {
                 var label = this.name||"debug";
+                var node = this;
                 $.ajax({
                     url: "debug/"+this.id+"/"+(this.active?"enable":"disable"),
                     type: "POST",
                     success: function(resp, textStatus, xhr) {
                         if (xhr.status == 200) {
-                            RED.notify("Successfully activated: "+label,"success");
+                            RED.notify(node._("debug.notification.activated",{label:label}),"success");
                         } else if (xhr.status == 201) {
-                            RED.notify("Successfully deactivated: "+label,"success");
+                            RED.notify(node._("debug.notification.deactivated",{label:label}),"success");
                         }
                     },
                     error: function(jqXHR,textStatus,errorThrown) {
                         if (jqXHR.status == 404) {
-                            RED.notify("<strong>Error</strong>: debug node not deployed","error");
+                            RED.notify(node._("common.notification.error", {message: node._("common.notification.errors.not-deployed")}),"error");
                         } else if (jqXHR.status == 0) {
-                            RED.notify("<strong>Error</strong>: no response from server","error");
+                            RED.notify(node._("common.notification.error", {message: node._("common.notification.errors.no-response")}),"error");
                         } else {
-                            RED.notify("<strong>Error</strong>: unexpected error: ("+err.status+") "+err.response,"error");
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.unexpected",{status:err.status,message:err.response})}),"error");
                         }
                     }
                 });
@@ -139,7 +140,7 @@
             messages.id = "debug-content";
             content.appendChild(messages);
 
-            RED.sidebar.addTab("debug",content);
+            RED.sidebar.addTab(this._("debug.sidebarTitle"),content);
 
             function getTimestamp() {
                 var d = new Date();

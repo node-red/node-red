@@ -16,28 +16,28 @@
 
 <script type="text/x-red" data-template-name="exec">
     <div class="form-row">
-        <label for="node-input-command"><i class="fa fa-file"></i> Command</label>
-        <input type="text" id="node-input-command" placeholder="command">
+        <label for="node-input-command"><i class="fa fa-file"></i> <span data-i18n="exec.label.command"></span></label>
+        <input type="text" id="node-input-command" data-i18n="[placeholder]exec.label.command">
     </div>
     <div class="form-row">
-        <label><i class="fa fa-plus"></i> Append</label>
+        <label><i class="fa fa-plus"></i> <span data-i18n="exec.label.append"></span></label>
         <input type="checkbox" id="node-input-addpay" style="display: inline-block; width: auto; vertical-align: top;">
         &nbsp;msg.payload
     </div>
     <div class="form-row">
         <label for="node-input-append"> </label>
-        <input type="text" id="node-input-append" placeholder="extra input parameters">
+        <input type="text" id="node-input-append" data-i18n="[placeholder]exec.placeholder.extraparams">
     </div>
     <div class="form-row">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-useSpawn" placeholder="spawn" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-useSpawn" style="width: 70%;">Use spawn() instead of exec() ?</label>
+        <label for="node-input-useSpawn" style="width: 70%;"><span data-i18n="exec.spawn"></span></label>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-tips" id="spawnTip">Tip: <i>spawn</i> expects only one command word - and appended args to be comma separated.</div>
+    <div class="form-tips" id="spawnTip"><span data-i18n="[html]exec.tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="exec">

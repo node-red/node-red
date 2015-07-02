@@ -14,13 +14,13 @@
  * limitations under the License.
  **/
 RED.user = (function() {
-        
+
     function login(opts,done) {
         if (typeof opts == 'function') {
             done = opts;
             opts = {};
         }
-        
+
         var dialog = $('<div id="node-dialog-login" class="hide">'+
                        '<div style="display: inline-block;width: 250px; vertical-align: top; margin-right: 10px; margin-bottom: 20px;"><img id="node-dialog-login-image" src=""/></div>'+
                        '<div style="display: inline-block; width: 250px; vertical-align: bottom; margin-left: 10px; margin-bottom: 20px;">'+
@@ -37,7 +37,7 @@ RED.user = (function() {
             resizable: false,
             draggable: false
         });
-        
+
         $("#node-dialog-login-fields").empty();
         $.ajax({
             dataType: "json",
@@ -45,7 +45,7 @@ RED.user = (function() {
             success: function(data) {
                 if (data.type == "credentials") {
                     var i=0;
-                    
+
                     if (data.image) {
                         $("#node-dialog-login-image").attr("src",data.image);
                     } else {
@@ -56,7 +56,7 @@ RED.user = (function() {
                         var row = $("<div/>",{id:"rrr"+i,class:"form-row"});
                         $('<label for="node-dialog-login-'+field.id+'">'+field.label+':</label><br/>').appendTo(row);
                         var input = $('<input style="width: 100%" id="node-dialog-login-'+field.id+'" type="'+field.type+'" tabIndex="'+(i+1)+'"/>').appendTo(row);
-                        
+
                         if (i<data.prompts.length-1) {
                             input.keypress(
                                 (function() {
@@ -72,17 +72,17 @@ RED.user = (function() {
                         }
                         row.appendTo("#node-dialog-login-fields");
                     }
-                    $('<div class="form-row" style="text-align: right; margin-top: 10px;"><span id="node-dialog-login-failed" style="line-height: 2em;float:left;" class="hide">Login failed</span><img src="red/images/spin.svg" style="height: 30px; margin-right: 10px; " class="login-spinner hide"/>'+
-                        (opts.cancelable?'<a href="#" id="node-dialog-login-cancel" style="margin-right: 20px;" tabIndex="'+(i+1)+'">Cancel</a>':'')+
-                        '<input type="submit" id="node-dialog-login-submit" style="width: auto;" tabIndex="'+(i+2)+'" value="Login"></div>').appendTo("#node-dialog-login-fields");
-                        
-                                
+                    $('<div class="form-row" style="text-align: right; margin-top: 10px;"><span id="node-dialog-login-failed" style="line-height: 2em;float:left;" class="hide">'+RED._("user.loginFailed")+'</span><img src="red/images/spin.svg" style="height: 30px; margin-right: 10px; " class="login-spinner hide"/>'+
+                        (opts.cancelable?'<a href="#" id="node-dialog-login-cancel" style="margin-right: 20px;" tabIndex="'+(i+1)+'">'+RED._("common.label.cancel")+'</a>':'')+
+                        '<input type="submit" id="node-dialog-login-submit" style="width: auto;" tabIndex="'+(i+2)+'" value="'+RED._("user.login")+'"></div>').appendTo("#node-dialog-login-fields");
+
+
                     $("#node-dialog-login-submit").button();
                     $("#node-dialog-login-fields").submit(function(event) {
                         $("#node-dialog-login-submit").button("option","disabled",true);
                         $("#node-dialog-login-failed").hide();
                         $(".login-spinner").show();
-                        
+
                         var body = {
                             client_id: "node-red-editor",
                             grant_type: "password",
@@ -116,7 +116,7 @@ RED.user = (function() {
                     }
                 }
                 dialog.dialog("open");
-            }     
+            }
         });
     }
 
@@ -131,17 +131,17 @@ RED.user = (function() {
             }
         })
     }
-    
+
     function updateUserMenu() {
         $("#usermenu-submenu li").remove();
         if (RED.settings.user.anonymous) {
             RED.menu.addItem("btn-usermenu",{
                 id:"usermenu-item-login",
-                label:"Login",
+                label:RED._("menu.label.login"),
                 onselect: function() {
                     RED.user.login({cancelable:true},function() {
                         RED.settings.load(function() {
-                            RED.notify("Logged in as "+RED.settings.user.username,"success");
+                            RED.notify(RED._("user.loggedInAs",{name:RED.settings.user.username}),"success");
                             updateUserMenu();
                         });
                     });
@@ -154,31 +154,31 @@ RED.user = (function() {
             });
             RED.menu.addItem("btn-usermenu",{
                 id:"usermenu-item-logout",
-                label:"Logout",
+                label:RED._("menu.label.logout"),
                 onselect: function() {
                     RED.user.logout();
                 }
             });
         }
-        
+
     }
-    
-    
-    
+
+
+
     function init() {
         if (RED.settings.user) {
             if (!RED.settings.editorTheme || !RED.settings.editorTheme.hasOwnProperty("userMenu")) {
-            
+
                 $('<li><a id="btn-usermenu" class="button hide" data-toggle="dropdown" href="#"><i class="fa fa-user"></i></a></li>')
                     .prependTo(".header-toolbar");
-    
+
                 RED.menu.init({id:"btn-usermenu",
                     options: []
                 });
                 updateUserMenu();
             }
         }
-        
+
     }
     return {
         init: init,

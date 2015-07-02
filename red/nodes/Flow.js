@@ -43,7 +43,7 @@ function createNode(type,config) {
             });
         }
     } else {
-        Log.error("Unknown type: "+type);
+        Log.error(Log._("nodes.flow.unknown-type", {type:type}));
     }
     return nn;
 }
@@ -368,7 +368,7 @@ Flow.prototype.start = function(configDiff) {
     
     this.started = true;
     if (this.missingTypes.length > 0) {
-        throw new Error("missing types");
+        throw new Error(Log._("nodes.flow.missing-types"));
     }
     events.emit("nodes-starting");
     
@@ -758,7 +758,7 @@ Flow.prototype.handleError = function(node,logMessage,msg) {
                 if (msg.error.source.id === node.id) {
                     count = msg.error.source.count+1;
                     if (count === 10) {
-                        node.warn("Message exceeded maximum number of catches"); 
+                        node.warn(Log._("nodes.flow.error-loop")); 
                         return;
                     }
                 }

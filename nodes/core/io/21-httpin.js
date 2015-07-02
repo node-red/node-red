@@ -137,7 +137,7 @@ module.exports = function(RED) {
                 }
             });
         } else {
-            this.warn("Cannot create http-in node when httpNodeRoot set to false");
+            this.warn(RED._("httpin.errors.not-created"));
         }
     }
     RED.nodes.registerType("http in",HTTPIn);
@@ -172,7 +172,7 @@ module.exports = function(RED) {
                     msg.res.send(statusCode,msg.payload);
                 }
             } else {
-                node.warn("No response object");
+                node.warn(RED._("httpin.errors.no-response"));
             }
         });
     }
@@ -195,16 +195,16 @@ module.exports = function(RED) {
 
         this.on("input",function(msg) {
             var preRequestTimestamp = process.hrtime();
-            node.status({fill:"blue",shape:"dot",text:"requesting"});
+            node.status({fill:"blue",shape:"dot",text:"httpin.status.requesting"});
             var url = nodeUrl || msg.url;
             if (msg.url && nodeUrl && (nodeUrl !== msg.url)) {  // revert change below when warning is finally removed
-                node.warn("Warning: msg properties can no longer override set node properties. See bit.ly/nr-override-msg-props");
+                node.warn(RED._("common.errors.nooverride"));
             }
             if (isTemplatedUrl) {
                 url = mustache.render(nodeUrl,msg);
             }
             if (!url) {
-                node.error("No url specified",msg);
+                node.error(RED._("httpin.errors.no-url"),msg);
                 return;
             }
             // url must start http:// or https:// so assume http:// if not set
@@ -214,7 +214,7 @@ module.exports = function(RED) {
 
             var method = nodeMethod.toUpperCase() || "GET";
             if (msg.method && n.method && (n.method !== "use")) {     // warn if override option not set
-                node.warn("Warning: msg properties can no longer override fixed node properties. Use explicit override option. See bit.ly/nr-override-msg-props");
+                node.warn(RED._("httpin.errors.not-overridden"));
             }
             if (msg.method && n.method && (n.method === "use")) {
                 method = msg.method.toUpperCase();          // use the msg parameter
@@ -312,7 +312,7 @@ module.exports = function(RED) {
                     }
                     else if (node.ret === "obj") {
                         try { msg.payload = JSON.parse(msg.payload); }
-                        catch(e) { node.warn("JSON parse error"); }
+                        catch(e) { node.warn(RED._("httpin.errors.json-error")); }
                     }
                     node.send(msg);
                     node.status({});

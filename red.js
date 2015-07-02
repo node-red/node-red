@@ -23,6 +23,7 @@ var nopt = require("nopt");
 var path = require("path");
 var fs = require("fs");
 var RED = require("./red/red.js");
+var log = require("./red/log");
 
 var server;
 var app = express();
@@ -166,7 +167,7 @@ try {
 }
 
 if (settings.httpAdminRoot !== false && settings.httpAdminAuth) {
-    RED.log.warn("use of httpAdminAuth is deprecated. Use adminAuth instead");
+    RED.log.warn(log._("server.httpadminauth-deprecated"));
     app.use(settings.httpAdminRoot,
         express.basicAuth(function(user, pass) {
             return user === settings.httpAdminAuth.user && crypto.createHash('md5').update(pass,'utf8').digest('hex') === settings.httpAdminAuth.pass;
@@ -216,10 +217,10 @@ RED.start().then(function() {
     if (settings.httpAdminRoot !== false || settings.httpNodeRoot !== false || settings.httpStatic) {
         server.on('error', function(err) {
             if (err.errno === "EADDRINUSE") {
-                RED.log.error('Unable to listen on '+getListenPath());
-                RED.log.error('Error: port in use');
+                RED.log.error(log._("server.unable-to-listen", {listenpath:getListenPath()}));
+                RED.log.error(log._("server.port-in-use"));
             } else {
-                RED.log.error('Uncaught Exception:');
+                RED.log.error(log._("server.uncaught-exception"));
                 if (err.stack) {
                     RED.log.error(err.stack);
                 } else {
@@ -230,16 +231,16 @@ RED.start().then(function() {
         });
         server.listen(settings.uiPort,settings.uiHost,function() {
             if (settings.httpAdminRoot === false) {
-                RED.log.info('Admin UI disabled');
+                RED.log.info(log._("server.admin-ui-disabled"));
             }
             process.title = 'node-red';
-            RED.log.info('Server now running at '+getListenPath());
+            RED.log.info(log._("server.now-running", {listenpath:getListenPath()}));
         });
     } else {
-        util.log('[red] Running in headless mode');
+        RED.log.info(log._("server.headless-mode"));
     }
 }).otherwise(function(err) {
-    RED.log.error("Failed to start server:");
+    RED.log.error(log._("server.failed-to-start"));
     if (err.stack) {
         RED.log.error(err.stack);
     } else {

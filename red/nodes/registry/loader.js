@@ -18,16 +18,26 @@ var when = require("when");
 var fs = require("fs");
 var path = require("path");
 
+var events = require("../../events");
 
 var localfilesystem = require("./localfilesystem");
 var registry = require("./registry");
 
+var RED;
 var settings;
 
+var i18n = require("../../i18n");
+
+events.on("node-locales-dir", function(info) {
+   i18n.registerMessageCatalog(info.namespace,info.dir,info.file);
+});
 
 function init(_settings) {
     settings = _settings;
     localfilesystem.init(settings);
+    
+    RED = require('../../red');
+
 }
 
 function load(defaultNodesDir,disableNodePathScan) {
@@ -133,6 +143,7 @@ function loadNodeConfig(fileInfo) {
                     node.types = [];
                     node.err = err.toString();
                 }
+                resolve(node);
             } else {                
                 var types = [];
         
@@ -143,8 +154,32 @@ function loadNodeConfig(fileInfo) {
                     types.push(match[2]);
                 }
                 node.types = types;
-                node.config = content;
         
+                var langRegExp = /^<script[^>]* data-lang=['"](.+?)['"]/i;
+                regExp = /(<script[^>]* data-help-name=[\s\S]*?<\/script>)/gi;
+                match = null;
+                var mainContent = "";
+                var helpContent = {};
+                var index = 0;
+                while((match = regExp.exec(content)) !== null) {
+                    mainContent += content.substring(index,regExp.lastIndex-match[1].length);
+                    index = regExp.lastIndex;
+                    var help = content.substring(regExp.lastIndex-match[1].length,regExp.lastIndex);
+                    
+                    var lang = "en-US";
+                    if ((match = langRegExp.exec(help)) !== null) {
+                        lang = match[1];
+                    }
+                    if (!helpContent.hasOwnProperty(lang)) {
+                        helpContent[lang] = "";
+                    }
+                    
+                    helpContent[lang] += help;
+                }
+                mainContent += content.substring(index);
+
+                node.config = mainContent;
+                node.help = helpContent;
                 // TODO: parse out the javascript portion of the template
                 //node.script = "";
                 for (var i=0;i<node.types.length;i++) {
@@ -153,12 +188,37 @@ function loadNodeConfig(fileInfo) {
                         break;
                     }
                 }
+                fs.stat(path.join(path.dirname(file),"locales"),function(err,stat) {
+                    if (!err) {
+                        node.namespace = node.id;
+                        i18n.registerMessageCatalog(node.id,
+                                path.join(path.dirname(file),"locales"),
+                                path.basename(file,".js")+".json")
+                            .then(function() {
+                                resolve(node);
+                            });
+                    } else {
+                        node.namespace = node.module;
+                        resolve(node);
+                    }
+                });
             }
-            resolve(node);
         });
     });
 }
 
+
+//function getAPIForNode(node) {
+//    var red = {
+//        nodes: RED.nodes,
+//        library: RED.library,
+//        credentials: RED.credentials,
+//        events: RED.events,
+//        log: RED.log,
+//        
+//    }
+//    
+//}
 
 
 /**
@@ -180,7 +240,20 @@ function loadNodeSet(node) {
         var loadPromise = null;
         var r = require(node.file);
         if (typeof r === "function") {
-            var promise = r(require('../../red'));
+            
+            var red = {};
+            for (var i in RED) {
+                if (RED.hasOwnProperty(i) && !/^(init|start|stop)$/.test(i)) {
+                    var propDescriptor = Object.getOwnPropertyDescriptor(RED,i);
+                    Object.defineProperty(red,i,propDescriptor);
+                }
+            }
+            red["_"] = function() {
+                var args = Array.prototype.slice.call(arguments, 0);
+                args[0] = node.namespace+":"+args[0];
+                return i18n._.apply(null,args);
+            }
+            var promise = r(red);
             if (promise != null && typeof promise.then === "function") {
                 loadPromise = promise.then(function() {
                     node.enabled = true;
@@ -229,7 +302,8 @@ function addModule(module) {
     }
     var nodes = [];
     if (registry.getModuleInfo(module)) {
-        var e = new Error("Module already loaded");
+        // TODO: nls
+        var e = new Error("module_already_loaded");
         e.code = "module_already_loaded";
         return when.reject(e);
     }
@@ -269,10 +343,43 @@ function addFile(file) {
     }
 }
 
+function loadNodeHelp(node,lang) {
+    var dir = path.dirname(node.template);
+    var base = path.basename(node.template);
+    var localePath = path.join(dir,"locales",lang,base);
+    try {
+        // TODO: make this async
+        var content = fs.readFileSync(localePath, "utf8")
+        return content;
+    } catch(err) {
+        return null;
+    }
+}
+
+function getNodeHelp(node,lang) {
+    if (!node.help[lang]) {
+        var help = loadNodeHelp(node,lang);
+        if (help == null) {
+            var langParts = lang.split("-");
+            if (langParts.length == 2) {
+                help = loadNodeHelp(node,langParts[0]);
+            }
+        }
+        if (help) {
+            node.help[lang] = help;
+        } else {
+            node.help[lang] = node.help["en-US"];
+        }
+
+    }
+    return node.help[lang];
+}
+
 module.exports = {
     init: init,
     load: load,
     addModule: addModule,
     addFile: addFile,
-    loadNodeSet: loadNodeSet
+    loadNodeSet: loadNodeSet,
+    getNodeHelp: getNodeHelp
 }

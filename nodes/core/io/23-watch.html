@@ -16,14 +16,14 @@
 
 <script type="text/x-red" data-template-name="watch">
     <div class="form-row node-input-filename">
-         <label for="node-input-files"><i class="fa fa-file"></i> File(s)</label>
-         <input type="text" id="node-input-files" placeholder="File(s) or Directory">
+         <label for="node-input-files"><i class="fa fa-file"></i> <span data-i18n="watch.label.files"></span></label>
+         <input type="text" id="node-input-files" data-i18n="[placeholder]watch.placeholder.files">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-     <div id="node-input-tip" class="form-tips">On Windows you must use double back-slashes \\ in any directory names.</div>
+     <div id="node-input-tip" class="form-tips"><span data-i18n="watch.tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="watch">

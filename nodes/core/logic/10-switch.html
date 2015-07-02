@@ -16,11 +16,11 @@
 
 <script type="text/x-red" data-template-name="switch">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
     <div class="form-row">
-        If msg.<input type="text" id="node-input-property" style="width: 200px;"/>
+        <span data-i18n="switch.label.property"></span> msg.<input type="text" id="node-input-property" style="width: 200px;"/>
     </div>
     <div class="form-row node-input-rule-container-row" style="margin-bottom: 0px;">
         <div id="node-input-rule-container-div" style="box-sizing: border-box; border-radius: 5px; height: 310px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
@@ -28,12 +28,12 @@
         </div>
     </div>
     <div class="form-row">
-        <a href="#" class="btn btn-mini" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> rule</a>
+        <a href="#" class="btn btn-mini" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="switch.label.rule"></span></a>
     </div>
     <div class="form-row">
         <select id="node-input-checkall" style="width:100%; margin-right:5px;">
-            <option value="true">checking all rules</option>
-            <option value="false">stopping after first match</option>
+            <option value="true" data-i18n="switch.checkall"></option>
+            <option value="false" data-i18n="switch.stopfirst"></option>
         </select>
     </div>
 </script>
@@ -72,14 +72,14 @@
                 {v:"lte",t:"<="},
                 {v:"gt",t:">"},
                 {v:"gte",t:">="},
-                {v:"btwn",t:"is between"},
-                {v:"cont",t:"contains"},
-                {v:"regex",t:"matches regex"},
-                {v:"true",t:"is true"},
-                {v:"false",t:"is false"},
-                {v:"null",t:"is null"},
-                {v:"nnull",t:"is not null"},
-                {v:"else",t:"otherwise"}
+                {v:"btwn",t:this._("switch.rules.btwn")},
+                {v:"cont",t:this._("switch.rules.cont")},
+                {v:"regex",t:this._("switch.rules.regex")},
+                {v:"true",t:this._("switch.rules.true")},
+                {v:"false",t:this._("switch.rules.false")},
+                {v:"null",t:this._("switch.rules.null")},
+                {v:"nnull",t:this._("switch.rules.nnull")},
+                {v:"else",t:this._("switch.rules.else")}
             ];
 
             function generateRule(i,rule) {

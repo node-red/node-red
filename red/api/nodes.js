@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-var express = require('express');
-var fs = require("fs");
-var path = require("path");
-var when = require('when');
-
-var events = require("../events");
 var redNodes = require("../nodes");
 var comms = require("../comms");
 var server = require("../server");
 var log = require("../log");
+var i18n = require("../i18n");
+
+var when = require("when");
 
 var settings = require("../settings");
 
@@ -32,8 +29,9 @@ module.exports = {
             log.audit({event: "nodes.list.get"},req);
             res.json(redNodes.getNodeList());
         } else {
+            var lang = i18n.determineLangFromHeaders(req.acceptedLanguages);
             log.audit({event: "nodes.configs.get"},req);
-            res.send(redNodes.getNodeConfigs());
+            res.send(redNodes.getNodeConfigs(lang));
         }
     },
 
@@ -127,7 +125,8 @@ module.exports = {
                 res.send(404);
             }
         } else {
-            result = redNodes.getNodeConfig(id);
+            var lang = i18n.determineLangFromHeaders(req.acceptedLanguages);
+            result = redNodes.getNodeConfig(id,lang);
             if (result) {
                 log.audit({event: "nodes.config.get",id:id},req);
                 res.send(result);
@@ -232,12 +231,12 @@ function putNode(node, enabled) {
         return promise.then(function(info) {
             if (info.enabled === enabled && !info.err) {
                 comms.publish("node/"+(enabled?"enabled":"disabled"),info,false);
-                log.info(" "+(enabled?"Enabled":"Disabled")+" node types:");
+                log.info(" "+log._("api.nodes."+(enabled?"enabled":"disabled")));
                 for (var i=0;i<info.types.length;i++) {
                     log.info(" - "+info.types[i]);
                 }
             } else if (enabled && info.err) {
-                log.warn("Failed to enable node:");
+            log.warn(log._("api.nodes.error-enable"));
                 log.warn(" - "+info.name+" : "+info.err);
             }
             return info;

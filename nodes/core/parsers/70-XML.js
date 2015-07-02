@@ -40,7 +40,7 @@ module.exports = function(RED) {
                         }
                     });
                 }
-                else { node.warn("This node only handles xml strings or js objects."); }
+                else { node.warn(RED._("xml.errors.xml_js")); }
             }
             else { node.send(msg); } // If no payload - just pass it on.
         });

@@ -93,6 +93,7 @@ module.exports = function(grunt) {
                   // Ensure editor source files are concatenated in
                   // the right order
                   "editor/js/main.js",
+                  "editor/js/i18n.js",
                   "editor/js/settings.js",
                   "editor/js/user.js",
                   "editor/js/comms.js",
@@ -128,7 +129,8 @@ module.exports = function(grunt) {
                         "editor/vendor/jquery/js/jquery.ui.touch-punch.min.js",
                         "editor/vendor/marked/marked.min.js",
                         "editor/vendor/orion/built-editor.min.js",
-                        "editor/vendor/d3/d3.v3.min.js"
+                        "editor/vendor/d3/d3.v3.min.js",
+                        "editor/vendor/i18next/i18next.min.js"
                     ],
                     "public/vendor/vendor.css": [
                         "editor/vendor/orion/built-editor.css"
@@ -154,6 +156,15 @@ module.exports = function(grunt) {
                     dest: 'public/red/style.min.css',
                     src: 'editor/sass/style.scss'
                 }]
+            }
+        },
+        jsonlint: {
+            messages: {
+                src: [
+                    'nodes/core/locales/en-US/messages.json',
+                    'locales/en-US/editor.json',
+                    'locales/en-US/runtime.json'
+                ]
             }
         },
         attachCopyright: {
@@ -196,6 +207,14 @@ module.exports = function(grunt) {
                     'editor/sass/**/*.scss'
                 ],
                 tasks: ['sass','attachCopyright:css']
+            },
+            json: {
+                files: [
+                    'nodes/core/locales/en-US/messages.json',
+                    'locales/en-US/editor.json',
+                    'locales/en-US/runtime.json'
+                ],
+                tasks: ['jsonlint:messages']
             }
         },
 
@@ -205,7 +224,7 @@ module.exports = function(grunt) {
                 script: 'red.js',
                 options: {
                     args:['-v'],
-                    ext: 'js,html',
+                    ext: 'js,html,json',
                     watch: [
                         'red','nodes'
                     ]
@@ -312,6 +331,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-chmod');
+    grunt.loadNpmTasks('grunt-jsonlint');
     
     grunt.registerMultiTask('attachCopyright', function() {
         var files = this.data.src;
@@ -377,7 +397,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('build',
         'Builds editor content',
-        ['clean:build','concat:build','concat:vendor','uglify:build','sass:build','copy:build','attachCopyright']);
+        ['clean:build','concat:build','concat:vendor','uglify:build','sass:build','jsonlint:messages','copy:build','attachCopyright']);
 
     grunt.registerTask('dev',
         'Developer mode: run node-red, watch for source changes and build/restart',

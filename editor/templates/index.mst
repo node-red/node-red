@@ -46,7 +46,7 @@
         <div id="palette-container" class="palette-scroll">
         </div>
         <div id="palette-search">
-            <i class="fa fa-search"></i><input id="palette-search-input" type="text" placeholder="filter"><a href="#" id="palette-search-clear"><i class="fa fa-times"></i></a></input>
+            <i class="fa fa-search"></i><input id="palette-search-input" type="text" data-i18n="[placeholder]palette.filter"><a href="#" id="palette-search-clear"><i class="fa fa-times"></i></a></input>
         </div>
     </div><!-- /palette -->
 
@@ -55,10 +55,10 @@
         <div id="workspace-add-tab"><a id="btn-workspace-add-tab" href="#"><i class="fa fa-plus"></i></a></div>
         <div id="chart"></div>
         <div id="workspace-toolbar">
-            <a class="button" id="workspace-subflow-edit" href="#"><i class="fa fa-pencil"></i> edit name</a>
-            <a class="button disabled" id="workspace-subflow-add-input" href="#"><i class="fa fa-plus"></i> input</a>
-            <a class="button" id="workspace-subflow-add-output" href="#"><i class="fa fa-plus"></i> output</a>
-            <a class="button" id="workspace-subflow-delete" href="#"><i class="fa fa-trash"></i> delete subflow</a>
+            <a class="button" id="workspace-subflow-edit" href="#" data-i18n="[append]subflow.editSubflowName"><i class="fa fa-pencil"></i> </a>
+            <a class="button disabled" id="workspace-subflow-add-input" href="#" data-i18n="[append]subflow.input"><i class="fa fa-plus"></i> </a>
+            <a class="button" id="workspace-subflow-add-output" href="#" data-i18n="[append]subflow.output"><i class="fa fa-plus"></i> </a>
+            <a class="button" id="workspace-subflow-delete" href="#" data-i18n="[append]subflow.deleteSubflow"><i class="fa fa-trash"></i> </a>
         </div>
     </div>
 
@@ -80,14 +80,14 @@
 </div>
 
 <div id="notifications"></div>
-<div id="dropTarget"><div>Drop the flow here<br/><i class="fa fa-download"></i></div></div>
+<div id="dropTarget"><div data-i18n="[append]workspace.dropFlowHere"><br/><i class="fa fa-download"></i></div></div>
 
 <div id="dialog" class="hide"><form id="dialog-form" class="form-horizontal"></form></div>
 <div id="node-config-dialog" class="hide"><form id="dialog-config-form" class="form-horizontal"></form><div class="form-tips" id="node-config-dialog-user-count"></div></div>
 <div id="subflow-dialog" class="hide">
     <form class="form-horizontal">
         <div class="form-row">
-            <label>Name</label><input type="text" id="subflow-input-name">
+            <label data-i18n="common.label.name"></label><input type="text" id="subflow-input-name">
         </div>
     </form>
     <div class="form-tips" id="subflow-dialog-user-count"></div>
@@ -95,26 +95,19 @@
 
 <div id="node-dialog-confirm-deploy" class="hide">
     <form class="form-horizontal">
-        <div id="node-dialog-confirm-deploy-config" style="text-align: left; padding-top: 30px;">
-         Some of the nodes are not properly configured. Are you sure you want to deploy?
-        </div>
-        <div id="node-dialog-confirm-deploy-unknown" style="text-align: left; padding-top: 10px;">
-         The workspace contains some unknown node types:
+        <div id="node-dialog-confirm-deploy-config" style="text-align: left; padding-top: 30px;" data-i18n="[prepend]deploy.confirm.improperlyConfigured;[append]deploy.confirm.confirm"> </div>
+        <div id="node-dialog-confirm-deploy-unknown" style="text-align: left; padding-top: 10px;" data-i18n="[prepend]deploy.confirm.unknown;[append]deploy.confirm.confirm">
          <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-unknown-list"></ul>
-         Are you sure you want to deploy?
         </div>
-        <div id="node-dialog-confirm-deploy-unused" style="text-align: left; padding-top: 10px;">
-         The workspace contains some unused configuration nodes:
+        <div id="node-dialog-confirm-deploy-unused" style="text-align: left; padding-top: 10px;" data-i18n="[prepend]deploy.confirm.unusedConfig;[append]deploy.confirm.confirm">
          <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-unused-list"></ul>
-         Are you sure you want to deploy?
         </div>
     </form>
 </div>
 
 <div id="node-dialog-library-save-confirm" class="hide">
     <form class="form-horizontal">
-        <div style="text-align: center; padding-top: 30px;">
-         A <span id="node-dialog-library-save-type"></span> called <span id="node-dialog-library-save-name"></span> already exists. Overwrite?
+        <div style="text-align: center; padding-top: 30px;" id="node-dialog-library-save-content">
         </div>
     </form>
 </div>
@@ -122,12 +115,12 @@
 <div id="node-dialog-library-save" class="hide">
     <form class="form-horizontal">
         <div class="form-row">
-            <label for="node-dialog-library-save-folder"><i class="fa fa-folder-open"></i> Folder</label>
-            <input type="text" id="node-dialog-library-save-folder" placeholder="Folder">
+            <label for="node-dialog-library-save-folder" data-i18n="[append]library.folder"><i class="fa fa-folder-open"></i> </label>
+            <input type="text" id="node-dialog-library-save-folder" data-i18n="[placeholder]library.folderPlaceholder">
         </div>
         <div class="form-row">
-            <label for="node-dialog-library-save-filename"><i class="fa fa-file"></i> Filename</label>
-            <input type="text" id="node-dialog-library-save-filename" placeholder="Filename">
+            <label for="node-dialog-library-save-filename" data-i18n="[append]library.filename"><i class="fa fa-file"></i> </label>
+            <input type="text" id="node-dialog-library-save-filename" data-i18n="[placeholder]library.filenamePlaceholder">
         </div>
     </form>
 </div>
@@ -136,7 +129,7 @@
     <form class="form-horizontal">
         <div class="form-row">
             <ul id="node-dialog-library-breadcrumbs" class="breadcrumb">
-                <li class="active"><a href="#">Library</a></li>
+                <li class="active" data-i18n="[append]library.breadcrumb"><a href="#"></a></li>
             </ul>
         </div>
         <div class="form-row">
@@ -152,30 +145,29 @@
 <div id="node-dialog-rename-workspace" class="hide">
     <form class="form-horizontal">
         <div class="form-row">
-            <label for="node-input-workspace-name" ><i class="fa fa-tag"></i> Name:</label>
+            <label for="node-input-workspace-name" ><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
             <input type="text" id="node-input-workspace-name">
         </div>
     </form>
 </div>
 <div id="node-dialog-delete-workspace" class="hide">
     <form class="form-horizontal">
-        <div style="text-align: center; padding-top: 30px;">
-         Are you sure you want to delete '<span id="node-dialog-delete-workspace-name"></span>'?
+        <div style="text-align: center; padding-top: 30px;" id="node-dialog-delete-workspace-content">
         </div>
     </form>
 </div>
 
 <script type="text/x-red" data-template-name="export-library-dialog">
     <div class="form-row">
-        <label for="node-input-filename" ><i class="fa fa-file"></i> Filename:</label>
-        <input type="text" id="node-input-filename" placeholder="Filename">
+        <label for="node-input-filename" data-i18n="[append]editor:library.filename"><i class="fa fa-file"></i> </label>
+        <input type="text" id="node-input-filename" data-i18n="[placeholder]editor:library.fullFilenamePlaceholder">
     </div>
 </script>
 
 <script type="text/x-red" data-template-name="subflow">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="name">
+        <label for="node-input-name" data-i18n="[append]editor:common.label.name"><i class="fa fa-tag"></i> </label>
+        <input type="text" id="node-input-name">
     </div>
 </script>
 

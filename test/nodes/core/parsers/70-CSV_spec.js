@@ -254,9 +254,9 @@ describe('CSV node', function() {
                     });
                     logEvents.should.have.length(2);
                     logEvents[0][0].should.have.a.property('msg');
-                    logEvents[0][0].msg.toString().should.startWith('This node only handles csv strings or js objects.');
+                    logEvents[0][0].msg.toString().should.startWith('csv.errors.csv_js');
                     logEvents[1][0].should.have.a.property('msg');
-                    logEvents[1][0].msg.toString().should.startWith('This node only handles csv strings or js objects.');
+                    logEvents[1][0].msg.toString().should.startWith('csv.errors.csv_js');
                     done();
                 } catch(err) {
                     done(err);

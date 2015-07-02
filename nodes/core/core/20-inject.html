@@ -16,38 +16,48 @@
 
 <script type="text/x-red" data-template-name="inject">
     <div class="form-row node-input-payload">
-        <label for="node-input-payloadType"><i class="fa fa-envelope"></i> Payload</label>
+        <label for="node-input-payloadType"><i class="fa fa-envelope"></i> <span data-i18n="common.label.payload"></span></label>
         <select id="node-input-payloadType" style="width:73%">
-          <option value="date">timestamp</option>
-          <option value="string">string</option>
-          <option value="none">blank</option>
+          <option value="date" data-i18n="inject.timestamp"></option>
+          <option value="string" data-i18n="inject.string"></option>
+          <option value="none" data-i18n="inject.blank"></option>
         </select>
     </div>
 
     <div class="form-row" id="node-input-row-payload">
         <label for="node-input-payload"></label>
-        <input type="text" id="node-input-payload" placeholder="payload" style="width:70%">
+        <input type="text" id="node-input-payload" style="width:70%">
     </div>
 
     <div class="form-row">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
-        <input type="text" id="node-input-topic" placeholder="topic" style="width: 70%x">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" style="width: 70%x">
     </div>
 
     <div class="form-row">
-        <label for=""><i class="fa fa-repeat"></i> Repeat</label>
-        <select id="inject-time-type-select" style="width: 73%"><option value="none">none</option><option value="interval">interval</option><option value="interval-time">interval between times</option><option value="time">at a specific time</option></select>
-        <input type="hidden" id="node-input-repeat" placeholder="payload">
-        <input type="hidden" id="node-input-crontab" placeholder="payload">
+        <label for=""><i class="fa fa-repeat"></i> <span data-i18n="inject.label.repeat"></span></label>
+        <select id="inject-time-type-select" style="width: 73%">
+            <option value="none" data-i18n="inject.none"></option>
+            <option value="interval" data-i18n="inject.interval"></option>
+            <option value="interval-time" data-i18n="inject.interval-time"></option>
+            <option value="time" data-i18n="inject.time"></option>
+        </select>
+        <input type="hidden" id="node-input-repeat">
+        <input type="hidden" id="node-input-crontab">
     </div>
 
     <div class="form-row inject-time-row hidden" id="inject-time-row-interval">
-        every <input id="inject-time-interval-count" class="inject-time-count" value="1"></input>
-              <select style="width: 100px" id="inject-time-interval-units"><option value="s">seconds</option><option value="m">minutes</option><option value="h">hours</option></select><br/>
+        <span data-i18n="inject.every"></span>
+        <input id="inject-time-interval-count" class="inject-time-count" value="1"></input>
+        <select style="width: 100px" id="inject-time-interval-units">
+            <option value="s" data-i18n="inject.seconds"></option>
+            <option value="m" data-i18n="inject.minutes"></option>
+            <option value="h" data-i18n="inject.hours"></option>
+        </select><br/>
     </div>
 
     <div class="form-row inject-time-row hidden" id="inject-time-row-interval-time">
-        at every <select style="width: 90px" id="inject-time-interval-time-units" class="inject-time-int-count" value="1">
+        <span data-i18n="inject.every"></span> <select style="width: 90px" id="inject-time-interval-time-units" class="inject-time-int-count" value="1">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -60,46 +70,46 @@
             <option value="20">20</option>
             <option value="30">30</option>
             <option value="0">60</option>
-        </select> minutes<br/>
-        between <select id="inject-time-interval-time-start" class="inject-time-times"></select>
-        and <select id="inject-time-interval-time-end" class="inject-time-times"></select><br/>
+        </select> <span data-i18n="inject.minutes"></span><br/>
+        <span data-i18n="inject.between"></span> <select id="inject-time-interval-time-start" class="inject-time-times"></select>
+        <span data-i18n="inject.and"></span> <select id="inject-time-interval-time-end" class="inject-time-times"></select><br/>
         <div id="inject-time-interval-time-days" class="inject-time-days">
-            <div style="display: inline-block; vertical-align: top;margin-right: 5px;">on </div>
+            <div style="display: inline-block; vertical-align: top;margin-right: 5px;" data-i18n="inject.on">on</div>
             <div style="display:inline-block;">
                 <div>
-                    <label><input type='checkbox' checked value='1'/> Monday</label>
-                    <label><input type='checkbox' checked value='2'/> Tuesday</label>
-                    <label><input type='checkbox' checked value='3'/> Wednesday</label>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="inject.days.0"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="inject.days.1"></span></label>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="inject.days.2"></span></label>
                 </div>
                 <div>
-                    <label><input type='checkbox' checked value='4'/> Thursday</label>
-                    <label><input type='checkbox' checked value='5'/> Friday</label>
-                    <label><input type='checkbox' checked value='6'/> Saturday</label>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="inject.days.3"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="inject.days.4"></span></label>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="inject.days.5"></span></label>
                 </div>
                 <div>
-                    <label><input type='checkbox' checked value='0'/> Sunday</label>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="inject.days.6"></span></label>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="form-row inject-time-row hidden" id="inject-time-row-time">
-        at <input id="inject-time-time" value="12:00"></input><br/>
+        <span data-i18n="inject.at"></span> <input id="inject-time-time" value="12:00"></input><br/>
         <div id="inject-time-time-days" class="inject-time-days">
             <div style="display: inline-block; vertical-align: top;margin-right: 5px;">on </div>
             <div style="display:inline-block;">
                 <div>
-                    <label><input type='checkbox' checked value='1'/> Monday</label>
-                    <label><input type='checkbox' checked value='2'/> Tuesday</label>
-                    <label><input type='checkbox' checked value='3'/> Wednesday</label>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="inject.days.0"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="inject.days.1"></span></label>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="inject.days.2"></span></label>
                 </div>
                 <div>
-                    <label><input type='checkbox' checked value='4'/> Thursday</label>
-                    <label><input type='checkbox' checked value='5'/> Friday</label>
-                    <label><input type='checkbox' checked value='6'/> Saturday</label>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="inject.days.3"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="inject.days.4"></span></label>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="inject.days.5"></span></label>
                 </div>
                 <div>
-                    <label><input type='checkbox' checked value='0'/> Sunday</label>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="inject.days.6"></span></label>
                 </div>
             </div>
         </div>
@@ -108,15 +118,15 @@
     <div class="form-row" id="node-once">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-once" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-once" style="width: 70%;">Fire once at start ?</label>
+        <label for="node-input-once" style="width: 70%;" data-i18n="inject.onstart"></label>
     </div>
 
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
 
-    <div class="form-tips"><b>Note:</b> "interval between times" and "at a specific time" will use cron.<br/>See info box for details.</div>
+    <div class="form-tips" data-i18n="[html]inject.tip"></div>
 </script>
 <style>
     .inject-time-row {
@@ -197,7 +207,7 @@
             if ((this.topic.length < 24) && (this.topic.length > 0)) {
                 return this.name||this.topic;
             }
-            else { return this.name||(this.payloadType==="date"?"timestamp":null)||"inject"; }
+            else { return this.name||(this.payloadType==="date"?this._("inject.timestamp"):null)||this._("inject.inject"); }
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -474,24 +484,24 @@
         button: {
             onclick: function() {
                 var label = (this.name||this.payload).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-                if (this.payloadType === "date") { label = "timestamp"; }
-                if (this.payloadType === "none") { label = "blank"; }
-
+                if (this.payloadType === "date") { label = this._("inject.timestamp"); }
+                if (this.payloadType === "none") { label = this._("inject.blank"); }
+                var node = this;
                 $.ajax({
                     url: "inject/"+this.id,
                     type:"POST",
                     success: function(resp) {
-                        RED.notify("Successfully injected: "+label,"success");
+                        RED.notify(node._("inject.success",{label:label}),"success");
                     },
                     error: function(jqXHR,textStatus,errorThrown) {
                         if (jqXHR.status == 404) {
-                            RED.notify("<strong>Error</strong>: inject node not deployed","error");
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.not-deployed")}),"error");
                         } else if (jqXHR.status == 500) {
-                            RED.notify("<strong>Error</strong>: inject failed, see log for details.","error");
+                            RED.notify(node._("common.notification.error",{message:node._("inject.errors.failed")}),"error");
                         } else if (jqXHR.status == 0) {
-                            RED.notify("<strong>Error</strong>: no response from server","error");
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.no-response")}),"error");
                         } else {
-                            RED.notify("<strong>Error</strong>: unexpected error: ("+jqXHR.status+") "+textStatus,"error");
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.unexpected",{status:jqXHR.status,message:textStatus})}),"error");
                         }
                     }
                 });

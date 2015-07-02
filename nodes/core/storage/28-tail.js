@@ -20,7 +20,7 @@ module.exports = function(RED) {
     var plat = require('os').platform();
 
     if (plat.match(/^win/)) {
-        throw "Info : Currently not supported on Windows.";
+        throw RED._("tail.errors.windowsnotsupport");
     }
 
     function TailNode(n) {

@@ -33,9 +33,9 @@ module.exports = function(RED) {
 
         server.on("error", function (err) {
             if ((err.code == "EACCES") && (node.port < 1024)) {
-                node.error("UDP access error, you may need root access for ports below 1024");
+                node.error(RED._("udp.errors.access-error"));
             } else {
-                node.error("UDP error : "+err.code);
+                node.error(RED._("udp.errors.error",{error:err.code}));
             }
             server.close();
         });
@@ -54,20 +54,20 @@ module.exports = function(RED) {
 
         server.on('listening', function () {
             var address = server.address();
-            node.log('udp listener at ' + address.address + ":" + address.port);
+            node.log(RED._("udp.status.listener-at",{host:address.address,port:address.port}));
             if (node.multicast == "true") {
                 server.setBroadcast(true);
                 try {
                     server.setMulticastTTL(128);
                     server.addMembership(node.group,node.iface);
-                    node.log("udp multicast group "+node.group);
+                    node.log(RED._("udp.status.mc-group",{group:node.group}));
                 } catch (e) {
                     if (e.errno == "EINVAL") {
-                        node.error("Bad Multicast Address");
+                        node.error(RED._("udp.errors.bad-mcaddress"));
                     } else if (e.errno == "ENODEV") {
-                        node.error("Must be ip address of the required interface");
+                        node.error(RED._("udp.errors.interface"));
                     } else {
-                        node.error("Error :"+e.errno);
+                        node.error(RED._("udp.errors.error",{error:e.errno}));
                     }
                 }
             }
@@ -76,7 +76,7 @@ module.exports = function(RED) {
         node.on("close", function() {
             try {
                 server.close();
-                node.log('udp listener stopped');
+                node.log(RED._("udp.status.listener-stopped"));
             } catch (err) {
                 node.error(err);
             }
@@ -118,25 +118,25 @@ module.exports = function(RED) {
                     try {
                         sock.setMulticastTTL(128);
                         sock.addMembership(node.addr,node.iface);   // Add to the multicast group
-                        node.log('udp multicast ready : '+node.outport+' -> '+node.addr+":"+node.port);
+                        node.log(RED._("udp.status.mc-ready",{outport:node.outport,host:node.addr,port:node.port}));
                     } catch (e) {
                         if (e.errno == "EINVAL") {
-                            node.error("Bad Multicast Address");
+                            node.error(RED._("udp.errors.bad-mcaddress"));
                         } else if (e.errno == "ENODEV") {
-                            node.error("Must be ip address of the required interface");
+                            node.error(RED._("udp.errors.interface"));
                         } else {
-                            node.error("Error :"+e.errno);
+                            node.error(RED._("udp.errors.error",{error:e.errno}));
                         }
                     }
                 } else {
-                    node.log('udp broadcast ready : '+node.outport+' -> '+node.addr+":"+node.port);
+                    node.log(RED._("udp.status.bc-ready",{outport:node.outport,host:node.addr,port:node.port}));
                 }
             });
         } else if (node.outport != "") {
             sock.bind(node.outport);
-            node.log('udp ready : '+node.outport+' -> '+node.addr+":"+node.port);
+            node.log(RED._("udp.errors.ready",{outport:node.outport,host:node.addr,port:node.port}));
         } else {
-            node.log('udp ready : '+node.addr+":"+node.port);
+            node.log(RED._("udp.errors.ready-nolocal",{host:node.addr,port:node.port}));
         }
 
         node.on("input", function(msg) {
@@ -144,11 +144,11 @@ module.exports = function(RED) {
                 var add = node.addr || msg.ip || "";
                 var por = node.port || msg.port || 0;
                 if (add == "") {
-                    node.warn("udp: ip address not set");
+                    node.warn(RED._("udp.errors.ip-notset"));
                 } else if (por == 0) {
-                    node.warn("udp: port not set");
+                    node.warn(RED._("udp.errors.port-notset"));
                 } else if (isNaN(por) || (por < 1) || (por > 65535)) {
-                    node.warn("udp: port number not valid");
+                    node.warn(RED._("udp.errors.port-invalid"));
                 } else {
                     var message;
                     if (node.base64) {
@@ -171,7 +171,7 @@ module.exports = function(RED) {
         node.on("close", function() {
             try {
                 sock.close();
-                node.log('udp output stopped');
+                node.log(RED._("udp.status.output-stopped"));
             } catch (err) {
                 node.error(err);
             }

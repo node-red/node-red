@@ -52,7 +52,7 @@ module.exports = function(RED) {
                     rule.from = new RegExp(rule.from, "g");
                 } catch (e) {
                     valid = false;
-                    this.error("Invalid 'from' property: "+e.message);
+                    this.error(RED._("change.errors.invalid-from",{error:e.message}));
                 }
             }
         }

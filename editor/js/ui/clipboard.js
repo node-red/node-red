@@ -16,62 +16,71 @@
 
 
 RED.clipboard = (function() {
-    
-    var dialog = $('<div id="clipboard-dialog" class="hide"><form class="dialog-form form-horizontal"></form></div>')
-        .appendTo("body")
-        .dialog({
-            modal: true,
-            autoOpen: false,
-            width: 500,
-            resizable: false,
-            buttons: [
-                {
-                    id: "clipboard-dialog-ok",
-                    text: "Ok",
-                    click: function() {
-                        if (/Import/.test(dialog.dialog("option","title"))) {
-                            RED.view.importNodes($("#clipboard-import").val());
-                        }
-                        $( this ).dialog( "close" );
-                    }
-                },
-                {
-                    id: "clipboard-dialog-cancel",
-                    text: "Cancel",
-                    click: function() {
-                        $( this ).dialog( "close" );
-                    }
-                },
-                {
-                    id: "clipboard-dialog-close",
-                    text: "Close",
-                    click: function() {
-                        $( this ).dialog( "close" );
-                    }
-                }
-            ],
-            open: function(e) {
-                $(this).parent().find(".ui-dialog-titlebar-close").hide();
-                RED.keyboard.disable();
-            },
-            close: function(e) {
-                RED.keyboard.enable();
-            }
-    });
 
-    var dialogContainer = dialog.children(".dialog-form");
-    
-    var exportNodesDialog = '<div class="form-row">'+
-        '<label for="node-input-export" style="display: block; width:100%;"><i class="fa fa-clipboard"></i> Nodes:</label>'+
-        '<textarea readonly style="resize: none; width: 100%; border-radius: 0px;font-family: monospace; font-size: 12px; background:#eee; padding-left: 0.5em; box-sizing:border-box;" id="clipboard-export" rows="5"></textarea>'+
-        '</div>'+
-        '<div class="form-tips">'+
-        'Select the text above and copy to the clipboard with Ctrl-C.'+
-        '</div>';
-        
-    var importNodesDialog = '<div class="form-row">'+
-        '<textarea style="resize: none; width: 100%; border-radius: 0px;font-family: monospace; font-size: 12px; background:#eee; padding-left: 0.5em; box-sizing:border-box;" id="clipboard-import" rows="5" placeholder="Paste nodes here"></textarea>'+
-        '</div>';
+    var dialog;
+    var dialogContainer;
+    var exportNodesDialog;
+    var importNodesDialog;
+
+    function setupDialogs(){
+        dialog = $('<div id="clipboard-dialog" class="hide"><form class="dialog-form form-horizontal"></form></div>')
+            .appendTo("body")
+            .dialog({
+                modal: true,
+                autoOpen: false,
+                width: 500,
+                resizable: false,
+                buttons: [
+                    {
+                        id: "clipboard-dialog-ok",
+                        text: RED._("common.label.ok"),
+                        click: function() {
+                            if (/Import/.test(dialog.dialog("option","title"))) {
+                                RED.view.importNodes($("#clipboard-import").val());
+                            }
+                            $( this ).dialog( "close" );
+                        }
+                    },
+                    {
+                        id: "clipboard-dialog-cancel",
+                        text: RED._("common.label.cancel"),
+                        click: function() {
+                            $( this ).dialog( "close" );
+                        }
+                    },
+                    {
+                        id: "clipboard-dialog-close",
+                        text: RED._("common.label.close"),
+                        click: function() {
+                            $( this ).dialog( "close" );
+                        }
+                    }
+                ],
+                open: function(e) {
+                    $(this).parent().find(".ui-dialog-titlebar-close").hide();
+                    RED.keyboard.disable();
+                },
+                close: function(e) {
+                    RED.keyboard.enable();
+                }
+        });
+
+        dialogContainer = dialog.children(".dialog-form");
+
+        exportNodesDialog = '<div class="form-row">'+
+            '<label for="node-input-export" style="display: block; width:100%;"><i class="fa fa-clipboard"></i> '+RED._("clipboard.nodes")+'</label>'+
+            '<textarea readonly style="resize: none; width: 100%; border-radius: 0px;font-family: monospace; font-size: 12px; background:#eee; padding-left: 0.5em; box-sizing:border-box;" id="clipboard-export" rows="5"></textarea>'+
+            '</div>'+
+            '<div class="form-tips">'+
+            RED._("clipboard.selectNodes")+
+            '</div>';
+
+        importNodesDialog = '<div class="form-row">'+
+            '<textarea style="resize: none; width: 100%; border-radius: 0px;font-family: monospace; font-size: 12px; background:#eee; padding-left: 0.5em; box-sizing:border-box;" id="clipboard-import" rows="5" placeholder="'+
+            RED._("clipboard.pasteNodes")+
+            '"></textarea>'+
+            '</div>';
+    }
 
     function validateImport() {
         var importInput = $("#clipboard-import");
@@ -87,7 +96,7 @@ RED.clipboard = (function() {
             $("#clipboard-dialog-ok").button("disable");
         }
     }
-    
+
     function importNodes() {
         dialogContainer.empty();
         dialogContainer.append($(importNodesDialog));
@@ -97,8 +106,8 @@ RED.clipboard = (function() {
         $("#clipboard-dialog-ok").button("disable");
         $("#clipboard-import").keyup(validateImport);
         $("#clipboard-import").on('paste',function() { setTimeout(validateImport,10)});
-        
-        dialog.dialog("option","title","Import nodes").dialog("open");
+
+        dialog.dialog("option","title",RED._("clipboard.importNodes")).dialog("open");
     }
 
     function exportNodes() {
@@ -120,17 +129,18 @@ RED.clipboard = (function() {
                         return false;
                     })
                 });
-            dialog.dialog("option","title","Export nodes to clipboard").dialog( "open" );
+            dialog.dialog("option","title",RED._("clipboard.exportNodes")).dialog( "open" );
         }
     }
-    
+
     function hideDropTarget() {
         $("#dropTarget").hide();
         RED.keyboard.remove(/* ESCAPE */ 27);
     }
-    
+
     return {
         init: function() {
+            setupDialogs();
             RED.view.on("selection-changed",function(selection) {
                 if (!selection.nodes) {
                     RED.menu.setDisabled("menu-item-export",true);
@@ -144,16 +154,16 @@ RED.clipboard = (function() {
             });
             RED.keyboard.add(/* e */ 69,{ctrl:true},function(){exportNodes();d3.event.preventDefault();});
             RED.keyboard.add(/* i */ 73,{ctrl:true},function(){importNodes();d3.event.preventDefault();});
-            
-            
-            
+
+
+
             $('#chart').on("dragenter",function(event) {
                 if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
                     $("#dropTarget").css({display:'table'});
                     RED.keyboard.add(/* ESCAPE */ 27,hideDropTarget);
                 }
             });
-            
+
             $('#dropTarget').on("dragover",function(event) {
                 if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
                     event.preventDefault();
@@ -168,15 +178,15 @@ RED.clipboard = (function() {
                 RED.view.importNodes(data);
                 event.preventDefault();
             });
-            
-            
+
+
         },
         import: importNodes,
         export: exportNodes
     }
-        
-        
-        
-        
-        
+
+
+
+
+
 })();

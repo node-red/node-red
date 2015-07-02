@@ -17,54 +17,41 @@
 <!--  The Input Node  -->
 <script type="text/x-red" data-template-name="udp in">
     <div class="form-row">
-        <label for="node-input-port"><i class="fa fa-sign-in"></i> Listen for</label>
+        <label for="node-input-port"><i class="fa fa-sign-in"></i> <span data-i18n="udp.label.listen"></span></label>
         <select id="node-input-multicast" style='width:62%'>
-          <option value="false">udp messages</option>
-          <option value="true">multicast messages</option>
+          <option value="false" data-i18n="udp.udpmsgs"></option>
+          <option value="true" data-i18n="udp.mcmsgs"></option>
         </select>
     </div>
     <div class="form-row node-input-group">
-        <label for="node-input-group"><i class="fa fa-list"></i> Group</label>
+        <label for="node-input-group"><i class="fa fa-list"></i> <span data-i18n="udp.label.group"></span></label>
         <input type="text" id="node-input-group" placeholder="225.0.18.83">
     </div>
     <div class="form-row node-input-iface">
-        <label for="node-input-iface"><i class="fa fa-random"></i> Interface</label>
-        <input type="text" id="node-input-iface" placeholder="(optional) ip address of eth0">
+        <label for="node-input-iface"><i class="fa fa-random"></i> <span data-i18n="udp.label.interface"></span></label>
+        <input type="text" id="node-input-iface" data-i18n="[placeholder]udp.label.interface">
     </div>
     <div class="form-row">
-        <label for="node-input-port"><i class="fa fa-sign-in"></i> on Port</label>
-        <input type="text" id="node-input-port" placeholder="Port" style="width: 80px">
-        &nbsp;&nbsp;using <select id="node-input-ipv" style="width:80px">
+        <label for="node-input-port"><i class="fa fa-sign-in"></i> <span data-i18n="udp.label.onport"></span></label>
+        <input type="text" id="node-input-port" style="width: 80px">
+        &nbsp;&nbsp;<span data-i18n="udp.label.using"></span> <select id="node-input-ipv" style="width:80px">
           <option value="udp4">ipv4</option>
           <option value="udp6">ipv6</option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-datatype"><i class="fa fa-sign-out"></i> Output</label>
+        <label for="node-input-datatype"><i class="fa fa-sign-out"></i> <span data-i18n="udp.label.output"></span></label>
         <select id="node-input-datatype" style="width: 70%;">
-            <option value="buffer">a Buffer</option>
-            <option value="utf8">a String</option>
-            <option value="base64">a Base64 encoded string</option>
+            <option value="buffer" data-i18n="udp.output.buffer"></option>
+            <option value="utf8" data-i18n="udp.output.string"></option>
+            <option value="base64" data-i18n="udp.output.base64"></option>
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-tips">Tip: Make sure your firewall will allow the data in.</div>
-    <script>
-        $("#node-input-multicast").change(function() {
-            var id = $("#node-input-multicast option:selected").val();
-            if (id == "false") {
-                $(".node-input-group").hide();
-                $(".node-input-iface").hide();
-            }
-            else {
-                $(".node-input-group").show();
-                $(".node-input-iface").show();
-            }
-        });
-    </script>
+    <div class="form-tips"><span data-i18n="udp.tip.in"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="udp in">
@@ -97,6 +84,20 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            $("#node-input-multicast").change(function() {
+                var id = $("#node-input-multicast option:selected").val();
+                if (id == "false") {
+                    $(".node-input-group").hide();
+                    $(".node-input-iface").hide();
+                }
+                else {
+                    $(".node-input-group").show();
+                    $(".node-input-iface").show();
+                }
+            });
+            $("#node-input-multicast").change();
         }
     });
 </script>
@@ -105,62 +106,44 @@
 <!--  The Output Node  -->
 <script type="text/x-red" data-template-name="udp out">
     <div class="form-row">
-        <label for="node-input-port"><i class="fa fa-envelope"></i> Send a</label>
+        <label for="node-input-port"><i class="fa fa-envelope"></i> <span data-i18n="udp.label.send"></span></label>
         <select id="node-input-multicast" style="width:40%">
-          <option value="false">udp message</option>
-          <option value="broad">broadcast message</option>
-          <option value="multi">multicast message</option>
+          <option value="false" data-i18n="udp.udpmsg"></option>
+          <option value="broad" data-i18n="udp.bcmsg"></option>
+          <option value="multi" data-i18n="udp.mcmsg"></option>
         </select>
-        to port <input type="text" id="node-input-port" placeholder="port" style="width: 70px">
+        <span data-i18n="udp.label.toport"></span> <input type="text" id="node-input-port" style="width: 70px">
     </div>
     <div class="form-row node-input-addr">
-        <label for="node-input-addr" id="node-input-addr-label"><i class="fa fa-list"></i> Address</label>
-        <input type="text" id="node-input-addr" placeholder="destination ip" style="width: 50%;">
+        <label for="node-input-addr" id="node-input-addr-label"><i class="fa fa-list"></i> <span data-i18n="udp.label.address"></span></label>
+        <input type="text" id="node-input-addr" data-i18n="[placeholder]udp.placeholder.address" style="width: 50%;">
         <select id="node-input-ipv" style="width:70px">
           <option value="udp4">ipv4</option>
           <option value="udp6">ipv6</option>
         </select>
     </div>
     <div class="form-row node-input-iface">
-        <label for="node-input-iface"><i class="fa fa-random"></i> Interface</label>
-        <input type="text" id="node-input-iface" placeholder="(optional) ip address of eth0">
+        <label for="node-input-iface"><i class="fa fa-random"></i> <span data-i18n="udp.label.interface"></span></label>
+        <input type="text" id="node-input-iface" data-i18n="[placeholder]udp.placeholder.interface">
     </div>
     <div class="form-row">
         <label for="node-input-outport-type">&nbsp;</label>
         <select id="node-input-outport-type">
-          <option id="node-input-outport-type-random" value="random">use random local port</option>
-          <option value="fixed">bind to local port</option>
+          <option id="node-input-outport-type-random" value="random" data-i18n="udp.bind.random"></option>
+          <option value="fixed" data-i18n="udp.bind.local"></option>
         </select>
-        <input type="text" id="node-input-outport"  style="width: 70px;" placeholder="port">
+        <input type="text" id="node-input-outport"  style="width: 70px;">
     </div>
     <div class="form-row">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-base64" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-base64" style="width: 70%;">Decode Base64 encoded payload ?</label>
+        <label for="node-input-base64" style="width: 70%;"><span data-i18n="udp.label.decode-base64"></span></label>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-tips">Tip: leave address and port blank if you want to set using <b>msg.ip</b> and <b>msg.port</b>.</div>
-    <script>
-        $("#node-input-multicast").change(function() {
-            var id = $("#node-input-multicast option:selected").val();
-            if (id !== "multi") {
-                $(".node-input-iface").hide();
-                $("#node-input-addr-label").html('<i class="fa fa-list"></i> Address');
-                $("#node-input-addr")[0].placeholder = 'destination ip';
-            }
-            else {
-                $(".node-input-iface").show();
-                $("#node-input-addr-label").html('<i class="fa fa-list"></i> Group');
-                $("#node-input-addr")[0].placeholder = '225.0.18.83';
-            }
-            if (id === "broad") {
-                $("#node-input-addr")[0].placeholder = '255.255.255.255';
-            }
-        });
-    </script>
+    <div class="form-tips"><span data-i18n="[html]udp.tip.out"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="udp out">
@@ -195,6 +178,12 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+            var addresslabel = this._("udp.label.address");
+            var addressph = this._("udp.placeholder.address");
+            var grouplabel = this._("udp.label.group");
+            var bindrandom = this._("udp.bind.random");
+            var bindtarget = this._("udp.bind.target");
+
             var type = this.outport==""?"random":"fixed";
             $("#node-input-outport-type option").filter(function() {
                 return $(this).val() == type;
@@ -208,15 +197,30 @@
                     $("#node-input-outport").show();
                 }
             });
-
             $("#node-input-outport-type").change();
 
             $("#node-input-multicast").change(function() {
+                var id = $("#node-input-multicast option:selected").val();
+                if (id === "multi") {
+                    $(".node-input-iface").show();
+                    $("#node-input-addr-label").html('<i class="fa fa-list"></i> ' + grouplabel);
+                    $("#node-input-addr")[0].placeholder = '225.0.18.83';
+                }
+                else if (id === "broad") {
+                    $(".node-input-iface").hide();
+                    $("#node-input-addr-label").html('<i class="fa fa-list"></i> ' + addresslabel);
+                    $("#node-input-addr")[0].placeholder = '255.255.255.255';
+                }
+                else {
+                    $(".node-input-iface").hide();
+                    $("#node-input-addr-label").html('<i class="fa fa-list"></i> ' + addresslabel);
+                    $("#node-input-addr")[0].placeholder = addressph;
+                }
                 var type = $(this).children("option:selected").val();
                 if (type == "false") {
-                    $("#node-input-outport-type-random").html("bind to random local port");
+                    $("#node-input-outport-type-random").html(bindrandom);
                 } else {
-                    $("#node-input-outport-type-random").html("bind to target port");
+                    $("#node-input-outport-type-random").html(bindtarget);
                 }
             });
             $("#node-input-multicast").change();

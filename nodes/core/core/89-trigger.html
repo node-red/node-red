@@ -16,48 +16,48 @@
 
 <script type="text/x-red" data-template-name="trigger">
     <div class="form-row">
-        Send
+        <span data-i18n="trigger.send"></span>
         <select id="node-input-op1type" style="width:200px !important">
-            <option value="val">the string payload</option>
-            <option value="pay">the existing message</option>
-            <option value="nul">nothing</option>
+            <option value="val" data-i18n="trigger.output.string"></option>
+            <option value="pay" data-i18n="trigger.output.existing"></option>
+            <option value="nul" data-i18n="trigger.output.nothing"></option>
         </select>
         <input style="width: 180px !important" type="text" id="node-input-op1">
     </div>
     <div class="form-row">
-        then
+        <span data-i18n="trigger.then"></span>
         <select id="node-then-type" style="width:150px;">
-            <option value="block">wait to be reset</option>
-            <option value="wait">wait for</option>
+            <option value="block" data-i18n="trigger.wait-reset"></option>
+            <option value="wait" data-i18n="trigger.wait-for"></option>
         </select>
         <span class="node-type-wait">
-            <input type="text" id="node-input-duration" style="width:70px !important">
+            <input type="text" id="node-input-duration" style="text-align:right; width:70px !important">
             <select id="node-input-units" style="width:140px !important">
-                <option value="ms">Milliseconds</option>
-                <option value="s">Seconds</option>
-                <option value="min">Minutes</option>
-                <option value="hr">Hours</option>
+                <option value="ms" data-i18n="trigger.duration.ms"></option>
+                <option value="s" data-i18n="trigger.duration.s"></option>
+                <option value="min" data-i18n="trigger.duration.m"></option>
+                <option value="hr" data-i18n="trigger.duration.h"></option>
             </select>
        </span>
     </div>
     <div class="form-row node-type-wait">
-        then send
+        <span data-i18n="trigger.then-send"></span>
         <select id="node-input-op2type" style="width:200px !important">
-            <option value="val">the string payload</option>
-            <option value="pay">the existing message</option>
-            <option value="nul">nothing</option>
+            <option value="val" data-i18n="trigger.output.string"></option>
+            <option value="pay" data-i18n="trigger.output.existing"></option>
+            <option value="nul" data-i18n="trigger.output.nothing"></option>
         </select>
         <input style="width: 145px !important" type="text" id="node-input-op2">
     </div>
     <div class="form-row node-type-wait">
-        <input type="checkbox" id="node-input-extend" style="margin-left: 5px; vertical-align: top; width: auto !important;"> <label style="width:auto !important;" for="node-input-extend">extend delay if new message arrives</label>
+        <input type="checkbox" id="node-input-extend" style="margin-left: 5px; vertical-align: top; width: auto !important;"> <label style="width:auto !important;" for="node-input-extend" data-i18n="trigger.extend"></label>
     </div>
     <br/>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-tips">The node can be reset by sending a message with the <b>msg.reset</b> property set</div>
+    <div class="form-tips" data-i18n="[html]trigger.tip"></div>
 </script>
 
 <script type="text/x-red" data-help-name="trigger">
@@ -95,10 +95,10 @@
         icon: "trigger.png",
         label: function() {
             if (this.duration > 0) {
-                return this.name|| "trigger"+" "+this.duration+this.units;
+                return this.name|| this._("trigger.label.trigger")+" "+this.duration+this.units;
             }
             else {
-                return this.name|| "trigger & block";
+                return this.name|| this._("trigger.label.trigger-block");
             }
         },
         labelStyle: function() {
@@ -136,19 +136,19 @@
             $("#node-then-type").change();
             $("#node-input-op1type").change();
             $("#node-input-op2type").change();
-            
+
             if (this.extend === "true" || this.extend === true) {
                 $("#node-input-extend").prop("checked",true);
             } else {
                 $("#node-input-extend").prop("checked",false);
             }
-            
+
         },
         oneditsave: function() {
             if ($("#node-then-type").val() == "block") {
                 $("#node-input-duration").val("0");
             }
-        
+
         }
     });
 </script>

@@ -23,6 +23,8 @@ var settings;
 
 var Node;
 
+var loader;
+
 var nodeConfigCache = null;
 var moduleConfigs = {};
 var nodeList = [];
@@ -30,8 +32,9 @@ var nodeConstructors = {};
 var nodeTypeToId = {};
 var moduleNodes = {};
 
-function init(_settings) {
+function init(_settings,_loader) {
     settings = _settings;
+    loader = _loader;
     if (settings.available()) {
         moduleConfigs = loadNodeConfigs();
     } else {
@@ -323,7 +326,7 @@ function registerNodeConstructor(type,constructor) {
     events.emit("type-registered",type);
 }
 
-function getAllNodeConfigs() {
+function getAllNodeConfigs(lang) {
     if (!nodeConfigCache) {
         var result = "";
         var script = "";
@@ -332,6 +335,7 @@ function getAllNodeConfigs() {
             var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
             if (config.enabled && !config.err) {
                 result += config.config;
+                result += loader.getNodeHelp(config,lang||"en-US")||"";
                 //script += config.script;
             }
         }
@@ -345,7 +349,7 @@ function getAllNodeConfigs() {
     return nodeConfigCache;
 }
 
-function getNodeConfig(id) {
+function getNodeConfig(id,lang) {
     var config = moduleConfigs[getModule(id)];
     if (!config) {
         return null;
@@ -353,6 +357,8 @@ function getNodeConfig(id) {
     config = config.nodes[getNode(id)];
     if (config) {
         var result = config.config;
+        result += loader.getNodeHelp(config,lang||"en-US")
+        
         //if (config.script) {
         //    result += '<script type="text/javascript">'+config.script+'</script>';
         //}

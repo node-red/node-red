@@ -14,8 +14,8 @@
  * limitations under the License.
  **/
 RED.library = (function() {
-    
-    
+
+
     function loadFlowLibrary() {
         $.getJSON("library/flows",function(data) {
             //console.log(data);
@@ -66,12 +66,12 @@ RED.library = (function() {
             $("#menu-item-import-library-submenu").replaceWith(menu);
         });
     }
-    
+
     function createUI(options) {
         var libraryData = {};
         var selectedLibraryItem = null;
         var libraryEditor = null;
-        
+
         // Orion editor has set/getText
         // ACE editor has set/getValue
         // normalise to set/getValue
@@ -84,14 +84,14 @@ RED.library = (function() {
         if (options.editor.getText) {
             options.editor.getValue = options.editor.getText;
         }
-        
+
         function buildFileListItem(item) {
             var li = document.createElement("li");
             li.onmouseover = function(e) { $(this).addClass("list-hover"); };
             li.onmouseout = function(e) { $(this).removeClass("list-hover"); };
             return li;
         }
-        
+
         function buildFileList(root,data) {
             var ul = document.createElement("ul");
             var li;
@@ -104,7 +104,7 @@ RED.library = (function() {
                         var dirName = v;
                         return function(e) {
                             var bcli = $('<li class="active"><span class="divider">/</span> <a href="#">'+dirName+'</a></li>');
-                            $("a",bcli).click(function(e) { 
+                            $("a",bcli).click(function(e) {
                                 $(this).parent().nextAll().remove();
                                 $.getJSON("library/"+options.url+root+dirName,function(data) {
                                     $("#node-select-library").children().first().replaceWith(buildFileList(root+dirName+"/",data));
@@ -141,24 +141,24 @@ RED.library = (function() {
             }
             return ul;
         }
-    
+
         $('#node-input-name').addClass('input-append-left').css("width","65%").after(
             '<div class="btn-group" style="margin-left: 0px;">'+
             '<button id="node-input-'+options.type+'-lookup" class="btn input-append-right" data-toggle="dropdown"><i class="fa fa-book"></i> <i class="fa fa-caret-down"></i></button>'+
             '<ul class="dropdown-menu pull-right" role="menu">'+
-            '<li><a id="node-input-'+options.type+'-menu-open-library" tabindex="-1" href="#">Open Library...</a></li>'+
-            '<li><a id="node-input-'+options.type+'-menu-save-library" tabindex="-1" href="#">Save to Library...</a></li>'+
+            '<li><a id="node-input-'+options.type+'-menu-open-library" tabindex="-1" href="#">'+RED._("library.openLibrary")+'</a></li>'+
+            '<li><a id="node-input-'+options.type+'-menu-save-library" tabindex="-1" href="#">'+RED._("library.saveToLibrary")+'</a></li>'+
             '</ul></div>'
         );
-    
-        
-        
+
+
+
         $('#node-input-'+options.type+'-menu-open-library').click(function(e) {
             $("#node-select-library").children().remove();
             var bc = $("#node-dialog-library-breadcrumbs");
             bc.children().first().nextAll().remove();
             libraryEditor.setValue('',-1);
-            
+
             $.getJSON("library/"+options.url,function(data) {
                 $("#node-select-library").append(buildFileList("/",data));
                 $("#node-dialog-library-breadcrumbs a").click(function(e) {
@@ -168,10 +168,10 @@ RED.library = (function() {
                 });
                 $( "#node-dialog-library-lookup" ).dialog( "open" );
             });
-            
+
             e.preventDefault();
         });
-    
+
         $('#node-input-'+options.type+'-menu-save-library').click(function(e) {
             //var found = false;
             var name = $("#node-input-name").val().replace(/(^\s*)|(\s*$)/g,"");
@@ -217,7 +217,7 @@ RED.library = (function() {
             $( "#node-dialog-library-save" ).dialog( "open" );
             e.preventDefault();
         });
-    
+
         libraryEditor = ace.edit('node-select-library-text');
         libraryEditor.setTheme("ace/theme/tomorrow");
         if (options.mode) {
@@ -230,16 +230,16 @@ RED.library = (function() {
         });
         libraryEditor.renderer.$cursorLayer.element.style.opacity=0;
         libraryEditor.$blockScrolling = Infinity;
-        
+
         $( "#node-dialog-library-lookup" ).dialog({
-            title: options.type+" library",
+            title: RED._("library.typeLibrary", {type:options.type}),
             modal: true,
             autoOpen: false,
             width: 800,
             height: 450,
             buttons: [
                 {
-                    text: "Ok",
+                    text: RED._("common.label.ok"),
                     click: function() {
                         if (selectedLibraryItem) {
                             for (var i=0;i<options.fields.length;i++) {
@@ -252,7 +252,7 @@ RED.library = (function() {
                     }
                 },
                 {
-                    text: "Cancel",
+                    text: RED._("common.label.cancel"),
                     click: function() {
                         $( this ).dialog( "close" );
                     }
@@ -270,16 +270,16 @@ RED.library = (function() {
                 $(".form-row:last-child",form).children().height(form.height()-60);
             }
         });
-        
+
         function saveToLibrary(overwrite) {
             var name = $("#node-input-name").val().replace(/(^\s*)|(\s*$)/g,"");
             if (name === "") {
-                name = "Unnamed "+options.type;
+                name = RED._("library.unnamedType",{type:options.type});
             }
             var filename = $("#node-dialog-library-save-filename").val().replace(/(^\s*)|(\s*$)/g,"");
             var pathname = $("#node-dialog-library-save-folder").val().replace(/(^\s*)|(\s*$)/g,"");
             if (filename === "" || !/.+\.js$/.test(filename)) {
-                RED.notify("Invalid filename","warning");
+                RED.notify(RED._("library.invalidFilename"),"warning");
                 return;
             }
             var fullpath = pathname+(pathname===""?"":"/")+filename;
@@ -304,8 +304,7 @@ RED.library = (function() {
                 //    }
                 //}
                 //if (exists) {
-                //    $("#node-dialog-library-save-type").html(options.type);
-                //    $("#node-dialog-library-save-name").html(fullpath);
+                //    $("#node-dialog-library-save-content").html(RED._("library.dialogSaveOverwrite",{libraryType:options.type,libraryName:fullpath}));
                 //    $("#node-dialog-library-save-confirm").dialog( "open" );
                 //    return;
                 //}
@@ -320,7 +319,7 @@ RED.library = (function() {
                     data[field] = $("#node-input-"+field).val();
                 }
             }
-            
+
             data.text = options.editor.getValue();
             $.ajax({
                 url:"library/"+options.url+'/'+fullpath,
@@ -328,27 +327,27 @@ RED.library = (function() {
                 data: JSON.stringify(data),
                 contentType: "application/json; charset=utf-8"
             }).done(function(data,textStatus,xhr) {
-                RED.notify("Saved "+options.type,"success");
+                RED.notify(RED._("library.savedType", {type:options.type}),"success");
             }).fail(function(xhr,textStatus,err) {
-                RED.notify("Saved failed: "+xhr.responseJSON.message,"error");
+                RED.notify(RED._("library.saveFailed",{message:xhr.responseJSON.message}),"error");
             });
         }
         $( "#node-dialog-library-save-confirm" ).dialog({
-            title: "Save to library",
+            title: RED._("library.saveToLibrary"),
             modal: true,
             autoOpen: false,
             width: 530,
             height: 230,
             buttons: [
                 {
-                    text: "Ok",
+                    text: RED._("common.label.ok"),
                     click: function() {
                         saveToLibrary(true);
                         $( this ).dialog( "close" );
                     }
                 },
                 {
-                    text: "Cancel",
+                    text: RED._("common.label.cancel"),
                     click: function() {
                         $( this ).dialog( "close" );
                     }
@@ -356,21 +355,21 @@ RED.library = (function() {
             ]
         });
         $( "#node-dialog-library-save" ).dialog({
-            title: "Save to library",
+            title: RED._("library.saveToLibrary"),
             modal: true,
             autoOpen: false,
             width: 530,
             height: 230,
             buttons: [
                 {
-                    text: "Ok",
+                    text: RED._("common.label.ok"),
                     click: function() {
                         saveToLibrary(false);
                         $( this ).dialog( "close" );
                     }
                 },
                 {
-                    text: "Cancel",
+                    text: RED._("common.label.cancel"),
                     click: function() {
                         $( this ).dialog( "close" );
                     }
@@ -379,15 +378,16 @@ RED.library = (function() {
         });
 
     }
-    
+
     function exportFlow() {
         //TODO: don't rely on the main dialog
         var nns = RED.nodes.createExportableNodeSet(RED.view.selection().nodes);
         $("#dialog-form").html($("script[data-template-name='export-library-dialog']").html());
         $("#node-input-filename").attr('nodes',JSON.stringify(nns));
-        $( "#dialog" ).dialog("option","title","Export nodes to library").dialog( "open" );
+        $("#dialog").i18n();
+        $("#dialog").dialog("option","title",RED._("library.exportToLibrary")).dialog( "open" );
     }
-    
+
     return {
         init: function() {
             RED.view.on("selection-changed",function(selection) {
@@ -401,16 +401,14 @@ RED.library = (function() {
                     RED.menu.setDisabled("menu-item-export-library",false);
                 }
             });
-            
-            if (RED.settings.theme("menu.menu-item-import-library") !== false) { 
+
+            if (RED.settings.theme("menu.menu-item-import-library") !== false) {
                 loadFlowLibrary();
             }
         },
         create: createUI,
         loadFlowLibrary: loadFlowLibrary,
-        
+
         export: exportFlow
     }
 })();
-
-

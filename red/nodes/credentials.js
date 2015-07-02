@@ -17,6 +17,7 @@
 var when = require("when");
 
 var log = require("../log");
+
 var needsPermission = require("../api/auth").needsPermission;
 
 var credentialCache = {};
@@ -75,7 +76,7 @@ module.exports = {
         return storage.getCredentials().then(function (creds) {
             credentialCache = creds;
         }).otherwise(function (err) {
-            log.warn("Error loading credentials : " + err);
+            log.warn(log._("nodes.credentials.error",{message: err}));
         });
     },
     
@@ -167,7 +168,7 @@ module.exports = {
             var dashedType = nodeType.replace(/\s+/g, '-');
             var definition = credentialsDef[dashedType];
             if (!definition) {
-                log.warn('Credential Type ' + nodeType + ' is not registered.');
+                log.warn(log._("nodes.credentials.not-registered",{type:nodeType}));
                 return;
             }
             

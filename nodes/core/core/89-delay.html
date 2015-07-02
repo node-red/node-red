@@ -18,58 +18,58 @@
 <script type="text/x-red" data-template-name="delay">
 
     <div class="form-row">
-        <label for="node-input-pauseType"><i class="fa fa-tasks"></i> Action</label>
+        <label for="node-input-pauseType"><i class="fa fa-tasks"></i> <span data-i18n="delay.action"></span></label>
         <select id="node-input-pauseType" style="width:270px !important">
-          <option value="delay">Delay message</option>
-          <option value="random">Random delay</option>
-          <option value="rate">Limit rate to</option>
-          <option value="queue">Topic based fair queue</option>
+          <option value="delay" data-i18n="delay.delaymsg"></option>
+          <option value="random" data-i18n="delay.ramdomdelay"></option>
+          <option value="rate" data-i18n="delay.limitrate"></option>
+          <option value="queue" data-i18n="delay.fairqueue"></option>
         </select>
     </div>
     <div id="delay-details" class="form-row">
-        <label for="node-input-timeout"><i class="fa fa-clock-o"></i> For</label>
+        <label for="node-input-timeout"><i class="fa fa-clock-o"></i> <span data-i18n="delay.for"></span></label>
         <input type="text" id="node-input-timeout" placeholder="Time" style="direction:rtl; width:50px !important">
         <select id="node-input-timeoutUnits" style="width:200px !important">
-          <option value="milliseconds">Milliseconds</option>
-          <option value="seconds">Seconds</option>
-          <option value="minutes">Minutes</option>
-          <option value="hours">Hours</option>
-          <option value="days">Days</option>
+          <option value="milliseconds" data-i18n="delay.milisecs"></option>
+          <option value="seconds" data-i18n="delay.secs"></option>
+          <option value="minutes" data-i18n="delay.mins"></option>
+          <option value="hours" data-i18n="delay.hours"></option>
+          <option value="days" data-i18n="delay.days"></option>
         </select>
     </div>
 
     <div id="rate-details" class="form-row">
-        <label for="node-input-rate"><i class="fa fa-clock-o"></i> Rate</label>
+        <label for="node-input-rate"><i class="fa fa-clock-o"></i> <span data-i18n="delay.rate"></span></label>
         <input type="text" id="node-input-rate" placeholder="1" style="direction:rtl; width:30px !important">
-        <label for="node-input-rateUnits">msg(s) per</label>
+        <label for="node-input-rateUnits"><span data-i18n="delay.msgper"></span></label>
         <select id="node-input-rateUnits" style="width:140px !important">
-          <option value="second">Second</option>
-          <option value="minute">Minute</option>
-          <option value="hour">Hour</option>
-          <option value="day">Day</option>
+          <option value="second" data-i18n="delay.sec"></option>
+          <option value="minute" data-i18n="delay.min"></option>
+          <option value="hour" data-i18n="delay.hour"></option>
+          <option value="day" data-i18n="delay.day"></option>
         </select>
         <br/>
-        <div id="node-input-dr"><input style="margin: 20px 0 20px 100px; width: 30px;" type="checkbox" id="node-input-drop"><label style="width: 250px;" for="node-input-drop">drop intermediate messages</label></div>
+        <div id="node-input-dr"><input style="margin: 20px 0 20px 100px; width: 30px;" type="checkbox" id="node-input-drop"><label style="width: 250px;" for="node-input-drop"><span data-i18n="delay.dropmsg"></span></label></div>
     </div>
 
 
     <div id="random-details" class="form-row">
-        <label for="node-input-randomFirst"><i class="fa fa-clock-o"></i> Between</label>
+        <label for="node-input-randomFirst"><i class="fa fa-clock-o"></i> <span data-i18n="delay.between"></span></label>
         <input type="text" id="node-input-randomFirst" placeholder="" style="directon:rtl; width:30px !important">
         <label for="node-input-randomLast" style="width:20px"> &amp; </label>
         <input type="text" id="node-input-randomLast" placeholder="" style="directon:rtl; width:30px !important">
         <select id="node-input-randomUnits" style="width:140px !important">
-          <option value="milliseconds">Milliseconds</option>
-          <option value="seconds">Seconds</option>
-          <option value="minutes">Minutes</option>
-          <option value="hours">Hours</option>
-          <option value="days">Days</option>
+          <option value="milliseconds" data-i18n="delay.milisecs"></option>
+          <option value="seconds" data-i18n="delay.secs"></option>
+          <option value="minutes" data-i18n="delay.mins"></option>
+          <option value="hours" data-i18n="delay.hours"></option>
+          <option value="days" data-i18n="delay.days"></option>
         </select>
     </div>
 
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
 
 </script>
@@ -109,16 +109,16 @@
             if (this.pauseType == "delay") {
               var units = this.timeoutUnits ? this.timeoutUnits.charAt(0) : "s";
               if (this.timeoutUnits == "milliseconds") { units = "ms"; }
-              return this.name||"delay "+this.timeout+" " + units;
+              return this.name||this._("delay.label.delay")+" "+this.timeout+" " + units;
             } else if (this.pauseType == "rate") {
               var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
-              return this.name||"limit "+this.rate+" msg/"+ units;
+              return this.name||this._("delay.label.limit")+" "+this.rate+" msg/"+ units;
             } else if (this.pauseType == "random") {
-              return this.name || "random";
+              return this.name || this._("delay.label.random");
             }
             else {
                 var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
-                return this.name || "queue" +this.rate+" msg/"+ units;
+                return this.name || this._("delay.label.queue") +this.rate+" msg/"+ units;
             }
         },
         labelStyle: function() { // sets the class to apply to the label
