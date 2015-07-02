@@ -307,7 +307,7 @@ module.exports = function(RED) {
                 var remoteDetails = socket.remoteAddress+":"+socket.remotePort;
                 node.log(RED._("tcpin.status.connection-from",{host:socket.remoteAddress, port:socket.remotePort}));
                 connectedSockets.push(socket);
-                node.status({text:connectedSockets.length+" "+"tcpin.status.connections")});
+                node.status({text:connectedSockets.length+" "+"tcpin.status.connections"});
                 socket.on('timeout', function() {
                     node.log(RED._("tcpin.errors.timeout",{port:node.port}));
                     socket.end();
