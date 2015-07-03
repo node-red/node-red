@@ -145,7 +145,7 @@ RED.sidebar.info = (function() {
             //table += '<div class="node-help">'+(typeof info === "function" ? info.call(node) : info)+'</div>';
         }
 
-        $("#tab-info").html(table);
+        $(content).html(table);
 
         $(".node-info-property-header").click(function(e) {
             var icon = $(this).find("i");

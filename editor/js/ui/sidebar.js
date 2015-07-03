@@ -26,7 +26,7 @@ RED.sidebar = (function() {
             $(tab.content).show();
         },
         onremove: function(tab) {
-            $(tab.content).remove();
+            $(tab.content).hide();
             if (tab.onremove) {
                 tab.onremove.call(tab);
             }
@@ -76,9 +76,9 @@ RED.sidebar = (function() {
 
     function removeTab(id) {
         sidebar_tabs.removeTab(id);
+        $(knownTabs[id].content).remove();
         delete knownTabs[id];
         RED.menu.removeItem("menu-item-sidebar-menu-"+id);
-        //TODO: remove menu item
     }
 
     var sidebarSeparator =  {};
