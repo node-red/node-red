@@ -16,16 +16,18 @@
     },
     "menu": {
         "label": {
-            "sidebar": "Sidebar",
-            "displayStatus": "Display node status",
+            "sidebar": {
+                "sidebar": "Sidebar",
+                "show": "Toggle Sidebar"
+            },
+            "displayStatus": "Display Node Status",
             "import": "Import",
             "export": "Export",
             "clipboard": "Clipboard",
             "library": "Library",
-            "configurationNodes": "Configuration nodes",
             "subflows": "Subflows",
-            "createSubflow": "Create subflow",
-            "selectionToSubflow": "Selection to subflow",
+            "createSubflow": "Create Subflow",
+            "selectionToSubflow": "Selection to Subflow",
             "workspaces": "Workspaces",
             "add": "Add",
             "rename": "Rename",
@@ -175,7 +177,8 @@
     },
     "sidebar": {
         "info": {
-            "title": "info",
+            "name": "Node Information",
+            "label": "info",
             "node": "Node",
             "type": "Type",
             "id": "ID",
@@ -186,7 +189,8 @@
             "arrayItems": "__count__ items"
         },
         "config": {
-            "title": "config"
+            "name": "Configuration nodes",
+            "label": "config"
         }
     }
 }

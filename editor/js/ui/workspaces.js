@@ -28,6 +28,7 @@ RED.workspaces = (function() {
             var tabId = RED.nodes.id();
             do {
                 workspaceIndex += 1;
+                //TODO: nls of Sheet
             } while($("#workspace-tabs a[title='Sheet "+workspaceIndex+"']").size() !== 0);
 
             ws = {type:"tab",id:tabId,label:"Sheet "+workspaceIndex};

@@ -16,17 +16,24 @@
 RED.sidebar.config = (function() {
 
     var content = document.createElement("div");
-    content.id = "tab-config";
     content.style.paddingTop = "4px";
     content.style.paddingLeft = "4px";
     content.style.paddingRight = "4px";
 
     var list = $("<ul>",{class:"tab-config-list"}).appendTo(content);
 
+    function init() {
+        RED.sidebar.addTab({
+            id: "config",
+            label: RED._("sidebar.config.label"),
+            name: RED._("sidebar.config.name"),
+            content: content,
+            closeable: true,
+            visible: false,
+            onchange: function() { refresh(); }
+        });
+    }
     function show() {
-        if (!RED.sidebar.containsTab("config")) {
-            RED.sidebar.addTab(RED._("sidebar.config.title"),content,true);
-        }
         refresh();
         RED.sidebar.show("config");
     }
@@ -78,6 +85,7 @@ RED.sidebar.config = (function() {
         });
     }
     return {
+        init:init,
         show:show,
         refresh:refresh
     }

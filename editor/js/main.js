@@ -160,7 +160,10 @@ var RED = (function() {
     function loadEditor() {
         RED.menu.init({id:"btn-sidemenu",
             options: [
-                {id:"menu-item-sidebar",label:RED._("menu.label.sidebar"),toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
+                {id:"menu-item-sidebar-menu",label:RED._("menu.label.sidebar.sidebar"),options:[
+                    {id:"menu-item-sidebar",label:RED._("menu.label.sidebar.show"),toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
+                    null
+                ]},
                 {id:"menu-item-status",label:RED._("menu.label.displayStatus"),toggle:true,onselect:toggleStatus, selected: true},
                 null,
                 {id:"menu-item-import",label:RED._("menu.label.import"),options:[
@@ -171,8 +174,6 @@ var RED = (function() {
                     {id:"menu-item-export-clipboard",label:RED._("menu.label.clipboard"),disabled:true,onselect:RED.clipboard.export},
                     {id:"menu-item-export-library",label:RED._("menu.label.library"),disabled:true,onselect:RED.library.export}
                 ]},
-                null,
-                {id:"menu-item-config-nodes",label:RED._("menu.label.configurationNodes"),onselect:RED.sidebar.config.show},
                 null,
                 {id:"menu-item-subflow",label:RED._("menu.label.subflows"), options: [
                     {id:"menu-item-subflow-create",label:RED._("menu.label.createSubflow"),onselect:RED.subflow.createSubflow},

@@ -27,17 +27,23 @@ RED.sidebar.info = (function() {
     });
 
     var content = document.createElement("div");
-    content.id = "tab-info";
     content.style.paddingTop = "4px";
     content.style.paddingLeft = "4px";
     content.style.paddingRight = "4px";
 
     var propertiesExpanded = false;
 
+    function init() {
+        RED.sidebar.addTab({
+            id: "info",
+            label: RED._("sidebar.info.label"),
+            name: RED._("sidebar.info.name"),
+            content: content
+        });
+
+    }
+
     function show() {
-        if (!RED.sidebar.containsTab("info")) {
-            RED.sidebar.addTab(RED._("sidebar.info.title"),content,false);
-        }
         RED.sidebar.show("info");
     }
 
@@ -184,6 +190,7 @@ RED.sidebar.info = (function() {
     });
 
     return {
+        init: init,
         show: show,
         refresh:refresh,
         clear: clear

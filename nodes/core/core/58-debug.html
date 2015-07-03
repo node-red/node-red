@@ -128,7 +128,6 @@
         },
         onpaletteadd: function() {
             var content = document.createElement("div");
-            content.id = "tab-debug";
 
             var toolbar = document.createElement("div");
             toolbar.id = "debug-toolbar";
@@ -140,7 +139,12 @@
             messages.id = "debug-content";
             content.appendChild(messages);
 
-            RED.sidebar.addTab(this._("debug.sidebarTitle"),content);
+            RED.sidebar.addTab({
+                id: "debug",
+                label: this._("debug.sidebar.label"),
+                name: this._("debug.sidebar.name"),
+                content: content
+            });
 
             function getTimestamp() {
                 var d = new Date();

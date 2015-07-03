@@ -20,26 +20,67 @@ RED.sidebar = (function() {
         id:"sidebar-tabs",
         onchange:function(tab) {
             $("#sidebar-content").children().hide();
-            $("#"+tab.id).show();
+            if (tab.onchange) {
+                tab.onchange.call(tab);
+            }
+            $(tab.content).show();
         },
         onremove: function(tab) {
-            $("#"+tab.id).remove();
+            $(tab.content).remove();
+            if (tab.onremove) {
+                tab.onremove.call(tab);
+            }
         }
     });
-    
-    function addTab(title,content,closeable) {
-        $("#sidebar-content").append(content);
-        $(content).hide();
-        var id = content.id || "tab-"+title.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\|])/g, "\\$1" );
-        sidebar_tabs.addTab({id:id,label:title,closeable:closeable});
-        //content.style.position = "absolute";
-        //$('#sidebar').tabs("refresh");
+
+    var knownTabs = {
+
+    };
+
+    function addTab(title,content,closeable,visible) {
+        var options;
+        if (typeof title === "string") {
+            // TODO: legacy support in case anyone uses this...
+            options = {
+                id: content.id,
+                label: title,
+                name: title,
+                content: content,
+                closeable: closeable,
+                visible: visible
+            }
+        } else if (typeof title === "object") {
+            options = title;
+        }
+
+
+
+        $("#sidebar-content").append(options.content);
+        $(options.content).hide();
+        var id = options.id;
+
+        RED.menu.addItem("menu-item-sidebar-menu",{
+            id:"menu-item-sidebar-menu-"+options.id,
+            label:options.name,
+            onselect:function() {
+                showSidebar(options.id);
+            }
+        });
+
+        knownTabs[options.id] = options;
+
+        if (options.visible !== false) {
+            sidebar_tabs.addTab(knownTabs[options.id]);
+        }
     }
 
-    function removeTab(title) {
-        sidebar_tabs.removeTab("tab-"+title);
+    function removeTab(id) {
+        sidebar_tabs.removeTab(id);
+        delete knownTabs[id];
+        RED.menu.removeItem("menu-item-sidebar-menu-"+id);
+        //TODO: remove menu item
     }
-    
+
     var sidebarSeparator =  {};
     $("#sidebar-separator").draggable({
             axis: "x",
@@ -70,7 +111,7 @@ RED.sidebar = (function() {
                 if (sidebarSeparator.opening) {
                     newSidebarWidth -= 13;
                 }
-                
+
                 if (newSidebarWidth > 150) {
                     if (sidebarSeparator.chartWidth+d < 200) {
                         ui.position.left = 200+sidebarSeparator.start-sidebarSeparator.chartWidth;
@@ -78,7 +119,7 @@ RED.sidebar = (function() {
                         newSidebarWidth = sidebarSeparator.width-d;
                     }
                 }
-                    
+
                 if (newSidebarWidth < 150) {
                     if (!sidebarSeparator.closing) {
                         $("#sidebar").addClass("closing");
@@ -117,7 +158,7 @@ RED.sidebar = (function() {
                 eventHandler.emit("resize");
             }
     });
-    
+
     function toggleSidebar(state) {
         if (!state) {
             $("#main-container").addClass("sidebar-closed");
@@ -127,28 +168,35 @@ RED.sidebar = (function() {
         }
         eventHandler.emit("resize");
     }
-    
+
     function showSidebar(id) {
         if (id) {
-            sidebar_tabs.activateTab("tab-"+id);
+            if (!containsTab(id)) {
+                sidebar_tabs.addTab(knownTabs[id]);
+            }
+            sidebar_tabs.activateTab(id);
+            if (!RED.menu.isSelected("menu-item-sidebar")) {
+                RED.menu.setSelected("menu-item-sidebar",true);
+            }
         }
     }
-    
+
     function containsTab(id) {
-        return sidebar_tabs.contains("tab-"+id);
+        return sidebar_tabs.contains(id);
     }
-    
+
     function init () {
         RED.keyboard.add(/* SPACE */ 32,{ctrl:true},function(){RED.menu.setSelected("menu-item-sidebar",!RED.menu.isSelected("menu-item-sidebar"));d3.event.preventDefault();});
         showSidebar();
-        RED.sidebar.info.show();
+        RED.sidebar.info.init();
+        RED.sidebar.config.init();
         // hide info bar at start if screen rather narrow...
         if ($(window).width() < 600) { toggleSidebar(); }
     }
-    
+
     var eventHandler = (function() {
         var handlers = {};
-        
+
         return {
             on: function(evt,func) {
                 handlers[evt] = handlers[evt]||[];
@@ -159,12 +207,12 @@ RED.sidebar = (function() {
                     for (var i=0;i<handlers[evt].length;i++) {
                         handlers[evt][i](arg);
                     }
-                    
+
                 }
             }
         }
     })();
-    
+
     return {
         init: init,
         addTab: addTab,
@@ -174,5 +222,5 @@ RED.sidebar = (function() {
         toggleSidebar: toggleSidebar,
         on: eventHandler.on
     }
-    
+
 })();
