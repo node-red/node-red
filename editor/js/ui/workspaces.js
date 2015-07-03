@@ -117,7 +117,8 @@ RED.workspaces = (function() {
             onremove: function(tab) {
                 RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() == 1);
                 RED.menu.removeItem("menu-item-workspace-menu-"+tab.id.replace(".","-"));
-            }
+            },
+            minimumActiveTabWidth: 150
         });
 
 

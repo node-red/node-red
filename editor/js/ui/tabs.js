@@ -21,6 +21,7 @@ RED.tabs = (function() {
 
     function createTabs(options) {
         var tabs = {};
+        var currentTabWidth;
 
         var ul = $("#"+options.id)
         ul.addClass("red-ui-tabs");
@@ -45,10 +46,18 @@ RED.tabs = (function() {
             }
             if (!link.parent().hasClass("active")) {
                 ul.children().removeClass("active");
+                ul.children().css({"transition": "width 100ms"});
                 link.parent().addClass("active");
                 if (options.onchange) {
                     options.onchange(tabs[link.attr('href').slice(1)]);
                 }
+                if (options.hasOwnProperty("minimumActiveTabWidth")) {
+                    ul.children().css({"width":currentTabWidth+"%"});
+                    link.parent().css({"width":options.minimumActiveTabWidth});
+                }
+                setTimeout(function() {
+                    ul.children().css({"transition": ""});
+                },100);
             }
         }
 
@@ -57,8 +66,18 @@ RED.tabs = (function() {
             var width = ul.width();
             var tabCount = tabs.size();
             var tabWidth = (width-6-(tabCount*7))/tabCount;
-            var pct = 100*tabWidth/width;
-            tabs.css({width:pct+"%"});
+            currentTabWidth = 100*tabWidth/width;
+            if (options.hasOwnProperty("minimumActiveTabWidth")) {
+                if (tabWidth < options.minimumActiveTabWidth) {
+                    tabCount -= 1;
+                    tabWidth = (width-7-options.minimumActiveTabWidth-(tabCount*7))/tabCount;
+                    currentTabWidth = 100*tabWidth/width;
+                }
+                tabs.css({width:currentTabWidth+"%"});
+                ul.find("li.red-ui-tab.active").css({"width":options.minimumActiveTabWidth});
+            } else {
+                tabs.css({width:currentTabWidth+"%"});
+            }
         }
 
         ul.find("li.red-ui-tab a").on("click",onTabClick).on("dblclick",onTabDblClick);
