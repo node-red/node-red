@@ -22,6 +22,7 @@ RED.tabs = (function() {
     function createTabs(options) {
         var tabs = {};
         var currentTabWidth;
+        var currentActiveTabWidth = 0;
 
         var ul = $("#"+options.id)
         ul.addClass("red-ui-tabs");
@@ -53,7 +54,9 @@ RED.tabs = (function() {
                 }
                 if (options.hasOwnProperty("minimumActiveTabWidth")) {
                     ul.children().css({"width":currentTabWidth+"%"});
-                    link.parent().css({"width":options.minimumActiveTabWidth});
+                    if (currentActiveTabWidth !== 0) {
+                        link.parent().css({"width":currentActiveTabWidth});
+                    }
                 }
                 setTimeout(function() {
                     ul.children().css({"transition": ""});
@@ -67,16 +70,21 @@ RED.tabs = (function() {
             var tabCount = tabs.size();
             var tabWidth = (width-6-(tabCount*7))/tabCount;
             currentTabWidth = 100*tabWidth/width;
+            currentActiveTabWidth = currentTabWidth+"%";
+
             if (options.hasOwnProperty("minimumActiveTabWidth")) {
                 if (tabWidth < options.minimumActiveTabWidth) {
                     tabCount -= 1;
                     tabWidth = (width-7-options.minimumActiveTabWidth-(tabCount*7))/tabCount;
                     currentTabWidth = 100*tabWidth/width;
+                    currentActiveTabWidth = options.minimumActiveTabWidth+"px";
+                } else {
+                    currentActiveTabWidth = 0;
                 }
-                tabs.css({width:currentTabWidth+"%"});
+            }
+            tabs.css({width:currentTabWidth+"%"});
+            if (currentActiveTabWidth !== 0) {
                 ul.find("li.red-ui-tab.active").css({"width":options.minimumActiveTabWidth});
-            } else {
-                tabs.css({width:currentTabWidth+"%"});
             }
         }
 
