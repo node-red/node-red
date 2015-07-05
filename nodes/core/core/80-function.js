@@ -106,15 +106,27 @@ module.exports = function(RED) {
                         this.status({fill:"yellow",shape:"dot",text:""+converted});
                     }
                 } catch(err) {
-                    var errorMessage = err.toString();
+
+                    var line = 0;
+                    var errorMessage;
                     var stack = err.stack.split(/\r?\n/);
                     if (stack.length > 0) {
-                        var m = /at undefined:(\d+):(\d+)$/.exec(stack[1]);
-                        if (m) {
-                            var line = Number(m[1])-1;
-                            var cha = m[2];
-                            errorMessage += " (line "+line+", col "+cha+")";
+                        while(line < stack.length && stack[line].indexOf("ReferenceError") !== 0) {
+                            line++;
                         }
+
+                        if (line < stack.length) {
+                            errorMessage = stack[line];
+                            var m = /:(\d+):(\d+)$/.exec(stack[line+1]);
+                            if (m) {
+                                var line = Number(m[1])-1;
+                                var cha = m[2];
+                                errorMessage += " (line "+line+", col "+cha+")";
+                            }
+                        }
+                    }
+                    if (!errorMessage) {
+                        errorMessage = err.toString();
                     }
                     this.error(errorMessage, msg);
                 }
