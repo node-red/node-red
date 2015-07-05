@@ -23,7 +23,7 @@ var child_process = require('child_process');
 
 describe('exec node', function() {
 
-    before(function(done) {
+    beforeEach(function(done) {
         helper.startServer(done);
     });
 
