@@ -16,10 +16,6 @@
 var RED = (function() {
 
 
-    function loadLocales() {
-        RED.i18n.init(loadEditor);
-    }
-
     function loadNodeList() {
         $.ajax({
             headers: {
@@ -225,7 +221,9 @@ var RED = (function() {
 
         ace.require("ace/ext/language_tools");
 
-        RED.settings.init(loadLocales);
+        RED.i18n.init(function() {
+            RED.settings.init(loadEditor);
+        })
     });
 
 

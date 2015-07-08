@@ -38,9 +38,9 @@ var errorHandler = function(err,req,res,next) {
 };
 
 function init(adminApp,storage) {
-    
+
     auth.init(settings,storage);
-    
+
     // Editor
     if (!settings.disableEditor) {
         ui.init(settings);
@@ -58,7 +58,7 @@ function init(adminApp,storage) {
     adminApp.use(express.urlencoded());
 
     adminApp.get("/auth/login",auth.login);
-    
+
     if (settings.adminAuth) {
         //TODO: all passport references ought to be in ./auth
         adminApp.use(passport.initialize());
@@ -74,7 +74,7 @@ function init(adminApp,storage) {
     // Flows
     adminApp.get("/flows",needsPermission("flows.read"),flows.get);
     adminApp.post("/flows",needsPermission("flows.write"),flows.post);
-    
+
     // Nodes
     adminApp.get("/nodes",needsPermission("nodes.read"),nodes.getAll);
     adminApp.post("/nodes",needsPermission("nodes.write"),nodes.post);
@@ -82,21 +82,21 @@ function init(adminApp,storage) {
     adminApp.get("/nodes/:mod",needsPermission("nodes.read"),nodes.getModule);
     adminApp.put("/nodes/:mod",needsPermission("nodes.write"),nodes.putModule);
     adminApp.delete("/nodes/:mod",needsPermission("nodes.write"),nodes.delete);
-    
+
     adminApp.get("/nodes/:mod/:set",needsPermission("nodes.read"),nodes.getSet);
     adminApp.put("/nodes/:mod/:set",needsPermission("nodes.write"),nodes.putSet);
 
-    adminApp.get(/locales\/(.+)\/?$/,needsPermission("nodes.read"),locales.get);
+    adminApp.get(/locales\/(.+)\/?$/,locales.get);
 
     // Library
     library.init(adminApp);
     adminApp.post(new RegExp("/library/flows\/(.*)"),needsPermission("library.write"),library.post);
     adminApp.get("/library/flows",needsPermission("library.read"),library.getAll);
     adminApp.get(new RegExp("/library/flows\/(.*)"),needsPermission("library.read"),library.get);
-    
+
     // Settings
     adminApp.get("/settings",needsPermission("settings.read"),info.settings);
-    
+
     // Error Handler
     adminApp.use(errorHandler);
 }
