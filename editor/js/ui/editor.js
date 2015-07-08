@@ -518,7 +518,8 @@ RED.editor = (function() {
         for (var d in definition.defaults) {
             if (definition.defaults.hasOwnProperty(d)) {
                 if (definition.defaults[d].type) {
-                    if (definition.defaults[d].exclusive) {
+                    var configTypeDef = RED.nodes.getType(definition.defaults[d].type);
+                    if (configTypeDef.exclusive) {
                         prepareConfigNodeButton(node,d,definition.defaults[d].type);
                     } else {
                         prepareConfigNodeSelect(node,d,definition.defaults[d].type);

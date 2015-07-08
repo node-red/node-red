@@ -756,9 +756,10 @@ RED.view = (function() {
                     if (node.x < 0) {
                         node.x = 25
                     }
-                    var rmlinks = RED.nodes.remove(node.id);
+                    var removedEntities = RED.nodes.remove(node.id);
                     removedNodes.push(node);
-                    removedLinks = removedLinks.concat(rmlinks);
+                    removedNodes = removedNodes.concat(removedEntities.nodes);
+                    removedLinks = removedLinks.concat(removedEntities.links);
                 } else {
                     if (node.direction === "out") {
                         removedSubflowOutputs.push(node);
@@ -851,8 +852,21 @@ RED.view = (function() {
             var nns = [];
             for (var n=0;n<moving_set.length;n++) {
                 var node = moving_set[n].n;
+                // The only time a node.type == subflow can be selected is the
+                // input/output 'proxy' nodes. They cannot be copied.
                 if (node.type != "subflow") {
+                    for (var d in node._def.defaults) {
+                        if (node._def.defaults.hasOwnProperty(d)) {
+                            if (node._def.defaults[d].type) {
+                                var configNode = RED.nodes.node(node[d]);
+                                if (configNode && configNode._def.exclusive) {
+                                    nns.push(RED.nodes.convertNode(configNode));
+                                }
+                            }
+                        }
+                    }
                     nns.push(RED.nodes.convertNode(node));
+                    //TODO: if the node has an exclusive config node, it should also be copied, to ensure it remains exclusive...
                 }
             }
             clipboard = JSON.stringify(nns);

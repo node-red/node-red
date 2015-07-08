@@ -210,6 +210,7 @@ RED.nodes = (function() {
 
     function removeNode(id) {
         var removedLinks = [];
+        var removedNodes = [];
         var node;
         if (id in configNodes) {
             node = configNodes[id];
@@ -231,8 +232,13 @@ RED.nodes = (function() {
                                 var configNode = configNodes[node[d]];
                                 if (configNode) {
                                     updatedConfigNode = true;
-                                    var users = configNode.users;
-                                    users.splice(users.indexOf(node),1);
+                                    if (configNode._def.exclusive) {
+                                        removeNode(node[d]);
+                                        removedNodes.push(configNode);
+                                    } else {
+                                        var users = configNode.users;
+                                        users.splice(users.indexOf(node),1);
+                                    }
                                 }
                             }
                         }
@@ -246,7 +252,7 @@ RED.nodes = (function() {
         if (node._def.onremove) {
             node._def.onremove.call(n);
         }
-        return removedLinks;
+        return {links:removedLinks,nodes:removedNodes};
     }
 
     function removeLink(l) {
@@ -539,6 +545,32 @@ RED.nodes = (function() {
         return nns;
     }
 
+    function compareNodes(nodeA,nodeB) {
+        if (nodeA.id != nodeB.id || nodeA.type != nodeB.type) {
+            return false;
+        }
+        var def = nodeA._def;
+        for (var d in def.defaults) {
+            if (def.defaults.hasOwnProperty(d)) {
+                var vA = nodeA[d];
+                var vB = nodeB[d];
+                if (typeof vA !== typeof vB) {
+                    return false;
+                }
+                if (vA === null || typeof vA === "string" || typeof vA === "number") {
+                    if (vA !== vB) {
+                        return false;
+                    }
+                } else {
+                    if (JSON.stringify(vA) !== JSON.stringify(vB)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     function importNodes(newNodesObj,createNewIds) {
         var i;
         var n;
@@ -607,6 +639,9 @@ RED.nodes = (function() {
         var workspace_map = {};
         var new_subflows = [];
         var subflow_map = {};
+        var node_map = {};
+        var new_nodes = [];
+        var new_links = [];
         var nid;
         var def;
         for (i=0;i<newNodes.length;i++) {
@@ -653,7 +688,8 @@ RED.nodes = (function() {
             } else {
                 def = registry.getNodeType(n.type);
                 if (def && def.category == "config") {
-                    if (!RED.nodes.node(n.id)) {
+                    var existingConfigNode = RED.nodes.node(n.id);
+                    if (!existingConfigNode || !compareNodes(existingConfigNode,n) || existingConfigNode._def.exclusive) {
                         var configNode = {id:n.id,type:n.type,users:[]};
                         for (var d in def.defaults) {
                             if (def.defaults.hasOwnProperty(d)) {
@@ -662,22 +698,22 @@ RED.nodes = (function() {
                         }
                         configNode.label = def.label;
                         configNode._def = def;
+                        if (existingConfigNode || createNewIds) {
+                            configNode.id = getID();
+                        }
+                        node_map[n.id] = configNode;
                         RED.nodes.add(configNode);
                     }
                 }
             }
         }
         if (defaultWorkspace == null) {
-            defaultWorkspace = { type:"tab", id:getID(), label:"Sheet 1" };
+            defaultWorkspace = { type:"tab", id:getID(), label:RED._('workspace.defaultName',{number:1})};
             addWorkspace(defaultWorkspace);
             RED.workspaces.add(defaultWorkspace);
             new_workspaces.push(defaultWorkspace);
             activeWorkspace = RED.workspaces.active();
         }
-
-        var node_map = {};
-        var new_nodes = [];
-        var new_links = [];
 
         for (i=0;i<newNodes.length;i++) {
             n = newNodes[i];
@@ -749,7 +785,15 @@ RED.nodes = (function() {
                             node.outputs = n.outputs||node._def.outputs;
                             for (var d2 in node._def.defaults) {
                                 if (node._def.defaults.hasOwnProperty(d2)) {
-                                    node[d2] = n[d2];
+                                    if (node._def.defaults[d2].type) {
+                                        if (node_map[n[d2]]) {
+                                            node[d2] = node_map[n[d2]].id;
+                                        } else {
+                                            node[d2] = n[d2];
+                                        }
+                                    } else {
+                                        node[d2] = n[d2];
+                                    }
                                 }
                             }
                         }

@@ -153,10 +153,14 @@ RED.subflow = (function() {
                 }
             });
 
+            var removedConfigNodes = [];
             for (var i=0;i<removedNodes.length;i++) {
-                var rmlinks = RED.nodes.remove(removedNodes[i].id);
-                removedLinks = removedLinks.concat(rmlinks);
+                var removedEntities = RED.nodes.remove(removedNodes[i].id);
+                removedLinks = removedLinks.concat(removedEntities.links);
+                removedConfigNodes = removedConfigNodes.concat(removedEntities.nodes);
             }
+            // TODO: this whole delete logic should be in RED.nodes.removeSubflow..
+            removedNodes = removedNodes.concat(removedConfigNodes);
 
             var activeSubflow = getSubflow();
 
