@@ -31,7 +31,7 @@ module.exports = function(RED) {
 
         if (n.timeoutUnits === "milliseconds") {
             this.timeout = n.timeout;
-        }  else if (n.timeoutUnits === "minutes") {
+        } else if (n.timeoutUnits === "minutes") {
             this.timeout = n.timeout * (60 * 1000);
         } else if (n.timeoutUnits === "hours") {
             this.timeout = n.timeout * (60 * 60 * 1000);
@@ -81,11 +81,15 @@ module.exports = function(RED) {
         if (this.pauseType === "delay") {
             this.on("input", function(msg) {
                 var id;
-                id = setTimeout(function(){
+                id = setTimeout(function() {
                     node.idList.splice(node.idList.indexOf(id),1);
+                    if (node.idList.length === 0) { node.status({}); }
                     node.send(msg);
                 }, node.timeout);
                 this.idList.push(id);
+                if ((node.timeout > 1000) && (node.idList.length === 0)) {
+                    node.status({fill:"blue",shape:"dot"});
+                }
             });
 
             this.on("close", function() {
@@ -93,6 +97,7 @@ module.exports = function(RED) {
                     clearTimeout(this.idList[i]);
                 }
                 this.idList = [];
+                this.status({});
             });
 
         } else if (this.pauseType === "rate") {
@@ -112,7 +117,7 @@ module.exports = function(RED) {
                             if (node.buffer.length === 0) {
                                 clearInterval(node.intervalID);
                                 node.intervalID = -1;
-                                node.status({text:""});
+                                node.status({});
                             }
 
                             if (node.buffer.length > 0) {
@@ -165,13 +170,13 @@ module.exports = function(RED) {
             this.on("close", function() {
                 clearInterval(this.intervalID);
                 this.buffer = [];
-                node.status({text:node.buffer.length});
+                node.status({});
             });
 
         } else if (this.pauseType === "random") {
             this.on("input", function(msg) {
                 var wait = node.randomFirst + (node.diff * Math.random());
-                var id = setTimeout(function(){
+                var id = setTimeout(function() {
                     node.idList.splice(node.idList.indexOf(id),1);
                     node.send(msg);
                 }, wait);
