@@ -86,7 +86,7 @@ var RED = (function() {
                     var node = RED.nodes.node(parts[1]);
                     if (node) {
                         if (msg.text) {
-                            msg.text = node._(msg.text,{defaultValue:msg.text});
+                            msg.text = node._(msg.text.toString(),{defaultValue:msg.text.toString()});
                         }
                         node.status = msg;
                         if (statusEnabled) {
