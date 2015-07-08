@@ -135,9 +135,9 @@
         "dropmsg": "drop intermediate messages",
         "label": {
             "delay": "delay",
-            "limitlabel": "limit",
-            "randomlabel": "ramdom",
-            "queuelabel": "queue"
+            "limit": "limit",
+            "random": "ramdom",
+            "queue": "queue"
         },
         "error": {
             "buffer": "buffer exceeded 1000 messages"
