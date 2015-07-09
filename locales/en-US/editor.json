@@ -178,7 +178,7 @@
     },
     "sidebar": {
         "info": {
-            "name": "Node Information",
+            "name": "Information",
             "label": "info",
             "node": "Node",
             "type": "Type",

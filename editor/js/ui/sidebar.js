@@ -64,7 +64,8 @@ RED.sidebar = (function() {
             label:options.name,
             onselect:function() {
                 showSidebar(options.id);
-            }
+            },
+            group: "sidebar-tabs"
         });
 
         knownTabs[options.id] = options;

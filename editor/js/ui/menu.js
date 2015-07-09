@@ -29,7 +29,7 @@ RED.menu = (function() {
                 return null;
             }
         }
-        
+
         function setInitialState() {
             var savedStateActive = isSavedStateActive(opt.id);
             if (savedStateActive) {
@@ -52,12 +52,16 @@ RED.menu = (function() {
             item = $('<li class="divider"></li>');
         } else {
             item = $('<li></li>');
-            
+
+            if (opt.group) {
+                item.addClass("menu-group-"+opt.group);
+
+            }
             var linkContent = '<a '+(opt.id?'id="'+opt.id+'" ':'')+'tabindex="-1" href="#">';
             if (opt.toggle) {
                 linkContent += '<i class="fa fa-square pull-left"></i>';
                 linkContent += '<i class="fa fa-check-square pull-left"></i>';
-                
+
             }
             if (opt.icon !== undefined) {
                 if (/\.png/.test(opt.icon)) {
@@ -66,16 +70,16 @@ RED.menu = (function() {
                     linkContent += '<i class="'+(opt.icon?opt.icon:'" style="display: inline-block;"')+'"></i> ';
                 }
             }
-            
+
             if (opt.sublabel) {
                 linkContent += '<span class="menu-label-container"><span class="menu-label">'+opt.label+'</span>'+
                                '<span class="menu-sublabel">'+opt.sublabel+'</span></span>'
             } else {
                 linkContent += '<span class="menu-label">'+opt.label+'</span>'
             }
-            
+
             linkContent += '</a>';
-                
+
             var link = $(linkContent).appendTo(item);
 
             menuItems[opt.id] = opt;
@@ -139,7 +143,7 @@ RED.menu = (function() {
                     content: opt.tip
                 });
             }
-            
+
         }
 
 
@@ -154,8 +158,8 @@ RED.menu = (function() {
         //    $("#"+options.id+"-submenu").show();
         //    event.preventDefault();
         //});
-        
-        
+
+
         var topMenu = $("<ul/>",{id:options.id+"-submenu", class:"dropdown-menu pull-right"}).insertAfter(button);
 
         var lastAddedSeparator = false;
@@ -208,7 +212,27 @@ RED.menu = (function() {
     }
 
     function addItem(id,opt) {
-        createMenuItem(opt).appendTo("#"+id+"-submenu");
+        var item = createMenuItem(opt);
+        if (opt.group) {
+            var groupItems = $("#"+id+"-submenu").children(".menu-group-"+opt.group);
+            if (groupItems.length === 0) {
+                item.appendTo("#"+id+"-submenu");
+            } else {
+                for (var i=0;i<groupItems.length;i++) {
+                    var groupItem = groupItems[i];
+                    var label = $(groupItem).find(".menu-label").html();
+                    if (opt.label < label) {
+                        $(groupItem).before(item);
+                        break;
+                    }
+                }
+                if (i === groupItems.length) {
+                    item.appendTo("#"+id+"-submenu");
+                }
+            }
+        } else {
+            item.appendTo("#"+id+"-submenu");
+        }
     }
     function removeItem(id) {
         $("#"+id).parent().remove();
