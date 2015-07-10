@@ -17,6 +17,7 @@
 var when = require("when");
 var fs = require("fs");
 var path = require("path");
+var semver = require("semver");
 
 var events = require("../../events");
 
@@ -35,7 +36,7 @@ events.on("node-locales-dir", function(info) {
 function init(_settings) {
     settings = _settings;
     localfilesystem.init(settings);
-    
+
     RED = require('../../red');
 
 }
@@ -45,7 +46,7 @@ function load(defaultNodesDir,disableNodePathScan) {
     // We should expose that as an option at some point, although the
     // performance gains are minimal.
     //return loadNodeFiles(registry.getModuleList());
-    
+
     var nodeFiles = localfilesystem.getNodeFiles(defaultNodesDir,disableNodePathScan);
     return loadNodeFiles(nodeFiles);
 }
@@ -55,6 +56,11 @@ function loadNodeFiles(nodeFiles) {
     for (var module in nodeFiles) {
         /* istanbul ignore else */
         if (nodeFiles.hasOwnProperty(module)) {
+            if (nodeFiles[module].redVersion &&
+                !semver.satisfies(RED.version().replace("-git",""), nodeFiles[module].redVersion)) {
+                //TODO: log it
+                continue;
+            }
             if (module == "node-red" || !registry.getModuleInfo(module)) {
                 var first = true;
                 for (var node in nodeFiles[module].nodes) {
@@ -72,7 +78,7 @@ function loadNodeFiles(nodeFiles) {
                                 }
                             }
                             var moduleFn = parts.slice(0,i+2).join("/");
-                            
+
                             try {
                                 var stat = fs.statSync(moduleFn);
                             } catch(err) {
@@ -80,7 +86,7 @@ function loadNodeFiles(nodeFiles) {
                                 break;
                             }
                         }
-                        
+
                         try {
                             promises.push(loadNodeConfig(nodeFiles[module].nodes[node]))
                         } catch(err) {
@@ -106,7 +112,7 @@ function loadNodeConfig(fileInfo) {
         var module = fileInfo.module;
         var name = fileInfo.name;
         var version = fileInfo.version;
-        
+
         var id = module + "/" + name;
         var info = registry.getNodeInfo(id);
         var isEnabled = true;
@@ -116,7 +122,7 @@ function loadNodeConfig(fileInfo) {
             }
             isEnabled = info.enabled;
         }
-    
+
         var node = {
             id: id,
             module: module,
@@ -130,7 +136,7 @@ function loadNodeConfig(fileInfo) {
         if (fileInfo.hasOwnProperty("types")) {
             node.types = fileInfo.types;
         }
-    
+
         fs.readFile(node.template,'utf8', function(err,content) {
             if (err) {
                 node.types = [];
@@ -144,17 +150,17 @@ function loadNodeConfig(fileInfo) {
                     node.err = err.toString();
                 }
                 resolve(node);
-            } else {                
+            } else {
                 var types = [];
-        
+
                 var regExp = /<script ([^>]*)data-template-name=['"]([^'"]*)['"]/gi;
                 var match = null;
-        
+
                 while((match = regExp.exec(content)) !== null) {
                     types.push(match[2]);
                 }
                 node.types = types;
-        
+
                 var langRegExp = /^<script[^>]* data-lang=['"](.+?)['"]/i;
                 regExp = /(<script[^>]* data-help-name=[\s\S]*?<\/script>)/gi;
                 match = null;
@@ -165,7 +171,7 @@ function loadNodeConfig(fileInfo) {
                     mainContent += content.substring(index,regExp.lastIndex-match[1].length);
                     index = regExp.lastIndex;
                     var help = content.substring(regExp.lastIndex-match[1].length,regExp.lastIndex);
-                    
+
                     var lang = "en-US";
                     if ((match = langRegExp.exec(help)) !== null) {
                         lang = match[1];
@@ -173,7 +179,7 @@ function loadNodeConfig(fileInfo) {
                     if (!helpContent.hasOwnProperty(lang)) {
                         helpContent[lang] = "";
                     }
-                    
+
                     helpContent[lang] += help;
                 }
                 mainContent += content.substring(index);
@@ -215,9 +221,9 @@ function loadNodeConfig(fileInfo) {
 //        credentials: RED.credentials,
 //        events: RED.events,
 //        log: RED.log,
-//        
+//
 //    }
-//    
+//
 //}
 
 
@@ -240,7 +246,7 @@ function loadNodeSet(node) {
         var loadPromise = null;
         var r = require(node.file);
         if (typeof r === "function") {
-            
+
             var red = {};
             for (var i in RED) {
                 if (RED.hasOwnProperty(i) && !/^(init|start|stop)$/.test(i)) {
@@ -334,7 +340,7 @@ function addFile(file) {
             nodes: {}
         };
         fileObj[nodeFiles.module].nodes[nodeFiles.name] = nodeFiles;
-        
+
         return loadNodeFiles(fileObj);
     } else {
         var e = new Error();

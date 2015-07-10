@@ -58,7 +58,7 @@ function getLocalFile(file) {
         };
     }
     return null;
-    
+
 }
 
 
@@ -141,7 +141,7 @@ function scanTreeForNodesModules(moduleName) {
         userDir = path.join(settings.userDir,"node_modules");
         results = results.concat(scanDirForNodesModules(userDir,moduleName));
     }
-    
+
     var up = path.resolve(path.join(dir,".."));
     while (up !== dir) {
         var pm = path.join(dir,"node_modules");
@@ -155,14 +155,14 @@ function scanTreeForNodesModules(moduleName) {
 }
 
 function getModuleNodeFiles(module) {
-    
+
     var moduleDir = module.dir;
     var pkg = module.package;
-    
+
     var nodes = pkg['node-red'].nodes||{};
     var results = [];
     var iconDirs = [];
-    
+
     for (var n in nodes) {
         /* istanbul ignore else */
         if (nodes.hasOwnProperty(n)) {
@@ -186,24 +186,24 @@ function getModuleNodeFiles(module) {
 }
 
 function getNodeFiles(_defaultNodesDir,disableNodePathScan) {
-    
+
     if (_defaultNodesDir) {
         defaultNodesDir = _defaultNodesDir;
     }
-    
+
     var dir;
     // Find all of the nodes to load
     //console.log(defaultNodesDir);
     var nodeFiles = getLocalNodeFiles(path.resolve(defaultNodesDir));
     //console.log(nodeFiles);
-    
+
     var defaultLocalesPath = path.resolve(path.join(defaultNodesDir,"core","locales"));
     events.emit("node-locales-dir", {
         namespace:"node-red",
         dir: defaultLocalesPath,
         file: "messages.json"
     });
-    
+
     if (settings.userDir) {
         dir = path.join(settings.userDir,"nodes");
         nodeFiles = nodeFiles.concat(getLocalNodeFiles(dir));
@@ -217,7 +217,7 @@ function getNodeFiles(_defaultNodesDir,disableNodePathScan) {
             nodeFiles = nodeFiles.concat(getLocalNodeFiles(dir[i]));
         }
     }
-    
+
     var nodeList = {
         "node-red": {
             name: "node-red",
@@ -228,7 +228,7 @@ function getNodeFiles(_defaultNodesDir,disableNodePathScan) {
     nodeFiles.forEach(function(node) {
         nodeList["node-red"].nodes[node.name] = node;
     });
-    
+
     if (!disableNodePathScan) {
         var moduleFiles = scanTreeForNodesModules();
         moduleFiles.forEach(function(moduleFile) {
@@ -238,6 +238,9 @@ function getNodeFiles(_defaultNodesDir,disableNodePathScan) {
                 version: moduleFile.package.version,
                 nodes: {}
             };
+            if (moduleFile.package['node-red'].version) {
+                nodeList[moduleFile.package.name].redVersion = moduleFile.package['node-red'].version;
+            }
             nodeModuleFiles.forEach(function(node) {
                 nodeList[moduleFile.package.name].nodes[node.name] = node;
             });
@@ -249,7 +252,7 @@ function getNodeFiles(_defaultNodesDir,disableNodePathScan) {
 
 function getModuleFiles(module) {
     var nodeList = {};
-    
+
     var moduleFiles = scanTreeForNodesModules(module);
     if (moduleFiles.length === 0) {
         var err = new Error(log._("nodes.registry.localfilesystem.module-not-found", {module:module}));
@@ -264,6 +267,9 @@ function getModuleFiles(module) {
             version: moduleFile.package.version,
             nodes: {}
         };
+        if (moduleFile.package['node-red'].version) {
+            nodeList[moduleFile.package.name].redVersion = moduleFile.package['node-red'].version;
+        }
         nodeModuleFiles.forEach(function(node) {
             nodeList[moduleFile.package.name].nodes[node.name] = node;
         });

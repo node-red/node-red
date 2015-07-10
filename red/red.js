@@ -67,7 +67,7 @@ var RED = {
         var p = require(path.join(process.env.NODE_RED_HOME,"package.json")).version;
         /* istanbul ignore else */
         if (fs.existsSync(path.join(process.env.NODE_RED_HOME,".git"))) {
-            p += ".git";
+            p += "-git";
         }
         return p;
     },
