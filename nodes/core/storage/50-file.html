@@ -29,8 +29,13 @@
     </div>
     <div class="form-row" id="node-appline">
         <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-appendNewline" placeholder="Name" style="display: inline-block; width: auto; vertical-align: top;">
+        <input type="checkbox" id="node-input-appendNewline" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-appendNewline" style="width: 70%;"><span data-i18n="file.label.addnewline"></span></label>
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-createDir" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-createDir" style="width: 70%;"><span data-i18n="file.label.createdir"></span></label>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
@@ -76,6 +81,7 @@
             name: {value:""},
             filename: {value:""},
             appendNewline: {value:true},
+            createDir: {value:false},
             overwriteFile: {value:"false"}
         },
         color:"BurlyWood",

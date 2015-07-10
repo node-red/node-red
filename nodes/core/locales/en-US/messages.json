@@ -60,7 +60,7 @@
             "Sunday"
         ],
         "on": "on",
-        "onstart": "Inject once at start?",
+        "onstart": "Inject once at start ?",
         "tip": "<b>Note:</b> \"interval between times\" and \"at a specific time\" will use cron.<br/>See info box for details.",
         "success": "Successfully injected: __label__",
         "errors": {
@@ -96,7 +96,7 @@
         "placeholder": {
             "extraparams": "extra input parameters"
         },
-        "spawn": "Use spawn() instead of exec()?",
+        "spawn": "Use spawn() instead of exec() ?",
         "tip": "Tip: <i>spawn</i> expects only one command word - and appended args to be comma separated."
     },
     "function": {
@@ -210,7 +210,7 @@
             "return": "Return"
         },
         "setby": "- set by msg.method -",
-        "basicauth": "Use basic authentication?",
+        "basicauth": "Use basic authentication ?",
         "utf8": "a UTF-8 string",
         "binary": "a binary buffer",
         "json": "a parsed JSON object",
@@ -269,8 +269,8 @@
             "host": "at host",
             "payload": "payload(s)",
             "delimited": "delimited by",
-            "close-connection": "Close connection after each message is sent?",
-            "decode-base64": "Decode Base64 message?",
+            "close-connection": "Close connection after each message is sent ?",
+            "decode-base64": "Decode Base64 message ?",
             "server": "Server",
             "return": "Return"
         },
@@ -326,7 +326,7 @@
             "send": "Send a",
             "toport": "to port",
             "address": "Address",
-            "decode-base64": "Decode Base64 encoded payload?"
+            "decode-base64": "Decode Base64 encoded payload ?"
         },
         "placeholder": {
             "interface": "(optional) ip address of eth0",
@@ -418,7 +418,7 @@
             "resultrange": "to the result range",
             "from": "from",
             "to": "to",
-            "roundresult": "Round result to the nearest integer?"
+            "roundresult": "Round result to the nearest integer ?"
         },
         "placeholder": {
             "min": "e.g. 0",
@@ -509,9 +509,9 @@
             "gpiopin": "GPIO Pin",
             "selectpin": "select pin",
             "resistor": "Resistor?",
-            "readinitial": "Read initial state of pin on deploy/restart?",
+            "readinitial": "Read initial state of pin on deploy/restart ?",
             "type": "Type",
-            "initpin": "Initialise pin state?",
+            "initpin": "Initialise pin state ?",
             "button": "Button",
             "pimouse": "Pi Mouse",
             "left": "Left",
@@ -571,7 +571,7 @@
     "tail": {
         "label": {
             "filename": "Filename",
-            "splitlines": "Split lines on \\n?"
+            "splitlines": "Split lines on \\n ?"
         },
         "errors": {
             "windowsnotsupport": "Not currently supported on Windows."
@@ -581,7 +581,8 @@
         "label": {
             "filename": "Filename",
             "action": "Action",
-            "addnewline": "Add newline (\\n) to each payload?",
+            "addnewline": "Add newline (\\n) to each payload ?",
+            "createdir": "Create directory if it doesn't exist ?",
             "outputas": "Output as",
             "filelabel": "file",
             "deletelabel": "delete __file__"
@@ -605,7 +606,8 @@
             "invaliddelete": "Warning: Invalid delete. Please use specific delete option in config dialog.",
             "deletefail": "failed to delete file: __error__",
             "writefail": "failed to write to file: __error__",
-            "appendfail": "failed to append to file: __error__"
+            "appendfail": "failed to append to file: __error__",
+            "createfail": "failed to create file: __error__"
         }
     }
 }

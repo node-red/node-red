@@ -240,6 +240,109 @@ describe('file Nodes', function() {
             });
         });
 
+        it('should fail to create a new directory if not asked to do so (append)', function(done) {
+            // Stub file write so we can make writes fail
+            var fileToTest2 = path.join(resourcesDir,"a","50-file-test-file.txt");
+            //var spy = sinon.stub(fs, 'appendFile', function(arg,arg2,arg3,arg4){ arg4(new Error("Stub error message")); });
+
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":true, "overwriteFile":false}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                setTimeout(function() {
+                    try {
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == "file";
+                        });
+                        //console.log(logEvents);
+                        logEvents.should.have.length(1);
+                        logEvents[0][0].should.have.a.property('msg');
+                        logEvents[0][0].msg.toString().should.startWith("file.errors.appendfail");
+                        done();
+                    }
+                    catch(e) { done(e); }
+                    //finally { fs.appendFile.restore(); }
+                },wait);
+                n1.receive({payload:"test2"});
+            });
+        });
+
+        it('should try to create a new directory if asked to do so (append)', function(done) {
+            // Stub file write so we can make writes fail
+            var fileToTest2 = path.join(resourcesDir,"a","50-file-test-file.txt");
+            var spy = sinon.stub(fs, "ensureFile", function(arg1,arg2,arg3,arg4) { arg2(null); });
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":true, "overwriteFile":false, "createDir":true}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                setTimeout(function() {
+                    try {
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == "file";
+                        });
+                        //console.log(logEvents);
+                        logEvents.should.have.length(1);
+                        logEvents[0][0].should.have.a.property('msg');
+                        logEvents[0][0].msg.toString().should.startWith("file.errors.appendfail");
+                        done();
+                    }
+                    catch(e) { done(e); }
+                    finally { fs.ensureFile.restore(); }
+                },wait);
+                n1.receive({payload:"test2"});
+            });
+        });
+
+        it('should fail to create a new directory if not asked to do so (overwrite)', function(done) {
+            // Stub file write so we can make writes fail
+            var fileToTest2 = path.join(resourcesDir,"a","50-file-test-file.txt");
+            //var spy = sinon.stub(fs, 'appendFile', function(arg,arg2,arg3,arg4){ arg4(new Error("Stub error message")); });
+
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":false, "overwriteFile":true}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                setTimeout(function() {
+                    try {
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == "file";
+                        });
+                        //console.log(logEvents);
+                        logEvents.should.have.length(1);
+                        logEvents[0][0].should.have.a.property('msg');
+                        logEvents[0][0].msg.toString().should.startWith("file.errors.writefail");
+                        done();
+                    }
+                    catch(e) { done(e); }
+                    //finally { fs.appendFile.restore(); }
+                },wait);
+                n1.receive({payload:"test2"});
+            });
+        });
+
+        it('should try to create a new directory if asked to do so (overwrite)', function(done) {
+            // Stub file write so we can make writes fail
+            var fileToTest2 = path.join(resourcesDir,"a","50-file-test-file.txt");
+            var spy = sinon.stub(fs, "ensureFile", function(arg1,arg2,arg3,arg4){ arg2(null); });
+
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":true, "overwriteFile":true, "createDir":true}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                setTimeout(function() {
+                    try {
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == "file";
+                        });
+                        //console.log(logEvents);
+                        logEvents.should.have.length(1);
+                        logEvents[0][0].should.have.a.property('msg');
+                        logEvents[0][0].msg.toString().should.startWith("file.errors.writefail");
+                        done();
+                    }
+                    catch(e) { done(e); }
+                    finally { fs.ensureFile.restore(); }
+                },wait);
+                n1.receive({payload:"test2"});
+            });
+        });
+
     });
 
 
@@ -303,27 +406,28 @@ describe('file Nodes', function() {
             //});
         //});
 
-        it('should warn if msg.props try to overide', function(done) {
-            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":fileToTest, "format":"", wires:[["n2"]]},
-                    {id:"n2", type:"helper"}];
-            helper.load(fileNode, flow, function() {
-                var n1 = helper.getNode("fileInNode1");
-                var n2 = helper.getNode("n2");
-                n2.on("input", function(msg) {
-                    msg.should.have.property('payload');
-                    msg.payload.should.have.length(39).and.be.a.Buffer;
-                    msg.payload.toString().should.equal("File message line 1\File message line 2\n");
-                    var logEvents = helper.log().args.filter(function(evt) {
-                        return evt[0].type == "file in";
-                    });
-                    logEvents.should.have.length(1);
-                    logEvents[0][0].should.have.a.property('msg');
-                    logEvents[0][0].msg.toString().should.startWith("file.errors.nooverride");
-                    done();
-                });
-                n1.receive({payload:"",filename:"foo.txt"});
-            });
-        });
+// Commented out as we no longer need to warn of the very old deprecated behaviour
+        //it('should warn if msg.props try to overide', function(done) {
+            //var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":fileToTest, "format":"", wires:[["n2"]]},
+                    //{id:"n2", type:"helper"}];
+            //helper.load(fileNode, flow, function() {
+                //var n1 = helper.getNode("fileInNode1");
+                //var n2 = helper.getNode("n2");
+                //n2.on("input", function(msg) {
+                    //msg.should.have.property('payload');
+                    //msg.payload.should.have.length(39).and.be.a.Buffer;
+                    //msg.payload.toString().should.equal("File message line 1\File message line 2\n");
+                    //var logEvents = helper.log().args.filter(function(evt) {
+                        //return evt[0].type == "file in";
+                    //});
+                    //logEvents.should.have.length(1);
+                    //logEvents[0][0].should.have.a.property('msg');
+                    //logEvents[0][0].msg.toString().should.startWith("file.errors.nooverride");
+                    //done();
+                //});
+                //n1.receive({payload:"",filename:"foo.txt"});
+            //});
+        //});
 
         it('should warn if no filename set', function(done) {
             var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "format":""}];
