@@ -27,7 +27,7 @@ RED.nodes = (function() {
 
     function setDirty(d) {
         dirty = d;
-        eventHandler.emit("change",{dirty:dirty});
+        RED.events.emit("nodes:change",{dirty:dirty});
     }
 
     var registry = (function() {
@@ -894,29 +894,7 @@ RED.nodes = (function() {
         return result;
     }
 
-    // TODO: DRY
-    var eventHandler = (function() {
-        var handlers = {};
-
-        return {
-            on: function(evt,func) {
-                handlers[evt] = handlers[evt]||[];
-                handlers[evt].push(func);
-            },
-            emit: function(evt,arg) {
-                if (handlers[evt]) {
-                    for (var i=0;i<handlers[evt].length;i++) {
-                        handlers[evt][i](arg);
-                    }
-
-                }
-            }
-        }
-    })();
-
     return {
-        on: eventHandler.on,
-
         registry:registry,
         setNodeList: registry.setNodeList,
 

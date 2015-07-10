@@ -93,6 +93,7 @@ module.exports = function(grunt) {
                   // Ensure editor source files are concatenated in
                   // the right order
                   "editor/js/main.js",
+                  "editor/js/events.js",
                   "editor/js/i18n.js",
                   "editor/js/settings.js",
                   "editor/js/user.js",
@@ -301,7 +302,7 @@ module.exports = function(grunt) {
                 mode: '755'
             },
             release: {
-                // Target-specific file/dir lists and/or options go here. 
+                // Target-specific file/dir lists and/or options go here.
                 src: [
                     path.resolve('<%= paths.dist %>/node-red-<%= pkg.version %>/nodes/core/hardware/nrgpio*')
                 ]
@@ -332,7 +333,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-chmod');
     grunt.loadNpmTasks('grunt-jsonlint');
-    
+
     grunt.registerMultiTask('attachCopyright', function() {
         var files = this.data.src;
         var copyright = "/**\n"+

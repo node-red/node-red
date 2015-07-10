@@ -94,8 +94,7 @@ RED.workspaces = (function() {
                 }
                 activeWorkspace = tab.id;
                 event.workspace = activeWorkspace;
-
-                eventHandler.emit("change",event);
+                RED.events.emit("workspace:change",event);
             },
             ondblclick: function(tab) {
                 if (tab.type != "subflow") {
@@ -200,32 +199,12 @@ RED.workspaces = (function() {
     function init() {
         createWorkspaceTabs();
         $('#btn-workspace-add-tab').on("click",function(e) {addWorkspace(); e.preventDefault()});
-        RED.sidebar.on("resize",workspace_tabs.resize);
+        RED.events.on("sidebar:resize",workspace_tabs.resize);
 
         RED.menu.setAction('menu-item-workspace-delete',function() {
             deleteWorkspace(RED.nodes.workspace(activeWorkspace));
         });
     }
-
-    // TODO: DRY
-    var eventHandler = (function() {
-        var handlers = {};
-
-        return {
-            on: function(evt,func) {
-                handlers[evt] = handlers[evt]||[];
-                handlers[evt].push(func);
-            },
-            emit: function(evt,arg) {
-                if (handlers[evt]) {
-                    for (var i=0;i<handlers[evt].length;i++) {
-                        handlers[evt][i](arg);
-                    }
-
-                }
-            }
-        }
-    })();
 
     function removeWorkspace(ws) {
         if (!ws) {
@@ -238,7 +217,6 @@ RED.workspaces = (function() {
     }
     return {
         init: init,
-        on: eventHandler.on,
         add: addWorkspace,
         remove: removeWorkspace,
 

@@ -169,7 +169,7 @@ RED.sidebar.info = (function() {
         $("#tab-info").html("");
     }
 
-    RED.view.on("selection-changed",function(selection) {
+    RED.events.on("view:selection-changed",function(selection) {
         if (selection.nodes) {
             if (selection.nodes.length == 1) {
                 var node = selection.nodes[0];

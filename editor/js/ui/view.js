@@ -243,7 +243,7 @@ RED.view = (function() {
     }
 
     function init() {
-        RED.workspaces.on("change",function(event) {
+        RED.events.on("workspace:change",function(event) {
             var chart = $("#chart");
             if (event.old !== 0) {
                 workspaceScrollPositions[event.old] = {
@@ -700,8 +700,7 @@ RED.view = (function() {
         if (selected_link != null) {
             selection.link = selected_link;
         }
-
-        eventHandler.emit("selection-changed",selection);
+        RED.events.emit("view:selection-changed",selection);
     }
 
     function endKeyboardMove() {
@@ -1775,29 +1774,8 @@ RED.view = (function() {
         }
     }
 
-    // TODO: DRY
-    var eventHandler = (function() {
-        var handlers = {};
-
-        return {
-            on: function(evt,func) {
-                handlers[evt] = handlers[evt]||[];
-                handlers[evt].push(func);
-            },
-            emit: function(evt,arg) {
-                if (handlers[evt]) {
-                    for (var i=0;i<handlers[evt].length;i++) {
-                        handlers[evt][i](arg);
-                    }
-
-                }
-            }
-        }
-    })();
-
     return {
         init: init,
-        on: eventHandler.on,
         state:function(state) {
             if (state == null) {
                 return mouse_mode

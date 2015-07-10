@@ -102,7 +102,7 @@ RED.sidebar = (function() {
                     $("#chart-zoom-controls").css("right",newChartRight+20);
                     $("#sidebar").width(0);
                     RED.menu.setSelected("menu-item-sidebar",true);
-                    eventHandler.emit("resize");
+                    RED.events.emit("sidebar:resize");
                 }
                 sidebarSeparator.width = $("#sidebar").width();
             },
@@ -142,7 +142,7 @@ RED.sidebar = (function() {
                 $("#sidebar").width(newSidebarWidth);
 
                 sidebar_tabs.resize();
-                eventHandler.emit("resize");
+                RED.events.emit("sidebar:resize");
             },
             stop:function(event,ui) {
                 if (sidebarSeparator.closing) {
@@ -156,7 +156,7 @@ RED.sidebar = (function() {
                 }
                 $("#sidebar-separator").css("left","auto");
                 $("#sidebar-separator").css("right",($("#sidebar").width()+13)+"px");
-                eventHandler.emit("resize");
+                RED.events.emit("sidebar:resize");
             }
     });
 
@@ -167,7 +167,7 @@ RED.sidebar = (function() {
             $("#main-container").removeClass("sidebar-closed");
             sidebar_tabs.resize();
         }
-        eventHandler.emit("resize");
+        RED.events.emit("sidebar:resize");
     }
 
     function showSidebar(id) {
@@ -195,25 +195,6 @@ RED.sidebar = (function() {
         if ($(window).width() < 600) { toggleSidebar(); }
     }
 
-    var eventHandler = (function() {
-        var handlers = {};
-
-        return {
-            on: function(evt,func) {
-                handlers[evt] = handlers[evt]||[];
-                handlers[evt].push(func);
-            },
-            emit: function(evt,arg) {
-                if (handlers[evt]) {
-                    for (var i=0;i<handlers[evt].length;i++) {
-                        handlers[evt][i](arg);
-                    }
-
-                }
-            }
-        }
-    })();
-
     return {
         init: init,
         addTab: addTab,
@@ -221,7 +202,6 @@ RED.sidebar = (function() {
         show: showSidebar,
         containsTab: containsTab,
         toggleSidebar: toggleSidebar,
-        on: eventHandler.on
     }
 
 })();

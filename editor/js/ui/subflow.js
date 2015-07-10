@@ -179,7 +179,7 @@ RED.subflow = (function() {
             RED.view.redraw();
         });
 
-        RED.view.on("selection-changed",function(selection) {
+        RED.events.on("view:selection-changed",function(selection) {
             if (!selection.nodes) {
                 RED.menu.setDisabled("menu-item-subflow-convert",true);
             } else {
