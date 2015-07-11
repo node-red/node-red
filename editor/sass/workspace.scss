@@ -20,9 +20,10 @@
    background: #e3e3e3;
    position: absolute;
    bottom:0px;
-   top: 30px;
+   top: 35px;
    left:0px;
    right:0px;
+   box-sizing:border-box;
 }
 #chart svg:focus {
     outline: none;
@@ -31,11 +32,12 @@
 #workspace {
     position: absolute;
     margin: 0;
-    top:5px;
-    left:190px;
+    top:0px;
+    left:179px;
     bottom: 10px;
     right: 330px;
     overflow: hidden;
+    @include component-border;
 }
 
 #chart-zoom-controls {
@@ -56,21 +58,21 @@
     position: absolute;
     top: 0;
     right: 0;
-    height: 29px;
+    height: 34px;
     width: 28px;
     border-bottom: 1px solid #999;
+    border-left: 1px solid #999;
 }
 
 #btn-workspace-add-tab {
     display: inline-block;
     width: 100%;
-    background: #e3e3e3;
+    background: #f3f3f3;
     height: 100%;
-    line-height: 30px;
+    line-height: 35px;
     text-align: center;
     color: #000;
 }
 #btn-workspace-add-tab:hover {
-    background: #efefef;
+    background: #ddd;
 }
-

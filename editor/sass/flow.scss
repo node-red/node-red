@@ -49,10 +49,6 @@
     margin-left: 20px;
 }
 
-#workspace  {
-    @include component-border;
-}
-
 .node_label_italic {
     font-style: italic;
 }
@@ -90,7 +86,7 @@
 .node {
     stroke: #999;
     cursor: move;
-    stroke-width: 2;
+    stroke-width: 1;
 }
 .node_unknown {
     stroke-dasharray:10,4;
@@ -116,11 +112,11 @@
 
 .node_button {
     fill: inherit;
-    
+
 }
 .port {
     stroke: #999;
-    stroke-width: 2;
+    stroke-width: 1;
     fill: #ddd;
     cursor: crosshair;
 }
@@ -152,17 +148,18 @@
     pointer-events: none;
     -webkit-touch-callout: none;
     @include disable-selection;
-    
+
 }
 .node_invalid {
     stroke: #ff0000;
 }
 .node_selected {
+    stroke-width: 2;
     stroke: #ff7f0e !important;
 }
 .node_highlighted {
     stroke: #dd1616;
-    stroke-width: 3;
+    stroke-width: 2;
     stroke-dasharray: 10, 4;
 }
 .node_hovered {
@@ -180,7 +177,7 @@
 
 .drag_line {
     stroke: #ff7f0e;
-    stroke-width: 5;
+    stroke-width: 4;
     fill: none;
     pointer-events: none;
 }
@@ -194,7 +191,7 @@
 
 .link_line {
     stroke: #7f7f7f;
-    stroke-width: 4;
+    stroke-width: 3;
     fill: none;
     pointer-events: none;
 }
@@ -202,12 +199,12 @@
 .link_subflow {
     stroke: #bbb;
     stroke-dasharray: 10,5;
-    stroke-width: 3;
+    stroke-width: 2;
 }
 
 .link_outline {
     stroke: #fff;
-    stroke-width: 6;
+    stroke-width: 4;
     cursor: crosshair;
     fill: none;
     pointer-events: none;
@@ -215,7 +212,7 @@
 .link_background {
     stroke: #fff;
     opacity: 0;
-    stroke-width: 25;
+    stroke-width: 20;
     cursor: crosshair;
     fill: none;
 }
@@ -228,4 +225,3 @@ g.link_unknown path.link_line {
     stroke-width: 2;
     stroke-dasharray: 10, 4;
 }
-

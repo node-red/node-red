@@ -30,7 +30,8 @@ RED.sidebar = (function() {
             if (tab.onremove) {
                 tab.onremove.call(tab);
             }
-        }
+        },
+        minimumActiveTabWidth: 110
     });
 
     var knownTabs = {
@@ -110,7 +111,7 @@ RED.sidebar = (function() {
                 var d = ui.position.left-sidebarSeparator.start;
                 var newSidebarWidth = sidebarSeparator.width-d;
                 if (sidebarSeparator.opening) {
-                    newSidebarWidth -= 13;
+                    newSidebarWidth -= 3;
                 }
 
                 if (newSidebarWidth > 150) {
@@ -155,7 +156,7 @@ RED.sidebar = (function() {
                     }
                 }
                 $("#sidebar-separator").css("left","auto");
-                $("#sidebar-separator").css("right",($("#sidebar").width()+13)+"px");
+                $("#sidebar-separator").css("right",($("#sidebar").width()+3)+"px");
                 RED.events.emit("sidebar:resize");
             }
     });

@@ -14,14 +14,14 @@
  * limitations under the License.
  **/
 
- 
- 
+
+
 #sidebar {
     position: absolute;
-    top: 5px;
-    right: 10px;
+    top: 0px;
+    right: 0px;
     bottom: 10px;
-    width: 305px;
+    width: 315px;
     background: #fff;
     box-sizing: border-box;
     @include component-border;
@@ -35,10 +35,11 @@
 
 #sidebar-content {
     position: absolute;
-    top: 30px;
+    top: 35px;
     right: 0;
     bottom: 1px;
     left: 0px;
+    padding-top: 10px;
     font-size: 1.2em;
     overflow-y: auto;
 }
@@ -57,4 +58,3 @@
 .sidebar-closed > #sidebar-separator { right: 0px !important; }
 .sidebar-closed > #workspace { right: 15px !important; }
 .sidebar-closed > #chart-zoom-controls { right: 35px !important; }
-

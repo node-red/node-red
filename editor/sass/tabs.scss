@@ -16,12 +16,13 @@
 
 ul.red-ui-tabs {
     list-style-type: none;
-    padding:5px 2px 0px 5px;
+    padding:0;
     margin: 0;
     display: block;
-    height: 24px;
+    height: 35px;
+    box-sizing:border-box;
     border-bottom: 1px solid #999;
-    background: #e3e3e3;
+    background: #fff;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
@@ -30,17 +31,16 @@ ul.red-ui-tabs {
 }
 
 ul.red-ui-tabs li {
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+    box-sizing:border-box;
     display: inline-block;
     border-left: 1px solid  #999;
     border-top: 1px solid   #999;
     border-right: 1px solid #999;
     border-bottom: 1px solid #999;
-    background: #e3e3e3;
-    margin: 0 5px 0 0;
-    height: 23px;
-    line-height: 17px;
+    background: #f3f3f3;
+    margin: 3px 3px 0 3px;
+    height: 32px;
+    line-height: 24px;
     max-width: 200px;
     width: 14%;
     overflow: hidden;
@@ -49,7 +49,9 @@ ul.red-ui-tabs li {
 
 ul.red-ui-tabs li a.red-ui-tab-label {
     display: block;
-    padding: 3px 16px;
+    padding: 3px 12px;
+    width: 100%;
+    height: 100%;
     color: #666;
 }
 ul.red-ui-tabs li {
@@ -75,11 +77,15 @@ ul.red-ui-tabs li a.red-ui-tab-close:hover {
 }
 ul.red-ui-tabs li a:hover {
     text-decoration: none;
-    background: #f0f0f0;
+    background: #ddd;
+}
+ul.red-ui-tabs li a:focus {
+    text-decoration: none;
 }
 
 ul.red-ui-tabs li.active {
     background: #fff;
+    font-weight: bold;
     border-bottom: 1px solid #fff;
 }
 ul.red-ui-tabs li.active a {
@@ -93,7 +99,6 @@ ul.red-ui-tabs li.active a.red-ui-tab-label:hover {
 }
 ul.red-ui-tabs li.red-ui-add-tab {
     width: 25px;
-    border-top-right-radius: 15px;
     line-height: 22px;
 }
 ul.red-ui-tabs li.red-ui-add-tab a {
