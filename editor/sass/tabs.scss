@@ -37,7 +37,7 @@ ul.red-ui-tabs li {
     border-top: 1px solid  $primary-border-color;
     border-right: 1px solid $primary-border-color;
     border-bottom: 1px solid $primary-border-color;
-    background: #f3f3f3;
+    background: $tab-background-inactive;
     margin: 3px 3px 0 3px;
     height: 32px;
     line-height: 29px;
@@ -77,14 +77,14 @@ ul.red-ui-tabs li a.red-ui-tab-close:hover {
 }
 ul.red-ui-tabs li a:hover {
     text-decoration: none;
-    background: #ddd;
+    background: $tab-background-hover;
 }
 ul.red-ui-tabs li a:focus {
     text-decoration: none;
 }
 
 ul.red-ui-tabs li.active {
-    background: #fff;
+    background: $tab-background-active;
     font-weight: bold;
     border-bottom: 1px solid #fff;
 }

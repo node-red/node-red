@@ -28,7 +28,7 @@
         </div>
     </div>
     <div class="form-row">
-        <a href="#" class="btn btn-mini" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="change.label.rule"></span></a>
+        <a href="#" class="editor-button" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="change.label.rule"></span></a>
     </div>
 </script>
 
@@ -101,12 +101,12 @@
             var regex = this._("change.label.regex");
             if (this.reg === null) { $("#node-input-reg").prop('checked', true); }
             $("#node-input-action").change();
-            
+
             function generateRule(rule) {
                 var container = $('<li/>',{style:"background: #fff; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"});
-                
+
                 var row1 = $('<div/>').appendTo(container);
-                
+
                 var row2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(container);
                 var row3 = $('<div/>',{style:"margin-top:8px;"}).appendTo(container);
 
@@ -115,36 +115,36 @@
                 for (var i=0;i<3;i++) {
                     selectField.append($("<option></option>").val(selectOptions[i].v).text(selectOptions[i].l));
                 }
-                
+
                 $('<div/>',{style:"display:inline-block; width: 50px; text-align: right;"}).text("msg.").appendTo(row1);
                 var propertyName = $('<input/>',{style:"width: 220px",class:"node-input-rule-property-name",type:"text"}).appendTo(row1);
 
-                
-                var finalspan = $('<span/>',{style:"float: right; margin-top: 3px;margin-right: 10px;"}).appendTo(row1);
-                var deleteButton = $('<a/>',{href:"#",class:"btn btn-mini", style:"margin-left: 5px;"}).appendTo(finalspan);
+
+                var finalspan = $('<span/>',{style:"float: right; margin-right: 10px;"}).appendTo(row1);
+                var deleteButton = $('<a/>',{href:"#",class:"editor-button", style:"margin-left: 5px;"}).appendTo(finalspan);
                 $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
 
-                
+
                 $('<div/>',{style:"display: inline-block;text-align:right; width:150px;padding-right: 10px; box-sizing: border-box;"}).text(to).appendTo(row2);
                 var propertyValue = $('<input/>',{style:"width: 220px",class:"node-input-rule-property-value",type:"text"}).appendTo(row2);
-                
+
                 var row3_1 = $('<div/>').appendTo(row3);
                 $('<div/>',{style:"display: inline-block;text-align:right; width:150px;padding-right: 10px; box-sizing: border-box;"}).text(search).appendTo(row3_1);
                 var fromValue = $('<input/>',{style:"width: 220px",class:"node-input-rule-property-search-value",type:"text"}).appendTo(row3_1);
-                
+
                 var row3_2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(row3);
                 $('<div/>',{style:"display: inline-block;text-align:right; width:150px;padding-right: 10px; box-sizing: border-box;"}).text(replace).appendTo(row3_2);
                 var toValue = $('<input/>',{style:"width: 220px",class:"node-input-rule-property-replace-value",type:"text"}).appendTo(row3_2);
-                
+
                 var row3_3 = $('<div/>',{style:"margin-top:8px;"}).appendTo(row3);
                 var id = "node-input-rule-property-regex-"+Math.floor(Math.random()*10000);
                 var useRegExp = $('<input/>',{id:id,class:"node-input-rule-property-re",type:"checkbox", style:"margin-left: 150px; margin-right: 10px; display: inline-block; width: auto; vertical-align: top;"}).appendTo(row3_3);
                 $('<label/>',{for:id,style:"width: auto;"}).text(regex).appendTo(row3_3);
-                
+
 
                 selectField.change(function() {
                     var type = $(this).val();
-                    
+
                     if (type == "set") {
                         row2.show();
                         row3.hide();
@@ -162,7 +162,7 @@
                         $(this).remove();
                     });
                 });
-                
+
                 selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
                 propertyName.val(rule.p);
                 propertyValue.val(rule.to);
@@ -170,19 +170,19 @@
                 toValue.val(rule.to);
                 useRegExp.prop('checked', rule.re);
                 selectField.change();
-                
+
                 $("#node-input-rule-container").append(container);
             }
             $("#node-input-add-rule").click(function() {
                 generateRule({t:"replace",p:"payload"});
             });
-            
+
             if (!this.rules) {
                 var rule = {
                     t:(this.action=="replace"?"set":this.action),
                     p:this.property
                 }
-                
+
                 if (rule.t === "set") {
                     rule.to = this.to;
                 } else if (rule.t === "change") {
@@ -190,20 +190,20 @@
                     rule.to = this.to;
                     rule.re = this.reg;
                 }
-                
+
                 delete this.to;
                 delete this.from;
                 delete this.reg;
                 delete this.action;
                 delete this.property;
-                
+
                 this.rules = [rule];
             }
-            
+
             for (var i=0;i<this.rules.length;i++) {
                 generateRule(this.rules[i]);
             }
-            
+
             function changeDialogResize() {
                 var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
                 var height = $("#dialog-form").height();

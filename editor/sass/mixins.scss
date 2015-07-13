@@ -29,6 +29,7 @@
 }
 
 @mixin workspace-button {
+    @include disable-selection;
     color: $workspace-button-color;
     box-sizing: border-box;
     display: inline-block;
@@ -37,11 +38,13 @@
     text-align: center;
     margin:0;
     text-decoration: none;
+    cursor:pointer;
     &.disabled {
         cursor: default;
         color: $workspace-button-color-disabled;
     }
     &:not(.disabled):hover {
+        text-decoration: none;
         color: $workspace-button-color-hover;
         background: $workspace-button-background-hover;
     }

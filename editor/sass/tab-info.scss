@@ -14,6 +14,10 @@
  * limitations under the License.
  **/
 
+.sidebar-node-info  hr {
+    margin: 10px 0;
+}
+
 table.node-info {
     font-size: 14px;
     margin: 5px;
@@ -65,10 +69,14 @@ div.node-info {
     }
     h2 {
         font-weight: normal;
+        font-size: 18px;
+        margin: 8px auto;
+    }
+    h3 {
+        font-weight: normal;
         font-size: 16px;
         margin: 8px auto;
     }
-    h3,
     h4,
     h5 {
         font-weight: normal;

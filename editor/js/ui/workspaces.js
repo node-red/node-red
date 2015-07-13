@@ -206,6 +206,10 @@ RED.workspaces = (function() {
         RED.menu.setAction('menu-item-workspace-delete',function() {
             deleteWorkspace(RED.nodes.workspace(activeWorkspace));
         });
+
+        $(window).resize(function() {
+            workspace_tabs.resize();
+        });
     }
 
     function removeWorkspace(ws) {

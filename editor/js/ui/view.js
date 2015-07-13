@@ -1322,7 +1322,7 @@ RED.view = (function() {
                             .attr("class","node_icon_shade_border")
                             .attr("stroke-opacity","0.1")
                             .attr("stroke","#000")
-                            .attr("stroke-width","2");
+                            .attr("stroke-width","1");
 
                         if ("right" == d._def.align) {
                             icon_group.attr('class','node_icon_group node_icon_group_'+d._def.align);

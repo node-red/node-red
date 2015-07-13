@@ -97,7 +97,7 @@ RED.sidebar = (function() {
 
                 if (!RED.menu.isSelected("menu-item-sidebar")) {
                     sidebarSeparator.opening = true;
-                    var newChartRight = 10;
+                    var newChartRight = 7;
                     $("#sidebar").addClass("closing");
                     $("#workspace").css("right",newChartRight);
                     $("#chart-zoom-controls").css("right",newChartRight+20);
@@ -151,12 +151,12 @@ RED.sidebar = (function() {
                     RED.menu.setSelected("menu-item-sidebar",false);
                     if ($("#sidebar").width() < 180) {
                         $("#sidebar").width(180);
-                        $("#workspace").css("right",191);
-                        $("#chart-zoom-controls").css("right",211);
+                        $("#workspace").css("right",187);
+                        $("#chart-zoom-controls").css("right",210);
                     }
                 }
                 $("#sidebar-separator").css("left","auto");
-                $("#sidebar-separator").css("right",($("#sidebar").width()+3)+"px");
+                $("#sidebar-separator").css("right",($("#sidebar").width()+2)+"px");
                 RED.events.emit("sidebar:resize");
             }
     });

@@ -45,14 +45,22 @@
 #sidebar-separator {
     position: absolute;
     top: 5px;
-    right: 316px;
+    right: 315px;
     bottom:10px;
-    width: 10px;
+    width: 7px;
     background: url(images/grip.png) no-repeat 50% 50%;
     cursor: col-resize;
 }
 
 .sidebar-closed > #sidebar { display: none; }
 .sidebar-closed > #sidebar-separator { right: 0px !important; }
-.sidebar-closed > #workspace { right: 10px !important; }
+.sidebar-closed > #workspace { right: 7px !important; }
 .sidebar-closed > #chart-zoom-controls { right: 30px !important; }
+
+#sidebar .button {
+    @include workspace-button;
+    line-height: 18px;
+    font-size: 12px;
+    margin-right: 5px;
+    padding: 2px 8px;
+}

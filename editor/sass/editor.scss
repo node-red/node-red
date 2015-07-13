@@ -30,7 +30,7 @@
 .form-row {
     clear: both;
     color: $form-text-color;
-    margin-bottom:10px;
+    margin-bottom:12px;
 }
 .form-row label {
     display: inline-block;
@@ -40,31 +40,20 @@
     width:70%;
 }
 
-input.input-append-left {
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
-}
-button.input-append-right {
-    border-top-left-radius: 0px !important;
-    border-bottom-left-radius: 0px !important;
-    border-top-right-radius: 4px !important;
-    border-bottom-right-radius: 4px !important;
-    margin-left: -1px !important;
-    padding-left: 4px !important;
-    padding-right: 4px !important;
-}
-
 .form-tips {
-    background: lightgoldenrodyellow;
+    background: #ffe;
     font-size: 12px;
     padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #999;
+    border-radius: 2px;
+    border: 1px solid $secondary-border-color;
     max-width: 450px;
 }
 .form-tips code {
     border: none;
     padding: auto;
+}
+.form-tips a {
+    text-decoration: underline;
 }
 
 .node-text-editor {
@@ -73,4 +62,13 @@ button.input-append-right {
     overflow: hidden;
     font-size: 14px !important;
     font-family: monospace !important;
+}
+
+.editor-button {
+    @include workspace-button;
+    height: 30px;
+    line-height: 28px;
+    font-size: 12px;
+    border-radius: 3px;
+    padding: 0 10px;
 }
