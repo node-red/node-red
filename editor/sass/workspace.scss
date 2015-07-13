@@ -42,18 +42,22 @@
 
 #chart-zoom-controls {
     position: absolute;
-    bottom:30px; right: 350px;
+    bottom:30px;
+    right: 350px;
 }
 
-#chart-zoom-controls {
-    padding-top: 3px;
-    text-align: right;
-    float: right;
+.chart-zoom-button {
+    @include workspace-button;
+    font-size: 10px;
+    line-height: 17px;
+    width: 18px;
+    height: 18px;
 }
 
 #workspace-tabs {
     margin-right: 28px;
 }
+
 #workspace-add-tab {
     position: absolute;
     top: 0;
@@ -65,14 +69,9 @@
 }
 
 #btn-workspace-add-tab {
-    display: inline-block;
+    @include workspace-button;
+    border: none;
     width: 100%;
-    background: #f3f3f3;
     height: 100%;
     line-height: 35px;
-    text-align: center;
-    color: #000;
-}
-#btn-workspace-add-tab:hover {
-    background: #ddd;
 }

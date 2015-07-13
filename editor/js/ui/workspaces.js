@@ -85,9 +85,11 @@ RED.workspaces = (function() {
             id: "workspace-tabs",
             onchange: function(tab) {
                 if (tab.type == "subflow") {
+                    $("#chart").css({"margin-top": "40px"});
                     $("#workspace-toolbar").show();
                 } else {
                     $("#workspace-toolbar").hide();
+                    $("#chart").css({"margin-top": "0"});
                 }
                 var event = {
                     old: activeWorkspace

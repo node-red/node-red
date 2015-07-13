@@ -62,11 +62,9 @@
     </div>
 
     <div id="chart-zoom-controls">
-        <div class="btn-group">
-            <a class="btn btn-mini" id="btn-zoom-out" href="#"><i class="fa fa-search-minus"></i></a>
-            <a class="btn btn-mini" id="btn-zoom-zero" href="#"><i class="fa fa-dot-circle-o"></i></a>
-            <a class="btn btn-mini" id="btn-zoom-in" href="#"><i class="fa fa-search-plus"></i></a>
-        </div>
+        <a class="chart-zoom-button" id="btn-zoom-out" href="#"><i class="fa fa-minus"></i></a>
+        <a class="chart-zoom-button" id="btn-zoom-zero" href="#"><i class="fa fa-circle-o"></i></a>
+        <a class="chart-zoom-button" id="btn-zoom-in" href="#"><i class="fa fa-plus"></i></a>
     </div>
 
     <div id="sidebar">
@@ -128,7 +126,7 @@
     <form class="form-horizontal">
         <div class="form-row">
             <ul id="node-dialog-library-breadcrumbs" class="breadcrumb">
-                <li class="active" data-i18n="[append]library.breadcrumb"><a href="#"></a></li>
+                <li class="active"><a href="#" data-i18n="[append]library.breadcrumb"></a></li>
             </ul>
         </div>
         <div class="form-row">
