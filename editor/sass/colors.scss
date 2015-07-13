@@ -14,15 +14,12 @@
  * limitations under the License.
  **/
 
-@mixin disable-selection {
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
+$form-placeholder-color: #bbbbbb;
 
-@mixin component-border {
-   border: 1px solid $primary-border-color;
-   box-sizing: border-box;
-}
+$form-text-color: #444;
+$form-input-focus-color:  rgba(85,150,230,0.8);
+$form-input-border-color:  #ccc;
+
+$node-selected-color: #5596E6; // #ff7f0e
+
+$primary-border-color: #bbbbbb;

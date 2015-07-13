@@ -14,8 +14,6 @@
  * limitations under the License.
  **/
 
-
-
 #sidebar {
     position: absolute;
     top: 0px;
@@ -49,12 +47,12 @@
     top: 5px;
     right: 316px;
     bottom:10px;
-    width: 15px;
+    width: 10px;
     background: url(images/grip.png) no-repeat 50% 50%;
     cursor: col-resize;
 }
 
 .sidebar-closed > #sidebar { display: none; }
 .sidebar-closed > #sidebar-separator { right: 0px !important; }
-.sidebar-closed > #workspace { right: 15px !important; }
-.sidebar-closed > #chart-zoom-controls { right: 35px !important; }
+.sidebar-closed > #workspace { right: 10px !important; }
+.sidebar-closed > #chart-zoom-controls { right: 30px !important; }

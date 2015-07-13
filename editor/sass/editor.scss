@@ -29,6 +29,7 @@
 
 .form-row {
     clear: both;
+    color: $form-text-color;
     margin-bottom:10px;
 }
 .form-row label {
@@ -73,4 +74,3 @@ button.input-append-right {
     font-size: 14px !important;
     font-family: monospace !important;
 }
-

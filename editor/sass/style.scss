@@ -14,7 +14,10 @@
  * limitations under the License.
  **/
 
+@import "colors";
 @import "mixins";
+
+@import "forms";
 
 @import "jquery";
 @import "bootstrap";
@@ -44,7 +47,7 @@
 
 
 body {
-  font: 13px "Helvetica" !important;
+  font: 14px "Helvetica" !important;
   padding-top: 100px;
   background: #f3f3f3;
 }

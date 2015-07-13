@@ -32,7 +32,7 @@
     position: absolute;
     top: 35px;
     right: 0;
-    bottom: 0;
+    bottom: 0px;
     left:0;
     padding: 0;
     overflow-y: auto;
@@ -52,7 +52,7 @@
     text-align: center;
     height: 35px;
     padding: 3px;
-    border-bottom: 1px solid #999;
+    border-bottom: 1px solid $primary-border-color;
     box-sizing:border-box;
 }
 #palette-search i {
@@ -126,6 +126,7 @@
     clear: both;
 }
 .palette_label {
+    font-size: 13px;
     margin: 4px 0 4px 28px;
     line-height: 20px;
     overflow: hidden;
@@ -137,7 +138,6 @@
 
 .palette_node {
     cursor:move;
-    font-size:13px;
     background: #ddd;
     margin: 10px auto;
     height: 25px;
@@ -150,7 +150,7 @@
     position: relative;
 }
 .palette_node:hover {
-    border-color: #ff7f0e;
+    border-color: $node-selected-color;
     background-color: #eee;
 }
 .palette_port {

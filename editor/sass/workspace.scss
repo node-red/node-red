@@ -35,7 +35,7 @@
     top:0px;
     left:179px;
     bottom: 10px;
-    right: 330px;
+    right: 326px;
     overflow: hidden;
     @include component-border;
 }
@@ -60,8 +60,8 @@
     right: 0;
     height: 34px;
     width: 28px;
-    border-bottom: 1px solid #999;
-    border-left: 1px solid #999;
+    border-bottom: 1px solid $primary-border-color;
+    border-left: 1px solid $primary-border-color;
 }
 
 #btn-workspace-add-tab {

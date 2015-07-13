@@ -128,7 +128,7 @@
         },
         onpaletteadd: function() {
             var content = document.createElement("div");
-
+            $(content).css({"position":"relative","height":"100%"});
             var toolbar = document.createElement("div");
             toolbar.id = "debug-toolbar";
             content.appendChild(toolbar);

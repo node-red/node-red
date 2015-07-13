@@ -22,7 +22,7 @@ RED.palette = (function() {
     function createCategoryContainer(category, label){
         label = label || category.replace("_", " ");
         var catDiv = $("#palette-container").append('<div id="palette-container-'+category+'" class="palette-category hide">'+
-            '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-caret-down"></i><span>'+label+'</span></div>'+
+            '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-angle-down"></i><span>'+label+'</span></div>'+
             '<div class="palette-content" id="palette-base-category-'+category+'">'+
             '<div id="palette-'+category+'-input"></div>'+
             '<div id="palette-'+category+'-output"></div>'+
@@ -150,7 +150,7 @@ RED.palette = (function() {
             if ($("#palette-base-category-"+rootCategory).length === 0) {
                 if(core.indexOf(rootCategory) !== -1){
                     createCategoryContainer(rootCategory, RED._("node-red:palette.label."+rootCategory, {defaultValue:rootCategory}));
-                } else { 
+                } else {
                     var ns = def.set.id;
                     createCategoryContainer(rootCategory, RED._(ns+":palette.label."+rootCategory, {defaultValue:rootCategory}));
                 }

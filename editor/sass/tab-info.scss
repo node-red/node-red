@@ -56,22 +56,23 @@ div.node-info {
     text-decoration: none;
 }
 .node-help {
-    font-size: 16px;
+    font-size: 14px;
+    line-height: 1.5em;
     h1 {
         font-weight: normal;
-        font-size: 1.953em;
+        font-size: 23px;
         margin: 8px auto;
     }
     h2 {
         font-weight: normal;
-        font-size: 1.563em;
+        font-size: 16px;
         margin: 8px auto;
     }
     h3,
     h4,
     h5 {
         font-weight: normal;
-        font-size: 1.25em;
+        font-size: 14px;
         margin: 8px auto;
     }
 }

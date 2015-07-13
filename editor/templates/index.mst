@@ -43,11 +43,10 @@
 <div id="main-container" class="sidebar-closed hide">
     <div id="palette">
         <img src="red/images/spin.svg" class="palette-spinner hide"/>
-        <div id="palette-container" class="palette-scroll">
-        </div>
         <div id="palette-search">
             <i class="fa fa-search"></i><input id="palette-search-input" type="text" data-i18n="[placeholder]palette.filter"><a href="#" id="palette-search-clear"><i class="fa fa-times"></i></a></input>
         </div>
+        <div id="palette-container" class="palette-scroll"></div>
     </div><!-- /palette -->
 
     <div id="workspace">
