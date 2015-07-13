@@ -1767,9 +1767,9 @@ RED.view = (function() {
         } catch(error) {
             if (error.code != "NODE_RED") {
                 console.log(error.stack);
-                RED.notify(RED._("notification.error")+error,"error");
+                RED.notify(RED._("notification.error",{message:error.toString()}),"error");
             } else {
-                RED.notify(RED._("notification.error")+error.message,"error");
+                RED.notify(RED._("notification.error",{message:error.message}),"error");
             }
         }
     }
