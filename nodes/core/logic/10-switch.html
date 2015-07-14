@@ -28,7 +28,7 @@
         </div>
     </div>
     <div class="form-row">
-        <a href="#" class="editor-button" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="switch.label.rule"></span></a>
+        <a href="#" class="editor-button editor-button-small" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="switch.label.rule"></span></a>
     </div>
     <div class="form-row">
         <select id="node-input-checkall" style="width:100%; margin-right:5px;">
@@ -102,7 +102,7 @@
                 var finalspan = $('<span/>',{style:"float: right;margin-right: 10px;"}).appendTo(row);
                 finalspan.append(' &#8594; <span class="node-input-rule-index">'+i+'</span> ');
 
-                var deleteButton = $('<a/>',{href:"#",class:"editor-button", style:"margin-left: 5px;"}).appendTo(finalspan);
+                var deleteButton = $('<a/>',{href:"#",class:"editor-button editor-button-small", style:"margin-top: 7px; margin-left: 5px;"}).appendTo(finalspan);
                 $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
 
                 selectField.change(function() {

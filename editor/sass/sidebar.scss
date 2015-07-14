@@ -18,7 +18,7 @@
     position: absolute;
     top: 0px;
     right: 0px;
-    bottom: 10px;
+    bottom: 0px;
     width: 315px;
     background: #fff;
     box-sizing: border-box;
@@ -35,7 +35,7 @@
     position: absolute;
     top: 35px;
     right: 0;
-    bottom: 1px;
+    bottom: 25px;
     left: 0px;
     padding-top: 10px;
     overflow-y: auto;
@@ -54,7 +54,6 @@
 .sidebar-closed > #sidebar { display: none; }
 .sidebar-closed > #sidebar-separator { right: 0px !important; }
 .sidebar-closed > #workspace { right: 7px !important; }
-.sidebar-closed > #chart-zoom-controls { right: 30px !important; }
 
 #sidebar .button {
     @include workspace-button;
@@ -62,4 +61,8 @@
     font-size: 12px;
     margin-right: 5px;
     padding: 2px 8px;
+}
+
+#sidebar-footer {
+    @include component-footer;
 }

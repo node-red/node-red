@@ -47,6 +47,11 @@
             <i class="fa fa-search"></i><input id="palette-search-input" type="text" data-i18n="[placeholder]palette.filter"><a href="#" id="palette-search-clear"><i class="fa fa-times"></i></a></input>
         </div>
         <div id="palette-container" class="palette-scroll"></div>
+        <div id="palette-footer">
+            <a class="palette-button" id="palette-collapse-all" href="#"><i class="fa fa-angle-double-up"></i></a>
+            <a class="palette-button" id="palette-expand-all" href="#"><i class="fa fa-angle-double-down"></i></a>
+        </div>
+
     </div><!-- /palette -->
 
     <div id="workspace">
@@ -59,17 +64,16 @@
             <a class="button" id="workspace-subflow-add-output" href="#" data-i18n="[append]subflow.output"><i class="fa fa-plus"></i> </a>
             <a class="button" id="workspace-subflow-delete" href="#" data-i18n="[append]subflow.deleteSubflow"><i class="fa fa-trash"></i> </a>
         </div>
+        <div id="workspace-footer">
+            <a class="workspace-footer-button" id="btn-zoom-out" href="#"><i class="fa fa-minus"></i></a>
+            <a class="workspace-footer-button" id="btn-zoom-zero" href="#"><i class="fa fa-circle-o"></i></a>
+            <a class="workspace-footer-button" id="btn-zoom-in" href="#"><i class="fa fa-plus"></i></a>
+        </div>
     </div>
-
-    <div id="chart-zoom-controls">
-        <a class="chart-zoom-button" id="btn-zoom-out" href="#"><i class="fa fa-minus"></i></a>
-        <a class="chart-zoom-button" id="btn-zoom-zero" href="#"><i class="fa fa-circle-o"></i></a>
-        <a class="chart-zoom-button" id="btn-zoom-in" href="#"><i class="fa fa-plus"></i></a>
-    </div>
-
     <div id="sidebar">
         <ul id="sidebar-tabs"></ul>
         <div id="sidebar-content"></div>
+        <div id="sidebar-footer"></div>
     </div>
 
     <div id="sidebar-separator"></div>

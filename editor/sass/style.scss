@@ -68,3 +68,43 @@ i.spinner {
     background: url(images/spin.svg) no-repeat 50% 50%;
     background-size: contain
 }
+
+code, pre {
+  padding: 0 3px 2px;
+  font-family: monospace;
+  font-size: 14px;
+  color: #333333;
+  border-radius: 1px;
+}
+
+code {
+  padding: 0px 4px;
+  color: #AD1625;
+  white-space: nowrap;
+  background-color: #f7f7f9;
+  border: 1px solid #e1e1e8;
+}
+
+pre {
+  display: block;
+  padding: 9.5px;
+  margin: 0 0 10px;
+  line-height: 20px;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre;
+  white-space: pre-wrap;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+}
+
+pre code {
+  padding: 0;
+  color: inherit;
+  white-space: pre;
+  white-space: pre-wrap;
+  background-color: transparent;
+  border: 0;
+}

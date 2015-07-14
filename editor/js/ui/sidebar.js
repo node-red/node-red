@@ -100,7 +100,6 @@ RED.sidebar = (function() {
                     var newChartRight = 7;
                     $("#sidebar").addClass("closing");
                     $("#workspace").css("right",newChartRight);
-                    $("#chart-zoom-controls").css("right",newChartRight+20);
                     $("#sidebar").width(0);
                     RED.menu.setSelected("menu-item-sidebar",true);
                     RED.events.emit("sidebar:resize");
@@ -139,7 +138,6 @@ RED.sidebar = (function() {
 
                 var newChartRight = sidebarSeparator.chartRight-d;
                 $("#workspace").css("right",newChartRight);
-                $("#chart-zoom-controls").css("right",newChartRight+20);
                 $("#sidebar").width(newSidebarWidth);
 
                 sidebar_tabs.resize();
@@ -152,7 +150,6 @@ RED.sidebar = (function() {
                     if ($("#sidebar").width() < 180) {
                         $("#sidebar").width(180);
                         $("#workspace").css("right",187);
-                        $("#chart-zoom-controls").css("right",210);
                     }
                 }
                 $("#sidebar-separator").css("left","auto");

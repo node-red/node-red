@@ -58,27 +58,46 @@ ul.red-ui-tabs li {
     position: relative;
 }
 
-ul.red-ui-tabs li a.red-ui-tab-close {
-    background: rgba(227,227,227,0.8);
+.red-ui-tab-close {
+    background: $tab-background-inactive;
+    opacity: 0.8;
     position: absolute;
-    right: 2px;
-    top: 2px;
+    right: 0px;
+    top: 0px;
     display: block;
     width: 20px;
-    height: 20px;
-    line-height: 20px;
+    height: 30px;
+    line-height: 28px;
     text-align: center;
     padding: 0px;
-    border-radius: 5px;
-    color: #666;
+    color: #aaa;
+    &:hover {
+        background: $workspace-button-background-hover !important;
+        opacity: 1;
+    }
 }
-ul.red-ui-tabs li a.red-ui-tab-close:hover {
-    background: #bbb !important;
-}
-ul.red-ui-tabs li a:hover {
-    text-decoration: none;
+ul.red-ui-tabs li:not(.active) a:hover+a.red-ui-tab-close {
     background: $tab-background-hover;
 }
+
+ul.red-ui-tabs li.active a.red-ui-tab-close {
+    color: #aaa;
+    background: $tab-background-active;
+    &:hover {
+        background: $workspace-button-background-hover !important;
+        color: $workspace-button-color-hover;
+    }
+}
+
+ul.red-ui-tabs li a:hover {
+    text-decoration: none;
+}
+
+ul.red-ui-tabs li:not(.active) a:hover {
+    color: $workspace-button-color-hover;
+    background: $tab-background-hover;
+}
+
 ul.red-ui-tabs li a:focus {
     text-decoration: none;
 }
@@ -90,17 +109,4 @@ ul.red-ui-tabs li.active {
 }
 ul.red-ui-tabs li.active a {
     color: #333;
-}
-ul.red-ui-tabs li.active a.red-ui-tab-close {
-    background: rgba(255,255,255,0.8);
-}
-ul.red-ui-tabs li.active a.red-ui-tab-label:hover {
-    background: #fff;
-}
-ul.red-ui-tabs li.red-ui-add-tab {
-    width: 25px;
-    line-height: 22px;
-}
-ul.red-ui-tabs li.red-ui-add-tab a {
-    padding: 2px 4px;
 }

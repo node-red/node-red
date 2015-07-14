@@ -14,87 +14,32 @@
  * limitations under the License.
  **/
 
- #notifications {
-     z-index: 10000;
-     width: 500px;
-     margin-left: -250px;
-     left: 50%;
-     position: absolute;
-     top: 1px;
- }
- .notification {
-     box-sizing: border-box;
-     position: relative;
-     padding: 14px 18px;
-     margin-bottom: 4px;
-     box-shadow: 0 1px 1px 1px rgba(0,0,0, 0.15);
-     background-color: #fff;
-     color: #666;
-     border: 1px solid #325C80;
-     border-left-width: 16px;
- }
-
- .notification-success {
-     border-color: #4B8400;
- }
- .notification-warning {
-     border-color: #D74108;
- }
- .notification-error {
-     border-color: #AD1625;
- }
- /*
- .notification {
-     box-sizing: border-box;
-     position: relative;
-     padding: 12px 20px;
-     margin-bottom: 4px;
-     box-shadow: 0 1px 1px 1px rgba(0,0,0, 0.15);
-     color: #f0f0f0;
-     background-color: #5AAAFA;
-     border: 1px solid #325C80;
-     border-left-width: 16px;
- }
-
- .notification-success {
-     background: #5AA700;
-     border-color: #4B8400;
- }
- .notification-warning {
-     background:#FF7832;
-     border-color: #D74108;
- }
- .notification-error {
-     background: #FF5050;
-     border-color: #AD1625;
- }
-
-*/
-
-/*
+#notifications {
+    z-index: 10000;
+    width: 500px;
+    margin-left: -250px;
+    left: 50%;
+    position: absolute;
+    top: 1px;
+}
 .notification {
+    box-sizing: border-box;
     position: relative;
-    padding: 12px 20px;
+    padding: 14px 18px;
     margin-bottom: 4px;
-    box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.15);
-    color: #325C80;
-    background-color: #C0E6FF;
+    box-shadow: 0 1px 1px 1px rgba(0,0,0, 0.15);
+    background-color: #fff;
+    color: #666;
     border: 1px solid #325C80;
+    border-left-width: 16px;
 }
 
 .notification-success {
-  color: #4B8400;
-  background-color: #C8F08F;
-  border-color: #4B8400;
+    border-color: #4B8400;
 }
 .notification-warning {
-    color:#D74108;
     border-color: #D74108;
-    background-color:#FFD791;
 }
 .notification-error {
-  color: #AD1625;
-  background-color: #FFD2DD;
-  border-color: #AD1625;
+    border-color: #AD1625;
 }
-*/

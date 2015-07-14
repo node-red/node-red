@@ -56,3 +56,23 @@
         background: $workspace-button-background-active;
     }
 }
+@mixin component-footer {
+    border-top: 1px solid $primary-border-color;
+    background: #f3f3f3;
+    text-align: right;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 25px;
+    line-height: 23px;
+    padding: 0 10px;
+}
+
+@mixin component-footer-button {
+    @include workspace-button;
+    font-size: 11px;
+    line-height: 17px;
+    width: 18px;
+    height: 18px;
+}

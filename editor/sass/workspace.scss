@@ -19,7 +19,7 @@
    overflow: auto;
    background: #e3e3e3;
    position: absolute;
-   bottom:0px;
+   bottom:25px;
    top: 35px;
    left:0px;
    right:0px;
@@ -34,44 +34,41 @@
     margin: 0;
     top:0px;
     left:179px;
-    bottom: 10px;
+    bottom: 0px;
     right: 322px;
     overflow: hidden;
     @include component-border;
 }
 
-#chart-zoom-controls {
-    position: absolute;
-    bottom:30px;
-    right: 350px;
-}
-
-.chart-zoom-button {
-    @include workspace-button;
-    font-size: 10px;
-    line-height: 17px;
-    width: 18px;
-    height: 18px;
+.workspace-footer-button {
+    @include component-footer-button;
 }
 
 #workspace-tabs {
-    margin-right: 28px;
+    margin-right: 40px;
 }
 
 #workspace-add-tab {
     position: absolute;
+    box-sizing: border-box;
     top: 0;
     right: 0;
-    height: 34px;
-    width: 28px;
+    height: 35px;
+    width: 40px;
+    background: #fff;
     border-bottom: 1px solid $primary-border-color;
-    border-left: 1px solid $primary-border-color;
 }
 
 #btn-workspace-add-tab {
     @include workspace-button;
-    border: none;
-    width: 100%;
-    height: 100%;
-    line-height: 35px;
+    line-height: 32px;
+    height: 32px;
+    width: 32px;
+    margin-top: 3px;
+    margin-right:8px;
+    border: 1px solid $primary-border-color;
+}
+
+#workspace-footer {
+    @include component-footer;
 }

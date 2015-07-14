@@ -66,9 +66,16 @@
 
 .editor-button {
     @include workspace-button;
-    height: 30px;
-    line-height: 28px;
-    font-size: 12px;
-    border-radius: 3px;
+    height: 34px;
+    line-height: 30px;
+    font-size: 13px;
+    border-radius: 4px;
     padding: 0 10px;
+}
+.editor-button-small {
+    height: 20px;
+    line-height: 18px;
+    font-size: 10px;
+    border-radius: 2px;
+    padding: 0 5px;
 }

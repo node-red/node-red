@@ -19,20 +19,44 @@ RED.palette = (function() {
     var exclusion = ['config','unknown','deprecated'];
     var core = ['subflows', 'input', 'output', 'function', 'social', 'storage', 'analysis', 'advanced'];
 
+    var categoryContainers = {};
+
     function createCategoryContainer(category, label){
         label = label || category.replace("_", " ");
-        var catDiv = $("#palette-container").append('<div id="palette-container-'+category+'" class="palette-category hide">'+
+        var catDiv = $('<div id="palette-container-'+category+'" class="palette-category palette-close hide">'+
             '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-angle-down"></i><span>'+label+'</span></div>'+
             '<div class="palette-content" id="palette-base-category-'+category+'">'+
             '<div id="palette-'+category+'-input"></div>'+
             '<div id="palette-'+category+'-output"></div>'+
             '<div id="palette-'+category+'-function"></div>'+
             '</div>'+
-            '</div>');
+            '</div>').appendTo("#palette-container");
+
+        categoryContainers[category] = {
+            container: catDiv,
+            close: function() {
+                catDiv.removeClass("palette-open");
+                catDiv.addClass("palette-closed");
+                $("#palette-base-category-"+category).slideUp();
+                $("#palette-header-"+category+" i").removeClass("expanded");
+            },
+            open: function() {
+                catDiv.addClass("palette-open");
+                catDiv.removeClass("palette-closed");
+                $("#palette-base-category-"+category).slideDown();
+                $("#palette-header-"+category+" i").addClass("expanded");
+            },
+            toggle: function() {
+                if (catDiv.hasClass("palette-open")) {
+                    categoryContainers[category].close();
+                } else {
+                    categoryContainers[category].open();
+                }
+            }
+        };
 
         $("#palette-header-"+category).on('click', function(e) {
-            $(this).next().slideToggle();
-            $(this).children("i").toggleClass("expanded");
+            categoryContainers[category].toggle();
         });
     }
 
@@ -196,10 +220,7 @@ RED.palette = (function() {
 
             var categoryNode = $("#palette-container-"+category);
             if (categoryNode.find(".palette_node").length === 1) {
-                if (!categoryNode.find("i").hasClass("expanded")) {
-                    categoryNode.find(".palette-content").slideToggle();
-                    categoryNode.find("i").toggleClass("expanded");
-                }
+                categoryContainers[category].open();
             }
 
         }
@@ -269,6 +290,18 @@ RED.palette = (function() {
                 $(this).hide();
             }
         });
+
+        for (var category in categoryContainers) {
+            if (categoryContainers.hasOwnProperty(category)) {
+                if (categoryContainers[category].container
+                        .find(".palette_node")
+                        .filter(function() { return $(this).css('display') !== 'none'}).length === 0) {
+                    categoryContainers[category].close();
+                } else {
+                    categoryContainers[category].open();
+                }
+            }
+        }
     }
 
     function init() {
@@ -306,6 +339,23 @@ RED.palette = (function() {
             $("body").one("mousedown",function() {
                 $("#palette-search-input").blur();
             });
+        });
+
+        $("#palette-collapse-all").on("click", function(e) {
+            e.preventDefault();
+            for (var cat in categoryContainers) {
+                if (categoryContainers.hasOwnProperty(cat)) {
+                    categoryContainers[cat].close();
+                }
+            }
+        });
+        $("#palette-expand-all").on("click", function(e) {
+            e.preventDefault();
+            for (var cat in categoryContainers) {
+                if (categoryContainers.hasOwnProperty(cat)) {
+                    categoryContainers[cat].open();
+                }
+            }
         });
     }
 

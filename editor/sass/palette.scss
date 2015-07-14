@@ -18,7 +18,7 @@
 #palette {
     position: absolute;
     top: 0px;
-    bottom: 10px;
+    bottom: 0px;
     left:0px;
     background: #f3f3f3;
     width: 180px;
@@ -32,7 +32,7 @@
     position: absolute;
     top: 35px;
     right: 0;
-    bottom: 0px;
+    bottom: 25px;
     left:0;
     padding: 0;
     overflow-y: auto;
@@ -56,23 +56,28 @@
     box-sizing:border-box;
 }
 #palette-search i {
+    font-size: 10px;
     color: #666;
 }
 #palette-search i.fa-search {
     position: absolute;
     pointer-events: none;
-    left: 5px;
-    top: 11px;
+    left: 12px;
+    top: 12px;
 }
 #palette-search i.fa-times {
     position: absolute;
     right: 7px;
-    top: 11px;
+    top: 12px;
 }
 
 #palette-search-clear {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
     display: none;
-    color: #000;
 }
 
 #palette-search input {
@@ -81,7 +86,7 @@
     width: 100%;
     box-shadow: none;
     -webkit-box-shadow: none;
-    padding: 3px 17px;
+    padding: 3px 17px 3px 22px;
     margin: 0px;
     height: 30px;
     box-sizing:border-box;
@@ -92,6 +97,13 @@
     box-shadow: none;
     -webkit-box-shadow: none;
 }
+#palette-footer {
+    @include component-footer;
+}
+.palette-button {
+    @include component-footer-button;
+}
+
 
 .palette-category {
     border-bottom: 1px solid #ccc;
