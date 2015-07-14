@@ -30,10 +30,10 @@ RED.notify = (function() {
         }
         var n = document.createElement("div");
         n.id="red-notification-"+c;
-        n.className = "alert";
+        n.className = "notification";
         n.fixed = fixed;
         if (type) {
-            n.className = "alert alert-"+type;
+            n.className = "notification notification-"+type;
         }
         n.style.display = "none";
         n.innerHTML = msg;
@@ -44,7 +44,7 @@ RED.notify = (function() {
             return function() {
                 currentNotifications.splice(currentNotifications.indexOf(nn),1);
                 $(nn).slideUp(300, function() {
-                        nn.parentNode.removeChild(nn);
+                    nn.parentNode.removeChild(nn);
                 });
             };
         })();
@@ -56,4 +56,3 @@ RED.notify = (function() {
         return n;
     }
 })();
-

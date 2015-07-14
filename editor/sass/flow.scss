@@ -49,10 +49,6 @@
     margin-left: 20px;
 }
 
-#workspace  {
-    @include component-border;
-}
-
 .node_label_italic {
     font-style: italic;
 }
@@ -90,7 +86,7 @@
 .node {
     stroke: #999;
     cursor: move;
-    stroke-width: 2;
+    stroke-width: 1;
 }
 .node_unknown {
     stroke-dasharray:10,4;
@@ -116,11 +112,11 @@
 
 .node_button {
     fill: inherit;
-    
+
 }
 .port {
     stroke: #999;
-    stroke-width: 2;
+    stroke-width: 1;
     fill: #ddd;
     cursor: crosshair;
 }
@@ -152,25 +148,26 @@
     pointer-events: none;
     -webkit-touch-callout: none;
     @include disable-selection;
-    
+
 }
 .node_invalid {
     stroke: #ff0000;
 }
 .node_selected {
-    stroke: #ff7f0e !important;
+    stroke-width: 2;
+    stroke: $node-selected-color !important;
 }
 .node_highlighted {
     stroke: #dd1616;
-    stroke-width: 3;
+    stroke-width: 2;
     stroke-dasharray: 10, 4;
 }
 .node_hovered {
 }
 
 .port_hovered {
-    stroke: #ff7f0e;
-    fill:  #ff7f0e;
+    stroke: $port-selected-color;
+    fill:  $port-selected-color;
 }
 .subflowport {
     stroke-dasharray: 5,5;
@@ -179,35 +176,35 @@
 }
 
 .drag_line {
-    stroke: #ff7f0e;
-    stroke-width: 5;
+    stroke: $node-selected-color;
+    stroke-width: 4;
     fill: none;
     pointer-events: none;
 }
 
 .drag_line_hidden {
-    stroke: #ff7f0e;
+    stroke: $node-selected-color;
     stroke-width: 0;
     pointer-events: none;
     fill: none;
 }
 
 .link_line {
-    stroke: #7f7f7f;
-    stroke-width: 4;
+    stroke: $link-color;
+    stroke-width: 3;
     fill: none;
     pointer-events: none;
 }
 
 .link_subflow {
-    stroke: #bbb;
+    stroke: $link-subflow-color;
     stroke-dasharray: 10,5;
-    stroke-width: 3;
+    stroke-width: 2;
 }
 
 .link_outline {
     stroke: #fff;
-    stroke-width: 6;
+    stroke-width: 4;
     cursor: crosshair;
     fill: none;
     pointer-events: none;
@@ -215,17 +212,16 @@
 .link_background {
     stroke: #fff;
     opacity: 0;
-    stroke-width: 25;
+    stroke-width: 20;
     cursor: crosshair;
     fill: none;
 }
 
 g.link_selected path.link_line {
-    stroke: #ff7f0e;
+    stroke: $node-selected-color;
 }
 g.link_unknown path.link_line {
-    stroke: #f00;
+    stroke: $link-unknown-color;
     stroke-width: 2;
     stroke-dasharray: 10, 4;
 }
-

@@ -14,10 +14,6 @@
  * limitations under the License.
  **/
 
-
-.notification {
-    position: absolute;
-}
 #notifications {
     z-index: 10000;
     width: 500px;
@@ -26,7 +22,24 @@
     position: absolute;
     top: 1px;
 }
-#notifications .alert {
-    box-shadow: 0 0 1px 1px;
-    margin-bottom: 5px;
+.notification {
+    box-sizing: border-box;
+    position: relative;
+    padding: 14px 18px;
+    margin-bottom: 4px;
+    box-shadow: 0 1px 1px 1px rgba(0,0,0, 0.15);
+    background-color: #fff;
+    color: #666;
+    border: 1px solid #325C80;
+    border-left-width: 16px;
+}
+
+.notification-success {
+    border-color: #4B8400;
+}
+.notification-warning {
+    border-color: #D74108;
+}
+.notification-error {
+    border-color: #AD1625;
 }

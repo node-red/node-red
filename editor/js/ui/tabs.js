@@ -52,12 +52,7 @@ RED.tabs = (function() {
                 if (options.onchange) {
                     options.onchange(tabs[link.attr('href').slice(1)]);
                 }
-                if (options.hasOwnProperty("minimumActiveTabWidth")) {
-                    ul.children().css({"width":currentTabWidth+"%"});
-                    if (currentActiveTabWidth !== 0) {
-                        link.parent().css({"width":currentActiveTabWidth});
-                    }
-                }
+                updateTabWidths();
                 setTimeout(function() {
                     ul.children().css({"transition": ""});
                 },100);
@@ -68,14 +63,14 @@ RED.tabs = (function() {
             var tabs = ul.find("li.red-ui-tab");
             var width = ul.width();
             var tabCount = tabs.size();
-            var tabWidth = (width-6-(tabCount*7))/tabCount;
+            var tabWidth = (width-12-(tabCount*6))/tabCount;
             currentTabWidth = 100*tabWidth/width;
             currentActiveTabWidth = currentTabWidth+"%";
 
             if (options.hasOwnProperty("minimumActiveTabWidth")) {
                 if (tabWidth < options.minimumActiveTabWidth) {
                     tabCount -= 1;
-                    tabWidth = (width-7-options.minimumActiveTabWidth-(tabCount*7))/tabCount;
+                    tabWidth = (width-12-options.minimumActiveTabWidth-(tabCount*6))/tabCount;
                     currentTabWidth = 100*tabWidth/width;
                     currentActiveTabWidth = options.minimumActiveTabWidth+"px";
                 } else {
@@ -83,9 +78,16 @@ RED.tabs = (function() {
                 }
             }
             tabs.css({width:currentTabWidth+"%"});
+            if (tabWidth < 50) {
+                ul.find(".red-ui-tab-close").hide();
+            } else {
+                ul.find(".red-ui-tab-close").show();
+            }
             if (currentActiveTabWidth !== 0) {
                 ul.find("li.red-ui-tab.active").css({"width":options.minimumActiveTabWidth});
+                ul.find("li.red-ui-tab.active .red-ui-tab-close").show();
             }
+
         }
 
         ul.find("li.red-ui-tab a").on("click",onTabClick).on("dblclick",onTabDblClick);

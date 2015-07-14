@@ -23,7 +23,56 @@
 }
 
 @mixin component-border {
-   border: 1px solid #000;
-   border-radius: 3px;
+   border: 1px solid $primary-border-color;
+   box-sizing: border-box;
+
 }
 
+@mixin workspace-button {
+    @include disable-selection;
+    color: $workspace-button-color;
+    box-sizing: border-box;
+    display: inline-block;
+    background: $workspace-button-background;
+    border: 1px solid $secondary-border-color;
+    text-align: center;
+    margin:0;
+    text-decoration: none;
+    cursor:pointer;
+    &.disabled {
+        cursor: default;
+        color: $workspace-button-color-disabled;
+    }
+    &:not(.disabled):hover {
+        text-decoration: none;
+        color: $workspace-button-color-hover;
+        background: $workspace-button-background-hover;
+    }
+    &:not(.disabled):focus {
+        color: $workspace-button-color-focus;
+    }
+    &:not(.disabled):active {
+        color: $workspace-button-color-active;
+        background: $workspace-button-background-active;
+    }
+}
+@mixin component-footer {
+    border-top: 1px solid $primary-border-color;
+    background: #f3f3f3;
+    text-align: right;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 25px;
+    line-height: 23px;
+    padding: 0 10px;
+}
+
+@mixin component-footer-button {
+    @include workspace-button;
+    font-size: 11px;
+    line-height: 17px;
+    width: 18px;
+    height: 18px;
+}

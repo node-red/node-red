@@ -28,7 +28,7 @@
         </div>
     </div>
     <div class="form-row">
-        <a href="#" class="btn btn-mini" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="switch.label.rule"></span></a>
+        <a href="#" class="editor-button editor-button-small" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="switch.label.rule"></span></a>
     </div>
     <div class="form-row">
         <select id="node-input-checkall" style="width:100%; margin-right:5px;">
@@ -99,10 +99,10 @@
                 btwnField.append(" and ");
                 var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"width: 50px;margin-left:2px;"}).appendTo(btwnField);
 
-                var finalspan = $('<span/>',{style:"float: right; margin-top: 3px;margin-right: 10px;"}).appendTo(row);
+                var finalspan = $('<span/>',{style:"float: right;margin-right: 10px;"}).appendTo(row);
                 finalspan.append(' &#8594; <span class="node-input-rule-index">'+i+'</span> ');
 
-                var deleteButton = $('<a/>',{href:"#",class:"btn btn-mini", style:"margin-left: 5px;"}).appendTo(finalspan);
+                var deleteButton = $('<a/>',{href:"#",class:"editor-button editor-button-small", style:"margin-top: 7px; margin-left: 5px;"}).appendTo(finalspan);
                 $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
 
                 selectField.change(function() {
@@ -171,7 +171,7 @@
                 height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
                 $("#node-input-rule-container-div").css("height",height+"px");
             };
-            
+
             $( "#node-input-rule-container" ).sortable({
                 axis: "y",
                 update: function( event, ui ) {

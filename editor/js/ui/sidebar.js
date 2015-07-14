@@ -30,7 +30,8 @@ RED.sidebar = (function() {
             if (tab.onremove) {
                 tab.onremove.call(tab);
             }
-        }
+        },
+        minimumActiveTabWidth: 110
     });
 
     var knownTabs = {
@@ -96,10 +97,9 @@ RED.sidebar = (function() {
 
                 if (!RED.menu.isSelected("menu-item-sidebar")) {
                     sidebarSeparator.opening = true;
-                    var newChartRight = 15;
+                    var newChartRight = 7;
                     $("#sidebar").addClass("closing");
                     $("#workspace").css("right",newChartRight);
-                    $("#chart-zoom-controls").css("right",newChartRight+20);
                     $("#sidebar").width(0);
                     RED.menu.setSelected("menu-item-sidebar",true);
                     RED.events.emit("sidebar:resize");
@@ -110,7 +110,7 @@ RED.sidebar = (function() {
                 var d = ui.position.left-sidebarSeparator.start;
                 var newSidebarWidth = sidebarSeparator.width-d;
                 if (sidebarSeparator.opening) {
-                    newSidebarWidth -= 13;
+                    newSidebarWidth -= 3;
                 }
 
                 if (newSidebarWidth > 150) {
@@ -138,7 +138,6 @@ RED.sidebar = (function() {
 
                 var newChartRight = sidebarSeparator.chartRight-d;
                 $("#workspace").css("right",newChartRight);
-                $("#chart-zoom-controls").css("right",newChartRight+20);
                 $("#sidebar").width(newSidebarWidth);
 
                 sidebar_tabs.resize();
@@ -150,12 +149,11 @@ RED.sidebar = (function() {
                     RED.menu.setSelected("menu-item-sidebar",false);
                     if ($("#sidebar").width() < 180) {
                         $("#sidebar").width(180);
-                        $("#workspace").css("right",208);
-                        $("#chart-zoom-controls").css("right",228);
+                        $("#workspace").css("right",187);
                     }
                 }
                 $("#sidebar-separator").css("left","auto");
-                $("#sidebar-separator").css("right",($("#sidebar").width()+13)+"px");
+                $("#sidebar-separator").css("right",($("#sidebar").width()+2)+"px");
                 RED.events.emit("sidebar:resize");
             }
     });

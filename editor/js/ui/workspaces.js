@@ -85,9 +85,11 @@ RED.workspaces = (function() {
             id: "workspace-tabs",
             onchange: function(tab) {
                 if (tab.type == "subflow") {
+                    $("#chart").css({"margin-top": "40px"});
                     $("#workspace-toolbar").show();
                 } else {
                     $("#workspace-toolbar").hide();
+                    $("#chart").css({"margin-top": "0"});
                 }
                 var event = {
                     old: activeWorkspace
@@ -203,6 +205,10 @@ RED.workspaces = (function() {
 
         RED.menu.setAction('menu-item-workspace-delete',function() {
             deleteWorkspace(RED.nodes.workspace(activeWorkspace));
+        });
+
+        $(window).resize(function() {
+            workspace_tabs.resize();
         });
     }
 

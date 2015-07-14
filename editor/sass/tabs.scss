@@ -16,12 +16,13 @@
 
 ul.red-ui-tabs {
     list-style-type: none;
-    padding:5px 2px 0px 5px;
+    padding:0;
     margin: 0;
     display: block;
-    height: 24px;
-    border-bottom: 1px solid #999;
-    background: #e3e3e3;
+    height: 35px;
+    box-sizing:border-box;
+    border-bottom: 1px solid $primary-border-color;
+    background: #fff;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
@@ -30,17 +31,16 @@ ul.red-ui-tabs {
 }
 
 ul.red-ui-tabs li {
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+    box-sizing: border-box;
     display: inline-block;
-    border-left: 1px solid  #999;
-    border-top: 1px solid   #999;
-    border-right: 1px solid #999;
-    border-bottom: 1px solid #999;
-    background: #e3e3e3;
-    margin: 0 5px 0 0;
-    height: 23px;
-    line-height: 17px;
+    border-left: 1px solid  $primary-border-color;
+    border-top: 1px solid  $primary-border-color;
+    border-right: 1px solid $primary-border-color;
+    border-bottom: 1px solid $primary-border-color;
+    background: $tab-background-inactive;
+    margin: 3px 3px 0 3px;
+    height: 32px;
+    line-height: 29px;
     max-width: 200px;
     width: 14%;
     overflow: hidden;
@@ -49,53 +49,64 @@ ul.red-ui-tabs li {
 
 ul.red-ui-tabs li a.red-ui-tab-label {
     display: block;
-    padding: 3px 16px;
+    padding-left: 12px;
+    width: 100%;
+    height: 100%;
     color: #666;
 }
 ul.red-ui-tabs li {
     position: relative;
 }
 
-ul.red-ui-tabs li a.red-ui-tab-close {
-    background: rgba(227,227,227,0.8);
+.red-ui-tab-close {
+    background: $tab-background-inactive;
+    opacity: 0.8;
     position: absolute;
-    right: 2px;
-    top: 2px;
+    right: 0px;
+    top: 0px;
     display: block;
     width: 20px;
-    height: 20px;
-    line-height: 20px;
+    height: 30px;
+    line-height: 28px;
     text-align: center;
     padding: 0px;
-    border-radius: 5px;
-    color: #666;
+    color: #aaa;
+    &:hover {
+        background: $workspace-button-background-hover !important;
+        opacity: 1;
+    }
 }
-ul.red-ui-tabs li a.red-ui-tab-close:hover {
-    background: #bbb !important;
+ul.red-ui-tabs li:not(.active) a:hover+a.red-ui-tab-close {
+    background: $tab-background-hover;
 }
+
+ul.red-ui-tabs li.active a.red-ui-tab-close {
+    color: #aaa;
+    background: $tab-background-active;
+    &:hover {
+        background: $workspace-button-background-hover !important;
+        color: $workspace-button-color-hover;
+    }
+}
+
 ul.red-ui-tabs li a:hover {
     text-decoration: none;
-    background: #f0f0f0;
+}
+
+ul.red-ui-tabs li:not(.active) a:hover {
+    color: $workspace-button-color-hover;
+    background: $tab-background-hover;
+}
+
+ul.red-ui-tabs li a:focus {
+    text-decoration: none;
 }
 
 ul.red-ui-tabs li.active {
-    background: #fff;
+    background: $tab-background-active;
+    font-weight: bold;
     border-bottom: 1px solid #fff;
 }
 ul.red-ui-tabs li.active a {
     color: #333;
-}
-ul.red-ui-tabs li.active a.red-ui-tab-close {
-    background: rgba(255,255,255,0.8);
-}
-ul.red-ui-tabs li.active a.red-ui-tab-label:hover {
-    background: #fff;
-}
-ul.red-ui-tabs li.red-ui-add-tab {
-    width: 25px;
-    border-top-right-radius: 15px;
-    line-height: 22px;
-}
-ul.red-ui-tabs li.red-ui-add-tab a {
-    padding: 2px 4px;
 }

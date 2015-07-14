@@ -1224,8 +1224,8 @@ RED.view = (function() {
                             .attr("transform",function(d) { return "translate("+((d._def.align == "right") ? 94 : -25)+",2)"; })
                             .attr("class",function(d) { return "node_button "+((d._def.align == "right") ? "node_right_button" : "node_left_button"); });
                         nodeButtonGroup.append('rect')
-                            .attr("rx",8)
-                            .attr("ry",8)
+                            .attr("rx",5)
+                            .attr("ry",5)
                             .attr("width",32)
                             .attr("height",node_height-4)
                             .attr("fill","#eee");//function(d) { return d._def.color;})
@@ -1233,8 +1233,8 @@ RED.view = (function() {
                             .attr("class","node_button_button")
                             .attr("x",function(d) { return d._def.align == "right"? 10:5})
                             .attr("y",4)
-                            .attr("rx",5)
-                            .attr("ry",5)
+                            .attr("rx",4)
+                            .attr("ry",4)
                             .attr("width",16)
                             .attr("height",node_height-12)
                             .attr("fill",function(d) { return d._def.color;})
@@ -1256,8 +1256,8 @@ RED.view = (function() {
                     var mainRect = node.append("rect")
                         .attr("class", "node")
                         .classed("node_unknown",function(d) { return d.type == "unknown"; })
-                        .attr("rx", 6)
-                        .attr("ry", 6)
+                        .attr("rx", 5)
+                        .attr("ry", 5)
                         .attr("fill",function(d) { return d._def.color;})
                         .on("mouseup",nodeMouseUp)
                         .on("mousedown",nodeMouseDown)
@@ -1322,7 +1322,7 @@ RED.view = (function() {
                             .attr("class","node_icon_shade_border")
                             .attr("stroke-opacity","0.1")
                             .attr("stroke","#000")
-                            .attr("stroke-width","2");
+                            .attr("stroke-width","1");
 
                         if ("right" == d._def.align) {
                             icon_group.attr('class','node_icon_group node_icon_group_'+d._def.align);
@@ -1767,9 +1767,9 @@ RED.view = (function() {
         } catch(error) {
             if (error.code != "NODE_RED") {
                 console.log(error.stack);
-                RED.notify(RED._("notification.error")+error,"error");
+                RED.notify(RED._("notification.error",{message:error.toString()}),"error");
             } else {
-                RED.notify(RED._("notification.error")+error.message,"error");
+                RED.notify(RED._("notification.error",{message:error.message}),"error");
             }
         }
     }

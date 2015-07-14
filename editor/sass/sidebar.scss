@@ -14,14 +14,12 @@
  * limitations under the License.
  **/
 
- 
- 
 #sidebar {
     position: absolute;
-    top: 5px;
-    right: 10px;
-    bottom: 10px;
-    width: 305px;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    width: 315px;
     background: #fff;
     box-sizing: border-box;
     @include component-border;
@@ -35,26 +33,36 @@
 
 #sidebar-content {
     position: absolute;
-    top: 30px;
+    top: 35px;
     right: 0;
-    bottom: 1px;
+    bottom: 25px;
     left: 0px;
-    font-size: 1.2em;
+    padding-top: 10px;
     overflow-y: auto;
 }
 
 #sidebar-separator {
     position: absolute;
     top: 5px;
-    right: 316px;
+    right: 315px;
     bottom:10px;
-    width: 15px;
+    width: 7px;
     background: url(images/grip.png) no-repeat 50% 50%;
     cursor: col-resize;
 }
 
 .sidebar-closed > #sidebar { display: none; }
 .sidebar-closed > #sidebar-separator { right: 0px !important; }
-.sidebar-closed > #workspace { right: 15px !important; }
-.sidebar-closed > #chart-zoom-controls { right: 35px !important; }
+.sidebar-closed > #workspace { right: 7px !important; }
 
+#sidebar .button {
+    @include workspace-button;
+    line-height: 18px;
+    font-size: 12px;
+    margin-right: 5px;
+    padding: 2px 8px;
+}
+
+#sidebar-footer {
+    @include component-footer;
+}

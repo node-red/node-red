@@ -14,41 +14,24 @@
  * limitations under the License.
  **/
 
- 
+
 #workspace-toolbar {
     display: none;
     position: absolute;
-    top: 30px;
+    top: 35px;
     left:0;
-    right: 20px;
+    width: 100%;
     padding: 7px;
-    border-bottom-right-radius: 5px;
-    background: #f3f3f3;
+    height: 40px;
+    box-sizing: border-box;
+    background: #fff;
+    border-bottom: 1px solid $secondary-border-color;
 }
 
 #workspace-toolbar .button {
+    @include workspace-button;
     line-height: 18px;
-    display: inline-block;
     font-size: 12px;
-    padding: 2px 8px;
-    text-decoration: none;
-    border-radius: 3px;
-    color: #666;
-    background: #f6f6f6;
-    vertical-align: middle;
-    box-shadow: 0 0 2px #888;
     margin-right: 5px;
-}
-#workspace-toolbar .button.disabled {
-    box-shadow: 0 0 2px #bbb;
-    color: #aaa;
-    cursor: default;
-}
-#workspace-toolbar .button:not(.disabled):hover {
-    background: #e6e6e6;
-    box-shadow: 0 0 2px #666;
-}
-#workspace-toolbar .button:not(.disabled):active {
-    background: #e0e0e0;
-    box-shadow: 0 0 2px #444;
+    padding: 2px 8px;
 }

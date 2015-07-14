@@ -30,6 +30,7 @@ RED.sidebar.info = (function() {
     content.style.paddingTop = "4px";
     content.style.paddingLeft = "4px";
     content.style.paddingRight = "4px";
+    content.className = "sidebar-node-info"
 
     var propertiesExpanded = false;
 

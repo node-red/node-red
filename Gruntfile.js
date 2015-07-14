@@ -156,6 +156,10 @@ module.exports = function(grunt) {
                 files: [{
                     dest: 'public/red/style.min.css',
                     src: 'editor/sass/style.scss'
+                },
+                {
+                    dest: 'public/vendor/bootstrap/css/bootstrap.min.css',
+                    src: 'editor/vendor/bootstrap/css/bootstrap.css'
                 }]
             }
         },
@@ -254,7 +258,7 @@ module.exports = function(grunt) {
                     cwd: 'editor/vendor',
                     src: [
                         'ace/**',
-                        'bootstrap/css/**',
+                        //'bootstrap/css/**',
                         'bootstrap/img/**',
                         'jquery/css/**',
                         'font-awesome/**'

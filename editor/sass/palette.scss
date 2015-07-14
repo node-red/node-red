@@ -17,24 +17,24 @@
 
 #palette {
     position: absolute;
-    top: 5px; 
-    bottom: 10px;
-    left:10px; 
+    top: 0px;
+    bottom: 0px;
+    left:0px;
     background: #f3f3f3;
-    width: 170px;
+    width: 180px;
     text-align: center;
     @include disable-selection;
     @include component-border;
-    
+
 }
 .palette-scroll {
     display: none;
     position: absolute;
-    top: 0;
+    top: 35px;
     right: 0;
-    bottom: 35px;
+    bottom: 25px;
     left:0;
-    padding: 5px;
+    padding: 0;
     overflow-y: auto;
     box-sizing:border-box;
 }
@@ -44,32 +44,40 @@
 #palette-search {
     position: absolute;
     display: none;
-    bottom: 0;
+    top: 0;
     left:0;
     right:0;
     overflow: hidden;
-    background: #f3f3f3;
+    background: #ffffff;
     text-align: center;
     height: 35px;
     padding: 3px;
-    border-top: 1px solid #999;
+    border-bottom: 1px solid $primary-border-color;
     box-sizing:border-box;
+}
+#palette-search i {
+    font-size: 10px;
+    color: #666;
 }
 #palette-search i.fa-search {
     position: absolute;
     pointer-events: none;
-    left: 4px;
-    top: 10px;
+    left: 12px;
+    top: 12px;
 }
 #palette-search i.fa-times {
     position: absolute;
-    right: 6px;
-    top: 10px;
+    right: 7px;
+    top: 12px;
 }
 
 #palette-search-clear {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
     display: none;
-    color: #000;
 }
 
 #palette-search input {
@@ -78,7 +86,7 @@
     width: 100%;
     box-shadow: none;
     -webkit-box-shadow: none;
-    padding: 3px 17px;
+    padding: 3px 17px 3px 22px;
     margin: 0px;
     height: 30px;
     box-sizing:border-box;
@@ -89,27 +97,31 @@
     box-shadow: none;
     -webkit-box-shadow: none;
 }
+#palette-footer {
+    @include component-footer;
+}
+.palette-button {
+    @include component-footer-button;
+}
+
 
 .palette-category {
-    border: 1px solid #999;
-    border-radius: 3px;
-    margin-bottom: 5px;
+    border-bottom: 1px solid #ccc;
 }
 .palette-content {
     background: #fff;
-    border-top: 1px solid #aaa;
-    padding-bottom: 3px;
+    padding: 3px;
 }
 
 .palette-header {
-    background: #f3f3f3;
-    border-radius: 3px;
+    background: $palette-header-background;
     cursor: pointer;
     text-align: left;
-    padding: 1px;
+    padding: 9px;
+    font-weight: bold;
 }
 .palette-header i {
-    margin: 3px 4px 3px 3px;
+    margin: 3px 10px 3px 3px;
     -webkit-transition: all 0.2s ease-in-out;
     -moz-transition: all 0.2s ease-in-out;
     -o-transition: all 0.2s ease-in-out;
@@ -126,6 +138,7 @@
     clear: both;
 }
 .palette_label {
+    font-size: 13px;
     margin: 4px 0 4px 28px;
     line-height: 20px;
     overflow: hidden;
@@ -137,12 +150,11 @@
 
 .palette_node {
     cursor:move;
-    font-size:13px;
     background: #ddd;
     margin: 10px auto;
     height: 25px;
-    border-radius: 6px;
-    border: 2px solid #999;
+    border-radius: 5px;
+    border: 1px solid #999;
     background-position: 5% 50%;
     background-repeat: no-repeat;
     width: 120px;
@@ -150,7 +162,7 @@
     position: relative;
 }
 .palette_node:hover {
-    border-color: #ff7f0e;
+    border-color: $node-selected-color;
     background-color: #eee;
 }
 .palette_port {
@@ -181,7 +193,7 @@
     bottom:0;
     left:0;
     width: 30px;
-    border-right: 2px solid rgba(0,0,0,0.1);
+    border-right: 1px solid rgba(0,0,0,0.1);
     background-color: rgba(0,0,0,0.05);
 }
 .palette_icon_container_right {
