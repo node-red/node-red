@@ -295,7 +295,8 @@ module.exports = function(grunt) {
                         'red/**',
                         'public/**',
                         'editor/templates/**',
-                        'bin/**'
+                        'bin/**',
+                        'locales/**'
                     ],
                     dest: path.resolve('<%= paths.dist %>/node-red-<%= pkg.version %>')
                 }]
