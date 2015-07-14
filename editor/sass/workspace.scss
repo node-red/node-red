@@ -25,6 +25,7 @@
    right:0px;
    box-sizing:border-box;
 }
+
 #chart svg:focus {
     outline: none;
 }
@@ -45,7 +46,7 @@
 }
 
 #workspace-tabs {
-    margin-right: 40px;
+    margin-right: 35px;
 }
 
 #workspace-add-tab {
@@ -54,7 +55,7 @@
     top: 0;
     right: 0;
     height: 35px;
-    width: 40px;
+    width: 35px;
     background: #fff;
     border-bottom: 1px solid $primary-border-color;
 }
@@ -65,7 +66,7 @@
     height: 32px;
     width: 32px;
     margin-top: 3px;
-    margin-right:8px;
+    margin-right:3px;
     border: 1px solid $primary-border-color;
 }
 

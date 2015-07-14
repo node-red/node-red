@@ -1231,7 +1231,7 @@ RED.view = (function() {
                             .attr("fill","#eee");//function(d) { return d._def.color;})
                         nodeButtonGroup.append('rect')
                             .attr("class","node_button_button")
-                            .attr("x",function(d) { return d._def.align == "right"? 10:5})
+                            .attr("x",function(d) { return d._def.align == "right"? 11:5})
                             .attr("y",4)
                             .attr("rx",4)
                             .attr("ry",4)
