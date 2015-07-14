@@ -17,10 +17,9 @@
 .sidebar-node-info  hr {
     margin: 10px 0;
 }
-
 table.node-info {
     font-size: 14px;
-    margin: 5px;
+    margin: 0px;
     width: 97%;
 }
 table.node-info tr {
@@ -46,14 +45,12 @@ table.node-info td:last-child{
     padding-left: 5px;
     color: #666;
 }
-
 div.node-info {
     margin: 5px;
 }
 .node-info-property-header {
     color: #666;
 }
-
 .node-info-property-header:hover,
 .node-info-property-header:focus {
     color: #666;
