@@ -20,7 +20,7 @@ var path = require("path");
 var fs = require("fs");
 
 var defaultLang = "en-US";
-var supportedLangs = null;
+var supportedLangs = [];
 
 var resourceMap = {
     "runtime":  {

@@ -42,7 +42,7 @@ module.exports = {
         editorTemplate = fs.readFileSync(path.join(templateDir,"index.mst"),"utf8");
         Mustache.parse(editorTemplate);
     },
-    
+
     ensureSlash: function(req,res,next) {
         var parts = req.originalUrl.split("?");
         if (parts[0].slice(-1) != "/") {
@@ -55,17 +55,17 @@ module.exports = {
     },
     icon: function(req,res) {
         if (iconCache[req.params.icon]) {
-            res.sendfile(iconCache[req.params.icon]); // if not found, express prints this to the console and serves 404
-        } else { 
+            res.sendFile(iconCache[req.params.icon]); // if not found, express prints this to the console and serves 404
+        } else {
             for (var p=0;p<icon_paths.length;p++) {
                 var iconPath = path.join(icon_paths[p],req.params.icon);
                 if (fs.existsSync(iconPath)) {
-                    res.sendfile(iconPath);
+                    res.sendFile(iconPath);
                     iconCache[req.params.icon] = iconPath;
                     return;
                 }
             }
-            res.sendfile(defaultIcon);
+            res.sendFile(defaultIcon);
         }
     },
     editor: function(req,res) {

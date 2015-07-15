@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 var should = require("should");
 var when = require("when");
 var sinon = require("sinon");
@@ -28,7 +28,7 @@ var settings = require("../../../../red/settings");
 
 
 describe("api auth middleware",function() {
-    
+
     describe("ensureClientSecret", function() {
         it("leaves client_secret alone if not present",function(done) {
             var req = {
@@ -51,26 +51,26 @@ describe("api auth middleware",function() {
             })
         });
     });
-    
+
     describe("revoke", function() {
         it("revokes a token", function(done) {
             var revokeToken = sinon.stub(Tokens,"revoke",function() {
                 return when.resolve();
             });
-            
+
             var req = { body: { token: "abcdef" } };
-            
-            var res = { send: function(resp) {
+
+            var res = { status: function(resp) {
                 revokeToken.restore();
 
                 resp.should.equal(200);
                 done();
             }};
-            
+
             auth.revoke(req,res);
         });
     });
-    
+
     describe("login", function() {
         beforeEach(function() {
             sinon.stub(Tokens,"init",function(){});
@@ -96,7 +96,7 @@ describe("api auth middleware",function() {
                 done();
             }});
         });
-            
+
     });
-    
+
 });

@@ -26,12 +26,12 @@ var ui = require("../../../red/api/ui");
 
 describe("ui api", function() {
     var app;
-    
-    
+
+
     describe("slash handler", function() {
         before(function() {
             app = express();
-            app.get("/foo",ui.ensureSlash,function(req,res) { res.send(200);});
+            app.get("/foo",ui.ensureSlash,function(req,res) { res.sendStatus(200);});
         });
         it('redirects if the path does not end in a slash',function(done) {
             request(app)
@@ -57,13 +57,13 @@ describe("ui api", function() {
                 .expect(200,done);
         });
     });
-    
+
     describe("icon handler", function() {
         before(function() {
             app = express();
             app.get("/icons/:icon",ui.icon);
         });
-        
+
         function binaryParser(res, callback) {
             res.setEncoding('binary');
             res.data = '';
@@ -80,7 +80,7 @@ describe("ui api", function() {
                 b1[i].should.equal(b2[i]);
             }
         }
-        
+
         it('returns the default icon when getting an unknown icon', function(done) {
             var defaultIcon = fs.readFileSync(path.resolve(__dirname+'/../../../public/icons/arrow-in.png'));
             request(app)
@@ -96,7 +96,7 @@ describe("ui api", function() {
                     compareBuffers(res.body,defaultIcon);
                     done();
                 });
-                
+
         });
         it('returns a known icon', function(done) {
             var injectIcon = fs.readFileSync(path.resolve(__dirname+'/../../../public/icons/inject.png'));
@@ -114,7 +114,7 @@ describe("ui api", function() {
                     done();
                 });
         });
-        
+
         it('returns a registered icon' , function(done) {
             var testIcon = fs.readFileSync(path.resolve(__dirname+'/../../resources/icons/test_icon.png'));
             events.emit("node-icon-dir", path.resolve(__dirname+'/../../resources/icons'));
@@ -133,7 +133,7 @@ describe("ui api", function() {
                 });
         });
     });
-    
+
     describe("editor ui handler", function() {
         before(function() {
             app = express();
@@ -153,7 +153,7 @@ describe("ui api", function() {
                 });
         });
     });
-    
+
     describe("editor ui resource handler", function() {
         before(function() {
             app = express();
@@ -172,7 +172,7 @@ describe("ui api", function() {
         });
     });
 
-    
-    
-    
+
+
+
 });

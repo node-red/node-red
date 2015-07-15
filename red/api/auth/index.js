@@ -55,7 +55,7 @@ function needsPermission(permission) {
                     return next();
                 }
                 log.audit({event: "permission.fail"},req);
-                return res.send(401);
+                return res.status(401).end();
             });
         } else {
             next();
@@ -95,7 +95,7 @@ function revoke(req,res) {
     // TODO: audit log
     Tokens.revoke(token).then(function() {
         log.audit({event: "auth.login.revoke"},req);
-        res.send(200);
+        res.status(200).end();
     });
 }
 

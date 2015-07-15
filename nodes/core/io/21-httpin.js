@@ -19,13 +19,13 @@ module.exports = function(RED) {
     var http = require("follow-redirects").http;
     var https = require("follow-redirects").https;
     var urllib = require("url");
-    var express = require("express");
+    var bodyParser = require("body-parser");
     var getBody = require('raw-body');
     var mustache = require("mustache");
     var querystring = require("querystring");
     var cors = require('cors');
-    var jsonParser = express.json();
-    var urlencParser = express.urlencoded();
+    var jsonParser = bodyParser.json();
+    var urlencParser = bodyParser.urlencoded({extended:true});
     var onHeaders = require('on-headers');
 
     function rawBodyParser(req, res, next) {
@@ -43,6 +43,7 @@ module.exports = function(RED) {
         });
     }
 
+    var corsSetup = false;
 
     function HTTPIn(n) {
         RED.nodes.createNode(this,n);
@@ -60,7 +61,7 @@ module.exports = function(RED) {
 
             this.errorHandler = function(err,req,res,next) {
                 node.warn(err);
-                res.send(500);
+                res.sendStatus(500);
             };
 
             this.callback = function(req,res) {
@@ -77,9 +78,10 @@ module.exports = function(RED) {
 
             var corsHandler = function(req,res,next) { next(); }
 
-            if (RED.settings.httpNodeCors) {
+            if (RED.settings.httpNodeCors && !corsSetup) {
                 corsHandler = cors(RED.settings.httpNodeCors);
-                RED.httpNode.options(this.url,corsHandler);
+                RED.httpNode.options("*",corsHandler);
+                corsSetup = true;
             }
 
             var httpMiddleware = function(req,res,next) { next(); }
@@ -121,24 +123,12 @@ module.exports = function(RED) {
             }
 
             this.on("close",function() {
-                var routes = RED.httpNode.routes[this.method];
-                for (var i = 0; i<routes.length; i++) {
-                    if (routes[i].path == this.url) {
+                var node = this;
+                RED.httpNode._router.stack.forEach(function(route,i,routes) {
+                    if (route.route && route.route.path === node.url && route.route.methods[node.method]) {
                         routes.splice(i,1);
-                        //break;
                     }
-                }
-                if (RED.settings.httpNodeCors) {
-                    var routes = RED.httpNode.routes['options'];
-                    if (routes) {
-                        for (var j = 0; j<routes.length; j++) {
-                            if (routes[j].path == this.url) {
-                                routes.splice(j,1);
-                                //break;
-                            }
-                        }
-                    }
-                }
+                });
             });
         } else {
             this.warn(RED._("httpin.errors.not-created"));
@@ -157,7 +147,7 @@ module.exports = function(RED) {
                 }
                 var statusCode = msg.statusCode || 200;
                 if (typeof msg.payload == "object" && !Buffer.isBuffer(msg.payload)) {
-                    msg.res.jsonp(statusCode,msg.payload);
+                    msg.res.status(statusCode).jsonp(msg.payload);
                 } else {
                     if (msg.res.get('content-length') == null) {
                         var len;

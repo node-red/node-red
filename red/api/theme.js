@@ -43,7 +43,7 @@ function serveFile(app,baseUrl,file) {
         var url = baseUrl+path.basename(file);
         //console.log(url,"->",file);
         app.get(url,function(req, res) {
-            res.sendfile(file);
+            res.sendFile(file);
         });
         return "theme"+url;
     } catch(err) {
@@ -58,13 +58,13 @@ module.exports = {
         var url;
         themeContext = clone(defaultContext);
         themeSettings = null;
-        
+
         if (settings.editorTheme) {
             var theme = settings.editorTheme;
             themeSettings = {};
-            
+
             var themeApp = express();
-            
+
             if (theme.page) {
                 if (theme.page.css) {
                     var styles = theme.page.css;
@@ -72,7 +72,7 @@ module.exports = {
                         styles = [styles];
                     }
                     themeContext.page.css = [];
-                    
+
                     for (i=0;i<styles.length;i++) {
                         url = serveFile(themeApp,"/css/",styles[i]);
                         if (url) {
@@ -80,25 +80,25 @@ module.exports = {
                         }
                     }
                 }
-                
+
                 if (theme.page.favicon) {
                     url = serveFile(themeApp,"/favicon/",theme.page.favicon)
                     if (url) {
                         themeContext.page.favicon = url;
                     }
                 }
-                
+
                 themeContext.page.title = theme.page.title || themeContext.page.title;
             }
-            
+
             if (theme.header) {
-                
+
                 themeContext.header.title = theme.header.title || themeContext.header.title;
-                
+
                 if (theme.header.hasOwnProperty("url")) {
                     themeContext.header.url = theme.header.url;
                 }
-                
+
                 if (theme.header.hasOwnProperty("image")) {
                     if (theme.header.image) {
                         url = serveFile(themeApp,"/header/",theme.header.image);
@@ -110,7 +110,7 @@ module.exports = {
                     }
                 }
             }
-            
+
             if (theme.deployButton) {
                 if (theme.deployButton.type == "simple") {
                     themeSettings.deployButton = {
@@ -127,11 +127,11 @@ module.exports = {
                     }
                 }
             }
-            
+
             if (theme.hasOwnProperty("userMenu")) {
                 themeSettings.userMenu = theme.userMenu;
             }
-            
+
             if (theme.login) {
                 if (theme.login.image) {
                     url = serveFile(themeApp,"/login/",theme.login.image);
@@ -142,11 +142,11 @@ module.exports = {
                     }
                 }
             }
-            
+
             if (theme.hasOwnProperty("menu")) {
                 themeSettings.menu = theme.menu;
             }
-            
+
             return themeApp;
         }
     },

@@ -29,11 +29,11 @@ module.exports = {
         var deploymentType = req.get("Node-RED-Deployment-Type")||"full";
         log.audit({event: "flows.set",type:deploymentType},req);
         redNodes.setFlows(flows,deploymentType).then(function() {
-            res.send(204);
+            res.status(204).end();
         }).otherwise(function(err) {
             log.warn(log._("api.flows.error-save",{message:err.message}));
             log.warn(err.stack);
-            res.json(500,{error:"unexpected_error", message:err.message});
+            res.status(500).json({error:"unexpected_error", message:err.message});
         });
     }
 }

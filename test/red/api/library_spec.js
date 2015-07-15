@@ -17,6 +17,7 @@
 var should = require("should");
 var request = require('supertest');
 var express = require('express');
+var bodyParser = require('body-parser');
 
 var when = require('when');
 
@@ -27,7 +28,7 @@ var library = require("../../../red/api/library");
 var auth = require("../../../red/api/auth");
 
 describe("library api", function() {
-        
+
     function initStorage(_flows,_libraryEntries) {
         var flows = _flows;
         var libraryEntries = _libraryEntries;
@@ -67,13 +68,13 @@ describe("library api", function() {
 
     describe("flows", function() {
         var app;
-    
+
         before(function() {
             app = express();
-            app.use(express.json());
+            app.use(bodyParser.json());
             app.get("/library/flows",library.getAll);
             app.post(new RegExp("/library/flows\/(.*)"),library.post);
-            app.get(new RegExp("/library/flows\/(.*)"),library.get);                
+            app.get(new RegExp("/library/flows\/(.*)"),library.get);
         });
         it('returns empty result', function(done) {
             initStorage({},{flows:{}});
@@ -97,8 +98,8 @@ describe("library api", function() {
                 .expect(404)
                 .end(done);
         });
-        
-        
+
+
         it('can store and retrieve item', function(done) {
             initStorage({},{flows:{}});
             var flow = '[]';
@@ -122,7 +123,7 @@ describe("library api", function() {
                         });
                 });
         });
-        
+
         it('lists a stored item', function(done) {
             initStorage({f:["bar"]});
             request(app)
@@ -137,7 +138,7 @@ describe("library api", function() {
                     done();
                 });
         });
-        
+
         it('returns 403 for malicious get attempt', function(done) {
             initStorage({});
             // without the userDir override the malicious url would be
@@ -162,10 +163,10 @@ describe("library api", function() {
 
     describe("type", function() {
         var app;
-        
+
         before(function() {
             app = express();
-            app.use(express.json());
+            app.use(bodyParser.json());
             library.init(app);
             auth.init({});
             RED.library.register("test");
@@ -184,7 +185,7 @@ describe("library api", function() {
                     done();
                 });
         });
-    
+
         it('returns 404 for non-existent entry', function(done) {
             initStorage({},{});
             request(app)
@@ -192,7 +193,7 @@ describe("library api", function() {
                 .expect(404)
                 .end(done);
         });
-    
+
         it('can store and retrieve item', function(done) {
             initStorage({},{'test':{}});
             var flow = {text:"test content"};
@@ -216,7 +217,7 @@ describe("library api", function() {
                         });
                 });
         });
-        
+
         it('lists a stored item', function(done) {
             initStorage({},{'test':{'a':['abc','def']}});
                 request(app)
@@ -232,22 +233,22 @@ describe("library api", function() {
                         done();
                     });
         });
-        
-    
+
+
         it('returns 403 for malicious access attempt', function(done) {
             request(app)
                 .get('/library/test/../../../../../../../../../../etc/passwd')
                 .expect(403)
                 .end(done);
         });
-    
+
         it('returns 403 for malicious access attempt', function(done) {
             request(app)
                 .get('/library/test/..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\etc\\passwd')
                 .expect(403)
                 .end(done);
         });
-    
+
         it('returns 403 for malicious access attempt', function(done) {
             request(app)
                 .post('/library/test/../../../../../../../../../../etc/passwd')
@@ -256,6 +257,6 @@ describe("library api", function() {
                 .expect(403)
                 .end(done);
         });
-    
+
     });
 });

@@ -81,13 +81,13 @@ module.exports = function(RED) {
         if (node != null) {
             try {
                 node.receive();
-                res.send(200);
+                res.sendStatus(200);
             } catch(err) {
-                res.send(500);
+                res.sendStatus(500);
                 node.error(RED._("inject.failed",{error:err.toString()}));
             }
         } else {
-            res.send(404);
+            res.sendStatus(404);
         }
     });
 }

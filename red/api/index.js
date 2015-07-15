@@ -15,6 +15,7 @@
  **/
 
 var express = require("express");
+var bodyParser = require("body-parser");
 var util = require('util');
 var path = require('path');
 var passport = require('passport');
@@ -34,7 +35,7 @@ var settings = require("../settings");
 
 var errorHandler = function(err,req,res,next) {
     console.log(err.stack);
-    res.json(400,{error:"unexpected_error", message:err.toString()});
+    res.status(400).json({error:"unexpected_error", message:err.toString()});
 };
 
 function init(adminApp,storage) {
@@ -54,8 +55,8 @@ function init(adminApp,storage) {
         adminApp.use(editorApp);
     }
 
-    adminApp.use(express.json());
-    adminApp.use(express.urlencoded());
+    adminApp.use(bodyParser.json());
+    adminApp.use(bodyParser.urlencoded({extended:true}));
 
     adminApp.get("/auth/login",auth.login);
 

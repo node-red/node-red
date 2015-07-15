@@ -17,6 +17,7 @@
 var should = require("should");
 var request = require('supertest');
 var express = require('express');
+var bodyParser = require('body-parser');
 var sinon = require('sinon');
 var when = require('when');
 
@@ -25,16 +26,16 @@ var redNodes = require("../../../red/nodes");
 var flows = require("../../../red/api/flows");
 
 describe("flows api", function() {
-        
+
     var app;
 
     before(function() {
         app = express();
-        app.use(express.json());
+        app.use(bodyParser.json());
         app.get("/flows",flows.get);
         app.post("/flows",flows.post);
     });
-    
+
     it('returns flow', function(done) {
         var getFlows = sinon.stub(redNodes,'getFlows', function() {
             return [1,2,3];
@@ -52,7 +53,7 @@ describe("flows api", function() {
                 done();
             });
     });
-    
+
     it('sets flows', function(done) {
         var setFlows = sinon.stub(redNodes,'setFlows', function() {
             return when.resolve();
@@ -86,5 +87,5 @@ describe("flows api", function() {
                 done();
             });
     });
-    
+
 });

@@ -25,7 +25,8 @@
         "editor", "messaging", "iot", "m2m", "pi", "arduino", "beaglebone", "ibm", "flow"
     ],
     "dependencies": {
-        "express": "3.20.3",
+        "express": "4.13.1",
+        "body-parser": "1.13.2",
         "when": "3.7.3",
         "bcryptjs": "2.2.0",
         "nopt": "3.0.3",

@@ -17,6 +17,7 @@
 var should = require("should");
 var request = require('supertest');
 var express = require('express');
+var bodyParser = require('body-parser');
 var sinon = require('sinon');
 var when = require('when');
 
@@ -32,7 +33,7 @@ describe("nodes api", function() {
 
     before(function() {
         app = express();
-        app.use(express.json());
+        app.use(bodyParser.json());
         app.get("/nodes",nodes.getAll);
         app.post("/nodes",nodes.post);
         app.get("/nodes/:mod",nodes.getModule);

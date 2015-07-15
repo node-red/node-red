@@ -142,15 +142,15 @@ module.exports = function(RED) {
         if (node !== null && typeof node !== "undefined" ) {
             if (state === "enable") {
                 node.active = true;
-                res.send(200);
+                res.sendStatus(200);
             } else if (state === "disable") {
                 node.active = false;
-                res.send(201);
+                res.sendStatus(201);
             } else {
-                res.send(404);
+                res.sendStatus(404);
             }
         } else {
-            res.send(404);
+            res.sendStatus(404);
         }
     });
 };
