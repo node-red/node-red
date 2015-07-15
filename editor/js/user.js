@@ -86,7 +86,7 @@ RED.user = (function() {
                         var body = {
                             client_id: "node-red-editor",
                             grant_type: "password",
-                            scope:"*"
+                            scope:""
                         }
                         for (var i=0;i<data.prompts.length;i++) {
                             var field = data.prompts[i];

@@ -40,5 +40,9 @@ describe("Auth permissions", function() {
             permissions.hasPermission("read",["foo.read","foo.write"]).should.be.false;
             permissions.hasPermission("read",["foo.read","bar.read"]).should.be.true;
         });
+        it('permits an empty permission', function() {
+            permissions.hasPermission("*","").should.be.true;
+            permissions.hasPermission("read",[""]).should.be.true;
+        });
     });
 });

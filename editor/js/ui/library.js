@@ -329,7 +329,7 @@ RED.library = (function() {
             }).done(function(data,textStatus,xhr) {
                 RED.notify(RED._("library.savedType", {type:options.type}),"success");
             }).fail(function(xhr,textStatus,err) {
-                RED.notify(RED._("library.saveFailed",{message:xhr.responseJSON.message}),"error");
+                RED.notify(RED._("library.saveFailed",{message:xhr.responseText}),"error");
             });
         }
         $( "#node-dialog-library-save-confirm" ).dialog({

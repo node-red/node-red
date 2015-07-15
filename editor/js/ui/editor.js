@@ -287,6 +287,8 @@ RED.editor = (function() {
                                     }).done(function() {
                                             RED.library.loadFlowLibrary();
                                             RED.notify(RED._("library.savedNodes"),"success");
+                                    }).fail(function(xhr,textStatus,err) {
+                                        RED.notify(RED._("library.saveFailed",{message:xhr.responseText}),"error");
                                     });
                                 }
                             }

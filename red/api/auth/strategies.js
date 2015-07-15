@@ -85,6 +85,9 @@ var passwordTokenExchange = function(client, username, password, scope, done) {
 
     Users.authenticate(username,password).then(function(user) {
         if (user) {
+            if (scope === "") {
+                scope = user.permissions;
+            }
             if (permissions.hasPermission(user.permissions,scope)) {
                 loginAttempts = loginAttempts.filter(function(logEntry) {
                     return logEntry.user !== username;
