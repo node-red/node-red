@@ -21,7 +21,13 @@
     </div>
     <div class="form-row">
         <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
-        <input type="text" id="node-input-topic" data-i18n="[placeholder]common.label.topic">
+        <input type="text" id="node-input-topic" style="width:42% !important" data-i18n="[placeholder]common.label.topic">
+        <label for="node-input-qos" style="width:60px;margin-left:10px;"><i class="fa fa-empire"></i> <span data-i18n="mqtt.label.qos"></span></label>
+        <select id="node-input-qos" style="width:55px !important">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option selected value="2">2</option>
+        </select>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
@@ -41,6 +47,7 @@
         defaults: {
             name: {value:""},
             topic: {value:"",required:true},
+            qos: {value:"2",required:true},
             broker: {type:"mqtt-broker", required:true}
         },
         color:"#d8bfd8",
@@ -117,6 +124,13 @@
 </script>
 
 <script type="text/x-red" data-template-name="mqtt-broker">
+    <div class="form-row">
+        <label for="node-config-input-protocol"><i class="fa fa-check-circle-o"></i> <span data-i18n="mqtt.label.protocol"></span></label>
+        <select id="node-config-input-protocol" style="width:120px; margin-right:5px;">
+            <option value="mqtt">MQTT</option>
+            <option value="mqtts">MQTTS</option>
+        </select>
+    </div>
     <div class="form-row node-input-broker">
         <label for="node-config-input-broker"><i class="fa fa-globe"></i> <span data-i18n="mqtt.label.broker"></span></label>
         <input class="input-append-left" type="text" id="node-config-input-broker" placeholder="localhost" style="width: 40%;" >
@@ -135,15 +149,27 @@
         <label for="node-config-input-password"><i class="fa fa-lock"></i> <span data-i18n="common.label.password"></span></label>
         <input type="password" id="node-config-input-password">
     </div>
+    <div class="form-row mqtts-option">
+        <label for="node-config-input-acceptanycertificate"><i class="fa fa-shield"></i> Security</label>
+        <input type="checkbox" id="node-config-input-acceptanycertificate" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-config-input-acceptanycertificate" style="width: 70%;">Accept all certificates?</label>
+    </div>
+    <div class="form-row mqtts-option">
+        <label for="node-config-input-capath"><i class="fa fa-certificate"></i> CA path</label>
+        <input type="text" id="node-config-input-capath" placeholder="Insert broker CA certificate file path">
+    </div>
 </script>
 
 <script type="text/javascript">
     RED.nodes.registerType('mqtt-broker',{
         category: 'config',
         defaults: {
+            protocol: {value:"mqtt",required:true},
             broker: {value:"",required:true},
             port: {value:1883,required:true,validate:RED.validators.number()},
-            clientid: { value:"" }
+            clientid: { value:"" },
+            acceptanycertificate: { value:false},
+            capath: { value:"" }
         },
         credentials: {
             user: {type:"text"},
@@ -151,7 +177,17 @@
         },
         label: function() {
             if (this.broker == "") { this.broker = "localhost"; }
-            return (this.clientid?this.clientid+"@":"")+this.broker+":"+this.port;
+            return (this.clientid?this.clientid+"@":"")+this.protocol+"://"+this.broker+":"+this.port;
+        },
+        oneditprepare: function(){
+            $("#node-config-input-protocol").change(function() {
+                var protocol = $("#node-config-input-protocol option:selected").val();
+                if (protocol === "mqtts") {
+                    $(".mqtts-option").show();
+                } else {
+                    $(".mqtts-option").hide();
+                }
+            })
         }
     });
 </script>
