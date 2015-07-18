@@ -27,10 +27,9 @@
 
 .ui-dialog {
     border-radius: 1px;
-    border: 1px solid #eee;
     background: #fff;
     padding: 0;
-    box-shadow: 2px 2px 12px rgba(0,0,0,0.2);
+    @include component-shadow;
 }
 .ui-dialog .ui-dialog-content {
     padding: 25px 25px 10px 25px;

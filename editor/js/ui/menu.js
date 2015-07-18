@@ -133,17 +133,6 @@ RED.menu = (function() {
             if (opt.disabled) {
                 item.addClass("disabled");
             }
-            if (opt.tip) {
-                item.popover({
-                    placement:"left",
-                    trigger: "hover",
-                    delay: { show: 350, hide: 20 },
-                    html: true,
-                    container:'body',
-                    content: opt.tip
-                });
-            }
-
         }
 
 

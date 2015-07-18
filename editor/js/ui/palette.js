@@ -115,7 +115,7 @@ RED.palette = (function() {
         }
 
 
-        el.data('popover').options.content = popOverContent;
+        el.data('popover').setContent(popOverContent);
     }
 
     function escapeNodeType(nt) {
@@ -188,18 +188,24 @@ RED.palette = (function() {
             $("#palette-"+category).append(d);
             d.onmousedown = function(e) { e.preventDefault(); };
 
-            $(d).popover({
-                title:d.type,
-                placement:"right",
-                trigger: "hover",
-                delay: { show: 750, hide: 50 },
-                html: true,
-                container:'body'
+            RED.popover.create({
+                target:$(d),
+                content: "hi",
+                delay: { show: 750, hide: 50 }
             });
+
+            // $(d).popover({
+            //     title:d.type,
+            //     placement:"right",
+            //     trigger: "hover",
+            //     delay: { show: 750, hide: 50 },
+            //     html: true,
+            //     container:'body'
+            // });
             $(d).click(function() {
                 RED.view.focus();
                 var help = '<div class="node-help">'+($("script[data-help-name|='"+d.type+"']").html()||"")+"</div>";
-                $("#tab-info").html(help);
+                RED.sidebar.info.set(help);
             });
             $(d).draggable({
                 helper: 'clone',

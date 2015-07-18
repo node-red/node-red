@@ -167,9 +167,13 @@ RED.sidebar.info = (function() {
     }
 
     function clear() {
-        $("#tab-info").html("");
+        $(content).html("");
     }
 
+    function set(html) {
+        $(content).html(html);
+    }
+    
     RED.events.on("view:selection-changed",function(selection) {
         if (selection.nodes) {
             if (selection.nodes.length == 1) {
@@ -194,6 +198,7 @@ RED.sidebar.info = (function() {
         init: init,
         show: show,
         refresh:refresh,
-        clear: clear
+        clear: clear,
+        set: set
     }
 })();
