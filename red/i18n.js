@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 var i18n = require("i18next");
 var when = require("when");
 var path = require("path");
@@ -80,7 +80,7 @@ var MessageFileLoader = {
             callback(new Error("Unrecognised namespace"));
         }
     }
-    
+
 }
 
 function init() {
@@ -119,7 +119,7 @@ function getCatalog(namespace,lang) {
 
 function determineLangFromHeaders(acceptedLanguages){
     var lang = "en-US";
-    
+    acceptedLanguages = acceptedLanguages || [];
     for (var i=0;i<acceptedLanguages.length;i++){
         if (supportedLangs.indexOf(acceptedLanguages[i]) !== -1){
             lang = acceptedLanguages[i];
