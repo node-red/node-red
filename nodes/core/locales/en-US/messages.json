@@ -185,7 +185,8 @@
             "broker": "Broker",
             "qos": "QoS",
             "clientid": "Client ID",
-            "port": "Port"
+            "port": "Port",
+            "protocol": "Protocol"
         },
         "placeholder": {
             "clientid": "Leave blank for auto generated"
@@ -197,7 +198,8 @@
         "errors": {
             "not-defined": "topic not defined",
             "missing-config": "missing broker configuration",
-            "invalid-topic": "Invalid topic specified"
+            "invalid-topic": "Invalid topic specified",
+            "error": "error: __error__"
         }
     },
     "httpin": {

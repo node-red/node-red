@@ -16,14 +16,17 @@
 
 module.exports = function(RED) {
     "use strict";
-    var connectionPool = require("./lib/mqttConnectionPool");
+    var clientPool = require("./lib/mqttClientPool");
     var isUtf8 = require('is-utf8');
 
     function MQTTBrokerNode(n) {
         RED.nodes.createNode(this,n);
+        this.protocol = n.protocol;
         this.broker = n.broker;
         this.port = n.port;
         this.clientid = n.clientid;
+        this.acceptanycertificate = n.acceptanycertificate;
+        this.capath = n.capath;
         if (this.credentials) {
             this.username = this.credentials.user;
             this.password = this.credentials.password;
@@ -40,13 +43,14 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         this.topic = n.topic;
         this.broker = n.broker;
+        this.qos = n.qos;
         this.brokerConfig = RED.nodes.getNode(this.broker);
         if (this.brokerConfig) {
             this.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
-            this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.brokerConfig.clientid,this.brokerConfig.username,this.brokerConfig.password);
+            this.client = clientPool.get(this.brokerConfig);
             var node = this;
             if (this.topic) {
-                this.client.subscribe(this.topic,2,function(topic,payload,qos,retain) {
+                this.client.subscribe(this.topic,Number(this.qos),function(topic,payload,qos,retain) {
                     if (isUtf8(payload)) { payload = payload.toString(); }
                     var msg = {topic:topic,payload:payload,qos:qos,retain:retain};
                     if ((node.brokerConfig.broker === "localhost")||(node.brokerConfig.broker === "127.0.0.1")) {
@@ -54,16 +58,21 @@ module.exports = function(RED) {
                     }
                     node.send(msg);
                 }, this.id);
-                this.client.on("connectionlost",function() {
+                this.client.on("close",function() {
                     node.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
+                });
+                this.client.on("reconnect", function() {
+                    node.status({fill:"green",shape:"ring",text:"common.status.connecting"});
                 });
                 this.client.on("connect",function() {
                     node.status({fill:"green",shape:"dot",text:"common.status.connected"});
                 });
+                this.client.on("error", function(err){
+                    node.status({fill:"red",shape:"dot",text:"common.status.error"});
+                    node.warn(RED._("mqtt.errors.error",{error:err.message}));
+                });
                 if (this.client.isConnected()) {
                     node.status({fill:"green",shape:"dot",text:"common.status.connected"});
-                } else {
-                    this.client.connect();
                 }
             }
             else {
@@ -91,7 +100,7 @@ module.exports = function(RED) {
 
         if (this.brokerConfig) {
             this.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
-            this.client = connectionPool.get(this.brokerConfig.broker,this.brokerConfig.port,this.brokerConfig.clientid,this.brokerConfig.username,this.brokerConfig.password);
+            this.client = clientPool.get(this.brokerConfig);
             var node = this;
             this.on("input",function(msg) {
                 if (msg.qos) {
@@ -113,16 +122,21 @@ module.exports = function(RED) {
                     else { node.warn(RED._("mqtt.errors.invalid-topic")); }
                 }
             });
-            this.client.on("connectionlost",function() {
+            this.client.on("close",function() {
                 node.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
+            });
+            this.client.on("reconnect", function() {
+                node.status({fill:"green",shape:"ring",text:"common.status.connecting"});
             });
             this.client.on("connect",function() {
                 node.status({fill:"green",shape:"dot",text:"common.status.connected"});
             });
+            this.client.on("error", function(err){
+                node.status({fill:"red",shape:"dot",text:"common.status.error"});
+                node.warn(RED._("mqtt.errors.error",{error:err.message}));
+            });
             if (this.client.isConnected()) {
                 node.status({fill:"green",shape:"dot",text:"common.status.connected"});
-            } else {
-                this.client.connect();
             }
         } else {
             this.error(RED._("mqtt.errors.missing-config"));
