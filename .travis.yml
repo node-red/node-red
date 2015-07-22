@@ -1,3 +1,4 @@
+sudo: false
 language: node_js
 before_install:
   - npm install -g npm@~1.4.18
