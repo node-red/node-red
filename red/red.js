@@ -43,7 +43,9 @@ function checkBuild() {
 
 var RED = {
     init: function(httpServer,userSettings) {
-        checkBuild();
+        if (!userSettings.SKIP_BUILD_CHECK) {
+            checkBuild();
+        }
         userSettings.version = this.version();
         log.init(userSettings);
         settings.init(userSettings);

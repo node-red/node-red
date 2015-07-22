@@ -86,7 +86,7 @@ module.exports = {
             available: function() { return false; }
         };
 
-        
+
         var red = {};
         for (var i in RED) {
             if (RED.hasOwnProperty(i) && !/^(init|start|stop)$/.test(i)) {
@@ -94,11 +94,11 @@ module.exports = {
                 Object.defineProperty(red,i,propDescriptor);
             }
         }
-        
+
         red["_"] = function(messageId) {
             return messageId;
         };
-        
+
         redNodes.init(settings, storage);
         credentials.init(storage,express());
         RED.nodes.registerType("helper", helperNode);
@@ -138,6 +138,7 @@ module.exports = {
     startServer: function(done) {
         server = http.createServer(function(req,res){app(req,res);});
         RED.init(server, {
+            SKIP_BUILD_CHECK: true,
             logging:{console:{level:'off'}}
         });
         server.listen(listenPort, address);
