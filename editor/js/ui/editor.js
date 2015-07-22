@@ -303,6 +303,28 @@ RED.editor = (function() {
                                 if (editing_node._def.oneditcancel) {
                                     editing_node._def.oneditcancel.call(editing_node);
                                 }
+
+                                for (var d in editing_node._def.defaults) {
+                                    if (editing_node._def.defaults.hasOwnProperty(d)) {
+                                        var def = editing_node._def.defaults[d];
+                                        if (def.type) {
+                                            var configTypeDef = RED.nodes.getType(def.type);
+                                            if (configTypeDef && configTypeDef.exclusive) {
+                                                var input = $("#node-input-"+d).val()||"";
+                                                if (input !== "" && !editing_node[d]) {
+                                                    // This node has an exclusive config node that
+                                                    // has just been added. As the user is cancelling
+                                                    // the edit, need to delete the just-added config
+                                                    // node so that it doesn't get orphaned.
+                                                    RED.nodes.remove(input);
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                }
+
+
                             }
                             $( this ).dialog( "close" );
                         }
