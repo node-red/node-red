@@ -46,7 +46,7 @@ function start() {
             var path = settings.httpAdminRoot || "/";
             path = (path.slice(0,1) != "/" ? "/":"") + path + (path.slice(-1) == "/" ? "":"/") + "comms";
             wsServer = new ws.Server({server:server,path:path});
-            
+
             wsServer.on('connection',function(ws) {
                 log.audit({event: "comms.open"});
                 var pendingAuth = (settings.adminAuth != null);
@@ -122,13 +122,13 @@ function start() {
                     log.warn(log._("comms.error",{message:err.toString()}));
                 });
             });
-            
+
             wsServer.on('error', function(err) {
                 log.warn(log._("comms.error-server",{message:err.toString()}));
             });
-             
+
             lastSentTime = Date.now();
-            
+
             heartbeatTimer = setInterval(function() {
                 var now = Date.now();
                 if (now-lastSentTime > webSocketKeepAliveTime) {
@@ -167,6 +167,8 @@ function publishTo(ws,topic,data) {
     try {
         ws.send(msg);
     } catch(err) {
+        removeActiveConnection(ws);
+        removePendingConnection(ws);
         log.warn(log._("comms.error-send",{message:err.toString()}));
     }
 }
