@@ -15,7 +15,7 @@
  **/
 RED.history = (function() {
     var undo_history = [];
-    
+
     return {
         //TODO: this function is a placeholder until there is a 'save' event that can be listened to
         markAllDirty: function() {
@@ -62,6 +62,23 @@ RED.history = (function() {
                             RED.workspaces.remove(ev.subflows[i]);
                         }
                     }
+                    if (ev.subflow) {
+                        if (ev.subflow.instances) {
+                            ev.subflow.instances.forEach(function(n) {
+                                var node = RED.nodes.node(n.id);
+                                if (node) {
+                                    node.changed = n.changed;
+                                    node.dirty = true;
+                                }
+                            });
+                        }
+                        if (ev.subflow.hasOwnProperty('changed')) {
+                            var subflow = RED.nodes.subflow(ev.subflow.id);
+                            if (subflow) {
+                                subflow.changed = ev.subflow.changed;
+                            }
+                        }
+                    }
                 } else if (ev.t == "delete") {
                     if (ev.workspaces) {
                         for (i=0;i<ev.workspaces.length;i++) {
@@ -69,8 +86,8 @@ RED.history = (function() {
                             RED.workspaces.add(ev.workspaces[i]);
                         }
                     }
-                    if (ev.subflow) {
-                        RED.nodes.addSubflow(ev.subflow);
+                    if (ev.subflow && ev.subflow.subflow) {
+                        RED.nodes.addSubflow(ev.subflow.subflow);
                     }
                     var subflow;
                     if (ev.subflowInputs && ev.subflowInputs.length > 0) {
@@ -97,9 +114,17 @@ RED.history = (function() {
                             });
                         }
                     }
+                    if (ev.subflow && ev.subflow.hasOwnProperty('instances')) {
+                        ev.subflow.instances.forEach(function(n) {
+                            var node = RED.nodes.node(n.id);
+                            if (node) {
+                                node.changed = n.changed;
+                                node.dirty = true;
+                            }
+                        });
+                    }
                     if (subflow) {
                         RED.nodes.filterNodes({type:"subflow:"+subflow.id}).forEach(function(n) {
-                            n.changed = true;
                             n.inputs = subflow.in.length;
                             n.outputs = subflow.out.length;
                             while (n.outputs > n.ports.length) {
@@ -148,13 +173,21 @@ RED.history = (function() {
                                 ev.node.out = ev.node.out.concat(ev.subflow.outputs);
                             }
                         }
+                        if (ev.subflow.hasOwnProperty('instances')) {
+                            ev.subflow.instances.forEach(function(n) {
+                                var node = RED.nodes.node(n.id);
+                                if (node) {
+                                    node.changed = n.changed;
+                                    node.dirty = true;
+                                }
+                            });
+                        }
                         RED.nodes.filterNodes({type:"subflow:"+ev.node.id}).forEach(function(n) {
-                            n.changed = ev.changed;
                             n.inputs = ev.node.in.length;
                             n.outputs = ev.node.out.length;
                             RED.editor.updateNodeProperties(n);
                         });
-                        
+
                         RED.palette.refresh();
                     } else {
                         RED.editor.updateNodeProperties(ev.node);
@@ -182,10 +215,10 @@ RED.history = (function() {
                             RED.nodes.removeLink(ev.links[i]);
                         }
                     }
-                    
-                    RED.nodes.removeSubflow(ev.subflow);
-                    RED.workspaces.remove(ev.subflow);
-                    
+
+                    RED.nodes.removeSubflow(ev.subflow.subflow);
+                    RED.workspaces.remove(ev.subflow.subflow);
+
                     if (ev.removedLinks) {
                         for (i=0;i<ev.removedLinks.length;i++) {
                             RED.nodes.addLink(ev.removedLinks[i]);
@@ -199,7 +232,6 @@ RED.history = (function() {
                     }
                 });
 
-                
                 RED.nodes.dirty(ev.dirty);
                 RED.view.redraw(true);
                 RED.palette.refresh();

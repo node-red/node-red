@@ -17,6 +17,9 @@
 
 #workspace-toolbar {
     display: none;
+    color: $workspace-button-color;
+    font-size: 12px;
+    line-height: 18px;
     position: absolute;
     top: 35px;
     left:0;
@@ -26,12 +29,46 @@
     box-sizing: border-box;
     background: #fff;
     border-bottom: 1px solid $secondary-border-color;
-}
+    white-space: nowrap;
 
-#workspace-toolbar .button {
-    @include workspace-button;
-    line-height: 18px;
-    font-size: 12px;
-    margin-right: 5px;
-    padding: 2px 8px;
+    .button {
+        @include workspace-button;
+        margin-right: 10px;
+        padding: 2px 8px;
+    }
+
+    .button-group {
+        @include disable-selection;
+
+        .button:first-child {
+            margin-right: 0;
+        }
+
+        &:not(.spinner-group) {
+            .button:not(:first-child) {
+                border-left: none;
+            }
+        }
+        .button.active {
+            background: $workspace-button-background-active;
+            cursor: default;
+        }
+    }
+
+    .spinner-value {
+        width: 25px;
+        color: $workspace-button-color;
+        padding: 0 5px;
+        display: inline-block;
+        text-align: center;
+        border-top: 1px solid $secondary-border-color;
+        border-bottom: 1px solid $secondary-border-color;
+        margin: 0;
+        height: 24px;
+        font-size: 12px;
+        background: #f9f9f9;
+        line-height: 22px;
+        box-sizing: border-box;
+    }
+
 }

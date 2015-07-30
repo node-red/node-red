@@ -94,14 +94,13 @@
         }
     },
     "subflow": {
-        "tabLabel": "Subflow: __name__",
         "editSubflow": "Edit flow __name__",
         "edit": "Edit flow",
         "subflowInstances": "There is __count__ instance of this subflow",
         "subflowInstances_plural": "There are __count__ instances of this subflow",
         "editSubflowName": "edit name",
-        "input": "input",
-        "output": "output",
+        "input": "inputs:",
+        "output": "outputs:",
         "deleteSubflow": "delete subflow",
         "errors": {
             "noNodesSelected": "<strong>Cannot create subflow</strong>: no nodes selected",

@@ -21,13 +21,10 @@ ul.red-ui-tabs {
     display: block;
     height: 35px;
     box-sizing:border-box;
+    white-space: nowrap;
     border-bottom: 1px solid $primary-border-color;
     background: #fff;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+    @include disable-selection;
 }
 
 ul.red-ui-tabs li {
@@ -109,4 +106,17 @@ ul.red-ui-tabs li.active {
 }
 ul.red-ui-tabs li.active a {
     color: #333;
+}
+
+ul.red-ui-tabs li img {
+    margin-left: -8px;
+    margin-right: 3px;
+    margin-top: -2px;
+    opacity: 0.1;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+ul.red-ui-tabs li.active img {
+    opacity: 0.2;
 }

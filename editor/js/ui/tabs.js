@@ -80,12 +80,15 @@ RED.tabs = (function() {
             tabs.css({width:currentTabWidth+"%"});
             if (tabWidth < 50) {
                 ul.find(".red-ui-tab-close").hide();
+                ul.find(".red-ui-tab-icon").hide();
             } else {
                 ul.find(".red-ui-tab-close").show();
+                ul.find(".red-ui-tab-icon").show();
             }
             if (currentActiveTabWidth !== 0) {
                 ul.find("li.red-ui-tab.active").css({"width":options.minimumActiveTabWidth});
                 ul.find("li.red-ui-tab.active .red-ui-tab-close").show();
+                ul.find("li.red-ui-tab.active .red-ui-tab-icon").show();
             }
 
         }
@@ -116,13 +119,16 @@ RED.tabs = (function() {
                 tabs[tab.id] = tab;
                 var li = $("<li/>",{class:"red-ui-tab"}).appendTo(ul);
                 var link = $("<a/>",{href:"#"+tab.id, class:"red-ui-tab-label"}).appendTo(li);
-                link.html(tab.label);
+                if (tab.icon) {
+                    $('<img src="'+tab.icon+'" class="red-ui-tab-icon"/>').appendTo(link);
+                }
+                $('<span/>').text(tab.label).appendTo(link);
 
                 link.on("click",onTabClick);
                 link.on("dblclick",onTabDblClick);
                 if (tab.closeable) {
                     var closeLink = $("<a/>",{href:"#",class:"red-ui-tab-close"}).appendTo(li);
-                    closeLink.html('<i class="fa fa-times" />');
+                    closeLink.append('<i class="fa fa-times" />');
 
                     closeLink.on("click",function(event) {
                         removeTab(tab.id);
@@ -150,7 +156,7 @@ RED.tabs = (function() {
                 tabs[id].label = label;
                 var tab = ul.find("a[href='#"+id+"']");
                 tab.attr("title",label);
-                tab.text(label);
+                tab.find("span").text(label);
                 updateTabWidths();
             }
 

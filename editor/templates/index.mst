@@ -58,12 +58,7 @@
         <ul id="workspace-tabs"></ul>
         <div id="workspace-add-tab"><a id="btn-workspace-add-tab" href="#"><i class="fa fa-plus"></i></a></div>
         <div id="chart"></div>
-        <div id="workspace-toolbar">
-            <a class="button" id="workspace-subflow-edit" href="#" data-i18n="[append]subflow.editSubflowName"><i class="fa fa-pencil"></i> </a>
-            <a class="button disabled" id="workspace-subflow-add-input" href="#" data-i18n="[append]subflow.input"><i class="fa fa-plus"></i> </a>
-            <a class="button" id="workspace-subflow-add-output" href="#" data-i18n="[append]subflow.output"><i class="fa fa-plus"></i> </a>
-            <a class="button" id="workspace-subflow-delete" href="#" data-i18n="[append]subflow.deleteSubflow"><i class="fa fa-trash"></i> </a>
-        </div>
+        <div id="workspace-toolbar"></div>
         <div id="workspace-footer">
             <a class="workspace-footer-button" id="btn-zoom-out" href="#"><i class="fa fa-minus"></i></a>
             <a class="workspace-footer-button" id="btn-zoom-zero" href="#"><i class="fa fa-circle-o"></i></a>

@@ -33,7 +33,6 @@ RED.editor = (function() {
         var subflow;
         var isValid;
         var hasChanged;
-
         if (node.type.indexOf("subflow:")===0) {
             subflow = RED.nodes.subflow(node.type.substring(8));
             isValid = subflow.valid;
@@ -43,7 +42,7 @@ RED.editor = (function() {
                 hasChanged = subflow.changed;
             }
             node.valid = isValid;
-            node.changed = hasChanged;
+            node.changed = node.changed || hasChanged;
         } else if (node._def) {
             node.valid = validateNodeProperties(node, node._def.defaults, node);
             if (node._def._creds) {
@@ -65,7 +64,7 @@ RED.editor = (function() {
             var modifiedTabs = {};
             for (i=0;i<subflowInstances.length;i++) {
                 subflowInstances[i].valid = node.valid;
-                subflowInstances[i].changed = node.changed;
+                subflowInstances[i].changed = subflowInstances[i].changed || node.changed;
                 subflowInstances[i].dirty = true;
                 modifiedTabs[subflowInstances[i].z] = true;
             }
@@ -270,7 +269,36 @@ RED.editor = (function() {
                                     var wasChanged = editing_node.changed;
                                     editing_node.changed = true;
                                     RED.nodes.dirty(true);
-                                    RED.history.push({t:'edit',node:editing_node,changes:changes,links:removedLinks,dirty:wasDirty,changed:wasChanged});
+
+                                    var activeSubflow = RED.nodes.subflow(RED.workspaces.active());
+                                    if (activeSubflow) {
+                                        var subflowInstances = [];
+                                        RED.nodes.eachNode(function(n) {
+                                            if (n.type == "subflow:"+RED.workspaces.active()) {
+                                                subflowInstances.push({
+                                                    id:n.id,
+                                                    changed:n.changed
+                                                });
+                                                n.changed = true;
+                                                n.dirty = true;
+                                                updateNodeProperties(n);
+                                            }
+                                        });
+                                    }
+                                    var historyEvent = {
+                                        t:'edit',
+                                        node:editing_node,
+                                        changes:changes,
+                                        links:removedLinks,
+                                        dirty:wasDirty,
+                                        changed:wasChanged
+                                    };
+                                    if (subflowInstances) {
+                                        historyEvent.subflow = {
+                                            instances:subflowInstances
+                                        }
+                                    }
+                                    RED.history.push(historyEvent);
                                 }
                                 editing_node.dirty = true;
                                 validateNode(editing_node);
@@ -900,15 +928,21 @@ RED.editor = (function() {
                                 changes['name'] = editing_node.name;
                                 editing_node.name = newName;
                                 changed = true;
-                                $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text(RED._("subflow.tabLabel",{name:newName}));
+                                $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text(newName);
                             }
 
                             RED.palette.refresh();
 
                             if (changed) {
+                                var subflowInstances = [];
                                 RED.nodes.eachNode(function(n) {
                                     if (n.type == "subflow:"+editing_node.id) {
+                                        subflowInstances.push({
+                                            id:n.id,
+                                            changed:n.changed
+                                        })
                                         n.changed = true;
+                                        n.dirty = true;
                                         updateNodeProperties(n);
                                     }
                                 });
@@ -920,7 +954,10 @@ RED.editor = (function() {
                                     node:editing_node,
                                     changes:changes,
                                     dirty:wasDirty,
-                                    changed:wasChanged
+                                    changed:wasChanged,
+                                    subflow: {
+                                        instances:subflowInstances
+                                    }
                                 };
 
                                 RED.history.push(historyEvent);
