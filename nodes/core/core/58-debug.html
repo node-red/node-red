@@ -201,7 +201,7 @@
                 msg.className = 'debug-message'+(o.level?(' debug-message-level-'+o.level):'');
                 msg.innerHTML = '<span class="debug-message-date">'+
                                 getTimestamp()+'</span>'+
-                                (name?'<span class="debug-message-name">['+name+']':'')+
+                                (name?'<span class="debug-message-name">'+name:'')+
                                 '</span>';
                 // NOTE: relying on function error to have a "type" that all other msgs don't
                 if (o.hasOwnProperty("type") && (o.type === "function")) {
@@ -212,11 +212,11 @@
                         errorLvlType = 'warn';
                     }
                     msg.className = 'debug-message debug-message-level-' + errorLvl;
-                    msg.innerHTML += '<span class="debug-message-topic">[function] : (' + errorLvlType + ')</span>';
+                    msg.innerHTML += '<span class="debug-message-topic">function : (' + errorLvlType + ')</span>';
                 } else {
                     msg.innerHTML += '<span class="debug-message-topic">'+
                                     (o.topic?topic+' : ':'')+
-                                    (o.property?'[msg.'+property+']':'[msg]')+" : "+format+
+                                    (o.property?'msg.'+property:'msg')+" : "+format+
 
                                     '</span>';
                 }
@@ -284,7 +284,7 @@
     .debug-message-topic {
         display: block;
         background: #fff;
-        padding: 1px 5px;
+        padding: 1px;
         font-size: 10px;
         color: #a66;
     }

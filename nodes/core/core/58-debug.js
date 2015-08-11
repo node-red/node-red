@@ -82,13 +82,13 @@ module.exports = function(RED) {
             msg.format = "error";
             msg.msg = msg.msg.toString();
         } else if (msg.msg instanceof Buffer) {
-            msg.format = "buffer";
+            msg.format = "buffer ["+msg.msg.length+"]";
             msg.msg = msg.msg.toString('hex');
         } else if (typeof msg.msg === 'object') {
             var seen = [];
             msg.format = "object";
             if (util.isArray(msg.msg)) {
-                msg.format = "array";
+                msg.format = "array ["+msg.msg.length+"]";
             }
             msg.msg = JSON.stringify(msg.msg, function(key, value) {
                 if (typeof value === 'object' && value !== null) {
@@ -111,7 +111,7 @@ module.exports = function(RED) {
             msg.format = (msg.msg === null)?"null":"undefined";
             msg.msg = "(undefined)";
         } else {
-            msg.format = "string";
+            msg.format = "string ["+msg.msg.length+"]";
             msg.msg = msg.msg;
         }
 
