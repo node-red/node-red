@@ -637,16 +637,20 @@ RED.editor = (function() {
         }
         $("#dialog-form").find('[data-i18n]').each(function() {
             var current = $(this).attr("data-i18n");
-            if (current.indexOf(":") === -1) {
-                var prefix = "";
-                if (current.indexOf("[")===0) {
-                    var parts = current.split("]");
-                    prefix = parts[0]+"]";
-                    current = parts[1];
+            var keys = current.split(";");
+            for (var i=0;i<keys.length;i++) {
+                var key = keys[i];
+                if (key.indexOf(":") === -1) {
+                    var prefix = "";
+                    if (key.indexOf("[")===0) {
+                        var parts = key.split("]");
+                        prefix = parts[0]+"]";
+                        key = parts[1];
+                    }
+                    keys[i] = prefix+ns+":"+key;
                 }
-
-                $(this).attr("data-i18n",prefix+ns+":"+current);
             }
+            $(this).attr("data-i18n",keys.join(";"));
         });
         $('<input type="text" style="display: none;" />').appendTo("#dialog-form");
         prepareEditDialog(node,node._def,"node-input");

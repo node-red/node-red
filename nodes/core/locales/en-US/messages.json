@@ -68,7 +68,20 @@
         }
     },
     "catch": {
-        "catch": "catch"
+        "catch": "catch all",
+        "catchNodes": "catch (__number__)",
+        "label": {
+            "source": "Catch errors from",
+            "node": "node",
+            "type": "type",
+            "selectAll": "select all",
+            "sortByLabel": "sort by label",
+            "sortByType": "sort by type"
+        },
+        "scope": {
+            "all": "all nodes",
+            "selected": "selected nodes"
+        }
     },
     "debug": {
         "output": "Output",
