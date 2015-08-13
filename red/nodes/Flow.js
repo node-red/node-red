@@ -68,17 +68,23 @@ function createSubflow(sf,sfn,subflows) {
         node.z = sfn.id;
         newNodes.push(node);
     }
+    // Look for any catch nodes and update their scope ids
     // Update all subflow interior wiring to reflect new node IDs
     for (i=0;i<newNodes.length;i++) {
         node = newNodes[i];
         var outputs = node.wires;
-
         for (j=0;j<outputs.length;j++) {
             wires = outputs[j];
             for (k=0;k<wires.length;k++) {
                 outputs[j][k] = node_map[outputs[j][k]].id
             }
         }
+        if (node.type === 'catch' && node.scope) {
+            node.scope = node.scope.map(function(id) {
+                return node_map[id]?node_map[id].id:""
+            })
+        }
+
     }
 
     // Create a subflow node to accept inbound messages and route appropriately
@@ -226,31 +232,6 @@ function createCatchNodeMap(nodes) {
             }
         }
     }
-    for (id in nodes) {
-        if (nodes.hasOwnProperty(id)) {
-            var m = /^subflow:(.+)$/.exec(nodes[id].type);
-            if (m) {
-                subflowInstances[id] = nodes[id];
-            }
-        }
-    }
-    for (id in subflowInstances) {
-        if (subflowInstances.hasOwnProperty(id)) {
-            var z = id;
-            while(subflowInstances[z]) {
-                var sfi = subflowInstances[z];
-                if (!catchNodes[z]) {
-                    z = sfi.z;
-                } else {
-                    break;
-                }
-            }
-            if (catchNodes[z]) {
-                catchNodes[id] = catchNodes[id]||[];
-                catchNodes[id].push(catchNodes[z]);
-            }
-        }
-    }
     return catchNodes;
 }
 
@@ -325,14 +306,16 @@ Flow.prototype.parseConfig = function(config) {
                 } else {
                     this.nodes[nodeConfig.id] = nodeInfo;
                 }
-                for (var prop in nodeConfig) {
-                    if (nodeConfig.hasOwnProperty(prop) &&
-                        prop != "type" &&
-                        prop != "id" &&
-                        prop != "z" &&
-                        prop != "wires" &&
-                        this.allNodes[nodeConfig[prop]]) {
-                            this.configNodes[nodeConfig[prop]] = this.allNodes[nodeConfig[prop]];
+                if (nodeConfig.type != "catch") {
+                    for (var prop in nodeConfig) {
+                        if (nodeConfig.hasOwnProperty(prop) &&
+                            prop != "type" &&
+                            prop != "id" &&
+                            prop != "z" &&
+                            prop != "wires" &&
+                            this.allNodes[nodeConfig[prop]]) {
+                                this.configNodes[nodeConfig[prop]] = this.allNodes[nodeConfig[prop]];
+                        }
                     }
                 }
             }
@@ -760,37 +743,39 @@ Flow.prototype.handleError = function(node,logMessage,msg) {
     }
 
     var targetCatchNodes = null;
-    if (this.catchNodeMap[node.z]) {
-        targetCatchNodes = this.catchNodeMap[node.z];
-    } else if (this.activeNodes[node.z] && this.catchNodeMap[this.activeNodes[node.z].z]) {
-        targetCatchNodes = this.catchNodeMap[this.activeNodes[node.z].z];
-    }
-
-    if (targetCatchNodes) {
-        targetCatchNodes.forEach(function(targetCatchNode) {
-            console.log(targetCatchNode.scope);
-            if (targetCatchNode.scope && targetCatchNode.scope.indexOf(node.id) === -1) {
-                return;
-            }
-            var errorMessage;
-            if (msg) {
-                errorMessage = redUtil.cloneMessage(msg);
-            } else {
-                errorMessage = {};
-            }
-            if (errorMessage.hasOwnProperty("error")) {
-                errorMessage._error = errorMessage.error;
-            }
-            errorMessage.error = {
-                message: logMessage.toString(),
-                source: {
-                    id: node.id,
-                    type: node.type,
-                    count: count
+    var throwingNode = node;
+    var handled = false;
+    while (throwingNode && !handled) {
+        targetCatchNodes = this.catchNodeMap[throwingNode.z];
+        if (targetCatchNodes) {
+            targetCatchNodes.forEach(function(targetCatchNode) {
+                if (targetCatchNode.scope && targetCatchNode.scope.indexOf(node.id) === -1) {
+                    return;
                 }
-            };
-            targetCatchNode.receive(errorMessage);
-        })
+                var errorMessage;
+                if (msg) {
+                    errorMessage = redUtil.cloneMessage(msg);
+                } else {
+                    errorMessage = {};
+                }
+                if (errorMessage.hasOwnProperty("error")) {
+                    errorMessage._error = errorMessage.error;
+                }
+                errorMessage.error = {
+                    message: logMessage.toString(),
+                    source: {
+                        id: node.id,
+                        type: node.type,
+                        count: count
+                    }
+                };
+                targetCatchNode.receive(errorMessage);
+                handled = true;
+            });
+        }
+        if (!handled) {
+            throwingNode = this.activeNodes[throwingNode.z];
+        }
     }
 }
 
