@@ -18,6 +18,12 @@ var path = require("path");
 
 module.exports = function(grunt) {
 
+    var nodemonArgs = ["-v"];
+    var flowFile = grunt.option('flowFile');
+    if (flowFile) {
+        nodemonArgs.push(flowFile);
+    }
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         paths: {
@@ -229,7 +235,7 @@ module.exports = function(grunt) {
             dev: {
                 script: 'red.js',
                 options: {
-                    args:['-v'],
+                    args: nodemonArgs,
                     ext: 'js,html,json',
                     watch: [
                         'red','nodes'
