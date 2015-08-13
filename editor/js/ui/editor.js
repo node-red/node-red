@@ -271,8 +271,9 @@ RED.editor = (function() {
                                     RED.nodes.dirty(true);
 
                                     var activeSubflow = RED.nodes.subflow(RED.workspaces.active());
+                                    var subflowInstances = null;
                                     if (activeSubflow) {
-                                        var subflowInstances = [];
+                                        subflowInstances = [];
                                         RED.nodes.eachNode(function(n) {
                                             if (n.type == "subflow:"+RED.workspaces.active()) {
                                                 subflowInstances.push({

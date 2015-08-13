@@ -33,6 +33,7 @@ RED.history = (function() {
             var ev = undo_history.pop();
             var i;
             var node;
+            var subflow;
             var modifiedTabs = {};
             if (ev) {
                 if (ev.t == 'add') {
@@ -73,7 +74,7 @@ RED.history = (function() {
                             });
                         }
                         if (ev.subflow.hasOwnProperty('changed')) {
-                            var subflow = RED.nodes.subflow(ev.subflow.id);
+                            subflow = RED.nodes.subflow(ev.subflow.id);
                             if (subflow) {
                                 subflow.changed = ev.subflow.changed;
                             }
@@ -89,7 +90,6 @@ RED.history = (function() {
                     if (ev.subflow && ev.subflow.subflow) {
                         RED.nodes.addSubflow(ev.subflow.subflow);
                     }
-                    var subflow;
                     if (ev.subflowInputs && ev.subflowInputs.length > 0) {
                         subflow = RED.nodes.subflow(ev.subflowInputs[0].z);
                         subflow.in.push(ev.subflowInputs[0]);

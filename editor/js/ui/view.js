@@ -754,6 +754,7 @@ RED.view = (function() {
         redraw();
     }
     function deleteSelection() {
+        var result;
         var removedNodes = [];
         var removedLinks = [];
         var removedSubflowOutputs = [];
@@ -784,14 +785,14 @@ RED.view = (function() {
                 }
             }
             if (removedSubflowOutputs.length > 0) {
-                var result = RED.subflow.removeOutput(removedSubflowOutputs);
+                result = RED.subflow.removeOutput(removedSubflowOutputs);
                 if (result) {
                     removedLinks = removedLinks.concat(result.links);
                 }
             }
             // Assume 0/1 inputs
             if (removedSubflowInputs.length == 1) {
-                var result = RED.subflow.removeInput();
+                result = RED.subflow.removeInput();
                 if (result) {
                     removedLinks = removedLinks.concat(result.links);
                 }
