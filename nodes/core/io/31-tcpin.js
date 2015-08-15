@@ -393,7 +393,7 @@ module.exports = function(RED) {
             }
             if (!node.connected) {
                 client = net.Socket();
-                client.setTimeout(socketTimeout);
+                if (socketTimeout) { client.setTimeout(socketTimeout); }
                 //node.status({});
                 var host = node.server || msg.host;
                 var port = node.port || msg.port;
