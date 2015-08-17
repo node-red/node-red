@@ -432,7 +432,7 @@ module.exports = function(RED) {
                                         m = new Buffer(i+1);
                                         buf.copy(m,0,0,i+1);
                                         node.send({"payload":m});
-                                        if (client) { client.end(); }
+                                        //if (client) { client.end(); }
                                     }, node.splitc);
                                     i = 0;
                                     buf[0] = data[j];
@@ -445,7 +445,8 @@ module.exports = function(RED) {
                                 if ( i >= node.splitc) {
                                     m = new Buffer(i);
                                     buf.copy(m,0,0,i);
-                                    if (client) { client.end(); }
+                                    node.send({"payload":m});
+                                    //if (client) { client.end(); }
                                     i = 0;
                                 }
                             }
@@ -456,7 +457,8 @@ module.exports = function(RED) {
                                 if (data[j] == node.splitc) {
                                     m = new Buffer(i);
                                     buf.copy(m,0,0,i);
-                                    if (client) { client.end(); }
+                                    node.send({"payload":m});
+                                    //if (client) { client.end(); }
                                     i = 0;
                                 }
                             }
@@ -472,6 +474,7 @@ module.exports = function(RED) {
                 });
 
                 client.on('close', function() {
+                    node.status({});
                     if (node.done) { node.done(); }
                 });
 
@@ -501,7 +504,7 @@ module.exports = function(RED) {
             node.done = done;
             if (client) {
                 buf = null;
-                client.end();
+                client.destroy();
             }
             if (!node.connected) { done(); }
         });
