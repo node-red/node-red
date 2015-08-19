@@ -133,7 +133,7 @@ describe('Node', function() {
             });
             n.receive(null);
         });
-        
+
         it('handles thrown errors', function(done) {
             var n = new RedNode({id:'123',type:'abc'});
             sinon.stub(n,"error",function(err,msg) {});
@@ -145,7 +145,7 @@ describe('Node', function() {
             n.error.called.should.be.true;
             n.error.firstCall.args[1].should.equal(message);
             done();
-            
+
         });
     });
 
@@ -516,16 +516,29 @@ describe('Node', function() {
             comms.publish.restore();
         });
         it('publishes status', function(done) {
+            sinon.stub(flows,"handleStatus", function(node,message,msg) {});
             var n = new RedNode({id:'123',type:'abc'});
             var status = {fill:"green",shape:"dot",text:"connected"};
-            sinon.stub(comms, 'publish', function(topic, message, retain) {
-                topic.should.equal('status/123');
-                message.should.equal(status);
-                retain.should.be.true;
-                done();
+            var topic;
+            var message;
+            var retain;
+            sinon.stub(comms, 'publish', function(_topic, _message, _retain) {
+                topic = _topic;
+                message = _message;
+                retain = _retain;
             });
 
             n.status(status);
+
+            topic.should.equal('status/123');
+            message.should.equal(status);
+            retain.should.be.true;
+
+            flows.handleStatus.called.should.be.true;
+            flows.handleStatus.args[0][0].should.eql(n);
+            flows.handleStatus.args[0][1].should.eql(status);
+            flows.handleStatus.restore();
+            done();
         });
     });
 
