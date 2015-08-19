@@ -68,7 +68,7 @@ function createSubflow(sf,sfn,subflows) {
         node.z = sfn.id;
         newNodes.push(node);
     }
-    // Look for any catch nodes and update their scope ids
+    // Look for any catch/status nodes and update their scope ids
     // Update all subflow interior wiring to reflect new node IDs
     for (i=0;i<newNodes.length;i++) {
         node = newNodes[i];
@@ -79,7 +79,7 @@ function createSubflow(sf,sfn,subflows) {
                 outputs[j][k] = node_map[outputs[j][k]].id
             }
         }
-        if (node.type === 'catch' && node.scope) {
+        if ((node.type === 'catch' || node.type === 'status') && node.scope) {
             node.scope = node.scope.map(function(id) {
                 return node_map[id]?node_map[id].id:""
             })
@@ -216,25 +216,6 @@ function diffNodeConfigs(oldNode,newNode) {
     return false;
 }
 
-function createCatchNodeMap(nodes) {
-    var catchNodes = {};
-    var subflowInstances = {};
-    var id;
-    /*
-     - a catchNode with same z as error node
-     - if error occurs on a subflow without catchNode, look at z of subflow instance
-    */
-    for (id in nodes) {
-        if (nodes.hasOwnProperty(id)) {
-            if (nodes[id].type === "catch") {
-                catchNodes[nodes[id].z] = catchNodes[nodes[id].z] || [];
-                catchNodes[nodes[id].z].push(nodes[id]);
-            }
-        }
-    }
-    return catchNodes;
-}
-
 var subflowInstanceRE = /^subflow:(.+)$/;
 
 function Flow(config) {
@@ -242,6 +223,7 @@ function Flow(config) {
     this.activeNodes = {};
     this.subflowInstanceNodes = {};
     this.catchNodeMap = {};
+    this.statusNodeMap = {};
     this.started = false;
 
     this.parseConfig(config);
@@ -306,7 +288,7 @@ Flow.prototype.parseConfig = function(config) {
                 } else {
                     this.nodes[nodeConfig.id] = nodeInfo;
                 }
-                if (nodeConfig.type != "catch") {
+                if (nodeConfig.type != "catch" && nodeConfig.type != "status") {
                     for (var prop in nodeConfig) {
                         if (nodeConfig.hasOwnProperty(prop) &&
                             prop != "type" &&
@@ -394,7 +376,22 @@ Flow.prototype.start = function(configDiff) {
         }
     }
 
-    this.catchNodeMap = createCatchNodeMap(this.activeNodes);
+
+    this.catchNodeMap = {};
+    this.statusNodeMap = {};
+
+    for (id in this.activeNodes) {
+        if (this.activeNodes.hasOwnProperty(id)) {
+            node = this.activeNodes[id];
+            if (node.type === "catch") {
+                this.catchNodeMap[node.z] = this.catchNodeMap[node.z] || [];
+                this.catchNodeMap[node.z].push(node);
+            } else if (node.type === "status") {
+                this.statusNodeMap[node.z] = this.statusNodeMap[node.z] || [];
+                this.statusNodeMap[node.z].push(node);
+            }
+        }
+    }
 
     credentials.clean(this.config);
     events.emit("nodes-started");
@@ -727,6 +724,38 @@ function diffFlow(flow,config) {
     return diff;
 }
 
+Flow.prototype.handleStatus = function(node,statusMessage) {
+    var targetStatusNodes = null;
+    var reportingNode = node;
+    var handled = false;
+    while(reportingNode && !handled) {
+        targetStatusNodes = this.statusNodeMap[reportingNode.z];
+        if (targetStatusNodes) {
+            targetStatusNodes.forEach(function(targetStatusNode) {
+                if (targetStatusNode.scope && targetStatusNode.scope.indexOf(node.id) === -1) {
+                    return;
+                }
+                var message = {
+                    status: {
+                        source: {
+                            id: node.id,
+                            type: node.type,
+                            name: node.name
+                        }
+                    }
+                };
+                if (statusMessage.text) {
+                    message.status.text = statusMessage.text;
+                }
+                targetStatusNode.receive(message);
+                handled = true;
+            });
+        }
+        if (!handled) {
+            reportingNode = this.activeNodes[reportingNode.z];
+        }
+    }
+}
 
 Flow.prototype.handleError = function(node,logMessage,msg) {
     var count = 1;

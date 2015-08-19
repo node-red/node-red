@@ -83,6 +83,22 @@
             "selected": "selected nodes"
         }
     },
+    "status": {
+        "status": "status (all)",
+        "statusNodes": "status (__number__)",
+        "label": {
+            "source": "Report status from",
+            "node": "node",
+            "type": "type",
+            "selectAll": "select all",
+            "sortByLabel": "sort by label",
+            "sortByType": "sort by type"
+        },
+        "scope": {
+            "all": "all nodes",
+            "selected": "selected nodes"
+        }
+    },
     "debug": {
         "output": "Output",
         "msgprop": "message property",
