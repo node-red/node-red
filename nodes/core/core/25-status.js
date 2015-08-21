@@ -20,6 +20,7 @@ module.exports = function(RED) {
     function StatusNode(n) {
         RED.nodes.createNode(this,n);
         var node = this;
+        this.scope = n.scope;
         this.on("input", function(msg) {
             this.send(msg);
         });
