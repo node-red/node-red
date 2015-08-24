@@ -106,7 +106,7 @@
             var nodeList = $("#node-input-status-target-container");
             var node = this;
             function createNodeList() {
-                node.scope = node.scope || [];
+                var scope = node.scope || [];
                 nodeList.empty();
 
                 var candidateNodes = RED.nodes.filterNodes({z:node.z});
@@ -116,7 +116,7 @@
                     if (n.id === node.id) {
                         return;
                     }
-                    var isChecked = node.scope.indexOf(n.id) !== -1;
+                    var isChecked = scope.indexOf(n.id) !== -1;
 
                     allChecked = allChecked && isChecked;
 
