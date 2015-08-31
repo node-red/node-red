@@ -214,7 +214,7 @@ module.exports = function(RED) {
 
             var method = nodeMethod.toUpperCase() || "GET";
             if (msg.method && n.method && (n.method !== "use")) {     // warn if override option not set
-                node.warn(RED._("httpin.errors.not-overridden"));
+                node.warn(RED._("common.errors.nooverride"));
             }
             if (msg.method && n.method && (n.method === "use")) {
                 method = msg.method.toUpperCase();          // use the msg parameter
