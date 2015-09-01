@@ -103,7 +103,7 @@ module.exports = function(RED) {
         this.options.username = this.username;
         this.options.password = this.password;
         this.options.keepalive = this.keepalive;
-        this.options.clean = this.clean;
+        this.options.clean = this.cleansession;
         this.options.reconnectPeriod = RED.settings.mqttReconnectTime||5000;
         if (this.compatmode == "true" || this.compatmode === true){
             this.options.protocolId = 'MQIsdp';

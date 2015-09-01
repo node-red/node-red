@@ -240,6 +240,10 @@
                 label: this._("mqtt.tabs-label.will")
             });
             setTimeout(function() { tabs.resize()},0);
+            if (typeof this.cleansession === 'undefined') {
+                this.cleansession = true;
+                $("#node-config-input-cleansession").prop("checked",true);
+            }
             if (typeof this.usetls  === 'undefined'){
                 this.usetls = false;
                 $("#node-config-input-usetls").prop("checked",false);
@@ -254,6 +258,7 @@
             }
             if (typeof this.keepalive  === 'undefined'){
                 this.keepalive = 15;
+                $("#node-config-input-keepalive").val(this.keepalive);
             }
 
             function updateTLSOptions() {
