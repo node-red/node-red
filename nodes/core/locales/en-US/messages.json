@@ -224,12 +224,14 @@
         "tabs-label": {
             "connection": "Connection",
             "security": "Security",
-            "will": "Will Message"
+            "will": "Will Message",
+            "birth": "Birth Message"
         },
         "placeholder": {
             "clientid": "Leave blank for auto generated",
             "clientid-nonclean":"Must be set for non-clean sessions",
-            "will-topic": "Leave blank to disable will message"
+            "will-topic": "Leave blank to disable will message",
+            "birth-topic": "Leave blank to disable birth message"
         },
         "state": {
             "connected": "Connected to broker: __broker__",

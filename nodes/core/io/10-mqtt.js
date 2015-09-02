@@ -51,6 +51,14 @@ module.exports = function(RED) {
         this.queue = [];
         this.subscriptions = {};
 
+        if (n.birthTopic) {
+            this.birthMessage = {
+                topic: n.birthTopic,
+                payload: n.birthPayload || "",
+                qos: Number(n.birthQos||0),
+                retain: n.birthRetain=="true"|| n.birthRetain===true
+            };
+        }
         events.EventEmitter.call(this);
         this.setMaxListeners(0);
 
@@ -157,6 +165,11 @@ module.exports = function(RED) {
                         }
                         var options = {qos: qos};
                         node.client.subscribe(topic, options);
+                    }
+
+                    // Send any birth message
+                    if (node.birthMessage) {
+                        node.publish(node.birthMessage);
                     }
 
                     // Send any queued messages
