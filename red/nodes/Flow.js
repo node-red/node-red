@@ -737,6 +737,7 @@ Flow.prototype.handleStatus = function(node,statusMessage) {
                 }
                 var message = {
                     status: {
+                        text: "",
                         source: {
                             id: node.id,
                             type: node.type,

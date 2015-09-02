@@ -32,7 +32,7 @@ describe('status Node', function() {
             var n2 = helper.getNode("n2");
             n1.should.have.property('name', 'status');
             n2.on("input", function(msg) {
-                msg.message.should.equal("Oh dear");
+                msg.text.should.equal("Oh dear");
                 msg.should.have.property('source');
                 msg.source.should.have.property('id',"12345");
                 msg.source.should.have.property('type',"testnode");
@@ -40,7 +40,7 @@ describe('status Node', function() {
                 done();
             });
             var mst = {
-                message: "Oh dear",
+                text: "Oh dear",
                 source: {
                     id: "12345",
                     type: "testnode",
