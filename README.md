@@ -2,8 +2,8 @@
 
 http://nodered.org
 
-[![Build Status](https://travis-ci.org/node-red/node-red.png)](https://travis-ci.org/node-red/node-red)
-[![Coverage Status](https://coveralls.io/repos/node-red/node-red/badge.png?branch=master)](https://coveralls.io/r/node-red/node-red?branch=master)
+[![Build Status](https://travis-ci.org/node-red/node-red.svg)](https://travis-ci.org/node-red/node-red)
+[![Coverage Status](https://coveralls.io/repos/node-red/node-red/badge.svg?branch=master)](https://coveralls.io/r/node-red/node-red?branch=master)
 
 A visual tool for wiring the Internet of Things.
 
@@ -67,4 +67,3 @@ For more open-source projects from IBM, head over [here](http://ibm.github.io).
 ## Copyright and license
 
 Copyright 2013, 2015 IBM Corp. under [the Apache 2.0 license](LICENSE).
-
