@@ -64,7 +64,7 @@ module.exports = function(RED) {
                     else if (node.op1Templated) { msg.payload = mustache.render(node.op1,msg); }
                     else { msg.payload = node.op1; }
                     if (node.op1type !== "nul") { node.send(msg); }
-                    if (node.duration === 0) { tout = "infinite"; }
+                    if (node.duration === 0) { tout = 0; }
                     else {
                         tout = setTimeout(function() {
                             msg.payload = m2;
