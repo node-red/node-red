@@ -686,7 +686,7 @@ RED.editor = (function() {
             configNode["_"] = node_def._;
         }
 
-        $("#dialog-config-form").html($("script[data-template-name='"+type+"']").html());
+        $("#node-config-dialog-edit-form").html($("script[data-template-name='"+type+"']").html());
 
         $("#dialog-config-form").find('[data-i18n]').each(function() {
             var current = $(this).attr("data-i18n");
@@ -899,7 +899,7 @@ RED.editor = (function() {
                 close: function(e) {
                     $(this).dialog('option','width','auto');
                     $(this).dialog('option','height','auto');
-                    $("#dialog-config-form").html("");
+                    $("#node-config-dialog-edit-form").html("");
                     if (RED.view.state() != RED.state.EDITING) {
                         RED.keyboard.enable();
                     }
