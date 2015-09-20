@@ -41,7 +41,7 @@
         "follow-redirects":"0.0.6",
         "cors":"2.7.1",
         "cheerio":"0.19.0",
-        "uglify-js":"2.4.23",
+        "uglify-js":"2.4.24",
         "on-headers":"1.0.0",
         "is-utf8":"0.2.0",
         "fs.notify":"0.0.4",
