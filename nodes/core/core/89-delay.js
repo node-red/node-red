@@ -87,8 +87,8 @@ module.exports = function(RED) {
                     node.send(msg);
                 }, node.timeout);
                 this.idList.push(id);
-                if ((node.timeout > 1000) && (node.idList.length === 0)) {
-                    node.status({fill:"blue",shape:"dot"});
+                if ((node.timeout > 1000) && (node.idList.length !== 0)) {
+                    node.status({fill:"blue",shape:"dot",text:" "});
                 }
             });
 
