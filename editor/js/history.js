@@ -188,7 +188,12 @@ RED.history = (function() {
                             RED.editor.updateNodeProperties(n);
                         });
 
+                        if (ev.node.type === 'subflow') {
+                            $("#menu-item-workspace-menu-"+ev.node.id.replace(".","-")).text(ev.node.name);
+                        }
+
                         RED.palette.refresh();
+                        RED.workspaces.refresh();
                     } else {
                         RED.editor.updateNodeProperties(ev.node);
                         RED.editor.validateNode(ev.node);
