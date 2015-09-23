@@ -24,7 +24,21 @@
    left:0px;
    right:0px;
    box-sizing:border-box;
+   transition: right 0.2s ease;
 }
+
+#workspace.config-open {
+    #chart {
+        right: 190px;
+    }
+    #workspace-config-node-tray {
+        right: 0px;
+    }
+    #workspace-toolbar {
+        right: 190px;
+    }
+}
+
 
 #chart svg:focus {
     outline: none;
@@ -72,4 +86,65 @@
 
 #workspace-footer {
     @include component-footer;
+}
+
+#workspace-config-node-tray {
+    @include disable-selection;
+    position: absolute;
+    top: 35px;
+    bottom:25px;
+    right:-190px;
+    width: 190px;
+    border-left: 1px solid $secondary-border-color;
+    box-sizing:border-box;
+    background: #f3f3f3;
+    transition: right 0.2s ease;
+    overflow-y: auto;
+}
+
+.config-node-list {
+    margin: 0;
+    list-style-type: none;
+}
+.config_node {
+    width: 160px;
+    height: 30px;
+    background: #f3f3f3;
+    color: #666;
+    cursor: pointer;
+
+    .palette_label {
+        margin-left: 8px;
+        line-height: 24px;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .palette_icon_container {
+        font-size: 12px;
+        line-height: 30px;
+        background-color: #e8e8e8;
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+}
+.config_node_type {
+    color: #999;
+    text-align: right;
+    padding-right: 3px;
+    &:not(:first-child) {
+        margin-top: 20px;
+    }
+}
+.config_node_none {
+    color: #ddd;
+    text-align:right;
+    padding-right: 3px;
+}
+.config_node_unused {
+    border-color: #aaa;
+    background: #f9f9f9;
+    border-style: dashed;
+    color: #aaa;
 }

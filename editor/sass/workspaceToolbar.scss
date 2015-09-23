@@ -23,13 +23,15 @@
     position: absolute;
     top: 35px;
     left:0;
-    width: 100%;
+    right: 0;
     padding: 7px;
     height: 40px;
     box-sizing: border-box;
     background: #fff;
     border-bottom: 1px solid $secondary-border-color;
     white-space: nowrap;
+    transition: right 0.2s ease;
+    overflow: hidden;
 
     .button {
         @include workspace-button;

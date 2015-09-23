@@ -14,6 +14,15 @@
  * limitations under the License.
  **/
 
+.ui-widget {
+    font-size: 14px !important;
+    font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
+}
+.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
+    font-size: 14px !important;
+    font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
+}
+
 /* jQuery Theme overrides */
 .ui-tabs .ui-tabs-panel {
     padding: 0px;
@@ -34,6 +43,9 @@
 .ui-dialog .ui-dialog-content {
     padding: 25px 25px 10px 25px;
 }
+.ui-dialog .ui-dialog-title {
+    width: auto;
+}
 .ui-dialog .ui-dialog-titlebar {
     padding: 10px;
     background: #f3f3f3;
@@ -49,4 +61,15 @@
 }
 .ui-dialog-no-close .ui-dialog-titlebar-close {
     display: none;
+}
+
+.ui-dialog-buttonset {
+    text-align: right;
+}
+
+.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
+    float: none;
+}
+.ui-dialog .ui-dialog-buttonpane {
+    padding: .3em 1em .5em 1em;
 }

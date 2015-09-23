@@ -61,7 +61,7 @@ RED.palette = (function() {
     }
 
     function setLabel(type, el,label) {
-        var nodeWidth = 80;
+        var nodeWidth = 82;
         var nodeHeight = 25;
         var lineHeight = 20;
         var portHeight = 10;

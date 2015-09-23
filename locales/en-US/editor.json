@@ -9,11 +9,15 @@
         }
     },
     "workspace": {
-        "defaultName": "Sheet __number__",
-        "renameSheet": "Rename sheet",
+        "defaultName": "Flow __number__",
+        "renameSheet": "Rename flow",
         "confirmDelete": "Confirm delete",
         "delete": "Are you sure you want to delete '__label__'?",
-        "dropFlowHere": "Drop the flow here"
+        "dropFlowHere": "Drop the flow here",
+        "config": {
+            "local": "on this flow",
+            "global": "on all flows"
+        }
     },
     "menu": {
         "label": {
@@ -22,6 +26,7 @@
                 "show": "Toggle Sidebar"
             },
             "displayStatus": "Display Node Status",
+            "displayConfig": "Configuration Nodes",
             "import": "Import",
             "export": "Export",
             "clipboard": "Clipboard",
@@ -29,7 +34,7 @@
             "subflows": "Subflows",
             "createSubflow": "Create Subflow",
             "selectionToSubflow": "Selection to Subflow",
-            "workspaces": "Workspaces",
+            "flows": "Flows",
             "add": "Add",
             "rename": "Rename",
             "delete": "Delete",
@@ -115,7 +120,10 @@
         "nodesUse_plural": "__count__ nodes use this config",
         "addNewConfig": "Add new __type__ config node",
         "editConfig": "Edit __type__ config node",
-        "addNewType": "Add new __type__..."
+        "addNewType": "Add new __type__...",
+        "errors": {
+            "scopeChange": "Changing the scope will make it unavailable to nodes in other flows that use it"
+        }
     },
     "keyboard": {
         "selectAll": "Select all nodes",

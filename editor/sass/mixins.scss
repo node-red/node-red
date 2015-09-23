@@ -50,10 +50,12 @@
     }
     &:not(.disabled):focus {
         color: $workspace-button-color-focus;
+        text-decoration: none;
     }
     &:not(.disabled):active {
         color: $workspace-button-color-active;
         background: $workspace-button-background-active;
+        text-decoration: none;
     }
 }
 @mixin component-footer {
@@ -75,6 +77,10 @@
     line-height: 17px;
     width: 18px;
     height: 18px;
+    &.text-button {
+        width: auto;
+        padding: 0 5px;
+    }
 }
 
 @mixin component-shadow {

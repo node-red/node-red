@@ -19,7 +19,7 @@
 }
 
 .lasso {
-    stroke-width: 2px;
+    stroke-width: 1px;
     stroke: #ff7f0e;
     fill: rgba(20,125,255,0.1);
     stroke-dasharray: 10 5;
@@ -163,6 +163,15 @@
     stroke-dasharray: 10, 4;
 }
 .node_hovered {
+}
+
+.node_status_label {
+    @include disable-selection;
+    stroke-width: 0;
+    fill: #888;
+    font-size:9pt;
+    stroke:#000;
+    text-anchor:start;
 }
 
 .port_hovered {

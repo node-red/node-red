@@ -256,8 +256,8 @@ RED.view = (function() {
 
             activeSubflow = RED.nodes.subflow(event.workspace);
 
-            RED.menu.setDisabled("menu-item-workspace-edit", activeSubflow);
-            RED.menu.setDisabled("menu-item-workspace-delete",RED.workspaces.count() == 1 || activeSubflow);
+            RED.menu.setDisabled("menu-item-flow-edit", activeSubflow);
+            RED.menu.setDisabled("menu-item-flow-delete",RED.workspaces.count() == 1 || activeSubflow);
 
             if (workspaceScrollPositions[event.workspace]) {
                 chart.scrollLeft(workspaceScrollPositions[event.workspace].left);
@@ -407,8 +407,8 @@ RED.view = (function() {
                 lasso = vis.append('rect')
                     .attr("ox",point[0])
                     .attr("oy",point[1])
-                    .attr("rx",2)
-                    .attr("ry",2)
+                    .attr("rx",1)
+                    .attr("ry",1)
                     .attr("x",point[0])
                     .attr("y",point[1])
                     .attr("width",0)
@@ -1370,14 +1370,7 @@ RED.view = (function() {
 
                     var statusLabel = status.append("svg:text")
                         .attr("class","node_status_label")
-                        .attr('x',20).attr('y',9)
-                        .style({
-                                'stroke-width': 0,
-                                'fill': '#888',
-                                'font-size':'9pt',
-                                'stroke':'#000',
-                                'text-anchor':'start'
-                        });
+                        .attr('x',20).attr('y',9);
 
                     //node.append("circle").attr({"class":"centerDot","cx":0,"cy":0,"r":5});
 
@@ -1802,7 +1795,6 @@ RED.view = (function() {
             if (updateActive) {
                 updateActiveNodes();
             }
-            RED.workspaces.refresh();
             redraw();
         },
         focus: focusView,

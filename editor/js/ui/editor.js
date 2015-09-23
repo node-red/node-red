@@ -391,7 +391,7 @@ RED.editor = (function() {
                     if (editing_node) {
                         RED.sidebar.info.refresh(editing_node);
                     }
-                    RED.sidebar.config.refresh();
+                    RED.workspaces.refresh();
 
                     var buttons = $( this ).dialog("option","buttons");
                     if (buttons.length == 3) {
@@ -671,12 +671,18 @@ RED.editor = (function() {
             ns = node_def.set.id;
         }
 
+        var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
+        if (!activeWorkspace) {
+            activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
+        }
 
         if (configNode == null) {
             configNode = {
                 id: (1+Math.random()*4294967295).toString(16),
                 _def: node_def,
-                type: type
+                type: type,
+                z: activeWorkspace.id,
+                users: []
             }
             for (var d in node_def.defaults) {
                 if (node_def.defaults[d].value) {
@@ -710,7 +716,7 @@ RED.editor = (function() {
                 buttons = buttons.splice(1);
             }
             buttons[0].text = "Add";
-            $("#node-config-dialog-user-count").html("").hide();
+            $("#node-config-dialog-user-count").find("span").html("").parent().hide();
         } else {
             if (buttons.length == 2) {
                 buttons.unshift({
@@ -747,8 +753,60 @@ RED.editor = (function() {
                 });
             }
             buttons[1].text = "Update";
-            $("#node-config-dialog-user-count").html(RED._("editor.nodesUse", {count:configNode.users.length})).show();
+            $("#node-config-dialog-user-count").find("span").html(RED._("editor.nodesUse", {count:configNode.users.length})).parent().show();
         }
+
+        if (configNode._def.exclusive) {
+            $("#node-config-dialog-scope").hide();
+        } else {
+            $("#node-config-dialog-scope").show();
+        }
+        $("#node-config-dialog-scope-warning").hide();
+
+
+        var nodeUserFlows = {};
+        configNode.users.forEach(function(n) {
+            nodeUserFlows[n.z] = true;
+        });
+        var flowCount = Object.keys(nodeUserFlows).length;
+
+        var tabSelect = $("#node-config-dialog-scope").empty();
+        tabSelect.off("change");
+        tabSelect.append('<option value=""'+(!configNode.z?" selected":"")+' data-i18n="workspace.config.global"></option>');
+        tabSelect.append('<option disabled>flows</option>');
+        RED.nodes.eachWorkspace(function(ws) {
+            var workspaceLabel = ws.label;
+            if (nodeUserFlows[ws.id]) {
+                workspaceLabel = "* "+workspaceLabel;
+            }
+            tabSelect.append('<option value="'+ws.id+'"'+(ws.id==configNode.z?" selected":"")+'>'+workspaceLabel+'</option>');
+        });
+        tabSelect.append('<option disabled>subflows</option>');
+        RED.nodes.eachSubflow(function(ws) {
+            var workspaceLabel = ws.name;
+            if (nodeUserFlows[ws.id]) {
+                workspaceLabel = "* "+workspaceLabel;
+            }
+            tabSelect.append('<option value="'+ws.id+'"'+(ws.id==configNode.z?" selected":"")+'>'+workspaceLabel+'</option>');
+        });
+        if (flowCount > 0) {
+            tabSelect.on('change',function() {
+                var newScope = $(this).val();
+                if (newScope === '') {
+                    // global scope - everyone can use it
+                    $("#node-config-dialog-scope-warning").hide();
+                } else if (!nodeUserFlows[newScope] || flowCount > 1) {
+                    // a user will loose access to it
+                    $("#node-config-dialog-scope-warning").show();
+                } else {
+                    $("#node-config-dialog-scope-warning").hide();
+                }
+            });
+        }
+
+        //tabSelect.append('<option value="'+activeWorkspace.id+'"'+(activeWorkspace.id==configNode.z?" selected":"")+'>'+workspaceLabel+'</option>');
+        tabSelect.i18n();
+
         $( "#node-config-dialog" ).dialog("option","buttons",buttons);
 
         $("#node-config-dialog").i18n();
@@ -776,17 +834,39 @@ RED.editor = (function() {
             var select = $("#node-input-"+name);
             var node_def = RED.nodes.getType(type);
             select.children().remove();
+
+            var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
+            if (!activeWorkspace) {
+                activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
+            }
+
+            var configNodes = [];
+
             RED.nodes.eachConfig(function(config) {
-                if (config.type == type) {
+                if (config.type == type && (!config.z || config.z === activeWorkspace.id)) {
                     var label = "";
                     if (typeof node_def.label == "function") {
                         label = node_def.label.call(config);
                     } else {
                         label = node_def.label;
                     }
-                    select.append('<option value="'+config.id+'"'+(value==config.id?" selected":"")+'>'+label+'</option>');
+                    configNodes.push({id:config.id,label:label});
                 }
             });
+
+            configNodes.sort(function(A,B) {
+                if (A.label < B.label) {
+                    return -1;
+                } else if (A.label > B.label) {
+                    return 1;
+                }
+                return 0;
+            });
+
+            configNodes.forEach(function(cn) {
+                select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+cn.label+'</option>');
+            });
+
             select.append('<option value="_ADD_"'+(value===""?" selected":"")+'>'+RED._("editor.addNewType", {type:type})+'</option>');
             window.setTimeout(function() { select.change();},50);
         }
@@ -813,7 +893,7 @@ RED.editor = (function() {
                             var configNode;
                             var d;
                             var input;
-
+                            var scope = $("#node-config-dialog-scope").val();
                             if (configAdding) {
                                 configNode = {type:configType,id:configId,users:[]};
                                 for (d in configTypeDef.defaults) {
@@ -828,6 +908,7 @@ RED.editor = (function() {
                                 }
                                 configNode.label = configTypeDef.label;
                                 configNode._def = configTypeDef;
+                                configNode.z = scope;
                                 RED.nodes.add(configNode);
                                 updateConfigNodeSelect(configProperty,configType,configNode.id);
                             } else {
@@ -842,6 +923,26 @@ RED.editor = (function() {
                                         }
                                     }
                                 }
+                                if (scope) {
+                                    configNode.users = configNode.users.filter(function(n) {
+                                        var keep = true;
+                                        for (var d in n._def.defaults) {
+                                            if (n._def.defaults.hasOwnProperty(d)) {
+                                                if (n._def.defaults[d].type === configNode.type &&
+                                                    n[d] === configNode.id &&
+                                                    n.z !== scope) {
+                                                        keep = false;
+                                                        n[d] = null;
+                                                        n.dirty = true;
+                                                        n.changed = true;
+                                                        validateNode(n);
+                                                }
+                                            }
+                                        }
+                                        return keep;
+                                    });
+                                }
+                                configNode.z = scope;
                                 updateConfigNodeSelect(configProperty,configType,configId);
                             }
                             if (configTypeDef.credentials) {
@@ -857,6 +958,7 @@ RED.editor = (function() {
                             }
 
                             RED.nodes.dirty(true);
+                            RED.view.redraw(true);
                             $(this).dialog("close");
 
                         }
@@ -903,7 +1005,16 @@ RED.editor = (function() {
                     if (RED.view.state() != RED.state.EDITING) {
                         RED.keyboard.enable();
                     }
-                    RED.sidebar.config.refresh();
+                    RED.workspaces.refresh();
+                },
+                create: function() {
+                    $("#node-config-dialog").parent().find("div.ui-dialog-buttonpane")
+                        .prepend('<div id="node-config-dialog-user-count"><i class="fa fa-info-circle"></i> <span></span></div>');
+
+                    $("#node-config-dialog").parent().find('.ui-dialog-titlebar').append('<span id="node-config-dialog-scope-container"><span id="node-config-dialog-scope-warning" data-i18n="[title]editor.errors.scopeChange"><i class="fa fa-warning"></i></span><select id="node-config-dialog-scope"></select></span>');
+                    $("#node-config-dialog").parent().draggable({
+                        cancel: '.ui-dialog-content, .ui-dialog-titlebar-close, #node-config-dialog-scope-container'
+                    });
                 }
         });
     }
@@ -933,7 +1044,7 @@ RED.editor = (function() {
                                 changes['name'] = editing_node.name;
                                 editing_node.name = newName;
                                 changed = true;
-                                $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text(newName);
+                                $("#menu-item-flow-menu-"+editing_node.id.replace(".","-")).text(newName);
                             }
 
                             RED.palette.refresh();
@@ -996,6 +1107,7 @@ RED.editor = (function() {
                     RED.view.state(RED.state.DEFAULT);
                 }
                 RED.sidebar.info.refresh(editing_node);
+                RED.workspaces.refresh();
                 editing_node = null;
             }
         });

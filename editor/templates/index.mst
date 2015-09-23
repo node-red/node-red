@@ -58,6 +58,16 @@
         <ul id="workspace-tabs"></ul>
         <div id="workspace-add-tab"><a id="btn-workspace-add-tab" href="#"><i class="fa fa-plus"></i></a></div>
         <div id="chart"></div>
+        <div id="workspace-config-node-tray">
+            <div class="palette-category">
+                <div class="workspace-config-node-tray-header palette-header"><i class="fa fa-angle-down expanded"></i><span data-i18n="workspace.config.local"></span></div>
+                <ul id="workspace-config-node-tray-locals" class="palette-content config-node-list"></ul>
+            </div>
+            <div class="palette-category">
+                <div class="workspace-config-node-tray-header palette-header"><i class="fa fa-angle-down expanded"></i><span data-i18n="workspace.config.global"></span></div>
+                <ul id="workspace-config-node-tray-globals" class="palette-content config-node-list"></ul>
+            </div>
+        </div>
         <div id="workspace-toolbar"></div>
         <div id="workspace-footer">
             <a class="workspace-footer-button" id="btn-zoom-out" href="#"><i class="fa fa-minus"></i></a>
@@ -79,7 +89,7 @@
 <div id="dropTarget"><div data-i18n="[append]workspace.dropFlowHere"><br/><i class="fa fa-download"></i></div></div>
 
 <div id="dialog" class="hide"><form id="dialog-form" class="form-horizontal"></form></div>
-<div id="node-config-dialog" class="hide"><form id="dialog-config-form" class="form-horizontal"><div id="node-config-dialog-edit-form"></div><div class="form-tips" id="node-config-dialog-user-count"></div></form></div>
+<div id="node-config-dialog" class="hide"><form id="dialog-config-form" class="form-horizontal"><div id="node-config-dialog-edit-form"></div><!--<div id="node-config-dialog-toolbar" class="form-row"><label><span>Node scope</span></label><select id="node-config-dialog-scope"></select></div>--></form></div>
 <div id="subflow-dialog" class="hide">
     <form class="form-horizontal">
         <div class="form-row">

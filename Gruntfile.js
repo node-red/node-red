@@ -118,7 +118,6 @@ module.exports = function(grunt) {
                   "editor/js/ui/sidebar.js",
                   "editor/js/ui/palette.js",
                   "editor/js/ui/tab-info.js",
-                  "editor/js/ui/tab-config.js",
                   "editor/js/ui/editor.js",
                   "editor/js/ui/clipboard.js",
                   "editor/js/ui/library.js",

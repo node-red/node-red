@@ -156,7 +156,6 @@ RED.nodes = (function() {
         }
         if (n._def.category == "config") {
             configNodes[n.id] = n;
-            RED.sidebar.config.refresh();
         } else {
             n.dirty = true;
             var updatedConfigNode = false;
@@ -176,7 +175,7 @@ RED.nodes = (function() {
                 }
             }
             if (updatedConfigNode) {
-                RED.sidebar.config.refresh();
+                // TODO: refresh config tab?
             }
             if (n._def.category == "subflows" && typeof n.i === "undefined") {
                 var nextId = 0;
@@ -215,7 +214,7 @@ RED.nodes = (function() {
         if (id in configNodes) {
             node = configNodes[id];
             delete configNodes[id];
-            RED.sidebar.config.refresh();
+            RED.workspaces.refresh();
         } else {
             node = getNode(id);
             if (node) {
@@ -245,11 +244,11 @@ RED.nodes = (function() {
                     }
                 }
                 if (updatedConfigNode) {
-                    RED.sidebar.config.refresh();
+                    RED.workspaces.refresh();
                 }
             }
         }
-        if (node._def.onremove) {
+        if (node && node._def.onremove) {
             node._def.onremove.call(n);
         }
         return {links:removedLinks,nodes:removedNodes};
@@ -273,16 +272,26 @@ RED.nodes = (function() {
         var removedNodes = [];
         var removedLinks = [];
         var n;
+        var node;
         for (n=0;n<nodes.length;n++) {
-            var node = nodes[n];
+            node = nodes[n];
             if (node.z == id) {
                 removedNodes.push(node);
             }
         }
-        for (n=0;n<removedNodes.length;n++) {
-            var rmlinks = removeNode(removedNodes[n].id);
-            removedLinks = removedLinks.concat(rmlinks);
+        for(n in configNodes) {
+            if (configNodes.hasOwnProperty(n)) {
+                node = configNodes[n];
+                if (node.z == id) {
+                    removedNodes.push(node);
+                }
+            }
         }
+        for (n=0;n<removedNodes.length;n++) {
+            var result = removeNode(removedNodes[n].id);
+            removedLinks = removedLinks.concat(result.links);
+        }
+        console.log(removedLinks);
         return {nodes:removedNodes,links:removedLinks};
     }
 
@@ -382,6 +391,7 @@ RED.nodes = (function() {
         var node = {};
         node.id = n.id;
         node.type = n.type;
+        node.z = n.z;
         if (node.type == "unknown") {
             for (var p in n._orig) {
                 if (n._orig.hasOwnProperty(p)) {
@@ -417,7 +427,6 @@ RED.nodes = (function() {
         if (n._def.category != "config") {
             node.x = n.x;
             node.y = n.y;
-            node.z = n.z;
             node.wires = [];
             for(var i=0;i<n.outputs;i++) {
                 node.wires.push([]);
@@ -690,7 +699,7 @@ RED.nodes = (function() {
                 if (def && def.category == "config") {
                     var existingConfigNode = RED.nodes.node(n.id);
                     if (!existingConfigNode || !compareNodes(existingConfigNode,n) || existingConfigNode._def.exclusive) {
-                        var configNode = {id:n.id,type:n.type,users:[]};
+                        var configNode = {id:n.id, z:n.z, type:n.type, users:[]};
                         for (var d in def.defaults) {
                             if (def.defaults.hasOwnProperty(d)) {
                                 configNode[d] = n[d];
@@ -846,6 +855,7 @@ RED.nodes = (function() {
             });
         }
 
+        RED.workspaces.refresh();
         return [new_nodes,new_links,new_workspaces,new_subflows];
     }
 
@@ -944,6 +954,13 @@ RED.nodes = (function() {
             for (var id in subflows) {
                 if (subflows.hasOwnProperty(id)) {
                     cb(subflows[id]);
+                }
+            }
+        },
+        eachWorkspace: function(cb) {
+            for (var id in workspaces) {
+                if (workspaces.hasOwnProperty(id)) {
+                    cb(workspaces[id]);
                 }
             }
         },

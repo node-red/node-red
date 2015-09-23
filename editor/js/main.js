@@ -152,6 +152,9 @@ var RED = (function() {
         statusEnabled = state;
         RED.view.status(statusEnabled);
     }
+    function toggleConfigNodes(state) {
+        RED.workspaces.toggleConfigNodes(state);
+    }
 
     function loadEditor() {
         RED.menu.init({id:"btn-sidemenu",
@@ -161,6 +164,7 @@ var RED = (function() {
                     null
                 ]},
                 {id:"menu-item-status",label:RED._("menu.label.displayStatus"),toggle:true,onselect:toggleStatus, selected: true},
+                {id:"menu-item-config-nodes",label:RED._("menu.label.displayConfig"),toggle:true,onselect:toggleConfigNodes, selected: false},
                 null,
                 {id:"menu-item-import",label:RED._("menu.label.import"),options:[
                     {id:"menu-item-import-clipboard",label:RED._("menu.label.clipboard"),onselect:RED.clipboard.import},
@@ -171,16 +175,16 @@ var RED = (function() {
                     {id:"menu-item-export-library",label:RED._("menu.label.library"),disabled:true,onselect:RED.library.export}
                 ]},
                 null,
+                {id:"menu-item-flow",label:RED._("menu.label.flows"),options:[
+                    {id:"menu-item-flow-add",label:RED._("menu.label.add"),onselect:RED.workspaces.add},
+                    {id:"menu-item-flow-edit",label:RED._("menu.label.rename"),onselect:RED.workspaces.edit},
+                    {id:"menu-item-flow-delete",label:RED._("menu.label.delete"),onselect:RED.workspaces.remove},
+                    null
+                ]},
+                null,
                 {id:"menu-item-subflow",label:RED._("menu.label.subflows"), options: [
                     {id:"menu-item-subflow-create",label:RED._("menu.label.createSubflow"),onselect:RED.subflow.createSubflow},
                     {id:"menu-item-subflow-convert",label:RED._("menu.label.selectionToSubflow"),disabled:true,onselect:RED.subflow.convertToSubflow},
-                ]},
-                null,
-                {id:"menu-item-workspace",label:RED._("menu.label.workspaces"),options:[
-                    {id:"menu-item-workspace-add",label:RED._("menu.label.add"),onselect:RED.workspaces.add},
-                    {id:"menu-item-workspace-edit",label:RED._("menu.label.rename"),onselect:RED.workspaces.edit},
-                    {id:"menu-item-workspace-delete",label:RED._("menu.label.delete"),onselect:RED.workspaces.remove},
-                    null
                 ]},
                 null,
                 {id:"menu-item-keyboard-shortcuts",label:RED._("menu.label.keyboardShortcuts"),onselect:RED.keyboard.showHelp},

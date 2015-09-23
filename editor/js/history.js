@@ -189,7 +189,7 @@ RED.history = (function() {
                         });
 
                         if (ev.node.type === 'subflow') {
-                            $("#menu-item-workspace-menu-"+ev.node.id.replace(".","-")).text(ev.node.name);
+                            $("#menu-item-flow-menu-"+ev.node.id.replace(".","-")).text(ev.node.name);
                         }
 
                         RED.palette.refresh();
