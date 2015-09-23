@@ -22,6 +22,7 @@ RED.comms = (function() {
     var subscriptions = {};
     var ws;
     var pendingAuth = false;
+    var reconnectAttempts = 0;
 
     function connectWS() {
         var path = location.hostname;
@@ -46,6 +47,7 @@ RED.comms = (function() {
 
         ws = new WebSocket(path);
         ws.onopen = function() {
+            reconnectAttempts = 0;
             if (errornotification) {
                 clearErrorTimer = setTimeout(function() {
                     errornotification.close();
@@ -80,12 +82,13 @@ RED.comms = (function() {
             }
         };
         ws.onclose = function() {
-            if (errornotification == null) {
+            if (reconnectAttempts > 5 && errornotification == null) {
                 errornotification = RED.notify(RED._("notification.error",{message:RED._("notification.errors.lostConnection")}),"error",true);
             } else if (clearErrorTimer) {
                 clearTimeout(clearErrorTimer);
                 clearErrorTimer = null;
             }
+            reconnectAttempts++;
             setTimeout(connectWS,1000);
         }
     }
