@@ -1,6 +1,5 @@
 /Gruntfile.js
 /.git/*
-*.json
 /lib/*
 *.backup
 /public/*
