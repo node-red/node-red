@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 RED.i18n = (function() {
-    
+
     return {
         init: function(done) {
             i18n.init({
@@ -26,7 +26,8 @@ RED.i18n = (function() {
                     namespaces: ["editor","node-red"],
                     defaultNs: "editor"
                 },
-                fallbackLng: ['en-US']
+                fallbackLng: ['en-US'],
+                useCookie: false
             },function() {
                 done();
             });
@@ -40,6 +41,3 @@ RED.i18n = (function() {
         }
     }
 })();
-
-
-
