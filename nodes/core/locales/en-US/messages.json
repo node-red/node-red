@@ -269,6 +269,7 @@
         "httpreq": "http request",
         "errors": {
             "not-created": "Cannot create http-in node when httpNodeRoot set to false",
+            "missing-path": "missing path",
             "no-response": "No response object",
             "json-error": "JSON parse error",
             "no-url": "No url specified"

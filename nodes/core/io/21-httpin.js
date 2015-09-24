@@ -48,6 +48,10 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         if (RED.settings.httpNodeRoot !== false) {
 
+            if (!n.url) {
+                this.warn(RED._("httpin.errors.missing-path"));
+                return;
+            }
             this.url = n.url;
             this.method = n.method;
             this.swaggerDoc = n.swaggerDoc;
