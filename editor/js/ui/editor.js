@@ -572,10 +572,15 @@ RED.editor = (function() {
             if (definition.defaults.hasOwnProperty(d)) {
                 if (definition.defaults[d].type) {
                     var configTypeDef = RED.nodes.getType(definition.defaults[d].type);
-                    if (configTypeDef && configTypeDef.exclusive) {
-                        prepareConfigNodeButton(node,d,definition.defaults[d].type);
+                    if (configTypeDef) {
+                        if (configTypeDef.exclusive) {
+                            prepareConfigNodeButton(node,d,definition.defaults[d].type);
+                        } else {
+                            prepareConfigNodeSelect(node,d,definition.defaults[d].type);
+                        }
                     } else {
-                        prepareConfigNodeSelect(node,d,definition.defaults[d].type);
+                        console.log("Unknown type:", definition.defaults[d].type);
+                        preparePropertyEditor(node,d,prefix);
                     }
                 } else {
                     preparePropertyEditor(node,d,prefix);
