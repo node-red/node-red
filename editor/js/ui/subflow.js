@@ -310,11 +310,18 @@ RED.subflow = (function() {
             var removedLinks = [];
             var startDirty = RED.nodes.dirty();
 
+            var activeSubflow = getSubflow();
+
             RED.nodes.eachNode(function(n) {
-                if (n.type == "subflow:"+getSubflow().id) {
+                if (n.type == "subflow:"+activeSubflow.id) {
                     removedNodes.push(n);
                 }
-                if (n.z == getSubflow().id) {
+                if (n.z == activeSubflow.id) {
+                    removedNodes.push(n);
+                }
+            });
+            RED.nodes.eachConfig(function(n) {
+                if (n.z == activeSubflow.id) {
                     removedNodes.push(n);
                 }
             });
@@ -327,8 +334,6 @@ RED.subflow = (function() {
             }
             // TODO: this whole delete logic should be in RED.nodes.removeSubflow..
             removedNodes = removedNodes.concat(removedConfigNodes);
-
-            var activeSubflow = getSubflow();
 
             RED.nodes.removeSubflow(activeSubflow);
 
