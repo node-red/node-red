@@ -87,16 +87,22 @@ module.exports = function(RED) {
         } else if (typeof msg.msg === 'object') {
             var seen = [];
             msg.format = "object";
-            if (util.isArray(msg.msg)) {
-                msg.format = "array ["+msg.msg.length+"]";
-            }
-            msg.msg = JSON.stringify(msg.msg, function(key, value) {
-                if (typeof value === 'object' && value !== null) {
-                    if (seen.indexOf(value) !== -1) { return "[circular]"; }
-                    seen.push(value);
+            var isArray = util.isArray(msg.msg);
+            if (!isArray && msg.msg.toString !== Object.prototype.toString) {
+                msg.format = msg.msg.constructor.name || "object";
+                msg.msg = msg.msg.toString();
+            } else {
+                if (isArray) {
+                    msg.format = "array ["+msg.msg.length+"]";
                 }
-                return value;
-            }," ");
+                msg.msg = JSON.stringify(msg.msg, function(key, value) {
+                    if (typeof value === 'object' && value !== null) {
+                        if (seen.indexOf(value) !== -1) { return "[circular]"; }
+                        seen.push(value);
+                    }
+                    return value;
+                }," ");
+            }
             seen = null;
         } else if (typeof msg.msg === "boolean") {
             msg.format = "boolean";
