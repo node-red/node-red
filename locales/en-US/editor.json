@@ -92,7 +92,7 @@
                 "cancel": "Cancel"
             },
             "undeployedChanges": "You have undeployed changes.\n\nLeaving this page will lose these changes.",
-            "improperlyConfigured": "Some of the nodes are not properly configured.",
+            "improperlyConfigured": "The workspace contains some nodes that are not properly configured:",
             "unknown": "The workspace contains some unknown node types:",
             "unusedConfig": "The workspace contains some unused configuration nodes:",
             "confirm": "Are you sure you want to deploy?"

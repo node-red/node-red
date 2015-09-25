@@ -124,6 +124,36 @@ RED.deploy = (function() {
         });
     }
 
+    function getNodeInfo(node) {
+        var tabLabel = "";
+        if (node.z) {
+            var tab = RED.nodes.workspace(node.z);
+            if (!tab) {
+                tab = RED.nodes.subflow(node.z);
+                tabLabel = tab.name;
+            } else {
+                tabLabel = tab.label;
+            }
+        }
+        var label = "";
+        if (typeof node._def.label == "function") {
+            label = node._def.label.call(node);
+        } else {
+            label = node._def.label;
+        }
+        label = label || node.id;
+        return {tab:tabLabel,type:node.type,label:label};
+    }
+    function sortNodeInfo(A,B) {
+        if (A.tab < B.tab) { return -1;}
+        if (A.tab > B.tab) { return 1;}
+        if (A.type < B.type) { return -1;}
+        if (A.type > B.type) { return 1;}
+        if (A.name < B.name) { return -1;}
+        if (A.name > B.name) { return 1;}
+        return 0;
+    }
+
     function save(force) {
         if (RED.nodes.dirty()) {
             //$("#debug-tab-clear").click();  // uncomment this to auto clear debug on deploy
@@ -134,8 +164,13 @@ RED.deploy = (function() {
                 var hasUnusedConfig = false;
 
                 var unknownNodes = [];
+                var invalidNodes = [];
+
                 RED.nodes.eachNode(function(node) {
                     hasInvalid = hasInvalid || !node.valid;
+                    if (!node.valid) {
+                        invalidNodes.push(getNodeInfo(node));
+                    }
                     if (node.type === "unknown") {
                         if (unknownNodes.indexOf(node.name) == -1) {
                             unknownNodes.push(node.name);
@@ -144,18 +179,10 @@ RED.deploy = (function() {
                 });
                 hasUnknown = unknownNodes.length > 0;
 
-                var unusedConfigNodes = {};
+                var unusedConfigNodes = [];
                 RED.nodes.eachConfig(function(node) {
                     if (node.users.length === 0) {
-                        var label = "";
-                        if (typeof node._def.label == "function") {
-                            label = node._def.label.call(node);
-                        } else {
-                            label = node._def.label;
-                        }
-                        label = label || node.id;
-                        unusedConfigNodes[node.type] = unusedConfigNodes[node.type]  || [];
-                        unusedConfigNodes[node.type].push(label);
+                        unusedConfigNodes.push(getNodeInfo(node));
                         hasUnusedConfig = true;
                     }
                 });
@@ -176,19 +203,18 @@ RED.deploy = (function() {
                     showWarning = true;
                     $( "#node-dialog-confirm-deploy-type" ).val("invalid");
                     $( "#node-dialog-confirm-deploy-config" ).show();
+                    invalidNodes.sort(sortNodeInfo);
+                    $( "#node-dialog-confirm-deploy-invalid-list" )
+                        .html("<li>"+invalidNodes.map(function(A) { return (A.tab?"["+A.tab+"] ":"")+A.label+" ("+A.type+")"}).join("</li><li>")+"</li>");
+
                 } else if (hasUnusedConfig && !ignoreDeployWarnings.unusedConfig) {
                     showWarning = true;
                     $( "#node-dialog-confirm-deploy-type" ).val("unusedConfig");
                     $( "#node-dialog-confirm-deploy-unused" ).show();
-                    var unusedNodeLabels = [];
-                    var unusedTypes = Object.keys(unusedConfigNodes).sort();
-                    unusedTypes.forEach(function(type) {
-                        unusedConfigNodes[type].forEach(function(label) {
-                                unusedNodeLabels.push(type+": "+label);
-                        });
-                    });
+
+                    unusedConfigNodes.sort(sortNodeInfo);
                     $( "#node-dialog-confirm-deploy-unused-list" )
-                        .html("<li>"+unusedNodeLabels.join("</li><li>")+"</li>");
+                        .html("<li>"+unusedConfigNodes.map(function(A) { return (A.tab?"["+A.tab+"] ":"")+A.label+" ("+A.type+")"}).join("</li><li>")+"</li>");
                 }
                 if (showWarning) {
                     $( "#node-dialog-confirm-deploy-hide" ).prop("checked",false);

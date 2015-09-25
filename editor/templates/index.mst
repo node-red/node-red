@@ -101,12 +101,14 @@
 
 <div id="node-dialog-confirm-deploy" class="hide">
     <form class="form-horizontal">
-        <div id="node-dialog-confirm-deploy-config" style="text-align: left; padding-top: 30px;" data-i18n="[prepend]deploy.confirm.improperlyConfigured;[append]deploy.confirm.confirm"> </div>
+        <div id="node-dialog-confirm-deploy-config" style="text-align: left; padding-top: 30px;" data-i18n="[prepend]deploy.confirm.improperlyConfigured;[append]deploy.confirm.confirm">
+            <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-invalid-list"></ul>
+        </div>
         <div id="node-dialog-confirm-deploy-unknown" style="text-align: left; padding-top: 10px;" data-i18n="[prepend]deploy.confirm.unknown;[append]deploy.confirm.confirm">
-         <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-unknown-list"></ul>
+            <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-unknown-list"></ul>
         </div>
         <div id="node-dialog-confirm-deploy-unused" style="text-align: left; padding-top: 10px;" data-i18n="[prepend]deploy.confirm.unusedConfig;[append]deploy.confirm.confirm">
-         <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-unused-list"></ul>
+            <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-unused-list"></ul>
         </div>
     </form>
 </div>
