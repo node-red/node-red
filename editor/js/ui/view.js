@@ -1698,7 +1698,7 @@ RED.view = (function() {
                 var new_workspaces = result[2];
                 var new_subflows = result[3];
 
-                var new_ms = new_nodes.filter(function(n) { return n.z == RED.workspaces.active() }).map(function(n) { return {n:n};});
+                var new_ms = new_nodes.filter(function(n) { return n.hasOwnProperty('x') && n.hasOwnProperty('y') && n.z == RED.workspaces.active() }).map(function(n) { return {n:n};});
                 var new_node_ids = new_nodes.map(function(n){ return n.id; });
 
                 // TODO: pick a more sensible root node
