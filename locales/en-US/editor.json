@@ -9,14 +9,14 @@
         }
     },
     "workspace": {
-        "defaultName": "Flow __number__",
-        "renameSheet": "Rename flow",
+        "defaultName": "Sheet __number__",
+        "renameSheet": "Rename sheet",
         "confirmDelete": "Confirm delete",
         "delete": "Are you sure you want to delete '__label__'?",
         "dropFlowHere": "Drop the flow here",
         "config": {
-            "local": "on this flow",
-            "global": "on all flows"
+            "local": "on this sheet",
+            "global": "on all sheets"
         }
     },
     "menu": {
@@ -34,7 +34,7 @@
             "subflows": "Subflows",
             "createSubflow": "Create Subflow",
             "selectionToSubflow": "Selection to Subflow",
-            "flows": "Flows",
+            "flows": "Sheets",
             "add": "Add",
             "rename": "Rename",
             "delete": "Delete",
