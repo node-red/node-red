@@ -145,6 +145,20 @@ RED.history = (function() {
                             RED.nodes.addLink(ev.links[i]);
                         }
                     }
+                    if (ev.changes) {
+                        for (i in ev.changes) {
+                            if (ev.changes.hasOwnProperty(i)) {
+                                node = RED.nodes.node(i);
+                                for (var d in ev.changes[i]) {
+                                    if (ev.changes[i].hasOwnProperty(d)) {
+                                        node[d] = ev.changes[i][d];
+                                    }
+                                }
+                                node.dirty = true;
+                            }
+                        }
+
+                    }
                 } else if (ev.t == "move") {
                     for (i=0;i<ev.nodes.length;i++) {
                         var n = ev.nodes[i];
@@ -191,9 +205,6 @@ RED.history = (function() {
                         if (ev.node.type === 'subflow') {
                             $("#menu-item-flow-menu-"+ev.node.id.replace(".","-")).text(ev.node.name);
                         }
-
-                        RED.palette.refresh();
-                        RED.workspaces.refresh();
                     } else {
                         RED.editor.updateNodeProperties(ev.node);
                         RED.editor.validateNode(ev.node);
@@ -240,6 +251,7 @@ RED.history = (function() {
                 RED.nodes.dirty(ev.dirty);
                 RED.view.redraw(true);
                 RED.palette.refresh();
+                RED.workspaces.refresh();
             }
         }
     }

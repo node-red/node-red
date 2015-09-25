@@ -735,12 +735,25 @@ RED.editor = (function() {
                             if (configTypeDef.oneditdelete) {
                                 configTypeDef.oneditdelete.call(RED.nodes.node(configId));
                             }
+                            var historyEvent = {
+                                t:'delete',
+                                nodes:[configNode],
+                                changes: {},
+                                dirty: RED.nodes.dirty()
+                            }
                             RED.nodes.remove(configId);
                             for (var i=0;i<configNode.users.length;i++) {
                                 var user = configNode.users[i];
+                                historyEvent.changes[user.id] = {
+                                    changed: user.changed,
+                                    valid: user.valid
+                                };
                                 for (var d in user._def.defaults) {
                                     if (user._def.defaults.hasOwnProperty(d) && user[d] == configId) {
+                                        historyEvent.changes[user.id][d] = configId
                                         user[d] = "";
+                                        user.changed = true;
+                                        user.dirty = true;
                                     }
                                 }
                                 validateNode(user);
@@ -749,6 +762,7 @@ RED.editor = (function() {
                             RED.nodes.dirty(true);
                             $( this ).dialog( "close" );
                             RED.view.redraw();
+                            RED.history.push(historyEvent);
                         }
                 });
             }
