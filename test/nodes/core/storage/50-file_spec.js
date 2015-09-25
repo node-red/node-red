@@ -457,7 +457,7 @@ describe('file Nodes', function() {
                     logEvents.should.have.length(1);
                     logEvents[0][0].should.have.a.property('msg');
                     //logEvents[0][0].msg.toString().should.equal("Error: ENOENT, open 'badfile'");
-                    logEvents[0][0].msg.toString().should.startWith("Error: ENOENT, open");
+                    logEvents[0][0].msg.toString().should.startWith("Error: ENOENT");
                     done();
                 },wait);
                 n1.receive({payload:""});
