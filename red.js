@@ -100,8 +100,11 @@ try {
     var settings = require(settingsFile);
     settings.settingsFile = settingsFile;
 } catch(err) {
+    console.log("Error loading settings file: "+settingsFile)
     if (err.code == 'MODULE_NOT_FOUND') {
-        console.log("Unable to load settings file: "+settingsFile);
+        if (err.toString().indexOf(settingsFile) === -1) {
+            console.log(err.toString());
+        }
     } else {
         console.log(err);
     }
