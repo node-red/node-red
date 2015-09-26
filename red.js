@@ -21,7 +21,7 @@ var express = require("express");
 var crypto = require("crypto");
 var nopt = require("nopt");
 var path = require("path");
-var fs = require("fs");
+var fs = require("fs-extra");
 var RED = require("./red/red.js");
 var log = require("./red/log");
 
@@ -76,13 +76,22 @@ if (parsedArgs.settings) {
         // NODE_RED_HOME contains user data - use its settings.js
         settingsFile = path.join(process.env.NODE_RED_HOME,"settings.js");
     } else {
-        var userSettingsFile = path.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE,".node-red","settings.js");
+        var userDir = path.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE,".node-red");
+        var userSettingsFile = path.join(userDir,"settings.js");
         if (fs.existsSync(userSettingsFile)) {
             // $HOME/.node-red/settings.js exists
             settingsFile = userSettingsFile;
         } else {
-            // Use default settings.js
-            settingsFile = __dirname+"/settings.js";
+            var defaultSettings = path.join(__dirname,"settings.js");
+            var settingsStat = fs.statSync(defaultSettings);
+            if (settingsStat.mtime.getTime() < settingsStat.ctime.getTime()) {
+                // Default settings file has not been modified - safe to copy
+                fs.copySync(defaultSettings,userSettingsFile);
+                settingsFile = userSettingsFile;
+            } else {
+                // Use default settings.js as it has been modified
+                settingsFile = defaultSettings;
+            }
         }
     }
 }
