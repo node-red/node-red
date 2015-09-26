@@ -36,7 +36,7 @@
         "mustache": "2.1.2",
         "cron":"1.0.9",
         "raw-body":"2.1.2",
-        "xml2js":"0.4.9",
+        "xml2js":"0.4.12",
         "sentiment":"0.2.3",
         "follow-redirects":"0.0.6",
         "cors":"2.7.1",

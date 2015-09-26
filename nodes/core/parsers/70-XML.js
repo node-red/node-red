@@ -22,17 +22,25 @@ module.exports = function(RED) {
 
     function XMLNode(n) {
         RED.nodes.createNode(this,n);
-        this.attrkey = n.attr || '$';
-        this.charkey = n.chr || '_';
+        this.attrkey = n.attr;
+        this.charkey = n.chr;
         var node = this;
         this.on("input", function(msg) {
             if (msg.hasOwnProperty("payload")) {
-                if (typeof msg.payload == "object") {
-                    msg.payload = builder.buildObject(msg.payload);
+                if (typeof msg.payload === "object") {
+                    var options = {};
+                    if (msg.hasOwnProperty("options") && typeof msg.options === "object") { options = msg.options; }
+                    options.async = false;
+                    msg.payload = builder.buildObject(msg.payload, options);
                     node.send(msg);
                 }
                 else if (typeof msg.payload == "string") {
-                    parseString(msg.payload, {strict:true,async:true,attrkey:node.attrkey,charkey:node.charkey}, function (err, result) {
+                    var options = {};
+                    if (msg.hasOwnProperty("options") && typeof msg.options === "object") { options = msg.options; }
+                    options.async = true;
+                    options.attrkey = node.attrkey || options.attrkey || '$';
+                    options.charkey = node.charkey || options.charkey || '_';
+                    parseString(msg.payload, options, function (err, result) {
                         if (err) { node.error(err, msg); }
                         else {
                             msg.payload = result;
