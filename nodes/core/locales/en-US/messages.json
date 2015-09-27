@@ -272,7 +272,8 @@
             "missing-path": "missing path",
             "no-response": "No response object",
             "json-error": "JSON parse error",
-            "no-url": "No url specified"
+            "no-url": "No url specified",
+            "deprecated-call":"Deprecated call to __method__"
         },
         "status": {
             "requesting": "requesting"
