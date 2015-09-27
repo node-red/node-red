@@ -180,10 +180,10 @@ var RED = (function() {
                     {id:"menu-item-subflow-convert",label:RED._("menu.label.selectionToSubflow"),disabled:true,onselect:RED.subflow.convertToSubflow},
                 ]},
                 null,
-                {id:"menu-item-flow",label:RED._("menu.label.flows"),options:[
-                    {id:"menu-item-flow-add",label:RED._("menu.label.add"),onselect:RED.workspaces.add},
-                    {id:"menu-item-flow-edit",label:RED._("menu.label.rename"),onselect:RED.workspaces.edit},
-                    {id:"menu-item-flow-delete",label:RED._("menu.label.delete"),onselect:RED.workspaces.remove},
+                {id:"menu-item-workspace",label:RED._("menu.label.flows"),options:[
+                    {id:"menu-item-workspace-add",label:RED._("menu.label.add"),onselect:RED.workspaces.add},
+                    {id:"menu-item-workspace-edit",label:RED._("menu.label.rename"),onselect:RED.workspaces.edit},
+                    {id:"menu-item-workspace-delete",label:RED._("menu.label.delete"),onselect:RED.workspaces.remove},
                     null
                 ]},
                 null,

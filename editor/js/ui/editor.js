@@ -1063,7 +1063,7 @@ RED.editor = (function() {
                                 changes['name'] = editing_node.name;
                                 editing_node.name = newName;
                                 changed = true;
-                                $("#menu-item-flow-menu-"+editing_node.id.replace(".","-")).text(newName);
+                                $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text(newName);
                             }
 
                             RED.palette.refresh();

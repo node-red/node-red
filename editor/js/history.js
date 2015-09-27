@@ -203,7 +203,7 @@ RED.history = (function() {
                         });
 
                         if (ev.node.type === 'subflow') {
-                            $("#menu-item-flow-menu-"+ev.node.id.replace(".","-")).text(ev.node.name);
+                            $("#menu-item-workspace-menu-"+ev.node.id.replace(".","-")).text(ev.node.name);
                         }
                     } else {
                         RED.editor.updateNodeProperties(ev.node);

@@ -256,8 +256,8 @@ RED.view = (function() {
 
             activeSubflow = RED.nodes.subflow(event.workspace);
 
-            RED.menu.setDisabled("menu-item-flow-edit", activeSubflow);
-            RED.menu.setDisabled("menu-item-flow-delete",RED.workspaces.count() == 1 || activeSubflow);
+            RED.menu.setDisabled("menu-item-workspace-edit", activeSubflow);
+            RED.menu.setDisabled("menu-item-workspace-delete",RED.workspaces.count() == 1 || activeSubflow);
 
             if (workspaceScrollPositions[event.workspace]) {
                 chart.scrollLeft(workspaceScrollPositions[event.workspace].left);
