@@ -149,12 +149,14 @@ RED.history = (function() {
                         for (i in ev.changes) {
                             if (ev.changes.hasOwnProperty(i)) {
                                 node = RED.nodes.node(i);
-                                for (var d in ev.changes[i]) {
-                                    if (ev.changes[i].hasOwnProperty(d)) {
-                                        node[d] = ev.changes[i][d];
+                                if (node) {
+                                    for (var d in ev.changes[i]) {
+                                        if (ev.changes[i].hasOwnProperty(d)) {
+                                            node[d] = ev.changes[i][d];
+                                        }
                                     }
+                                    node.dirty = true;
                                 }
-                                node.dirty = true;
                             }
                         }
 
@@ -169,6 +171,17 @@ RED.history = (function() {
                 } else if (ev.t == "edit") {
                     for (i in ev.changes) {
                         if (ev.changes.hasOwnProperty(i)) {
+                            if (ev.node._def.defaults[i].type) {
+                                // This is a config node property
+                                var currentConfigNode = RED.nodes.node(ev.node[i]);
+                                if (currentConfigNode) {
+                                    currentConfigNode.users.splice(currentConfigNode.users.indexOf(ev.node),1);
+                                }
+                                var newConfigNode = RED.nodes.node(ev.changes[i]);
+                                if (newConfigNode) {
+                                    newConfigNode.users.push(ev.node);
+                                }
+                            }
                             ev.node[i] = ev.changes[i];
                         }
                     }
