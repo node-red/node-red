@@ -10,7 +10,6 @@
     },
     "main"         : "red/red.js",
     "scripts"      : {
-        "postinstall": "grunt build",
         "start": "node red.js",
         "test": "grunt"
     },
