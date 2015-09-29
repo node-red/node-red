@@ -153,7 +153,7 @@ module.exports = function(RED) {
                 }
                 var statusCode = msg.statusCode || 200;
                 if (typeof msg.payload == "object" && !Buffer.isBuffer(msg.payload)) {
-                    msg.res.jsonp(statusCode,msg.payload);
+                    msg.res.status(statusCode).jsonp(msg.payload);
                 } else {
                     if (msg.res.get('content-length') == null) {
                         var len;
