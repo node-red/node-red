@@ -56,7 +56,7 @@ module.exports = function(RED) {
 
             this.errorHandler = function(err,req,res,next) {
                 node.warn(err);
-                res.send(500);
+                res.sendStatus(err.status || 500);
             };
 
             this.callback = function(req,res) {
@@ -153,7 +153,7 @@ module.exports = function(RED) {
                 }
                 var statusCode = msg.statusCode || 200;
                 if (typeof msg.payload == "object" && !Buffer.isBuffer(msg.payload)) {
-                    msg.res.jsonp(statusCode,msg.payload);
+                    msg.res.status(statusCode).jsonp(msg.payload);
                 } else {
                     if (msg.res.get('content-length') == null) {
                         var len;
@@ -169,7 +169,7 @@ module.exports = function(RED) {
                         msg.res.set('content-length', len);
                     }
 
-                    msg.res.send(statusCode,msg.payload);
+                    msg.res.sendStatus(statusCode).send(msg.payload);
                 }
             } else {
                 node.warn(RED._("httpin.errors.no-response"));

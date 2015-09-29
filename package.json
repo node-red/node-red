@@ -10,8 +10,9 @@
     },
     "main"         : "red/red.js",
     "scripts"      : {
+        "install": "grunt build",
         "start": "node red.js",
-        "test": "./node_modules/.bin/grunt"
+        "test": "grunt"
     },
     "bin"          : {
         "node-red": "./red.js",
@@ -54,14 +55,8 @@
         "node-red-node-feedparser":"0.1.*",
         "node-red-node-email":"0.1.*",
         "node-red-node-twitter":"0.1.*",
-        "node-red-node-rbe":"0.1.*"
-    },
-    "optionalDependencies": {
-        "node-red-node-serialport":"0.0.*",
-        "bcrypt":"0.8.3"
-    },
-    "devDependencies": {
-        "grunt": "0.4.5",
+        "node-red-node-rbe":"0.1.*",
+         "grunt": "0.4.5",
         "grunt-chmod": "1.0.3",
         "grunt-cli": "0.1.13",
         "grunt-concurrent":"2.0.0",
@@ -74,7 +69,13 @@
         "grunt-contrib-watch":"0.6.1",
         "grunt-jsonlint":"1.0.4",
         "grunt-nodemon":"0.4.0",
-        "grunt-sass":"1.0.0",
+        "grunt-sass":"1.0.0"
+    },
+    "optionalDependencies": {
+        "node-red-node-serialport":"0.0.*",
+        "bcrypt":"0.8.3"
+    },
+    "devDependencies": {
         "grunt-simple-mocha": "0.4.0",
         "mocha": "2.2.5",
         "should": "6.0.3",
