@@ -80,7 +80,7 @@ describe('XML node', function() {
         helper.load(xmlNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
-            n1.receive({payload:'<not valid xml>',topic: "bar"});
+            n1.receive({payload:'<not valid>',topic: "bar"});
             setTimeout(function() {
                 try {
                     var logEvents = helper.log().args.filter(function(evt) {
