@@ -23,7 +23,7 @@ describe('JSON node', function() {
     before(function(done) {
         helper.startServer(done);
     });
-    
+
     afterEach(function() {
         helper.unload();
     });
@@ -54,7 +54,7 @@ describe('JSON node', function() {
             jn1.receive({payload:jsonString,topic: "bar"});
         });
     });
-    
+
     it('should convert a javascript object to a json string', function(done) {
         var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
                     {id:"jn2", type:"helper"}];
@@ -69,7 +69,23 @@ describe('JSON node', function() {
             jn1.receive({payload:obj});
         });
     });
-    
+
+    it('should convert a array to a json string', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                console.log(msg);
+                should.equal(msg.payload, '[1,2,3]');
+                done();
+            });
+            var obj = [1,2,3];
+            jn1.receive({payload:obj});
+        });
+    });
+
     it('should log an error if asked to parse an invalid json string', function(done) {
         var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
                     {id:"jn2", type:"helper"}];
@@ -90,7 +106,7 @@ describe('JSON node', function() {
             }
         });
     });
-    
+
     it('should log an error if asked to parse something thats not json or js', function(done) {
         var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
                     {id:"jn2", type:"helper"}];
@@ -102,16 +118,14 @@ describe('JSON node', function() {
                     var logEvents = helper.log().args.filter(function(evt) {
                         return evt[0].type == "json";
                     });
-                    //console.log(logEvents);
-                    logEvents.should.have.length(4);
+                    console.log(logEvents);
+                    logEvents.should.have.length(3);
                     logEvents[0][0].should.have.a.property('msg');
                     logEvents[0][0].msg.toString().should.eql('json.errors.dropped');
                     logEvents[1][0].should.have.a.property('msg');
                     logEvents[1][0].msg.toString().should.eql('json.errors.dropped');
                     logEvents[2][0].should.have.a.property('msg');
                     logEvents[2][0].msg.toString().should.eql('json.errors.dropped-object');
-                    logEvents[3][0].should.have.a.property('msg');
-                    logEvents[3][0].msg.toString().should.eql('json.errors.dropped-object');
                     done();
                 } catch(err) {
                     done(err);
@@ -119,7 +133,6 @@ describe('JSON node', function() {
             },150);
             jn1.receive({payload:true});
             jn1.receive({payload:1});
-            jn1.receive({payload:["a"]});
             jn1.receive({payload:new Buffer("a")});
         });
     });
