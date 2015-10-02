@@ -44,6 +44,7 @@
         "uglify-js":"2.4.24",
         "on-headers":"1.0.0",
         "is-utf8":"0.2.0",
+        "media-typer": "0.3.0",
         "fs.notify":"0.0.4",
         "passport":"0.2.2",
         "passport-http-bearer":"1.0.1",
