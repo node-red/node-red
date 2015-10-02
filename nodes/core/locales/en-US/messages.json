@@ -488,7 +488,8 @@
     "json": {
         "errors": {
             "dropped-object": "Ignored non-object payload",
-            "dropped": "Ignored unsupported payload type"
+            "dropped": "Ignored unsupported payload type",
+            "dropped-error": "Failed to convert payload"
         }
     },
     "xml": {
