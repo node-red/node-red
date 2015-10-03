@@ -64,7 +64,9 @@ describe("api auth middleware",function() {
                 revokeToken.restore();
 
                 resp.should.equal(200);
-                done();
+                return {
+                    end: done
+                }
             }};
 
             auth.revoke(req,res);
