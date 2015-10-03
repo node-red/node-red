@@ -11,13 +11,11 @@ addons:
     - gcc-4.8
 matrix:
   allow_failures:
-  - node_js: "4.1.0"
+  - node_js: "4"
 before_install:
   - npm install -g npm@~1.4.18
-# node_js 4.1.0 is brand new
 node_js:
-  - "4.1.0"
-  - "4.0.0"
+  - "4"
   - "0.12"
   - "0.10"
 script:
