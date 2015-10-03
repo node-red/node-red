@@ -82,6 +82,34 @@
                 {v:"else",t:this._("switch.rules.else")}
             ];
 
+            function resizeRule(rule,width) {
+                var selectField = rule.find("select");
+                var type = selectField.children("option:selected").val();
+                var valueField = rule.find(".node-input-rule-value");
+                var btwnField1 = rule.find(".node-input-rule-btwn-value");
+                var btwnField2 = rule.find(".node-input-rule-btwn-value2");
+                var selectWidth;
+                if (type.length < 4) {
+                    selectWidth = 60;
+                } else if (type === "regex") {
+                    selectWidth = 147;
+                } else {
+                    selectWidth = 120;
+                }
+                selectField.width(selectWidth);
+
+                if (type === "btwn") {
+                    btwnField1.width((width-288)/2);
+                    btwnField2.width((width-288)/2);
+                } else {
+                    if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
+                        // valueField.hide();
+                    } else {
+                        valueField.width(width-selectWidth-120);
+                    }
+                }
+            }
+
             function generateRule(i,rule) {
                 var container = $('<li/>',{style:"background: #fff; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"});
                 var row = $('<div/>').appendTo(container);
@@ -106,14 +134,10 @@
                 $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
 
                 selectField.change(function() {
+                    var width = $("#node-input-rule-container").width();
+                    resizeRule(container,width);
                     var type = selectField.children("option:selected").val();
-                    if (type.length < 4) {
-                        selectField.css({"width":"60px"});
-                    } else if (type === "regex") {
-                        selectField.css({"width":"147px"});
-                    } else {
-                        selectField.css({"width":"120px"});
-                    }
+
                     if (type === "btwn") {
                         valueField.hide();
                         btwnField.show();
@@ -126,7 +150,6 @@
                         }
                     }
                 });
-
 
                 deleteButton.click(function() {
                     container.css({"background":"#fee"});
@@ -170,6 +193,12 @@
                 var editorRow = $("#dialog-form>div.node-input-rule-container-row");
                 height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
                 $("#node-input-rule-container-div").css("height",height+"px");
+
+                var rules = $("#node-input-rule-container").children();
+                var newWidth = $("#node-input-rule-container").width();
+                rules.each(function(i) {
+                    resizeRule($(this),newWidth);
+                })
             };
 
             $( "#node-input-rule-container" ).sortable({
@@ -192,6 +221,8 @@
                     $("#dialog").dialog('option','width',size.width);
                     $("#dialog").dialog('option','height',size.height);
                     switchDialogResize();
+                } else {
+                    setTimeout(switchDialogResize,10);
                 }
             });
             $( "#dialog" ).one("dialogclose", function(ev,ui) {

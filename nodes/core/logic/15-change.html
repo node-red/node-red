@@ -102,6 +102,10 @@
             if (this.reg === null) { $("#node-input-reg").prop('checked', true); }
             $("#node-input-action").change();
 
+            function resizeRule(rule,width) {
+                rule.find('input[type="text"]').width(width-220);
+            }
+
             function generateRule(rule) {
                 var container = $('<li/>',{style:"background: #fff; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"});
 
@@ -143,8 +147,9 @@
 
 
                 selectField.change(function() {
+                    var width = $("#node-input-rule-container").width();
+                    resizeRule(container,width);
                     var type = $(this).val();
-
                     if (type == "set") {
                         row2.show();
                         row3.hide();
@@ -213,6 +218,12 @@
                 var editorRow = $("#dialog-form>div.node-input-rule-container-row");
                 height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
                 $("#node-input-rule-container-div").css("height",height+"px");
+
+                var rules = $("#node-input-rule-container").children();
+                var newWidth = $("#node-input-rule-container").width();
+                rules.each(function(i) {
+                    resizeRule($(this),newWidth);
+                })
             };
             $( "#dialog" ).on("dialogresize", changeDialogResize);
             $( "#dialog" ).one("dialogopen", function(ev) {
@@ -221,6 +232,8 @@
                     $("#dialog").dialog('option','width',size.width);
                     $("#dialog").dialog('option','height',size.height);
                     changeDialogResize();
+                } else {
+                    setTimeout(changeDialogResize,10);
                 }
             });
             $( "#dialog" ).one("dialogclose", function(ev,ui) {
