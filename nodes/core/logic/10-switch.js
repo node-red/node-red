@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ module.exports = function(RED) {
         'gte': function(a, b) { return a >= b; },
         'btwn': function(a, b, c) { return a >= b && a <= c; },
         'cont': function(a, b) { return (a + "").indexOf(b) != -1; },
-        'regex': function(a, b) { return (a + "").match(new RegExp(b)); },
+        'regex': function(a, b, c, d) { return (a + "").match(new RegExp(b,d?'i':'')); },
         'true': function(a) { return a === true; },
         'false': function(a) { return a === false; },
         'null': function(a) { return (typeof a == "undefined" || a === null); },
@@ -60,7 +60,7 @@ module.exports = function(RED) {
                     var rule = node.rules[i];
                     var test = prop;
                     if (rule.t == "else") { test = elseflag; elseflag = true; }
-                    if (operators[rule.t](test,rule.v, rule.v2)) {
+                    if (operators[rule.t](test,rule.v, rule.v2, rule.case)) {
                         onward.push(msg);
                         elseflag = false;
                         if (node.checkall == "false") { break; }

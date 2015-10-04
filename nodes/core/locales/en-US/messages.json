@@ -425,8 +425,10 @@
             "property": "Property",
             "rule": "rule"
         },
+        "and": "and",
         "checkall": "checking all rules",
         "stopfirst": "stopping after first match",
+        "ignorecase": "ignore case",
         "rules": {
             "btwn":"is between",
             "cont":"contains",
