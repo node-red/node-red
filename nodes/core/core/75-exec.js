@@ -35,9 +35,9 @@ module.exports = function(RED) {
                 // make the extra args into an array
                 // then prepend with the msg.payload
                 if (typeof(msg.payload !== "string")) { msg.payload = (msg.payload || "").toString(); }
-                var arg = [];
-                if (node.append.length > 0) { arg = node.append.split(","); }
-                if ((node.addpay === true) && (msg.payload.toString().trim() !== "")) { arg.unshift(msg.payload); }
+                var pay = [];
+                if ((node.addpay === true) && (msg.payload.toString().trim() !== "")) { pay = msg.payload.split(","); }
+                var arg = pay.concat(node.append.split(","));
                 if (RED.settings.verbose) { node.log(node.cmd+" ["+arg+"]"); }
                 if (node.cmd.indexOf(" ") == -1) {
                     var ex = spawn(node.cmd,arg);
