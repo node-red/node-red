@@ -27,17 +27,39 @@ module.exports = function(RED) {
     var jsonParser = bodyParser.json();
     var urlencParser = bodyParser.urlencoded({extended:true});
     var onHeaders = require('on-headers');
+    var typer = require('media-typer');
+    var isUtf8 = require('is-utf8');
+
+    function isMIMETypeText(mimeType) {
+        var parsedType = typer.parse(mimeType)
+
+        if (parsedType.type === "text") {
+          return true;
+        }
+
+        if (parsedType.subtype === "xml" || parsedType.suffix === "xml") {
+          return true;
+        }
+
+        return false;
+    }
 
     function rawBodyParser(req, res, next) {
         if (req._body) { return next(); }
         req.body = "";
         req._body = true;
+
+       var textType = isMIMETypeText(req.headers['content-type'])
+
         getBody(req, {
-            limit: '1mb',
             length: req.headers['content-length'],
-            encoding: 'utf8'
+            encoding: textType ? "utf8" : null
         }, function (err, buf) {
             if (err) { return next(err); }
+            if (!textType && isUtf8(buf)) {
+              buf = buf.toString()
+            }
+
             req.body = buf;
             next();
         });
