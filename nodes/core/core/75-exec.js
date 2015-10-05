@@ -34,13 +34,14 @@ module.exports = function(RED) {
             if (this.useSpawn === true) {
                 // make the extra args into an array
                 // then prepend with the msg.payload
-                if (typeof(msg.payload !== "string")) { msg.payload = (msg.payload || "").toString(); }
-                var pay = [];
-                if ((node.addpay === true) && (msg.payload.toString().trim() !== "")) { pay = msg.payload.split(","); }
-                var arg = pay.concat(node.append.split(","));
-                if (RED.settings.verbose) { node.log(node.cmd+" ["+arg+"]"); }
-                if (node.cmd.indexOf(" ") == -1) {
-                    var ex = spawn(node.cmd,arg);
+
+                var arg = node.cmd+" "+msg.payload+" "+node.append;
+                // slice whole line by spaces (trying to honour quotes);
+                arg = arg.match(/(?:[^\s"]+|"[^"]*")+/g);
+                var cmd = arg.shift();
+                if (RED.settings.verbose) { node.log(cmd+" ["+arg+"]"); }
+                if (cmd.indexOf(" ") == -1) {
+                    var ex = spawn(cmd,arg);
                     ex.stdout.on('data', function (data) {
                         //console.log('[exec] stdout: ' + data);
                         if (isUtf8(data)) { msg.payload = data.toString(); }
