@@ -30,34 +30,34 @@ module.exports = function(RED) {
     var typer = require('media-typer');
     var isUtf8 = require('is-utf8');
 
-    function isMIMETypeText(mimeType) {
-        var parsedType = typer.parse(mimeType)
-
-        if (parsedType.type === "text") {
-          return true;
-        }
-
-        if (parsedType.subtype === "xml" || parsedType.suffix === "xml") {
-          return true;
-        }
-
-        return false;
-    }
-
     function rawBodyParser(req, res, next) {
         if (req._body) { return next(); }
         req.body = "";
         req._body = true;
 
-       var textType = isMIMETypeText(req.headers['content-type'])
+        var isText = true;
+        var checkUTF = false;
+
+        if (req.headers['content-type']) {
+            var parsedType = typer.parse(req.headers['content-type'])
+            if (parsedType.type === "text") {
+                isText = true;
+            } else if (parsedType.subtype === "xml" || parsedType.suffix === "xml") {
+                isText = true;
+            } else if (parsedType.type !== "application") {
+                isText = false;
+            } else if (parsedType.subtype !== "octet-stream") {
+                checkUTF = true;
+            }
+        }
 
         getBody(req, {
             length: req.headers['content-length'],
-            encoding: textType ? "utf8" : null
+            encoding: isText ? "utf8" : null
         }, function (err, buf) {
             if (err) { return next(err); }
-            if (!textType && isUtf8(buf)) {
-              buf = buf.toString()
+            if (!isText && checkUTF && isUtf8(buf)) {
+                buf = buf.toString()
             }
 
             req.body = buf;
