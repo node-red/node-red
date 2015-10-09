@@ -391,6 +391,7 @@ module.exports = function(RED) {
                     opts = urllib.parse(prox);
                     opts.path = opts.pathname = path;
                     opts.headers = heads;
+                    opts.method = method;
                     //console.log(opts);
                     urltotest = match[0];
                 }
