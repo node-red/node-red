@@ -16,7 +16,7 @@
 var util = require("util");
 var mqtt = require("mqtt");
 var events = require("events");
-//var inspect = require("sys").inspect;
+//var inspect = require("util").inspect;
 
 //var Client = module.exports.Client = function(
 

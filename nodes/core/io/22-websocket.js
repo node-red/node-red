@@ -17,7 +17,7 @@
 module.exports = function(RED) {
     "use strict";
     var ws = require("ws");
-    var inspect = require("sys").inspect;
+    var inspect = require("util").inspect;
 
     // A node red node that sets up a local websocket server
     function WebSocketListenerNode(n) {
