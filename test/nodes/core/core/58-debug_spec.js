@@ -94,7 +94,7 @@ describe('debug node', function() {
             }, function(msg) {
                 JSON.parse(msg).should.eql({
                     topic:"debug",
-                    data:{id:"n1",msg:'{\n "payload": "test"\n}',format:"object"}
+                    data:{id:"n1",msg:'{\n "payload": "test"\n}',format:"Object"}
                 });
             }, done);
         });
@@ -179,7 +179,7 @@ describe('debug node', function() {
             }, function(msg) {
                 JSON.parse(msg).should.eql({
                     topic:"debug",
-                    data:{id:"n1",msg:'{\n "type": "foo"\n}',property:"payload",format:"object"}
+                    data:{id:"n1",msg:'{\n "type": "foo"\n}',property:"payload",format:"Object"}
                 });
             }, done);
         });
@@ -215,7 +215,7 @@ describe('debug node', function() {
                     data:{
                         id:"n1",
                         msg:'{\n "name": "bar",\n "o": "[circular]"\n}',
-                        property:"payload",format:"object"
+                        property:"payload",format:"Object"
                     }
                 });
             }, done);

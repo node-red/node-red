@@ -86,15 +86,12 @@ module.exports = function(RED) {
             msg.msg = msg.msg.toString('hex');
         } else if (typeof msg.msg === 'object') {
             var seen = [];
-            msg.format = "object";
+            msg.format = msg.msg.constructor.name || "Object";
             var isArray = util.isArray(msg.msg);
-            if (!isArray && msg.msg.toString !== Object.prototype.toString) {
-                msg.format = msg.msg.constructor.name || "object";
-                msg.msg = msg.msg.toString();
-            } else {
-                if (isArray) {
-                    msg.format = "array ["+msg.msg.length+"]";
-                }
+            if (isArray) {
+                msg.format = "array ["+msg.msg.length+"]";
+            }
+            if (isArray || (msg.format === "Object")) {
                 msg.msg = JSON.stringify(msg.msg, function(key, value) {
                     if (typeof value === 'object' && value !== null) {
                         if (seen.indexOf(value) !== -1) { return "[circular]"; }
@@ -102,6 +99,9 @@ module.exports = function(RED) {
                     }
                     return value;
                 }," ");
+            } else {
+                try { msg.msg = msg.msg.toString(); }
+                catch(e) { msg.msg = "[Type not printable]"; }
             }
             seen = null;
         } else if (typeof msg.msg === "boolean") {
