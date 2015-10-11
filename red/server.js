@@ -107,7 +107,7 @@ function start() {
                     }
                 }
                 log.info(log._("runtime.paths.settings",{path:settings.settingsFile}));
-                redNodes.loadFlows();
+                redNodes.loadFlows().then(redNodes.startFlows);
                 comms.start();
             }).otherwise(function(err) {
                 console.log(err);
