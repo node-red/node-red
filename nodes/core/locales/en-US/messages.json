@@ -520,7 +520,8 @@
             "windows": "Windows (\\r\\n)"
         },
         "errors": {
-            "csv_js": "This node only handles csv strings or js objects."
+            "csv_js": "This node only handles csv strings or js objects.",
+            "obj_csv": "No columns template specified for object -> csv."
         }
     },
     "html": {
