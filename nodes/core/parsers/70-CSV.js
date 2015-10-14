@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014,2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,23 +55,37 @@ module.exports = function(RED) {
                         }
                         if (!Array.isArray(msg.payload)) { msg.payload = [ msg.payload ]; }
                         for (var s = 0; s < msg.payload.length; s++) {
-                            for (var t=0; t < node.template.length; t++) {
-
-                                // aaargh - resorting to eval here - but fairly contained front and back.
-                                var p = RED.util.ensureString(eval("msg.payload[s]."+node.template[t]));
-
-                                if (p === "undefined") { p = ""; }
-                                if (p.indexOf(node.quo) !== -1) { // add double quotes if any quotes
-                                    console.log("ping");
-                                    p = p.replace(/"/g, '""');
-                                    ou += node.quo + p + node.quo + node.sep;
+                            if ((Array.isArray(msg.payload[s])) || (typeof msg.payload[s] !== "object")) {
+                                if (typeof msg.payload[s] !== "object") { msg.payload = [ msg.payload ]; }
+                                for (var t = 0; t < msg.payload[s].length; t++) {
+                                    if (msg.payload[s][t].toString().indexOf(node.quo) !== -1) { // add double quotes if any quotes
+                                        msg.payload[s][t] = msg.payload[s][t].toString().replace(/"/g, '""');
+                                        msg.payload[s][t] = node.quo + msg.payload[s][t].toString() + node.quo;
+                                    }
+                                    else if (msg.payload[s][t].toString().indexOf(node.sep) !== -1) { // add quotes if any "commas"
+                                        msg.payload[s][t] = node.quo + msg.payload[s][t].toString() + node.quo;
+                                    }
                                 }
-                                else if (p.indexOf(node.sep) !== -1) { // add quotes if any "commas"
-                                    ou += node.quo + p + node.quo + node.sep;
-                                }
-                                else { ou += p + node.sep; } // otherwise just add
+                                ou += msg.payload[s].join(node.sep) + node.ret;
                             }
-                            ou = ou.slice(0,-1) + node.ret; // remove final "comma" and add "newline"
+                            else {
+                                for (var t=0; t < node.template.length; t++) {
+
+                                    // aaargh - resorting to eval here - but fairly contained front and back.
+                                    var p = RED.util.ensureString(eval("msg.payload[s]."+node.template[t]));
+
+                                    if (p === "undefined") { p = ""; }
+                                    if (p.indexOf(node.quo) !== -1) { // add double quotes if any quotes
+                                        p = p.replace(/"/g, '""');
+                                        ou += node.quo + p + node.quo + node.sep;
+                                    }
+                                    else if (p.indexOf(node.sep) !== -1) { // add quotes if any "commas"
+                                        ou += node.quo + p + node.quo + node.sep;
+                                    }
+                                    else { ou += p + node.sep; } // otherwise just add
+                                }
+                                ou = ou.slice(0,-1) + node.ret; // remove final "comma" and add "newline"
+                            }
                         }
                         msg.payload = ou;
                         node.send(msg);
