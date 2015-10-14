@@ -61,11 +61,12 @@ module.exports = function(RED) {
                                 var p = RED.util.ensureString(eval("msg.payload[s]."+node.template[t]));
 
                                 if (p === "undefined") { p = ""; }
-                                if (p.indexOf(node.sep) != -1) { // add quotes if any "commas"
+                                if (p.indexOf(node.quo) !== -1) { // add double quotes if any quotes
+                                    console.log("ping");
+                                    p = p.replace(/"/g, '""');
                                     ou += node.quo + p + node.quo + node.sep;
                                 }
-                                else if (p.indexOf(node.quo) != -1) { // add double quotes if any quotes
-                                    p = p.replace(/"/g, '""');
+                                else if (p.indexOf(node.sep) !== -1) { // add quotes if any "commas"
                                     ou += node.quo + p + node.quo + node.sep;
                                 }
                                 else { ou += p + node.sep; } // otherwise just add
