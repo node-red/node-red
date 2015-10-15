@@ -231,7 +231,7 @@ RED.history = (function() {
                     ev.node.changed = ev.changed;
                 } else if (ev.t == "createSubflow") {
                     if (ev.nodes) {
-                        RED.nodes.filterNodes({z:ev.subflow.id}).forEach(function(n) {
+                        RED.nodes.filterNodes({z:ev.subflow.subflow.id}).forEach(function(n) {
                             n.z = ev.activeWorkspace;
                             n.dirty = true;
                         });
