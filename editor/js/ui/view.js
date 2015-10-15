@@ -1359,7 +1359,9 @@ RED.view = (function() {
                     var text = node.append('svg:text').attr('class','node_label').attr('x', 38).attr('dy', '.35em').attr('text-anchor','start');
                     if (d._def.align) {
                         text.attr('class','node_label node_label_'+d._def.align);
-                        text.attr('text-anchor','end');
+                        if (d._def.align === "right") {
+                            text.attr('text-anchor','end');
+                        }
                     }
 
                     var status = node.append("svg:g").attr("class","node_status_group").style("display","none");
