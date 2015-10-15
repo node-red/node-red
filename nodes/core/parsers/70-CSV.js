@@ -69,25 +69,31 @@ module.exports = function(RED) {
                                 ou += msg.payload[s].join(node.sep) + node.ret;
                             }
                             else {
-                                if (node.template[0] !== '') {
+                                if ((node.template.length === 1) && (node.template[0] === '')) {
+                                    node.warn(RED._("csv.errors.obj_csv"));
+                                }
+                                else {
                                     for (var t=0; t < node.template.length; t++) {
-
-                                        // aaargh - resorting to eval here - but fairly contained front and back.
-                                        var p = RED.util.ensureString(eval("msg.payload[s]."+node.template[t]));
-
-                                        if (p === "undefined") { p = ""; }
-                                        if (p.indexOf(node.quo) !== -1) { // add double quotes if any quotes
-                                            p = p.replace(/"/g, '""');
-                                            ou += node.quo + p + node.quo + node.sep;
+                                        if (node.template[t] === '') {
+                                            ou += node.sep;
                                         }
-                                        else if (p.indexOf(node.sep) !== -1) { // add quotes if any "commas"
-                                            ou += node.quo + p + node.quo + node.sep;
+                                        else {
+                                            // aaargh - resorting to eval here - but fairly contained front and back.
+                                            var p = RED.util.ensureString(eval("msg.payload[s]."+node.template[t]));
+
+                                            if (p === "undefined") { p = ""; }
+                                            if (p.indexOf(node.quo) !== -1) { // add double quotes if any quotes
+                                                p = p.replace(/"/g, '""');
+                                                ou += node.quo + p + node.quo + node.sep;
+                                            }
+                                            else if (p.indexOf(node.sep) !== -1) { // add quotes if any "commas"
+                                                ou += node.quo + p + node.quo + node.sep;
+                                            }
+                                            else { ou += p + node.sep; } // otherwise just add
                                         }
-                                        else { ou += p + node.sep; } // otherwise just add
                                     }
                                     ou = ou.slice(0,-1) + node.ret; // remove final "comma" and add "newline"
                                 }
-                                else { node.warn(RED._("csv.errors.obj_csv")); }
                             }
                         }
                         msg.payload = ou;
