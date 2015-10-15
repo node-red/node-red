@@ -57,6 +57,7 @@ module.exports = function(RED) {
                                  "error:__node__.error,"+
                                  "warn:__node__.warn,"+
                                  "on:__node__.on,"+
+                                 "status:__node__.status,"+
                                  "send:function(msgs){ __node__.send(__msgid__,msgs);}"+
                               "};\n"+
                               this.func+"\n"+
@@ -70,17 +71,20 @@ module.exports = function(RED) {
                 log: function() {
                     node.log.apply(node, arguments);
                 },
-                error: function(){
+                error: function() {
                     node.error.apply(node, arguments);
                 },
                 warn: function() {
                     node.warn.apply(node, arguments);
                 },
-                send: function(id,msgs) {
-                    sendResults(node,id,msgs);
+                send: function(id, msgs) {
+                    sendResults(node, id, msgs);
                 },
                 on: function() {
-                    node.on.apply(node,arguments);
+                    node.on.apply(node, arguments);
+                },
+                status: function() {
+                    node.status.apply(node, arguments);
                 }
             },
             context: {
@@ -100,7 +104,7 @@ module.exports = function(RED) {
                     sendResults(this,msg._msgid,context.results);
 
                     var duration = process.hrtime(start);
-                    var converted = Math.floor((duration[0]* 1e9 +  duration[1])/10000)/100;
+                    var converted = Math.floor((duration[0] * 1e9 + duration[1])/10000)/100;
                     this.metric("duration", msg, converted);
                     if (process.env.NODE_RED_FUNCTION_TIME) {
                         this.status({fill:"yellow",shape:"dot",text:""+converted});
@@ -111,7 +115,7 @@ module.exports = function(RED) {
                     var errorMessage;
                     var stack = err.stack.split(/\r?\n/);
                     if (stack.length > 0) {
-                        while(line < stack.length && stack[line].indexOf("ReferenceError") !== 0) {
+                        while (line < stack.length && stack[line].indexOf("ReferenceError") !== 0) {
                             line++;
                         }
 
@@ -119,9 +123,9 @@ module.exports = function(RED) {
                             errorMessage = stack[line];
                             var m = /:(\d+):(\d+)$/.exec(stack[line+1]);
                             if (m) {
-                                var line = Number(m[1])-1;
+                                var lineno = Number(m[1])-1;
                                 var cha = m[2];
-                                errorMessage += " (line "+line+", col "+cha+")";
+                                errorMessage += " (line "+lineno+", col "+cha+")";
                             }
                         }
                     }
