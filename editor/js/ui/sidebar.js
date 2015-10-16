@@ -188,6 +188,7 @@ RED.sidebar = (function() {
         RED.keyboard.add(/* SPACE */ 32,{ctrl:true},function(){RED.menu.setSelected("menu-item-sidebar",!RED.menu.isSelected("menu-item-sidebar"));d3.event.preventDefault();});
         showSidebar();
         RED.sidebar.info.init();
+        RED.sidebar.config.init();
         // hide info bar at start if screen rather narrow...
         if ($(window).width() < 600) { toggleSidebar(); }
     }

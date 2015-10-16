@@ -58,16 +58,6 @@
         <ul id="workspace-tabs"></ul>
         <div id="workspace-add-tab"><a id="btn-workspace-add-tab" href="#"><i class="fa fa-plus"></i></a></div>
         <div id="chart"></div>
-        <div id="workspace-config-node-tray">
-            <div class="palette-category">
-                <div class="workspace-config-node-tray-header palette-header"><i class="fa fa-angle-down expanded"></i><span data-i18n="workspace.config.local"></span></div>
-                <ul id="workspace-config-node-tray-locals" class="palette-content config-node-list"></ul>
-            </div>
-            <div class="palette-category">
-                <div class="workspace-config-node-tray-header palette-header"><i class="fa fa-angle-down expanded"></i><span data-i18n="workspace.config.global"></span></div>
-                <ul id="workspace-config-node-tray-globals" class="palette-content config-node-list"></ul>
-            </div>
-        </div>
         <div id="workspace-toolbar"></div>
         <div id="workspace-footer">
             <a class="workspace-footer-button" id="btn-zoom-out" href="#"><i class="fa fa-minus"></i></a>

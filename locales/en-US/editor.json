@@ -13,11 +13,7 @@
         "renameSheet": "Rename sheet",
         "confirmDelete": "Confirm delete",
         "delete": "Are you sure you want to delete '__label__'?",
-        "dropFlowHere": "Drop the flow here",
-        "config": {
-            "local": "on this sheet",
-            "global": "on all sheets"
-        }
+        "dropFlowHere": "Drop the flow here"
     },
     "menu": {
         "label": {
@@ -198,7 +194,10 @@
         },
         "config": {
             "name": "Configuration nodes",
-            "label": "config"
+            "label": "config",
+            "local": "on this sheet",
+            "global": "on all sheets",
+            "none": "none"
         }
     }
 }

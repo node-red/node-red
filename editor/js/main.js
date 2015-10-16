@@ -152,9 +152,6 @@ var RED = (function() {
         statusEnabled = state;
         RED.view.status(statusEnabled);
     }
-    function toggleConfigNodes(state) {
-        RED.workspaces.toggleConfigNodes(state);
-    }
 
     function loadEditor() {
         RED.menu.init({id:"btn-sidemenu",
@@ -164,7 +161,6 @@ var RED = (function() {
                     null
                 ]},
                 {id:"menu-item-status",label:RED._("menu.label.displayStatus"),toggle:true,onselect:toggleStatus, selected: true},
-                {id:"menu-item-config-nodes",label:RED._("menu.label.displayConfig"),toggle:true,onselect:toggleConfigNodes, selected: false},
                 null,
                 {id:"menu-item-import",label:RED._("menu.label.import"),options:[
                     {id:"menu-item-import-clipboard",label:RED._("menu.label.clipboard"),onselect:RED.clipboard.import},
