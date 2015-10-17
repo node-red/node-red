@@ -152,8 +152,8 @@ if (settings.httpNodeRoot !== false) {
     settings.httpNodeAuth = settings.httpNodeAuth || settings.httpAuth;
 }
 
-settings.uiPort = settings.uiPort||1880;
-settings.uiHost = settings.uiHost||"0.0.0.0";
+settings.uiPort = process.env.PORT||settings.uiPort||1880;
+settings.uiHost = process.env.IP||settings.uiHost||"0.0.0.0";
 
 if (flowFile) {
     settings.flowFile = flowFile;
