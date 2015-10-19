@@ -1,5 +1,5 @@
 ---
 applications:
-- name: node-red-template
-  memory: 128M
+- name: nodered-phg
+  memory: 512M
   command: node red.js
