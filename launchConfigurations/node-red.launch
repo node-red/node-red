@@ -1,0 +1,17 @@
+{
+  "ServiceId": "com.ibm.cloudoe.orion.client.deploy",
+  "Params": {
+    "Target": {
+      "Url": "https://api.ng.bluemix.net",
+      "Org": "philippe.gregoire@fr.ibm.com",
+      "Space": "AntiBusRED"
+    },
+    "Name": "nodered-phg",
+    "Instrumentation": {
+      "host": "nodered-phg",
+      "domain": "mybluemix.net"
+    }
+  },
+  "Path": "manifest.yml",
+  "Type": "Cloud Foundry"
+}

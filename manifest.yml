@@ -1,0 +1,5 @@
+---
+applications:
+- name: node-red-template
+  memory: 128M
+  command: node red.js
