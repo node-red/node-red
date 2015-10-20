@@ -115,7 +115,7 @@ module.exports = function(RED) {
             else {
                 node.closing = true;
                 node.server.close();
-                if (node.tout) { clearTimeout(tout); }
+                if (node.tout) { clearTimeout(node.tout); }
             }
         });
     }
