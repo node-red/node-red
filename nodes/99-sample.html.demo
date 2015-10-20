@@ -28,7 +28,7 @@
    <!-- Generally, there should be an input for each property of the node.   -->
    <!-- The for and id attributes identify the corresponding property        -->
    <!-- (with the 'node-input-' prefix).                                     -->
-   <!-- The available icon classes are defined Twitter Bootstrap glyphicons  -->
+   <!-- The available icon classes are defined Font Awesome Icons (FA Icons) -->
     <div class="form-row">
         <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
         <input type="text" id="node-input-topic" placeholder="Topic">
