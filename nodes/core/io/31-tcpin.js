@@ -125,10 +125,12 @@ module.exports = function(RED) {
             });
         } else {
             var server = net.createServer(function (socket) {
+                socket.setKeepAlive(true,120000);
                 if (socketTimeout !== null) { socket.setTimeout(socketTimeout); }
                 var id = (1+Math.random()*4294967295).toString(16);
                 connectionPool[id] = socket;
-                node.status({text:RED._("tcpin.status.connections",{count:++count})});
+                count++;
+                node.status({text:RED._("tcpin.status.connections",{count:count})});
 
                 var buffer = (node.datatype == 'buffer')? new Buffer(0):"";
                 socket.on('data', function (data) {
@@ -175,7 +177,8 @@ module.exports = function(RED) {
                 });
                 socket.on('close', function() {
                     delete connectionPool[id];
-                    node.status({text:RED._("tcpin.status.connections",{count:--count})});
+                    count--;
+                    node.status({text:RED._("tcpin.status.connections",{count:count})});
                 });
                 socket.on('error',function(err) {
                     node.log(err);
@@ -303,6 +306,7 @@ module.exports = function(RED) {
             var connectedSockets = [];
             node.status({text:RED._("tcpin.status.connections",{count:0})});
             var server = net.createServer(function (socket) {
+                socket.setKeepAlive(true,120000);
                 if (socketTimeout !== null) { socket.setTimeout(socketTimeout); }
                 var remoteDetails = socket.remoteAddress+":"+socket.remotePort;
                 node.log(RED._("tcpin.status.connection-from",{host:socket.remoteAddress, port:socket.remotePort}));
