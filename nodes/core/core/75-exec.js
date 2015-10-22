@@ -30,7 +30,7 @@ module.exports = function(RED) {
 
         var node = this;
         this.on("input", function(msg) {
-            node.status({fill:"blue",shape:"dot"});
+            node.status({fill:"blue",shape:"dot",text:" "});
             if (this.useSpawn === true) {
                 // make the extra args into an array
                 // then prepend with the msg.payload
