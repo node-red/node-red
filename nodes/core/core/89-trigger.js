@@ -54,6 +54,7 @@ module.exports = function(RED) {
             if (msg.hasOwnProperty("reset")) {
                 clearTimeout(tout);
                 tout = null;
+                node.status({});
             }
             else {
                 if (!tout) {
@@ -70,8 +71,10 @@ module.exports = function(RED) {
                             msg.payload = m2;
                             if (node.op2type !== "nul") { node.send(msg); }
                             tout = null;
+                            node.status({});
                         },node.duration);
                     }
+                    node.status({fill:"blue",shape:"dot",text:" "});
                 }
                 else if ((node.extend === "true" || node.extend === true) && (node.duration > 0)) {
                     clearTimeout(tout);
@@ -79,12 +82,16 @@ module.exports = function(RED) {
                         msg.payload = m2;
                         if (node.op2type !== "nul") { node.send(msg); }
                         tout = null;
+                        node.status({});
                     },node.duration);
                 }
             }
         });
         this.on("close", function() {
-            if (tout) { clearTimeout(tout); }
+            if (tout) {
+                clearTimeout(tout);
+                node.status({});
+            }
         });
     }
     RED.nodes.registerType("trigger",TriggerNode);
