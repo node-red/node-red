@@ -83,10 +83,17 @@
 <div id="subflow-dialog" class="hide">
     <form class="form-horizontal">
         <div class="form-row">
-            <label data-i18n="common.label.name"></label><input type="text" id="subflow-input-name">
+            <label for="subflow-input-name" data-i18n="common.label.name"></label><input type="text" id="subflow-input-name">
         </div>
+        <div class="form-row" style="margin-bottom: 0px;">
+            <label for="subflow-input-info" data-i18n="subflow.info"></label>
+            <a href="https://help.github.com/articles/markdown-basics/" style="font-size: 0.8em; float: right;" data-i18n="[html]subflow.format"></a>
+        </div>
+        <div class="form-row node-text-editor-row">
+            <div style="height: 250px;" class="node-text-editor" id="subflow-input-info-editor"></div>
+        </div>
+        <div class="form-row form-tips" id="subflow-dialog-user-count"></div>
     </form>
-    <div class="form-tips" id="subflow-dialog-user-count"></div>
 </div>
 
 <div id="node-dialog-confirm-deploy" class="hide">

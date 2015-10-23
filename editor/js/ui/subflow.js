@@ -224,7 +224,7 @@ RED.subflow = (function() {
         var toolbar = $("#workspace-toolbar");
         toolbar.empty();
 
-        $('<a class="button" id="workspace-subflow-edit" href="#" data-i18n="[append]subflow.editSubflowName"><i class="fa fa-pencil"></i></a>').appendTo(toolbar);
+        $('<a class="button" id="workspace-subflow-edit" href="#" data-i18n="[append]subflow.editSubflowProperties"><i class="fa fa-pencil"></i> </a>').appendTo(toolbar);
         $('<span style="margin-left: 5px;" data-i18n="subflow.input"></span> '+
             '<div style="display: inline-block;" class="button-group">'+
             '<a id="workspace-subflow-input-remove" class="button active" href="#">0</a>'+
@@ -398,6 +398,7 @@ RED.subflow = (function() {
             type:"subflow",
             id:subflowId,
             name:name,
+            info:"",
             in: [],
             out: []
         };
@@ -410,6 +411,7 @@ RED.subflow = (function() {
             dirty:RED.nodes.dirty()
         });
         RED.workspaces.show(subflowId);
+        RED.nodes.dirty(true);
     }
 
     function convertToSubflow() {
@@ -497,6 +499,7 @@ RED.subflow = (function() {
             type:"subflow",
             id:subflowId,
             name:name,
+            info:"",
             in: Object.keys(candidateInputNodes).map(function(v,i) { var index = i; return {
                 type:"subflow",
                 direction:"in",

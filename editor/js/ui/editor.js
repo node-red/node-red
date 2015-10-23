@@ -15,6 +15,7 @@
  **/
 RED.editor = (function() {
     var editing_node = null;
+    var subflowEditor;
 
     function getCredentialsURL(nodeType, nodeID) {
         var dashedType = nodeType.replace(/\s+/g, '-');
@@ -1066,6 +1067,14 @@ RED.editor = (function() {
                                 $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text(newName);
                             }
 
+                            var newDescription = subflowEditor.getValue();
+
+                            if (newDescription != editing_node.info) {
+                                changes['info'] = editing_node.info;
+                                editing_node.info = newDescription;
+                                changed = true;
+                            }
+
                             RED.palette.refresh();
 
                             if (changed) {
@@ -1112,6 +1121,14 @@ RED.editor = (function() {
                     }
                 }
             ],
+            create: function(e) {
+                $("#subflow-dialog form" ).submit(function(e) { e.preventDefault();});
+                subflowEditor = RED.editor.createEditor({
+                    id: 'subflow-input-info-editor',
+                    mode: 'ace/mode/markdown',
+                    value: ""
+                });
+            },
             open: function(e) {
                 RED.keyboard.disable();
                 var minWidth = $(this).dialog('option','minWidth');
@@ -1128,16 +1145,28 @@ RED.editor = (function() {
                 RED.sidebar.info.refresh(editing_node);
                 RED.workspaces.refresh();
                 editing_node = null;
+            },
+            resize: function(e) {
+                var rows = $("#subflow-dialog>form>div:not(.node-text-editor-row)");
+                var editorRow = $("#subflow-dialog>form>div.node-text-editor-row");
+                var height = $("#subflow-dialog").height();
+                for (var i=0;i<rows.size();i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                height -= (parseInt($("#subflow-dialog>form").css("marginTop"))+parseInt($("#subflow-dialog>form").css("marginBottom")));
+                $(".node-text-editor").css("height",height+"px");
+                subflowEditor.resize();
             }
         });
-        $("#subflow-dialog form" ).submit(function(e) { e.preventDefault();});
     }
 
 
     function showEditSubflowDialog(subflow) {
         editing_node = subflow;
         RED.view.state(RED.state.EDITING);
+
         $("#subflow-input-name").val(subflow.name);
+        subflowEditor.getSession().setValue(subflow.info,-1);
         var userCount = 0;
         var subflowType = "subflow:"+editing_node.id;
 

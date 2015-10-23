@@ -60,7 +60,7 @@ RED.palette = (function() {
         });
     }
 
-    function setLabel(type, el,label) {
+    function setLabel(type, el,label, info) {
         var nodeWidth = 82;
         var nodeHeight = 25;
         var lineHeight = 20;
@@ -101,10 +101,9 @@ RED.palette = (function() {
             if (label != type) {
                 l = "<p><b>"+label+"</b><br/><i>"+type+"</i></p>";
             }
-
-            popOverContent = $(l+($("script[data-help-name|='"+type+"']").html()||"<p>"+RED._("palette.noInfo")+"</p>").trim())
+            popOverContent = $(l+(info?info:$("script[data-help-name|='"+type+"']").html()||"<p>"+RED._("palette.noInfo")+"</p>").trim())
                                 .filter(function(n) {
-                                    return this.nodeType == 1 || (this.nodeType == 3 && this.textContent.trim().length > 0)
+                                    return (this.nodeType == 1 && this.nodeName == "P") || (this.nodeType == 3 && this.textContent.trim().length > 0)
                                 }).slice(0,2);
         } catch(err) {
             // Malformed HTML may cause errors. TODO: need to understand what can break
@@ -113,7 +112,6 @@ RED.palette = (function() {
             console.log(err.toString());
             popOverContent = "<p><b>"+label+"</b></p><p>"+RED._("palette.noInfo")+"</p>";
         }
-
 
         el.data('popover').setContent(popOverContent);
     }
@@ -127,7 +125,6 @@ RED.palette = (function() {
         if ($("#palette_node_"+nodeTypeId).length) {
             return;
         }
-
         if (exclusion.indexOf(def.category)===-1) {
 
             var category = def.category.replace(" ","_");
@@ -204,7 +201,13 @@ RED.palette = (function() {
             // });
             $(d).click(function() {
                 RED.view.focus();
-                var help = '<div class="node-help">'+($("script[data-help-name|='"+d.type+"']").html()||"")+"</div>";
+                var helpText;
+                if (nt.indexOf("subflow:") === 0) {
+                    helpText = marked(RED.nodes.subflow(nt.substring(8)).info) || "";
+                } else {
+                    helpText = $("script[data-help-name|='"+d.type+"']").html()||"";
+                }
+                var help = '<div class="node-help">'+helpText+"</div>";
                 RED.sidebar.info.set(help);
             });
             $(d).draggable({
@@ -215,14 +218,15 @@ RED.palette = (function() {
                 start: function() {RED.view.focus();}
             });
 
+            var nodeInfo = null;
             if (def.category == "subflows") {
                 $(d).dblclick(function(e) {
                     RED.workspaces.show(nt.substring(8));
                     e.preventDefault();
                 });
+                nodeInfo = marked(def.info);
             }
-
-            setLabel(nt,$(d),label);
+            setLabel(nt,$(d),label,nodeInfo);
 
             var categoryNode = $("#palette-container-"+category);
             if (categoryNode.find(".palette_node").length === 1) {
@@ -275,7 +279,7 @@ RED.palette = (function() {
             } else if (portOutput.length !== 0 && sf.out.length === 0) {
                 portOutput.remove();
             }
-            setLabel(sf.type+":"+sf.id,paletteNode,sf.name);
+            setLabel(sf.type+":"+sf.id,paletteNode,sf.name,marked(sf.info));
         });
     }
 

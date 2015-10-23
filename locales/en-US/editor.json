@@ -99,10 +99,12 @@
         "edit": "Edit flow",
         "subflowInstances": "There is __count__ instance of this subflow",
         "subflowInstances_plural": "There are __count__ instances of this subflow",
-        "editSubflowName": "edit name",
+        "editSubflowProperties": "edit properties",
         "input": "inputs:",
         "output": "outputs:",
         "deleteSubflow": "delete subflow",
+        "info": "Description",
+        "format":"markdown format",
         "errors": {
             "noNodesSelected": "<strong>Cannot create subflow</strong>: no nodes selected",
             "multipleInputsToSelection": "<strong>Cannot create subflow</strong>: multiple inputs to selection"

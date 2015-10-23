@@ -75,8 +75,8 @@ RED.sidebar.info = (function() {
         table += "<tr><td>"+RED._("sidebar.info.id")+"</td><td>&nbsp;"+node.id+"</td></tr>";
 
         var m = /^subflow(:(.+))?$/.exec(node.type);
+        var subflowNode;
         if (m) {
-            var subflowNode;
             if (m[2]) {
                 subflowNode = RED.nodes.subflow(m[2]);
             } else {
@@ -135,12 +135,13 @@ RED.sidebar.info = (function() {
             }
         }
         table += "</tbody></table><hr/>";
-        if (node.type != "comment") {
+        if (!subflowNode && node.type != "comment") {
             var helpText = $("script[data-help-name|='"+node.type+"']").html()||"";
             table  += '<div class="node-help">'+helpText+"</div>";
         }
-
-        if (node._def && node._def.info) {
+        if (subflowNode) {
+            table += '<div class="node-help">'+marked(subflowNode.info)+'</div>';
+        } else if (node._def && node._def.info) {
             var info = node._def.info;
             table += '<div class="node-help">'+marked(typeof info === "function" ? info.call(node) : info)+'</div>';
             //table += '<div class="node-help">'+(typeof info === "function" ? info.call(node) : info)+'</div>';
@@ -173,7 +174,7 @@ RED.sidebar.info = (function() {
     function set(html) {
         $(content).html(html);
     }
-    
+
     RED.events.on("view:selection-changed",function(selection) {
         if (selection.nodes) {
             if (selection.nodes.length == 1) {
