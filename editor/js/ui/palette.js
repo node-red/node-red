@@ -203,7 +203,7 @@ RED.palette = (function() {
                 RED.view.focus();
                 var helpText;
                 if (nt.indexOf("subflow:") === 0) {
-                    helpText = marked(RED.nodes.subflow(nt.substring(8)).info) || "";
+                    helpText = marked(RED.nodes.subflow(nt.substring(8)).info||"");
                 } else {
                     helpText = $("script[data-help-name|='"+d.type+"']").html()||"";
                 }
@@ -224,7 +224,7 @@ RED.palette = (function() {
                     RED.workspaces.show(nt.substring(8));
                     e.preventDefault();
                 });
-                nodeInfo = marked(def.info);
+                nodeInfo = marked(def.info||"");
             }
             setLabel(nt,$(d),label,nodeInfo);
 
@@ -279,7 +279,7 @@ RED.palette = (function() {
             } else if (portOutput.length !== 0 && sf.out.length === 0) {
                 portOutput.remove();
             }
-            setLabel(sf.type+":"+sf.id,paletteNode,sf.name,marked(sf.info));
+            setLabel(sf.type+":"+sf.id,paletteNode,sf.name,marked(sf.info||""));
         });
     }
 

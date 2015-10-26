@@ -140,7 +140,7 @@ RED.sidebar.info = (function() {
             table  += '<div class="node-help">'+helpText+"</div>";
         }
         if (subflowNode) {
-            table += '<div class="node-help">'+marked(subflowNode.info)+'</div>';
+            table += '<div class="node-help">'+marked(subflowNode.info||"")+'</div>';
         } else if (node._def && node._def.info) {
             var info = node._def.info;
             table += '<div class="node-help">'+marked(typeof info === "function" ? info.call(node) : info)+'</div>';
