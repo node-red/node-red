@@ -110,6 +110,7 @@ module.exports = {
             testNode(red);
         }
         flows.load().then(function() {
+            flows.startFlows();
             should.deepEqual(testFlows, flows.getFlows());
             cb();
         });
