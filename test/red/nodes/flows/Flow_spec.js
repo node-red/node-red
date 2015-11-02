@@ -634,6 +634,7 @@ describe('Flow', function() {
                 {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
                 {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"4",x:10,y:10,z:"t1",type:"status",foo:"a",wires:[]},
                 {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
                     "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
                 {id:"sf1-1",type:"test2","z":"sf1",x:166,y:99,"wires":[[]]},
@@ -651,10 +652,11 @@ describe('Flow', function() {
             flow.start();
 
             var activeNodes = flow.getActiveNodes();
-            var sfInstanceId = Object.keys(activeNodes)[3];
-            var statusInstanceId = Object.keys(activeNodes)[4];
-            var statusInstanceId2 = Object.keys(activeNodes)[5];
-            var statusInstanceId3 = Object.keys(activeNodes)[6];
+
+            var sfInstanceId = Object.keys(activeNodes)[4];
+            var statusInstanceId = Object.keys(activeNodes)[5];
+            var statusInstanceId2 = Object.keys(activeNodes)[6];
+            var statusInstanceId3 = Object.keys(activeNodes)[7];
 
             flow.handleStatus(activeNodes[sfInstanceId],{text:"my-status"});
 
@@ -667,6 +669,8 @@ describe('Flow', function() {
             statusMessage.status.source.should.have.a.property("id",sfInstanceId);
             statusMessage.status.source.should.have.a.property("type","test2");
             statusMessage.status.source.should.have.a.property("name",undefined);
+
+            activeNodes["4"].should.have.a.property("handled",0);
 
             currentNodes[statusInstanceId2].should.have.a.property("handled",0);
 

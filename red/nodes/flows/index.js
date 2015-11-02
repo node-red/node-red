@@ -38,6 +38,7 @@ var activeFlows = {};
 var started = false;
 
 var activeNodesToFlow = {};
+var subflowInstanceNodeMap = {};
 
 var typeEventRegistered = false;
 
@@ -151,17 +152,45 @@ function getConfig() {
     return activeConfig;
 }
 
-function handleError(node,logMessage,msg) {
+function delegateError(node,logMessage,msg) {
     if (activeFlows[node.z]) {
         activeFlows[node.z].handleError(node,logMessage,msg);
     } else if (activeNodesToFlow[node.z]) {
         activeFlows[activeNodesToFlow[node.z]].handleError(node,logMessage,msg);
+    } else if (activeFlowConfig.subflows[node.z]) {
+        subflowInstanceNodeMap[node.id].forEach(function(n) {
+            delegateError(getNode(n),logMessage,msg);
+        });
+    }
+}
+function handleError(node,logMessage,msg) {
+    if (node.z) {
+        delegateError(node,logMessage,msg);
+    } else {
+        if (activeFlowConfig.configs[node.id]) {
+            activeFlowConfig.configs[node.id]._users.forEach(function(id) {
+                var userNode = activeFlowConfig.allNodes[id];
+                delegateError(userNode,logMessage,msg);
+            })
+        }
     }
 }
 
-function handleStatus(node,statusMessage) {
+function delegateStatus(node,statusMessage) {
     if (activeFlows[node.z]) {
         activeFlows[node.z].handleStatus(node,statusMessage);
+    }
+}
+function handleStatus(node,statusMessage) {
+    if (node.z) {
+        delegateStatus(node,statusMessage);
+    } else {
+        if (activeFlowConfig.configs[node.id]) {
+            activeFlowConfig.configs[node.id]._users.forEach(function(id) {
+                var userNode = activeFlowConfig.allNodes[id];
+                delegateStatus(userNode,statusMessage);
+            })
+        }
     }
 }
 
@@ -223,7 +252,12 @@ function start(type,diff) {
             var activeNodes = activeFlows[id].getActiveNodes();
             Object.keys(activeNodes).forEach(function(nid) {
                 activeNodesToFlow[nid] = id;
+                if (activeNodes[nid]._alias) {
+                    subflowInstanceNodeMap[activeNodes[nid]._alias] = subflowInstanceNodeMap[activeNodes[nid]._alias] || [];
+                    subflowInstanceNodeMap[activeNodes[nid]._alias].push(nid);
+                }
             });
+
         }
     }
     events.emit("nodes-started");
@@ -267,6 +301,16 @@ function stop(type,diff) {
                     }
                 }
             }
+            if (stopList) {
+                stopList.forEach(function(id) {
+                    delete activeNodesToFlow[id];
+                });
+            }
+            // Ideally we'd prune just what got stopped - but mapping stopList
+            // id to the list of subflow instance nodes is something only Flow
+            // can do... so cheat by wiping the map knowing it'll be rebuilt
+            // in start()
+            subflowInstanceNodeMap = {};
             if (diff) {
                 log.info(log._("nodes.flows.stopped-modified-"+type));
             } else {

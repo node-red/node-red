@@ -33,6 +33,9 @@ function Node(n) {
     if (n.name) {
         this.name = n.name;
     }
+    if (n._alias) {
+        this._alias = n._alias;
+    }
     this.updateWires(n.wires);
 }
 

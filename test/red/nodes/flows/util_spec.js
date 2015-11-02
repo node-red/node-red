@@ -90,7 +90,17 @@ describe('flows/util', function() {
             var expectedConfig = {"allNodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]},"t1":{"id":"t1","type":"tab"}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]}}}},"missingTypes":[]};
 
             redUtil.compareObjects(parsedConfig,expectedConfig).should.be.true;
+        });
 
+        it('parses a single-tab flow with global config node', function() {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",foo:"cn", wires:[]},
+                {id:"cn",type:"test"},
+                {id:"t1",type:"tab"}
+            ];
+            var parsedConfig = flowUtil.parseConfig(originalConfig);
+            var expectedConfig = {"allNodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]},"cn":{"id":"cn","type":"test"},"t1":{"id":"t1","type":"tab"}},"subflows":{},"configs":{"cn":{"id":"cn","type":"test","_users":["t1-1"]}},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]}}}},"missingTypes":[]};
+            redUtil.compareObjects(parsedConfig,expectedConfig).should.be.true;
         });
 
         it('parses a multi-tab flow', function() {

@@ -187,7 +187,6 @@ function Flow(global,flow) {
                 }
             }
         }
-
         var targetCatchNodes = null;
         var throwingNode = node;
         var handled = false;
