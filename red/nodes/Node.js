@@ -39,6 +39,7 @@ function Node(n) {
 util.inherits(Node, EventEmitter);
 
 Node.prototype.updateWires = function(wires) {
+    //console.log("UPDATE",this.id);
     this.wires = wires || [];
     delete this._wire;
 

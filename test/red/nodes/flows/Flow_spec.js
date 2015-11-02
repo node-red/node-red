@@ -20,246 +20,133 @@ var sinon = require('sinon');
 var clone = require('clone');
 var util = require("util");
 
-// var Flow = require("../../../../red/nodes/Flow");
-// var flows = require("../../../../red/nodes/flows");
-// var Node = require("../../../../red/nodes/Node");
-//
-// var typeRegistry = require("../../../red/nodes/registry");
-// var credentials = require("../../../red/nodes/credentials");
-return;
+var flowUtils = require("../../../../red/nodes/flows/util");
+var Flow = require("../../../../red/nodes/flows/Flow");
+var flows = require("../../../../red/nodes/flows");
+var Node = require("../../../../red/nodes/Node");
+var typeRegistry = require("../../../../red/nodes/registry");
 
-describe.skip('Flow', function() {
-    describe('#constructor',function() {
-        it('called with an empty flow',function() {
-            var config = [];
-            var flow = new Flow(config);
-            config.should.eql(flow.getFlow());
 
-            var nodeCount = 0;
-            flow.eachNode(function(node) {
-                nodeCount++;
-            });
+describe('Flow', function() {
+    var getType;
+    var getNode;
 
-            nodeCount.should.equal(0);
-        });
+    var stoppedNodes = {};
+    var currentNodes = {};
+    var rewiredNodes = {};
+    var createCount = 0;
 
-        it('called with a non-empty flow with no missing types', function() {
-            var getType = sinon.stub(typeRegistry,"get",function(type) {
-                // For this test, don't care what the actual type is, just
-                // that this returns a non-false result
-                return {};
-            });
-            try {
-                var config = [{id:"123",type:"test"}];
-                var flow = new Flow(config);
-                config.should.eql(flow.getFlow());
-
-                flow.getMissingTypes().should.have.length(0);
-            } finally {
-                getType.restore();
-            }
-        });
-
-        it('identifies missing types in a flow', function() {
-            var getType = sinon.stub(typeRegistry,"get",function(type) {
-                if (type == "test") {
-                    return {};
-                } else {
-                    return null;
-                }
-            });
-            try {
-                var config = [{id:"123",type:"test"},{id:"456",type:"test1"},{id:"789",type:"test2"}];
-                var flow = new Flow(config);
-                config.should.eql(flow.getFlow());
-
-                flow.getMissingTypes().should.eql(["test1","test2"]);
-            } finally {
-                getType.restore();
-            }
-        });
-
-        it('extracts node credentials', function() {
-            var getType = sinon.stub(typeRegistry,"get",function(type) {
-                // For this test, don't care what the actual type is, just
-                // that this returns a non-false result
-                return {};
-            });
-
-            try {
-                var config = [{id:"123",type:"test",credentials:{a:1,b:2}}];
-                var resultingConfig = clone(config);
-                delete resultingConfig[0].credentials;
-                var flow = new Flow(config);
-                flow.getFlow().should.eql(resultingConfig);
-                flow.getMissingTypes().should.have.length(0);
-            } finally {
-                getType.restore();
-            }
-        });
-
+    beforeEach(function() {
+        currentNodes = {};
+        stoppedNodes = {};
+        rewiredNodes = {};
+        createCount = 0;
     });
 
-    describe('missing types',function() {
-        it('prevents a flow with missing types from starting', function() {
-            var getType = sinon.stub(typeRegistry,"get",function(type) {
-                if (type == "test") {
-                    return {};
-                } else {
-                    return null;
-                }
-            });
-            try {
-                var config = [{id:"123",type:"test"},{id:"456",type:"test1"},{id:"789",type:"test2"}];
-                var flow = new Flow(config);
-                flow.getMissingTypes().should.have.length(2);
-
-                /*jshint immed: false */
-                (function() {
-                    flow.start();
-                }).should.throw();
-            } finally {
-                getType.restore();
-            }
+    var TestNode = function(n) {
+        Node.call(this,n);
+        createCount++;
+        this.scope = n.scope;
+        var node = this;
+        this.foo = n.foo;
+        this.handled = 0;
+        this.stopped = false;
+        currentNodes[node.id] = node;
+        this.on('input',function(msg) {
+            node.handled++;
+            node.send(msg);
         });
-
-        it('removes missing types as they are registered', function() {
-            var getType = sinon.stub(typeRegistry,"get",function(type) {
-                if (type == "test") {
-                    return {};
-                } else {
-                    return null;
-                }
-            });
-            var flowStart;
-            try {
-                var config = [{id:"123",type:"test"},{id:"456",type:"test1"},{id:"789",type:"test2"}];
-                var flow = new Flow(config);
-
-                flowStart = sinon.stub(flow,"start",function() {this.started = true;});
-                config.should.eql(flow.getFlow());
-
-                flow.getMissingTypes().should.eql(["test1","test2"]);
-
-                var resp = flow.typeRegistered("a-random-node");
-                resp.should.be.false;
-
-                resp = flow.typeRegistered("test1");
-                resp.should.be.true;
-                flow.getMissingTypes().should.eql(["test2"]);
-                flowStart.called.should.be.false;
-
-                resp = flow.typeRegistered("test2");
-                resp.should.be.true;
-                flow.getMissingTypes().should.eql([]);
-                flowStart.called.should.be.false;
-            } finally {
-                flowStart.restore();
-                getType.restore();
-            }
+        this.on('close',function() {
+            node.stopped = true;
+            stoppedNodes[node.id] = node;
+            delete currentNodes[node.id];
         });
+        this.__updateWires = this.updateWires;
+        this.updateWires = function(newWires) {
+            rewiredNodes[node.id] = node;
+            node.newWires = newWires;
+            node.__updateWires[newWires];
+        };
+    }
+    util.inherits(TestNode,Node);
 
-        it('starts flows once all missing types are registered', function() {
-            var getType = sinon.stub(typeRegistry,"get",function(type) {
-                if (type == "test") {
-                    return {};
-                } else {
-                    return null;
-                }
-            });
-            var flowStart;
-            try {
-                var config = [{id:"123",type:"test"},{id:"456",type:"test1"},{id:"789",type:"test2"}];
-                var flow = new Flow(config);
-
-                // First call to .start throws err due to missing types
-                /*jshint immed: false */
-                (function() {
-                    flow.start();
-                }).should.throw();
-
-                // Stub .start so when missing types are registered, we don't actually try starting them
-                flowStart = sinon.stub(flow,"start",function() {});
-                config.should.eql(flow.getFlow());
-
-                flow.getMissingTypes().should.eql(["test1","test2"]);
-
-                flow.typeRegistered("test1");
-                flow.typeRegistered("test2");
-                flow.getMissingTypes().should.have.length(0);
-                flowStart.called.should.be.true;
-            } finally {
-                flowStart.restore();
-                getType.restore();
-            }
+    var TestAsyncNode = function(n) {
+        Node.call(this,n);
+        var node = this;
+        this.scope = n.scope;
+        this.foo = n.foo;
+        this.handled = 0;
+        this.messages = [];
+        this.stopped = false;
+        currentNodes[node.id] = node;
+        this.on('input',function(msg) {
+            node.handled++;
+            node.messages.push(msg);
+            node.send(msg);
         });
-    });
-
-    describe('#start',function() {
-        var getType;
-        var getNode;
-        var credentialsClean;
-
-        var stoppedNodes = {};
-        var currentNodes = {};
-        var rewiredNodes = {};
-        var createCount = 0;
-
-        var TestNode = function(n) {
-            Node.call(this,n);
-            createCount++;
-            var node = this;
-            this.handled = 0;
-            this.stopped = false;
-            currentNodes[node.id] = node;
-            this.on('input',function(msg) {
-                node.handled++;
-                node.send(msg);
-            });
-            this.on('close',function() {
+        this.on('close',function(done) {
+            setTimeout(function() {
                 node.stopped = true;
                 stoppedNodes[node.id] = node;
                 delete currentNodes[node.id];
-            });
-            this.updateWires = function(newWires) {
-                rewiredNodes[node.id] = node;
-                node.newWires = newWires;
-            };
-        }
-        util.inherits(TestNode,Node);
+                done();
+            },50);
+        });
+    }
+    util.inherits(TestAsyncNode,Node);
 
-        before(function() {
-            getNode = sinon.stub(flows,"get",function(id) {
-                return currentNodes[id];
-            });
-            getType = sinon.stub(typeRegistry,"get",function(type) {
+    before(function() {
+        getType = sinon.stub(typeRegistry,"get",function(type) {
+            if (type=="test") {
                 return TestNode;
-            });
-            credentialsClean = sinon.stub(credentials,"clean",function(config){});
-
+            } else {
+                return TestAsyncNode;
+            }
         });
-        after(function() {
-            getType.restore();
-            credentialsClean.restore();
-            getNode.restore();
+        getNode = sinon.stub(flows,"get",function(id) {
+            return currentNodes[id];
         });
 
-        beforeEach(function() {
-            currentNodes = {};
-            stoppedNodes = {};
-            rewiredNodes = {};
-            createCount = 0;
-        });
+    });
+    after(function() {
+        getType.restore();
+        getNode.restore();
+    });
 
+
+
+    describe('#constructor',function() {
+        it('called with an empty flow',function() {
+            var config = flowUtils.parseConfig([]);
+            var flow = Flow.create(config);
+
+            var nodeCount = 0;
+            Object.keys(flow.getActiveNodes()).length.should.equal(0);
+        });
+    });
+    describe('#start',function() {
         it("instantiates an initial configuration and stops it",function(done) {
-            var config = [{id:"1",type:"test",foo:"a",wires:["2"]},{id:"2",type:"test",bar:"b",wires:[["3"]]},{id:"3",type:"test",foo:"a",wires:[]}];
-
-            var flow = new Flow(config);
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"4",z:"t1",type:"test",foo:"a"}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
             flow.start();
+
+            Object.keys(flow.getActiveNodes()).should.have.length(4);
+
+            flow.getNode('1').should.have.a.property('id','1');
+            flow.getNode('2').should.have.a.property('id','2');
+            flow.getNode('3').should.have.a.property('id','3');
+            flow.getNode('4').should.have.a.property('id','4');
 
             currentNodes.should.have.a.property("1");
             currentNodes.should.have.a.property("2");
             currentNodes.should.have.a.property("3");
+            currentNodes.should.have.a.property("4");
 
             currentNodes["1"].should.have.a.property("handled",0);
             currentNodes["2"].should.have.a.property("handled",0);
@@ -276,106 +163,267 @@ describe.skip('Flow', function() {
                 currentNodes.should.not.have.a.property("1");
                 currentNodes.should.not.have.a.property("2");
                 currentNodes.should.not.have.a.property("3");
+                currentNodes.should.not.have.a.property("4");
                 stoppedNodes.should.have.a.property("1");
                 stoppedNodes.should.have.a.property("2");
                 stoppedNodes.should.have.a.property("3");
+                stoppedNodes.should.have.a.property("4");
+                done();
+            });
+        });
+
+
+        it("instantiates a subflow and stops it",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3","4"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"4",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
+                    "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-2","port":0}]},{"wires":[{"id":"sf1","port":0}]}]},
+                {id:"sf1-1",type:"test","z":"sf1",x:166,y:99,"wires":[["sf1-2"]]},
+                {id:"sf1-2",type:"test","z":"sf1",foo:"sf1-cn",x:166,y:99,"wires":[[]]},
+                {id:"sf1-cn",type:"test","z":"sf1"}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+
+            getNode.restore();
+            getNode = sinon.stub(flows,"get",function(id) {
+                return flow.getNode(id);
+            });
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            Object.keys(activeNodes).should.have.length(7);
+            var sfInstanceId = Object.keys(activeNodes)[5];
+            var sfInstanceId2 = Object.keys(activeNodes)[6];
+            var sfConfigId = Object.keys(activeNodes)[4];
+
+            flow.getNode('1').should.have.a.property('id','1');
+            flow.getNode('2').should.have.a.property('id','2');
+            flow.getNode('3').should.have.a.property('id','3');
+            flow.getNode('4').should.have.a.property('id','4');
+            flow.getNode(sfInstanceId).should.have.a.property('id',sfInstanceId);
+            flow.getNode(sfInstanceId2).should.have.a.property('id',sfInstanceId2);
+            flow.getNode(sfConfigId).should.have.a.property('id',sfConfigId);
+
+            flow.getNode(sfInstanceId2).should.have.a.property('foo',sfConfigId);
+
+            currentNodes.should.have.a.property("1");
+            currentNodes.should.not.have.a.property("2");
+            currentNodes.should.have.a.property("3");
+            currentNodes.should.have.a.property("4");
+            currentNodes.should.have.a.property(sfInstanceId);
+            currentNodes.should.have.a.property(sfInstanceId2);
+            currentNodes.should.have.a.property(sfConfigId);
+
+            currentNodes["1"].should.have.a.property("handled",0);
+            currentNodes["3"].should.have.a.property("handled",0);
+            currentNodes["4"].should.have.a.property("handled",0);
+            currentNodes[sfInstanceId].should.have.a.property("handled",0);
+            currentNodes[sfInstanceId2].should.have.a.property("handled",0);
+
+            currentNodes["1"].receive({payload:"test"});
+
+            currentNodes["1"].should.have.a.property("handled",1);
+            currentNodes[sfInstanceId].should.have.a.property("handled",1);
+            currentNodes[sfInstanceId2].should.have.a.property("handled",1);
+            currentNodes["3"].should.have.a.property("handled",1);
+            currentNodes["4"].should.have.a.property("handled",1);
+
+
+
+            flow.stop().then(function() {
+                currentNodes.should.not.have.a.property("1");
+                currentNodes.should.not.have.a.property("3");
+                currentNodes.should.not.have.a.property("4");
+                currentNodes.should.not.have.a.property(sfInstanceId);
+                currentNodes.should.not.have.a.property(sfInstanceId2);
+                currentNodes.should.not.have.a.property(sfConfigId);
+                stoppedNodes.should.have.a.property("1");
+                stoppedNodes.should.have.a.property("3");
+                stoppedNodes.should.have.a.property("4");
+                stoppedNodes.should.have.a.property(sfInstanceId);
+                stoppedNodes.should.have.a.property(sfInstanceId2);
+                stoppedNodes.should.have.a.property(sfConfigId);
+                done();
+            });
+        });
+
+        it("instantiates a subflow inside a subflow and stops it",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3","4"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"4",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sf1",type:"subflow","name":"Subflow 1","info":"",
+                    "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-2","port":0}]}]},
+                {id:"sf2",type:"subflow","name":"Subflow 2","info":"",
+                    "in":[{wires:[]}],"out":[{"wires":[{"id":"sf2","port":0}]}]},
+                {id:"sf1-1",type:"test","z":"sf1",x:166,y:99,"wires":[["sf1-2"]]},
+                {id:"sf1-2",type:"subflow:sf2","z":"sf1",x:166,y:99,"wires":[[]]}
+
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+
+            getNode.restore();
+            getNode = sinon.stub(flows,"get",function(id) {
+                return flow.getNode(id);
+            });
+
+            flow.start();
+
+            currentNodes["1"].should.have.a.property("handled",0);
+            currentNodes["3"].should.have.a.property("handled",0);
+
+            currentNodes["1"].receive({payload:"test"});
+
+            currentNodes["1"].should.have.a.property("handled",1);
+            currentNodes["3"].should.have.a.property("handled",1);
+
+
+
+            flow.stop().then(function() {
+                Object.keys(currentNodes).should.have.length(0);
                 done();
             });
         });
 
         it("rewires nodes specified by diff",function(done) {
-            var config = [{id:"1",type:"test",foo:"a",wires:["2"]},{id:"2",type:"test",bar:"b",wires:[["3"]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]}
+            ]);
 
-            var flow = new Flow(config);
+            var flow = Flow.create(config,config.flows["t1"]);
             createCount.should.equal(0);
             flow.start();
+            //TODO: use update to pass in new wiring and verify the change
             createCount.should.equal(3);
-            flow.start({rewire:"2"});
+            flow.start({rewired:["2"]});
             createCount.should.equal(3);
             rewiredNodes.should.have.a.property("2");
             done();
         });
 
+        it("rewires a subflow node on update/start",function(done){
+
+            var rawConfig = [
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"4",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
+                    "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-2","port":0}]}]},
+                {id:"sf1-1",type:"test1","z":"sf1",x:166,y:99,"wires":[["sf1-2"]]},
+                {id:"sf1-2",type:"test2","z":"sf1",x:166,y:99,"wires":[[]]}
+            ];
+
+            var config = flowUtils.parseConfig(clone(rawConfig));
+
+            rawConfig[2].wires = [["4"]];
+
+            var newConfig = flowUtils.parseConfig(rawConfig);
+            var diff = flowUtils.diffConfigs(config,newConfig);
+            var flow = Flow.create(config,config.flows["t1"]);
+
+            getNode.restore();
+            getNode = sinon.stub(flows,"get",function(id) {
+                return flow.getNode(id);
+            });
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            Object.keys(activeNodes).should.have.length(6);
+            var sfInstanceId = Object.keys(activeNodes)[4];
+            var sfInstanceId2 = Object.keys(activeNodes)[5];
+
+            currentNodes["1"].should.have.a.property("handled",0);
+            currentNodes["3"].should.have.a.property("handled",0);
+            currentNodes["4"].should.have.a.property("handled",0);
+
+            currentNodes["1"].receive({payload:"test"});
+
+            currentNodes["1"].should.have.a.property("handled",1);
+            currentNodes[sfInstanceId].should.have.a.property("handled",1);
+            currentNodes[sfInstanceId2].should.have.a.property("handled",1);
+            currentNodes["3"].should.have.a.property("handled",1);
+            currentNodes["4"].should.have.a.property("handled",0);
+
+            flow.update(newConfig,newConfig.flows["t1"]);
+            flow.start(diff)
+
+            currentNodes["1"].receive({payload:"test2"});
+
+            currentNodes["1"].should.have.a.property("handled",2);
+            currentNodes[sfInstanceId].should.have.a.property("handled",2);
+            currentNodes[sfInstanceId2].should.have.a.property("handled",2);
+            currentNodes["3"].should.have.a.property("handled",1);
+            currentNodes["4"].should.have.a.property("handled",1);
+
+
+            flow.stop().then(function() {
+                done();
+            });
+
+
+        });
+
+
+        it("instantiates a node with environment variable property values",function(done) {
+            after(function() {
+                delete process.env.NODE_RED_TEST_VALUE;
+            })
+            process.env.NODE_RED_TEST_VALUE = "a-value";
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"$(NODE_RED_TEST_VALUE)",wires:[]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:{a:"$(NODE_RED_TEST_VALUE)"},wires:[]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:" $(NODE_RED_TEST_VALUE)",wires:[]},
+                {id:"4",x:10,y:10,z:"t1",type:"test",foo:"$(NODE_RED_TEST_VALUE) ",wires:[]},
+                {id:"5",x:10,y:10,z:"t1",type:"test",foo:"$(NODE_RED_TEST_VALUE_NONE)",wires:[]},
+                {id:"6",x:10,y:10,z:"t1",type:"test",foo:["$(NODE_RED_TEST_VALUE)"],wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            activeNodes["1"].foo.should.equal("a-value");
+            activeNodes["2"].foo.a.should.equal("a-value");
+            activeNodes["3"].foo.should.equal(" $(NODE_RED_TEST_VALUE)");
+            activeNodes["4"].foo.should.equal("$(NODE_RED_TEST_VALUE) ");
+            activeNodes["5"].foo.should.equal("$(NODE_RED_TEST_VALUE_NONE)");
+            activeNodes["6"].foo[0].should.equal("a-value");
+
+            flow.stop().then(function() {
+                done();
+            });
+        });
 
 
     });
 
     describe('#stop', function() {
-        var getType;
-        var getNode;
-        var credentialsClean;
 
-        var stoppedNodes = {};
-        var currentNodes = {};
-
-        var TestNode = function(n) {
-            Node.call(this,n);
-            var node = this;
-            this.handled = 0;
-            this.stopped = false;
-            currentNodes[node.id] = node;
-            this.on('input',function(msg) {
-                node.handled++;
-                node.send(msg);
-            });
-            this.on('close',function() {
-                node.stopped = true;
-                stoppedNodes[node.id] = node;
-                delete currentNodes[node.id];
-            });
-        }
-        util.inherits(TestNode,Node);
-
-        var TestAsyncNode = function(n) {
-            Node.call(this,n);
-            var node = this;
-            this.handled = 0;
-            this.stopped = false;
-            currentNodes[node.id] = node;
-            this.on('input',function(msg) {
-                node.handled++;
-                node.send(msg);
-            });
-            this.on('close',function(done) {
-                setTimeout(function() {
-                    node.stopped = true;
-                    stoppedNodes[node.id] = node;
-                    delete currentNodes[node.id];
-                    done();
-                },500);
-            });
-        }
-        util.inherits(TestAsyncNode,Node);
-
-        before(function() {
-            getNode = sinon.stub(flows,"get",function(id) {
-                return currentNodes[id];
-            });
-            getType = sinon.stub(typeRegistry,"get",function(type) {
-                if (type=="test") {
-                    return TestNode;
-                } else {
-                    return TestAsyncNode;
-                }
-            });
-            credentialsClean = sinon.stub(credentials,"clean",function(config){});
-
-        });
-        after(function() {
-            getType.restore();
-            credentialsClean.restore();
-            getNode.restore();
-        });
-
-        beforeEach(function() {
-            currentNodes = {};
-            stoppedNodes = {};
-        });
 
         it("stops all nodes",function(done) {
-            var config = [{id:"1",type:"test",foo:"a",wires:["2"]},{id:"2",type:"asyncTest",bar:"b",wires:[["3"]]},{id:"3",type:"test",foo:"a",wires:[]}];
-            var flow = new Flow(config);
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"asyncTest",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
             flow.start();
+
 
             currentNodes.should.have.a.property("1");
             currentNodes.should.have.a.property("2");
@@ -392,16 +440,21 @@ describe.skip('Flow', function() {
             });
         });
 
-        it("stops nodes specified by diff",function(done) {
-            var config = [{id:"1",type:"test",foo:"a",wires:["2"]},{id:"2",type:"test",bar:"b",wires:[["3"]]},{id:"3",type:"test",foo:"a",wires:[]}];
-            var flow = new Flow(config);
+        it("stops specified nodes",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
             flow.start();
 
             currentNodes.should.have.a.property("1");
             currentNodes.should.have.a.property("2");
             currentNodes.should.have.a.property("3");
 
-            flow.stop({stop:["2"]}).then(function() {
+            flow.stop(["2"]).then(function() {
                 currentNodes.should.have.a.property("1");
                 currentNodes.should.not.have.a.property("2");
                 currentNodes.should.have.a.property("3");
@@ -412,480 +465,532 @@ describe.skip('Flow', function() {
             });
         });
 
-    });
+        it("stops subflow instance nodes",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
+                    "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
+                {id:"sf1-1",type:"test","z":"sf1",x:166,y:99,"wires":[[]]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
 
-
-    describe('#diffConfig',function() {
-        var getType;
-        var getNode;
-        var credentialsClean;
-
-        var stoppedNodes = {};
-        var currentNodes = {};
-
-        var TestNode = function(n) {
-            Node.call(this,n);
-            var node = this;
-            this.handled = 0;
-            this.stopped = false;
-            currentNodes[node.id] = node;
-            this.on('input',function(msg) {
-                node.handled++;
-                node.send(msg);
-            });
-            this.on('close',function() {
-                node.stopped = true;
-                stoppedNodes[node.id] = node;
-                delete currentNodes[node.id];
-            });
-        }
-        util.inherits(TestNode,Node);
-
-        before(function() {
-            getNode = sinon.stub(flows,"get",function(id) {
-                return currentNodes[id];
-            });
-            getType = sinon.stub(typeRegistry,"get",function(type) {
-                return TestNode;
-            });
-            credentialsClean = sinon.stub(credentials,"clean",function(config){});
-
-        });
-        after(function() {
-            getType.restore();
-            credentialsClean.restore();
             getNode.restore();
-        });
-
-        beforeEach(function() {
-            currentNodes = {};
-            stoppedNodes = {};
-        });
-
-
-
-
-
-    });
-
-    describe("#diffConfig",function() {
-            return;
-        var getType;
-        var getNode;
-        var credentialsClean;
-
-        var stoppedNodes = {};
-        var currentNodes = {};
-
-        var TestNode = function(n) {
-            Node.call(this,n);
-            var node = this;
-            this.handled = 0;
-            this.stopped = false;
-            currentNodes[node.id] = node;
-            this.on('input',function(msg) {
-                node.handled++;
-                node.send(msg);
-            });
-            this.on('close',function() {
-                node.stopped = true;
-                stoppedNodes[node.id] = node;
-                delete currentNodes[node.id];
-            });
-        }
-        util.inherits(TestNode,Node);
-
-        before(function() {
             getNode = sinon.stub(flows,"get",function(id) {
-                return currentNodes[id];
+                return flow.getNode(id);
             });
-            getType = sinon.stub(typeRegistry,"get",function(type) {
-                return TestNode;
-            });
-            credentialsClean = sinon.stub(credentials,"clean",function(config){});
 
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            Object.keys(activeNodes).should.have.length(4);
+            var sfInstanceId = Object.keys(activeNodes)[3];
+            flow.stop(["2"]).then(function() {
+                currentNodes.should.not.have.a.property(sfInstanceId);
+                stoppedNodes.should.have.a.property(sfInstanceId);
+                done();
+            });
         });
-        after(function() {
-            getType.restore();
-            credentialsClean.restore();
+
+
+    });
+
+    describe("#handleStatus",function() {
+        it("passes a status event to the adjacent status node",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sn",x:10,y:10,z:"t1",type:"status",foo:"a",wires:[]},
+                {id:"sn2",x:10,y:10,z:"t1",type:"status",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+
             getNode.restore();
-        });
-
-        beforeEach(function() {
-            currentNodes = {};
-            stoppedNodes = {};
-        });
-
-        it('handles an identical configuration', function() {
-            var config = [{id:"123",type:"test",foo:"a",wires:[]}];
-            var newConfig = [{id:"123",type:"test",foo:"a",wires:[]}];
-
-            var flow = new Flow(config);
-            flow.start();
-            var diffResult = flow.diffConfig(newConfig,"nodes");
-
-            diffResult.should.have.property("type","nodes");
-            diffResult.should.have.property("stop",[]);
-            diffResult.should.have.property("rewire",[]);
-            diffResult.should.have.property("config",newConfig);
-        });
-
-
-    });
-
-
-    describe("#dead",function() {
-        return;
-        it("stops all nodes on new full deploy",function(done) {
-            var config = [{id:"1",type:"test",foo:"a",wires:["2"]},{id:"2",type:"test",bar:"b",wires:[["3"]]},{id:"3",type:"test",foo:"a",wires:[]}];
-            var newConfig = [{id:"4",type:"test",foo:"a",wires:["5"]},{id:"5",type:"test",bar:"b",wires:[["6"]]},{id:"6",type:"test",foo:"a",wires:[]}];
-
-            var flow = new Flow(config);
-            flow.start();
-
-            currentNodes.should.have.a.property("1");
-            currentNodes.should.have.a.property("2");
-            currentNodes.should.have.a.property("3");
-
-            flow.applyConfig(newConfig).then(function() {
-                currentNodes.should.not.have.a.property("1");
-                currentNodes.should.not.have.a.property("2");
-                currentNodes.should.not.have.a.property("3");
-                stoppedNodes.should.have.a.property("1");
-                stoppedNodes.should.have.a.property("2");
-                stoppedNodes.should.have.a.property("3");
-
-                currentNodes.should.have.a.property("4");
-                currentNodes.should.have.a.property("5");
-                currentNodes.should.have.a.property("6");
-                done();
-            });
-        });
-        return true;
-
-        it("stops only modified nodes on 'nodes' deploy",function(done) {
-            var config = [{id:"1",type:"test",name:"a",wires:["2"]},{id:"2",type:"test",name:"b",wires:[["3"]]},{id:"3",type:"test",name:"c",wires:[]}];
-            var newConfig = clone(config);
-            newConfig[1].name = "B";
-
-            var flow = new Flow(config);
-            flow.start();
-
-            currentNodes.should.have.a.property("1");
-            currentNodes.should.have.a.property("2");
-            currentNodes.should.have.a.property("3");
-            currentNodes["2"].should.have.a.property("name","b");
-
-            currentNodes["1"].receive({payload:"test"});
-            currentNodes["1"].should.have.a.property("handled",1);
-            currentNodes["2"].should.have.a.property("handled",1);
-            currentNodes["3"].should.have.a.property("handled",1);
-
-
-            flow.applyConfig(newConfig,"nodes").then(function() {
-                currentNodes.should.have.a.property("1");
-                currentNodes.should.have.a.property("2");
-                currentNodes.should.have.a.property("3");
-                currentNodes["2"].should.have.a.property("name","B");
-
-                stoppedNodes.should.not.have.a.property("1");
-                stoppedNodes.should.have.a.property("2");
-                stoppedNodes.should.not.have.a.property("3");
-                stoppedNodes["2"].should.have.a.property("name","b");
-
-
-                currentNodes["1"].receive({payload:"test"});
-                currentNodes["1"].should.have.a.property("handled",2);
-                currentNodes["2"].should.have.a.property("handled",1);
-                currentNodes["3"].should.have.a.property("handled",2);
-
-                done();
-            });
-        });
-
-        it("stops only modified flows on 'flows' deploy",function(done) {
-            var config = [{id:"1",type:"test",name:"a",wires:["2"]},{id:"2",type:"test",name:"b",wires:[[]]},{id:"3",type:"test",name:"c",wires:[]}];
-            var newConfig = clone(config);
-            newConfig[1].name = "B";
-
-            var flow = new Flow(config);
-            flow.start();
-
-            currentNodes.should.have.a.property("1");
-            currentNodes.should.have.a.property("2");
-            currentNodes.should.have.a.property("3");
-            currentNodes["2"].should.have.a.property("name","b");
-
-            currentNodes["1"].receive({payload:"test"});
-            currentNodes["1"].should.have.a.property("handled",1);
-            currentNodes["2"].should.have.a.property("handled",1);
-            currentNodes["3"].should.have.a.property("handled",0);
-
-            currentNodes["3"].receive({payload:"test"});
-            currentNodes["3"].should.have.a.property("handled",1);
-
-            flow.applyConfig(newConfig,"flows").then(function() {
-                currentNodes.should.have.a.property("1");
-                currentNodes.should.have.a.property("2");
-                currentNodes.should.have.a.property("3");
-                currentNodes["2"].should.have.a.property("name","B");
-
-                stoppedNodes.should.have.a.property("1");
-                stoppedNodes.should.have.a.property("2");
-                stoppedNodes.should.not.have.a.property("3");
-
-                stoppedNodes["2"].should.have.a.property("name","b");
-
-                currentNodes["1"].receive({payload:"test"});
-                currentNodes["1"].should.have.a.property("handled",1);
-                currentNodes["2"].should.have.a.property("handled",1);
-
-                currentNodes["3"].receive({payload:"test"});
-                currentNodes["3"].should.have.a.property("handled",2);
-
-                done();
-            });
-        });
-
-        it("rewires otherwise unmodified nodes on 'nodes' deploy",function(done) {
-            var config = [{id:"1",type:"test",name:"a",wires:["2"]},{id:"2",type:"test",name:"b",wires:[[]]},{id:"3",type:"test",name:"c",wires:[]}];
-            var newConfig = clone(config);
-            newConfig[1].wires[0].push("3");
-
-            var flow = new Flow(config);
-            flow.start();
-
-            currentNodes.should.have.a.property("1");
-            currentNodes.should.have.a.property("2");
-            currentNodes.should.have.a.property("3");
-
-            currentNodes["1"].receive({payload:"test"});
-            currentNodes["1"].should.have.a.property("handled",1);
-            currentNodes["2"].should.have.a.property("handled",1);
-            currentNodes["3"].should.have.a.property("handled",0);
-
-            flow.applyConfig(newConfig,"nodes").then(function() {
-                currentNodes.should.have.a.property("1");
-                currentNodes.should.have.a.property("2");
-                currentNodes.should.have.a.property("3");
-
-                stoppedNodes.should.not.have.a.property("1");
-                stoppedNodes.should.not.have.a.property("2");
-                stoppedNodes.should.not.have.a.property("3");
-
-                currentNodes["1"].receive({payload:"test"});
-                currentNodes["1"].should.have.a.property("handled",2);
-                currentNodes["2"].should.have.a.property("handled",2);
-                currentNodes["3"].should.have.a.property("handled",1);
-
-                done();
-            });
-        });
-
-        it("stops rewired but otherwise unmodified nodes on 'flows' deploy",function(done) {
-            var config = [{id:"1",type:"test",name:"a",wires:["2"]},{id:"2",type:"test",name:"b",wires:[[]]},{id:"3",type:"test",name:"c",wires:[]}];
-            var newConfig = clone(config);
-            newConfig[1].wires[0].push("3");
-
-            var flow = new Flow(config);
-            flow.start();
-
-            currentNodes.should.have.a.property("1");
-            currentNodes.should.have.a.property("2");
-            currentNodes.should.have.a.property("3");
-
-            currentNodes["1"].receive({payload:"test"});
-            currentNodes["1"].should.have.a.property("handled",1);
-            currentNodes["2"].should.have.a.property("handled",1);
-            currentNodes["3"].should.have.a.property("handled",0);
-
-            flow.applyConfig(newConfig,"flows").then(function() {
-                currentNodes.should.have.a.property("1");
-                currentNodes.should.have.a.property("2");
-                currentNodes.should.have.a.property("3");
-
-                stoppedNodes.should.have.a.property("1");
-                stoppedNodes.should.have.a.property("2");
-                stoppedNodes.should.have.a.property("3");
-
-                currentNodes["1"].receive({payload:"test"});
-                currentNodes["1"].should.have.a.property("handled",1);
-                currentNodes["2"].should.have.a.property("handled",1);
-                currentNodes["3"].should.have.a.property("handled",1);
-
-                done();
-            });
-        });
-    });
-
-    describe('#handleError',function() {
-        var getType;
-        var getNode;
-        var credentialsClean;
-
-        var currentNodes = {};
-
-        var TestNode = function(n) {
-            Node.call(this,n);
-            var node = this;
-            this.handled = [];
-            currentNodes[node.id] = node;
-            this.on('input',function(msg) {
-                node.handled.push(msg);
-                node.send(msg);
-            });
-        }
-        util.inherits(TestNode,Node);
-
-        before(function() {
             getNode = sinon.stub(flows,"get",function(id) {
-                return currentNodes[id];
+                return flow.getNode(id);
             });
-            getType = sinon.stub(typeRegistry,"get",function(type) {
-                return TestNode;
-            });
-            credentialsClean = sinon.stub(credentials,"clean",function(config){});
 
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            Object.keys(activeNodes).should.have.length(5);
+
+
+            flow.handleStatus(config.flows["t1"].nodes["1"],{text:"my-status"});
+
+            currentNodes["sn"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn"].messages[0];
+
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","my-status");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("id","1");
+            statusMessage.status.source.should.have.a.property("type","test");
+            statusMessage.status.source.should.have.a.property("name","a");
+
+            currentNodes["sn2"].should.have.a.property("handled",1);
+            statusMessage = currentNodes["sn2"].messages[0];
+
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","my-status");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("id","1");
+            statusMessage.status.source.should.have.a.property("type","test");
+            statusMessage.status.source.should.have.a.property("name","a");
+
+
+            flow.stop().then(function() {
+                done();
+            });
         });
-        after(function() {
-            getType.restore();
-            credentialsClean.restore();
+        it("passes a status event to the adjacent scoped status node ",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sn",x:10,y:10,z:"t1",type:"status",scope:["2"],foo:"a",wires:[]},
+                {id:"sn2",x:10,y:10,z:"t1",type:"status",scope:["1"],foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+
             getNode.restore();
-        });
+            getNode = sinon.stub(flows,"get",function(id) {
+                return flow.getNode(id);
+            });
 
-        beforeEach(function() {
-            currentNodes = {};
-        });
-
-        it("reports error to catch nodes on same z",function(done) {
-            var config = [
-                {id:"1",type:"test",z:"tab1",name:"a",wires:["2"]},
-                {id:"2",type:"catch",z:"tab1",wires:[[]]},
-                {id:"3",type:"catch",z:"tab2",wires:[[]]}
-            ];
-            var flow = new Flow(config);
             flow.start();
-            var msg = {a:1};
-            flow.handleError(getNode(1),"test error",msg);
-            var n2 = getNode(2);
-            n2.handled.should.have.lengthOf(1);
-            n2.handled[0].should.have.property("a",1);
-            n2.handled[0].should.have.property("error");
-            n2.handled[0].error.should.have.property("message","test error");
-            n2.handled[0].error.should.have.property("source");
-            n2.handled[0].error.source.should.have.property("id","1");
-            n2.handled[0].error.source.should.have.property("type","test");
-            getNode(3).handled.should.have.lengthOf(0);
-            done();
+
+            var activeNodes = flow.getActiveNodes();
+            Object.keys(activeNodes).should.have.length(5);
+
+
+            flow.handleStatus(config.flows["t1"].nodes["1"],{text:"my-status"});
+
+            currentNodes["sn"].should.have.a.property("handled",0);
+            currentNodes["sn2"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn2"].messages[0];
+
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","my-status");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("id","1");
+            statusMessage.status.source.should.have.a.property("type","test");
+            statusMessage.status.source.should.have.a.property("name","a");
+
+
+            flow.stop().then(function() {
+                done();
+            });
         });
 
-        it("reports error with Error object",function(done) {
-            var config = [
-                {id:"1",type:"test",z:"tab1",name:"a",wires:["2"]},
-                {id:"2",type:"catch",z:"tab1",wires:[[]]},
-                {id:"3",type:"catch",z:"tab2",wires:[[]]}
-            ];
-            var flow = new Flow(config);
+        it("passes a status event to the adjacent status node in subflow",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
+                    "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
+                {id:"sf1-1",type:"test2","z":"sf1",x:166,y:99,"wires":[[]]},
+                {id:"sf1-sn",x:10,y:10,z:"sf1",type:"status",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+
+            getNode.restore();
+            getNode = sinon.stub(flows,"get",function(id) {
+                return flow.getNode(id);
+            });
+
             flow.start();
-            var msg = {a:1,error:"existing"};
-            flow.handleError(getNode(1),"test error",msg);
-            var n2 = getNode(2);
-            n2.handled.should.have.lengthOf(1);
-            n2.handled[0].should.have.property("error");
-            n2.handled[0].should.have.property("_error","existing");
-            n2.handled[0].error.should.have.property("message","test error");
-            n2.handled[0].error.should.have.property("source");
-            n2.handled[0].error.source.should.have.property("id","1");
-            n2.handled[0].error.source.should.have.property("type","test");
-            getNode(3).handled.should.have.lengthOf(0);
-            done();
+
+            var activeNodes = flow.getActiveNodes();
+            var sfInstanceId = Object.keys(activeNodes)[3];
+            var statusInstanceId = Object.keys(activeNodes)[4];
+
+            flow.handleStatus(activeNodes[sfInstanceId],{text:"my-status"});
+
+            currentNodes[statusInstanceId].should.have.a.property("handled",1);
+            var statusMessage = currentNodes[statusInstanceId].messages[0];
+
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","my-status");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("id",sfInstanceId);
+            statusMessage.status.source.should.have.a.property("type","test2");
+            statusMessage.status.source.should.have.a.property("name",undefined);
+            flow.stop().then(function() {
+
+                done();
+            });
+        });
+        it("passes a status event to the multiple adjacent status nodes in subflow",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
+                    "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
+                {id:"sf1-1",type:"test2","z":"sf1",x:166,y:99,"wires":[[]]},
+                {id:"sf1-sn",x:10,y:10,z:"sf1",type:"status",foo:"a",wires:[]},
+                {id:"sf1-sn2",x:10,y:10,z:"sf1",type:"status",scope:["none"],wires:[]},
+                {id:"sf1-sn3",x:10,y:10,z:"sf1",type:"status",scope:["sf1-1"],wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+
+            getNode.restore();
+            getNode = sinon.stub(flows,"get",function(id) {
+                return flow.getNode(id);
+            });
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            var sfInstanceId = Object.keys(activeNodes)[3];
+            var statusInstanceId = Object.keys(activeNodes)[4];
+            var statusInstanceId2 = Object.keys(activeNodes)[5];
+            var statusInstanceId3 = Object.keys(activeNodes)[6];
+
+            flow.handleStatus(activeNodes[sfInstanceId],{text:"my-status"});
+
+            currentNodes[statusInstanceId].should.have.a.property("handled",1);
+            var statusMessage = currentNodes[statusInstanceId].messages[0];
+
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","my-status");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("id",sfInstanceId);
+            statusMessage.status.source.should.have.a.property("type","test2");
+            statusMessage.status.source.should.have.a.property("name",undefined);
+
+            currentNodes[statusInstanceId2].should.have.a.property("handled",0);
+
+            currentNodes[statusInstanceId3].should.have.a.property("handled",1);
+            statusMessage = currentNodes[statusInstanceId3].messages[0];
+
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","my-status");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("id",sfInstanceId);
+            statusMessage.status.source.should.have.a.property("type","test2");
+            statusMessage.status.source.should.have.a.property("name",undefined);
+
+            flow.stop().then(function() {
+
+                done();
+            });
+        });
+        it("passes a status event to the subflow's parent tab status node",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
+                    "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
+                {id:"sf1-1",type:"test2","z":"sf1",x:166,y:99,"wires":[[]]},
+                {id:"sn",x:10,y:10,z:"t1",type:"status",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+
+            getNode.restore();
+            getNode = sinon.stub(flows,"get",function(id) {
+                return flow.getNode(id);
+            });
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            var sfInstanceId = Object.keys(activeNodes)[3];
+
+            flow.handleStatus(activeNodes[sfInstanceId],{text:"my-status"});
+
+            currentNodes["sn"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn"].messages[0];
+
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","my-status");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("id",sfInstanceId);
+            statusMessage.status.source.should.have.a.property("type","test2");
+            statusMessage.status.source.should.have.a.property("name",undefined);
+
+            flow.stop().then(function() {
+
+                done();
+            });
+        });
+    });
+
+
+    describe("#handleError",function() {
+        it("passes an error event to the adjacent catch node",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sn",x:10,y:10,z:"t1",type:"catch",foo:"a",wires:[]},
+                {id:"sn2",x:10,y:10,z:"t1",type:"catch",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+
+            getNode.restore();
+            getNode = sinon.stub(flows,"get",function(id) {
+                return flow.getNode(id);
+            });
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            Object.keys(activeNodes).should.have.length(5);
+
+
+            flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo"});
+
+            currentNodes["sn"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn"].messages[0];
+
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id","1");
+            statusMessage.error.source.should.have.a.property("type","test");
+            statusMessage.error.source.should.have.a.property("name","a");
+
+            currentNodes["sn2"].should.have.a.property("handled",1);
+            statusMessage = currentNodes["sn2"].messages[0];
+
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id","1");
+            statusMessage.error.source.should.have.a.property("type","test");
+            statusMessage.error.source.should.have.a.property("name","a");
+
+
+            flow.stop().then(function() {
+                done();
+            });
+        });
+        it("passes an error event to the adjacent scoped catch node ",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sn",x:10,y:10,z:"t1",type:"catch",scope:["2"],foo:"a",wires:[]},
+                {id:"sn2",x:10,y:10,z:"t1",type:"catch",scope:["1"],foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+
+            getNode.restore();
+            getNode = sinon.stub(flows,"get",function(id) {
+                return flow.getNode(id);
+            });
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            Object.keys(activeNodes).should.have.length(5);
+
+            flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo"});
+
+            currentNodes["sn"].should.have.a.property("handled",0);
+            currentNodes["sn2"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn2"].messages[0];
+
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id","1");
+            statusMessage.error.source.should.have.a.property("type","test");
+            statusMessage.error.source.should.have.a.property("name","a");
+
+
+            flow.stop().then(function() {
+                done();
+            });
         });
 
-         it("reports error with Error object",function(done) {
-            var config = [
-                {id:"1",type:"test",z:"tab1",name:"a",wires:["2"]},
-                {id:"2",type:"catch",z:"tab1",wires:[[]]},
-                {id:"3",type:"catch",z:"tab2",wires:[[]]}
-            ];
-            var flow = new Flow(config);
+        it("passes an error event to the adjacent catch node in subflow",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
+                    "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
+                {id:"sf1-1",type:"test2","z":"sf1",x:166,y:99,"wires":[[]]},
+                {id:"sf1-sn",x:10,y:10,z:"sf1",type:"catch",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+
+            getNode.restore();
+            getNode = sinon.stub(flows,"get",function(id) {
+                return flow.getNode(id);
+            });
+
             flow.start();
-            flow.handleError(getNode(1),new Error("test error"));
-            var n2 = getNode(2);
-            n2.handled.should.have.lengthOf(1);
-            n2.handled[0].should.have.property("error");
-            n2.handled[0].error.should.have.property("message","Error: test error");
-            n2.handled[0].error.should.have.property("source");
-            n2.handled[0].error.source.should.have.property("id","1");
-            n2.handled[0].error.source.should.have.property("type","test");
-            getNode(3).handled.should.have.lengthOf(0);
-            done();
+
+            var activeNodes = flow.getActiveNodes();
+            var sfInstanceId = Object.keys(activeNodes)[3];
+            var catchInstanceId = Object.keys(activeNodes)[4];
+
+            flow.handleError(activeNodes[sfInstanceId],"my-error",{a:"foo"});
+
+            currentNodes[catchInstanceId].should.have.a.property("handled",1);
+            var statusMessage = currentNodes[catchInstanceId].messages[0];
+
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id",sfInstanceId);
+            statusMessage.error.source.should.have.a.property("type","test2");
+            statusMessage.error.source.should.have.a.property("name",undefined);
+
+            flow.stop().then(function() {
+                done();
+            });
         });
 
-        it('reports error in subflow to a local handler', function(done) {
-            var config = [
-                {id:"1",type:"test",z:"tab1",wires:[[]]},
-                {id:"2",type:"subflow:sf1",z:"tab1",wires:[[]]},
-                {id:"3",type:"catch",z:"tab1",wires:[]},
-                {id:"sf1",type:"subflow","in": [],"out": []},
-                {id:"sf1-1",z:"sf1",type:"test",wires:[]},
-                {id:"sf1-catch",type:"catch",z:"sf1",wires:[]}
-            ];
-            var flow = new Flow(config);
-            flow.start();
-            var instanceNode;
-            var instanceCatch;
-            for (var id in currentNodes) {
-                if (currentNodes.hasOwnProperty(id)) {
-                    if (currentNodes[id].z == '2') {
-                        if (currentNodes[id].type == "catch") {
-                            instanceCatch = currentNodes[id];
-                        } else {
-                            instanceNode = currentNodes[id];
-                        }
-                    }
-                }
-            }
-            flow.handleError(instanceNode,new Error("test error"));
-            var n3 = instanceCatch;
-            n3.handled.should.have.lengthOf(1);
-            n3.handled[0].should.have.property("error");
-            n3.handled[0].error.should.have.property("message","Error: test error");
-            n3.handled[0].error.should.have.property("source");
-            n3.handled[0].error.source.should.have.property("id",instanceNode.id);
-            n3.handled[0].error.source.should.have.property("type","test");
-            getNode(3).handled.should.have.lengthOf(0);
-            done();
-        });
-        it('reports error in subflow to a parent handler', function(done) {
-            var config = [
-                {id:"1",type:"test",z:"tab1",wires:[[]]},
-                {id:"2",type:"subflow:sf1",z:"tab1",wires:[[]]},
-                {id:"3",type:"catch",z:"tab1",wires:[]},
-                {id:"4",type:"catch",z:"tab2",wires:[]},
-                {id:"sf1",type:"subflow","in": [],"out": []},
-                {id:"sf1-1",z:"sf1",type:"test",wires:[]}
-            ];
-            var flow = new Flow(config);
-            flow.start();
-            var instanceNode;
+        it("passes an error event to the multiple adjacent catch nodes in subflow",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
+                    "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
+                {id:"sf1-1",type:"test2","z":"sf1",x:166,y:99,"wires":[[]]},
+                {id:"sf1-sn",x:10,y:10,z:"sf1",type:"catch",foo:"a",wires:[]},
+                {id:"sf1-sn2",x:10,y:10,z:"sf1",type:"catch",scope:["none"],wires:[]},
+                {id:"sf1-sn3",x:10,y:10,z:"sf1",type:"catch",scope:["sf1-1"],wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
 
-            for (var id in currentNodes) {
-                if (currentNodes.hasOwnProperty(id)) {
-                    if (currentNodes[id].z == '2') {
-                        instanceNode = currentNodes[id];
-                    }
-                }
-            }
-            flow.handleError(instanceNode,new Error("test error"));
-            var n3 = getNode(3);
-            n3.handled.should.have.lengthOf(1);
-            n3.handled[0].should.have.property("error");
-            n3.handled[0].error.should.have.property("message","Error: test error");
-            n3.handled[0].error.should.have.property("source");
-            n3.handled[0].error.source.should.have.property("id",instanceNode.id);
-            n3.handled[0].error.source.should.have.property("type","test");
-            getNode(4).handled.should.have.lengthOf(0);
-            done();
+            getNode.restore();
+            getNode = sinon.stub(flows,"get",function(id) {
+                return flow.getNode(id);
+            });
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            var sfInstanceId = Object.keys(activeNodes)[3];
+            var catchInstanceId = Object.keys(activeNodes)[4];
+            var catchInstanceId2 = Object.keys(activeNodes)[5];
+            var catchInstanceId3 = Object.keys(activeNodes)[6];
+
+            flow.handleError(activeNodes[sfInstanceId],"my-error",{a:"foo"});
+
+            currentNodes[catchInstanceId].should.have.a.property("handled",1);
+            var statusMessage = currentNodes[catchInstanceId].messages[0];
+
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id",sfInstanceId);
+            statusMessage.error.source.should.have.a.property("type","test2");
+            statusMessage.error.source.should.have.a.property("name",undefined);
+
+            currentNodes[catchInstanceId2].should.have.a.property("handled",0);
+
+            currentNodes[catchInstanceId3].should.have.a.property("handled",1);
+            statusMessage = currentNodes[catchInstanceId3].messages[0];
+
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id",sfInstanceId);
+            statusMessage.error.source.should.have.a.property("type","test2");
+            statusMessage.error.source.should.have.a.property("name",undefined);
+
+            flow.stop().then(function() {
+
+                done();
+            });
         });
+        it("passes an error event to the subflow's parent tab catch node",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
+                    "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
+                {id:"sf1-1",type:"test2","z":"sf1",x:166,y:99,"wires":[[]]},
+                {id:"sn",x:10,y:10,z:"t1",type:"catch",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+
+            getNode.restore();
+            getNode = sinon.stub(flows,"get",function(id) {
+                return flow.getNode(id);
+            });
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            var sfInstanceId = Object.keys(activeNodes)[3];
+
+            flow.handleError(activeNodes[sfInstanceId],"my-error",{a:"foo"});
+
+            currentNodes["sn"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn"].messages[0];
+
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id",sfInstanceId);
+            statusMessage.error.source.should.have.a.property("type","test2");
+            statusMessage.error.source.should.have.a.property("name",undefined);
+
+            flow.stop().then(function() {
+                done();
+            });
+        });
+        it("moves any existing error object sideways",function(){
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sn",x:10,y:10,z:"t1",type:"catch",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+
+            getNode.restore();
+            getNode = sinon.stub(flows,"get",function(id) {
+                return flow.getNode(id);
+            });
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo",error:"existing"});
+
+            currentNodes["sn"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn"].messages[0];
+
+            statusMessage.should.have.a.property("_error","existing");
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id","1");
+            statusMessage.error.source.should.have.a.property("type","test");
+            statusMessage.error.source.should.have.a.property("name","a");
+
+            flow.stop().then(function() {
+                done();
+            });
+        });
+        it.skip("prevents an error looping more than 10 times",function(){});
     });
 });

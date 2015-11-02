@@ -39,22 +39,30 @@ var started = false;
 
 var activeNodesToFlow = {};
 
+var typeEventRegistered = false;
+
 function init(_settings, _storage) {
+    if (started) {
+        throw new Error("Cannot init without a stop");
+    }
     settings = _settings;
     storage = _storage;
     started = false;
-    events.on('type-registered',function(type) {
-        if (activeFlowConfig && activeFlowConfig.missingTypes.length > 0) {
-            var i = activeFlowConfig.missingTypes.indexOf(type);
-            if (i != -1) {
-                log.info(log._("nodes.flows.registered-missing", {type:type}));
-                activeFlowConfig.missingTypes.splice(i,1);
-                if (activeFlowConfig.missingTypes.length === 0 && started) {
-                    start();
+    if (!typeEventRegistered) {
+        events.on('type-registered',function(type) {
+            if (activeFlowConfig && activeFlowConfig.missingTypes.length > 0) {
+                var i = activeFlowConfig.missingTypes.indexOf(type);
+                if (i != -1) {
+                    log.info(log._("nodes.flows.registered-missing", {type:type}));
+                    activeFlowConfig.missingTypes.splice(i,1);
+                    if (activeFlowConfig.missingTypes.length === 0 && started) {
+                        start();
+                    }
                 }
             }
-        }
-    });
+        });
+        typeEventRegistered = true;
+    }
 }
 function load() {
     return storage.getFlows().then(function(flows) {
@@ -67,21 +75,25 @@ function load() {
     });
 }
 
-function setConfig(config,type) {
+function setConfig(_config,type) {
+    var config = clone(_config);
     type = type||"full";
 
     var credentialsChanged = false;
     var credentialSavePromise = null;
     var configSavePromise = null;
 
-    var cleanConfig = clone(config);
-    cleanConfig.forEach(function(node) {
+    var diff;
+    var newFlowConfig = flowUtil.parseConfig(clone(config));
+    if (type !== 'full' && type !== 'load') {
+        diff = flowUtil.diffConfigs(activeFlowConfig,newFlowConfig);
+    }
+    config.forEach(function(node) {
         if (node.credentials) {
             credentials.extract(node);
             credentialsChanged = true;
         }
     });
-
     if (credentialsChanged) {
         credentialSavePromise = credentials.save();
     } else {
@@ -92,27 +104,19 @@ function setConfig(config,type) {
         type = 'full';
     } else {
         configSavePromise = credentialSavePromise.then(function() {
-            return storage.saveFlows(cleanConfig);
+            return storage.saveFlows(config);
         });
     }
 
     return configSavePromise
         .then(function() {
-            var diff;
-            activeConfig = cleanConfig;
-            if (type === 'full') {
-                activeFlowConfig = flowUtil.parseConfig(clone(config));
-            } else {
-                var newConfig = flowUtil.parseConfig(clone(config));
-                diff = flowUtil.diffConfigs(activeFlowConfig,newConfig);
-                activeFlowConfig = newConfig;
-            }
-            credentials.clean(activeConfig).then(function() {
+            activeConfig = config;
+            activeFlowConfig = newFlowConfig;
+            return credentials.clean(activeConfig).then(function() {
                 if (started) {
                     return stop(type,diff).then(function() {
                         start(type,diff);
                     }).otherwise(function(err) {
-                        console.log(err);
                     })
                 }
             });
@@ -136,9 +140,9 @@ function getNode(id) {
 }
 
 function eachNode(cb) {
-    for (var id in activeFlowConfig.nodes) {
-        if (activeFlowConfig.nodes.hasOwnProperty(id)) {
-            cb(activeFlowConfig.nodes[id]);
+    for (var id in activeFlowConfig.allNodes) {
+        if (activeFlowConfig.allNodes.hasOwnProperty(id)) {
+            cb(activeFlowConfig.allNodes[id]);
         }
     }
 }

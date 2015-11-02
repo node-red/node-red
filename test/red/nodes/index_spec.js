@@ -21,8 +21,15 @@ var when = require("when");
 var sinon = require('sinon');
 
 var index = require("../../../red/nodes/index");
+var flows = require("../../../red/nodes/flows");
 
 describe("red/nodes/index", function() {
+    before(function() {
+        sinon.stub(flows,"startFlows");
+    });
+    after(function() {
+        flows.startFlows.restore();
+    });
 
     afterEach(function() {
         index.clearRegistry();

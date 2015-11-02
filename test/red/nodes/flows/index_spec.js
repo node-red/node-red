@@ -26,30 +26,10 @@ var credentials = require("../../../../red/nodes/credentials");
 var typeRegistry = require("../../../../red/nodes/registry");
 var Flow = require("../../../../red/nodes/flows/Flow");
 
-var settings = {
-    available: function() { return false; }
-}
-
-function loadFlows(testFlows, cb) {
-    var storage = {
-        getFlows: function() {
-            return when.resolve(testFlows);
-        },
-        getCredentials: function() {
-            return when.resolve({});
-        }
-    };
-    RED.init(settings, storage);
-    flows.load().then(function() {
-        should.deepEqual(testFlows, flows.getFlows());
-        cb();
-    });
-}
-
 describe('flows/index', function() {
 
-    var eventsOn;
     var storage;
+    var eventsOn;
     var credentialsExtract;
     var credentialsSave;
     var credentialsClean;
@@ -60,7 +40,7 @@ describe('flows/index', function() {
 
     before(function() {
         getType = sinon.stub(typeRegistry,"get",function(type) {
-            return type!=='missing';
+            return type.indexOf('missing') === -1;
         });
     });
     after(function() {
@@ -69,7 +49,7 @@ describe('flows/index', function() {
 
 
     beforeEach(function() {
-        eventsOn = sinon.stub(events,"on",function(evt,handler) {});
+        eventsOn = sinon.spy(events,"on");
         credentialsExtract = sinon.stub(credentials,"extract",function(conf) {
             delete conf.credentials;
         });
@@ -91,9 +71,17 @@ describe('flows/index', function() {
                 id = flow.id;
             }
             flowCreate.flows[id] = {
+                flow: flow,
+                global: global,
                 start: sinon.spy(),
                 update: sinon.spy(),
-                stop: sinon.spy()
+                stop: sinon.spy(),
+                getActiveNodes: function() {
+                    return flow.nodes||{};
+                },
+                handleError: sinon.spy(),
+                handleStatus: sinon.spy()
+
             }
             return flowCreate.flows[id];
         });
@@ -107,20 +95,23 @@ describe('flows/index', function() {
         }
     });
 
-    afterEach(function() {
+    afterEach(function(done) {
         eventsOn.restore();
         credentialsExtract.restore();
         credentialsSave.restore();
         credentialsClean.restore();
         credentialsLoad.restore();
         flowCreate.restore();
+
+        flows.stopFlows().then(done);
+
     });
-    describe('#init',function() {
-        it('registers the type-registered handler', function() {
-            flows.init({},{});
-            eventsOn.calledOnce.should.be.true;
-        });
-    });
+    // describe('#init',function() {
+    //     it('registers the type-registered handler', function() {
+    //         flows.init({},{});
+    //         eventsOn.calledOnce.should.be.true;
+    //     });
+    // });
 
     describe('#setFlows', function() {
         it('sets the full flow', function(done) {
@@ -166,12 +157,70 @@ describe('flows/index', function() {
                 credentialsClean.called.should.be.true;
                 storage.hasOwnProperty('conf').should.be.true;
                 var cleanedFlows = flows.getFlows();
+                storage.conf.should.eql(cleanedFlows);
                 cleanedFlows.should.not.eql(originalConfig);
                 cleanedFlows[0].credentials = {};
                 cleanedFlows.should.eql(originalConfig);
                 done();
             });
+        });
 
+        it('updates existing flows with partial deployment - nodes', function(done) {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            var newConfig = clone(originalConfig);
+            newConfig.push({id:"t1-2",x:10,y:10,z:"t1",type:"test",wires:[]});
+            newConfig.push({id:"t2",type:"tab"});
+            newConfig.push({id:"t2-1",x:10,y:10,z:"t2",type:"test",wires:[]});
+            storage.getFlows = function() {
+                return when.resolve(originalConfig);
+            }
+
+            events.once('nodes-started',function() {
+                flows.setFlows(newConfig,"nodes").then(function() {
+                    flows.getFlows().should.eql(newConfig);
+                    flowCreate.flows['t1'].update.called.should.be.true;
+                    flowCreate.flows['t2'].start.called.should.be.true;
+                    flowCreate.flows['_GLOBAL_'].update.called.should.be.true;
+                    done();
+                })
+            });
+
+            flows.init({},storage);
+            flows.load().then(function() {
+                flows.startFlows();
+            });
+        });
+
+        it('updates existing flows with partial deployment - flows', function(done) {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            var newConfig = clone(originalConfig);
+            newConfig.push({id:"t1-2",x:10,y:10,z:"t1",type:"test",wires:[]});
+            newConfig.push({id:"t2",type:"tab"});
+            newConfig.push({id:"t2-1",x:10,y:10,z:"t2",type:"test",wires:[]});
+            storage.getFlows = function() {
+                return when.resolve(originalConfig);
+            }
+
+            events.once('nodes-started',function() {
+                flows.setFlows(newConfig,"nodes").then(function() {
+                    flows.getFlows().should.eql(newConfig);
+                    flowCreate.flows['t1'].update.called.should.be.true;
+                    flowCreate.flows['t2'].start.called.should.be.true;
+                    flowCreate.flows['_GLOBAL_'].update.called.should.be.true;
+                    flows.stopFlows().then(done);
+                })
+            });
+
+            flows.init({},storage);
+            flows.load().then(function() {
+                flows.startFlows();
+            });
         });
 
     });
@@ -195,12 +244,84 @@ describe('flows/index', function() {
                 flows.getFlows().should.eql(originalConfig);
                 done();
             });
-
         });
     });
 
     describe('#startFlows', function() {
-        it.skip('starts the loaded config', function(done) {
+        it('starts the loaded config', function(done) {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            storage.getFlows = function() {
+                return when.resolve(originalConfig);
+            }
+
+            events.once('nodes-started',function() {
+                Object.keys(flowCreate.flows).should.eql(['_GLOBAL_','t1']);
+                done();
+            });
+
+            flows.init({},storage);
+            flows.load().then(function() {
+                flows.startFlows();
+            });
+        });
+        it('does not start if nodes missing', function(done) {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1-2",x:10,y:10,z:"t1",type:"missing",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            storage.getFlows = function() {
+                return when.resolve(originalConfig);
+            }
+
+            flows.init({},storage);
+            flows.load().then(function() {
+                flows.startFlows();
+                flowCreate.called.should.be.false;
+                done();
+            });
+        });
+
+        it('starts when missing nodes registered', function(done) {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1-2",x:10,y:10,z:"t1",type:"missing",wires:[]},
+                {id:"t1-3",x:10,y:10,z:"t1",type:"missing2",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            storage.getFlows = function() {
+                return when.resolve(originalConfig);
+            }
+            flows.init({},storage);
+            flows.load().then(function() {
+                flows.startFlows();
+                flowCreate.called.should.be.false;
+
+                events.emit("type-registered","missing");
+                setTimeout(function() {
+                    flowCreate.called.should.be.false;
+                    events.emit("type-registered","missing2");
+                    setTimeout(function() {
+                        flowCreate.called.should.be.true;
+                        done();
+                    },10);
+                },10);
+            });
+        });
+
+
+
+    });
+
+    describe('#get',function() {
+
+    });
+
+    describe('#eachNode', function() {
+        it('iterates the flow nodes', function(done) {
             var originalConfig = [
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
                 {id:"t1",type:"tab"}
@@ -210,29 +331,62 @@ describe('flows/index', function() {
             }
             flows.init({},storage);
             flows.load().then(function() {
-                flows.startFlows();
-                // TODO: PICK IT UP FROM HERE
+                var c = 0;
+                flows.eachNode(function(node) {
+                    c++
+                })
+                c.should.equal(2);
                 done();
             });
         });
-    });
-
-    describe('#get',function() {
-
-    });
-
-    describe('#eachNode', function() {
-
     });
 
     describe('#stopFlows', function() {
 
     });
     describe('#handleError', function() {
+        it('passes error to correct flow', function(done) {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            storage.getFlows = function() {
+                return when.resolve(originalConfig);
+            }
 
+            events.once('nodes-started',function() {
+                flows.handleError(originalConfig[0],"message",{});
+                flowCreate.flows['t1'].handleError.called.should.be.true;
+                done();
+            });
+
+            flows.init({},storage);
+            flows.load().then(function() {
+                flows.startFlows();
+            });
+        });
     });
     describe('#handleStatus', function() {
+        it('passes status to correct flow', function(done) {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            storage.getFlows = function() {
+                return when.resolve(originalConfig);
+            }
 
+            events.once('nodes-started',function() {
+                flows.handleStatus(originalConfig[0],"message");
+                flowCreate.flows['t1'].handleStatus.called.should.be.true;
+                done();
+            });
+
+            flows.init({},storage);
+            flows.load().then(function() {
+                flows.startFlows();
+            });
+        });
     });
 });
 

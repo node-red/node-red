@@ -212,6 +212,7 @@ function Flow(global,flow) {
                         source: {
                             id: node.id,
                             type: node.type,
+                            name: node.name,
                             count: count
                         }
                     };
@@ -258,11 +259,12 @@ function mapEnvVarProperties(obj,prop) {
 }
 
 function createNode(type,config) {
-    //console.log("CREATE",type,config.id);
+    // console.log("CREATE",type,config.id);
     var nn = null;
     var nt = typeRegistry.get(type);
     if (nt) {
         var conf = clone(config);
+        delete conf.credentials;
         for (var p in conf) {
             if (conf.hasOwnProperty(p)) {
                 mapEnvVarProperties(conf,p);
@@ -371,9 +373,7 @@ function createSubflow(sf,sfn,subflows,globalSubflows,activeNodes) {
         if (sf.out) {
             var node,wires,i,j;
             // Restore the original wiring to the internal nodes
-
             subflowInstance.wires = clone(subflowInstance._originalWires);
-
             for (i=0;i<sf.out.length;i++) {
                 wires = sf.out[i].wires;
                 for (j=0;j<wires.length;j++) {
