@@ -63,6 +63,8 @@ module.exports = function(RED) {
                               this.func+"\n"+
                            "})(msg);";
         this.topic = n.topic;
+        this.outstandingTimers = [];
+        this.outstandingIntervals = [];
         var sandbox = {
             console:console,
             util:util,
@@ -90,8 +92,31 @@ module.exports = function(RED) {
             context: {
                 global:RED.settings.functionGlobalContext || {}
             },
-            setTimeout: setTimeout,
-            clearTimeout: clearTimeout
+            setTimeout: function (func,delay) {
+                var timerId = setTimeout(function() {
+                    sandbox.clearTimeout(timerId);
+                    func();
+                },delay);
+                node.outstandingTimers.push(timerId);
+            },
+            clearTimeout: function(id) {
+                clearTimeout(id);
+                var index = node.outstandingTimers.indexOf(id);
+                if (index > -1) {
+                    node.outstandingTimers.splice(index,1);
+                }
+            },
+            setInterval: function(func,delay) {
+                var timerId = setInterval(func,delay);
+                node.outstandingIntervals.push(timerId);
+            },
+            clearInterval: function(id) {
+                clearInterval(id);
+                var index = node.outstandingIntervals.indexOf(id);
+                if (index > -1) {
+                    node.outstandingIntervals.splice(index,1);
+                }
+            }
         };
         var context = vm.createContext(sandbox);
         try {
@@ -135,6 +160,14 @@ module.exports = function(RED) {
                     this.error(errorMessage, msg);
                 }
             });
+            this.on("close", function() {
+                while(node.outstandingTimers.length > 0) {
+                    clearTimeout(node.outstandingTimers.pop())
+                }
+                while(node.outstandingIntervals.length > 0) {
+                    clearInterval(node.outstandingIntervals.pop())
+                }
+            })
         } catch(err) {
             // eg SyntaxError - which v8 doesn't include line number information
             // so we can't do better than this
