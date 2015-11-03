@@ -28,13 +28,20 @@ var info = require("./info");
 var theme = require("./theme");
 var locales = require("./locales");
 
+var log = require("../log");
+
 var auth = require("./auth");
 var needsPermission = auth.needsPermission;
 
 var settings = require("../settings");
 
 var errorHandler = function(err,req,res,next) {
-    console.log(err.stack);
+    if (err.message === "request entity too large") {
+        log.error(err);
+    } else {
+        console.log(err.stack);
+    }
+    log.audit({event: "api.error",error:err.code||"unexpected_error",message:err.toString()},req);
     res.status(400).json({error:"unexpected_error", message:err.toString()});
 };
 
@@ -54,9 +61,9 @@ function init(adminApp,storage) {
         editorApp.use("/",ui.editorResources);
         adminApp.use(editorApp);
     }
-
-    adminApp.use(bodyParser.json());
-    adminApp.use(bodyParser.urlencoded({extended:true}));
+    var maxApiRequestSize = settings.apiMaxLength || '1mb';
+    adminApp.use(bodyParser.json({limit:maxApiRequestSize}));
+    adminApp.use(bodyParser.urlencoded({limit:maxApiRequestSize,extended:true}));
 
     adminApp.get("/auth/login",auth.login);
 
