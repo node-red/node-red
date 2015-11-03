@@ -140,6 +140,7 @@ module.exports = {
 
     // Flow handling
     loadFlows: flows.load,
+    startFlows: flows.startFlows,
     stopFlows: flows.stopFlows,
     setFlows: flows.setFlows,
     getFlows: flows.getFlows,
@@ -149,4 +150,3 @@ module.exports = {
     getCredentials: credentials.get,
     deleteCredentials: credentials.delete
 };
-

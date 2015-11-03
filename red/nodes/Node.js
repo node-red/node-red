@@ -33,12 +33,16 @@ function Node(n) {
     if (n.name) {
         this.name = n.name;
     }
+    if (n._alias) {
+        this._alias = n._alias;
+    }
     this.updateWires(n.wires);
 }
 
 util.inherits(Node, EventEmitter);
 
 Node.prototype.updateWires = function(wires) {
+    //console.log("UPDATE",this.id);
     this.wires = wires || [];
     delete this._wire;
 

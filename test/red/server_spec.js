@@ -30,11 +30,11 @@ var log = require("../../red/log");
 describe("red/server", function() {
     var commsMessages = [];
     var commsPublish;
-    
+
     beforeEach(function() {
         commsMessages = [];
     });
-    
+
     before(function() {
         commsPublish = sinon.stub(comms,"publish", function(topic,msg,retained) {
             commsMessages.push({topic:topic,msg:msg,retained:retained});
@@ -43,22 +43,22 @@ describe("red/server", function() {
     after(function() {
         commsPublish.restore();
     });
-    
+
     it("initialises components", function() {
         var commsInit = sinon.stub(comms,"init",function() {});
         var dummyServer = {};
         server.init(dummyServer,{testSettings: true, httpAdminRoot:"/", load:function() { return when.resolve();}});
-        
+
         commsInit.called.should.be.true;
-        
+
         should.exist(server.app);
         should.exist(server.nodeApp);
-        
+
         server.server.should.equal(dummyServer);
-        
+
         commsInit.restore();
     });
-    
+
     describe("start",function() {
         var commsInit;
         var storageInit;
@@ -73,8 +73,9 @@ describe("red/server", function() {
         var redNodesCleanModuleList;
         var redNodesGetNodeList;
         var redNodesLoadFlows;
+        var redNodesStartFlows;
         var commsStart;
-        
+
         beforeEach(function() {
             commsInit = sinon.stub(comms,"init",function() {});
             storageInit = sinon.stub(storage,"init",function(settings) {return when.resolve();});
@@ -86,7 +87,8 @@ describe("red/server", function() {
             redNodesInit = sinon.stub(redNodes,"init", function() {});
             redNodesLoad = sinon.stub(redNodes,"load", function() {return when.resolve()});
             redNodesCleanModuleList = sinon.stub(redNodes,"cleanModuleList",function(){});
-            redNodesLoadFlows = sinon.stub(redNodes,"loadFlows",function() {});
+            redNodesLoadFlows = sinon.stub(redNodes,"loadFlows",function() {return when.resolve()});
+            redNodesStartFlows = sinon.stub(redNodes,"startFlows",function() {});
             commsStart = sinon.stub(comms,"start",function(){});
         });
         afterEach(function() {
@@ -99,9 +101,10 @@ describe("red/server", function() {
             logLog.restore();
             redNodesInit.restore();
             redNodesLoad.restore();
-            redNodesGetNodeList.restore(); 
+            redNodesGetNodeList.restore();
             redNodesCleanModuleList.restore();
             redNodesLoadFlows.restore();
+            redNodesStartFlows.restore();
             commsStart.restore();
         });
         it("reports errored/missing modules",function(done) {
@@ -120,7 +123,7 @@ describe("red/server", function() {
                     redNodesLoad.calledOnce.should.be.true;
                     commsStart.calledOnce.should.be.true;
                     redNodesLoadFlows.calledOnce.should.be.true;
-                    
+
                     logWarn.calledWithMatch("Failed to register 1 node type");
                     logWarn.calledWithMatch("Missing node modules");
                     logWarn.calledWithMatch(" - module: typeA, typeB");
@@ -168,7 +171,7 @@ describe("red/server", function() {
             });
             server.init({},{testSettings: true, verbose:true, httpAdminRoot:"/", load:function() { return when.resolve();}});
             server.start().then(function() {
-                
+
                 try {
                     apiInit.calledOnce.should.be.true;
                     logWarn.neverCalledWithMatch("Failed to register 1 node type");
@@ -179,7 +182,7 @@ describe("red/server", function() {
                 }
             });
         });
-        
+
         it("reports runtime metrics",function(done) {
             var commsStop = sinon.stub(comms,"stop",function() {} );
             var stopFlows = sinon.stub(redNodes,"stopFlows",function() {} );
@@ -208,8 +211,8 @@ describe("red/server", function() {
                     }
                 },500);
             });
-        }); 
-        
+        });
+
         it("doesn't init api if httpAdminRoot set to false",function(done) {
             redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function() {return []});
             server.init({},{testSettings: true, httpAdminRoot:false, load:function() { return when.resolve();}});
@@ -225,20 +228,20 @@ describe("red/server", function() {
             });
         });
     });
-    
+
     it("stops components", function() {
         var commsStop = sinon.stub(comms,"stop",function() {} );
         var stopFlows = sinon.stub(redNodes,"stopFlows",function() {} );
-        
+
         server.stop();
-        
+
         commsStop.called.should.be.true;
         stopFlows.called.should.be.true;
-        
+
         commsStop.restore();
         stopFlows.restore();
     });
-    
+
     it("reports added modules", function() {
         var nodes = {nodes:[
             {types:["a"]},
@@ -246,13 +249,13 @@ describe("red/server", function() {
             {types:["c"],err:"error"}
         ]};
         var result = server.reportAddedModules(nodes);
-        
+
         result.should.equal(nodes);
         commsMessages.should.have.length(1);
         commsMessages[0].topic.should.equal("node/added");
         commsMessages[0].msg.should.eql(nodes.nodes);
     });
-    
+
     it("reports removed modules", function() {
         var nodes = [
             {types:["a"]},
@@ -260,13 +263,13 @@ describe("red/server", function() {
             {types:["c"],err:"error"}
         ];
         var result = server.reportRemovedModules(nodes);
-        
+
         result.should.equal(nodes);
         commsMessages.should.have.length(1);
         commsMessages[0].topic.should.equal("node/removed");
         commsMessages[0].msg.should.eql(nodes);
     });
-    
+
     describe("installs module", function() {
         it("rejects invalid module names", function(done) {
             var promises = [];
@@ -278,12 +281,12 @@ describe("red/server", function() {
                 done();
             });
         });
-        
+
         it("rejects when npm returns a 404", function(done) {
             var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
                 cb(new Error(),""," 404  this_wont_exist");
             });
-            
+
             server.installModule("this_wont_exist").otherwise(function(err) {
                 err.code.should.be.eql(404);
                 done();
@@ -295,7 +298,7 @@ describe("red/server", function() {
             var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
                 cb(new Error("test_error"),"","");
             });
-            
+
             server.installModule("this_wont_exist").then(function() {
                 done(new Error("Unexpected success"));
             }).otherwise(function(err) {
@@ -312,7 +315,7 @@ describe("red/server", function() {
             var addModule = sinon.stub(redNodes,"addModule",function(md) {
                 return when.resolve(nodeInfo);
             });
-            
+
             server.installModule("this_wont_exist").then(function(info) {
                 info.should.eql(nodeInfo);
                 commsMessages.should.have.length(1);
@@ -347,7 +350,7 @@ describe("red/server", function() {
             var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
                 cb(new Error("test_error"),"","");
             });
-            
+
             server.uninstallModule("this_wont_exist").then(function() {
                 done(new Error("Unexpected success"));
             }).otherwise(function(err) {
@@ -366,7 +369,7 @@ describe("red/server", function() {
                 cb(null,"","");
             });
             var exists = sinon.stub(fs,"existsSync", function(fn) { return true; });
-            
+
             server.uninstallModule("this_wont_exist").then(function(info) {
                 info.should.eql(nodeInfo);
                 commsMessages.should.have.length(1);
@@ -382,5 +385,5 @@ describe("red/server", function() {
             });
         });
     });
-    
+
 });

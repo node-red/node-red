@@ -68,7 +68,7 @@ module.exports = {
         storage = _storage;
         redApp = _app;
     },
-    
+
     /**
      * Loads the credentials from storage.
      */
@@ -79,7 +79,7 @@ module.exports = {
             log.warn(log._("nodes.credentials.error",{message: err}));
         });
     },
-    
+
     /**
      * Adds a set of credentials for the given node id.
      * @param id the node id for the credentials
@@ -118,7 +118,7 @@ module.exports = {
     clean: function (config) {
         var existingIds = {};
         config.forEach(function(n) {
-            existingIds[n.id] = true;     
+            existingIds[n.id] = true;
         });
         var deletedCredentials = false;
         for (var c in credentialCache) {
@@ -135,7 +135,7 @@ module.exports = {
             return when.resolve();
         }
     },
-    
+
     /**
      * Registers a node credential definition.
      * @param type the node type
@@ -146,14 +146,14 @@ module.exports = {
         credentialsDef[dashedType] = definition;
         registerEndpoint(dashedType);
     },
-    
+
     /**
      * Extracts and stores any credential updates in the provided node.
      * The provided node may have a .credentials property that contains
      * new credentials for the node.
      * This function loops through the credentials in the definition for
      * the node-type and applies any of the updates provided in the node.
-     * 
+     *
      * This function does not save the credentials to disk as it is expected
      * to be called multiple times when a new flow is deployed.
      *
@@ -171,7 +171,7 @@ module.exports = {
                 log.warn(log._("nodes.credentials.not-registered",{type:nodeType}));
                 return;
             }
-            
+
             for (var cred in definition) {
                 if (definition.hasOwnProperty(cred)) {
                     if (newCreds[cred] === undefined) {
@@ -191,7 +191,7 @@ module.exports = {
             delete node.credentials;
         }
     },
-    
+
     /**
      * Saves the credentials to storage
      * @return a promise for the saving of credentials to storage
@@ -199,7 +199,7 @@ module.exports = {
     save: function () {
         return storage.saveCredentials(credentialCache);
     },
-    
+
     /**
      * Gets the credential definition for the given node type
      * @param type the node type

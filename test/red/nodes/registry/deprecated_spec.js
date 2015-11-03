@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 var should = require("should");
 
-var deprecated = require("../../../red/nodes/deprecated.js");
+var deprecated = require("../../../../red/nodes/registry/deprecated.js");
 
 describe('deprecated', function() {
     it('should return info on a node',function() {
