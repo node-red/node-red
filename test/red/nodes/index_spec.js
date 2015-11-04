@@ -134,7 +134,7 @@ describe("red/nodes/index", function() {
                }
            });
            var testnode = new TestNode({id:'tab1',type:'test',name:'barney', '_alias':'tab1'});
-           credentials.getDefinition("test").should.have.property('foo');
+           index.getCredentialDefinition("test").should.have.property('foo');
            done();
        });
 

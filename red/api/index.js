@@ -27,6 +27,7 @@ var library = require("./library");
 var info = require("./info");
 var theme = require("./theme");
 var locales = require("./locales");
+var credentials = require("./credentials");
 
 var log = require("../log");
 
@@ -48,7 +49,6 @@ var errorHandler = function(err,req,res,next) {
 function init(adminApp,storage) {
 
     auth.init(settings,storage);
-
     // Editor
     if (!settings.disableEditor) {
         ui.init(settings);
@@ -93,6 +93,8 @@ function init(adminApp,storage) {
 
     adminApp.get("/nodes/:mod/:set",needsPermission("nodes.read"),nodes.getSet);
     adminApp.put("/nodes/:mod/:set",needsPermission("nodes.write"),nodes.putSet);
+
+    adminApp.get('/credentials/:type/:id', needsPermission("credentials.read"),credentials.get);
 
     adminApp.get(/locales\/(.+)\/?$/,locales.get);
 

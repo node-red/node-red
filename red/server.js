@@ -64,7 +64,7 @@ function start() {
             }
             log.info(log._("runtime.version",{component:"Node.js ",version:process.version}));
             log.info(log._("server.loading"));
-            redNodes.init(settings,storage,app);
+            redNodes.init(settings,storage);
             return redNodes.load().then(function() {
 
                 var i;

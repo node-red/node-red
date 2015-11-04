@@ -23,50 +23,10 @@ var needsPermission = require("../api/auth").needsPermission;
 var credentialCache = {};
 var storage = null;
 var credentialsDef = {};
-var redApp = null;
-
-/**
- * Adds an HTTP endpoint to allow look up of credentials for a given node id.
- */
-function registerEndpoint(type) {
-    redApp.get('/credentials/' + type + '/:id', needsPermission(type+".read"), function (req, res) {
-        // TODO: This could be a generic endpoint with the type value
-        //       parameterised.
-        //
-        // TODO: It should verify the given node id is of the type specified -
-        //       but that would add a dependency from this module to the
-        //       registry module that knows about node types.
-        var nodeType = type;
-        var nodeID = req.params.id;
-
-        var credentials = credentialCache[nodeID];
-        if (credentials === undefined) {
-            res.json({});
-            return;
-        }
-        var definition = credentialsDef[nodeType];
-
-        var sendCredentials = {};
-        for (var cred in definition) {
-            if (definition.hasOwnProperty(cred)) {
-                if (definition[cred].type == "password") {
-                    var key = 'has_' + cred;
-                    sendCredentials[key] = credentials[cred] != null && credentials[cred] !== '';
-                    continue;
-                }
-                sendCredentials[cred] = credentials[cred] || '';
-            }
-        }
-        res.json(sendCredentials);
-
-    });
-}
-
 
 module.exports = {
-    init: function (_storage,_app) {
+    init: function (_storage) {
         storage = _storage;
-        redApp = _app;
     },
 
     /**
@@ -144,7 +104,6 @@ module.exports = {
     register: function (type, definition) {
         var dashedType = type.replace(/\s+/g, '-');
         credentialsDef[dashedType] = definition;
-        registerEndpoint(dashedType);
     },
 
     /**

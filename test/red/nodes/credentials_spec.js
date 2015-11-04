@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ var auth = require("../../../red/api/auth");
 
 
 describe('Credentials', function() {
-        
+
     afterEach(function() {
         index.clearRegistry();
     });
-    
+
     it('loads from storage',function(done) {
-        
+
         var storage = {
             getCredentials: function() {
                 return when.promise(function(resolve,reject) {
@@ -43,18 +43,18 @@ describe('Credentials', function() {
                 });
             }
         };
-        
+
         credentials.init(storage);
-        
+
         credentials.load().then(function() {
-                
+
             credentials.get("a").should.have.property('b',1);
             credentials.get("a").should.have.property('c',2);
-            
+
             done();
         });
     });
-    
+
     it('saves to storage', function(done) {
         var storage = {
             saveCredentials: function(creds) {
@@ -66,8 +66,8 @@ describe('Credentials', function() {
             res.should.equal("saveCalled");
             done();
         });
-    });   
-    
+    });
+
     it('saves to storage when new cred added', function(done) {
         var storage = {
             getCredentials: function() {
@@ -90,7 +90,7 @@ describe('Credentials', function() {
             done();
         });
     });
-    
+
     it('deletes from storage', function(done) {
         var storage = {
             getCredentials: function() {
@@ -112,9 +112,9 @@ describe('Credentials', function() {
             storage.saveCredentials.restore();
             done();
         });
-            
+
     });
-            
+
     it('clean up from storage', function(done) {
         var storage = {
             getCredentials: function() {
@@ -137,7 +137,7 @@ describe('Credentials', function() {
             done();
         });
     });
-    
+
     it('handle error loading from storage', function(done) {
         var storage = {
             getCredentials: function() {
@@ -153,7 +153,7 @@ describe('Credentials', function() {
         sinon.stub(log, 'warn', function(msg) {
             logmsg = msg;
         });
-        
+
         credentials.init(storage);
         credentials.load().then(function() {
             log.warn.calledOnce.should.be.true;
@@ -164,7 +164,7 @@ describe('Credentials', function() {
             done(err);
         });
     });
-    
+
     it('credential type is not registered when extract', function(done) {
         var testFlows = [{"type":"test","id":"tab1","label":"Sheet 1"}];
         var storage = {
@@ -196,7 +196,7 @@ describe('Credentials', function() {
         };
         function TestNode(n) {
             index.createNode(this, n);
-            
+
             this.id = 'tab1';
             this.type = 'test';
             this.name = 'barney';
@@ -214,9 +214,9 @@ describe('Credentials', function() {
             available: function() { return false;}
         }
         index.init(settings, storage);
-        index.registerType('test', TestNode);   
+        index.registerType('test', TestNode);
         index.loadFlows().then(function() {
-            var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});   
+            var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});
             credentials.extract(testnode);
             log.warn.calledOnce.should.be.true;
             log.warn.restore();
@@ -226,7 +226,7 @@ describe('Credentials', function() {
             done(err);
         });
     });
-    
+
     it('extract and store credential updates in the provided node', function(done) {
         credentials.init({saveCredentials:function(){}},express());
         credentials.register("test",{
@@ -236,7 +236,7 @@ describe('Credentials', function() {
             password2:{type:"password"},
             user3:{type:"text"},
             password3:{type:"password"}
-            
+
         });
         credentials.add("node",{user1:"abc",password1:"123",user2:"def",password2:"456",user3:"ghi",password3:"789"});
         var node = {id:"node",type:"test",credentials:{
@@ -248,9 +248,9 @@ describe('Credentials', function() {
             password3:"newPassword"
         }};
         credentials.extract(node);
-        
+
         node.should.not.have.a.property("credentials");
-        
+
         var newCreds = credentials.get("node");
         newCreds.should.have.a.property("user1","abc");
         newCreds.should.have.a.property("password1","123");
@@ -258,79 +258,7 @@ describe('Credentials', function() {
         newCreds.should.not.have.a.property("password2");
         newCreds.should.have.a.property("user3","newUser");
         newCreds.should.have.a.property("password3","newPassword");
-        
+
         done();
     });
-    
-    describe('registerEndpoint',function() {
-        it('returns empty credentials if none are stored',function(done) {
-            auth.init({});
-            var app = express();
-            credentials.init({saveCredentials:function(){}},app);
-            credentials.register("test",{
-                user1:{type:"text"},
-                password1:{type:"password"},
-                user2:{type:"text"},
-                password2:{type:"password"},
-                user3:{type:"text"},
-                password3:{type:"password"}
-                
-            });
-            request(app)
-                .get("/credentials/test/123")
-                .expect("Content-Type",/json/)
-                .end(function(err,res) {
-                    if (err) {
-                        done(err);
-                    } else {
-                        try {
-                            res.body.should.eql({});
-                            done();
-                        } catch(e) {
-                            done(e);
-                        }
-                    }
-                })
-        });
-        it('returns stored credentials',function(done) {
-            auth.init({});
-            var app = express();
-            credentials.init({saveCredentials:function(){}},app);
-            credentials.register("test",{
-                user1:{type:"text"},
-                password1:{type:"password"},
-                user2:{type:"text"},
-                password2:{type:"password"},
-                user3:{type:"text"},
-                password3:{type:"password"}
-                
-            });
-            credentials.add("node",{user1:"abc",password1:"123",user2:"def",password2:"456",user3:"ghi",password3:"789"});
-            request(app)
-                .get("/credentials/test/node")
-                .expect("Content-Type",/json/)
-                .end(function(err,res) {
-                    if (err) {
-                        done(err);
-                    } else {
-                        try {
-                            res.body.should.have.a.property("user1","abc");
-                            res.body.should.have.a.property("user2","def");
-                            res.body.should.have.a.property("user3","ghi");
-                            res.body.should.have.a.property("has_password1",true);
-                            res.body.should.have.a.property("has_password2",true);
-                            res.body.should.have.a.property("has_password3",true);
-                            res.body.should.not.have.a.property("password1");
-                            res.body.should.not.have.a.property("password2");
-                            res.body.should.not.have.a.property("password3");
-                            done();
-                        } catch(e) {
-                            done(e);
-                        }
-                    }
-                })
-        });
-            
-    });
-})     
-
+})

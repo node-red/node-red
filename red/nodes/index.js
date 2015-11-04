@@ -53,8 +53,8 @@ function createNode(node,def) {
     }
 }
 
-function init(_settings,storage,app) {
-    credentials.init(storage,app);
+function init(_settings,storage) {
+    credentials.init(storage);
     flows.init(_settings,storage);
     registry.init(_settings);
 }
@@ -148,5 +148,6 @@ module.exports = {
     // Credentials
     addCredentials: credentials.add,
     getCredentials: credentials.get,
-    deleteCredentials: credentials.delete
+    deleteCredentials: credentials.delete,
+    getCredentialDefinition: credentials.getDefinition
 };
