@@ -30,7 +30,7 @@
             "subflows": "Subflows",
             "createSubflow": "Create Subflow",
             "selectionToSubflow": "Selection to Subflow",
-            "flows": "Sheets",
+            "flows": "Tabs",
             "add": "Add",
             "rename": "Rename",
             "delete": "Delete",
@@ -197,9 +197,11 @@
         "config": {
             "name": "Configuration nodes",
             "label": "config",
-            "local": "on this sheet",
-            "global": "on all sheets",
-            "none": "none"
+            "local": "on this flow",
+            "global": "on all flows",
+            "none": "none",
+            "subflows": "subflows",
+            "flows": "flows"
         }
     }
 }

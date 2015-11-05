@@ -14,6 +14,7 @@
  * limitations under the License.
  **/
 
+var log = require("../log");
 var api = require("../nodes");
 
 module.exports = {
@@ -23,6 +24,7 @@ module.exports = {
         //       registry module that knows about node types.
         var nodeType = req.params.type;
         var nodeID = req.params.id;
+        log.audit({event: "credentials.get",type:nodeType,id:nodeID},req);
         var credentials = api.getCredentials(nodeID);
         if (!credentials) {
             res.json({});

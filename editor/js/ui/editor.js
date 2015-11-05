@@ -792,8 +792,8 @@ RED.editor = (function() {
 
         var tabSelect = $("#node-config-dialog-scope").empty();
         tabSelect.off("change");
-        tabSelect.append('<option value=""'+(!configNode.z?" selected":"")+' data-i18n="workspace.config.global"></option>');
-        tabSelect.append('<option disabled>flows</option>');
+        tabSelect.append('<option value=""'+(!configNode.z?" selected":"")+' data-i18n="sidebar.config.global"></option>');
+        tabSelect.append('<option disabled data-i18n="sidebar.config.flows"></option>');
         RED.nodes.eachWorkspace(function(ws) {
             var workspaceLabel = ws.label;
             if (nodeUserFlows[ws.id]) {
@@ -801,7 +801,7 @@ RED.editor = (function() {
             }
             tabSelect.append('<option value="'+ws.id+'"'+(ws.id==configNode.z?" selected":"")+'>'+workspaceLabel+'</option>');
         });
-        tabSelect.append('<option disabled>subflows</option>');
+        tabSelect.append('<option disabled data-i18n="sidebar.config.subflows"></option>');
         RED.nodes.eachSubflow(function(ws) {
             var workspaceLabel = ws.name;
             if (nodeUserFlows[ws.id]) {
