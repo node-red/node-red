@@ -19,9 +19,11 @@ var fs = require('fs-extra');
 var path = require('path');
 var when = require("when");
 var sinon = require('sinon');
+var child_process = require('child_process');
 
 var index = require("../../../red/nodes/index");
 var flows = require("../../../red/nodes/flows");
+var registry = require("../../../red/nodes/registry");
 
 describe("red/nodes/index", function() {
     before(function() {
@@ -275,4 +277,155 @@ describe("red/nodes/index", function() {
             });
         });
     });
+
+    describe("installs module", function() {
+        it("rejects invalid module names", function(done) {
+            var promises = [];
+            promises.push(index.installModule("this_wont_exist "));
+            promises.push(index.installModule("this_wont_exist;no_it_really_wont"));
+            when.settle(promises).then(function(results) {
+                results[0].state.should.be.eql("rejected");
+                results[1].state.should.be.eql("rejected");
+                done();
+            });
+        });
+
+        it("rejects when npm returns a 404", function(done) {
+            var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
+                cb(new Error(),""," 404  this_wont_exist");
+            });
+
+            index.installModule("this_wont_exist").otherwise(function(err) {
+                err.code.should.be.eql(404);
+                done();
+            }).finally(function() {
+                exec.restore();
+            });
+        });
+        it("rejects with generic error", function(done) {
+            var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
+                cb(new Error("test_error"),"","");
+            });
+
+            index.installModule("this_wont_exist").then(function() {
+                done(new Error("Unexpected success"));
+            }).otherwise(function(err) {
+                done();
+            }).finally(function() {
+                exec.restore();
+            });
+        });
+        it("succeeds when module is found", function(done) {
+            var nodeInfo = {nodes:{module:"foo",types:["a"]}};
+            var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
+                cb(null,"","");
+            });
+            var addModule = sinon.stub(registry,"addModule",function(md) {
+                return when.resolve(nodeInfo);
+            });
+
+            index.installModule("this_wont_exist").then(function(info) {
+                info.should.eql(nodeInfo);
+                // commsMessages.should.have.length(1);
+                // commsMessages[0].topic.should.equal("node/added");
+                // commsMessages[0].msg.should.eql(nodeInfo.nodes);
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            }).finally(function() {
+                exec.restore();
+                addModule.restore();
+            });
+        });
+        it.skip("reports added modules", function() {
+            var nodes = {nodes:[
+                {types:["a"]},
+                {module:"foo",types:["b"]},
+                {types:["c"],err:"error"}
+            ]};
+            var result = index.reportAddedModules(nodes);
+
+            result.should.equal(nodes);
+            commsMessages.should.have.length(1);
+            commsMessages[0].topic.should.equal("node/added");
+            commsMessages[0].msg.should.eql(nodes.nodes);
+        });
+
+    });
+    describe("uninstalls module", function() {
+        it("rejects invalid module names", function(done) {
+            var promises = [];
+            promises.push(index.uninstallModule("this_wont_exist "));
+            promises.push(index.uninstallModule("this_wont_exist;no_it_really_wont"));
+            when.settle(promises).then(function(results) {
+                results[0].state.should.be.eql("rejected");
+                results[1].state.should.be.eql("rejected");
+                done();
+            });
+        });
+
+        it("rejects with generic error", function(done) {
+            var nodeInfo = [{module:"foo",types:["a"]}];
+            var removeModule = sinon.stub(registry,"removeModule",function(md) {
+                return when.resolve(nodeInfo);
+            });
+            var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
+                cb(new Error("test_error"),"","");
+            });
+
+            index.uninstallModule("this_wont_exist").then(function() {
+                done(new Error("Unexpected success"));
+            }).otherwise(function(err) {
+                done();
+            }).finally(function() {
+                exec.restore();
+                removeModule.restore();
+            });
+        });
+        it("succeeds when module is found", function(done) {
+            var nodeInfo = [{module:"foo",types:["a"]}];
+            var removeModule = sinon.stub(registry,"removeModule",function(md) {
+                return nodeInfo;
+            });
+            var getModuleInfo = sinon.stub(registry,"getModuleInfo",function(md) {
+                return {nodes:[]};
+            });
+            var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
+                cb(null,"","");
+            });
+
+            var exists = sinon.stub(require('fs'),"existsSync", function(fn) { return true; });
+
+            index.uninstallModule("this_wont_exist").then(function(info) {
+                info.should.eql(nodeInfo);
+                // commsMessages.should.have.length(1);
+                // commsMessages[0].topic.should.equal("node/removed");
+                // commsMessages[0].msg.should.eql(nodeInfo);
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            }).finally(function() {
+                exec.restore();
+                removeModule.restore();
+                exists.restore();
+                getModuleInfo.restore();
+            });
+        });
+
+        it.skip("reports removed modules", function() {
+            var nodes = [
+                {types:["a"]},
+                {module:"foo",types:["b"]},
+                {types:["c"],err:"error"}
+            ];
+            var result = server.reportRemovedModules(nodes);
+
+            result.should.equal(nodes);
+            commsMessages.should.have.length(1);
+            commsMessages[0].topic.should.equal("node/removed");
+            commsMessages[0].msg.should.eql(nodes);
+        });
+
+    });
+
 });
