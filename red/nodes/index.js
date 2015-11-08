@@ -135,7 +135,7 @@ function installModule(module) {
         log.info(log._("server.install.installing",{name: module}));
 
         var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
-        var child = child_process.exec('npm install --production '+module,
+        var child = child_process.execFile('npm',['install','--production',module],
             {
                 cwd: installDir
             },
@@ -206,7 +206,7 @@ function uninstallModule(module) {
 
         var list = removeModule(module);
         log.info(log._("server.install.uninstalling",{name:module}));
-        var child = child_process.exec('npm remove '+module,
+        var child = child_process.execFile('npm',['remove',module],
             {
                 cwd: installDir
             },

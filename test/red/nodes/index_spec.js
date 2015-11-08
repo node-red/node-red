@@ -291,7 +291,7 @@ describe("red/nodes/index", function() {
         });
 
         it("rejects when npm returns a 404", function(done) {
-            var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
+            var exec = sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
                 cb(new Error(),""," 404  this_wont_exist");
             });
 
@@ -303,7 +303,7 @@ describe("red/nodes/index", function() {
             });
         });
         it("rejects with generic error", function(done) {
-            var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
+            var exec = sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
                 cb(new Error("test_error"),"","");
             });
 
@@ -317,7 +317,7 @@ describe("red/nodes/index", function() {
         });
         it("succeeds when module is found", function(done) {
             var nodeInfo = {nodes:{module:"foo",types:["a"]}};
-            var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
+            var exec = sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
                 cb(null,"","");
             });
             var addModule = sinon.stub(registry,"addModule",function(md) {
@@ -337,20 +337,6 @@ describe("red/nodes/index", function() {
                 addModule.restore();
             });
         });
-        it.skip("reports added modules", function() {
-            var nodes = {nodes:[
-                {types:["a"]},
-                {module:"foo",types:["b"]},
-                {types:["c"],err:"error"}
-            ]};
-            var result = index.reportAddedModules(nodes);
-
-            result.should.equal(nodes);
-            commsMessages.should.have.length(1);
-            commsMessages[0].topic.should.equal("node/added");
-            commsMessages[0].msg.should.eql(nodes.nodes);
-        });
-
     });
     describe("uninstalls module", function() {
         it("rejects invalid module names", function(done) {
@@ -369,7 +355,7 @@ describe("red/nodes/index", function() {
             var removeModule = sinon.stub(registry,"removeModule",function(md) {
                 return when.resolve(nodeInfo);
             });
-            var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
+            var exec = sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
                 cb(new Error("test_error"),"","");
             });
 
@@ -390,7 +376,7 @@ describe("red/nodes/index", function() {
             var getModuleInfo = sinon.stub(registry,"getModuleInfo",function(md) {
                 return {nodes:[]};
             });
-            var exec = sinon.stub(child_process,"exec",function(cmd,opt,cb) {
+            var exec = sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
                 cb(null,"","");
             });
 
@@ -411,21 +397,6 @@ describe("red/nodes/index", function() {
                 getModuleInfo.restore();
             });
         });
-
-        it.skip("reports removed modules", function() {
-            var nodes = [
-                {types:["a"]},
-                {module:"foo",types:["b"]},
-                {types:["c"],err:"error"}
-            ];
-            var result = server.reportRemovedModules(nodes);
-
-            result.should.equal(nodes);
-            commsMessages.should.have.length(1);
-            commsMessages[0].topic.should.equal("node/removed");
-            commsMessages[0].msg.should.eql(nodes);
-        });
-
     });
 
 });
