@@ -208,12 +208,11 @@ describe("nodes api", function() {
                 });
                 var getModuleInfo = sinon.stub(redNodes,'getModuleInfo');
                 getModuleInfo.onCall(0).returns(null);
-                getModuleInfo.onCall(1).returns({
-                    name:"foo",
-                    nodes:[{id:"123"}]
-                });
                 var installModule = sinon.stub(redNodes,'installModule', function() {
-                    return when.resolve({id:"123"});
+                    return when.resolve({
+                        name:"foo",
+                        nodes:[{id:"123"}]
+                    });
                 });
 
                 request(app)

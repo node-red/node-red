@@ -17,6 +17,7 @@
 var should = require("should");
 var sinon = require("sinon");
 var when = require("when");
+var path = require("path");
 
 var child_process = require('child_process');
 var installer = require("../../../../red/nodes/registry/installer");
@@ -28,33 +29,25 @@ describe('nodes/registry/installer', function() {
     before(function() {
         installer.init({});
     });
+    afterEach(function() {
+        if (child_process.execFile.restore) {
+            child_process.execFile.restore();
+        }
+    })
 
     describe("installs module", function() {
-        it("rejects invalid module names", function(done) {
-            var promises = [];
-            promises.push(installer.installModule("this_wont_exist "));
-            promises.push(installer.installModule("this_wont_exist;no_it_really_wont"));
-            when.settle(promises).then(function(results) {
-                results[0].state.should.be.eql("rejected");
-                results[1].state.should.be.eql("rejected");
-                done();
-            });
-        });
-
         it("rejects when npm returns a 404", function(done) {
-            var exec = sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
+            sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
                 cb(new Error(),""," 404  this_wont_exist");
             });
 
             installer.installModule("this_wont_exist").otherwise(function(err) {
                 err.code.should.be.eql(404);
                 done();
-            }).finally(function() {
-                exec.restore();
             });
         });
         it("rejects with generic error", function(done) {
-            var exec = sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
+            sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
                 cb(new Error("test_error"),"","");
             });
 
@@ -62,13 +55,11 @@ describe('nodes/registry/installer', function() {
                 done(new Error("Unexpected success"));
             }).otherwise(function(err) {
                 done();
-            }).finally(function() {
-                exec.restore();
             });
         });
         it("succeeds when module is found", function(done) {
             var nodeInfo = {nodes:{module:"foo",types:["a"]}};
-            var exec = sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
+            sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
                 cb(null,"","");
             });
             var addModule = sinon.stub(registry,"addModule",function(md) {
@@ -84,10 +75,37 @@ describe('nodes/registry/installer', function() {
             }).otherwise(function(err) {
                 done(err);
             }).finally(function() {
-                exec.restore();
                 addModule.restore();
             });
         });
+        it("rejects when non-existant path is provided", function(done) {
+            var resourcesDir = path.resolve(path.join(__dirname,"..","resources","TestNodeModule","node_modules","NonExistant"));
+            installer.installModule(resourcesDir).then(function() {
+                done(new Error("Unexpected success"));
+            }).otherwise(function(err) {
+                err.code.should.eql(404);
+                done();
+            });
+        });
+        it("succeeds when path is valid node-red module", function(done) {
+            var nodeInfo = {nodes:{module:"foo",types:["a"]}};
+            var addModule = sinon.stub(registry,"addModule",function(md) {
+                return when.resolve(nodeInfo);
+            });
+            var resourcesDir = path.resolve(path.join(__dirname,"..","resources","TestNodeModule","node_modules","TestNodeModule"));
+            sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
+                cb(null,"","");
+            });
+            installer.installModule(resourcesDir).then(function(info) {
+                info.should.eql(nodeInfo);
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            }).finally(function() {
+                addModule.restore();
+            });
+        });
+
     });
     describe("uninstalls module", function() {
         it("rejects invalid module names", function(done) {
@@ -106,7 +124,7 @@ describe('nodes/registry/installer', function() {
             var removeModule = sinon.stub(registry,"removeModule",function(md) {
                 return when.resolve(nodeInfo);
             });
-            var exec = sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
+            sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
                 cb(new Error("test_error"),"","");
             });
 
@@ -115,7 +133,6 @@ describe('nodes/registry/installer', function() {
             }).otherwise(function(err) {
                 done();
             }).finally(function() {
-                exec.restore();
                 removeModule.restore();
             });
         });
@@ -127,7 +144,7 @@ describe('nodes/registry/installer', function() {
             var getModuleInfo = sinon.stub(registry,"getModuleInfo",function(md) {
                 return {nodes:[]};
             });
-            var exec = sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
+            sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
                 cb(null,"","");
             });
 
@@ -142,7 +159,6 @@ describe('nodes/registry/installer', function() {
             }).otherwise(function(err) {
                 done(err);
             }).finally(function() {
-                exec.restore();
                 removeModule.restore();
                 exists.restore();
                 getModuleInfo.restore();

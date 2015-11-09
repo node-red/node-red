@@ -321,34 +321,6 @@ function addModule(module) {
     }
 }
 
-function addFile(file) {
-    if (!settings.available()) {
-        throw new Error("Settings unavailable");
-    }
-    var info = registry.getNodeInfo("node-red/"+path.basename(file).replace(/^\d+-/,"").replace(/\.js$/,""));
-    if (info) {
-        var err = new Error("File already loaded");
-        err.code = "file_already_loaded";
-        return when.reject(err);
-    }
-    var nodeFiles = localfilesystem.getLocalFile(file);
-    if (nodeFiles) {
-        var fileObj = {};
-        fileObj[nodeFiles.module] = {
-            name: nodeFiles.module,
-            version: nodeFiles.version,
-            nodes: {}
-        };
-        fileObj[nodeFiles.module].nodes[nodeFiles.name] = nodeFiles;
-
-        return loadNodeFiles(fileObj);
-    } else {
-        var e = new Error();
-        e.code = 404;
-        return when.reject(e);
-    }
-}
-
 function loadNodeHelp(node,lang) {
     var dir = path.dirname(node.template);
     var base = path.basename(node.template);
@@ -385,7 +357,6 @@ module.exports = {
     init: init,
     load: load,
     addModule: addModule,
-    addFile: addFile,
     loadNodeSet: loadNodeSet,
     getNodeHelp: getNodeHelp
 }

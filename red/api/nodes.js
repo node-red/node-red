@@ -59,20 +59,17 @@ module.exports = {
             comms.publish("node/added",info.nodes,false);
             if (node.module) {
                 log.audit({event: "nodes.install",module:node.module},req);
-                res.json(redNodes.getModuleInfo(node.module));
-            } else if (node.file) {
-                log.audit({event: "nodes.install",file:node.file},req);
-                res.json(info.nodes[0]);
+                res.json(info);
             }
         }).otherwise(function(err) {
             if (err.code === 404) {
-                log.audit({event: "nodes.install",module:node.module,file:node.file,error:"not_found"},req);
+                log.audit({event: "nodes.install",module:node.module,error:"not_found"},req);
                 res.status(404).end();
             } else if (err.code) {
                 log.audit({event: "nodes.install",module:node.module,error:err.code},req);
                 res.status(400).json({error:err.code, message:err.message});
             } else {
-                log.audit({event: "nodes.install",module:node.module,file:node.file,error:err.code||"unexpected_error",message:err.toString()},req);
+                log.audit({event: "nodes.install",module:node.module,error:err.code||"unexpected_error",message:err.toString()},req);
                 res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
             }
         });

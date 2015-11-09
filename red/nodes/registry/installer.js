@@ -28,37 +28,74 @@ var child_process = require('child_process');
 
 var settings;
 
+var moduleRe = /^[^/]+$/;
+var slashRe = process.platform === "win32" ? /\\|[/]/ : /[/]/;
+
 function init(_settings) {
     settings = _settings;
+}
+
+function checkModulePath(folder) {
+    var moduleName;
+    var err;
+    var fullPath = path.resolve(folder);
+    var packageFile = path.join(fullPath,'package.json');
+    if (fs.existsSync(packageFile)) {
+        var pkg = require(packageFile);
+        moduleName = pkg.name;
+        if (!pkg['node-red']) {
+            // TODO: nls
+            err = new Error("Invalid Node-RED module");
+            err.code = 'invalid_module';
+            throw err;
+        }
+    } else {
+        err = new Error("Module not found");
+        err.code = 404;
+        throw err;
+    }
+    return moduleName;
+}
+
+function checkExistingModule(module) {
+    if (registry.getModuleInfo(module)) {
+        // TODO: nls
+        var err = new Error("Module already loaded");
+        err.code = "module_already_loaded";
+        throw err;
+    }
 }
 
 function installModule(module) {
     //TODO: ensure module is 'safe'
     return when.promise(function(resolve,reject) {
-        if (/[\s;]/.test(module)) {
-            reject(new Error(log._("server.install.invalid")));
-            return;
-        }
-        if (registry.getModuleInfo(module)) {
-            // TODO: nls
-            var err = new Error("Module already loaded");
-            err.code = "module_already_loaded";
-            reject(err);
-            return;
+        var installName = module;
+
+        try {
+            if (moduleRe.test(module)) {
+                // Simple module name - assume it can be npm installed
+            } else if (slashRe.test(module)) {
+                // A path - check if there's a valid package.json
+                installName = module;
+                module = checkModulePath(module);
+            }
+            checkExistingModule(module);
+        } catch(err) {
+            return reject(err);
         }
         log.info(log._("server.install.installing",{name: module}));
 
         var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
-        var child = child_process.execFile('npm',['install','--production',module],
+        var child = child_process.execFile('npm',['install','--production',installName],
             {
                 cwd: installDir
             },
             function(err, stdin, stdout) {
                 if (err) {
-                    var lookFor404 = new RegExp(" 404 .*"+module+"$","m");
+                    var lookFor404 = new RegExp(" 404 .*"+installName+"$","m");
                     if (lookFor404.test(stdout)) {
                         log.warn(log._("server.install.install-failed-not-found",{name:module}));
-                        var e = new Error();
+                        var e = new Error("Module not found");
                         e.code = 404;
                         reject(e);
                     } else {
