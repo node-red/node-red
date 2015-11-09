@@ -451,4 +451,50 @@ describe('flows/index', function() {
             });
         });
     });
+
+    describe('#checkTypeInUse', function() {
+
+        before(function() {
+            sinon.stub(typeRegistry,"getNodeInfo",function(id) {
+                if (id === 'unused-module') {
+                    return {types:['one','two','three']}
+                } else {
+                    return {types:['one','test','three']}
+                }
+            });
+        });
+
+        after(function() {
+            typeRegistry.getNodeInfo.restore();
+        });
+
+        it('returns cleanly if type not is use', function(done) {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            flows.init({},storage);
+            flows.setFlows(originalConfig).then(function() {
+                flows.checkTypeInUse("unused-module");
+                done();
+            });
+        });
+        it('throws error if type is in use', function(done) {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            flows.init({},storage);
+            flows.setFlows(originalConfig).then(function() {
+                /*jshint immed: false */
+                try {
+                    flows.checkTypeInUse("used-module");
+                    done("type_in_use error not thrown");
+                } catch(err) {
+                    err.code.should.eql("type_in_use");
+                    done();
+                }
+            });
+        });
+    });
 });

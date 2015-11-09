@@ -21,11 +21,13 @@ var path = require("path");
 var events = require("../../events");
 var registry = require("./registry");
 var loader = require("./loader");
+var installer = require("./installer");
 
 var settings;
 
 function init(_settings) {
     settings = _settings;
+    installer.init(settings);
     loader.init(settings);
     registry.init(settings,loader);
 }
@@ -75,6 +77,9 @@ module.exports = {
 
     addModule: addModule,
     removeModule: registry.removeModule,
+
+    installModule: installer.installModule,
+    uninstallModule: installer.uninstallModule,
 
     cleanModuleList: registry.cleanModuleList
 };

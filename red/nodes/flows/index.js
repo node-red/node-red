@@ -322,7 +322,30 @@ function stop(type,diff) {
 }
 
 
-
+function checkTypeInUse(id) {
+    var nodeInfo = typeRegistry.getNodeInfo(id);
+    if (!nodeInfo) {
+        throw new Error(log._("nodes.index.unrecognised-id", {id:id}));
+    } else {
+        var inUse = {};
+        var config = getConfig();
+        config.forEach(function(n) {
+            inUse[n.type] = (inUse[n.type]||0)+1;
+        });
+        var nodesInUse = [];
+        nodeInfo.types.forEach(function(t) {
+            if (inUse[t]) {
+                nodesInUse.push(t);
+            }
+        });
+        if (nodesInUse.length > 0) {
+            var msg = nodesInUse.join(", ");
+            var err = new Error(log._("nodes.index.type-in-use", {msg:msg}));
+            err.code = "type_in_use";
+            throw err;
+        }
+    }
+}
 
 module.exports = {
     init: init,
@@ -362,5 +385,8 @@ module.exports = {
 
 
     handleError: handleError,
-    handleStatus: handleStatus
+    handleStatus: handleStatus,
+
+    checkTypeInUse: checkTypeInUse
+
 };
