@@ -71,7 +71,7 @@ module.exports = {
     // By default, these are served relative to '/'. The following property
     // can be used to specifiy a different root path. If set to false, this is
     // disabled.
-    //httpNodeRoot: '/nodes',
+    //httpNodeRoot: '/red-nodes',
 
     // To password protect the node-defined HTTP endpoints, the following property
     // can be used.
