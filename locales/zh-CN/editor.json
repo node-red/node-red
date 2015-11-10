@@ -1,0 +1,208 @@
+{
+    "common": {
+        "label": {
+            "name": "名称",
+            "ok": "确定",
+            "cancel": "取消",
+            "delete": "删除",
+            "close": "关闭"
+        }
+    },
+    "workspace": {
+        "defaultName": "工作表 __number__",
+        "renameSheet": "重命名工作表",
+        "confirmDelete": "确认删除",
+        "delete": "确定要删除 '__label__'?",
+        "dropFlowHere": "放置工作流在这里"
+    },
+    "menu": {
+        "label": {
+            "sidebar": {
+                "sidebar": "侧边栏",
+                "show": "切换侧边栏"
+            },
+            "displayStatus": "显示节点状态",
+            "displayConfig": "配置节点 ",
+            "import": "导入",
+            "export": "导出",
+            "clipboard": "剪贴板",
+            "library": "库",
+            "subflows": "子工作流",
+            "createSubflow": "创建子工作流",
+            "selectionToSubflow": "选择到子工作流",
+            "flows": "标签",
+            "add": "添加",
+            "rename": "重命名",
+            "delete": "删除",
+            "keyboardShortcuts": "快捷键",
+            "login": "登入",
+            "logout": "登出"
+        }
+    },
+    "user": {
+        "loggedInAs": "__name__已登录",
+        "login": "登入",
+        "loginFailed": "登录失败"
+    },
+    "notification": {
+        "warning": "<strong>警告</strong>: __message__",
+        "warnings": {
+            "undeployedChanges": "节点存在未部署的修改",
+            "nodeActionDisabled": "该操作在子工作流中被禁止"
+        },
+
+        "error": "<strong>错误</strong>: __message__",
+        "errors": {
+            "lostConnection": "失去连接",
+            "cannotAddSubflowToItself": "无法为子工作流添加子工作流",
+            "cannotAddCircularReference": "无法添加子工作流 - 检测到循环引用",
+            "repeatPin": "无法部署 - 存在重复的管脚号"
+        }
+    },
+    "clipboard": {
+        "nodes": "节点:",
+        "selectNodes": "选择上边的文本并复制到剪贴板中.",
+        "pasteNodes": "将复制的节点粘贴到这里",
+        "importNodes": "导入节点",
+        "exportNodes": "导出节点到剪贴板",
+        "importUnrecognised": "导入无法识别的类型:",
+        "importUnrecognised_plural": "导入无法识别的类型:",
+        "nodeCopied": "拷贝了 __count__ 个节点",
+        "nodeCopied_plural": "拷贝了 __count__ 个节点",
+        "invalidFlow": "非法工作流: __message__"
+    },
+    "deploy": {
+        "deploy": "部署",
+        "full": "全部",
+        "fullDesc": "部署工作区中的所有节点",
+        "modifiedFlows": "有修改的工作流",
+        "modifiedFlowsDesc": "只部署包含修改的工作流",
+        "modifiedNodes": "有修改的节点",
+        "modifiedNodesDesc": "只部署有修改的节点",
+        "successfulDeploy": "部署成功",
+        "errors": {
+            "noResponse": "服务器无响应"
+        },
+        "confirm": {
+            "button": {
+                "confirm": "确认部署",
+                "cancel": "取消"
+            },
+            "undeployedChanges": "存在未部署的修改.\n\n离开当前页面，所有的修改将丢失.",
+            "improperlyConfigured": "部分节点没有经过配置",
+            "unknown": "工作区包含未知的节点类型:",
+            "unusedConfig": "工作区包含未使用的配置过的节点:",
+            "confirm": "您确定要部署吗?"
+        }
+    },
+    "subflow": {
+        "editSubflow": "编辑子工作流 __name__",
+        "edit": "编辑子工作流",
+        "subflowInstances": "子工作流中包含 __count__ 个实体",
+        "subflowInstances_plural": "子工作流中包含 __count__ 个实体",
+        "editSubflowName": "编辑子工作流名称",
+        "input": "输入",
+        "output": "输出",
+        "deleteSubflow": "删除子工作流",
+        "info": "描述",
+        "format":"markdown 格式",
+        "errors": {
+            "noNodesSelected": "<strong>无法创建子工作流</strong>: 未选中任何节点",
+            "multipleInputsToSelection": "<strong>无法创建子工作流</strong>: 选择了多个输入"
+        }
+    },
+    "editor": {
+        "configEdit": "编辑",
+        "configAdd": "添加",
+        "configDelete": "删除",
+        "nodesUse": "__count__ 个节点使用了这个配置",
+        "nodesUse_plural": "__count__ 个节点使用了这个配置",
+        "addNewConfig": "添加了新的 __type__ 类型节点",
+        "editConfig": "编辑了新的 __type__ 类型节点",
+        "addNewType": "添加了新的类型：__type__...",
+        "errors": {
+            "scopeChange": "改变作用域会使这个节点在包含该节点的其他工作流中无法使用"
+        }
+    },
+    "keyboard": {
+        "selectAll": "选择所有节点",
+        "selectAllConnected": "选择所有链接的节点",
+        "addRemoveNode": "从选择的节点中添加/移除节点",
+        "deleteSelected": "删除或连接选择的节点",
+        "importNode": "导入节点",
+        "exportNode": "导出选择的节点",
+        "toggleSidebar": "切换侧边栏",
+        "deleteNode": "删除或连接选择的节点",
+        "copyNode": "复制选择的节点",
+        "cutNode": "剪切选择的节点",
+        "pasteNode": "粘贴节点"
+    },
+    "library": {
+        "openLibrary": "打开库...",
+        "saveToLibrary": "保存到库...",
+        "typeLibrary": "__type__ 库",
+        "unnamedType": "未命名的类型： __type__",
+        "saveToLibrary": "保存到库",
+        "exportToLibrary": "导出节点到库",
+        "dialogSaveOverwrite": "存在名为 __libraryName__ 的 __libraryType__ 类型节点. 覆盖?",
+        "invalidFilename": "文件名无效",
+        "savedNodes": "保存节点",
+        "savedType": "保存 __type__ 类型",
+        "saveFailed": "保存失败: __message__",
+
+        "filename": "文件名",
+        "folder": "文件夹",
+        "filenamePlaceholder": "文件",
+        "fullFilenamePlaceholder": "a/b/文件",
+        "folderPlaceholder": "a/b",
+
+        "breadcrumb": "库"
+    },
+    "palette": {
+        "noInfo": "无信息",
+        "filter": "过滤节点",
+        "label": {
+            "subflows": "子工作流",
+            "input": "输入",
+            "output": "输出",
+            "function": "功能",
+            "social": "社交",
+            "storage": "存储",
+            "analysis": "分析",
+            "advanced": "高级"
+        },
+        "event": {
+            "nodeAdded": "添加节点到面板:",
+            "nodeAdded_plural": "添加节点到面板",
+            "nodeRemoved": "从面板中移除节点:",
+            "nodeRemoved_plural": "从面板中移除节点:",
+            "nodeEnabled": "节点启用:",
+            "nodeEnabled_plural": "节点启用:",
+            "nodeDisabled": "节点被禁用:",
+            "nodeDisabled_plural": "节点被禁用:"
+        }
+    },
+    "sidebar": {
+        "info": {
+            "name": "名称",
+            "label": "信息",
+            "node": "节点",
+            "type": "类型",
+            "id": "编号",
+            "subflow": "子工作流",
+            "instances": "实体",
+            "properties": "属性",
+            "blank": "空白",
+            "arrayItems": "__count__ 个实体"
+        },
+        "config": {
+            "name": "配置节点",
+            "label": "配置",
+            "local": "在当前工作流中",
+            "global": "在所有工作流中",
+            "none": "无",
+            "subflows": "子工作流",
+            "flows": "工作流"
+        }
+    }
+}
