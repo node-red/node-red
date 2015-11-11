@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-var express = require('express');
 var when = require('when');
 
 var redNodes = require("./nodes");
@@ -22,23 +21,27 @@ var comms = require("./comms");
 var storage = require("./storage");
 var log = require("./log");
 var i18n = require("./i18n");
-
-var app = null;
-var nodeApp = null;
-var server = null;
-var settings = null;
+var events = require("./events");
+var settings = require("./settings");
+var path = require('path');
+var fs = require("fs");
 
 var runtimeMetricInterval = null;
 
+function init(server,userSettings) {
+    userSettings.version = version();
+    log.init(userSettings);
+    settings.init(userSettings);
+    comms.init(server,settings);
+}
 
-function init(_server,_settings) {
-    server = _server;
-    settings = _settings;
-
-    comms.init(_server,_settings);
-
-    nodeApp = express();
-    app = express();
+function version() {
+    var p = require(path.join(process.env.NODE_RED_HOME,"package.json")).version;
+    /* istanbul ignore else */
+    if (fs.existsSync(path.join(process.env.NODE_RED_HOME,".git"))) {
+        p += "-git";
+    }
+    return p;
 }
 
 function start() {
@@ -46,9 +49,6 @@ function start() {
         .then(function() { return storage.init(settings)})
         .then(function() { return settings.load(storage)})
         .then(function() {
-            if (settings.httpAdminRoot !== false) {
-                require("./api").init(app,storage);
-            }
 
             if (log.metric()) {
                 runtimeMetricInterval = setInterval(function() {
@@ -141,12 +141,19 @@ function stop() {
     comms.stop();
 }
 
-var serverAPI = module.exports = {
+var runtime = module.exports = {
     init: init,
     start: start,
     stop: stop,
 
-    get app() { return app },
-    get nodeApp() { return nodeApp },
-    get server() { return server }
+    version: version,
+
+    log: log,
+    i18n: i18n,
+    settings: settings,
+    storage: storage,
+    comms: comms,
+    events: events,
+    api: redNodes,
+    util: require("./util")
 }

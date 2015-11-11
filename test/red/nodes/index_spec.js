@@ -145,7 +145,7 @@ describe("red/nodes/index", function() {
        var registry = require("../../../red/nodes/registry");
        var randomNodeInfo = {id:"5678",types:["random"]};
 
-       before(function() {
+       beforeEach(function() {
            sinon.stub(registry,"getNodeInfo",function(id) {
                if (id == "test") {
                    return {id:"1234",types:["test"]};
@@ -159,7 +159,7 @@ describe("red/nodes/index", function() {
                return randomNodeInfo;
            });
        });
-       after(function() {
+       afterEach(function() {
            registry.getNodeInfo.restore();
            registry.disableNode.restore();
        });

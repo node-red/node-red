@@ -21,30 +21,26 @@ var sinon = require('sinon');
 var when = require('when');
 
 var app = express();
-var settings = require("../../../red/settings");
 var info = require("../../../red/api/info");
-
 var theme = require("../../../red/api/theme");
 
 describe("info api", function() {
     describe("settings handler", function() {
         before(function() {
-            var userSettings = {
-                foo: 123,
-                httpNodeRoot: "testHttpNodeRoot",
-                version: "testVersion",
-                paletteCategories :["red","blue","green"]
-            }
-            settings.init(userSettings);
-            
             sinon.stub(theme,"settings",function() { return { test: 456 };});
-            
+            info.init({
+                settings: {
+                    foo: 123,
+                    httpNodeRoot: "testHttpNodeRoot",
+                    version: "testVersion",
+                    paletteCategories :["red","blue","green"]
+                }
+            })
             app = express();
             app.get("/settings",info.settings);
         });
 
         after(function() {
-            settings.reset();
             theme.settings.restore();
         });
 

@@ -14,12 +14,16 @@
  * limitations under the License.
  **/
 
-var log = require("../log");
-
-var redNodes = require("../nodes");
-var settings = require("../settings");
+var log;
+var redNodes;
+var settings;
 
 module.exports = {
+    init: function(runtime) {
+        settings = runtime.settings;
+        redNodes = runtime.api;
+        log = runtime.log;
+    },
     get: function(req,res) {
         log.audit({event: "flows.get"},req);
         res.json(redNodes.getFlows());

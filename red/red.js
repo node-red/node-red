@@ -14,21 +14,17 @@
  * limitations under the License.
  **/
 
-var server = require("./server");
-var nodes = require("./nodes");
-var library = require("./api/library");
-var comms = require("./comms");
-var log = require("./log");
-var util = require("./util");
-var i18n = require("./i18n");
 var fs = require("fs");
-var settings = require("./settings");
-var credentials = require("./nodes/credentials");
-var auth = require("./api/auth");
 var path = require('path');
-var events = require("events");
+
+var runtime = require("./runtime");
+var api = require("./api");
 
 process.env.NODE_RED_HOME = process.env.NODE_RED_HOME || path.resolve(__dirname+"/..");
+
+var nodeApp = null;
+var adminApp = null;
+var server = null;
 
 function checkBuild() {
     var editorFile = path.resolve(path.join(__dirname,"..","public","red","red.min.js"));
@@ -43,40 +39,44 @@ function checkBuild() {
 
 var RED = {
     init: function(httpServer,userSettings) {
+        server = httpServer;
+
         if (!userSettings.SKIP_BUILD_CHECK) {
             checkBuild();
         }
-        userSettings.version = this.version();
-        log.init(userSettings);
-        settings.init(userSettings);
-        server.init(httpServer,settings);
-        return server.app;
-    },
-    start: server.start,
-    stop: server.stop,
-    nodes: nodes,
-    library: { register: library.register },
-    credentials: credentials,
-    events: events,
-    log: log,
-    comms: comms,
-    settings:settings,
-    util: util,
-    auth: {
-        needsPermission: auth.needsPermission
-    },
-    version: function () {
-        var p = require(path.join(process.env.NODE_RED_HOME,"package.json")).version;
-        /* istanbul ignore else */
-        if (fs.existsSync(path.join(process.env.NODE_RED_HOME,".git"))) {
-            p += "-git";
+        runtime.init(httpServer,userSettings);
+        if (userSettings.httpAdminRoot !== false || userSettings.httpNodeRoot !== false) {
+            api.init(runtime);
+            adminApp = api.adminApp();
+            nodeApp = api.nodeApp();
         }
-        return p;
+
+        if (adminApp === null) {
+            adminApp = {
+                get:function(){},
+                post: function(){},
+                put: function(){},
+                delete: function(){}
+            }
+        }
+        return runtime.app;
     },
-    get app() { console.log("Deprecated use of RED.app - use RED.httpAdmin instead"); return server.app },
-    get httpAdmin() { return server.app },
-    get httpNode() { return server.nodeApp },
-    get server() { return server.server }
+    start: runtime.start,
+    stop: runtime.stop,
+    nodes: runtime.api,
+    events: runtime.events,
+    log: runtime.log,
+    comms: runtime.comms,
+    settings:runtime.settings,
+    util: runtime.util,
+    version: runtime.version,
+    library: api.library,
+    auth: api.auth,
+
+    get app() { console.log("Deprecated use of RED.app - use RED.httpAdmin instead"); return runtime.app },
+    get httpAdmin() { return adminApp },
+    get httpNode() { return nodeApp },
+    get server() { return server }
 };
 
 module.exports = RED;

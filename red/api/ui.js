@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2014 IBM Corp.
+ * Copyright 2013, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,26 +21,26 @@ var theme = require("./theme");
 
 var Mustache = require("mustache");
 
-var events = require("../events");
-var settings;
-
 var icon_paths = [path.resolve(__dirname + '/../../public/icons')];
 var iconCache = {};
 //TODO: create a default icon
 var defaultIcon = path.resolve(__dirname + '/../../public/icons/arrow-in.png');
-
-events.on("node-icon-dir",function(dir) {
-    icon_paths.push(path.resolve(dir));
-});
-
 var templateDir = path.resolve(__dirname+"/../../editor/templates");
 var editorTemplate;
 
+function nodeIconDir(dir) {
+    icon_paths.push(path.resolve(dir));
+}
+
 module.exports = {
-    init: function(_settings) {
-        settings = _settings;
+    init: function(runtime) {
         editorTemplate = fs.readFileSync(path.join(templateDir,"index.mst"),"utf8");
         Mustache.parse(editorTemplate);
+        // TODO: this allows init to be called multiple times without
+        //       registering multiple instances of the listener.
+        //       It isn't.... ideal.
+        runtime.events.removeListener("node-icon-dir",nodeIconDir);
+        runtime.events.on("node-icon-dir",nodeIconDir);
     },
 
     ensureSlash: function(req,res,next) {

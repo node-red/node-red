@@ -18,8 +18,6 @@ var when = require("when");
 
 var log = require("../log");
 
-var needsPermission = require("../api/auth").needsPermission;
-
 var credentialCache = {};
 var storage = null;
 var credentialsDef = {};

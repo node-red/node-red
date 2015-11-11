@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-var redNodes = require("../nodes");
-var comms = require("../comms");
-var log = require("../log");
-var i18n = require("../i18n");
 
 var when = require("when");
-
-var settings = require("../settings");
+var redNodes;
+var comms;
+var log;
+var i18n;
+var settings;
 
 module.exports = {
+    init: function(runtime) {
+        redNodes = runtime.api;
+        comms = runtime.comms;
+        log = runtime.log;
+        i18n = runtime.i18n;
+        settings = runtime.settings;
+    },
     getAll: function(req,res) {
         if (req.get("accept") == "application/json") {
             log.audit({event: "nodes.list.get"},req);

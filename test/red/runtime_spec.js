@@ -20,18 +20,23 @@ var sinon = require("sinon");
 var comms = require("../../red/comms");
 var redNodes = require("../../red/nodes");
 var api = require("../../red/api");
-var server = require("../../red/server");
+var runtime = require("../../red/runtime");
 var storage = require("../../red/storage");
 var settings = require("../../red/settings");
 var log = require("../../red/log");
 
-describe("red/server", function() {
+describe("red/runtime", function() {
     var commsMessages = [];
     var commsPublish;
 
     beforeEach(function() {
         commsMessages = [];
     });
+    afterEach(function() {
+        if (console.log.restore) {
+            console.log.restore();
+        }
+    })
 
     before(function() {
         commsPublish = sinon.stub(comms,"publish", function(topic,msg,retained) {
@@ -42,26 +47,48 @@ describe("red/server", function() {
         commsPublish.restore();
     });
 
-    it("initialises components", function() {
-        var commsInit = sinon.stub(comms,"init",function() {});
-        var dummyServer = {};
-        server.init(dummyServer,{testSettings: true, httpAdminRoot:"/", load:function() { return when.resolve();}});
+    describe("init", function() {
+        var commsInit;
+        var apiInit;
+        beforeEach(function() {
+            commsInit = sinon.stub(comms,"init",function() {});
+            apiInit = sinon.stub(api,"init",function() {});
+        });
+        afterEach(function() {
+            commsInit.restore();
+            apiInit.restore();
+        })
 
-        commsInit.called.should.be.true;
+        it("initialises components", function() {
+            var dummyServer = {};
+            runtime.init(dummyServer,{testSettings: true, httpAdminRoot:"/", load:function() { return when.resolve();}});
+            commsInit.called.should.be.true;
+            apiInit.called.should.be.true;
 
-        should.exist(server.app);
-        should.exist(server.nodeApp);
+            should.exist(runtime.app);
+            should.exist(runtime.nodeApp);
 
-        server.server.should.equal(dummyServer);
+            runtime.server.should.equal(dummyServer);
+        });
 
-        commsInit.restore();
+        it("doesn't init api if httpAdminRoot set to false",function() {
+
+            var dummyServer = {};
+            runtime.init(dummyServer,{testSettings: true, httpAdminRoot:false, load:function() { return when.resolve();}});
+            commsInit.called.should.be.true;
+            apiInit.called.should.be.false;
+
+            should.exist(runtime.app);
+            should.exist(runtime.nodeApp);
+
+            runtime.server.should.equal(dummyServer);
+        });
     });
 
     describe("start",function() {
         var commsInit;
         var storageInit;
         var settingsLoad;
-        var apiInit;
         var logMetric;
         var logWarn;
         var logInfo;
@@ -77,7 +104,6 @@ describe("red/server", function() {
         beforeEach(function() {
             commsInit = sinon.stub(comms,"init",function() {});
             storageInit = sinon.stub(storage,"init",function(settings) {return when.resolve();});
-            apiInit = sinon.stub(api,"init",function() {});
             logMetric = sinon.stub(log,"metric",function() { return false; });
             logWarn = sinon.stub(log,"warn",function() { });
             logInfo = sinon.stub(log,"info",function() { });
@@ -92,7 +118,6 @@ describe("red/server", function() {
         afterEach(function() {
             commsInit.restore();
             storageInit.restore();
-            apiInit.restore();
             logMetric.restore();
             logWarn.restore();
             logInfo.restore();
@@ -112,10 +137,11 @@ describe("red/server", function() {
                     {  module:"module",enabled:true,loaded:false,types:["typeA","typeB"]} // missing
                 ].filter(cb);
             });
-            server.init({},{testSettings: true, httpAdminRoot:"/", load:function() { return when.resolve();}});
-            server.start().then(function() {
+            runtime.init({},{testSettings: true, httpAdminRoot:"/", load:function() { return when.resolve();}});
+            sinon.stub(console,"log");
+            runtime.start().then(function() {
+                console.log.restore();
                 try {
-                    apiInit.calledOnce.should.be.true;
                     storageInit.calledOnce.should.be.true;
                     redNodesInit.calledOnce.should.be.true;
                     redNodesLoad.calledOnce.should.be.true;
@@ -142,10 +168,11 @@ describe("red/server", function() {
                 ].filter(cb);
             });
             var serverInstallModule = sinon.stub(redNodes,"installModule",function(name) { return when.resolve();});
-            server.init({},{testSettings: true, autoInstallModules:true, httpAdminRoot:"/", load:function() { return when.resolve();}});
-            server.start().then(function() {
+            runtime.init({},{testSettings: true, autoInstallModules:true, httpAdminRoot:"/", load:function() { return when.resolve();}});
+            sinon.stub(console,"log");
+            runtime.start().then(function() {
+                console.log.restore();
                 try {
-                    apiInit.calledOnce.should.be.true;
                     logWarn.calledWithMatch("Failed to register 2 node types");
                     logWarn.calledWithMatch("Missing node modules");
                     logWarn.calledWithMatch(" - module: typeA, typeB");
@@ -167,11 +194,11 @@ describe("red/server", function() {
                     {  err:"errored",name:"errName" } // error
                 ].filter(cb);
             });
-            server.init({},{testSettings: true, verbose:true, httpAdminRoot:"/", load:function() { return when.resolve();}});
-            server.start().then(function() {
-
+            runtime.init({},{testSettings: true, verbose:true, httpAdminRoot:"/", load:function() { return when.resolve();}});
+            sinon.stub(console,"log");
+            runtime.start().then(function() {
+                console.log.restore();
                 try {
-                    apiInit.calledOnce.should.be.true;
                     logWarn.neverCalledWithMatch("Failed to register 1 node type");
                     logWarn.calledWithMatch("[errName] errored");
                     done();
@@ -187,11 +214,12 @@ describe("red/server", function() {
             redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function() {return []});
             logMetric.restore();
             logMetric = sinon.stub(log,"metric",function() { return true; });
-            server.init({},{testSettings: true, runtimeMetricInterval:400, httpAdminRoot:"/", load:function() { return when.resolve();}});
-            server.start().then(function() {
+            runtime.init({},{testSettings: true, runtimeMetricInterval:200, httpAdminRoot:"/", load:function() { return when.resolve();}});
+            sinon.stub(console,"log");
+            runtime.start().then(function() {
+                console.log.restore();
                 setTimeout(function() {
                     try {
-                        apiInit.calledOnce.should.be.true;
                         logLog.args.should.have.lengthOf(3);
                         logLog.args[0][0].should.have.property("level",log.METRIC);
                         logLog.args[0][0].should.have.property("event","runtime.memory.rss");
@@ -203,35 +231,22 @@ describe("red/server", function() {
                     } catch(err) {
                         done(err);
                     } finally {
-                        server.stop();
+                        runtime.stop();
                         commsStop.restore();
                         stopFlows.restore();
                     }
-                },500);
+                },300);
             });
         });
 
-        it("doesn't init api if httpAdminRoot set to false",function(done) {
-            redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function() {return []});
-            server.init({},{testSettings: true, httpAdminRoot:false, load:function() { return when.resolve();}});
-            server.start().then(function() {
-                setTimeout(function() {
-                    try {
-                        apiInit.calledOnce.should.be.false;
-                        done();
-                    } catch(err) {
-                        done(err);
-                    }
-                },500);
-            });
-        });
+
     });
 
     it("stops components", function() {
         var commsStop = sinon.stub(comms,"stop",function() {} );
         var stopFlows = sinon.stub(redNodes,"stopFlows",function() {} );
 
-        server.stop();
+        runtime.stop();
 
         commsStop.called.should.be.true;
         stopFlows.called.should.be.true;

@@ -14,10 +14,14 @@
  * limitations under the License.
  **/
 
-var log = require("../log");
-var api = require("../nodes");
+var log;
+var api;
 
 module.exports = {
+    init: function(runtime) {
+        log = runtime.log;
+        api = runtime.api;
+    },
     get: function (req, res) {
         // TODO: It should verify the given node id is of the type specified -
         //       but that would add a dependency from this module to the

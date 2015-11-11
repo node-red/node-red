@@ -22,7 +22,7 @@ var events = require("../../events");
 var log = require("../../log");
 
 var settings;
-var defaultNodesDir = path.resolve(path.join(__dirname,"..","..","..","nodes"));
+var defaultNodesDir = path.resolve(path.join(__dirname,"..","..","..","..","nodes"));
 var disableNodePathScan = false;
 
 function init(_settings,_defaultNodesDir,_disableNodePathScan) {
@@ -133,7 +133,7 @@ function scanDirForNodesModules(dir,moduleName) {
  * @return a list of node modules: {dir,package}
  */
 function scanTreeForNodesModules(moduleName) {
-    var dir = __dirname+"/../../nodes";
+    var dir = __dirname+"/../../../../nodes";
     var results = [];
     var userDir;
 

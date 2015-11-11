@@ -20,11 +20,11 @@ var settings = require("../../red/settings");
 
 
 describe("red/settings", function() {
-        
+
     afterEach(function() {
         settings.reset();
     });
-    
+
     it('wraps the user settings as read-only properties', function() {
         var userSettings = {
             a: 123,
@@ -32,22 +32,22 @@ describe("red/settings", function() {
             c: [1,2,3]
         }
         settings.init(userSettings);
-        
+
         settings.available().should.be.false;
-        
+
         settings.a.should.equal(123);
         settings.b.should.equal("test");
         settings.c.should.be.an.Array.with.lengthOf(3);
-        
+
         settings.get("a").should.equal(123);
         settings.get("b").should.equal("test");
         settings.get("c").should.be.an.Array.with.lengthOf(3);
-        
+
         /*jshint immed: false */
         (function() {
             settings.a = 456;
         }).should.throw();
-        
+
         settings.c.push(5);
         settings.c.should.be.an.Array.with.lengthOf(4);
 
@@ -55,7 +55,7 @@ describe("red/settings", function() {
         (function() {
             settings.set("a",456);
         }).should.throw();
-        
+
         /*jshint immed: false */
         (function() {
             settings.set("a",456);
@@ -70,9 +70,9 @@ describe("red/settings", function() {
         (function() {
             settings.set("unknown",456);
         }).should.throw();
-        
+
     });
-    
+
     it('loads global settings from storage', function(done) {
         var userSettings = {
             a: 123,
@@ -94,7 +94,7 @@ describe("red/settings", function() {
         settings.init(userSettings);
 
         settings.available().should.be.false;
-        
+
         /*jshint immed: false */
         (function() {
             settings.get("unknown");
@@ -117,7 +117,7 @@ describe("red/settings", function() {
             done(err);
         });
     });
-    
+
     it('removes persistent settings when reset', function() {
         var userSettings = {
             a: 123,
@@ -125,18 +125,18 @@ describe("red/settings", function() {
             c: [1,2,3]
         }
         settings.init(userSettings);
-        
+
         settings.available().should.be.false;
-        
+
         settings.should.have.property("a",123);
         settings.should.have.property("b","test");
         settings.c.should.be.an.Array.with.lengthOf(3);
-        
+
         settings.reset();
-        
+
         settings.should.not.have.property("a");
         settings.should.not.have.property("d");
         settings.should.not.have.property("c");
-        
+
     });
 });

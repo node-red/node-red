@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-var i18n = require("../i18n");
-
+var i18n;
 module.exports = {
+    init: function(runtime) {
+        i18n = runtime.i18n;
+    },
     get: function(req,res) {
         var namespace = req.params[0];
         namespace = namespace.replace(/\.json$/,"");

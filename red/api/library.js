@@ -15,9 +15,8 @@
  **/
 
 var redApp = null;
-var storage = require("../storage");
-var log = require("../log");
-
+var storage;
+var log;
 var needsPermission = require("./auth").needsPermission;
 
 function createLibrary(type) {
@@ -70,8 +69,10 @@ function createLibrary(type) {
     }
 }
 module.exports = {
-    init: function(app) {
+    init: function(app,runtime) {
         redApp = app;
+        log = runtime.log;
+        storage = runtime.storage;
     },
     register: createLibrary,
 
@@ -90,7 +91,7 @@ module.exports = {
         }).otherwise(function(err) {
             if (err) {
                 log.warn(log._("api.library.error-load-flow",{path:req.params[0],message:err.toString()}));
-                    if (err.code === 'forbidden') {
+                if (err.code === 'forbidden') {
                     log.audit({event: "library.get",type:"flow",path:req.params[0],error:"forbidden"},req);
                     res.status(403).end();
                     return;

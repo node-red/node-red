@@ -26,7 +26,7 @@ var Users = require("./users");
 var Clients = require("./clients");
 var permissions = require("./permissions");
 
-var log = require("../../log");
+var log;
 
 var bearerStrategy = function (accessToken, done) {
     // is this a valid token?
@@ -124,6 +124,9 @@ AnonymousStrategy.prototype.authenticate = function(req) {
 }
 
 module.exports = {
+    init: function(runtime) {
+        log = runtime.log;
+    },
     bearerStrategy: bearerStrategy,
     clientPasswordStrategy: clientPasswordStrategy,
     passwordTokenExchange: passwordTokenExchange,

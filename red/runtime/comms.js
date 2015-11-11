@@ -37,9 +37,9 @@ function init(_server,_settings) {
 
 
 function start() {
-    var Tokens = require("./api/auth/tokens");
-    var Users = require("./api/auth/users");
-    var Permissions = require("./api/auth/permissions");
+    var Tokens = require("../api/auth/tokens");
+    var Users = require("../api/auth/users");
+    var Permissions = require("../api/auth/permissions");
     if (!settings.disableEditor) {
         Users.default().then(function(anonymousUser) {
             var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;

@@ -29,12 +29,12 @@ var theme = require("./theme");
 var locales = require("./locales");
 var credentials = require("./credentials");
 
-var log = require("../log");
-
 var auth = require("./auth");
 var needsPermission = auth.needsPermission;
 
-var settings = require("../settings");
+var log;
+var adminApp;
+var nodeApp;
 
 var errorHandler = function(err,req,res,next) {
     if (err.message === "request entity too large") {
@@ -46,71 +46,92 @@ var errorHandler = function(err,req,res,next) {
     res.status(400).json({error:"unexpected_error", message:err.toString()});
 };
 
-function init(adminApp,storage) {
+function init(runtime) {
+    var settings = runtime.settings;
+    log = runtime.log;
+    if (settings.httpNodeRoot !== false) {
+        nodeApp = express();
+    }
+    if (settings.httpAdminRoot !== false) {
+        adminApp = express();
+        auth.init(runtime);
+        credentials.init(runtime);
+        flows.init(runtime);
+        info.init(runtime);
+        library.init(adminApp,runtime);
+        locales.init(runtime);
+        nodes.init(runtime);
 
-    auth.init(settings,storage);
-    // Editor
-    if (!settings.disableEditor) {
-        ui.init(settings);
-        var editorApp = express();
-        editorApp.get("/",ui.ensureSlash,ui.editor);
-        editorApp.get("/icons/:icon",ui.icon);
-        if (settings.editorTheme) {
-            editorApp.use("/theme",theme.init(settings));
+        // Editor
+        if (!settings.disableEditor) {
+            ui.init(runtime);
+            var editorApp = express();
+            editorApp.get("/",ui.ensureSlash,ui.editor);
+            editorApp.get("/icons/:icon",ui.icon);
+            if (settings.editorTheme) {
+                editorApp.use("/theme",theme.init(runtime));
+            }
+            editorApp.use("/",ui.editorResources);
+            adminApp.use(editorApp);
         }
-        editorApp.use("/",ui.editorResources);
-        adminApp.use(editorApp);
+        var maxApiRequestSize = settings.apiMaxLength || '1mb';
+        adminApp.use(bodyParser.json({limit:maxApiRequestSize}));
+        adminApp.use(bodyParser.urlencoded({limit:maxApiRequestSize,extended:true}));
+
+        adminApp.get("/auth/login",auth.login);
+
+        if (settings.adminAuth) {
+            //TODO: all passport references ought to be in ./auth
+            adminApp.use(passport.initialize());
+            adminApp.post("/auth/token",
+                auth.ensureClientSecret,
+                auth.authenticateClient,
+                auth.getToken,
+                auth.errorHandler
+            );
+            adminApp.post("/auth/revoke",needsPermission(""),auth.revoke);
+        }
+
+        // Flows
+        adminApp.get("/flows",needsPermission("flows.read"),flows.get);
+        adminApp.post("/flows",needsPermission("flows.write"),flows.post);
+
+        // Nodes
+        adminApp.get("/nodes",needsPermission("nodes.read"),nodes.getAll);
+        adminApp.post("/nodes",needsPermission("nodes.write"),nodes.post);
+
+        adminApp.get("/nodes/:mod",needsPermission("nodes.read"),nodes.getModule);
+        adminApp.put("/nodes/:mod",needsPermission("nodes.write"),nodes.putModule);
+        adminApp.delete("/nodes/:mod",needsPermission("nodes.write"),nodes.delete);
+
+        adminApp.get("/nodes/:mod/:set",needsPermission("nodes.read"),nodes.getSet);
+        adminApp.put("/nodes/:mod/:set",needsPermission("nodes.write"),nodes.putSet);
+
+        adminApp.get('/credentials/:type/:id', needsPermission("credentials.read"),credentials.get);
+
+        adminApp.get(/locales\/(.+)\/?$/,locales.get);
+
+        // Library
+        adminApp.post(new RegExp("/library/flows\/(.*)"),needsPermission("library.write"),library.post);
+        adminApp.get("/library/flows",needsPermission("library.read"),library.getAll);
+        adminApp.get(new RegExp("/library/flows\/(.*)"),needsPermission("library.read"),library.get);
+
+        // Settings
+        adminApp.get("/settings",needsPermission("settings.read"),info.settings);
+
+        // Error Handler
+        adminApp.use(errorHandler);
     }
-    var maxApiRequestSize = settings.apiMaxLength || '1mb';
-    adminApp.use(bodyParser.json({limit:maxApiRequestSize}));
-    adminApp.use(bodyParser.urlencoded({limit:maxApiRequestSize,extended:true}));
-
-    adminApp.get("/auth/login",auth.login);
-
-    if (settings.adminAuth) {
-        //TODO: all passport references ought to be in ./auth
-        adminApp.use(passport.initialize());
-        adminApp.post("/auth/token",
-            auth.ensureClientSecret,
-            auth.authenticateClient,
-            auth.getToken,
-            auth.errorHandler
-        );
-        adminApp.post("/auth/revoke",needsPermission(""),auth.revoke);
-    }
-
-    // Flows
-    adminApp.get("/flows",needsPermission("flows.read"),flows.get);
-    adminApp.post("/flows",needsPermission("flows.write"),flows.post);
-
-    // Nodes
-    adminApp.get("/nodes",needsPermission("nodes.read"),nodes.getAll);
-    adminApp.post("/nodes",needsPermission("nodes.write"),nodes.post);
-
-    adminApp.get("/nodes/:mod",needsPermission("nodes.read"),nodes.getModule);
-    adminApp.put("/nodes/:mod",needsPermission("nodes.write"),nodes.putModule);
-    adminApp.delete("/nodes/:mod",needsPermission("nodes.write"),nodes.delete);
-
-    adminApp.get("/nodes/:mod/:set",needsPermission("nodes.read"),nodes.getSet);
-    adminApp.put("/nodes/:mod/:set",needsPermission("nodes.write"),nodes.putSet);
-
-    adminApp.get('/credentials/:type/:id', needsPermission("credentials.read"),credentials.get);
-
-    adminApp.get(/locales\/(.+)\/?$/,locales.get);
-
-    // Library
-    library.init(adminApp);
-    adminApp.post(new RegExp("/library/flows\/(.*)"),needsPermission("library.write"),library.post);
-    adminApp.get("/library/flows",needsPermission("library.read"),library.getAll);
-    adminApp.get(new RegExp("/library/flows\/(.*)"),needsPermission("library.read"),library.get);
-
-    // Settings
-    adminApp.get("/settings",needsPermission("settings.read"),info.settings);
-
-    // Error Handler
-    adminApp.use(errorHandler);
 }
 
 module.exports = {
-    init: init
+    init: init,
+    library: {
+        register: library.register
+    },
+    auth: {
+        needsPermission: auth.needsPermission
+    },
+    adminApp: function() { return adminApp; },
+    nodeApp: function() { return nodeApp; }
 };

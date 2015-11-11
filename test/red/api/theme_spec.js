@@ -31,13 +31,13 @@ describe("theme handler", function() {
         sinon.stub(fs,"statSync",function() { return true; });
     });
     afterEach(function() {
-        theme.init({});
+        theme.init({settings:{}});
         fs.statSync.restore();
     });
     it("applies the default theme", function() {
-        var result = theme.init({});
+        var result = theme.init({settings:{}});
         should.not.exist(result);
-        
+
         var context = theme.context();
         context.should.have.a.property("page");
         context.page.should.have.a.property("title","Node-RED");
@@ -45,12 +45,12 @@ describe("theme handler", function() {
         context.should.have.a.property("header");
         context.header.should.have.a.property("title","Node-RED");
         context.header.should.have.a.property("image","red/images/node-red.png");
-        
+
         should.not.exist(theme.settings());
     });
-    
+
     it("picks up custom theme", function() {
-        var result = theme.init({
+        var result = theme.init({settings:{
             editorTheme: {
                 page: {
                     title: "Test Page Title",
@@ -61,13 +61,13 @@ describe("theme handler", function() {
                     title: "Test Header Title",
                     image: "/absolute/path/to/header/image" // or null to remove image
                 },
-                
+
                 deployButton: {
                     type:"simple",
                     label:"Save",
                     icon: "/absolute/path/to/deploy/button/image" // or null to remove image
                 },
-                
+
                 menu: { // Hide unwanted menu items by id. see editor/js/main.js:loadEditor for complete list
                     "menu-item-import-library": false,
                     "menu-item-export-library": false,
@@ -77,27 +77,27 @@ describe("theme handler", function() {
                         url: "http://example.com"
                     }
                 },
-                
+
                 userMenu: false, // Hide the user-menu even if adminAuth is enabled
-                
+
                 login: {
                     image: "/absolute/path/to/login/page/big/image" // a 256x256 image
-                }        
+                }
             }
-        });
+        }});
         should.exist(result);
-        
+
         var context = theme.context();
         context.should.have.a.property("page");
         context.page.should.have.a.property("title","Test Page Title");
         context.should.have.a.property("header");
         context.header.should.have.a.property("title","Test Header Title");
-        
+
         var settings = theme.settings();
         settings.should.have.a.property("deployButton");
         settings.should.have.a.property("userMenu");
         settings.should.have.a.property("menu");
-        
+
     });
 
 });

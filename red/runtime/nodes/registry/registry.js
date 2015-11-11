@@ -256,7 +256,7 @@ function getFullNodeInfo(typeOrId) {
         var module = moduleConfigs[getModule(id)];
         if (module) {
             return module.nodes[getNode(id)];
-        }        
+        }
     }
     return null;
 }
@@ -292,7 +292,7 @@ function getModuleList() {
     //}
     //return list;
     return moduleConfigs;
-        
+
 }
 
 function getModuleInfo(module) {
@@ -358,7 +358,7 @@ function getNodeConfig(id,lang) {
     if (config) {
         var result = config.config;
         result += loader.getNodeHelp(config,lang||"en-US")
-        
+
         //if (config.script) {
         //    result += '<script type="text/javascript">'+config.script+'</script>';
         //}
@@ -490,9 +490,9 @@ var registry = module.exports = {
     addNodeSet: addNodeSet,
     enableNodeSet: enableNodeSet,
     disableNodeSet: disableNodeSet,
-    
+
     removeModule: removeModule,
-    
+
     getNodeInfo: getNodeInfo,
     getFullNodeInfo: getFullNodeInfo,
     getNodeList: getNodeList,

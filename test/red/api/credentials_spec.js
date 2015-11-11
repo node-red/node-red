@@ -20,8 +20,6 @@ var express = require('express');
 var sinon = require('sinon');
 var when = require('when');
 
-
-var nodeApi = require("../../../red/nodes");
 var credentials = require("../../../red/api/credentials");
 
 describe('credentials api', function() {
@@ -30,26 +28,26 @@ describe('credentials api', function() {
     before(function() {
         app = express();
         app.get('/credentials/:type/:id',credentials.get);
-
-        sinon.stub(nodeApi,"getCredentials",function(id) {
-            if (id === "n1") {
-                return {user1:"abc",password1:"123"};
-            } else {
-                return null;
-            }
-        });
-        sinon.stub(nodeApi,"getCredentialDefinition",function(type) {
-            if (type === "known-type") {
-                return {user1:{type:"text"},password1:{type:"password"}};
-            } else {
-                return null;
+        credentials.init({
+            log:{audit:function(){}},
+            api:{
+                getCredentials: function(id) {
+                    if (id === "n1") {
+                        return {user1:"abc",password1:"123"};
+                    } else {
+                        return null;
+                    }
+                },
+                getCredentialDefinition:function(type) {
+                    if (type === "known-type") {
+                        return {user1:{type:"text"},password1:{type:"password"}};
+                    } else {
+                        return null;
+                    }
+                }
             }
         });
     });
-    after(function() {
-        nodeApi.getCredentials.restore();
-        nodeApi.getCredentialDefinition.restore();
-    })
     it('returns empty credentials if unknown type',function(done) {
         request(app)
             .get("/credentials/unknown-type/n1")

@@ -21,7 +21,6 @@ var bodyParser = require('body-parser');
 var sinon = require('sinon');
 var when = require('when');
 
-var redNodes = require("../../../red/nodes");
 var settings = require("../../../red/settings");
 
 var nodes = require("../../../red/api/nodes");
@@ -29,6 +28,16 @@ var nodes = require("../../../red/api/nodes");
 describe("nodes api", function() {
 
     var app;
+    function initNodes(runtime) {
+        runtime.log = {
+            audit:function(e){},//console.log(e)},
+            _:function(){},
+            info: function(){},
+            warn: function(){}
+        }
+        runtime.comms = { publish:function(){}}
+        nodes.init(runtime);
+    }
 
     before(function() {
         app = express();
@@ -44,15 +53,18 @@ describe("nodes api", function() {
 
     describe('get nodes', function() {
         it('returns node list', function(done) {
-            var getNodeList = sinon.stub(redNodes,'getNodeList', function() {
-                return [1,2,3];
+            initNodes({
+                api:{
+                    getNodeList: function() {
+                        return [1,2,3];
+                    }
+                }
             });
             request(app)
                 .get('/nodes')
                 .set('Accept', 'application/json')
                 .expect(200)
                 .end(function(err,res) {
-                    getNodeList.restore();
                     if (err) {
                         throw err;
                     }
@@ -62,8 +74,15 @@ describe("nodes api", function() {
         });
 
         it('returns node configs', function(done) {
-            var getNodeConfigs = sinon.stub(redNodes,'getNodeConfigs', function() {
-                return "<script></script>";
+            initNodes({
+                api:{
+                    getNodeConfigs: function() {
+                        return "<script></script>";
+                    }
+                },
+                i18n: {
+                    determineLangFromHeaders: function(){}
+                }
             });
             request(app)
                 .get('/nodes')
@@ -71,7 +90,6 @@ describe("nodes api", function() {
                 .expect(200)
                 .expect("<script></script>")
                 .end(function(err,res) {
-                    getNodeConfigs.restore();
                     if (err) {
                         throw err;
                     }
@@ -80,14 +98,17 @@ describe("nodes api", function() {
         });
 
         it('returns node module info', function(done) {
-            var getNodeInfo = sinon.stub(redNodes,'getModuleInfo', function(id) {
-                return {"node-red":{name:"node-red"}}[id];
+            initNodes({
+                api:{
+                    getModuleInfo: function(id) {
+                        return {"node-red":{name:"node-red"}}[id];
+                    }
+                }
             });
             request(app)
                 .get('/nodes/node-red')
                 .expect(200)
                 .end(function(err,res) {
-                    getNodeInfo.restore();
                     if (err) {
                         throw err;
                     }
@@ -97,14 +118,17 @@ describe("nodes api", function() {
         });
 
         it('returns 404 for unknown module', function(done) {
-            var getNodeInfo = sinon.stub(redNodes,'getModuleInfo', function(id) {
-                return {"node-red":{name:"node-red"}}[id];
+            initNodes({
+                api:{
+                    getModuleInfo: function(id) {
+                        return {"node-red":{name:"node-red"}}[id];
+                    }
+                }
             });
             request(app)
                 .get('/nodes/node-blue')
                 .expect(404)
                 .end(function(err,res) {
-                    getNodeInfo.restore();
                     if (err) {
                         throw err;
                     }
@@ -113,15 +137,18 @@ describe("nodes api", function() {
         });
 
         it('returns individual node info', function(done) {
-            var getNodeInfo = sinon.stub(redNodes,'getNodeInfo', function(id) {
-                return {"node-red/123":{id:"node-red/123"}}[id];
+            initNodes({
+                api:{
+                    getNodeInfo: function(id) {
+                        return {"node-red/123":{id:"node-red/123"}}[id];
+                    }
+                }
             });
             request(app)
                 .get('/nodes/node-red/123')
                 .set('Accept', 'application/json')
                 .expect(200)
                 .end(function(err,res) {
-                    getNodeInfo.restore();
                     if (err) {
                         throw err;
                     }
@@ -131,8 +158,15 @@ describe("nodes api", function() {
         });
 
         it('returns individual node configs', function(done) {
-            var getNodeConfig = sinon.stub(redNodes,'getNodeConfig', function(id) {
-                return {"node-red/123":"<script></script>"}[id];
+            initNodes({
+                api:{
+                    getNodeConfig: function(id) {
+                        return {"node-red/123":"<script></script>"}[id];
+                    }
+                },
+                i18n: {
+                    determineLangFromHeaders: function(){}
+                }
             });
             request(app)
                 .get('/nodes/node-red/123')
@@ -140,7 +174,6 @@ describe("nodes api", function() {
                 .expect(200)
                 .expect("<script></script>")
                 .end(function(err,res) {
-                    getNodeConfig.restore();
                     if (err) {
                         throw err;
                     }
@@ -149,15 +182,18 @@ describe("nodes api", function() {
         });
 
         it('returns 404 for unknown node', function(done) {
-            var getNodeInfo = sinon.stub(redNodes,'getNodeInfo', function(id) {
-                return {"node-red/123":{id:"node-red/123"}}[id];
+            initNodes({
+                api:{
+                    getNodeInfo: function(id) {
+                        return {"node-red/123":{id:"node-red/123"}}[id];
+                    }
+                }
             });
             request(app)
                 .get('/nodes/node-red/456')
                 .set('Accept', 'application/json')
                 .expect(404)
                 .end(function(err,res) {
-                    getNodeInfo.restore();
                     if (err) {
                         throw err;
                     }
@@ -169,14 +205,13 @@ describe("nodes api", function() {
     describe('install', function() {
 
         it('returns 400 if settings are unavailable', function(done) {
-            var settingsAvailable = sinon.stub(settings,'available', function() {
-                return false;
+            initNodes({
+                settings:{available:function(){return false}}
             });
             request(app)
                 .post('/nodes')
                 .expect(400)
                 .end(function(err,res) {
-                    settingsAvailable.restore();
                     if (err) {
                         throw err;
                     }
@@ -185,15 +220,14 @@ describe("nodes api", function() {
         });
 
         it('returns 400 if request is invalid', function(done) {
-            var settingsAvailable = sinon.stub(settings,'available', function() {
-                return true;
+            initNodes({
+                settings:{available:function(){return true}}
             });
             request(app)
                 .post('/nodes')
                 .send({})
                 .expect(400)
                 .end(function(err,res) {
-                    settingsAvailable.restore();
                     if (err) {
                         throw err;
                     }
@@ -203,26 +237,23 @@ describe("nodes api", function() {
 
         describe('by module', function() {
             it('installs the module and returns module info', function(done) {
-                var settingsAvailable = sinon.stub(settings,'available', function() {
-                    return true;
+                initNodes({
+                    settings:{available:function(){return true}},
+                    api:{
+                        getModuleInfo: function(id) { return null; },
+                        installModule: function() {
+                            return when.resolve({
+                                name:"foo",
+                                nodes:[{id:"123"}]
+                            });
+                        }
+                    }
                 });
-                var getModuleInfo = sinon.stub(redNodes,'getModuleInfo');
-                getModuleInfo.onCall(0).returns(null);
-                var installModule = sinon.stub(redNodes,'installModule', function() {
-                    return when.resolve({
-                        name:"foo",
-                        nodes:[{id:"123"}]
-                    });
-                });
-
                 request(app)
                     .post('/nodes')
                     .send({module: 'foo'})
                     .expect(200)
                     .end(function(err,res) {
-                        settingsAvailable.restore();
-                        getModuleInfo.restore();
-                        installModule.restore();
                         if (err) {
                             throw err;
                         }
@@ -234,24 +265,20 @@ describe("nodes api", function() {
             });
 
             it('fails the install if already installed', function(done) {
-                var settingsAvailable = sinon.stub(settings,'available', function() {
-                    return true;
+                initNodes({
+                    settings:{available:function(){return true}},
+                    api:{
+                        getModuleInfo: function(id) { return {nodes:{id:"123"}}; },
+                        installModule: function() {
+                            return when.resolve({id:"123"});
+                        }
+                    }
                 });
-                var getModuleInfo = sinon.stub(redNodes,'getModuleInfo',function(id) {
-                    return {nodes:{id:"123"}};
-                });
-                var installModule = sinon.stub(redNodes,'installModule', function() {
-                    return when.resolve({id:"123"});
-                });
-
                 request(app)
                     .post('/nodes')
                     .send({module: 'foo'})
                     .expect(400)
                     .end(function(err,res) {
-                        settingsAvailable.restore();
-                        getModuleInfo.restore();
-                        installModule.restore();
                         if (err) {
                             throw err;
                         }
@@ -260,24 +287,20 @@ describe("nodes api", function() {
             });
 
             it('fails the install if module error', function(done) {
-                var settingsAvailable = sinon.stub(settings,'available', function() {
-                    return true;
+                initNodes({
+                    settings:{available:function(){return true}},
+                    api:{
+                        getModuleInfo: function(id) { return null },
+                        installModule: function() {
+                            return when.reject(new Error("test error"));
+                        }
+                    }
                 });
-                var getModuleInfo = sinon.stub(redNodes,'getModuleInfo',function(id) {
-                    return null;
-                });
-                var installModule = sinon.stub(redNodes,'installModule', function() {
-                    return when.reject(new Error("test error"));
-                });
-
                 request(app)
                     .post('/nodes')
                     .send({module: 'foo'})
                     .expect(400)
                     .end(function(err,res) {
-                        settingsAvailable.restore();
-                        getModuleInfo.restore();
-                        installModule.restore();
                         if (err) {
                             throw err;
                         }
@@ -286,26 +309,22 @@ describe("nodes api", function() {
                     });
             });
             it('fails the install if module not found', function(done) {
-                var settingsAvailable = sinon.stub(settings,'available', function() {
-                    return true;
+                initNodes({
+                    settings:{available:function(){return true}},
+                    api:{
+                        getModuleInfo: function(id) { return null },
+                        installModule: function() {
+                            var err = new Error("test error");
+                            err.code = 404;
+                            return when.reject(err);
+                        }
+                    }
                 });
-                var getModuleInfo = sinon.stub(redNodes,'getModuleInfo',function(id) {
-                    return null;
-                });
-                var installModule = sinon.stub(redNodes,'installModule', function() {
-                    var err = new Error("test error");
-                    err.code = 404;
-                    return when.reject(err);
-                });
-
                 request(app)
                     .post('/nodes')
                     .send({module: 'foo'})
                     .expect(404)
                     .end(function(err,res) {
-                        settingsAvailable.restore();
-                        getModuleInfo.restore();
-                        installModule.restore();
                         if (err) {
                             throw err;
                         }
@@ -319,6 +338,10 @@ describe("nodes api", function() {
             var settingsAvailable = sinon.stub(settings,'available', function() {
                 return false;
             });
+            initNodes({
+                settings:{available:function(){return false}}
+            });
+
             request(app)
                 .del('/nodes/123')
                 .expect(400)
@@ -333,27 +356,18 @@ describe("nodes api", function() {
 
         describe('by module', function() {
             it('uninstalls the module', function(done) {
-                var settingsAvailable = sinon.stub(settings,'available', function() {
-                    return true;
+                initNodes({
+                    settings:{available:function(){return true}},
+                    api:{
+                        getModuleInfo: function(id) { return {nodes:[{id:"123"}]} },
+                        getNodeInfo: function() { return null },
+                        uninstallModule: function() { return when.resolve({id:"123"});}
+                    }
                 });
-                var getNodeInfo = sinon.stub(redNodes,'getNodeInfo',function(id) {
-                    return null;
-                });
-                var getModuleInfo = sinon.stub(redNodes,'getModuleInfo',function(id) {
-                    return {nodes:[{id:"123"}]};
-                });
-                var uninstallModule = sinon.stub(redNodes,'uninstallModule', function() {
-                    return when.resolve({id:"123"});
-                });
-
                 request(app)
                     .del('/nodes/foo')
                     .expect(204)
                     .end(function(err,res) {
-                        settingsAvailable.restore();
-                        getNodeInfo.restore();
-                        getModuleInfo.restore();
-                        uninstallModule.restore();
                         if (err) {
                             throw err;
                         }
@@ -362,23 +376,17 @@ describe("nodes api", function() {
             });
 
             it('fails the uninstall if the module is not installed', function(done) {
-                var settingsAvailable = sinon.stub(settings,'available', function() {
-                    return true;
+                initNodes({
+                    settings:{available:function(){return true}},
+                    api:{
+                        getModuleInfo: function(id) { return null },
+                        getNodeInfo: function() { return null }
+                    }
                 });
-                var getNodeInfo = sinon.stub(redNodes,'getNodeInfo',function(id) {
-                    return null;
-                });
-                var getModuleInfo = sinon.stub(redNodes,'getModuleInfo',function(id) {
-                    return null;
-                });
-
                 request(app)
                     .del('/nodes/foo')
                     .expect(404)
                     .end(function(err,res) {
-                        settingsAvailable.restore();
-                        getNodeInfo.restore();
-                        getModuleInfo.restore();
                         if (err) {
                             throw err;
                         }
@@ -387,27 +395,18 @@ describe("nodes api", function() {
             });
 
             it('fails the uninstall if the module is not installed', function(done) {
-                var settingsAvailable = sinon.stub(settings,'available', function() {
-                    return true;
+                initNodes({
+                    settings:{available:function(){return true}},
+                    api:{
+                        getModuleInfo: function(id) { return {nodes:[{id:"123"}]} },
+                        getNodeInfo: function() { return null },
+                        uninstallModule: function() { return when.reject(new Error("test error"));}
+                    }
                 });
-                var getNodeInfo = sinon.stub(redNodes,'getNodeInfo',function(id) {
-                    return null;
-                });
-                var getModuleInfo = sinon.stub(redNodes,'getModuleInfo',function(id) {
-                    return {nodes:[{id:"123"}]};
-                });
-                var uninstallModule = sinon.stub(redNodes,'uninstallModule', function() {
-                    return when.reject(new Error("test error"));
-                });
-
                 request(app)
                     .del('/nodes/foo')
                     .expect(400)
                     .end(function(err,res) {
-                        settingsAvailable.restore();
-                        getNodeInfo.restore();
-                        getModuleInfo.restore();
-                        uninstallModule.restore();
                         if (err) {
                             throw err;
                         }
@@ -421,14 +420,13 @@ describe("nodes api", function() {
 
     describe('enable/disable', function() {
         it('returns 400 if settings are unavailable', function(done) {
-            var settingsAvailable = sinon.stub(settings,'available', function() {
-                return false;
+            initNodes({
+                settings:{available:function(){return false}}
             });
             request(app)
                 .put('/nodes/123')
                 .expect(400)
                 .end(function(err,res) {
-                    settingsAvailable.restore();
                     if (err) {
                         throw err;
                     }
@@ -437,16 +435,14 @@ describe("nodes api", function() {
         });
 
         it('returns 400 for invalid node payload', function(done) {
-            var settingsAvailable = sinon.stub(settings,'available', function() {
-                return true;
+            initNodes({
+                settings:{available:function(){return true}}
             });
-
             request(app)
                 .put('/nodes/node-red/foo')
                 .send({})
                 .expect(400)
                 .end(function(err,res) {
-                    settingsAvailable.restore();
                     if (err) {
                         throw err;
                     }
@@ -456,16 +452,14 @@ describe("nodes api", function() {
         });
 
         it('returns 400 for invalid module payload', function(done) {
-            var settingsAvailable = sinon.stub(settings,'available', function() {
-                return true;
+            initNodes({
+                settings:{available:function(){return true}}
             });
-
             request(app)
                 .put('/nodes/foo')
                 .send({})
                 .expect(400)
                 .end(function(err,res) {
-                    settingsAvailable.restore();
                     if (err) {
                         throw err;
                     }
@@ -476,11 +470,11 @@ describe("nodes api", function() {
         });
 
         it('returns 404 for unknown node', function(done) {
-            var settingsAvailable = sinon.stub(settings,'available', function() {
-                return true;
-            });
-            var getNodeInfo = sinon.stub(redNodes,'getNodeInfo',function(id) {
-                return null;
+            initNodes({
+                settings:{available:function(){return true}},
+                api:{
+                    getNodeInfo: function() { return null }
+                }
             });
 
             request(app)
@@ -488,8 +482,6 @@ describe("nodes api", function() {
                 .send({enabled:false})
                 .expect(404)
                 .end(function(err,res) {
-                    settingsAvailable.restore();
-                    getNodeInfo.restore();
                     if (err) {
                         throw err;
                     }
@@ -498,11 +490,11 @@ describe("nodes api", function() {
         });
 
         it('returns 404 for unknown module', function(done) {
-            var settingsAvailable = sinon.stub(settings,'available', function() {
-                return true;
-            });
-            var getModuleInfo = sinon.stub(redNodes,'getModuleInfo',function(id) {
-                return null;
+            initNodes({
+                settings:{available:function(){return true}},
+                api:{
+                    getModuleInfo: function(id) { return null }
+                }
             });
 
             request(app)
@@ -510,8 +502,6 @@ describe("nodes api", function() {
                 .send({enabled:false})
                 .expect(404)
                 .end(function(err,res) {
-                    settingsAvailable.restore();
-                    getModuleInfo.restore();
                     if (err) {
                         throw err;
                     }
@@ -520,24 +510,18 @@ describe("nodes api", function() {
         });
 
         it('enables disabled node', function(done) {
-            var settingsAvailable = sinon.stub(settings,'available', function() {
-                return true;
+            initNodes({
+                settings:{available:function(){return true}},
+                api:{
+                    getNodeInfo: function() { return {id:"123",enabled: false} },
+                    enableNode: function() { return when.resolve({id:"123",enabled: true,types:['a']}); }
+                }
             });
-            var getNodeInfo = sinon.stub(redNodes,'getNodeInfo',function(id) {
-                return {id:"123",enabled: false};
-            });
-            var enableNode = sinon.stub(redNodes,'enableNode',function(id) {
-                return when.resolve({id:"123",enabled: true,types:['a']});
-            });
-
             request(app)
                 .put('/nodes/node-red/foo')
                 .send({enabled:true})
                 .expect(200)
                 .end(function(err,res) {
-                    settingsAvailable.restore();
-                    getNodeInfo.restore();
-                    enableNode.restore();
                     if (err) {
                         throw err;
                     }
@@ -549,24 +533,18 @@ describe("nodes api", function() {
         });
 
         it('disables enabled node', function(done) {
-            var settingsAvailable = sinon.stub(settings,'available', function() {
-                return true;
+            initNodes({
+                settings:{available:function(){return true}},
+                api:{
+                    getNodeInfo: function() { return {id:"123",enabled: true} },
+                    disableNode: function() { return when.resolve({id:"123",enabled: false,types:['a']}); }
+                }
             });
-            var getNodeInfo = sinon.stub(redNodes,'getNodeInfo',function(id) {
-                return {id:"123",enabled: true};
-            });
-            var disableNode = sinon.stub(redNodes,'disableNode',function(id) {
-                return when.resolve({id:"123",enabled: false,types:['a']});
-            });
-
             request(app)
                 .put('/nodes/node-red/foo')
                 .send({enabled:false})
                 .expect(200)
                 .end(function(err,res) {
-                    settingsAvailable.restore();
-                    getNodeInfo.restore();
-                    disableNode.restore();
                     if (err) {
                         throw err;
                     }
@@ -579,31 +557,24 @@ describe("nodes api", function() {
 
         describe('no-ops if already in the right state', function() {
             function run(state,done) {
-                var settingsAvailable = sinon.stub(settings,'available', function() {
-                    return true;
-                });
-                var getNodeInfo = sinon.stub(redNodes,'getNodeInfo',function(id) {
-                    return {id:"123",enabled: state};
-                });
-                var enableNode = sinon.stub(redNodes,'enableNode',function(id) {
-                    return when.resolve({id:"123",enabled: true,types:['a']});
-                });
+                var enableNode = sinon.spy(function() { return when.resolve({id:"123",enabled: true,types:['a']}) });
+                var disableNode = sinon.spy(function() { return when.resolve({id:"123",enabled: false,types:['a']}) });
 
-                var disableNode = sinon.stub(redNodes,'disableNode',function(id) {
-                    return when.resolve({id:"123",enabled: false,types:['a']});
+                initNodes({
+                    settings:{available:function(){return true}},
+                    api:{
+                        getNodeInfo: function() { return {id:"123",enabled: state} },
+                        enableNode: enableNode,
+                        disableNode: disableNode
+                    }
                 });
-
                 request(app)
                     .put('/nodes/node-red/foo')
                     .send({enabled:state})
                     .expect(200)
                     .end(function(err,res) {
-                        settingsAvailable.restore();
-                        getNodeInfo.restore();
                         var enableNodeCalled = enableNode.called;
                         var disableNodeCalled = disableNode.called;
-                        enableNode.restore();
-                        disableNode.restore();
                         if (err) {
                             throw err;
                         }
@@ -625,31 +596,24 @@ describe("nodes api", function() {
 
         describe('does not no-op if err on node', function() {
             function run(state,done) {
-                var settingsAvailable = sinon.stub(settings,'available', function() {
-                    return true;
-                });
-                var getNodeInfo = sinon.stub(redNodes,'getNodeInfo',function(id) {
-                    return {id:"123",enabled: state, err:"foo" };
-                });
-                var enableNode = sinon.stub(redNodes,'enableNode',function(id) {
-                    return when.resolve({id:"123",enabled: true,types:['a']});
-                });
+                var enableNode = sinon.spy(function() { return when.resolve({id:"123",enabled: true,types:['a']}) });
+                var disableNode = sinon.spy(function() { return when.resolve({id:"123",enabled: false,types:['a']}) });
 
-                var disableNode = sinon.stub(redNodes,'disableNode',function(id) {
-                    return when.resolve({id:"123",enabled: false,types:['a']});
+                initNodes({
+                    settings:{available:function(){return true}},
+                    api:{
+                        getNodeInfo: function() { return {id:"123",enabled: state, err:"foo"} },
+                        enableNode: enableNode,
+                        disableNode: disableNode
+                    }
                 });
-
                 request(app)
                     .put('/nodes/node-red/foo')
                     .send({enabled:state})
                     .expect(200)
                     .end(function(err,res) {
-                        settingsAvailable.restore();
-                        getNodeInfo.restore();
                         var enableNodeCalled = enableNode.called;
                         var disableNodeCalled = disableNode.called;
-                        enableNode.restore();
-                        disableNode.restore();
                         if (err) {
                             throw err;
                         }
@@ -672,14 +636,7 @@ describe("nodes api", function() {
         it('enables disabled module', function(done) {
             var n1 = {id:"123",enabled:false,types:['a']};
             var n2 = {id:"456",enabled:false,types:['b']};
-            var settingsAvailable = sinon.stub(settings,'available', function() {
-                return true;
-            });
-            var getModuleInfo = sinon.stub(redNodes,'getModuleInfo',function(name) {
-                return {name:"node-red", nodes:[n1, n2]};
-            });
-
-            var enableNode = sinon.stub(redNodes,'enableNode');
+            var enableNode = sinon.stub();
             enableNode.onFirstCall().returns((function() {
                 n1.enabled = true;
                 return when.resolve(n1);
@@ -689,15 +646,19 @@ describe("nodes api", function() {
                 return when.resolve(n2);
             })());
             enableNode.returns(null);
+            initNodes({
+                settings:{available:function(){return true}},
+                api:{
+                    getModuleInfo: function() { return {name:"node-red", nodes:[n1, n2]} },
+                    enableNode: enableNode
+                }
+            });
 
             request(app)
                 .put('/nodes/node-red')
                 .send({enabled:true})
                 .expect(200)
                 .end(function(err,res) {
-                    settingsAvailable.restore();
-                    getModuleInfo.restore();
-                    enableNode.restore();
                     if (err) {
                         throw err;
                     }
@@ -713,14 +674,7 @@ describe("nodes api", function() {
         it('disables enabled module', function(done) {
             var n1 = {id:"123",enabled:true,types:['a']};
             var n2 = {id:"456",enabled:true,types:['b']};
-            var settingsAvailable = sinon.stub(settings,'available', function() {
-                return true;
-            });
-            var getModuleInfo = sinon.stub(redNodes,'getModuleInfo',function(name) {
-                return {name:"node-red", nodes:[n1, n2]};
-            });
-
-            var disableNode = sinon.stub(redNodes,'disableNode');
+            var disableNode = sinon.stub();
             disableNode.onFirstCall().returns((function() {
                 n1.enabled = false;
                 return when.resolve(n1);
@@ -730,15 +684,19 @@ describe("nodes api", function() {
                 return when.resolve(n2);
             })());
             disableNode.returns(null);
+            initNodes({
+                settings:{available:function(){return true}},
+                api:{
+                    getModuleInfo: function() { return {name:"node-red", nodes:[n1, n2]} },
+                    disableNode: disableNode
+                }
+            });
 
             request(app)
                 .put('/nodes/node-red')
                 .send({enabled:false})
                 .expect(200)
                 .end(function(err,res) {
-                    settingsAvailable.restore();
-                    getModuleInfo.restore();
-                    disableNode.restore();
                     if (err) {
                         throw err;
                     }
@@ -754,32 +712,30 @@ describe("nodes api", function() {
         describe('no-ops if a node in module already in the right state', function() {
             function run(state,done) {
                 var node = {id:"123",enabled:state,types:['a']};
-                var settingsAvailable = sinon.stub(settings,'available', function() {
-                    return true;
-                });
-                var getModuleInfo = sinon.stub(redNodes,'getModuleInfo',function(id) {
-                    return {name:"node-red", nodes:[node]};
-                });
-                var enableNode = sinon.stub(redNodes,'enableNode',function(id) {
+                var enableNode = sinon.spy(function(id) {
                     node.enabled = true;
                     return when.resolve(node);
                 });
-                var disableNode = sinon.stub(redNodes,'disableNode',function(id) {
+                var disableNode = sinon.spy(function(id) {
                     node.enabled = false;
                     return when.resolve(node);
                 });
 
+                initNodes({
+                    settings:{available:function(){return true}},
+                    api:{
+                        getModuleInfo: function() { return {name:"node-red", nodes:[node]}; },
+                        enableNode: enableNode,
+                        disableNode: disableNode
+                    }
+                });
                 request(app)
                     .put('/nodes/node-red')
                     .send({enabled:state})
                     .expect(200)
                     .end(function(err,res) {
-                        settingsAvailable.restore();
-                        getModuleInfo.restore();
                         var enableNodeCalled = enableNode.called;
                         var disableNodeCalled = disableNode.called;
-                        enableNode.restore();
-                        disableNode.restore();
                         if (err) {
                             throw err;
                         }
@@ -803,19 +759,22 @@ describe("nodes api", function() {
         describe('does not no-op if err on a node in module', function() {
             function run(state,done) {
                 var node = {id:"123",enabled:state,types:['a'],err:"foo"};
-                var settingsAvailable = sinon.stub(settings,'available', function() {
-                    return true;
-                });
-                var getModuleInfo = sinon.stub(redNodes,'getModuleInfo',function(id) {
-                    return {name:"node-red", nodes:[node]};
-                });
-                var enableNode = sinon.stub(redNodes,'enableNode',function(id) {
+                var enableNode = sinon.spy(function(id) {
                     node.enabled = true;
                     return when.resolve(node);
                 });
-                var disableNode = sinon.stub(redNodes,'disableNode',function(id) {
+                var disableNode = sinon.spy(function(id) {
                     node.enabled = false;
                     return when.resolve(node);
+                });
+
+                initNodes({
+                    settings:{available:function(){return true}},
+                    api:{
+                        getModuleInfo: function() { return {name:"node-red", nodes:[node]}; },
+                        enableNode: enableNode,
+                        disableNode: disableNode
+                    }
                 });
 
                 request(app)
@@ -823,12 +782,8 @@ describe("nodes api", function() {
                     .send({enabled:state})
                     .expect(200)
                     .end(function(err,res) {
-                        settingsAvailable.restore();
-                        getModuleInfo.restore();
                         var enableNodeCalled = enableNode.called;
                         var disableNodeCalled = disableNode.called;
-                        enableNode.restore();
-                        disableNode.restore();
                         if (err) {
                             throw err;
                         }

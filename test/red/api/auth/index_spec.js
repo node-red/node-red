@@ -24,12 +24,14 @@ var auth = require("../../../../red/api/auth");
 var Users = require("../../../../red/api/auth/users");
 var Tokens = require("../../../../red/api/auth/tokens");
 
-var settings = require("../../../../red/settings");
-
-
 describe("api auth middleware",function() {
 
+
+
     describe("ensureClientSecret", function() {
+        before(function() {
+            auth.init({settings:{},log:{audit:function(){}}})
+        });
         it("leaves client_secret alone if not present",function(done) {
             var req = {
                 body: {
@@ -83,7 +85,7 @@ describe("api auth middleware",function() {
             Users.init.restore();
         });
         it("returns login details - credentials", function(done) {
-            auth.init({adminAuth:{}},null);
+            auth.init({settings:{adminAuth:{}},log:{audit:function(){}}})
             auth.login(null,{json: function(resp) {
                 resp.should.have.a.property("type","credentials");
                 resp.should.have.a.property("prompts");
@@ -92,7 +94,7 @@ describe("api auth middleware",function() {
             }});
         });
         it("returns login details - none", function(done) {
-            auth.init({},null);
+            auth.init({settings:{},log:{audit:function(){}}})
             auth.login(null,{json: function(resp) {
                 resp.should.eql({});
                 done();

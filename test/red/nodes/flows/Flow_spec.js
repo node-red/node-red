@@ -959,7 +959,7 @@ describe('Flow', function() {
                 done();
             });
         });
-        it("moves any existing error object sideways",function(){
+        it("moves any existing error object sideways",function(done){
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},

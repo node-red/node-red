@@ -20,14 +20,17 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 
-var events = require("../../../red/events");
+var EventEmitter = require('events').EventEmitter;
+var events = new EventEmitter();
 var ui = require("../../../red/api/ui");
 
 
 describe("ui api", function() {
     var app;
 
-
+    before(function() {
+        ui.init({events:events});
+    });
     describe("slash handler", function() {
         before(function() {
             app = express();

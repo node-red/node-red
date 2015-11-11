@@ -21,8 +21,6 @@ var bodyParser = require('body-parser');
 var sinon = require('sinon');
 var when = require('when');
 
-var redNodes = require("../../../red/nodes");
-
 var flows = require("../../../red/api/flows");
 
 describe("flows api", function() {
@@ -37,15 +35,17 @@ describe("flows api", function() {
     });
 
     it('returns flow', function(done) {
-        var getFlows = sinon.stub(redNodes,'getFlows', function() {
-            return [1,2,3];
+        flows.init({
+            log:{warn:function(){},_:function(){},audit:function(){}},
+            api:{
+                getFlows: function() { return [1,2,3]; }
+            }
         });
         request(app)
             .get('/flows')
             .set('Accept', 'application/json')
             .expect(200)
             .end(function(err,res) {
-                getFlows.restore();
                 if (err) {
                     throw err;
                 }
@@ -55,15 +55,17 @@ describe("flows api", function() {
     });
 
     it('sets flows', function(done) {
-        var setFlows = sinon.stub(redNodes,'setFlows', function() {
-            return when.resolve();
+        flows.init({
+            log:{warn:function(){},_:function(){},audit:function(){}},
+            api:{
+                setFlows: function() { return when.resolve(); }
+            }
         });
         request(app)
             .post('/flows')
             .set('Accept', 'application/json')
             .expect(204)
             .end(function(err,res) {
-                setFlows.restore();
                 if (err) {
                     throw err;
                 }
@@ -71,15 +73,17 @@ describe("flows api", function() {
             });
     });
     it('returns error when set fails', function(done) {
-        var setFlows = sinon.stub(redNodes,'setFlows', function() {
-            return when.reject(new Error("expected error"));
+        flows.init({
+            log:{warn:function(){},_:function(){},audit:function(){}},
+            api:{
+                setFlows: function() { return when.reject(new Error("expected error")); }
+            }
         });
         request(app)
             .post('/flows')
             .set('Accept', 'application/json')
             .expect(500)
             .end(function(err,res) {
-                setFlows.restore();
                 if (err) {
                     throw err;
                 }

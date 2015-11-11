@@ -24,11 +24,11 @@ var supportedLangs = [];
 
 var resourceMap = {
     "runtime":  {
-        basedir: path.resolve(__dirname+"/../locales"),
+        basedir: path.resolve(__dirname+"/../../locales"),
         file:"runtime.json"
     },
     "editor": {
-        basedir: path.resolve(__dirname+"/../locales"),
+        basedir: path.resolve(__dirname+"/../../locales"),
         file: "editor.json"
     }
 }

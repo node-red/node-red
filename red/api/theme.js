@@ -53,7 +53,8 @@ function serveFile(app,baseUrl,file) {
 }
 
 module.exports = {
-    init: function(settings) {
+    init: function(runtime) {
+        var settings = runtime.settings;
         var i;
         var url;
         themeContext = clone(defaultContext);
