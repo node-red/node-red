@@ -21,8 +21,6 @@ var bodyParser = require('body-parser');
 var sinon = require('sinon');
 var when = require('when');
 
-var settings = require("../../../red/settings");
-
 var nodes = require("../../../red/api/nodes");
 
 describe("nodes api", function() {
@@ -335,9 +333,6 @@ describe("nodes api", function() {
     });
     describe('delete', function() {
          it('returns 400 if settings are unavailable', function(done) {
-            var settingsAvailable = sinon.stub(settings,'available', function() {
-                return false;
-            });
             initNodes({
                 settings:{available:function(){return false}}
             });
@@ -346,7 +341,6 @@ describe("nodes api", function() {
                 .del('/nodes/123')
                 .expect(400)
                 .end(function(err,res) {
-                    settingsAvailable.restore();
                     if (err) {
                         throw err;
                     }

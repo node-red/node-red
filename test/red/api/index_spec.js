@@ -28,13 +28,11 @@ describe("api index", function() {
 
     describe("disables editor", function() {
         before(function() {
-            app = express();
-            api.init(app,{
-                settings:{disableEditor:true},
-                api:{
-
-                }
+            api.init({
+                settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:true},
+                events: {on:function(){},removeListener: function(){}}
             });
+            app = api.adminApp();
         });
 
         it('does not serve the editor', function(done) {
@@ -69,11 +67,11 @@ describe("api index", function() {
             })
         });
         before(function() {
-            app = express();
-            api.init(app,{
-                settings:{adminAuth:{type: "credentials",users:[],default:{permissions:"read"}}},
+            api.init({
+                settings:{httpNodeRoot:true, httpAdminRoot: true, adminAuth:{type: "credentials",users:[],default:{permissions:"read"}}},
                 storage:{getSessions:function(){return when.resolve({})}}
             });
+            app = api.adminApp();
         });
 
         it('it now serves auth', function(done) {
@@ -105,12 +103,12 @@ describe("api index", function() {
         });
 
         before(function() {
-            app = express();
-            api.init(app,{
+            api.init({
                 log:{audit:function(){}},
-                settings:{disableEditor:false},
+                settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false},
                 events:{on:function(){},removeListener:function(){}}
             });
+            app = api.adminApp();
         });
         it('serves the editor', function(done) {
             request(app)

@@ -19,30 +19,27 @@ var fs = require("fs");
 var path = require("path");
 
 var RED = require("../../red/red");
-var log = require("../../red/log");
-var settings = require("../../red/settings");
-var server = require("../../red/server");
+var runtime = require("../../red/runtime");
+var api = require("../../red/api");
 
 
 describe("red/red", function() {
 
     describe("check build", function() {
         beforeEach(function() {
-            sinon.stub(log,"init",function() {});
-            sinon.stub(settings,"init",function() {});
-            sinon.stub(server,"init",function() {});
+            sinon.stub(runtime,"init",function() {});
+            sinon.stub(api,"init",function() {});
             sinon.stub(RED,"version",function() { return "version";});
         });
         afterEach(function() {
-            log.init.restore();
-            settings.init.restore();
-            server.init.restore();
+            runtime.init.restore();
+            api.init.restore();
             fs.statSync.restore();
             RED.version.restore();
         });
         it('warns if build has not been run',function() {
             sinon.stub(fs,"statSync",function() { throw new Error();});
-            
+
             /*jshint immed: false */
             (function() {
                 RED.init({},{});
@@ -53,19 +50,22 @@ describe("red/red", function() {
             RED.init({},{});
         });
     });
-    
+
     describe("externals", function() {
         it('reports version', function() {
             var p = require(path.join(process.env.NODE_RED_HOME,"package.json")).version;
             RED.version().indexOf(p).should.eql(0);
         });
-        it('access server externals', function() {
+        it.skip('access server externals', function() {
             // TODO: unstubable accessors - need to make this testable
             RED.app;
             RED.httpAdmin;
             RED.httpNode;
             RED.server;
         });
+        it.skip('only initialises api component if httpAdmin enabled');
+        it.skip('stubs httpAdmin if httpAdmin disabled');
+        it.skip('stubs httpNode if httpNode disabled');
     });
 
 });

@@ -22,7 +22,6 @@ var when = require('when');
 var fs = require("fs");
 
 var app = express();
-var settings = require("../../../red/settings");
 
 var theme = require("../../../red/api/theme");
 

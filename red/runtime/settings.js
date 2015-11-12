@@ -28,7 +28,7 @@ var persistentSettings = {
         userSettings = settings;
         for (var i in settings) {
             /* istanbul ignore else */
-            if (settings.hasOwnProperty(i)) {
+            if (settings.hasOwnProperty(i) && typeof settings[i] !== "function") {
                 (function() {
                     var j = i;
                     persistentSettings.__defineGetter__(j,function() { return userSettings[j]; });
