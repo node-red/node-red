@@ -19,9 +19,6 @@ var should = require("should");
 var changeNode = require("../../../../nodes/core/logic/15-change.js");
 var helper = require("../../helper.js");
 
-var Log = require("../../../../red/log.js");
-
-
 describe('change Node', function() {
 
     beforeEach(function(done) {

@@ -34,9 +34,9 @@ function init(userSettings) {
 }
 
 function version() {
-    var p = require(path.join(process.env.NODE_RED_HOME,"package.json")).version;
+    var p = require(path.join(__dirname,"..","..","package.json")).version;
     /* istanbul ignore else */
-    if (fs.existsSync(path.join(process.env.NODE_RED_HOME,".git"))) {
+    if (fs.existsSync(path.join(__dirname,"..","..",".git"))) {
         p += "-git";
     }
     return p;

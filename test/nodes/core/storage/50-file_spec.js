@@ -20,7 +20,6 @@ var fs = require('fs-extra');
 var sinon = require("sinon");
 var fileNode = require("../../../../nodes/core/storage/50-file.js");
 var helper = require("../../helper.js");
-var log = require("../../../../red/log");
 
 describe('file Nodes', function() {
 

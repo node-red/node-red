@@ -1,36 +1,37 @@
 /**
- * Copyright 2014 IBM Corp.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
+* Copyright 2014 IBM Corp.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
 
 var should = require("should");
 var sinon = require("sinon");
 var path = require("path");
 var when = require("when");
+var fs = require("fs");
 
 var RedNodes = require("../../../../../red/runtime/nodes");
 var RedNode = require("../../../../../red/runtime/nodes/Node");
 var typeRegistry = require("../../../../../red/runtime/nodes/registry");
 var events = require("../../../../../red/runtime/events");
 
-afterEach(function() {
-    typeRegistry.clear();
-});
-
 describe('red/nodes/registry/index', function() {
-    var resourcesDir = path.join(__dirname,"..","resources",path.sep);
 
+    afterEach(function() {
+        typeRegistry.clear();
+    });
+
+    var resourcesDir = path.join(__dirname,"..","resources",path.sep);
     function stubSettings(s,available,initialConfig) {
         s.available =  function() {return available;};
         s.set = function(s,v) { return when.resolve();};
@@ -163,8 +164,7 @@ describe('red/nodes/registry/index', function() {
             eventEmitSpy.callCount.should.equal(3);
 
             eventEmitSpy.firstCall.args[0].should.be.equal("node-icon-dir");
-            eventEmitSpy.firstCall.args[1].should.be.equal(
-                    resourcesDir + "NestedDirectoryNode" + path.sep + "NestedNode" + path.sep + "icons");
+            eventEmitSpy.firstCall.args[1].should.be.equal(resourcesDir + "NestedDirectoryNode" + path.sep + "NestedNode" + path.sep + "icons");
 
             eventEmitSpy.secondCall.args[0].should.be.equal("node-locales-dir");
 
@@ -178,7 +178,6 @@ describe('red/nodes/registry/index', function() {
             eventEmitSpy.restore();
         });
     });
-
     it('rejects a duplicate node type registration during load', function(done) {
         typeRegistry.init(stubSettings({
             nodesDir:[resourcesDir + "TestNode1",resourcesDir + "DuplicateTestNode"]
@@ -395,220 +394,91 @@ describe('red/nodes/registry/index', function() {
 
     });
 
-    it('returns modules list', function(done) {
-        var fs = require("fs");
-        var path = require("path");
-
-        var pathJoin = (function() {
+    describe('with mocked filesystem', function() {
+        beforeEach(function() {
             var _join = path.join;
-            return sinon.stub(path,"join",function() {
+            sinon.stub(path,"join",function() {
+                console.log(arguments);
+                var result;
                 if (arguments.length  == 3 && arguments[2] == "package.json") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1],arguments[2]);
+                    result = _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1],arguments[2]);
+                } else if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
+                    result = _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1]);
+                } else {
+                    result = _join.apply(this,arguments);
                 }
-                if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1]);
-                }
-                return _join.apply(this,arguments);
+                console.log("==",result);
+                return result;
             });
-        })();
-
-        var readdirSync = (function() {
             var originalReaddirSync = fs.readdirSync;
             var callCount = 0;
-            return sinon.stub(fs,"readdirSync",function(dir) {
+            sinon.stub(fs,"readdirSync",function(dir) {
                 var result = [];
                 if (callCount == 1) {
                     result = originalReaddirSync(resourcesDir + "TestNodeModule" + path.sep + "node_modules");
                 }
                 callCount++;
+                console.log("@",callCount,result)
                 return result;
             });
-        })();
-        typeRegistry.init(settingsWithStorage);
-        typeRegistry.load("wontexist",true).then(function(){
+        });
+        afterEach(function() {
+            if (path.join.restore) {
+                path.join.restore();
+            }
+            if (fs.readdirSync.restore) {
+                fs.readdirSync.restore();
+            }
+        });
 
-            typeRegistry.addModule("TestNodeModule").then(function() {
-                var list = typeRegistry.getModuleList();
-                Object.keys(list).should.have.length(1);
-                list.should.have.a.property("TestNodeModule");
-                Object.keys(list["TestNodeModule"].nodes).should.have.length(2);
+        it('returns modules list', function(done) {
+            typeRegistry.init(settingsWithStorage);
+            typeRegistry.load("wontexist",true).then(function(){
 
-                list["TestNodeModule"].nodes["TestNodeMod1"].should.have.property("name", "TestNodeMod1");
-                list["TestNodeModule"].nodes["TestNodeMod2"].should.have.property("name", "TestNodeMod2");
+                typeRegistry.addModule("TestNodeModule").then(function() {
+                    var list = typeRegistry.getModuleList();
+                    Object.keys(list).should.have.length(1);
+                    list.should.have.a.property("TestNodeModule");
+                    Object.keys(list["TestNodeModule"].nodes).should.have.length(2);
 
-                done();
+                    list["TestNodeModule"].nodes["TestNodeMod1"].should.have.property("name", "TestNodeMod1");
+                    list["TestNodeModule"].nodes["TestNodeMod2"].should.have.property("name", "TestNodeMod2");
+
+                    done();
+                }).catch(function(e) {
+                    done(e);
+                });
+
             }).catch(function(e) {
                 done(e);
             });
-
-        }).catch(function(e) {
-            done(e);
-        }).finally(function() {
-            readdirSync.restore();
-            pathJoin.restore();
         });
-    });
 
-    it('returns module info', function(done) {
-        var fs = require("fs");
-        var path = require("path");
+        it('returns module info', function(done) {
+            typeRegistry.init(settingsWithStorage);
+            typeRegistry.load("wontexist",true).then(function(){
 
-        var pathJoin = (function() {
-            var _join = path.join;
-            return sinon.stub(path,"join",function() {
-                if (arguments.length  == 3 && arguments[2] == "package.json") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1],arguments[2]);
-                }
-                if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1]);
-                }
-                return _join.apply(this,arguments);
-            });
-        })();
+                typeRegistry.addModule("TestNodeModule").then(function(modInfo) {
+                    var info = typeRegistry.getModuleInfo("TestNodeModule");
 
-        var readdirSync = (function() {
-            var originalReaddirSync = fs.readdirSync;
-            var callCount = 0;
-            return sinon.stub(fs,"readdirSync",function(dir) {
-                var result = [];
-                if (callCount == 1) {
-                    result = originalReaddirSync(resourcesDir + "TestNodeModule" + path.sep + "node_modules");
-                }
-                callCount++;
-                return result;
-            });
-        })();
-        typeRegistry.init(settingsWithStorage);
-        typeRegistry.load("wontexist",true).then(function(){
+                    modInfo.should.eql(info);
+                    should.not.exist(typeRegistry.getModuleInfo("does-not-exist"));
 
-            typeRegistry.addModule("TestNodeModule").then(function(modInfo) {
-                var info = typeRegistry.getModuleInfo("TestNodeModule");
+                    done();
+                }).catch(function(e) {
+                    done(e);
+                });
 
-                modInfo.should.eql(info);
-                should.not.exist(typeRegistry.getModuleInfo("does-not-exist"));
-
-                done();
             }).catch(function(e) {
                 done(e);
             });
-
-        }).catch(function(e) {
-            done(e);
-        }).finally(function() {
-            readdirSync.restore();
-            pathJoin.restore();
         });
-    });
 
-    it('scans the node_modules path for node files', function(done) {
-        var fs = require("fs");
-        var path = require("path");
-
-        var eventEmitSpy = sinon.spy(events,"emit");
-        var pathJoin = (function() {
-            var _join = path.join;
-            return sinon.stub(path,"join",function() {
-                if (arguments.length  == 3 && arguments[2] == "package.json") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1],arguments[2]);
-                }
-                if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1]);
-                }
-                return _join.apply(this,arguments);
-            });
-        })();
-
-        var readdirSync = (function() {
-            var originalReaddirSync = fs.readdirSync;
-            var callCount = 0;
-            return sinon.stub(fs,"readdirSync",function(dir) {
-                var result = [];
-                if (callCount == 1) {
-                    result = originalReaddirSync(resourcesDir + "TestNodeModule" + path.sep + "node_modules");
-                }
-                callCount++;
-                return result;
-            });
-        })();
-
-        typeRegistry.init(settings);
-        typeRegistry.load("wontexist",false).then(function(){
-            var list = typeRegistry.getNodeList();
-            list.should.be.an.Array.and.have.lengthOf(2);
-            list[0].should.have.property("id","TestNodeModule/TestNodeMod1");
-            list[0].should.have.property("name","TestNodeMod1");
-            list[0].should.have.property("module","TestNodeModule");
-            list[0].should.have.property("types",["test-node-mod-1"]);
-            list[0].should.have.property("enabled",true);
-            list[0].should.not.have.property("err");
-
-            list[1].should.have.property("id","TestNodeModule/TestNodeMod2");
-            list[1].should.have.property("name","TestNodeMod2");
-            list[1].should.have.property("module","TestNodeModule");
-            list[1].should.have.property("types",["test-node-mod-2"]);
-            list[1].should.have.property("enabled",true);
-            list[1].should.have.property("err");
-
-
-            eventEmitSpy.callCount.should.equal(3);
-
-            eventEmitSpy.firstCall.args[0].should.be.equal("node-locales-dir");
-
-
-            eventEmitSpy.secondCall.args[0].should.be.equal("node-icon-dir");
-            eventEmitSpy.secondCall.args[1].should.be.equal(
-                    resourcesDir + "TestNodeModule" + path.sep+ "node_modules" + path.sep + "TestNodeModule" + path.sep + "icons");
-
-
-            eventEmitSpy.thirdCall.args[0].should.be.equal("type-registered");
-            eventEmitSpy.thirdCall.args[1].should.be.equal("test-node-mod-1");
-
-            done();
-        }).catch(function(e) {
-            done(e);
-        }).finally(function() {
-            readdirSync.restore();
-            pathJoin.restore();
-            eventEmitSpy.restore();
-        });
-    });
-
-    it('allows nodes to be added by module name', function(done) {
-        var fs = require("fs");
-        var path = require("path");
-
-        var pathJoin = (function() {
-            var _join = path.join;
-            return sinon.stub(path,"join",function() {
-                if (arguments.length  == 3 && arguments[2] == "package.json") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1],arguments[2]);
-                }
-                if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1]);
-                }
-                return _join.apply(this,arguments);
-            });
-        })();
-
-        var readdirSync = (function() {
-            var originalReaddirSync = fs.readdirSync;
-            var callCount = 0;
-            return sinon.stub(fs,"readdirSync",function(dir) {
-                var result = [];
-                if (callCount == 1) {
-                    result = originalReaddirSync(resourcesDir + "TestNodeModule" + path.sep + "node_modules");
-                }
-                callCount++;
-                return result;
-            });
-        })();
-        typeRegistry.init(settingsWithStorage);
-        typeRegistry.load("wontexist",true).then(function(){
-            var list = typeRegistry.getNodeList();
-            list.should.be.an.Array.and.be.empty;
-
-            typeRegistry.addModule("TestNodeModule").then(function(modInfo) {
-                list = typeRegistry.getNodeList();
+        it('scans the node_modules path for node files', function(done) {
+            var eventEmitSpy = sinon.spy(events,"emit");
+            typeRegistry.init(settings);
+            typeRegistry.load("wontexist",false).then(function(){
+                var list = typeRegistry.getNodeList();
                 list.should.be.an.Array.and.have.lengthOf(2);
                 list[0].should.have.property("id","TestNodeModule/TestNodeMod1");
                 list[0].should.have.property("name","TestNodeMod1");
@@ -624,191 +494,137 @@ describe('red/nodes/registry/index', function() {
                 list[1].should.have.property("enabled",true);
                 list[1].should.have.property("err");
 
+
+                eventEmitSpy.callCount.should.equal(3);
+
+                eventEmitSpy.firstCall.args[0].should.be.equal("node-locales-dir");
+
+
+                eventEmitSpy.secondCall.args[0].should.be.equal("node-icon-dir");
+                eventEmitSpy.secondCall.args[1].should.be.equal(
+                    resourcesDir + "TestNodeModule" + path.sep+ "node_modules" + path.sep + "TestNodeModule" + path.sep + "icons");
+                eventEmitSpy.thirdCall.args[0].should.be.equal("type-registered");
+                eventEmitSpy.thirdCall.args[1].should.be.equal("test-node-mod-1");
+
+                done();
+            }).catch(function(e) {
+                done(e);
+            }).finally(function() {
+                eventEmitSpy.restore();
+            });
+        });
+
+        it('allows nodes to be added by module name', function(done) {
+            typeRegistry.init(settingsWithStorage);
+            typeRegistry.load("wontexist",true).then(function(){
+                var list = typeRegistry.getNodeList();
+                list.should.be.an.Array.and.be.empty;
+
+                typeRegistry.addModule("TestNodeModule").then(function(modInfo) {
+                    list = typeRegistry.getNodeList();
+                    list.should.be.an.Array.and.have.lengthOf(2);
+                    list[0].should.have.property("id","TestNodeModule/TestNodeMod1");
+                    list[0].should.have.property("name","TestNodeMod1");
+                    list[0].should.have.property("module","TestNodeModule");
+                    list[0].should.have.property("types",["test-node-mod-1"]);
+                    list[0].should.have.property("enabled",true);
+                    list[0].should.not.have.property("err");
+
+                    list[1].should.have.property("id","TestNodeModule/TestNodeMod2");
+                    list[1].should.have.property("name","TestNodeMod2");
+                    list[1].should.have.property("module","TestNodeModule");
+                    list[1].should.have.property("types",["test-node-mod-2"]);
+                    list[1].should.have.property("enabled",true);
+                    list[1].should.have.property("err");
+
+                    done();
+                }).catch(function(e) {
+                    done(e);
+                });
+
+            }).catch(function(e) {
+                done(e);
+            });
+        });
+
+        it('adds module with version number', function(done) {
+            typeRegistry.init(settingsWithStorage);
+            typeRegistry.load("wontexist",true).then(function(){
+                typeRegistry.addModule("TestNodeModule","0.0.1").then(function(node) {
+                    var module = typeRegistry.getModuleInfo("TestNodeModule");
+
+                    module.should.have.property("name","TestNodeModule");
+                    module.should.have.property("version","0.0.1");
+
+                    var modules = typeRegistry.getModuleList();
+
+                    modules.should.have.property("TestNodeModule");
+                    modules["TestNodeModule"].should.have.property("version","0.0.1");
+
+                    done();
+                }).catch(function(e) {
+                    done(e);
+                });
+
+            }).catch(function(e) {
+                done(e);
+            });
+        });
+
+        it('rejects adding duplicate node modules', function(done) {
+            typeRegistry.init(settingsWithStorage);
+            typeRegistry.load('wontexist',false).then(function(){
+                var list = typeRegistry.getNodeList();
+                list.should.be.an.Array.and.have.lengthOf(2);
+                typeRegistry.addModule("TestNodeModule").then(function(node) {
+                    done(new Error("addModule resolved"));
+                }).otherwise(function(err) {
+                    done();
+                });
+            }).catch(function(e) {
+                done(e);
+            });
+        });
+
+
+        it('fails to add non-existent module name', function(done) {
+            typeRegistry.init(settingsWithStorage);
+            typeRegistry.load("wontexist",true).then(function(){
+                var list = typeRegistry.getNodeList();
+                list.should.be.an.Array.and.be.empty;
+
+                typeRegistry.addModule("DoesNotExistModule").then(function(node) {
+                    done(new Error("ENOENT not thrown"));
+                }).otherwise(function(e) {
+                    e.code.should.eql("MODULE_NOT_FOUND");
+                    done();
+                });
+
+            }).catch(function(e) {
+                done(e);
+            });
+        });
+
+        it('removes nodes from the registry by module', function(done) {
+            typeRegistry.init(settingsWithStorage);
+            typeRegistry.load('wontexist',false).then(function(){
+                var list = typeRegistry.getNodeList();
+                list.should.be.an.Array.and.have.lengthOf(2);
+                var res = typeRegistry.removeModule("TestNodeModule");
+
+                res.should.be.an.Array.and.have.lengthOf(2);
+                res[0].should.have.a.property("id",list[0].id);
+                res[1].should.have.a.property("id",list[1].id);
+
+                list = typeRegistry.getNodeList();
+                list.should.be.an.Array.and.be.empty;
+
                 done();
             }).catch(function(e) {
                 done(e);
             });
 
-        }).catch(function(e) {
-            done(e);
-        }).finally(function() {
-            readdirSync.restore();
-            pathJoin.restore();
         });
-    });
-
-    it('adds module with version number', function(done) {
-        var fs = require("fs");
-        var path = require("path");
-
-        var pathJoin = (function() {
-            var _join = path.join;
-            return sinon.stub(path,"join",function() {
-                if (arguments.length  == 3 && arguments[2] == "package.json") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1],arguments[2]);
-                }
-                if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1]);
-                }
-                return _join.apply(this,arguments);
-            });
-        })();
-
-        var readdirSync = (function() {
-            var originalReaddirSync = fs.readdirSync;
-            var callCount = 0;
-            return sinon.stub(fs,"readdirSync",function(dir) {
-                var result = [];
-                if (callCount == 1) {
-                    result = originalReaddirSync(resourcesDir + "TestNodeModule" + path.sep + "node_modules");
-                }
-                callCount++;
-                return result;
-            });
-        })();
-        typeRegistry.init(settingsWithStorage);
-        typeRegistry.load("wontexist",true).then(function(){
-            typeRegistry.addModule("TestNodeModule","0.0.1").then(function(node) {
-                var module = typeRegistry.getModuleInfo("TestNodeModule");
-
-                module.should.have.property("name","TestNodeModule");
-                module.should.have.property("version","0.0.1");
-
-                var modules = typeRegistry.getModuleList();
-
-                modules.should.have.property("TestNodeModule");
-                modules["TestNodeModule"].should.have.property("version","0.0.1");
-
-                done();
-            }).catch(function(e) {
-                done(e);
-            });
-
-        }).catch(function(e) {
-            done(e);
-        }).finally(function() {
-            readdirSync.restore();
-            pathJoin.restore();
-        });
-    });
-
-    it('rejects adding duplicate node modules', function(done) {
-        var fs = require("fs");
-        var path = require("path");
-
-        var pathJoin = (function() {
-            var _join = path.join;
-            return sinon.stub(path,"join",function() {
-                if (arguments.length  == 3 && arguments[2] == "package.json") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1],arguments[2]);
-                }
-                if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1]);
-                }
-                return _join.apply(this,arguments);
-            });
-        })();
-
-        var readdirSync = (function() {
-            var originalReaddirSync = fs.readdirSync;
-            var callCount = 0;
-            return sinon.stub(fs,"readdirSync",function(dir) {
-                var result = [];
-                if (callCount == 1) {
-                    result = originalReaddirSync(resourcesDir + "TestNodeModule" + path.sep + "node_modules");
-                }
-                callCount++;
-                return result;
-            });
-        })();
-
-        typeRegistry.init(settingsWithStorage);
-        typeRegistry.load('wontexist',false).then(function(){
-            var list = typeRegistry.getNodeList();
-            list.should.be.an.Array.and.have.lengthOf(2);
-            typeRegistry.addModule("TestNodeModule").then(function(node) {
-                done(new Error("addModule resolved"));
-            }).otherwise(function(err) {
-                done();
-            });
-        }).catch(function(e) {
-            done(e);
-        }).finally(function() {
-            readdirSync.restore();
-            pathJoin.restore();
-        });
-    });
-
-
-    it('fails to add non-existent module name', function(done) {
-        typeRegistry.init(settingsWithStorage);
-        typeRegistry.load("wontexist",true).then(function(){
-            var list = typeRegistry.getNodeList();
-            list.should.be.an.Array.and.be.empty;
-
-            typeRegistry.addModule("DoesNotExistModule").then(function(node) {
-                done(new Error("ENOENT not thrown"));
-            }).otherwise(function(e) {
-                e.code.should.eql("MODULE_NOT_FOUND");
-                done();
-            });
-
-        }).catch(function(e) {
-            done(e);
-        });
-    });
-
-    it('removes nodes from the registry by module', function(done) {
-        var fs = require("fs");
-        var path = require("path");
-
-        var pathJoin = (function() {
-            var _join = path.join;
-            return sinon.stub(path,"join",function() {
-                if (arguments.length  == 3 && arguments[2] == "package.json") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1],arguments[2]);
-                }
-                if (arguments.length == 2 && arguments[1] == "TestNodeModule") {
-                    return _join(resourcesDir,"TestNodeModule" + path.sep + "node_modules" + path.sep,arguments[1]);
-                }
-                return _join.apply(this,arguments);
-            });
-        })();
-
-        var readdirSync = (function() {
-            var originalReaddirSync = fs.readdirSync;
-            var callCount = 0;
-            return sinon.stub(fs,"readdirSync",function(dir) {
-                var result = [];
-                if (callCount == 1) {
-                    result = originalReaddirSync(resourcesDir + "TestNodeModule" + path.sep + "node_modules");
-                }
-                callCount++;
-                return result;
-            });
-        })();
-
-        typeRegistry.init(settingsWithStorage);
-        typeRegistry.load('wontexist',false).then(function(){
-            var list = typeRegistry.getNodeList();
-            list.should.be.an.Array.and.have.lengthOf(2);
-            var res = typeRegistry.removeModule("TestNodeModule");
-
-            res.should.be.an.Array.and.have.lengthOf(2);
-            res[0].should.have.a.property("id",list[0].id);
-            res[1].should.have.a.property("id",list[1].id);
-
-            list = typeRegistry.getNodeList();
-            list.should.be.an.Array.and.be.empty;
-
-            done();
-        }).catch(function(e) {
-            done(e);
-        }).finally(function() {
-            readdirSync.restore();
-            pathJoin.restore();
-        });
-
     });
 
     it('fails to remove non-existent module name', function(done) {

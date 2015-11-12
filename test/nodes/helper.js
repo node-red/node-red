@@ -30,11 +30,11 @@ if (!process.version.match(/^v0\.[0-9]\./)) {
     }
 }
 var RED = require("../../red/red.js");
-var redNodes = require("../../red/nodes");
-var flows = require("../../red/nodes/flows");
-var credentials = require("../../red/nodes/credentials");
-var comms = require("../../red/comms.js");
-var log = require("../../red/log.js");
+var redNodes = require("../../red/runtime/nodes");
+var flows = require("../../red/runtime/nodes/flows");
+var credentials = require("../../red/runtime/nodes/credentials");
+var comms = require("../../red/api/comms.js");
+var log = require("../../red/runtime/log.js");
 
 var http = require('http');
 var express = require('express');
