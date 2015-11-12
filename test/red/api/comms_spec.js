@@ -23,21 +23,26 @@ var express = require('express');
 var app = express();
 var WebSocket = require('ws');
 
-var comms = require("../../../red/runtime/comms");
+var comms = require("../../../red/api/comms");
 var Users = require("../../../red/api/auth/users");
 var Tokens = require("../../../red/api/auth/tokens");
 
 var address = '127.0.0.1';
 var listenPort = 0; // use ephemeral port
 
-describe("runtime/comms", function() {
+describe("api/comms", function() {
     describe("with default keepalive", function() {
         var server;
         var url;
         var port;
         before(function(done) {
+            sinon.stub(Users,"default",function() { return when.resolve(null);});
             server = http.createServer(function(req,res){app(req,res)});
-            comms.init(server, {});
+            comms.init(server, {
+                settings:{},
+                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
+                events:{on:function(){},removeListener:function(){}}
+            });
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -48,6 +53,7 @@ describe("runtime/comms", function() {
         });
 
         after(function() {
+            Users.default.restore();
             comms.stop();
         });
 
@@ -119,29 +125,34 @@ describe("runtime/comms", function() {
         // implementation. More test should be written to test topic
         // matching once this one is passing
 
-        if (0) {
-            it('receives message on correct topic', function(done) {
-                var ws = new WebSocket(url);
-                ws.on('open', function() {
-                    ws.send('{"subscribe":"topic4"}');
-                    comms.publish('topic5', 'foo');
-                    comms.publish('topic4', 'bar');
-                });
-                ws.on('message', function(msg) {
-                    msg.should.equal('{"topic":"topic4","data":"bar"}');
-                    ws.close();
-                    done();
-                });
+        it.skip('receives message on correct topic', function(done) {
+            var ws = new WebSocket(url);
+            ws.on('open', function() {
+                ws.send('{"subscribe":"topic4"}');
+                comms.publish('topic5', 'foo');
+                comms.publish('topic4', 'bar');
             });
-        }
+            ws.on('message', function(msg) {
+                msg.should.equal('{"topic":"topic4","data":"bar"}');
+                ws.close();
+                done();
+            });
+        });
+
+        it.skip('listens for node/status events');
     });
     describe("disabled editor", function() {
         var server;
         var url;
         var port;
         before(function(done) {
+            sinon.stub(Users,"default",function() { return when.resolve(null);});
             server = http.createServer(function(req,res){app(req,res)});
-            comms.init(server, {disableEditor:true});
+            comms.init(server, {
+                settings:{disableEditor:true},
+                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
+                events:{on:function(){},removeListener:function(){}}
+            });
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -152,6 +163,7 @@ describe("runtime/comms", function() {
         });
 
         after(function() {
+            Users.default.restore();
             comms.stop();
         });
 
@@ -173,8 +185,13 @@ describe("runtime/comms", function() {
         var url;
         var port;
         before(function(done) {
+            sinon.stub(Users,"default",function() { return when.resolve(null);});
             server = http.createServer(function(req,res){app(req,res)});
-            comms.init(server, {httpAdminRoot:"/adminPath"});
+            comms.init(server, {
+                settings:{httpAdminRoot:"/adminPath"},
+                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
+                events:{on:function(){},removeListener:function(){}}
+            });
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -185,6 +202,7 @@ describe("runtime/comms", function() {
         });
 
         after(function() {
+            Users.default.restore();
             comms.stop();
         });
 
@@ -206,8 +224,13 @@ describe("runtime/comms", function() {
         var url;
         var port;
         before(function(done) {
+            sinon.stub(Users,"default",function() { return when.resolve(null);});
             server = http.createServer(function(req,res){app(req,res)});
-            comms.init(server, {httpAdminRoot:"/adminPath/"});
+            comms.init(server,{
+                settings:{httpAdminRoot:"/adminPath"},
+                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
+                events:{on:function(){},removeListener:function(){}}
+            });
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -218,6 +241,7 @@ describe("runtime/comms", function() {
         });
 
         after(function() {
+            Users.default.restore();
             comms.stop();
         });
 
@@ -239,8 +263,13 @@ describe("runtime/comms", function() {
         var url;
         var port;
         before(function(done) {
+            sinon.stub(Users,"default",function() { return when.resolve(null);});
             server = http.createServer(function(req,res){app(req,res)});
-            comms.init(server, {httpAdminRoot:"adminPath"});
+            comms.init(server, {
+                settings:{httpAdminRoot:"adminPath"},
+                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
+                events:{on:function(){},removeListener:function(){}}
+            });
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -251,6 +280,7 @@ describe("runtime/comms", function() {
         });
 
         after(function() {
+            Users.default.restore();
             comms.stop();
         });
 
@@ -272,8 +302,13 @@ describe("runtime/comms", function() {
         var url;
         var port;
         before(function(done) {
+            sinon.stub(Users,"default",function() { return when.resolve(null);});
             server = http.createServer(function(req,res){app(req,res)});
-            comms.init(server, {webSocketKeepAliveTime: 100});
+            comms.init(server, {
+                settings:{webSocketKeepAliveTime: 100},
+                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
+                events:{on:function(){},removeListener:function(){}}
+            });
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -283,6 +318,7 @@ describe("runtime/comms", function() {
             });
         });
         after(function() {
+            Users.default.restore();
             comms.stop();
         });
         it('are sent', function(done) {
@@ -354,7 +390,11 @@ describe("runtime/comms", function() {
 
 
             server = http.createServer(function(req,res){app(req,res)});
-            comms.init(server, {adminAuth:{}});
+            comms.init(server,{
+                settings:{adminAuth:{}},
+                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
+                events:{on:function(){},removeListener:function(){}}
+            });
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -440,7 +480,11 @@ describe("runtime/comms", function() {
         before(function(done) {
             getDefaultUser = sinon.stub(Users,"default",function() { return when.resolve({permissions:"read"});});
             server = http.createServer(function(req,res){app(req,res)});
-            comms.init(server, {adminAuth:{}});
+            comms.init(server, {
+                settings:{adminAuth:{}},
+                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
+                events:{on:function(){},removeListener:function(){}}
+            });
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;

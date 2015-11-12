@@ -15,7 +15,7 @@
  **/
 
 var ws = require("ws");
-var log = require("./log");
+var log;
 
 var server;
 var settings;
@@ -29,17 +29,24 @@ var retained = {};
 var heartbeatTimer;
 var lastSentTime;
 
+function handleStatus(event) {
+    publish("status/"+event.id,event.status,true);
+}
 
-function init(_server,_settings) {
+function init(_server,runtime) {
     server = _server;
-    settings = _settings;
+    settings = runtime.settings;
+    log = runtime.log;
+
+    runtime.events.removeListener("node-status",handleStatus);
+    runtime.events.on("node-status",handleStatus);
 }
 
 
 function start() {
-    var Tokens = require("../api/auth/tokens");
-    var Users = require("../api/auth/users");
-    var Permissions = require("../api/auth/permissions");
+    var Tokens = require("./auth/tokens");
+    var Users = require("./auth/users");
+    var Permissions = require("./auth/permissions");
     if (!settings.disableEditor) {
         Users.default().then(function(anonymousUser) {
             var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
@@ -151,15 +158,17 @@ function stop() {
 }
 
 function publish(topic,data,retain) {
-    if (retain) {
-        retained[topic] = data;
-    } else {
-        delete retained[topic];
+    if (server) {
+        if (retain) {
+            retained[topic] = data;
+        } else {
+            delete retained[topic];
+        }
+        lastSentTime = Date.now();
+        activeConnections.forEach(function(conn) {
+            publishTo(conn,topic,data);
+        });
     }
-    lastSentTime = Date.now();
-    activeConnections.forEach(function(conn) {
-        publishTo(conn,topic,data);
-    });
 }
 
 function publishTo(ws,topic,data) {

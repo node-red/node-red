@@ -17,7 +17,6 @@
 var when = require('when');
 
 var redNodes = require("./nodes");
-var comms = require("./comms");
 var storage = require("./storage");
 var log = require("./log");
 var i18n = require("./i18n");
@@ -28,11 +27,10 @@ var fs = require("fs");
 
 var runtimeMetricInterval = null;
 
-function init(server,userSettings) {
+function init(userSettings) {
     userSettings.version = version();
     log.init(userSettings);
     settings.init(userSettings);
-    comms.init(server,settings);
 }
 
 function version() {
@@ -105,7 +103,6 @@ function start() {
                 }
                 log.info(log._("runtime.paths.settings",{path:settings.settingsFile}));
                 redNodes.loadFlows().then(redNodes.startFlows);
-                comms.start();
             }).otherwise(function(err) {
                 console.log(err);
             });
@@ -137,8 +134,7 @@ function stop() {
         clearInterval(runtimeMetricInterval);
         runtimeMetricInterval = null;
     }
-    redNodes.stopFlows();
-    comms.stop();
+    return redNodes.stopFlows();
 }
 
 var runtime = module.exports = {
@@ -152,7 +148,6 @@ var runtime = module.exports = {
     i18n: i18n,
     settings: settings,
     storage: storage,
-    comms: comms,
     events: events,
     api: redNodes,
     util: require("./util")

@@ -19,7 +19,6 @@ var sinon = require('sinon');
 var RedNode = require("../../../../red/runtime/nodes/Node");
 var Log = require("../../../../red/runtime/log");
 var flows = require("../../../../red/runtime/nodes/flows");
-var comms = require("../../../../red/runtime/comms");
 
 describe('Node', function() {
     describe('#constructor',function() {
@@ -512,9 +511,6 @@ describe('Node', function() {
     });
 
     describe('#status', function() {
-        after(function() {
-            comms.publish.restore();
-        });
         it('publishes status', function(done) {
             sinon.stub(flows,"handleStatus", function(node,message,msg) {});
             var n = new RedNode({id:'123',type:'abc'});
@@ -522,17 +518,8 @@ describe('Node', function() {
             var topic;
             var message;
             var retain;
-            sinon.stub(comms, 'publish', function(_topic, _message, _retain) {
-                topic = _topic;
-                message = _message;
-                retain = _retain;
-            });
 
             n.status(status);
-
-            topic.should.equal('status/123');
-            message.should.equal(status);
-            retain.should.be.true;
 
             flows.handleStatus.called.should.be.true;
             flows.handleStatus.args[0][0].should.eql(n);

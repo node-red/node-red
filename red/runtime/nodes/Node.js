@@ -22,7 +22,6 @@ var redUtil = require("../util");
 var Log = require("../log");
 
 var flows = require("./flows");
-var comms = require("../comms");
 
 function Node(n) {
     this.id = n.id;
@@ -250,7 +249,6 @@ Node.prototype.metric = function(eventname, msg, metricValue) {
  * status: { fill:"red|green", shape:"dot|ring", text:"blah" }
  */
 Node.prototype.status = function(status) {
-    comms.publish("status/" + this.id, status, true);
     flows.handleStatus(this,status);
 };
 module.exports = Node;

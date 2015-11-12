@@ -28,7 +28,7 @@ describe("api index", function() {
 
     describe("disables editor", function() {
         before(function() {
-            api.init({
+            api.init({},{
                 settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:true},
                 events: {on:function(){},removeListener: function(){}}
             });
@@ -67,9 +67,10 @@ describe("api index", function() {
             })
         });
         before(function() {
-            api.init({
+            api.init({},{
                 settings:{httpNodeRoot:true, httpAdminRoot: true, adminAuth:{type: "credentials",users:[],default:{permissions:"read"}}},
-                storage:{getSessions:function(){return when.resolve({})}}
+                storage:{getSessions:function(){return when.resolve({})}},
+                events:{on:function(){},removeListener:function(){}}
             });
             app = api.adminApp();
         });
@@ -103,7 +104,7 @@ describe("api index", function() {
         });
 
         before(function() {
-            api.init({
+            api.init({},{
                 log:{audit:function(){}},
                 settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false},
                 events:{on:function(){},removeListener:function(){}}

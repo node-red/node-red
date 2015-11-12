@@ -19,6 +19,7 @@ var bodyParser = require("body-parser");
 var util = require('util');
 var path = require('path');
 var passport = require('passport');
+var when = require('when');
 
 var ui = require("./ui");
 var nodes = require("./nodes");
@@ -28,6 +29,7 @@ var info = require("./info");
 var theme = require("./theme");
 var locales = require("./locales");
 var credentials = require("./credentials");
+var comms = require("./comms");
 
 var auth = require("./auth");
 var needsPermission = auth.needsPermission;
@@ -46,13 +48,14 @@ var errorHandler = function(err,req,res,next) {
     res.status(400).json({error:"unexpected_error", message:err.toString()});
 };
 
-function init(runtime) {
+function init(server,runtime) {
     var settings = runtime.settings;
     log = runtime.log;
     if (settings.httpNodeRoot !== false) {
         nodeApp = express();
     }
     if (settings.httpAdminRoot !== false) {
+        comms.init(server,runtime);
         adminApp = express();
         auth.init(runtime);
         credentials.init(runtime);
@@ -123,14 +126,26 @@ function init(runtime) {
         adminApp.use(errorHandler);
     }
 }
-
+function start() {
+    comms.start();
+    return when.resolve();
+}
+function stop() {
+    comms.stop();
+    return when.resolve();
+}
 module.exports = {
     init: init,
+    start: start,
+    stop: stop,
     library: {
         register: library.register
     },
     auth: {
         needsPermission: auth.needsPermission
+    },
+    comms: {
+        publish: comms.publish
     },
     adminApp: function() { return adminApp; },
     nodeApp: function() { return nodeApp; }

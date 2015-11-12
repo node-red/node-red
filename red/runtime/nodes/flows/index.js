@@ -182,6 +182,10 @@ function delegateStatus(node,statusMessage) {
     }
 }
 function handleStatus(node,statusMessage) {
+    events.emit("node-status",{
+        id: node.id,
+        status:statusMessage
+    });
     if (node.z) {
         delegateStatus(node,statusMessage);
     } else {

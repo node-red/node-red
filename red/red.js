@@ -25,6 +25,7 @@ process.env.NODE_RED_HOME = process.env.NODE_RED_HOME || path.resolve(__dirname+
 var nodeApp = null;
 var adminApp = null;
 var server = null;
+var apiEnabled = false;
 
 function checkBuild() {
     var editorFile = path.resolve(path.join(__dirname,"..","public","red","red.min.js"));
@@ -44,9 +45,9 @@ var RED = {
         if (!userSettings.SKIP_BUILD_CHECK) {
             checkBuild();
         }
-        runtime.init(httpServer,userSettings);
+        runtime.init(userSettings);
         if (userSettings.httpAdminRoot !== false || userSettings.httpNodeRoot !== false) {
-            api.init(runtime);
+            api.init(server,runtime);
             adminApp = api.adminApp();
             nodeApp = api.nodeApp();
         }
@@ -58,15 +59,29 @@ var RED = {
                 put: function(){},
                 delete: function(){}
             }
+        } else {
+            apiEnabled = true;
         }
         return runtime.app;
     },
-    start: runtime.start,
-    stop: runtime.stop,
+    start: function() {
+        return runtime.start().then(function() {
+            if (apiEnabled) {
+                return api.start();
+            }
+        });
+    },
+    stop: function() {
+        return runtime.stop().then(function() {
+            if (apiEnabled) {
+                return api.stop();
+            }
+        })
+    },
     nodes: runtime.api,
     events: runtime.events,
     log: runtime.log,
-    comms: runtime.comms,
+    comms: api.comms,
     settings:runtime.settings,
     util: runtime.util,
     version: runtime.version,

@@ -21,19 +21,12 @@ var path = require("path");
 var api = require("../../../red/api");
 var runtime = require("../../../red/runtime");
 
-var comms = require("../../../red/runtime/comms");
 var redNodes = require("../../../red/runtime/nodes");
 var storage = require("../../../red/runtime/storage");
 var settings = require("../../../red/runtime/settings");
 var log = require("../../../red/runtime/log");
 
 describe("runtime", function() {
-    var commsMessages = [];
-    var commsPublish;
-
-    beforeEach(function() {
-        commsMessages = [];
-    });
     afterEach(function() {
         if (console.log.restore) {
             console.log.restore();
@@ -41,13 +34,9 @@ describe("runtime", function() {
     })
 
     before(function() {
-        commsPublish = sinon.stub(comms,"publish", function(topic,msg,retained) {
-            commsMessages.push({topic:topic,msg:msg,retained:retained});
-        });
         process.env.NODE_RED_HOME = path.resolve(path.join(__dirname,"..","..",".."))
     });
     after(function() {
-        commsPublish.restore();
         delete process.env.NODE_RED_HOME;
     });
 
@@ -55,32 +44,26 @@ describe("runtime", function() {
         beforeEach(function() {
             sinon.stub(log,"init",function() {});
             sinon.stub(settings,"init",function() {});
-            sinon.stub(comms,"init",function() {});
         });
         afterEach(function() {
             log.init.restore();
             settings.init.restore();
-            comms.init.restore();
         })
 
         it("initialises components", function() {
-            var dummyServer = {};
-            runtime.init(dummyServer,{testSettings: true, httpAdminRoot:"/"});
+            runtime.init({testSettings: true, httpAdminRoot:"/"});
             log.init.called.should.be.true;
             settings.init.called.should.be.true;
-            comms.init.called.should.be.true;
         });
 
         it("returns version", function() {
-            var dummyServer = {};
-            runtime.init(dummyServer,{testSettings: true, httpAdminRoot:"/"});
+            runtime.init({testSettings: true, httpAdminRoot:"/"});
             /^\d+\.\d+\.\d+(-git)?$/.test(runtime.version()).should.be.true;
 
         })
     });
 
     describe("start",function() {
-        var commsInit;
         var storageInit;
         var settingsLoad;
         var logMetric;
@@ -93,10 +76,8 @@ describe("runtime", function() {
         var redNodesGetNodeList;
         var redNodesLoadFlows;
         var redNodesStartFlows;
-        var commsStart;
 
         beforeEach(function() {
-            commsInit = sinon.stub(comms,"init",function() {});
             storageInit = sinon.stub(storage,"init",function(settings) {return when.resolve();});
             logMetric = sinon.stub(log,"metric",function() { return false; });
             logWarn = sinon.stub(log,"warn",function() { });
@@ -107,10 +88,8 @@ describe("runtime", function() {
             redNodesCleanModuleList = sinon.stub(redNodes,"cleanModuleList",function(){});
             redNodesLoadFlows = sinon.stub(redNodes,"loadFlows",function() {return when.resolve()});
             redNodesStartFlows = sinon.stub(redNodes,"startFlows",function() {});
-            commsStart = sinon.stub(comms,"start",function(){});
         });
         afterEach(function() {
-            commsInit.restore();
             storageInit.restore();
             logMetric.restore();
             logWarn.restore();
@@ -122,7 +101,6 @@ describe("runtime", function() {
             redNodesCleanModuleList.restore();
             redNodesLoadFlows.restore();
             redNodesStartFlows.restore();
-            commsStart.restore();
         });
         it("reports errored/missing modules",function(done) {
             redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function(cb) {
@@ -131,7 +109,7 @@ describe("runtime", function() {
                     {  module:"module",enabled:true,loaded:false,types:["typeA","typeB"]} // missing
                 ].filter(cb);
             });
-            runtime.init({},{testSettings: true, httpAdminRoot:"/", load:function() { return when.resolve();}});
+            runtime.init({testSettings: true, httpAdminRoot:"/", load:function() { return when.resolve();}});
             sinon.stub(console,"log");
             runtime.start().then(function() {
                 console.log.restore();
@@ -139,7 +117,6 @@ describe("runtime", function() {
                     storageInit.calledOnce.should.be.true;
                     redNodesInit.calledOnce.should.be.true;
                     redNodesLoad.calledOnce.should.be.true;
-                    commsStart.calledOnce.should.be.true;
                     redNodesLoadFlows.calledOnce.should.be.true;
 
                     logWarn.calledWithMatch("Failed to register 1 node type");
@@ -162,7 +139,7 @@ describe("runtime", function() {
                 ].filter(cb);
             });
             var serverInstallModule = sinon.stub(redNodes,"installModule",function(name) { return when.resolve();});
-            runtime.init({},{testSettings: true, autoInstallModules:true, httpAdminRoot:"/", load:function() { return when.resolve();}});
+            runtime.init({testSettings: true, autoInstallModules:true, httpAdminRoot:"/", load:function() { return when.resolve();}});
             sinon.stub(console,"log");
             runtime.start().then(function() {
                 console.log.restore();
@@ -188,7 +165,7 @@ describe("runtime", function() {
                     {  err:"errored",name:"errName" } // error
                 ].filter(cb);
             });
-            runtime.init({},{testSettings: true, verbose:true, httpAdminRoot:"/", load:function() { return when.resolve();}});
+            runtime.init({testSettings: true, verbose:true, httpAdminRoot:"/", load:function() { return when.resolve();}});
             sinon.stub(console,"log");
             runtime.start().then(function() {
                 console.log.restore();
@@ -203,12 +180,11 @@ describe("runtime", function() {
         });
 
         it("reports runtime metrics",function(done) {
-            var commsStop = sinon.stub(comms,"stop",function() {} );
             var stopFlows = sinon.stub(redNodes,"stopFlows",function() {} );
             redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function() {return []});
             logMetric.restore();
             logMetric = sinon.stub(log,"metric",function() { return true; });
-            runtime.init({},{testSettings: true, runtimeMetricInterval:200, httpAdminRoot:"/", load:function() { return when.resolve();}});
+            runtime.init({testSettings: true, runtimeMetricInterval:200, httpAdminRoot:"/", load:function() { return when.resolve();}});
             sinon.stub(console,"log");
             runtime.start().then(function() {
                 console.log.restore();
@@ -226,7 +202,6 @@ describe("runtime", function() {
                         done(err);
                     } finally {
                         runtime.stop();
-                        commsStop.restore();
                         stopFlows.restore();
                     }
                 },300);
@@ -237,15 +212,9 @@ describe("runtime", function() {
     });
 
     it("stops components", function() {
-        var commsStop = sinon.stub(comms,"stop",function() {} );
         var stopFlows = sinon.stub(redNodes,"stopFlows",function() {} );
-
         runtime.stop();
-
-        commsStop.called.should.be.true;
         stopFlows.called.should.be.true;
-
-        commsStop.restore();
         stopFlows.restore();
     });
 });
