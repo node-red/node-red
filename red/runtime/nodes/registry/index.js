@@ -31,12 +31,6 @@ function init(_settings) {
     loader.init(settings);
     registry.init(settings,loader);
 }
-//TODO: defaultNodesDir/disableNodePathScan are to make testing easier.
-//      When the tests are componentized to match the new registry structure,
-//      these flags belong on localfilesystem.load, not here.
-function load(defaultNodesDir,disableNodePathScan) {
-    return loader.load(defaultNodesDir,disableNodePathScan);
-}
 
 function addModule(module) {
     return loader.addModule(module).then(function() {
@@ -58,7 +52,7 @@ function enableNodeSet(typeOrId) {
 
 module.exports = {
     init:init,
-    load:load,
+    load:loader.load,
     clear: registry.clear,
     registerType: registry.registerNodeConstructor,
 

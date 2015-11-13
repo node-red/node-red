@@ -133,7 +133,7 @@ function scanDirForNodesModules(dir,moduleName) {
  * @return a list of node modules: {dir,package}
  */
 function scanTreeForNodesModules(moduleName) {
-    var dir = __dirname+"/../../../../nodes";
+    var dir = defaultNodesDir;
     var results = [];
     var userDir;
 

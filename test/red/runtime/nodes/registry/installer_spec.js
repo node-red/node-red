@@ -79,7 +79,7 @@ describe('nodes/registry/installer', function() {
             });
         });
         it("rejects when non-existant path is provided", function(done) {
-            var resourcesDir = path.resolve(path.join(__dirname,"..","resources","TestNodeModule","node_modules","NonExistant"));
+            var resourcesDir = path.resolve(path.join(__dirname,"..","resources","local","TestNodeModule","node_modules","NonExistant"));
             installer.installModule(resourcesDir).then(function() {
                 done(new Error("Unexpected success"));
             }).otherwise(function(err) {
@@ -92,7 +92,7 @@ describe('nodes/registry/installer', function() {
             var addModule = sinon.stub(registry,"addModule",function(md) {
                 return when.resolve(nodeInfo);
             });
-            var resourcesDir = path.resolve(path.join(__dirname,"..","resources","TestNodeModule","node_modules","TestNodeModule"));
+            var resourcesDir = path.resolve(path.join(__dirname,"..","resources","local","TestNodeModule","node_modules","TestNodeModule"));
             sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
                 cb(null,"","");
             });
