@@ -98,6 +98,7 @@ module.exports = function(RED) {
                     func();
                 },delay);
                 node.outstandingTimers.push(timerId);
+                return timerId;
             },
             clearTimeout: function(id) {
                 clearTimeout(id);
@@ -109,6 +110,7 @@ module.exports = function(RED) {
             setInterval: function(func,delay) {
                 var timerId = setInterval(func,delay);
                 node.outstandingIntervals.push(timerId);
+                return timerId;
             },
             clearInterval: function(id) {
                 clearInterval(id);
