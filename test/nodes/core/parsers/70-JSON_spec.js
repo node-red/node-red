@@ -77,7 +77,6 @@ describe('JSON node', function() {
             var jn1 = helper.getNode("jn1");
             var jn2 = helper.getNode("jn2");
             jn2.on("input", function(msg) {
-                console.log(msg);
                 should.equal(msg.payload, '[1,2,3]');
                 done();
             });
@@ -118,7 +117,6 @@ describe('JSON node', function() {
                     var logEvents = helper.log().args.filter(function(evt) {
                         return evt[0].type == "json";
                     });
-                    console.log(logEvents);
                     logEvents.should.have.length(3);
                     logEvents[0][0].should.have.a.property('msg');
                     logEvents[0][0].msg.toString().should.eql('json.errors.dropped');

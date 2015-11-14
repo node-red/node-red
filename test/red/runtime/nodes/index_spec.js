@@ -124,13 +124,16 @@ describe("red/nodes/index", function() {
        });
 
        after(function(done) {
-           fs.remove(userDir,done);
-           runtime.stop();
-           index.load.restore();
-           localfilesystem.getCredentials.restore();
+           fs.remove(userDir,function() {;
+               runtime.stop().then(function() {
+                   index.load.restore();
+                   localfilesystem.getCredentials.restore();
+                   done();
+               });
+           });
        });
 
-       it(': definition defined',function(done) {
+       it(': definition defined',function() {
            index.registerType('test', TestNode, {
                credentials: {
                    foo: {type:"test"}
@@ -138,13 +141,11 @@ describe("red/nodes/index", function() {
            });
            var testnode = new TestNode({id:'tab1',type:'test',name:'barney', '_alias':'tab1'});
            index.getCredentialDefinition("test").should.have.property('foo');
-           done();
        });
 
    });
 
    describe('allows nodes to be added/removed/enabled/disabled from the registry', function() {
-       var registry = require("../../../../red/runtime/nodes/registry");
        var randomNodeInfo = {id:"5678",types:["random"]};
 
        beforeEach(function() {

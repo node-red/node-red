@@ -18,6 +18,7 @@ var should = require("should");
 var sinon = require("sinon");
 var when = require("when");
 var path = require("path");
+var fs = require('fs');
 
 var child_process = require('child_process');
 var installer = require("../../../../../red/runtime/nodes/registry/installer");
@@ -33,7 +34,24 @@ describe('nodes/registry/installer', function() {
         if (child_process.execFile.restore) {
             child_process.execFile.restore();
         }
-    })
+        if (registry.addModule.restore) {
+            registry.addModule.restore();
+        }
+        if (registry.removeModule.restore) {
+            registry.removeModule.restore();
+        }
+        if (typeRegistry.removeModule.restore) {
+            typeRegistry.removeModule.restore();
+        }
+        if (registry.getModuleInfo.restore) {
+            registry.getModuleInfo.restore();
+        }
+
+        if (require('fs').existsSync.restore) {
+            require('fs').existsSync.restore();
+        }
+
+    });
 
     describe("installs module", function() {
         it("rejects when npm returns a 404", function(done) {
@@ -74,8 +92,6 @@ describe('nodes/registry/installer', function() {
                 done();
             }).otherwise(function(err) {
                 done(err);
-            }).finally(function() {
-                addModule.restore();
             });
         });
         it("rejects when non-existant path is provided", function(done) {
@@ -101,8 +117,6 @@ describe('nodes/registry/installer', function() {
                 done();
             }).otherwise(function(err) {
                 done(err);
-            }).finally(function() {
-                addModule.restore();
             });
         });
 
@@ -132,8 +146,6 @@ describe('nodes/registry/installer', function() {
                 done(new Error("Unexpected success"));
             }).otherwise(function(err) {
                 done();
-            }).finally(function() {
-                removeModule.restore();
             });
         });
         it("succeeds when module is found", function(done) {
@@ -148,7 +160,7 @@ describe('nodes/registry/installer', function() {
                 cb(null,"","");
             });
 
-            var exists = sinon.stub(require('fs'),"existsSync", function(fn) { return true; });
+            var exists = sinon.stub(fs,"existsSync", function(fn) { return true; });
 
             installer.uninstallModule("this_wont_exist").then(function(info) {
                 info.should.eql(nodeInfo);
@@ -158,10 +170,6 @@ describe('nodes/registry/installer', function() {
                 done();
             }).otherwise(function(err) {
                 done(err);
-            }).finally(function() {
-                removeModule.restore();
-                exists.restore();
-                getModuleInfo.restore();
             });
         });
     });
