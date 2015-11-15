@@ -92,11 +92,18 @@ module.exports = function(RED) {
             context: {
                 global:RED.settings.functionGlobalContext || {}
             },
-            setTimeout: function (func,delay) {
-                var timerId = setTimeout(function() {
+            setTimeout: function () {
+                var func = arguments[0];
+                var timerId;
+                arguments[0] = function() {
                     sandbox.clearTimeout(timerId);
-                    func();
-                },delay);
+                    try {
+                        func.apply(this,arguments);
+                    } catch(err) {
+                        node.error(err,{});
+                    }
+                };
+                timerId = setTimeout.apply(this,arguments);
                 node.outstandingTimers.push(timerId);
                 return timerId;
             },
@@ -107,8 +114,17 @@ module.exports = function(RED) {
                     node.outstandingTimers.splice(index,1);
                 }
             },
-            setInterval: function(func,delay) {
-                var timerId = setInterval(func,delay);
+            setInterval: function() {
+                var func = arguments[0];
+                var timerId;
+                arguments[0] = function() {
+                    try {
+                        func.apply(this,arguments);
+                    } catch(err) {
+                        node.error(err,{});
+                    }
+                };
+                timerId = setInterval.apply(this,arguments);
                 node.outstandingIntervals.push(timerId);
                 return timerId;
             },
