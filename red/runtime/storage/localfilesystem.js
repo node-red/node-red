@@ -128,9 +128,10 @@ var localfilesystem = {
         var promises = [];
 
         if (!settings.userDir) {
-            if (fs.existsSync(fspath.join(process.env.NODE_RED_HOME,".config.json"))) {
+            try {
+                fs.statSync(fspath.join(process.env.NODE_RED_HOME,".config.json"));
                 settings.userDir = process.env.NODE_RED_HOME;
-            } else {
+            } catch(err) {
                 settings.userDir = fspath.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE || process.env.NODE_RED_HOME,".node-red");
                 if (!settings.readOnly) {
                     promises.push(promiseDir(settings.userDir));
@@ -148,10 +149,11 @@ var localfilesystem = {
                 // Relative to cwd
                 flowsFullPath = fspath.join(process.cwd(),flowsFile);
             } else {
-                if (fs.existsSync(fspath.join(process.cwd(),flowsFile))) {
+                try {
+                    fs.statSync(fspath.join(process.cwd(),flowsFile));
                     // Found in cwd
                     flowsFullPath = fspath.join(process.cwd(),flowsFile);
-                } else {
+                } catch(err) {
                     // Use userDir
                     flowsFullPath = fspath.join(settings.userDir,flowsFile);
                 }
@@ -191,15 +193,12 @@ var localfilesystem = {
         return when.promise(function(resolve) {
             log.info(log._("storage.localfilesystem.user-dir",{path:settings.userDir}));
             log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));
-            fs.exists(flowsFullPath, function(exists) {
-                if (exists) {
-                    resolve(nodeFn.call(fs.readFile,flowsFullPath,'utf8').then(function(data) {
-                        return JSON.parse(data);
-                    }));
-                } else {
-                    log.info(log._("storage.localfilesystem.create"));
-                    resolve([]);
+            fs.readFile(flowsFullPath,'utf8',function(err,data) {
+                if (!err) {
+                    return resolve(JSON.parse(data));
                 }
+                log.info(log._("storage.localfilesystem.create"));
+                resolve([]);
             });
         });
     },
@@ -209,8 +208,9 @@ var localfilesystem = {
             return when.resolve();
         }
 
-        if (fs.existsSync(flowsFullPath)) {
+        try {
             fs.renameSync(flowsFullPath,flowsFileBackup);
+        } catch(err) {
         }
 
         var flowData;
@@ -225,17 +225,13 @@ var localfilesystem = {
 
     getCredentials: function() {
         return when.promise(function(resolve) {
-            fs.exists(credentialsFile, function(exists) {
-                if (exists) {
-                    resolve(nodeFn.call(fs.readFile, credentialsFile, 'utf8').then(function(data) {
-                        return JSON.parse(data)
-                    }));
+            fs.readFile(credentialsFile,'utf8',function(err,data) {
+                if (!err) {
+                    resolve(JSON.parse(data));
                 } else {
-                    fs.exists(oldCredentialsFile, function(exists) {
-                        if (exists) {
-                            resolve(nodeFn.call(fs.readFile, oldCredentialsFile, 'utf8').then(function(data) {
-                                return JSON.parse(data)
-                            }));
+                    fs.readFile(oldCredentialsFile,'utf8',function(err,data) {
+                        if (!err) {
+                            resolve(JSON.parse(data));
                         } else {
                             resolve({});
                         }
@@ -250,8 +246,9 @@ var localfilesystem = {
             return when.resolve();
         }
 
-        if (fs.existsSync(credentialsFile)) {
+        try {
             fs.renameSync(credentialsFile,credentialsFileBackup);
+        } catch(err) {
         }
         var credentialData;
         if (settings.flowFilePretty) {
@@ -263,21 +260,18 @@ var localfilesystem = {
     },
 
     getSettings: function() {
-        if (fs.existsSync(globalSettingsFile)) {
-            return nodeFn.call(fs.readFile,globalSettingsFile,'utf8').then(function(data) {
-                if (data) {
+        return when.promise(function(resolve,reject) {
+            fs.readFile(globalSettingsFile,'utf8',function(err,data) {
+                if (!err) {
                     try {
-                        return JSON.parse(data);
-                    } catch(err) {
+                        return resolve(JSON.parse(data));
+                    } catch(err2) {
                         log.trace("Corrupted config detected - resetting");
-                        return {};
                     }
-                } else {
-                    return {};
                 }
-            });
-        }
-        return when.resolve({});
+                return resolve({});
+            })
+        })
     },
     saveSettings: function(settings) {
         if (settings.readOnly) {
@@ -286,21 +280,18 @@ var localfilesystem = {
         return writeFile(globalSettingsFile,JSON.stringify(settings,null,1));
     },
     getSessions: function() {
-        if (fs.existsSync(sessionsFile)) {
-            return nodeFn.call(fs.readFile,sessionsFile,'utf8').then(function(data) {
-                if (data) {
+        return when.promise(function(resolve,reject) {
+            fs.readFile(sessionsFile,'utf8',function(err,data){
+                if (!err) {
                     try {
-                        return JSON.parse(data);
-                    } catch(err) {
+                        return resolve(JSON.parse(data));
+                    } catch(err2) {
                         log.trace("Corrupted sessions file - resetting");
-                        return {};
                     }
-                } else {
-                    return {};
                 }
-            });
-        }
-        return when.resolve({});
+                resolve({});
+            })
+        });
     },
     saveSessions: function(sessions) {
         if (settings.readOnly) {

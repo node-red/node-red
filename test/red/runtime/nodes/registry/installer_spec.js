@@ -47,8 +47,8 @@ describe('nodes/registry/installer', function() {
             registry.getModuleInfo.restore();
         }
 
-        if (require('fs').existsSync.restore) {
-            require('fs').existsSync.restore();
+        if (require('fs').statSync.restore) {
+            require('fs').statSync.restore();
         }
 
     });
@@ -160,7 +160,7 @@ describe('nodes/registry/installer', function() {
                 cb(null,"","");
             });
 
-            var exists = sinon.stub(fs,"existsSync", function(fn) { return true; });
+            sinon.stub(fs,"statSync", function(fn) { return {}; });
 
             installer.uninstallModule("this_wont_exist").then(function(info) {
                 info.should.eql(nodeInfo);

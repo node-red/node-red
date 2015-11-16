@@ -49,16 +49,17 @@ function getLocalFile(file) {
     if (isExcluded(path.basename(file))) {
         return null;
     }
-    if (fs.existsSync(file.replace(/\.js$/,".html"))) {
+    try {
+        fs.statSync(file.replace(/\.js$/,".html"));
         return {
             file:    file,
             module:  "node-red",
             name:    path.basename(file).replace(/^\d+-/,"").replace(/\.js$/,""),
             version: settings.version
         };
+    } catch(err) {
+        return null;
     }
-    return null;
-
 }
 
 
@@ -175,9 +176,11 @@ function getModuleNodeFiles(module) {
             });
             var iconDir = path.join(moduleDir,path.dirname(nodes[n]),"icons");
             if (iconDirs.indexOf(iconDir) == -1) {
-                if (fs.existsSync(iconDir)) {
+                try {
+                    fs.statSync(iconDir);
                     events.emit("node-icon-dir",iconDir);
                     iconDirs.push(iconDir);
+                } catch(err) {
                 }
             }
         }

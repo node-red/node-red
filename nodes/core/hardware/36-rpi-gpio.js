@@ -22,17 +22,21 @@ module.exports = function(RED) {
 
     var gpioCommand = __dirname+'/nrgpio.py';
 
-    if (!fs.existsSync("/dev/ttyAMA0")) { // unlikely if not on a Pi
+    try {
+        fs.statSync("/dev/ttyAMA0"); // unlikely if not on a Pi
+    } catch(err) {
         //RED.log.info(RED._("rpi-gpio.errors.ignorenode"));
         throw "Info : "+RED._("rpi-gpio.errors.ignorenode");
     }
 
-    if (!fs.existsSync("/usr/share/doc/python-rpi.gpio")) {
+    try {
+        fs.statSync("/usr/share/doc/python-rpi.gpio");
+    } catch(err) {
         RED.log.warn(RED._("rpi-gpio.errors.libnotfound"));
         throw "Warning : "+RED._("rpi-gpio.errors.libnotfound");
     }
 
-    if ( !(1 & parseInt ((fs.statSync(gpioCommand).mode & parseInt ("777", 8)).toString (8)[0]) )) {
+    if ( !(1 & parseInt((fs.statSync(gpioCommand).mode & parseInt("777", 8)).toString(8)[0]) )) {
         RED.log.error(RED._("rpi-gpio.errors.needtobeexecutable",{command:gpioCommand}));
         throw "Error : "+RED._("rpi-gpio.errors.mustbeexecutable");
     }

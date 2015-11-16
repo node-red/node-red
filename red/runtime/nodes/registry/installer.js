@@ -40,7 +40,7 @@ function checkModulePath(folder) {
     var err;
     var fullPath = path.resolve(folder);
     var packageFile = path.join(fullPath,'package.json');
-    if (fs.existsSync(packageFile)) {
+    try {
         var pkg = require(packageFile);
         moduleName = pkg.name;
         if (!pkg['node-red']) {
@@ -49,7 +49,7 @@ function checkModulePath(folder) {
             err.code = 'invalid_module';
             throw err;
         }
-    } else {
+    } catch(err2) {
         err = new Error("Module not found");
         err.code = 404;
         throw err;
@@ -151,7 +151,10 @@ function uninstallModule(module) {
         }
         var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
         var moduleDir = path.join(installDir,"node_modules",module);
-        if (!fs.existsSync(moduleDir)) {
+
+        try {
+            fs.statSync(moduleDir);
+        } catch(err) {
             return reject(new Error(log._("server.install.uninstall-failed",{name:module})));
         }
 

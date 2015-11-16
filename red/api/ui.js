@@ -59,10 +59,13 @@ module.exports = {
         } else {
             for (var p=0;p<icon_paths.length;p++) {
                 var iconPath = path.join(icon_paths[p],req.params.icon);
-                if (fs.existsSync(iconPath)) {
+                try {
+                    fs.statSync(iconPath);
                     res.sendFile(iconPath);
                     iconCache[req.params.icon] = iconPath;
                     return;
+                } catch(err) {
+                    // iconPath doesn't exist
                 }
             }
             res.sendFile(defaultIcon);

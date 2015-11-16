@@ -28,18 +28,25 @@ var fs = require("fs");
 var runtimeMetricInterval = null;
 
 function init(userSettings) {
-    userSettings.version = version();
+    userSettings.version = getVersion();
     log.init(userSettings);
     settings.init(userSettings);
 }
 
-function version() {
-    var p = require(path.join(__dirname,"..","..","package.json")).version;
-    /* istanbul ignore else */
-    if (fs.existsSync(path.join(__dirname,"..","..",".git"))) {
-        p += "-git";
+var version;
+
+function getVersion() {
+    if (!version) {
+        version = require(path.join(__dirname,"..","..","package.json")).version;
+        /* istanbul ignore else */
+        try {
+            fs.statSync(path.join(__dirname,"..","..",".git"));
+            version += "-git";
+        } catch(err) {
+            // No git directory
+        }
     }
-    return p;
+    return version;
 }
 
 function start() {
@@ -142,7 +149,7 @@ var runtime = module.exports = {
     start: start,
     stop: stop,
 
-    version: version,
+    version: getVersion,
 
     log: log,
     i18n: i18n,
