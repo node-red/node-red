@@ -103,7 +103,7 @@ module.exports = function(RED) {
         var node = this;
 
         var sock = dgram.createSocket(node.ipv);  // default to ipv4
-        
+
         sock.on("error", function(err) {
             // Any async error will also get reported in the sock.send call.
             // This handler is needed to ensure the error marked as handled to
@@ -134,9 +134,9 @@ module.exports = function(RED) {
             });
         } else if (node.outport != "") {
             sock.bind(node.outport);
-            node.log(RED._("udp.errors.ready",{outport:node.outport,host:node.addr,port:node.port}));
+            node.log(RED._("udp.status.ready",{outport:node.outport,host:node.addr,port:node.port}));
         } else {
-            node.log(RED._("udp.errors.ready-nolocal",{host:node.addr,port:node.port}));
+            node.log(RED._("udp.status.ready-nolocal",{host:node.addr,port:node.port}));
         }
 
         node.on("input", function(msg) {
