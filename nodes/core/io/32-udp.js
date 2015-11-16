@@ -29,7 +29,7 @@ module.exports = function(RED) {
         this.ipv = n.ipv || "udp4";
         var node = this;
 
-        var server = dgram.createSocket(node.ipv);  // default to ipv4
+        var server = dgram.createSocket({type:node.ipv, reuseAddr:true});  // default to ipv4
 
         server.on("error", function (err) {
             if ((err.code == "EACCES") && (node.port < 1024)) {
@@ -82,9 +82,7 @@ module.exports = function(RED) {
             }
         });
 
-        // Hack for when you have both in and out udp nodes sharing a port
-        //   if udp in starts last it shares better - so give it a chance to be last
-        setTimeout( function() { server.bind(node.port,node.iface); }, 250);
+        server.bind(node.port,node.iface);
     }
     RED.nodes.registerType("udp in",UDPin);
 
@@ -102,7 +100,7 @@ module.exports = function(RED) {
         this.ipv = n.ipv || "udp4";
         var node = this;
 
-        var sock = dgram.createSocket(node.ipv);  // default to ipv4
+        var sock = dgram.createSocket({type:node.ipv, reuseAddr:true});  // default to ipv4
 
         sock.on("error", function(err) {
             // Any async error will also get reported in the sock.send call.
@@ -133,8 +131,10 @@ module.exports = function(RED) {
                 }
             });
         } else if (node.outport != "") {
-            sock.bind(node.outport);
-            node.log(RED._("udp.status.ready",{outport:node.outport,host:node.addr,port:node.port}));
+            setTimeout( function() {
+                sock.bind(node.outport);
+                node.log(RED._("udp.status.ready",{outport:node.outport,host:node.addr,port:node.port}));
+            }, 250);
         } else {
             node.log(RED._("udp.status.ready-nolocal",{host:node.addr,port:node.port}));
         }
