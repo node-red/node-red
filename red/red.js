@@ -38,7 +38,7 @@ function checkBuild() {
     }
 }
 
-var RED = {
+module.exports = {
     init: function(httpServer,userSettings) {
         server = httpServer;
 
@@ -79,12 +79,12 @@ var RED = {
         })
     },
     nodes: runtime.api,
-    events: runtime.events,
     log: runtime.log,
-    comms: api.comms,
     settings:runtime.settings,
     util: runtime.util,
     version: runtime.version,
+
+    comms: api.comms,
     library: api.library,
     auth: api.auth,
 
@@ -93,5 +93,3 @@ var RED = {
     get httpNode() { return nodeApp },
     get server() { return server }
 };
-
-module.exports = RED;

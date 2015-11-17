@@ -64,11 +64,11 @@ function createNode(node,def) {
     }
 }
 
-function init(_settings,storage) {
-    settings = _settings;
-    credentials.init(storage);
-    flows.init(_settings,storage);
-    registry.init(_settings);
+function init(runtime) {
+    settings = runtime.settings;
+    credentials.init(runtime.storage);
+    flows.init(runtime.settings,runtime.storage);
+    registry.init(runtime);
 }
 
 function disableNode(id) {

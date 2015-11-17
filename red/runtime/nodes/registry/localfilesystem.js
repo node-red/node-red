@@ -18,15 +18,18 @@ var when = require("when");
 var fs = require("fs");
 var path = require("path");
 
-var events = require("../../events");
-var log = require("../../log");
+var events;
+var log;
 
 var settings;
 var defaultNodesDir = path.resolve(path.join(__dirname,"..","..","..","..","nodes"));
 var disableNodePathScan = false;
 
-function init(_settings,_defaultNodesDir,_disableNodePathScan) {
-    settings = _settings;
+function init(runtime,_defaultNodesDir,_disableNodePathScan) {
+    settings = runtime.settings;
+    events = runtime.events;
+    log = runtime.log;
+
     if (_disableNodePathScan) {
         disableNodePathScan = _disableNodePathScan;
     }

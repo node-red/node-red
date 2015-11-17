@@ -213,7 +213,7 @@ describe('Credentials', function() {
         var settings = {
             available: function() { return false;}
         }
-        index.init(settings, storage);
+        index.init({settings:settings, storage:storage});
         index.registerType('test', TestNode);
         index.loadFlows().then(function() {
             var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});

@@ -45,7 +45,7 @@ describe("red/nodes/registry/localfilesystem",function() {
     }
     describe("#getNodeFiles",function() {
         it("Finds all the node files in the resources tree",function(done) {
-            localfilesystem.init({});
+            localfilesystem.init({events:{emit:function(){}},settings:{}});
             var nodeList = localfilesystem.getNodeFiles(resourcesDir,true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -56,7 +56,7 @@ describe("red/nodes/registry/localfilesystem",function() {
             done();
         });
         it("Excludes node files from settings",function(done) {
-            localfilesystem.init({nodesExcludes:['TestNode1.js']});
+            localfilesystem.init({events:{emit:function(){}},settings:{nodesExcludes:['TestNode1.js']}});
             var nodeList = localfilesystem.getNodeFiles(resourcesDir,true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -66,7 +66,7 @@ describe("red/nodes/registry/localfilesystem",function() {
             done();
         });
         it("Finds nodes in userDir/nodes",function(done) {
-            localfilesystem.init({userDir:userDir});
+            localfilesystem.init({events:{emit:function(){}},settings:{userDir:userDir}});
             var nodeList = localfilesystem.getNodeFiles(__dirname,true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -77,7 +77,7 @@ describe("red/nodes/registry/localfilesystem",function() {
         });
 
         it("Finds nodes in settings.nodesDir (string)",function(done) {
-            localfilesystem.init({nodesDir:userDir});
+            localfilesystem.init({events:{emit:function(){}},settings:{nodesDir:userDir}});
             var nodeList = localfilesystem.getNodeFiles(__dirname,true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -87,7 +87,7 @@ describe("red/nodes/registry/localfilesystem",function() {
             done();
         });
         it("Finds nodes in settings.nodesDir (array)",function(done) {
-            localfilesystem.init({nodesDir:[userDir]});
+            localfilesystem.init({events:{emit:function(){}},settings:{nodesDir:[userDir]}});
             var nodeList = localfilesystem.getNodeFiles(__dirname,true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -106,7 +106,7 @@ describe("red/nodes/registry/localfilesystem",function() {
                 }
                 return _join.apply(null,arguments);
             }));
-            localfilesystem.init({});
+            localfilesystem.init({events:{emit:function(){}},settings:{}});
             var nodeList = localfilesystem.getNodeFiles(moduleDir,false);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -126,6 +126,9 @@ describe("red/nodes/registry/localfilesystem",function() {
 
             done();
         });
+        it.skip("finds locales directory");
+        it.skip("finds icon path directory");
+
     });
     describe("#getModuleFiles",function() {
         it("gets a nodes module files",function(done) {
@@ -138,7 +141,7 @@ describe("red/nodes/registry/localfilesystem",function() {
                 }
                 return _join.apply(null,arguments);
             }));
-            localfilesystem.init({},moduleDir,true);
+            localfilesystem.init({events:{emit:function(){}},settings:{}},moduleDir,true);
             var nodeModule = localfilesystem.getModuleFiles('TestNodeModule');
             nodeModule.should.have.a.property('TestNodeModule');
             nodeModule['TestNodeModule'].should.have.a.property('name','TestNodeModule');
@@ -162,12 +165,14 @@ describe("red/nodes/registry/localfilesystem",function() {
                 }
                 return _join.apply(null,arguments);
             }));
-            localfilesystem.init({},moduleDir,true);
+            localfilesystem.init({events:{emit:function(){}},settings:{}},moduleDir,true);
             /*jshint immed: false */
             (function(){
                 localfilesystem.getModuleFiles('WontExistModule');
             }).should.throw();
             done();
         });
+        it.skip("finds locales directory");
+        it.skip("finds icon path directory");
     });
 });

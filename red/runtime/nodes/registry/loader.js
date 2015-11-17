@@ -19,23 +19,25 @@ var fs = require("fs");
 var path = require("path");
 var semver = require("semver");
 
-var events = require("../../events");
-
 var localfilesystem = require("./localfilesystem");
 var registry = require("./registry");
 
 var RED;
 var settings;
+var runtime;
 
-var i18n = require("../../i18n");
+function registerMessageCatalog(info) {
+    runtime.i18n.registerMessageCatalog(info.namespace,info.dir,info.file);
+}
 
-events.on("node-locales-dir", function(info) {
-   i18n.registerMessageCatalog(info.namespace,info.dir,info.file);
-});
-
-function init(_settings) {
-    settings = _settings;
-    localfilesystem.init(settings);
+function init(_runtime) {
+    runtime = _runtime;
+    settings = runtime.settings;
+    localfilesystem.init(runtime);
+    if (runtime.events) {
+        runtime.events.removeListener("node-locales-dir", registerMessageCatalog);
+        runtime.events.on("node-locales-dir", registerMessageCatalog);
+    }
     RED = require('../../../red');
 }
 
@@ -55,7 +57,7 @@ function loadNodeFiles(nodeFiles) {
         /* istanbul ignore else */
         if (nodeFiles.hasOwnProperty(module)) {
             if (nodeFiles[module].redVersion &&
-                !semver.satisfies(RED.version().replace("-git",""), nodeFiles[module].redVersion)) {
+                !semver.satisfies(runtime.version().replace("-git",""), nodeFiles[module].redVersion)) {
                 //TODO: log it
                 continue;
             }
@@ -195,7 +197,7 @@ function loadNodeConfig(fileInfo) {
                 fs.stat(path.join(path.dirname(file),"locales"),function(err,stat) {
                     if (!err) {
                         node.namespace = node.id;
-                        i18n.registerMessageCatalog(node.id,
+                        runtime.i18n.registerMessageCatalog(node.id,
                                 path.join(path.dirname(file),"locales"),
                                 path.basename(file,".js")+".json")
                             .then(function() {
@@ -210,20 +212,6 @@ function loadNodeConfig(fileInfo) {
         });
     });
 }
-
-
-//function getAPIForNode(node) {
-//    var red = {
-//        nodes: RED.nodes,
-//        library: RED.library,
-//        credentials: RED.credentials,
-//        events: RED.events,
-//        log: RED.log,
-//
-//    }
-//
-//}
-
 
 /**
  * Loads the specified node into the runtime

@@ -59,6 +59,11 @@ describe("red/nodes/index", function() {
         available: function() { return false }
     };
 
+    var runtime = {
+        settings: settings,
+        storage: storage
+    };
+
     function TestNode(n) {
         index.createNode(this, n);
         var node = this;
@@ -68,7 +73,7 @@ describe("red/nodes/index", function() {
     }
 
    it('nodes are initialised with credentials',function(done) {
-        index.init(settings, storage);
+        index.init(runtime);
         index.registerType('test', TestNode);
         index.loadFlows().then(function() {
             var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});
@@ -81,7 +86,7 @@ describe("red/nodes/index", function() {
     });
 
    it('flows should be initialised',function(done) {
-        index.init(settings, storage);
+        index.init(runtime);
         index.loadFlows().then(function() {
             should.deepEqual(testFlows, index.getFlows());
             done();
@@ -168,7 +173,7 @@ describe("red/nodes/index", function() {
        });
 
        it(': allows an unused node type to be disabled',function(done) {
-            index.init(settings, storage);
+            index.init(runtime);
             index.registerType('test', TestNode);
             index.loadFlows().then(function() {
                 var info = index.disableNode("5678");
@@ -182,7 +187,7 @@ describe("red/nodes/index", function() {
        });
 
        it(': prevents disabling a node type that is in use',function(done) {
-            index.init(settings, storage);
+            index.init(runtime);
             index.registerType('test', TestNode);
             index.loadFlows().then(function() {
                 /*jshint immed: false */
@@ -197,7 +202,7 @@ describe("red/nodes/index", function() {
        });
 
        it(': prevents disabling a node type that is unknown',function(done) {
-            index.init(settings, storage);
+            index.init(runtime);
             index.registerType('test', TestNode);
             index.loadFlows().then(function() {
                 /*jshint immed: false */
@@ -250,7 +255,7 @@ describe("red/nodes/index", function() {
        });
 
        it(': prevents removing a module that is in use',function(done) {
-            index.init(settings, storage);
+            index.init(runtime);
             index.registerType('test', TestNode);
             index.loadFlows().then(function() {
                 /*jshint immed: false */
@@ -265,7 +270,7 @@ describe("red/nodes/index", function() {
        });
 
        it(': prevents removing a module that is unknown',function(done) {
-            index.init(settings, storage);
+            index.init(runtime);
             index.registerType('test', TestNode);
             index.loadFlows().then(function() {
                 /*jshint immed: false */

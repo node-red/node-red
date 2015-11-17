@@ -25,11 +25,11 @@ var installer = require("./installer");
 
 var settings;
 
-function init(_settings) {
-    settings = _settings;
-    installer.init(settings);
-    loader.init(settings);
-    registry.init(settings,loader);
+function init(runtime) {
+    settings = runtime.settings;
+    installer.init(runtime.settings);
+    loader.init(runtime);
+    registry.init(runtime.settings,loader);
 }
 
 function addModule(module) {
