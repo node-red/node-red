@@ -238,6 +238,21 @@ function loadNodeSet(node) {
                 if (RED.hasOwnProperty(i) && !/^(init|start|stop)$/.test(i)) {
                     var propDescriptor = Object.getOwnPropertyDescriptor(RED,i);
                     Object.defineProperty(red,i,propDescriptor);
+                    if (typeof RED[i] === 'function') {
+                        console.log(i+"()");
+                    } else {
+                        for (var j in RED[i]) {
+                            if (typeof RED[i][j] === 'function') {
+                                console.log(i+"."+j+"()");
+                            } else if (typeof RED[i][j] === 'number') {
+                                console.log(i+"."+j+" #");
+                            } else if (typeof RED[i][j] === 'string') {
+                                console.log(i+"."+j+" $");
+                            } else {
+                                console.log(i+"."+j+" "+typeof RED[i][j]);
+                            }
+                        }
+                    }
                 }
             }
             red["_"] = function() {

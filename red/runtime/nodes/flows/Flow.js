@@ -227,11 +227,6 @@ function Flow(global,flow) {
 
 }
 
-
-function getID() {
-    return (1+Math.random()*4294967295).toString(16);
-}
-
 var EnvVarPropertyRE = /^\$\((\S+)\)$/;
 
 function mapEnvVarProperties(obj,prop) {
@@ -297,7 +292,7 @@ function createSubflow(sf,sfn,subflows,globalSubflows,activeNodes) {
 
     var createNodeInSubflow = function(def) {
         node = clone(def);
-        var nid = getID();
+        var nid = redUtil.generateId();
         node_map[node.id] = node;
         node._alias = node.id;
         node.id = nid;
