@@ -15,8 +15,8 @@
  **/
 
 var when = require("when");
+var comms = require("./comms");
 var redNodes;
-var comms;
 var log;
 var i18n;
 var settings;
@@ -24,7 +24,6 @@ var settings;
 module.exports = {
     init: function(runtime) {
         redNodes = runtime.api;
-        comms = runtime.comms;
         log = runtime.log;
         i18n = runtime.i18n;
         settings = runtime.settings;

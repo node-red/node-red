@@ -23,6 +23,9 @@ var when = require('when');
 
 var nodes = require("../../../red/api/nodes");
 
+var comms = require("../../../red/api/comms");
+
+
 describe("nodes api", function() {
 
     var app;
@@ -33,7 +36,6 @@ describe("nodes api", function() {
             info: function(){},
             warn: function(){}
         }
-        runtime.comms = { publish:function(){}}
         nodes.init(runtime);
     }
 
@@ -47,6 +49,11 @@ describe("nodes api", function() {
         app.put("/nodes/:mod",nodes.putModule);
         app.put("/nodes/:mod/:set",nodes.putSet);
         app.delete("/nodes/:id",nodes.delete);
+        sinon.stub(comms,"publish");
+    });
+    
+    after(function() {
+        comms.publish.restore();
     });
 
     describe('get nodes', function() {
