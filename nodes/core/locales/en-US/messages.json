@@ -412,7 +412,7 @@
         },
         "errors": {
             "access-error": "UDP access error, you may need root access for ports below 1024",
-            "error": "error: __error_",
+            "error": "error: __error__",
             "bad-mcaddress": "Bad Multicast Address",
             "interface": "Must be ip address of the required interface",
             "ip-notset": "udp: ip address not set",

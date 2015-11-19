@@ -178,21 +178,25 @@ try {
     process.exit(1);
 }
 
+function basicAuthMiddleware(user,pass) {
+    var basicAuth = require('basic-auth');
+    return function(req,res,next) {
+        var requestUser = basicAuth(req);
+        if (!requestUser || requestUser.name !== user || crypto.createHash('md5').update(requestUser.pass,'utf8').digest('hex') !== pass) {
+            res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
+            return res.sendStatus(401);
+        }
+        next();
+    }
+}
+
 if (settings.httpAdminRoot !== false && settings.httpAdminAuth) {
     RED.log.warn(log._("server.httpadminauth-deprecated"));
-    app.use(settings.httpAdminRoot,
-        express.basicAuth(function(user, pass) {
-            return user === settings.httpAdminAuth.user && crypto.createHash('md5').update(pass,'utf8').digest('hex') === settings.httpAdminAuth.pass;
-        })
-    );
+    app.use(settings.httpAdminRoot, basicAuthMiddleware(settings.httpAdminAuth.user,settings.httpAdminAuth.pass));
 }
 
 if (settings.httpNodeRoot !== false && settings.httpNodeAuth) {
-    app.use(settings.httpNodeRoot,
-        express.basicAuth(function(user, pass) {
-            return user === settings.httpNodeAuth.user && crypto.createHash('md5').update(pass,'utf8').digest('hex') === settings.httpNodeAuth.pass;
-        })
-    );
+    app.use(settings.httpNodeRoot,basicAuthMiddleware(settings.httpNodeAuth.user,settings.httpNodeAuth.pass));
 }
 if (settings.httpAdminRoot !== false) {
     app.use(settings.httpAdminRoot,RED.httpAdmin);
@@ -204,11 +208,7 @@ if (settings.httpNodeRoot !== false) {
 if (settings.httpStatic) {
     settings.httpStaticAuth = settings.httpStaticAuth || settings.httpAuth;
     if (settings.httpStaticAuth) {
-        app.use("/",
-            express.basicAuth(function(user, pass) {
-                return user === settings.httpStaticAuth.user && crypto.createHash('md5').update(pass,'utf8').digest('hex') === settings.httpStaticAuth.pass;
-            })
-        );
+        app.use("/",basicAuthMiddleware(settings.httpStaticAuth.user,settings.httpStaticAuth.pass));
     }
     app.use("/",express.static(settings.httpStatic));
 }
