@@ -32,12 +32,22 @@ module.exports = {
         var flows = req.body;
         var deploymentType = req.get("Node-RED-Deployment-Type")||"full";
         log.audit({event: "flows.set",type:deploymentType},req);
-        redNodes.setFlows(flows,deploymentType).then(function() {
-            res.status(204).end();
-        }).otherwise(function(err) {
-            log.warn(log._("api.flows.error-save",{message:err.message}));
-            log.warn(err.stack);
-            res.status(500).json({error:"unexpected_error", message:err.message});
-        });
+        if (deploymentType === 'reload') {
+            redNodes.loadFlows().then(function() {
+                res.status(204).end();
+            }).otherwise(function(err) {
+                log.warn(log._("api.flows.error-reload",{message:err.message}));
+                log.warn(err.stack);
+                res.status(500).json({error:"unexpected_error", message:err.message});
+            });
+        } else {
+            redNodes.setFlows(flows,deploymentType).then(function() {
+                res.status(204).end();
+            }).otherwise(function(err) {
+                log.warn(log._("api.flows.error-save",{message:err.message}));
+                log.warn(err.stack);
+                res.status(500).json({error:"unexpected_error", message:err.message});
+            });
+        }
     }
 }

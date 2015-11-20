@@ -41,7 +41,8 @@
 
     "api": {
         "flows": {
-            "error-save": "Error saving flows: __message__"
+            "error-save": "Error saving flows: __message__",
+            "error-reload": "Error reloading flows: __message__"
         },
         "library": {
             "error-load-entry": "Error loading library entry '__path__': __message__",

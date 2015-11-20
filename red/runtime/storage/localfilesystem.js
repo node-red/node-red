@@ -25,6 +25,7 @@ var log = require("../log");
 
 var promiseDir = nodeFn.lift(mkdirp);
 
+var initialFlowLoadComplete = false;
 var settings;
 var flowsFile;
 var flowsFullPath;
@@ -191,8 +192,11 @@ var localfilesystem = {
 
     getFlows: function() {
         return when.promise(function(resolve) {
-            log.info(log._("storage.localfilesystem.user-dir",{path:settings.userDir}));
-            log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));
+            if (!initialFlowLoadComplete) {
+                initialFlowLoadComplete = true;
+                log.info(log._("storage.localfilesystem.user-dir",{path:settings.userDir}));
+                log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));
+            }
             fs.readFile(flowsFullPath,'utf8',function(err,data) {
                 if (!err) {
                     return resolve(JSON.parse(data));
