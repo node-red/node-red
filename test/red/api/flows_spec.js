@@ -47,18 +47,19 @@ describe("flows api", function() {
             .expect(200)
             .end(function(err,res) {
                 if (err) {
-                    throw err;
+                    return done(err);
                 }
                 res.body.should.be.an.Array.and.have.lengthOf(3);
                 done();
             });
     });
 
-    it('sets flows', function(done) {
+    it('sets flows - default', function(done) {
+        var setFlows = sinon.spy(function() { return when.resolve();});
         flows.init({
             log:{warn:function(){},_:function(){},audit:function(){}},
             api:{
-                setFlows: function() { return when.resolve(); }
+                setFlows: setFlows
             }
         });
         request(app)
@@ -67,11 +68,58 @@ describe("flows api", function() {
             .expect(204)
             .end(function(err,res) {
                 if (err) {
-                    throw err;
+                    return done(err);
                 }
+                setFlows.calledOnce.should.be.true;
+                setFlows.lastCall.args[1].should.eql('full');
                 done();
             });
     });
+    it('sets flows - non-default', function(done) {
+        var setFlows = sinon.spy(function() { return when.resolve();});
+        flows.init({
+            log:{warn:function(){},_:function(){},audit:function(){}},
+            api:{
+                setFlows: setFlows
+            }
+        });
+        request(app)
+            .post('/flows')
+            .set('Accept', 'application/json')
+            .set('Node-RED-Deployment-Type','nodes')
+            .expect(204)
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                setFlows.calledOnce.should.be.true;
+                setFlows.lastCall.args[1].should.eql('nodes');
+                done();
+            });
+    });
+
+    it('reloads flows', function(done) {
+        var loadFlows = sinon.spy(function() { return when.resolve(); });
+        flows.init({
+            log:{warn:function(){},_:function(){},audit:function(){}},
+            api:{
+                loadFlows: loadFlows
+            }
+        });
+        request(app)
+            .post('/flows')
+            .set('Accept', 'application/json')
+            .set('Node-RED-Deployment-Type','reload')
+            .expect(204)
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                loadFlows.called.should.be.true;
+                done();
+            });
+    });
+
     it('returns error when set fails', function(done) {
         flows.init({
             log:{warn:function(){},_:function(){},audit:function(){}},
@@ -85,7 +133,7 @@ describe("flows api", function() {
             .expect(500)
             .end(function(err,res) {
                 if (err) {
-                    throw err;
+                    return done(err);
                 }
                 res.body.should.have.property("message","expected error");
                 done();
