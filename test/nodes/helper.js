@@ -99,7 +99,7 @@ module.exports = {
             return messageId;
         };
 
-        redNodes.init(settings, storage);
+        redNodes.init({settings:settings, storage:storage});
         credentials.init(storage,express());
         RED.nodes.registerType("helper", helperNode);
         if (Array.isArray(testNode)) {
