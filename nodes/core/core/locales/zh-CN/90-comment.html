@@ -1,0 +1,97 @@
+<!--
+  Copyright 2013, 2015 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="comment">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-comment"></i> <span data-i18n="comment.label.title"></span></label>
+        <input type="text" id="node-input-name">
+    </div>
+    <div class="form-row" style="margin-bottom: 0px;">
+        <label for="node-input-info" style="width: 100% !important;"><i class="fa fa-comments"></i> <span data-i18n="comment.label.body"></span></label>
+        <input type="hidden" id="node-input-info" autofocus="autofocus">
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height: 250px;" class="node-text-editor" id="node-input-info-editor"></div>
+    </div>
+    <div class="form-tips" data-i18n="[html]comment.tip"></div>
+</script>
+
+<script type="text/x-red" data-help-name="comment">
+    <p>A node you can use to add comments to your flows.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('comment',{
+        category: 'function',
+        color:"#ffffff",
+        defaults: {
+            name: {value:""},
+            info: {value:""}
+        },
+        inputs:0,
+        outputs:0,
+        icon: "comment.png",
+        label: function() {
+            return this.name||"";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        info: function() {
+            return (this.name?"# "+this.name+"\n":"")+(this.info||"");
+        },
+        oneditprepare: function() {
+            var that = this;
+            $( "#node-input-outputs" ).spinner({
+                min:1
+            });
+            function functionDialogResize() {
+                var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+                var height = $("#dialog-form").height();
+                for (var i=0;i<rows.size();i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                var editorRow = $("#dialog-form>div.node-text-editor-row");
+                height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+                $(".node-text-editor").css("height",height+"px");
+                that.editor.resize();
+            };
+            $( "#dialog" ).on("dialogresize", functionDialogResize);
+            $( "#dialog" ).one("dialogopen", function(ev) {
+                var size = $( "#dialog" ).dialog('option','sizeCache-function');
+                if (size) {
+                    $("#dialog").dialog('option','width',size.width);
+                    $("#dialog").dialog('option','height',size.height);
+                    functionDialogResize();
+                }
+            });
+            $( "#dialog" ).one("dialogclose", function(ev,ui) {
+                var height = $( "#dialog" ).dialog('option','height');
+                $( "#dialog" ).off("dialogresize",functionDialogResize);
+            });
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-info-editor',
+                mode: 'ace/mode/markdown',
+                value: $("#node-input-info").val()
+            });
+            this.editor.focus();
+        },
+        oneditsave: function() {
+            $("#node-input-info").val(this.editor.getValue());
+            delete this.editor;
+        }
+    });
+</script>

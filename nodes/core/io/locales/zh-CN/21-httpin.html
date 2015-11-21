@@ -1,0 +1,277 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="http in">
+    <div class="form-row">
+        <label for="node-input-method"><i class="fa fa-tasks"></i> <span data-i18n="httpin.label.method"></span></label>
+        <select type="text" id="node-input-method" style="width:72%;">
+        <option value="get">GET</option>
+        <option value="post">POST</option>
+        <option value="put">PUT</option>
+        <option value="delete">DELETE</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-url"><i class="fa fa-globe"></i> <span data-i18n="httpin.label.url"></span></label>
+        <input type="text" id="node-input-url" placeholder="/url">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-row row-swagger-doc">
+        <label for="node-input-swaggerDoc"><i class="fa fa-file-text-o"></i> <span data-i18n="httpin.label.doc"></span></label>
+        <input type="text" id="node-input-swaggerDoc">
+    </div>
+    <div id="node-input-tip" class="form-tips"><span data-i18n="httpin.tip.in"></span><code><span id="node-input-path"></span></code>.</div>
+</script>
+
+<script type="text/x-red" data-help-name="http in">
+    <p>Provides an input node for http requests, allowing the creation of simple web services.</p>
+    <p>The resulting message has the following properties:
+        <ul>
+            <li>msg.req : <a href="http://expressjs.com/api.html#req">http request</a></li>
+            <li>msg.res : <a href="http://expressjs.com/api.html#res">http response</a></li>
+        </ul>
+    </p>
+    <p>For POST/PUT requests, the body is available under <code>msg.req.body</code>. This
+       uses the <a href="http://expressjs.com/api.html#bodyParser">Express bodyParser middleware</a> to parse the content to a JSON object.
+    </p>
+    <p>
+       By default, this expects the body of the request to be url encoded:
+       <pre>foo=bar&amp;this=that</pre>
+    </p>
+    <p>
+       To send JSON encoded data to the node, the content-type header of the request must be set to
+       <code>application/json</code>.
+    </p>
+    <p>
+       <b>Note: </b>This node does not send any response to the http request.
+       This should be done with a subsequent HTTP Response node.
+    </p>
+
+</script>
+
+<script type="text/x-red" data-template-name="http response">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-tips"><span data-i18n="[html]httpin.tip.res"></span></div>
+</script>
+
+<script type="text/x-red" data-help-name="http response">
+    <p>Sends responses back to http requests received from an HTTP Input node.</p>
+    <p>The response can be customised using the following message properties:</p>
+    <ul>
+        <li><code>payload</code> is sent as the body of the response</li>
+        <li><code>statusCode</code>, if set, is used as the response status code (default: 200)</li>
+        <li><code>headers</code>, if set, should be an object containing field/value
+        pairs to be added as response headers.</li>
+    </ul>
+</script>
+
+<script type="text/x-red" data-template-name="http request">
+    <div class="form-row">
+        <label for="node-input-method"><i class="fa fa-tasks"></i> <span data-i18n="httpin.label.method"></span></label>
+        <select type="text" id="node-input-method" style="width:72%;">
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+        <option value="use" data-i18n="httpin.setby"></option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-url"><i class="fa fa-globe"></i> <span data-i18n="httpin.label.url"></span></label>
+        <input type="text" id="node-input-url" placeholder="http://">
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-useAuth" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-useAuth" style="width: 70%;"><span data-i18n="httpin.basicauth"></span></label>
+    </div>
+    <div class="form-row node-input-useAuth-row">
+        <label for="node-input-user"><i class="fa fa-user"></i> <span data-i18n="common.label.username"></span></label>
+        <input type="text" id="node-input-user">
+    </div>
+    <div class="form-row node-input-useAuth-row">
+        <label for="node-input-password"><i class="fa fa-lock"></i> <span data-i18n="common.label.password"></span></label>
+        <input type="password" id="node-input-password">
+    </div>
+    <div class="form-row">
+        <label for="node-input-ret"><i class="fa fa-arrow-left"></i> <span data-i18n="httpin.label.return"></span></label>
+        <select type="text" id="node-input-ret" style="width:72%;">
+        <option value="txt" data-i18n="httpin.utf8"></option>
+        <option value="bin" data-i18n="httpin.binary"></option>
+        <option value="obj" data-i18n="httpin.json"></option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-tips" id="tip-json" hidden><span data-i18n="httpin.tip.req"></span></div>
+</script>
+
+<script type="text/x-red" data-help-name="http request">
+    <p>Provides a node for making http requests.</p>
+    <p>The URL and HTTP method can be configured in the node, if they are left blank they should be set in an incoming message on <code>msg.url</code> and <code>msg.method</code>:</p>
+    <ul>
+        <li><code>url</code>, if set, is used as the url of the request. Must start with http: or https:</li>
+        <li><code>method</code>, if set, is used as the HTTP method of the request.
+        Must be one of <code>GET</code>, <code>PUT</code>, <code>POST</code>, <code>PATCH</code> or <code>DELETE</code> (default: GET)</li>
+        <li><code>headers</code>, if set, should be an object containing field/value
+        pairs to be added as request headers</li>
+        <li><code>payload</code> is sent as the body of the request</li>
+    </ul>
+    <p>When configured within the node, the URL property can contain <a href="http://mustache.github.io/mustache.5.html" target="_new">mustache-style</a> tags. These allow the
+    url to be constructed using values of the incoming message. For example, if the url is set to
+    <code>example.com/{{{topic}}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.
+    Using {{{...}}} prevents mustache from escaping characters like / & etc.</p>
+    <p>
+    The output message contains the following properties:
+    <ul>
+        <li><code>payload</code> is the body of the response</li>
+        <li><code>statusCode</code> is the status code of the response, or the error code if the request could not be completed</li>
+        <li><code>headers</code> is an object containing the response headers</li>
+    </ul>
+    <p><b>Note</b>: If you need to configure a proxy please add <b>http_proxy=...</b> to your environment variables and restart Node-RED.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('http in',{
+        category: 'input',
+        color:"rgb(231, 231, 174)",
+        defaults: {
+            name: {value:""},
+            url: {value:"",required:true},
+            method: {value:"get",required:true},
+            swaggerDoc: {type:"swagger-doc", required:false}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "white-globe.png",
+        label: function() {
+            if (this.name) {
+                return this.name;
+            } else if (this.url) {
+                var root = RED.settings.httpNodeRoot;
+                if (root.slice(-1) != "/") {
+                    root = root+"/";
+                }
+                if (this.url.charAt(0) == "/") {
+                    root += this.url.slice(1);
+                } else {
+                    root += this.url;
+                }
+                return "["+this.method+"] "+root;
+            } else {
+                return "http";
+            }
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            var root = RED.settings.httpNodeRoot;
+            if (root.slice(-1) == "/") {
+                root = root.slice(0,-1);
+            }
+            if (root == "") {
+                $("#node-input-tip").hide();
+            } else {
+                $("#node-input-path").html(root);
+                $("#node-input-tip").show();
+            }
+            if(!RED.nodes.getType("swagger-doc")){
+                $('.row-swagger-doc').hide();
+            }
+        }
+
+    });
+
+    RED.nodes.registerType('http response',{
+        category: 'output',
+        color:"rgb(231, 231, 174)",
+        defaults: {
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:0,
+        align: "right",
+        icon: "white-globe.png",
+        label: function() {
+            return this.name||"http";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+
+    RED.nodes.registerType('http request',{
+        category: 'function',
+        color:"rgb(231, 231, 174)",
+        defaults: {
+            name: {value:""},
+            method:{value:"GET"},
+            ret: {value:"txt"},
+            url:{value:""},
+            //user -> credentials
+            //pass -> credentials
+        },
+        credentials: {
+            user: {type:"text"},
+            password: {type: "password"}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "white-globe.png",
+        label: function() {
+            return this.name||this._("httpin.httpreq");
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            if (this.credentials.user || this.credentials.has_password) {
+                $('#node-input-useAuth').prop('checked', true);
+                $(".node-input-useAuth-row").show();
+            } else {
+                $('#node-input-useAuth').prop('checked', false);
+                $(".node-input-useAuth-row").hide();
+            }
+
+            $("#node-input-useAuth").change(function() {
+                if ($(this).is(":checked")) {
+                    $(".node-input-useAuth-row").show();
+                } else {
+                    $(".node-input-useAuth-row").hide();
+                    $('#node-input-user').val('');
+                    $('#node-input-password').val('');
+                }
+            });
+
+            $("#node-input-ret").change(function() {
+                if ($("#node-input-ret").val() === "obj") {
+                    $("#tip-json").show();
+                } else {
+                    $("#tip-json").hide();
+                }
+            });
+        }
+    });
+</script>

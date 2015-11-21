@@ -1,0 +1,75 @@
+<!--
+  Copyright 2013,2015 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="exec">
+    <div class="form-row">
+        <label for="node-input-command"><i class="fa fa-file"></i> <span data-i18n="exec.label.command"></span></label>
+        <input type="text" id="node-input-command" data-i18n="[placeholder]exec.label.command">
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-plus"></i> <span data-i18n="exec.label.append"></span></label>
+        <input type="checkbox" id="node-input-addpay" style="display: inline-block; width: auto; vertical-align: top;">
+        &nbsp;msg.payload
+    </div>
+    <div class="form-row">
+        <label for="node-input-append"> </label>
+        <input type="text" id="node-input-append" data-i18n="[placeholder]exec.placeholder.extraparams">
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-useSpawn" placeholder="spawn" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-useSpawn" style="width: 70%;"><span data-i18n="exec.spawn"></span></label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="exec">
+    <p>Calls out to a system command.<br/></p>
+    <p>Provides 3 outputs... stdout, stderr, and return code.</p>
+    <p>By default uses exec() which calls the command, then gets a callback on completion, returning the complete result in one message, along with any errors.</p>
+    <p>Optionally can use spawn() instead, which returns the output from stdout and stderr as the command runs (usually one line at a time). On completion it then returns a return code (on the 3rd output).</p>
+    <p>The optional append gets added to the command after the <b>msg.payload</b> - so you can do things like pipe the result to another command.</p>
+    <p>Parameters with spaces should be enclosed in quotes - <i>"This is a single parameter"</i></p>
+    <p>If stdout is binary a <i>buffer</i> is returned - otherwise returns a <i>string</i>.</p>
+    <p>The blue status icon will be visible while the node is active.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('exec',{
+        category: 'advanced-function',
+        color:"darksalmon",
+        defaults: {
+            command: {value:"",required:true},
+            addpay: {value:true},
+            append: {value:""},
+            useSpawn: {value:""},
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:3,
+        icon: "arrow-in.png",
+        align: "right",
+        label: function() {
+            return this.name||this.command;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>

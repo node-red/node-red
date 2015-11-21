@@ -1,0 +1,127 @@
+
+<!--
+  Copyright 2014,2015 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="csv">
+    <div class="form-row">
+        <label for="node-input-temp"><i class="fa fa-list"></i> <span data-i18n="csv.label.columns"></span></label>
+        <input type="text" id="node-input-temp" data-i18n="[placeholder]csv.placeholder.columns">
+    </div>
+    <div class="form-row">
+        <label for="node-input-select-sep"><i class="fa fa-text-width"></i> <span data-i18n="csv.label.separator"></span></label>
+            <select style="width: 150px" id="node-input-select-sep">
+                <option value="," data-i18n="csv.separator.comma"></option>
+                <option value="\t" data-i18n="csv.separator.tab"></option>
+                <option value=" " data-i18n="csv.separator.space"></option>
+                <option value=";" data-i18n="csv.separator.semicolon"></option>
+                <option value=":" data-i18n="csv.separator.colon"></option>
+                <option value="#" data-i18n="csv.separator.hashtag"></option>
+                <option value="" data-i18n="csv.separator.other"></option>
+           </select>
+           <input style="width: 40px;" type="text" id="node-input-sep" pattern=".">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <hr align="middle"/>
+    <div class="form-row">
+        <label style="width: 100%;"><i class="fa fa-gears"></i> <span data-i18n="csv.label.c2o"></span></label>
+        <label style="margin-left: 10px; margin-right: -10px;"><i class="fa fa-sign-in"></i> <span data-i18n="csv.label.input"></span></label>
+        <input style="width: 30px" type="checkbox" id="node-input-hdrin"><label style="width: auto;" for="node-input-hdrin"><span data-i18n="csv.label.firstrow"></span></span>
+    </div>
+    <div class="form-row">
+        <label style="margin-left: 10px; margin-right: -10px;"><i class="fa fa-sign-out"></i> <span data-i18n="csv.label.output"></span></label>
+        <select type="text" id="node-input-multi" style="width: 250px;">
+            <option value="one" data-i18n="csv.output.row"></option>
+            <option value="mult" data-i18n="csv.output.array"></option>
+        </select>
+    </div>
+    <hr align="middle"/>
+    <div class="form-row">
+        <label style="width: 100%;"><i class="fa fa-gears"></i> <span data-i18n="csv.label.o2c"></span></label>
+        <label style="margin-left: 10px; margin-right: -10px;"><i class="fa fa-sign-in"></i> <span data-i18n="csv.label.output"></span></label>
+        <input style="width: 30px" type="checkbox" id="node-input-hdrout"><label style="width: auto;" for="node-input-hdrout"><span data-i18n="csv.label.includerow"></span></span>
+    </div>
+    <div class="form-row">
+        <label style="margin-left: 10px; margin-right: -10px;"><i class="fa fa-align-left"></i> <span data-i18n="csv.label.newline"></span></label>
+        <select style="width: 150px" id="node-input-ret">
+            <option value='\n' data-i18n="csv.newline.linux"></option>
+            <option value='\r' data-i18n="csv.newline.mac"></option>
+            <option value='\r\n' data-i18n="csv.newline.windows"></option>
+       </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="csv">
+    <p>A function that parses the <b>msg.payload</b> to convert CSV to/from a javascript object.
+    Places the result in the payload.</p>
+    <p>If the input is a string it tries to parse it as CSV and creates a javascript object.</p>
+    <p>If the input is a javascript object it tries to build a CSV string.</p>
+    <p>If the input is a simple array the output is just a CSV generated from that array.</p>
+    <p>If the input is an array of arrays or an array of objects a multiple-line CSV is created.</p>
+    <p>The columns template should contain an ordered list of column headers. For CSV input these become the property names.
+    For CSV output these specify the properties to extract from the object and the order for the CSV.</p>
+    <p>If the input is an array then the columns template does not matter, but can be used to generate a row of column titles.</p>
+    <p><b>Note:</b> the columns should always be specified comma separated - even if another separator is chosen for the data.</p>
+    </script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('csv',{
+        category: 'function',
+        color:"#DEBD5C",
+        defaults: {
+            name: {value:""},
+            sep: {value:',',required:true,validate:RED.validators.regex(/^.{1,2}$/)},
+            //quo: {value:'"',required:true},
+            hdrin: {value:""},
+            hdrout: {value:""},
+            multi: {value:"one",required:true},
+            ret: {value:'\\n'},
+            temp: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "arrow-in.png",
+        label: function() {
+            return this.name||"csv";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            if (this.sep == "," || this.sep == "\\t" || this.sep == ";" || this.sep == ":" || this.sep == " " || this.sep == "#") {
+                $("#node-input-select-sep").val(this.sep);
+                $("#node-input-sep").hide();
+            } else {
+                $("#node-input-select-sep").val("");
+                $("#node-input-sep").val(this.sep);
+                $("#node-input-sep").show();
+            }
+            $("#node-input-select-sep").change(function() {
+                var v = $("#node-input-select-sep option:selected").val();
+                $("#node-input-sep").val(v);
+                if (v == "") {
+                    $("#node-input-sep").val("");
+                    $("#node-input-sep").show().focus();
+                } else {
+                    $("#node-input-sep").hide();
+                }
+            });
+        }
+    });
+</script>

@@ -1,0 +1,129 @@
+<!--
+  Copyright 2013, 2014 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="file">
+    <div class="form-row node-input-filename">
+         <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="file.label.filename"></span></label>
+         <input type="text" id="node-input-filename">
+    </div>
+    <div class="form-row">
+        <label for="node-input-overwriteFile"><i class="fa fa-random"></i> <span data-i18n="file.label.action"></span></label>
+        <select type="text" id="node-input-overwriteFile" style="display: inline-block; width: 250px; vertical-align: top;">
+            <option value="false" data-i18n="file.action.append"></option>
+            <option value="true" data-i18n="file.action.overwrite"></option>
+            <option value="delete" data-i18n="file.action.delete"></option>
+        </select>
+    </div>
+    <div class="form-row" id="node-appline">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-appendNewline" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-appendNewline" style="width: 70%;"><span data-i18n="file.label.addnewline"></span></label>
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-createDir" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-createDir" style="width: 70%;"><span data-i18n="file.label.createdir"></span></label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="file">
+    <p>Writes <b>msg.payload</b> to the file specified, e.g. to create a log.</p>
+    <p>The filename can be configured in the node, if left blank it should be set in an incoming message on <b>msg.filename</b>.</p>
+    <p>A newline is added to every message. But this can be turned off if required, for example, to allow binary files to be written.</p>
+    <p>The default behaviour is to append to the file. This can be changed to overwrite the file each time, for example if you want to output a "static" web page or report.</p>
+    <p>This node can also be configured to delete a file if required. <i>Note:</i> Using msg.delete is now deprecated.</p>
+</script>
+
+<script type="text/x-red" data-template-name="file in">
+    <div class="form-row">
+         <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="file.label.filename"></span></label>
+         <input type="text" id="node-input-filename" data-i18n="[placeholder]file.label.filename">
+    </div>
+    <div class="form-row">
+        <label for="node-input-format"><i class="fa fa-sign-out"></i> <span data-i18n="file.label.outputas"></span></label>
+        <select id="node-input-format">
+            <option value="utf8" data-i18n="file.output.utf8"></option>
+            <option value="" data-i18n="file.output.buffer"></option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="file in">
+    <p>Reads the specified file and sends the content as <b>msg.payload</b>, and the filename as <b>msg.filename</b>.</p>
+    <p>The filename can be configured in the node, if left blank it should be set in an incoming message on <b>msg.filename</b>.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('file',{
+        category: 'storage-output',
+        defaults: {
+            name: {value:""},
+            filename: {value:""},
+            appendNewline: {value:true},
+            createDir: {value:false},
+            overwriteFile: {value:"false"}
+        },
+        color:"BurlyWood",
+        inputs:1,
+        outputs:0,
+        icon: "file.png",
+        align: "right",
+        label: function() {
+            if (this.overwriteFile === "delete") {
+                return this.name||this._("file.label.deletelabel",{file:this.filename})
+            } else {
+                return this.name||this.filename||this._("file.label.filelabel");
+            }
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+          $("#node-input-overwriteFile").on("change",function() {
+            if (this.value === "delete") { $("#node-appline").hide(); }
+            else { $("#node-appline").show(); }
+          });
+        }
+    });
+
+    RED.nodes.registerType('file in',{
+        category: 'storage-input',
+        defaults: {
+            name: {value:""},
+            filename: {value:""},
+            format: {value:"utf8"},
+        },
+        color:"BurlyWood",
+        inputs:1,
+        outputs:1,
+        icon: "file.png",
+        label: function() {
+            return this.name||this.filename||this._("file.label.filelabel");
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+
+</script>

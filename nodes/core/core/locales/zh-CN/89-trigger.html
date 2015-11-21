@@ -1,0 +1,155 @@
+<!--
+  Copyright 2014, 2015 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="trigger">
+    <div class="form-row">
+        <span data-i18n="trigger.send"></span>
+        <select id="node-input-op1type" style="width:200px !important">
+            <option value="val" data-i18n="trigger.output.string"></option>
+            <option value="pay" data-i18n="trigger.output.existing"></option>
+            <option value="nul" data-i18n="trigger.output.nothing"></option>
+        </select>
+        <input style="width: 180px !important" type="text" id="node-input-op1">
+    </div>
+    <div class="form-row">
+        <span data-i18n="trigger.then"></span>
+        <select id="node-then-type" style="width:150px;">
+            <option value="block" data-i18n="trigger.wait-reset"></option>
+            <option value="wait" data-i18n="trigger.wait-for"></option>
+        </select>
+        <span class="node-type-wait">
+            <input type="text" id="node-input-duration" style="text-align:right; width:70px !important">
+            <select id="node-input-units" style="width:140px !important">
+                <option value="ms" data-i18n="trigger.duration.ms"></option>
+                <option value="s" data-i18n="trigger.duration.s"></option>
+                <option value="min" data-i18n="trigger.duration.m"></option>
+                <option value="hr" data-i18n="trigger.duration.h"></option>
+            </select>
+       </span>
+    </div>
+    <div class="form-row node-type-wait">
+        <span data-i18n="trigger.then-send"></span>
+        <select id="node-input-op2type" style="width:200px !important">
+            <option value="val" data-i18n="trigger.output.string"></option>
+            <option value="pay" data-i18n="trigger.output.existing"></option>
+            <option value="nul" data-i18n="trigger.output.nothing"></option>
+        </select>
+        <input style="width: 145px !important" type="text" id="node-input-op2">
+    </div>
+    <div class="form-row node-type-wait">
+        <input type="checkbox" id="node-input-extend" style="margin-left: 5px; vertical-align: top; width: auto !important;"> <label style="width:auto !important;" for="node-input-extend" data-i18n="trigger.extend"></label>
+    </div>
+    <br/>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-tips" data-i18n="[html]trigger.tip"></div>
+</script>
+
+<script type="text/x-red" data-help-name="trigger">
+    <p>Creates two messages on the output separated by a timeout whenever ANY <b>msg</b> arrives on the input.</p>
+    <p>For example, this can be used to toggle a Raspberry PI GPIO pin on and off.</p>
+    <p>The two output states can be specified as can the duration of the timer.
+    Either output can be set to a value, or templated from the inbound
+    <b>msg</b> using mustache syntax. <pre>The payload is {{payload}}</pre></p>
+    <p>If the payload is an object then setting the output to <i>existing payload</i> will pass the complete payload object through.</p>
+    <p>Optionally the timer can be extended by being retriggered... or not.</p>
+    <p>By setting the first output to <i>nothing</i>, and selecting extend timer - a watchdog timer can be created.
+    No output will happen as long as repeated inputs occur within the timeout period.</p>
+    <p>Setting the timer to 0 creates an "infinite" timeout - the first output will happen but the second
+    never will, and neither can the first be retriggered - so a true one shot.</p>
+    <p>If a <b>msg.reset</b> property is present any timeout currently in progress
+    will be cleared and the second output will not happen.</p>
+    <p>The blue status icon will be visible while the node is active.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('trigger',{
+        category: 'function',
+        color:"#E6E0F8",
+        defaults: {
+            op1: {value:"1"},
+            op2: {value:"0"},
+            op1type: {value:"val"},
+            op2type: {value:"val"},
+            duration: {value:"250",required:true,validate:RED.validators.number()},
+            extend: {value:"false"},
+            units: {value: "ms"},
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "trigger.png",
+        label: function() {
+            if (this.duration > 0) {
+                return this.name|| this._("trigger.label.trigger")+" "+this.duration+this.units;
+            }
+            else {
+                return this.name|| this._("trigger.label.trigger-block");
+            }
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            $("#node-then-type").change(function() {
+                if ($(this).val() == "block") {
+                    $(".node-type-wait").hide();
+                    $(".form-tips").show();
+                } else {
+                    $(".node-type-wait").show();
+                    $(".form-tips").hide();
+                }
+            });
+            $("#node-input-op1type").change(function() {
+                if ($(this).val() == "val") {
+                    $("#node-input-op1").show();
+                } else {
+                    $("#node-input-op1").hide();
+                }
+            });
+            $("#node-input-op2type").change(function() {
+                if ($(this).val() == "val") {
+                    $("#node-input-op2").show();
+                } else {
+                    $("#node-input-op2").hide();
+                }
+            });
+            if (this.duration == "0") {
+                $("#node-then-type").val("block");
+            } else {
+                $("#node-then-type").val("wait");
+            }
+            $("#node-then-type").change();
+            $("#node-input-op1type").change();
+            $("#node-input-op2type").change();
+
+            if (this.extend === "true" || this.extend === true) {
+                $("#node-input-extend").prop("checked",true);
+            } else {
+                $("#node-input-extend").prop("checked",false);
+            }
+
+        },
+        oneditsave: function() {
+            if ($("#node-then-type").val() == "block") {
+                $("#node-input-duration").val("0");
+            }
+
+        }
+    });
+</script>

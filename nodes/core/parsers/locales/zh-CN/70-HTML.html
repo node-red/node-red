@@ -1,0 +1,74 @@
+<!--
+  Copyright 2014 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="html">
+    <div class="form-row">
+        <label for="node-input-tag"><i class="fa fa-filter"></i> <span data-i18n="html.label.select"></span></label>
+        <input type="text" id="node-input-tag" style="width:73% !important" placeholder="h1">
+    </div>
+    <div class="form-row">
+        <label for="node-input-ret"><i class="fa fa-sign-out"></i> <span data-i18n="html.label.output"></span></label>
+        <select id="node-input-ret" style="width:76% !important">
+            <option value="html" data-i18n="html.output.html"></option>
+            <option value="text"data-i18n="html.output.text"></option>
+            <!-- <option value="attr">an object of any attributes</option> -->
+            <!-- <option value="val">return the value from a form element</option> -->
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-as">&nbsp;</label>
+        <select id="node-input-as" style="width:76% !important">
+            <option value="single" data-i18n="html.format.single"></option>
+            <option value="multi" data-i18n="html.format.multi"></option>
+        </select>
+    </div>
+    <br/>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" style="width:73% !important" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-tips"><span data-i18n="[html]html.tip"></span></div>
+</script>
+
+<script type="text/x-red" data-help-name="html">
+    <p>Extracts elements from an html document held in <b>msg.payload</b> using a selector.</p>
+    <p>The selector uses <a href=="https://github.com/cheeriojs/cheerio/blob/master/Readme.md" target="_new">Cheerio</a>
+     which uses the <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_new">CSS selector</a> syntax.</p>
+    <p>The result can be either a single message with a payload containing an array of the matched elements, or multiple
+       messages that each contain a matched element.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('html',{
+        category: 'function',
+        color:"#DEBD5C",
+        defaults: {
+            name: {value:""},
+            tag: {value:""},
+            ret: {value:"html"},
+            as: {value:"single"}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "jq.png",
+        label: function() {
+            return this.name||this.tag||"html";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
