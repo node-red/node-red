@@ -14,24 +14,6 @@
   limitations under the License.
 -->
 
-<script type="text/x-red" data-template-name="xml">
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name" style="width:280px !important">
-    </div>
-    <div class="form-row" id="advanced">
-    </div>
-    <div id="advanced-options">
-        <div class="form-row">
-            <i class="fa fa-key"></i> <span data-i18n="xml.label.represent"></span> <input type="text" id="node-input-attr" style="width:20px !important" placeholder="$">
-        </div>
-        <div class="form-row">
-            <i class="fa fa-key"></i> <span data-i18n="xml.label.prefix"></span> <input type="text" id="node-input-chr" style="width:20px !important" placeholder="_">
-        </div>
-        <div class="form-tips"><span data-i18n="xml.tip"></span></div>
-    </div>
-</script>
-
 <script type="text/x-red" data-help-name="xml">
     <p>A function that parses the <b>msg.payload</b> to convert xml to/from a javascript object. Places the result in the payload.</p>
     <p>If the input is a string it tries to parse it as XML and creates a javascript object.</p>
@@ -42,40 +24,3 @@
      <p>If set, options in the edit dialogue override those passed in on the msg.options object.</p>
 </script>
 
-<script type="text/javascript">
-    RED.nodes.registerType('xml',{
-        category: 'function',
-        color:"#DEBD5C",
-        defaults: {
-            name: {value:""},
-            attr: {value:""},
-            chr: {value:""}
-        },
-        inputs:1,
-        outputs:1,
-        icon: "arrow-in.png",
-        label: function() {
-            return this.name||"xml";
-        },
-        labelStyle: function() {
-            return this.name?"node_label_italic":"";
-        },
-        oneditprepare: function() {
-            var showadvanced = showadvanced || true;
-            var advanced = this._("xml.label.advanced");
-            var showall = function() {
-                showadvanced = !showadvanced;
-                if (showadvanced) {
-                    $("#advanced-options").show();
-                    $("#advanced").html('<label for="node-advanced" style="width:200px !important"><i class="fa fa-minus-square"></i> '+advanced+'</label>');
-                }
-                else {
-                    $("#advanced-options").hide();
-                    $("#advanced").html('<label for="node-advanced" style="width:200px !important"><i class="fa fa-plus-square"></i> '+advanced+' ...</label>');
-                }
-            };
-            showall();
-            $("#advanced").click( function() { showall(); });
-        }
-    });
-</script>

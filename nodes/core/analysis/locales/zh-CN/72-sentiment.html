@@ -14,13 +14,6 @@
   limitations under the License.
 -->
 
-<script type="text/x-red" data-template-name="sentiment">
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
-    </div>
-</script>
-
 <script type="text/x-red" data-help-name="sentiment">
     <p>Analyses the <b>msg.payload</b> and adds a <b>msg.sentiment</b> object that contains the resulting AFINN-111 sentiment score as <b>msg.sentiment.score</b>.</p>
     <p>A score greater than zero is positive and less than zero is negative.</p>
@@ -29,21 +22,3 @@
     <p>See <a href="https://github.com/thisandagain/sentiment/blob/master/README.md" target="_new">the Sentiment docs here</a>.</p>
 </script>
 
-<script type="text/javascript">
-    RED.nodes.registerType('sentiment',{
-        category: 'analysis-function',
-        color:"#E6E0F8",
-        defaults: {
-            name: {value:""},
-        },
-        inputs:1,
-        outputs:1,
-        icon: "arrow-in.png",
-        label: function() {
-            return this.name||"sentiment";
-        },
-        labelStyle: function() {
-            return this.name?"node_label_italic":"";
-        }
-    });
-</script>
