@@ -16,6 +16,7 @@
 
 var when = require("when");
 var comms = require("./comms");
+var locales = require("./locales");
 var redNodes;
 var log;
 var i18n;
@@ -33,7 +34,7 @@ module.exports = {
             log.audit({event: "nodes.list.get"},req);
             res.json(redNodes.getNodeList());
         } else {
-            var lang = i18n.determineLangFromHeaders(req.acceptsLanguages());
+            var lang = locales.determineLangFromHeaders(req.acceptsLanguages());
             log.audit({event: "nodes.configs.get"},req);
             res.send(redNodes.getNodeConfigs(lang));
         }
@@ -126,7 +127,7 @@ module.exports = {
                 res.status(404).end();
             }
         } else {
-            var lang = i18n.determineLangFromHeaders(req.acceptsLanguages());
+            var lang = locales.determineLangFromHeaders(req.acceptsLanguages());
             result = redNodes.getNodeConfig(id,lang);
             if (result) {
                 log.audit({event: "nodes.config.get",id:id},req);

@@ -22,9 +22,8 @@ var sinon = require('sinon');
 var when = require('when');
 
 var nodes = require("../../../red/api/nodes");
-
 var comms = require("../../../red/api/comms");
-
+var locales = require("../../../red/api/locales");
 
 describe("nodes api", function() {
 
@@ -37,6 +36,7 @@ describe("nodes api", function() {
             warn: function(){}
         }
         nodes.init(runtime);
+
     }
 
     before(function() {
@@ -50,8 +50,11 @@ describe("nodes api", function() {
         app.put("/nodes/:mod/:set",nodes.putSet);
         app.delete("/nodes/:id",nodes.delete);
         sinon.stub(comms,"publish");
+        sinon.stub(locales,"determineLangFromHeaders", function() {
+            return "en-US";
+        });
     });
-    
+
     after(function() {
         comms.publish.restore();
     });

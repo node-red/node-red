@@ -174,8 +174,8 @@ module.exports = function(grunt) {
             messages: {
                 src: [
                     'nodes/core/locales/en-US/messages.json',
-                    'locales/en-US/editor.json',
-                    'locales/en-US/runtime.json'
+                    'red/api/locales/en-US/editor.json',
+                    'red/runtime/locales/en-US/runtime.json'
                 ]
             }
         },
@@ -223,8 +223,8 @@ module.exports = function(grunt) {
             json: {
                 files: [
                     'nodes/core/locales/en-US/messages.json',
-                    'locales/en-US/editor.json',
-                    'locales/en-US/runtime.json'
+                    'red/api/locales/en-US/editor.json',
+                    'red/runtime/locales/en-US/runtime.json'
                 ],
                 tasks: ['jsonlint:messages']
             }
@@ -238,7 +238,7 @@ module.exports = function(grunt) {
                     args: nodemonArgs,
                     ext: 'js,html,json',
                     watch: [
-                        'red','nodes','locales'
+                        'red','nodes'
                     ]
                 }
             }
@@ -302,8 +302,7 @@ module.exports = function(grunt) {
                         'red/**',
                         'public/**',
                         'editor/templates/**',
-                        'bin/**',
-                        'locales/**'
+                        'bin/**'
                     ],
                     dest: path.resolve('<%= paths.dist %>/node-red-<%= pkg.version %>')
                 }]

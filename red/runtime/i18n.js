@@ -20,38 +20,15 @@ var path = require("path");
 var fs = require("fs");
 
 var defaultLang = "en-US";
-var supportedLangs = [];
 
-var resourceMap = {
-    "runtime":  {
-        basedir: path.resolve(__dirname+"/../../locales"),
-        file:"runtime.json"
-    },
-    "editor": {
-        basedir: path.resolve(__dirname+"/../../locales"),
-        file: "editor.json"
-    }
-}
-var resourceCache = {}
+var resourceMap = {};
+var resourceCache = {};
 
 function registerMessageCatalog(namespace,dir,file) {
     return when.promise(function(resolve,reject) {
         resourceMap[namespace] = { basedir:dir, file:file};
         i18n.loadNamespace(namespace,function() {
             resolve();
-        });
-    });
-}
-
-var initSupportedLangs = function() {
-    return when.promise(function(resolve,reject) {
-        fs.readdir(resourceMap.editor.basedir, function(err,files) {
-            if(err) {
-                reject(err);
-            } else {
-                supportedLangs = files;
-                resolve();
-            }
         });
     });
 }
@@ -102,21 +79,17 @@ function init() {
         i18n.backend(MessageFileLoader);
         i18n.init({
             ns: {
-                namespaces: ["runtime","editor"],
+                namespaces: [],
                 defaultNs: "runtime"
             },
-            fallbackLng: ['en-US']
+            fallbackLng: [defaultLang]
         },function() {
-            initSupportedLangs().then(function() {
-                resolve();
-            });
+            resolve();
         });
     });
 }
 
 function getCatalog(namespace,lang) {
-    //console.log("+",namespace,lang);
-    //console.log(resourceCache[namespace][lang]);
     var result = null;
     if (resourceCache.hasOwnProperty(namespace)) {
         result = resourceCache[namespace][lang];
@@ -130,24 +103,7 @@ function getCatalog(namespace,lang) {
             }
         }
     }
-    //console.log(result);
     return result;
-}
-
-function determineLangFromHeaders(acceptedLanguages){
-    var lang = "en-US";
-    acceptedLanguages = acceptedLanguages || [];
-    for (var i=0;i<acceptedLanguages.length;i++){
-        if (supportedLangs.indexOf(acceptedLanguages[i]) !== -1){
-            lang = acceptedLanguages[i];
-            break;
-        // check the language without the country code
-        } else if (supportedLangs.indexOf(acceptedLanguages[i].split("-")[0]) !== -1) {
-            lang = acceptedLanguages[i].split("-")[0];
-            break;
-        }
-    }
-    return lang;
 }
 
 var obj = module.exports = {
@@ -155,7 +111,7 @@ var obj = module.exports = {
     registerMessageCatalog: registerMessageCatalog,
     catalog: getCatalog,
     i: i18n,
-    determineLangFromHeaders: determineLangFromHeaders
+    defaultLang:defaultLang
 }
 
 obj['_'] = function() {

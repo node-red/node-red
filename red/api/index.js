@@ -34,6 +34,7 @@ var comms = require("./comms");
 var auth = require("./auth");
 var needsPermission = auth.needsPermission;
 
+var i18n;
 var log;
 var adminApp;
 var nodeApp;
@@ -50,6 +51,7 @@ var errorHandler = function(err,req,res,next) {
 
 function init(server,runtime) {
     var settings = runtime.settings;
+    i18n = runtime.i18n;
     log = runtime.log;
     if (settings.httpNodeRoot !== false) {
         nodeApp = express();
@@ -127,8 +129,9 @@ function init(server,runtime) {
     }
 }
 function start() {
-    comms.start();
-    return when.resolve();
+    return i18n.registerMessageCatalog("editor",path.resolve(path.join(__dirname,"locales")),"editor.json").then(function(){
+        comms.start();
+    });
 }
 function stop() {
     comms.stop();
