@@ -20,6 +20,7 @@ var path = require("path");
 
 var events;
 var log;
+var i18n;
 
 var settings;
 var defaultNodesDir = path.resolve(path.join(__dirname,"..","..","..","..","nodes"));
@@ -29,6 +30,7 @@ function init(runtime,_defaultNodesDir,_disableNodePathScan) {
     settings = runtime.settings;
     events = runtime.events;
     log = runtime.log;
+    i18n = runtime.i18n;
 
     if (_disableNodePathScan) {
         disableNodePathScan = _disableNodePathScan;
@@ -204,11 +206,7 @@ function getNodeFiles(_defaultNodesDir,disableNodePathScan) {
     //console.log(nodeFiles);
 
     var defaultLocalesPath = path.resolve(path.join(defaultNodesDir,"core","locales"));
-    events.emit("node-locales-dir", {
-        namespace:"node-red",
-        dir: defaultLocalesPath,
-        file: "messages.json"
-    });
+    i18n.registerMessageCatalog("node-red",defaultLocalesPath,"messages.json");
 
     if (settings.userDir) {
         dir = path.join(settings.userDir,"nodes");

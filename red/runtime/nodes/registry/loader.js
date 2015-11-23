@@ -26,18 +26,10 @@ var RED;
 var settings;
 var runtime;
 
-function registerMessageCatalog(info) {
-    runtime.i18n.registerMessageCatalog(info.namespace,info.dir,info.file);
-}
-
 function init(_runtime) {
     runtime = _runtime;
     settings = runtime.settings;
     localfilesystem.init(runtime);
-    if (runtime.events) {
-        runtime.events.removeListener("node-locales-dir", registerMessageCatalog);
-        runtime.events.on("node-locales-dir", registerMessageCatalog);
-    }
     RED = require('../../../red');
 }
 
