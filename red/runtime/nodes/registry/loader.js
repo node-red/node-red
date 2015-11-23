@@ -172,7 +172,7 @@ function loadNodeConfig(fileInfo) {
                     index = regExp.lastIndex;
                     var help = content.substring(regExp.lastIndex-match[1].length,regExp.lastIndex);
 
-                    var lang = "en-US";
+                    var lang = runtime.i18n.defaultLang;
                     if ((match = langRegExp.exec(help)) !== null) {
                         lang = match[1];
                     }
@@ -332,7 +332,7 @@ function getNodeHelp(node,lang) {
         if (help) {
             node.help[lang] = help;
         } else {
-            node.help[lang] = node.help["en-US"];
+            node.help[lang] = node.help[runtime.i18n.defaultLang];
         }
 
     }
