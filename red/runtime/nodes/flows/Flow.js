@@ -32,6 +32,7 @@ function Flow(global,flow) {
 
     this.start = function(diff) {
         var node;
+        var newNode;
         var id;
         catchNodeMap = {};
         statusNodeMap = {};
@@ -39,7 +40,10 @@ function Flow(global,flow) {
             if (flow.configs.hasOwnProperty(id)) {
                 node = flow.configs[id];
                 if (!activeNodes[id]) {
-                    activeNodes[id] = createNode(node.type,node);
+                    newNode = createNode(node.type,node);
+                    if (newNode) {
+                        activeNodes[id] = newNode;
+                    }
                 }
             }
         }
@@ -57,7 +61,10 @@ function Flow(global,flow) {
                 node = flow.nodes[id];
                 if (!node.subflow) {
                     if (!activeNodes[id]) {
-                        activeNodes[id] = createNode(node.type,node);
+                        newNode = createNode(node.type,node);
+                        if (newNode) {
+                            activeNodes[id] = newNode;
+                        }
                     }
                 } else {
                     if (!subflowInstanceNodes[id]) {
@@ -65,7 +72,9 @@ function Flow(global,flow) {
                             var nodes = createSubflow(flow.subflows[node.subflow]||global.subflows[node.subflow],node,flow.subflows,global.subflows,activeNodes);
                             subflowInstanceNodes[id] = nodes.map(function(n) { return n.id});
                             for (var i=0;i<nodes.length;i++) {
-                                activeNodes[nodes[i].id] = nodes[i];
+                                if (nodes[i]) {
+                                    activeNodes[nodes[i].id] = nodes[i];
+                                }
                             }
                         } catch(err) {
                             console.log(err.stack)
@@ -438,8 +447,10 @@ function createSubflow(sf,sfn,subflows,globalSubflows,activeNodes) {
         var m = /^subflow:(.+)$/.exec(type);
         if (!m) {
             var newNode = createNode(type,node);
-            activeNodes[node.id] = newNode;
-            nodes.push(newNode);
+            if (newNode) {
+                activeNodes[node.id] = newNode;
+                nodes.push(newNode);
+            }
         } else {
             var subflowId = m[1];
             nodes = nodes.concat(createSubflow(subflows[subflowId]||globalSubflows[subflowId],node,subflows,globalSubflows,activeNodes));

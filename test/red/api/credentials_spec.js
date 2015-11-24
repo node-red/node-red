@@ -30,7 +30,7 @@ describe('credentials api', function() {
         app.get('/credentials/:type/:id',credentials.get);
         credentials.init({
             log:{audit:function(){}},
-            api:{
+            nodes:{
                 getCredentials: function(id) {
                     if (id === "n1") {
                         return {user1:"abc",password1:"123"};

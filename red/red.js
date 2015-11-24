@@ -40,29 +40,22 @@ function checkBuild() {
 
 module.exports = {
     init: function(httpServer,userSettings) {
-        server = httpServer;
-
         if (!userSettings.SKIP_BUILD_CHECK) {
             checkBuild();
         }
-        runtime.init(userSettings);
-        if (userSettings.httpAdminRoot !== false || userSettings.httpNodeRoot !== false) {
-            api.init(server,runtime);
-            adminApp = api.adminApp();
-            nodeApp = api.nodeApp();
-        }
 
-        if (adminApp === null) {
-            adminApp = {
-                get:function(){},
-                post: function(){},
-                put: function(){},
-                delete: function(){}
-            }
-        } else {
+        if (userSettings.httpAdminRoot !== false || userSettings.httpNodeRoot !== false) {
+            runtime.init(userSettings,api);
+            api.init(httpServer,runtime);
             apiEnabled = true;
+        } else {
+            runtime.init(userSettings);
+            apiEnabled = false;
         }
-        return runtime.app;
+        adminApp = runtime.adminApi.adminApp;
+        nodeApp = runtime.adminApi.nodeApp;
+        server = runtime.adminApi.server;
+        return;
     },
     start: function() {
         return runtime.start().then(function() {
@@ -78,7 +71,7 @@ module.exports = {
             }
         })
     },
-    nodes: runtime.api,
+    nodes: runtime.nodes,
     log: runtime.log,
     settings:runtime.settings,
     util: runtime.util,

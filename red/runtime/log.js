@@ -50,9 +50,9 @@ var LogHandler = function(settings) {
     this.logLevel  = settings ? levels[settings.level]||levels.info : levels.info;
     this.metricsOn = settings ? settings.metrics||false : false;
     this.auditOn = settings ? settings.audit||false : false;
-    
+
     metricsEnabled = metricsEnabled || this.metricsOn;
-    
+
     this.handler   = (settings && settings.handler) ? settings.handler(settings) : consoleLogger;
     this.on("log",function(msg) {
         if (this.shouldReportMessage(msg.level)) {
@@ -134,7 +134,7 @@ var log = module.exports = {
     metric: function() {
         return metricsEnabled;
     },
-    
+
     audit: function(msg,req) {
         msg.level = log.AUDIT;
         if (req) {

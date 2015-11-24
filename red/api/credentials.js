@@ -20,7 +20,7 @@ var api;
 module.exports = {
     init: function(runtime) {
         log = runtime.log;
-        api = runtime.api;
+        api = runtime.nodes;
     },
     get: function (req, res) {
         // TODO: It should verify the given node id is of the type specified -

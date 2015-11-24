@@ -42,7 +42,6 @@ function init(_server,runtime) {
     runtime.events.on("node-status",handleStatus);
 }
 
-
 function start() {
     var Tokens = require("./auth/tokens");
     var Users = require("./auth/users");

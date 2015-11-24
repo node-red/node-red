@@ -37,7 +37,7 @@ describe("flows api", function() {
     it('returns flow', function(done) {
         flows.init({
             log:{warn:function(){},_:function(){},audit:function(){}},
-            api:{
+            nodes:{
                 getFlows: function() { return [1,2,3]; }
             }
         });
@@ -58,7 +58,7 @@ describe("flows api", function() {
         var setFlows = sinon.spy(function() { return when.resolve();});
         flows.init({
             log:{warn:function(){},_:function(){},audit:function(){}},
-            api:{
+            nodes:{
                 setFlows: setFlows
             }
         });
@@ -79,7 +79,7 @@ describe("flows api", function() {
         var setFlows = sinon.spy(function() { return when.resolve();});
         flows.init({
             log:{warn:function(){},_:function(){},audit:function(){}},
-            api:{
+            nodes:{
                 setFlows: setFlows
             }
         });
@@ -102,7 +102,7 @@ describe("flows api", function() {
         var loadFlows = sinon.spy(function() { return when.resolve(); });
         flows.init({
             log:{warn:function(){},_:function(){},audit:function(){}},
-            api:{
+            nodes:{
                 loadFlows: loadFlows
             }
         });
@@ -123,7 +123,7 @@ describe("flows api", function() {
     it('returns error when set fails', function(done) {
         flows.init({
             log:{warn:function(){},_:function(){},audit:function(){}},
-            api:{
+            nodes:{
                 setFlows: function() { return when.reject(new Error("expected error")); }
             }
         });

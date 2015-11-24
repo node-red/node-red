@@ -314,6 +314,18 @@ function getModuleInfo(module) {
     }
 }
 
+function getCaller(){
+    var orig = Error.prepareStackTrace;
+    Error.prepareStackTrace = function(_, stack){ return stack; };
+    var err = new Error;
+    Error.captureStackTrace(err, arguments.callee);
+    var stack = err.stack;
+    Error.prepareStackTrace = orig;
+    stack.shift();
+    stack.shift();
+    return stack[0].getFileName();
+}
+
 function registerNodeConstructor(type,constructor) {
     if (nodeConstructors[type]) {
         throw new Error(type+" already registered");

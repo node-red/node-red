@@ -62,7 +62,7 @@ describe("nodes api", function() {
     describe('get nodes', function() {
         it('returns node list', function(done) {
             initNodes({
-                api:{
+                nodes:{
                     getNodeList: function() {
                         return [1,2,3];
                     }
@@ -83,7 +83,7 @@ describe("nodes api", function() {
 
         it('returns node configs', function(done) {
             initNodes({
-                api:{
+                nodes:{
                     getNodeConfigs: function() {
                         return "<script></script>";
                     }
@@ -107,7 +107,7 @@ describe("nodes api", function() {
 
         it('returns node module info', function(done) {
             initNodes({
-                api:{
+                nodes:{
                     getModuleInfo: function(id) {
                         return {"node-red":{name:"node-red"}}[id];
                     }
@@ -127,7 +127,7 @@ describe("nodes api", function() {
 
         it('returns 404 for unknown module', function(done) {
             initNodes({
-                api:{
+                nodes:{
                     getModuleInfo: function(id) {
                         return {"node-red":{name:"node-red"}}[id];
                     }
@@ -146,7 +146,7 @@ describe("nodes api", function() {
 
         it('returns individual node info', function(done) {
             initNodes({
-                api:{
+                nodes:{
                     getNodeInfo: function(id) {
                         return {"node-red/123":{id:"node-red/123"}}[id];
                     }
@@ -167,7 +167,7 @@ describe("nodes api", function() {
 
         it('returns individual node configs', function(done) {
             initNodes({
-                api:{
+                nodes:{
                     getNodeConfig: function(id) {
                         return {"node-red/123":"<script></script>"}[id];
                     }
@@ -191,7 +191,7 @@ describe("nodes api", function() {
 
         it('returns 404 for unknown node', function(done) {
             initNodes({
-                api:{
+                nodes:{
                     getNodeInfo: function(id) {
                         return {"node-red/123":{id:"node-red/123"}}[id];
                     }
@@ -247,7 +247,7 @@ describe("nodes api", function() {
             it('installs the module and returns module info', function(done) {
                 initNodes({
                     settings:{available:function(){return true}},
-                    api:{
+                    nodes:{
                         getModuleInfo: function(id) { return null; },
                         installModule: function() {
                             return when.resolve({
@@ -275,7 +275,7 @@ describe("nodes api", function() {
             it('fails the install if already installed', function(done) {
                 initNodes({
                     settings:{available:function(){return true}},
-                    api:{
+                    nodes:{
                         getModuleInfo: function(id) { return {nodes:{id:"123"}}; },
                         installModule: function() {
                             return when.resolve({id:"123"});
@@ -297,7 +297,7 @@ describe("nodes api", function() {
             it('fails the install if module error', function(done) {
                 initNodes({
                     settings:{available:function(){return true}},
-                    api:{
+                    nodes:{
                         getModuleInfo: function(id) { return null },
                         installModule: function() {
                             return when.reject(new Error("test error"));
@@ -319,7 +319,7 @@ describe("nodes api", function() {
             it('fails the install if module not found', function(done) {
                 initNodes({
                     settings:{available:function(){return true}},
-                    api:{
+                    nodes:{
                         getModuleInfo: function(id) { return null },
                         installModule: function() {
                             var err = new Error("test error");
@@ -362,7 +362,7 @@ describe("nodes api", function() {
             it('uninstalls the module', function(done) {
                 initNodes({
                     settings:{available:function(){return true}},
-                    api:{
+                    nodes:{
                         getModuleInfo: function(id) { return {nodes:[{id:"123"}]} },
                         getNodeInfo: function() { return null },
                         uninstallModule: function() { return when.resolve({id:"123"});}
@@ -382,7 +382,7 @@ describe("nodes api", function() {
             it('fails the uninstall if the module is not installed', function(done) {
                 initNodes({
                     settings:{available:function(){return true}},
-                    api:{
+                    nodes:{
                         getModuleInfo: function(id) { return null },
                         getNodeInfo: function() { return null }
                     }
@@ -401,7 +401,7 @@ describe("nodes api", function() {
             it('fails the uninstall if the module is not installed', function(done) {
                 initNodes({
                     settings:{available:function(){return true}},
-                    api:{
+                    nodes:{
                         getModuleInfo: function(id) { return {nodes:[{id:"123"}]} },
                         getNodeInfo: function() { return null },
                         uninstallModule: function() { return when.reject(new Error("test error"));}
@@ -476,7 +476,7 @@ describe("nodes api", function() {
         it('returns 404 for unknown node', function(done) {
             initNodes({
                 settings:{available:function(){return true}},
-                api:{
+                nodes:{
                     getNodeInfo: function() { return null }
                 }
             });
@@ -496,7 +496,7 @@ describe("nodes api", function() {
         it('returns 404 for unknown module', function(done) {
             initNodes({
                 settings:{available:function(){return true}},
-                api:{
+                nodes:{
                     getModuleInfo: function(id) { return null }
                 }
             });
@@ -516,7 +516,7 @@ describe("nodes api", function() {
         it('enables disabled node', function(done) {
             initNodes({
                 settings:{available:function(){return true}},
-                api:{
+                nodes:{
                     getNodeInfo: function() { return {id:"123",enabled: false} },
                     enableNode: function() { return when.resolve({id:"123",enabled: true,types:['a']}); }
                 }
@@ -539,7 +539,7 @@ describe("nodes api", function() {
         it('disables enabled node', function(done) {
             initNodes({
                 settings:{available:function(){return true}},
-                api:{
+                nodes:{
                     getNodeInfo: function() { return {id:"123",enabled: true} },
                     disableNode: function() { return when.resolve({id:"123",enabled: false,types:['a']}); }
                 }
@@ -566,7 +566,7 @@ describe("nodes api", function() {
 
                 initNodes({
                     settings:{available:function(){return true}},
-                    api:{
+                    nodes:{
                         getNodeInfo: function() { return {id:"123",enabled: state} },
                         enableNode: enableNode,
                         disableNode: disableNode
@@ -605,7 +605,7 @@ describe("nodes api", function() {
 
                 initNodes({
                     settings:{available:function(){return true}},
-                    api:{
+                    nodes:{
                         getNodeInfo: function() { return {id:"123",enabled: state, err:"foo"} },
                         enableNode: enableNode,
                         disableNode: disableNode
@@ -652,7 +652,7 @@ describe("nodes api", function() {
             enableNode.returns(null);
             initNodes({
                 settings:{available:function(){return true}},
-                api:{
+                nodes:{
                     getModuleInfo: function() { return {name:"node-red", nodes:[n1, n2]} },
                     enableNode: enableNode
                 }
@@ -690,7 +690,7 @@ describe("nodes api", function() {
             disableNode.returns(null);
             initNodes({
                 settings:{available:function(){return true}},
-                api:{
+                nodes:{
                     getModuleInfo: function() { return {name:"node-red", nodes:[n1, n2]} },
                     disableNode: disableNode
                 }
@@ -727,7 +727,7 @@ describe("nodes api", function() {
 
                 initNodes({
                     settings:{available:function(){return true}},
-                    api:{
+                    nodes:{
                         getModuleInfo: function() { return {name:"node-red", nodes:[node]}; },
                         enableNode: enableNode,
                         disableNode: disableNode
@@ -774,7 +774,7 @@ describe("nodes api", function() {
 
                 initNodes({
                     settings:{available:function(){return true}},
-                    api:{
+                    nodes:{
                         getModuleInfo: function() { return {name:"node-red", nodes:[node]}; },
                         enableNode: enableNode,
                         disableNode: disableNode

@@ -22,7 +22,6 @@ var semver = require("semver");
 var localfilesystem = require("./localfilesystem");
 var registry = require("./registry");
 
-var RED;
 var settings;
 var runtime;
 
@@ -30,7 +29,6 @@ function init(_runtime) {
     runtime = _runtime;
     settings = runtime.settings;
     localfilesystem.init(runtime);
-    RED = require('../../../red');
 }
 
 function load(defaultNodesDir,disableNodePathScan) {
@@ -42,6 +40,66 @@ function load(defaultNodesDir,disableNodePathScan) {
     var nodeFiles = localfilesystem.getNodeFiles(defaultNodesDir,disableNodePathScan);
     return loadNodeFiles(nodeFiles);
 }
+
+function copyObjectProperties(src,dst,copyList,blockList) {
+    if (!src) {
+        return;
+    }
+    if (copyList && !blockList) {
+        copyList.forEach(function(i) {
+            if (src.hasOwnProperty(i)) {
+                var propDescriptor = Object.getOwnPropertyDescriptor(src,i);
+                Object.defineProperty(dst,i,propDescriptor);
+            }
+        });
+    } else if (!copyList && blockList) {
+        for (var i in src) {
+            if (src.hasOwnProperty(i) && blockList.indexOf(i) === -1) {
+                var propDescriptor = Object.getOwnPropertyDescriptor(src,i);
+                Object.defineProperty(dst,i,propDescriptor);
+            }
+        }
+    }
+}
+
+function createNodeApi(node) {
+    var red = {
+        nodes: {},
+        log: {},
+        settings: {},
+        util: runtime.util,
+        version: runtime.version,
+    }
+    copyObjectProperties(runtime.nodes,red.nodes,["createNode","getNode","eachNode","registerType","addCredentials","getCredentials","deleteCredentials" ]);
+    copyObjectProperties(runtime.log,red.log,null,["init"]);
+    copyObjectProperties(runtime.settings,red.settings,null,["init","load","reset"]);
+    if (runtime.adminApi) {
+        red.comms = runtime.adminApi.comms;
+        red.library = runtime.adminApi.library;
+        red.auth = runtime.adminApi.auth;
+        red.httpAdmin = runtime.adminApi.adminApp;
+        red.httpNode = runtime.adminApi.nodeApp;
+        red.server = runtime.adminApi.server;
+    } else {
+        red.comms = {
+            publish: function(){}
+        };
+        red.library = {
+            register: function(){}
+        };
+        red.auth = {
+            needsPermission: function() {}
+        };
+        // TODO: stub out httpAdmin/httpNode/server
+    }
+    red["_"] = function() {
+        var args = Array.prototype.slice.call(arguments, 0);
+        args[0] = node.namespace+":"+args[0];
+        return runtime.i18n._.apply(null,args);
+    }
+    return red;
+}
+
 
 function loadNodeFiles(nodeFiles) {
     var promises = [];
@@ -225,18 +283,7 @@ function loadNodeSet(node) {
         var r = require(node.file);
         if (typeof r === "function") {
 
-            var red = {};
-            for (var i in RED) {
-                if (RED.hasOwnProperty(i) && !/^(init|start|stop)$/.test(i)) {
-                    var propDescriptor = Object.getOwnPropertyDescriptor(RED,i);
-                    Object.defineProperty(red,i,propDescriptor);
-                }
-            }
-            red["_"] = function() {
-                var args = Array.prototype.slice.call(arguments, 0);
-                args[0] = node.namespace+":"+args[0];
-                return runtime.i18n._.apply(null,args);
-            }
+            var red = createNodeApi(node);
             var promise = r(red);
             if (promise != null && typeof promise.then === "function") {
                 loadPromise = promise.then(function() {

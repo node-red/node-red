@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ var i18n;
 var log;
 var adminApp;
 var nodeApp;
+var server;
 
 var errorHandler = function(err,req,res,next) {
     if (err.message === "request entity too large") {
@@ -49,7 +50,8 @@ var errorHandler = function(err,req,res,next) {
     res.status(400).json({error:"unexpected_error", message:err.toString()});
 };
 
-function init(server,runtime) {
+function init(_server,runtime) {
+    server = _server;
     var settings = runtime.settings;
     i18n = runtime.i18n;
     log = runtime.log;
@@ -150,6 +152,7 @@ module.exports = {
     comms: {
         publish: comms.publish
     },
-    adminApp: function() { return adminApp; },
-    nodeApp: function() { return nodeApp; }
+    get adminApp() { return adminApp; },
+    get nodeApp() { return nodeApp; },
+    get server() { return server; }
 };

@@ -27,10 +27,36 @@ var fs = require("fs");
 
 var runtimeMetricInterval = null;
 
-function init(userSettings) {
+var stubbedExpressApp = {
+    get: function() {},
+    post: function() {},
+    put: function() {},
+    delete: function(){}
+}
+var adminApi = {
+    library: {
+        register: function(){}
+    },
+    auth: {
+        needsPermission: function(){}
+    },
+    comms: {
+        publish: function(){}
+    },
+    adminApp: stubbedExpressApp,
+    nodeApp: stubbedExpressApp,
+    server: {}
+}
+
+function init(userSettings,_adminApi) {
     userSettings.version = getVersion();
     log.init(userSettings);
     settings.init(userSettings);
+    if (_adminApi) {
+        adminApi = _adminApi;
+    }
+    redNodes.init(runtime);
+
 }
 
 var version;
@@ -69,7 +95,6 @@ function start() {
             }
             log.info(log._("runtime.version",{component:"Node.js ",version:process.version}));
             log.info(log._("server.loading"));
-            redNodes.init(runtime);
             return redNodes.load().then(function() {
 
                 var i;
@@ -159,6 +184,7 @@ var runtime = module.exports = {
     settings: settings,
     storage: storage,
     events: events,
-    api: redNodes,
-    util: require("./util")
+    nodes: redNodes,
+    util: require("./util"),
+    get adminApi() { return adminApi }
 }

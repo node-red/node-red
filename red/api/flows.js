@@ -21,7 +21,7 @@ var settings;
 module.exports = {
     init: function(runtime) {
         settings = runtime.settings;
-        redNodes = runtime.api;
+        redNodes = runtime.nodes;
         log = runtime.log;
     },
     get: function(req,res) {

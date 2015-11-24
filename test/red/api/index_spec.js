@@ -32,7 +32,7 @@ describe("api index", function() {
                 settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:true},
                 events: {on:function(){},removeListener: function(){}}
             });
-            app = api.adminApp();
+            app = api.adminApp;
         });
 
         it('does not serve the editor', function(done) {
@@ -72,7 +72,7 @@ describe("api index", function() {
                 storage:{getSessions:function(){return when.resolve({})}},
                 events:{on:function(){},removeListener:function(){}}
             });
-            app = api.adminApp();
+            app = api.adminApp;
         });
 
         it('it now serves auth', function(done) {
@@ -109,7 +109,7 @@ describe("api index", function() {
                 settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false},
                 events:{on:function(){},removeListener:function(){}}
             });
-            app = api.adminApp();
+            app = api.adminApp;
         });
         it('serves the editor', function(done) {
             request(app)

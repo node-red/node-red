@@ -44,16 +44,19 @@ describe("runtime", function() {
         beforeEach(function() {
             sinon.stub(log,"init",function() {});
             sinon.stub(settings,"init",function() {});
+            sinon.stub(redNodes,"init",function() {})
         });
         afterEach(function() {
             log.init.restore();
             settings.init.restore();
+            redNodes.init.restore();
         })
 
         it("initialises components", function() {
             runtime.init({testSettings: true, httpAdminRoot:"/"});
             log.init.called.should.be.true;
             settings.init.called.should.be.true;
+            redNodes.init.called.should.be.true;
         });
 
         it("returns version", function() {

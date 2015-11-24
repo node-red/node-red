@@ -222,7 +222,7 @@ function start(type,diff) {
             log.info(log._("nodes.flows.missing-type-install-2"));
             log.info("  "+settings.userDir);
         }
-        return;
+        return when.resolve();
     }
     if (diff) {
         log.info(log._("nodes.flows.starting-modified-"+type));
@@ -270,6 +270,7 @@ function start(type,diff) {
     } else {
         log.info(log._("nodes.flows.started-flows"));
     }
+    return when.resolve();
 }
 
 function stop(type,diff) {
@@ -387,6 +388,7 @@ module.exports = {
      */
     stopFlows: stop,
 
+    started: function() { return started },
 
     handleError: handleError,
     handleStatus: handleStatus,
