@@ -495,6 +495,7 @@ module.exports = function(RED) {
                         setTimeout(function() {
                             client.connect(port, host, function() {
                                 node.connected = true;
+                                node.status({fill:"green",shape:"dot",text:"common.status.connected"});
                                 client.write(msg.payload);
                             });
                         },reconnectTime);
