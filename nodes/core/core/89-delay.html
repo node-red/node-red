@@ -77,8 +77,9 @@
 <!-- Next, some simple help text is provided for the node.                   -->
 <script type="text/x-red" data-help-name="delay">
     <p>Introduces a delay into a flow or rate limits messages.</p>
-    <p>Default delay is 5 seconds and rate limit of 1 msg/second, but both can be configured.</p>
-    <p>If you select a rate limit you may optionally discard any intermediate messages that arrive.</p>
+    <p>The default delay is 5 seconds and rate limit of 1 msg/second, but both can be configured.</p>
+    <p>When set to rate limit messages, they are spread across the configured time period. It can
+    also be set to discard any intermediate messages that arrive.</p>
     <p>The "topic based fair queue" adds messages to a release queue tagged by their <b>msg.topic</b> property.
     At each "tick", derived from the rate, the next "topic" is released.
     Any messages arriving on the same topic before release replace those in that position in the queue.

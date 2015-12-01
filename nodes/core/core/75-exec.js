@@ -27,6 +27,7 @@ module.exports = function(RED) {
         this.addpay = n.addpay;
         this.append = (n.append || "").trim();
         this.useSpawn = n.useSpawn;
+        this.activeProcesses = {};
 
         var node = this;
         this.on("input", function(msg) {
@@ -35,13 +36,18 @@ module.exports = function(RED) {
                 // make the extra args into an array
                 // then prepend with the msg.payload
 
-                var arg = node.cmd+" "+msg.payload+" "+node.append;
+                var arg = node.cmd;
+                if (node.addpay) {
+                    arg += " "+msg.payload;
+                }
+                arg += " "+node.append;
                 // slice whole line by spaces (trying to honour quotes);
                 arg = arg.match(/(?:[^\s"]+|"[^"]*")+/g);
                 var cmd = arg.shift();
                 if (RED.settings.verbose) { node.log(cmd+" ["+arg+"]"); }
                 if (cmd.indexOf(" ") == -1) {
                     var ex = spawn(cmd,arg);
+                    node.activeProcesses[ex.pid] = ex;
                     ex.stdout.on('data', function (data) {
                         //console.log('[exec] stdout: ' + data);
                         if (isUtf8(data)) { msg.payload = data.toString(); }
@@ -56,11 +62,13 @@ module.exports = function(RED) {
                     });
                     ex.on('close', function (code) {
                         //console.log('[exec] result: ' + code);
+                        delete node.activeProcesses[ex.pid];
                         msg.payload = code;
                         node.status({});
                         node.send([null,null,msg]);
                     });
                     ex.on('error', function (code) {
+                        delete node.activeProcesses[ex.pid];
                         node.error(code,msg);
                     });
                 }
@@ -88,8 +96,19 @@ module.exports = function(RED) {
                     }
                     node.status({});
                     node.send([msg,msg2,msg3]);
+                    delete node.activeProcesses[child.pid];
                 });
+                child.on('error',function(){})
+                node.activeProcesses[child.pid] = child;
             }
+        });
+        this.on('close',function() {
+            for (var pid in node.activeProcesses) {
+                if (node.activeProcesses.hasOwnProperty(pid)) {
+                    node.activeProcesses[pid].kill();
+                }
+            }
+            node.activeProcesses = {};
         });
     }
     RED.nodes.registerType("exec",ExecNode);

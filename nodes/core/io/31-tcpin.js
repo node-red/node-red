@@ -397,8 +397,7 @@ module.exports = function(RED) {
             }
             if (!node.connected) {
                 client = net.Socket();
-                if (socketTimeout) { client.setTimeout(socketTimeout); }
-                //node.status({});
+                if (socketTimeout !== null) { client.setTimeout(socketTimeout); }
                 var host = node.server || msg.host;
                 var port = node.port || msg.port;
                 var m;
@@ -471,30 +470,38 @@ module.exports = function(RED) {
                 });
 
                 client.on('end', function() {
+                    //console.log("END");
                     node.connected = false;
-                    node.status({});
+                    node.status({fill:"grey",shape:"ring",text:"common.status.disconnected"});
                     node.send({"payload":m});
                     client = null;
                 });
 
                 client.on('close', function() {
-                    node.status({});
+                    //console.log("CLOSE");
+                    node.connected = false;
                     if (node.done) { node.done(); }
                 });
 
                 client.on('error', function() {
-                    node.error(RED._("tcpin.errors.connect-fail"),msg);
+                    //console.log("ERROR");
+                    node.connected = false;
                     node.status({fill:"red",shape:"ring",text:"common.status.error"});
+                    node.error(RED._("tcpin.errors.connect-fail"),msg);
                     if (client) { client.end(); }
                 });
 
                 client.on('timeout',function() {
+                    //console.log("TIMEOUT");
+                    node.connected = false;
+                    node.status({fill:"grey",shape:"dot"});
                     node.warn(RED._("tcpin.errors.connect-timeout"));
                     if (client) {
                         client.end();
                         setTimeout(function() {
                             client.connect(port, host, function() {
                                 node.connected = true;
+                                node.status({fill:"green",shape:"dot",text:"common.status.connected"});
                                 client.write(msg.payload);
                             });
                         },reconnectTime);
@@ -510,6 +517,7 @@ module.exports = function(RED) {
                 buf = null;
                 client.destroy();
             }
+            node.status({});
             if (!node.connected) { done(); }
         });
 
