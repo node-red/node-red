@@ -29,7 +29,9 @@ module.exports = function(RED) {
         this.ipv = n.ipv || "udp4";
         var node = this;
 
-        var server = dgram.createSocket({type:node.ipv, reuseAddr:true});  // default to ipv4
+        var opts = {type:node.ipv, reuseAddr:true};
+        if (process.version.indexOf("v0.10") === 0) { opts = node.ipv; }
+        var server = dgram.createSocket(opts);  // default to udp4
 
         server.on("error", function (err) {
             if ((err.code == "EACCES") && (node.port < 1024)) {
@@ -100,7 +102,9 @@ module.exports = function(RED) {
         this.ipv = n.ipv || "udp4";
         var node = this;
 
-        var sock = dgram.createSocket({type:node.ipv, reuseAddr:true});  // default to ipv4
+        var opts = {type:node.ipv, reuseAddr:true};
+        if (process.version.indexOf("v0.10") === 0) { opts = node.ipv; }
+        var sock = dgram.createSocket(opts);  // default to udp4
 
         sock.on("error", function(err) {
             // Any async error will also get reported in the sock.send call.
