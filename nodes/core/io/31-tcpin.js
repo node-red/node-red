@@ -494,17 +494,17 @@ module.exports = function(RED) {
                 client.on('timeout',function() {
                     //console.log("TIMEOUT");
                     node.connected = false;
-                    node.status({fill:"grey",shape:"dot"});
-                    node.warn(RED._("tcpin.errors.connect-timeout"));
+                    node.status({fill:"grey",shape:"dot",text:"tcpin.errors.connect-timeout"});
+                    //node.warn(RED._("tcpin.errors.connect-timeout"));
                     if (client) {
-                        client.end();
-                        setTimeout(function() {
+                        //client.end();
+                        //setTimeout(function() {
                             client.connect(port, host, function() {
                                 node.connected = true;
                                 node.status({fill:"green",shape:"dot",text:"common.status.connected"});
-                                client.write(msg.payload);
+                                //client.write(msg.payload);
                             });
-                        },reconnectTime);
+                        //},reconnectTime);
                     }
                 });
             }
