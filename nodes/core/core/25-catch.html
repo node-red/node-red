@@ -111,6 +111,9 @@
         labelStyle: function() {
             return this.name?"node_label_italic":"";
         },
+        paletteLabel: function () {
+            return this.name||this._("catch.label.palette");
+        },
         oneditprepare: function() {
             var nodeList = $("#node-input-catch-target-container");
             var node = this;

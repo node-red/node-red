@@ -34,7 +34,8 @@
         "stopped": "stopped",
         "failed": "Inject failed: __error__",
         "label": {
-            "repeat": "Repeat"
+            "repeat": "Repeat",
+            "palette": "Inject"
         },
         "timestamp": "timestamp",
         "string": "string",
@@ -76,7 +77,8 @@
             "type": "type",
             "selectAll": "select all",
             "sortByLabel": "sort by label",
-            "sortByType": "sort by type"
+            "sortByType": "sort by type",
+            "palette": "Catch"
         },
         "scope": {
             "all": "all nodes",
@@ -92,7 +94,8 @@
             "type": "type",
             "selectAll": "select all",
             "sortByLabel": "sort by label",
-            "sortByType": "sort by type"
+            "sortByType": "sort by type",
+            "palette": "Status"
         },
         "scope": {
             "all": "all nodes",
@@ -113,6 +116,9 @@
         "sidebar": {
             "label": "debug",
             "name": "Debug messages"
+        },
+        "label": {
+            "palette": "Debug"
         }
     },
     "exec": {
@@ -120,7 +126,8 @@
         "badstdout": "Bad STDOUT",
         "label": {
             "command": "Command",
-            "append": "Append"
+            "append": "Append",
+            "palette": "Exec"
         },
         "placeholder": {
             "extraparams": "extra input parameters"
@@ -131,14 +138,16 @@
     "function": {
         "label": {
             "function": "Function",
-            "outputs": "Outputs"
+            "outputs": "Outputs",
+            "palette": "Function"
         },
         "tip": "See the Info tab for help writing functions."
     },
     "template": {
         "label": {
             "template": "Template",
-            "property": "Property"
+            "property": "Property",
+            "palette": "Template"
         },
         "templatevalue": "This is the payload: {{payload}} !"
     },
@@ -166,7 +175,8 @@
             "delay": "delay",
             "limit": "limit",
             "random": "ramdom",
-            "queue": "queue"
+            "queue": "queue",
+            "palette": "Delay"
         },
         "error": {
             "buffer": "buffer exceeded 1000 messages"
@@ -193,19 +203,22 @@
         "tip": "The node can be reset by sending a message with the <b>msg.reset</b> property set",
         "label": {
             "trigger": "trigger",
-            "trigger-block": "trigger & block"
+            "trigger-block": "trigger & block",
+            "palette": "Trigger"
         }
     },
     "comment": {
         "label": {
             "title": "Title",
-            "body": "Body"
+            "body": "Body",
+            "palette": "Comment"
         },
         "tip": "Tip: The text can be styled as <a href=\"https://help.github.com/articles/markdown-basics/\" target=\"_new\">Github flavoured Markdown</a>"
     },
     "unknown": {
         "label": {
-            "unknown": "unknown"
+            "unknown": "unknown",
+            "palette": "Unknown"
         },
         "tip": "<p>This node is a type unknown to your installation of Node-RED.</p><p><i>If you deploy with the node in this state, it's configuration will be preserved, but the flow will not start until the missing type is installed.</i></p><p>See the Info side bar for more help</p>"
     },
@@ -219,7 +232,8 @@
             "cleansession": "Use clean session",
             "use-tls": "Enable secure (SSL/TLS) connection",
             "verify-server-cert":"Verify server certificate",
-            "compatmode": "Use legacy MQTT 3.1 support"
+            "compatmode": "Use legacy MQTT 3.1 support",
+            "palette": "MQTT"
         },
         "tabs-label": {
             "connection": "Connection",
@@ -254,7 +268,8 @@
             "method": "Method",
             "url": "URL",
             "doc": "Docs",
-            "return": "Return"
+            "return": "Return",
+            "palette": "httpin"
         },
         "setby": "- set by msg.method -",
         "basicauth": "Use basic authentication?",
@@ -283,7 +298,8 @@
         "label": {
             "type": "Type",
             "path": "Path",
-            "url": "URL"
+            "url": "URL",
+            "palette": "WebSocket"
         },
         "listenon": "Listen on",
         "connectto": "Connect to",
@@ -303,7 +319,8 @@
     },
     "watch": {
         "label": {
-            "files": "File(s)"
+            "files": "File(s)",
+            "palette": "Watch"
         },
         "placeholder": {
             "files": "Comma-separated list of files and/or directories"
@@ -321,7 +338,8 @@
             "close-connection": "Close connection after each message is sent?",
             "decode-base64": "Decode Base64 message?",
             "server": "Server",
-            "return": "Return"
+            "return": "Return",
+            "palette": "tcpin"
         },
         "type": {
             "listen": "Listen on",
@@ -375,7 +393,8 @@
             "send": "Send a",
             "toport": "to port",
             "address": "Address",
-            "decode-base64": "Decode Base64 encoded payload?"
+            "decode-base64": "Decode Base64 encoded payload?",
+            "palette": "udp"
         },
         "placeholder": {
             "interface": "(optional) ip address of eth0",
@@ -423,7 +442,8 @@
     "switch": {
         "label": {
             "property": "Property",
-            "rule": "rule"
+            "rule": "rule",
+            "palette": "Switch"
         },
         "and": "and",
         "checkall": "checking all rules",
@@ -448,7 +468,8 @@
             "change": "change __property__",
             "delete": "delete __property__",
             "changeCount": "change: __count__ rules",
-            "regex": "Use regular expressions"
+            "regex": "Use regular expressions",
+            "palette": "Change"
         },
         "action": {
             "set": "Set",
@@ -469,7 +490,8 @@
             "resultrange": "to the result range",
             "from": "from",
             "to": "to",
-            "roundresult": "Round result to the nearest integer?"
+            "roundresult": "Round result to the nearest integer?",
+            "palette": "Range"
         },
         "placeholder": {
             "min": "e.g. 0",
@@ -496,7 +518,8 @@
             "firstrow": "first row contains column names",
             "output": "Output",
             "includerow": "include column name row",
-            "newline": "Newline"
+            "newline": "Newline",
+            "palette": "CSV"
         },
         "placeholder": {
             "columns": "comma-separated column names"
@@ -527,7 +550,8 @@
     "html": {
         "label": {
             "select": "Select",
-            "output": "Output"
+            "output": "Output",
+            "palette": "HTML"
         },
         "output": {
             "html": "the html content of the elements",
@@ -544,13 +568,17 @@
             "dropped-object": "Ignored non-object payload",
             "dropped": "Ignored unsupported payload type",
             "dropped-error": "Failed to convert payload"
+        },
+        "label": {
+            "palette": "json"
         }
     },
     "xml": {
         "label": {
             "represent": "Represent XML tag attributes as a property named",
             "prefix": "Prefix to access character content",
-            "advanced": "Advanced options"
+            "advanced": "Advanced options",
+            "palette": "xml"
         },
         "tip": "There is no simple way to convert XML attributes to JSON so the approach taken here is to add a property, named $ by default, to the JSON structure.",
         "errors": {
@@ -569,7 +597,8 @@
             "pimouse": "Pi Mouse",
             "left": "Left",
             "right": "Right",
-            "middle": "Middle"
+            "middle": "Middle",
+            "palette": "RPi GPIO"
         },
         "resistor": {
             "none": "none",
@@ -624,7 +653,8 @@
     "tail": {
         "label": {
             "filename": "Filename",
-            "splitlines": "Split lines on \\n?"
+            "splitlines": "Split lines on \\n?",
+            "palette": "Tail"
         },
         "errors": {
             "windowsnotsupport": "Not currently supported on Windows."
@@ -638,7 +668,8 @@
             "createdir": "Create directory if it doesn't exist?",
             "outputas": "Output as",
             "filelabel": "file",
-            "deletelabel": "delete __file__"
+            "deletelabel": "delete __file__",
+            "palette": "File"
         },
         "action": {
             "append": "append to file",

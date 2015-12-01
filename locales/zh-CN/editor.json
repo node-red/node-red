@@ -45,18 +45,16 @@
         "loginFailed": "登录失败"
     },
     "notification": {
-        "warning": "<strong>警告</strong>: __message__",
+    "warning":"<strong>警告<\/strong>: __message__",
         "warnings": {
             "undeployedChanges": "节点存在未部署的修改",
             "nodeActionDisabled": "该操作在子工作流中被禁止"
         },
-
-        "error": "<strong>错误</strong>: __message__",
+    "error":"<strong>错误<\/strong>: __message__",
         "errors": {
             "lostConnection": "失去连接",
             "cannotAddSubflowToItself": "无法为子工作流添加子工作流",
-            "cannotAddCircularReference": "无法添加子工作流 - 检测到循环引用",
-            "repeatPin": "无法部署 - 存在重复的管脚号"
+            "cannotAddCircularReference":"无法添加子工作流 - 检测到循环引用"
         }
     },
     "clipboard": {
@@ -100,15 +98,15 @@
         "edit": "编辑子工作流",
         "subflowInstances": "子工作流中包含 __count__ 个实体",
         "subflowInstances_plural": "子工作流中包含 __count__ 个实体",
-        "editSubflowName": "编辑子工作流名称",
+        "editSubflowProperties":"编辑子工作流属性",
         "input": "输入",
         "output": "输出",
         "deleteSubflow": "删除子工作流",
         "info": "描述",
         "format":"markdown 格式",
         "errors": {
-            "noNodesSelected": "<strong>无法创建子工作流</strong>: 未选中任何节点",
-            "multipleInputsToSelection": "<strong>无法创建子工作流</strong>: 选择了多个输入"
+        "noNodesSelected":"<strong>无法创建子工作流<\/strong>: 未选中任何节点",
+        "multipleInputsToSelection":"<strong>无法创建子工作流<\/strong>: 选择了多个输入"
         }
     },
     "editor": {
@@ -127,7 +125,7 @@
     "keyboard": {
         "selectAll": "选择所有节点",
         "selectAllConnected": "选择所有链接的节点",
-        "addRemoveNode": "从选择的节点中添加/移除节点",
+        "addRemoveNode":"从选择的节点中添加\/移除节点",
         "deleteSelected": "删除或连接选择的节点",
         "importNode": "导入节点",
         "exportNode": "导出选择的节点",
@@ -153,9 +151,8 @@
         "filename": "文件名",
         "folder": "文件夹",
         "filenamePlaceholder": "文件",
-        "fullFilenamePlaceholder": "a/b/文件",
-        "folderPlaceholder": "a/b",
-
+        "fullFilenamePlaceholder":"a\/b\/文件",
+        "folderPlaceholder":"a\/b",
         "breadcrumb": "库"
     },
     "palette": {

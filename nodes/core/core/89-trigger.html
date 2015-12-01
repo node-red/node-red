@@ -105,6 +105,9 @@
         labelStyle: function() {
             return this.name?"node_label_italic":"";
         },
+        paletteLabel: function () {
+            return this.name||this._("trigger.label.palette");
+        },
         oneditprepare: function() {
             $("#node-then-type").change(function() {
                 if ($(this).val() == "block") {

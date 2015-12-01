@@ -70,6 +70,9 @@
         label: function() {
             return this.name;
         },
+        paletteLabel: function () {
+            return this.name||this._("template.label.palette");
+        },
         oneditprepare: function() {
             var that = this;
             function templateDialogResize() {

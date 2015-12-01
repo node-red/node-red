@@ -16,7 +16,7 @@
             "ok": "确定"
         },
         "notification": {
-            "error": "<strong>错误</strong>: __message__",
+            "error":"<strong>错误<\/strong>: __message__",
             "errors": {
                 "not-deployed": "节点未部署",
                 "no-response": "服务器无响应",
@@ -24,7 +24,7 @@
             }
         },
         "errors": {
-            "nooverride": "警告: 消息属性无法覆盖节点属性. 详见 bit.ly/nr-override-msg-props"
+            "nooverride":"警告: 消息属性无法覆盖节点属性. 详见 bit.ly\/nr-override-msg-props"
         }
     },
     "inject": {
@@ -34,7 +34,8 @@
         "stopped": "停止",
         "failed": "插入失败: __error__",
         "label": {
-            "repeat": "重复"
+            "repeat":"重复",
+            "palette":"注入"
         },
         "timestamp": "时间戳",
         "string": "字符串",
@@ -61,7 +62,7 @@
         ],
         "on": "on",
         "onstart": "在最开始插入一次?",
-        "tip": "<b>注意:</b> \"时间段内的时间间隔\" 和 \"特定时间\" 将会使用 cron.<br/>详见信息栏",
+        "tip":"<b>注意:<\/b> \"时间段内的时间间隔\" 和 \"特定时间\" 将会使用 cron.<br\/>详见信息栏",
         "success": "插入成功: __label__",
         "errors": {
             "failed": "插入失败，详见日志"
@@ -76,7 +77,8 @@
             "type": "类型",
             "selectAll": "选择所有",
             "sortByLabel": "按标签排序",
-            "sortByType": "按类型排序"
+            "sortByType":"按类型排序",
+            "palette":"捕获"
         },
         "scope": {
             "all": "所有节点",
@@ -92,7 +94,8 @@
             "type": "类型",
             "selectAll": "选择所有",
             "sortByLabel": "按标签排序",
-            "sortByType": "按类型排序"
+            "sortByType":"按类型排序",
+            "palette":"状态"
         },
         "scope": {
             "all": "所有节点",
@@ -113,6 +116,9 @@
         "sidebar": {
             "label": "调试",
             "name": "调试消息"
+        },
+        "label":{
+            "palette":"调试"
         }
     },
     "exec": {
@@ -120,25 +126,28 @@
         "badstdout": "错误的标准输出",
         "label": {
             "command": "命令",
-            "append": "附加"
+            "append":"附加",
+            "palette":"执行"
         },
         "placeholder": {
             "extraparams": "额外的输入参数"
         },
         "spawn": "使用 spawn() 代替 exec()?",
-        "tip": "Tip: <i>派生</i> 仅期望一个命令 - 并且附加的参数需要用逗号分隔."
+        "tip":"Tip: <i>派生<\/i> 仅期望一个命令 - 并且附加的参数需要用逗号分隔."
     },
     "function": {
         "label": {
             "function": "函数",
-            "outputs": "输出"
+            "outputs":"输出",
+            "palette":"函数"
         },
         "tip": "如何写函数，请参考信息标签页."
     },
     "template": {
         "label": {
             "template": "模板",
-            "property": "属性"
+            "property":"属性",
+            "palette":"模板"
         },
         "templatevalue": "有效载荷是: {{payload}} !"
     },
@@ -160,13 +169,14 @@
         "day": "天",
         "between": "在...之间",
         "rate": "比率",
-        "msgper": "消息/每",
+        "msgper":"消息\/每",
         "dropmsg": "丢弃多余的消息",
         "label": {
             "delay": "延迟",
             "limit": "限制",
             "random": "随机",
-            "queue": "队列"
+            "queue":"队列",
+            "palette":"延迟"
         },
         "error": {
             "buffer": "缓冲超过1000条消息"
@@ -190,24 +200,27 @@
             "h": "小时"
         },
         "extend": "当新的消息到来时扩展延时",
-        "tip": "本节点的延时时间可以被含有 <b>msg.reset</b> 属性的消息复位",
+        "tip":"本节点的延时时间可以被含有 <b>msg.reset<\/b> 属性的消息复位",
         "label": {
             "trigger": "触发",
-            "trigger-block": "触发并且阻塞"
+            "trigger-block":"触发并且阻塞",
+            "palette":"触发"
         }
     },
     "comment": {
         "label": {
             "title": "标题",
-            "body": "注释"
+            "body":"注释",
+            "palette":"备注"
         },
-        "tip": "提示: 文本的样式可以是如下的样式 <a href=\"https://help.github.com/articles/markdown-basics/\" target=\"_new\">Github flavoured Markdown</a>"
+        "tip":"提示: 文本的样式可以是如下的样式 <a href=\"https:\/\/help.github.com\/articles\/markdown-basics\/\" target=\"_new\">Github flavoured Markdown<\/a>"
     },
     "unknown": {
         "label": {
-            "unknown": "未知"
+            "unknown":"未知",
+            "palette":"未知"
         },
-        "tip": "<p>这个节点在您安装的SmartNode中，是一个未知的类型</p><p><i>如果您在当前状态下部署了这个节点, 他的配置将被保留, 但是工作流将不会开始，知道这个未知的类型被重新安装.</i></p><p>详见信息栏</p>"
+        "tip":"<p>这个节点在您安装的SmartNode中，是一个未知的类型<\/p><p><i>如果您在当前状态下部署了这个节点, 他的配置将被保留, 但是工作流将不会开始，知道这个未知的类型被重新安装.<\/i><\/p><p>详见信息栏<\/p>"
     },
     "mqtt": {
         "label": {
@@ -217,9 +230,10 @@
             "port": "端口",
             "keepalive": "存活时间 (秒)",
             "cleansession": "使用干净的会话",
-            "use-tls": "使能安全连接 (SSL/TLS)",
+            "use-tls":"使能安全连接 (SSL\/TLS)",
             "verify-server-cert":"验证服务器证书",
-            "compatmode": "使用 legacy MQTT 3.1 支持"
+            "compatmode":"使用 legacy MQTT 3.1 支持",
+            "palette":"MQTT"
         },
         "tabs-label": {
             "connection": "连接",
@@ -238,9 +252,9 @@
             "disconnected": "断开到broker的链接: __broker__",
             "connect-failed": "连接到broker失败: __broker__"
         },
-        "retain": "Retain",
-        "true": "true",
-        "false": "false",
+        "retain":"保留",
+        "true":"真",
+        "false":"假",
         "tip": "提示: 如果您想通过消息属性来设置topic, qos 或者 retain，则留空.",
         "errors": {
             "not-defined": "topic未定义",
@@ -252,9 +266,10 @@
     "httpin": {
         "label": {
             "method": "方法",
-            "url": "URL",
+            "url":"网页地址",
             "doc": "文档",
-            "return": "返回"
+            "return":"返回",
+            "palette":"httpin"
         },
         "setby": "- 通过msg.method设置 -",
         "basicauth": "使用基本的认证机制?",
@@ -263,14 +278,14 @@
         "json": "解析过的JSON对象",
         "tip": {
             "in": "URL与...有关 ",
-            "res": "发送到改节点的消息 <b>必须</b> 来自一个 <i>http input</i> 节点",
+            "res":"发送到改节点的消息 <b>必须<\/b> 来自一个 <i>http input<\/i> 节点",
             "req": "提示: 如果JSON解析失败的话，就会返回字符串as-is."
         },
         "httpreq": "http请求",
         "errors": {
             "not-created": "当httpNodeRoot属性被设置为false的时候，无法创建 http-in节点",
-            "missing-path": "missing path",
-            "no-response": "No response object",
+            "missing-path":"缺少路径",
+            "no-response":"没有响应对象",
             "json-error": "JSON解析错误",
             "no-url": "未指定url",
             "deprecated-call":"废弃的调用 __method__"
@@ -283,17 +298,18 @@
         "label": {
             "type": "类型",
             "path": "路径",
-            "url": "URL"
+            "url":"网页地址",
+            "palette":"WebSocket"
         },
         "listenon": "监听...",
         "connectto": "连接到...",
         "payload": "发送接收有效载荷",
         "message": "发送接收整个消息",
         "tip": {
-            "path1": "<code>有效载荷</code>默认包含要发送接收的数据. Listener可以被配置为发送或者接收JSON格式的整个消息.",
+            "path1":"<code>有效载荷<\/code>默认包含要发送接收的数据. Listener可以被配置为发送或者接收JSON格式的整个消息.",
             "path2": "该路径与...有关 ",
             "url1": "URL 应该使用 ws:&#47;&#47; 或者 wss:&#47;&#47; scheme 并且要指向一个存在的webSocket Listener.",
-            "url2": "<code>有效载荷</code>默认包含要发送接收的数据. CLient可以被配置为发送或者接收JSON格式的整个消息."
+            "url2":"<code>有效载荷<\/code>默认包含要发送接收的数据. CLient可以被配置为发送或者接收JSON格式的整个消息."
         },
         "errors": {
             "connect-error": "webSocket出现错误: ",
@@ -303,7 +319,8 @@
     },
     "watch": {
         "label": {
-            "files": "文件"
+            "files":"文件",
+            "palette":"观察"
         },
         "placeholder": {
             "files": "逗号分隔的文件或目录列表"
@@ -321,7 +338,8 @@
             "close-connection": "所有消息发送完成后，断开连接?",
             "decode-base64": "解码Base64编码信息?",
             "server": "服务器",
-            "return": "返回"
+            "return":"返回",
+            "palette":"tcpin"
         },
         "type": {
             "listen": "监听",
@@ -350,16 +368,14 @@
             "connection-closed": "从 __host__:__port__ 连接关闭",
             "connections": "__count__ 个连接",
             "connections_plural": "__count__ 个连接"
-
         },
         "errors": {
             "connection-lost": "到 __host__:__port__得连接中断",
             "timeout": "超时关闭端口 __port__",
             "cannot-listen": "无法监听端口 __port__, 错误: __error__",
             "error": "错误: __error__",
-
             "socket-error": "从 __host__:__port__ 的socket错误",
-            "no-host": "主机名和/或端口未配置",
+            "no-host":"主机名和\/或端口未配置",
             "connect-timeout": "连接超时",
             "connect-fail": "连接失败"
         }
@@ -375,7 +391,8 @@
             "send": "发送",
             "toport": "到端口",
             "address": "地址",
-            "decode-base64": "解码Base64编码信息?"
+            "decode-base64":"解码Base64编码信息?",
+            "palette":"udp"
         },
         "placeholder": {
             "interface": "(可选的) eth0的IP地址",
@@ -398,7 +415,7 @@
         },
         "tip": {
             "in": "提示: 确保您的防火墙允许数据进入.",
-            "out": "提示: 如果您想用<b>msg.ip</b> and <b>msg.port</b>来设置Ip地址和端口的话，那么请留空."
+      "out":"提示: 如果您想用<b>msg.ip<\/b> and <b>msg.port<\/b>来设置Ip地址和端口的话，那么请留空."
         },
         "status": {
             "listener-at": "UDP监听 __host__:__port__ 中",
@@ -412,7 +429,7 @@
         },
         "errors": {
             "access-error": "UDP访问错误, 您可能需要访问小于1024的端口",
-            "error": "错误: __error_",
+      "error":"错误: __error__",
             "bad-mcaddress": "错误的多播地址",
             "interface": "请求的接口必须是一个IP地址",
             "ip-notset": "UDP：IP地址未设置",
@@ -423,7 +440,8 @@
     "switch": {
         "label": {
             "property": "属性",
-            "rule": "规则"
+            "rule":"规则",
+            "palette":"切换"
         },
         "and": "与",
         "checkall": "检查所有规则",
@@ -448,7 +466,8 @@
             "change": "改变 __property__",
             "delete": "删除 __property__",
             "changeCount": "改变 __count__ 条规则",
-            "regex": "使用正则表达式"
+            "regex":"使用正则表达式",
+            "palette":"改变"
         },
         "action": {
             "set": "设置",
@@ -469,7 +488,8 @@
             "resultrange": "到输出范围",
             "from": "从",
             "to": "到",
-            "roundresult": "取整?"
+            "roundresult":"取整?",
+            "palette":"范围"
         },
         "placeholder": {
             "min": "例如 0",
@@ -496,7 +516,8 @@
             "firstrow": "第一行包含列名",
             "output": "输出",
             "includerow": "包含列名行",
-            "newline": "新行"
+            "newline":"新行",
+            "palette":"CSV"
         },
         "placeholder": {
             "columns": "列名用逗号分隔"
@@ -527,7 +548,8 @@
     "html": {
         "label": {
             "select": "选择",
-            "output": "输出"
+            "output":"输出",
+            "palette":"HTML"
         },
         "output": {
             "html": "元素的HTML内容",
@@ -537,20 +559,24 @@
             "single": "作为一个包含数组的独立消息",
             "multi": "每一个元素作为一个消息"
         },
-        "tip": "提示: <b>Select</b> 值是一个<a href=\"https://github.com/fb55/CSSselect#user-content-supported-selectors\" target=\"_new\"><i><u>CSS Selector</u></i></a>, 类似一个 jQuery selector."
+        "tip":"提示: <b>Select<\/b> 值是一个<a href=\"https:\/\/github.com\/fb55\/CSSselect#user-content-supported-selectors\" target=\"_new\"><i><u>CSS Selector<\/u><\/i><\/a>, 类似一个 jQuery selector."
     },
     "json": {
         "errors": {
             "dropped-object": "忽略非对象的有效载荷",
             "dropped": "忽略不支持的有效载荷类型",
             "dropped-error": "转换有效载荷失败"
+        },
+        "label":{
+            "palette":"json"
         }
     },
     "xml": {
         "label": {
             "represent": "将XML标签属性表示为属性名",
             "prefix": "访问字符内容的前缀",
-            "advanced": "高级选项"
+            "advanced":"高级选项",
+            "palette":"xml"
         },
         "tip": "转换XML到JSON非常复杂，所以需要添加一个$属性来转换到JSON.",
         "errors": {
@@ -559,72 +585,74 @@
     },
     "rpi-gpio": {
         "label": {
-            "gpiopin": "GPIO Pin",
-            "selectpin": "select pin",
-            "resistor": "Resistor?",
-            "readinitial": "Read initial state of pin on deploy/restart?",
-            "type": "Type",
-            "initpin": "Initialise pin state?",
-            "button": "Button",
-            "pimouse": "Pi Mouse",
-            "left": "Left",
-            "right": "Right",
-            "middle": "Middle"
+            "gpiopin":"GPIO 引脚",
+            "selectpin":"选择引脚",
+            "resistor":"电阻?",
+            "readinitial":"在部署\/重新启动时去的引脚的初始状态吗?",
+            "type":"类型",
+            "initpin":"初始化引脚状态吗?",
+            "button":"按钮",
+            "pimouse":"Pi 鼠标",
+            "left":"左侧",
+            "right":"右侧",
+            "middle":"中间",
+            "palette":"RPi GPIO"
         },
         "resistor": {
-            "none": "none",
-            "pullup": "pullup",
-            "pulldown": "pulldown"
+            "none":"无",
+            "pullup":"上拉",
+            "pulldown":"下拉列表"
         },
-        "digout": "Digital output",
-        "pwmout": "PWM output",
+        "digout":"数字输出",
+        "pwmout":"PWM 输出",
         "initpin0": "initial level of pin - low (0)",
         "initpin1": "initial level of pin - high (1)",
-        "left": "left",
-        "right": "right",
-        "middle": "middle",
-        "any": "any",
-        "pinname": "Pin",
-        "alreadyuse": "already in use",
-        "alreadyset": "already set as",
+        "left":"向左",
+        "right":"向右",
+        "middle":"中间",
+        "any":"任何",
+        "pinname":"引脚",
+        "alreadyuse":"已在使用中",
+        "alreadyset":"已设置为",
         "tip": {
-            "pin": "<b>Pins in Use</b>: ",
-            "in": "Tip: Only Digital Input is supported - input must be 0 or 1.",
-            "dig": "<b>Tip</b>: For digital output - input must be 0 or 1.",
-            "pwm": "<b>Tip</b>: For PWM output - input must be between 0 to 100."
+            "pin":"<b>在使用针脚<\/b>: ",
+            "in":"提示: 只有数字输入，支持-输入必须是 0 或 1。",
+            "dig":"<b>提示<\/b>: 对于数字输出 - 输入参数必须是 0 或 1。",
+            "pwm":"<b>提示<\/b>: 对于 PWM 输出 - 输入参数必须为 0 到 100 之间。"
         },
         "types": {
-            "digout": "digital output",
-            "input": "input",
+            "digout":"数字输出",
+            "input":"输入",
             "pullup": "input with pull up",
             "pulldown": "input with pull down",
-            "pwmout": "PWM output"
+            "pwmout":"PWM 输出"
         },
         "status": {
-            "stopped": "stopped",
-            "closed": "closed",
-            "not-running": "not running"
+            "stopped":"已停止",
+            "closed":"已关闭",
+            "not-running":"未运行"
         },
         "errors": {
-            "ignorenode": "Ignoring Raspberry Pi specific node",
-            "version": "Version command failed",
+            "ignorenode":"忽略树莓派特定节点",
+            "version":"版本命令执行失败",
             "sawpitype": "Saw Pi Type",
-            "libnotfound": "Cannot find Pi RPi.GPIO python library",
+            "libnotfound":"找不到 Pi RPi.GPIO python 库",
             "alreadyset": "GPIO pin __pin__ already set as type: __type__",
-            "invalidpin": "Invalid GPIO pin",
-            "invalidinput": "Invalid input",
-            "needtobeexecutable": "__command__ needs to be executable",
-            "mustbeexecutable": "nrgpio must to be executable",
-            "commandnotfound": "nrgpio command not found",
-            "commandnotexecutable": "nrgpio command not executable",
-            "error": "error: __error__",
-            "pythoncommandnotfound": "nrpgio python command not running"
+            "invalidpin":"无效的 GPIO 引脚",
+            "invalidinput":"无效的输入",
+            "needtobeexecutable":"__command__ 必须是可执行文件",
+            "mustbeexecutable":"nrgpio 必须是可执行文件",
+            "commandnotfound":"nrgpio 命令找不到",
+            "commandnotexecutable":"nrgpio 命令不能执行",
+            "error":"错误: __error__",
+            "pythoncommandnotfound":"nrpgio python 命令未运行"
         }
     },
     "tail": {
         "label": {
             "filename": "文件名",
-            "splitlines": "用\\n来分隔行?"
+            "splitlines":"用\\n来分隔行?",
+            "palette":"tail命令"
         },
         "errors": {
             "windowsnotsupport": "目前不支持windows操作系统."
@@ -638,7 +666,8 @@
             "createdir": "如果文件夹不存在，则创建它?",
             "outputas": "作为...输出",
             "filelabel": "文件",
-            "deletelabel": "删除 __file__"
+            "deletelabel":"删除 __file__",
+            "palette":"文件"
         },
         "action": {
             "append": "附加到文件",

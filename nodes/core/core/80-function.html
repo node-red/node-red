@@ -82,6 +82,9 @@
         label: function() {
             return this.name;
         },
+        paletteLabel: function () {
+            return this.name||this._("status.label.palette");
+        },
         oneditprepare: function() {
             var that = this;
             $( "#node-input-outputs" ).spinner({
