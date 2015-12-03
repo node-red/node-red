@@ -233,7 +233,8 @@
             "use-tls":"使能安全连接 (SSL\/TLS)",
             "verify-server-cert":"验证服务器证书",
             "compatmode":"使用 legacy MQTT 3.1 支持",
-            "palette":"MQTT"
+            "palette-in":"MQTT输入",
+            "palette-out":"MQTT输出"
         },
         "tabs-label": {
             "connection": "连接",
@@ -269,7 +270,9 @@
             "url":"网页地址",
             "doc": "文档",
             "return":"返回",
-            "palette":"httpin"
+            "palette-in":"Http输入",
+            "palette-req":"Http请求",
+            "palette-resp":"Http响应"
         },
         "setby": "- 通过msg.method设置 -",
         "basicauth": "使用基本的认证机制?",
@@ -299,7 +302,10 @@
             "type": "类型",
             "path": "路径",
             "url":"网页地址",
-            "palette":"WebSocket"
+            "palette-out":"WebSocket",
+            "palette-in":"WebSocket",
+            "palette-listener":"WebSocket Listener",
+            "palette-client":"WebSocket客户端"
         },
         "listenon": "监听...",
         "connectto": "连接到...",
@@ -339,7 +345,9 @@
             "decode-base64": "解码Base64编码信息?",
             "server": "服务器",
             "return":"返回",
-            "palette":"tcpin"
+            "palette-in":"tcp输入",
+            "palette-out":"tcp输出",
+            "palette-request":"tcp请求"
         },
         "type": {
             "listen": "监听",
@@ -392,7 +400,8 @@
             "toport": "到端口",
             "address": "地址",
             "decode-base64":"解码Base64编码信息?",
-            "palette":"udp"
+            "palette-in":"udp输入",
+            "palette-out":"udp输出"
         },
         "placeholder": {
             "interface": "(可选的) eth0的IP地址",
@@ -441,7 +450,7 @@
         "label": {
             "property": "属性",
             "rule":"规则",
-            "palette":"切换"
+            "palette":"判断\/切换"
         },
         "and": "与",
         "checkall": "检查所有规则",
@@ -568,7 +577,7 @@
             "dropped-error": "转换有效载荷失败"
         },
         "label":{
-            "palette":"json"
+            "palette":"JSON"
         }
     },
     "xml": {
@@ -576,7 +585,7 @@
             "represent": "将XML标签属性表示为属性名",
             "prefix": "访问字符内容的前缀",
             "advanced":"高级选项",
-            "palette":"xml"
+            "palette":"XML"
         },
         "tip": "转换XML到JSON非常复杂，所以需要添加一个$属性来转换到JSON.",
         "errors": {
@@ -596,7 +605,9 @@
             "left":"左侧",
             "right":"右侧",
             "middle":"中间",
-            "palette":"RPi GPIO"
+            "palette-in":"树莓派GPIO输入",
+            "palette-out":"树莓派GPIO输出",
+            "palette-mouse":"树莓派鼠标"
         },
         "resistor": {
             "none":"无",
@@ -667,7 +678,8 @@
             "outputas": "作为...输出",
             "filelabel": "文件",
             "deletelabel":"删除 __file__",
-            "palette":"文件"
+            "palette-in":"文件输入",
+            "palette-out":"文件输出"
         },
         "action": {
             "append": "附加到文件",
@@ -690,6 +702,11 @@
             "writefail": "写入文件失败: __error__",
             "appendfail": "附加到文件失败: __error__",
             "createfail": "创建文件失败: __error__"
+        }
+    },
+    "sentiment": {
+        "label": {
+            "palette":"词性分析"
         }
     }
 }

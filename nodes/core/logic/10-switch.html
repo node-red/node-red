@@ -245,6 +245,9 @@
                 $( "#dialog" ).off("dialogresize",switchDialogResize);
             });
         },
+        paletteLabel: function () {
+            return this.name||this._("switch.label.palette");
+        },
         oneditsave: function() {
             var rules = $("#node-input-rule-container").children();
             var ruleset;

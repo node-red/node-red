@@ -84,6 +84,9 @@
         labelStyle: function() {
             return this.name?"node_label_italic":"";
         },
+        paletteLabel: function () {
+            return this.name||this._("tcpin.label.palette-in");
+        },
         oneditprepare: function() {
             var updateOptions = function() {
                 var sockettype = $("#node-input-server option:selected").val();
@@ -176,6 +179,9 @@
         },
         labelStyle: function() {
             return (this.name)?"node_label_italic":"";
+        },
+        paletteLabel: function () {
+            return this.name||this._("tcpin.label.palette-out");
         },
         oneditprepare: function() {
             var updateOptions = function() {
@@ -274,6 +280,9 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        paletteLabel: function () {
+            return this.name||this._("tcpin.label.palette-request");
         }
     });
 </script>
