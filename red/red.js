@@ -40,6 +40,11 @@ function checkBuild() {
 
 module.exports = {
     init: function(httpServer,userSettings) {
+        if (!userSettings) {
+            userSettings = httpServer;
+            httpServer = null;
+        }
+        
         if (!userSettings.SKIP_BUILD_CHECK) {
             checkBuild();
         }
