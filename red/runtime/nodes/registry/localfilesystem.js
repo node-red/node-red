@@ -23,21 +23,13 @@ var log;
 var i18n;
 
 var settings;
-var defaultNodesDir = path.resolve(path.join(__dirname,"..","..","..","..","nodes"));
 var disableNodePathScan = false;
 
-function init(runtime,_defaultNodesDir,_disableNodePathScan) {
+function init(runtime) {
     settings = runtime.settings;
     events = runtime.events;
     log = runtime.log;
     i18n = runtime.i18n;
-
-    if (_disableNodePathScan) {
-        disableNodePathScan = _disableNodePathScan;
-    }
-    if (_defaultNodesDir) {
-        defaultNodesDir = path.resolve(_defaultNodesDir);
-    }
 }
 
 function isExcluded(name) {
@@ -139,7 +131,7 @@ function scanDirForNodesModules(dir,moduleName) {
  * @return a list of node modules: {dir,package}
  */
 function scanTreeForNodesModules(moduleName) {
-    var dir = defaultNodesDir;
+    var dir = settings.coreNodesDir;
     var results = [];
     var userDir;
 
@@ -193,19 +185,13 @@ function getModuleNodeFiles(module) {
     return results;
 }
 
-function getNodeFiles(_defaultNodesDir,disableNodePathScan) {
-
-    if (_defaultNodesDir) {
-        defaultNodesDir = _defaultNodesDir;
-    }
-
+function getNodeFiles(disableNodePathScan) {
     var dir;
     // Find all of the nodes to load
-    //console.log(defaultNodesDir);
-    var nodeFiles = getLocalNodeFiles(path.resolve(defaultNodesDir));
+    var nodeFiles = getLocalNodeFiles(path.resolve(settings.coreNodesDir));
     //console.log(nodeFiles);
 
-    var defaultLocalesPath = path.resolve(path.join(defaultNodesDir,"core","locales"));
+    var defaultLocalesPath = path.resolve(path.join(settings.coreNodesDir,"core","locales"));
     i18n.registerMessageCatalog("node-red",defaultLocalesPath,"messages.json");
 
     if (settings.userDir) {
@@ -250,6 +236,8 @@ function getNodeFiles(_defaultNodesDir,disableNodePathScan) {
             });
             nodeFiles = nodeFiles.concat(nodeModuleFiles);
         });
+    } else {
+        console.log("node path scan disabled");
     }
     return nodeList;
 }

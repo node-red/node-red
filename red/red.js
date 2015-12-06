@@ -44,9 +44,13 @@ module.exports = {
             userSettings = httpServer;
             httpServer = null;
         }
-        
+
         if (!userSettings.SKIP_BUILD_CHECK) {
             checkBuild();
+        }
+
+        if (!userSettings.coreNodesDir) {
+            userSettings.coreNodesDir = path.resolve(path.join(__dirname,"..","nodes"));
         }
 
         if (userSettings.httpAdminRoot !== false || userSettings.httpNodeRoot !== false) {
