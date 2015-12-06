@@ -140,14 +140,16 @@ function scanTreeForNodesModules(moduleName) {
         results = results.concat(scanDirForNodesModules(userDir,moduleName));
     }
 
-    var up = path.resolve(path.join(dir,".."));
-    while (up !== dir) {
-        var pm = path.join(dir,"node_modules");
-        if (pm != userDir) {
-            results = results.concat(scanDirForNodesModules(pm,moduleName));
+    if (dir) {
+        var up = path.resolve(path.join(dir,".."));
+        while (up !== dir) {
+            var pm = path.join(dir,"node_modules");
+            if (pm != userDir) {
+                results = results.concat(scanDirForNodesModules(pm,moduleName));
+            }
+            dir = up;
+            up = path.resolve(path.join(dir,".."));
         }
-        dir = up;
-        up = path.resolve(path.join(dir,".."));
     }
     return results;
 }
@@ -188,11 +190,13 @@ function getModuleNodeFiles(module) {
 function getNodeFiles(disableNodePathScan) {
     var dir;
     // Find all of the nodes to load
-    var nodeFiles = getLocalNodeFiles(path.resolve(settings.coreNodesDir));
-    //console.log(nodeFiles);
+    var nodeFiles = [];
 
-    var defaultLocalesPath = path.resolve(path.join(settings.coreNodesDir,"core","locales"));
-    i18n.registerMessageCatalog("node-red",defaultLocalesPath,"messages.json");
+    if (settings.coreNodesDir) {
+        nodeFiles = getLocalNodeFiles(path.resolve(settings.coreNodesDir));
+        var defaultLocalesPath = path.resolve(path.join(settings.coreNodesDir,"core","locales"));
+        i18n.registerMessageCatalog("node-red",defaultLocalesPath,"messages.json");
+    }
 
     if (settings.userDir) {
         dir = path.join(settings.userDir,"nodes");

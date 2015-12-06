@@ -136,7 +136,9 @@ function start() {
                         redNodes.cleanModuleList();
                     }
                 }
-                log.info(log._("runtime.paths.settings",{path:settings.settingsFile}));
+                if (settings.settingsFile) {
+                    log.info(log._("runtime.paths.settings",{path:settings.settingsFile}));
+                }
                 redNodes.loadFlows().then(redNodes.startFlows);
             }).otherwise(function(err) {
                 console.log(err);
