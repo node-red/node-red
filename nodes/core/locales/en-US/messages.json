@@ -233,7 +233,8 @@
             "use-tls": "Enable secure (SSL/TLS) connection",
             "verify-server-cert":"Verify server certificate",
             "compatmode": "Use legacy MQTT 3.1 support",
-            "palette": "MQTT"
+            "palette-in":"MQTT in",
+            "palette-out":"MQTT out"
         },
         "tabs-label": {
             "connection": "Connection",
@@ -269,7 +270,9 @@
             "url": "URL",
             "doc": "Docs",
             "return": "Return",
-            "palette": "httpin"
+            "palette-in":"Http in",
+            "palette-req":"Http req",
+            "palette-resp":"Http resp"
         },
         "setby": "- set by msg.method -",
         "basicauth": "Use basic authentication?",
@@ -299,7 +302,10 @@
             "type": "Type",
             "path": "Path",
             "url": "URL",
-            "palette": "WebSocket"
+            "palette-out":"WebSocket",
+            "palette-in":"WebSocket",
+            "palette-listener":"WebSocket Listener",
+            "palette-client":"WebSocket client"
         },
         "listenon": "Listen on",
         "connectto": "Connect to",
@@ -339,7 +345,9 @@
             "decode-base64": "Decode Base64 message?",
             "server": "Server",
             "return": "Return",
-            "palette": "tcpin"
+            "palette-in":"tcp in",
+            "palette-out":"tcp out",
+            "palette-request":"tcp req"
         },
         "type": {
             "listen": "Listen on",
@@ -394,7 +402,8 @@
             "toport": "to port",
             "address": "Address",
             "decode-base64": "Decode Base64 encoded payload?",
-            "palette": "udp"
+            "palette-in":"udp in",
+            "palette-out":"udp out"
         },
         "placeholder": {
             "interface": "(optional) ip address of eth0",
@@ -598,7 +607,9 @@
             "left": "Left",
             "right": "Right",
             "middle": "Middle",
-            "palette": "RPi GPIO"
+            "palette-in":"RPI GPIO in",
+            "palette-out":"RPi GPIO out",
+            "palette-mouse":"RPI mouse"
         },
         "resistor": {
             "none": "none",
@@ -669,7 +680,8 @@
             "outputas": "Output as",
             "filelabel": "file",
             "deletelabel": "delete __file__",
-            "palette": "File"
+            "palette-in":"file in",
+            "palette-out":"file out"
         },
         "action": {
             "append": "append to file",
@@ -692,6 +704,11 @@
             "writefail": "failed to write to file: __error__",
             "appendfail": "failed to append to file: __error__",
             "createfail": "failed to create file: __error__"
+        }
+    },
+    "sentiment": {
+        "label": {
+            "palette":"Words Analysis"
         }
     }
 }
