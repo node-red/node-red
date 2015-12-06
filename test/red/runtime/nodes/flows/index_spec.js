@@ -497,4 +497,74 @@ describe('flows/index', function() {
             });
         });
     });
+
+    describe('#addFlow', function() {
+        it("rejects duplicate node id",function(done) {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            storage.getFlows = function() {
+                return when.resolve(originalConfig);
+            }
+            flows.init({},storage);
+            flows.load().then(function() {
+                flows.addFlow({
+                    label:'new flow',
+                    nodes:[
+                        {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]}
+                    ]
+                }).then(function() {
+                    done(new Error('failed to reject duplicate node id'));
+                }).otherwise(function(err) {
+                    done();
+                })
+            });
+
+        });
+
+        it("addFlow",function(done) {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            storage.getFlows = function() {
+                return when.resolve(originalConfig);
+            }
+            flows.init({},storage);
+            flows.load().then(function() {
+                return flows.startFlows();
+            }).then(function() {
+                flows.addFlow({
+                    label:'new flow',
+                    nodes:[
+                        {id:"t2-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                        {id:"t2-2",x:10,y:10,z:"t1",type:"test",wires:[]},
+                        {id:"t2-3",z:"t1",type:"test"}
+                    ]
+                }).then(function(id) {
+                    flows.getFlows().should.have.lengthOf(6);
+                    var createdFlows = Object.keys(flowCreate.flows);
+                    createdFlows.should.have.lengthOf(3);
+                    createdFlows[2].should.eql(id);
+                    done();
+                }).otherwise(function(err) {
+                    done(err);
+                })
+            });
+
+        });
+    })
+    describe('#updateFlow', function() {
+        it.skip("updateFlow");
+    })
+    describe('#removeFlow', function() {
+        it.skip("removeFlow");
+    })
+    describe('#disableFlow', function() {
+        it.skip("disableFlow");
+    })
+    describe('#enableFlow', function() {
+        it.skip("enableFlow");
+    })
 });

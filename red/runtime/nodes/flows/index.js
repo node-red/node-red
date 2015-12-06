@@ -352,6 +352,81 @@ function checkTypeInUse(id) {
     }
 }
 
+function addFlow(flow) {
+    /*
+    {
+        id:'',
+        label:'',
+        nodes:[]
+    }
+
+    */
+
+    // flow.id should not exist - it will be assigned by the runtime
+    // all flow.{subflows|configs|nodes}.z will be set to flow.id
+    // all nodes will have new ids assigned if there is a clash
+    // check all known types - fail if otherwise?
+    //
+    // resolves with generated flow id
+
+    return when.promise(function(resolve,reject) {
+        var i,id,node;
+
+        flow.id = redUtil.generateId();
+
+        for (i=0;i<flow.nodes.length;i++) {
+            node = flow.nodes[i];
+            if (activeFlowConfig.allNodes[node.id]) {
+                // TODO nls
+                return reject(new Error('duplicate id'));
+            }
+            node.z = flow.id;
+        }
+        var tabNode = {
+            type:'tab',
+            label:flow.label,
+            id:flow.id
+        }
+        var nodes = [tabNode].concat(flow.nodes);
+        var parsedConfig = flowUtil.parseConfig(clone(nodes));
+        // TODO: handle unknown type
+        for (id in parsedConfig.flows[flow.id]) {
+            if (parsedConfig.flows[flow.id].hasOwnProperty(id)) {
+                activeFlowConfig.allNodes[id] = parsedConfig.flows[flow.id][id];
+            }
+        }
+        activeFlowConfig.flows[flow.id] = parsedConfig.flows[flow.id];
+
+        activeConfig = activeConfig.concat(nodes);
+        // TODO: extract creds
+        // TODO: save config
+
+        start("flows",{added:flow.nodes.map(function(n) { return n.id})}).then(function() {
+            // console.log(activeFlowConfig);
+            resolve(flow.id);
+        })
+    })
+}
+
+function getFlow(id) {
+    var flow = activeFlowConfig.flows[id];
+    if (!flow) {
+        return null;
+    }
+    var result = {
+        id: id,
+        label: flow.label,
+        nodes: []
+    };
+
+    for (var i=0;i<activeConfig.length;i++) {
+        if (activeConfig[i].z === id && activeConfig[i].type != 'tab') {
+            result.nodes.push(activeConfig[i]);
+        }
+    }
+    return result;
+}
+
 module.exports = {
     init: init,
 
@@ -388,11 +463,19 @@ module.exports = {
      */
     stopFlows: stop,
 
-    started: function() { return started },
+    get started() { return started },
 
     handleError: handleError,
     handleStatus: handleStatus,
 
-    checkTypeInUse: checkTypeInUse
+    checkTypeInUse: checkTypeInUse,
+
+
+    addFlow: addFlow,
+    getFlow: getFlow,
+    updateFlow:null,
+    removeFlow:null,
+    disableFlow:null,
+    enableFlow:null
 
 };

@@ -120,11 +120,19 @@ module.exports = {
     cleanModuleList: registry.cleanModuleList,
 
     // Flow handling
-    loadFlows: flows.load,
+    loadFlows:  flows.load,
     startFlows: flows.startFlows,
-    stopFlows: flows.stopFlows,
-    setFlows: flows.setFlows,
-    getFlows: flows.getFlows,
+    stopFlows:  flows.stopFlows,
+    setFlows:   flows.setFlows,
+    getFlows:   flows.getFlows,
+
+    addFlow:     flows.addFlow,
+    getFlow:     flows.getFlow,
+    updateFlow:  flows.updateFlow,
+    removeFlow:  flows.removeFlow,
+    disableFlow: flows.disableFlow,
+    enableFlow:  flows.enableFlow,
+
 
     // Credentials
     addCredentials: credentials.add,

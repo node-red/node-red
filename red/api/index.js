@@ -24,6 +24,7 @@ var when = require('when');
 var ui = require("./ui");
 var nodes = require("./nodes");
 var flows = require("./flows");
+var flow = require("./flow");
 var library = require("./library");
 var info = require("./info");
 var theme = require("./theme");
@@ -64,6 +65,7 @@ function init(_server,runtime) {
         auth.init(runtime);
         credentials.init(runtime);
         flows.init(runtime);
+        flow.init(runtime);
         info.init(runtime);
         library.init(adminApp,runtime);
         locales.init(runtime);
@@ -102,6 +104,8 @@ function init(_server,runtime) {
         // Flows
         adminApp.get("/flows",needsPermission("flows.read"),flows.get);
         adminApp.post("/flows",needsPermission("flows.write"),flows.post);
+
+        adminApp.get("/flow/:id",needsPermission("flows.read"),flow.get);
 
         // Nodes
         adminApp.get("/nodes",needsPermission("nodes.read"),nodes.getAll);
