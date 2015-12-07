@@ -242,6 +242,8 @@ module.exports = function(RED) {
                     node.log(RED._("tcpin.errors.error",{error:err.toString()}));
                 });
                 client.on('end', function (err) {
+                    node.status({});
+                    node.connected = false;
                 });
                 client.on('close', function() {
                     node.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
@@ -282,7 +284,7 @@ module.exports = function(RED) {
             node.on("close", function(done) {
                 node.done = done;
                 this.closing = true;
-                if (client) { client.end(); }
+                if (client) { client.destroy(); }
                 clearTimeout(reconnectTimeout);
                 if (!node.connected) { done(); }
             });
