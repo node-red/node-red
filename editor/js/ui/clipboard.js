@@ -35,9 +35,7 @@ RED.clipboard = (function() {
                         id: "clipboard-dialog-ok",
                         text: RED._("common.label.ok"),
                         click: function() {
-                            if (/Import/.test(dialog.dialog("option","title"))) {
-                                RED.view.importNodes($("#clipboard-import").val());
-                            }
+                            RED.view.importNodes($("#clipboard-import").val());
                             $( this ).dialog( "close" );
                         }
                     },
