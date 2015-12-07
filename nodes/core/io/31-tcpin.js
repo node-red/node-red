@@ -490,7 +490,7 @@ module.exports = function(RED) {
                     node.connected = false;
                     node.status({fill:"red",shape:"ring",text:"common.status.error"});
                     node.error(RED._("tcpin.errors.connect-fail"),msg);
-                    if (client) { client.end(); }
+                    if (client) { client.destroy(); }
                 });
 
                 client.on('timeout',function() {
@@ -499,14 +499,10 @@ module.exports = function(RED) {
                     node.status({fill:"grey",shape:"dot",text:"tcpin.errors.connect-timeout"});
                     //node.warn(RED._("tcpin.errors.connect-timeout"));
                     if (client) {
-                        //client.end();
-                        //setTimeout(function() {
-                            client.connect(port, host, function() {
-                                node.connected = true;
-                                node.status({fill:"green",shape:"dot",text:"common.status.connected"});
-                                //client.write(msg.payload);
-                            });
-                        //},reconnectTime);
+                        client.connect(port, host, function() {
+                            node.connected = true;
+                            node.status({fill:"green",shape:"dot",text:"common.status.connected"});
+                        });
                     }
                 });
             }
