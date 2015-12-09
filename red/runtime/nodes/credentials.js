@@ -121,6 +121,7 @@ module.exports = {
         var nodeType = node.type;
         var newCreds = node.credentials;
         if (newCreds) {
+            delete node.credentials;
             var savedCredentials = credentialCache[nodeID] || {};
             var dashedType = nodeType.replace(/\s+/g, '-');
             var definition = credentialsDef[dashedType];
@@ -145,7 +146,6 @@ module.exports = {
                 }
             }
             credentialCache[nodeID] = savedCredentials;
-            delete node.credentials;
         }
     },
 

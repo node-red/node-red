@@ -137,8 +137,7 @@ describe('flows/util', function() {
             ];
             var parsedConfig = flowUtil.parseConfig(originalConfig);
             parsedConfig.missingTypes.should.eql(['missing']);
-            var expectedConfig = {"allNodes":{"t1":{"id":"t1","type":"tab"},"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"sf1","wires":[]},"t1-2":{"id":"t1-2","x":10,"y":10,"z":"t1","type":"missing","wires":[]}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"sf1","wires":[]}}}},"missingTypes":["missing"]};
-
+            var expectedConfig = {"allNodes":{"t1":{"id":"t1","type":"tab"},"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"sf1","wires":[]},"t1-2":{"id":"t1-2","x":10,"y":10,"z":"t1","type":"missing","wires":[]}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"sf1","wires":[]},'t1-2': { id: 't1-2', x: 10, y: 10, z: 't1', type: 'missing', wires: [] }}}},"missingTypes":["missing"]};
             redUtil.compareObjects(parsedConfig,expectedConfig).should.be.true;
         });
 

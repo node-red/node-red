@@ -531,6 +531,9 @@ describe('flows/index', function() {
             storage.getFlows = function() {
                 return when.resolve(originalConfig);
             }
+            storage.setFlows = function() {
+                return when.resolve();
+            }
             flows.init({},storage);
             flows.load().then(function() {
                 return flows.startFlows();
@@ -539,7 +542,8 @@ describe('flows/index', function() {
                     label:'new flow',
                     nodes:[
                         {id:"t2-1",x:10,y:10,z:"t1",type:"test",wires:[]},
-                        {id:"t2-2",x:10,y:10,z:"t1",type:"test",wires:[]},
+                        {id:"t2-2",x:10,y:10,z:"t1",type:"test",wires:[]}
+                        ,
                         {id:"t2-3",z:"t1",type:"test"}
                     ]
                 }).then(function(id) {

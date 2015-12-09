@@ -26,7 +26,64 @@ module.exports = {
     },
     get: function(req,res) {
         var id = req.params.id;
-        log.audit({event: "flow.get"},req);
-        res.json(redNodes.getFlow(id));
+        var flow = redNodes.getFlow(id);
+        if (flow) {
+            log.audit({event: "flow.get",id:id},req);
+            res.json(flow);
+        } else {
+            log.audit({event: "flow.get",id:id,error:"not_found"},req);
+            res.status(404).end();
+        }
+    },
+    post: function(req,res) {
+        var flow = req.body;
+        redNodes.addFlow(flow).then(function(id) {
+            log.audit({event: "flow.add",id:id},req);
+            res.json({id:id});
+        }).otherwise(function(err) {
+            log.audit({event: "flow.add",error:err.code||"unexpected_error",message:err.toString()},req);
+            res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
+        })
+
+    },
+    put: function(req,res) {
+        var id = req.params.id;
+        var flow = req.body;
+        try {
+            redNodes.updateFlow(id,flow).then(function() {
+                log.audit({event: "flow.update",id:id},req);
+                res.json({id:id});
+            }).otherwise(function(err) {
+                console.log(err.stack);
+                log.audit({event: "flow.update",error:err.code||"unexpected_error",message:err.toString()},req);
+                res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
+            })
+        } catch(err) {
+            if (err.code === 404) {
+                log.audit({event: "flow.update",id:id,error:"not_found"},req);
+                res.status(404).end();
+            } else {
+                console.log(err.stack);
+                log.audit({event: "flow.update",error:err.code||"unexpected_error",message:err.toString()},req);
+                res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
+            }
+        }
+    },
+    delete: function(req,res) {
+        var id = req.params.id;
+        try {
+            redNodes.removeFlow(id).then(function() {
+                log.audit({event: "flow.remove",id:id},req);
+                res.status(204).end();
+            })
+        } catch(err) {
+            if (err.code === 404) {
+                log.audit({event: "flow.remove",id:id,error:"not_found"},req);
+                res.status(404).end();
+            } else {
+                log.audit({event: "flow.remove",id:id,error:err.code||"unexpected_error",message:err.toString()},req);
+                res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
+            }
+        }
     }
 }

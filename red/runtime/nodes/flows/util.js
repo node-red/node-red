@@ -76,29 +76,28 @@ module.exports = {
                     if (flow.missingTypes.indexOf(n.type) === -1) {
                         flow.missingTypes.push(n.type);
                     }
-                } else {
-                    var container = null;
-                    if (flow.flows[n.z]) {
-                        container = flow.flows[n.z];
-                    } else if (flow.subflows[n.z]) {
-                        container = flow.subflows[n.z];
+                }
+                var container = null;
+                if (flow.flows[n.z]) {
+                    container = flow.flows[n.z];
+                } else if (flow.subflows[n.z]) {
+                    container = flow.subflows[n.z];
+                }
+                if (n.hasOwnProperty('x') && n.hasOwnProperty('y')) {
+                    if (subflowDetails) {
+                        var subflowType = subflowDetails[1]
+                        n.subflow = subflowType;
+                        flow.subflows[subflowType].instances.push(n)
                     }
-                    if (n.hasOwnProperty('x') && n.hasOwnProperty('y')) {
-                        if (subflowDetails) {
-                            var subflowType = subflowDetails[1]
-                            n.subflow = subflowType;
-                            flow.subflows[subflowType].instances.push(n)
-                        }
-                        if (container) {
-                            container.nodes[n.id] = n;
-                        }
+                    if (container) {
+                        container.nodes[n.id] = n;
+                    }
+                } else {
+                    if (container) {
+                        container.configs[n.id] = n;
                     } else {
-                        if (container) {
-                            container.configs[n.id] = n;
-                        } else {
-                            flow.configs[n.id] = n;
-                            flow.configs[n.id]._users = [];
-                        }
+                        flow.configs[n.id] = n;
+                        flow.configs[n.id]._users = [];
                     }
                 }
             }

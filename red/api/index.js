@@ -106,6 +106,9 @@ function init(_server,runtime) {
         adminApp.post("/flows",needsPermission("flows.write"),flows.post);
 
         adminApp.get("/flow/:id",needsPermission("flows.read"),flow.get);
+        adminApp.post("/flow",needsPermission("flows.write"),flow.post);
+        adminApp.delete("/flow/:id",needsPermission("flows.write"),flow.delete);
+        adminApp.put("/flow/:id",needsPermission("flows.write"),flow.put);
 
         // Nodes
         adminApp.get("/nodes",needsPermission("nodes.read"),nodes.getAll);

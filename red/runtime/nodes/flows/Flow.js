@@ -47,7 +47,7 @@ function Flow(global,flow) {
                 }
             }
         }
-        if (diff) {
+        if (diff && diff.rewired) {
             for (var j=0;j<diff.rewired.length;j++) {
                 var rewireNode = activeNodes[diff.rewired[j]];
                 if (rewireNode) {
@@ -262,7 +262,6 @@ function mapEnvVarProperties(obj,prop) {
 }
 
 function createNode(type,config) {
-    // console.log("CREATE",type,config.id);
     var nn = null;
     var nt = typeRegistry.get(type);
     if (nt) {
