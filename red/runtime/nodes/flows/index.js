@@ -76,7 +76,7 @@ function load() {
     });
 }
 
-function setConfig(_config,type) {
+function setConfig(_config,type,muteLog) {
     var config = clone(_config);
     type = type||"full";
 
@@ -115,8 +115,8 @@ function setConfig(_config,type) {
             activeFlowConfig = newFlowConfig;
             return credentials.clean(activeConfig).then(function() {
                 if (started) {
-                    return stop(type,diff).then(function() {
-                        start(type,diff);
+                    return stop(type,diff,muteLog).then(function() {
+                        start(type,diff,muteLog);
                     }).otherwise(function(err) {
                     })
                 }
@@ -199,7 +199,7 @@ function handleStatus(node,statusMessage) {
 }
 
 
-function start(type,diff) {
+function start(type,diff,muteLog) {
     //dumpActiveNodes();
     type = type||"full";
     started = true;
@@ -225,10 +225,12 @@ function start(type,diff) {
         }
         return when.resolve();
     }
-    if (diff) {
-        log.info(log._("nodes.flows.starting-modified-"+type));
-    } else {
-        log.info(log._("nodes.flows.starting-flows"));
+    if (!muteLog) {
+        if (diff) {
+            log.info(log._("nodes.flows.starting-modified-"+type));
+        } else {
+            log.info(log._("nodes.flows.starting-flows"));
+        }
     }
     var id;
     if (!diff) {
@@ -270,20 +272,24 @@ function start(type,diff) {
         }
     }
     events.emit("nodes-started");
-    if (diff) {
-        log.info(log._("nodes.flows.started-modified-"+type));
-    } else {
-        log.info(log._("nodes.flows.started-flows"));
+    if (!muteLog) {
+        if (diff) {
+            log.info(log._("nodes.flows.started-modified-"+type));
+        } else {
+            log.info(log._("nodes.flows.started-flows"));
+        }
     }
     return when.resolve();
 }
 
-function stop(type,diff) {
+function stop(type,diff,muteLog) {
     type = type||"full";
-    if (diff) {
-        log.info(log._("nodes.flows.stopping-modified-"+type));
-    } else {
-        log.info(log._("nodes.flows.stopping-flows"));
+    if (!muteLog) {
+        if (diff) {
+            log.info(log._("nodes.flows.stopping-modified-"+type));
+        } else {
+            log.info(log._("nodes.flows.stopping-flows"));
+        }
     }
     started = false;
     var promises = [];
@@ -321,10 +327,12 @@ function stop(type,diff) {
             // can do... so cheat by wiping the map knowing it'll be rebuilt
             // in start()
             subflowInstanceNodeMap = {};
-            if (diff) {
-                log.info(log._("nodes.flows.stopped-modified-"+type));
-            } else {
-                log.info(log._("nodes.flows.stopped-flows"));
+            if (!muteLog) {
+                if (diff) {
+                    log.info(log._("nodes.flows.stopped-modified-"+type));
+                } else {
+                    log.info(log._("nodes.flows.stopped-flows"));
+                }
             }
             resolve();
         });
@@ -376,33 +384,17 @@ function updateMissingTypes() {
     }
 }
 
-// function dumpActiveNodes() {
-//     console.log("--------")
-//     for (var i in activeFlowConfig.allNodes) {
-//         console.log(i,activeFlowConfig.allNodes[i].type,activeFlowConfig.allNodes[i].z)
-//     }
-//     console.log("--------")
-// }
 function addFlow(flow) {
-    //dumpActiveNodes();
-    /*
-    {
-        id:'',
-        label:'',
-        nodes:[]
-    }
 
-    */
-
-    // flow.id should not exist - it will be assigned by the runtime
-    // all flow.{subflows|configs|nodes}.z will be set to flow.id
-    // check all known types - fail if otherwise?
-    //
-    // resolves with generated flow id
-
-    var i,id,node;
+    var i,node;
 
     flow.id = redUtil.generateId();
+
+    var nodes = [{
+        type:'tab',
+        label:flow.label,
+        id:flow.id
+    }];
 
     for (i=0;i<flow.nodes.length;i++) {
         node = flow.nodes[i];
@@ -411,6 +403,7 @@ function addFlow(flow) {
             return when.reject(new Error('duplicate id'));
         }
         node.z = flow.id;
+        nodes.push(node);
     }
     if (flow.configs) {
         for (i=0;i<flow.configs.length;i++) {
@@ -420,61 +413,15 @@ function addFlow(flow) {
                 return when.reject(new Error('duplicate id'));
             }
             node.z = flow.id;
+            nodes.push(node);
         }
     }
-    var tabNode = {
-        type:'tab',
-        label:flow.label,
-        id:flow.id
-    }
-    var nodes = [tabNode].concat(flow.nodes||[]).concat(flow.configs||[]);
-    var credentialSavePromise;
-    var credentialsChanged = false;
-    nodes.forEach(function(node) {
-        if (node.credentials) {
-            credentials.extract(node);
-            credentialsChanged = true;
-        }
-    });
-    if (credentialsChanged) {
-        credentialSavePromise = credentials.save();
-    } else {
-        credentialSavePromise = when.resolve();
-    }
+    var newConfig = clone(activeConfig);
+    newConfig = newConfig.concat(nodes);
 
-    var parsedConfig = flowUtil.parseConfig(clone(nodes));
-    parsedConfig.missingTypes.forEach(function(type) {
-        if (activeFlowConfig.missingTypes.indexOf(type) == -1) {
-            activeFlowConfig.missingTypes.push(type);
-        }
-    })
-    activeFlowConfig.allNodes[tabNode.id] = tabNode;
-    for (id in parsedConfig.flows[flow.id].nodes) {
-        if (parsedConfig.flows[flow.id].nodes.hasOwnProperty(id)) {
-            activeFlowConfig.allNodes[id] = parsedConfig.flows[flow.id].nodes[id];
-        }
-    }
-    if (parsedConfig.flows[flow.id].configs) {
-        for (id in parsedConfig.flows[flow.id].configs) {
-            if (parsedConfig.flows[flow.id].configs.hasOwnProperty(id)) {
-                activeFlowConfig.allNodes[id] = parsedConfig.flows[flow.id].configs[id];
-            }
-        }
-    }
-
-
-    activeFlowConfig.flows[flow.id] = parsedConfig.flows[flow.id];
-
-    activeConfig = activeConfig.concat(nodes);
-    // TODO: extract creds
-    return credentialSavePromise.then(function() {
-        return storage.saveFlows(activeConfig).then(function() {
-            return start("flows",{added:flow.nodes.map(function(n) { return n.id})}).then(function() {
-                //dumpActiveNodes();
-                // console.log(activeFlowConfig);
-                return flow.id;
-            })
-        })
+    return setConfig(newConfig,'flows',true).then(function() {
+        log.info(log._("nodes.flows.added-flow",{label:(flow.label?flow.label+" ":"")+"["+flow.id+"]"}));
+        return flow.id;
     });
 }
 
@@ -528,6 +475,7 @@ function getFlow(id) {
     }
     return result;
 }
+
 function updateFlow(id,newFlow) {
     if (id === 'global') {
         // TODO: handle global update
@@ -556,11 +504,11 @@ function updateFlow(id,newFlow) {
     });
     newConfig = newConfig.concat(nodes);
 
-    return setConfig(newConfig,'flows');
-
-    // filter activeConfig to remove nodes
-
+    return setConfig(newConfig,'flows',true).then(function() {
+        log.info(log._("nodes.flows.updated-flow",{label:(flow.label?flow.label+" ":"")+"["+flow.id+"]"}));
+    })
 }
+
 function removeFlow(id) {
     if (id === 'global') {
         // TODO: nls + error code
@@ -573,37 +521,16 @@ function removeFlow(id) {
         throw e;
     }
 
-    var diff = {
-        removed: [id].concat(Object.keys(flow.nodes)).concat(Object.keys(flow.configs)),
-        linked:[],
-        changed:[]
-    }
-
-    delete activeFlowConfig.flows[id];
-
-    diff.removed.forEach(function(id) {
-        delete activeFlowConfig.allNodes[id];
-    });
-
-    activeConfig = activeConfig.filter(function(node) {
+    var newConfig = clone(activeConfig);
+    newConfig = newConfig.filter(function(node) {
         return node.z !== id && node.id !== id;
     });
 
-    var missingTypeCount = activeFlowConfig.missingTypes.length;
-    updateMissingTypes();
-
-    return credentials.clean(activeConfig).then(function() {
-        storage.saveFlows(activeConfig).then(function() {
-            stop("flows",diff).then(function() {
-                if (missingTypeCount > 0 && activeFlowConfig.missingTypes.length === 0) {
-                    return start();
-                }
-                //dumpActiveNodes();
-            });
-        });
-    })
-
+    return setConfig(newConfig,'flows',true).then(function() {
+        log.info(log._("nodes.flows.removed-flow",{label:(flow.label?flow.label+" ":"")+"["+flow.id+"]"}));
+    });
 }
+
 module.exports = {
     init: init,
 
