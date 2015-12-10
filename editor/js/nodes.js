@@ -157,6 +157,12 @@ RED.nodes = (function() {
         if (n._def.category == "config") {
             configNodes[n.id] = n;
         } else {
+            n.ports = [];
+            if (n.outputs) {
+                for (var i=0;i<n.outputs;i++) {
+                    n.ports.push(i);
+                }
+            }
             n.dirty = true;
             var updatedConfigNode = false;
             for (var d in n._def.defaults) {
