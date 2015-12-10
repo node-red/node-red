@@ -203,5 +203,5 @@ module.exports = {
     init:init,
     start:start,
     stop:stop,
-    publish:publish,
+    publish:publish
 }

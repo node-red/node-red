@@ -144,6 +144,7 @@ module.exports = function(RED) {
             this.on("close", function() {
                 clearInterval(this.intervalID);
                 this.buffer = [];
+                node.status({});
             });
 
         } else if (this.pauseType === "queue") {

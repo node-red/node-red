@@ -57,7 +57,7 @@ module.exports = function(RED) {
                 node.status({});
             }
             else {
-                if (!tout) {
+                if ((!tout) && (tout !== 0)) {
                     if (node.op2type === "pay") { m2 = msg.payload; }
                     else if (node.op2Templated) { m2 = mustache.render(node.op2,msg); }
                     else { m2 = node.op2; }

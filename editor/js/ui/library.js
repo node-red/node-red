@@ -16,6 +16,8 @@
 RED.library = (function() {
 
 
+    var exportToLibraryDialog;
+
     function loadFlowLibrary() {
         $.getJSON("library/flows",function(data) {
             //console.log(data);
@@ -382,10 +384,8 @@ RED.library = (function() {
     function exportFlow() {
         //TODO: don't rely on the main dialog
         var nns = RED.nodes.createExportableNodeSet(RED.view.selection().nodes);
-        $("#dialog-form").html($("script[data-template-name='export-library-dialog']").html());
         $("#node-input-filename").attr('nodes',JSON.stringify(nns));
-        $("#dialog").i18n();
-        $("#dialog").dialog("option","title",RED._("library.exportToLibrary")).dialog( "open" );
+        exportToLibraryDialog.dialog( "open" );
     }
 
     return {
@@ -405,6 +405,61 @@ RED.library = (function() {
             if (RED.settings.theme("menu.menu-item-import-library") !== false) {
                 loadFlowLibrary();
             }
+
+            exportToLibraryDialog = $('<div id="library-dialog" class="hide"><form class="dialog-form form-horizontal"></form></div>')
+                .appendTo("body")
+                .dialog({
+                    modal: true,
+                    autoOpen: false,
+                    width: 500,
+                    resizable: false,
+                    title: RED._("library.exportToLibrary"),
+                    buttons: [
+                        {
+                            id: "library-dialog-ok",
+                            text: RED._("common.label.ok"),
+                            click: function() {
+                                //TODO: move this to RED.library
+                                var flowName = $("#node-input-filename").val();
+                                if (!/^\s*$/.test(flowName)) {
+                                    $.ajax({
+                                        url:'library/flows/'+flowName,
+                                        type: "POST",
+                                        data: $("#node-input-filename").attr('nodes'),
+                                        contentType: "application/json; charset=utf-8"
+                                    }).done(function() {
+                                            RED.library.loadFlowLibrary();
+                                            RED.notify(RED._("library.savedNodes"),"success");
+                                    }).fail(function(xhr,textStatus,err) {
+                                        RED.notify(RED._("library.saveFailed",{message:xhr.responseText}),"error");
+                                    });
+                                }
+                                $( this ).dialog( "close" );
+                            }
+                        },
+                        {
+                            id: "library-dialog-cancel",
+                            text: RED._("common.label.cancel"),
+                            click: function() {
+                                $( this ).dialog( "close" );
+                            }
+                        }
+                    ],
+                    open: function(e) {
+                        $(this).parent().find(".ui-dialog-titlebar-close").hide();
+                        RED.keyboard.disable();
+                    },
+                    close: function(e) {
+                        RED.keyboard.enable();
+                    }
+            });
+            exportToLibraryDialog.children(".dialog-form").append($(
+                '<div class="form-row">'+
+                '<label for="node-input-filename" data-i18n="[append]editor:library.filename"><i class="fa fa-file"></i> </label>'+
+                '<input type="text" id="node-input-filename" data-i18n="[placeholder]editor:library.fullFilenamePlaceholder">'+
+                '<input type="text" style="display: none;" />'+ // Second hidden input to prevent submit on Enter
+                '</div>'
+            ));
         },
         create: createUI,
         loadFlowLibrary: loadFlowLibrary,

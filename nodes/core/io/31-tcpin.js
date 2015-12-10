@@ -119,7 +119,7 @@ module.exports = function(RED) {
             this.on('close', function(done) {
                 node.done = done;
                 this.closing = true;
-                if (client) { client.end(); }
+                if (client) { client.destroy(); }
                 clearTimeout(reconnectTimeout);
                 if (!node.connected) { done(); }
             });
@@ -242,6 +242,8 @@ module.exports = function(RED) {
                     node.log(RED._("tcpin.errors.error",{error:err.toString()}));
                 });
                 client.on('end', function (err) {
+                    node.status({});
+                    node.connected = false;
                 });
                 client.on('close', function() {
                     node.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
@@ -282,7 +284,7 @@ module.exports = function(RED) {
             node.on("close", function(done) {
                 node.done = done;
                 this.closing = true;
-                if (client) { client.end(); }
+                if (client) { client.destroy(); }
                 clearTimeout(reconnectTimeout);
                 if (!node.connected) { done(); }
             });
@@ -488,23 +490,19 @@ module.exports = function(RED) {
                     node.connected = false;
                     node.status({fill:"red",shape:"ring",text:"common.status.error"});
                     node.error(RED._("tcpin.errors.connect-fail"),msg);
-                    if (client) { client.end(); }
+                    if (client) { client.destroy(); }
                 });
 
                 client.on('timeout',function() {
                     //console.log("TIMEOUT");
                     node.connected = false;
-                    node.status({fill:"grey",shape:"dot"});
-                    node.warn(RED._("tcpin.errors.connect-timeout"));
+                    node.status({fill:"grey",shape:"dot",text:"tcpin.errors.connect-timeout"});
+                    //node.warn(RED._("tcpin.errors.connect-timeout"));
                     if (client) {
-                        client.end();
-                        setTimeout(function() {
-                            client.connect(port, host, function() {
-                                node.connected = true;
-                                node.status({fill:"green",shape:"dot",text:"common.status.connected"});
-                                client.write(msg.payload);
-                            });
-                        },reconnectTime);
+                        client.connect(port, host, function() {
+                            node.connected = true;
+                            node.status({fill:"green",shape:"dot",text:"common.status.connected"});
+                        });
                     }
                 });
             }
