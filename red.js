@@ -195,11 +195,11 @@ if (settings.httpAdminRoot !== false && settings.httpAdminAuth) {
     app.use(settings.httpAdminRoot, basicAuthMiddleware(settings.httpAdminAuth.user,settings.httpAdminAuth.pass));
 }
 
-if (settings.httpNodeRoot !== false && settings.httpNodeAuth) {
-    app.use(settings.httpNodeRoot,basicAuthMiddleware(settings.httpNodeAuth.user,settings.httpNodeAuth.pass));
-}
 if (settings.httpAdminRoot !== false) {
     app.use(settings.httpAdminRoot,RED.httpAdmin);
+}
+if (settings.httpNodeRoot !== false && settings.httpNodeAuth) {
+    app.use(settings.httpNodeRoot,basicAuthMiddleware(settings.httpNodeAuth.user,settings.httpNodeAuth.pass));
 }
 if (settings.httpNodeRoot !== false) {
     app.use(settings.httpNodeRoot,RED.httpNode);
