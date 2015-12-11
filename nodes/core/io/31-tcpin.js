@@ -402,7 +402,6 @@ module.exports = function(RED) {
                 if (socketTimeout !== null) { client.setTimeout(socketTimeout); }
                 var host = node.server || msg.host;
                 var port = node.port || msg.port;
-                var m;
 
                 if (host && port) {
                     client.connect(port, host, function() {
@@ -477,8 +476,6 @@ module.exports = function(RED) {
                     //console.log("END");
                     node.connected = false;
                     node.status({fill:"grey",shape:"ring",text:"common.status.disconnected"});
-                    msg.payload = null;
-                    node.send(msg);
                     client = null;
                 });
 
