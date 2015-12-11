@@ -286,7 +286,7 @@ function stop(type,diff) {
     for (var id in activeFlows) {
         if (activeFlows.hasOwnProperty(id)) {
             promises = promises.concat(activeFlows[id].stop(stopList));
-            if (!diff || diff.removed[id]) {
+            if (!diff || diff.removed.indexOf(id)!==-1) {
                 delete activeFlows[id];
             }
         }
