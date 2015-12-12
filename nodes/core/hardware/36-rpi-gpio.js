@@ -19,7 +19,7 @@ module.exports = function(RED) {
     var exec = require('child_process').exec;
     var spawn = require('child_process').spawn;
     var fs =  require('fs');
-s
+
     var gpioCommand = __dirname+'/nrgpio.py';
 
     if (!fs.existsSync("/dev/ttyAMA0")) { // unlikely if not on a Pi
