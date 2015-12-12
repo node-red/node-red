@@ -384,7 +384,7 @@ RED.library = (function() {
     function exportFlow() {
         //TODO: don't rely on the main dialog
         var nns = RED.nodes.createExportableNodeSet(RED.view.selection().nodes);
-        $("#node-input-filename").attr('nodes',JSON.stringify(nns));
+        $("#node-input-library-filename").attr('nodes',JSON.stringify(nns));
         exportToLibraryDialog.dialog( "open" );
     }
 
@@ -420,12 +420,12 @@ RED.library = (function() {
                             text: RED._("common.label.ok"),
                             click: function() {
                                 //TODO: move this to RED.library
-                                var flowName = $("#node-input-filename").val();
+                                var flowName = $("#node-input-library-filename").val();
                                 if (!/^\s*$/.test(flowName)) {
                                     $.ajax({
                                         url:'library/flows/'+flowName,
                                         type: "POST",
-                                        data: $("#node-input-filename").attr('nodes'),
+                                        data: $("#node-input-library-filename").attr('nodes'),
                                         contentType: "application/json; charset=utf-8"
                                     }).done(function() {
                                             RED.library.loadFlowLibrary();
@@ -455,8 +455,8 @@ RED.library = (function() {
             });
             exportToLibraryDialog.children(".dialog-form").append($(
                 '<div class="form-row">'+
-                '<label for="node-input-filename" data-i18n="[append]editor:library.filename"><i class="fa fa-file"></i> </label>'+
-                '<input type="text" id="node-input-filename" data-i18n="[placeholder]editor:library.fullFilenamePlaceholder">'+
+                '<label for="node-input-library-filename" data-i18n="[append]editor:library.filename"><i class="fa fa-file"></i> </label>'+
+                '<input type="text" id="node-input-library-filename" data-i18n="[placeholder]editor:library.fullFilenamePlaceholder">'+
                 '<input type="text" style="display: none;" />'+ // Second hidden input to prevent submit on Enter
                 '</div>'
             ));
