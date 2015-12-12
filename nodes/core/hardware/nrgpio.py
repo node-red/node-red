@@ -23,7 +23,7 @@ if sys.version_info >= (3,0):
     print("Sorry - currently only configured to work with python 2.x")
     sys.exit(1)
 
-if len(sys.argv) > 1:
+if len(sys.argv) > 2:
     cmd = sys.argv[1].lower()
     pin = int(sys.argv[2])
     GPIO.setmode(GPIO.BOARD)
@@ -193,5 +193,15 @@ if len(sys.argv) > 1:
                 file.close()
                 sys.exit(0)
 
+elif len(sys.argv) > 1:
+    cmd = sys.argv[1].lower()
+    if cmd == "rev":
+        print GPIO.RPI_REVISION
+    elif cmd == "ver":
+        print GPIO.VERSION
+    else:
+        print "Bad parameters - in|out|pwm|buzz|byte|borg|mouse|ver {pin} {value|up|down}"
+        print "  only ver (gpio version) and rev (board revision) accept no pin parameter."
+
 else:
-    print "Bad parameters - {in|out|pwm} {pin} {value|up|down}"
+    print "Bad parameters - in|out|pwm|buzz|byte|borg|mouse|ver {pin} {value|up|down}"

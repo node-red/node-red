@@ -1,5 +1,5 @@
 /**
- * Copyright 2013,2014 IBM Corp.
+ * Copyright 2013,2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ module.exports = function(RED) {
     var exec = require('child_process').exec;
     var spawn = require('child_process').spawn;
     var fs =  require('fs');
-
-    var gpioCommand = __dirname+'/nrgpio';
+s
+    var gpioCommand = __dirname+'/nrgpio.py';
 
     if (!fs.existsSync("/dev/ttyAMA0")) { // unlikely if not on a Pi
         //RED.log.info(RED._("rpi-gpio.errors.ignorenode"));
@@ -231,7 +231,7 @@ module.exports = function(RED) {
         this.butt = n.butt || 7;
         var node = this;
 
-        node.child = spawn(gpioCommand+".py", ["mouse",node.butt]);
+        node.child = spawn(gpioCommand, ["mouse",node.butt]);
         node.status({fill:"green",shape:"dot",text:"common.status.ok"});
 
         node.child.stdout.on('data', function (data) {
