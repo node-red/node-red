@@ -19,6 +19,8 @@ var https = require('https');
 var util = require("util");
 var express = require("express");
 var crypto = require("crypto");
+try { bcrypt = require('bcrypt'); }
+catch(e) { bcrypt = require('bcryptjs'); }
 var nopt = require("nopt");
 var path = require("path");
 var fs = require("fs-extra");
@@ -180,9 +182,21 @@ try {
 
 function basicAuthMiddleware(user,pass) {
     var basicAuth = require('basic-auth');
+    var checkPassword;
+    if (pass.length == "32") {
+        // Assume its a legacy md5 password
+        checkPassword = function(p) {
+            return crypto.createHash('md5').update(p,'utf8').digest('hex') === pass;
+        }
+    } else {
+        checkPassword = function(p) {
+            return bcrypt.compareSync(p,pass);
+        }
+    }
+
     return function(req,res,next) {
         var requestUser = basicAuth(req);
-        if (!requestUser || requestUser.name !== user || crypto.createHash('md5').update(requestUser.pass,'utf8').digest('hex') !== pass) {
+        if (!requestUser || requestUser.name !== user || !checkPassword(requestUser.pass)) {
             res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
             return res.sendStatus(401);
         }
