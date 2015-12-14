@@ -402,6 +402,9 @@ function addFlow(flow) {
             // TODO nls
             return when.reject(new Error('duplicate id'));
         }
+        if (node.type === 'tab' || node.type === 'subflow') {
+            return when.reject(new Error('invalid node type: '+node.type));
+        }
         node.z = flow.id;
         nodes.push(node);
     }
@@ -411,6 +414,9 @@ function addFlow(flow) {
             if (activeFlowConfig.allNodes[node.id]) {
                 // TODO nls
                 return when.reject(new Error('duplicate id'));
+            }
+            if (node.type === 'tab' || node.type === 'subflow') {
+                return when.reject(new Error('invalid node type: '+node.type));
             }
             node.z = flow.id;
             nodes.push(node);
