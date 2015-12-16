@@ -12,14 +12,15 @@
 -->
 
 <script type="text/x-red" data-help-name="mqtt in">
-    <p>MQTT input node. Connects to a broker and subscribes to the specified topic. The topic may contain MQTT wildcards.</p>
-    <p>Outputs an object called <b>msg</b> containing <b>msg.topic, msg.payload, msg.qos</b> and <b>msg.retain</b>.</p>
-    <p><b>msg.payload</b> is usually a string, but can also be a binary buffer.</p>
+    <p>这是一个MQTT(Message Queuing Telemetry Transport，消息队列遥测传输)协议的输入节点。MQTT协议是一个用于物联网设备之间的轻量级通信协议。这个节点可以连接到一个MQTT的broker并且注册一个特定的主题，这个主题可以包含MQTT的通配符。</p>
+    <p>节点输出的<b>msg</b>对象包含<b>msg.topic, msg.payload, msg.qos</b> 和<b>msg.retain</b>.</p>
+    <p><b>msg.payload</b>通常是一个字符串，但也可以是一段内存。</p>
 </script>
 
 <script type="text/x-red" data-help-name="mqtt out">
-    <p>Connects to a MQTT broker and publishes <b>msg.payload</b> either to the <b>msg.topic</b> or to the topic specified in the edit window. The value in the edit window has precedence.</p>
-    <p>Likewise QoS and/or retain values in the edit panel will overwrite any <b>msg.qos</b> and <b>msg.retain</b> properties. If nothing is set they default to <i>0</i> and <i>false</i> respectively.</p>
-    <p>If <b>msg.payload</b> contains an object it will be stringified before being sent.</p>
+    <p>这是一个MQTT(Message Queuing Telemetry Transport，消息队列遥测传输)协议的输出节点。MQTT协议是一个用于物联网设备之间的轻量级通信协议。这个节点可以连接到一个MQTT的broker并发布一个可配置的主题消息，消息内容由 <b>msg.payload</b> 指定，并且也是可配置的。</p>
+    <p>同样，如果你在配置界面配置了QoS 和/或者 retain 值，那么就会使用配置的值，否则使用对应的默认值 <i>0</i> 和 <i>false</i> 。</p>
+    <p>如果 <b>msg.payload</b>中包含了一个对象，那么在发送消息之前，这个节点会先将他字符串化。</p>
 </script>
+
 

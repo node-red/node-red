@@ -15,14 +15,13 @@
 -->
 
 <script type="text/x-red" data-help-name="status">
-    <p>Send status messages from other nodes on the same tab.</p>
-    <p>The message sent by this node will have a <code>status</code> property
-    with the following attributes:
+    <p>这个节点用来把同一个工作区中其他节点的状态，发送给status节点的后续节点。</p>
+    <p>消息中将会包含存在如下属性的<code>status</code>字段:
         <ul>
-            <li><code>text</code> : the status text</li>
-            <li><code>source.type</code> : the type of the node that reported status</li>
-            <li><code>source.id</code> : the id of the node that reported status</li>
-            <li><code>source.name</code> : the name, if set, of the node that reported status</li>
+            <li><code>text</code> : 状态描述文字</li>
+            <li><code>source.type</code> : 上报状态的节点类型</li>
+            <li><code>source.id</code> : 上报状态的节点状态</li>
+            <li><code>source.name</code> : 上报状态的节点名称（如果配置了节点名称的话）</li>
 
         </ul>
    </p>

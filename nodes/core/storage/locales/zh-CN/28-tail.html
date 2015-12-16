@@ -15,6 +15,8 @@
 -->
 
 <script type="text/x-red" data-help-name="tail">
+    <p>Tails命令会检测预先配置的文件，并返回文件中增加的内容。(仅 Linux/Mac操作系统有效)。</p>
+    <p>这个节点在Windows文件系统中无法正常工作工作, 因为它依赖于 tail -F 命令，而这个命令只能在Linux/Mac操作系统中运行。</p>
     <p>Tails (watches for things to be added) to the configured file. (Linux/Mac ONLY)</p>
     <p>This won't work on Windows filesystems, as it relies on the tail -F command.</p>
 </script>

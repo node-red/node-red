@@ -16,15 +16,13 @@
 -->
 
 <script type="text/x-red" data-help-name="csv">
-    <p>A function that parses the <b>msg.payload</b> to convert CSV to/from a javascript object.
-    Places the result in the payload.</p>
-    <p>If the input is a string it tries to parse it as CSV and creates a javascript object.</p>
-    <p>If the input is a javascript object it tries to build a CSV string.</p>
-    <p>If the input is a simple array the output is just a CSV generated from that array.</p>
-    <p>If the input is an array of arrays or an array of objects a multiple-line CSV is created.</p>
-    <p>The columns template should contain an ordered list of column headers. For CSV input these become the property names.
-    For CSV output these specify the properties to extract from the object and the order for the CSV.</p>
-    <p>If the input is an array then the columns template does not matter, but can be used to generate a row of column titles.</p>
-    <p><b>Note:</b> the columns should always be specified comma separated - even if another separator is chosen for the data.</p>
-    </script>
+    <p><这个节点可以将b>msg.payload</b>中的javascript对象转化成csv，或者将csv转换成javascript对象，并且将转换结果放到payload中。</p>
+    <p>如果输入是一个字符串，那么它试图解析CSV并创建一个javascript对象。</p>
+    <p>如果输入是一个javascript对象，那么它则试图建立一个 CSV 字符串。</p>
+    <p>如果输入是一个简单的数组，那么输出的只是一个CSV。</p>
+    <p>如果输入是一个包含数组的数组或对象数组，则创建一个多行CSV。</p>
+    <p>列模板应该包含一个列标题的有序列表，对于输入的CSV数据，这写列标题，就作为CSV的属性名。对于输出的CSV数据，这些列标题则指明了从对象解析出的属性，以及CSV的顺序。</p>
+    <p>如果输入是一个数组，则列模板则并不是很重要, 但可以用于生成一行列标题。</p>
+    <p><b>Note:</b> 指定的列应该是逗号分隔 - 即使数据中选择了另一种分隔符。</p>
+</script>
 

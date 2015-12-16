@@ -15,17 +15,17 @@
 -->
 
 <script type="text/x-red" data-help-name="template">
-    <p>Creates a new message based on the provided template.</p>
-    <p>This uses the <i><a href="http://mustache.github.io/mustache.5.html" target="_new">mustache</a></i> format.</p>
-    <p>For example, when a template of:
+    <p>这个节点用来按照模板创建一个新的消息。</p>
+    <p>下面的例子使用了 <i><a href="http://mustache.github.io/mustache.5.html" target="_new">mustache</a></i> 格式</p>
+    <p>例如，如果模板的写法是:</p>
     <pre>Hello {{name}}. Today is {{date}}</pre>
-    <p>receives a message containing:
+    <p>收到的消息是:
     <pre>{
   name: "Fred",
   date: "Monday"
   payload: ...
 }</pre>
-    <p>The resulting payload will be:
+    <p>则输出结果的msg.payload为:
     <pre>Hello Fred. Today is Monday</pre>
 </script>
 

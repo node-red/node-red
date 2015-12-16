@@ -15,13 +15,13 @@
 -->
 
 <script type="text/x-red" data-help-name="exec">
-    <p>Calls out to a system command.<br/></p>
-    <p>Provides 3 outputs... stdout, stderr, and return code.</p>
-    <p>By default uses exec() which calls the command, then gets a callback on completion, returning the complete result in one message, along with any errors.</p>
-    <p>Optionally can use spawn() instead, which returns the output from stdout and stderr as the command runs (usually one line at a time). On completion it then returns a return code (on the 3rd output).</p>
-    <p>The optional append gets added to the command after the <b>msg.payload</b> - so you can do things like pipe the result to another command.</p>
-    <p>Parameters with spaces should be enclosed in quotes - <i>"This is a single parameter"</i></p>
-    <p>If stdout is binary a <i>buffer</i> is returned - otherwise returns a <i>string</i>.</p>
-    <p>The blue status icon will be visible while the node is active.</p>
+    <p>这个节点用来调用一个系统命令<br/></p>
+    <p>该节点提供三个输出，stdout、stderr以及return值</p>
+    <p>默认exec节点会调用exec()函数来执行一个系统命令，并且只会从第一个输出中返回整个系统命令的执行结果，当然也有可能从第二个输出中返回执行错误的信息。</p>
+    <p>或者，exec节点也可以被配置为使用spawn()函数来执行一个系统命令，那么这条命令将会在一个派生的进程中运行，并且在第一个输出中返回执行结果，在第三个输出中返回return值。</p>
+    <p>如果选中“附加”选项，则会将输入到exec节点的<b>msg.payload</b>中的内容，附加到输出内容的后面，这样你可以做很多其他的处理，比如将结果通过管道发送到另一个命令。</p>
+    <p>参数中如果有空格，需要使用引号包围起来，例如：<i>"This is a single parameter"</i>。</p>
+    <p>如果输出结果是一个二进制文件，则返回一段<i>内存</i> - 否则返回一个<i>字符串</i>.</p>
+    <p>如果节点右上角的蓝色小圈状态标记可见，则说明节点处于激活状态。</p>
 </script>
 

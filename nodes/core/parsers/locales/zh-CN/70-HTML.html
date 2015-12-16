@@ -15,10 +15,9 @@
 -->
 
 <script type="text/x-red" data-help-name="html">
-    <p>Extracts elements from an html document held in <b>msg.payload</b> using a selector.</p>
-    <p>The selector uses <a href=="https://github.com/cheeriojs/cheerio/blob/master/Readme.md" target="_new">Cheerio</a>
-     which uses the <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_new">CSS selector</a> syntax.</p>
-    <p>The result can be either a single message with a payload containing an array of the matched elements, or multiple
-       messages that each contain a matched element.</p>
+    <p>这个节点使用一个选择器来从<b>msg.payload</b>包含的HTML文档中提取一个里面的元素集</p>
+    <p>选择器使用的是 <a href=="https://github.com/cheeriojs/cheerio/blob/master/Readme.md" target="_new">Cheerio</a>
+     它使用的是 <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_new">CSS 的选择器</a> 语法。</p>
+    <p>结果既可以是一个单个消息，其中包含了存储着匹配的元素数组的payload, 也可以是多个消息,每个包含一个匹配的元素。</p>
 </script>
 

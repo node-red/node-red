@@ -15,18 +15,12 @@
 -->
 
 <script type="text/x-red" data-help-name="inject">
-    <p>Pressing the button on the left side of the node allows a message on a topic
-       to be injected into the flow. This is mainly for test purposes.</p>
-    <p>The payload defaults to the current time in millisecs since 1970, but can
-       also be set to a String or left blank.</p>
-    <p>The repeat function allows the payload to be sent on the required schedule.</p>
-    <p>The <i>Fire once at start</i> option actually waits a short interval before firing
-       to give other nodes a chance to instantiate properly.</p>
-    <p><b>Note: </b>"Interval between times" and "at a specific time" uses cron.
-       This means that 20 minutes will be at the next hour, 20 minutes past and
-       40 minutes past - not in 20 minutes time. If you want every 20 minutes
-       from now - use the "interval" option.</p>
-    <p><b>Note: </b>all string input is escaped. To add a carriage return to a string
-    you should use a following function.</p>
+    <p>这是用来给工作流中插入一个消息的节点。单击节点的左边按钮，就可以向工作流中输入一个指定主题的消息。通常这个节点用来测试。</p>
+    <p>消息中payload默认是一个从从1970年开始的绝对毫秒数，另外还可以被配置成指定字符串或者空。</p>
+    <p>重复功能允许按照配置的规则发送消息。</p>
+    <p><i>在最开始插入一次</i> 复选框选中后，如果配置为定时发送，则在最开始先发送一次，否则，则在第一个定时周期到时后，才发送第一次。</p>
+    <p><b>注意: </b>"时间段内的时间间隔" 和 "特定时间" 将会使用 cron.
+       这意味着如果你想要从现在开始每20分钟发送一条消息的话，就必须使用<b>“时间间隔”</b>选项。因为cron定义的时间间隔，是从下一个小时开始计算的，他会在下一小时开始后的第20分钟，40分钟，发送消息，而不是从现在开始。</p>
+    <p><b>注意: </b>所有的字符串结尾都是换行，如果你想要在字符串最后添加回车，则需要使用function节点自己转换。</p>
 </script>
 

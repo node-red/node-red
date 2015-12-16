@@ -15,17 +15,15 @@
 -->
 
 <script type="text/x-red" data-help-name="watch">
-    <p>Watches a directory or file for changes.</p>
-    <p>You can enter a list of comma separated directories and/or files. You will
-    need to put quotes "..." around any that have spaces in.</p>
-    <p>On Windows you must use double back-slashes \\ in any directory names.</p>
-    <p>The full filename of the file that actually changed is put into <b>msg.payload</b>,
-    while a stringified version of the watch list is returned in <b>msg.topic</b>.</p>
-    <p><b>msg.file</b> contains just the short filename of the file that changed.
-    <b>msg.type</b> has the type of thing changed, usually <i>file</i> or <i>directory</i>,
-    while <b>msg.size</b> holds the file size in bytes.</p>
-    <p>Of course in Linux, <i>everything</i> is a file and thus can be watched...</p>
-    <p><b>Note: </b>The directory or file must exist in order to be watched. If the file
-    or directory gets deleted it may no longer be monitored even if it gets re-created.</p>
+    <p>监控目录或文件的变化</p>
+    <p>您可以输入一个逗号分隔目录和/或者文件. 你将需要用引号"..."包含住任何有空格的地方</p>
+    <p>在Windows上必须使用双反斜杠 \\ 在任何目录名字（前后）</p>
+    <p>该节点把实际上被改变了的文件的完整文件名放进<b>msg.payload</b>,
+    同时，监控列表的版本号，将会被字符串化之后，包含在<b>msg.topic</b>中被返回.</p>
+    <p><b>msg.file</b>只包含发生改变的文件的短文件名,
+    <b>msg.type</b> 中包含了改变东西的类型，通常是 <i>文件</i> 或者 <i>目录</i>,
+    同时 <b>msg.size</b> 中包含文件大小的字节数。</p>
+    <p>当然在Linux中, <i> 所有一切</i> 都能被看做是文件，所以都能被监控...</p>
+    <p><b>Note: </b>为了实现监控，目录或文件必须存在，如果文件或目录被删除它有可能不再被监控,即使它被重新创建</p>
 </script>
 

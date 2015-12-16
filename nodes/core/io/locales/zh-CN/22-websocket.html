@@ -15,33 +15,27 @@
 -->
 <!-- WebSocket Input Node -->
 <script type="text/x-red" data-help-name="websocket in">
-    <p>WebSocket input node.</p>
-    <p>By default, the data received from the WebSocket will be in <b>msg.payload</b>.
-    The socket can be configured to expect a properly formed JSON string, in which
-    case it will parse the JSON and send on the resulting object as the entire message.</p>
+    <p>WebSocket输入节点</p>
+    <p>默认方式, 从WebSocket接收到的数据将会放在<b>msg.payload</b>.
+    套接字可以被配置成期望格式的JSON字符串, 在这情况下,websocket将解析JSON，并将整个消息作为结果对象发送.</p>
 </script>
 
 <!-- WebSocket out Node -->
 <script type="text/x-red" data-help-name="websocket out">
-    <p>WebSocket out node.</p>
-    <p>By default, <b>msg.payload</b> will be sent over the WebSocket. The socket
-    can be configured to encode the entire message object as a JSON string and send that
-    over the WebSocket.</p>
-
-    <p>If the message arriving at this node started at a WebSocket In node, the message
-    will be sent back to the client that triggered the flow. Otherwise, the message
-    will be broadcast to all connected clients.</p>
-    <p>If you want to broadcast a message that started at a WebSocket In node, you
-    should delete the <b>msg._session</b> property within the flow</p>.
+    <p>WebSocket输出节点</p>
+    <p>默认方式, <b>msg.payload</b> 将通过WebSocket发送,套接字可以被配置为将整个消息对象作为JSON字符串编码，并且通过WebSocket发送。</p>
+    <p>如果这个节点由一个WebSocket输入节点触发开始，那么当消息到达该节点时，消息将被发送回触发工作流的客户端, 否则, 消息将被广播给所有连接的客户机。</p>
+    <p>如果这个节点由一个WebSocket输入节点触发开始，而你希望广播一个消息, 你应该删除工作流中的 <b>msg._session</b> 属性</p>.
 </script>
 
 <!-- WebSocket Server configuration node -->
 <script type="text/x-red" data-help-name="websocket-listener">
-   <p>This configuration node creates a WebSocket Server using the specified path</p>
+   <p>这个配置节点创建一个WebSocket服务器使用指定的路径</p>
 </script>
 
 <!-- WebSocket Client configuration node -->
 <script type="text/x-red" data-help-name="websocket-client">
-   <p>This configuration node connects a WebSocket client to the specified URL.</p>
+   <p>这个配置节点连接一个WebSocket客户端到一个指定的URL。</p>
+
 </script>
 

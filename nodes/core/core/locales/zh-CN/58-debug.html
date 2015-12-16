@@ -15,13 +15,13 @@
 -->
 
 <script type="text/x-red" data-help-name="debug">
-    <p>The Debug node can be connected to the output of any node. It can be used to display the output of any message property in the debug tab of the sidebar. The default is to display <b>msg.payload</b>.</p>
-    <p>Each message will also display the timestamp, <b>msg.topic</b> and the property chosen to output.</p>
-    <p>The sidebar can be accessed under the options drop-down in the top right corner.</p>
-    <p>The button to the right of the node will toggle its output on and off so you can de-clutter the debug window.</p>
-    <p>If the payload is an object or buffer it will be stringified first for display and indicate that by saying "(Object)" or "(Buffer)".</p>
-    <p>Selecting any particular message will highlight (in red) the debug node that reported it. This is useful if you wire up multiple debug nodes.</p>
-    <p>Optionally can show the complete <b>msg</b> object.</p>
-    <p>In addition any calls to node.warn or node.error will appear here.</p>
+    <p>这是一个用来查看其他节点输出信息的调试节点。他可以连接在任意的节点的输出上。默认在右侧的侧边栏上显示<b>msg.payload</b>。</p>
+    <p>每个消息将会显示出消息发送的时间戳、 <b>msg.topic</b> 以及你选择的输出字段</p>
+    <p>通过右上角的选项下拉菜单中的<b>侧边栏</b>选项，可以控制显示和隐藏。</p>
+    <p>节点右边的开关，可以用来临时关掉debug的显示，以方便调试</p>
+    <p>如果payload是一个对象或者一段内存，那么debug节点首先会将他们字符串化，并以"(Object)" 或者 "(Buffer)" 的格式显示.</p>
+    <p>当工作区中有多个debug节点是，一旦你在右边选择了任意一条消息，那么对应的debug节点将会高亮显示。</p>
+    <p>另外，通过配置，你也可以选择显示整个<b>msg</b> 对象的内容.</p>
+    <p>并且，如果节点的代码中有调用的<code>node.warn()</code>或者<code>node.error()</code>函数，那么这些信息，也会在右侧的侧边栏种显示。</p>
 </script>
 

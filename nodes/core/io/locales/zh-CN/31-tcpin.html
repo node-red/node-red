@@ -15,25 +15,22 @@
 -->
 
 <script type="text/x-red" data-help-name="tcp in">
-    <p>Provides a choice of tcp inputs. Can either connect to a remote tcp port,
-       or accept incoming connections.</p>
+    <p>提供了一种TCP输入的选择机会。可以连接到一个远程的TCP端口，
+       或接受传入的连接。</p>
 </script>
 
 <script type="text/x-red" data-help-name="tcp out">
-    <p>Provides a choice of tcp outputs. Can either connect to a remote tcp port,
-    accept incoming connections, or reply to messages received from a TCP In node.</p>
-    <p>Only <b>msg.payload</b> is sent.</p>
-    <p>If <b>msg.payload</b> is a string containing a Base64 encoding of binary
-    data, the Base64 decoding option will cause it to be converted back to binary
-    before being sent.</p>
+<p>提供了一种TCP输出的选择机会。可以连接到一个远程的TCP端口，
+    或者接受传入的连接，或通过节点的TCP连接回复接收到的消息。</p>
+    <p>只有 <b>msg.payload</b> 被发送。</p>
+    <p>如果<b>msg.payload</b> 是一个包含二进制数据的Base64编码， 那么base64解码选项会导致它在被发送前转换回二进制。</p>
 </script>
 
 <script type="text/x-red" data-help-name="tcp request">
-    <p>A simple TCP request node - sends the <b>msg.payload</b> to a server tcp port and expects a response.</p>
-    <p>Connects, sends the "request", reads the "response". It can either count a number of
-    returned characters into a fixed buffer, match a specified character before returning,
-    wait a fixed timeout from first reply and then return, or just sit and wait for data.</p>
-    <p>The response will be output in <b>msg.payload</b> as a buffer, so you may want to .toString() it.</p>
-    <p>If you leave tcp host or port blank they must be set by using the <b>msg.host</b> and <b>msg.port</b> properties.</p>
+<p>一个简单的TCP请求节点 - 发送<b>msg.payload</b>给一个服务器的端口并等待响应。</p>
+    <p>连接， 发送“请求”，读取“响应”，不仅可以算返回到一个固定缓冲区的字符个数，也可以在返回之前匹配指定的字符，
+    还可以在第一个回复之后等待一个固定的超时时间，然后返回，或者只是坐等数据。</p>
+    <p>响应将在<b>msg.payload</b>作为缓冲区输出，所以你可以用.totring()转换它。</p>
+    <p>如果你把TCP主机或端口设置为空，那么必须利用 <b>msg.host</b> 和 <b>msg.port</b> 设置这一属性。</p>
 </script>
 

@@ -15,13 +15,11 @@
 -->
 
 <script type="text/x-red" data-help-name="delay">
-    <p>Introduces a delay into a flow or rate limits messages.</p>
-    <p>The default delay is 5 seconds and rate limit of 1 msg/second, but both can be configured.</p>
-    <p>When set to rate limit messages, they are spread across the configured time period. It can
-    also be set to discard any intermediate messages that arrive.</p>
-    <p>The "topic based fair queue" adds messages to a release queue tagged by their <b>msg.topic</b> property.
-    At each "tick", derived from the rate, the next "topic" is released.
-    Any messages arriving on the same topic before release replace those in that position in the queue.
-    So each "topic" gets a turn - but the most recent value is always the one sent.</p>
+    <p>这个节点用来给工作流中引入一个消息延迟或者限制消息的发送频率。</p>
+    <p>默认延迟时间是5秒，默认的限制发送频率是1秒钟1条消息，但是他们都可以自由配置。</p>
+    <p>如果你选择了显示消息发送频率，则该节点会丢弃所有多余的消息，只会按照配置的频率发送消息。</p>
+    <p>如果配置了"基于主题的公平调度队列" ，则消息会按照他们的主题<b>msg.topic</b>，被放入一个以主题标示的队列。
+    并且在每一个时钟周期(按照配置的发送频率)将会发送其中一个主题队列中的消息.
+    所有相同主题的消息在没有发送之前，都会按到来的顺序存储在对应的队列中。</p>
 </script>
 

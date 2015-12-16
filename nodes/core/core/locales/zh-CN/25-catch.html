@@ -15,24 +15,17 @@
 -->
 
 <script type="text/x-red" data-help-name="catch">
-    <p>Catch errors thrown by nodes on the same tab.</p>
-    <p>If a node throws a error whilst handling a message, the flow will typically
-       halt. This node can be used to catch those errors and handle them with a
-       dedicated flow.</p>
-    <p>The node will catch errors thrown by any node on the same tab. If there
-       are multiple catch nodes on a tab, they will all get triggered.</p>
-    <p>If an error is thrown within a subflow, the error will get handled by any
-       catch nodes within the subflow. If none exists, the error is propagated
-       up to the tab the subflow instance is on.</p>
-    <p>The message sent by this node will be the original message if the node that
-       threw the error provided it. The message will have an <code>error</code>
-       property with the following attributes:
+    <p>这个节点用来从其他的node中捕获异常（在同一个工作区中）。</p>
+    <p>如果一个节点在处理消息时抛出了异常，通常整个工作流就会挂起。这个节点就可以用来捕获这个异常，并且使用catch节点后续的工作流处理这个异常。</p>
+    <p>catch节点将会捕获工作区中任意节点抛出的异常，如果工作区中有多个catch节点，那么一旦有异常发生，所有的catch节点将被激活。</p>
+    <p>如果子工作流抛出了异常，那么首先子工作流中的catch节点将会捕获到异常，但是如果子工作流中没有catch节点，则这个异常将会被传播到上一级工作流中，由上一级工作流中的catch节点处理。</p>
+    <p>如果抛出异常的节点的异常信息中包含了原始的消息，那么catch节点的输出中，也会包含原始消息，并且还会包含一个含有如下属性的<code>error</code>字段：
        <ul>
-        <li><code>message</code> : the error message</li>
-        <li><code>source.id</code> : the id of the node that threw the error</li>
-        <li><code>source.type</code> : the type of the node that threw the error</li>
-        <li><code>source.name</code> : the name, if set, of the node that threw the error</li>
+        <li><code>message</code> : 错误信息</li>
+        <li><code>source.id</code> : 抛出异常的节点ID</li>
+        <li><code>source.type</code> : 抛出异常的节点类型</li>
+        <li><code>source.name</code> : 抛出异常的节点名称（如果配置了节点名称的话）</li>
        </ul>
    </p>
-   <p>If the message already had a <code>error</code> property, it is copied to <code>_error</code>.</p>
+   <p>如果原始消息中已经包含了<code>error</code>字段，则它将会被拷贝到catch输出消息的<code>error</code>字段中。</p>
 </script>

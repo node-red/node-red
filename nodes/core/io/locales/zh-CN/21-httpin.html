@@ -15,63 +15,58 @@
 -->
 
 <script type="text/x-red" data-help-name="http in">
-    <p>Provides an input node for http requests, allowing the creation of simple web services.</p>
-    <p>The resulting message has the following properties:
+    <p>这个节点可以生成一个简单的http requests, 用来创建一个简单的web服务。</p>
+    <p>结果消息包含下面的字段:
         <ul>
             <li>msg.req : <a href="http://expressjs.com/api.html#req">http request</a></li>
             <li>msg.res : <a href="http://expressjs.com/api.html#res">http response</a></li>
         </ul>
     </p>
-    <p>For POST/PUT requests, the body is available under <code>msg.req.body</code>. This
-       uses the <a href="http://expressjs.com/api.html#bodyParser">Express bodyParser middleware</a> to parse the content to a JSON object.
+    <p>对于POST/PUT请求, 消息体包含在<code>msg.req.body</code>中。 可以使用<a href="http://expressjs.com/api.html#bodyParser">Express bodyParser middleware</a>来把它解析成一个JSON对象。
     </p>
     <p>
-       By default, this expects the body of the request to be url encoded:
+       在默认情况下，期望的请求消息体应该是URL编码过的：
        <pre>foo=bar&amp;this=that</pre>
     </p>
     <p>
-       To send JSON encoded data to the node, the content-type header of the request must be set to
-       <code>application/json</code>.
+       如果希望发送JSON格式编码过的对象，到这个节点，那么请求消息的content-type header必须要设置成 <code>application/json</code>。
     </p>
     <p>
-       <b>Note: </b>This node does not send any response to the http request.
-       This should be done with a subsequent HTTP Response node.
+       <b>注意: </b>这个节点不会给http请求发送任何的响应。
+       这个过程应该由另外一个HTTP Response 节点。
     </p>
 
 </script>
 
 <script type="text/x-red" data-help-name="http response">
-    <p>Sends responses back to http requests received from an HTTP Input node.</p>
-    <p>The response can be customised using the following message properties:</p>
+    <p>这个节点用来给http requests节点回响应。</p>
+    <p>响应消息可以用以下的字段来自定义内容：</p>
     <ul>
-        <li><code>payload</code> is sent as the body of the response</li>
-        <li><code>statusCode</code>, if set, is used as the response status code (default: 200)</li>
-        <li><code>headers</code>, if set, should be an object containing field/value
-        pairs to be added as response headers.</li>
+        <li><code>payload</code> 响应消息的消息体</li>
+        <li><code>statusCode</code>, 如果设置了，则表示相依消息的状态码（默认是200）</li>
+        <li><code>headers</code>如果设置了，则是一个包含了field/value的对象。</li>
     </ul>
 </script>
 <script type="text/x-red" data-help-name="http request">
-    <p>Provides a node for making http requests.</p>
-    <p>The URL and HTTP method can be configured in the node, if they are left blank they should be set in an incoming message on <code>msg.url</code> and <code>msg.method</code>:</p>
+    <p>这个节点可以接收其他节点的消息，并触发生成一个http requests。</p>
+    <p>节点中可以配置URL和HTTP方法。但是如果没有配置的话，那么节点接收到的消息中，就需要带有 <code>msg.url</code> 和 <code>msg.method</code>字段，如下:</p>
     <ul>
-        <li><code>url</code>, if set, is used as the url of the request. Must start with http: or https:</li>
-        <li><code>method</code>, if set, is used as the HTTP method of the request.
-        Must be one of <code>GET</code>, <code>PUT</code>, <code>POST</code>, <code>PATCH</code> or <code>DELETE</code> (default: GET)</li>
-        <li><code>headers</code>, if set, should be an object containing field/value
-        pairs to be added as request headers</li>
-        <li><code>payload</code> is sent as the body of the request</li>
+        <li><code>url</code>, 如果设置，则用来做为HTTP请求的URL地址。这个地址必须是http:或者https:开头的。</li>
+        <li><code>method</code>, 如果设置，则用来作为HTTP请求的方法。方法必须是
+        <code>GET</code>, <code>PUT</code>, <code>POST</code>, <code>PATCH</code> 或者 <code>DELETE</code> 其中的一个，默认是GET方法。</li>
+        <li><code>headers</code>, 如果设置了，则是一个包含了field/value的对象，这个对象会被添加到Http Requests的头部。</li>
+        <li><code>payload</code> 作为Request消息的消息体。</li>
     </ul>
-    <p>When configured within the node, the URL property can contain <a href="http://mustache.github.io/mustache.5.html" target="_new">mustache-style</a> tags. These allow the
-    url to be constructed using values of the incoming message. For example, if the url is set to
-    <code>example.com/{{{topic}}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.
-    Using {{{...}}} prevents mustache from escaping characters like / & etc.</p>
+    <p>URL字段如果在节点中做配置的话，他就可以支持<a href="http://mustache.github.io/mustache.5.html" target="_new">mustache-style</a> 的标签. 这样的话，就可以使用收到的消息来构造一个灵活可变的URL。例如，如果URL被配置为
+    <code>example.com/{{{topic}}}</code>, 那么收到的消息中的<code>msg.topic</code>字段就会被自动的插入到URL中的topic字段。
+    对于一些特殊字符，例如 / &，可以使用 {{{...}}} 来阻止mustache自动格式化。</p>
     <p>
-    The output message contains the following properties:
+    输出的消息中包含下面的字段：
     <ul>
-        <li><code>payload</code> is the body of the response</li>
-        <li><code>statusCode</code> is the status code of the response, or the error code if the request could not be completed</li>
-        <li><code>headers</code> is an object containing the response headers</li>
+        <li><code>payload</code> response响应消息的消息体</li>
+        <li><code>statusCode</code> respones消息的状态码，或者如果无法完成Http Request的话，那么就会包含错误码</li>
+        <li><code>headers</code> 包含对象的Response消息头部</li>
     </ul>
-    <p><b>Note</b>: If you need to configure a proxy please add <b>http_proxy=...</b> to your environment variables and restart Node-RED.</p>
+    <p><b>注意</b>: 如果你需要配置一个代理才能上网的话，你需要通过增加<b>http_proxy=...</b>环境变量的方式，把代理的地址增加到环境变量中，然后重新启动SmartNode。</p>
 </script>
 

@@ -15,19 +15,15 @@
 -->
 
 <script type="text/x-red" data-help-name="trigger">
-    <p>Creates two messages on the output separated by a timeout whenever ANY <b>msg</b> arrives on the input.</p>
-    <p>For example, this can be used to toggle a Raspberry PI GPIO pin on and off.</p>
-    <p>The two output states can be specified as can the duration of the timer.
-    Either output can be set to a value, or templated from the inbound
-    <b>msg</b> using mustache syntax. <pre>The payload is {{payload}}</pre></p>
-    <p>If the payload is an object then setting the output to <i>existing payload</i> will pass the complete payload object through.</p>
-    <p>Optionally the timer can be extended by being retriggered... or not.</p>
-    <p>By setting the first output to <i>nothing</i>, and selecting extend timer - a watchdog timer can be created.
-    No output will happen as long as repeated inputs occur within the timeout period.</p>
-    <p>Setting the timer to 0 creates an "infinite" timeout - the first output will happen but the second
-    never will, and neither can the first be retriggered - so a true one shot.</p>
-    <p>If a <b>msg.reset</b> property is present any timeout currently in progress
-    will be cleared and the second output will not happen.</p>
-    <p>The blue status icon will be visible while the node is active.</p>
+    <p>这个节点会在收到任何输入消息时，创建两条消息，两条消息之间相隔一个可配置的时间。。</p>
+    <p>例如，他可以当做一个开关，用来控制树莓派的通用IO的开和关。</p>
+    <p>两条输出消息都是可以指定内容的，不论是设置成输出固定值，还是按照mustache语法设置成一个格式化的字符串，都是支持的。例如，可以设置成<pre>The payload is {{payload}}</pre></p>
+    <p>则会输出“The payload is” 加上输入的msg.payload.</p>
+    <p>如果payload是一个对象，那么设置成 <i>存在的消息</i> 将会发送完整的消息对象。</p>
+    <p>如果选择了当新的消息到来时扩展延时。那么这个节点就可以被重新触发。每次触发都会重设两条消息之间的间隔时间</p>
+    <p>如果设置第一条消息的输出为<i>无</i>, 并且选择扩展延时，那么这就是一个看门狗定时器。如果一直有消息输入，那么就不会有第二条消息输出；一旦有第二条消息输出，就意味着出现了异常。</p>
+    <p>将定时器时间设置为0，则会创建一个不会超时的定时器——第一个输出会出现，但是第二个不会。而且第一条消息也不会被重新触发——这就构造出了一种一次性的消息。</p>
+    <p>如果选择了<b>等待直到复位</b>，则只有收到了<b>msg.reset</b>消息，当前过程才会结束，同时也不会发出第二条消息。</p>
+    <p>如果节点右上角的蓝色小圈状态标记可见，则说明节点处于激活状态。</p>
 </script>
 

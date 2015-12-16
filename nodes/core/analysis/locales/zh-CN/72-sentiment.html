@@ -15,10 +15,10 @@
 -->
 
 <script type="text/x-red" data-help-name="sentiment">
-    <p>Analyses the <b>msg.payload</b> and adds a <b>msg.sentiment</b> object that contains the resulting AFINN-111 sentiment score as <b>msg.sentiment.score</b>.</p>
-    <p>A score greater than zero is positive and less than zero is negative.</p>
-    <p>The score typically ranges from -5 to +5, but can go higher and lower.</p>
-    <p>An object of word score overrides can be supplied as <b>msg.overrides</b>.</p>
-    <p>See <a href="https://github.com/thisandagain/sentiment/blob/master/README.md" target="_new">the Sentiment docs here</a>.</p>
+    <p>这是一个用于分析文字情绪的节点。它可以分析<b>msg.payload</b>中携带的字符串，并在msg中添加一个<b>msg.sentiment</b>对象。这个对象中包含一个AFINN-111标准的情绪得分，这个得分包含在<b>msg.sentiment.score</b>中。</p>
+    <p>如果得分大于零，则说明这段文字是正面的，否则，是负面的.</p>
+    <p>通常这个得分在-5到+5之间，但是也有可能高于或者低于这个范围</p>
+    <p>对于某些敏感词，可以使用<b>msg.overrides</b>来覆盖这个敏感词，这样，输出的msg.payload中就不包含敏感词.</p>
+    <p>详细请参考 <a href="https://github.com/thisandagain/sentiment/blob/master/README.md" target="_new">文档</a></p>
 </script>
 

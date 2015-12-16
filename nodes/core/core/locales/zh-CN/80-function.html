@@ -15,34 +15,33 @@
 -->
 
 <script type="text/x-red" data-help-name="function">
-    <p>A function block where you can write code to do more interesting things.</p>
-    <p>The message is passed in as a JavaScript object called <code>msg</code>.</p>
-    <p>By convention it will have a <code>msg.payload</code> property containing
-       the body of the message.</p>
-    <h4>Logging and Error Handling</h4>
-    <p>To log any information, or report an error, the following functions are available:</p>
+    <p>function节点可以允许你自由的编写javascript代码，来灵活的完成更多有趣的事情</p>
+    <p>所有的消息通过<code>msg</code>这个JavaScript对象来传递.</p>
+    <p>每一个msg对象，都有一个<code>msg.payload</code>字段。</p>
+    <h4>日志和错误处理</h4>
+    <p>如果你需要记录任何的信息，或者上报错误，那么可以使用下面的几个函数T:</p>
         <ul>
-            <li><code>node.log("Log")</code></li>
-            <li><code>node.warn("Warning")</code></li>
-            <li><code>node.error("Error")</code></li>
+            <li><code>node.log("日志")</code></li>
+            <li><code>node.warn("警告")</code></li>
+            <li><code>node.error("错误")</code></li>
         </ul>
     </p>
-    <p>The Catch node can also be used to handle errors. To invoke a Catch node,
-    pass <code>msg</code> as a second argument to <code>node.error</code>:</p>
+    <p>如果你想使用Catch节点来处理错误. 你可以把<code>msg</code>作为<code>node.error</code>函数的第二个参数，这样就可以传递给catch节点，例如:</p>
     <pre>node.error("Error",msg)</pre>
-    <h4>Sending messages</h4>
-    <p>The function can either return the messages it wants to pass on to the next nodes
-    in the flow, or can call <code>node.send(messages)</code>.</p>
-    <p>It can return/send:</p>
+    <h4>发送消息</h4>
+    <p>function节点也可以用来发送消息给后续节点，你可以简单的返回消息，例如：</p>
+    <pre>return msg；</pre>
+    <p>或者调用<code>node.send(messages)</code>.</p>
+    <p>他将会返回/发送:</p>
     <ul>
-      <li>a single message object - passed to nodes connected to the first output</li>
-      <li>an array of message objects - passed to nodes connected to the corresponding outputs</li>
+      <li>如果是一个单独的消息对象 - 把消息发送给第一个输出连接的节点。</li>
+      <li>如果是一组消息对象 - 把消息发送给每一个输出对应连接的节点</li>
     </ul>
-    <p>If any element of the array is itself an array of messages, multiple
-          messages are sent to the corresponding output.</p>
-    <p>If null is returned, either by itself or as an element of the array, no
-          message is passed on.</p>
-    <p>See the <a target="_new" href="http://nodered.org/docs/writing-functions.html">online documentation</a> for more help.</p>
+    <p>如果其中的任意一个消息本身就是一组消息的话，那这一组消息都会发送给对应的那个输出连接的节点。</p>
+    <p>如果返回值为NULL，例如：</p>
+    <pre>return null；</pre>
+    <p>则不会发送任何消息给后续节点</p>
+    <p>详细说明请参考<a target="_new" href="http://nodered.org/docs/writing-functions.html">在线文档</a>。</p>
 
 </script>
 
