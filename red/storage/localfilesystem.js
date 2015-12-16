@@ -132,7 +132,9 @@ var localfilesystem = {
                 settings.userDir = process.env.NODE_RED_HOME;
             } else {
                 settings.userDir = fspath.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE || process.env.NODE_RED_HOME,".node-red");
-                promises.push(promiseDir(settings.userDir));
+                if (!settings.readOnly) {
+                    promises.push(promiseDir(settings.userDir));
+                }
             }
         }
 
@@ -178,7 +180,9 @@ var localfilesystem = {
 
         globalSettingsFile = fspath.join(settings.userDir,".config.json");
 
-        promises.push(promiseDir(libFlowsDir));
+        if (!settings.readOnly) {
+            promises.push(promiseDir(libFlowsDir));
+        }
 
         return when.all(promises);
     },
@@ -201,6 +205,10 @@ var localfilesystem = {
     },
 
     saveFlows: function(flows) {
+        if (settings.readOnly) {
+            return when.resolve();
+        }
+
         if (fs.existsSync(flowsFullPath)) {
             fs.renameSync(flowsFullPath,flowsFileBackup);
         }
@@ -238,6 +246,10 @@ var localfilesystem = {
     },
 
     saveCredentials: function(credentials) {
+        if (settings.readOnly) {
+            return when.resolve();
+        }
+
         if (fs.existsSync(credentialsFile)) {
             fs.renameSync(credentialsFile,credentialsFileBackup);
         }
@@ -268,6 +280,9 @@ var localfilesystem = {
         return when.resolve({});
     },
     saveSettings: function(settings) {
+        if (settings.readOnly) {
+            return when.resolve();
+        }
         return writeFile(globalSettingsFile,JSON.stringify(settings,null,1));
     },
     getSessions: function() {
@@ -288,6 +303,9 @@ var localfilesystem = {
         return when.resolve({});
     },
     saveSessions: function(sessions) {
+        if (settings.readOnly) {
+            return when.resolve();
+        }
         return writeFile(sessionsFile,JSON.stringify(sessions));
     },
 
@@ -335,6 +353,9 @@ var localfilesystem = {
     },
 
     saveLibraryEntry: function(type,path,meta,body) {
+        if (settings.readOnly) {
+            return when.resolve();
+        }
         var fn = fspath.join(libDir, type, path);
         var headers = "";
         for (var i in meta) {

@@ -402,7 +402,6 @@ module.exports = function(RED) {
                 if (socketTimeout !== null) { client.setTimeout(socketTimeout); }
                 var host = node.server || msg.host;
                 var port = node.port || msg.port;
-                var m;
 
                 if (host && port) {
                     client.connect(port, host, function() {
@@ -418,10 +417,12 @@ module.exports = function(RED) {
 
                 client.on('data', function(data) {
                     if (node.out == "sit") { // if we are staying connected just send the buffer
-                        node.send({"payload": data});
+                        msg.payload = data;
+                        node.send(msg);
                     }
                     else if (node.splitc === 0) {
-                        node.send({"payload": data});
+                        msg.payload = data;
+                        node.send(msg);
                     }
                     else {
                         for (var j = 0; j < data.length; j++ ) {
@@ -434,9 +435,9 @@ module.exports = function(RED) {
                                 else {
                                     node.tout = setTimeout(function () {
                                         node.tout = null;
-                                        m = new Buffer(i+1);
-                                        buf.copy(m,0,0,i+1);
-                                        node.send({"payload":m});
+                                        msg.payload = new Buffer(i+1);
+                                        buf.copy(msg.payload,0,0,i+1);
+                                        node.send(msg);
                                         //if (client) { client.end(); }
                                     }, node.splitc);
                                     i = 0;
@@ -448,9 +449,9 @@ module.exports = function(RED) {
                                 buf[i] = data[j];
                                 i += 1;
                                 if ( i >= node.splitc) {
-                                    m = new Buffer(i);
-                                    buf.copy(m,0,0,i);
-                                    node.send({"payload":m});
+                                    msg.payload = new Buffer(i);
+                                    buf.copy(msg.payload,0,0,i);
+                                    node.send(msg);
                                     //if (client) { client.end(); }
                                     i = 0;
                                 }
@@ -460,9 +461,9 @@ module.exports = function(RED) {
                                 buf[i] = data[j];
                                 i += 1;
                                 if (data[j] == node.splitc) {
-                                    m = new Buffer(i);
-                                    buf.copy(m,0,0,i);
-                                    node.send({"payload":m});
+                                    msg.payload = new Buffer(i);
+                                    buf.copy(msg.payload,0,0,i);
+                                    node.send(msg);
                                     //if (client) { client.end(); }
                                     i = 0;
                                 }
@@ -475,7 +476,6 @@ module.exports = function(RED) {
                     //console.log("END");
                     node.connected = false;
                     node.status({fill:"grey",shape:"ring",text:"common.status.disconnected"});
-                    node.send({"payload":m});
                     client = null;
                 });
 
