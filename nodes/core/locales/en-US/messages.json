@@ -531,7 +531,8 @@
         },
         "output": {
             "html": "the html content of the elements",
-            "text": "only the text content of the elements"
+            "text": "only the text content of the elements",
+            "attr": "an object of any attributes of the elements"
         },
         "format": {
             "single": "as a single message containing an array",
