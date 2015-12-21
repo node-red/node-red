@@ -366,3 +366,37 @@
         }
     });
 </script>
+
+<script type="text/x-red" data-template-name="rpi-keyboard">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="rpi-keyboard">
+    <p>Raspberry Pi keyboard handling node. Requires a USB keyboard.</p>
+    <p>Generates a <b>msg.payload</b> with a keycode, and <b>msg.action</b> set to
+    <i>up, down</i> or <i>repeat</i> whenever a key is pressed or released.</p>
+    <p>It also sets <b>msg.topic</b> to <i>pi/key</i>.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('rpi-keyboard',{
+        category: 'Raspberry Pi',
+        label: 'Raspberry Pi',
+        color:"#c6dbef",
+        defaults: {
+            name: { value:"" }
+        },
+        inputs:0,
+        outputs:1,
+        icon: "rpi.png",
+        label: function() {
+            return this.name||this._("rpi-gpio.label.pikeyboard");;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>

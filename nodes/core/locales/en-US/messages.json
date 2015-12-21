@@ -568,6 +568,7 @@
             "initpin": "Initialise pin state?",
             "button": "Button",
             "pimouse": "Pi Mouse",
+            "pikeyboard": "Pi Keyboard",
             "left": "Left",
             "right": "Right",
             "middle": "Middle"
