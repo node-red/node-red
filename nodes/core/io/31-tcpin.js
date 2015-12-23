@@ -276,7 +276,7 @@ module.exports = function(RED) {
                     }
                     if (node.doend === true) {
                         end = true;
-                        if (client) { client.end(); }
+                        if (client) { node.status({}); client.destroy(); }
                     }
                 }
             });
@@ -438,7 +438,7 @@ module.exports = function(RED) {
                                         msg.payload = new Buffer(i+1);
                                         buf.copy(msg.payload,0,0,i+1);
                                         node.send(msg);
-                                        //if (client) { client.end(); }
+                                        if (client) { node.status({}); client.destroy(); }
                                     }, node.splitc);
                                     i = 0;
                                     buf[0] = data[j];
@@ -452,7 +452,7 @@ module.exports = function(RED) {
                                     msg.payload = new Buffer(i);
                                     buf.copy(msg.payload,0,0,i);
                                     node.send(msg);
-                                    //if (client) { client.end(); }
+                                    if (client) { node.status({}); client.destroy(); }
                                     i = 0;
                                 }
                             }
@@ -464,7 +464,7 @@ module.exports = function(RED) {
                                     msg.payload = new Buffer(i);
                                     buf.copy(msg.payload,0,0,i);
                                     node.send(msg);
-                                    //if (client) { client.end(); }
+                                    if (client) { node.status({}); client.destroy(); }
                                     i = 0;
                                 }
                             }
