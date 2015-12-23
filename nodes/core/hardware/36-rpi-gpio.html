@@ -203,7 +203,9 @@
     <p>Raspberry Pi output node. Expects a <b>msg.payload</b> with either a 0 or 1 (or true or false). Requires the gpio command to work.</p>
     <p>Will set the selected physical pin high or low depending on the value passed in.</p>
     <p>The initial value of the pin at deploy time can also be set to 0 or 1.</p>
-    <p>When using PWM mode - expects an input value of a number 0 - 100.</p>
+    <p>When using PWM mode - expects an input value of a number 0 - 100. It can be floating point.</p>
+    <p>PWM mode can be used to drive a servo using input values between 10 and 20 only.
+    The GPIO2 pin is best for this as it uses hardware to do the PWM.</p>
     <p>Requires the RPi.GPIO python library version 0.5.8 (or better) in order to work.</p>
     <p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
 </script>
