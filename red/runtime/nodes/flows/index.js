@@ -20,6 +20,7 @@ var when = require("when");
 var Flow = require('./Flow');
 
 var typeRegistry = require("../registry");
+var context = require("../context")
 var credentials = require("../credentials");
 
 var flowUtil = require("./util");
@@ -116,6 +117,7 @@ function setConfig(_config,type,muteLog) {
             return credentials.clean(activeConfig).then(function() {
                 if (started) {
                     return stop(type,diff,muteLog).then(function() {
+                        context.clean(activeFlowConfig);
                         start(type,diff,muteLog);
                     }).otherwise(function(err) {
                     })

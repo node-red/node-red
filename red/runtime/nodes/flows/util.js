@@ -158,7 +158,7 @@ module.exports = {
                         changed[removed[id].z] = newConfig.allNodes[removed[id].z];
                         if (changed[removed[id].z].type === "subflow") {
                             changedSubflows[removed[id].z] = changed[removed[id].z];
-                            delete removed[id];
+                            //delete removed[id];
                         }
                     }
                 } else {

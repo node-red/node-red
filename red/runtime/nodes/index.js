@@ -21,6 +21,7 @@ var fs = require("fs");
 var registry = require("./registry");
 var credentials = require("./credentials");
 var flows = require("./flows");
+var context = require("./context");
 var Node = require("./Node");
 var log = require("../log");
 
@@ -69,6 +70,7 @@ function init(runtime) {
     credentials.init(runtime.storage);
     flows.init(runtime.settings,runtime.storage);
     registry.init(runtime);
+    context.init(runtime.settings);
 }
 
 function disableNode(id) {

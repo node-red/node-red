@@ -20,7 +20,7 @@ var when = require("when");
 
 var redUtil = require("../util");
 var Log = require("../log");
-
+var context = require("./context");
 var flows = require("./flows");
 
 function Node(n) {
@@ -62,6 +62,12 @@ Node.prototype.updateWires = function(wires) {
         }
     }
 
+}
+Node.prototype.context = function() {
+    if (!this._context) {
+         this._context = context.get(this._alias||this.id,this.z);
+    }
+    return this._context;
 }
 
 Node.prototype._on = Node.prototype.on;
