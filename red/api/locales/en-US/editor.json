@@ -203,5 +203,12 @@
             "subflows": "subflows",
             "flows": "flows"
         }
+    },
+    "propertySelect": {
+        "type": {
+            "str": "string",
+            "num": "number",
+            "re": "regular expression"
+        }
     }
 }

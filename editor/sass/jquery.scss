@@ -22,6 +22,9 @@
     font-size: 14px !important;
     font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
 }
+.ui-widget input {
+    box-shadow: none;
+}
 
 /* jQuery Theme overrides */
 .ui-tabs .ui-tabs-panel {

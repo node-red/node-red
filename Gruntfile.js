@@ -124,7 +124,8 @@ module.exports = function(grunt) {
                   "editor/js/ui/library.js",
                   "editor/js/ui/notifications.js",
                   "editor/js/ui/subflow.js",
-                  "editor/js/ui/touch/radialMenu.js"
+                  "editor/js/ui/touch/radialMenu.js",
+                  "editor/js/ui/propertySelect.js"
               ],
               dest: "public/red/red.js"
             },
