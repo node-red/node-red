@@ -19,15 +19,15 @@ module.exports = function(RED) {
 
     function ChangeNode(n) {
         RED.nodes.createNode(this, n);
-        
+
         this.rules = n.rules;
-        
+
         if (!this.rules) {
             var rule = {
                 t:(n.action=="replace"?"set":n.action),
                 p:n.property||""
             }
-            
+
             if (rule.t === "set") {
                 rule.to = n.to||"";
             } else if (rule.t === "change") {
@@ -37,15 +37,35 @@ module.exports = function(RED) {
             }
             this.rules = [rule];
         }
-        
+
         this.actions = [];
 
         var valid = true;
-        
+
         for (var i=0;i<this.rules.length;i++) {
             var rule = this.rules[i];
+            // Migrate to type-aware rules
+            if (!rule.pt) {
+                rule.pt = "msg";
+            }
+            if (rule.t === "change" && rule.re) {
+                rule.fromt = 're';
+                delete rule.re;
+            }
+            if (rule.t === "set" && !rule.tot) {
+                if (rule.to.indexOf("msg.") === 0 && !rule.tot) {
+                    rule.to = rule.to.substring(4);
+                    rule.tot = "msg";
+                }
+            }
+            if (!rule.tot) {
+                rule.tot = "str";
+            }
+            if (!rule.fromt) {
+                rule.fromt = "str";
+            }
             if (rule.t === "change") {
-                if (rule.re === false) {
+                if (rule.fromt !== 're') {
                     rule.from = rule.from.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
                 }
                 try {
@@ -55,57 +75,66 @@ module.exports = function(RED) {
                     this.error(RED._("change.errors.invalid-from",{error:e.message}));
                 }
             }
+            if (rule.tot === 'num') {
+                rule.to = Number(rule.to);
+            } else if (rule.tot === 'json') {
+                try {
+                    rule.to = JSON.parse(rule.to);
+                } catch(e2) {
+                    valid = false;
+                    this.error(RED._("change.errors.invalid-json"));
+                }
+            }
         }
-        
+
         function applyRule(msg,rule) {
-            var propertyParts;
-            var depth = 0;
-
-            propertyParts = rule.p.split(".");
             try {
-                propertyParts.reduce(function(obj, i) {
-                    var to = rule.to;
-                    // Set msg from property to another msg property
-                    if (rule.t === "set" && rule.to.indexOf("msg.") === 0) {
-                        var parts = to.substring(4);
-                        var msgPropParts = parts.split(".");
-                        try {
-                            msgPropParts.reduce(function(ob, j) {
-                                to = (typeof ob[j] !== "undefined" ? ob[j] : undefined);
-                                return to;
-                            }, msg);
-                        } catch (err) {}
+                var property = rule.p;
+                var value = rule.to;
+                if (rule.tot === "msg") {
+                    value = RED.util.getMessageProperty(msg,rule.to);
+                } else if (rule.tot === 'flow') {
+                    value = node.context().flow.get(rule.to);
+                } else if (rule.tot === 'global') {
+                    value = node.context().global.get(rule.to);
+                }
+                if (rule.pt === 'msg') {
+                    if (rule.t === 'delete') {
+                        RED.util.setMessageProperty(msg,property,undefined);
+                    } else if (rule.t === 'set') {
+                        RED.util.setMessageProperty(msg,property,value);
+                    } else if (rule.t === 'change') {
+                        var current = RED.util.getMessageProperty(msg,property);
+                        if (typeof current === 'string') {
+                            current = current.replace(rule.from,value);
+                            RED.util.setMessageProperty(msg,property,current);
+                        }
+                    }
+                } else {
+                    var target;
+                    if (rule.pt === 'flow') {
+                        target = node.context().flow;
+                    } else if (rule.pt === 'global') {
+                        target = node.context().global;
+                    }
+                    if (target) {
+                        if (rule.t === 'delete') {
+                            target.set(property,undefined);
+                        } else if (rule.t === 'set') {
+                            target.set(property,value);
+                        } else if (rule.t === 'change') {
+                            var current = target.get(msg,property);
+                            if (typeof current === 'string') {
+                                current = current.replace(rule.from,value);
+                                target.set(property,current);
+                            }
+                        }
                     }
 
-                    if (++depth === propertyParts.length) {
-                        if (rule.t === "change") {
-                            if (typeof obj[i] === "string") {
-                                obj[i] = obj[i].replace(rule.from, rule.to);
-                            }
-                        } else if (rule.t === "set") {
-                            if (typeof to === "undefined") {
-                                delete(obj[i]);
-                            } else {
-                                obj[i] = to;
-                            }
-                        } else if (rule.t === "delete") {
-                            delete(obj[i]);
-                        }
-                    } else {
-                        // to property doesn't exist, don't create empty object
-                        if (typeof to === "undefined") {
-                            return;
-                        // setting a non-existent multilevel object, create empty parent
-                        } else if (!obj[i]) {
-                            obj[i] = {};
-                        }
-                        return obj[i];
-                    }
-                }, msg);
-            } catch (err) {}
+                }
+            } catch(err) {console.log(err.stack)}
             return msg;
         }
-        
         if (valid) {
             var node = this;
             this.on('input', function(msg) {

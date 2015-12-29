@@ -459,7 +459,8 @@
             "replace": "Replace with"
         },
         "errors": {
-            "invalid-from": "Invalid 'from' property: __error__"
+            "invalid-from": "Invalid 'from' property: __error__",
+            "invalid-json": "Invalid 'to' JSON property"            
         }
     },
     "range": {

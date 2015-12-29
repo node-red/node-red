@@ -434,7 +434,8 @@ describe('flows/util', function() {
             var diffResult = flowUtil.diffConfigs(originalConfig,changedConfig);
             diffResult.added.should.have.length(0);
             diffResult.changed.sort().should.eql(['2', 'sf1']);
-            diffResult.removed.should.have.length(0);
+            diffResult.removed.should.have.length(1);
+            diffResult.removed.sort().should.eql(['sf1-2']);
             diffResult.rewired.should.have.length(0);
             diffResult.linked.sort().should.eql(["1","3"]);
 

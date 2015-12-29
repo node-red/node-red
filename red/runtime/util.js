@@ -103,10 +103,58 @@ function compareObjects(obj1,obj2) {
     return true;
 }
 
+function getMessageProperty(msg,expr) {
+    var result = null;
+    if (expr.indexOf('msg.')===0) {
+        expr = expr.substring(4);
+    }
+    var msgPropParts = expr.split(".");
+    msgPropParts.reduce(function(obj, i) {
+        result = (typeof obj[i] !== "undefined" ? obj[i] : undefined);
+        return result;
+    }, msg);
+    return result;
+}
+
+function setMessageProperty(msg,prop,value,createMissing) {
+    if (typeof createMissing === 'undefined') {
+        createMissing = (typeof value !== 'undefined');
+    }
+    if (prop.indexOf('msg.')===0) {
+        prop = prop.substring(4);
+    }
+    var msgPropParts = prop.split(".");
+    var depth = 0;
+    msgPropParts.reduce(function(obj, i) {
+        if (obj === null) {
+            return null;
+        }
+        depth++;
+        if (depth === msgPropParts.length) {
+            if (typeof value === "undefined") {
+                delete obj[i];
+            } else {
+                obj[i] = value;
+            }
+        } else {
+            if (!obj[i]) {
+                if (createMissing) {
+                    obj[i] = {};
+                } else {
+                    return null;
+                }
+            }
+            return obj[i];
+        }
+    }, msg);
+}
+
 module.exports = {
     ensureString: ensureString,
     ensureBuffer: ensureBuffer,
     cloneMessage: cloneMessage,
     compareObjects: compareObjects,
-    generateId: generateId
+    generateId: generateId,
+    getMessageProperty: getMessageProperty,
+    setMessageProperty: setMessageProperty
 };

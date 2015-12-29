@@ -42,6 +42,7 @@ var nodeApp;
 var server;
 
 var errorHandler = function(err,req,res,next) {
+    console.log("HERE I AM");
     if (err.message === "request entity too large") {
         log.error(err);
     } else {
@@ -87,7 +88,7 @@ function init(_server,runtime) {
         adminApp.use(bodyParser.json({limit:maxApiRequestSize}));
         adminApp.use(bodyParser.urlencoded({limit:maxApiRequestSize,extended:true}));
 
-        adminApp.get("/auth/login",auth.login);
+        adminApp.get("/auth/login",auth.login,errorHandler);
 
         if (settings.adminAuth) {
             //TODO: all passport references ought to be in ./auth
@@ -98,43 +99,43 @@ function init(_server,runtime) {
                 auth.getToken,
                 auth.errorHandler
             );
-            adminApp.post("/auth/revoke",needsPermission(""),auth.revoke);
+            adminApp.post("/auth/revoke",needsPermission(""),auth.revoke,errorHandler);
         }
 
         // Flows
-        adminApp.get("/flows",needsPermission("flows.read"),flows.get);
-        adminApp.post("/flows",needsPermission("flows.write"),flows.post);
+        adminApp.get("/flows",needsPermission("flows.read"),flows.get,errorHandler);
+        adminApp.post("/flows",needsPermission("flows.write"),flows.post,errorHandler);
 
-        adminApp.get("/flow/:id",needsPermission("flows.read"),flow.get);
-        adminApp.post("/flow",needsPermission("flows.write"),flow.post);
-        adminApp.delete("/flow/:id",needsPermission("flows.write"),flow.delete);
-        adminApp.put("/flow/:id",needsPermission("flows.write"),flow.put);
+        adminApp.get("/flow/:id",needsPermission("flows.read"),flow.get,errorHandler);
+        adminApp.post("/flow",needsPermission("flows.write"),flow.post,errorHandler);
+        adminApp.delete("/flow/:id",needsPermission("flows.write"),flow.delete,errorHandler);
+        adminApp.put("/flow/:id",needsPermission("flows.write"),flow.put,errorHandler);
 
         // Nodes
-        adminApp.get("/nodes",needsPermission("nodes.read"),nodes.getAll);
-        adminApp.post("/nodes",needsPermission("nodes.write"),nodes.post);
+        adminApp.get("/nodes",needsPermission("nodes.read"),nodes.getAll,errorHandler);
+        adminApp.post("/nodes",needsPermission("nodes.write"),nodes.post,errorHandler);
 
-        adminApp.get("/nodes/:mod",needsPermission("nodes.read"),nodes.getModule);
-        adminApp.put("/nodes/:mod",needsPermission("nodes.write"),nodes.putModule);
-        adminApp.delete("/nodes/:mod",needsPermission("nodes.write"),nodes.delete);
+        adminApp.get("/nodes/:mod",needsPermission("nodes.read"),nodes.getModule,errorHandler);
+        adminApp.put("/nodes/:mod",needsPermission("nodes.write"),nodes.putModule,errorHandler);
+        adminApp.delete("/nodes/:mod",needsPermission("nodes.write"),nodes.delete,errorHandler);
 
-        adminApp.get("/nodes/:mod/:set",needsPermission("nodes.read"),nodes.getSet);
-        adminApp.put("/nodes/:mod/:set",needsPermission("nodes.write"),nodes.putSet);
+        adminApp.get("/nodes/:mod/:set",needsPermission("nodes.read"),nodes.getSet,errorHandler);
+        adminApp.put("/nodes/:mod/:set",needsPermission("nodes.write"),nodes.putSet,errorHandler);
 
-        adminApp.get('/credentials/:type/:id', needsPermission("credentials.read"),credentials.get);
+        adminApp.get('/credentials/:type/:id', needsPermission("credentials.read"),credentials.get,errorHandler);
 
-        adminApp.get(/locales\/(.+)\/?$/,locales.get);
+        adminApp.get(/locales\/(.+)\/?$/,locales.get,errorHandler);
 
         // Library
-        adminApp.post(new RegExp("/library/flows\/(.*)"),needsPermission("library.write"),library.post);
-        adminApp.get("/library/flows",needsPermission("library.read"),library.getAll);
-        adminApp.get(new RegExp("/library/flows\/(.*)"),needsPermission("library.read"),library.get);
+        adminApp.post(new RegExp("/library/flows\/(.*)"),needsPermission("library.write"),library.post,errorHandler);
+        adminApp.get("/library/flows",needsPermission("library.read"),library.getAll,errorHandler);
+        adminApp.get(new RegExp("/library/flows\/(.*)"),needsPermission("library.read"),library.get,errorHandler);
 
         // Settings
-        adminApp.get("/settings",needsPermission("settings.read"),info.settings);
+        adminApp.get("/settings",needsPermission("settings.read"),info.settings,errorHandler);
 
         // Error Handler
-        adminApp.use(errorHandler);
+        //adminApp.use(errorHandler);
     }
 }
 function start() {

@@ -110,6 +110,57 @@ describe("red/util", function() {
             cloned.req.should.equal(msg.req);
             cloned.res.should.equal(msg.res);
         });
-
     });
+
+    describe('getMessageProperty', function() {
+        it('retrieves a simple property', function() {
+            var v = util.getMessageProperty({a:"foo"},"msg.a");
+            v.should.eql("foo");
+            var v2 = util.getMessageProperty({a:"foo"},"a");
+            v2.should.eql("foo");
+        });
+        it('should return undefined if property does not exist', function() {
+            var v = util.getMessageProperty({a:"foo"},"msg.b");
+            should.not.exist(v);
+        });
+        it('should throw error if property parent does not exist', function() {
+            /*jshint immed: false */
+            (function() {
+                util.getMessageProperty({a:"foo"},"msg.a.b.c");
+            }).should.throw();
+        })
+    });
+
+    describe('setMessageProperty', function() {
+        it('sets a property', function() {
+            var msg = {a:"foo"};
+            util.setMessageProperty(msg,"msg.a","bar");
+            msg.a.should.eql('bar');
+        });
+        it('sets a deep level property', function() {
+            var msg = {a:{b:{c:"foo"}}};
+            util.setMessageProperty(msg,"msg.a.b.c","bar");
+            msg.a.b.c.should.eql('bar');
+        });
+        it('creates missing parent properties by default', function() {
+            var msg = {a:{}};
+            util.setMessageProperty(msg,"msg.a.b.c","bar");
+            msg.a.b.c.should.eql('bar');
+        })
+        it('does not create missing parent properties', function() {
+            var msg = {a:{}};
+            util.setMessageProperty(msg,"msg.a.b.c","bar",false);
+            should.not.exist(msg.a.b);
+        })
+        it('deletes property if value is undefined', function() {
+            var msg = {a:{b:{c:"foo"}}};
+            util.setMessageProperty(msg,"msg.a.b.c",undefined);
+            should.not.exist(msg.a.b.c);
+        })
+        it('does not create missing parent properties if value is undefined', function() {
+            var msg = {a:{}};
+            util.setMessageProperty(msg,"msg.a.b.c",undefined);
+            should.not.exist(msg.a.b);
+        })
+    })
 });
