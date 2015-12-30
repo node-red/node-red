@@ -27,11 +27,6 @@
 
     $.widget( "nodered.propertySelect", {
         _create: function() {
-            /*
-            {
-                options: []
-            }
-            */
             if (!nlsd && RED && RED._) {
                 for (var i in allOptions) {
                     if (allOptions.hasOwnProperty(i)) {
@@ -40,6 +35,7 @@
                 }
             }
             nlsd = true;
+
             var that = this;
             this.disarmClick = false;
             this.element.addClass('red-ui-propertySelect');
@@ -49,6 +45,12 @@
                 .wrap( "<div>" )
                 .parent();
 
+            ["Top","Right","Bottom","Left"].forEach(function(d) {
+                var m = that.element.css("margin"+d);
+                that.uiSelect.css("margin"+d,m);
+                that.element.css("margin"+d,0);
+            });
+            
             this.uiSelect.addClass("red-ui-propertySelect-container");
 
             this.selectTrigger = $('<a href="#" class="foo"><i class="fa fa-sort-desc"></i></a>').prependTo(this.uiSelect);

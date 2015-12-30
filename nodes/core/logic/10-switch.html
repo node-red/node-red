@@ -20,7 +20,7 @@
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
     <div class="form-row">
-        <span data-i18n="switch.label.property"></span> msg.<input type="text" id="node-input-property" style="width: 200px;"/>
+        <span data-i18n="switch.label.property"></span> <input type="text" id="node-input-property" style="width: 300px;"/>
     </div>
     <div class="form-row node-input-rule-container-row" style="margin-bottom: 0px;">
         <div id="node-input-rule-container-div" style="box-sizing: border-box; border-radius: 5px; height: 310px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
@@ -53,6 +53,7 @@
         defaults: {
             name: {value:""},
             property: {value:"payload", required:true},
+            propertyType: { value:"msg" },
             rules: {value:[{t:"eq", v:""}]},
             checkall: {value:"true", required:true},
             outputs: {value:1}
@@ -64,7 +65,7 @@
             return this.name||"switch";
         },
         oneditprepare: function() {
-
+            $("#node-input-property").propertySelect({default:this.propertyType||'msg',options:['msg','flow','global']});
             var operators = [
                 {v:"eq",t:"=="},
                 {v:"neq",t:"!="},
@@ -102,14 +103,14 @@
                 selectField.width(selectWidth);
 
                 if (type === "btwn") {
-                    var labelWidth = rule.find(".node-input-tule-btwn-label").width();
-                    btwnField1.width((width-256-labelWidth)/2);
-                    btwnField2.width((width-256-labelWidth)/2);
+                    var labelWidth = rule.find(".node-input-rule-btwn-label").width();
+                    btwnField1.propertySelect("width",(width-selectWidth-120));
+                    btwnField2.propertySelect("width",(width-selectWidth-120));
                 } else {
                     if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
                         // valueField.hide();
                     } else {
-                        valueField.width(width-selectWidth-120);
+                        valueField.propertySelect("width",(width-selectWidth-120));
                     }
                 }
             }
@@ -118,6 +119,8 @@
                 var container = $('<li/>',{style:"background: #fff; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"});
                 var row = $('<div/>').appendTo(container);
                 var row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
+                var row3 = $('<div/>',{style:"padding-top: 5px; padding-left: 120px;"}).appendTo(container);
+
                 $('<i style="color: #eee; cursor: move;" class="node-input-rule-handle fa fa-bars"></i>').appendTo(row);
 
                 var selectField = $('<select/>',{style:"width:120px; margin-left: 5px; text-align: center;"}).appendTo(row);
@@ -125,11 +128,10 @@
                     selectField.append($("<option></option>").val(operators[d].v).text(operators[d].t));
                 }
 
-                var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px; width: 145px;"}).appendTo(row);
-                var btwnField = $('<span/>').appendTo(row);
-                var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px; width: 50px;"}).appendTo(btwnField);
-                var btwnAndLabel = $('<span/>',{class:"node-input-tule-btwn-label"}).text(" "+andLabel+" ").appendTo(btwnField);
-                var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"width: 50px;margin-left:2px;"}).appendTo(btwnField);
+                var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px; width: 145px;"}).appendTo(row).propertySelect({default:'str',options:['msg','flow','global','str','num']});
+                var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).propertySelect({default:'num',options:['msg','flow','global','str','num']});
+                var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
+                var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).propertySelect({default:'num',options:['msg','flow','global','str','num']});
 
                 var finalspan = $('<span/>',{style:"float: right;margin-right: 10px;"}).appendTo(row);
                 finalspan.append(' &#8594; <span class="node-input-rule-index">'+i+'</span> ');
@@ -145,20 +147,25 @@
                     var type = selectField.children("option:selected").val();
 
                     if (type === "btwn") {
-                        valueField.hide();
-                        btwnField.show();
+                        valueField.parent().hide();
+                        btwnValueField.parent().show();
                     } else {
-                        btwnField.hide();
+                        btwnValueField.parent().hide();
                         if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
-                            valueField.hide();
+                            valueField.parent().hide();
                         } else {
-                            valueField.show();
+                            valueField.parent().show();
                         }
                     }
                     if (type === "regex") {
                         row2.show();
+                        row3.hide();
+                    } else if (type === "btwn"){
+                        row2.hide();
+                        row3.show();
                     } else {
                         row2.hide();
+                        row3.hide();
                     }
                 });
 
@@ -178,9 +185,12 @@
                 selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
                 if (rule.t == "btwn") {
                     btwnValueField.val(rule.v);
+                    btwnValueField.propertySelect('type',rule.vt||'num');
                     btwnValue2Field.val(rule.v2);
+                    btwnValue2Field.propertySelect('type',rule.v2t||'num');
                 } else if (typeof rule.v != "undefined") {
                     valueField.val(rule.v);
+                    valueField.propertySelect('type',rule.vt||'str');
                 }
                 if (rule.case) {
                     caseSensitive.prop('checked',true);
@@ -257,9 +267,12 @@
                 if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else")) {
                     if (type === "btwn") {
                         r.v = rule.find(".node-input-rule-btwn-value").val();
+                        r.vt = rule.find(".node-input-rule-btwn-value").propertySelect('type');
                         r.v2 = rule.find(".node-input-rule-btwn-value2").val();
+                        r.v2t = rule.find(".node-input-rule-btwn-value2").propertySelect('type');
                     } else {
                         r.v = rule.find(".node-input-rule-value").val();
+                        r.vt = rule.find(".node-input-rule-value").propertySelect('type');
                     }
                     if (type === "regex") {
                         r.case = rule.find(".node-input-rule-case").prop("checked");
@@ -267,7 +280,8 @@
                 }
                 node.rules.push(r);
             });
-            node.outputs = node.rules.length;
+            this.outputs = node.rules.length;
+            this.propertyType = $("#node-input-property").propertySelect('type');
         }
     });
 </script>

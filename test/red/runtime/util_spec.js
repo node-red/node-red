@@ -162,5 +162,58 @@ describe("red/util", function() {
             util.setMessageProperty(msg,"msg.a.b.c",undefined);
             should.not.exist(msg.a.b);
         })
+    });
+
+    describe('evaluateNodeProperty', function() {
+        it('returns string',function() {
+            var result = util.evaluateNodeProperty('hello','str');
+            result.should.eql('hello');
+        });
+        it('returns number',function() {
+            var result = util.evaluateNodeProperty('0123','num');
+            result.should.eql(123);
+        });
+        it('returns evaluated json',function() {
+            var result = util.evaluateNodeProperty('{"a":123}','json');
+            result.should.eql({a:123});
+        });
+        it('returns regex',function() {
+            var result = util.evaluateNodeProperty('^abc$','re');
+            result.toString().should.eql("/^abc$/");
+        });
+        it('returns msg property',function() {
+            var result = util.evaluateNodeProperty('foo.bar','msg',{},{foo:{bar:"123"}});
+            result.should.eql("123");
+        });
+        it('returns flow property',function() {
+            var result = util.evaluateNodeProperty('foo.bar','flow',{
+                context:function() { return {
+                    flow: { get: function(k) {
+                        if (k === 'foo.bar') {
+                            return '123';
+                        } else {
+                            return null;
+                        }
+                    }}
+                }}
+            },{});
+            result.should.eql("123");
+        });
+        it('returns global property',function() {
+            var result = util.evaluateNodeProperty('foo.bar','global',{
+                context:function() { return {
+                    global: { get: function(k) {
+                        if (k === 'foo.bar') {
+                            return '123';
+                        } else {
+                            return null;
+                        }
+                    }}
+                }}
+            },{});
+            result.should.eql("123");
+        });
+
+
     })
 });

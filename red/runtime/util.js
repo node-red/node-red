@@ -149,6 +149,26 @@ function setMessageProperty(msg,prop,value,createMissing) {
     }, msg);
 }
 
+function evaluateNodeProperty(value, type, node, msg) {
+    if (type === 'str') {
+        return ""+value;
+    } else if (type === 'num') {
+        return Number(value);
+    } else if (type === 'json') {
+        return JSON.parse(value);
+    } else if (type === 're') {
+        return new RegExp(value);
+    } else if (type === 'msg' && msg) {
+        return getMessageProperty(msg,value);
+    } else if (type === 'flow' && node) {
+        return node.context().flow.get(value);
+    } else if (type === 'global' && node) {
+        return node.context().global.get(value);
+    }
+    return value;
+}
+
+
 module.exports = {
     ensureString: ensureString,
     ensureBuffer: ensureBuffer,
@@ -156,5 +176,6 @@ module.exports = {
     compareObjects: compareObjects,
     generateId: generateId,
     getMessageProperty: getMessageProperty,
-    setMessageProperty: setMessageProperty
+    setMessageProperty: setMessageProperty,
+    evaluateNodeProperty: evaluateNodeProperty
 };
