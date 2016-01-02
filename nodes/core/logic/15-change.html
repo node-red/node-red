@@ -33,12 +33,12 @@
 </script>
 
 <script type="text/x-red" data-help-name="change">
-    <p>Set, change or delete properties of a message.</p>
-    <p>The node can specify multiple rules that will be applied to the message in turn.</p>
+    <p>Set, change or delete properties of a message, flow context or global context.</p>
+    <p>The node can specify multiple rules that will be applied in turn.</p>
     <p>The available operations are:</p>
     <ul>
-        <li><b>Set</b> - set a property. The <b>to</b> property can either be a string value, or reference
-         another message property by name, for example: <code>msg.topic</code>.</li>
+        <li><b>Set</b> - set a property. The value can be a variety of different types, or
+            can be taken from an existing message or context property.</li>
         <li><b>Change</b> - search &amp; replace parts of the property. If regular expressions
             are enabled, the <b>replace with</b> property can include capture groups, for example <code>$1</code></li>
         <li><b>Delete</b> - delete a property.</li>
