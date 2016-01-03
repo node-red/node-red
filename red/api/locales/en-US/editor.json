@@ -204,11 +204,13 @@
             "flows": "flows"
         }
     },
-    "propertySelect": {
+    "typedInput": {
         "type": {
             "str": "string",
             "num": "number",
-            "re": "regular expression"
+            "re": "regular expression",
+            "bool": "boolean",
+            "json": "JSON"
         }
     }
 }
