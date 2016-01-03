@@ -84,6 +84,8 @@ module.exports = function(RED) {
                     valid = false;
                     this.error(RED._("change.errors.invalid-json"));
                 }
+            } else if (rule.tot === 'bool') {
+                rule.to = /^true$/i.test(rule.to);
             }
         }
 

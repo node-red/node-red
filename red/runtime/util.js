@@ -164,6 +164,8 @@ function evaluateNodeProperty(value, type, node, msg) {
         return node.context().flow.get(value);
     } else if (type === 'global' && node) {
         return node.context().global.get(value);
+    } else if (type === 'bool') {
+        return /^true$/i.test(value)
     }
     return value;
 }

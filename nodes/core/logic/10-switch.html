@@ -65,7 +65,7 @@
             return this.name||"switch";
         },
         oneditprepare: function() {
-            $("#node-input-property").propertySelect({default:this.propertyType||'msg',options:['msg','flow','global']});
+            $("#node-input-property").typedInput({default:this.propertyType||'msg',options:['msg','flow','global']});
             var operators = [
                 {v:"eq",t:"=="},
                 {v:"neq",t:"!="},
@@ -104,13 +104,13 @@
 
                 if (type === "btwn") {
                     var labelWidth = rule.find(".node-input-rule-btwn-label").width();
-                    btwnField1.propertySelect("width",(width-selectWidth-120));
-                    btwnField2.propertySelect("width",(width-selectWidth-120));
+                    btwnField1.typedInput("width",(width-selectWidth-120));
+                    btwnField2.typedInput("width",(width-selectWidth-120));
                 } else {
                     if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
                         // valueField.hide();
                     } else {
-                        valueField.propertySelect("width",(width-selectWidth-120));
+                        valueField.typedInput("width",(width-selectWidth-120));
                     }
                 }
             }
@@ -128,10 +128,10 @@
                     selectField.append($("<option></option>").val(operators[d].v).text(operators[d].t));
                 }
 
-                var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px; width: 145px;"}).appendTo(row).propertySelect({default:'str',options:['msg','flow','global','str','num']});
-                var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).propertySelect({default:'num',options:['msg','flow','global','str','num']});
+                var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px; width: 145px;"}).appendTo(row).typedInput({default:'str',options:['msg','flow','global','str','num']});
+                var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',options:['msg','flow','global','str','num']});
                 var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
-                var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).propertySelect({default:'num',options:['msg','flow','global','str','num']});
+                var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',options:['msg','flow','global','str','num']});
 
                 var finalspan = $('<span/>',{style:"float: right;margin-right: 10px;"}).appendTo(row);
                 finalspan.append(' &#8594; <span class="node-input-rule-index">'+i+'</span> ');
@@ -185,12 +185,12 @@
                 selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
                 if (rule.t == "btwn") {
                     btwnValueField.val(rule.v);
-                    btwnValueField.propertySelect('type',rule.vt||'num');
+                    btwnValueField.typedInput('type',rule.vt||'num');
                     btwnValue2Field.val(rule.v2);
-                    btwnValue2Field.propertySelect('type',rule.v2t||'num');
+                    btwnValue2Field.typedInput('type',rule.v2t||'num');
                 } else if (typeof rule.v != "undefined") {
                     valueField.val(rule.v);
-                    valueField.propertySelect('type',rule.vt||'str');
+                    valueField.typedInput('type',rule.vt||'str');
                 }
                 if (rule.case) {
                     caseSensitive.prop('checked',true);
@@ -267,12 +267,12 @@
                 if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else")) {
                     if (type === "btwn") {
                         r.v = rule.find(".node-input-rule-btwn-value").val();
-                        r.vt = rule.find(".node-input-rule-btwn-value").propertySelect('type');
+                        r.vt = rule.find(".node-input-rule-btwn-value").typedInput('type');
                         r.v2 = rule.find(".node-input-rule-btwn-value2").val();
-                        r.v2t = rule.find(".node-input-rule-btwn-value2").propertySelect('type');
+                        r.v2t = rule.find(".node-input-rule-btwn-value2").typedInput('type');
                     } else {
                         r.v = rule.find(".node-input-rule-value").val();
-                        r.vt = rule.find(".node-input-rule-value").propertySelect('type');
+                        r.vt = rule.find(".node-input-rule-value").typedInput('type');
                     }
                     if (type === "regex") {
                         r.case = rule.find(".node-input-rule-case").prop("checked");
@@ -281,7 +281,7 @@
                 node.rules.push(r);
             });
             this.outputs = node.rules.length;
-            this.propertyType = $("#node-input-property").propertySelect('type');
+            this.propertyType = $("#node-input-property").typedInput('type');
         }
     });
 </script>
