@@ -150,9 +150,9 @@ RED.editor = (function() {
                     node.ports.pop();
                 }
                 RED.nodes.eachLink(function(l) {
-                        if (l.source === node && l.sourcePort >= node.outputs) {
-                            removedLinks.push(l);
-                        }
+                    if (l.source === node && l.sourcePort >= node.outputs) {
+                        removedLinks.push(l);
+                    }
                 });
             } else if (node.outputs > node.ports.length) {
                 while (node.outputs > node.ports.length) {
@@ -305,7 +305,7 @@ RED.editor = (function() {
                                 }
                                 editing_node.dirty = true;
                                 validateNode(editing_node);
-                                RED.view.redraw();
+                                RED.view.redraw(true);
                             }
                             $( this ).dialog( "close" );
                         }
@@ -1079,7 +1079,7 @@ RED.editor = (function() {
                                 RED.history.push(historyEvent);
                             }
                             editing_node.dirty = true;
-                            RED.view.redraw();
+                            RED.view.redraw(true);
                         }
                         $( this ).dialog( "close" );
                     }
