@@ -58,7 +58,7 @@ module.exports = function(RED) {
             } else if (this.payloadType == 'none') {
                 msg.payload = "";
             } else {
-                msg.payload = RED.util.evaluateNodeProperty(this.payload,this.payloadType,this,msg);
+                msg.payload = RED.util.evaluateNodeProperty(this.payload,this.payloadType,this,msg)||"";
             }
             this.send(msg);
             msg = null;
