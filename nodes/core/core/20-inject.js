@@ -53,10 +53,12 @@ module.exports = function(RED) {
             var msg = {topic:this.topic};
             if ( (this.payloadType == null && this.payload === "") || this.payloadType === "date") {
                 msg.payload = Date.now();
-            } else if (this.payloadType == null || this.payloadType === "string") {
+            } else if (this.payloadType == null) {
                 msg.payload = this.payload;
-            } else {
+            } else if (this.payloadType == 'none') {
                 msg.payload = "";
+            } else {
+                msg.payload = RED.util.evaluateNodeProperty(this.payload,this.payloadType,this,msg);
             }
             this.send(msg);
             msg = null;

@@ -52,8 +52,30 @@
             });
             this.uiSelect.addClass("red-ui-typedInput-container");
 
+            this.options.options = this.options.options||Object.keys(allOptions);
+
+            var hasSubOptions = false;
+            this.typeMap = {};
+            this.types = this.options.options.map(function(opt) {
+                var result;
+                if (typeof opt === 'string') {
+                    result = allOptions[opt];
+                } else {
+                    result = opt;
+                }
+                that.typeMap[result.value] = result;
+                if (result.options) {
+                    hasSubOptions = true;
+                }
+                return result;
+            });
+
             if (this.options.typeField) {
                 this.typeField = $(this.options.typeField).hide();
+                var t = this.typeField.val();
+                if (t && this.typeMap[t]) {
+                    this.options.default = t;
+                }
             } else {
                 this.typeField = $("<input>",{type:'hidden'}).appendTo(this.uiSelect);
             }
@@ -76,9 +98,8 @@
                 that._showMenu(that.menu,that.selectTrigger);
             });
 
-            this.options.options = this.options.options||Object.keys(allOptions);
 
-            if (this.options.options.filter(function(opt) { return allOptions[opt] && allOptions[opt].hasOwnProperty('options')}).length > 0) {
+            if (hasSubOptions) {
                 // explicitly set optionSelectTrigger display to inline-block otherwise jQ sets it to 'inline'
                 this.optionSelectTrigger = $('<a href="#" class="red-ui-typedInput-option-trigger" style="display:inline-block"><i class="fa fa-sort-desc"></i></a>').appendTo(this.uiSelect);
                 this.optionSelectLabel = $('<span></span>').prependTo(this.optionSelectTrigger);
@@ -93,7 +114,7 @@
                     }
                 });
             }
-            this.menu = this._createMenu(this.options.options, function(v) { that.type(v) });
+            this.menu = this._createMenu(this.types, function(v) { that.type(v) });
             this.type(this.options.default||this.options.options[0]);
         },
         _hideMenu: function(menu) {
@@ -104,10 +125,9 @@
         _createMenu: function(opts,callback) {
             var that = this;
             var menu = $("<div>").addClass("red-ui-typedInput-options");
-            opts.forEach(function(key) {
-                var opt = allOptions[key];
-                if (!opt) {
-                    opt = {value:key,label:key};
+            opts.forEach(function(opt) {
+                if (typeof opt === 'string') {
+                    opt = {value:opt,label:opt};
                 }
                 var op = $('<a href="#">').attr("value",opt.value).appendTo(menu);
                 if (opt.label) {
@@ -121,7 +141,7 @@
 
                 op.click(function(event) {
                     event.preventDefault();
-                    callback(key);
+                    callback(opt.value);
                     that._hideMenu(menu);
                 });
             });
@@ -144,7 +164,7 @@
                 top: (height+pos.top-3)+"px",
                 left: (2+pos.left)+"px",
             });
-            menu.slideDown(200);
+            menu.slideDown(100);
             this._delay(function() {
                 that.uiSelect.addClass('red-ui-typedInput-focus');
                 $(document).on("mousedown.close-property-select", function(event) {
@@ -173,15 +193,21 @@
             return labelWidth;
         },
         _resize: function() {
-            var labelWidth = this._getLabelWidth(this.selectTrigger);
 
-            var newWidth = this.uiWidth-labelWidth+4;
-            this.element.width(newWidth);
+            if (this.typeMap[this.propertyType] && this.typeMap[this.propertyType].hasValue === false) {
+                this.selectTrigger.width(this.uiWidth+5);
+            } else {
+                this.selectTrigger.width('auto');
+                var labelWidth = this._getLabelWidth(this.selectTrigger);
 
-            if (this.optionSelectTrigger) {
-                var triggerWidth = this._getLabelWidth(this.optionSelectTrigger);
-                labelWidth = this._getLabelWidth(this.optionSelectLabel)-4;
-                this.optionSelectLabel.width(labelWidth+(newWidth-triggerWidth));
+                var newWidth = this.uiWidth-labelWidth+4;
+                this.element.width(newWidth);
+
+                if (this.optionSelectTrigger) {
+                    var triggerWidth = this._getLabelWidth(this.optionSelectTrigger);
+                    labelWidth = this._getLabelWidth(this.optionSelectLabel)-4;
+                    this.optionSelectLabel.width(labelWidth+(newWidth-triggerWidth));
+                }
             }
         },
         _destroy: function() {
@@ -195,8 +221,8 @@
             if (!arguments.length) {
                 return this.element.val();
             } else {
-                if (allOptions[this.propertyType].options) {
-                    if (allOptions[this.propertyType].options.indexOf(value) === -1) {
+                if (this.typeMap[this.propertyType].options) {
+                    if (this.typeMap[this.propertyType].options.indexOf(value) === -1) {
                         value = "";
                     }
                     this.optionSelectLabel.text(value);
@@ -209,7 +235,7 @@
             if (!arguments.length) {
                 return this.propertyType;
             } else {
-                var opt = allOptions[type];
+                var opt = this.typeMap[type];
                 if (opt && this.propertyType !== type) {
                     this.propertyType = type;
                     this.typeField.val(type);
@@ -243,7 +269,12 @@
                         if (this.optionSelectTrigger) {
                             this.optionSelectTrigger.hide();
                         }
-                        this.element.show();
+                        if (opt.hasValue === false) {
+                            this.element.val("");
+                            this.element.hide();
+                        } else {
+                            this.element.show();
+                        }
                         this.element.trigger('change');
                     }
                     this._resize();
@@ -254,8 +285,8 @@
             var result;
             var value = this.value();
             var type = this.type();
-            if (allOptions[type] && allOptions[type].validate) {
-                var val = allOptions[type].validate;
+            if (this.typeMap[type] && this.typeMap[type].validate) {
+                var val = this.typeMap[type].validate;
                 if (typeof val === 'function') {
                     result = val(value);
                 } else {

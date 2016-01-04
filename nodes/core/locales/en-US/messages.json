@@ -37,8 +37,6 @@
             "repeat": "Repeat"
         },
         "timestamp": "timestamp",
-        "string": "string",
-        "blank": "blank",
         "none": "none",
         "interval": "interval",
         "interval-time": "interval between times",
@@ -460,7 +458,7 @@
         },
         "errors": {
             "invalid-from": "Invalid 'from' property: __error__",
-            "invalid-json": "Invalid 'to' JSON property"            
+            "invalid-json": "Invalid 'to' JSON property"
         }
     },
     "range": {

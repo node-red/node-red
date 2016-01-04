@@ -172,13 +172,13 @@
                 });
 
                 selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
-                propertyName.val(rule.p);
+                propertyName.typedInput('value',rule.p);
                 propertyName.typedInput('type',rule.pt)
-                propertyValue.val(rule.to);
+                propertyValue.typedInput('value',rule.to);
                 propertyValue.typedInput('type',rule.tot)
-                fromValue.val(rule.from);
+                fromValue.typedInput('value',rule.from);
                 fromValue.typedInput('type',rule.fromt)
-                toValue.val(rule.to);
+                toValue.typedInput('value',rule.to);
                 toValue.typedInput('type',rule.tot)
                 selectField.change();
 
@@ -258,18 +258,17 @@
                 var type = rule.find(".node-input-rule-type option:selected").val();
                 var r = {
                     t:type,
-                    p:rule.find(".node-input-rule-property-name").val(),
+                    p:rule.find(".node-input-rule-property-name").typedInput('value'),
                     pt:rule.find(".node-input-rule-property-name").typedInput('type')
                 };
                 if (type === "set") {
-                    r.to = rule.find(".node-input-rule-property-value").val();
+                    r.to = rule.find(".node-input-rule-property-value").typedInput('value');
                     r.tot = rule.find(".node-input-rule-property-value").typedInput('type');
                 } else if (type === "change") {
-                    r.from = rule.find(".node-input-rule-property-search-value").val();
+                    r.from = rule.find(".node-input-rule-property-search-value").typedInput('value');
                     r.fromt = rule.find(".node-input-rule-property-search-value").typedInput('type');
-                    r.to = rule.find(".node-input-rule-property-replace-value").val();
+                    r.to = rule.find(".node-input-rule-property-replace-value").typedInput('value');
                     r.tot = rule.find(".node-input-rule-property-replace-value").typedInput('type');
-                    r.re = rule.find(".node-input-rule-property-re").prop('checked');
                 }
                 node.rules.push(r);
             });

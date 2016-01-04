@@ -184,12 +184,12 @@
 
                 selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
                 if (rule.t == "btwn") {
-                    btwnValueField.val(rule.v);
+                    btwnValueField.typedInput('value',rule.v);
                     btwnValueField.typedInput('type',rule.vt||'num');
-                    btwnValue2Field.val(rule.v2);
+                    btwnValue2Field.typedInput('value',rule.v2);
                     btwnValue2Field.typedInput('type',rule.v2t||'num');
                 } else if (typeof rule.v != "undefined") {
-                    valueField.val(rule.v);
+                    valueField.typedInput('value',rule.v);
                     valueField.typedInput('type',rule.vt||'str');
                 }
                 if (rule.case) {
@@ -266,12 +266,12 @@
                 var r = {t:type};
                 if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else")) {
                     if (type === "btwn") {
-                        r.v = rule.find(".node-input-rule-btwn-value").val();
+                        r.v = rule.find(".node-input-rule-btwn-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-btwn-value").typedInput('type');
-                        r.v2 = rule.find(".node-input-rule-btwn-value2").val();
+                        r.v2 = rule.find(".node-input-rule-btwn-value2").typedInput('value');
                         r.v2t = rule.find(".node-input-rule-btwn-value2").typedInput('type');
                     } else {
-                        r.v = rule.find(".node-input-rule-value").val();
+                        r.v = rule.find(".node-input-rule-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-value").typedInput('type');
                     }
                     if (type === "regex") {

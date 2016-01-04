@@ -15,6 +15,7 @@
 -->
 
 <script type="text/x-red" data-template-name="inject">
+<!--
     <div class="form-row node-input-payload">
         <label for="node-input-payloadType"><i class="fa fa-envelope"></i> <span data-i18n="common.label.payload"></span></label>
         <select id="node-input-payloadType" style="width:73%">
@@ -27,6 +28,12 @@
     <div class="form-row" id="node-input-row-payload">
         <label for="node-input-payload"></label>
         <input type="text" id="node-input-payload" style="width:70%">
+    </div>
+-->
+    <div class="form-row">
+        <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="common.label.payload"></span></label>
+        <input type="text" id="node-input-payload" style="width:300px">
+        <input type="hidden" id="node-input-payloadType">
     </div>
 
     <div class="form-row">
@@ -196,23 +203,51 @@
         outputs:1,
         icon: "inject.png",
         label: function() {
-            if (this.payloadType === "string") {
+            if (this.name) {
+                return this.name;
+            } else if (this.payloadType === "string" ||
+                    this.payloadType === "str" ||
+                    this.payloadType === "num" ||
+                    this.payloadType === "bool" ||
+                    this.payloadType === "json") {
                 if ((this.topic !== "") && ((this.topic.length + this.payload.length) <= 32)) {
-                    return this.name||this.topic + ":" + this.payload;
+                    return this.topic + ":" + this.payload;
+                } else if (this.payload.length > 0 && this.payload.length < 24) {
+                    return this.payload;
+                } else {
+                    return this._("inject.inject");
                 }
-                else if (this.payload.length < 24) {
-                    return this.name||this.payload;
-                }
+            } else if (this.payloadType === 'date') {
+                return this._("inject.timestamp")
+            } else if (this.payloadType === 'flow' && this.payload.length < 19) {
+                return 'flow.'+this.payload;
+            } else if (this.payloadType === 'global' && this.payload.length < 17) {
+                return 'global.'+this.payload;
+            } else {
+                return this._("inject.inject");
             }
-            if ((this.topic.length < 24) && (this.topic.length > 0)) {
-                return this.name||this.topic;
-            }
-            else { return this.name||(this.payloadType==="date"?this._("inject.timestamp"):null)||this._("inject.inject"); }
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+            if (this.payloadType == null) {
+                if (this.payload == "") {
+                    this.payloadType = "date";
+                } else {
+                    this.payloadType = "str";
+                }
+            } else if (this.payloadType === 'string' || this.payloadType === 'none') {
+                this.payloadType = "str";
+            }
+            $("#node-input-payloadType").val(this.payloadType);
+
+            $("#node-input-payload").typedInput({
+                default: 'str',
+                typeField: $("#node-input-payloadType"),
+                options:['flow','global','str','num','bool','json',{value:"date",label:this._("inject.timestamp"),hasValue:false}]
+            });
+
             $("#inject-time-type-select").change(function() {
                 $("#node-input-crontab").val('');
                 var id = $("#inject-time-type-select option:selected").val();
@@ -373,24 +408,8 @@
             $("#inject-time-type-select option").filter(function() {return $(this).val() == repeattype;}).attr('selected',true);
             $("#inject-time-row-"+repeattype).show();
 
-            if (this.payloadType == null) {
-                if (this.payload == "") {
-                    this.payloadType = "date";
-                } else {
-                    this.payloadType = "string";
-                }
-            }
+            $("#node-input-payload").typedInput('type',this.payloadType);
 
-            $("#node-input-payloadType").change(function() {
-                var id = $("#node-input-payloadType option:selected").val();
-                if (id === "string") {
-                    $("#node-input-row-payload").show();
-                } else {
-                    $("#node-input-row-payload").hide();
-                }
-            });
-            $("#node-input-payloadType").val(this.payloadType);
-            $("#node-input-payloadType").change();
             $("#inject-time-type-select").change();
             $("#inject-time-interval-time-start").change();
 
