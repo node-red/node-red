@@ -19,28 +19,32 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
+    <div class="form-row">
+        <label for="node-input-field"><i class="fa fa-edit"></i> <span data-i18n="template.label.property"></span></label>
+        <input type="text" id="node-input-field" placeholder="payload" style="width:250px;">
+        <input type="hidden" id="node-input-fieldType">
+    </div>
     <div class="form-row" style="margin-bottom: 0px;">
         <label for="node-input-template"><i class="fa fa-file-code-o"></i> <span data-i18n="template.label.template"></span></label>
         <input type="hidden" id="node-input-template" autofocus="autofocus">
-        <select id="node-input-format" style=" font-size: 0.8em; margin-bottom: 3px; width:110px; float:right;">
-            <option value="handlebars">mustache</option>
-            <option value="html">HTML</option>
-            <option value="json">JSON</option>
-            <option value="markdown">Markdown</option>
-            <option value="text">none</option>
-        </select>
+        <div style="float:right;margin-bottom: 3px; font-size: 0.8em;">
+            <span data-i18n="template.label.format"></span>:
+            <select id="node-input-format" style=" height: 20px; font-size: 1em !important; width:110px;">
+                <option value="handlebars">mustache</option>
+                <option value="html">HTML</option>
+                <option value="json">JSON</option>
+                <option value="markdown">Markdown</option>
+                <option value="text">none</option>
+            </select>
+        </div>
     </div>
     <div class="form-row node-text-editor-row">
         <div style="height: 250px;" class="node-text-editor" id="node-input-template-editor" ></div>
     </div>
-    <div class="form-row">
-        <label for="node-input-field"><i class="fa fa-edit"></i> <span data-i18n="template.label.property"></span></label>
-        msg.<input type="text" id="node-input-field" placeholder="payload" style="width:170px;">
-    </div>
 </script>
 
 <script type="text/x-red" data-help-name="template">
-    <p>Creates a new message based on the provided template.</p>
+    <p>Sets a property based on the provided template.</p>
     <p>This uses the <i><a href="http://mustache.github.io/mustache.5.html" target="_new">mustache</a></i> format.</p>
     <p>For example, when a template of:
     <pre>Hello {{name}}. Today is {{date}}</pre>
@@ -50,8 +54,10 @@
   date: "Monday"
   payload: ...
 }</pre>
-    <p>The resulting payload will be:
+    <p>The resulting property will be:
     <pre>Hello Fred. Today is Monday</pre>
+    <p>By default, mustache will escape any HTML entities in the values it substitutes.
+       To prevent this, use <code>{{{triple}}}</code> braces.
 </script>
 
 <script type="text/javascript">
@@ -61,6 +67,7 @@
         defaults: {
             name: {value:""},
             field: {value:"payload"},
+            fieldType: {value:"msg"},
             format: {value:"handlebars"},
             template: {value:"This is the payload: {{payload}} !"},
         },
@@ -72,6 +79,15 @@
         },
         oneditprepare: function() {
             var that = this;
+            if (!this.fieldType) {
+                this.fieldType = 'msg';
+            }
+            $("#node-input-field").typedInput({
+                default: 'msg',
+                options: ['msg','flow','global'],
+                typeField: $("#node-input-fieldType")
+            });
+
             function templateDialogResize() {
                 var rows = $("#dialog-form>div:not(.node-text-editor-row)");
                 var height = $("#dialog-form").height();
@@ -108,7 +124,7 @@
                 fields:['name','outputs']
             });
             this.editor.focus();
-            
+
             $("#node-input-format").change(function() {
                 var mod = "ace/mode/"+$("#node-input-format").val();
                 that.editor.getSession().setMode({

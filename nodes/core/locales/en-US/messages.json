@@ -136,7 +136,8 @@
     "template": {
         "label": {
             "template": "Template",
-            "property": "Property"
+            "property": "Property",
+            "format": "Syntax Highlight"
         },
         "templatevalue": "This is the payload: {{payload}} !"
     },
