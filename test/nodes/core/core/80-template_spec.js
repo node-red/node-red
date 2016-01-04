@@ -68,7 +68,7 @@ describe('template node', function() {
                 msg.topic.foo.should.have.a.property('bar', 'payload=foo');
                 done();
             });
-            n1.receive({payload:{doh:{rei:{me:"foo"}}}, topic:"bar"});
+            n1.receive({payload:{doh:{rei:{me:"foo"}}}});
         });
     });
 
