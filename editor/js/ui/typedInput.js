@@ -52,11 +52,11 @@
             });
             this.uiSelect.addClass("red-ui-typedInput-container");
 
-            this.options.options = this.options.options||Object.keys(allOptions);
+            this.options.types = this.options.types||Object.keys(allOptions);
 
             var hasSubOptions = false;
             this.typeMap = {};
-            this.types = this.options.options.map(function(opt) {
+            this.types = this.options.types.map(function(opt) {
                 var result;
                 if (typeof opt === 'string') {
                     result = allOptions[opt];
@@ -115,7 +115,7 @@
                 });
             }
             this.menu = this._createMenu(this.types, function(v) { that.type(v) });
-            this.type(this.options.default||this.options.options[0]);
+            this.type(this.options.default||this.types[0].value);
         },
         _hideMenu: function(menu) {
             $(document).off("mousedown.close-property-select");

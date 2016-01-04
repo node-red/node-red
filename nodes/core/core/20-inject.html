@@ -230,7 +230,7 @@
             $("#node-input-payload").typedInput({
                 default: 'str',
                 typeField: $("#node-input-payloadType"),
-                options:['flow','global','str','num','bool','json',{value:"date",label:this._("inject.timestamp"),hasValue:false}]
+                types:['flow','global','str','num','bool','json',{value:"date",label:this._("inject.timestamp"),hasValue:false}]
             });
 
             $("#inject-time-type-select").change(function() {
