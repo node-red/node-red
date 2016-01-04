@@ -348,6 +348,10 @@ RED.editor = (function() {
                 resize: function(e,ui) {
                     if (editing_node) {
                         $(this).dialog('option',"sizeCache-"+editing_node.type,ui.size);
+                        if (editing_node._def.oneditresize) {
+                            var form = $("#dialog-form");
+                            editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
+                        }
                     }
                 },
                 open: function(e) {
@@ -363,6 +367,12 @@ RED.editor = (function() {
                         if (size) {
                             $(this).dialog('option','width',size.width);
                             $(this).dialog('option','height',size.height);
+                        }
+                        if (editing_node._def.oneditresize) {
+                            setTimeout(function() {
+                                var form = $("#dialog-form");
+                                editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
+                            },0);
                         }
                     }
                 },

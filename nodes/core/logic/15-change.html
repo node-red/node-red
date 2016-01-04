@@ -100,11 +100,6 @@
             var replace = this._("change.action.replace");
             var regex = this._("change.label.regex");
 
-            function resizeRule(rule,width) {
-                rule.find('input[type="text"]:not(.red-ui-typedInput)').width(width-180);
-                rule.find('.red-ui-typedInput').typedInput("width",width-180);
-            }
-
             function generateRule(rule) {
 
                 if (rule.t === "change" && rule.re) {
@@ -151,7 +146,6 @@
 
                 selectField.change(function() {
                     var width = $("#node-input-rule-container").width();
-                    resizeRule(container,width);
                     var type = $(this).val();
                     if (type == "set") {
                         row2.show();
@@ -215,38 +209,6 @@
             for (var i=0;i<this.rules.length;i++) {
                 generateRule(this.rules[i]);
             }
-
-            function changeDialogResize() {
-                var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
-                var height = $("#dialog-form").height();
-                for (var i=0;i<rows.size();i++) {
-                    height -= $(rows[i]).outerHeight(true);
-                }
-                var editorRow = $("#dialog-form>div.node-input-rule-container-row");
-                height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
-                $("#node-input-rule-container-div").css("height",height+"px");
-
-                var rules = $("#node-input-rule-container").children();
-                var newWidth = $("#node-input-rule-container").width();
-                rules.each(function(i) {
-                    resizeRule($(this),newWidth);
-                })
-                $("#node-input-name").width(newWidth-130);
-            };
-            $( "#dialog" ).on("dialogresize", changeDialogResize);
-            $( "#dialog" ).one("dialogopen", function(ev) {
-                var size = $( "#dialog" ).dialog('option','sizeCache-change');
-                if (size) {
-                    $("#dialog").dialog('option','width',size.width);
-                    $("#dialog").dialog('option','height',size.height);
-                    changeDialogResize();
-                } else {
-                    setTimeout(changeDialogResize,10);
-                }
-            });
-            $( "#dialog" ).one("dialogclose", function(ev,ui) {
-                $( "#dialog" ).off("dialogresize",changeDialogResize);
-            });
         },
         oneditsave: function() {
             var rules = $("#node-input-rule-container").children();
@@ -272,6 +234,23 @@
                 }
                 node.rules.push(r);
             });
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
+            var height = size.height;
+            for (var i=0;i<rows.size();i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-input-rule-container-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            $("#node-input-rule-container-div").css("height",height+"px");
+
+            var rules = $("#node-input-rule-container").children();
+            var newWidth = $("#node-input-rule-container").width();
+            rules.each(function(i) {
+                $(this).find('.red-ui-typedInput').typedInput("width",newWidth-180);
+            })
+            $("#node-input-name").width(newWidth-130);
         }
     });
 </script>

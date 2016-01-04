@@ -65,6 +65,7 @@
             return this.name||"switch";
         },
         oneditprepare: function() {
+            var node = this;
             $("#node-input-property").typedInput({default:this.propertyType||'msg',types:['msg','flow','global']});
             var operators = [
                 {v:"eq",t:"=="},
@@ -86,7 +87,7 @@
             var andLabel = this._("switch.and");
             var caseLabel = this._("switch.ignorecase");
 
-            function resizeRule(rule,width) {
+            this.resizeRule = function(rule,newWidth) {
                 var selectField = rule.find("select");
                 var type = selectField.children("option:selected").val();
                 var valueField = rule.find(".node-input-rule-value");
@@ -104,13 +105,13 @@
 
                 if (type === "btwn") {
                     var labelWidth = rule.find(".node-input-rule-btwn-label").width();
-                    btwnField1.typedInput("width",(width-selectWidth-120));
-                    btwnField2.typedInput("width",(width-selectWidth-120));
+                    btwnField1.typedInput("width",(newWidth-selectWidth-120));
+                    btwnField2.typedInput("width",(newWidth-selectWidth-120));
                 } else {
                     if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
                         // valueField.hide();
                     } else {
-                        valueField.typedInput("width",(width-selectWidth-120));
+                        valueField.typedInput("width",(newWidth-selectWidth-120));
                     }
                 }
             }
@@ -143,9 +144,8 @@
                 $('<label/>',{for:"node-input-rule-case-"+i,style:"margin-left: 3px;"}).text(caseLabel).appendTo(row2);
                 selectField.change(function() {
                     var width = $("#node-input-rule-container").width();
-                    resizeRule(container,width);
                     var type = selectField.children("option:selected").val();
-
+                    node.resizeRule(container,width);
                     if (type === "btwn") {
                         valueField.parent().hide();
                         btwnValueField.parent().show();
@@ -210,23 +210,6 @@
                 generateRule(i+1,rule);
             }
 
-            function switchDialogResize() {
-                var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
-                var height = $("#dialog-form").height();
-                for (var i=0;i<rows.size();i++) {
-                    height -= $(rows[i]).outerHeight(true);
-                }
-                var editorRow = $("#dialog-form>div.node-input-rule-container-row");
-                height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
-                $("#node-input-rule-container-div").css("height",height+"px");
-
-                var rules = $("#node-input-rule-container").children();
-                var newWidth = $("#node-input-rule-container").width();
-                rules.each(function(i) {
-                    resizeRule($(this),newWidth);
-                })
-            };
-
             $( "#node-input-rule-container" ).sortable({
                 axis: "y",
                 update: function( event, ui ) {
@@ -239,21 +222,6 @@
                 cursor: "move"
             });
             $( "#node-input-rule-container .node-input-rule-handle" ).disableSelection();
-
-            $( "#dialog" ).on("dialogresize", switchDialogResize);
-            $( "#dialog" ).one("dialogopen", function(ev) {
-                var size = $( "#dialog" ).dialog('option','sizeCache-switch');
-                if (size) {
-                    $("#dialog").dialog('option','width',size.width);
-                    $("#dialog").dialog('option','height',size.height);
-                    switchDialogResize();
-                } else {
-                    setTimeout(switchDialogResize,10);
-                }
-            });
-            $( "#dialog" ).one("dialogclose", function(ev,ui) {
-                $( "#dialog" ).off("dialogresize",switchDialogResize);
-            });
         },
         oneditsave: function() {
             var rules = $("#node-input-rule-container").children();
@@ -282,6 +250,23 @@
             });
             this.outputs = node.rules.length;
             this.propertyType = $("#node-input-property").typedInput('type');
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
+            var height = size.height;
+            for (var i=0;i<rows.size();i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-input-rule-container-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            $("#node-input-rule-container-div").css("height",height+"px");
+
+            var rules = $("#node-input-rule-container").children();
+            var newWidth = $("#node-input-rule-container").width();
+            var node = this;
+            rules.each(function(i) {
+                node.resizeRule($(this),newWidth);
+            })
         }
     });
 </script>

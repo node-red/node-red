@@ -22,7 +22,7 @@
             <option value="target" data-i18n="status.scope.selected"></options>
         </select>
     </div>
-    <div class="form-row node-input-target-row" style="display: none;">
+    <div class="form-row node-input-target-row" style="display: none; min-height: 100px;">
         <div id="node-input-status-target-container-div" style="position: relative;   box-sizing: border-box; border-radius: 2px; height: 180px;  border: 1px solid #ccc;overflow:hidden; ">
             <div style="box-sizing: border-box; line-height: 20px; font-size: 0.8em; border-bottom: 1px solid #ddd; height: 20px;">
               <input type="checkbox" data-i18n="[title]status.label.selectAll" id="node-input-target-node-checkbox-all" style="width: 30px; margin: 0 2px 1px 2px;">
@@ -105,6 +105,17 @@
         oneditprepare: function() {
             var nodeList = $("#node-input-status-target-container");
             var node = this;
+            this.resize = function() {
+                var rows = $("#dialog-form>div:not(.node-input-target-row)");
+                var height = $("#dialog-form").height();
+                for (var i=0;i<rows.size();i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                var editorRow = $("#dialog-form>div.node-input-target-row");
+                height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+                $("#node-input-status-target-container-div").css("height",height+"px");
+            }
+
             function createNodeList() {
                 var scope = node.scope || [];
                 nodeList.empty();
@@ -219,8 +230,6 @@
                 $(".node-input-target-node-checkbox").prop('checked',this.checked);
             })
 
-
-
             $("#node-input-scope-select").change(function(e) {
                 var scope = $(this).children("option:selected").val();
                 if (scope === "target") {
@@ -229,6 +238,7 @@
                 } else {
                     $(".node-input-target-row").hide();
                 }
+                node.resize();
             });
             if (this.scope == null) {
                 $("#node-input-scope-select").val("all");
@@ -236,31 +246,6 @@
                 $("#node-input-scope-select").val("target");
             }
             $("#node-input-scope-select").change();
-
-            function dialogResize() {
-                var rows = $("#dialog-form>div:not(.node-input-target-row)");
-                var height = $("#dialog-form").height();
-                for (var i=0;i<rows.size();i++) {
-                    height -= $(rows[i]).outerHeight(true);
-                }
-                var editorRow = $("#dialog-form>div.node-input-target-row");
-                height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
-                $("#node-input-status-target-container-div").css("height",height+"px");
-            };
-
-            $( "#dialog" ).on("dialogresize", dialogResize);
-            $( "#dialog" ).one("dialogopen", function(ev) {
-                var size = $( "#dialog" ).dialog('option','sizeCache-status');
-                if (size) {
-                    $("#dialog").dialog('option','width',size.width);
-                    $("#dialog").dialog('option','height',size.height);
-                    dialogResize();
-                }
-            });
-            $( "#dialog" ).one("dialogclose", function(ev,ui) {
-                $( "#dialog" ).off("dialogresize",dialogResize);
-            });
-
         },
         oneditsave: function() {
             var scope = $("#node-input-scope-select").children("option:selected").val();
@@ -276,6 +261,9 @@
                 })
 
             }
+        },
+        oneditresize: function(size) {
+            this.resize();
         }
     });
 </script>
