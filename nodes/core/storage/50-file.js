@@ -42,6 +42,7 @@ module.exports = function(RED) {
                 if (typeof data === "boolean") { data = data.toString(); }
                 if (typeof data === "number") { data = data.toString(); }
                 if ((this.appendNewline) && (!Buffer.isBuffer(data))) { data += os.EOL; }
+                data = new Buffer(data);
                 if (this.overwriteFile === "true") {
                     // using "binary" not {encoding:"binary"} to be 0.8 compatible for a while
                     fs.writeFile(filename, data, "binary", function (err) {
