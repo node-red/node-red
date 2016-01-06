@@ -49,7 +49,7 @@
         "passport-oauth2-client-password":"0.1.2",
         "raw-body":"2.1.5",
         "semver": "5.1.0",
-        "sentiment":"0.2.3",
+        "sentiment":"1.0.4",
         "uglify-js":"2.6.1",
         "when": "3.7.5",
         "ws": "0.8.1",
