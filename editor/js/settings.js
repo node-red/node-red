@@ -16,9 +16,9 @@
 
 
 RED.settings = (function () {
-    
+
     var loadedSettings = {};
-        
+
     var hasLocalStorage = function () {
         try {
             return 'localStorage' in window && window['localStorage'] !== null;
@@ -74,7 +74,7 @@ RED.settings = (function () {
             RED.settings.set("auth-tokens",{access_token: accessToken});
             window.location.search = "";
         }
-        
+
         $.ajaxSetup({
             beforeSend: function(jqXHR,settings) {
                 // Only attach auth header for requests to relative paths
@@ -89,7 +89,7 @@ RED.settings = (function () {
 
         load(done);
     }
-    
+
     var load = function(done) {
         $.ajax({
             headers: {
@@ -104,6 +104,7 @@ RED.settings = (function () {
                     RED.settings.remove("auth-tokens");
                 }
                 console.log("Node-RED: " + data.version);
+                $('#node-red-version').text("v"+data.version);
                 done();
             },
             error: function(jqXHR,textStatus,errorThrown) {
@@ -141,7 +142,7 @@ RED.settings = (function () {
         set: set,
         get: get,
         remove: remove,
-        
+
         theme: theme
     }
 })

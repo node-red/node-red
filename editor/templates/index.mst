@@ -68,7 +68,7 @@
     <div id="sidebar">
         <ul id="sidebar-tabs"></ul>
         <div id="sidebar-content"></div>
-        <div id="sidebar-footer"></div>
+        <div id="sidebar-footer"><span id="node-red-version"></span></div>
     </div>
 
     <div id="sidebar-separator"></div>
