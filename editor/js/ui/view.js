@@ -601,7 +601,7 @@ RED.view = (function() {
             updateSelection();
             lasso.remove();
             lasso = null;
-        } else if (mouse_mode == RED.state.DEFAULT && mousedown_link == null && !d3.event.ctrlKey ) {
+        } else if (mouse_mode == RED.state.DEFAULT && mousedown_link == null && !d3.event.ctrlKey&& !d3.event.metaKey ) {
             clearSelection();
             updateSelection();
         }
@@ -1001,10 +1001,10 @@ RED.view = (function() {
 
         var i;
 
-        if (d.selected && d3.event.ctrlKey) {
-            d.selected = false;
+        if (d.selected && (d3.event.ctrlKey||d3.event.metaKey)) {
+            mousedown_node.selected = false;
             for (i=0;i<moving_set.length;i+=1) {
-                if (moving_set[i].n === d) {
+                if (moving_set[i].n === mousedown_node) {
                     moving_set.splice(i,1);
                     break;
                 }
@@ -1019,7 +1019,7 @@ RED.view = (function() {
                     moving_set.push({n:cnodes[n]});
                 }
             } else if (!d.selected) {
-                if (!d3.event.ctrlKey) {
+                if (!d3.event.ctrlKey && !d3.event.metaKey) {
                     clearSelection();
                 }
                 mousedown_node.selected = true;
