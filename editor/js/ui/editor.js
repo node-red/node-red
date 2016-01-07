@@ -395,7 +395,7 @@ RED.editor = (function() {
                     }
                     editing_node = null;
                 }
-        }).on('keydown', function(evt) {
+        }).parent().on('keydown', function(evt) {
             if (evt.keyCode === $.ui.keyCode.ESCAPE && (evt.metaKey || evt.ctrlKey)) {
                 $("#node-dialog-cancel").click();
             } else if (evt.keyCode === $.ui.keyCode.ENTER && (evt.metaKey || evt.ctrlKey)) {
@@ -1024,7 +1024,7 @@ RED.editor = (function() {
                         cancel: '.ui-dialog-content, .ui-dialog-titlebar-close, #node-config-dialog-scope-container'
                     });
                 }
-        }).on('keydown', function(evt) {
+        }).parent().on('keydown', function(evt) {
             if (evt.keyCode === $.ui.keyCode.ESCAPE && (evt.metaKey || evt.ctrlKey)) {
                 $("#node-config-dialog-cancel").click();
             } else if (evt.keyCode === $.ui.keyCode.ENTER && (evt.metaKey || evt.ctrlKey)) {
@@ -1151,7 +1151,7 @@ RED.editor = (function() {
                 $(".node-text-editor").css("height",height+"px");
                 subflowEditor.resize();
             }
-        }).on('keydown', function(evt) {
+        }).parent().on('keydown', function(evt) {
             if (evt.keyCode === $.ui.keyCode.ESCAPE && (evt.metaKey || evt.ctrlKey)) {
                 $("#subflow-dialog-cancel").click();
             } else if (evt.keyCode === $.ui.keyCode.ENTER && (evt.metaKey || evt.ctrlKey)) {
