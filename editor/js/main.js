@@ -176,16 +176,16 @@ var RED = (function() {
                     {id:"menu-item-subflow-convert",label:RED._("menu.label.selectionToSubflow"),disabled:true,onselect:RED.subflow.convertToSubflow},
                 ]},
                 null,
-                {id:"menu-item-layout",label:RED._("menu.label.layout.layout"), options: [
-                    {id:"menu-item-layout-show-grid",label:RED._("menu.label.layout.showGrid"),toggle:true,onselect:RED.view.toggleShowGrid},
-                    {id:"menu-item-layout-snap-grid",label:RED._("menu.label.layout.snapGrid"),toggle:true,onselect:RED.view.toggleSnapGrid}
-                ]},
-                null,
                 {id:"menu-item-workspace",label:RED._("menu.label.flows"),options:[
                     {id:"menu-item-workspace-add",label:RED._("menu.label.add"),onselect:RED.workspaces.add},
                     {id:"menu-item-workspace-edit",label:RED._("menu.label.rename"),onselect:RED.workspaces.edit},
                     {id:"menu-item-workspace-delete",label:RED._("menu.label.delete"),onselect:RED.workspaces.remove},
                     null
+                ]},
+                null,
+                {id:"menu-item-layout",label:RED._("menu.label.layout.layout"), options: [
+                    {id:"menu-item-layout-show-grid",label:RED._("menu.label.layout.showGrid"),toggle:true,onselect:RED.view.toggleShowGrid},
+                    {id:"menu-item-layout-snap-grid",label:RED._("menu.label.layout.snapGrid"),toggle:true,onselect:RED.view.toggleSnapGrid}
                 ]},
                 null,
                 {id:"menu-item-keyboard-shortcuts",label:RED._("menu.label.keyboardShortcuts"),onselect:RED.keyboard.showHelp},
