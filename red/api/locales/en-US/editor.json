@@ -36,7 +36,12 @@
             "delete": "Delete",
             "keyboardShortcuts": "Keyboard Shortcuts",
             "login": "Login",
-            "logout": "Logout"
+            "logout": "Logout",
+            "layout": {
+                "layout": "Layout",
+                "showGrid": "Show grid",
+                "snapGrid": "Snap to grid"
+            }
         }
     },
     "user": {

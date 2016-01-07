@@ -31,6 +31,8 @@ RED.view = (function() {
 
     var workspaceScrollPositions = {};
 
+    var gridSize = 20;
+    var snapGrid = false;
 
     var activeSubflow = null;
     var activeNodes = [];
@@ -196,38 +198,38 @@ RED.view = (function() {
         .attr('height', space_height)
         .attr('fill','#fff');
 
-    //var gridScale = d3.scale.linear().range([0,2000]).domain([0,2000]);
-    //var grid = vis.append('g');
-    //
-    //grid.selectAll("line.horizontal").data(gridScale.ticks(100)).enter()
-    //    .append("line")
-    //        .attr(
-    //        {
-    //            "class":"horizontal",
-    //            "x1" : 0,
-    //            "x2" : 2000,
-    //            "y1" : function(d){ return gridScale(d);},
-    //            "y2" : function(d){ return gridScale(d);},
-    //            "fill" : "none",
-    //            "shape-rendering" : "crispEdges",
-    //            "stroke" : "#eee",
-    //            "stroke-width" : "1px"
-    //        });
-    //grid.selectAll("line.vertical").data(gridScale.ticks(100)).enter()
-    //    .append("line")
-    //        .attr(
-    //        {
-    //            "class":"vertical",
-    //            "y1" : 0,
-    //            "y2" : 2000,
-    //            "x1" : function(d){ return gridScale(d);},
-    //            "x2" : function(d){ return gridScale(d);},
-    //            "fill" : "none",
-    //            "shape-rendering" : "crispEdges",
-    //            "stroke" : "#eee",
-    //            "stroke-width" : "1px"
-    //        });
+    var gridScale = d3.scale.linear().range([0,space_width]).domain([0,space_width]);
+    var grid = vis.append('g');
 
+    grid.selectAll("line.horizontal").data(gridScale.ticks(space_width/gridSize)).enter()
+       .append("line")
+           .attr(
+           {
+               "class":"horizontal",
+               "x1" : 0,
+               "x2" : space_width,
+               "y1" : function(d){ return gridScale(d);},
+               "y2" : function(d){ return gridScale(d);},
+               "fill" : "none",
+               "shape-rendering" : "crispEdges",
+               "stroke" : "#eee",
+               "stroke-width" : "1px"
+           });
+    grid.selectAll("line.vertical").data(gridScale.ticks(space_width/gridSize)).enter()
+       .append("line")
+           .attr(
+           {
+               "class":"vertical",
+               "y1" : 0,
+               "y2" : space_width,
+               "x1" : function(d){ return gridScale(d);},
+               "x2" : function(d){ return gridScale(d);},
+               "fill" : "none",
+               "shape-rendering" : "crispEdges",
+               "stroke" : "#eee",
+               "stroke-width" : "1px"
+           });
+    grid.style("visibility","hidden");
 
     var drag_line = vis.append("svg:path").attr("class", "drag_line");
 
@@ -321,6 +323,11 @@ RED.view = (function() {
                 mousePos[0] += this.scrollLeft;
                 mousePos[1] /= scaleFactor;
                 mousePos[0] /= scaleFactor;
+
+                if (snapGrid) {
+                    mousePos[0] = gridSize*(Math.ceil(mousePos[0]/gridSize));
+                    mousePos[1] = gridSize*(Math.ceil(mousePos[1]/gridSize));
+                }
 
                 var nn = { id:(1+Math.random()*4294967295).toString(16),x: mousePos[0],y:mousePos[1],w:node_width,z:RED.workspaces.active()};
 
@@ -532,11 +539,11 @@ RED.view = (function() {
                     node.n.y -= minY;
                 }
             }
-            if (d3.event.shiftKey && moving_set.length > 0) {
-                var gridOffset =  [0,0];
+            if (snapGrid && moving_set.length > 0) {
+                var gridOffset = [0,0];
                 node = moving_set[0];
-                gridOffset[0] = node.n.x-(20*Math.floor((node.n.x-node.n.w/2)/20)+node.n.w/2);
-                gridOffset[1] = node.n.y-(20*Math.floor(node.n.y/20));
+                gridOffset[0] = node.n.x-(gridSize*Math.floor((node.n.x-node.n.w/2)/gridSize)+node.n.w/2);
+                gridOffset[1] = node.n.y-(gridSize*Math.floor(node.n.y/gridSize));
                 if (gridOffset[0] !== 0 || gridOffset[1] !== 0) {
                     for (i = 0; i<moving_set.length; i++) {
                         node = moving_set[i];
@@ -1203,9 +1210,10 @@ RED.view = (function() {
             nodeEnter.each(function(d,i) {
                     var node = d3.select(this);
                     node.attr("id",d.id);
+                    d.resize = true;
                     var l = d._def.label;
                     l = (typeof l === "function" ? l.call(d) : l)||"";
-                    d.w = Math.max(node_width,calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0) );
+                    d.w = Math.max(node_width,gridSize*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/gridSize)) );
                     d.h = Math.max(node_height,(d.outputs||0) * 15);
 
                     if (d._def.badge) {
@@ -1388,8 +1396,10 @@ RED.view = (function() {
                         if (d.resize) {
                             var l = d._def.label;
                             l = (typeof l === "function" ? l.call(d) : l)||"";
-                            d.w = Math.max(node_width,calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0) );
+                            var ow = d.w;
+                            d.w = Math.max(node_width,gridSize*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/gridSize)) );
                             d.h = Math.max(node_height,(d.outputs||0) * 15);
+                            d.x += (d.w-ow)/2;
                             d.resize = false;
                         }
                         var thisNode = d3.select(this);
@@ -1844,6 +1854,17 @@ RED.view = (function() {
                 selection.link = selected_link;
             }
             return selection;
+        },
+        toggleShowGrid: function(state) {
+            if (state) {
+                grid.style("visibility","visible");
+            } else {
+                grid.style("visibility","hidden");
+            }
+        },
+        toggleSnapGrid: function(state) {
+            snapGrid = state;
+            redraw();
         }
     };
 })();
