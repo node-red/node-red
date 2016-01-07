@@ -395,6 +395,12 @@ RED.editor = (function() {
                     }
                     editing_node = null;
                 }
+        }).on('keydown', function(evt) {
+            if (evt.keyCode === $.ui.keyCode.ESCAPE && (evt.metaKey || evt.ctrlKey)) {
+                $("#node-dialog-cancel").click();
+            } else if (evt.keyCode === $.ui.keyCode.ENTER && (evt.metaKey || evt.ctrlKey)) {
+                $("#node-dialog-ok").click();
+            }
         });
     }
 
@@ -1018,6 +1024,12 @@ RED.editor = (function() {
                         cancel: '.ui-dialog-content, .ui-dialog-titlebar-close, #node-config-dialog-scope-container'
                     });
                 }
+        }).on('keydown', function(evt) {
+            if (evt.keyCode === $.ui.keyCode.ESCAPE && (evt.metaKey || evt.ctrlKey)) {
+                $("#node-config-dialog-cancel").click();
+            } else if (evt.keyCode === $.ui.keyCode.ENTER && (evt.metaKey || evt.ctrlKey)) {
+                $("#node-config-dialog-ok").click();
+            }
         });
     }
 
@@ -1138,6 +1150,12 @@ RED.editor = (function() {
                 height -= (parseInt($("#subflow-dialog>form").css("marginTop"))+parseInt($("#subflow-dialog>form").css("marginBottom")));
                 $(".node-text-editor").css("height",height+"px");
                 subflowEditor.resize();
+            }
+        }).on('keydown', function(evt) {
+            if (evt.keyCode === $.ui.keyCode.ESCAPE && (evt.metaKey || evt.ctrlKey)) {
+                $("#subflow-dialog-cancel").click();
+            } else if (evt.keyCode === $.ui.keyCode.ENTER && (evt.metaKey || evt.ctrlKey)) {
+                $("#subflow-dialog-ok").click();
             }
         });
     }
