@@ -34,7 +34,7 @@ describe("theme handler", function() {
         fs.statSync.restore();
     });
     it("applies the default theme", function() {
-        var result = theme.init({settings:{}});
+        var result = theme.init({settings:{},version:function() { return '123.456'}});
         should.not.exist(result);
 
         var context = theme.context();
@@ -44,12 +44,13 @@ describe("theme handler", function() {
         context.should.have.a.property("header");
         context.header.should.have.a.property("title","Node-RED");
         context.header.should.have.a.property("image","red/images/node-red.png");
+        context.should.have.a.property("version","123.456");
 
         should.not.exist(theme.settings());
     });
 
     it("picks up custom theme", function() {
-        var result = theme.init({settings:{
+        theme.init({settings:{
             editorTheme: {
                 page: {
                     title: "Test Page Title",
@@ -84,8 +85,9 @@ describe("theme handler", function() {
                 }
             }
         }});
-        should.exist(result);
 
+        theme.app();
+        
         var context = theme.context();
         context.should.have.a.property("page");
         context.page.should.have.a.property("title","Test Page Title");

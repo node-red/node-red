@@ -42,7 +42,6 @@ var nodeApp;
 var server;
 
 var errorHandler = function(err,req,res,next) {
-    console.log("HERE I AM");
     if (err.message === "request entity too large") {
         log.error(err);
     } else {
@@ -78,8 +77,9 @@ function init(_server,runtime) {
             var editorApp = express();
             editorApp.get("/",ui.ensureSlash,ui.editor);
             editorApp.get("/icons/:icon",ui.icon);
+            theme.init(runtime);
             if (settings.editorTheme) {
-                editorApp.use("/theme",theme.init(runtime));
+                editorApp.use("/theme",theme.app());
             }
             editorApp.use("/",ui.editorResources);
             adminApp.use(editorApp);

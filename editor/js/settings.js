@@ -104,7 +104,6 @@ RED.settings = (function () {
                     RED.settings.remove("auth-tokens");
                 }
                 console.log("Node-RED: " + data.version);
-                $('#node-red-version').text("v"+data.version);
                 done();
             },
             error: function(jqXHR,textStatus,errorThrown) {
