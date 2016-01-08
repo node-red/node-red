@@ -22,7 +22,7 @@ RED.clipboard = (function() {
     var exportNodesDialog;
     var importNodesDialog;
 
-    function setupDialogs(){
+    function setupDialogs() {
         dialog = $('<div id="clipboard-dialog" class="hide"><form class="dialog-form form-horizontal"></form></div>')
             .appendTo("body")
             .dialog({
@@ -61,7 +61,7 @@ RED.clipboard = (function() {
                 close: function(e) {
                     RED.keyboard.enable();
                 }
-        });
+            });
 
         dialogContainer = dialog.children(".dialog-form");
 
@@ -83,9 +83,11 @@ RED.clipboard = (function() {
     function validateImport() {
         var importInput = $("#clipboard-import");
         var v = importInput.val();
+        v = v.substring(v.indexOf('['),v.lastIndexOf(']')+1);
         try {
             JSON.parse(v);
             importInput.removeClass("input-error");
+            importInput.val(v);
             $("#clipboard-dialog-ok").button("enable");
         } catch(err) {
             if (v !== "") {
@@ -153,8 +155,6 @@ RED.clipboard = (function() {
             RED.keyboard.add(/* e */ 69,{ctrl:true},function(){exportNodes();d3.event.preventDefault();});
             RED.keyboard.add(/* i */ 73,{ctrl:true},function(){importNodes();d3.event.preventDefault();});
 
-
-
             $('#chart').on("dragenter",function(event) {
                 if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
                     $("#dropTarget").css({display:'table'});
@@ -173,18 +173,13 @@ RED.clipboard = (function() {
             .on("drop",function(event) {
                 var data = event.originalEvent.dataTransfer.getData("text/plain");
                 hideDropTarget();
+                data = data.substring(data.indexOf('['),data.lastIndexOf(']')+1);
                 RED.view.importNodes(data);
                 event.preventDefault();
             });
-
 
         },
         import: importNodes,
         export: exportNodes
     }
-
-
-
-
-
 })();
