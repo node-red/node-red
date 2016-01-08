@@ -186,7 +186,8 @@
 
 .drag_line {
     stroke: $node-selected-color;
-    stroke-width: 4;
+    stroke-width: 2;
+    stroke-dasharray: 15,8;
     fill: none;
     pointer-events: none;
 }
@@ -224,6 +225,9 @@
     stroke-width: 20;
     cursor: crosshair;
     fill: none;
+}
+.link_splice > .link_line {
+    stroke-dasharray: 15,8;
 }
 
 g.link_selected path.link_line {

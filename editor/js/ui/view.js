@@ -363,6 +363,7 @@ RED.view = (function() {
 
                 var helperOffset = d3.touches(ui.helper.get(0))[0]||d3.mouse(ui.helper.get(0));
                 var mousePos = d3.touches(this)[0]||d3.mouse(this);
+
                 mousePos[1] += this.scrollTop + ((nn.h/2)-helperOffset[1]);
                 mousePos[0] += this.scrollLeft + ((nn.w/2)-helperOffset[0]);
                 mousePos[1] /= scaleFactor;
@@ -375,6 +376,24 @@ RED.view = (function() {
                 nn.x = mousePos[0];
                 nn.y = mousePos[1];
 
+                var spliceLink = $(ui.helper).data('splice');
+                if (spliceLink) {
+                    RED.nodes.removeLink(spliceLink);
+                    var link1 = {
+                        source:spliceLink.source,
+                        sourcePort:spliceLink.sourcePort,
+                        target: nn
+                    };
+                    var link2 = {
+                        source:nn,
+                        sourcePort:0,
+                        target: spliceLink.target
+                    };
+                    RED.nodes.addLink(link1);
+                    RED.nodes.addLink(link2);
+                    historyEvent.links = [link1,link2];
+                    historyEvent.removedLinks = [spliceLink];
+                }
 
                 RED.history.push(historyEvent);
                 RED.nodes.add(nn);
@@ -1634,7 +1653,7 @@ RED.view = (function() {
                             touchStartTime = null;
                             showTouchMenu(obj,pos);
                         },touchLongPressTimeout);
-                    });
+                    })
                 l.append("svg:path").attr("class","link_outline link_path");
                 l.append("svg:path").attr("class","link_line link_path")
                     .classed("link_subflow", function(d) { return activeSubflow && (d.source.type === "subflow" || d.target.type === "subflow") });
@@ -1871,6 +1890,9 @@ RED.view = (function() {
         toggleSnapGrid: function(state) {
             snapGrid = state;
             redraw();
+        },
+        scale: function() {
+            return scaleFactor;
         }
     };
 })();

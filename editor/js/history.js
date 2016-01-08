@@ -80,6 +80,12 @@ RED.history = (function() {
                             }
                         }
                     }
+                    if (ev.removedLinks) {
+                        for (i=0;i<ev.removedLinks.length;i++) {
+                            RED.nodes.addLink(ev.removedLinks[i]);
+                        }
+                    }
+
                 } else if (ev.t == "delete") {
                     if (ev.workspaces) {
                         for (i=0;i<ev.workspaces.length;i++) {
