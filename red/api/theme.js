@@ -56,8 +56,6 @@ function serveFile(app,baseUrl,file) {
 module.exports = {
     init: function(runtime) {
         var settings = runtime.settings;
-        var i;
-        var url;
         themeContext = clone(defaultContext);
         if (runtime.version) {
             themeContext.version = runtime.version();
@@ -68,6 +66,8 @@ module.exports = {
     },
 
     app: function() {
+        var i;
+        var url;
         themeSettings = {};
 
         var themeApp = express();
