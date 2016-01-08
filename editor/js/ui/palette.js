@@ -215,7 +215,12 @@ RED.palette = (function() {
                 appendTo: 'body',
                 revert: true,
                 revertDuration: 50,
-                start: function() {RED.view.focus();}
+                start: function() {RED.view.focus();},
+                drag: function(e,ui) {
+                    // TODO: this is the margin-left of palette node. Hard coding
+                    // it here makes me sad
+                    ui.position.left += 17.5;
+                }
             });
 
             var nodeInfo = null;

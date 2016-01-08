@@ -302,7 +302,6 @@ RED.view = (function() {
             drop: function( event, ui ) {
                 d3.event = event;
                 var selected_tool = ui.draggable[0].type;
-
                 var m = /^subflow:(.+)$/.exec(selected_tool);
 
                 if (activeSubflow && m) {
@@ -315,21 +314,9 @@ RED.view = (function() {
                         RED.notify(RED._("notification.error",{message: RED._("notification.errors.cannotAddCircularReference")}),"error");
                         return;
                     }
-
                 }
 
-                var mousePos = d3.touches(this)[0]||d3.mouse(this);
-                mousePos[1] += this.scrollTop;
-                mousePos[0] += this.scrollLeft;
-                mousePos[1] /= scaleFactor;
-                mousePos[0] /= scaleFactor;
-
-                if (snapGrid) {
-                    mousePos[0] = gridSize*(Math.ceil(mousePos[0]/gridSize));
-                    mousePos[1] = gridSize*(Math.ceil(mousePos[1]/gridSize));
-                }
-
-                var nn = { id:(1+Math.random()*4294967295).toString(16),x: mousePos[0],y:mousePos[1],w:node_width,z:RED.workspaces.active()};
+                var nn = { id:(1+Math.random()*4294967295).toString(16),z:RED.workspaces.active()};
 
                 nn.type = selected_tool;
                 nn._def = RED.nodes.getType(nn.type);
@@ -354,7 +341,10 @@ RED.view = (function() {
                 }
 
                 nn.changed = true;
+
+                nn.w = node_width;
                 nn.h = Math.max(node_height,(nn.outputs||0) * 15);
+
                 var historyEvent = {
                     t:'add',
                     nodes:[nn.id],
@@ -370,6 +360,21 @@ RED.view = (function() {
                         }
                     }
                 }
+
+                var helperOffset = d3.touches(ui.helper.get(0))[0]||d3.mouse(ui.helper.get(0));
+                var mousePos = d3.touches(this)[0]||d3.mouse(this);
+                mousePos[1] += this.scrollTop + ((nn.h/2)-helperOffset[1]);
+                mousePos[0] += this.scrollLeft + ((nn.w/2)-helperOffset[0]);
+                mousePos[1] /= scaleFactor;
+                mousePos[0] /= scaleFactor;
+
+                if (snapGrid) {
+                    mousePos[0] = gridSize*(Math.ceil(mousePos[0]/gridSize));
+                    mousePos[1] = gridSize*(Math.ceil(mousePos[1]/gridSize));
+                }
+                nn.x = mousePos[0];
+                nn.y = mousePos[1];
+
 
                 RED.history.push(historyEvent);
                 RED.nodes.add(nn);
@@ -1212,7 +1217,6 @@ RED.view = (function() {
             nodeEnter.each(function(d,i) {
                     var node = d3.select(this);
                     node.attr("id",d.id);
-                    d.resize = true;
                     var l = d._def.label;
                     l = (typeof l === "function" ? l.call(d) : l)||"";
                     d.w = Math.max(node_width,gridSize*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/gridSize)) );
