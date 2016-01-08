@@ -611,7 +611,9 @@ RED.view = (function() {
                 for (var j=0;j<moving_set.length;j++) {
                     ns.push({n:moving_set[j].n,ox:moving_set[j].ox,oy:moving_set[j].oy});
                 }
-                RED.history.push({t:'move',nodes:ns,dirty:RED.nodes.dirty()});
+                var wasDirty = RED.nodes.dirty();
+                RED.nodes.dirty(true);
+                RED.history.push({t:'move',nodes:ns,dirty:wasDirty});
             }
         }
         if (mouse_mode == RED.state.MOVING || mouse_mode == RED.state.MOVING_ACTIVE) {
