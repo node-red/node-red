@@ -231,7 +231,21 @@ RED.view = (function() {
            });
     grid.style("visibility","hidden");
 
-    var drag_line = vis.append("svg:path").attr("class", "drag_line");
+    var dragGroup = vis.append('g');
+    var drag_lines = [];
+
+    function showDragLines(nodes) {
+        for (var i=0;i<nodes.length;i++) {
+            var node = nodes[i];
+            node.el = dragGroup.append("svg:path").attr("class", "drag_line");
+            drag_lines.push(node);
+        }
+    }
+    function hideDragLines() {
+        while(drag_lines.length) {
+            (drag_lines.pop()).el.remove();
+        }
+    }
 
     function updateActiveNodes() {
         var activeWorkspace = RED.workspaces.active();
@@ -497,36 +511,73 @@ RED.view = (function() {
         var mousePos;
         if (mouse_mode == RED.state.JOINING) {
             // update drag line
-            drag_line.attr("class", "drag_line");
-            mousePos = mouse_position;
-            var numOutputs = (mousedown_port_type === 0)?(mousedown_node.outputs || 1):1;
-            var sourcePort = mousedown_port_index;
-            var portY = -((numOutputs-1)/2)*13 +13*sourcePort;
-
-            var sc = (mousedown_port_type === 0)?1:-1;
-
-            var dy = mousePos[1]-(mousedown_node.y+portY);
-            var dx = mousePos[0]-(mousedown_node.x+sc*mousedown_node.w/2);
-            var delta = Math.sqrt(dy*dy+dx*dx);
-            var scale = lineCurveScale;
-            var scaleY = 0;
-
-            if (delta < node_width) {
-                scale = 0.75-0.75*((node_width-delta)/node_width);
-            }
-            if (dx*sc < 0) {
-                scale += 2*(Math.min(5*node_width,Math.abs(dx))/(5*node_width));
-                if (Math.abs(dy) < 3*node_height) {
-                    scaleY = ((dy>0)?0.5:-0.5)*(((3*node_height)-Math.abs(dy))/(3*node_height))*(Math.min(node_width,Math.abs(dx))/(node_width)) ;
+            if (drag_lines.length === 0) {
+                if (d3.event.shiftKey) {
+                    // Get all the wires we need to detach.
+                    var links = [];
+                    var filter;
+                    if (mousedown_port_type === 0) {
+                        filter = {
+                            source:mousedown_node,
+                            sourcePort: mousedown_port_index
+                        }
+                    } else {
+                        filter = {
+                            target: mousedown_node
+                        }
+                    }
+                    var existingLinks = RED.nodes.filterLinks(filter);
+                    for (var i=0;i<existingLinks.length;i++) {
+                        var link = existingLinks[i];
+                        RED.nodes.removeLink(link);
+                        links.push({
+                            link:link,
+                            node: (mousedown_port_type===0)?link.target:link.source,
+                            port: (mousedown_port_type===0)?0:link.sourcePort,
+                            portType: (mousedown_port_type===0)?1:0
+                        })
+                    }
+                    showDragLines(links);
+                    mouse_mode = 0;
+                    updateActiveNodes();
+                    redraw();
+                    mouse_mode = RED.state.JOINING;
+                } else {
+                    showDragLines([{node:mousedown_node,port:mousedown_port_index,portType:mousedown_port_type}]);
                 }
             }
+            mousePos = mouse_position;
+            for (var i=0;i<drag_lines.length;i++) {
+                var drag_line = drag_lines[i];
+                var numOutputs = (drag_line.portType === 0)?(drag_line.node.outputs || 1):1;
+                var sourcePort = drag_line.port;
+                var portY = -((numOutputs-1)/2)*13 +13*sourcePort;
 
-            drag_line.attr("d",
-                "M "+(mousedown_node.x+sc*mousedown_node.w/2)+" "+(mousedown_node.y+portY)+
-                " C "+(mousedown_node.x+sc*(mousedown_node.w/2+node_width*scale))+" "+(mousedown_node.y+portY+scaleY*node_height)+" "+
-                (mousePos[0]-sc*(scale)*node_width)+" "+(mousePos[1]-scaleY*node_height)+" "+
-                mousePos[0]+" "+mousePos[1]
-                );
+                var sc = (drag_line.portType === 0)?1:-1;
+
+                var dy = mousePos[1]-(drag_line.node.y+portY);
+                var dx = mousePos[0]-(drag_line.node.x+sc*drag_line.node.w/2);
+                var delta = Math.sqrt(dy*dy+dx*dx);
+                var scale = lineCurveScale;
+                var scaleY = 0;
+
+                if (delta < node_width) {
+                    scale = 0.75-0.75*((node_width-delta)/node_width);
+                }
+                if (dx*sc < 0) {
+                    scale += 2*(Math.min(5*node_width,Math.abs(dx))/(5*node_width));
+                    if (Math.abs(dy) < 3*node_height) {
+                        scaleY = ((dy>0)?0.5:-0.5)*(((3*node_height)-Math.abs(dy))/(3*node_height))*(Math.min(node_width,Math.abs(dx))/(node_width)) ;
+                    }
+                }
+
+                drag_line.el.attr("d",
+                    "M "+(drag_line.node.x+sc*drag_line.node.w/2)+" "+(drag_line.node.y+portY)+
+                    " C "+(drag_line.node.x+sc*(drag_line.node.w/2+node_width*scale))+" "+(drag_line.node.y+portY+scaleY*node_height)+" "+
+                    (mousePos[0]-sc*(scale)*node_width)+" "+(mousePos[1]-scaleY*node_height)+" "+
+                    mousePos[0]+" "+mousePos[1]
+                    );
+            }
             d3.event.preventDefault();
         } else if (mouse_mode == RED.state.MOVING) {
             mousePos = d3.mouse(document.body);
@@ -587,7 +638,19 @@ RED.view = (function() {
 
     function canvasMouseUp() {
         if (mousedown_node && mouse_mode == RED.state.JOINING) {
-            drag_line.attr("class", "drag_line_hidden");
+            var removedLinks = [];
+            for (var i=0;i<drag_lines.length;i++) {
+                if (drag_lines[i].link) {
+                    removedLinks.push(drag_lines[i].link)
+                }
+            }
+            var historyEvent = {
+                t:'delete',
+                links: removedLinks,
+                dirty:RED.nodes.dirty()
+            };
+            RED.history.push(historyEvent);
+            hideDragLines();
         }
         if (lasso) {
             var x = parseInt(lasso.attr("x"));
@@ -925,46 +988,59 @@ RED.view = (function() {
     }
 
     function portMouseUp(d,portType,portIndex) {
+        var i;
         document.body.style.cursor = "";
-        if (mouse_mode == RED.state.JOINING && mousedown_node) {
+        if (mouse_mode == RED.state.JOINING && drag_lines.length > 0) {
             if (typeof TouchEvent != "undefined" && d3.event instanceof TouchEvent) {
                 RED.nodes.eachNode(function(n) {
-                        if (n.z == RED.workspaces.active()) {
-                            var hw = n.w/2;
-                            var hh = n.h/2;
-                            if (n.x-hw<mouse_position[0] && n.x+hw> mouse_position[0] &&
-                                n.y-hh<mouse_position[1] && n.y+hh>mouse_position[1]) {
-                                    mouseup_node = n;
-                                    portType = mouseup_node.inputs>0?1:0;
-                                    portIndex = 0;
-                            }
+                    if (n.z == RED.workspaces.active()) {
+                        var hw = n.w/2;
+                        var hh = n.h/2;
+                        if (n.x-hw<mouse_position[0] && n.x+hw> mouse_position[0] &&
+                            n.y-hh<mouse_position[1] && n.y+hh>mouse_position[1]) {
+                                mouseup_node = n;
+                                portType = mouseup_node.inputs>0?1:0;
+                                portIndex = 0;
                         }
+                    }
                 });
             } else {
                 mouseup_node = d;
             }
-            if (portType == mousedown_port_type || mouseup_node === mousedown_node) {
-                drag_line.attr("class", "drag_line_hidden");
-                resetMouseVars();
-                return;
+            var addedLinks = [];
+            var removedLinks = [];
+
+            for (i=0;i<drag_lines.length;i++) {
+                if (drag_lines[i].link) {
+                    removedLinks.push(drag_lines[i].link)
+                }
             }
-            var src,dst,src_port;
-            if (mousedown_port_type === 0) {
-                src = mousedown_node;
-                src_port = mousedown_port_index;
-                dst = mouseup_node;
-            } else if (mousedown_port_type == 1) {
-                src = mouseup_node;
-                dst = mousedown_node;
-                src_port = portIndex;
+            for (i=0;i<drag_lines.length;i++) {
+                if (portType != drag_lines[i].portType && mouseup_node !== drag_lines[i].node) {
+                    var drag_line = drag_lines[i];
+                    var src,dst,src_port;
+                    if (drag_line.portType === 0) {
+                        src = drag_line.node;
+                        src_port = drag_line.port;
+                        dst = mouseup_node;
+                    } else if (drag_line.portType == 1) {
+                        src = mouseup_node;
+                        dst = drag_line.node;
+                        src_port = portIndex;
+                    }
+                    var existingLink = RED.nodes.filterLinks({source:src,target:dst,sourcePort: src_port}).length !== 0;
+                    if (!existingLink) {
+                        var link = {source: src, sourcePort:src_port, target: dst};
+                        RED.nodes.addLink(link);
+                        addedLinks.push(link);
+                    }
+                }
             }
-            var existingLink = RED.nodes.filterLinks({source:src,target:dst,sourcePort: src_port}).length !== 0;
-            if (!existingLink) {
-                var link = {source: src, sourcePort:src_port, target: dst};
-                RED.nodes.addLink(link);
+            if (addedLinks.length > 0 || removedLinks.length > 0) {
                 var historyEvent = {
                     t:'add',
-                    links:[link],
+                    links:addedLinks,
+                    removedLinks: removedLinks,
                     dirty:RED.nodes.dirty()
                 };
                 if (activeSubflow) {
@@ -980,8 +1056,9 @@ RED.view = (function() {
                 RED.history.push(historyEvent);
                 updateActiveNodes();
                 RED.nodes.dirty(true);
-            } else {
             }
+            resetMouseVars();
+            hideDragLines();
             selected_link = null;
             redraw();
         }
