@@ -465,6 +465,7 @@ RED.view = (function() {
     }
 
     function canvasMouseMove() {
+        var i;
         mouse_position = d3.touches(this)[0]||d3.mouse(this);
         // Prevent touch scrolling...
         //if (d3.touches(this)[0]) {
@@ -527,7 +528,7 @@ RED.view = (function() {
                         }
                     }
                     var existingLinks = RED.nodes.filterLinks(filter);
-                    for (var i=0;i<existingLinks.length;i++) {
+                    for (i=0;i<existingLinks.length;i++) {
                         var link = existingLinks[i];
                         RED.nodes.removeLink(link);
                         links.push({
@@ -547,7 +548,7 @@ RED.view = (function() {
                 }
             }
             mousePos = mouse_position;
-            for (var i=0;i<drag_lines.length;i++) {
+            for (i=0;i<drag_lines.length;i++) {
                 var drag_line = drag_lines[i];
                 var numOutputs = (drag_line.portType === 0)?(drag_line.node.outputs || 1):1;
                 var sourcePort = drag_line.port;
@@ -592,7 +593,6 @@ RED.view = (function() {
         } else if (mouse_mode == RED.state.MOVING_ACTIVE || mouse_mode == RED.state.IMPORT_DRAGGING) {
             mousePos = mouse_position;
             var node;
-            var i;
             var minX = 0;
             var minY = 0;
             for (var n = 0; n<moving_set.length; n++) {
@@ -637,9 +637,10 @@ RED.view = (function() {
     }
 
     function canvasMouseUp() {
+        var i;
         if (mousedown_node && mouse_mode == RED.state.JOINING) {
             var removedLinks = [];
-            for (var i=0;i<drag_lines.length;i++) {
+            for (i=0;i<drag_lines.length;i++) {
                 if (drag_lines[i].link) {
                     removedLinks.push(drag_lines[i].link)
                 }
@@ -704,7 +705,7 @@ RED.view = (function() {
             }
         }
         if (mouse_mode == RED.state.MOVING || mouse_mode == RED.state.MOVING_ACTIVE) {
-            for (var i=0;i<moving_set.length;i++) {
+            for (i=0;i<moving_set.length;i++) {
                 delete moving_set[i].ox;
                 delete moving_set[i].oy;
             }
