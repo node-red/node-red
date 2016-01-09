@@ -186,8 +186,7 @@
 
 .drag_line {
     stroke: $node-selected-color;
-    stroke-width: 2;
-    stroke-dasharray: 15,8;
+    stroke-width: 3;
     fill: none;
     pointer-events: none;
 }

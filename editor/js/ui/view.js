@@ -1234,7 +1234,7 @@ RED.view = (function() {
                     .on("touchstart", function(d,i){portMouseDown(d,1,0);} )
                     .on("mouseup", function(d,i){portMouseUp(d,1,0);})
                     .on("touchend",function(d,i){portMouseUp(d,1,0);} )
-                    .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || mousedown_port_type !== 0 ));})
+                    .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== 1)));})
                     .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
 
                 outGroup.append("svg:text").attr('class','port_label').attr('x',20).attr('y',8).style("font-size","10px").text("output");
@@ -1277,7 +1277,7 @@ RED.view = (function() {
                     .on("touchstart", function(d,i){portMouseDown(d,0,i);} )
                     .on("mouseup", function(d,i){portMouseUp(d,0,i);})
                     .on("touchend",function(d,i){portMouseUp(d,0,i);} )
-                    .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || mousedown_port_type !== 0 ));})
+                    .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== 0) ));})
                     .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
                 inGroup.append("svg:text").attr('class','port_label').attr('x',18).attr('y',20).style("font-size","10px").text("input");
 
@@ -1536,7 +1536,7 @@ RED.view = (function() {
                                     .on("touchstart",function(d){portMouseDown(d,1,0);})
                                     .on("mouseup",function(d){portMouseUp(d,1,0);} )
                                     .on("touchend",function(d){portMouseUp(d,1,0);} )
-                                    .on("mouseover",function(d) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || mousedown_port_type != 1 ));})
+                                    .on("mouseover",function(d) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== 1) ));})
                                     .on("mouseout",function(d) { var port = d3.select(this); port.classed("port_hovered",false);})
                             }
 
@@ -1551,7 +1551,7 @@ RED.view = (function() {
                                 .on("touchstart",(function(){var node = d; return function(d,i){portMouseDown(node,0,i);}})() )
                                 .on("mouseup",(function(){var node = d; return function(d,i){portMouseUp(node,0,i);}})() )
                                 .on("touchend",(function(){var node = d; return function(d,i){portMouseUp(node,0,i);}})() )
-                                .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || mousedown_port_type !== 0 ));})
+                                .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== 0) ));})
                                 .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
 
                             d._ports.exit().remove();
