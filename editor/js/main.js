@@ -156,11 +156,14 @@ var RED = (function() {
     function loadEditor() {
         RED.menu.init({id:"btn-sidemenu",
             options: [
-                {id:"menu-item-sidebar-menu",label:RED._("menu.label.sidebar.sidebar"),options:[
-                    {id:"menu-item-sidebar",label:RED._("menu.label.sidebar.show"),toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true},
-                    null
+                {id:"menu-item-view-menu",label:RED._("menu.label.view.view"),options:[
+                    {id:"menu-item-view-show-grid",label:RED._("menu.label.view.showGrid"),toggle:true,onselect:RED.view.toggleShowGrid},
+                    {id:"menu-item-view-snap-grid",label:RED._("menu.label.view.snapGrid"),toggle:true,onselect:RED.view.toggleSnapGrid},
+                    null,
+                    {id:"menu-item-status",label:RED._("menu.label.displayStatus"),toggle:true,onselect:toggleStatus, selected: true},
+                    null,
+                    {id:"menu-item-sidebar",label:RED._("menu.label.sidebar.show"),toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true}
                 ]},
-                {id:"menu-item-status",label:RED._("menu.label.displayStatus"),toggle:true,onselect:toggleStatus, selected: true},
                 null,
                 {id:"menu-item-import",label:RED._("menu.label.import"),options:[
                     {id:"menu-item-import-clipboard",label:RED._("menu.label.clipboard"),onselect:RED.clipboard.import},
@@ -171,28 +174,24 @@ var RED = (function() {
                     {id:"menu-item-export-library",label:RED._("menu.label.library"),disabled:true,onselect:RED.library.export}
                 ]},
                 null,
-                {id:"menu-item-subflow",label:RED._("menu.label.subflows"), options: [
-                    {id:"menu-item-subflow-create",label:RED._("menu.label.createSubflow"),onselect:RED.subflow.createSubflow},
-                    {id:"menu-item-subflow-convert",label:RED._("menu.label.selectionToSubflow"),disabled:true,onselect:RED.subflow.convertToSubflow},
-                ]},
-                null,
+                {id:"menu-item-config-nodes",label:RED._("menu.label.displayConfig"),onselect:function(){}},
                 {id:"menu-item-workspace",label:RED._("menu.label.flows"),options:[
                     {id:"menu-item-workspace-add",label:RED._("menu.label.add"),onselect:RED.workspaces.add},
                     {id:"menu-item-workspace-edit",label:RED._("menu.label.rename"),onselect:RED.workspaces.edit},
                     {id:"menu-item-workspace-delete",label:RED._("menu.label.delete"),onselect:RED.workspaces.remove},
                     null
                 ]},
-                null,
-                {id:"menu-item-layout",label:RED._("menu.label.layout.layout"), options: [
-                    {id:"menu-item-layout-show-grid",label:RED._("menu.label.layout.showGrid"),toggle:true,onselect:RED.view.toggleShowGrid},
-                    {id:"menu-item-layout-snap-grid",label:RED._("menu.label.layout.snapGrid"),toggle:true,onselect:RED.view.toggleSnapGrid}
+                {id:"menu-item-subflow",label:RED._("menu.label.subflows"), options: [
+                    {id:"menu-item-subflow-create",label:RED._("menu.label.createSubflow"),onselect:RED.subflow.createSubflow},
+                    {id:"menu-item-subflow-convert",label:RED._("menu.label.selectionToSubflow"),disabled:true,onselect:RED.subflow.convertToSubflow},
                 ]},
                 null,
                 {id:"menu-item-keyboard-shortcuts",label:RED._("menu.label.keyboardShortcuts"),onselect:RED.keyboard.showHelp},
                 {id:"menu-item-help",
                     label: RED.settings.theme("menu.menu-item-help.label","Node-RED Website"),
                     href: RED.settings.theme("menu.menu-item-help.url","http://nodered.org/docs")
-                }
+                },
+                {id:"menu-item-node-red-version", label:"v"+RED.settings.version}
             ]
         });
 

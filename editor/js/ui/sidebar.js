@@ -60,8 +60,8 @@ RED.sidebar = (function() {
         $(options.content).hide();
         var id = options.id;
 
-        RED.menu.addItem("menu-item-sidebar-menu",{
-            id:"menu-item-sidebar-menu-"+options.id,
+        RED.menu.addItem("menu-item-view-menu",{
+            id:"menu-item-view-menu-"+options.id,
             label:options.name,
             onselect:function() {
                 showSidebar(options.id);
@@ -80,7 +80,7 @@ RED.sidebar = (function() {
         sidebar_tabs.removeTab(id);
         $(knownTabs[id].content).remove();
         delete knownTabs[id];
-        RED.menu.removeItem("menu-item-sidebar-menu-"+id);
+        RED.menu.removeItem("menu-item-view-menu-"+id);
     }
 
     var sidebarSeparator =  {};

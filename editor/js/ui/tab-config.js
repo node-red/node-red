@@ -116,6 +116,9 @@ RED.sidebar.config = (function() {
             onchange: function() { refreshConfigNodeList(); }
         });
 
+        RED.menu.setAction('menu-item-config-nodes',function() {
+            RED.sidebar.show('config');
+        })
         $(".workspace-config-node-tray-header").on('click', function(e) {
             var icon = $(this).find("i");
             if (icon.hasClass("expanded")) {

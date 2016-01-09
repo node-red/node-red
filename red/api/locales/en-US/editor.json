@@ -17,11 +17,15 @@
     },
     "menu": {
         "label": {
-            "sidebar": {
-                "sidebar": "Sidebar",
-                "show": "Toggle Sidebar"
+            "view": {
+                "view": "View",
+                "showGrid": "Show grid",
+                "snapGrid": "Snap to grid"
             },
-            "displayStatus": "Display Node Status",
+            "sidebar": {
+                "show": "Show sidebar"
+            },
+            "displayStatus": "Display node status",
             "displayConfig": "Configuration Nodes",
             "import": "Import",
             "export": "Export",
@@ -30,18 +34,13 @@
             "subflows": "Subflows",
             "createSubflow": "Create Subflow",
             "selectionToSubflow": "Selection to Subflow",
-            "flows": "Tabs",
+            "flows": "Flows",
             "add": "Add",
             "rename": "Rename",
             "delete": "Delete",
             "keyboardShortcuts": "Keyboard Shortcuts",
             "login": "Login",
-            "logout": "Logout",
-            "layout": {
-                "layout": "Layout",
-                "showGrid": "Show grid",
-                "snapGrid": "Snap to grid"
-            }
+            "logout": "Logout"
         }
     },
     "user": {
