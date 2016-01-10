@@ -233,17 +233,25 @@ RED.palette = (function() {
 
                         if (!spliceTimer) {
                             spliceTimer = setTimeout(function() {
-
-                                var svgRect = chartSVG.createSVGRect();
-                                svgRect.x = mouseX;
-                                svgRect.y = mouseY;
-                                svgRect.width = 1;
-                                svgRect.height = 1;
+                                var nodes = [];
                                 var bestDistance = Infinity;
                                 var bestLink = null;
-                                var nodes = chartSVG.getIntersectionList(svgRect,chartSVG);
-                                mouseX /= RED.view.scale();
-                                mouseY /= RED.view.scale();
+                                if (chartSVG.getIntersectionList) {
+                                    var svgRect = chartSVG.createSVGRect();
+                                    svgRect.x = mouseX;
+                                    svgRect.y = mouseY;
+                                    svgRect.width = 1;
+                                    svgRect.height = 1;
+                                    nodes = chartSVG.getIntersectionList(svgRect,chartSVG);
+                                    mouseX /= RED.view.scale();
+                                    mouseY /= RED.view.scale();
+                                } else {
+                                    // Firefox doesn't do getIntersectionList and that
+                                    // makes us sad
+                                    mouseX /= RED.view.scale();
+                                    mouseY /= RED.view.scale();
+                                    nodes = RED.view.getLinksAtPoint(mouseX,mouseY);
+                                }
                                 for (var i=0;i<nodes.length;i++) {
                                     if (d3.select(nodes[i]).classed('link_background')) {
                                         var length = nodes[i].getTotalLength();

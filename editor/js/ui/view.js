@@ -1971,6 +1971,17 @@ RED.view = (function() {
         },
         scale: function() {
             return scaleFactor;
+        },
+        getLinksAtPoint: function(x,y) {
+            var result = [];
+            var links = outer.selectAll(".link_background")[0];
+            for (var i=0;i<links.length;i++) {
+                var bb = links[i].getBBox();
+                if (x >= bb.x && y >= bb.y && x <= bb.x+bb.width && y <= bb.y+bb.height) {
+                    result.push(links[i])
+                }
+            }
+            return result;
         }
     };
 })();
