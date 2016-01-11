@@ -19,7 +19,7 @@ var when = require("when");
 var util = require("../util");
 
 function createContext(id,seed) {
-    var data = {};
+    var data = seed || {};
     var obj = seed || {};
     obj.get = function get(key) {
         return util.getMessageProperty(data,key);
