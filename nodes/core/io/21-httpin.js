@@ -98,7 +98,7 @@ module.exports = function(RED) {
                 wrapper[f] = function() {
                     node.warn(RED._("httpin.errors.deprecated-call",{method:"msg.req."+f}));
                     var result = req[f].apply(req,arguments);
-                    if (result === res) {
+                    if (result === req) {
                         return wrapper;
                     } else {
                         return result;
@@ -177,11 +177,11 @@ module.exports = function(RED) {
                 var msgid = RED.util.generateId();
                 res._msgid = msgid;
                 if (node.method.match(/(^post$|^delete$|^put$|^options$)/)) {
-                    node.send({_msgid:msgid,req:req,res:createResponseWrapper(node,res),payload:req.body});
+                    node.send({_msgid:msgid,req:createRequestWrapper(node,req),res:createResponseWrapper(node,res),payload:req.body});
                 } else if (node.method == "get") {
-                    node.send({_msgid:msgid,req:req,res:createResponseWrapper(node,res),payload:req.query});
+                    node.send({_msgid:msgid,req:createRequestWrapper(node,req),res:createResponseWrapper(node,res),payload:req.query});
                 } else {
-                    node.send({_msgid:msgid,req:req,res:createResponseWrapper(node,res)});
+                    node.send({_msgid:msgid,req:createRequestWrapper(node,req),res:createResponseWrapper(node,res)});
                 }
             };
 
