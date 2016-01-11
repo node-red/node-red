@@ -18,11 +18,11 @@
         msg: {value:"msg",label:"msg.",validate:/^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]+)*/i},
         flow: {value:"flow",label:"flow.",validate:/^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]+)*/i},
         global: {value:"global",label:"global.",validate:/^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]+)*/i},
-        str: {value:"str",label:"string",icon:"red/images/az.png"},
-        num: {value:"num",label:"number",icon:"red/images/09.png",validate:/^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/},
-        bool: {value:"bool",label:"boolean",icon:"red/images/bool.png",options:["true","false"]},
-        json: {value:"json",label:"JSON",icon:"red/images/json.png", validate: function(v) { try{JSON.parse(v);return true;}catch(e){return false;}}},
-        re: {value:"re",label:"regular expression",icon:"red/images/re.png"}
+        str: {value:"str",label:"string",icon:"red/images/typedInput/az.png"},
+        num: {value:"num",label:"number",icon:"red/images/typedInput/09.png",validate:/^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/},
+        bool: {value:"bool",label:"boolean",icon:"red/images/typedInput/bool.png",options:["true","false"]},
+        json: {value:"json",label:"JSON",icon:"red/images/typedInput/json.png", validate: function(v) { try{JSON.parse(v);return true;}catch(e){return false;}}},
+        re: {value:"re",label:"regular expression",icon:"red/images/typedInput/re.png"}
     };
     var nlsd = false;
 
