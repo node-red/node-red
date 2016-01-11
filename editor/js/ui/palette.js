@@ -223,6 +223,7 @@ RED.palette = (function() {
                 revert: true,
                 revertDuration: 50,
                 start: function() {RED.view.focus();},
+                stop: function() { d3.select('.link_splice').classed('link_splice',false); if (spliceTimer) { clearTimeout(spliceTimer); spliceTimer = null;}},
                 drag: function(e,ui) {
                     // TODO: this is the margin-left of palette node. Hard coding
                     // it here makes me sad
