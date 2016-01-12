@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -821,6 +821,7 @@ RED.view = (function() {
             delete moving_set[i].oy;
         }
         RED.history.push({t:'move',nodes:ns,dirty:RED.nodes.dirty()});
+        RED.nodes.dirty(true);
     }
     function moveSelection(dx,dy) {
         var minX = 0;
