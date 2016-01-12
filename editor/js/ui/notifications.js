@@ -48,14 +48,14 @@ RED.notify = (function() {
                 });
             };
         })();
-        $(n).click((function() {
-            var nn = n;
-            return function() {
-                nn.close();
-                window.clearTimeout(nn.timeoutid);
-            };
-        })());
         if (!fixed) {
+            $(n).click((function() {
+                var nn = n;
+                return function() {
+                    nn.close();
+                    window.clearTimeout(nn.timeoutid);
+                };
+            })());
             n.timeoutid = window.setTimeout(n.close,timeout||3000);
         }
         currentNotifications.push(n);
