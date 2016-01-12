@@ -58,11 +58,16 @@
         text-decoration: none;
     }
     &.selected:not(.disabled) {
-        color: $workspace-button-color-active;
+        color: $workspace-button-color-selected;
         background: $workspace-button-background-active;
         cursor: default;
     }
+
+    .button-group &:not(:first-child) {
+        border-left: none;
+    }
 }
+
 @mixin component-footer {
     border-top: 1px solid $primary-border-color;
     background: #f3f3f3;

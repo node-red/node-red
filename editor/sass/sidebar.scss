@@ -62,6 +62,14 @@
     padding: 2px 8px;
 }
 
+.sidebar-header {
+    color: #666;
+    text-align: right;
+    padding: 8px 10px;
+    background: #f3f3f3;
+    border-bottom: 1px solid $secondary-border-color;
+}
+
 #sidebar-footer {
     @include component-footer;
 }
@@ -74,4 +82,7 @@
     font-size: 13px;
     line-height: 13px;
     padding: 5px 8px;
+}
+.sidebar-header-button:not(:first-child) {
+    border-left: none;
 }

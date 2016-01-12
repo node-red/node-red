@@ -127,17 +127,10 @@
             }
         },
         onpaletteadd: function() {
-            var content = document.createElement("div");
-            $(content).css({"position":"relative","height":"100%"});
-            var toolbar = document.createElement("div");
-            toolbar.id = "debug-toolbar";
-            content.appendChild(toolbar);
+            var content = $("<div>").css({"position":"relative","height":"100%"});
+            var toolbar = $('<div class="sidebar-header"><a id="debug-tab-clear" title="clear log" class="button" href="#"><i class="fa fa-trash"></i></a></div>').appendTo(content);
 
-            toolbar.innerHTML = '<div class="pull-right"><a id="debug-tab-clear" title="clear log" class="button" href="#"><i class="fa fa-trash"></i></a></div> ';
-
-            var messages = document.createElement("div");
-            messages.id = "debug-content";
-            content.appendChild(messages);
+            var messages = $('<div id="debug-content"/>').appendTo(content);
 
             RED.sidebar.addTab({
                 id: "debug",
@@ -221,9 +214,9 @@
                                     '</span>';
                 }
                 msg.innerHTML += '<span class="debug-message-payload">'+ payload+ '</span>';
-                var atBottom = (sbc.scrollHeight-messages.offsetHeight-sbc.scrollTop) < 5;
+                var atBottom = (sbc.scrollHeight-messages.height()-sbc.scrollTop) < 5;
                 messageCount++;
-                $(messages).append(msg);
+                messages.append(msg);
 
                 if (messageCount > 200) {
                     $("#debug-content .debug-message:first").remove();
@@ -257,16 +250,11 @@
 <style>
     #debug-content {
         position: absolute;
-        top: 30px;
+        top: 43px;
         bottom: 0px;
         left:0px;
         right: 0px;
         overflow-y: scroll;
-    }
-    #debug-toolbar {
-        padding: 3px 10px;
-        height: 24px;
-        background: #f3f3f3;
     }
     .debug-message {
         cursor: pointer;
