@@ -9,8 +9,8 @@
         }
     },
     "workspace": {
-        "defaultName": "Sheet __number__",
-        "renameSheet": "Rename sheet",
+        "defaultName": "Flow __number__",
+        "renameSheet": "Rename flow",
         "confirmDelete": "Confirm delete",
         "delete": "Are you sure you want to delete '__label__'?",
         "dropFlowHere": "Drop the flow here"
@@ -82,7 +82,8 @@
         "modifiedFlowsDesc": "Only deploys flows that contain changed nodes",
         "modifiedNodes": "Modified Nodes",
         "modifiedNodesDesc": "Only deploys nodes that have changed",
-        "successfulDeploy": "Successfully Deployed",
+        "successfulDeploy": "Successfully deployed",
+        
         "errors": {
             "noResponse": "no response from server"
         },
@@ -94,7 +95,6 @@
             "undeployedChanges": "You have undeployed changes.\n\nLeaving this page will lose these changes.",
             "improperlyConfigured": "The workspace contains some nodes that are not properly configured:",
             "unknown": "The workspace contains some unknown node types:",
-            "unusedConfig": "The workspace contains some unused configuration nodes:",
             "confirm": "Are you sure you want to deploy?"
         }
     },
@@ -201,11 +201,11 @@
         "config": {
             "name": "Configuration nodes",
             "label": "config",
-            "local": "on this flow",
-            "global": "on all flows",
+            "global": "Global Nodes",
             "none": "none",
             "subflows": "subflows",
-            "flows": "flows"
+            "flows": "flows",
+            "filterUnused":"show unused only"
         }
     },
     "typedInput": {

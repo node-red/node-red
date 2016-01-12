@@ -208,13 +208,13 @@ RED.deploy = (function() {
                         .html("<li>"+invalidNodes.map(function(A) { return (A.tab?"["+A.tab+"] ":"")+A.label+" ("+A.type+")"}).join("</li><li>")+"</li>");
 
                 } else if (hasUnusedConfig && !ignoreDeployWarnings.unusedConfig) {
-                    showWarning = true;
-                    $( "#node-dialog-confirm-deploy-type" ).val("unusedConfig");
-                    $( "#node-dialog-confirm-deploy-unused" ).show();
-
-                    unusedConfigNodes.sort(sortNodeInfo);
-                    $( "#node-dialog-confirm-deploy-unused-list" )
-                        .html("<li>"+unusedConfigNodes.map(function(A) { return (A.tab?"["+A.tab+"] ":"")+A.label+" ("+A.type+")"}).join("</li><li>")+"</li>");
+                    // showWarning = true;
+                    // $( "#node-dialog-confirm-deploy-type" ).val("unusedConfig");
+                    // $( "#node-dialog-confirm-deploy-unused" ).show();
+                    //
+                    // unusedConfigNodes.sort(sortNodeInfo);
+                    // $( "#node-dialog-confirm-deploy-unused-list" )
+                    //     .html("<li>"+unusedConfigNodes.map(function(A) { return (A.tab?"["+A.tab+"] ":"")+A.label+" ("+A.type+")"}).join("</li><li>")+"</li>");
                 }
                 if (showWarning) {
                     $( "#node-dialog-confirm-deploy-hide" ).prop("checked",false);
@@ -241,7 +241,12 @@ RED.deploy = (function() {
                     "Node-RED-Deployment-Type":deploymentType
                 }
             }).done(function(data,textStatus,xhr) {
-                RED.notify(RED._("deploy.successfulDeploy"),"success");
+                if (hasUnusedConfig) {
+                    RED.notify(RED._("deploy.successfulDeploy")+
+                    '<p><br>You have some unused configuration nodes. <a href="#" onclick="RED.sidebar.config.show(); return false;" >Click here</a> to see them</p>',"success",false,6000);
+                } else {
+                    RED.notify(RED._("deploy.successfulDeploy"),"success");
+                }
                 RED.nodes.eachNode(function(node) {
                     if (node.changed) {
                         node.dirty = true;

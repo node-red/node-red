@@ -363,7 +363,7 @@ RED.palette = (function() {
         }
 
         var re = new RegExp(val,'i');
-        $(".palette_node").each(function(i,el) {
+        $("#palette-container .palette_node").each(function(i,el) {
             var currentLabel = $(el).find(".palette_label").text();
             if (val === "" || re.test(el.id) || re.test(currentLabel)) {
                 $(this).show();

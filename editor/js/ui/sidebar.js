@@ -20,10 +20,14 @@ RED.sidebar = (function() {
         id:"sidebar-tabs",
         onchange:function(tab) {
             $("#sidebar-content").children().hide();
+            $("#sidebar-footer").children().hide();
             if (tab.onchange) {
                 tab.onchange.call(tab);
             }
             $(tab.content).show();
+            if (tab.toolbar) {
+                $(tab.toolbar).show();
+            }
         },
         onremove: function(tab) {
             $(tab.content).hide();
@@ -57,6 +61,11 @@ RED.sidebar = (function() {
 
 
         $("#sidebar-content").append(options.content);
+        $(options.content).hide();
+        if (options.toolbar) {
+            $("#sidebar-footer").append(options.toolbar);
+            $(options.toolbar).hide();
+        }
         $(options.content).hide();
         var id = options.id;
 

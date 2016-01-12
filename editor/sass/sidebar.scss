@@ -37,7 +37,6 @@
     right: 0;
     bottom: 25px;
     left: 0px;
-    padding-top: 3px;
     overflow-y: auto;
 }
 
@@ -65,4 +64,8 @@
 
 #sidebar-footer {
     @include component-footer;
+}
+
+.sidebar-button {
+    @include component-footer-button;
 }

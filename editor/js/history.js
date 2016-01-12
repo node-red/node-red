@@ -271,6 +271,7 @@ RED.history = (function() {
                 RED.view.redraw(true);
                 RED.palette.refresh();
                 RED.workspaces.refresh();
+                RED.sidebar.config.refresh();
             }
         }
     }
