@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,27 +19,23 @@ RED.sidebar.config = (function() {
     var content = document.createElement("div");
     content.className = "sidebar-node-config"
 
-    var toolbar = $('<div id="palette-footer">'+
-        //'<a class="sidebar-button text-button" id="workspace-config-node-filter-unused" href="#"><i class="fa fa-square-o"></i> <span data-i18n="sidebar.config.filterUnused"></span></a> '+
-        '<a class="sidebar-button" id="workspace-config-node-collapse-all" href="#"><i class="fa fa-angle-double-up"></i></a> '+
-        '<a class="sidebar-button" id="workspace-config-node-expand-all" href="#"><i class="fa fa-angle-double-down"></i></a>'+
+    $('<div id="sidebar-node-config-header">'+
+      '<a class="sidebar-header-button selected" id="workspace-config-node-filter-all" href="#"><span data-i18n="sidebar.config.filterAll"></span></a>'+
+      '<a class="sidebar-header-button" id="workspace-config-node-filter-unused" href="#"><span data-i18n="sidebar.config.filterUnused"></span></a> '+
+      '</div>'
+    ).appendTo(content);
+
+
+    var toolbar = $('<div>'+
+        '<a class="sidebar-footer-button" id="workspace-config-node-collapse-all" href="#"><i class="fa fa-angle-double-up"></i></a> '+
+        '<a class="sidebar-footer-button" id="workspace-config-node-expand-all" href="#"><i class="fa fa-angle-double-down"></i></a>'+
         '</div>');
 
-
+    var globalCategories = $("<div>").appendTo(content);
     var flowCategories = $("<div>").appendTo(content);
     var subflowCategories = $("<div>").appendTo(content);
-    var globalCategories = $("<div>").appendTo(content);
 
     var showUnusedOnly = false;
-
-    // $('<div class="palette-category">'+
-    //   '<div class="workspace-config-node-tray-header palette-header"><i class="fa fa-angle-down expanded"></i><span data-i18n="sidebar.config.local"></span></div>'+
-    // '<ul id="workspace-config-node-tray-locals" class="palette-content config-node-list"></ul>'+
-    // '</div>'+
-    // '<div class="palette-category">'+
-    //     '<div class="workspace-config-node-tray-header palette-header"><i class="fa fa-angle-down expanded"></i><span data-i18n="sidebar.config.global"></span></div>'+
-    //     '<ul id="workspace-config-node-tray-globals" class="palette-content config-node-list"></ul>'+
-    // '</div>').appendTo(content);
 
     var categories = {};
 
@@ -80,11 +76,14 @@ RED.sidebar.config = (function() {
                             result.list.slideUp();
                         }
                     }
+                },
+                isOpen: function() {
+                    return icon.hasClass("expanded");
                 }
             };
 
             header.on('click', function(e) {
-                if (icon.hasClass("expanded")) {
+                if (result.isOpen()) {
                     result.close();
                 } else {
                     result.open();
@@ -109,7 +108,6 @@ RED.sidebar.config = (function() {
                 return n.users.length === 0;
             })
         }
-        // console.log(list);
         list.empty();
         if (nodes.length === 0) {
             $('<li class="config_node_none" data-i18n="sidebar.config.none">NONE</li>').i18n().appendTo(list);
@@ -237,20 +235,35 @@ RED.sidebar.config = (function() {
                 }
             }
         });
-        $('#workspace-config-node-filter-unused').on("click",function(e) {
+        $('#workspace-config-node-filter-all').on("click",function(e) {
             e.preventDefault();
             if (showUnusedOnly) {
-                $(this).find("i").addClass('fa-square-o').removeClass('fa-check-square-o');
-            } else {
-                $(this).find("i").removeClass('fa-square-o').addClass('fa-check-square-o');
+                $(this).addClass('selected');
+                $('#workspace-config-node-filter-unused').removeClass('selected');
+                showUnusedOnly = !showUnusedOnly;
+                refreshConfigNodeList();
             }
-            showUnusedOnly = !showUnusedOnly;
-            refreshConfigNodeList();
-        })
+        });
+        $('#workspace-config-node-filter-unused').on("click",function(e) {
+            e.preventDefault();
+            if (!showUnusedOnly) {
+                $(this).addClass('selected');
+                $('#workspace-config-node-filter-all').removeClass('selected');
+                showUnusedOnly = !showUnusedOnly;
+                refreshConfigNodeList();
+            }
+        });
 
 
     }
-    function show() {
+    function show(unused) {
+        if (unused !== undefined) {
+            if (unused) {
+                $('#workspace-config-node-filter-unused').click();
+            } else {
+                $('#workspace-config-node-filter-all').click();
+            }
+        }
         refreshConfigNodeList();
         RED.sidebar.show("config");
     }

@@ -57,6 +57,11 @@
         background: $workspace-button-background-active;
         text-decoration: none;
     }
+    &.selected:not(.disabled) {
+        color: $workspace-button-color-active;
+        background: $workspace-button-background-active;
+        cursor: default;
+    }
 }
 @mixin component-footer {
     border-top: 1px solid $primary-border-color;

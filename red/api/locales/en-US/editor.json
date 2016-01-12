@@ -83,7 +83,8 @@
         "modifiedNodes": "Modified Nodes",
         "modifiedNodesDesc": "Only deploys nodes that have changed",
         "successfulDeploy": "Successfully deployed",
-        
+        "unusedConfigNodes":"You have some unused configuration nodes.",
+        "unusedConfigNodesLink":"Click here to see them",
         "errors": {
             "noResponse": "no response from server"
         },
@@ -201,11 +202,12 @@
         "config": {
             "name": "Configuration nodes",
             "label": "config",
-            "global": "Global Nodes",
+            "global": "Global",
             "none": "none",
             "subflows": "subflows",
             "flows": "flows",
-            "filterUnused":"show unused only"
+            "filterUnused":"unused",
+            "filterAll":"all"
         }
     },
     "typedInput": {

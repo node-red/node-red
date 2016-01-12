@@ -33,6 +33,12 @@
     border: 1px solid #325C80;
     border-left-width: 16px;
 }
+.notification a {
+    text-decoration: none;
+    &:hover {
+        text-decoration: underline;
+    }
+}
 
 .notification-success {
     border-color: #4B8400;

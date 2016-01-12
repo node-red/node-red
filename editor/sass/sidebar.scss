@@ -66,6 +66,12 @@
     @include component-footer;
 }
 
-.sidebar-button {
+.sidebar-footer-button {
     @include component-footer-button;
+}
+.sidebar-header-button {
+    @include workspace-button;
+    font-size: 13px;
+    line-height: 13px;
+    padding: 5px 8px;
 }

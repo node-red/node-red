@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,8 +242,9 @@ RED.deploy = (function() {
                 }
             }).done(function(data,textStatus,xhr) {
                 if (hasUnusedConfig) {
-                    RED.notify(RED._("deploy.successfulDeploy")+
-                    '<p><br>You have some unused configuration nodes. <a href="#" onclick="RED.sidebar.config.show(); return false;" >Click here</a> to see them</p>',"success",false,6000);
+                    RED.notify(
+                    '<p>'+RED._("deploy.successfulDeploy")+'</p>'+
+                    '<p>'+RED._("deploy.unusedConfigNodes")+' <a href="#" onclick="RED.sidebar.config.show(true); return false;">'+RED._("deploy.unusedConfigNodesLink")+'</a></p>',"success",false,6000);
                 } else {
                     RED.notify(RED._("deploy.successfulDeploy"),"success");
                 }
