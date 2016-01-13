@@ -154,6 +154,13 @@ module.exports = function(RED) {
         return wrapper;
     }
 
+    var corsHandler = function(req,res,next) { next(); }
+
+    if (RED.settings.httpNodeCors) {
+        corsHandler = cors(RED.settings.httpNodeCors);
+        RED.httpNode.options("*",corsHandler);
+    }
+
     function HTTPIn(n) {
         RED.nodes.createNode(this,n);
         if (RED.settings.httpNodeRoot !== false) {
@@ -184,14 +191,6 @@ module.exports = function(RED) {
                     node.send({_msgid:msgid,req:createRequestWrapper(node,req),res:createResponseWrapper(node,res)});
                 }
             };
-
-            var corsHandler = function(req,res,next) { next(); }
-
-            if (RED.settings.httpNodeCors && !corsSetup) {
-                corsHandler = cors(RED.settings.httpNodeCors);
-                RED.httpNode.options("*",corsHandler);
-                corsSetup = true;
-            }
 
             var httpMiddleware = function(req,res,next) { next(); }
 
