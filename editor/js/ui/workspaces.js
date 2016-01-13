@@ -140,8 +140,8 @@ RED.workspaces = (function() {
                         if (workspace.label != label) {
                             workspace_tabs.renameTab(workspace.id,label);
                             RED.nodes.dirty(true);
+                            RED.sidebar.config.refresh();
                             $("#menu-item-workspace-menu-"+workspace.id.replace(".","-")).text(label);
-                            // TODO: update entry in menu
                         }
                         $( this ).dialog( "close" );
                     }

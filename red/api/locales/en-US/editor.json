@@ -207,7 +207,8 @@
             "subflows": "subflows",
             "flows": "flows",
             "filterUnused":"unused",
-            "filterAll":"all"
+            "filterAll":"all",
+            "filtered": "__count__ hidden"
         }
     },
     "typedInput": {

@@ -67,3 +67,15 @@
     border-style: dashed;
     color: #aaa;
 }
+.config-node-filter-info {
+    position: absolute;
+    top: 0;
+    right:0;
+    height: 38px;
+    line-height: 38px;
+    padding: 0 8px;
+    background: $palette-header-background;
+    font-size: 0.8em;
+    color: #999;
+    font-weight: normal;
+}

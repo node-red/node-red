@@ -114,11 +114,16 @@
 }
 
 .palette-header {
+    position: relative;
     background: $palette-header-background;
     cursor: pointer;
     text-align: left;
     padding: 9px;
     font-weight: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
 }
 .palette-header i {
     margin: 3px 10px 3px 3px;

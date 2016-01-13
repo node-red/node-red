@@ -45,14 +45,16 @@ RED.sidebar.config = (function() {
             var container = $('<div class="palette-category workspace-config-node-category" id="workspace-config-node-category-'+name+'"></div>').appendTo(parent);
             var header = $('<div class="workspace-config-node-tray-header palette-header"><i class="fa fa-angle-down expanded"></i></div>').appendTo(container);
             if (label) {
-                $('<span/>').text(label).appendTo(header);
+                $('<span class="config-node-label"/>').text(label).appendTo(header);
             } else {
-                $('<span data-i18n="sidebar.config.'+name+'">').appendTo(header);
+                $('<span class="config-node-label" data-i18n="sidebar.config.'+name+'">').appendTo(header);
             }
+            $('<span class="config-node-filter-info"></span>').appendTo(header);
             category = $('<ul class="palette-content config-node-list"></ul>').appendTo(container);
             container.i18n();
             var icon = header.find("i");
             var result = {
+                label: label,
                 list: category,
                 size: function() {
                     return result.list.find("li:not(.config_node_none)").length
@@ -90,6 +92,11 @@ RED.sidebar.config = (function() {
                 }
             });
             categories[name] = result;
+        } else {
+            if (categories[name].label !== label) {
+                categories[name].list.parent().find('.config-node-label').text(label);
+                categories[name].label = label;
+            }
         }
         return categories[name];
     }
@@ -104,9 +111,18 @@ RED.sidebar.config = (function() {
             return 0;
         });
         if (showUnusedOnly) {
+            var hiddenCount = nodes.length;
             nodes = nodes.filter(function(n) {
                 return n.users.length === 0;
             })
+            hiddenCount = hiddenCount - nodes.length;
+            if (hiddenCount > 0) {
+                list.parent().find('.config-node-filter-info').text(RED._('sidebar.config.filtered',{count:hiddenCount})).show();
+            } else {
+                list.parent().find('.config-node-filter-info').hide();
+            }
+        } else {
+            list.parent().find('.config-node-filter-info').hide();
         }
         list.empty();
         if (nodes.length === 0) {
