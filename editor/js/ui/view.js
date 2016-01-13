@@ -614,7 +614,7 @@ RED.view = (function() {
                     node.n.y -= minY;
                 }
             }
-            if (snapGrid && moving_set.length > 0) {
+            if (snapGrid != d3.event.shiftKey && moving_set.length > 0) {
                 var gridOffset = [0,0];
                 node = moving_set[0];
                 gridOffset[0] = node.n.x-(gridSize*Math.floor((node.n.x-node.n.w/2)/gridSize)+node.n.w/2);
