@@ -34,6 +34,10 @@ RED.view = (function() {
     var gridSize = 20;
     var snapGrid = false;
 
+    var activeSpliceLink;
+    var spliceActive = false;
+    var spliceTimer;
+
     var activeSubflow = null;
     var activeNodes = [];
     var activeLinks = [];
@@ -392,6 +396,7 @@ RED.view = (function() {
 
                 var spliceLink = $(ui.helper).data('splice');
                 if (spliceLink) {
+                    // TODO: DRY - canvasMouseUp
                     RED.nodes.removeLink(spliceLink);
                     var link1 = {
                         source:spliceLink.source,
@@ -589,6 +594,14 @@ RED.view = (function() {
             if (d > 3) {
                 mouse_mode = RED.state.MOVING_ACTIVE;
                 clickElapsed = 0;
+                spliceActive = false;
+                if (moving_set.length === 1) {
+                    node = moving_set[0];
+                    spliceActive = node.n._def.inputs > 0 &&
+                                   node.n._def.outputs > 0 &&
+                                   RED.nodes.filterLinks({ source: node.n }).length === 0 &&
+                                   RED.nodes.filterLinks({ target: node.n }).length === 0;
+                }
             }
         } else if (mouse_mode == RED.state.MOVING_ACTIVE || mouse_mode == RED.state.IMPORT_DRAGGING) {
             mousePos = mouse_position;
@@ -630,6 +643,57 @@ RED.view = (function() {
                     }
                 }
             }
+            if (mouse_mode == RED.state.MOVING_ACTIVE && moving_set.length === 1) {
+                node = moving_set[0];
+                if (spliceActive) {
+                    if (!spliceTimer) {
+                        spliceTimer = setTimeout(function() {
+                            var nodes = [];
+                            var bestDistance = Infinity;
+                            var bestLink = null;
+                            var mouseX = mousePos[0];
+                            var mouseY = mousePos[1];
+                            if (outer[0][0].getIntersectionList) {
+                                var svgRect = outer[0][0].createSVGRect();
+                                svgRect.x = mouseX;
+                                svgRect.y = mouseY;
+                                svgRect.width = 1;
+                                svgRect.height = 1;
+                                nodes = outer[0][0].getIntersectionList(svgRect, outer[0][0]);
+                            } else {
+                                // Firefox doesn't do getIntersectionList and that
+                                // makes us sad
+                                nodes = RED.view.getLinksAtPoint(mouseX,mouseY);
+                            }
+                            for (var i=0;i<nodes.length;i++) {
+                                if (d3.select(nodes[i]).classed('link_background')) {
+                                    var length = nodes[i].getTotalLength();
+                                    for (var j=0;j<length;j+=10) {
+                                        var p = nodes[i].getPointAtLength(j);
+                                        var d2 = ((p.x-mouseX)*(p.x-mouseX))+((p.y-mouseY)*(p.y-mouseY));
+                                        if (d2 < 200 && d2 < bestDistance) {
+                                            bestDistance = d2;
+                                            bestLink = nodes[i];
+                                        }
+                                    }
+                                }
+                            }
+                            if (activeSpliceLink && activeSpliceLink !== bestLink) {
+                                d3.select(activeSpliceLink.parentNode).classed('link_splice',false);
+                            }
+                            if (bestLink) {
+                                d3.select(bestLink.parentNode).classed('link_splice',true)
+                            } else {
+                                d3.select('.link_splice').classed('link_splice',false);
+                            }
+                            activeSpliceLink = bestLink;
+                            spliceTimer = null;
+                        },100);
+                    }
+                }
+            }
+
+
         }
         if (mouse_mode !== 0) {
             redraw();
@@ -638,6 +702,7 @@ RED.view = (function() {
 
     function canvasMouseUp() {
         var i;
+        var historyEvent;
         if (mousedown_node && mouse_mode == RED.state.JOINING) {
             var removedLinks = [];
             for (i=0;i<drag_lines.length;i++) {
@@ -645,7 +710,7 @@ RED.view = (function() {
                     removedLinks.push(drag_lines[i].link)
                 }
             }
-            var historyEvent = {
+            historyEvent = {
                 t:'delete',
                 links: removedLinks,
                 dirty:RED.nodes.dirty()
@@ -699,9 +764,29 @@ RED.view = (function() {
                 for (var j=0;j<moving_set.length;j++) {
                     ns.push({n:moving_set[j].n,ox:moving_set[j].ox,oy:moving_set[j].oy});
                 }
-                var wasDirty = RED.nodes.dirty();
+                historyEvent = {t:'move',nodes:ns,dirty:RED.nodes.dirty()};
+                if (activeSpliceLink) {
+                    // TODO: DRY - droppable
+                    var spliceLink = d3.select(activeSpliceLink).data()[0];
+                    RED.nodes.removeLink(spliceLink);
+                    var link1 = {
+                        source:spliceLink.source,
+                        sourcePort:spliceLink.sourcePort,
+                        target: moving_set[0].n
+                    };
+                    var link2 = {
+                        source:moving_set[0].n,
+                        sourcePort:0,
+                        target: spliceLink.target
+                    };
+                    RED.nodes.addLink(link1);
+                    RED.nodes.addLink(link2);
+                    historyEvent.links = [link1,link2];
+                    historyEvent.removedLinks = [spliceLink];
+                    updateActiveNodes();
+                }
                 RED.nodes.dirty(true);
-                RED.history.push({t:'move',nodes:ns,dirty:wasDirty});
+                RED.history.push(historyEvent);
             }
         }
         if (mouse_mode == RED.state.MOVING || mouse_mode == RED.state.MOVING_ACTIVE) {
@@ -974,6 +1059,13 @@ RED.view = (function() {
         mousedown_link = null;
         mouse_mode = 0;
         mousedown_port_type = 0;
+        activeSpliceLink = null;
+        spliceActive = false;
+        d3.select('.link_splice').classed('link_splice',false);
+        if (spliceTimer) {
+            clearTimeout(spliceTimer);
+            spliceTimer = null;
+        }
     }
 
     function portMouseDown(d,portType,portIndex) {
