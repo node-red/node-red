@@ -187,24 +187,26 @@ RED.sidebar.config = (function() {
         getOrCreateCategory("global",globalCategories);
 
         RED.nodes.eachWorkspace(function(ws) {
-            validList[ws.id] = true;
+            validList[ws.id.replace(/\./g,"-")] = true;
             getOrCreateCategory(ws.id,flowCategories,ws.label);
         })
         RED.nodes.eachSubflow(function(sf) {
-            validList[sf.id] = true;
+            validList[sf.id.replace(/\./g,"-")] = true;
             getOrCreateCategory(sf.id,subflowCategories,sf.name);
         })
-        // $(".workspace-config-node-category").each(function() {
-        //     if (!validList[$(this).attr('id').substring("workspace-config-node-category-".length)]) {
-        //         $(this).remove();
-        //     }
-        // })
+        $(".workspace-config-node-category").each(function() {
+            var id = $(this).attr('id').substring("workspace-config-node-category-".length);
+            if (!validList[id]) {
+                $(this).remove();
+                delete categories[id];
+            }
+        })
         var globalConfigNodes = [];
         var configList = {};
         RED.nodes.eachConfig(function(cn) {
             if (cn.z) {//} == RED.workspaces.active()) {
-                configList[cn.z] = configList[cn.z]||[];
-                configList[cn.z].push(cn);
+                configList[cn.z.replace(/\./g,"-")] = configList[cn.z.replace(/\./g,"-")]||[];
+                configList[cn.z.replace(/\./g,"-")].push(cn);
             } else if (!cn.z) {
                 globalConfigNodes.push(cn);
             }

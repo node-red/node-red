@@ -54,6 +54,7 @@ RED.workspaces = (function() {
             historyEvent.workspaces = [ws];
             RED.history.push(historyEvent);
             RED.nodes.dirty(true);
+            RED.sidebar.config.refresh();
         } else {
             $( "#node-dialog-delete-workspace" ).dialog('option','workspace',ws);
             $( "#node-dialog-delete-workspace-content" ).text(RED._("workspace.delete",{label:ws.label}));
