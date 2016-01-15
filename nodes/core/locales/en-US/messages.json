@@ -45,6 +45,7 @@
         "minutes": "minutes",
         "hours": "hours",
         "between": "between",
+        "previous": "previous value",
         "at": "at",
         "and": "and",
         "every": "every",

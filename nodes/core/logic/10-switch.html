@@ -66,6 +66,8 @@
         },
         oneditprepare: function() {
             var node = this;
+            var previousValueType = {value:"prev",label:this._("inject.previous"),hasValue:false};
+
             $("#node-input-property").typedInput({default:this.propertyType||'msg',types:['msg','flow','global']});
             var operators = [
                 {v:"eq",t:"=="},
@@ -129,10 +131,10 @@
                     selectField.append($("<option></option>").val(operators[d].v).text(operators[d].t));
                 }
 
-                var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px; width: 145px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num']});
-                var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num']});
+                var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px; width: 145px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num',previousValueType]});
+                var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num',previousValueType]});
                 var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
-                var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num']});
+                var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num',previousValueType]});
 
                 var finalspan = $('<span/>',{style:"float: right;margin-right: 10px;"}).appendTo(row);
                 finalspan.append(' &#8594; <span class="node-input-rule-index">'+i+'</span> ');
