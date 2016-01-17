@@ -398,7 +398,8 @@
         },
         "tip": {
             "in": "Tip: Make sure your firewall will allow the data in.",
-            "out": "Tip: leave address and port blank if you want to set using <b>msg.ip</b> and <b>msg.port</b>."
+            "out": "Tip: leave address and port blank if you want to set using <b>msg.ip</b> and <b>msg.port</b>.",
+            "port": "Ports already in use: "
         },
         "status": {
             "listener-at": "udp listener at __host__:__port__",
@@ -417,7 +418,8 @@
             "interface": "Must be ip address of the required interface",
             "ip-notset": "udp: ip address not set",
             "port-notset": "udp: port not set",
-            "port-invalid": "udp: port number not valid"
+            "port-invalid": "udp: port number not valid",
+            "alreadyused": "udp: port already in use"
         }
     },
     "switch": {

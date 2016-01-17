@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013,2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 module.exports = function(RED) {
     "use strict";
     var dgram = require('dgram');
+    var udpInputPortsInUse = {};
 
     // The Input Node
     function UDPin(n) {
@@ -28,6 +29,12 @@ module.exports = function(RED) {
         this.multicast = n.multicast;
         this.ipv = n.ipv || "udp4";
         var node = this;
+        if (!udpInputPortsInUse.hasOwnProperty(this.port)) {
+            udpInputPortsInUse[this.port] = n.id;
+        }
+        else {
+            node.warn(RED._("udp.errors.alreadyused",node.port));
+        }
 
         var opts = {type:node.ipv, reuseAddr:true};
         if (process.version.indexOf("v0.10") === 0) { opts = node.ipv; }
@@ -76,6 +83,10 @@ module.exports = function(RED) {
         });
 
         node.on("close", function() {
+            console.log("ID=",node.id);
+            if (udpInputPortsInUse[node.port] === node.id) {
+                delete udpInputPortsInUse[node.port];
+            }
             try {
                 server.close();
                 node.log(RED._("udp.status.listener-stopped"));
@@ -86,8 +97,10 @@ module.exports = function(RED) {
 
         server.bind(node.port,node.iface);
     }
+    RED.httpAdmin.get('/udp-ports/:id', RED.auth.needsPermission('udp-in.read'), function(req,res) {
+        res.json(udpInputPortsInUse);
+    });
     RED.nodes.registerType("udp in",UDPin);
-
 
     // The Output Node
     function UDPout(n) {

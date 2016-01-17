@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013 IBM Corp.
+  Copyright 2013,2016 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
     <div class="form-tips"><span data-i18n="udp.tip.in"></span></div>
+    <div class="form-tips" id="udpporttip"><span data-i18n="[html]udp.tip.port"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="udp in">
@@ -98,6 +99,21 @@
                 }
             });
             $("#node-input-multicast").change();
+
+            var porttip = this._("udp.tip.port");
+            var alreadyused = this._("udp.errors.alreadyused");
+            var portsInUse = {};
+            $.getJSON('udp-ports/'+this.id,function(data) {
+                portsInUse = data || {};
+                $('#udpporttip').html(porttip + Object.keys(data||{}));
+            });
+            $("#node-input-port").change(function() {
+                var portnew = $("#node-input-port").val();
+                if (portsInUse.hasOwnProperty($("#node-input-port").val())) {
+                    console.log($("#node-input-port").val());
+                    RED.notify(alreadyused+" "+$("#node-input-port").val(),"warn");
+                }
+            });
         }
     });
 </script>
