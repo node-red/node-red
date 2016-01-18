@@ -132,8 +132,8 @@ module.exports = {
     getFlow:     flows.getFlow,
     updateFlow:  flows.updateFlow,
     removeFlow:  flows.removeFlow,
-    disableFlow: flows.disableFlow,
-    enableFlow:  flows.enableFlow,
+    // disableFlow: flows.disableFlow,
+    // enableFlow:  flows.enableFlow,
 
 
     // Credentials
