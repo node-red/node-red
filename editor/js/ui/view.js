@@ -471,6 +471,7 @@ RED.view = (function() {
 
     function canvasMouseMove() {
         var i;
+        var node;
         mouse_position = d3.touches(this)[0]||d3.mouse(this);
         // Prevent touch scrolling...
         //if (d3.touches(this)[0]) {
@@ -605,7 +606,6 @@ RED.view = (function() {
             }
         } else if (mouse_mode == RED.state.MOVING_ACTIVE || mouse_mode == RED.state.IMPORT_DRAGGING) {
             mousePos = mouse_position;
-            var node;
             var minX = 0;
             var minY = 0;
             for (var n = 0; n<moving_set.length; n++) {

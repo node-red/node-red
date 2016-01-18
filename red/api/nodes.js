@@ -163,8 +163,8 @@ module.exports = {
             res.status(400).json({error:"invalid_request", message:"Invalid request"});
             return;
         }
+        var id = req.params.mod + "/" + req.params.set;
         try {
-            var id = req.params.mod + "/" + req.params.set;
             var node = redNodes.getNodeInfo(id);
             var info;
             if (!node) {
@@ -195,8 +195,8 @@ module.exports = {
             res.status(400).json({error:"invalid_request", message:"Invalid request"});
             return;
         }
+        var mod = req.params.mod;
         try {
-            var mod = req.params.mod;
             var module = redNodes.getModuleInfo(mod);
             if (!module) {
                 log.audit({event: "nodes.module.set",module:mod,error:"not_found"},req);

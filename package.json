@@ -1,6 +1,6 @@
 {
     "name"         : "node-red",
-    "version"      : "0.12.5",
+    "version"      : "0.13.0",
     "description"  : "A visual tool for wiring the Internet of Things",
     "homepage"     : "http://nodered.org",
     "license"      : "Apache-2.0",
@@ -22,7 +22,7 @@
         {"name": "Dave Conway-Jones"}
     ],
     "keywords": [
-        "editor", "messaging", "iot", "m2m", "pi", "arduino", "beaglebone", "ibm", "flow"
+        "editor", "messaging", "iot", "ibm", "flow"
     ],
     "dependencies": {
         "basic-auth": "1.0.3",
@@ -49,11 +49,11 @@
         "passport-oauth2-client-password":"0.1.2",
         "raw-body":"2.1.5",
         "semver": "5.1.0",
-        "sentiment":"1.0.4",
+        "sentiment":"1.0.5",
         "uglify-js":"2.6.1",
         "when": "3.7.7",
         "ws": "0.8.1",
-        "xml2js":"0.4.15",
+        "xml2js":"0.4.16",
         "node-red-node-feedparser":"0.1.*",
         "node-red-node-email":"0.1.*",
         "node-red-node-twitter":"0.1.*",
@@ -72,7 +72,7 @@
         "grunt-contrib-compress": "0.14.0",
         "grunt-contrib-concat":"0.5.1",
         "grunt-contrib-copy": "0.8.2",
-        "grunt-contrib-jshint": "0.11.3",
+        "grunt-contrib-jshint": "0.12.0",
         "grunt-contrib-uglify": "0.11.0",
         "grunt-contrib-watch":"0.6.1",
         "grunt-jsonlint":"1.0.7",
