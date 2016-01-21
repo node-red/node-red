@@ -1,5 +1,5 @@
 /**
- * Copyright 2013,2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,8 @@ module.exports = function(RED) {
     var corsSetup = false;
 
     function createRequestWrapper(node,req) {
+        // This misses a bunch of properties (eg headers). Before we use this function
+        // need to ensure it captures everything documented by Express and HTTP modules.
         var wrapper = {
             _req: req
         };
@@ -184,11 +186,11 @@ module.exports = function(RED) {
                 var msgid = RED.util.generateId();
                 res._msgid = msgid;
                 if (node.method.match(/(^post$|^delete$|^put$|^options$)/)) {
-                    node.send({_msgid:msgid,req:createRequestWrapper(node,req),res:createResponseWrapper(node,res),payload:req.body});
+                    node.send({_msgid:msgid,req:req,res:createResponseWrapper(node,res),payload:req.body});
                 } else if (node.method == "get") {
-                    node.send({_msgid:msgid,req:createRequestWrapper(node,req),res:createResponseWrapper(node,res),payload:req.query});
+                    node.send({_msgid:msgid,req:req,res:createResponseWrapper(node,res),payload:req.query});
                 } else {
-                    node.send({_msgid:msgid,req:createRequestWrapper(node,req),res:createResponseWrapper(node,res)});
+                    node.send({_msgid:msgid,req:req,res:createResponseWrapper(node,res)});
                 }
             };
 
