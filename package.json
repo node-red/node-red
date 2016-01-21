@@ -1,6 +1,6 @@
 {
     "name"         : "node-red",
-    "version"      : "0.13.0",
+    "version"      : "0.13.1",
     "description"  : "A visual tool for wiring the Internet of Things",
     "homepage"     : "http://nodered.org",
     "license"      : "Apache-2.0",
