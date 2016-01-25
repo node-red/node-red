@@ -569,6 +569,7 @@
             "readinitial": "Read initial state of pin on deploy/restart?",
             "type": "Type",
             "initpin": "Initialise pin state?",
+            "debounce": "Debounce",
             "button": "Button",
             "pimouse": "Pi Mouse",
             "pikeyboard": "Pi Keyboard",

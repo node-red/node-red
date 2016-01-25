@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2014 IBM Corp.
+# Copyright 2014,2016 IBM Corp.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ import struct
 import sys
 import os
 import subprocess
+from time import sleep
 
-bounce = 20     # bounce time in mS to apply
+bouce = 20;
 
 if sys.version_info >= (3,0):
     print("Sorry - currently only configured to work with python 2.x")
@@ -95,18 +96,18 @@ if len(sys.argv) > 2:
 
     elif cmd == "in":
         #print "Initialised pin "+str(pin)+" to IN"
+        bounce = int(sys.argv[4])
         def handle_callback(chan):
+            sleep(bounce/1000)
             print GPIO.input(chan)
 
-        if len(sys.argv) == 4:
-            if sys.argv[3].lower() == "up":
-                GPIO.setup(pin,GPIO.IN,GPIO.PUD_UP)
-            elif sys.argv[3].lower() == "down":
-                GPIO.setup(pin,GPIO.IN,GPIO.PUD_DOWN)
-            else:
-                GPIO.setup(pin,GPIO.IN)
+        if sys.argv[3].lower() == "up":
+            GPIO.setup(pin,GPIO.IN,GPIO.PUD_UP)
+        elif sys.argv[3].lower() == "down":
+            GPIO.setup(pin,GPIO.IN,GPIO.PUD_DOWN)
         else:
             GPIO.setup(pin,GPIO.IN)
+
         print GPIO.input(pin)
         GPIO.add_event_detect(pin, GPIO.BOTH, callback=handle_callback, bouncetime=bounce)
 
@@ -169,12 +170,6 @@ if len(sys.argv) > 2:
             except:
                 data = 0
 
-    elif cmd == "rev":
-        print GPIO.RPI_REVISION
-
-    elif cmd == "ver":
-        print GPIO.VERSION
-
     elif cmd == "mouse":  # catch mice button events
         file = open( "/dev/input/mice", "rb" )
         oldbutt = 0
@@ -225,9 +220,11 @@ elif len(sys.argv) > 1:
         print GPIO.RPI_REVISION
     elif cmd == "ver":
         print GPIO.VERSION
+    elif cmd == "info":
+        print GPIO.RPI_INFO
     else:
-        print "Bad parameters - in|out|pwm|buzz|byte|borg|mouse|kbd|ver {pin} {value|up|down}"
-        print "  only ver (gpio version) and rev (board revision) accept no pin parameter."
+        print "Bad parameters - in|out|pwm|buzz|byte|borg|mouse|kbd|ver|info {pin} {value|up|down}"
+        print "  only ver (gpio version) and info (board information) accept no pin parameter."
 
 else:
-    print "Bad parameters - in|out|pwm|buzz|byte|borg|mouse|kbd|ver {pin} {value|up|down}"
+    print "Bad parameters - in|out|pwm|buzz|byte|borg|mouse|kbd|ver|info {pin} {value|up|down}"

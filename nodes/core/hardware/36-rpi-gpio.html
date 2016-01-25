@@ -41,16 +41,18 @@
     </div>
     <div class="form-row">
         <label for="node-input-intype"><i class="fa fa-level-up"></i> <span data-i18n="rpi-gpio.label.resistor"></span></label>
-        <select type="text" id="node-input-intype" style="width: 150px;">
+        <select type="text" id="node-input-intype" style="width:100px;">
         <option value="tri" data-i18n="rpi-gpio.resistor.none"></option>
         <option value="up" data-i18n="rpi-gpio.resistor.pullup"></option>
         <option value="down" data-i18n="rpi-gpio.resistor.pulldown"></option>
         </select>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span data-i18n="rpi-gpio.label.debounce"></span>
+        <input type="text" id="node-input-debounce" style="width:47px; text-align:right"/>&nbsp;mS
     </div>
     <div class="form-row">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-read" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-read" style="width: 70%;"><span data-i18n="rpi-gpio.label.readinitial"></span></label>
+        <label for="node-input-read" style="width:70%;"><span data-i18n="rpi-gpio.label.readinitial"></span></label>
     </div>
     <br/>
     <div class="form-row">
@@ -65,7 +67,7 @@
     <p>Raspberry Pi input node. Generates a <b>msg.payload</b> with either a 0 or 1 depending on the state of the input pin. Requires the gpio command to work.</p>
     <p>You may also enable the input pullup resistor or the pulldown resistor.</p>
     <p>The <b>msg.topic</b> is set to <i>pi/{the pin number}</i></p>
-    <p>Requires the RPi.GPIO python library version 0.5.8 (or better) in order to work.</p>
+    <p>Requires the RPi.GPIO python library version 0.5.10 (or better) in order to work.</p>
     <p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
     </script>
 
@@ -77,8 +79,9 @@
         color:"#c6dbef",
         defaults: {
             name: { value:"" },
-            pin: { value:"",required:true,validate:RED.validators.number() },
-            intype: { value: "in" },
+            pin: { value:"tri",required:true,validate:RED.validators.number() },
+            intype: { value:"in" },
+            debounce: { value:"25" },
             read: { value:false }
         },
         inputs:0,
@@ -104,7 +107,7 @@
             var alreadyset = this._("rpi-gpio.alreadyset");
             $.getJSON('rpi-gpio/'+this.id,function(data) {
                 $('#pitype').text(data.type);
-                if ((data.type === "Model B+") || (data.type === "Model A+")) {
+                if ((data.type !== "Model B") && (data.type !== "Model A")) {
                     $('#node-input-pin').append($("<option></option>").attr("value",27).text("27 - SDA0 - BCM0"));
                     $('#node-input-pin').append($("<option></option>").attr("value",28).text("28 - SCL0 - BCM1"));
                     $('#node-input-pin').append($("<option></option>").attr("value",29).text("29 - GPIO21 - BCM5"));
@@ -206,7 +209,7 @@
     <p>When using PWM mode - expects an input value of a number 0 - 100. It can be floating point.</p>
     <p>PWM mode can be used to drive a servo using input values between 10 and 20 only.
     The GPIO2 pin is best for this as it uses hardware to do the PWM.</p>
-    <p>Requires the RPi.GPIO python library version 0.5.8 (or better) in order to work.</p>
+    <p>Requires the RPi.GPIO python library version 0.5.10 (or better) in order to work.</p>
     <p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
 </script>
 
@@ -249,7 +252,7 @@
             if (!$("#node-input-out").val()) { $("#node-input-out").val("out"); }
             $.getJSON('rpi-gpio/'+this.id,function(data) {
                 $('#pitype').text(data.type);
-                if ((data.type === "Model B+") || (data.type === "Model A+")) {
+                if ((data.type !== "Model B") && (data.type !== "Model A")) {
                     $('#node-input-pin').append($("<option></option>").attr("value",27).text("27 - SDA0 - BCM0"));
                     $('#node-input-pin').append($("<option></option>").attr("value",28).text("28 - SCL0 - BCM1"));
                     $('#node-input-pin').append($("<option></option>").attr("value",29).text("29 - GPIO21 - BCM5"));
