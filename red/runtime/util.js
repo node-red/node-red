@@ -17,7 +17,7 @@
 var clone = require("clone");
 
 function generateId() {
-    return (1+Math.random()*4294967295).toString(16);
+    return (1+Math.random()*4294967295).toString(16).replace('.', '');
 }
 
 function ensureString(o) {

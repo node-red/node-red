@@ -42,7 +42,7 @@ module.exports = function(RED) {
         }
 
         function handleConnection(/*socket*/socket) {
-            var id = (1+Math.random()*4294967295).toString(16);
+            var id = (1+Math.random()*4294967295).toString(16).replace('.', '');
             if (node.isServer) { node._clients[id] = socket; node.emit('opened',Object.keys(node._clients).length); }
             socket.on('open',function() {
                 if (!node.isServer) { node.emit('opened',''); }

@@ -685,7 +685,7 @@ RED.editor = (function() {
 
         if (editing_config_node == null) {
             editing_config_node = {
-                id: (1+Math.random()*4294967295).toString(16),
+                id: (1+Math.random()*4294967295).toString(16).replace('.', ''),
                 _def: node_def,
                 type: type,
                 z: activeWorkspace.id,

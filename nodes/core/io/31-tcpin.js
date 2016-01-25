@@ -45,7 +45,7 @@ module.exports = function(RED) {
             var setupTcpClient = function() {
                 node.log(RED._("tcpin.status.connecting",{host:node.host,port:node.port}));
                 node.status({fill:"grey",shape:"dot",text:"common.status.connecting"});
-                var id = (1+Math.random()*4294967295).toString(16);
+                var id = (1+Math.random()*4294967295).toString(16).replace('.', '');
                 client = net.connect(node.port, node.host, function() {
                     buffer = (node.datatype == 'buffer')? new Buffer(0):"";
                     node.connected = true;
@@ -127,7 +127,7 @@ module.exports = function(RED) {
             var server = net.createServer(function (socket) {
                 socket.setKeepAlive(true,120000);
                 if (socketTimeout !== null) { socket.setTimeout(socketTimeout); }
-                var id = (1+Math.random()*4294967295).toString(16);
+                var id = (1+Math.random()*4294967295).toString(16).replace('.', '');
                 connectionPool[id] = socket;
                 count++;
                 node.status({text:RED._("tcpin.status.connections",{count:count})});

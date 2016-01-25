@@ -32,12 +32,12 @@ module.exports = {
         var id = "["+(username||"")+":"+(password||"")+"]["+(clientid||"")+"]@"+broker+":"+port;
         if (!connections[id]) {
             connections[id] = function() {
-                var uid = (1+Math.random()*4294967295).toString(16);
+                var uid = (1+Math.random()*4294967295).toString(16).replace('.', '');
                 var client = mqtt.createClient(port,broker);
                 client.uid = uid;
                 client.setMaxListeners(0);
                 var options = {keepalive:15};
-                options.clientId = clientid || 'mqtt_' + (1+Math.random()*4294967295).toString(16);
+                options.clientId = clientid || 'mqtt_' + (1+Math.random()*4294967295).toString(16).replace('.', '');
                 options.username = username;
                 options.password = password;
                 options.will = will;
@@ -60,7 +60,7 @@ module.exports = {
                     subscribe: function(topic,qos,callback,ref) {
                         ref = ref||0;
                         subscriptions[topic] = subscriptions[topic]||{};
-                        
+
                         var sub = {
                             topic:topic,
                             qos:qos,
@@ -104,7 +104,7 @@ module.exports = {
                         }
                     },
                     disconnect: function(ref) {
-                        
+
                         this._instances -= 1;
                         if (this._instances == 0) {
                             client.disconnect();

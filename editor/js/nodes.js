@@ -147,7 +147,7 @@ RED.nodes = (function() {
     })();
 
     function getID() {
-        return (1+Math.random()*4294967295).toString(16);
+        return (1+Math.random()*4294967295).toString(16).replace('.', '');
     }
 
     function addNode(n) {
