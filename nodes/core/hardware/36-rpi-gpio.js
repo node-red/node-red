@@ -121,7 +121,6 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType("rpi-gpio in",GPIOInNode);
 
-
     function GPIOOutNode(n) {
         RED.nodes.createNode(this,n);
         this.pin = n.pin;
@@ -211,22 +210,6 @@ module.exports = function(RED) {
         });
 
     }
-
-    var pitype = { type:"" };
-    exec(gpioCommand+" info", function(err,stdout,stderr) {
-        if (err) {
-            RED.log.info(RED._("rpi-gpio.errors.version"));
-        }
-        else {
-            try {
-                var info = JSON.parse( stdout.trim().replace(/\'/g,"\"") );
-                pitype.type = info["TYPE"];
-            }
-            catch(e) {
-                RED.log.info(RED._("rpi-gpio.errors.sawpitype"),stdout.trim());
-            }
-        }
-    });
     RED.nodes.registerType("rpi-gpio out",GPIOOutNode);
 
     function PiMouseNode(n) {
@@ -323,6 +306,22 @@ module.exports = function(RED) {
         });
     }
     RED.nodes.registerType("rpi-keyboard",PiKeyboardNode);
+
+    var pitype = { type:"" };
+    exec(gpioCommand+" info", function(err,stdout,stderr) {
+        if (err) {
+            RED.log.info(RED._("rpi-gpio.errors.version"));
+        }
+        else {
+            try {
+                var info = JSON.parse( stdout.trim().replace(/\'/g,"\"") );
+                pitype.type = info["TYPE"];
+            }
+            catch(e) {
+                RED.log.info(RED._("rpi-gpio.errors.sawpitype"),stdout.trim());
+            }
+        }
+    });
 
     RED.httpAdmin.get('/rpi-gpio/:id', RED.auth.needsPermission('rpi-gpio.read'), function(req,res) {
         res.json(pitype);

@@ -21,7 +21,7 @@ import os
 import subprocess
 from time import sleep
 
-bouce = 20;
+bounce = 25;
 
 if sys.version_info >= (3,0):
     print("Sorry - currently only configured to work with python 2.x")
