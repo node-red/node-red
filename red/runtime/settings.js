@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ var persistentSettings = {
         userSettings = settings;
         for (var i in settings) {
             /* istanbul ignore else */
-            if (settings.hasOwnProperty(i) && typeof settings[i] !== "function") {
+            if (settings.hasOwnProperty(i) && i !== 'load' && i !== 'get' && i !== 'set' && i !== 'available' && i !== 'reset') {
+                // Don't allow any of the core functions get replaced via settings
                 (function() {
                     var j = i;
                     persistentSettings.__defineGetter__(j,function() { return userSettings[j]; });
