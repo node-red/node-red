@@ -951,19 +951,19 @@ RED.editor = (function() {
                                 RED.nodes.add(editing_config_node);
                             }
 
-                            updateConfigNodeSelect(configProperty,configType,editing_config_node.id);
-
-                            if (configTypeDef.credentials) {
-                                updateNodeCredentials(editing_config_node,configTypeDef.credentials,"node-config-input");
-                            }
                             if (configTypeDef.oneditsave) {
                                 configTypeDef.oneditsave.call(editing_config_node);
+                            }
+                            if (configTypeDef.credentials) {
+                                updateNodeCredentials(editing_config_node,configTypeDef.credentials,"node-config-input");
                             }
                             validateNode(editing_config_node);
                             for (var i=0;i<editing_config_node.users.length;i++) {
                                 var user = editing_config_node.users[i];
                                 validateNode(user);
                             }
+
+                            updateConfigNodeSelect(configProperty,configType,editing_config_node.id);
 
                             RED.nodes.dirty(true);
                             RED.view.redraw(true);
