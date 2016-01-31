@@ -22,6 +22,7 @@
     width: 315px;
     background: #fff;
     box-sizing: border-box;
+    z-index: 100;
     @include component-border;
 }
 
@@ -46,13 +47,15 @@
     right: 315px;
     bottom:10px;
     width: 7px;
-    background: url(images/grip.png) no-repeat 50% 50%;
+    z-index: 101;
+    background: $background-color url(images/grip.png) no-repeat 50% 50%;
     cursor: col-resize;
 }
 
 .sidebar-closed > #sidebar { display: none; }
 .sidebar-closed > #sidebar-separator { right: 0px !important; }
 .sidebar-closed > #workspace { right: 7px !important; }
+.sidebar-closed > #editor-stack { right: 8px !important; }
 
 #sidebar .button {
     @include workspace-button;

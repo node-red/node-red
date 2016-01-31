@@ -62,9 +62,12 @@
         background: $workspace-button-background-active;
         cursor: default;
     }
-
     .button-group &:not(:first-child) {
         border-left: none;
+    }
+
+    &:focus {
+        outline: 1px solid $workspace-button-color-focus-outline;
     }
 }
 @mixin workspace-button-toggle {
