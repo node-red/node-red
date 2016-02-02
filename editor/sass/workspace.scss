@@ -17,7 +17,6 @@
 
 #chart {
    overflow: auto;
-   background: #e3e3e3;
    position: absolute;
    bottom:25px;
    top: 35px;
@@ -25,6 +24,7 @@
    right:0px;
    box-sizing:border-box;
    transition: right 0.2s ease;
+   fill: $back;
 }
 
 #chart svg:focus {
@@ -57,7 +57,7 @@
     right: 0;
     height: 35px;
     width: 35px;
-    background: #fff;
+    background: $back;
     border-bottom: 1px solid $primary-border-color;
 }
 

@@ -16,16 +16,16 @@
 
 
 #palette {
+    color: $fore;
     position: absolute;
     top: 0px;
     bottom: 0px;
     left:0px;
-    background: #f3f3f3;
+    background: $back-dark;
     width: 180px;
     text-align: center;
     @include disable-selection;
     @include component-border;
-
 }
 .palette-scroll {
     display: none;
@@ -48,27 +48,45 @@
     left:0;
     right:0;
     overflow: hidden;
-    background: #ffffff;
+    background: $back;
     text-align: center;
     height: 35px;
     padding: 3px;
     border-bottom: 1px solid $primary-border-color;
     box-sizing:border-box;
-}
-#palette-search i {
-    font-size: 10px;
-    color: #666;
-}
-#palette-search i.fa-search {
-    position: absolute;
-    pointer-events: none;
-    left: 12px;
-    top: 12px;
-}
-#palette-search i.fa-times {
-    position: absolute;
-    right: 7px;
-    top: 12px;
+    i {
+        font-size: 10px;
+        color: $fore;
+        &.fa-search {
+            position: absolute;
+            pointer-events: none;
+            left: 12px;
+            top: 12px;
+        }
+        &.fa-times {
+            position: absolute;
+            right: 7px;
+            top: 12px;
+        }
+    }
+    input {
+        background: $back;
+        color: $fore;
+        border-radius: 0;
+        border: none;
+        width: 100%;
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        padding: 3px 17px 3px 22px;
+        margin: 0px;
+        height: 30px;
+        box-sizing:border-box;
+        &:focus {
+            border: none;
+            box-shadow: none;
+            -webkit-box-shadow: none;
+        }
+    }
 }
 
 #palette-search-clear {
@@ -80,23 +98,7 @@
     display: none;
 }
 
-#palette-search input {
-    border-radius: 0;
-    border: none;
-    width: 100%;
-    box-shadow: none;
-    -webkit-box-shadow: none;
-    padding: 3px 17px 3px 22px;
-    margin: 0px;
-    height: 30px;
-    box-sizing:border-box;
-}
 
-#palette-search input:focus {
-    border: none;
-    box-shadow: none;
-    -webkit-box-shadow: none;
-}
 #palette-footer {
     @include component-footer;
 }
@@ -106,16 +108,16 @@
 
 
 .palette-category {
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid $primary-border-color;
 }
 .palette-content {
-    background: #fff;
+    background: $back;
     padding: 3px;
 }
 
 .palette-header {
     position: relative;
-    background: $palette-header-background;
+    background: $back-dark;
     cursor: pointer;
     text-align: left;
     padding: 9px;

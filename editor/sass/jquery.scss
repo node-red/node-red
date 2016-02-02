@@ -16,11 +16,11 @@
 
 .ui-widget {
     font-size: 14px !important;
-    font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
+    font-family: $font-family;
 }
 .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
     font-size: 14px !important;
-    font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
+    font-family: $font-family;
 }
 .ui-widget input {
     box-shadow: none;
@@ -39,28 +39,36 @@
 
 .ui-dialog {
     border-radius: 1px;
-    background: #fff;
+    background: $back;
+    color: $fore;
     padding: 0;
     @include component-shadow;
+}
+.ui-dialog label {
+    color: $fore;
 }
 .ui-dialog .ui-dialog-content {
     padding: 25px 25px 10px 25px;
 }
 .ui-dialog .ui-dialog-title {
     width: auto;
+    color: $fore;
 }
 .ui-dialog .ui-dialog-titlebar {
     padding: 10px;
-    background: #f3f3f3;
+    background: $back-dark;
     border: none;
-    border-bottom: 1px solid #999;
+    border-bottom: 1px solid $primary-border-color;
     border-radius: 0;
 }
 .ui-corner-all {
     border-radius: 1px;
 }
 .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
-    background: #f3f3f3;
+    background: $back-dark;
+}
+.ui-widget-content {
+    border-top: 1px solid $primary-border-color;
 }
 .ui-dialog-no-close .ui-dialog-titlebar-close {
     display: none;
@@ -74,5 +82,10 @@
     float: none;
 }
 .ui-dialog .ui-dialog-buttonpane {
+    background: $back;
     padding: .3em 1em .5em 1em;
+}
+.ui-dialog .ui-dialog-buttonpane button {
+    border-color: $primary-border-color;
+    color: $fore;
 }

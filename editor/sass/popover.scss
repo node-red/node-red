@@ -21,8 +21,9 @@
      width: 300px;
      padding: 10px;
      height: auto;
-     background: #fff;
-     
+     background: $popover-back;
+     color: $fore;
+
      z-index: 1000;
      font-size: 14px;
      line-height: 1.4em;
@@ -41,7 +42,7 @@
 
  .red-ui-popover:after {
  	border-color: rgba(136, 183, 213, 0);
- 	border-right-color: #fff;
+ 	border-right-color: $popover-back;
  	border-width: 10px;
  	margin-top: -10px;
  }
