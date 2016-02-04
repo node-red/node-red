@@ -91,8 +91,8 @@ module.exports = function(RED) {
         this.on("close", function() {
             if (tout) {
                 clearTimeout(tout);
-                node.status({});
             }
+            node.status({});
         });
     }
     RED.nodes.registerType("trigger",TriggerNode);
