@@ -153,7 +153,7 @@ function evaluateNodeProperty(value, type, node, msg) {
     if (type === 'str') {
         return ""+value;
     } else if (type === 'num') {
-        return Number(value);
+        return new Number(value);
     } else if (type === 'json') {
         return JSON.parse(value);
     } else if (type === 're') {
@@ -165,7 +165,7 @@ function evaluateNodeProperty(value, type, node, msg) {
     } else if (type === 'global' && node) {
         return node.context().global.get(value);
     } else if (type === 'bool') {
-        return /^true$/i.test(value)
+        return new Boolean(/^true$/i.test(value));
     }
     return value;
 }
