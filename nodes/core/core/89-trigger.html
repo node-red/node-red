@@ -19,6 +19,7 @@
         <span data-i18n="trigger.send"></span>
         <select id="node-input-op1type" style="width:200px !important">
             <option value="val" data-i18n="trigger.output.string"></option>
+            <option value="num" data-i18n="trigger.output.number"></option>
             <option value="pay" data-i18n="trigger.output.existing"></option>
             <option value="nul" data-i18n="trigger.output.nothing"></option>
         </select>
@@ -44,13 +45,17 @@
         <span data-i18n="trigger.then-send"></span>
         <select id="node-input-op2type" style="width:200px !important">
             <option value="val" data-i18n="trigger.output.string"></option>
+            <option value="num" data-i18n="trigger.output.number"></option>
             <option value="pay" data-i18n="trigger.output.existing"></option>
             <option value="nul" data-i18n="trigger.output.nothing"></option>
         </select>
         <input style="width: 145px !important" type="text" id="node-input-op2">
     </div>
     <div class="form-row node-type-wait">
-        <input type="checkbox" id="node-input-extend" style="margin-left: 5px; vertical-align: top; width: auto !important;"> <label style="width:auto !important;" for="node-input-extend" data-i18n="trigger.extend"></label>
+        <input type="checkbox" id="node-input-extend" style="margin-left: 0px; vertical-align: top; width: auto !important;"> <label style="width:auto !important;" for="node-input-extend" data-i18n="trigger.extend"></label>
+    </div>
+    <div class="form-row">
+        <span data-i18n="trigger.label.reset"></span><input type="text" id="node-input-reset" style="width:240px" data-i18n="[placeholder]trigger.label.resetprompt">
     </div>
     <br/>
     <div class="form-row">
@@ -88,7 +93,8 @@
             op2type: {value:"val"},
             duration: {value:"250",required:true,validate:RED.validators.number()},
             extend: {value:"false"},
-            units: {value: "ms"},
+            units: {value:"ms"},
+            reset: {value:""},
             name: {value:""}
         },
         inputs:1,
@@ -116,14 +122,14 @@
                 }
             });
             $("#node-input-op1type").change(function() {
-                if ($(this).val() == "val") {
+                if (($(this).val() == "val")||($(this).val() == "num")) {
                     $("#node-input-op1").show();
                 } else {
                     $("#node-input-op1").hide();
                 }
             });
             $("#node-input-op2type").change(function() {
-                if ($(this).val() == "val") {
+                if (($(this).val() == "val")||($(this).val() == "num")) {
                     $("#node-input-op2").show();
                 } else {
                     $("#node-input-op2").hide();

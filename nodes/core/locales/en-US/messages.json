@@ -177,8 +177,9 @@
         "then": "then",
         "then-send": "then send",
         "output": {
-            "string": "the string payload",
-            "existing": "the existing message",
+            "string": "the string",
+            "number": "the number",
+            "existing": "the existing msg.payload",
             "nothing": "nothing"
         },
         "wait-reset": "wait to be reset",
@@ -189,11 +190,13 @@
             "m": "Minutes",
             "h": "Hours"
         },
-        "extend": "extend delay if new message arrives",
-        "tip": "The node can be reset by sending a message with the <b>msg.reset</b> property set",
+        "extend": " extend delay if new message arrives",
+        "tip": "The node can also be reset by sending a message with the <b>msg.reset</b> property set to any value.",
         "label": {
             "trigger": "trigger",
-            "trigger-block": "trigger & block"
+            "trigger-block": "trigger & block",
+            "reset": "and reset if msg.payload == ",
+            "resetprompt": "(optional reset value)"
         }
     },
     "comment": {

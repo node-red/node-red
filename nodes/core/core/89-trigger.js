@@ -25,6 +25,7 @@ module.exports = function(RED) {
         this.op2type = n.op2type || "val";
         this.extend = n.extend || "false";
         this.units = n.units || "ms";
+        this.reset = n.reset || '';
         this.duration = n.duration || 250;
         if (this.duration <= 0) { this.duration = 0; }
         else {
@@ -34,24 +35,24 @@ module.exports = function(RED) {
         }
         this.op1Templated = this.op1.indexOf("{{") != -1;
         this.op2Templated = this.op2.indexOf("{{") != -1;
-        if (!isNaN(this.op1)) { this.op1 = Number(this.op1); }
-        if (!isNaN(this.op2)) { this.op2 = Number(this.op2); }
+        if ((this.op1type === "num") && (!isNaN(this.op1))) { this.op1 = Number(this.op1); }
+        if ((this.op2type === "num") && (!isNaN(this.op2))) { this.op2 = Number(this.op2); }
         if (this.op1 == "true") { this.op1 = true; }
         if (this.op2 == "true") { this.op2 = true; }
         if (this.op1 == "false") { this.op1 = false; }
         if (this.op2 == "false") { this.op2 = false; }
         if (this.op1 == "null") { this.op1 = null; }
         if (this.op2 == "null") { this.op2 = null; }
-        try { this.op1 = JSON.parse(this.op1); }
-        catch(e) { this.op1 = this.op1; }
-        try { this.op2 = JSON.parse(this.op2); }
-        catch(e) { this.op2 = this.op2; }
+        //try { this.op1 = JSON.parse(this.op1); }
+        //catch(e) { this.op1 = this.op1; }
+        //try { this.op2 = JSON.parse(this.op2); }
+        //catch(e) { this.op2 = this.op2; }
 
         var node = this;
         var tout = null;
         var m2;
         this.on("input", function(msg) {
-            if (msg.hasOwnProperty("reset")) {
+            if (msg.hasOwnProperty("reset") || ((node.reset !== '')&&(msg.payload == node.reset)) ) {
                 clearTimeout(tout);
                 tout = null;
                 node.status({});
