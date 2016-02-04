@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2015 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,8 +153,7 @@ function evaluateNodeProperty(value, type, node, msg) {
     if (type === 'str') {
         return ""+value;
     } else if (type === 'num') {
-        /*jshint -W053 */
-        return new Number(value);
+        return Number(value);
     } else if (type === 'json') {
         return JSON.parse(value);
     } else if (type === 're') {
@@ -166,8 +165,7 @@ function evaluateNodeProperty(value, type, node, msg) {
     } else if (type === 'global' && node) {
         return node.context().global.get(value);
     } else if (type === 'bool') {
-        /*jshint -W053 */
-        return new Boolean(/^true$/i.test(value));
+        return /^true$/i.test(value);
     }
     return value;
 }
