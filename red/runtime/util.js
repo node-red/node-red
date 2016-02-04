@@ -153,6 +153,7 @@ function evaluateNodeProperty(value, type, node, msg) {
     if (type === 'str') {
         return ""+value;
     } else if (type === 'num') {
+        /*jshint -W053 */
         return new Number(value);
     } else if (type === 'json') {
         return JSON.parse(value);
@@ -165,6 +166,7 @@ function evaluateNodeProperty(value, type, node, msg) {
     } else if (type === 'global' && node) {
         return node.context().global.get(value);
     } else if (type === 'bool') {
+        /*jshint -W053 */
         return new Boolean(/^true$/i.test(value));
     }
     return value;
