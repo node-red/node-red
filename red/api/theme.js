@@ -23,7 +23,8 @@ var clone = require("clone");
 var defaultContext = {
     page: {
         title: "Node-RED",
-        favicon: "favicon.ico"
+        favicon: "favicon.ico",
+        tabicon: "red/images/node-red-icon-black.svg"
     },
     header: {
         title: "Node-RED",
@@ -92,6 +93,13 @@ module.exports = {
                 url = serveFile(themeApp,"/favicon/",theme.page.favicon)
                 if (url) {
                     themeContext.page.favicon = url;
+                }
+            }
+            
+            if (theme.page.tabicon) {
+                url = serveFile(themeApp,"/tabicon/",theme.page.tabicon)
+                if (url) {
+                    themeContext.page.tabicon = url;
                 }
             }
 
