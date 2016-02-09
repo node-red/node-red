@@ -146,7 +146,7 @@
         "action": "Action",
         "for": "For",
         "delaymsg": "Delay message",
-        "ramdomdelay": "Random delay",
+        "randomdelay": "Random delay",
         "limitrate": "Limit rate to",
         "fairqueue": "Topic based fair queue",
         "milisecs": "Miliseconds",
@@ -165,7 +165,7 @@
         "label": {
             "delay": "delay",
             "limit": "limit",
-            "random": "ramdom",
+            "random": "random",
             "queue": "queue"
         },
         "error": {
