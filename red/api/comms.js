@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2015 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,15 @@ function start() {
             var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
             var path = settings.httpAdminRoot || "/";
             path = (path.slice(0,1) != "/" ? "/":"") + path + (path.slice(-1) == "/" ? "":"/") + "comms";
-            wsServer = new ws.Server({server:server,path:path});
+            wsServer = new ws.Server({
+                server:server,
+                path:path,
+                // Disable the deflate option due to this issue
+                //  https://github.com/websockets/ws/pull/632
+                // that is fixed in the 1.x release of the ws module
+                // that we cannot currently pickup as it drops node 0.10 support
+                perMessageDeflate: false
+            });
 
             wsServer.on('connection',function(ws) {
                 log.audit({event: "comms.open"});
