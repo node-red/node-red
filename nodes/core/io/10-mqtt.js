@@ -1,5 +1,5 @@
 /**
- * Copyright 2013,2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -306,6 +306,9 @@ module.exports = function(RED) {
         this.topic = n.topic;
         this.broker = n.broker;
         this.brokerConn = RED.nodes.getNode(this.broker);
+        if (!/^(#$|(\+|[^+#]*)(\/(\+|[^+#]*))*(\/(\+|#|[^+#]*))?$)/.test(this.topic)) {
+            return this.warn(RED._("mqtt.errors.invalid-topic"));
+        }
         var node = this;
         if (this.brokerConn) {
             this.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
