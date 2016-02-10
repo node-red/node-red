@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,6 +194,9 @@ function basicAuthMiddleware(user,pass) {
     }
 
     return function(req,res,next) {
+        if (req.method === 'OPTIONS') {
+            return next();
+        }
         var requestUser = basicAuth(req);
         if (!requestUser || requestUser.name !== user || !checkPassword(requestUser.pass)) {
             res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
