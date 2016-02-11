@@ -137,8 +137,11 @@
     "template": {
         "label": {
             "template": "Template",
-            "property": "Property",
-            "format": "Syntax Highlight"
+            "property": "Set property",
+            "format": "Syntax Highlight",
+            "syntax": "Format",
+            "mustache": "Mustache template",
+            "plain": "Plain text"
         },
         "templatevalue": "This is the payload: {{payload}} !"
     },

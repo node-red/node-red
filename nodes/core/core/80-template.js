@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,18 @@ module.exports = function(RED) {
         this.name = n.name;
         this.field = n.field || "payload";
         this.template = n.template;
+        this.syntax = n.syntax || "mustache";
         this.fieldType = n.fieldType || "msg";
 
         var node = this;
         node.on("input", function(msg) {
             try {
-                var value = mustache.render(node.template,msg);
+                var value;
+                if (node.syntax === "mustache") {
+                    value = mustache.render(node.template,msg);
+                } else {
+                    value = node.template;
+                }
                 if (node.fieldType === 'msg') {
                     RED.util.setMessageProperty(msg,node.field,value);
                 } else if (node.fieldType === 'flow') {

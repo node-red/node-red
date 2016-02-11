@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013, 2015 IBM Corp.
+  Copyright 2013, 2016 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@
         <input type="text" id="node-input-field" placeholder="payload" style="width:250px;">
         <input type="hidden" id="node-input-fieldType">
     </div>
-    <div class="form-row" style="margin-bottom: 0px;">
+    <div class="form-row" style="position: relative; margin-bottom: 0px;">
         <label for="node-input-template"><i class="fa fa-file-code-o"></i> <span data-i18n="template.label.template"></span></label>
         <input type="hidden" id="node-input-template" autofocus="autofocus">
-        <div style="float:right;margin-bottom: 3px; font-size: 0.8em;">
+        <div style="position: absolute; right:0;display:inline-block; text-align: right; font-size: 0.8em;">
             <span data-i18n="template.label.format"></span>:
-            <select id="node-input-format" style=" height: 20px; font-size: 1em !important; width:110px;">
+            <select id="node-input-format" style="width:110px; font-size: 10px !important;  height: 24px; padding:0;">
                 <option value="handlebars">mustache</option>
                 <option value="html">HTML</option>
                 <option value="json">JSON</option>
@@ -40,6 +40,13 @@
     </div>
     <div class="form-row node-text-editor-row">
         <div style="height: 250px;" class="node-text-editor" id="node-input-template-editor" ></div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-syntax"><i class="fa fa-code"></i> <span data-i18n="template.label.syntax"></span></label>
+        <select id="node-input-syntax" style="width:180px;">
+            <option value="mustache" data-i18n="template.label.mustache"></option>
+            <option value="plain" data-i18n="template.label.plain"></option>
+        </select>
     </div>
 </script>
 
@@ -69,6 +76,7 @@
             field: {value:"payload"},
             fieldType: {value:"msg"},
             format: {value:"handlebars"},
+            syntax: {value:"mustache"},
             template: {value:"This is the payload: {{payload}} !"},
         },
         inputs:1,
@@ -81,6 +89,10 @@
             var that = this;
             if (!this.fieldType) {
                 this.fieldType = 'msg';
+            }
+            if (!this.syntax) {
+                this.syntax = 'mustache';
+                $("#node-input-syntax").val(this.syntax);
             }
             $("#node-input-field").typedInput({
                 default: 'msg',
