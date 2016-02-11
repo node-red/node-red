@@ -15,6 +15,7 @@
  **/
 
 ul.red-ui-tabs {
+    background: $back;
     list-style-type: none;
     padding:0;
     margin: 0;
@@ -23,7 +24,6 @@ ul.red-ui-tabs {
     box-sizing:border-box;
     white-space: nowrap;
     border-bottom: 1px solid $primary-border-color;
-    background: #fff;
     @include disable-selection;
 }
 
@@ -45,12 +45,12 @@ ul.red-ui-tabs li {
 }
 
 ul.red-ui-tabs li a.red-ui-tab-label {
+    color: $fore;
     display: block;
     font-size: 14px;
     padding-left: 12px;
     width: 100%;
     height: 100%;
-    color: #666;
 }
 ul.red-ui-tabs li {
     position: relative;
@@ -68,7 +68,7 @@ ul.red-ui-tabs li {
     line-height: 28px;
     text-align: center;
     padding: 0px;
-    color: #aaa;
+    color: $fore;
     &:hover {
         background: $workspace-button-background-hover !important;
         opacity: 1;
@@ -79,7 +79,7 @@ ul.red-ui-tabs li:not(.active) a:hover+a.red-ui-tab-close {
 }
 
 ul.red-ui-tabs li.active a.red-ui-tab-close {
-    color: #aaa;
+    color: $fore;
     background: $tab-background-active;
     &:hover {
         background: $workspace-button-background-hover !important;
@@ -92,7 +92,7 @@ ul.red-ui-tabs li a:hover {
 }
 
 ul.red-ui-tabs li:not(.active) a:hover {
-    color: $workspace-button-color-hover;
+    color: $fore;
     background: $tab-background-hover;
 }
 
@@ -103,10 +103,10 @@ ul.red-ui-tabs li a:focus {
 ul.red-ui-tabs li.active {
     background: $tab-background-active;
     font-weight: bold;
-    border-bottom: 1px solid #fff;
+    border-bottom: 1px solid $back;
 }
 ul.red-ui-tabs li.active a {
-    color: #333;
+    color: $fore;
 }
 
 ul.red-ui-tabs li img {

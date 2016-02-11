@@ -14,10 +14,23 @@
  * limitations under the License.
  **/
 
-$form-placeholder-color: #bbbbbb;
-$form-text-color: #444;
+$back: white;
+$back-dark: darken($back,2%);
+$back-light: lighten($back,2%);
+
+$inactive: darken($back,8%);
+$hover: darken($back,4%);
+$fore: black;
+$color-disabled: darken($fore,5%);
+
+$primary-border-color: darken($back,7.5%);
+$secondary-border-color: darken($back,15%);
+
+$button-active: darken($back,2%);
+$popover-back: lighten($back,10%);
+
+$form-placeholder-color: darken($fore,5%);
 $form-input-focus-color:  rgba(85,150,230,0.8);
-$form-input-border-color:  #ccc;
 
 
 $node-selected-color: #ff7f0e;
@@ -26,12 +39,9 @@ $link-color: #888;
 $link-subflow-color: #bbb;
 $link-unknown-color: #f00;
 
-$primary-border-color: #bbbbbb;
-$secondary-border-color: #dddddd;
-
-$tab-background-active: #fff;
-$tab-background-inactive: #f0f0f0;
-$tab-background-hover: #ddd;
+$tab-background-active: $back;
+$tab-background-inactive: $inactive;
+$tab-background-hover: $hover;
 
 $palette-header-background: #f3f3f3;
 

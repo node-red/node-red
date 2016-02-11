@@ -30,10 +30,10 @@
 
 @mixin workspace-button {
     @include disable-selection;
-    color: $workspace-button-color;
+    color: $fore;
     box-sizing: border-box;
     display: inline-block;
-    background: $workspace-button-background;
+    background: $back;
     border: 1px solid $secondary-border-color;
     text-align: center;
     margin:0;
@@ -41,25 +41,25 @@
     cursor:pointer;
     &.disabled {
         cursor: default;
-        color: $workspace-button-color-disabled;
+        color: $color-disabled;
     }
     &:not(.disabled):hover {
         text-decoration: none;
-        color: $workspace-button-color-hover;
-        background: $workspace-button-background-hover;
+        color: $fore;
+        background: $hover;
     }
     &:not(.disabled):focus {
-        color: $workspace-button-color-focus;
+        color: $fore;
         text-decoration: none;
     }
     &:not(.disabled):active {
-        color: $workspace-button-color-active;
-        background: $workspace-button-background-active;
+        color: $fore;
+        background: $button-active;
         text-decoration: none;
     }
     &.selected:not(.disabled) {
-        color: $workspace-button-color-selected;
-        background: $workspace-button-background-active;
+        color: $fore;
+        background: $button-active;
         cursor: default;
     }
 
@@ -70,7 +70,7 @@
 
 @mixin component-footer {
     border-top: 1px solid $primary-border-color;
-    background: #f3f3f3;
+    background: $back;
     text-align: right;
     position: absolute;
     bottom: 0;

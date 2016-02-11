@@ -97,7 +97,7 @@ legend {
   margin-bottom: 20px;
   font-size: 21px;
   line-height: 40px;
-  color: #333333;
+  color: $fore;
   border: 0;
   border-bottom: 1px solid #e5e5e5;
 }
@@ -116,13 +116,18 @@ textarea {
   font-size: 14px;
   font-weight: normal;
   line-height: 20px;
+  background: $back-light;
+  color: $fore;
+}
+label {
+  background: $back;
 }
 
 input,
 button,
 select,
 textarea {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: $font-family;
 }
 
 label {
@@ -153,7 +158,7 @@ input[type="color"],
   margin-bottom: 10px;
   font-size: 14px;
   line-height: 20px;
-  color: #555555;
+  color: $fore;
   vertical-align: middle;
   border-radius: 4px;
 }
@@ -184,8 +189,7 @@ input[type="search"],
 input[type="tel"],
 input[type="color"],
 .uneditable-input {
-  background-color: #ffffff;
-  border: 1px solid $form-input-border-color;
+  border: 1px solid $primary-border-color;
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
      -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
           box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
@@ -208,6 +212,7 @@ input[type="tel"]:focus,
 input[type="color"]:focus,
 .uneditable-input:focus {
   border-color: $form-input-focus-color;
+  color: $fore;
   outline: 0;
   outline: thin dotted \9;
   /* IE6-9 */
@@ -248,8 +253,7 @@ input[type="file"] {
 
 select {
   width: 220px;
-  background-color: #ffffff;
-  border: 1px solid $form-input-border-color;
+  border: 1px solid $primary-border-color;
 }
 
 select[multiple],
@@ -495,7 +499,7 @@ input[readonly],
 select[readonly],
 textarea[readonly] {
   cursor: not-allowed;
-  background-color: #eeeeee;
+  background-color: $back-dark;
 }
 
 input[type="radio"][disabled],
@@ -772,8 +776,8 @@ select:focus:invalid:focus {
   font-weight: normal;
   line-height: 20px;
   text-align: center;
-  text-shadow: 0 1px 0 #ffffff;
-  background-color: #eeeeee;
+  text-shadow: 0 1px 0 $back;
+  background-color: $back-dark;
   border: 1px solid #ccc;
 }
 
