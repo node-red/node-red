@@ -303,6 +303,17 @@ module.exports = function(RED) {
                         }
                     }
                 }
+                else {
+                    for (var i in connectionPool) {
+                        if (Buffer.isBuffer(msg.payload)) {
+                            connectionPool[i].write(msg.payload);
+                        } else if (typeof msg.payload === "string" && node.base64) {
+                            connectionPool[i].write(new Buffer(msg.payload,'base64'));
+                        } else {
+                            connectionPool[i].write(new Buffer(""+msg.payload));
+                        }
+                    }
+                }
             });
         } else {
             var connectedSockets = [];
