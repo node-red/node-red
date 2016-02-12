@@ -60,7 +60,7 @@
     Buffer, string, or base64 encoded string. Supports multicast.</p>
     <p>It also provides <code>msg.ip</code> and <code>msg.port</code> set to the
     ip address and port from which the message was received.</p>
-    <p>On some systems you may need to be root to use ports below 1024 and/or broadcast.</p>
+    <p><b>Note</b>: On some systems you may need to be root to use ports below 1024 and/or broadcast.</p>
 </script>
 
 <script type="text/javascript">
@@ -166,10 +166,9 @@
 
 <script type="text/x-red" data-help-name="udp out">
     <p>This node sends <code>msg.payload</code> to the designated UDP host and port. Supports multicast.</p>
-    <p>You may also use <code>msg.ip</code> and <code>msg.port</code> to set the destination values.<br/>
-    <b>Note</b>: the statically configured values have precedence.</p>
+    <p>You may also use <code>msg.ip</code> and <code>msg.port</code> to set the destination values, but the statically configured values have precedence.</p>
     <p>If you select broadcast either set the address to the local broadcast ip address, or maybe try 255.255.255.255, which is the global broadcast address.</p>
-    <p>On some systems you may need to be root to use ports below 1024 and/or broadcast.</p>
+    <p><b>Note</b>: On some systems you may need to be root to use ports below 1024 and/or broadcast.</p>
 </script>
 
 <script type="text/javascript">
