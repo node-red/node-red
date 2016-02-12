@@ -68,12 +68,12 @@
 </script>
 
 <script type="text/x-red" data-help-name="csv">
-    <p>A function that parses the <b>msg.payload</b> to convert CSV to/from a javascript object.
+    <p>A function that parses the <code>msg.payload</code> to convert CSV to/from a javascript object.
     Places the result in the payload.</p>
     <p>If the input is a string it tries to parse it as CSV and creates a javascript object.</p>
     <p>If the input is a javascript object it tries to build a CSV string.</p>
     <p>If the input is a simple array the output is just a CSV generated from that array.</p>
-    <p>If the input is an array of arrays or an array of objects a multiple-line CSV is created.</p>
+    <p>If the input is an array of arrays, or an array of objects, a multiple-line CSV is created.</p>
     <p>The columns template should contain an ordered list of column headers. For CSV input these become the property names.
     For CSV output these specify the properties to extract from the object and the order for the CSV.</p>
     <p>If the input is an array then the columns template does not matter, but can be used to generate a row of column titles.</p>
