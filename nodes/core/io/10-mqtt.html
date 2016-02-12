@@ -28,8 +28,8 @@
 
 <script type="text/x-red" data-help-name="mqtt in">
     <p>MQTT input node. Connects to a broker and subscribes to the specified topic. The topic may contain MQTT wildcards.</p>
-    <p>Outputs an object called <b>msg</b> containing <b>msg.topic, msg.payload, msg.qos</b> and <b>msg.retain</b>.</p>
-    <p><b>msg.payload</b> is usually a string, but can also be a binary buffer.</p>
+    <p>Outputs an object called <code>msg</code> containing <code>msg.topic</code>, <code>msg.payload</code>, <code>msg.qos</code> and <code>msg.retain</code>.</p>
+    <p><code>msg.payload</code> is usually a string, but can also be a binary buffer.</p>
 </script>
 
 <script type="text/javascript">
@@ -84,9 +84,10 @@
 </script>
 
 <script type="text/x-red" data-help-name="mqtt out">
-    <p>Connects to a MQTT broker and publishes <b>msg.payload</b> either to the <b>msg.topic</b> or to the topic specified in the edit window. The value in the edit window has precedence.</p>
-    <p>Likewise QoS and/or retain values in the edit panel will overwrite any <b>msg.qos</b> and <b>msg.retain</b> properties. If nothing is set they default to <i>0</i> and <i>false</i> respectively.</p>
-    <p>If <b>msg.payload</b> contains an object it will be stringified before being sent.</p>
+    <p>Connects to a MQTT broker and publishes <code>msg.payload</code> either to the <code>msg.topic</code> or to the topic specified in the edit window. The value in the edit window has precedence.</p>
+    <p>Likewise QoS and/or retain values in the edit panel will overwrite any <code>msg.qos</code> and <code>msg.retain</code> properties. If nothing is set they default to <i>0</i> and <i>false</i> respectively.</p>
+    <p>If <code>msg.payload</code> contains an object it will be stringified before being sent.</p>
+    <p><code>msg.payload</code> can be a binary Buffer.</p>
 </script>
 
 <script type="text/javascript">

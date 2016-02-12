@@ -38,7 +38,7 @@
 
 <script type="text/x-red" data-help-name="websocket in">
     <p>WebSocket input node.</p>
-    <p>By default, the data received from the WebSocket will be in <b>msg.payload</b>.
+    <p>By default, the data received from the WebSocket will be in <code>msg.payload</code>.
     The socket can be configured to expect a properly formed JSON string, in which
     case it will parse the JSON and send on the resulting object as the entire message.</p>
 </script>
@@ -48,7 +48,7 @@
 (function() {
 
     function ws_oneditprepare() {
-        $("#websocket-client-row").hide();            
+        $("#websocket-client-row").hide();
         $("#node-input-mode").change(function(){
             if( $("#node-input-mode").val() === 'client') {
                 $("#websocket-server-row").hide();
@@ -59,7 +59,7 @@
                 $("#websocket-client-row").hide();
             }
         });
-    
+
         if(this.client) {
             $("#node-input-mode").val('client').change();
         }
@@ -67,24 +67,24 @@
             $("#node-input-mode").val('server').change();
         }
     }
-    
+
     function ws_oneditsave() {
         if($("#node-input-mode").val() === 'client') {
             $("#node-input-server").append('<option value="">Dummy</option>');
-            $("#node-input-server").val('');                
+            $("#node-input-server").val('');
         }
         else {
             $("#node-input-client").append('<option value="">Dummy</option>');
-            $("#node-input-client").val('');                
+            $("#node-input-client").val('');
         }
     }
-    
+
     function ws_label() {
         var nodeid = (this.client)?this.client:this.server;
         var wsNode = RED.nodes.node(nodeid);
         return this.name||(wsNode?"[ws] "+wsNode.label():"websocket");
     }
-    
+
     function ws_validateserver() {
         if($("#node-input-mode").val() === 'client' || (this.client && !this.server)) {
             return true;
@@ -93,7 +93,7 @@
             return RED.nodes.node(this.server) != null;
         }
     }
-    
+
     function ws_validateclient() {
         if($("#node-input-mode").val() === 'client' || (this.client && !this.server)) {
             return RED.nodes.node(this.client) != null;
@@ -121,7 +121,7 @@
         oneditsave: ws_oneditsave,
         oneditprepare: ws_oneditprepare
     });
-    
+
     RED.nodes.registerType('websocket out',{
         category: 'output',
         defaults: {
@@ -141,7 +141,7 @@
         oneditsave: ws_oneditsave,
         oneditprepare: ws_oneditprepare
     });
-    
+
     RED.nodes.registerType('websocket-listener',{
         category: 'config',
         defaults: {
@@ -152,7 +152,7 @@
         outputs:0,
         label: function() {
             var root = RED.settings.httpNodeRoot;
-            if (root.slice(-1) != "/") { 
+            if (root.slice(-1) != "/") {
                 root = root+"/";
             }
             if (this.path.charAt(0) == "/") {
@@ -164,7 +164,7 @@
         },
         oneditprepare: function() {
             var root = RED.settings.httpNodeRoot;
-            if (root.slice(-1) == "/") { 
+            if (root.slice(-1) == "/") {
                 root = root.slice(0,-1);
             }
             if (root == "") {
@@ -188,7 +188,7 @@
             return this.path;
         }
     });
-    
+
 })();
 </script>
 
@@ -217,15 +217,15 @@
 
 <script type="text/x-red" data-help-name="websocket out">
     <p>WebSocket out node.</p>
-    <p>By default, <b>msg.payload</b> will be sent over the WebSocket. The socket
-    can be configured to encode the entire message object as a JSON string and send that
+    <p>By default, <code>msg.payload</code> will be sent over the WebSocket. The socket
+    can be configured to encode the entire <code>msg</code> object as a JSON string and send that
     over the WebSocket.</p>
 
     <p>If the message arriving at this node started at a WebSocket In node, the message
     will be sent back to the client that triggered the flow. Otherwise, the message
     will be broadcast to all connected clients.</p>
     <p>If you want to broadcast a message that started at a WebSocket In node, you
-    should delete the <b>msg._session</b> property within the flow</p>.
+    should delete the <code>msg._session</code> property within the flow.</p>
 </script>
 
 <!-- WebSocket Server configuration node -->
