@@ -157,11 +157,11 @@
 </style>
 <script type="text/x-red" data-help-name="inject">
     <p>Pressing the button on the left side of the node allows a message on a topic
-       to be injected into the flow. This is mainly for test purposes.</p>
+       to be injected into the flow.</p>
     <p>The payload defaults to the current time in millisecs since 1970, but can
-       also be set to a String or left blank.</p>
+       also be set to various other javascript types.</p>
     <p>The repeat function allows the payload to be sent on the required schedule.</p>
-    <p>The <i>Fire once at start</i> option actually waits a short interval before firing
+    <p>The <i>Inject once at start</i> option actually waits a short interval before firing
        to give other nodes a chance to instantiate properly.</p>
     <p><b>Note: </b>"Interval between times" and "at a specific time" uses cron.
        This means that 20 minutes will be at the next hour, 20 minutes past and
