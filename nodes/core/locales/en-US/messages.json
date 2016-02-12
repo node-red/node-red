@@ -114,6 +114,13 @@
             "name": "Debug messages"
         }
     },
+    "link": {
+        "linkIn": "link in",
+        "linkOut": "link out",
+        "label": {
+            "event": "Event name"
+        }
+    },
     "exec": {
         "spawnerr": "Spawn command must be just the command - no spaces or extra parameters",
         "badstdout": "Bad STDOUT",
