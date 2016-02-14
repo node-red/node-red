@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,4 +75,24 @@
 }
 .ui-dialog .ui-dialog-buttonpane {
     padding: .3em 1em .5em 1em;
+}
+
+.ui-spinner {
+    border-radius: 4px;
+    padding: 0;
+    border: 1px solid $form-input-border-color;
+}
+.ui-spinner input {
+    margin: 0 17px 0 0;
+    padding: 6px;
+    border: none;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+       -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    &:focus {
+        outline: none;
+    }
 }

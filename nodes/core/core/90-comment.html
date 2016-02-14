@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013, 2015 IBM Corp.
+  Copyright 2013, 2016 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -55,9 +55,6 @@
         },
         oneditprepare: function() {
             var that = this;
-            $( "#node-input-outputs" ).spinner({
-                min:1
-            });
             this.editor = RED.editor.createEditor({
                 id: 'node-input-info-editor',
                 mode: 'ace/mode/markdown',
