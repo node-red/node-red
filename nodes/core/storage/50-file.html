@@ -71,8 +71,10 @@
 </script>
 
 <script type="text/x-red" data-help-name="file in">
-    <p>Reads the specified file and sends the content as <b>msg.payload</b>, and the filename as <b>msg.filename</b>.</p>
-    <p>The filename can be configured in the node, if left blank it should be set in an incoming message on <b>msg.filename</b>.</p>
+    <p>Reads the specified file and sends the content as <code>msg.payload</code>,
+    and the filename as <code>msg.filename</code>.</p>
+    <p>The filename can be configured in the node. If left blank it should be
+    set by <code>msg.filename</code> on the incoming message.</p>
 </script>
 
 <script type="text/javascript">
