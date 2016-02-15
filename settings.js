@@ -40,6 +40,10 @@ module.exports = {
     //  defaults to no timeout
     //socketTimeout: 120000,
 
+    // Timeout in milliseconds for HTTP request connections
+    //  defaults to 120 seconds
+    //httpRequestTimeout: 120000,
+
     // The maximum length, in characters, of any message sent to the debug sidebar tab
     debugMaxLength: 1000,
 

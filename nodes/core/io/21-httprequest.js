@@ -28,6 +28,8 @@ module.exports = function(RED) {
         var isTemplatedUrl = (nodeUrl||"").indexOf("{{") != -1;
         var nodeMethod = n.method || "GET";
         this.ret = n.ret || "txt";
+        if (RED.settings.httpRequestTimeout) { this.reqTimeout = parseInt(RED.settings.httpRequestTimeout) || 120000; }
+        else { this.reqTimeout = 120000; }
         var node = this;
 
         var prox, noprox;
@@ -161,6 +163,13 @@ module.exports = function(RED) {
                     node.send(msg);
                     node.status({});
                 });
+            });
+            req.setTimeout(node.reqTimeout, function() {
+                node.error(RED._("common.notification.errors.no-response"),msg);
+                setTimeout(function() {
+                    node.status({fill:"red",shape:"ring",text:"common.notification.errors.no-response"});
+                },10);
+                req.abort();
             });
             req.on('error',function(err) {
                 msg.payload = err.toString() + " : " + url;
