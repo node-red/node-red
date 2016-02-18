@@ -20,8 +20,8 @@ RED.sidebar.config = (function() {
     content.className = "sidebar-node-config"
 
     $('<div class="button-group sidebar-header">'+
-      '<a class="sidebar-header-button selected" id="workspace-config-node-filter-all" href="#"><span data-i18n="sidebar.config.filterAll"></span></a>'+
-      '<a class="sidebar-header-button" id="workspace-config-node-filter-unused" href="#"><span data-i18n="sidebar.config.filterUnused"></span></a> '+
+      '<a class="sidebar-header-button-toggle selected" id="workspace-config-node-filter-all" href="#"><span data-i18n="sidebar.config.filterAll"></span></a>'+
+      '<a class="sidebar-header-button-toggle" id="workspace-config-node-filter-unused" href="#"><span data-i18n="sidebar.config.filterUnused"></span></a> '+
       '</div>'
     ).appendTo(content);
 

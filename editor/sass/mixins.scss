@@ -30,9 +30,9 @@
 
 @mixin workspace-button {
     @include disable-selection;
-    color: $workspace-button-color;
     box-sizing: border-box;
     display: inline-block;
+    color: $workspace-button-color;
     background: $workspace-button-background;
     border: 1px solid $secondary-border-color;
     text-align: center;
@@ -67,6 +67,17 @@
         border-left: none;
     }
 }
+@mixin workspace-button-toggle {
+    @include workspace-button;
+    color: $workspace-button-color-selected;
+    background: $workspace-button-background-active;
+
+    &.selected:not(.disabled) {
+        color: $workspace-button-color;
+        background: $workspace-button-background;
+    }
+}
+
 
 @mixin component-footer {
     border-top: 1px solid $primary-border-color;

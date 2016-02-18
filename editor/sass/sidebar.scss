@@ -83,6 +83,12 @@
     line-height: 13px;
     padding: 5px 8px;
 }
+.sidebar-header-button-toggle {
+    @include workspace-button-toggle;
+    font-size: 13px;
+    line-height: 13px;
+    padding: 5px 8px;
+}
 .sidebar-header-button:not(:first-child) {
     border-left: none;
 }
