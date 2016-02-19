@@ -76,7 +76,7 @@ module.exports = function(RED) {
             this.verifyservercert = false;
         }
         if (typeof this.keepalive === 'undefined'){
-            this.keepalive = 15;
+            this.keepalive = 60;
         } else if (typeof this.keepalive === 'string') {
             this.keepalive = Number(this.keepalive);
         }
@@ -184,15 +184,14 @@ module.exports = function(RED) {
                     if (node.birthMessage) {
                         node.publish(node.birthMessage);
                     }
-
-                    // Send any queued messages
-                    while(node.queue.length) {
-                        var msg = node.queue.shift();
-                        //console.log(msg);
-                        node.publish(msg);
-                    }
                 });
-
+                node.client.on("reconnect", function() {
+                    for (var id in node.users) {
+                        if (node.users.hasOwnProperty(id)) {
+                            node.users[id].status({fill:"yellow",shape:"ring",text:"common.status.connecting"});
+                        }
+                    }
+                })
                 // Register disconnect handlers
                 node.client.on('close', function () {
                     if (node.connected) {
@@ -272,11 +271,6 @@ module.exports = function(RED) {
                     retain: msg.retain || false
                 };
                 node.client.publish(msg.topic, msg.payload, options, function (err){return});
-            } else {
-                if (!node.connecting) {
-                    node.connect();
-                }
-                node.queue.push(msg);
             }
         };
 

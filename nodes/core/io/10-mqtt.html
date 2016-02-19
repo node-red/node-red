@@ -27,9 +27,15 @@
 </script>
 
 <script type="text/x-red" data-help-name="mqtt in">
-    <p>MQTT input node. Connects to a broker and subscribes to the specified topic. The topic may contain MQTT wildcards.</p>
-    <p>Outputs an object called <code>msg</code> containing <code>msg.topic</code>, <code>msg.payload</code>, <code>msg.qos</code> and <code>msg.retain</code>.</p>
-    <p><code>msg.payload</code> is usually a string, but can also be a binary buffer.</p>
+    <p>Connects to a broker and subscribes to the specified topic.</p>
+    <p>Outputs a message with the properties:</p>
+    <ul>
+       <li><code>msg.topic</code></li>
+       <li><code>msg.payload</code></li>
+       <li><code>msg.qos</code></li>
+       <li><code>msg.retain</code></li>
+    </ul>
+    <p><code>msg.payload</code> will be a String, unless it is detected as a binary buffer.</p>
 </script>
 
 <script type="text/javascript">
@@ -84,10 +90,14 @@
 </script>
 
 <script type="text/x-red" data-help-name="mqtt out">
-    <p>Connects to a MQTT broker and publishes <code>msg.payload</code> either to the <code>msg.topic</code> or to the topic specified in the edit window. The value in the edit window has precedence.</p>
-    <p>Likewise QoS and/or retain values in the edit panel will overwrite any <code>msg.qos</code> and <code>msg.retain</code> properties. If nothing is set they default to <i>0</i> and <i>false</i> respectively.</p>
-    <p>If <code>msg.payload</code> contains an object it will be stringified before being sent.</p>
-    <p><code>msg.payload</code> can be a binary Buffer.</p>
+    <p>Connects to a MQTT broker and publishes messages.</p>
+    <p>The topic used can be configured in the node or, if left blank, can be set
+       by <code>msg.topic</code>.</p>
+    <p>Likewise the QoS and retain values can be configured in the node or, if left
+       blank, set by <code>msg.qos</code> and <code>msg.retain</code> respectively.
+       By default, messages are published at QoS 0 with the retain flag set to false.</p>
+    <p>If <code>msg.payload</code> contains an object it will be converted to JSON
+       before being sent.</p>
 </script>
 
 <script type="text/javascript">
@@ -227,7 +237,7 @@
             usetls: {value: false},
             verifyservercert: { value: false},
             compatmode: { value: true},
-            keepalive: {value:15,validate:RED.validators.number()},
+            keepalive: {value:60,validate:RED.validators.number()},
             cleansession: {value: true},
             willTopic: {value:""},
             willQos: {value:"0"},
