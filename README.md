@@ -66,4 +66,4 @@ For more open-source projects from IBM, head over [here](http://ibm.github.io).
 
 ## Copyright and license
 
-Copyright 2013, 2015 IBM Corp. under [the Apache 2.0 license](LICENSE).
+Copyright 2013, 2016 IBM Corp. under [the Apache 2.0 license](LICENSE).

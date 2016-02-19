@@ -35,12 +35,14 @@ var flowFile;
 var knownOpts = {
     "settings":[path],
     "userDir":[path],
+    "port": Number,
     "v": Boolean,
     "help": Boolean
 };
 var shortHands = {
     "s":["--settings"],
     "u":["--userDir"],
+    "p":["--port"],
     "?":["--help"]
 };
 nopt.invalidHandler = function(k,v,t) {
@@ -51,11 +53,13 @@ var parsedArgs = nopt(knownOpts,shortHands,process.argv,2)
 
 if (parsedArgs.help) {
     console.log("Node-RED v"+RED.version());
-    console.log("Usage: node-red [-v] [-?] [--settings settings.js] [--userDir DIR] [flows.json]");
+    console.log("Usage: node-red [-v] [-?] [--settings settings.js] [--userDir DIR]");
+    console.log("                [--port PORT] [flows.json]");
     console.log("");
     console.log("Options:");
     console.log("  -s, --settings FILE  use specified settings file");
     console.log("  -u, --userDir  DIR   use specified user directory");
+    console.log("  -p, --port     PORT  port to listen on");
     console.log("  -v                   enable verbose output");
     console.log("  -?, --help           show usage");
     console.log("");
@@ -153,7 +157,7 @@ if (settings.httpNodeRoot !== false) {
     settings.httpNodeAuth = settings.httpNodeAuth || settings.httpAuth;
 }
 
-settings.uiPort = settings.uiPort||1880;
+settings.uiPort = parsedArgs.port||settings.uiPort||1880;
 settings.uiHost = settings.uiHost||"0.0.0.0";
 
 if (flowFile) {
