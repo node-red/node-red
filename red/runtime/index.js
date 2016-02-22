@@ -24,6 +24,7 @@ var events = require("./events");
 var settings = require("./settings");
 var path = require('path');
 var fs = require("fs");
+var os = require("os");
 
 var runtimeMetricInterval = null;
 
@@ -94,6 +95,7 @@ function start() {
                 log.info(log._("runtime.version",{component:"Node-RED",version:"v"+settings.version}));
             }
             log.info(log._("runtime.version",{component:"Node.js ",version:process.version}));
+            log.info(os.type()+" "+os.release()+" "+os.arch()+" "+os.endianness());
             log.info(log._("server.loading"));
             return redNodes.load().then(function() {
 
