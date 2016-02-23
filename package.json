@@ -1,6 +1,6 @@
 {
     "name"         : "node-red",
-    "version"      : "0.13.2",
+    "version"      : "0.13.3",
     "description"  : "A visual tool for wiring the Internet of Things",
     "homepage"     : "http://nodered.org",
     "license"      : "Apache-2.0",
@@ -28,7 +28,7 @@
         "basic-auth": "1.0.3",
         "bcryptjs": "2.3.0",
         "body-parser": "1.15.0",
-        "cheerio":"0.20.0",
+        "cheerio":"0.19.0",
         "clone": "1.0.2",
         "cors":"2.7.1",
         "cron":"1.1.0",
