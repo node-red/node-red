@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2014 IBM Corp.
+ * Copyright 2013,2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
 
         this.filename = n.filename;
+        this.filetype = n.filetype || "text";
         this.split = n.split;
         var node = this;
 
@@ -34,24 +35,28 @@ module.exports = function(RED) {
         // TODO: rewrite to use node-tail
         var tail = spawn("tail", ["-F", "-n", "0", this.filename]);
         tail.stdout.on("data", function (data) {
-            if (node.split) {
-                // TODO: allow customisation of the line break - as we do elsewhere
-                var strings = data.toString().split("\n");
-                for (var s in strings) {
-                    //TODO: should we really filter blanks? Is that expected?
-                    if (strings[s] !== "") {
-                        node.send({
-                            topic: node.filename,
-                            payload: strings[s]
-                        });
+            var msg = { topic:node.filename };
+            if (this.filetype === "text") {
+                if (node.split) {
+                    // TODO: allow customisation of the line break - as we do elsewhere
+                    var strings = data.toString().split("\n");
+                    for (var s in strings) {
+                        //TODO: should we really filter blanks? Is that expected?
+                        if (strings[s] !== "") {
+                            node.send({
+                                topic: node.filename,
+                                payload: strings[s]
+                            });
+                        }
                     }
+                }
+                else {
+                    msg.payload = data.toString();
+                    node.send(msg);
                 }
             }
             else {
-                var msg = {
-                    topic:node.filename,
-                    payload: data.toString()
-                };
+                msg.payload = data;
                 node.send(msg);
             }
         });
