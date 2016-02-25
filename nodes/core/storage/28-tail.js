@@ -28,7 +28,7 @@ module.exports = function(RED) {
 
         this.filename = n.filename;
         this.filetype = n.filetype || "text";
-        this.split = n.split;
+        this.split = n.split || false;
         var node = this;
 
         var err = "";
@@ -36,7 +36,7 @@ module.exports = function(RED) {
         var tail = spawn("tail", ["-F", "-n", "0", this.filename]);
         tail.stdout.on("data", function (data) {
             var msg = { topic:node.filename };
-            if (this.filetype === "text") {
+            if (node.filetype === "text") {
                 if (node.split) {
                     // TODO: allow customisation of the line break - as we do elsewhere
                     var strings = data.toString().split("\n");
