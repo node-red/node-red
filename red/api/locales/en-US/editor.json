@@ -121,8 +121,9 @@
         }
     },
     "editor": {
-        "configEdit": "edit",
-        "configAdd": "add",
+        "configEdit": "Edit",
+        "configAdd": "Add",
+        "configUpdate": "Update",
         "configDelete": "Delete",
         "nodesUse": "__count__ node uses this config",
         "nodesUse_plural": "__count__ nodes use this config",

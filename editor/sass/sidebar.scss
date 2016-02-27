@@ -22,7 +22,7 @@
     width: 315px;
     background: #fff;
     box-sizing: border-box;
-    z-index: 100;
+    z-index: 10;
     @include component-border;
 }
 
@@ -47,7 +47,7 @@
     right: 315px;
     bottom:10px;
     width: 7px;
-    z-index: 101;
+    z-index: 11;
     background: $background-color url(images/grip.png) no-repeat 50% 50%;
     cursor: col-resize;
 }

@@ -97,9 +97,14 @@
     button {
         @include workspace-button;
         padding: 0.4em 1em;
-    }
+        margin-right: 8px;
 
+        &.leftButton {
+            margin-right: 40px;
+        }
+    }
 }
+
 #editor-shade {
     position: absolute;
     top:0;
