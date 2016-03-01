@@ -135,7 +135,7 @@ var localfilesystem = {
             } catch(err) {
                 settings.userDir = fspath.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE || process.env.NODE_RED_HOME,".node-red");
                 if (!settings.readOnly) {
-                    promises.push(promiseDir(settings.userDir));
+                    promises.push(promiseDir(fspath.join(settings.userDir,"node_modules")));
                 }
             }
         }
