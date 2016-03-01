@@ -350,7 +350,11 @@ RED.view = (function() {
                     }
 
                     if (nn._def.onadd) {
-                        nn._def.onadd.call(nn);
+                        try {
+                            nn._def.onadd.call(nn);
+                        } catch(err) {
+                            console.log("onadd:",err);
+                        }
                     }
                 } else {
                     var subflow = RED.nodes.subflow(m[1]);
@@ -1253,7 +1257,11 @@ RED.view = (function() {
                 d.dirty = true;
             }
             if (d._def.button.onclick) {
-                d._def.button.onclick.call(d);
+                try {
+                    d._def.button.onclick.call(d);
+                } catch(err) {
+                    console.log("Definition error: "+d.type+".onclick",err);
+                }
             }
             if (d.dirty) {
                 redraw();
@@ -1408,7 +1416,12 @@ RED.view = (function() {
                     var node = d3.select(this);
                     node.attr("id",d.id);
                     var l = d._def.label;
-                    l = (typeof l === "function" ? l.call(d) : l)||"";
+                    try {
+                        l = (typeof l === "function" ? l.call(d) : l)||"";
+                    } catch(err) {
+                        console.log("Definition error: "+d.type+".label",err);
+                        l = d.type;
+                    }
                     d.w = Math.max(node_width,gridSize*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/gridSize)) );
                     d.h = Math.max(node_height,(d.outputs||0) * 15);
 
@@ -1591,7 +1604,12 @@ RED.view = (function() {
                         //if (d.x < -50) deleteSelection();  // Delete nodes if dragged back to palette
                         if (d.resize) {
                             var l = d._def.label;
-                            l = (typeof l === "function" ? l.call(d) : l)||"";
+                            try {
+                                l = (typeof l === "function" ? l.call(d) : l)||"";
+                            } catch(err) {
+                                console.log("Definition error: "+d.type+".label",err);
+                                l = d.type;
+                            }
                             var ow = d.w;
                             d.w = Math.max(node_width,gridSize*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/gridSize)) );
                             d.h = Math.max(node_height,(d.outputs||0) * 15);
@@ -1659,20 +1677,33 @@ RED.view = (function() {
                                 });
                             }
                             thisNode.selectAll('text.node_label').text(function(d,i){
+                                    var l = "";
                                     if (d._def.label) {
-                                        if (typeof d._def.label == "function") {
-                                            return d._def.label.call(d);
-                                        } else {
-                                            return d._def.label;
+                                        l = d._def.label;
+                                        try {
+                                            l = (typeof l === "function" ? l.call(d) : l)||"";
+                                        } catch(err) {
+                                            console.log("Definition error: "+d.type+".label",err);
+                                            l = d.type;
                                         }
                                     }
-                                    return "";
+                                    return l;
                                 })
                                 .attr('y', function(d){return (d.h/2)-1;})
                                 .attr('class',function(d){
+                                    var s = "";
+                                    if (d._def.labelStyle) {
+                                        s = d._def.labelStyle;
+                                        try {
+                                            s = (typeof s === "function" ? s.call(d) : s)||"";
+                                        } catch(err) {
+                                            console.log("Definition error: "+d.type+".labelStyle",err);
+                                            s = "";
+                                        }
+                                        s = " "+s;
+                                    }
                                     return 'node_label'+
-                                    (d._def.align?' node_label_'+d._def.align:'')+
-                                    (d._def.labelStyle?' '+(typeof d._def.labelStyle == "function" ? d._def.labelStyle.call(d):d._def.labelStyle):'') ;
+                                    (d._def.align?' node_label_'+d._def.align:'')+s;
                             });
 
                             if (d._def.icon) {
@@ -1680,7 +1711,12 @@ RED.view = (function() {
                                 var current_url = icon.attr("xlink:href");
                                 var icon_url;
                                 if (typeof d._def.icon == "function") {
-                                    icon_url = d._def.icon.call(d);
+                                    try {
+                                        icon_url = d._def.icon.call(d);
+                                    } catch(err) {
+                                        console.log("icon",err);
+                                        icon_url = "arrow-in.png";
+                                    }
                                 } else {
                                     icon_url = d._def.icon;
                                 }
@@ -1744,7 +1780,12 @@ RED.view = (function() {
                             thisNode.selectAll('text.node_badge_label').text(function(d,i) {
                                 if (d._def.badge) {
                                     if (typeof d._def.badge == "function") {
-                                        return d._def.badge.call(d);
+                                        try {
+                                            return d._def.badge.call(d);
+                                        } catch(err) {
+                                            console.log("Definition error: "+d.type+".badge",err);
+                                            return "";
+                                        }
                                     } else {
                                         return d._def.badge;
                                     }

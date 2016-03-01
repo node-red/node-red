@@ -134,14 +134,14 @@ RED.palette = (function() {
             d.id = "palette_node_"+nodeTypeId;
             d.type = nt;
 
-            var label;
-
-            if (typeof def.paletteLabel === "undefined") {
-                label = /^(.*?)([ -]in|[ -]out)?$/.exec(nt)[1];
-            } else {
-                label = (typeof def.paletteLabel === "function" ? def.paletteLabel.call(def) : def.paletteLabel)||"";
+            var label = /^(.*?)([ -]in|[ -]out)?$/.exec(nt)[1];
+            if (typeof def.paletteLabel !== "undefined") {
+                try {
+                    label = (typeof def.paletteLabel === "function" ? def.paletteLabel.call(def) : def.paletteLabel)||"";
+                } catch(err) {
+                    console.log("Definition error: "+nt+".paletteLabel",err);
+                }
             }
-
 
             $('<div/>',{class:"palette_label"+(def.align=="right"?" palette_label_right":"")}).appendTo(d);
 
@@ -149,7 +149,12 @@ RED.palette = (function() {
 
 
             if (def.icon) {
-                var icon_url = (typeof def.icon === "function" ? def.icon.call({}) : def.icon);
+                var icon_url = "arrow-in.png";
+                try {
+                    icon_url = (typeof def.icon === "function" ? def.icon.call({}) : def.icon);
+                } catch(err) {
+                    console.log("Definition error: "+nt+".icon",err);
+                }
                 var iconContainer = $('<div/>',{class:"palette_icon_container"+(def.align=="right"?" palette_icon_container_right":"")}).appendTo(d);
                 $('<div/>',{class:"palette_icon",style:"background-image: url(icons/"+icon_url+")"}).appendTo(iconContainer);
             }

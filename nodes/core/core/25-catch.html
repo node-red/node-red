@@ -1,5 +1,5 @@
 <!--
-  Copyright 2015 IBM Corp.
+  Copyright 2015, 2016 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@
         outputs:1,
         icon: "alert.png",
         label: function() {
-            return this.name||this.scope?this._("catch.catchNodes",{number:this.scope.length}):this._("catch.catch");
+            return this.name||(this.scope?this._("catch.catchNodes",{number:this.scope.length}):this._("catch.catch"));
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
