@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ RED.library = (function() {
                 var li;
                 var a;
                 var ul = document.createElement("ul");
-                ul.id = "menu-item-import-library-submenu";
+                if (root === "") {
+                    ul.id = "menu-item-import-library-submenu";
+                }
                 ul.className = "dropdown-menu";
                 if (data.d) {
                     for (i in data.d) {
@@ -63,7 +65,17 @@ RED.library = (function() {
                 }
                 return ul;
             };
+            var examples;
+            if (data.d && data.d._examples_) {
+                examples = data.d._examples_;
+                delete data.d._examples_;
+            }
             var menu = buildMenu(data,"");
+            $("#menu-item-import-examples").remove();
+            if (examples) {
+                RED.menu.addItem("menu-item-import",{id:"menu-item-import-examples",label:RED._("menu.label.examples"),options:[]})
+                $("#menu-item-import-examples-submenu").replaceWith(buildMenu(examples,"_examples_"));
+            }
             //TODO: need an api in RED.menu for this
             $("#menu-item-import-library-submenu").replaceWith(menu);
         });

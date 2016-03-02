@@ -184,6 +184,12 @@ function getModuleNodeFiles(module) {
             }
         }
     }
+    var examplesDir = path.join(moduleDir,"examples");
+    try {
+        fs.statSync(examplesDir)
+        events.emit("node-examples-dir",{name:pkg.name,path:examplesDir});
+    } catch(err) {
+    }
     return results;
 }
 

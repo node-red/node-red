@@ -142,6 +142,8 @@ var RED = (function() {
                             RED.notify(RED._("palette.event.nodeDisabled", {count:msg.types.length})+typeList,"success");
                         }
                     }
+                    // Refresh flow library to ensure any examples are updated
+                    RED.library.loadFlowLibrary();
                 });
             }
         });
