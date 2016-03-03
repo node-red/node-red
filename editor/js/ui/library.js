@@ -38,7 +38,8 @@ RED.library = (function() {
                             li.className = "dropdown-submenu pull-left";
                             a = document.createElement("a");
                             a.href="#";
-                            a.innerHTML = i;
+                            var label = i.replace(/^node-red-contrib-/,"").replace(/^node-red-node-/,"");
+                            a.innerHTML = label;
                             li.appendChild(a);
                             li.appendChild(buildMenu(data.d[i],root+(root!==""?"/":"")+i));
                             ul.appendChild(li);
