@@ -38,7 +38,7 @@ RED.library = (function() {
                             li.className = "dropdown-submenu pull-left";
                             a = document.createElement("a");
                             a.href="#";
-                            var label = i.replace(/^node-red-contrib-/,"").replace(/^node-red-node-/,"");
+                            var label = i.replace(/^node-red-contrib-/,"").replace(/^node-red-node-/,"").replace(/-/," ").replace(/_/," "));
                             a.innerHTML = label;
                             li.appendChild(a);
                             li.appendChild(buildMenu(data.d[i],root+(root!==""?"/":"")+i));
@@ -56,7 +56,7 @@ RED.library = (function() {
                             a.flowName = root+(root!==""?"/":"")+data.f[i];
                             a.onclick = function() {
                                 $.get('library/flows/'+this.flowName, function(data) {
-                                        RED.view.importNodes(data);
+                                    RED.view.importNodes(data);
                                 });
                             };
                             li.appendChild(a);
@@ -130,7 +130,7 @@ RED.library = (function() {
                             $(".active",bc).removeClass("active");
                             bc.append(bcli);
                             $.getJSON("library/"+options.url+root+dirName,function(data) {
-                                    $("#node-select-library").children().first().replaceWith(buildFileList(root+dirName+"/",data));
+                                $("#node-select-library").children().first().replaceWith(buildFileList(root+dirName+"/",data));
                             });
                         }
                     })();
@@ -138,20 +138,20 @@ RED.library = (function() {
                     ul.appendChild(li);
                 } else {
                     // file
-                   li = buildFileListItem(v);
-                   li.innerHTML = v.name;
-                   li.onclick = (function() {
-                       var item = v;
-                       return function(e) {
-                           $(".list-selected",ul).removeClass("list-selected");
-                           $(this).addClass("list-selected");
-                           $.get("library/"+options.url+root+item.fn, function(data) {
-                                   selectedLibraryItem = item;
-                                   libraryEditor.setValue(data,-1);
-                           });
-                       }
-                   })();
-                   ul.appendChild(li);
+                    li = buildFileListItem(v);
+                    li.innerHTML = v.name;
+                    li.onclick = (function() {
+                        var item = v;
+                        return function(e) {
+                            $(".list-selected",ul).removeClass("list-selected");
+                            $(this).addClass("list-selected");
+                            $.get("library/"+options.url+root+item.fn, function(data) {
+                                selectedLibraryItem = item;
+                                libraryEditor.setValue(data,-1);
+                            });
+                        }
+                    })();
+                    ul.appendChild(li);
                 }
             }
             return ul;
@@ -441,8 +441,8 @@ RED.library = (function() {
                                         data: $("#node-input-library-filename").attr('nodes'),
                                         contentType: "application/json; charset=utf-8"
                                     }).done(function() {
-                                            RED.library.loadFlowLibrary();
-                                            RED.notify(RED._("library.savedNodes"),"success");
+                                        RED.library.loadFlowLibrary();
+                                        RED.notify(RED._("library.savedNodes"),"success");
                                     }).fail(function(xhr,textStatus,err) {
                                         RED.notify(RED._("library.saveFailed",{message:xhr.responseText}),"error");
                                     });
@@ -465,7 +465,7 @@ RED.library = (function() {
                     close: function(e) {
                         RED.keyboard.enable();
                     }
-            });
+                });
             exportToLibraryDialog.children(".dialog-form").append($(
                 '<div class="form-row">'+
                 '<label for="node-input-library-filename" data-i18n="[append]editor:library.filename"><i class="fa fa-file"></i> </label>'+
