@@ -94,7 +94,9 @@ function createNodeApi(node) {
     }
     red["_"] = function() {
         var args = Array.prototype.slice.call(arguments, 0);
-        args[0] = node.namespace+":"+args[0];
+        if (args[0].indexOf(":") === -1) {
+            args[0] = node.namespace+":"+args[0];
+        }
         return runtime.i18n._.apply(null,args);
     }
     return red;
