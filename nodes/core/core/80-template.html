@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013, 2015 IBM Corp.
+  Copyright 2013, 2016 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -16,32 +16,44 @@
 
 <script type="text/x-red" data-template-name="template">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-row" style="margin-bottom: 0px;">
-        <label for="node-input-template"><i class="fa fa-file-code-o"></i> Template</label>
+    <div class="form-row">
+        <label for="node-input-field"><i class="fa fa-edit"></i> <span data-i18n="template.label.property"></span></label>
+        <input type="text" id="node-input-field" placeholder="payload" style="width:250px;">
+        <input type="hidden" id="node-input-fieldType">
+    </div>
+    <div class="form-row" style="position: relative; margin-bottom: 0px;">
+        <label for="node-input-template"><i class="fa fa-file-code-o"></i> <span data-i18n="template.label.template"></span></label>
         <input type="hidden" id="node-input-template" autofocus="autofocus">
-        <select id="node-input-format" style=" font-size: 0.8em; margin-bottom: 3px; width:110px; float:right;">
-            <option value="handlebars">mustache</option>
-            <option value="html">HTML</option>
-            <option value="json">JSON</option>
-            <option value="markdown">Markdown</option>
-            <option value="text">none</option>
-        </select>
+        <div style="position: absolute; right:0;display:inline-block; text-align: right; font-size: 0.8em;">
+            <span data-i18n="template.label.format"></span>:
+            <select id="node-input-format" style="width:110px; font-size: 10px !important;  height: 24px; padding:0;">
+                <option value="handlebars">mustache</option>
+                <option value="html">HTML</option>
+                <option value="json">JSON</option>
+                <option value="markdown">Markdown</option>
+                <option value="text">none</option>
+            </select>
+        </div>
     </div>
     <div class="form-row node-text-editor-row">
         <div style="height: 250px;" class="node-text-editor" id="node-input-template-editor" ></div>
     </div>
     <div class="form-row">
-        <label for="node-input-field"><i class="fa fa-edit"></i> Property</label>
-        msg.<input type="text" id="node-input-field" placeholder="payload" style="width:170px;">
+        <label for="node-input-syntax"><i class="fa fa-code"></i> <span data-i18n="template.label.syntax"></span></label>
+        <select id="node-input-syntax" style="width:180px;">
+            <option value="mustache" data-i18n="template.label.mustache"></option>
+            <option value="plain" data-i18n="template.label.plain"></option>
+        </select>
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="template">
-    <p>Creates a new message based on the provided template.</p>
-    <p>This uses the <i><a href="http://mustache.github.io/mustache.5.html" target="_new">mustache</a></i> format.</p>
+    <p>Sets a property based on the provided template.</p>
+    <p>By default this uses the <i><a href="http://mustache.github.io/mustache.5.html" target="_new">mustache</a></i>
+    format, but this can be switched off if required.</p>
     <p>For example, when a template of:
     <pre>Hello {{name}}. Today is {{date}}</pre>
     <p>receives a message containing:
@@ -50,8 +62,10 @@
   date: "Monday"
   payload: ...
 }</pre>
-    <p>The resulting payload will be:
+    <p>The resulting property will be:
     <pre>Hello Fred. Today is Monday</pre>
+    <p>By default, mustache will escape any HTML entities in the values it substitutes.
+       To prevent this, use <code>{{{triple}}}</code> braces.
 </script>
 
 <script type="text/javascript">
@@ -61,7 +75,9 @@
         defaults: {
             name: {value:""},
             field: {value:"payload"},
+            fieldType: {value:"msg"},
             format: {value:"handlebars"},
+            syntax: {value:"mustache"},
             template: {value:"This is the payload: {{payload}} !"},
         },
         inputs:1,
@@ -72,35 +88,24 @@
         },
         oneditprepare: function() {
             var that = this;
-            function templateDialogResize() {
-                var rows = $("#dialog-form>div:not(.node-text-editor-row)");
-                var height = $("#dialog-form").height();
-                for (var i=0;i<rows.size();i++) {
-                    height -= $(rows[i]).outerHeight(true);
-                }
-                var editorRow = $("#dialog-form>div.node-text-editor-row");
-                height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
-                $(".node-text-editor").css("height",height+"px");
-                that.editor.resize();
-            };
-            $( "#dialog" ).on("dialogresize", templateDialogResize);
-            $( "#dialog" ).one("dialogopen", function(ev) {
-                var size = $( "#dialog" ).dialog('option','sizeCache-template');
-                if (size) {
-                    $("#dialog").dialog('option','width',size.width);
-                    $("#dialog").dialog('option','height',size.height);
-                    templateDialogResize();
-                }
+            if (!this.fieldType) {
+                this.fieldType = 'msg';
+            }
+            if (!this.syntax) {
+                this.syntax = 'mustache';
+                $("#node-input-syntax").val(this.syntax);
+            }
+            $("#node-input-field").typedInput({
+                default: 'msg',
+                types: ['msg','flow','global'],
+                typeField: $("#node-input-fieldType")
             });
-            $( "#dialog" ).one("dialogclose", function(ev,ui) {
-                var height = $( "#dialog" ).dialog('option','height');
-                $( "#dialog" ).off("dialogresize",templateDialogResize);
-            });
+
             this.editor = RED.editor.createEditor({
                 id: 'node-input-template-editor',
-                mode: 'ace/mode/html'
+                mode: 'ace/mode/html',
+                value: $("#node-input-template").val()
             });
-            this.editor.setValue($("#node-input-template").val(),-1);
             RED.library.create({
                 url:"functions", // where to get the data from
                 type:"function", // the type of object the library is for
@@ -108,7 +113,7 @@
                 fields:['name','outputs']
             });
             this.editor.focus();
-            
+
             $("#node-input-format").change(function() {
                 var mod = "ace/mode/"+$("#node-input-format").val();
                 that.editor.getSession().setMode({
@@ -120,6 +125,17 @@
         oneditsave: function() {
             $("#node-input-template").val(this.editor.getValue())
             delete this.editor;
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+            var height = $("#dialog-form").height();
+            for (var i=0;i<rows.size();i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-text-editor-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            $(".node-text-editor").css("height",height+"px");
+            this.editor.resize();
         }
     });
 </script>

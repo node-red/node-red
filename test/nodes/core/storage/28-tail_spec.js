@@ -17,9 +17,7 @@
 var should = require("should");
 var path = require('path');
 var fs = require('fs-extra');
-var mkdirp = require('mkdirp');
 var sinon = require('sinon');
-
 var tailNode = require("../../../../nodes/core/storage/28-tail.js");
 var helper = require("../../helper.js");
 
@@ -90,8 +88,26 @@ describe('tail Node', function() {
         });
     });
 
+    it('should work in binary mode', function(done) {
+        var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "filetype":"binary", "filename":fileToTail, "wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(tailNode, flow, function() {
+            var tailNode1 = helper.getNode("tailNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            helperNode1.on("input", function(msg) {
+                //console.log(msg);
+                msg.should.have.property('topic', fileToTail);
+                msg.payload.toString().should.equal("Tail message line 7\nTail message line 8\n");
+                done();
+            });
+            setTimeout( function() {
+                fs.appendFileSync(fileToTail, "Tail message line 7\nTail message line 8\n");
+            },wait);
+        });
+    });
+
     it('should handle a non-existent file', function(done) {
-        fs.unlinkSync(fileToTail);
+        fs.writeFileSync(fileToTail, "Tail message line.\n");
         var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail, "wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(tailNode, flow, function() {
@@ -102,9 +118,12 @@ describe('tail Node', function() {
                 msg.payload.should.equal("Tail message line");
                 done();
             });
+            setTimeout(function(){
+                fs.unlinkSync(fileToTail);
+            },500);
             setTimeout( function() {
                 fs.writeFile(fileToTail, "Tail message line\n");
-            },wait);
+            },1000);
         });
     });
 

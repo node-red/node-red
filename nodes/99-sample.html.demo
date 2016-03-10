@@ -28,7 +28,7 @@
    <!-- Generally, there should be an input for each property of the node.   -->
    <!-- The for and id attributes identify the corresponding property        -->
    <!-- (with the 'node-input-' prefix).                                     -->
-   <!-- The available icon classes are defined Twitter Bootstrap glyphicons  -->
+   <!-- The available icon classes are defined Font Awesome Icons (FA Icons) -->
     <div class="form-row">
         <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
         <input type="text" id="node-input-topic" placeholder="Topic">
@@ -52,8 +52,8 @@
    <!-- node in the palette.                                                 -->
    <p>Simple sample input node. Just sends a single message when it starts up.
    This is not very useful.</p>
-   <p>Outputs an object called <b>msg</b> containing <b>msg.topic</b> and
-   <b>msg.payload</b>. msg.payload is a String.</p>
+   <p>Outputs an object called <code>msg</code> containing <code>msg.topic</code> and
+   <code>msg.payload</code>. msg.payload is a String.</p>
 </script>
 
 <!-- Finally, the node type is registered along with all of its properties   -->

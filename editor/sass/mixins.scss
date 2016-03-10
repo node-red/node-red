@@ -1,0 +1,111 @@
+/**
+ * Copyright 2015 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+@mixin disable-selection {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+@mixin component-border {
+   border: 1px solid $primary-border-color;
+   box-sizing: border-box;
+
+}
+
+@mixin workspace-button {
+    @include disable-selection;
+    box-sizing: border-box;
+    display: inline-block;
+    color: $workspace-button-color;
+    background: $workspace-button-background;
+    border: 1px solid $secondary-border-color;
+    text-align: center;
+    margin:0;
+    text-decoration: none;
+    cursor:pointer;
+    &.disabled {
+        cursor: default;
+        color: $workspace-button-color-disabled;
+    }
+    &:not(.disabled):hover {
+        text-decoration: none;
+        color: $workspace-button-color-hover;
+        background: $workspace-button-background-hover;
+    }
+    &:not(.disabled):focus {
+        color: $workspace-button-color-focus;
+        text-decoration: none;
+    }
+    &:not(.disabled):active {
+        color: $workspace-button-color-active;
+        background: $workspace-button-background-active;
+        text-decoration: none;
+    }
+    &.selected:not(.disabled) {
+        color: $workspace-button-color-selected;
+        background: $workspace-button-background-active;
+        cursor: default;
+    }
+
+    .button-group &:not(:first-child) {
+        border-left: none;
+    }
+}
+@mixin workspace-button-toggle {
+    @include workspace-button;
+    color: $workspace-button-color-selected;
+    background: $workspace-button-background-active;
+
+    &.selected:not(.disabled) {
+        color: $workspace-button-color;
+        background: $workspace-button-background;
+    }
+}
+
+
+@mixin component-footer {
+    border-top: 1px solid $primary-border-color;
+    background: #f3f3f3;
+    text-align: right;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 25px;
+    line-height: 23px;
+    padding: 0 10px;
+}
+
+@mixin component-footer-button {
+    @include workspace-button;
+    font-size: 11px;
+    line-height: 17px;
+    width: 18px;
+    height: 18px;
+    &.text-button {
+        width: auto;
+        padding: 0 5px;
+    }
+}
+
+@mixin component-shadow {
+    border: 1px solid $secondary-border-color;
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+
+}

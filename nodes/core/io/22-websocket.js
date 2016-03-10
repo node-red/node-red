@@ -1,5 +1,5 @@
 /**
- * Copyright 2013,2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 module.exports = function(RED) {
     "use strict";
-    var ws = require("ws"),
-        inspect = require("sys").inspect;
+    var ws = require("ws");
+    var inspect = require("util").inspect;
 
     // A node red node that sets up a local websocket server
     function WebSocketListenerNode(n) {
         // Create a RED node
         RED.nodes.createNode(this,n);
-
         var node = this;
 
         // Store local copies of the node configuration (as defined in the .html)
@@ -32,25 +31,41 @@ module.exports = function(RED) {
 
         node._inputNodes = [];    // collection of nodes that want to receive events
         node._clients = {};
+        // match absolute url
+        node.isServer = !/^ws{1,2}:\/\//i.test(node.path);
+        node.closing = false;
+
+        function startconn() {    // Connect to remote endpoint
+            var socket = new ws(node.path);
+            node.server = socket; // keep for closing
+            handleConnection(socket);
+        }
 
         function handleConnection(/*socket*/socket) {
             var id = (1+Math.random()*4294967295).toString(16);
-            node._clients[id] = socket;
+            if (node.isServer) { node._clients[id] = socket; node.emit('opened',Object.keys(node._clients).length); }
+            socket.on('open',function() {
+                if (!node.isServer) { node.emit('opened',''); }
+            });
             socket.on('close',function() {
-                delete node._clients[id];
+                if (node.isServer) { delete node._clients[id]; node.emit('closed',Object.keys(node._clients).length); }
+                else { node.emit('closed'); }
+                if (!node.closing && !node.isServer) {
+                    node.tout = setTimeout(function(){ startconn(); }, 3000); // try to reconnect every 3 secs... bit fast ?
+                }
             });
             socket.on('message',function(data,flags){
                 node.handleEvent(id,socket,'message',data,flags);
             });
             socket.on('error', function(err) {
-                node.warn("An error occured on the ws connection: "+inspect(err));
+                node.emit('erro');
+                if (!node.closing && !node.isServer) {
+                    node.tout = setTimeout(function(){ startconn(); }, 3000); // try to reconnect every 3 secs... bit fast ?
+                }
             });
         }
 
-        // match absolute url
-        node.isServer = !/^ws{1,2}:\/\//i.test(node.path);
-        if(node.isServer)
-        {
+        if (node.isServer) {
             var path = RED.settings.httpNodeRoot || "/";
             path = path + (path.slice(-1) == "/" ? "":"/") + (node.path.charAt(0) == "/" ? node.path.substring(1) : node.path);
 
@@ -67,7 +82,15 @@ module.exports = function(RED) {
             RED.server.addListener('newListener',storeListener);
 
             // Create a WebSocket Server
-            node.server = new ws.Server({server:RED.server,path:path});
+            node.server = new ws.Server({
+                server:RED.server,
+                path:path,
+                // Disable the deflate option due to this issue
+                //  https://github.com/websockets/ws/pull/632
+                // that is fixed in the 1.x release of the ws module
+                // that we cannot currently pickup as it drops node 0.10 support
+                perMessageDeflate: false
+            });
 
             // Workaround https://github.com/einaros/ws/pull/253
             // Stop listening for new listener events
@@ -75,36 +98,48 @@ module.exports = function(RED) {
 
             node.server.on('connection', handleConnection);
         }
-        else
-        {
-            // Connect to remote endpoint
-            var socket = new ws(node.path);
-            node.server = socket; // keep for closing
-            handleConnection(socket);
+        else {
+            node.closing = false;
+            startconn(); // start outbound connection
         }
 
         node.on("close", function() {
             // Workaround https://github.com/einaros/ws/pull/253
             // Remove listeners from RED.server
-            var listener = null;
-            for(var event in node._serverListeners) {
-                if (node._serverListeners.hasOwnProperty(event)) {
-                    listener = node._serverListeners[event];
-                    if(typeof listener === "function"){
-                        RED.server.removeListener(event,listener);
+            if (node.isServer) {
+                var listener = null;
+                for (var event in node._serverListeners) {
+                    if (node._serverListeners.hasOwnProperty(event)) {
+                        listener = node._serverListeners[event];
+                        if (typeof listener === "function") {
+                            RED.server.removeListener(event,listener);
+                        }
                     }
                 }
+                node._serverListeners = {};
+                node.server.close();
+                node._inputNodes = [];
             }
-            node._serverListeners = {};
-            node.server.close();
-            node._inputNodes = [];
+            else {
+                node.closing = true;
+                node.server.close();
+                if (node.tout) { clearTimeout(node.tout); }
+            }
         });
     }
     RED.nodes.registerType("websocket-listener",WebSocketListenerNode);
     RED.nodes.registerType("websocket-client",WebSocketListenerNode);
 
-    WebSocketListenerNode.prototype.registerInputNode = function(/*Node*/handler){
+    WebSocketListenerNode.prototype.registerInputNode = function(/*Node*/handler) {
         this._inputNodes.push(handler);
+    }
+
+    WebSocketListenerNode.prototype.removeInputNode = function(/*Node*/handler) {
+        this._inputNodes.forEach(function(node, i, inputNodes) {
+            if (node === handler) {
+                inputNodes.splice(i, 1);
+            }
+        });
     }
 
     WebSocketListenerNode.prototype.handleEvent = function(id,/*socket*/socket,/*String*/event,/*Object*/data,/*Object*/flags){
@@ -122,13 +157,12 @@ module.exports = function(RED) {
             };
         }
         msg._session = {type:"websocket",id:id};
-
         for (var i = 0; i < this._inputNodes.length; i++) {
             this._inputNodes[i].send(msg);
         }
     }
 
-    WebSocketListenerNode.prototype.broadcast = function(data){
+    WebSocketListenerNode.prototype.broadcast = function(data) {
         try {
             if(this.isServer) {
                 for (var i = 0; i < this.server.clients.length; i++) {
@@ -162,9 +196,18 @@ module.exports = function(RED) {
         this.serverConfig = RED.nodes.getNode(this.server);
         if (this.serverConfig) {
             this.serverConfig.registerInputNode(this);
+            // TODO: nls
+            this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:"connected "+n}); });
+            this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"error"}); });
+            this.serverConfig.on('closed', function() { node.status({fill:"red",shape:"ring",text:"disconnected"}); });
         } else {
-            this.error("Missing server configuration");
+            this.error(RED._("websocket.errors.missing-conf"));
         }
+
+        this.on('close', function() {
+            node.serverConfig.removeInputNode(node);
+        });
+
     }
     RED.nodes.registerType("websocket in",WebSocketInNode);
 
@@ -174,7 +217,13 @@ module.exports = function(RED) {
         this.server = (n.client)?n.client:n.server;
         this.serverConfig = RED.nodes.getNode(this.server);
         if (!this.serverConfig) {
-            this.error("Missing server configuration");
+            this.error(RED._("websocket.errors.missing-conf"));
+        }
+        else {
+            // TODO: nls
+            this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:"connected "+n}); });
+            this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"error"}); });
+            this.serverConfig.on('closed', function() { node.status({fill:"red",shape:"ring",text:"disconnected"}); });
         }
         this.on("input", function(msg) {
             var payload;
@@ -195,7 +244,7 @@ module.exports = function(RED) {
                 } else {
                     node.serverConfig.broadcast(payload,function(error){
                         if (!!error) {
-                            node.warn("An error occurred while sending:" + inspect(error));
+                            node.warn(RED._("websocket.errors.send-error")+inspect(error));
                         }
                     });
                 }

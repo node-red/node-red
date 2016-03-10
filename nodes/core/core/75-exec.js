@@ -23,23 +23,31 @@ module.exports = function(RED) {
     function ExecNode(n) {
         RED.nodes.createNode(this,n);
         this.cmd = (n.command || "").trim();
+        if (n.addpay === undefined) { n.addpay = true; }
         this.addpay = n.addpay;
         this.append = (n.append || "").trim();
         this.useSpawn = n.useSpawn;
+        this.activeProcesses = {};
 
         var node = this;
         this.on("input", function(msg) {
-            node.status({fill:"blue",shape:"dot"});
+            node.status({fill:"blue",shape:"dot",text:" "});
             if (this.useSpawn === true) {
                 // make the extra args into an array
                 // then prepend with the msg.payload
-                if (typeof(msg.payload !== "string")) { msg.payload = (msg.payload || "").toString(); }
-                var arg = [];
-                if (node.append.length > 0) { arg = node.append.split(","); }
-                if ((node.addpay === true) && (msg.payload.trim() !== "")) { arg.unshift(msg.payload); }
-                if (RED.settings.verbose) { node.log(node.cmd+" ["+arg+"]"); }
-                if (node.cmd.indexOf(" ") == -1) {
-                    var ex = spawn(node.cmd,arg);
+
+                var arg = node.cmd;
+                if (node.addpay) {
+                    arg += " "+msg.payload;
+                }
+                arg += " "+node.append;
+                // slice whole line by spaces (trying to honour quotes);
+                arg = arg.match(/(?:[^\s"]+|"[^"]*")+/g);
+                var cmd = arg.shift();
+                if (RED.settings.verbose) { node.log(cmd+" ["+arg+"]"); }
+                if (cmd.indexOf(" ") == -1) {
+                    var ex = spawn(cmd,arg);
+                    node.activeProcesses[ex.pid] = ex;
                     ex.stdout.on('data', function (data) {
                         //console.log('[exec] stdout: ' + data);
                         if (isUtf8(data)) { msg.payload = data.toString(); }
@@ -54,24 +62,30 @@ module.exports = function(RED) {
                     });
                     ex.on('close', function (code) {
                         //console.log('[exec] result: ' + code);
+                        delete node.activeProcesses[ex.pid];
                         msg.payload = code;
                         node.status({});
                         node.send([null,null,msg]);
                     });
                     ex.on('error', function (code) {
+                        delete node.activeProcesses[ex.pid];
                         node.error(code,msg);
                     });
                 }
-                else { node.error("Spawn command must be just the command - no spaces or extra parameters"); }
+                else { node.error(RED._("exec.spawnerr")); }
             }
             else {
                 var cl = node.cmd;
-                if ((node.addpay === true) && ((msg.payload || "").trim() !== "")) { cl += " "+msg.payload; }
+                if ((node.addpay === true) && ((msg.payload.toString() || "").trim() !== "")) { cl += " "+msg.payload; }
                 if (node.append.trim() !== "") { cl += " "+node.append; }
                 if (RED.settings.verbose) { node.log(cl); }
                 var child = exec(cl, {encoding: 'binary', maxBuffer:10000000}, function (error, stdout, stderr) {
                     msg.payload = new Buffer(stdout,"binary");
-                    if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
+                    try {
+                        if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
+                    } catch(e) {
+                        node.log(RED._("exec.badstdout"));
+                    }
                     var msg2 = {payload:stderr};
                     var msg3 = null;
                     //console.log('[exec] stdout: ' + stdout);
@@ -82,8 +96,19 @@ module.exports = function(RED) {
                     }
                     node.status({});
                     node.send([msg,msg2,msg3]);
+                    delete node.activeProcesses[child.pid];
                 });
+                child.on('error',function(){})
+                node.activeProcesses[child.pid] = child;
             }
+        });
+        this.on('close',function() {
+            for (var pid in node.activeProcesses) {
+                if (node.activeProcesses.hasOwnProperty(pid)) {
+                    node.activeProcesses[pid].kill();
+                }
+            }
+            node.activeProcesses = {};
         });
     }
     RED.nodes.registerType("exec",ExecNode);

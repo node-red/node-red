@@ -22,8 +22,10 @@ var Tokens = require("./tokens");
 var Users = require("./users");
 var permissions = require("./permissions");
 
+var theme = require("../theme");
+
 var settings = null;
-var log = require("../../log");
+var log = null
 
 
 passport.use(strategies.bearerStrategy.BearerStrategy);
@@ -34,11 +36,13 @@ var server = oauth2orize.createServer();
 
 server.exchange(oauth2orize.exchange.password(strategies.passwordTokenExchange));
 
-function init(_settings,storage) {
-    settings = _settings;
+function init(runtime) {
+    settings = runtime.settings;
+    log = runtime.log;
     if (settings.adminAuth) {
         Users.init(settings.adminAuth);
-        Tokens.init(settings.adminAuth,storage);
+        Tokens.init(settings.adminAuth,runtime.storage);
+        strategies.init(runtime);
     }
 }
 
@@ -52,7 +56,8 @@ function needsPermission(permission) {
                 if (permissions.hasPermission(req.authInfo.scope,permission)) {
                     return next();
                 }
-                return res.send(401);
+                log.audit({event: "permission.fail"},req);
+                return res.status(401).end();
             });
         } else {
             next();
@@ -80,6 +85,9 @@ function login(req,res) {
             "type":"credentials",
             "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"}]
         }
+        if (theme.context().login && theme.context().login.image) {
+            response.image = theme.context().login.image;
+        }
     }
     res.json(response);
 }
@@ -88,7 +96,8 @@ function revoke(req,res) {
     var token = req.body.token;
     // TODO: audit log
     Tokens.revoke(token).then(function() {
-        res.send(200);
+        log.audit({event: "auth.login.revoke"},req);
+        res.status(200).end();
     });
 }
 

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2014 IBM Corp.
+# Copyright 2014,2016 IBM Corp.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,15 +15,19 @@
 
 # Import library functions we need
 import RPi.GPIO as GPIO
+import struct
 import sys
+import os
+import subprocess
+from time import sleep
 
-bounce = 20     # bounce time in mS to apply
+bounce = 25;
 
 if sys.version_info >= (3,0):
     print("Sorry - currently only configured to work with python 2.x")
     sys.exit(1)
 
-if len(sys.argv) > 1:
+if len(sys.argv) > 2:
     cmd = sys.argv[1].lower()
     pin = int(sys.argv[2])
     GPIO.setmode(GPIO.BOARD)
@@ -92,18 +96,18 @@ if len(sys.argv) > 1:
 
     elif cmd == "in":
         #print "Initialised pin "+str(pin)+" to IN"
+        bounce = int(sys.argv[4])
         def handle_callback(chan):
+            sleep(bounce/1000)
             print GPIO.input(chan)
 
-        if len(sys.argv) == 4:
-            if sys.argv[3].lower() == "up":
-                GPIO.setup(pin,GPIO.IN,GPIO.PUD_UP)
-            elif sys.argv[3].lower() == "down":
-                GPIO.setup(pin,GPIO.IN,GPIO.PUD_DOWN)
-            else:
-                GPIO.setup(pin,GPIO.IN)
+        if sys.argv[3].lower() == "up":
+            GPIO.setup(pin,GPIO.IN,GPIO.PUD_UP)
+        elif sys.argv[3].lower() == "down":
+            GPIO.setup(pin,GPIO.IN,GPIO.PUD_DOWN)
         else:
             GPIO.setup(pin,GPIO.IN)
+
         print GPIO.input(pin)
         GPIO.add_event_detect(pin, GPIO.BOTH, callback=handle_callback, bouncetime=bounce)
 
@@ -166,12 +170,6 @@ if len(sys.argv) > 1:
             except:
                 data = 0
 
-    elif cmd == "rev":
-        print GPIO.RPI_REVISION
-
-    elif cmd == "ver":
-        print GPIO.VERSION
-
     elif cmd == "mouse":  # catch mice button events
         file = open( "/dev/input/mice", "rb" )
         oldbutt = 0
@@ -193,5 +191,40 @@ if len(sys.argv) > 1:
                 file.close()
                 sys.exit(0)
 
+    elif cmd == "kbd":  # catch keyboard button events
+        try:
+            while not os.path.isdir("/dev/input/by-path"):
+                time.sleep(10)
+            infile = subprocess.check_output("ls /dev/input/by-path/ | grep -m 1 'kbd'", shell=True).strip()
+            infile_path = "/dev/input/by-path/" + infile
+            EVENT_SIZE = struct.calcsize('llHHI')
+            file = open(infile_path, "rb")
+            event = file.read(EVENT_SIZE)
+            while event:
+                (tv_sec, tv_usec, type, code, value) = struct.unpack('llHHI', event)
+                #if type != 0 or code != 0 or value != 0:
+                if type == 1:
+                    # type,code,value
+                    print("%u,%u" % (code, value))
+                event = file.read(EVENT_SIZE)
+            print "0,0"
+            file.close()
+            sys.exit(0)
+        except:
+            file.close()
+            sys.exit(0)
+
+elif len(sys.argv) > 1:
+    cmd = sys.argv[1].lower()
+    if cmd == "rev":
+        print GPIO.RPI_REVISION
+    elif cmd == "ver":
+        print GPIO.VERSION
+    elif cmd == "info":
+        print GPIO.RPI_INFO
+    else:
+        print "Bad parameters - in|out|pwm|buzz|byte|borg|mouse|kbd|ver|info {pin} {value|up|down}"
+        print "  only ver (gpio version) and info (board information) accept no pin parameter."
+
 else:
-    print "Bad parameters - {in|out|pwm} {pin} {value|up|down}"
+    print "Bad parameters - in|out|pwm|buzz|byte|borg|mouse|kbd|ver|info {pin} {value|up|down}"

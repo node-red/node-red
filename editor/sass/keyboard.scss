@@ -1,0 +1,40 @@
+/**
+ * Copyright 2015 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+#keyboard-help-dialog {
+    font-size: 0.9em;
+}
+.keyboard-shortcuts {
+    padding: 10px;
+}
+.keyboard-shortcuts td  {
+    padding: 7px 5px;
+    margin-bottom: 10px;
+    white-space: pre;
+}
+.keyboard-shortcuts td:first-child {
+    text-align: right;
+    padding-right: 10px;
+}
+.help-key {
+    border: 1px solid #ddd;
+    padding: 4px;
+    border-radius: 3px;
+    background: #f6f6f6;
+    font-family: Courier, monospace;
+    box-shadow: #999 1px 1px 1px;
+}
+

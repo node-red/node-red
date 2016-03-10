@@ -1,0 +1,13 @@
+{
+    "asi": true,        // allow missing semicolons
+    "curly": true,      // require braces
+    "eqnull": true,     // ignore ==null
+    "forin": true,      // require property filtering in "for in" loops
+    "immed": true,      // require immediate functions to be wrapped in ( )
+    "nonbsp": true,     // warn on unexpected whitespace breaking chars
+    //"strict": true,   // commented out for now as it causes 100s of warnings, but want to get there eventually
+    //"unused": true,   // Check for unused functions and variables
+    "loopfunc": true,   // allow functions to be defined in loops
+    //"expr": true,       // allow ternery operator syntax...
+    "sub": true         // don't warn that foo['bar'] should be written as foo.bar
+}

@@ -16,7 +16,7 @@
 
 <script type="text/x-red" data-template-name="http in">
     <div class="form-row">
-        <label for="node-input-method"><i class="fa fa-tasks"></i> Method</label>
+        <label for="node-input-method"><i class="fa fa-tasks"></i> <span data-i18n="httpin.label.method"></span></label>
         <select type="text" id="node-input-method" style="width:72%;">
         <option value="get">GET</option>
         <option value="post">POST</option>
@@ -25,14 +25,18 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-url"><i class="fa fa-globe"></i> url</label>
+        <label for="node-input-url"><i class="fa fa-globe"></i> <span data-i18n="httpin.label.url"></span></label>
         <input type="text" id="node-input-url" placeholder="/url">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div id="node-input-tip" class="form-tips">The url will be relative to <code><span id="node-input-path"></span></code>.</div>
+    <div class="form-row row-swagger-doc">
+        <label for="node-input-swaggerDoc"><i class="fa fa-file-text-o"></i> <span data-i18n="httpin.label.doc"></span></label>
+        <input type="text" id="node-input-swaggerDoc">
+    </div>
+    <div id="node-input-tip" class="form-tips"><span data-i18n="httpin.tip.in"></span><code><span id="node-input-path"></span></code>.</div>
 </script>
 
 <script type="text/x-red" data-help-name="http in">
@@ -55,21 +59,18 @@
        <code>application/json</code>.
     </p>
     <p>
-       <b>Note: </b>This node does not send any response to the http request. This should be done with
-       a subsequent HTTP Response node, or Function node.
-       In the case of a Function node, the <a href="http://expressjs.com/api.html#res">Express response documentation</a>
-       describes how this should be done. For example:
-       <pre>msg.res.send(200, 'Thanks for the request ');<br/>return msg;</pre>
+       <b>Note: </b>This node does not send any response to the http request.
+       This should be done with a subsequent HTTP Response node.
     </p>
 
 </script>
 
 <script type="text/x-red" data-template-name="http response">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-tips">The messages sent to this node <b>must</b> originate from an <i>http input</i> node</div>
+    <div class="form-tips"><span data-i18n="[html]httpin.tip.res"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="http response">
@@ -83,73 +84,6 @@
     </ul>
 </script>
 
-<script type="text/x-red" data-template-name="http request">
-    <div class="form-row">
-        <label for="node-input-method"><i class="fa fa-tasks"></i> Method</label>
-        <select type="text" id="node-input-method" style="width:72%;">
-        <option value="GET">GET</option>
-        <option value="POST">POST</option>
-        <option value="PUT">PUT</option>
-        <option value="DELETE">DELETE</option>
-        <option value="use">- set by msg.method -</option>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="node-input-url"><i class="fa fa-globe"></i> URL</label>
-        <input type="text" id="node-input-url" placeholder="http://">
-    </div>
-    <div class="form-row">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-useAuth" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-useAuth" style="width: 70%;">Use basic authentication ?</label>
-    </div>
-    <div class="form-row node-input-useAuth-row">
-        <label for="node-input-user"><i class="fa fa-user"></i> Username</label>
-        <input type="text" id="node-input-user">
-    </div>
-    <div class="form-row node-input-useAuth-row">
-        <label for="node-input-password"><i class="fa fa-lock"></i> Password</label>
-        <input type="password" id="node-input-password">
-    </div>
-    <div class="form-row">
-        <label for="node-input-ret"><i class="fa fa-arrow-left"></i> Return</label>
-        <select type="text" id="node-input-ret" style="width:72%;">
-        <option value="txt">a UTF-8 string</option>
-        <option value="bin">a binary buffer</option>
-        <option value="obj">a parsed JSON object</option>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-    <div class="form-tips" id="tip-json" hidden>Tip: If the JSON parse fails the fetched string is returned as-is.</div>
-</script>
-
-<script type="text/x-red" data-help-name="http request">
-    <p>Provides a node for making http requests.</p>
-    <p>The URL and HTTP method can be configured in the node, if they are left blank they should be set in an incoming message on <code>msg.url</code> and <code>msg.method</code>:</p>
-    <ul>
-        <li><code>url</code>, if set, is used as the url of the request. Must start with http: or https:</li>
-        <li><code>method</code>, if set, is used as the HTTP method of the request.
-        Must be one of <code>GET</code>, <code>PUT</code>, <code>POST</code>, <code>PATCH</code> or <code>DELETE</code> (default: GET)</li>
-        <li><code>headers</code>, if set, should be an object containing field/value
-        pairs to be added as request headers</li>
-        <li><code>payload</code> is sent as the body of the request</li>
-    </ul>
-    <p>When configured within the node, the URL property can contain <a href="http://mustache.github.io/mustache.5.html" target="_new">mustache-style</a> tags. These allow the
-    url to be constructed using values of the incoming message. For example, if the url is set to
-    <code>example.com/{{{topic}}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.
-    Using {{{...}}} prevents mustache from escaping characters like / & etc.</p>
-    <p>
-    The output message contains the following properties:
-    <ul>
-        <li><code>payload</code> is the body of the response</li>
-        <li><code>statusCode</code> is the status code of the response, or the error code if the request could not be completed</li>
-        <li><code>headers</code> is an object containing the response headers</li>
-    </ul>
-</script>
-
 <script type="text/javascript">
     RED.nodes.registerType('http in',{
         category: 'input',
@@ -157,7 +91,8 @@
         defaults: {
             name: {value:""},
             url: {value:"",required:true},
-            method: {value:"get",required:true}
+            method: {value:"get",required:true},
+            swaggerDoc: {type:"swagger-doc", required:false}
         },
         inputs:0,
         outputs:1,
@@ -194,7 +129,9 @@
                 $("#node-input-path").html(root);
                 $("#node-input-tip").show();
             }
-            //document.getElementById("node-config-wsdocpath").innerHTML=
+            if(!RED.nodes.getType("swagger-doc")){
+                $('.row-swagger-doc').hide();
+            }
         }
 
     });
@@ -214,60 +151,6 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
-        }
-    });
-
-    RED.nodes.registerType('http request',{
-        category: 'function',
-        color:"rgb(231, 231, 174)",
-        defaults: {
-            name: {value:""},
-            method:{value:"GET"},
-            ret: {value:"txt"},
-            url:{value:""},
-            //user -> credentials
-            //pass -> credentials
-        },
-        credentials: {
-            user: {type:"text"},
-            password: {type: "password"}
-        },
-        inputs:1,
-        outputs:1,
-        align: "right",
-        icon: "white-globe.png",
-        label: function() {
-            return this.name||"http request";
-        },
-        labelStyle: function() {
-            return this.name?"node_label_italic":"";
-        },
-        oneditprepare: function() {
-            if (this.credentials.user || this.credentials.has_password) {
-                $('#node-input-useAuth').prop('checked', true);
-                $(".node-input-useAuth-row").show();
-            } else {
-                $('#node-input-useAuth').prop('checked', false);
-                $(".node-input-useAuth-row").hide();
-            }
-
-            $("#node-input-useAuth").change(function() {
-                if ($(this).is(":checked")) {
-                    $(".node-input-useAuth-row").show();
-                } else {
-                    $(".node-input-useAuth-row").hide();
-                    $('#node-input-user').val('');
-                    $('#node-input-password').val('');
-                }
-            });
-
-            $("#node-input-ret").change(function() {
-                if ($("#node-input-ret").val() === "obj") {
-                    $("#tip-json").show();
-                } else {
-                    $("#tip-json").hide();
-                }
-            });
         }
     });
 </script>

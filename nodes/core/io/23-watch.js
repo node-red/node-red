@@ -37,15 +37,18 @@ module.exports = function(RED) {
                 if (fs.statSync(path).isDirectory()) { path = path + sep + file; }
                 stat = fs.statSync(path);
             } catch(e) { }
-            var type = "other";
-            if (stat.isFile()) { type = "file"; }
-            else if (stat.isDirectory()) { type = "directory"; }
-            else if (stat.isBlockDevice()) { type = "blockdevice"; }
-            else if (stat.isCharacterDevice()) { type = "characterdevice"; }
-            else if (stat.isSocket()) { type = "socket"; }
-            else if (stat.isFIFO()) { type = "fifo"; }
-            else { type = "n/a"; }
-            var msg = { payload:path, topic:node.p, file:file, type:type, size:stat.size };
+            var type = "none";
+            var msg = { payload:path, topic:node.p, file:file };
+            if (stat) {
+                if (stat.isFile()) { type = "file"; msg.size = stat.size; }
+                else if (stat.isDirectory()) { type = "directory"; }
+                else if (stat.isBlockDevice()) { type = "blockdevice"; }
+                else if (stat.isCharacterDevice()) { type = "characterdevice"; }
+                else if (stat.isSocket()) { type = "socket"; }
+                else if (stat.isFIFO()) { type = "fifo"; }
+                else { type = "n/a"; }
+            }
+            msg.type = type;
             node.send(msg);
         });
 

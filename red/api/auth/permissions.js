@@ -32,11 +32,15 @@ function hasPermission(userScope,permission) {
         }
         return true;
     }
-    
-    if (userScope == "*") {
+
+    if (permission === "") {
         return true;
     }
-    
+
+    if (userScope === "*") {
+        return true;
+    }
+
     if (util.isArray(permission)) {
         for (i=0;i<permission.length;i++) {
             if (!hasPermission(userScope,permission[i])) {
@@ -45,8 +49,8 @@ function hasPermission(userScope,permission) {
         }
         return true;
     }
-    
-    if (userScope == "read") {
+
+    if (userScope === "read") {
         return readRE.test(permission);
     } else {
         return false; // anything not allowed is disallowed

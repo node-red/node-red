@@ -1,0 +1,113 @@
+/**
+ * Copyright 2013, 2015 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+@import "colors";
+@import "mixins";
+
+@import "forms";
+
+@import "jquery";
+@import "bootstrap";
+
+@import "dropdownMenu";
+
+@import "header";
+@import "palette";
+@import "sidebar";
+@import "workspace";
+@import "workspaceToolbar";
+
+@import "notifications";
+
+@import "editor";
+@import "library";
+
+@import "tabs";
+@import "tab-config";
+@import "tab-info";
+@import "popover";
+@import "flow";
+
+@import "typedInput";
+
+@import "dragdrop";
+
+@import "keyboard";
+
+
+body {
+    font-size: 14px;
+    font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    padding-top: 100px;
+    background: #f3f3f3;
+}
+
+#main-container {
+    position: absolute;
+    top:40px; left:0; bottom: 0; right:0;
+    overflow:hidden;
+}
+
+i.spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+    vertical-align: text-top;
+    margin-top: 0px;
+    background: url(images/spin.svg) no-repeat 50% 50%;
+    background-size: contain
+}
+
+code, pre {
+  padding: 0 3px 2px;
+  font-family: monospace;
+  font-size: 14px;
+  color: #333333;
+  border-radius: 1px;
+}
+
+code {
+  padding: 0px 4px;
+  color: #AD1625;
+  white-space: nowrap;
+  background-color: #f7f7f9;
+  border: 1px solid #e1e1e8;
+}
+
+pre {
+  display: block;
+  padding: 9.5px;
+  margin: 0 0 10px;
+  line-height: 20px;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre;
+  white-space: pre-wrap;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+}
+
+pre code {
+  padding: 0;
+  color: inherit;
+  white-space: pre;
+  white-space: pre-wrap;
+  background-color: transparent;
+  border: 0;
+}

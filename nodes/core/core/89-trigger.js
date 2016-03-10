@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ module.exports = function(RED) {
         this.op2type = n.op2type || "val";
         this.extend = n.extend || "false";
         this.units = n.units || "ms";
+        this.reset = n.reset || '';
         this.duration = n.duration || 250;
         if (this.duration <= 0) { this.duration = 0; }
         else {
@@ -34,29 +35,30 @@ module.exports = function(RED) {
         }
         this.op1Templated = this.op1.indexOf("{{") != -1;
         this.op2Templated = this.op2.indexOf("{{") != -1;
-        if (!isNaN(this.op1)) { this.op1 = Number(this.op1); }
-        if (!isNaN(this.op2)) { this.op2 = Number(this.op2); }
+        if ((this.op1type === "num") && (!isNaN(this.op1))) { this.op1 = Number(this.op1); }
+        if ((this.op2type === "num") && (!isNaN(this.op2))) { this.op2 = Number(this.op2); }
         if (this.op1 == "true") { this.op1 = true; }
         if (this.op2 == "true") { this.op2 = true; }
         if (this.op1 == "false") { this.op1 = false; }
         if (this.op2 == "false") { this.op2 = false; }
         if (this.op1 == "null") { this.op1 = null; }
         if (this.op2 == "null") { this.op2 = null; }
-        try { this.op1 = JSON.parse(this.op1); }
-        catch(e) { this.op1 = this.op1; }
-        try { this.op2 = JSON.parse(this.op2); }
-        catch(e) { this.op2 = this.op2; }
+        //try { this.op1 = JSON.parse(this.op1); }
+        //catch(e) { this.op1 = this.op1; }
+        //try { this.op2 = JSON.parse(this.op2); }
+        //catch(e) { this.op2 = this.op2; }
 
         var node = this;
         var tout = null;
         var m2;
         this.on("input", function(msg) {
-            if (msg.hasOwnProperty("reset")) {
+            if (msg.hasOwnProperty("reset") || ((node.reset !== '')&&(msg.payload == node.reset)) ) {
                 clearTimeout(tout);
                 tout = null;
+                node.status({});
             }
             else {
-                if (!tout) {
+                if ((!tout) && (tout !== 0)) {
                     if (node.op2type === "pay") { m2 = msg.payload; }
                     else if (node.op2Templated) { m2 = mustache.render(node.op2,msg); }
                     else { m2 = node.op2; }
@@ -64,27 +66,33 @@ module.exports = function(RED) {
                     else if (node.op1Templated) { msg.payload = mustache.render(node.op1,msg); }
                     else { msg.payload = node.op1; }
                     if (node.op1type !== "nul") { node.send(msg); }
-                    if (node.duration === 0) { tout = "infinite"; }
+                    if (node.duration === 0) { tout = 0; }
                     else {
                         tout = setTimeout(function() {
                             msg.payload = m2;
                             if (node.op2type !== "nul") { node.send(msg); }
                             tout = null;
+                            node.status({});
                         },node.duration);
                     }
+                    node.status({fill:"blue",shape:"dot",text:" "});
                 }
-                else if ((node.extend == "true") && (node.duration > 0)) {
+                else if ((node.extend === "true" || node.extend === true) && (node.duration > 0)) {
                     clearTimeout(tout);
                     tout = setTimeout(function() {
                         msg.payload = m2;
                         if (node.op2type !== "nul") { node.send(msg); }
                         tout = null;
+                        node.status({});
                     },node.duration);
                 }
             }
         });
         this.on("close", function() {
-            if (tout) { clearTimeout(tout); }
+            if (tout) {
+                clearTimeout(tout);
+            }
+            node.status({});
         });
     }
     RED.nodes.registerType("trigger",TriggerNode);

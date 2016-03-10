@@ -1,9 +1,24 @@
+sudo: false
 language: node_js
+env:
+  - CXX="g++-4.8"
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+    - gcc-4.8
+matrix:
+  allow_failures:
+  - node_js: "5"
 before_install:
-  - npm install -g npm@~1.4.18
+  - npm install -g npm@latest-2
 node_js:
+  - "5"
+  - "4"
+  - "0.12"
   - "0.10"
-  - "0.8"
 script:
   - istanbul cover ./node_modules/.bin/grunt --report lcovonly && istanbul report text && ( cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js || true ) && rm -rf coverage
 before_script:

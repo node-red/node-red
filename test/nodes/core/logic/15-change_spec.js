@@ -19,9 +19,6 @@ var should = require("should");
 var changeNode = require("../../../../nodes/core/logic/15-change.js");
 var helper = require("../../helper.js");
 
-var Log = require("../../../../red/log.js");
-
-
 describe('change Node', function() {
 
     beforeEach(function(done) {
@@ -37,7 +34,7 @@ describe('change Node', function() {
         var flow = [{ id: "c1", type: "change", name:"change1" }];
         helper.load(changeNode, flow, function() {
             helper.getNode("c1").should.have.property("name", "change1");
-            helper.getNode("c1").should.have.property("rules", [{t:undefined,p:''}]);
+            helper.getNode("c1").should.have.property("rules", [{fromt:'str',pt:'msg',tot:'str',t:undefined,p:''}]);
             done();
         });
     });
@@ -45,7 +42,7 @@ describe('change Node', function() {
         var flow = [{ id: "c1", type: "change", name:"change1", action:"replace" }];
         helper.load(changeNode, flow, function() {
             helper.getNode("c1").should.have.property("name", "change1");
-            helper.getNode("c1").should.have.property("rules", [ { p: '', t: 'set', to: '' } ]);
+            helper.getNode("c1").should.have.property("rules", [ {fromt: 'str', p: '', pt: 'msg', t: 'set', to: '', tot: 'str'} ]);
             done();
         });
     });
@@ -54,12 +51,12 @@ describe('change Node', function() {
         helper.load(changeNode, flow, function() {
             //console.log(helper.getNode("c1"));
             helper.getNode("c1").should.have.property("name", "change1");
-            helper.getNode("c1").should.have.property("rules", [ { from: /(?:)/g, p: '', re: undefined, t: 'change', to: '' } ]);
+            helper.getNode("c1").should.have.property("rules", [ { from: /(?:)/g,fromt: 'str', p: '',pt: 'msg', re: undefined, t: 'change', to: '',tot: 'str' } ]);
             done();
         });
     });
 
-    describe('#replace' , function() {
+    describe('#set' , function() {
 
         it('sets the value of the message property', function(done) {
             var flow = [{"id":"changeNode1","type":"change","action":"replace","property":"payload","from":"","to":"changed","reg":false,"name":"changeNode","wires":[["helperNode1"]]},
@@ -67,6 +64,7 @@ describe('change Node', function() {
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
+                var rule = helper.getNode("changeNode1").rules[0];
                 helperNode1.on("input", function(msg) {
                     try {
                         msg.payload.should.equal("changed");
@@ -121,6 +119,9 @@ describe('change Node', function() {
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
+                var rule = helper.getNode("changeNode1").rules[0];
+                rule.t.should.eql('set');
+                rule.tot.should.eql('msg');
                 helperNode1.on("input", function(msg) {
                     try {
                         msg.foo.should.equal("bar");
@@ -240,6 +241,44 @@ describe('change Node', function() {
                 changeNode1.receive({pay:{load:"changeMe"}});
             });
         });
+
+
+        it('changes the value to a number', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":"123","tot":"num"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.eql(123);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:""});
+            });
+        });
+        it('changes the value to a js object', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":'{"a":123}',"tot":"json"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.eql({a:123});
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:""});
+            });
+        });
+
+
     });
     describe('#change', function() {
         it('changes the value of the message property', function(done) {
@@ -350,7 +389,7 @@ describe('change Node', function() {
             });
         });
 
-        it('Reports invalid regex', function(done) {
+        it('reports invalid regex', function(done) {
             var sinon = require('sinon');
             var flow = [{"id":"changeNode1","type":"change","action":"change","property":"payload","from":"\\+**+","to":"NUMBER","reg":true,"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
@@ -364,6 +403,43 @@ describe('change Node', function() {
                 msg.should.have.property('id', 'changeNode1');
                 done();
 
+            });
+        });
+
+        it('supports regex groups - new rule format', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"(Hello)","to":"$1-$1-$1","fromt":"re","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal("Hello-Hello-Hello World");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:"Hello World"});
+            });
+        });
+
+
+        it('changes the value - new rule format', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"ABC","to":"123","fromt":"str","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal("abc123abc");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:"abcABCabc"});
             });
         });
     });

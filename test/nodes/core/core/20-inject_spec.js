@@ -23,7 +23,7 @@ describe('inject node', function() {
     before(function(done) {
         helper.startServer(done);
     });
-    
+
     afterEach(function() {
         helper.unload();
     });
@@ -87,13 +87,13 @@ describe('inject node', function() {
         it('should inject message', function(done) {
             helper.load(injectNode,
                         [{id:"n1", type:"inject",
-                          payloadType:"some type", topic: "t4",
+                          payloadType:"str", topic: "t4",payload:"hello",
                           wires:[["n4"]] },
                          { id:"n4", type:"helper"}], function() {
                              var n4 = helper.getNode("n4");
                              n4.on("input", function(msg) {
                                  msg.should.have.property('topic', 't4');
-                                 msg.should.have.property('payload', '');
+                                 msg.should.have.property('payload', 'hello');
                                  helper.clearFlows().then(function() {
                                      done();
                                  });

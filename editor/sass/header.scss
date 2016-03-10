@@ -1,0 +1,266 @@
+/**
+ * Copyright 2015 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+$activeButton: #121212;
+
+$deployButton: #8C101C;
+$deployButtonHover: #6E0A1E;
+$deployButtonActive: #4C0A17;
+
+$deployDisabledButton: #444;
+$deployDisabledButtonHover: #555;
+$deployDisabledButtonActive: #444;
+
+$headerMenuBackground: #121212;
+$headerMenuItemHover: #323232;
+$headerMenuItemDivider: #464646;
+
+#header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: #000;
+    box-sizing: border-box;
+    padding: 0px 0px 0px 20px;
+    color: #C7C7C7;
+    font-size: 14px;
+}
+
+span.logo {
+    float: left;
+    margin-top: 5px;
+    font-size: 30px;
+    line-height: 30px;
+    text-decoration: none;
+
+    span {
+        vertical-align: middle;
+        font-size: 16px !important;
+    }
+    img {
+        height: 18px;
+    }
+
+    a {
+        color: inherit;
+        &:hover {
+            text-decoration: none;
+        }
+    }
+
+}
+
+.header-toolbar {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    float: right;
+
+    > li {
+        display: inline-block;
+        padding: 0;
+        margin: 0;
+        position: relative;
+
+    }
+}
+
+.button {
+    @include disable-selection;
+}
+
+#header .button {
+    min-width: 20px;
+    text-align: center;
+    line-height: 40px;
+    display: inline-block;
+    font-size: 20px;
+    padding: 0px 12px;
+    text-decoration: none;
+    color: #C7C7C7;
+    margin: auto 5px;
+    vertical-align: middle;
+    border-left: 2px solid #000;
+    border-right: 2px solid #000;
+
+    &:hover {
+        border-color: $headerMenuItemHover;
+    }
+}
+
+#header .button-group {
+    display: inline-block;
+    margin: auto 15px;
+    vertical-align: middle;
+    clear: both;
+}
+#header .button-group > a {
+    display: inline-block;
+    float: left;
+    line-height: 22px;
+    font-size: 14px;
+    text-decoration: none;
+    padding: 4px 8px;
+    margin: 0;
+}
+
+.deploy-button {
+    background: $deployButton;
+    color: #eee !important;
+
+    &:hover {
+        background: $deployButtonHover;
+    }
+
+    &:active {
+        background: $deployButtonActive;
+        color: #ccc !important;
+    }
+}
+
+#btn-deploy {
+
+    padding: 4px 12px;
+
+    &.disabled {
+        cursor: default;
+        background: $deployDisabledButton;
+        color: #999 !important;
+
+        img {
+            opacity: 0.3;
+        }
+
+        &+ #btn-deploy-options {
+            background: $deployDisabledButton;
+            color: #ddd;
+        }
+        &+ #btn-deploy-options:hover {
+            background: $deployDisabledButtonHover;
+        }
+        &+ #btn-deploy-options:active {
+            background: $deployDisabledButton;
+        }
+    }
+
+    img {
+        margin-right: 8px;
+    }
+}
+
+.deploy-button-group.open {
+    #btn-deploy-options {
+        background: $activeButton !important;
+    }
+}
+
+
+#header .button {
+    &:active, &.active {
+        background: $activeButton;
+    }
+    &:focus {
+        outline: none;
+    }
+}
+
+#header li.open .button {
+    background: $activeButton;
+    border-color: $activeButton;
+}
+
+
+#header ul.dropdown-menu {
+    background: $headerMenuBackground;
+    width: 250px !important;
+    margin-top: 0;
+}
+
+#header ul.dropdown-menu li a {
+    color: #C7C7C7;
+    padding: 3px 40px;
+}
+
+#header ul.dropdown-menu li a img {
+    margin-right: 10px;
+    padding: 4px;
+    border: 3px solid rgba(0,0,0,0);
+}
+
+#header ul.dropdown-menu li a.active img {
+    border: 3px solid #777677;
+}
+
+#header ul.dropdown-menu li a span.menu-label-container {
+    width: 180px;
+    vertical-align: top;
+    display: inline-block;
+    text-indent: 0px;
+}
+#header ul.dropdown-menu li a span.menu-label {
+    font-size: 14px;
+    display: inline-block;
+    text-indent: 0px;
+}
+#header ul.dropdown-menu li a span.menu-sublabel {
+    color: #aeaeae;
+    font-size: 13px;
+    display: inline-block;
+    text-indent: 0px;
+}
+
+#header ul.dropdown-menu > li:hover > a,
+#header ul.dropdown-menu > li:focus > a {
+    background: $headerMenuItemHover !important;
+}
+
+#header ul.dropdown-menu li.divider {
+    background: $headerMenuItemDivider;
+    border-bottom-color: $headerMenuItemHover;
+}
+#header ul.dropdown-menu li.disabled a {
+    color: #666;
+}
+
+#header ul.dropdown-menu > li.disabled:hover > a,
+#header ul.dropdown-menu > li.disabled:focus > a {
+    background: none !important;
+}
+
+/* Deploy menu customisations */
+#header ul#btn-deploy-options-submenu {
+    width: 300px !important;
+}
+#header ul#btn-deploy-options-submenu li a span.menu-label {
+    font-size: 16px;
+    display: inline-block;
+    text-indent: 0px;
+}
+#header ul#btn-deploy-options-submenu li a {
+    padding: 10px 30px;
+    color: #fff;
+}
+#header ul#btn-deploy-options-submenu li a > i.fa {
+    display: none !important;
+}
+
+/* User menu customisations */
+#header ul#btn-usermenu-submenu li a#btn-username > .menu-label {
+    font-size: 16px;
+    color: #fff;
+}

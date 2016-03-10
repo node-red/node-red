@@ -13,28 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-var express = require('express');
-var fs = require("fs");
-var events = require("../events");
-var path = require("path");
 
-var log = require("../log");
-var redNodes = require("../nodes");
-var settings = require("../settings");
+var log;
+var redNodes;
+var settings;
 
 module.exports = {
+    init: function(runtime) {
+        settings = runtime.settings;
+        redNodes = runtime.nodes;
+        log = runtime.log;
+    },
     get: function(req,res) {
+        log.audit({event: "flows.get"},req);
         res.json(redNodes.getFlows());
     },
     post: function(req,res) {
         var flows = req.body;
         var deploymentType = req.get("Node-RED-Deployment-Type")||"full";
-        redNodes.setFlows(flows,deploymentType).then(function() {
-            res.send(204);
-        }).otherwise(function(err) {
-            log.warn("Error saving flows : "+err.message);
-            log.warn(err.stack);
-            res.json(500,{error:"unexpected_error", message:err.message});
-        });
+        log.audit({event: "flows.set",type:deploymentType},req);
+        if (deploymentType === 'reload') {
+            redNodes.loadFlows().then(function() {
+                res.status(204).end();
+            }).otherwise(function(err) {
+                log.warn(log._("api.flows.error-reload",{message:err.message}));
+                log.warn(err.stack);
+                res.status(500).json({error:"unexpected_error", message:err.message});
+            });
+        } else {
+            redNodes.setFlows(flows,deploymentType).then(function() {
+                res.status(204).end();
+            }).otherwise(function(err) {
+                log.warn(log._("api.flows.error-save",{message:err.message}));
+                log.warn(err.stack);
+                res.status(500).json({error:"unexpected_error", message:err.message});
+            });
+        }
     }
 }

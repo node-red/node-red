@@ -15,10 +15,8 @@
  **/
 
 var should = require("should");
-
-var triggerNode = require("../../../../nodes/core/core/89-trigger.js");
 var helper = require("../../helper.js");
-
+var triggerNode = require("../../../../nodes/core/core/89-trigger.js");
 
 describe('trigger Node', function() {
 
@@ -37,8 +35,8 @@ describe('trigger Node', function() {
         helper.load(triggerNode, flow, function() {
             var n1 = helper.getNode("n1");
             n1.should.have.property('name', 'triggerNode');
-            n1.should.have.property('op1', 1);
-            n1.should.have.property('op2', 0);
+            n1.should.have.property('op1', '1');
+            n1.should.have.property('op2', '0');
             n1.should.have.property('op1type', 'val');
             n1.should.have.property('op2type', 'val');
             n1.should.have.property('extend', "false");
@@ -84,11 +82,11 @@ describe('trigger Node', function() {
             var c = 0;
             n2.on("input", function(msg) {
                 if (c === 0) {
-                    msg.should.have.a.property("payload", 1);
+                    msg.should.have.a.property("payload", '1');
                     c+=1;
                 }
                 else {
-                    msg.should.have.a.property("payload", 0);
+                    msg.should.have.a.property("payload", '0');
                     done();
                 }
             });
@@ -105,11 +103,11 @@ describe('trigger Node', function() {
             var c = 0;
             n2.on("input", function(msg) {
                 if (c === 0) {
-                    msg.should.have.a.property("payload", 1);
+                    msg.should.have.a.property("payload", '1');
                     c+=1;
                 }
                 else {
-                    msg.should.have.a.property("payload", 0);
+                    msg.should.have.a.property("payload", '0');
                 }
             });
             setTimeout( function() {
@@ -222,7 +220,7 @@ describe('trigger Node', function() {
                 else {
                     msg.should.have.a.property("payload", "World");
                     //console.log(Date.now() - ss);
-                    (Date.now() - ss).should.be.greaterThan(399);
+                    (Date.now() - ss).should.be.greaterThan(380);
                     done();
                 }
             });

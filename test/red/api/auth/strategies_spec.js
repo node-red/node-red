@@ -24,8 +24,10 @@ var Tokens = require("../../../../red/api/auth/tokens");
 var Clients = require("../../../../red/api/auth/clients");
 
 describe("Auth strategies", function() {
+    before(function() {
+        strategies.init({log:{audit:function(){}}})
+    });
     describe("Password Token Exchange", function() {
-
         var userAuthentication;
         afterEach(function() {
             if (userAuthentication) {
@@ -49,7 +51,7 @@ describe("Auth strategies", function() {
                 }
             });
         });
-        
+
         it('Handles scope overreach',function(done) {
             userAuthentication = sinon.stub(Users,"authenticate",function(username,password) {
                 return when.resolve({username:"user",permissions:"read"});

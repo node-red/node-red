@@ -1,0 +1,53 @@
+/**
+ * Copyright 2015 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+
+ .red-ui-popover {
+     display: none;
+     position: absolute;
+     width: 300px;
+     padding: 10px;
+     height: auto;
+     background: #fff;
+     
+     z-index: 1000;
+     font-size: 14px;
+     line-height: 1.4em;
+     @include component-shadow;
+ }
+ .red-ui-popover:after, .red-ui-popover:before {
+ 	right: 100%;
+ 	top: 50%;
+ 	border: solid transparent;
+ 	content: " ";
+ 	height: 0;
+ 	width: 0;
+ 	position: absolute;
+ 	pointer-events: none;
+ }
+
+ .red-ui-popover:after {
+ 	border-color: rgba(136, 183, 213, 0);
+ 	border-right-color: #fff;
+ 	border-width: 10px;
+ 	margin-top: -10px;
+ }
+ .red-ui-popover:before {
+ 	border-color: rgba(194, 225, 245, 0);
+ 	border-right-color: $primary-border-color;
+ 	border-width: 11px;
+ 	margin-top: -11px;
+ }

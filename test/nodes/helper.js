@@ -30,11 +30,11 @@ if (!process.version.match(/^v0\.[0-9]\./)) {
     }
 }
 var RED = require("../../red/red.js");
-var redNodes = require("../../red/nodes");
-var flows = require("../../red/nodes/flows");
-var credentials = require("../../red/nodes/credentials");
-var comms = require("../../red/comms.js");
-var log = require("../../red/log.js");
+var redNodes = require("../../red/runtime/nodes");
+var flows = require("../../red/runtime/nodes/flows");
+var credentials = require("../../red/runtime/nodes/credentials");
+var comms = require("../../red/api/comms.js");
+var log = require("../../red/runtime/log.js");
 
 var http = require('http');
 var express = require('express');
@@ -86,17 +86,31 @@ module.exports = {
             available: function() { return false; }
         };
 
-        redNodes.init(settings, storage);
+
+        var red = {};
+        for (var i in RED) {
+            if (RED.hasOwnProperty(i) && !/^(init|start|stop)$/.test(i)) {
+                var propDescriptor = Object.getOwnPropertyDescriptor(RED,i);
+                Object.defineProperty(red,i,propDescriptor);
+            }
+        }
+
+        red["_"] = function(messageId) {
+            return messageId;
+        };
+
+        redNodes.init({settings:settings, storage:storage});
         credentials.init(storage,express());
         RED.nodes.registerType("helper", helperNode);
         if (Array.isArray(testNode)) {
             for (var i = 0; i < testNode.length; i++) {
-                testNode[i](RED);
+                testNode[i](red);
             }
         } else {
-            testNode(RED);
+            testNode(red);
         }
         flows.load().then(function() {
+            flows.startFlows();
             should.deepEqual(testFlows, flows.getFlows());
             cb();
         });
@@ -125,6 +139,7 @@ module.exports = {
     startServer: function(done) {
         server = http.createServer(function(req,res){app(req,res);});
         RED.init(server, {
+            SKIP_BUILD_CHECK: true,
             logging:{console:{level:'off'}}
         });
         server.listen(listenPort, address);

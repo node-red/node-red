@@ -17,22 +17,22 @@
 var should = require("should");
 var request = require('supertest');
 var express = require('express');
+var bodyParser = require('body-parser');
 
 var when = require('when');
 
-var app = express();
-var RED = require("../../../red/red.js");
-var storage = require("../../../red/storage");
+var app;
 var library = require("../../../red/api/library");
 var auth = require("../../../red/api/auth");
 
 describe("library api", function() {
-        
-    function initStorage(_flows,_libraryEntries) {
+
+    function initLibrary(_flows,_libraryEntries) {
         var flows = _flows;
         var libraryEntries = _libraryEntries;
-        storage.init({
-            storageModule: {
+        library.init(app,{
+            log:{audit:function(){},_:function(){},warn:function(){}},
+            storage: {
                 init: function() {
                     return when.resolve();
                 },
@@ -42,15 +42,29 @@ describe("library api", function() {
                 getFlow: function(fn) {
                     if (flows[fn]) {
                         return when.resolve(flows[fn]);
+                    } else if (fn.indexOf("..")!==-1) {
+                        var err = new Error();
+                        err.code = 'forbidden';
+                        return when.reject(err);
                     } else {
                         return when.reject();
                     }
                 },
                 saveFlow: function(fn,data) {
+                    if (fn.indexOf("..")!==-1) {
+                        var err = new Error();
+                        err.code = 'forbidden';
+                        return when.reject(err);
+                    }
                     flows[fn] = data;
                     return when.resolve();
                 },
                 getLibraryEntry: function(type,path) {
+                    if (path.indexOf("..")!==-1) {
+                        var err = new Error();
+                        err.code = 'forbidden';
+                        return when.reject(err);
+                    }
                     if (libraryEntries[type] && libraryEntries[type][path]) {
                         return when.resolve(libraryEntries[type][path]);
                     } else {
@@ -58,25 +72,32 @@ describe("library api", function() {
                     }
                 },
                 saveLibraryEntry: function(type,path,meta,body) {
+                    if (path.indexOf("..")!==-1) {
+                        var err = new Error();
+                        err.code = 'forbidden';
+                        return when.reject(err);
+                    }
                     libraryEntries[type][path] = body;
                     return when.resolve();
                 }
+            },
+            events: {
+                on: function(){},
+                removeListener: function(){}
             }
         });
     }
 
     describe("flows", function() {
-        var app;
-    
         before(function() {
             app = express();
-            app.use(express.json());
+            app.use(bodyParser.json());
             app.get("/library/flows",library.getAll);
             app.post(new RegExp("/library/flows\/(.*)"),library.post);
-            app.get(new RegExp("/library/flows\/(.*)"),library.get);                
+            app.get(new RegExp("/library/flows\/(.*)"),library.get);
         });
         it('returns empty result', function(done) {
-            initStorage({});
+            initLibrary({},{flows:{}});
             request(app)
                 .get('/library/flows')
                 .expect(200)
@@ -91,16 +112,16 @@ describe("library api", function() {
         });
 
         it('returns 404 for non-existent entry', function(done) {
-            initStorage({});
+            initLibrary({},{flows:{}});
             request(app)
                 .get('/library/flows/foo')
                 .expect(404)
                 .end(done);
         });
-        
-        
+
+
         it('can store and retrieve item', function(done) {
-            initStorage({});
+            initLibrary({},{flows:{}});
             var flow = '[]';
             request(app)
                 .post('/library/flows/foo')
@@ -122,9 +143,9 @@ describe("library api", function() {
                         });
                 });
         });
-        
+
         it('lists a stored item', function(done) {
-            initStorage({f:["bar"]});
+            initLibrary({f:["bar"]});
             request(app)
                 .get('/library/flows')
                 .expect(200)
@@ -137,9 +158,9 @@ describe("library api", function() {
                     done();
                 });
         });
-        
+
         it('returns 403 for malicious get attempt', function(done) {
-            initStorage({});
+            initLibrary({});
             // without the userDir override the malicious url would be
             // http://127.0.0.1:1880/library/flows/../../package to
             // obtain package.json from the node-red root.
@@ -149,7 +170,7 @@ describe("library api", function() {
                 .end(done);
         });
         it('returns 403 for malicious post attempt', function(done) {
-            initStorage({});
+            initLibrary({});
             // without the userDir override the malicious url would be
             // http://127.0.0.1:1880/library/flows/../../package to
             // obtain package.json from the node-red root.
@@ -161,18 +182,17 @@ describe("library api", function() {
     });
 
     describe("type", function() {
-        var app;
-        
         before(function() {
+
             app = express();
-            app.use(express.json());
-            library.init(app);
-            auth.init({});
-            RED.library.register("test");
+            app.use(bodyParser.json());
+            initLibrary({},{});
+            auth.init({settings:{}});
+            library.register("test");
         });
 
         it('returns empty result', function(done) {
-            initStorage({},{'test':{"":[]}});
+            initLibrary({},{'test':{"":[]}});
             request(app)
                 .get('/library/test')
                 .expect(200)
@@ -184,17 +204,17 @@ describe("library api", function() {
                     done();
                 });
         });
-    
+
         it('returns 404 for non-existent entry', function(done) {
-            initStorage({},{});
+            initLibrary({},{});
             request(app)
                 .get('/library/test/foo')
                 .expect(404)
                 .end(done);
         });
-    
+
         it('can store and retrieve item', function(done) {
-            initStorage({},{'test':{}});
+            initLibrary({},{'test':{}});
             var flow = {text:"test content"};
             request(app)
                 .post('/library/test/foo')
@@ -216,9 +236,9 @@ describe("library api", function() {
                         });
                 });
         });
-        
+
         it('lists a stored item', function(done) {
-            initStorage({},{'test':{'a':['abc','def']}});
+            initLibrary({},{'test':{'a':['abc','def']}});
                 request(app)
                     .get('/library/test/a')
                     .expect(200)
@@ -232,22 +252,22 @@ describe("library api", function() {
                         done();
                     });
         });
-        
-    
+
+
         it('returns 403 for malicious access attempt', function(done) {
             request(app)
                 .get('/library/test/../../../../../../../../../../etc/passwd')
                 .expect(403)
                 .end(done);
         });
-    
+
         it('returns 403 for malicious access attempt', function(done) {
             request(app)
                 .get('/library/test/..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\etc\\passwd')
                 .expect(403)
                 .end(done);
         });
-    
+
         it('returns 403 for malicious access attempt', function(done) {
             request(app)
                 .post('/library/test/../../../../../../../../../../etc/passwd')
@@ -256,6 +276,6 @@ describe("library api", function() {
                 .expect(403)
                 .end(done);
         });
-    
+
     });
 });

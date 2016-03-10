@@ -183,6 +183,60 @@ describe('CSV node', function() {
             });
         });
 
+        it('should convert an array of objects to a multi-line csv', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', '4,3,2,1\n1,2,3,4\n');
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                var testJson = [{ d: 1, b: 3, c: 2, a: 4 },{d:4,a:1,c:3,b:2}];
+                n1.emit("input", {payload:testJson});
+            });
+        });
+
+        it('should convert a simple array back to a csv', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', '1,2,3,4\n');
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                var testJson = [1,2,3,4];
+                n1.emit("input", {payload:testJson});
+            });
+        });
+
+        it('should convert aan array of arrays back to a multi-line csv', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', '1,2,3,4\n4,3,2,1\n');
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                var testJson = [[1,2,3,4],[4,3,2,1]];
+                n1.emit("input", {payload:testJson});
+            });
+        });
+
         it('should be able to include column names as first row', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", hdrout:true, ret:"\r\n", wires:[["n2"]] },
                     {id:"n2", type:"helper"} ];
@@ -254,9 +308,9 @@ describe('CSV node', function() {
                     });
                     logEvents.should.have.length(2);
                     logEvents[0][0].should.have.a.property('msg');
-                    logEvents[0][0].msg.toString().should.startWith('This node only handles csv strings or js objects.');
+                    logEvents[0][0].msg.toString().should.startWith('csv.errors.csv_js');
                     logEvents[1][0].should.have.a.property('msg');
-                    logEvents[1][0].msg.toString().should.startWith('This node only handles csv strings or js objects.');
+                    logEvents[1][0].msg.toString().should.startWith('csv.errors.csv_js');
                     done();
                 } catch(err) {
                     done(err);

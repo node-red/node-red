@@ -31,13 +31,18 @@ module.exports = function(RED) {
                     catch(e) { node.error(e.message,msg); }
                 }
                 else if (typeof msg.payload === "object") {
-                    if ((!Buffer.isBuffer(msg.payload)) && (!util.isArray(msg.payload))) {
-                        msg.payload = JSON.stringify(msg.payload);
-                        node.send(msg);
+                    if (!Buffer.isBuffer(msg.payload)) {
+                        try {
+                            msg.payload = JSON.stringify(msg.payload);
+                            node.send(msg);
+                        }
+                        catch(e) {
+                            node.error(RED._("json.errors.dropped-error"));
+                        }
                     }
-                    else { node.warn("Dropped: "+msg.payload); }
+                    else { node.warn(RED._("json.errors.dropped-object")); }
                 }
-                else { node.warn("Dropped: "+msg.payload); }
+                else { node.warn(RED._("json.errors.dropped")); }
             }
             else { node.send(msg); } // If no payload - just pass it on.
         });

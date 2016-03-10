@@ -1,0 +1,224 @@
+{
+    "common": {
+        "label": {
+            "name": "Name",
+            "ok": "Ok",
+            "cancel": "Cancel",
+            "delete": "Delete",
+            "close": "Close"
+        }
+    },
+    "workspace": {
+        "defaultName": "Flow __number__",
+        "renameSheet": "Rename flow",
+        "confirmDelete": "Confirm delete",
+        "delete": "Are you sure you want to delete '__label__'?",
+        "dropFlowHere": "Drop the flow here"
+    },
+    "menu": {
+        "label": {
+            "view": {
+                "view": "View",
+                "showGrid": "Show grid",
+                "snapGrid": "Snap to grid"
+            },
+            "sidebar": {
+                "show": "Show sidebar"
+            },
+            "displayStatus": "Show node status",
+            "displayConfig": "Configuration nodes",
+            "import": "Import",
+            "export": "Export",
+            "clipboard": "Clipboard",
+            "library": "Library",
+            "examples": "Examples",
+            "subflows": "Subflows",
+            "createSubflow": "Create Subflow",
+            "selectionToSubflow": "Selection to Subflow",
+            "flows": "Flows",
+            "add": "Add",
+            "rename": "Rename",
+            "delete": "Delete",
+            "keyboardShortcuts": "Keyboard Shortcuts",
+            "login": "Login",
+            "logout": "Logout"
+        }
+    },
+    "user": {
+        "loggedInAs": "Logged in as __name__",
+        "login": "Login",
+        "loginFailed": "Login failed"
+    },
+    "notification": {
+        "warning": "<strong>Warning</strong>: __message__",
+        "warnings": {
+            "undeployedChanges": "node has undeployed changes",
+            "nodeActionDisabled": "node actions disabled within subflow"
+        },
+
+        "error": "<strong>Error</strong>: __message__",
+        "errors": {
+            "lostConnection": "Lost connection to server",
+            "cannotAddSubflowToItself": "Cannot add subflow to itself",
+            "cannotAddCircularReference": "Cannot add subflow - circular reference detected"
+        }
+    },
+    "clipboard": {
+        "nodes": "Nodes:",
+        "selectNodes": "Select the text above and copy to the clipboard.",
+        "pasteNodes": "Paste nodes here",
+        "importNodes": "Import nodes",
+        "exportNodes": "Export nodes to clipboard",
+        "importUnrecognised": "Imported unrecognised type:",
+        "importUnrecognised_plural": "Imported unrecognised types:",
+        "nodeCopied": "__count__ node copied",
+        "nodeCopied_plural": "__count__ nodes copied",
+        "invalidFlow": "Invalid flow: __message__"
+    },
+    "deploy": {
+        "deploy": "Deploy",
+        "full": "Full",
+        "fullDesc": "Deploys everything in the workspace",
+        "modifiedFlows": "Modified Flows",
+        "modifiedFlowsDesc": "Only deploys flows that contain changed nodes",
+        "modifiedNodes": "Modified Nodes",
+        "modifiedNodesDesc": "Only deploys nodes that have changed",
+        "successfulDeploy": "Successfully deployed",
+        "unusedConfigNodes":"You have some unused configuration nodes.",
+        "unusedConfigNodesLink":"Click here to see them",
+        "errors": {
+            "noResponse": "no response from server"
+        },
+        "confirm": {
+            "button": {
+                "confirm": "Confirm deploy",
+                "cancel": "Cancel"
+            },
+            "undeployedChanges": "You have undeployed changes.\n\nLeaving this page will lose these changes.",
+            "improperlyConfigured": "The workspace contains some nodes that are not properly configured:",
+            "unknown": "The workspace contains some unknown node types:",
+            "confirm": "Are you sure you want to deploy?"
+        }
+    },
+    "subflow": {
+        "editSubflow": "Edit flow __name__",
+        "edit": "Edit flow",
+        "subflowInstances": "There is __count__ instance of this subflow",
+        "subflowInstances_plural": "There are __count__ instances of this subflow",
+        "editSubflowProperties": "edit properties",
+        "input": "inputs:",
+        "output": "outputs:",
+        "deleteSubflow": "delete subflow",
+        "info": "Description",
+        "format":"markdown format",
+        "errors": {
+            "noNodesSelected": "<strong>Cannot create subflow</strong>: no nodes selected",
+            "multipleInputsToSelection": "<strong>Cannot create subflow</strong>: multiple inputs to selection"
+        }
+    },
+    "editor": {
+        "configEdit": "edit",
+        "configAdd": "add",
+        "configDelete": "Delete",
+        "nodesUse": "__count__ node uses this config",
+        "nodesUse_plural": "__count__ nodes use this config",
+        "addNewConfig": "Add new __type__ config node",
+        "editConfig": "Edit __type__ config node",
+        "addNewType": "Add new __type__...",
+        "errors": {
+            "scopeChange": "Changing the scope will make it unavailable to nodes in other flows that use it"
+        }
+    },
+    "keyboard": {
+        "selectAll": "Select all nodes",
+        "selectAllConnected": "Select all connected nodes",
+        "addRemoveNode": "Add/remove node from selection",
+        "deleteSelected": "Delete selected nodes or link",
+        "importNode": "Import nodes",
+        "exportNode": "Export selected nodes",
+        "toggleSidebar": "Toggle sidebar",
+        "deleteNode": "Delete selected nodes or link",
+        "copyNode": "Copy selected nodes",
+        "cutNode": "Cut selected nodes",
+        "pasteNode": "Paste nodes"
+    },
+    "library": {
+        "openLibrary": "Open Library...",
+        "saveToLibrary": "Save to Library...",
+        "typeLibrary": "__type__ library",
+        "unnamedType": "Unnamed __type__",
+        "saveToLibrary": "Save to Library",
+        "exportToLibrary": "Export nodes to library",
+        "dialogSaveOverwrite": "A __libraryType__ called __libraryName__ already exists. Overwrite?",
+        "invalidFilename": "Invalid filename",
+        "savedNodes": "Saved nodes",
+        "savedType": "Saved __type__",
+        "saveFailed": "Save failed: __message__",
+
+        "filename": "Filename",
+        "folder": "Folder",
+        "filenamePlaceholder": "file",
+        "fullFilenamePlaceholder": "a/b/file",
+        "folderPlaceholder": "a/b",
+
+        "breadcrumb": "Library"
+    },
+    "palette": {
+        "noInfo": "no information available",
+        "filter": "filter nodes",
+        "label": {
+            "subflows": "subflows",
+            "input": "input",
+            "output": "output",
+            "function": "function",
+            "social": "social",
+            "storage": "storage",
+            "analysis": "analysis",
+            "advanced": "advanced"
+        },
+        "event": {
+            "nodeAdded": "Node added to palette:",
+            "nodeAdded_plural": "Nodes added to palette",
+            "nodeRemoved": "Node removed from palette:",
+            "nodeRemoved_plural": "Nodes removed from palette:",
+            "nodeEnabled": "Node enabled:",
+            "nodeEnabled_plural": "Nodes enabled:",
+            "nodeDisabled": "Node disabled:",
+            "nodeDisabled_plural": "Nodes disabled:"
+        }
+    },
+    "sidebar": {
+        "info": {
+            "name": "Information",
+            "label": "info",
+            "node": "Node",
+            "type": "Type",
+            "id": "ID",
+            "subflow": "Subflow",
+            "instances": "Instances",
+            "properties": "Properties",
+            "blank": "blank",
+            "arrayItems": "__count__ items"
+        },
+        "config": {
+            "name": "Configuration nodes",
+            "label": "config",
+            "global": "Global",
+            "none": "none",
+            "subflows": "subflows",
+            "flows": "flows",
+            "filterUnused":"unused",
+            "filterAll":"all",
+            "filtered": "__count__ hidden"
+        }
+    },
+    "typedInput": {
+        "type": {
+            "str": "string",
+            "num": "number",
+            "re": "regular expression",
+            "bool": "boolean",
+            "json": "JSON"
+        }
+    }
+}

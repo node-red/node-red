@@ -15,10 +15,7 @@
 -->
 
 <script type="text/x-red" data-template-name="unknown">
-    <div class="form-tips"><p>This node is a type unknown to your installation of Node-RED.</p>
-    <p><i>If you deploy with the node in this state, it's configuration will be preserved, but
-    the flow will not start until the missing type is installed.</i></p>
-    <p>See the Info side bar for more help</p></div>
+    <div class="form-tips"><span data-i18n="[html]unknown.tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="unknown">
@@ -42,7 +39,7 @@
         outputs:1,
         icon: "",
         label: function() {
-            return "("+this.name+")"||"unknown";
+            return "("+this.name+")"||this._("unknown.label.unknown");
         },
         labelStyle: function() {
             return "node_label_unknown";

@@ -1,0 +1,127 @@
+{
+    "runtime": {
+        "welcome": "Welcome to Node-RED",
+        "version": "__component__ version: __version__",
+        "paths": {
+            "settings": "Settings file  : __path__"
+        }
+    },
+
+    "server": {
+        "loading": "Loading palette nodes",
+        "errors": "Failed to register __count__ node type",
+        "errors_plural": "Failed to register __count__ node types",
+        "errors-help": "Run with -v for details",
+        "missing-modules": "Missing node modules:",
+        "removing-modules": "Removing modules from config",
+        "added-types": "Added node types:",
+        "removed-types": "Removed node types:",
+        "install": {
+            "invalid": "Invalid module name",
+            "installing": "Installing module: __name__",
+            "installed": "Installed module: __name__",
+            "install-failed": "Install failed",
+            "install-failed-long": "Installation of module __name__ failed:",
+            "install-failed-not-found": "$t(install-failed-long) module not found",
+
+            "uninstalling": "Uninstalling module: __name__",
+            "uninstall-failed": "Uninstall failed",
+            "uninstall-failed-long": "Uninstall of module __name__ failed:",
+            "uninstalled": "Uninstalled module: __name__"
+        },
+        "unable-to-listen": "Unable to listen on __listenpath__",
+        "port-in-use": "Error: port in use",
+        "uncaught-exception": "Uncaught Exception:",
+        "admin-ui-disabled": "Admin UI disabled",
+        "now-running": "Server now running at __listenpath__",
+        "failed-to-start": "Failed to start server:",
+        "headless-mode": "Running in headless mode",
+        "httpadminauth-deprecated": "use of httpAdminAuth is deprecated. Use adminAuth instead"
+    },
+
+    "api": {
+        "flows": {
+            "error-save": "Error saving flows: __message__",
+            "error-reload": "Error reloading flows: __message__"
+        },
+        "library": {
+            "error-load-entry": "Error loading library entry '__path__': __message__",
+            "error-save-entry": "Error saving library entry '__path__': __message__",
+            "error-load-flow": "Error loading flow '__path__': __message__",
+            "error-save-flow": "Error saving flow '__path__': __message__"
+        },
+        "nodes": {
+            "enabled": "Enabled node types:",
+            "disabled": "Disabled node types:",
+            "error-enable": "Failed to enable node:"
+        }
+    },
+
+    "comms": {
+        "error": "Communication channel error: __message__",
+        "error-server": "Communication server error: __message__",
+        "error-send": "Communication send error: __message__"
+    },
+
+    "settings": {
+        "not-available": "Settings not available",
+        "property-read-only": "Property '__prop__' is read-only"
+    },
+
+    "nodes": {
+        "credentials": {
+            "error":"Error loading credentials: __message__",
+            "not-registered": "Credential type '__type__' is not registered"
+        },
+        "flows": {
+            "registered-missing": "Missing type registered: __type__",
+            "error": "Error loading flows: __message__",
+            "starting-modified-nodes": "Starting modified nodes",
+            "starting-modified-flows": "Starting modified flows",
+            "starting-flows": "Starting flows",
+            "started-modified-nodes": "Started modified nodes",
+            "started-modified-flows": "Started modified flows",
+            "started-flows": "Started flows",
+            "stopping-modified-nodes": "Stopping modified nodes",
+            "stopping-modified-flows": "Stopping modified flows",
+            "stopping-flows": "Stopping flows",
+            "stopped-modified-nodes": "Stopped modified nodes",
+            "stopped-modified-flows": "Stopped modified flows",
+            "stopped-flows": "Stopped flows",
+            "stopped": "Stopped",
+            "added-flow": "Adding flow: __label__",
+            "updated-flow": "Updated flow: __label__",
+            "removed-flow": "Removed flow: __label__",
+            "missing-types": "Waiting for missing types to be registered:",
+            "missing-type-provided": " - __type__ (provided by npm module __module__)",
+            "missing-type-install-1": "To install any of these missing modules, run:",
+            "missing-type-install-2": "in the directory:"
+        },
+        "flow": {
+            "unknown-type": "Unknown type: __type__",
+            "missing-types": "missing types",
+            "error-loop": "Message exceeded maximum number of catches"
+        },
+        "index": {
+            "unrecognised-id": "Unrecognised id: __id__",
+            "type-in-use": "Type in use: __msg__",
+            "unrecognised-module": "Unrecognised module: __module__"
+        },
+        "registry": {
+            "localfilesystem": {
+                "module-not-found": "Cannot find module '__module__'"
+            }
+        }
+    },
+
+    "storage": {
+        "index": {
+            "forbidden-flow-name": "forbidden flow name"
+        },
+        "localfilesystem": {
+            "user-dir": "User directory : __path__",
+            "flows-file": "Flows file : __path__",
+            "create": "Creating new flow file"
+        }
+    }
+}

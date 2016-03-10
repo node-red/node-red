@@ -1,0 +1,84 @@
+/**
+ * Copyright 2015 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+
+.dropdown-menu>li>a:hover, .dropdown-menu>li>a:focus, .dropdown-submenu:hover>a, .dropdown-submenu:focus>a {
+    background: #999;
+}
+
+.dropdown-menu * .fa-check-square {
+    display: none;
+    color: #e0e0e0;
+    margin-left: -25px;
+    margin-top: 3px;
+}
+.dropdown-menu * a.active > .fa-check-square {
+    display: inline-block;
+}
+.dropdown-menu * .fa-square {
+    display: inline-block;
+    color: #e0e0e0;
+    margin-left: -25px;
+    margin-top: 3px;
+}
+.dropdown-menu * a.active > .fa-square {
+    display: none;
+}
+
+
+.dropdown-menu>li.disabled>a:hover>[class^="icon-"] {
+    background-image: url("vendor/bootstrap/img/glyphicons-halflings.png") !important;
+}
+/** Fix for unreachable dropdown menu **/
+.dropdown-menu  {
+    border-radius: 0;
+    width: 200px !important;
+    margin-left: 0px !important;
+}
+.dropdown-menu > li > a > i {
+    width: 10px;
+    text-align: center;
+    margin-left: -8px;
+}
+.dropdown-menu > li > a {
+     padding-left: 38px ;
+     text-indent: -8px ;
+     white-space: normal !important;
+}
+
+.dropdown-submenu>a:after {
+    display: none;
+}
+.dropdown-submenu>a:before {
+    display: block;
+    float: left;
+    width: 0;
+    height: 0;
+    margin-top: 5px;
+    margin-left: -30px;
+    border-color: transparent;
+    border-right-color: #e0e0e0;
+    border-style: solid;
+    border-width: 5px 5px 5px 0;
+    content: " ";
+}
+
+.dropdown-submenu.disabled > a:before {
+    border-right-color: #444;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+    border-radius: 0;
+}

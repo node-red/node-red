@@ -32,9 +32,9 @@ module.exports = function(RED) {
                     $(node.tag).each(function() {
                         if (node.as === "multi") {
                             var pay2 = null;
-                            if (node.ret === "html") { pay2 = $(this).html(); }
+                            if (node.ret === "html") { pay2 = cheerio.load($(this).html().trim()).xml(); }
                             if (node.ret === "text") { pay2 = $(this).text(); }
-                            //if (node.ret === "attr") { pay2 = $(this)[0]["attribs"]; }
+                            if (node.ret === "attr") { pay2 = this.attribs; }
                             //if (node.ret === "val")  { pay2 = $(this).val(); }
                             /* istanbul ignore else */
                             if (pay2) {
@@ -43,9 +43,9 @@ module.exports = function(RED) {
                             }
                         }
                         if (node.as === "single") {
-                            if (node.ret === "html") { pay.push( $(this).html() ); }
+                            if (node.ret === "html") { pay.push( cheerio.load($(this).html().trim()).xml() ); }
                             if (node.ret === "text") { pay.push( $(this).text() ); }
-                            //if (node.ret === "attr") { pay.push( $(this)[0]["attribs"] ); }
+                            if (node.ret === "attr") { pay.push( this.attribs ); }
                             //if (node.ret === "val")  { pay.push( $(this).val() ); }
                         }
                     });

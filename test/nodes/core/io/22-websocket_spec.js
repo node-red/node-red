@@ -489,7 +489,7 @@ describe('websocket Node', function() {
                 });
                 logEvents.should.have.length(1);
                 logEvents[0][0].should.have.a.property('msg');
-                logEvents[0][0].msg.toString().should.startWith("Missing server configuration");
+                logEvents[0][0].msg.toString().should.startWith("websocket.errors.missing-conf");
                 done();
             });
         });
@@ -505,7 +505,7 @@ describe('websocket Node', function() {
                 //console.log(logEvents);
                 logEvents.should.have.length(1);
                 logEvents[0][0].should.have.a.property('msg');
-                logEvents[0][0].msg.toString().should.startWith("Missing server configuration");
+                logEvents[0][0].msg.toString().should.startWith("websocket.errors.missing-conf");
                 done();
             });
         });

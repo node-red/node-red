@@ -1,0 +1,106 @@
+/**
+ * Copyright 2015 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+.dialog-form, #dialog-form, #dialog-config-form {
+    margin: 0;
+    height: 100%;
+}
+
+.input-error {
+    border-color: rgb(214, 97, 95) !important;
+}
+
+.ui-dialog .ui-dialog-buttonpane button.leftButton {
+    margin-right: 40px;
+}
+
+.form-row {
+    clear: both;
+    color: $form-text-color;
+    margin-bottom:12px;
+}
+.form-row label {
+    display: inline-block;
+    width: 100px;
+}
+.form-row input {
+    width:70%;
+}
+
+.form-tips {
+    background: #ffe;
+    padding: 8px;
+    border-radius: 2px;
+    border: 1px solid $secondary-border-color;
+    max-width: 450px;
+}
+.form-tips code {
+    border: none;
+    padding: auto;
+}
+.form-tips a {
+    text-decoration: underline;
+}
+
+.node-text-editor {
+    border:1px solid #ccc;
+    border-radius:5px;
+    overflow: hidden;
+    font-size: 14px !important;
+    font-family: monospace !important;
+}
+
+.editor-button {
+    @include workspace-button;
+    height: 34px;
+    line-height: 32px;
+    font-size: 13px;
+    border-radius: 4px;
+    padding: 0 10px;
+}
+.editor-button-small {
+    height: 20px;
+    line-height: 18px;
+    font-size: 10px;
+    border-radius: 2px;
+    padding: 0 5px;
+}
+
+#node-config-dialog-scope-container {
+    cursor: auto;
+    float: right;
+    font-size: 12px !important;
+}
+#node-config-dialog-scope-warning {
+    display: inline-block;
+    margin-right: 5px;
+    color: #AD1625;
+    vertical-align: middle;
+}
+#node-config-dialog-scope {
+    margin: 1px 0 0 0;
+    padding: 0;
+    height: 22px;
+    width: 110px;
+}
+#node-config-dialog-user-count {
+    vertical-align: middle;
+    display:inline-block;
+    margin-top: 10px;
+    margin-right: 20px;
+    float:left;
+    font-size: 12px;
+}

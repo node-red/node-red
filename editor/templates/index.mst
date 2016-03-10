@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<!--
+  Copyright 2013, 2015 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<head>
+<title>{{ page.title }}</title>
+<link rel="icon" type="image/png" href="{{ page.favicon }}">
+<link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="vendor/jquery/css/smoothness/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" media="screen">
+<link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="vendor/vendor.css">
+<link rel="stylesheet" href="red/style.min.css">
+{{#page.css}}
+<link rel="stylesheet" href="{{.}}">
+{{/page.css}}
+
+</head>
+<body spellcheck="false">
+<div id="header">
+    <span class="logo">{{#header.url}}<a href="{{.}}">{{/header.url}}{{#header.image}}<img src="{{.}}" title="{{version}}">{{/header.image}} <span>{{ header.title }}</span>{{#header.url}}</a>{{/header.url}}</span>
+    <ul class="header-toolbar hide">
+        <li><a id="btn-sidemenu" class="button" data-toggle="dropdown" href="#"><i class="fa fa-bars"></i></a></li>
+    <ul>
+</div>
+<div id="main-container" class="sidebar-closed hide">
+    <div id="palette">
+        <img src="red/images/spin.svg" class="palette-spinner hide"/>
+        <div id="palette-search">
+            <i class="fa fa-search"></i><input id="palette-search-input" type="text" data-i18n="[placeholder]palette.filter"><a href="#" id="palette-search-clear"><i class="fa fa-times"></i></a></input>
+        </div>
+        <div id="palette-container" class="palette-scroll"></div>
+        <div id="palette-footer">
+            <a class="palette-button" id="palette-collapse-all" href="#"><i class="fa fa-angle-double-up"></i></a>
+            <a class="palette-button" id="palette-expand-all" href="#"><i class="fa fa-angle-double-down"></i></a>
+        </div>
+
+    </div><!-- /palette -->
+
+    <div id="workspace">
+        <ul id="workspace-tabs"></ul>
+        <div id="workspace-add-tab"><a id="btn-workspace-add-tab" href="#"><i class="fa fa-plus"></i></a></div>
+        <div id="chart"></div>
+        <div id="workspace-toolbar"></div>
+        <div id="workspace-footer">
+            <a class="workspace-footer-button" id="btn-zoom-out" href="#"><i class="fa fa-minus"></i></a>
+            <a class="workspace-footer-button" id="btn-zoom-zero" href="#"><i class="fa fa-circle-o"></i></a>
+            <a class="workspace-footer-button" id="btn-zoom-in" href="#"><i class="fa fa-plus"></i></a>
+        </div>
+    </div>
+    <div id="sidebar">
+        <ul id="sidebar-tabs"></ul>
+        <div id="sidebar-content"></div>
+        <div id="sidebar-footer"></div>
+    </div>
+
+    <div id="sidebar-separator"></div>
+
+</div>
+
+<div id="notifications"></div>
+<div id="dropTarget"><div data-i18n="[append]workspace.dropFlowHere"><br/><i class="fa fa-download"></i></div></div>
+
+<div id="dialog" class="hide"><form id="dialog-form" class="form-horizontal"></form></div>
+<div id="node-config-dialog" class="hide"><form id="dialog-config-form" class="form-horizontal"><div id="node-config-dialog-edit-form"></div><!--<div id="node-config-dialog-toolbar" class="form-row"><label><span>Node scope</span></label><select id="node-config-dialog-scope"></select></div>--></form></div>
+<div id="subflow-dialog" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <label for="subflow-input-name" data-i18n="common.label.name"></label><input type="text" id="subflow-input-name">
+        </div>
+        <div class="form-row" style="margin-bottom: 0px;">
+            <label for="subflow-input-info" data-i18n="subflow.info"></label>
+            <a href="https://help.github.com/articles/markdown-basics/" style="font-size: 0.8em; float: right;" data-i18n="[html]subflow.format"></a>
+        </div>
+        <div class="form-row node-text-editor-row">
+            <div style="height: 250px;" class="node-text-editor" id="subflow-input-info-editor"></div>
+        </div>
+        <div class="form-row form-tips" id="subflow-dialog-user-count"></div>
+    </form>
+</div>
+
+<div id="node-dialog-confirm-deploy" class="hide">
+    <form class="form-horizontal">
+        <div id="node-dialog-confirm-deploy-config" style="text-align: left; padding-top: 30px;" data-i18n="[prepend]deploy.confirm.improperlyConfigured;[append]deploy.confirm.confirm">
+            <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-invalid-list"></ul>
+        </div>
+        <div id="node-dialog-confirm-deploy-unknown" style="text-align: left; padding-top: 10px;" data-i18n="[prepend]deploy.confirm.unknown;[append]deploy.confirm.confirm">
+            <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-unknown-list"></ul>
+        </div>
+    </form>
+</div>
+
+<div id="node-dialog-library-save-confirm" class="hide">
+    <form class="form-horizontal">
+        <div style="text-align: center; padding-top: 30px;" id="node-dialog-library-save-content">
+        </div>
+    </form>
+</div>
+
+<div id="node-dialog-library-save" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <label for="node-dialog-library-save-folder" data-i18n="[append]library.folder"><i class="fa fa-folder-open"></i> </label>
+            <input type="text" id="node-dialog-library-save-folder" data-i18n="[placeholder]library.folderPlaceholder">
+        </div>
+        <div class="form-row">
+            <label for="node-dialog-library-save-filename" data-i18n="[append]library.filename"><i class="fa fa-file"></i> </label>
+            <input type="text" id="node-dialog-library-save-filename" data-i18n="[placeholder]library.filenamePlaceholder">
+        </div>
+    </form>
+</div>
+
+<div id="node-dialog-library-lookup" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <ul id="node-dialog-library-breadcrumbs" class="breadcrumb">
+                <li class="active"><a href="#" data-i18n="[append]library.breadcrumb"></a></li>
+            </ul>
+        </div>
+        <div class="form-row">
+            <div style="vertical-align: top; display: inline-block; height: 100%; width: 30%; padding-right: 20px;">
+                <div id="node-select-library" style="border: 1px solid #999; width: 100%; height: 100%; overflow:scroll;"><ul></ul></div>
+            </div>
+            <div style="vertical-align: top; display: inline-block;width: 65%; height: 100%;">
+                <div style="height: 100%; width: 95%;" class="node-text-editor" id="node-select-library-text" ></div>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="node-dialog-rename-workspace" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <label for="node-input-workspace-name" ><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+            <input type="text" id="node-input-workspace-name">
+        </div>
+    </form>
+</div>
+<div id="node-dialog-delete-workspace" class="hide">
+    <form class="form-horizontal">
+        <div style="text-align: center; padding-top: 30px;" id="node-dialog-delete-workspace-content">
+        </div>
+    </form>
+</div>
+
+<script type="text/x-red" data-template-name="subflow">
+    <div class="form-row">
+        <label for="node-input-name" data-i18n="[append]editor:common.label.name"><i class="fa fa-tag"></i> </label>
+        <input type="text" id="node-input-name">
+    </div>
+</script>
+
+<script src="vendor/vendor.js"></script>
+<script src="vendor/ace/ace.js"></script>
+<script src="vendor/ace/ext-language_tools.js"></script>
+<script src="{{ asset.red }}"></script>
+
+</body>
+</html>

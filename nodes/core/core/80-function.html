@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013, 2015 IBM Corp.
+  Copyright 2013, 2016 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -16,22 +16,22 @@
 
 <script type="text/x-red" data-template-name="function">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
     <div class="form-row" style="margin-bottom: 0px;">
-        <label for="node-input-func"><i class="fa fa-wrench"></i> Function</label>
+        <label for="node-input-func"><i class="fa fa-wrench"></i> <span data-i18n="function.label.function"></span></label>
         <input type="hidden" id="node-input-func" autofocus="autofocus">
-        <input type="hidden" id="node-input-valid">
+        <input type="hidden" id="node-input-noerr">
     </div>
     <div class="form-row node-text-editor-row">
         <div style="height: 250px;" class="node-text-editor" id="node-input-func-editor" ></div>
     </div>
     <div class="form-row">
-        <label for="node-input-outputs"><i class="fa fa-random"></i> Outputs</label>
-        <input id="node-input-outputs" style="width: 60px; height: 1.7em;" value="1">
+        <label for="node-input-outputs"><i class="fa fa-random"></i> <span data-i18n="function.label.outputs"></span></label>
+        <input id="node-input-outputs" style="width: 60px;" value="1">
     </div>
-    <div class="form-tips">See the Info tab for help writing functions.</div>
+    <div class="form-tips"><span data-i18n="function.tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="function">
@@ -74,7 +74,7 @@
             name: {value:""},
             func: {value:"\nreturn msg;"},
             outputs: {value:1},
-            valid: {value:true,required:true}
+            noerr: {value:0,required:true,validate:function(v){ return ((!v) || (v === 0)) ? true : false; }}
         },
         inputs:1,
         outputs:1,
@@ -88,37 +88,12 @@
                 min:1
             });
 
-            function functionDialogResize() {
-                var rows = $("#dialog-form>div:not(.node-text-editor-row)");
-                var height = $("#dialog-form").height();
-                for (var i=0;i<rows.size();i++) {
-                    height -= $(rows[i]).outerHeight(true);
-                }
-                var editorRow = $("#dialog-form>div.node-text-editor-row");
-                height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
-                $(".node-text-editor").css("height",height+"px");
-                that.editor.resize();
-            };
-            $( "#dialog" ).on("dialogresize", functionDialogResize);
-            $( "#dialog" ).one("dialogopen", function(ev) {
-                var size = $( "#dialog" ).dialog('option','sizeCache-function');
-                if (size) {
-                    $("#dialog").dialog('option','width',size.width);
-                    $("#dialog").dialog('option','height',size.height);
-                    functionDialogResize();
-                }
-            });
-            $( "#dialog" ).one("dialogclose", function(ev,ui) {
-                var height = $( "#dialog" ).dialog('option','height');
-                $( "#dialog" ).off("dialogresize",functionDialogResize);
-            });
-
             this.editor = RED.editor.createEditor({
                 id: 'node-input-func-editor',
-                mode: 'ace/mode/javascript'
+                mode: 'ace/mode/javascript',
+                value: $("#node-input-func").val()
             });
-            this.editor.setValue($("#node-input-func").val(),-1);
-            
+
             RED.library.create({
                 url:"functions", // where to get the data from
                 type:"function", // the type of object the library is for
@@ -130,16 +105,28 @@
         },
         oneditsave: function() {
             var annot = this.editor.getSession().getAnnotations();
-            this.valid = true;
+            this.noerr = 0;
+            $("#node-input-noerr").val(0);
             for (var k=0; k < annot.length; k++) {
                 //console.log(annot[k].type,":",annot[k].text, "on line", annot[k].row);
                 if (annot[k].type === "error") {
-                    $("#node-input-valid").val(null);
-                    delete this.valid;
+                    $("#node-input-noerr").val(annot.length);
+                    this.noerr = annot.length;
                 }
             }
             $("#node-input-func").val(this.editor.getValue());
             delete this.editor;
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+            var height = $("#dialog-form").height();
+            for (var i=0;i<rows.size();i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-text-editor-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            $(".node-text-editor").css("height",height+"px");
+            this.editor.resize();
         }
     });
 </script>

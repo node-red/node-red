@@ -16,35 +16,35 @@
 
 <script type="text/x-red" data-template-name="range">
     <div class="form-row">
-        <label for="node-input-action"><i class="fa fa-dot-circle-o"></i> Action</label>
+        <label for="node-input-action"><i class="fa fa-dot-circle-o"></i> <span data-i18n="range.label.action"></span></label>
         <select id="node-input-action" style="width:70%; margin-right:5px;">
-            <option value="scale">Scale msg.payload</option>
-            <option value="clamp">Scale and limit to the target range</option>
-            <option value="roll">Scale and wrap within the target range</option>
+            <option value="scale" data-i18n="range.scale.payload"></option>
+            <option value="clamp" data-i18n="range.scale.limit"></option>
+            <option value="roll" data-i18n="range.scale.wrap"></option>
         </select>
     </div>
     <br/>
-    <div class="form-row"><i class="fa fa-sign-in"></i> Map the input range:</div>
+    <div class="form-row"><i class="fa fa-sign-in"></i> <span data-i18n="range.label.inputrange"></span>:</div>
     <div class="form-row"><label></label>
-        from: <input type="text" id="node-input-minin" placeholder="e.g. 0" style="width:100px;"/>
-        &nbsp;&nbsp;to: <input type="text" id="node-input-maxin" placeholder="e.g. 99" style="width:100px;"/>
+        <span data-i18n="range.label.from"></span>: <input type="text" id="node-input-minin" data-i18n="[placeholder]range.placeholder.min" style="width:100px;"/>
+        &nbsp;&nbsp;<span data-i18n="range.label.to"></span>: <input type="text" id="node-input-maxin" data-i18n="[placeholder]range.placeholder.maxin" style="width:100px;"/>
     </div>
-    <div class="form-row"><i class="fa fa-sign-out"></i> to the result range:</div>
+    <div class="form-row"><i class="fa fa-sign-out"></i> <span data-i18n="range.label.resultrange"></span>:</div>
     <div class="form-row"><label></label>
-        from: <input type="text" id="node-input-minout" placeholder="e.g. 0" style="width:100px;"/>
-        &nbsp;&nbsp;to: <input type="text" id="node-input-maxout" placeholder="e.g. 255" style="width:100px;"/>
+        <span data-i18n="range.label.from"></span>: <input type="text" id="node-input-minout" data-i18n="[placeholder]range.placeholder.min" style="width:100px;"/>
+        &nbsp;&nbsp;<span data-i18n="range.label.to"></span>: <input type="text" id="node-input-maxout" data-i18n="[placeholder]range.placeholder.maxout" style="width:100px;"/>
     </div>
     <br/>
     <div class="form-row"><label></label>
         <input type="checkbox" id="node-input-round" style="display: inline-block; width: auto; vertical-align: top;">
-        <label style="width: auto;" for="node-input-round">Round result to the nearest integer?</label></input>
+        <label style="width: auto;" for="node-input-round"><span data-i18n="range.label.roundresult"></span></label></input>
     </div>
     <br/>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-tips" id="node-tip">Tip: This node ONLY works with numbers.</div>
+    <div class="form-tips" id="node-tip"><span data-i18n="range.tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="range">

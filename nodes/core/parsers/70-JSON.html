@@ -16,13 +16,13 @@
 
 <script type="text/x-red" data-template-name="json">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="json">
-    <p>A function that parses the <b>msg.payload</b> to convert a JSON string to/from a javascript object. Places the result back into the payload.</p>
+    <p>A function that parses the <code>msg.payload</code> to convert a JSON string to/from a javascript object. Places the result back into the payload.</p>
     <p>If the input is a JSON string it tries to parse it to a javascript object.</p>
     <p>If the input is a javascript object it creates a JSON string.</p>
 </script>

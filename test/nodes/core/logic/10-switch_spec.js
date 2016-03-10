@@ -55,7 +55,7 @@ describe('switch Node', function() {
                     {id:"helperNode1", type:"helper", wires:[]}];
         customFlowSwitchTest(flow, shouldReceive, sendPayload, done);
     }
-    
+
     /**
      * Test a switch node where NO arguments are consumed by the rule (such as TRUE/FALSE)
      * @param rule - the switch rule (see 10-switc.js) string we're using
@@ -69,7 +69,7 @@ describe('switch Node', function() {
                     {id:"helperNode1", type:"helper", wires:[]}];
         customFlowSwitchTest(flow, shouldReceive, sendPayload, done);
     }
-    
+
     /**
      * Test a switch node where two arguments are consumed by the rule (such as between).
      * @param rule - the switch rule (see 10-switc.js) string we're using
@@ -85,7 +85,7 @@ describe('switch Node', function() {
                     {id:"helperNode1", type:"helper", wires:[]}];
         customFlowSwitchTest(flow, shouldReceive, sendPayload, done);
     }
-    
+
     /**
      * Execute a switch test. Can specify whether the should node is expected to send a payload onwards to the helper node.
      * The flow and the payload can be customised
@@ -102,7 +102,7 @@ describe('switch Node', function() {
                 try {
                     if(shouldReceive === true) {
                         msg.payload.should.equal(sendPayload);
-                        done();   
+                        done();
                     } else {
                         should.fail(null, null, "We should never get an input!");
                     }
@@ -118,127 +118,143 @@ describe('switch Node', function() {
             }
         });
     }
-    
+
     it('should check if payload equals given value', function(done) {
         genericSwitchTest("eq", "Hello", true, true, "Hello", done);
     });
-    
+
     it('should return nothing when the payload doesn\'t equal to desired string', function(done) {
         genericSwitchTest("eq", "Hello", true, false, "Hello!", done);
     });
-    
+
     it('should check if payload NOT equals given value', function(done) {
         genericSwitchTest("neq", "Hello", true, true, "HEllO", done);
     });
-    
+
     it('should return nothing when the payload does equal to desired string', function(done) {
         genericSwitchTest("neq", "Hello", true, false, "Hello", done);
     });
-    
+
     it('should check if payload equals given numeric value', function(done) {
         genericSwitchTest("eq", 3, true, true, 3, done);
     });
-    
+
     it('should return nothing when the payload doesn\'t equal to desired numeric value', function(done) {
         genericSwitchTest("eq", 2, true, false, 4, done);
     });
-    
+
     it('should check if payload NOT equals given numeric value', function(done) {
         genericSwitchTest("neq", 55667744, true, true, -1234, done);
     });
-    
+
     it('should return nothing when the payload does equal to desired numeric value', function(done) {
         genericSwitchTest("neq", 10, true, false, 10, done);
     });
-    
+
     it('should check if payload is less than given value', function(done) {
         genericSwitchTest("lt", 3, true, true, 2, done);
     });
-    
+
     it('should return nothing when the payload is not less than desired string', function(done) {
         genericSwitchTest("lt", 3, true, false, 4, done);
     });
-    
+
     it('should check if payload less than equals given value', function(done) {
         genericSwitchTest("lte", 3, true, true, 3, done);
     });
-    
+
     it('should check if payload is greater than given value', function(done) {
         genericSwitchTest("gt", 3, true, true, 6, done);
     });
-    
+
     it('should return nothing when the payload is not greater than desired string', function(done) {
         genericSwitchTest("gt", 3, true, false, -1, done);
     });
-    
+
     it('should check if payload is greater than/equals given value', function(done) {
         genericSwitchTest("gte", 3, true, true, 3, done);
     });
-    
+
     it('should return nothing when the payload is not greater than desired string', function(done) {
         genericSwitchTest("gt", 3, true, false, -1, done);
     });
-    
+
     it('should check if payload is greater than/equals given value', function(done) {
         genericSwitchTest("gte", 3, true, true, 3, done);
     });
-    
+
     it('should check if payload is between given values', function(done) {
         twoFieldSwitchTest("btwn", 3, 5, true, true, 4, done);
     });
-    
+
     it('should check if payload is not between given values', function(done) {
         twoFieldSwitchTest("btwn", 3, 5, true, false, 12, done);
     });
-    
+
     it('should check if payload contains given value', function(done) {
         genericSwitchTest("cont", "Hello", true, true, "Hello World!", done);
     });
-    
+
     it('should return nothing when the payload doesn\'t contain desired string', function(done) {
         genericSwitchTest("cont", "Hello", true, false, "This is not a greeting!", done);
     });
-    
+
     it('should match regex', function(done) {
         genericSwitchTest("regex", "[abc]+", true, true, "abbabac", done);
     });
-    
+
+    it('should match regex with ignore-case flag set true', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"regex","v":"onetwothree","case":true}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowSwitchTest(flow, true, "oneTWOthree", done);
+    });
+    it('should not match regex with ignore-case flag unset', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"regex","v":"onetwothree"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowSwitchTest(flow, false, "oneTWOthree", done);
+    });
+    it('should not match regex with ignore-case flag set false', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"regex","v":"onetwothree",case:false}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowSwitchTest(flow, false, "oneTWOthree", done);
+    });
+
     it('should return nothing when the payload doesn\'t match regex', function(done) {
         genericSwitchTest("regex", "\\d+", true, false, "This is not a digit", done);
     });
-    
+
     it('should return nothing when the payload doesn\'t contain desired string', function(done) {
         genericSwitchTest("cont", "Hello", true, false, "This is not a greeting!", done);
     });
-    
+
     it('should check if input is true', function(done) {
         singularSwitchTest(true, true, true, true, done);
     });
-    
+
     it('sends nothing when input is false and checking for true', function(done) {
         singularSwitchTest(true, true, false, false, done);
     });
-    
+
     it('should check if input is indeed false', function(done) {
         singularSwitchTest(false, true, true, false, done);
     });
-    
+
     it('sends nothing when input is false and checking for true', function(done) {
         singularSwitchTest(false, true, false, true, done);
     });
-    
+
     it('should check if input is indeed null', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"null"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
-        
-        
+
+
         helper.load(switchNode, flow, function() {
             var switchNode1 = helper.getNode("switchNode1");
             var helperNode1 = helper.getNode("helperNode1");
             helperNode1.on("input", function(msg) {
                 if(msg.payload) {
                     try {
-                        should.fail(null, null, "msg.payload should be undefined!");   
+                        should.fail(null, null, "msg.payload should be undefined!");
                     } catch (err) {
                         done(err);
                     }
@@ -249,12 +265,12 @@ describe('switch Node', function() {
             switchNode1.receive({payload:undefined});
         });
     });
-    
+
     it('should check if input is indeed not null', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"nnull"}],checkall:false,outputs:1,wires:[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
-        
-        
+
+
         helper.load(switchNode, flow, function() {
             var switchNode1 = helper.getNode("switchNode1");
             var helperNode1 = helper.getNode("helperNode1");
@@ -272,24 +288,24 @@ describe('switch Node', function() {
             switchNode1.receive({payload:"Anything here"});
         });
     });
-    
+
     it('sends a message when the "else/otherwise" statement is selected' , function(done) {
         singularSwitchTest("else", true, true, 123456, done);
     });
-    
+
     it('handles more than one switch statement' , function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"eq","v":"Hello"},{"t":"cont","v":"ello"}, {"t":"else"}],checkall:true,outputs:3,wires:[["helperNode1"], ["helperNode2"], ["helperNode3"]]},
                     {id:"helperNode1", type:"helper", wires:[]},
                     {id:"helperNode2", type:"helper", wires:[]},
                     {id:"helperNode3", type:"helper", wires:[]}];
-        
-        
+
+
         helper.load(switchNode, flow, function() {
             var switchNode1 = helper.getNode("switchNode1");
             var helperNode1 = helper.getNode("helperNode1");
             var helperNode2 = helper.getNode("helperNode2");
             var helperNode3 = helper.getNode("helperNode3");
-            
+
             var nodeHitCount = 0;
             helperNode1.on("input", function(msg) {
                 try {
@@ -307,7 +323,7 @@ describe('switch Node', function() {
                         done();
                     } else {
                         try {
-                            should.fail(null, null, "Both statements should be triggered!");   
+                            should.fail(null, null, "Both statements should be triggered!");
                         } catch (err) {
                             done(err);
                         }
@@ -318,7 +334,7 @@ describe('switch Node', function() {
             });
             helperNode3.on("input", function(msg) {
                 try {
-                    should.fail(null, null, "The otherwise/else statement should not be triggered here!");   
+                    should.fail(null, null, "The otherwise/else statement should not be triggered here!");
                 } catch (err) {
                     done(err);
                 }
@@ -326,20 +342,20 @@ describe('switch Node', function() {
             switchNode1.receive({payload:"Hello"});
         });
     });
-    
+
     it('stops after first statement' , function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"eq","v":"Hello"},{"t":"cont","v":"ello"}, {"t":"else"}],checkall:"false",outputs:3,wires:[["helperNode1"], ["helperNode2"], ["helperNode3"]]},
                     {id:"helperNode1", type:"helper", wires:[]},
                     {id:"helperNode2", type:"helper", wires:[]},
                     {id:"helperNode3", type:"helper", wires:[]}];
-        
-        
+
+
         helper.load(switchNode, flow, function() {
             var switchNode1 = helper.getNode("switchNode1");
             var helperNode1 = helper.getNode("helperNode1");
             var helperNode2 = helper.getNode("helperNode2");
             var helperNode3 = helper.getNode("helperNode3");
-            
+
             helperNode1.on("input", function(msg) {
                 try {
                     msg.payload.should.equal("Hello");
@@ -350,14 +366,14 @@ describe('switch Node', function() {
             });
             helperNode2.on("input", function(msg) {
                 try {
-                    should.fail(null, null, "The otherwise/else statement should not be triggered here!");   
+                    should.fail(null, null, "The otherwise/else statement should not be triggered here!");
                 } catch (err) {
                     done(err);
                 }
             });
             helperNode3.on("input", function(msg) {
                 try {
-                    should.fail(null, null, "The otherwise/else statement should not be triggered here!");   
+                    should.fail(null, null, "The otherwise/else statement should not be triggered here!");
                 } catch (err) {
                     done(err);
                 }
@@ -365,5 +381,5 @@ describe('switch Node', function() {
             switchNode1.receive({payload:"Hello"});
         });
     });
-    
+
 });
