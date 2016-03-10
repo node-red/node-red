@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -475,8 +475,8 @@ RED.editor = (function() {
             if (val == null) {
                 val = "";
             }
-            input.val(val).attr("dir", RED.view.resolveBaseTextDir(val));
-            RED.view.initInputEvents(input);            
+            input.val(val).attr("dir", RED.bidi.resolveBaseTextDir(val));
+            RED.bidi.initInputEvents(input);            
         }
     }
 

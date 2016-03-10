@@ -33,10 +33,6 @@ RED.view = (function() {
 
     var gridSize = 20;
     var snapGrid = false;
-    var textDir = "";
-    var LRE = "\u202A",
-        RLE = "\u202B",
-        PDF = "\u202C"; 
 
     var activeSpliceLink;
     var spliceActive = false;
@@ -1686,7 +1682,7 @@ RED.view = (function() {
                                         l = d._def.label;
                                         try {
                                             l = (typeof l === "function" ? l.call(d) : l)||"";
-                                            l = enforceTextDirectionWithUCC(l);
+                                            l = RED,bidi.enforceTextDirectionWithUCC(l);
                                         } catch(err) {
                                             console.log("Definition error: "+d.type+".label",err);
                                             l = d.type;
@@ -1930,7 +1926,7 @@ RED.view = (function() {
             ).classed("link_selected", false);
         }
 
-        enforceTextDirectionOnPage();
+        RED.bidi.enforceTextDirectionOnPage();
 
         if (d3.event) {
             d3.event.preventDefault();
@@ -2044,78 +2040,6 @@ RED.view = (function() {
         }
     }
 
-    function isRTLValue(stringValue) {
-        for (var ch in stringValue) {
-            if (isBidiChar(stringValue.charCodeAt(ch)))
-                return true;
-            else if(isLatinChar(stringValue.charCodeAt(ch)))
-                return false;        
-         }
-         return false;
-    }
-
-    function isBidiChar(c)  {
-        if (c >= 0x05d0 && c <= 0x05ff)
-            return true;
-        else if (c >= 0x0600 && c <= 0x065f)
-            return true;
-        else if (c >= 0x066a && c <= 0x06ef)
-            return true;
-        else if (c >= 0x06fa && c <= 0x07ff)
-            return true;
-        else if (c >= 0xfb1d && c <= 0xfdff)
-            return true;
-        else if (c >= 0xfe70 && c <= 0xfefc)
-            return true;
-        else
-            return false;
-    }
-
-    function isLatinChar(c){
-        if((c > 64 && c < 91)||(c > 96 && c < 123))
-             return true;
-        else            
-            return false;    
-    }
-    
-    function resolveBaseTextDir(value) {
-        if (textDir == "auto") {
-            if (isRTLValue(value)) {
-                return "rtl";
-            } else {
-                return "ltr";
-            }
-        } 
-        else {
-            return textDir;
-        }
-    }
-    
-    function onInputChange() {
-        $(this).attr("dir", resolveBaseTextDir($(this).val()));       
-    }
-
-	function initInputEvents(input) {
-        input.on("keyup",onInputChange).on("paste",onInputChange).on("cut",onInputChange);
-    }
-    
-    function enforceTextDirectionWithUCC(value) {
-        if (value) {
-            var dir = resolveBaseTextDir(value);
-            if (dir == "ltr")
-               return LRE + value + PDF;
-            else if (dir == "rtl")
-               return RLE + value + PDF;
-        }
-        return value;
-    }
-    
-    function enforceTextDirectionOnPage() {                  
-        $("#workspace").find('.bidiAware').each(function() {                       			    
-            $(this).attr("dir", resolveBaseTextDir($(this).html()));
-	    });
-    }
-
     return {
         init: init,
         state:function(state) {
@@ -2182,7 +2106,7 @@ RED.view = (function() {
             redraw();
         },
         toggleTextDir: function(value) {
-            textDir = value;
+            RED.bidi.setTextDirection(value);
             redraw();            
         },
         scale: function() {
@@ -2198,8 +2122,6 @@ RED.view = (function() {
                 }
             }
             return result;
-        },
-        resolveBaseTextDir: resolveBaseTextDir,
-        initInputEvents: initInputEvents
+        }        
     };
 })();
