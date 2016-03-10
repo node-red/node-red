@@ -113,7 +113,10 @@ module.exports = {
                         }
                     },
                     isConnected: function() {
-                        return client.isConnected();
+                        if(client){
+							return client.isConnected();
+						}
+						return false;
                     }
                 };
                 client.on('connect',function() {
