@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2014 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,10 +199,42 @@ var localfilesystem = {
             }
             fs.readFile(flowsFullPath,'utf8',function(err,data) {
                 if (!err) {
-                    return resolve(JSON.parse(data));
+                    if (data.length === 0) {
+                        log.warn(log._("storage.localfilesystem.empty"));
+                        try {
+                            var backupStat = fs.statSync(flowsFileBackup);
+                            if (backupStat.size === 0) {
+                                // Empty flows, empty backup - return empty flow
+                                return resolve([]);
+                            }
+                            // Empty flows, restore backup
+                            log.warn(log._("storage.localfilesystem.restore",{path:flowsFileBackup}));
+                            fs.copy(flowsFileBackup,flowsFullPath,function(backupCopyErr) {
+                                if (backupCopyErr) {
+                                    // Restore backup failed
+                                    log.warn(log._("storage.localfilesystem.restore-fail",{message:backupCopyErr.toString()}));
+                                    resolve([]);
+                                } else {
+                                    // Loop back in to load the restored backup
+                                    resolve(localfilesystem.getFlows());
+                                }
+                            });
+                            return;
+                        } catch(backupStatErr) {
+                            // Empty flow file, no back-up file
+                            return resolve([]);
+                        }
+                    }
+                    try {
+                        return resolve(JSON.parse(data));
+                    } catch(parseErr) {
+                        log.warn(log._("storage.localfilesystem.invalid"));
+                        return resolve([]);
+                    }
+                } else {
+                    log.info(log._("storage.localfilesystem.create"));
+                    resolve([]);
                 }
-                log.info(log._("storage.localfilesystem.create"));
-                resolve([]);
             });
         });
     },
