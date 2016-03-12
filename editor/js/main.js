@@ -103,8 +103,10 @@ var RED = (function() {
                             var id = m.id;
                             RED.nodes.addNodeSet(m);
                             addedTypes = addedTypes.concat(m.types);
-                            $.get('nodes/'+id, function(data) {
-                                $("body").append(data);
+                            RED.i18n.loadCatalog(id, function() {
+                                $.get('nodes/'+id, function(data) {
+                                    $("body").append(data);
+                                });
                             });
                         }
                         if (addedTypes.length) {
