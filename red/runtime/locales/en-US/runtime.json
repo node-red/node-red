@@ -121,7 +121,11 @@
         "localfilesystem": {
             "user-dir": "User directory : __path__",
             "flows-file": "Flows file : __path__",
-            "create": "Creating new flow file"
+            "create": "Creating new flow file",
+            "empty": "Existing flow file is empty",
+            "invalid": "Existing flow file is not valid json",
+            "restore": "Restoring flow file backup : __path__",
+            "restore-fail": "Restoring flow file backup failed : __message__"
         }
     }
 }
