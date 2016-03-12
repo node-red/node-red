@@ -66,7 +66,7 @@ RED.palette = (function() {
         var lineHeight = 20;
         var portHeight = 10;
 
-        var words = label.split(" ");
+        var words = label.split(/[ -]/);
 
         var displayLines = [];
 
