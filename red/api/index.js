@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2015 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ var log;
 var adminApp;
 var nodeApp;
 var server;
+var runtime;
 
 var errorHandler = function(err,req,res,next) {
     if (err.message === "request entity too large") {
@@ -51,8 +52,18 @@ var errorHandler = function(err,req,res,next) {
     res.status(400).json({error:"unexpected_error", message:err.toString()});
 };
 
-function init(_server,runtime) {
+var ensureRuntimeStarted = function(req,res,next) {
+    if (!runtime.isStarted()) {
+        log.error("Node-RED runtime not started");
+        res.status(503).send("Not started");
+    } else {
+        next();
+    }
+}
+
+function init(_server,_runtime) {
     server = _server;
+    runtime = _runtime;
     var settings = runtime.settings;
     i18n = runtime.i18n;
     log = runtime.log;
@@ -75,7 +86,7 @@ function init(_server,runtime) {
         if (!settings.disableEditor) {
             ui.init(runtime);
             var editorApp = express();
-            editorApp.get("/",ui.ensureSlash,ui.editor);
+            editorApp.get("/",ensureRuntimeStarted,ui.ensureSlash,ui.editor);
             editorApp.get("/icons/:icon",ui.icon);
             theme.init(runtime);
             if (settings.editorTheme) {

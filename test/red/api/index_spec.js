@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,45 @@ describe("api index", function() {
         });
     });
 
+    describe("editor warns if runtime not started", function() {
+        var mockList = [
+            'nodes','flows','library','info','theme','locales','credentials'
+        ]
+        before(function() {
+            mockList.forEach(function(m) {
+                sinon.stub(require("../../../red/api/"+m),"init",function(){});
+            });
+        });
+        after(function() {
+            mockList.forEach(function(m) {
+                require("../../../red/api/"+m).init.restore();
+            })
+        });
+
+        it('serves the editor', function(done) {
+            var errorLog = sinon.spy();
+            api.init({},{
+                log:{audit:function(){},error:errorLog},
+                settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false},
+                events:{on:function(){},removeListener:function(){}},
+                isStarted: function() { return false; } // <-----
+            });
+            app = api.adminApp;
+            request(app)
+                .get("/")
+                .expect(503)
+                .end(function(err,res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    res.text.should.eql("Not started");
+                    errorLog.calledOnce.should.be.true;
+                    done();
+                });
+        });
+
+    });
+
     describe("enables editor", function() {
 
         var mockList = [
@@ -107,7 +146,8 @@ describe("api index", function() {
             api.init({},{
                 log:{audit:function(){}},
                 settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false},
-                events:{on:function(){},removeListener:function(){}}
+                events:{on:function(){},removeListener:function(){}},
+                isStarted: function() { return true; }
             });
             app = api.adminApp;
         });
