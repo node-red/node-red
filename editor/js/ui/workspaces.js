@@ -75,7 +75,8 @@ RED.workspaces = (function() {
                 .removeClass("ui-state-disabled");
         }
 
-        $( "#node-input-workspace-name" ).val(ws.label);
+        $( "#node-input-workspace-name" ).val(ws.label).attr("dir", RED.bidi.resolveBaseTextDir(ws.label));
+        RED.bidi.initInputEvents($( "#node-input-workspace-name" ));       
         $( "#node-dialog-rename-workspace" ).dialog("open");
     }
 

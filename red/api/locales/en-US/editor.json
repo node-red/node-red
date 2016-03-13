@@ -20,7 +20,12 @@
             "view": {
                 "view": "View",
                 "showGrid": "Show grid",
-                "snapGrid": "Snap to grid"
+                "snapGrid": "Snap to grid",
+                "textDir": "Text Direction",
+                "defaultDir": "Default",
+                "ltr": "Left-to-right",
+                "rtl": "Right-to-left",
+                "auto": "Contextual"
             },
             "sidebar": {
                 "show": "Show sidebar"

@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -431,7 +431,7 @@ RED.editor = (function() {
                 label = node_def.label;
             }
         }
-        input.val(label);
+        input.val(label);        
     }
 
     /**
@@ -443,7 +443,7 @@ RED.editor = (function() {
     function prepareConfigNodeButton(node,property,type) {
         var input = $("#node-input-"+property);
         input.val(node[property]);
-        input.attr("type","hidden");
+        input.attr("type","hidden");        
 
         var button = $("<a>",{id:"node-input-edit-"+property, class:"editor-button"});
         input.after(button);
@@ -475,7 +475,8 @@ RED.editor = (function() {
             if (val == null) {
                 val = "";
             }
-            input.val(val);
+            input.val(val).attr("dir", RED.bidi.resolveBaseTextDir(val));
+            RED.bidi.initInputEvents(input);            
         }
     }
 

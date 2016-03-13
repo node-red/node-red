@@ -1682,6 +1682,7 @@ RED.view = (function() {
                                         l = d._def.label;
                                         try {
                                             l = (typeof l === "function" ? l.call(d) : l)||"";
+                                            l = RED.bidi.enforceTextDirectionWithUCC(l);
                                         } catch(err) {
                                             console.log("Definition error: "+d.type+".label",err);
                                             l = d.type;
@@ -1925,6 +1926,7 @@ RED.view = (function() {
             ).classed("link_selected", false);
         }
 
+        RED.bidi.enforceTextDirectionOnPage();
 
         if (d3.event) {
             d3.event.preventDefault();
@@ -2103,6 +2105,10 @@ RED.view = (function() {
             snapGrid = state;
             redraw();
         },
+        toggleTextDir: function(value) {
+            RED.bidi.setTextDirection(value);
+            redraw();            
+        },
         scale: function() {
             return scaleFactor;
         },
@@ -2116,6 +2122,6 @@ RED.view = (function() {
                 }
             }
             return result;
-        }
+        }        
     };
 })();
