@@ -51,7 +51,7 @@ describe('change Node', function() {
         helper.load(changeNode, flow, function() {
             //console.log(helper.getNode("c1"));
             helper.getNode("c1").should.have.property("name", "change1");
-            helper.getNode("c1").should.have.property("rules", [ { from: /(?:)/g,fromt: 'str', p: '',pt: 'msg', re: undefined, t: 'change', to: '',tot: 'str' } ]);
+            helper.getNode("c1").should.have.property("rules", [ { from: '', fromRE:/(?:)/g,fromt: 'str', p: '',pt: 'msg', re: undefined, t: 'change', to: '',tot: 'str' } ]);
             done();
         });
     });
@@ -424,7 +424,6 @@ describe('change Node', function() {
             });
         });
 
-
         it('changes the value - new rule format', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"ABC","to":"123","fromt":"str","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
@@ -440,6 +439,96 @@ describe('change Node', function() {
                     }
                 });
                 changeNode1.receive({payload:"abcABCabc"});
+            });
+        });
+
+        it('changes the value using msg property', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"topic","to":"123","fromt":"msg","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal("abc123abc");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:"abcABCabc",topic:"ABC"});
+            });
+        });
+
+        it('changes the value using number - string payload', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"123","to":"456","fromt":"num","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal("456");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:"123"});
+            });
+        });
+
+        it('changes the value using number - number payload', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"123","to":"abc","fromt":"num","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal("abc");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:123});
+            });
+        });
+
+        it('changes the value using boolean - string payload', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"true","to":"xxx","fromt":"bool","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal("xxx");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:"true"});
+            });
+        });
+
+        it('changes the value using boolean - boolean payload', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"true","to":"xxx","fromt":"bool","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal("xxx");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:true});
             });
         });
     });

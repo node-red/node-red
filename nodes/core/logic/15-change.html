@@ -128,21 +128,37 @@
                     selectField.append($("<option></option>").val(selectOptions[i].v).text(selectOptions[i].l));
                 }
 
-                var propertyName = $('<input/>',{style:"width: 250px",class:"node-input-rule-property-name",type:"text"}).appendTo(row1).typedInput({types:['msg','flow','global']});
-                var finalspan = $('<span/>',{style:"float: right; margin-right: 10px;"}).appendTo(row1);
-                var deleteButton = $('<a/>',{href:"#",class:"editor-button editor-button-small", style:"margin-top: 7px; margin-left: 5px;"}).appendTo(finalspan);
+                var propertyName = $('<input/>',{style:"width: 250px",class:"node-input-rule-property-name",type:"text"})
+                    .appendTo(row1)
+                    .typedInput({types:['msg','flow','global']});
+                var finalspan = $('<span/>',{style:"float: right; margin-right: 10px;"})
+                    .appendTo(row1);
+                var deleteButton = $('<a/>',{href:"#",class:"editor-button editor-button-small", style:"margin-top: 7px; margin-left: 5px;"})
+                    .appendTo(finalspan);
                 $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
 
 
-                $('<div/>',{style:"display: inline-block;text-align:right; width:120px;padding-right: 10px; box-sizing: border-box;"}).text(to).appendTo(row2);
-                var propertyValue = $('<input/>',{style:"width: 250px",class:"node-input-rule-property-value",type:"text"}).appendTo(row2).typedInput({default:'str',types:['msg','flow','global','str','num','bool','json']});
+                $('<div/>',{style:"display: inline-block;text-align:right; width:120px;padding-right: 10px; box-sizing: border-box;"})
+                    .text(to)
+                    .appendTo(row2);
+                var propertyValue = $('<input/>',{style:"width: 250px",class:"node-input-rule-property-value",type:"text"})
+                    .appendTo(row2)
+                    .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json']});
                 var row3_1 = $('<div/>').appendTo(row3);
-                $('<div/>',{style:"display: inline-block;text-align:right; width:120px;padding-right: 10px; box-sizing: border-box;"}).text(search).appendTo(row3_1);
-                var fromValue = $('<input/>',{style:"width: 250px",class:"node-input-rule-property-search-value",type:"text"}).appendTo(row3_1).typedInput({default:'str',types:['msg','flow','global','str','re']});
+                $('<div/>',{style:"display: inline-block;text-align:right; width:120px;padding-right: 10px; box-sizing: border-box;"})
+                    .text(search)
+                    .appendTo(row3_1);
+                var fromValue = $('<input/>',{style:"width: 250px",class:"node-input-rule-property-search-value",type:"text"})
+                    .appendTo(row3_1)
+                    .typedInput({default:'str',types:['msg','flow','global','str','re','num','bool']});
 
                 var row3_2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(row3);
-                $('<div/>',{style:"display: inline-block;text-align:right; width:120px;padding-right: 10px; box-sizing: border-box;"}).text(replace).appendTo(row3_2);
-                var toValue = $('<input/>',{style:"width: 250px",class:"node-input-rule-property-replace-value",type:"text"}).appendTo(row3_2).typedInput({default:'str',types:['msg','flow','global','str','num','json']});
+                $('<div/>',{style:"display: inline-block;text-align:right; width:120px;padding-right: 10px; box-sizing: border-box;"})
+                    .text(replace)
+                    .appendTo(row3_2);
+                var toValue = $('<input/>',{style:"width: 250px",class:"node-input-rule-property-replace-value",type:"text"})
+                    .appendTo(row3_2)
+                    .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json']});
 
                 selectField.change(function() {
                     var width = $("#node-input-rule-container").width();
