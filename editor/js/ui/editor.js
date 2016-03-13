@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,6 +116,9 @@ RED.editor = (function() {
      */
     function validateNodeProperty(node,definition,property,value) {
         var valid = true;
+        if (/^\$\([a-zA-Z_][a-zA-Z0-9_]*\)$/.test(value)) {
+            return true;
+        }
         if ("required" in definition[property] && definition[property].required) {
             valid = value !== "";
         }
