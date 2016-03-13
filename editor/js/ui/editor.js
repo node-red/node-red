@@ -126,8 +126,8 @@ RED.editor = (function() {
             if (!value || value == "_ADD_") {
                 valid = definition[property].hasOwnProperty("required") && !definition[property].required;
             } else {
-                var v = RED.nodes.node(value).valid;
-                valid = (v==null || v);
+                var configNode = RED.nodes.node(value);
+                valid = (configNode !== null && (configNode.valid == null || configNode.valid));
             }
         }
         return valid;
