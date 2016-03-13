@@ -73,7 +73,7 @@ module.exports = function(RED) {
             node.child.stdout.on('data', function (data) {
                 data = data.toString().trim();
                 if (data.length > 0) {
-                    if (node.buttonState !== -1) {
+                    if (node.running && node.buttonState !== -1) {
                         node.send({ topic:"pi/"+node.pin, payload:Number(data) });
                     }
                     node.buttonState = data;
@@ -87,8 +87,8 @@ module.exports = function(RED) {
             });
 
             node.child.on('close', function (code) {
-                node.child = null;
                 node.running = false;
+                node.child = null;
                 if (RED.settings.verbose) { node.log(RED._("rpi-gpio.status.closed")); }
                 if (node.done) {
                     node.status({fill:"grey",shape:"ring",text:"rpi-gpio.status.closed"});
@@ -279,8 +279,8 @@ module.exports = function(RED) {
         });
 
         node.child.on('close', function (code) {
-            node.child = null;
             node.running = false;
+            node.child = null;
             if (RED.settings.verbose) { node.log(RED._("rpi-gpio.status.closed")); }
             if (node.done) {
                 node.status({fill:"grey",shape:"ring",text:"rpi-gpio.status.closed"});
