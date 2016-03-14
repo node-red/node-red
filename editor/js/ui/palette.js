@@ -91,15 +91,15 @@ RED.palette = (function() {
         el.css({height:multiLineNodeHeight+"px"});
 
         var labelElement = el.find(".palette_label");
-        labelElement.html(lines);
+        labelElement.html(lines).attr('dir', RED.bidi.resolveBaseTextDir(lines));
 
         el.find(".palette_port").css({top:(multiLineNodeHeight/2-5)+"px"});
 
         var popOverContent;
         try {
-            var l = "<p><b>"+label+"</b></p>";
+            var l = "<p><b>"+RED.bidi.enforceTextDirectionWithUCC(label)+"</b></p>";
             if (label != type) {
-                l = "<p><b>"+label+"</b><br/><i>"+type+"</i></p>";
+                l = "<p><b>"+RED.bidi.enforceTextDirectionWithUCC(label)+"</b><br/><i>"+type+"</i></p>";
             }
             popOverContent = $(l+(info?info:$("script[data-help-name|='"+type+"']").html()||"<p>"+RED._("palette.noInfo")+"</p>").trim())
                                 .filter(function(n) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ RED.sidebar.info = (function() {
         var table = '<table class="node-info"><tbody>';
         table += '<tr class="blank"><td colspan="2">'+RED._("sidebar.info.node")+'</td></tr>';
         if (node.type != "subflow" && node.name) {
-            table += "<tr><td>"+RED._("common.label.name")+"</td><td>&nbsp;"+node.name+"</td></tr>";
+            table += '<tr><td>'+RED._("common.label.name")+'</td><td>&nbsp;<span class="bidiAware" dir="'+RED.bidi.resolveBaseTextDir(node.name)+'">'+node.name+'</span></td></tr>';
         }
         table += "<tr><td>"+RED._("sidebar.info.type")+"</td><td>&nbsp;"+node.type+"</td></tr>";
         table += "<tr><td>"+RED._("sidebar.info.id")+"</td><td>&nbsp;"+node.id+"</td></tr>";
@@ -92,7 +92,7 @@ RED.sidebar.info = (function() {
                     userCount++;
                 }
             });
-            table += "<tr><td>"+RED._("common.label.name")+"</td><td>"+subflowNode.name+"</td></tr>";
+            table += '<tr><td>'+RED._("common.label.name")+'</td><td><span class="bidiAware" dir=\"'+RED.bidi.resolveBaseTextDir(subflowNode.name)+'">'+subflowNode.name+'</span></td></tr>';
             table += "<tr><td>"+RED._("sidebar.info.instances")+"</td><td>"+userCount+"</td></tr>";
         }
 
@@ -137,13 +137,14 @@ RED.sidebar.info = (function() {
         table += "</tbody></table><hr/>";
         if (!subflowNode && node.type != "comment") {
             var helpText = $("script[data-help-name|='"+node.type+"']").html()||"";
-            table  += '<div class="node-help">'+helpText+"</div>";
+            table  += '<div class="node-help"><span class="bidiAware" dir=\"'+RED.bidi.resolveBaseTextDir(helpText)+'">'+helpText+'</span></div>';
         }
         if (subflowNode) {
-            table += '<div class="node-help">'+marked(subflowNode.info||"")+'</div>';
+            table += '<div class="node-help"><span class="bidiAware" dir=\"'+RED.bidi.resolveBaseTextDir(subflowNode.info||"")+'">'+marked(subflowNode.info||"")+'</span></div>';
         } else if (node._def && node._def.info) {
             var info = node._def.info;
-            table += '<div class="node-help">'+marked(typeof info === "function" ? info.call(node) : info)+'</div>';
+            var textInfo = (typeof info === "function" ? info.call(node) : info);            
+            table += '<div class="node-help"><span class="bidiAware" dir=\"'+RED.bidi.resolveBaseTextDir(textInfo)+'">'+marked(textInfo)+'</span></div>';
             //table += '<div class="node-help">'+(typeof info === "function" ? info.call(node) : info)+'</div>';
         }
 

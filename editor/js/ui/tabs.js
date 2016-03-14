@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ RED.tabs = (function() {
             }
             delete tabs[id];
             updateTabWidths();
-        }
+        }				
 
         return {
             addTab: function(tab) {
@@ -122,7 +122,8 @@ RED.tabs = (function() {
                 if (tab.icon) {
                     $('<img src="'+tab.icon+'" class="red-ui-tab-icon"/>').appendTo(link);
                 }
-                $('<span/>').text(tab.label).appendTo(link);
+                var span = $('<span/>',{class:"bidiAware"}).text(tab.label).appendTo(link);
+                span.attr('dir', RED.bidi.resolveBaseTextDir(tab.label));               
 
                 link.on("click",onTabClick);
                 link.on("dblclick",onTabDblClick);
@@ -156,14 +157,13 @@ RED.tabs = (function() {
                 tabs[id].label = label;
                 var tab = ul.find("a[href='#"+id+"']");
                 tab.attr("title",label);
-                tab.find("span").text(label);
+                tab.find("span").text(label).attr('dir', RED.bidi.resolveBaseTextDir(label));
                 updateTabWidths();
             }
-
         }
     }
 
     return {
-        create: createTabs
+        create: createTabs	
     }
 })();

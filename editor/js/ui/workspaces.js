@@ -75,7 +75,8 @@ RED.workspaces = (function() {
                 .removeClass("ui-state-disabled");
         }
 
-        $( "#node-input-workspace-name" ).val(ws.label);
+        $( "#node-input-workspace-name" ).val(ws.label).attr("dir", RED.bidi.resolveBaseTextDir(ws.label));
+        RED.bidi.initInputEvents($( "#node-input-workspace-name" ));       
         $( "#node-dialog-rename-workspace" ).dialog("open");
     }
 
@@ -142,7 +143,7 @@ RED.workspaces = (function() {
                             workspace_tabs.renameTab(workspace.id,label);
                             RED.nodes.dirty(true);
                             RED.sidebar.config.refresh();
-                            $("#menu-item-workspace-menu-"+workspace.id.replace(".","-")).text(label);
+                            $("#menu-item-workspace-menu-"+workspace.id.replace(".","-")).text(RED.bidi.enforceTextDirectionWithUCC(label));
                         }
                         $( this ).dialog( "close" );
                     }
