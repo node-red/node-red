@@ -428,6 +428,8 @@ describe("red/nodes/registry/registry",function() {
     });
 
     describe('#registerNodeConstructor', function() {
+        function TestNodeConstructor() {
+        }
         beforeEach(function() {
             sinon.stub(events,'emit');
         });
@@ -435,19 +437,19 @@ describe("red/nodes/registry/registry",function() {
             events.emit.restore();
         });
         it('registers a node constructor', function() {
-            typeRegistry.registerNodeConstructor('node-type',{});
+            typeRegistry.registerNodeConstructor('node-type',TestNodeConstructor);
             events.emit.calledOnce.should.be.true;
             events.emit.lastCall.args[0].should.eql('type-registered');
             events.emit.lastCall.args[1].should.eql('node-type');
         })
         it('throws error on duplicate node registration', function() {
-            typeRegistry.registerNodeConstructor('node-type',{});
+            typeRegistry.registerNodeConstructor('node-type',TestNodeConstructor);
             events.emit.calledOnce.should.be.true;
             events.emit.lastCall.args[0].should.eql('type-registered');
             events.emit.lastCall.args[1].should.eql('node-type');
             /*jshint immed: false */
             (function(){
-                typeRegistry.registerNodeConstructor('node-type',{});
+                typeRegistry.registerNodeConstructor('node-type',TestNodeConstructor);
             }).should.throw("node-type already registered");
             events.emit.calledOnce.should.be.true;
         })
