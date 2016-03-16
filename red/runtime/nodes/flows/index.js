@@ -128,7 +128,7 @@ function setConfig(_config,type,muteLog) {
 
 function getNode(id) {
     var node;
-    if (activeNodesToFlow[id]) {
+    if (activeNodesToFlow[id] && activeFlows[activeNodesToFlow[id]]) {
         return activeFlows[activeNodesToFlow[id]].getNode(id);
     }
     for (var flowId in activeFlows) {
