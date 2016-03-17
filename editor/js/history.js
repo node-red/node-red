@@ -23,6 +23,9 @@ RED.history = (function() {
                 undo_history[i].dirty = true;
             }
         },
+        list: function() {
+            return undo_history
+        },
         depth: function() {
             return undo_history.length;
         },
@@ -284,6 +287,9 @@ RED.history = (function() {
                 RED.workspaces.refresh();
                 RED.sidebar.config.refresh();
             }
+        },
+        peek: function() {
+            return undo_history[undo_history.length-1];
         }
     }
 

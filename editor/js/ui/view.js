@@ -400,7 +400,7 @@ RED.view = (function() {
 
                 var spliceLink = $(ui.helper).data('splice');
                 if (spliceLink) {
-                    // TODO: DRY - canvasMouseUp
+                    // TODO: DRY - droppable/nodeMouseDown/canvasMouseUp
                     RED.nodes.removeLink(spliceLink);
                     var link1 = {
                         source:spliceLink.source,
@@ -647,7 +647,7 @@ RED.view = (function() {
                     }
                 }
             }
-            if (mouse_mode == RED.state.MOVING_ACTIVE && moving_set.length === 1) {
+            if ((mouse_mode == RED.state.MOVING_ACTIVE || mouse_mode == RED.state.IMPORT_DRAGGING) && moving_set.length === 1) {
                 node = moving_set[0];
                 if (spliceActive) {
                     if (!spliceTimer) {
@@ -770,7 +770,7 @@ RED.view = (function() {
                 }
                 historyEvent = {t:'move',nodes:ns,dirty:RED.nodes.dirty()};
                 if (activeSpliceLink) {
-                    // TODO: DRY - droppable
+                    // TODO: DRY - droppable/nodeMouseDown/canvasMouseUp
                     var spliceLink = d3.select(activeSpliceLink).data()[0];
                     RED.nodes.removeLink(spliceLink);
                     var link1 = {
@@ -1185,6 +1185,29 @@ RED.view = (function() {
         //RED.touch.radialMenu.show(d3.select(this),pos);
         if (mouse_mode == RED.state.IMPORT_DRAGGING) {
             RED.keyboard.remove(/* ESCAPE */ 27);
+
+            if (activeSpliceLink) {
+                // TODO: DRY - droppable/nodeMouseDown/canvasMouseUp
+                var spliceLink = d3.select(activeSpliceLink).data()[0];
+                RED.nodes.removeLink(spliceLink);
+                var link1 = {
+                    source:spliceLink.source,
+                    sourcePort:spliceLink.sourcePort,
+                    target: moving_set[0].n
+                };
+                var link2 = {
+                    source:moving_set[0].n,
+                    sourcePort:0,
+                    target: spliceLink.target
+                };
+                RED.nodes.addLink(link1);
+                RED.nodes.addLink(link2);
+                var historyEvent = RED.history.peek();
+                historyEvent.links = [link1,link2];
+                historyEvent.removedLinks = [spliceLink];
+                updateActiveNodes();
+            }
+
             updateSelection();
             RED.nodes.dirty(true);
             redraw();
@@ -1993,6 +2016,12 @@ RED.view = (function() {
                     }
                     if (!touchImport) {
                         mouse_mode = RED.state.IMPORT_DRAGGING;
+                        spliceActive = false;
+                        if (new_ms.length === 1) {
+                            node = new_ms[0];
+                            spliceActive = node.n._def.inputs > 0 &&
+                                           node.n._def.outputs > 0;
+                        }
                     }
 
                     RED.keyboard.add(/* ESCAPE */ 27,function(){
