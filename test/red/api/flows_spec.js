@@ -36,6 +36,7 @@ describe("flows api", function() {
 
     it('returns flow', function(done) {
         flows.init({
+            settings: {},
             log:{warn:function(){},_:function(){},audit:function(){}},
             nodes:{
                 getFlows: function() { return [1,2,3]; }
