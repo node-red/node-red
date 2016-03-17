@@ -37,6 +37,10 @@ module.exports = {
             safeSettings.paletteCategories = settings.paletteCategories;
         }
 
+        if (settings.flowFilePretty) {
+            safeSettings.flowFilePretty = settings.flowFilePretty;
+        }
+
         res.json(safeSettings);
     }
 }

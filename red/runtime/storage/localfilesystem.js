@@ -390,8 +390,12 @@ var localfilesystem = {
                 headers += "// "+i+": "+meta[i]+"\n";
             }
         }
+        var data = headers+body;
+        if (settings.flowFilePretty) {
+            data = JSON.stringify(data,null,4);
+        }
         return promiseDir(fspath.dirname(fn)).then(function () {
-            writeFile(fn,headers+body);
+            writeFile(fn,data);
         });
     }
 };

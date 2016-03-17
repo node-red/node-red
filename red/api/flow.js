@@ -29,7 +29,11 @@ module.exports = {
         var flow = redNodes.getFlow(id);
         if (flow) {
             log.audit({event: "flow.get",id:id},req);
-            res.json(flow);
+            if (settings.flowFilePretty) {
+                flowDef = JSON.stringify(flowDef,null,4);
+            }
+            res.setHeader('Content-Type', 'application/json');
+            res.send(flow);
         } else {
             log.audit({event: "flow.get",id:id,error:"not_found"},req);
             res.status(404).end();

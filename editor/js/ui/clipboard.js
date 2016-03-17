@@ -119,8 +119,13 @@ RED.clipboard = (function() {
         var selection = RED.view.selection();
         if (selection.nodes) {
             var nns = RED.nodes.createExportableNodeSet(selection.nodes);
+            if (RED.settings.flowFilePretty) {
+                nns = JSON.stringify(nns,null,4);
+            } else {
+                nns = JSON.stringify(nns);
+            }
             $("#clipboard-export")
-                .val(JSON.stringify(nns))
+                .val(nns)
                 .focus(function() {
                     var textarea = $(this);
                     textarea.select();

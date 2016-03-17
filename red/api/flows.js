@@ -26,7 +26,12 @@ module.exports = {
     },
     get: function(req,res) {
         log.audit({event: "flows.get"},req);
-        res.json(redNodes.getFlows());
+        var flow = redNodes.getFlows();
+        if (settings.flowFilePretty) {
+            flow = JSON.stringify(flow,null,4);
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.send(flow);
     },
     post: function(req,res) {
         var flows = req.body;
