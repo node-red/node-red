@@ -477,4 +477,45 @@ describe('delay Node', function() {
         });
     });
 
+    it('handles timed queue', function(done) {
+        this.timeout(6000);
+
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"timed","timeout":5,"timeoutUnits":"seconds","rate":1000,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var messages = 2;
+            var c = 0;
+
+            helperNode1.on("input", function(msg) {
+                c += 1;
+                if (c === 1) {
+                    msg.should.have.property("topic","A");
+                    msg.should.have.property("payload",3);
+                }
+                else if (c === 2) {
+                    msg.should.have.property("topic","_none_");
+                    msg.should.have.property("payload",2);
+                }
+                else if (c === 3) {
+                    msg.should.have.property("topic","_none_");
+                    msg.should.have.property("payload","Biscuit");
+                    done();
+                }
+            });
+
+            // send test messages
+            delayNode1.receive({payload:1,topic:"A"});
+            delayNode1.receive({payload:1});
+            delayNode1.receive({payload:2,topic:"A"});
+            delayNode1.receive({payload:3,topic:"A"});      // should get this
+            delayNode1.receive({payload:2});                // and this
+            setTimeout( function() {
+                delayNode1.receive({payload:"Biscuit"});    // and then this
+            },2000);
+
+        });
+    });
+
 });

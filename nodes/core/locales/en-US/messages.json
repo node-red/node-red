@@ -152,6 +152,7 @@
         "randomdelay": "Random delay",
         "limitrate": "Limit rate to",
         "fairqueue": "Topic based fair queue",
+        "timedqueue": "Timed release queue",
         "milisecs": "Miliseconds",
         "secs": "Seconds",
         "sec": "Second",
@@ -169,7 +170,8 @@
             "delay": "delay",
             "limit": "limit",
             "random": "random",
-            "queue": "queue"
+            "queue": "queue",
+            "timed": "releases per"
         },
         "error": {
             "buffer": "buffer exceeded 1000 messages"

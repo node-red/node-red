@@ -19,10 +19,11 @@
     <div class="form-row">
         <label for="node-input-pauseType"><i class="fa fa-tasks"></i> <span data-i18n="delay.action"></span></label>
         <select id="node-input-pauseType" style="width:270px !important">
-          <option value="delay" data-i18n="delay.delaymsg"></option>
-          <option value="random" data-i18n="delay.randomdelay"></option>
-          <option value="rate" data-i18n="delay.limitrate"></option>
-          <option value="queue" data-i18n="delay.fairqueue"></option>
+            <option value="delay" data-i18n="delay.delaymsg"></option>
+            <option value="random" data-i18n="delay.randomdelay"></option>
+            <option value="rate" data-i18n="delay.limitrate"></option>
+            <option value="queue" data-i18n="delay.fairqueue"></option>
+            <option value="timed" data-i18n="delay.timedqueue"></option>
         </select>
     </div>
     <div id="delay-details" class="form-row">
@@ -82,6 +83,9 @@
     At each "tick", derived from the rate, the next "topic" is released.
     Any messages arriving on the same topic before release replace those in that position in the queue.
     So each "topic" gets a turn - but the most recent value is always the one sent.</p>
+    <p>The "timed release queue" adds messages to an array based on their <code>msg.topic</code> property.
+    At each "tick", all the latest messages are released. Any new messages arriving before release will
+    replace those of the same topic.</p>
 </script>
 
 <script type="text/javascript">
@@ -113,6 +117,9 @@
               return this.name||this._("delay.label.limit")+" "+this.rate+" msg/"+units;
             } else if (this.pauseType == "random") {
               return this.name || this._("delay.label.random");
+            }
+            else if (this.pauseType == "timed") {
+                return this.name || this.rate+" "+this._("delay.label.timed")+" "+this.rateUnits;
             }
             else {
                 var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
@@ -149,6 +156,11 @@
             $("#rate-details").show();
             $("#random-details").hide();
             $("#node-input-dr").hide();
+          } else if (this.pauseType == "timed") {
+            $("#delay-details").hide();
+            $("#rate-details").show();
+            $("#random-details").hide();
+            $("#node-input-dr").hide();
           }
 
           if (!this.timeoutUnits) {
@@ -180,6 +192,11 @@
               $("#random-details").show();
               $("#node-input-dr").hide();
             } else if (this.value == "queue") {
+              $("#delay-details").hide();
+              $("#rate-details").show();
+              $("#random-details").hide();
+              $("#node-input-dr").hide();
+            } else if (this.value == "timed") {
               $("#delay-details").hide();
               $("#rate-details").show();
               $("#random-details").hide();
