@@ -39,6 +39,7 @@
     <ul class="header-toolbar hide">
         <li><a id="btn-sidemenu" class="button" data-toggle="dropdown" href="#"><i class="fa fa-bars"></i></a></li>
     </ul>
+    <div id="header-shade" class="hide"></div>
 </div>
 <div id="main-container" class="sidebar-closed hide">
     <div id="palette">

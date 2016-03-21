@@ -56,6 +56,7 @@ RED.tray = (function() {
             options.open(el);
         }
 
+        $("#header-shade").show();
         $("#editor-shade").show();
         el.css({
             right: -(el.width()+10)+"px",
@@ -71,6 +72,9 @@ RED.tray = (function() {
 
             if (options.resize) {
                 options.resize();
+            }
+            if (options.show) {
+                options.show();
             }
             el.css({right:0});
         },0);
@@ -106,7 +110,7 @@ RED.tray = (function() {
             }
 
         },
-        close: function close() {
+        close: function close(done) {
             if (stack.length > 0) {
                 var tray = stack.pop();
                 tray.tray.css({
@@ -122,10 +126,17 @@ RED.tray = (function() {
                         oldTray.tray.appendTo("#editor-stack");
                         setTimeout(function() {
                             oldTray.tray.css({right:0});
+                            if (oldTray.options.show) {
+                                oldTray.options.show();
+                            }
                         },0);
+                    }
+                    if (done) {
+                        done();
                     }
                 },200)
                 if (stack.length === 0) {
+                    $("#header-shade").hide();
                     $("#editor-shade").hide();
                 }
             }
