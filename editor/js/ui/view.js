@@ -1434,7 +1434,10 @@ RED.view = (function() {
             var node = vis.selectAll(".nodegroup").data(activeNodes,function(d){return d.id});
             node.exit().remove();
 
-            var nodeEnter = node.enter().insert("svg:g").attr("class", "node nodegroup");
+            var nodeEnter = node.enter().insert("svg:g")
+                .attr("class", "node nodegroup")
+                .classed("node_subflow",function(d) { return activeSubflow != null; });
+
             nodeEnter.each(function(d,i) {
                     var node = d3.select(this);
                     node.attr("id",d.id);
@@ -1891,7 +1894,7 @@ RED.view = (function() {
                     })
                 l.append("svg:path").attr("class","link_outline link_path");
                 l.append("svg:path").attr("class","link_line link_path")
-                    .classed("link_subflow", function(d) { return activeSubflow && (d.source.type === "subflow" || d.target.type === "subflow") });
+                    .classed("link_subflow", function(d) { return activeSubflow });
             });
 
             link.exit().remove();

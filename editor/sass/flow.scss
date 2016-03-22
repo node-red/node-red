@@ -129,7 +129,6 @@
     fill-opacity: 0.5;
 }
 
-
 .node_error {
     stroke: #ff0000;
     stroke-width: 2;
@@ -163,6 +162,10 @@
     stroke-dasharray: 10, 4;
 }
 .node_hovered {
+}
+
+.node_subflow .node {
+    stroke-dasharray:8, 3;
 }
 
 .node_status_label {
