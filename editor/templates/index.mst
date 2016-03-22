@@ -92,23 +92,8 @@
 <div id="notifications"></div>
 <div id="dropTarget"><div data-i18n="[append]workspace.dropFlowHere"><br/><i class="fa fa-download"></i></div></div>
 
-<div id="dialog2" class="hide"><form id="dialog-form2" class="form-horizontal"></form></div>
-<div id="node-config-dialog" class="hide"><form id="dialog-config-form" class="form-horizontal"><div id="node-config-dialog-edit-form"></div><!--<div id="node-config-dialog-toolbar" class="form-row"><label><span>Node scope</span></label><select id="node-config-dialog-scope"></select></div>--></form></div>
-<div id="subflow-dialog" class="hide">
-    <form class="form-horizontal">
-        <div class="form-row">
-            <label for="subflow-input-name" data-i18n="common.label.name"></label><input type="text" id="subflow-input-name">
-        </div>
-        <div class="form-row" style="margin-bottom: 0px;">
-            <label for="subflow-input-info" data-i18n="subflow.info"></label>
-            <a href="https://help.github.com/articles/markdown-basics/" style="font-size: 0.8em; float: right;" data-i18n="[html]subflow.format"></a>
-        </div>
-        <div class="form-row node-text-editor-row">
-            <div style="height: 250px;" class="node-text-editor" id="subflow-input-info-editor"></div>
-        </div>
-        <div class="form-row form-tips" id="subflow-dialog-user-count"></div>
-    </form>
-</div>
+<div id="dialog-REMOVE" class="hide"><form id="dialog-form2" class="form-horizontal"></form></div>
+<div id="node-config-dialog-REMOVE" class="hide"><form id="dialog-config-form" class="form-horizontal"><div id="node-config-dialog-edit-form"></div><!--<div id="node-config-dialog-toolbar" class="form-row"><label><span>Node scope</span></label><select id="node-config-dialog-scope"></select></div>--></form></div>
 
 <div id="node-dialog-confirm-deploy" class="hide">
     <form class="form-horizontal">
@@ -178,6 +163,20 @@
         <label for="node-input-name" data-i18n="[append]editor:common.label.name"><i class="fa fa-tag"></i> </label>
         <input type="text" id="node-input-name">
     </div>
+</script>
+
+<script type="text/x-red" data-template-name="subflow-template">
+    <div class="form-row">
+        <label for="subflow-input-name" data-i18n="common.label.name"></label><input type="text" id="subflow-input-name">
+    </div>
+    <div class="form-row" style="margin-bottom: 0px;">
+        <label for="subflow-input-info" data-i18n="subflow.info"></label>
+        <a href="https://help.github.com/articles/markdown-basics/" style="font-size: 0.8em; float: right;" data-i18n="[html]subflow.format"></a>
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height: 250px;" class="node-text-editor" id="subflow-input-info-editor"></div>
+    </div>
+    <div class="form-row form-tips" id="subflow-dialog-user-count"></div>
 </script>
 
 <script src="vendor/vendor.js"></script>

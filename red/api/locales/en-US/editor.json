@@ -105,10 +105,10 @@
         }
     },
     "subflow": {
-        "editSubflow": "Edit flow __name__",
-        "edit": "Edit flow",
-        "subflowInstances": "There is __count__ instance of this subflow",
-        "subflowInstances_plural": "There are __count__ instances of this subflow",
+        "editSubflow": "Edit flow template: __name__",
+        "edit": "Edit flow template",
+        "subflowInstances": "There is __count__ instance of this subflow template",
+        "subflowInstances_plural": "There are __count__ instances of this subflow template",
         "editSubflowProperties": "edit properties",
         "input": "inputs:",
         "output": "outputs:",
