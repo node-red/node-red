@@ -562,10 +562,8 @@ RED.editor = (function() {
             ],
             resize: function() {
                 if (editing_node && editing_node._def.oneditresize) {
-                    setTimeout(function() {
-                        var form = $("#dialog-form");
-                        editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
-                    },0);
+                    var form = $("#dialog-form");
+                    editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
                 }
             },
             open: function(tray) {
@@ -698,10 +696,8 @@ RED.editor = (function() {
             title: (adding?RED._("editor.addNewConfig", {type:type}):RED._("editor.editConfig", {type:type})),
             resize: function() {
                 if (editing_config_node && editing_config_node._def.oneditresize) {
-                    setTimeout(function() {
-                        var form = $("#node-config-dialog-edit-form");
-                        editing_config_node._def.oneditresize.call(editing_config_node,{width:form.width(),height:form.height()});
-                    },0);
+                    var form = $("#node-config-dialog-edit-form");
+                    editing_config_node._def.oneditresize.call(editing_config_node,{width:form.width(),height:form.height()});
                 }
             },
             open: function(tray) {
@@ -1071,17 +1067,15 @@ RED.editor = (function() {
                 }
             ],
             resize: function() {
-                setTimeout(function() {
-                    var rows = $("#dialog-form>div:not(.node-text-editor-row)");
-                    var editorRow = $("#dialog-form>div.node-text-editor-row");
-                    var height = $("#dialog-form").height();
-                    for (var i=0;i<rows.size();i++) {
-                        height -= $(rows[i]).outerHeight(true);
-                    }
-                    height -= (parseInt($("#dialog-form").css("marginTop"))+parseInt($("#dialog-form").css("marginBottom")));
-                    $(".node-text-editor").css("height",height+"px");
-                    subflowEditor.resize();
-                },0);
+                var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+                var editorRow = $("#dialog-form>div.node-text-editor-row");
+                var height = $("#dialog-form").height();
+                for (var i=0;i<rows.size();i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                height -= (parseInt($("#dialog-form").css("marginTop"))+parseInt($("#dialog-form").css("marginBottom")));
+                $(".node-text-editor").css("height",height+"px");
+                subflowEditor.resize();
             },
             open: function(tray) {
                 if (editing_node) {

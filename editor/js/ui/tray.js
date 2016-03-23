@@ -66,16 +66,18 @@ RED.tray = (function() {
 
         stack.push(tray);
 
-        setTimeout(function() {
-            var trayHeight = el.height()-header.outerHeight()-footer.outerHeight();
-            body.height(trayHeight-40);
+        var trayHeight = el.height()-header.outerHeight()-footer.outerHeight();
+        body.height(trayHeight-40);
 
-            if (options.resize) {
-                options.resize();
-            }
-            if (options.show) {
-                options.show();
-            }
+        setTimeout(function() {
+            setTimeout(function() {
+                if (options.resize) {
+                    options.resize();
+                }
+                if (options.show) {
+                    options.show();
+                }
+            },150);
             el.css({right:0});
         },0);
     }

@@ -67,18 +67,7 @@
         </div>
     </div>
     <div id="editor-shade" class="hide"></div>
-    <div id="editor-stack">
-<!--
-        <div class="workspace-tray-header"></div>
-        <div class="workspace-tray-body">
-            <form id="dialog-form" class="form-horizontal"></form>
-        </div>
-        <div class="workspace-tray-footer">
-            <button type="button" id="node-dialog-ok">Ok</button>
-            <button type="button" id="node-dialog-cancel">Cancel</button>
-        </div>
-    -->
-    </div>
+    <div id="editor-stack"></div>
     <div id="sidebar">
         <ul id="sidebar-tabs"></ul>
         <div id="sidebar-content"></div>
@@ -91,9 +80,6 @@
 
 <div id="notifications"></div>
 <div id="dropTarget"><div data-i18n="[append]workspace.dropFlowHere"><br/><i class="fa fa-download"></i></div></div>
-
-<div id="dialog-REMOVE" class="hide"><form id="dialog-form2" class="form-horizontal"></form></div>
-<div id="node-config-dialog-REMOVE" class="hide"><form id="dialog-config-form" class="form-horizontal"><div id="node-config-dialog-edit-form"></div><!--<div id="node-config-dialog-toolbar" class="form-row"><label><span>Node scope</span></label><select id="node-config-dialog-scope"></select></div>--></form></div>
 
 <div id="node-dialog-confirm-deploy" class="hide">
     <form class="form-horizontal">
