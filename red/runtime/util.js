@@ -94,7 +94,7 @@ function compareObjects(obj1,obj2) {
     if (isBuffer1 && isBuffer2) {
         if (Buffer.compare) {
             // For node 4.x+ - use the native compare
-            return Buffer.compare(obj1,obj2);
+            return Buffer.equals(obj1,obj2);
         } else {
             if (obj1.length !== obj2.length) {
                 return false;
