@@ -345,7 +345,12 @@ function registerNodeConstructor(type,constructor) {
             //      which should be changed when support for node < v5.0.0 is dropped
             //      see: https://github.com/nodejs/node/pull/3455
             proto.constructor.super_ = Node;
-            Object.setPrototypeOf(proto, Node.prototype);
+            if(Object.setPrototypeOf) {
+                Object.setPrototypeOf(proto, Node.prototype);
+            } else {
+                // hack for node v0.10
+                proto.__proto__ = Node.prototype;
+            }
         }
     }
 
