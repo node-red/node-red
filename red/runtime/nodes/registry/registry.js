@@ -333,7 +333,18 @@ function registerNodeConstructor(type,constructor) {
     //TODO: Ensure type is known - but doing so will break some tests
     //      that don't have a way to register a node template ahead
     //      of registering the constructor
-    util.inherits(constructor,Node);
+    if(!(constructor.prototype instanceof Node)) {
+        if(Object.getPrototypeOf(constructor.prototype) === Object.prototype) {
+            util.inherits(constructor,Node);
+        } else {
+            var proto = constructor.prototype;
+            while(Object.getPrototypeOf(proto) !== Object.prototype) {
+                proto = Object.getPrototypeOf(proto);
+            }
+            util.inherits(proto.constructor,Node);
+        }
+    }
+
     nodeConstructors[type] = constructor;
     events.emit("type-registered",type);
 }
