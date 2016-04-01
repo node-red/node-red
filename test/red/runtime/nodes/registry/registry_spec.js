@@ -473,6 +473,10 @@ describe("red/nodes/registry/registry",function() {
 
             TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
             TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
+
+            typeRegistry.registerNodeConstructor('node-type2',TestNodeConstructor);
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
         });
     });
 
