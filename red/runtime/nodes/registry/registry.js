@@ -341,7 +341,11 @@ function registerNodeConstructor(type,constructor) {
             while(Object.getPrototypeOf(proto) !== Object.prototype) {
                 proto = Object.getPrototypeOf(proto);
             }
-            util.inherits(proto.constructor,Node);
+            //TODO: This is a partial implementation of util.inherits >= node v5.0.0
+            //      which should be changed when support for node < v5.0.0 is dropped
+            //      see: https://github.com/nodejs/node/pull/3455
+            proto.constructor.super_ = Node;
+            Object.setPrototypeOf(proto, Node.prototype);
         }
     }
 
