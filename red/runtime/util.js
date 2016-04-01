@@ -62,30 +62,54 @@ function cloneMessage(msg) {
 }
 
 function compareObjects(obj1,obj2) {
+    var i;
     if (obj1 === obj2) {
         return true;
     }
     if (obj1 == null || obj2 == null) {
         return false;
     }
-    if (!(obj1 instanceof Object) && !(obj2 instanceof Object)) {
-        return false;
-    }
+
     var isArray1 = Array.isArray(obj1);
     var isArray2 = Array.isArray(obj2);
     if (isArray1 != isArray2) {
         return false;
     }
     if (isArray1 && isArray2) {
-        if (obj1.length != obj2.length) {
+        if (obj1.length !== obj2.length) {
             return false;
         }
-        for (var i=0;i<obj1.length;i++) {
+        for (i=0;i<obj1.length;i++) {
             if (!compareObjects(obj1[i],obj2[i])) {
                 return false;
             }
         }
         return true;
+    }
+    var isBuffer1 = Buffer.isBuffer(obj1);
+    var isBuffer2 = Buffer.isBuffer(obj2);
+    if (isBuffer1 != isBuffer2) {
+        return false;
+    }
+    if (isBuffer1 && isBuffer2) {
+        if (Buffer.compare) {
+            // For node 4.x+ - use the native compare
+            return Buffer.compare(obj1,obj2);
+        } else {
+            if (obj1.length !== obj2.length) {
+                return false;
+            }
+            for (i=0;i<obj1.length;i++) {
+                if (obj1.readUInt8(i) !== obj2.readUInt8(i)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    if (typeof obj1 !== 'object' || typeof obj2 !== 'object') {
+        return false;
     }
     var keys1 = Object.keys(obj1);
     var keys2 = Object.keys(obj2);

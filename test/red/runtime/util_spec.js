@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2015 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,41 @@ describe("red/util", function() {
         });
     });
     describe('compareObjects', function() {
-        it('unequal arrays are unequal', function() {
+        it('numbers', function() {
+            util.compareObjects(0,0).should.equal(true);
+            util.compareObjects(0,1).should.equal(false);
+            util.compareObjects(1000,1001).should.equal(false);
+            util.compareObjects(1000,1000).should.equal(true);
+            util.compareObjects(0,"0").should.equal(false);
+            util.compareObjects(1,"1").should.equal(false);
+            util.compareObjects(0,null).should.equal(false);
+            util.compareObjects(0,undefined).should.equal(false);
+        });
+        it('strings', function() {
+            util.compareObjects("","").should.equal(true);
+            util.compareObjects("a","a").should.equal(true);
+            util.compareObjects("",null).should.equal(false);
+            util.compareObjects("",undefined).should.equal(false);
+        });
+
+        it('arrays', function() {
+            util.compareObjects(["a"],["a"]).should.equal(true);
+            util.compareObjects(["a"],["a","b"]).should.equal(false);
+            util.compareObjects(["a","b"],["b"]).should.equal(false);
             util.compareObjects(["a"],"a").should.equal(false);
+            util.compareObjects([[1],["a"]],[[1],["a"]]).should.equal(true);
+            util.compareObjects([[1],["a"]],[["a"],[1]]).should.equal(false);
         });
-        it('unequal key lengths are unequal', function() {
+        it('objects', function() {
             util.compareObjects({"a":1},{"a":1,"b":1}).should.equal(false);
+            util.compareObjects({"a":1,"b":1},{"a":1,"b":1}).should.equal(true);
+            util.compareObjects({"b":1,"a":1},{"a":1,"b":1}).should.equal(true);
         });
+        it('Buffer', function() {
+            util.compareObjects(new Buffer("hello"),new Buffer("hello")).should.equal(true);
+            util.compareObjects(new Buffer("hello"),new Buffer("hello ")).should.equal(false);
+        });
+
     });
 
     describe('ensureString', function() {
