@@ -92,9 +92,9 @@ function compareObjects(obj1,obj2) {
         return false;
     }
     if (isBuffer1 && isBuffer2) {
-        if (Buffer.compare) {
-            // For node 4.x+ - use the native compare
-            return Buffer.equals(obj1,obj2);
+        if (obj1.equals) {
+            // For node 0.12+ - use the native equals
+            return obj1.equals(obj2);
         } else {
             if (obj1.length !== obj2.length) {
                 return false;
