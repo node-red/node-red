@@ -129,6 +129,9 @@ RED.settings = (function () {
             for (var i=0;i<parts.length;i++) {
                 v = v[parts[i]];
             }
+            if (v === undefined) {
+                return defaultValue;
+            }
             return v;
         } catch(err) {
             return defaultValue;
