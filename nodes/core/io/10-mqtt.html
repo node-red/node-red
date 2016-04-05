@@ -21,6 +21,15 @@
         <input type="text" id="node-input-topic" data-i18n="[placeholder]common.label.topic">
     </div>
     <div class="form-row">
+        <label for="node-input-qos"><i class="fa fa-empire"></i> <span data-i18n="mqtt.label.qos"></span></label>
+        <select id="node-input-qos" style="width:125px !important">
+            <option value=""></option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+        </select>
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
@@ -44,7 +53,8 @@
         defaults: {
             name: {value:""},
             topic: {value:"",required:true,validate: RED.validators.regex(/^(#$|(\+|[^+#]*)(\/(\+|[^+#]*))*(\/(\+|#|[^+#]*))?$)/)},
-            broker: {type:"mqtt-broker", required:true}
+            broker: {type:"mqtt-broker", required:true},
+            qos: {value: ""}
         },
         color:"#d8bfd8",
         inputs:0,
@@ -166,9 +176,23 @@
                 <label for="node-config-input-usetls" style="width: 70%;" data-i18n="mqtt.label.use-tls"></label>
             </div>
             <div class="form-row">
-                <input type="checkbox" id="node-config-input-verifyservercert" style="display: inline-block; width: auto; vertical-align: top;">
+                <input type="checkbox" id="node-config-input-verifyservercert" class="tls-option" style="display: inline-block; width: auto; vertical-align: top;">
                 <label for="node-config-input-verifyservercert" style="width: 70%;" data-i18n="mqtt.label.verify-server-cert"></label>
             </div>
+
+            <div class="form-row">
+                <label for="node-config-input-certpath"><i class="fa fa-user"></i> <span data-i18n="mqtt.label.certpath"></span></label>
+                <input type="text" class="tls-option" id="node-config-input-certpath">
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-privatekeypath"><i class="fa fa-lock"></i> <span data-i18n="mqtt.label.privatekeypath"></span></label>
+                <input type="text" class="tls-option" id="node-config-input-privatekeypath">
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-rootcapath"><i class="fa fa-user"></i> <span data-i18n="mqtt.label.rootcapath"></span></label>
+                <input type="text" class="tls-option" id="node-config-input-rootcapath">
+            </div>
+
         </div>
         <div id="mqtt-broker-tab-birth" style="display:none">
             <div class="form-row">
@@ -236,6 +260,9 @@
             }},
             usetls: {value: false},
             verifyservercert: { value: false},
+            certpath: { value: "/Users/andersw/Downloads/uat2-00561069/cert.pem" },
+            privatekeypath:  { value: "/Users/andersw/Downloads/uat2-00561069/privkey.pem" },
+            rootcapath:  { value: "/Users/andersw/rootCA.pem" },
             compatmode: { value: true},
             keepalive: {value:60,validate:RED.validators.number()},
             cleansession: {value: true},
@@ -312,11 +339,11 @@
 
             function updateTLSOptions() {
                 if ($("#node-config-input-usetls").is(':checked')) {
-                    $("#node-config-input-verifyservercert").prop("disabled", false);
-                    $("#node-config-input-verifyservercert").next().css("color","");
+                    $("input.tls-option").prop("disabled", false);
+                    $("input.tls-option").next().css("color","");
                 } else {
-                    $("#node-config-input-verifyservercert").prop("disabled", true);
-                    $("#node-config-input-verifyservercert").next().css("color","#aaa");
+                    $("input.tls-option").prop("disabled", true);
+                    $("input.tls-option").next().css("color","#aaa");
                 }
             }
             updateTLSOptions();

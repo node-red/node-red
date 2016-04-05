@@ -227,7 +227,10 @@
             "cleansession": "Use clean session",
             "use-tls": "Enable secure (SSL/TLS) connection",
             "verify-server-cert":"Verify server certificate",
-            "compatmode": "Use legacy MQTT 3.1 support"
+            "compatmode": "Use legacy MQTT 3.1 support",
+            "certpath": "Certificate",
+            "privatekeypath": "Private key",
+            "rootcapath": "Root CA"
         },
         "tabs-label": {
             "connection": "Connection",
