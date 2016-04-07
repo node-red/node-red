@@ -20,7 +20,11 @@ var sinon = require("sinon");
 
 var typeRegistry = require("../../../../../red/runtime/nodes/registry/registry");
 
+var Node = require("../../../../../red/runtime/nodes/Node");
+
 var events = require("../../../../../red/runtime/events");
+
+var inherits = require("util").inherits;
 
 describe("red/nodes/registry/registry",function() {
 
@@ -428,9 +432,10 @@ describe("red/nodes/registry/registry",function() {
     });
 
     describe('#registerNodeConstructor', function() {
-        function TestNodeConstructor() {
-        }
+        var TestNodeConstructor;
         beforeEach(function() {
+            TestNodeConstructor = function TestNodeConstructor() {
+            };
             sinon.stub(events,'emit');
         });
         afterEach(function() {
@@ -452,7 +457,27 @@ describe("red/nodes/registry/registry",function() {
                 typeRegistry.registerNodeConstructor('node-type',TestNodeConstructor);
             }).should.throw("node-type already registered");
             events.emit.calledOnce.should.be.true;
-        })
+        });
+        it('extends a constructor with the Node constructor', function() {
+            TestNodeConstructor.prototype.should.not.be.an.instanceOf(Node);
+            typeRegistry.registerNodeConstructor('node-type',TestNodeConstructor);
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
+        });
+        it('does not override a constructor\'s prototype', function() {
+            function Foo(){};
+            inherits(TestNodeConstructor,Foo);
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
+            TestNodeConstructor.prototype.should.not.be.an.instanceOf(Node);
+
+            typeRegistry.registerNodeConstructor('node-type',TestNodeConstructor);
+
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
+
+            typeRegistry.registerNodeConstructor('node-type2',TestNodeConstructor);
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
+        });
     });
 
 });
