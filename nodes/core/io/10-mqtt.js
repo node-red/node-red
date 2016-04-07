@@ -19,6 +19,7 @@ module.exports = function(RED) {
     var mqtt = require("mqtt");
     var util = require("util");
     var isUtf8 = require('is-utf8');
+    var fs = require("fs");
 
     function matchTopic(ts,t) {
         if (ts == "#") {
@@ -37,6 +38,9 @@ module.exports = function(RED) {
         this.clientid = n.clientid;
         this.usetls = n.usetls;
         this.verifyservercert = n.verifyservercert;
+        this.certpath = n.certpath;
+        this.rootcapath = n.rootcapath;
+        this.privatekeypath = n.privatekeypath;
         this.compatmode = n.compatmode;
         this.keepalive = n.keepalive;
         this.cleansession = n.cleansession;
@@ -107,6 +111,11 @@ module.exports = function(RED) {
         this.options.clientId = this.clientid || 'mqtt_' + (1+Math.random()*4294967295).toString(16);
         this.options.username = this.username;
         this.options.password = this.password;
+        if (this.usetls && this.certpath && this.privatekeypath && this.rootcapath) {
+            this.options.cert = fs.readFileSync(this.certpath);
+            this.options.key = fs.readFileSync(this.privatekeypath);
+            this.options.ca = fs.readFileSync(this.rootcapath);
+        }
         this.options.keepalive = this.keepalive;
         this.options.clean = this.cleansession;
         this.options.reconnectPeriod = RED.settings.mqttReconnectTime||5000;
@@ -298,6 +307,7 @@ module.exports = function(RED) {
     function MQTTInNode(n) {
         RED.nodes.createNode(this,n);
         this.topic = n.topic;
+        this.qos = n.qos || null;
         this.broker = n.broker;
         this.brokerConn = RED.nodes.getNode(this.broker);
         if (!/^(#$|(\+|[^+#]*)(\/(\+|[^+#]*))*(\/(\+|#|[^+#]*))?$)/.test(this.topic)) {
@@ -308,7 +318,7 @@ module.exports = function(RED) {
             this.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
             if (this.topic) {
                 node.brokerConn.register(this);
-                this.brokerConn.subscribe(this.topic,2,function(topic,payload,packet) {
+                this.brokerConn.subscribe(this.topic,Number(node.qos),function(topic,payload,packet) {
                     if (isUtf8(payload)) { payload = payload.toString(); }
                     var msg = {topic:topic,payload:payload, qos: packet.qos, retain: packet.retain};
                     if ((node.brokerConn.broker === "localhost")||(node.brokerConn.broker === "127.0.0.1")) {
