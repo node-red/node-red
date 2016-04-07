@@ -55,6 +55,10 @@ If you want to run the latest code from git, here's how to get started:
 Before raising a pull-request, please read our
 [contributing guide](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md).
 
+This project adheres to the [Contributor Covenant 1.2](http://contributor-covenant.org/version/1/2/0).
+ By participating, you are expected to uphold this code. Please report unacceptable
+ behavior to any of the [project's core team](https://github.com/orgs/node-red/teams/core).
+
 ## Authors
 
 Node-RED is a creation of [IBM Emerging Technology](http://ibm.com/blogs/et).
