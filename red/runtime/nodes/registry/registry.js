@@ -326,6 +326,27 @@ function getCaller(){
     return stack[0].getFileName();
 }
 
+function inheritNode(constructor) {
+    if(Object.getPrototypeOf(constructor.prototype) === Object.prototype) {
+        util.inherits(constructor,Node);
+    } else {
+        var proto = constructor.prototype;
+        while(Object.getPrototypeOf(proto) !== Object.prototype) {
+            proto = Object.getPrototypeOf(proto);
+        }
+        //TODO: This is a partial implementation of util.inherits >= node v5.0.0
+        //      which should be changed when support for node < v5.0.0 is dropped
+        //      see: https://github.com/nodejs/node/pull/3455
+        proto.constructor.super_ = Node;
+        if(Object.setPrototypeOf) {
+            Object.setPrototypeOf(proto, Node.prototype);
+        } else {
+            // hack for node v0.10
+            proto.__proto__ = Node.prototype;
+        }
+    }
+}
+
 function registerNodeConstructor(type,constructor) {
     if (nodeConstructors[type]) {
         throw new Error(type+" already registered");
@@ -333,7 +354,10 @@ function registerNodeConstructor(type,constructor) {
     //TODO: Ensure type is known - but doing so will break some tests
     //      that don't have a way to register a node template ahead
     //      of registering the constructor
-    util.inherits(constructor,Node);
+    if(!(constructor.prototype instanceof Node)) {
+        inheritNode(constructor);
+    }
+
     nodeConstructors[type] = constructor;
     events.emit("type-registered",type);
 }
