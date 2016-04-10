@@ -465,6 +465,7 @@
             "set": "set __property__",
             "change": "change __property__",
             "delete": "delete __property__",
+            "move": "move __property__",
             "changeCount": "change: __count__ rules",
             "regex": "Use regular expressions"
         },
@@ -472,6 +473,7 @@
             "set": "Set",
             "change": "Change",
             "delete": "Delete",
+            "move": "Move",
             "to": "to",
             "search": "Search for",
             "replace": "Replace with"
