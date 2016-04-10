@@ -59,7 +59,9 @@
 
         "error": "<strong>Error</strong>: __message__",
         "errors": {
-            "lostConnection": "Lost connection to server",
+            "lostConnection": "Lost connection to server, reconnecting...",
+            "lostConnectionReconnect": "Lost connection to server, reconnecting in __time__s.",
+            "lostConnectionTry": "Try now",
             "cannotAddSubflowToItself": "Cannot add subflow to itself",
             "cannotAddCircularReference": "Cannot add subflow - circular reference detected"
         }

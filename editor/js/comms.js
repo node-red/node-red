@@ -18,7 +18,8 @@ RED.comms = (function() {
 
     var errornotification = null;
     var clearErrorTimer = null;
-
+    var connectCountdownTimer = null;
+    var connectCountdown = 10;
     var subscriptions = {};
     var ws;
     var pendingAuth = false;
@@ -82,14 +83,39 @@ RED.comms = (function() {
             }
         };
         ws.onclose = function() {
-            if (reconnectAttempts > 5 && errornotification == null) {
-                errornotification = RED.notify(RED._("notification.error",{message:RED._("notification.errors.lostConnection")}),"error",true);
-            } else if (clearErrorTimer) {
+            if (clearErrorTimer) {
                 clearTimeout(clearErrorTimer);
                 clearErrorTimer = null;
             }
             reconnectAttempts++;
-            setTimeout(connectWS,1000);
+            if (reconnectAttempts < 10) {
+                setTimeout(connectWS,1000);
+                if (reconnectAttempts > 5 && errornotification == null) {
+                    errornotification = RED.notify(RED._("notification.errors.lostConnection"),"error",true);
+                }
+            } else if (reconnectAttempts < 20) {
+                setTimeout(connectWS,2000);
+            } else {
+                connectCountdown = 60;
+                connectCountdownTimer = setInterval(function() {
+                    connectCountdown--;
+                    if (connectCountdown === 0) {
+                        errornotification.update(RED._("notification.errors.lostConnection"));
+                        clearInterval(connectCountdownTimer);
+                        connectWS();
+                    } else {
+                        var msg = RED._("notification.errors.lostConnectionReconnect",{time: connectCountdown})+' <a href="#">'+ RED._("notification.errors.lostConnectionTry")+'</a>';
+                        errornotification.update(msg);
+                        $(errornotification).find("a").click(function(e) {
+                            e.preventDefault();
+                            errornotification.update(RED._("notification.errors.lostConnection"));
+                            clearInterval(connectCountdownTimer);
+                            connectWS();
+                        })
+                    }
+                },1000);
+            }
+
         }
     }
 
