@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2015 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,10 @@ RED.comms = (function() {
     var ws;
     var pendingAuth = false;
     var reconnectAttempts = 0;
+    var active = false;
 
     function connectWS() {
+        active = true;
         var path = location.hostname;
         var port = location.port;
         if (port.length !== 0) {
@@ -63,9 +65,17 @@ RED.comms = (function() {
         }
         ws.onmessage = function(event) {
             var msg = JSON.parse(event.data);
-            if (pendingAuth && msg.auth == "ok") {
-                pendingAuth = false;
-                completeConnection();
+            if (pendingAuth && msg.auth) {
+                if (msg.auth === "ok") {
+                    pendingAuth = false;
+                    completeConnection();
+                } else if (msg.auth === "fail") {
+                    // anything else is an error...
+                    active = false;
+                    RED.user.login({updateMenu:true},function() {
+                        connectWS();
+                    })
+                }
             } else if (msg.topic) {
                 for (var t in subscriptions) {
                     if (subscriptions.hasOwnProperty(t)) {
@@ -83,6 +93,9 @@ RED.comms = (function() {
             }
         };
         ws.onclose = function() {
+            if (!active) {
+                return;
+            }
             if (clearErrorTimer) {
                 clearTimeout(clearErrorTimer);
                 clearErrorTimer = null;
