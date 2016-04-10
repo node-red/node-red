@@ -64,7 +64,9 @@ module.exports = function(RED) {
                         //console.log('[exec] result: ' + code);
                         delete node.activeProcesses[ex.pid];
                         msg.payload = code;
-                        node.status({});
+                        if (code === 0) { node.status({}); }
+                        else if (code < 0) { node.status({fill:"red",shape:"dot",text:"rc: "+code}); }
+                        else { node.status({fill:"yellow",shape:"dot",text:"rc: "+code}); }
                         node.send([null,null,msg]);
                     });
                     ex.on('error', function (code) {
