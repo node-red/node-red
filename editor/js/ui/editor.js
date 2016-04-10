@@ -626,6 +626,9 @@ RED.editor = (function() {
                 if (RED.view.state() != RED.state.IMPORT_DRAGGING) {
                     RED.view.state(RED.state.DEFAULT);
                 }
+                if (editing_node) {
+                    RED.sidebar.info.refresh(editing_node);
+                }
                 RED.workspaces.refresh();
             },
             show: function() {
