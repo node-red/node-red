@@ -33,6 +33,7 @@ RED.settings = (function () {
         }
         localStorage.setItem(key, JSON.stringify(value));
     };
+
     /**
      * If the key is not set in the localStorage it returns <i>undefined</i>
      * Else return the JSON parsed value
@@ -112,9 +113,9 @@ RED.settings = (function () {
                         window.location.search = "";
                     }
                     RED.user.login(function() { load(done); });
-                 } else {
-                     console.log("Unexpected error:",jqXHR.status,textStatus);
-                 }
+                } else {
+                    console.log("Unexpected error:",jqXHR.status,textStatus);
+                }
             }
         });
     };
@@ -144,7 +145,6 @@ RED.settings = (function () {
         set: set,
         get: get,
         remove: remove,
-
         theme: theme
     }
 })
