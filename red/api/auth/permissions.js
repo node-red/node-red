@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,41 +20,44 @@ var readRE = /^((.+)\.)?read$/
 var writeRE = /^((.+)\.)?write$/
 
 function hasPermission(userScope,permission) {
-    var i;
-    if (util.isArray(userScope)) {
-        if (userScope.length === 0) {
-            return false;
-        }
-        for (i=0;i<userScope.length;i++) {
-            if (!hasPermission(userScope[i],permission)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     if (permission === "") {
         return true;
     }
-
-    if (userScope === "*") {
-        return true;
-    }
+    var i;
 
     if (util.isArray(permission)) {
+        // Multiple permissions requested - check each one
         for (i=0;i<permission.length;i++) {
             if (!hasPermission(userScope,permission[i])) {
                 return false;
             }
         }
+        // All permissions check out
         return true;
     }
 
-    if (userScope === "read") {
-        return readRE.test(permission);
-    } else {
-        return false; // anything not allowed is disallowed
+    if (util.isArray(userScope)) {
+        if (userScope.length === 0) {
+            return false;
+        }
+        for (i=0;i<userScope.length;i++) {
+            if (hasPermission(userScope[i],permission)) {
+                return true;
+            }
+        }
+        return false;
     }
+
+    if (userScope === "*" || userScope === permission) {
+        return true;
+    }
+
+    if (userScope === "read" || userScope === "*.read") {
+        return readRE.test(permission);
+    } else if (userScope === "write" || userScope === "*.write") {
+        return writeRE.test(permission);
+    }
+    return false;
 }
 
 module.exports = {
