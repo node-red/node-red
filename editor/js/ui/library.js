@@ -344,7 +344,11 @@ RED.library = (function() {
             }).done(function(data,textStatus,xhr) {
                 RED.notify(RED._("library.savedType", {type:options.type}),"success");
             }).fail(function(xhr,textStatus,err) {
-                RED.notify(RED._("library.saveFailed",{message:xhr.responseText}),"error");
+                if (xhr.status === 401) {
+                    RED.notify(RED._("library.saveFailed",{message:RED._("user.notAuthorized")}),"error");
+                } else {
+                    RED.notify(RED._("library.saveFailed",{message:xhr.responseText}),"error");
+                }
             });
         }
         $( "#node-dialog-library-save-confirm" ).dialog({
@@ -444,7 +448,11 @@ RED.library = (function() {
                                         RED.library.loadFlowLibrary();
                                         RED.notify(RED._("library.savedNodes"),"success");
                                     }).fail(function(xhr,textStatus,err) {
-                                        RED.notify(RED._("library.saveFailed",{message:xhr.responseText}),"error");
+                                        if (xhr.status === 401) {
+                                            RED.notify(RED._("library.saveFailed",{message:RED._("user.notAuthorized")}),"error");
+                                        } else {
+                                            RED.notify(RED._("library.saveFailed",{message:xhr.responseText}),"error");
+                                        }
                                     });
                                 }
                                 $( this ).dialog( "close" );

@@ -268,10 +268,12 @@ RED.deploy = (function() {
                 RED.events.emit("deploy");
             }).fail(function(xhr,textStatus,err) {
                 RED.nodes.dirty(true);
-                if (xhr.responseText) {
-                    RED.notify(RED._("notification.error",{message:xhr.responseText}),"error");
+                if (xhr.status === 401) {
+                    RED.notify(RED._("deploy.deployFailed",{message:RED._("user.notAuthorized")}),"error");
+                } else if (xhr.responseText) {
+                    RED.notify(RED._("deploy.deployFailed",{message:xhr.responseText}),"error");
                 } else {
-                    RED.notify(RED._("notification.error",{message:RED._("deploy.errors.noResponse")}),"error");
+                    RED.notify(RED._("deploy.deployFailed",{message:RED._("deploy.errors.noResponse")}),"error");
                 }
             }).always(function() {
                 $("#btn-deploy-icon").removeClass('spinner');

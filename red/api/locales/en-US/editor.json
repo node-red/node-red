@@ -47,7 +47,8 @@
     "user": {
         "loggedInAs": "Logged in as __name__",
         "login": "Login",
-        "loginFailed": "Login failed"
+        "loginFailed": "Login failed",
+        "notAuthorized": "Not authorized"
     },
     "notification": {
         "warning": "<strong>Warning</strong>: __message__",
@@ -84,6 +85,7 @@
         "modifiedNodes": "Modified Nodes",
         "modifiedNodesDesc": "Only deploys nodes that have changed",
         "successfulDeploy": "Successfully deployed",
+        "deployFailed": "Deploy failed: __message__",
         "unusedConfigNodes":"You have some unused configuration nodes.",
         "unusedConfigNodesLink":"Click here to see them",
         "errors": {
