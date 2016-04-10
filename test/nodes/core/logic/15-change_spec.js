@@ -608,8 +608,53 @@ describe('change Node', function() {
             });
         });
     });
-    describe('- multiple rules', function() {
 
+//[{"id":"d5df2b27.7443a8","type":"change","z":"b0e25b28.3c7e88","name":"","rules":[{"t":"move","p":"topic","pt":"msg","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":242.5,"y":541,"wires":[[]]}]
+
+    describe("#move", function() {
+        it('moves the value of the message property', function(done) {
+            var flow = [{"id":"changeNode1","type":"change","rules":[{"t":"move","p":"topic","pt":"msg","to":"payload","tot":"msg"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.should.not.have.property('topic');
+                        msg.should.have.property('payload');
+                        msg.payload.should.equal("You've got to move it move it.");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({topic:"You've got to move it move it.", payload:{foo:"bar"}});
+            });
+        });
+        it('moves the value of a message property object', function(done) {
+            var flow = [{"id":"changeNode1","type":"change","rules":[{"t":"move","p":"topic","pt":"msg","to":"payload","tot":"msg"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.should.not.have.property('topic');
+                        msg.should.have.property('payload');
+                        msg.payload.should.have.property('foo');
+                        msg.payload.foo.should.have.property('bar');
+                        msg.payload.foo.bar.should.equal(1);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({topic:{foo:{bar:1}}, payload:"String"});
+            });
+        });
+    });
+
+    describe('- multiple rules', function() {
         it('handles multiple rules', function(done) {
             var flow = [{"id":"changeNode1","type":"change","wires":[["helperNode1"]],
                         rules:[
@@ -662,6 +707,5 @@ describe('change Node', function() {
                 });
             });
         });
-
     });
 });
