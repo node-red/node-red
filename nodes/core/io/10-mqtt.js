@@ -298,6 +298,8 @@ module.exports = function(RED) {
     function MQTTInNode(n) {
         RED.nodes.createNode(this,n);
         this.topic = n.topic;
+        this.qos = parseInt(n.qos===undefined?"2":n.qos);
+
         this.broker = n.broker;
         this.brokerConn = RED.nodes.getNode(this.broker);
         if (!/^(#$|(\+|[^+#]*)(\/(\+|[^+#]*))*(\/(\+|#|[^+#]*))?$)/.test(this.topic)) {
@@ -308,7 +310,7 @@ module.exports = function(RED) {
             this.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
             if (this.topic) {
                 node.brokerConn.register(this);
-                this.brokerConn.subscribe(this.topic,2,function(topic,payload,packet) {
+                this.brokerConn.subscribe(this.topic,this.qos,function(topic,payload,packet) {
                     if (isUtf8(payload)) { payload = payload.toString(); }
                     var msg = {topic:topic,payload:payload, qos: packet.qos, retain: packet.retain};
                     if ((node.brokerConn.broker === "localhost")||(node.brokerConn.broker === "127.0.0.1")) {
