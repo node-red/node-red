@@ -195,7 +195,7 @@
                         row4.show();
                     }
                 });
-                
+
                 deleteButton.click(function() {
                     container.css({"background":"#fee"});
                     container.fadeOut(300, function() {
@@ -215,6 +215,9 @@
                 toValue.typedInput('value',rule.to);
                 toValue.typedInput('type',rule.tot);
                 selectField.change();
+
+                var newWidth = $("#node-input-rule-container").width();
+                container.find('.red-ui-typedInput').typedInput("width",newWidth-180);
 
                 $("#node-input-rule-container").append(container);
             }
