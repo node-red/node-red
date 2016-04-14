@@ -19,6 +19,8 @@ RED.editor = (function() {
     var editing_config_node = null;
     var subflowEditor;
 
+    var editTrayWidthCache = {};
+
     function getCredentialsURL(nodeType, nodeID) {
         var dashedType = nodeType.replace(/\s+/g, '-');
         return  'credentials/' + dashedType + "/" + nodeID;
@@ -560,7 +562,8 @@ RED.editor = (function() {
                     }
                 }
             ],
-            resize: function() {
+            resize: function(dimensions) {
+                editTrayWidthCache[type] = dimensions.width;
                 if (editing_node && editing_node._def.oneditresize) {
                     var form = $("#dialog-form");
                     editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
@@ -645,6 +648,10 @@ RED.editor = (function() {
             }
         });
         */
+        if (editTrayWidthCache[type]) {
+            trayOptions.width = editTrayWidthCache[type];
+        }
+
         if (type === 'subflow') {
             var id = editing_node.type.substring(8);
             trayOptions.buttons.unshift({

@@ -25,6 +25,7 @@ RED.tray = (function() {
         var header = $('<div class="editor-tray-header">'+(options.title||"")+'</div>').appendTo(el);
         var body = $('<div class="editor-tray-body"></div>').appendTo(el);
         var footer = $('<div class="editor-tray-footer"></div>').appendTo(el);
+        var resizer = $('<div class="editor-tray-resize-handle"></div>').appendTo(el);
         if (options.buttons) {
             for (var i=0;i<options.buttons.length;i++) {
                 var button = options.buttons[i];
@@ -52,12 +53,39 @@ RED.tray = (function() {
             footer: footer,
             options: options
         };
+        el.draggable({
+                handle: resizer,
+                axis: "x",
+                start:function(event,ui) {
+                    el.width('auto');
+                },
+                drag: function(event,ui) {
+                    if (ui.position.left > -501) {
+                        ui.position.left = -501;
+                    } else if (tray.options.resize) {
+                        setTimeout(function() {
+                            tray.options.resize({width: -ui.position.left});
+                        },0);
+                    }
+                },
+                stop:function(event,ui) {
+                    el.width(-ui.position.left);
+                    el.css({left:''});
+                    if (tray.options.resize) {
+                        tray.options.resize({width: -ui.position.left});
+                    }
+                }
+            });
+
         if (options.open) {
             options.open(el);
         }
 
         $("#header-shade").show();
         $("#editor-shade").show();
+        if (options.width) {
+            el.width(options.width);
+        }
         el.css({
             right: -(el.width()+10)+"px",
             transition: "right 0.2s ease"
@@ -72,7 +100,7 @@ RED.tray = (function() {
         setTimeout(function() {
             setTimeout(function() {
                 if (options.resize) {
-                    options.resize();
+                    options.resize({width:el.width()});
                 }
                 if (options.show) {
                     options.show();
@@ -83,7 +111,7 @@ RED.tray = (function() {
     }
 
     return {
-        init: function() {
+        init: function init() {
             $( window ).resize(function() {
                 if (stack.length > 0) {
                     var tray = stack[stack.length-1];
@@ -91,7 +119,7 @@ RED.tray = (function() {
                     tray.body.height(trayHeight-40);
 
                     if (tray.options.resize) {
-                        tray.options.resize();
+                        tray.options.resize({width:tray.tray.width()});
                     }
                 }
             });
