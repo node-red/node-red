@@ -235,12 +235,17 @@
             if (!arguments.length) {
                 return this.propertyType;
             } else {
+                var that = this;
                 var opt = this.typeMap[type];
                 if (opt && this.propertyType !== type) {
                     this.propertyType = type;
                     this.typeField.val(type);
                     this.selectLabel.empty();
+                    var image;
                     if (opt.icon) {
+                        image = new Image();
+                        image.name = opt.icon;
+                        image.src = opt.icon;
                         $('<img>',{src:opt.icon,style:"margin-right: 4px;height: 18px;"}).prependTo(this.selectLabel);
                     } else {
                         this.selectLabel.text(opt.label);
@@ -249,7 +254,6 @@
                         if (this.optionSelectTrigger) {
                             this.optionSelectTrigger.show();
                             this.element.hide();
-                            var that = this;
                             this.optionMenu = this._createMenu(opt.options,function(v){
                                 that.optionSelectLabel.text(v);
                                 that.value(v);
@@ -277,7 +281,12 @@
                         }
                         this.element.trigger('change');
                     }
-                    this._resize();
+                    if (image) {
+                        image.onload = function() { that._resize(); }
+                        image.onerror = function() { that._resize(); }
+                    } else {
+                        this._resize();
+                    }
                 }
             }
         },
