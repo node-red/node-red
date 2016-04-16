@@ -69,7 +69,7 @@ module.exports = function(RED) {
                     }
                 }
                 if (this.active) {
-                    sendDebug({id:this.id,name:this.name,topic:msg.topic,property:property,msg:output,_path:msg._path});
+                    sendDebug({id:this.id,z:this.z,name:this.name,topic:msg.topic,property:property,msg:output,_path:msg._path});
                 }
             }
         });

@@ -111,7 +111,9 @@
         },
         "sidebar": {
             "label": "debug",
-            "name": "Debug messages"
+            "name": "Debug messages",
+            "filterAll": "all flows",
+            "filterCurrent": "current flow"
         }
     },
     "link": {
