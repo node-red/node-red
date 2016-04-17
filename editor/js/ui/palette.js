@@ -232,10 +232,12 @@ RED.palette = (function() {
                 drag: function(e,ui) {
                     // TODO: this is the margin-left of palette node. Hard coding
                     // it here makes me sad
+                    //console.log(ui.helper.position());
                     ui.position.left += 17.5;
                     if (def.inputs > 0 && def.outputs > 0) {
-                        mouseX = e.clientX - chartOffset.left+chart.scrollLeft();
-                        mouseY = e.clientY-chartOffset.top +chart.scrollTop();
+                        mouseX = ui.position.left+(ui.helper.width()/2) - chartOffset.left + chart.scrollLeft();
+                        mouseY = ui.position.top+(ui.helper.height()/2) - chartOffset.top + chart.scrollTop();
+
 
                         if (!spliceTimer) {
                             spliceTimer = setTimeout(function() {

@@ -655,8 +655,8 @@ RED.view = (function() {
                             var nodes = [];
                             var bestDistance = Infinity;
                             var bestLink = null;
-                            var mouseX = mousePos[0];
-                            var mouseY = mousePos[1];
+                            var mouseX = node.n.x;
+                            var mouseY = node.n.y;
                             if (outer[0][0].getIntersectionList) {
                                 var svgRect = outer[0][0].createSVGRect();
                                 svgRect.x = mouseX;
