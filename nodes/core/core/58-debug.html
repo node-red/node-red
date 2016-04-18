@@ -130,9 +130,11 @@
         onpaletteadd: function() {
             var content = $("<div>").css({"position":"relative","height":"100%"});
             var toolbar = $('<div class="sidebar-header">'+
-                '<a class="sidebar-header-button-toggle selected" id="debug-tab-filter-all" href="#"><span data-i18n="node-red:debug.sidebar.filterAll"></span></a>'+
-                '<a class="sidebar-header-button-toggle" id="debug-tab-filter-current" href="#"><span data-i18n="node-red:debug.sidebar.filterCurrent"></span></a> '+
-                '<a id="debug-tab-clear" title="clear log" class="button" href="#"><i class="fa fa-trash"></i></a></div>').appendTo(content);
+                '<span class="button-group">'+
+                    '<a class="sidebar-header-button-toggle selected" id="debug-tab-filter-all" href="#"><span data-i18n="node-red:debug.sidebar.filterAll"></span></a>'+
+                    '<a class="sidebar-header-button-toggle" id="debug-tab-filter-current" href="#"><span data-i18n="node-red:debug.sidebar.filterCurrent"></span></a> '+
+                '</span>'+
+                '<span><a id="debug-tab-clear" title="clear log" class="sidebar-header-button" href="#"><i class="fa fa-trash"></i></a></span></div>').appendTo(content);
 
             var messages = $('<div id="debug-content"/>').appendTo(content);
             content.i18n();
