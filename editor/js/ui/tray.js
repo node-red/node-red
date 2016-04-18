@@ -26,6 +26,9 @@ RED.tray = (function() {
         var body = $('<div class="editor-tray-body"></div>').appendTo(el);
         var footer = $('<div class="editor-tray-footer"></div>').appendTo(el);
         var resizer = $('<div class="editor-tray-resize-handle"></div>').appendTo(el);
+        var growButton = $('<a class="editor-tray-resize-button" style="cursor: w-resize;"><i class="fa fa-angle-left"></i></a>').appendTo(resizer);
+        var shrinkButton = $('<a class="editor-tray-resize-button" style="cursor: e-resize;"><i style="margin-left: 1px;" class="fa fa-angle-right"></i></a>').appendTo(resizer);
+
         if (options.buttons) {
             for (var i=0;i<options.buttons.length;i++) {
                 var button = options.buttons[i];
@@ -60,13 +63,14 @@ RED.tray = (function() {
                     el.width('auto');
                 },
                 drag: function(event,ui) {
-                    if (ui.position.left > -501) {
-                        ui.position.left = -501;
+                    if (ui.position.left > -tray.preferredWidth-1) {
+                        ui.position.left = -tray.preferredWidth-1;
                     } else if (tray.options.resize) {
                         setTimeout(function() {
                             tray.options.resize({width: -ui.position.left});
                         },0);
                     }
+                    tray.width = -ui.position.left;
                 },
                 stop:function(event,ui) {
                     el.width(-ui.position.left);
@@ -74,6 +78,7 @@ RED.tray = (function() {
                     if (tray.options.resize) {
                         tray.options.resize({width: -ui.position.left});
                     }
+                    tray.width = -ui.position.left;
                 }
             });
 
@@ -83,9 +88,12 @@ RED.tray = (function() {
 
         $("#header-shade").show();
         $("#editor-shade").show();
+
+        tray.preferredWidth = el.width();
         if (options.width) {
             el.width(options.width);
         }
+        tray.width = el.width();
         el.css({
             right: -(el.width()+10)+"px",
             transition: "right 0.2s ease"
@@ -99,6 +107,7 @@ RED.tray = (function() {
 
         setTimeout(function() {
             setTimeout(function() {
+                el.width(tray.preferredWidth);
                 if (options.resize) {
                     options.resize({width:el.width()});
                 }
@@ -108,22 +117,51 @@ RED.tray = (function() {
             },150);
             el.css({right:0});
         },0);
+
+        growButton.click(function(e) {
+            e.preventDefault();
+            tray.lastWidth = tray.width;
+            tray.width = $("#editor-stack").position().left-8;
+            el.width(tray.width);
+            if (options.resize) {
+                options.resize({width:tray.width});
+            }
+        });
+        shrinkButton.click(function(e) {
+            e.preventDefault();
+            if (tray.lastWidth && tray.width > tray.lastWidth) {
+                tray.width = tray.lastWidth;
+            } else if (tray.width > tray.preferredWidth) {
+                tray.width = tray.preferredWidth;
+            }
+            el.width(tray.width);
+            if (options.resize) {
+                options.resize({width:tray.width});
+            }
+        });
+
+    }
+
+    function handleWindowResize() {
+        if (stack.length > 0) {
+            var tray = stack[stack.length-1];
+            var trayHeight = tray.tray.height()-tray.header.outerHeight()-tray.footer.outerHeight();
+            tray.body.height(trayHeight-40);
+
+            if (tray.width > $("#editor-stack").position().left-8) {
+                tray.width = Math.max(tray.preferredWidth,$("#editor-stack").position().left-8);
+                tray.tray.width(tray.width);
+            }
+            if (tray.options.resize) {
+                tray.options.resize({width:tray.width});
+            }
+        }
     }
 
     return {
         init: function init() {
-            $( window ).resize(function() {
-                if (stack.length > 0) {
-                    var tray = stack[stack.length-1];
-                    var trayHeight = tray.tray.height()-tray.header.outerHeight()-tray.footer.outerHeight();
-                    tray.body.height(trayHeight-40);
-
-                    if (tray.options.resize) {
-                        tray.options.resize({width:tray.tray.width()});
-                    }
-                }
-            });
-
+            $(window).resize(handleWindowResize);
+            RED.events.on("sidebar:resize",handleWindowResize);
         },
         show: function show(options) {
             if (stack.length > 0) {
@@ -155,6 +193,7 @@ RED.tray = (function() {
                         var oldTray = stack[stack.length-1];
                         oldTray.tray.appendTo("#editor-stack");
                         setTimeout(function() {
+                            handleWindowResize();
                             oldTray.tray.css({right:0});
                             if (oldTray.options.show) {
                                 oldTray.options.show();

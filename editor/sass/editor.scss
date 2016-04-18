@@ -79,7 +79,16 @@
      border-left: 1px solid $primary-border-color;
      box-shadow: -1px 0 6px rgba(0,0,0,0.1);
  }
-
+.editor-tray-resize-button {
+    @include workspace-button;
+    display: block;
+    height: 20px;
+    border: none;
+    border-bottom: 1px solid $secondary-border-color;
+    margin: 0;
+    background: $background-color;
+    color: $workspace-button-color-disabled;
+}
  #editor-shade, #header-shade  {
      position: absolute;
      top:0;
