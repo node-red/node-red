@@ -143,8 +143,11 @@ module.exports = function(RED) {
                 return done();
             }
             if (Object.keys(node.users).length === 0) {
-                if (node.client) {
+                if (node.client && node.client.connected) {
                     return node.client.end(done);
+                } else {
+                    node.client.end();
+                    done();
                 }
             }
             done();
