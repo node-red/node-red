@@ -182,6 +182,8 @@ function evaluateNodeProperty(value, type, node, msg) {
         return JSON.parse(value);
     } else if (type === 're') {
         return new RegExp(value);
+    } else if (type === 'date') {
+        return Date.now();
     } else if (type === 'msg' && msg) {
         return getMessageProperty(msg,value);
     } else if (type === 'flow' && node) {

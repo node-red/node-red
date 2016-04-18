@@ -206,10 +206,10 @@ module.exports = function(RED) {
                 }
             });
             this.on("close", function() {
-                while(node.outstandingTimers.length > 0) {
+                while (node.outstandingTimers.length > 0) {
                     clearTimeout(node.outstandingTimers.pop())
                 }
-                while(node.outstandingIntervals.length > 0) {
+                while (node.outstandingIntervals.length > 0) {
                     clearInterval(node.outstandingIntervals.pop())
                 }
             })

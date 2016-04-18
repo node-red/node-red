@@ -17,14 +17,14 @@
 <script type="text/x-red" data-template-name="change">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
-        <input type="text" id="node-input-name" style="width: 370px;" data-i18n="[placeholder]common.label.name">
+        <input type="text" id="node-input-name" style="width:370px;" data-i18n="[placeholder]common.label.name">
     </div>
     <div class="form-row" style="margin-bottom:0;">
         <label><i class="fa fa-list"></i> <span data-i18n="change.label.rules"></span></label>
     </div>
-    <div class="form-row node-input-rule-container-row" style="margin-bottom: 0px;">
-        <div id="node-input-rule-container-div" style="box-sizing: border-box; border-radius: 5px; height: 300px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
-            <ol id="node-input-rule-container" style=" list-style-type:none; margin: 0;"></ol>
+    <div class="form-row node-input-rule-container-row" style="margin-bottom:0px;">
+        <div id="node-input-rule-container-div" style="box-sizing:border-box; border-radius:5px; height:300px; padding:5px; border:1px solid #ccc; overflow-y:scroll;">
+            <ol id="node-input-rule-container" style=" list-style-type:none; margin:0;"></ol>
         </div>
     </div>
     <div class="form-row">
@@ -123,54 +123,54 @@
                     rule.tot = "msg";
                 }
 
-                var container = $('<li/>',{style:"background: #fff; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"});
+                var container = $('<li/>',{style:"background:#fff; margin:0; padding:8px 0px; border-bottom:1px solid #ccc;"});
                 var row1 = $('<div/>').appendTo(container);
                 var row2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(container);
                 var row3 = $('<div/>',{style:"margin-top:8px;"}).appendTo(container);
                 var row4 = $('<div/>',{style:"margin-top:8px;"}).appendTo(container);
 
-                var selectField = $('<select/>',{class:"node-input-rule-type",style:"width: 110px; margin-right: 10px;"}).appendTo(row1);
+                var selectField = $('<select/>',{class:"node-input-rule-type",style:"width:110px; margin-right:10px;"}).appendTo(row1);
                 var selectOptions = [{v:"set",l:set},{v:"change",l:change},{v:"delete",l:del},{v:"move",l:move}];
                 for (var i=0;i<4;i++) {
                     selectField.append($("<option></option>").val(selectOptions[i].v).text(selectOptions[i].l));
                 }
 
-                var propertyName = $('<input/>',{style:"width: 250px",class:"node-input-rule-property-name",type:"text"})
+                var propertyName = $('<input/>',{style:"width:250px",class:"node-input-rule-property-name",type:"text"})
                     .appendTo(row1)
                     .typedInput({types:['msg','flow','global']});
-                var finalspan = $('<span/>',{style:"float: right; margin-right: 10px;"})
+                var finalspan = $('<span/>',{style:"float:right; margin-right:10px;"})
                     .appendTo(row1);
-                var deleteButton = $('<a/>',{href:"#",class:"editor-button editor-button-small", style:"margin-top: 7px; margin-left: 5px;"})
+                var deleteButton = $('<a/>',{href:"#",class:"editor-button editor-button-small", style:"margin-top:7px; margin-left:5px;"})
                     .appendTo(finalspan);
                 $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
 
-                $('<div/>',{style:"display: inline-block;text-align:right; width:120px;padding-right: 10px; box-sizing: border-box;"})
+                $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
                     .text(to)
                     .appendTo(row2);
-                var propertyValue = $('<input/>',{style:"width: 250px",class:"node-input-rule-property-value",type:"text"})
+                var propertyValue = $('<input/>',{style:"width:250px",class:"node-input-rule-property-value",type:"text"})
                     .appendTo(row2)
-                    .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json']});
+                    .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json','date']});
 
                 var row3_1 = $('<div/>').appendTo(row3);
-                $('<div/>',{style:"display: inline-block;text-align:right; width:120px;padding-right: 10px; box-sizing: border-box;"})
+                $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
                     .text(search)
                     .appendTo(row3_1);
-                var fromValue = $('<input/>',{style:"width: 250px",class:"node-input-rule-property-search-value",type:"text"})
+                var fromValue = $('<input/>',{style:"width:250px",class:"node-input-rule-property-search-value",type:"text"})
                     .appendTo(row3_1)
                     .typedInput({default:'str',types:['msg','flow','global','str','re','num','bool']});
 
                 var row3_2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(row3);
-                $('<div/>',{style:"display: inline-block;text-align:right; width:120px;padding-right: 10px; box-sizing: border-box;"})
+                $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
                     .text(replace)
                     .appendTo(row3_2);
-                var toValue = $('<input/>',{style:"width: 250px",class:"node-input-rule-property-replace-value",type:"text"})
+                var toValue = $('<input/>',{style:"width:250px",class:"node-input-rule-property-replace-value",type:"text"})
                     .appendTo(row3_2)
                     .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json']});
 
-                $('<div/>',{style:"display: inline-block;text-align:right; width:120px;padding-right: 10px; box-sizing: border-box;"})
+                $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
                     .text(to)
                     .appendTo(row4);
-                var moveValue = $('<input/>',{style:"width: 250px",class:"node-input-rule-property-move-value",type:"text"})
+                var moveValue = $('<input/>',{style:"width:250px",class:"node-input-rule-property-move-value",type:"text"})
                     .appendTo(row4)
                     .typedInput({default:'msg',types:['msg','flow','global']});
 

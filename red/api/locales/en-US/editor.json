@@ -222,7 +222,8 @@
             "num": "number",
             "re": "regular expression",
             "bool": "boolean",
-            "json": "JSON"
+            "json": "JSON",
+            "date": "timestamp"
         }
     }
 }

@@ -62,7 +62,6 @@ module.exports = {
         }
         themeSettings = null;
         theme = settings.editorTheme;
-
     },
 
     app: function() {

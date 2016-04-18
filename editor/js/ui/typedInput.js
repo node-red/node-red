@@ -22,7 +22,8 @@
         num: {value:"num",label:"number",icon:"red/images/typedInput/09.png",validate:/^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/},
         bool: {value:"bool",label:"boolean",icon:"red/images/typedInput/bool.png",options:["true","false"]},
         json: {value:"json",label:"JSON",icon:"red/images/typedInput/json.png", validate: function(v) { try{JSON.parse(v);return true;}catch(e){return false;}}},
-        re: {value:"re",label:"regular expression",icon:"red/images/typedInput/re.png"}
+        re: {value:"re",label:"regular expression",icon:"red/images/typedInput/re.png"},
+        date: {value:"date",label:"timestamp",hasValue:false}
     };
     var nlsd = false;
 

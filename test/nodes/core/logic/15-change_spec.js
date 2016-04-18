@@ -242,7 +242,6 @@ describe('change Node', function() {
             });
         });
 
-
         it('changes the value to a number', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":"123","tot":"num"}],"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
@@ -260,6 +259,7 @@ describe('change Node', function() {
                 changeNode1.receive({payload:""});
             });
         });
+
         it('changes the value to a js object', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":'{"a":123}',"tot":"json"}],"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
@@ -278,6 +278,24 @@ describe('change Node', function() {
             });
         });
 
+        it('sets the value of the message property to the current timestamp', function(done) {
+            var flow = [{"id":"changeNode1","type":"change","rules":[{"t":"set","p":"ts","pt":"msg","to":"","tot":"date"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                var rule = helper.getNode("changeNode1").rules[0];
+                helperNode1.on("input", function(msg) {
+                    try {
+                        (Date.now() - msg.ts).should.be.approximately(0,50);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:Date.now()});
+            });
+        });
 
     });
     describe('#change', function() {

@@ -100,6 +100,8 @@ module.exports = function(RED) {
                     value = node.context().flow.get(rule.to);
                 } else if (rule.tot === 'global') {
                     value = node.context().global.get(rule.to);
+                } else if (rule.tot === 'date') {
+                    value = Date.now();
                 }
                 if (rule.t === 'change') {
                     if (rule.fromt === 'msg' || rule.fromt === 'flow' || rule.fromt === 'global') {

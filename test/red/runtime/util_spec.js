@@ -210,6 +210,10 @@ describe("red/util", function() {
             var result = util.evaluateNodeProperty('^abc$','re');
             result.toString().should.eql("/^abc$/");
         });
+        it('returns date',function() {
+            var result = util.evaluateNodeProperty('','date');
+            (Date.now() - result).should.be.approximately(0,50);
+        });
         it('returns msg property',function() {
             var result = util.evaluateNodeProperty('foo.bar','msg',{},{foo:{bar:"123"}});
             result.should.eql("123");
