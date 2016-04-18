@@ -91,6 +91,9 @@ RED.tray = (function() {
 
         tray.preferredWidth = el.width();
         if (options.width) {
+            if (options.width > $("#editor-stack").position().left-8) {
+                options.width = $("#editor-stack").position().left-8;
+            }
             el.width(options.width);
         }
         tray.width = el.width();
@@ -107,7 +110,9 @@ RED.tray = (function() {
 
         setTimeout(function() {
             setTimeout(function() {
-                el.width(tray.preferredWidth);
+                if (!options.width) {
+                    el.width(tray.preferredWidth);
+                }
                 if (options.resize) {
                     options.resize({width:el.width()});
                 }
