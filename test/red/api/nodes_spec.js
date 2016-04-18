@@ -76,7 +76,8 @@ describe("nodes api", function() {
                     if (err) {
                         throw err;
                     }
-                    res.body.should.be.an.Array.and.have.lengthOf(3);
+                    res.body.should.be.an.Array;
+                    res.body.should.have.lengthOf(3);
                     done();
                 });
         });
