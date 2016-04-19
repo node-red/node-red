@@ -181,16 +181,16 @@ RED.editor = (function() {
      * @param property - the name of the field
      * @param type - the type of the config-node
      */
-    function prepareConfigNodeSelect(node,property,type) {
-        var input = $("#node-input-"+property);
+    function prepareConfigNodeSelect(node,property,type,prefix) {
+        var input = $("#"+prefix+"-"+property);
         var node_def = RED.nodes.getType(type);
 
-        input.replaceWith('<select style="width: 60%;" id="node-input-'+property+'"></select>');
-        updateConfigNodeSelect(property,type,node[property]);
-        var select = $("#node-input-"+property);
-        select.after(' <a id="node-input-lookup-'+property+'" class="editor-button"><i class="fa fa-pencil"></i></a>');
-        $('#node-input-lookup-'+property).click(function(e) {
-            showEditConfigNodeDialog(property,type,select.find(":selected").val());
+        input.replaceWith('<select style="width: 60%;" id="'+prefix+'-'+property+'"></select>');
+        updateConfigNodeSelect(property,type,node[property],prefix);
+        var select = $("#"+prefix+"-"+property);
+        select.after(' <a id="'+prefix+'-lookup-'+property+'" class="editor-button"><i class="fa fa-pencil"></i></a>');
+        $('#'+prefix+'-lookup-'+property).click(function(e) {
+            showEditConfigNodeDialog(property,type,select.find(":selected").val(),prefix);
             e.preventDefault();
         });
         var label = "";
@@ -211,12 +211,12 @@ RED.editor = (function() {
      * @param property - the name of the field
      * @param type - the type of the config-node
      */
-    function prepareConfigNodeButton(node,property,type) {
-        var input = $("#node-input-"+property);
+    function prepareConfigNodeButton(node,property,type,prefix) {
+        var input = $("#"+prefix+"-"+property);
         input.val(node[property]);
         input.attr("type","hidden");
 
-        var button = $("<a>",{id:"node-input-edit-"+property, class:"editor-button"});
+        var button = $("<a>",{id:prefix+"-edit-"+property, class:"editor-button"});
         input.after(button);
 
         if (node[property]) {
@@ -226,7 +226,7 @@ RED.editor = (function() {
         }
 
         button.click(function(e) {
-            showEditConfigNodeDialog(property,type,input.val()||"_ADD_");
+            showEditConfigNodeDialog(property,type,input.val()||"_ADD_",prefix);
             e.preventDefault();
         });
     }
@@ -347,9 +347,9 @@ RED.editor = (function() {
                     var configTypeDef = RED.nodes.getType(definition.defaults[d].type);
                     if (configTypeDef) {
                         if (configTypeDef.exclusive) {
-                            prepareConfigNodeButton(node,d,definition.defaults[d].type);
+                            prepareConfigNodeButton(node,d,definition.defaults[d].type,prefix);
                         } else {
-                            prepareConfigNodeSelect(node,d,definition.defaults[d].type);
+                            prepareConfigNodeSelect(node,d,definition.defaults[d].type,prefix);
                         }
                     } else {
                         console.log("Unknown type:", definition.defaults[d].type);
@@ -670,8 +670,9 @@ RED.editor = (function() {
      * name - name of the property that holds this config node
      * type - type of config node
      * id - id of config node to edit. _ADD_ for a new one
+     * prefix - the input prefix of the parent property
      */
-    function showEditConfigNodeDialog(name,type,id) {
+    function showEditConfigNodeDialog(name,type,id,prefix) {
         var adding = (id == "_ADD_");
         var node_def = RED.nodes.getType(type);
         var editing_config_node = RED.nodes.node(id);
@@ -688,7 +689,7 @@ RED.editor = (function() {
         }
         if (editing_config_node == null) {
             editing_config_node = {
-                id: (1+Math.random()*4294967295).toString(16),
+                id: RED.nodes.id(),
                 _def: node_def,
                 type: type,
                 z: activeWorkspace.id,
@@ -814,13 +815,37 @@ RED.editor = (function() {
                     var d;
                     var input;
                     var scope = $("#node-config-dialog-scope").val();
+
+                    if (configTypeDef.oneditsave) {
+                        configTypeDef.oneditsave.call(editing_config_node);
+                    }
+
                     for (d in configTypeDef.defaults) {
                         if (configTypeDef.defaults.hasOwnProperty(d)) {
+                            var newValue;
                             input = $("#node-config-input-"+d);
                             if (input.attr('type') === "checkbox") {
-                              editing_config_node[d] = input.prop('checked');
+                                newValue = input.prop('checked');
                             } else {
-                              editing_config_node[d] = input.val();
+                                newValue = input.val();
+                            }
+                            if (newValue !== editing_config_node[d]) {
+                                if (editing_config_node._def.defaults[d].type) {
+                                    if (newValue == "_ADD_") {
+                                        newValue = "";
+                                    }
+                                    // Change to a related config node
+                                    var configNode = RED.nodes.node(editing_config_node[d]);
+                                    if (configNode) {
+                                        var users = configNode.users;
+                                        users.splice(users.indexOf(editing_config_node),1);
+                                    }
+                                    configNode = RED.nodes.node(newValue);
+                                    if (configNode) {
+                                        configNode.users.push(editing_config_node);
+                                    }
+                                }
+                                editing_config_node[d] = newValue;
                             }
                         }
                     }
@@ -828,6 +853,8 @@ RED.editor = (function() {
                     editing_config_node.z = scope;
 
                     if (scope) {
+                        // Search for nodes that use this one that are no longer
+                        // in scope, so must be removed
                         editing_config_node.users = editing_config_node.users.filter(function(n) {
                             var keep = true;
                             for (var d in n._def.defaults) {
@@ -836,6 +863,8 @@ RED.editor = (function() {
                                         n[d] === editing_config_node.id &&
                                         n.z !== scope) {
                                             keep = false;
+                                            // Remove the reference to this node
+                                            // and revalidate
                                             n[d] = null;
                                             n.dirty = true;
                                             n.changed = true;
@@ -851,9 +880,6 @@ RED.editor = (function() {
                         RED.nodes.add(editing_config_node);
                     }
 
-                    if (configTypeDef.oneditsave) {
-                        configTypeDef.oneditsave.call(editing_config_node);
-                    }
                     if (configTypeDef.credentials) {
                         updateNodeCredentials(editing_config_node,configTypeDef.credentials,"node-config-input");
                     }
@@ -865,7 +891,7 @@ RED.editor = (function() {
                     RED.nodes.dirty(true);
                     RED.view.redraw(true);
                     RED.tray.close(function() {
-                        updateConfigNodeSelect(configProperty,configType,editing_config_node.id);
+                        updateConfigNodeSelect(configProperty,configType,editing_config_node.id,prefix);
                     });
                 }
             },
@@ -937,7 +963,7 @@ RED.editor = (function() {
                     RED.view.redraw();
                     RED.history.push(historyEvent);
                     RED.tray.close(function() {
-                        updateConfigNodeSelect(configProperty,configType,"");
+                        updateConfigNodeSelect(configProperty,configType,"",prefix);
                     });
                 }
             });
@@ -947,55 +973,58 @@ RED.editor = (function() {
     }
 
 
-    function updateConfigNodeSelect(name,type,value) {
-        var button = $("#node-input-edit-"+name);
-        if (button.length) {
-            if (value) {
-                button.text(RED._("editor.configEdit"));
+    function updateConfigNodeSelect(name,type,value,prefix) {
+        // if prefix is null, there is no config select to update
+        if (prefix) {
+            var button = $("#"+prefix+"-edit-"+name);
+            if (button.length) {
+                if (value) {
+                    button.text(RED._("editor.configEdit"));
+                } else {
+                    button.text(RED._("editor.configAdd"));
+                }
+                $("#"+prefix+"-"+name).val(value);
             } else {
-                button.text(RED._("editor.configAdd"));
-            }
-            $("#node-input-"+name).val(value);
-        } else {
 
-            var select = $("#node-input-"+name);
-            var node_def = RED.nodes.getType(type);
-            select.children().remove();
+                var select = $("#"+prefix+"-"+name);
+                var node_def = RED.nodes.getType(type);
+                select.children().remove();
 
-            var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
-            if (!activeWorkspace) {
-                activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
-            }
+                var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
+                if (!activeWorkspace) {
+                    activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
+                }
 
-            var configNodes = [];
+                var configNodes = [];
 
-            RED.nodes.eachConfig(function(config) {
-                if (config.type == type && (!config.z || config.z === activeWorkspace.id)) {
-                    var label = "";
-                    if (typeof node_def.label == "function") {
-                        label = node_def.label.call(config);
-                    } else {
-                        label = node_def.label;
+                RED.nodes.eachConfig(function(config) {
+                    if (config.type == type && (!config.z || config.z === activeWorkspace.id)) {
+                        var label = "";
+                        if (typeof node_def.label == "function") {
+                            label = node_def.label.call(config);
+                        } else {
+                            label = node_def.label;
+                        }
+                        configNodes.push({id:config.id,label:label});
                     }
-                    configNodes.push({id:config.id,label:label});
-                }
-            });
+                });
 
-            configNodes.sort(function(A,B) {
-                if (A.label < B.label) {
-                    return -1;
-                } else if (A.label > B.label) {
-                    return 1;
-                }
-                return 0;
-            });
+                configNodes.sort(function(A,B) {
+                    if (A.label < B.label) {
+                        return -1;
+                    } else if (A.label > B.label) {
+                        return 1;
+                    }
+                    return 0;
+                });
 
-            configNodes.forEach(function(cn) {
-                select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+cn.label+'</option>');
-            });
+                configNodes.forEach(function(cn) {
+                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+cn.label+'</option>');
+                });
 
-            select.append('<option value="_ADD_"'+(value===""?" selected":"")+'>'+RED._("editor.addNewType", {type:type})+'</option>');
-            window.setTimeout(function() { select.change();},50);
+                select.append('<option value="_ADD_"'+(value===""?" selected":"")+'>'+RED._("editor.addNewType", {type:type})+'</option>');
+                window.setTimeout(function() { select.change();},50);
+            }
         }
     }
 
