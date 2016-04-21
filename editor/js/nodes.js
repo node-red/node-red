@@ -847,9 +847,7 @@ RED.nodes = (function() {
                             node.outputs = n.outputs||node._def.outputs;
                             for (var d2 in node._def.defaults) {
                                 if (node._def.defaults.hasOwnProperty(d2)) {
-                                    if (node._def.defaults[d2].type) {
-                                        node[d2] = n[d2];
-                                    }
+                                    node[d2] = n[d2];
                                 }
                             }
                         }
