@@ -83,6 +83,9 @@ module.exports = function(RED) {
                     sendResults(node, id, msgs);
                 },
                 on: function() {
+                    if (arguments[0] === "input") {
+                        throw new Error(RED._("function.error.inputListener"));
+                    }
                     node.on.apply(node, arguments);
                 },
                 status: function() {

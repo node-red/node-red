@@ -141,6 +141,9 @@
             "function": "Function",
             "outputs": "Outputs"
         },
+        "error": {
+            "inputListener":"Cannot add listener to 'input' event within Function"
+        },
         "tip": "See the Info tab for help writing functions."
     },
     "template": {
