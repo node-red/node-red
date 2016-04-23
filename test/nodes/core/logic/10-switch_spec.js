@@ -100,7 +100,7 @@ describe('switch Node', function() {
             var helperNode1 = helper.getNode("helperNode1");
             helperNode1.on("input", function(msg) {
                 try {
-                    if(shouldReceive === true) {
+                    if (shouldReceive === true) {
                         msg.payload.should.equal(sendPayload);
                         done();
                     } else {
@@ -111,7 +111,7 @@ describe('switch Node', function() {
                 }
             });
             switchNode1.receive({payload:sendPayload});
-            if(shouldReceive === false) {
+            if (shouldReceive === false) {
                 setTimeout(function() {
                     done();
                 }, 200);
@@ -184,7 +184,7 @@ describe('switch Node', function() {
     });
 
     it('should check if payload is between given values', function(done) {
-        twoFieldSwitchTest("btwn", 3, 5, true, true, 4, done);
+        twoFieldSwitchTest("btwn", "3", "5", true, true, 4, done);
     });
 
     it('should check if payload is not between given values', function(done) {
@@ -243,23 +243,105 @@ describe('switch Node', function() {
         singularSwitchTest(false, true, false, true, done);
     });
 
-    it('should check if input is indeed null', function(done) {
-        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"null"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+    it('should check input against a previous value', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{ "t": "gt", "v": "", "vt": "prev" }],checkall:true,outputs:1,wires:[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
-
 
         helper.load(switchNode, flow, function() {
             var switchNode1 = helper.getNode("switchNode1");
             var helperNode1 = helper.getNode("helperNode1");
+            var c = 0;
             helperNode1.on("input", function(msg) {
-                if(msg.payload) {
+                if (msg.payload) {
                     try {
-                        should.fail(null, null, "msg.payload should be undefined!");
+                        if (c === 0) {
+                            msg.payload.should.equal(1);
+                        }
+                        if (c === 1) {
+                            msg.payload.should.equal(2);
+                            done();
+                        }
+                        c += 1;
                     } catch (err) {
                         done(err);
                     }
                 } else {
                     done();
+                }
+            });
+            switchNode1.receive({payload:1});
+            switchNode1.receive({payload:0});
+            switchNode1.receive({payload:-2});
+            switchNode1.receive({payload:2});
+        });
+    });
+
+    it('should check input against a previous value (2nd option)', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t": "btwn", "v": "10", "vt": "num", "v2": "", "v2t": "prev" }],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+
+        helper.load(switchNode, flow, function() {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                if (msg.payload) {
+                    try {
+                        if (c === 0) {
+                            msg.payload.should.equal(20);
+                        }
+                        if (c === 1) {
+                            msg.payload.should.equal(25);
+                            done();
+                        }
+                        c += 1;
+                    } catch (err) {
+                        done(err);
+                    }
+                } else {
+                    done();
+                }
+            });
+            switchNode1.receive({payload:0});
+            switchNode1.receive({payload:20});  // between 10 and 0
+            switchNode1.receive({payload:30});  // between 10 and 20
+            switchNode1.receive({payload:20});  // between 10 and 30  yes
+            switchNode1.receive({payload:30});  // between 10 and 20  no
+            switchNode1.receive({payload:25});  // between 10 and 30  yes
+        });
+    });
+
+    it('should check if input is indeed null', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"null"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+
+        helper.load(switchNode, flow, function() {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            helperNode1.on("input", function(msg) {
+                if (msg.payload === null) {
+                    done();
+                } else {
+                    console.log("msg is ",msg);
+                }
+            });
+            switchNode1.receive({payload:null});
+        });
+    });
+
+    it('should check if input is indeed undefined', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"null"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+
+        helper.load(switchNode, flow, function() {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            helperNode1.on("input", function(msg) {
+                if (msg.payload === undefined) {
+                    done();
+                }
+                else {
+                    console.log("msg is ",msg);
                 }
             });
             switchNode1.receive({payload:undefined});
@@ -275,7 +357,7 @@ describe('switch Node', function() {
             var switchNode1 = helper.getNode("switchNode1");
             var helperNode1 = helper.getNode("helperNode1");
             helperNode1.on("input", function(msg) {
-                if(msg.payload) {
+                if (msg.payload) {
                     done();
                 } else {
                     try {
@@ -319,7 +401,7 @@ describe('switch Node', function() {
                 try {
                     msg.payload.should.equal("Hello");
                     nodeHitCount++;
-                    if(nodeHitCount == 2) {
+                    if (nodeHitCount == 2) {
                         done();
                     } else {
                         try {
@@ -348,7 +430,6 @@ describe('switch Node', function() {
                     {id:"helperNode1", type:"helper", wires:[]},
                     {id:"helperNode2", type:"helper", wires:[]},
                     {id:"helperNode3", type:"helper", wires:[]}];
-
 
         helper.load(switchNode, flow, function() {
             var switchNode1 = helper.getNode("switchNode1");

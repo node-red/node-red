@@ -71,11 +71,13 @@ describe('file Nodes', function() {
                 n1.emit("input", {payload:"test2"});    // string
                 setTimeout(function() {
                     n1.emit("input", {payload:true});       // boolean
+                    n1.emit("input", {payload:1});
+                    n1.emit("input", {payload:[2]});
                 },50);
                 setTimeout(function() {
                     var f = fs.readFileSync(fileToTest).toString();
-                    f.should.have.length(11);
-                    f.should.equal("test2\ntrue\n");
+                    f.should.have.length(17);
+                    f.should.equal("test2\ntrue\n1\n[2]\n");
                     done();
                 },wait);
             });
