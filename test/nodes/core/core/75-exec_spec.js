@@ -234,17 +234,10 @@ describe('exec node', function() {
                 var n2 = helper.getNode("n2");
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
-                n2.on("input", function(msg) {
-                    console.log("n2",msg);
-                });
-                n3.on("input", function(msg) {
-                    console.log("n3",msg);
-                });
                 n4.on("input", function(msg) {
-                    console.log("n4",msg);
                     msg.should.have.property("payload");
-                    msg.payload.should.be.a.String;
-                    msg.payload.should.equal(-2);
+                    msg.payload.should.be.a.Number;
+                    msg.payload.should.be.below(0);
                     done();
                 });
                 n1.receive({payload:null});
