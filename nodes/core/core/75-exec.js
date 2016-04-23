@@ -44,6 +44,7 @@ module.exports = function(RED) {
                 // slice whole line by spaces (trying to honour quotes);
                 arg = arg.match(/(?:[^\s"]+|"[^"]*")+/g);
                 var cmd = arg.shift();
+                /* istanbul ignore else  */
                 if (RED.settings.verbose) { node.log(cmd+" ["+arg+"]"); }
                 if (cmd.indexOf(" ") == -1) {
                     var ex = spawn(cmd,arg);
@@ -78,8 +79,9 @@ module.exports = function(RED) {
             }
             else {
                 var cl = node.cmd;
-                if ((node.addpay === true) && ((msg.payload.toString() || "").trim() !== "")) { cl += " "+msg.payload; }
+                if ((node.addpay === true) && ((msg.payload || "").toString().trim() !== "")) { cl += " "+msg.payload; }
                 if (node.append.trim() !== "") { cl += " "+node.append; }
+                /* istanbul ignore else  */
                 if (RED.settings.verbose) { node.log(cl); }
                 var child = exec(cl, {encoding: 'binary', maxBuffer:10000000}, function (error, stdout, stderr) {
                     msg.payload = new Buffer(stdout,"binary");
@@ -100,12 +102,13 @@ module.exports = function(RED) {
                     node.send([msg,msg2,msg3]);
                     delete node.activeProcesses[child.pid];
                 });
-                child.on('error',function(){})
+                child.on('error',function() {});
                 node.activeProcesses[child.pid] = child;
             }
         });
         this.on('close',function() {
             for (var pid in node.activeProcesses) {
+                /* istanbul ignore else  */
                 if (node.activeProcesses.hasOwnProperty(pid)) {
                     node.activeProcesses[pid].kill();
                 }
