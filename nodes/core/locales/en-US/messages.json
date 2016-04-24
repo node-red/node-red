@@ -197,6 +197,8 @@
             "string": "the string",
             "number": "the number",
             "existing": "the existing msg.payload",
+            "original": "the original msg.payload",
+            "latest": "the latest msg.payload",
             "nothing": "nothing"
         },
         "wait-reset": "wait to be reset",

@@ -60,6 +60,7 @@ module.exports = function(RED) {
             else {
                 if ((!tout) && (tout !== 0)) {
                     if (node.op2type === "pay") { m2 = msg.payload; }
+                    else if (node.op2type === "payl") { m2 = msg.payload; }
                     else if (node.op2Templated) { m2 = mustache.render(node.op2,msg); }
                     else { m2 = node.op2; }
                     if (node.op1type === "pay") { }
@@ -79,6 +80,7 @@ module.exports = function(RED) {
                 }
                 else if ((node.extend === "true" || node.extend === true) && (node.duration > 0)) {
                     clearTimeout(tout);
+                    if (node.op2type === "payl") { m2 = msg.payload; }
                     tout = setTimeout(function() {
                         msg.payload = m2;
                         if (node.op2type !== "nul") { node.send(msg); }

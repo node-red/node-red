@@ -42,17 +42,18 @@
        </span>
     </div>
     <div class="form-row node-type-wait">
+        <input type="checkbox" id="node-input-extend" style="margin-left: 0px; vertical-align: top; width: auto !important;"> <label style="width:auto !important;" for="node-input-extend" data-i18n="trigger.extend"></label>
+    </div>
+    <div class="form-row node-type-wait">
         <span data-i18n="trigger.then-send"></span>
         <select id="node-input-op2type" style="width:200px !important">
             <option value="val" data-i18n="trigger.output.string"></option>
             <option value="num" data-i18n="trigger.output.number"></option>
-            <option value="pay" data-i18n="trigger.output.existing"></option>
+            <option value="pay" data-i18n="trigger.output.original"></option>
+            <option value="payl" data-i18n="trigger.output.latest"></option>
             <option value="nul" data-i18n="trigger.output.nothing"></option>
         </select>
         <input style="width: 145px !important" type="text" id="node-input-op2">
-    </div>
-    <div class="form-row node-type-wait">
-        <input type="checkbox" id="node-input-extend" style="margin-left: 0px; vertical-align: top; width: auto !important;"> <label style="width:auto !important;" for="node-input-extend" data-i18n="trigger.extend"></label>
     </div>
     <div class="form-row">
         <span data-i18n="trigger.label.reset"></span><input type="text" id="node-input-reset" style="width:240px" data-i18n="[placeholder]trigger.label.resetprompt">
