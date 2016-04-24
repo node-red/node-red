@@ -87,6 +87,8 @@ module.exports = function(RED) {
                         tout = null;
                         node.status({});
                     },node.duration);
+                } else {
+                    if (node.op2type === "payl") { m2 = msg.payload; }
                 }
             }
         });
