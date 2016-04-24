@@ -403,20 +403,17 @@ describe('delay Node', function() {
         randomDelayTest(0.0000046296, 0.0000092593, "days", done);
     });
 
-    it.skip('handles bursts using a buffer', function(done) {
-        // routinely timesout on Travis - needs fixing
-        this.timeout(8000);
+    it('handles bursts using a buffer', function(done) {
+        this.timeout(10000);
 
         var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":5,"timeoutUnits":"seconds","rate":1000,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
             var helperNode1 = helper.getNode("helperNode1");
-
             var sinon = require('sinon');
-
             var receivedWarning = false;
-            var messageBurstSize = 1500;
+            var messageBurstSize = 1200;
 
             // we ensure that we note that a warning is received for buffer growth
             sinon.stub(delayNode1, 'warn', function(warning) {
@@ -424,14 +421,13 @@ describe('delay Node', function() {
                     receivedWarning = true;
                 }
             });
-
             // we ensure that the warning is received for buffer size and that we get the last message
             helperNode1.on("input", function(msg) {
                 if (msg.payload === (messageBurstSize - 1) && receivedWarning === true) {
                     done(); // it will timeout if we don't receive the last message
                 }
             });
-            // send 1500 messages as quickly as possible
+            // send messages as quickly as possible
             for (var i = 0; i < messageBurstSize; i++) {
                 delayNode1.receive({payload:i});
             }
@@ -439,82 +435,87 @@ describe('delay Node', function() {
     });
 
     it('handles delay queue', function(done) {
-        this.timeout(6000);
-
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"queue","timeout":5,"timeoutUnits":"seconds","rate":1000,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+        this.timeout(2000);
+        var flow = [{id:"delayNode1", type :"delay","name":"delayNode","pauseType":"queue","timeout":1,"timeoutUnits":"seconds","rate":4,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
             var helperNode1 = helper.getNode("helperNode1");
-            var messages = 2;
-            var c = 0;
-
+            var t = Date.now();
             helperNode1.on("input", function(msg) {
-                c += 1;
                 msg.should.have.a.property('payload');
                 msg.should.have.a.property('topic');
-                if (msg.topic === "A") {
-                    msg.payload.should.equal(4);
-                }
-                else {
-                    msg.topic.should.equal("_none_");
-                    msg.payload.should.equal(2);
-                }
-                if (c == 2) {
-                    done(); // it will timeout if we don't receive both messages
+                try {
+                    if (msg.topic === "_none_") {
+                        msg.payload.should.equal(2);
+                        (Date.now() - t).should.be.approximately(500,50);
+                    }
+                    else if (msg.topic === "A") {
+                        msg.payload.should.equal(4);
+                        (Date.now() - t).should.be.approximately(750,50);
+                    }
+                    else {
+                        msg.topic.should.equal("B");
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(1000,50);
+                        done();
+                    }
+                } catch(e) {
+                    done(e);
                 }
             });
-
-            // send test messages
-            delayNode1.receive({payload:1,topic:"A"});
-            delayNode1.receive({payload:1});
-            delayNode1.receive({payload:2,topic:"A"});
-            delayNode1.receive({payload:3,topic:"A"});
-            delayNode1.receive({payload:2});            // only this should get out
-            delayNode1.receive({payload:4,topic:"A"});  // and this one also
-
+            setTimeout(function() {
+                // send test messages
+                delayNode1.receive({payload:1});            // send something with blank topic
+                delayNode1.receive({payload:1,topic:"A"});  // and something with a fixed topic
+                delayNode1.receive({payload:1,topic:"B"});  // and something else with a fixed topic (3rd tick)
+                delayNode1.receive({payload:2,topic:"A"});  // these should replace them in queue
+                delayNode1.receive({payload:3,topic:"A"});  //  ditto
+                delayNode1.receive({payload:2});            // so only this should get out on first tick
+                delayNode1.receive({payload:4,topic:"A"});  // and this one on second tick
+            }, 275);  // wait one tick beofre starting.. (to test no messages in queue path.)
         });
     });
 
     it('handles timed queue', function(done) {
-        this.timeout(6000);
-
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"timed","timeout":5,"timeoutUnits":"seconds","rate":1000,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"timed","timeout":1,"timeoutUnits":"seconds","rate":2,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
             var helperNode1 = helper.getNode("helperNode1");
-            var messages = 2;
-            var c = 0;
-
+            var t = Date.now();
             helperNode1.on("input", function(msg) {
-                c += 1;
-                if (c === 1) {
-                    msg.should.have.property("topic","A");
-                    msg.should.have.property("payload",3);
-                }
-                else if (c === 2) {
-                    msg.should.have.property("topic","_none_");
-                    msg.should.have.property("payload",2);
-                }
-                else if (c === 3) {
-                    msg.should.have.property("topic","_none_");
-                    msg.should.have.property("payload","Biscuit");
-                    done();
+                msg.should.have.a.property('payload');
+                msg.should.have.a.property('topic');
+                try {
+                    if (msg.topic === "_none_") {
+                        msg.payload.should.equal(2);
+                        (Date.now() - t).should.be.approximately(500,50);
+                    }
+                    else if (msg.topic === "A") {
+                        msg.payload.should.equal(4);
+                        (Date.now() - t).should.be.approximately(500,50);
+                    }
+                    else {
+                        msg.topic.should.equal("B");
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(500,50);
+                        done();
+                    }
+                } catch(e) {
+                    done(e);
                 }
             });
 
             // send test messages
-            delayNode1.receive({payload:1,topic:"A"});
-            delayNode1.receive({payload:1});
-            delayNode1.receive({payload:2,topic:"A"});
-            delayNode1.receive({payload:3,topic:"A"});      // should get this
-            delayNode1.receive({payload:2});                // and this
-            setTimeout( function() {
-                delayNode1.receive({payload:"Biscuit"});    // and then this
-            },2000);
-
+            delayNode1.receive({payload:1});            // send something with blank topic
+            delayNode1.receive({payload:1,topic:"A"});  // and something with a fixed topic
+            delayNode1.receive({payload:1,topic:"B"});  // and something else with a fixed topic
+            delayNode1.receive({payload:2,topic:"A"});  // these should replace them in queue
+            delayNode1.receive({payload:3,topic:"A"});  //  ditto
+            delayNode1.receive({payload:2});            // so all should go on first tick
+            delayNode1.receive({payload:4,topic:"A"});  //  and nothing on second
         });
     });
-
 });
