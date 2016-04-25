@@ -183,11 +183,24 @@ RED.editor = (function() {
      */
     function prepareConfigNodeSelect(node,property,type,prefix) {
         var input = $("#"+prefix+"-"+property);
-        var node_def = RED.nodes.getType(type);
-
-        input.replaceWith('<select style="width: 60%;" id="'+prefix+'-'+property+'"></select>');
+        if (input.length === 0 ) {
+            return;
+        }
+        var existingWidthCSS = input[0].style.width;
+        var newWidth;
+        if (existingWidthCSS !== '') {
+            if (/%/.test(existingWidthCSS)) {
+                newWidth = (input.width()-10)+"%";
+            } else {
+                newWidth = input.width()-50;
+            }
+        } else {
+            newWidth = "60%";
+        }
+        var select = $('<select id="'+prefix+'-'+property+'"></select>');
+        select.width(newWidth);
+        input.replaceWith(select);
         updateConfigNodeSelect(property,type,node[property],prefix);
-        var select = $("#"+prefix+"-"+property);
         select.after(' <a id="'+prefix+'-lookup-'+property+'" class="editor-button"><i class="fa fa-pencil"></i></a>');
         $('#'+prefix+'-lookup-'+property).click(function(e) {
             showEditConfigNodeDialog(property,type,select.find(":selected").val(),prefix);
@@ -195,6 +208,8 @@ RED.editor = (function() {
         });
         var label = "";
         var configNode = RED.nodes.node(node[property]);
+        var node_def = RED.nodes.getType(type);
+
         if (configNode && node_def.label) {
             if (typeof node_def.label == "function") {
                 label = node_def.label.call(configNode);
