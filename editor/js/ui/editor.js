@@ -734,9 +734,8 @@ RED.editor = (function() {
                 trayFooter.prepend('<div id="node-config-dialog-user-count"><i class="fa fa-info-circle"></i> <span></span></div>');
                 trayHeader.append('<span id="node-config-dialog-scope-container"><span id="node-config-dialog-scope-warning" data-i18n="[title]editor.errors.scopeChange"><i class="fa fa-warning"></i></span><select id="node-config-dialog-scope"></select></span>');
 
-                if (RED.view.state() != RED.state.EDITING) {
-                    RED.keyboard.disable();
-                }
+                RED.keyboard.disable();
+                
                 var dialogForm = $('<form id="node-config-dialog-edit-form" class="form-horizontal"></form>').appendTo(trayBody);
                 dialogForm.html($("script[data-template-name='"+type+"']").html());
                 dialogForm.find('[data-i18n]').each(function() {
