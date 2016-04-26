@@ -139,6 +139,32 @@ RED.editor = (function() {
         return valid;
     }
 
+
+    function validateNodeEditor(node,prefix) {
+        for (var prop in node._def.defaults) {
+            if (node._def.defaults.hasOwnProperty(prop)) {
+                validateNodeEditorProperty(node,node._def.defaults,prop,prefix);
+            }
+        }
+        if (node._def.credentials) {
+            for (prop in node._def.credentials) {
+                if (node._def.credentials.hasOwnProperty(prop)) {
+                    validateNodeEditorProperty(node,node._def.credentials,prop,prefix);
+                }
+            }
+        }
+    }
+    function validateNodeEditorProperty(node,defaults,property,prefix) {
+        var input = $("#"+prefix+"-"+property);
+        if (input.length > 0) {
+            if (!validateNodeProperty(node, defaults, property,input.val())) {
+                input.addClass("input-error");
+            } else {
+                input.removeClass("input-error");
+            }
+        }
+    }
+
     /**
      * Called when the node's properties have changed.
      * Marks the node as dirty and needing a size check.
@@ -274,11 +300,7 @@ RED.editor = (function() {
      */
     function attachPropertyChangeHandler(node,definition,property,prefix) {
         $("#"+prefix+"-"+property).change(function() {
-            if (!validateNodeProperty(node, definition, property,this.value)) {
-                $(this).addClass("input-error");
-            } else {
-                $(this).removeClass("input-error");
-            }
+            validateNodeEditor(node,prefix);
         });
     }
 
@@ -306,11 +328,6 @@ RED.editor = (function() {
                     preparePropertyEditor(credData, cred, prefix);
                 }
                 attachPropertyChangeHandler(node, credDef, cred, prefix);
-            }
-        }
-        for (cred in credDef) {
-            if (credDef.hasOwnProperty(cred)) {
-                $("#" + prefix + "-" + cred).change();
             }
         }
     }
@@ -380,11 +397,7 @@ RED.editor = (function() {
             if (definition.oneditprepare) {
                 definition.oneditprepare.call(node);
             }
-            for (var d in definition.defaults) {
-                if (definition.defaults.hasOwnProperty(d)) {
-                    $("#"+prefix+"-"+d).change();
-                }
-            }
+            validateNodeEditor(node,prefix);
         }
 
         if (definition.credentials) {
@@ -735,7 +748,7 @@ RED.editor = (function() {
                 trayHeader.append('<span id="node-config-dialog-scope-container"><span id="node-config-dialog-scope-warning" data-i18n="[title]editor.errors.scopeChange"><i class="fa fa-warning"></i></span><select id="node-config-dialog-scope"></select></span>');
 
                 RED.keyboard.disable();
-                
+
                 var dialogForm = $('<form id="node-config-dialog-edit-form" class="form-horizontal"></form>').appendTo(trayBody);
                 dialogForm.html($("script[data-template-name='"+type+"']").html());
                 dialogForm.find('[data-i18n]').each(function() {
