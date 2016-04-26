@@ -898,9 +898,19 @@ RED.editor = (function() {
                         updateNodeCredentials(editing_config_node,configTypeDef.credentials,"node-config-input");
                     }
                     validateNode(editing_config_node);
-                    for (var i=0;i<editing_config_node.users.length;i++) {
-                        var user = editing_config_node.users[i];
-                        validateNode(user);
+                    var validatedNodes = {};
+                    validatedNodes[editing_config_node.id] = true;
+
+                    var userStack = editing_config_node.users.slice();
+                    while(userStack.length > 0) {
+                        var user = userStack.pop();
+                        if (!validatedNodes[user.id]) {
+                            validatedNodes[user.id] = true;
+                            if (user.users) {
+                                userStack = userStack.concat(user.users);
+                            }
+                            validateNode(user);
+                        }
                     }
                     RED.nodes.dirty(true);
                     RED.view.redraw(true);
