@@ -41,6 +41,7 @@ describe('exec node', function() {
             n1.should.have.property("cmd", "");
             n1.should.have.property("append", "");
             n1.should.have.property("addpay",true);
+            n1.should.have.property("timer",0);
             done();
         });
     });
@@ -136,6 +137,33 @@ describe('exec node', function() {
                     done();
                     child_process.exec.restore();
                 });
+                n1.receive({});
+            });
+        });
+
+        it('should be able to timeout a long running command', function(done) {
+            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"0.3"},
+                        {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                n4.on("input", function(msg) {
+                    msg.should.have.property("payload");
+                    msg.payload.should.have.property("killed",true);
+                    //done();
+                });
+                setTimeout(function() {
+                    var logEvents = helper.log().args.filter(function(evt) {
+                        return evt[0].type == "exec";
+                    });
+                    logEvents.should.have.length(2);
+                    logEvents[1][0].should.have.a.property('msg');
+                    logEvents[1][0].msg.toString().should.startWith("Exec node timeout");
+                    done();
+                },400);
                 n1.receive({});
             });
         });
@@ -264,6 +292,32 @@ describe('exec node', function() {
                     done();
                 });
                 n1.receive({payload:null});
+            });
+        });
+
+        it('should be able to timeout a long running command', function(done) {
+            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"0.3", useSpawn:true},
+                        {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                n4.on("input", function(msg) {
+                    msg.should.have.property("payload",null);
+                    //done();
+                });
+                setTimeout(function() {
+                    var logEvents = helper.log().args.filter(function(evt) {
+                        return evt[0].type == "exec";
+                    });
+                    logEvents.should.have.length(2);
+                    logEvents[1][0].should.have.a.property('msg');
+                    logEvents[1][0].msg.toString().should.startWith("Exec node timeout");
+                    done();
+                },400);
+                n1.receive({});
             });
         });
 

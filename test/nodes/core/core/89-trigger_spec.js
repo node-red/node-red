@@ -264,6 +264,35 @@ describe('trigger Node', function() {
         });
     });
 
+    it('should be able output the 2nd payload', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"false", op1type:"nul", op2type:"payl", op1:"false", op2:"true", duration:200, wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                if (c === 0) {
+                    msg.should.have.a.property("payload", "Goodbye");
+                    c += 1;
+                }
+                else {
+                    msg.should.have.a.property("payload", "World");
+                    (Date.now() - ss).should.be.greaterThan(380);
+                    done();
+                }
+            });
+            var ss = Date.now();
+            n1.emit("input", {payload:"Hello"});
+            setTimeout( function() {
+                n1.emit("input", {payload:"Goodbye"});
+            },100);
+            setTimeout( function() {
+                n1.emit("input", {payload:"World"});
+            },400);
+        });
+    });
+
     it('should be able to apply mustache templates to payloads', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1type:"val", op2type:"val", op1:"{{payload}}",  op2:"{{topic}}", duration:50, wires:[["n2"]] },
             {id:"n2", type:"helper"} ];

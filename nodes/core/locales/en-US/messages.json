@@ -124,11 +124,11 @@
         }
     },
     "exec": {
-        "spawnerr": "Spawn command must be just the command - no spaces or extra parameters",
-        "badstdout": "Bad STDOUT",
         "label": {
             "command": "Command",
-            "append": "Append"
+            "append": "Append",
+            "timeout": "Timeout",
+            "timeoutplace": "optional"
         },
         "placeholder": {
             "extraparams": "extra input parameters"
