@@ -230,22 +230,32 @@ module.exports = {
             }
         }
 
-        for (id in newConfig.allNodes) {
-            if (newConfig.allNodes.hasOwnProperty(id)) {
-                node = newConfig.allNodes[id];
-                for (var prop in node) {
-                    if (node.hasOwnProperty(prop) && prop != "z" && prop != "id" && prop != "wires") {
-                        // This node has a property that references a changed/removed node
-                        // Assume it is a config node change and mark this node as
-                        // changed.
-                        if (changed[node[prop]] || removed[node[prop]]) {
-                            if (!changed[node.id]) {
-                                changed[node.id] = node;
-                                if (newConfig.allNodes[node.z]) {
-                                    changed[node.z] = newConfig.allNodes[node.z];
-                                    if (changed[node.z].type === "subflow") {
-                                        changedSubflows[node.z] = changed[node.z];
-                                        delete changed[node.id];
+        var madeChange;
+        // Loop through the nodes looking for references to changed config nodes
+        // Repeat the loop if anything is marked as changed as it may need to be
+        // propagated to parent nodes.
+        // TODO: looping through all nodes every time is a bit inefficient - could be more targeted
+        do {
+            madeChange = false;
+            for (id in newConfig.allNodes) {
+                if (newConfig.allNodes.hasOwnProperty(id)) {
+                    node = newConfig.allNodes[id];
+                    for (var prop in node) {
+                        if (node.hasOwnProperty(prop) && prop != "z" && prop != "id" && prop != "wires") {
+                            // This node has a property that references a changed/removed node
+                            // Assume it is a config node change and mark this node as
+                            // changed.
+                            if (changed[node[prop]] || removed[node[prop]]) {
+                                if (!changed[node.id]) {
+                                    madeChange = true;
+                                    changed[node.id] = node;
+                                    // This node exists within subflow template
+                                    // Mark the template as having changed
+                                    if (newConfig.allNodes[node.z]) {
+                                        changed[node.z] = newConfig.allNodes[node.z];
+                                        if (changed[node.z].type === "subflow") {
+                                            changedSubflows[node.z] = changed[node.z];
+                                        }
                                     }
                                 }
                             }
@@ -253,8 +263,18 @@ module.exports = {
                     }
                 }
             }
-        }
+        } while(madeChange===true)
 
+        // Find any nodes that exist on a subflow template and remove from changed
+        // list as the parent subflow will now be marked as containing a change
+        for (id in newConfig.allNodes) {
+            if (newConfig.allNodes.hasOwnProperty(id)) {
+                node = newConfig.allNodes[id];
+                if (newConfig.allNodes[node.z] && newConfig.allNodes[node.z].type === "subflow") {
+                    delete changed[node.id];
+                }
+            }
+        }
 
         // Recursively mark all instances of changed subflows as changed
         var changedSubflowStack = Object.keys(changedSubflows);
