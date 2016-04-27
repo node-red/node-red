@@ -159,9 +159,9 @@ describe('exec node', function() {
                     var logEvents = helper.log().args.filter(function(evt) {
                         return evt[0].type == "exec";
                     });
-                    logEvents.should.have.length(2);
-                    logEvents[1][0].should.have.a.property('msg');
-                    logEvents[1][0].msg.toString().should.startWith("Exec node timeout");
+                    logEvents.should.have.length(1);
+                    logEvents[0][0].should.have.a.property('msg');
+                    logEvents[0][0].msg.toString().should.startWith("Exec node timeout");
                     done();
                 },400);
                 n1.receive({});
@@ -312,9 +312,9 @@ describe('exec node', function() {
                     var logEvents = helper.log().args.filter(function(evt) {
                         return evt[0].type == "exec";
                     });
-                    logEvents.should.have.length(2);
-                    logEvents[1][0].should.have.a.property('msg');
-                    logEvents[1][0].msg.toString().should.startWith("Exec node timeout");
+                    logEvents.should.have.length(1);
+                    logEvents[0][0].should.have.a.property('msg');
+                    logEvents[0][0].msg.toString().should.startWith("Exec node timeout");
                     done();
                 },400);
                 n1.receive({});
