@@ -123,6 +123,23 @@
             "event": "Event name"
         }
     },
+    "tls": {
+        "tls": "TLS configuration",
+        "label": {
+            "cert": "Certificate",
+            "key": "Private Key",
+            "ca": "CA Certificate",
+            "verify-server-cert":"Verify server certificate"
+        },
+        "placeholder": {
+            "cert":"path to certificate (PEM format)",
+            "key":"path to private key (PEM format)",
+            "ca":"path to CA certificate (PEM format)"
+        },
+        "error": {
+            "missing-file": "No certificate/key file provided"
+        }
+    },
     "exec": {
         "spawnerr": "Spawn command must be just the command - no spaces or extra parameters",
         "badstdout": "Bad STDOUT",
@@ -240,6 +257,7 @@
             "keepalive": "Keep alive time (s)",
             "cleansession": "Use clean session",
             "use-tls": "Enable secure (SSL/TLS) connection",
+            "tls-config":"TLS Configuration",
             "verify-server-cert":"Verify server certificate",
             "compatmode": "Use legacy MQTT 3.1 support"
         },
@@ -279,7 +297,9 @@
             "return": "Return"
         },
         "setby": "- set by msg.method -",
-        "basicauth": "Use basic authentication?",
+        "basicauth": "Use basic authentication",
+        "use-tls": "Enable secure (SSL/TLS) connection",
+        "tls-config":"TLS Configuration",
         "utf8": "a UTF-8 string",
         "binary": "a binary buffer",
         "json": "a parsed JSON object",
