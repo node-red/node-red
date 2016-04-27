@@ -68,7 +68,7 @@ function Flow(global,flow) {
                     }
                 }
             }
-        };
+        }
 
         if (diff && diff.rewired) {
             for (var j=0;j<diff.rewired.length;j++) {
