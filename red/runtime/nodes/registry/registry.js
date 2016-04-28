@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -347,7 +347,7 @@ function inheritNode(constructor) {
     }
 }
 
-function registerNodeConstructor(type,constructor) {
+function registerNodeConstructor(nodeSet,type,constructor) {
     if (nodeConstructors[type]) {
         throw new Error(type+" already registered");
     }
@@ -356,6 +356,17 @@ function registerNodeConstructor(type,constructor) {
     //      of registering the constructor
     if(!(constructor.prototype instanceof Node)) {
         inheritNode(constructor);
+    }
+
+    var nodeSetInfo = getFullNodeInfo(nodeSet);
+    if (nodeSetInfo) {
+        if (nodeSetInfo.types.indexOf(type) === -1) {
+            // A type is being registered for a known set, but for some reason
+            // we didn't spot it when parsing the HTML file.
+            // Registered a type is the definitive action - not the presence
+            // of an edit template. Ensure it is on the list of known types.
+            nodeSetInfo.types.push(type);
+        }
     }
 
     nodeConstructors[type] = constructor;

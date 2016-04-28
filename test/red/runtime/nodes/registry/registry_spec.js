@@ -442,25 +442,25 @@ describe("red/nodes/registry/registry",function() {
             events.emit.restore();
         });
         it('registers a node constructor', function() {
-            typeRegistry.registerNodeConstructor('node-type',TestNodeConstructor);
+            typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
             events.emit.calledOnce.should.be.true;
             events.emit.lastCall.args[0].should.eql('type-registered');
             events.emit.lastCall.args[1].should.eql('node-type');
         })
         it('throws error on duplicate node registration', function() {
-            typeRegistry.registerNodeConstructor('node-type',TestNodeConstructor);
+            typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
             events.emit.calledOnce.should.be.true;
             events.emit.lastCall.args[0].should.eql('type-registered');
             events.emit.lastCall.args[1].should.eql('node-type');
             /*jshint immed: false */
             (function(){
-                typeRegistry.registerNodeConstructor('node-type',TestNodeConstructor);
+                typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
             }).should.throw("node-type already registered");
             events.emit.calledOnce.should.be.true;
         });
         it('extends a constructor with the Node constructor', function() {
             TestNodeConstructor.prototype.should.not.be.an.instanceOf(Node);
-            typeRegistry.registerNodeConstructor('node-type',TestNodeConstructor);
+            typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
             TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
         });
         it('does not override a constructor\'s prototype', function() {
@@ -469,12 +469,12 @@ describe("red/nodes/registry/registry",function() {
             TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
             TestNodeConstructor.prototype.should.not.be.an.instanceOf(Node);
 
-            typeRegistry.registerNodeConstructor('node-type',TestNodeConstructor);
+            typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
 
             TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
             TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
 
-            typeRegistry.registerNodeConstructor('node-type2',TestNodeConstructor);
+            typeRegistry.registerNodeConstructor('node-set','node-type2',TestNodeConstructor);
             TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
             TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
         });
