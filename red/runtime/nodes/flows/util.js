@@ -105,7 +105,7 @@ module.exports = {
         config.forEach(function(n) {
             if (n.type !== 'subflow' && n.type !== 'tab') {
                 for (var prop in n) {
-                    if (n.hasOwnProperty(prop) && prop !== 'id' && prop !== 'wires' && prop !== '_users' && flow.configs[n[prop]]) {
+                    if (n.hasOwnProperty(prop) && prop !== 'id' && prop !== 'wires' && prop !== 'type' && prop !== '_users' && flow.configs[n[prop]]) {
                         // This property references a global config node
                         flow.configs[n[prop]]._users.push(n.id)
                     }

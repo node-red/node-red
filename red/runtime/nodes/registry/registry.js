@@ -223,7 +223,7 @@ function removeModule(module) {
 
 function getNodeInfo(typeOrId) {
     var id = typeOrId;
-    if (nodeTypeToId[typeOrId]) {
+    if (nodeTypeToId.hasOwnProperty(typeOrId)) {
         id = nodeTypeToId[typeOrId];
     }
     /* istanbul ignore else */
@@ -248,7 +248,7 @@ function getFullNodeInfo(typeOrId) {
     // Used by index.enableNodeSet so that .file can be retrieved to pass
     // to loader.loadNodeSet
     var id = typeOrId;
-    if (nodeTypeToId[typeOrId]) {
+    if (nodeTypeToId.hasOwnProperty(typeOrId)) {
         id = nodeTypeToId[typeOrId];
     }
     /* istanbul ignore else */
@@ -348,7 +348,7 @@ function inheritNode(constructor) {
 }
 
 function registerNodeConstructor(nodeSet,type,constructor) {
-    if (nodeConstructors[type]) {
+    if (nodeConstructors.hasOwnProperty(type)) {
         throw new Error(type+" already registered");
     }
     //TODO: Ensure type is known - but doing so will break some tests
@@ -440,7 +440,11 @@ function clear() {
 }
 
 function getTypeId(type) {
-    return nodeTypeToId[type];
+    if (nodeTypeToId.hasOwnProperty(type)) {
+        return nodeTypeToId[type];
+    } else {
+        return null;
+    }
 }
 
 function enableNodeSet(typeOrId) {
@@ -449,7 +453,7 @@ function enableNodeSet(typeOrId) {
     }
 
     var id = typeOrId;
-    if (nodeTypeToId[typeOrId]) {
+    if (nodeTypeToId.hasOwnProperty(typeOrId)) {
         id = nodeTypeToId[typeOrId];
     }
     var config;
@@ -471,7 +475,7 @@ function disableNodeSet(typeOrId) {
         throw new Error("Settings unavailable");
     }
     var id = typeOrId;
-    if (nodeTypeToId[typeOrId]) {
+    if (nodeTypeToId.hasOwnProperty(typeOrId)) {
         id = nodeTypeToId[typeOrId];
     }
     var config;
