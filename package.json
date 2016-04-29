@@ -34,7 +34,7 @@
         "cron":"1.1.0",
         "express": "4.13.4",
         "follow-redirects":"0.0.7",
-        "fs-extra": "0.27.0",
+        "fs-extra": "0.30.0",
         "fs.notify":"0.0.4",
         "i18next":"1.10.6",
         "is-utf8":"0.2.1",
@@ -61,7 +61,7 @@
     },
     "optionalDependencies": {
         "node-red-node-serialport":"0.2.*",
-        "bcrypt":"0.8.5"
+        "bcrypt":"0.8.6"
     },
     "devDependencies": {
         "grunt": "0.4.5",
@@ -70,7 +70,7 @@
         "grunt-concurrent":"2.3.0",
         "grunt-contrib-clean":"1.0.0",
         "grunt-contrib-compress": "1.2.0",
-        "grunt-contrib-concat":"1.0.0",
+        "grunt-contrib-concat":"1.0.1",
         "grunt-contrib-copy": "1.0.0",
         "grunt-contrib-jshint": "1.0.0",
         "grunt-contrib-uglify": "1.0.1",
