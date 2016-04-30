@@ -123,7 +123,6 @@ describe('exec node', function() {
                     // arg3(error,stdout,stderr);
                     arg3("error",new Buffer([0x01,0x02,0x03,0x88]));
                 });
-
             helper.load(execNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -159,9 +158,10 @@ describe('exec node', function() {
                     var logEvents = helper.log().args.filter(function(evt) {
                         return evt[0].type == "exec";
                     });
-                    logEvents.should.have.length(1);
-                    logEvents[0][0].should.have.a.property('msg');
-                    logEvents[0][0].msg.toString().should.startWith("Exec node timeout");
+                    var i = logEvents.length - 1;
+                    //logEvents.should.have.length(1);
+                    logEvents[i][0].should.have.a.property('msg');
+                    logEvents[i][0].msg.toString().should.startWith("Exec node timeout");
                     done();
                 },400);
                 n1.receive({});
@@ -298,7 +298,6 @@ describe('exec node', function() {
         it('should be able to timeout a long running command', function(done) {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"0.3", useSpawn:true},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-
             helper.load(execNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -312,9 +311,9 @@ describe('exec node', function() {
                     var logEvents = helper.log().args.filter(function(evt) {
                         return evt[0].type == "exec";
                     });
-                    logEvents.should.have.length(1);
-                    logEvents[0][0].should.have.a.property('msg');
-                    logEvents[0][0].msg.toString().should.startWith("Exec node timeout");
+                    var i = logEvents.length - 1;
+                    logEvents[i][0].should.have.a.property('msg');
+                    logEvents[i][0].msg.toString().should.startWith("Exec node timeout");
                     done();
                 },400);
                 n1.receive({});

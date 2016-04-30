@@ -13,8 +13,6 @@ matrix:
   allow_failures:
   - node_js: "5"
   - node_js: "6"
-before_install:
-  - npm install -g npm@latest-2
 node_js:
   - "6"
   - "5"
