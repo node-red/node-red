@@ -26,6 +26,7 @@
 button,
 input,
 select,
+div[contenteditable="true"],
 textarea {
   margin: 0;
   font-size: 100%;
@@ -33,12 +34,14 @@ textarea {
 }
 
 button,
+div[contenteditable="true"],
 input {
   *overflow: visible;
   line-height: normal;
 }
 
 button::-moz-focus-inner,
+div[contenteditable="true"]::-moz-focus-inner,
 input::-moz-focus-inner {
   padding: 0;
   border: 0;
@@ -110,6 +113,7 @@ legend small {
 
 label,
 input,
+div[contenteditable="true"],
 button,
 select,
 textarea {
@@ -119,6 +123,7 @@ textarea {
 }
 
 input,
+div[contenteditable="true"],
 button,
 select,
 textarea {
@@ -146,6 +151,7 @@ input[type="url"],
 input[type="search"],
 input[type="tel"],
 input[type="color"],
+div[contenteditable="true"],
 .uneditable-input {
   display: inline-block;
   height: 20px;
@@ -160,6 +166,7 @@ input[type="color"],
 
 input,
 textarea,
+div[contenteditable="true"],
 .uneditable-input {
   width: 206px;
 }
@@ -183,6 +190,7 @@ input[type="url"],
 input[type="search"],
 input[type="tel"],
 input[type="color"],
+div[contenteditable="true"],
 .uneditable-input {
   background-color: #ffffff;
   border: 1px solid $form-input-border-color;
@@ -206,6 +214,7 @@ input[type="url"]:focus,
 input[type="search"]:focus,
 input[type="tel"]:focus,
 input[type="color"]:focus,
+div[contenteditable="true"],
 .uneditable-input:focus {
   border-color: $form-input-focus-color;
   outline: 0;
@@ -293,11 +302,13 @@ textarea:-moz-placeholder {
 }
 
 input:-ms-input-placeholder,
+div[contenteditable="true"]:-ms-input-placeholder,
 textarea:-ms-input-placeholder {
   color: $form-placeholder-color;
 }
 
 input::-webkit-input-placeholder,
+div[contenteditable="true"]::-webkit-input-placeholder,
 textarea::-webkit-input-placeholder {
   color: $form-placeholder-color;
 }
@@ -383,6 +394,7 @@ textarea[class*="span"],
 
 input,
 textarea,
+div[contenteditable="true"],
 .uneditable-input {
   margin-left: 0;
 }
@@ -514,12 +526,14 @@ input[type="checkbox"][readonly] {
 .control-group.warning .checkbox,
 .control-group.warning .radio,
 .control-group.warning input,
+.control-group.warning div[contenteditable="true"],
 .control-group.warning select,
 .control-group.warning textarea {
   color: #c09853;
 }
 
 .control-group.warning input,
+.control-group.warning div[contenteditable="true"],
 .control-group.warning select,
 .control-group.warning textarea {
   border-color: #c09853;
@@ -529,6 +543,7 @@ input[type="checkbox"][readonly] {
 }
 
 .control-group.warning input:focus,
+.control-group.warning div[contenteditable="true"]:focus,
 .control-group.warning select:focus,
 .control-group.warning textarea:focus {
   border-color: #a47e3c;
@@ -553,12 +568,14 @@ input[type="checkbox"][readonly] {
 .control-group.error .checkbox,
 .control-group.error .radio,
 .control-group.error input,
+.control-group.error div[contenteditable="true"],
 .control-group.error select,
 .control-group.error textarea {
   color: #b94a48;
 }
 
 .control-group.error input,
+.control-group.error div[contenteditable="true"],
 .control-group.error select,
 .control-group.error textarea {
   border-color: #b94a48;
@@ -568,6 +585,7 @@ input[type="checkbox"][readonly] {
 }
 
 .control-group.error input:focus,
+.control-group.error div[contenteditable="true"]:focus,
 .control-group.error select:focus,
 .control-group.error textarea:focus {
   border-color: #953b39;
@@ -592,12 +610,14 @@ input[type="checkbox"][readonly] {
 .control-group.success .checkbox,
 .control-group.success .radio,
 .control-group.success input,
+.control-group.success div[contenteditable="true"],
 .control-group.success select,
 .control-group.success textarea {
   color: #468847;
 }
 
 .control-group.success input,
+.control-group.success div[contenteditable="true"],
 .control-group.success select,
 .control-group.success textarea {
   border-color: #468847;
@@ -607,6 +627,7 @@ input[type="checkbox"][readonly] {
 }
 
 .control-group.success input:focus,
+.control-group.success div[contenteditable="true"]:focus,
 .control-group.success select:focus,
 .control-group.success textarea:focus {
   border-color: #356635;
@@ -631,12 +652,14 @@ input[type="checkbox"][readonly] {
 .control-group.info .checkbox,
 .control-group.info .radio,
 .control-group.info input,
+.control-group.info div[contenteditable="true"],
 .control-group.info select,
 .control-group.info textarea {
   color: #3a87ad;
 }
 
 .control-group.info input,
+.control-group.info div[contenteditable="true"],
 .control-group.info select,
 .control-group.info textarea {
   border-color: #3a87ad;
@@ -646,6 +669,7 @@ input[type="checkbox"][readonly] {
 }
 
 .control-group.info input:focus,
+.control-group.info div[contenteditable="true"]:focus,
 .control-group.info select:focus,
 .control-group.info textarea:focus {
   border-color: #2d6987;
@@ -662,6 +686,7 @@ input[type="checkbox"][readonly] {
 }
 
 input:focus:invalid,
+div[contenteditable="true"]:focus:invalid,
 textarea:focus:invalid,
 select:focus:invalid {
   color: #b94a48;
@@ -669,6 +694,7 @@ select:focus:invalid {
 }
 
 input:focus:invalid:focus,
+div[contenteditable="true"]:focus:invalid:focus,
 textarea:focus:invalid:focus,
 select:focus:invalid:focus {
   border-color: #e9322d;
@@ -726,6 +752,8 @@ select:focus:invalid:focus {
 
 .input-append input,
 .input-prepend input,
+.input-append div[contenteditable="true"],
+.input-prepend div[contenteditable="true"],
 .input-append select,
 .input-prepend select,
 .input-append .uneditable-input,
@@ -739,6 +767,8 @@ select:focus:invalid:focus {
 
 .input-append input,
 .input-prepend input,
+.input-append div[contenteditable="true"],
+.input-prepend div[contenteditable="true"],
 .input-append select,
 .input-prepend select,
 .input-append .uneditable-input,
@@ -754,6 +784,8 @@ select:focus:invalid:focus {
 
 .input-append input:focus,
 .input-prepend input:focus,
+.input-append div[contenteditable="true"]:focus,
+.input-prepend div[contenteditable="true"]:focus,
 .input-append select:focus,
 .input-prepend select:focus,
 .input-append .uneditable-input:focus,
@@ -808,6 +840,7 @@ select:focus:invalid:focus {
 }
 
 .input-append input,
+.input-append div[contenteditable="true"],
 .input-append select,
 .input-append .uneditable-input {
   -webkit-border-radius: 4px 0 0 4px;
@@ -838,6 +871,7 @@ select:focus:invalid:focus {
 }
 
 .input-prepend.input-append input,
+.input-prepend.input-append div[contenteditable="true"],
 .input-prepend.input-append select,
 .input-prepend.input-append .uneditable-input {
   -webkit-border-radius: 0;

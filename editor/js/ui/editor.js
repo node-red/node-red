@@ -228,7 +228,11 @@ RED.editor = (function() {
                                             var newValue;
                                             if (input.attr('type') === "checkbox") {
                                                 newValue = input.prop('checked');
-                                            } else {
+                                            }
+                                            else if ("format" in editing_node._def.defaults[d] && editing_node._def.defaults[d].format !== "" && input[0].nodeName === "DIV") {
+                                                newValue = input.text();
+                                            }
+                                            else {
                                                 newValue = input.val();
                                             }
                                             if (newValue != null) {
@@ -466,17 +470,23 @@ RED.editor = (function() {
      * @param property - the name of the field
      * @param prefix - the prefix to use in the input element ids (node-input|node-config-input)
      */
-    function preparePropertyEditor(node,property,prefix) {
+    function preparePropertyEditor(node,property,prefix,definition) {
         var input = $("#"+prefix+"-"+property);
         if (input.attr('type') === "checkbox") {
             input.prop('checked',node[property]);
-        } else {
+        } 
+        else {
             var val = node[property];
             if (val == null) {
                 val = "";
             }
-            input.val(val).attr("dir", RED.bidi.resolveBaseTextDir(val));
-            RED.bidi.initInputEvents(input);            
+            if ("format" in definition[property] && definition[property].format !== "" && input[0].nodeName === "DIV") {
+                input.html(RED.format.getHtml(val, definition[property].format, {}, false, "en"));
+                RED.format.attach(input[0], definition[property].format, {}, false, "en");                         
+            } else {
+                input.val(val).attr("dir", RED.bidi.resolveBaseTextDir(val));
+                RED.bidi.initInputEvents(input);
+            }                
         }
     }
 
@@ -488,13 +498,24 @@ RED.editor = (function() {
      * @param prefix - the prefix to use in the input element ids (node-input|node-config-input)
      */
     function attachPropertyChangeHandler(node,definition,property,prefix) {
-        $("#"+prefix+"-"+property).change(function() {
-            if (!validateNodeProperty(node, definition, property,this.value)) {
-                $(this).addClass("input-error");
-            } else {
-                $(this).removeClass("input-error");
-            }
-        });
+        var input = $("#"+prefix+"-"+property);
+        if ("format" in definition[property] && definition[property].format !== "" && input[0].nodeName === "DIV") {
+            $("#"+prefix+"-"+property).on('change keyup', function() {                
+                if (!validateNodeProperty(node, definition, property,this.textContent)) {
+                    $(this).addClass("input-error");
+                } else {
+                    $(this).removeClass("input-error");
+                }
+            });
+        } else {        
+            $("#"+prefix+"-"+property).change(function() {
+                if (!validateNodeProperty(node, definition, property,this.value)) {
+                    $(this).addClass("input-error");
+                } else {
+                    $(this).removeClass("input-error");
+                }
+            });
+        } 
     }
 
     /**
@@ -518,7 +539,7 @@ RED.editor = (function() {
                         $('#' + prefix + '-' + cred).val('');
                     }
                 } else {
-                    preparePropertyEditor(credData, cred, prefix);
+                    preparePropertyEditor(credData, cred, prefix, credDef);
                 }
                 attachPropertyChangeHandler(node, credDef, cred, prefix);
             }
@@ -583,10 +604,10 @@ RED.editor = (function() {
                         }
                     } else {
                         console.log("Unknown type:", definition.defaults[d].type);
-                        preparePropertyEditor(node,d,prefix);
+                        preparePropertyEditor(node,d,prefix,definition.defaults);
                     }
                 } else {
-                    preparePropertyEditor(node,d,prefix);
+                    preparePropertyEditor(node,d,prefix,definition.defaults);
                 }
                 attachPropertyChangeHandler(node,definition.defaults,d,prefix);
             }

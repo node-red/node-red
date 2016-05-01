@@ -18,11 +18,11 @@
     font-size: 14px !important;
     font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
 }
-.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
+.ui-widget input, .ui-widget div[contenteditable="true"], .ui-widget select, .ui-widget textarea, .ui-widget button {
     font-size: 14px !important;
     font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
 }
-.ui-widget input {
+.ui-widget input, .ui-widget div[contenteditable="true"] {
     box-shadow: none;
 }
 

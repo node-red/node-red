@@ -105,6 +105,7 @@ module.exports = function(grunt) {
                   "editor/js/user.js",
                   "editor/js/comms.js",
                   "editor/js/bidi.js",
+                  "editor/js/format.js",
                   "editor/js/ui/state.js",
                   "editor/js/nodes.js",
                   "editor/js/history.js",
