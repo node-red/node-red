@@ -254,7 +254,14 @@ RED.library = (function() {
             height: 450,
             buttons: [
                 {
-                    text: RED._("common.label.ok"),
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        $( this ).dialog( "close" );
+                    }
+                },
+                {
+                    text: RED._("common.label.load"),
+                    class: "primary",
                     click: function() {
                         if (selectedLibraryItem) {
                             for (var i=0;i<options.fields.length;i++) {
@@ -263,12 +270,6 @@ RED.library = (function() {
                             }
                             options.editor.setValue(libraryEditor.getValue(),-1);
                         }
-                        $( this ).dialog( "close" );
-                    }
-                },
-                {
-                    text: RED._("common.label.cancel"),
-                    click: function() {
                         $( this ).dialog( "close" );
                     }
                 }
@@ -359,15 +360,16 @@ RED.library = (function() {
             height: 230,
             buttons: [
                 {
-                    text: RED._("common.label.ok"),
+                    text: RED._("common.label.cancel"),
                     click: function() {
-                        saveToLibrary(true);
                         $( this ).dialog( "close" );
                     }
                 },
                 {
-                    text: RED._("common.label.cancel"),
+                    text: RED._("common.label.save"),
+                    class: "primary",
                     click: function() {
+                        saveToLibrary(true);
                         $( this ).dialog( "close" );
                     }
                 }
@@ -381,15 +383,16 @@ RED.library = (function() {
             height: 230,
             buttons: [
                 {
-                    text: RED._("common.label.ok"),
+                    text: RED._("common.label.cancel"),
                     click: function() {
-                        saveToLibrary(false);
                         $( this ).dialog( "close" );
                     }
                 },
                 {
-                    text: RED._("common.label.cancel"),
+                    text: RED._("common.label.save"),
+                    class: "primary",
                     click: function() {
+                        saveToLibrary(false);
                         $( this ).dialog( "close" );
                     }
                 }
@@ -433,8 +436,16 @@ RED.library = (function() {
                     title: RED._("library.exportToLibrary"),
                     buttons: [
                         {
+                            id: "library-dialog-cancel",
+                            text: RED._("common.label.cancel"),
+                            click: function() {
+                                $( this ).dialog( "close" );
+                            }
+                        },
+                        {
                             id: "library-dialog-ok",
-                            text: RED._("common.label.ok"),
+                            class: "primary",
+                            text: RED._("common.label.export"),
                             click: function() {
                                 //TODO: move this to RED.library
                                 var flowName = $("#node-input-library-filename").val();
@@ -455,13 +466,6 @@ RED.library = (function() {
                                         }
                                     });
                                 }
-                                $( this ).dialog( "close" );
-                            }
-                        },
-                        {
-                            id: "library-dialog-cancel",
-                            text: RED._("common.label.cancel"),
-                            click: function() {
                                 $( this ).dialog( "close" );
                             }
                         }

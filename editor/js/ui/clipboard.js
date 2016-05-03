@@ -23,7 +23,7 @@ RED.clipboard = (function() {
     var importNodesDialog;
 
     function setupDialogs() {
-        dialog = $('<div id="clipboard-dialog" class="hide"><form class="dialog-form form-horizontal"></form></div>')
+        dialog = $('<div id="clipboard-dialog" class="hide node-red-dialog"><form class="dialog-form form-horizontal"></form></div>')
             .appendTo("body")
             .dialog({
                 modal: true,
@@ -31,14 +31,6 @@ RED.clipboard = (function() {
                 width: 500,
                 resizable: false,
                 buttons: [
-                    {
-                        id: "clipboard-dialog-ok",
-                        text: RED._("common.label.ok"),
-                        click: function() {
-                            RED.view.importNodes($("#clipboard-import").val());
-                            $( this ).dialog( "close" );
-                        }
-                    },
                     {
                         id: "clipboard-dialog-cancel",
                         text: RED._("common.label.cancel"),
@@ -48,8 +40,18 @@ RED.clipboard = (function() {
                     },
                     {
                         id: "clipboard-dialog-close",
+                        class: "primary",
                         text: RED._("common.label.close"),
                         click: function() {
+                            $( this ).dialog( "close" );
+                        }
+                    },
+                    {
+                        id: "clipboard-dialog-ok",
+                        class: "primary",
+                        text: RED._("common.label.import"),
+                        click: function() {
+                            RED.view.importNodes($("#clipboard-import").val());
                             $( this ).dialog( "close" );
                         }
                     }

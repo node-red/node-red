@@ -71,7 +71,8 @@
 
     button {
         @include workspace-button;
-        padding: 0.4em 1em;
+        font-size: 14px;
+        padding: 6px 14px;
         margin-right: 8px;
         color: $editor-button-color-primary;
         &.leftButton {
@@ -83,7 +84,6 @@
         }
         &:not(.primary) {
             background: none;
-
             &:hover {
                 color: $editor-button-color-primary;
             }

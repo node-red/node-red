@@ -134,7 +134,14 @@ RED.workspaces = (function() {
                     }
                 },
                 {
-                    text: RED._("common.label.ok"),
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        $( this ).dialog( "close" );
+                    }
+                },
+                {
+                    text: RED._("common.label.done"),
+                    class: "primary",
                     click: function() {
                         var workspace = $(this).dialog('option','workspace');
                         var label = $( "#node-input-workspace-name" ).val();
@@ -146,13 +153,8 @@ RED.workspaces = (function() {
                         }
                         $( this ).dialog( "close" );
                     }
-                },
-                {
-                    text: RED._("common.label.cancel"),
-                    click: function() {
-                        $( this ).dialog( "close" );
-                    }
                 }
+
             ],
             open: function(e) {
                 RED.keyboard.disable();

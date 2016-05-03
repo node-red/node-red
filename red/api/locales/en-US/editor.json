@@ -6,7 +6,11 @@
             "done":"Done",
             "cancel": "Cancel",
             "delete": "Delete",
-            "close": "Close"
+            "close": "Close",
+            "load": "Load",
+            "save": "Save",
+            "import": "Import",
+            "export": "Export"
         }
     },
     "workspace": {
@@ -196,7 +200,7 @@
     },
     "sidebar": {
         "info": {
-            "name": "Information",
+            "name": "Node information",
             "label": "info",
             "node": "Node",
             "type": "Type",
