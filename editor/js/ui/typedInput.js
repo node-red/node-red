@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,8 +161,13 @@
             var that = this;
             var pos = relativeTo.offset();
             var height = relativeTo.height();
+            var menuHeight = menu.height();
+            var top = (height+pos.top-3);
+            if (top+menuHeight > $(window).height()) {
+                top -= (top+menuHeight)-$(window).height()+5;
+            }
             menu.css({
-                top: (height+pos.top-3)+"px",
+                top: top+"px",
                 left: (2+pos.left)+"px",
             });
             menu.slideDown(100);
