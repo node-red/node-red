@@ -22,23 +22,26 @@ RED.tray = (function() {
     }
     function showTray(options) {
         var el = $('<div class="editor-tray"></div>');
-        var header = $('<div class="editor-tray-header">'+(options.title||"")+'</div>').appendTo(el);
+        var header = $('<div class="editor-tray-header"></div>').appendTo(el);
         var body = $('<div class="editor-tray-body"></div>').appendTo(el);
         var footer = $('<div class="editor-tray-footer"></div>').appendTo(el);
         var resizer = $('<div class="editor-tray-resize-handle"></div>').appendTo(el);
-        var growButton = $('<a class="editor-tray-resize-button" style="cursor: w-resize;"><i class="fa fa-angle-left"></i></a>').appendTo(resizer);
-        var shrinkButton = $('<a class="editor-tray-resize-button" style="cursor: e-resize;"><i style="margin-left: 1px;" class="fa fa-angle-right"></i></a>').appendTo(resizer);
-
+        // var growButton = $('<a class="editor-tray-resize-button" style="cursor: w-resize;"><i class="fa fa-angle-left"></i></a>').appendTo(resizer);
+        // var shrinkButton = $('<a class="editor-tray-resize-button" style="cursor: e-resize;"><i style="margin-left: 1px;" class="fa fa-angle-right"></i></a>').appendTo(resizer);
+        if (options.title) {
+            $('<div class="editor-tray-titlebar">'+options.title+'</div>').appendTo(header);
+        }
+        var buttonBar = $('<div class="editor-tray-toolbar"></div>').appendTo(header);
         if (options.buttons) {
             for (var i=0;i<options.buttons.length;i++) {
                 var button = options.buttons[i];
 
-                var b = $('<button>').appendTo(footer);
+                var b = $('<button>').appendTo(buttonBar);
                 if (button.id) {
                     b.attr('id',button.id);
                 }
                 if (button.text) {
-                    b.text(button.text);
+                    b.html(button.text);
                 }
                 if (button.click) {
                     b.click(button.click);
@@ -56,6 +59,8 @@ RED.tray = (function() {
             footer: footer,
             options: options
         };
+        stack.push(tray);
+
         el.draggable({
                 handle: resizer,
                 axis: "x",
@@ -88,6 +93,7 @@ RED.tray = (function() {
 
         $("#header-shade").show();
         $("#editor-shade").show();
+        RED.sidebar.config.disable();
 
         tray.preferredWidth = el.width();
         if (options.width) {
@@ -102,8 +108,6 @@ RED.tray = (function() {
             transition: "right 0.2s ease"
         });
         $("#workspace").scrollLeft(0);
-
-        stack.push(tray);
 
         var trayHeight = el.height()-header.outerHeight()-footer.outerHeight();
         body.height(trayHeight-40);
@@ -123,27 +127,27 @@ RED.tray = (function() {
             el.css({right:0});
         },0);
 
-        growButton.click(function(e) {
-            e.preventDefault();
-            tray.lastWidth = tray.width;
-            tray.width = $("#editor-stack").position().left-8;
-            el.width(tray.width);
-            if (options.resize) {
-                options.resize({width:tray.width});
-            }
-        });
-        shrinkButton.click(function(e) {
-            e.preventDefault();
-            if (tray.lastWidth && tray.width > tray.lastWidth) {
-                tray.width = tray.lastWidth;
-            } else if (tray.width > tray.preferredWidth) {
-                tray.width = tray.preferredWidth;
-            }
-            el.width(tray.width);
-            if (options.resize) {
-                options.resize({width:tray.width});
-            }
-        });
+        // growButton.click(function(e) {
+        //     e.preventDefault();
+        //     tray.lastWidth = tray.width;
+        //     tray.width = $("#editor-stack").position().left-8;
+        //     el.width(tray.width);
+        //     if (options.resize) {
+        //         options.resize({width:tray.width});
+        //     }
+        // });
+        // shrinkButton.click(function(e) {
+        //     e.preventDefault();
+        //     if (tray.lastWidth && tray.width > tray.lastWidth) {
+        //         tray.width = tray.lastWidth;
+        //     } else if (tray.width > tray.preferredWidth) {
+        //         tray.width = tray.preferredWidth;
+        //     }
+        //     el.width(tray.width);
+        //     if (options.resize) {
+        //         options.resize({width:tray.width});
+        //     }
+        // });
 
     }
 
@@ -212,6 +216,8 @@ RED.tray = (function() {
                 if (stack.length === 0) {
                     $("#header-shade").hide();
                     $("#editor-shade").hide();
+                    RED.sidebar.config.enable();
+
                 }
             }
         }

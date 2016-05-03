@@ -3,6 +3,7 @@
         "label": {
             "name": "Name",
             "ok": "Ok",
+            "done":"Done",
             "cancel": "Cancel",
             "delete": "Delete",
             "close": "Close"
@@ -128,6 +129,7 @@
         "nodesUse": "__count__ node uses this config",
         "nodesUse_plural": "__count__ nodes use this config",
         "addNewConfig": "Add new __type__ config node",
+        "editNode": "Edit __type__ node",
         "editConfig": "Edit __type__ config node",
         "addNewType": "Add new __type__...",
         "errors": {

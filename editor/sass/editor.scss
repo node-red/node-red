@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,88 +15,139 @@
  **/
 
 
- #editor-stack {
-     position: absolute;
-     margin: 0;
-     top: 0;
-     bottom: 0px;
-     right: 323px;
-     width: 0;
- }
- .editor-tray {
-     position:absolute;
-     margin: 0;
-     top: 0;
-     min-width: 500px;
-     width: auto;
-     right: -1000px;
-     bottom: 0;
-     background: #fff;
-     border-left: 1px solid $secondary-border-color;
-     border-bottom: 1px solid $primary-border-color;
-     box-sizing: content-box;
- }
- .editor-tray.open {
-     right: 0;
- }
- .editor-tray-body {
-     width: auto;
-     padding: 20px;
-     min-width: 500px;
-     box-sizing: border-box;
-     overflow-y: scroll;
- }
- .editor-tray-header {
-     padding: 10px;
-     box-sizing: border-box;
-     font-weight: bold;
-     height: 40px;
-     border-bottom: 1px solid $primary-border-color;
-     background: $palette-header-background;
- }
- .editor-tray-footer {
-     @include component-footer;
-     height: auto;
-     padding: 8px;
-     button {
-         @include workspace-button;
-         padding: 0.4em 1em;
-         margin-right: 8px;
+#editor-stack {
+    position: absolute;
+    margin: 0;
+    top: 0;
+    bottom: 0px;
+    right: 323px;
+    width: 0;
+}
+.editor-tray {
+    position:absolute;
+    margin: 0;
+    top: 0;
+    min-width: 500px;
+    width: auto;
+    right: -1000px;
+    bottom: 0;
+    background: #fff;
+    border-left: 1px solid $secondary-border-color;
+    border-bottom: 1px solid $primary-border-color;
+    box-sizing: content-box;
+}
+.editor-tray.open {
+    right: 0;
+}
+.editor-tray-body {
+    width: auto;
+    padding: 20px;
+    min-width: 500px;
+    box-sizing: border-box;
+    overflow-y: scroll;
+}
+.editor-tray-header {
+    @include disable-selection;
+    position: relative;
+    box-sizing: border-box;
+    font-weight: bold;
+    border-bottom: 1px solid $secondary-border-color;
+    background: $palette-header-background;
+    &:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+}
 
-         &.leftButton {
-             margin-right: 40px;
-         }
-     }
- }
- .editor-tray-resize-handle {
-     position: absolute;
-     top: 0px;
-     bottom: 0px;
-     width: 7px;
-     left: -9px;
-     background: $background-color url(images/grip.png) no-repeat 50% 50%;
-     cursor: col-resize;
-     border-left: 1px solid $primary-border-color;
-     box-shadow: -1px 0 6px rgba(0,0,0,0.1);
- }
+.editor-tray-footer {
+    @include component-footer;
+    height: 35px;
+}
+
+.editor-tray-toolbar {
+    text-align: right;
+    padding: 8px;
+
+    button {
+        @include workspace-button;
+        padding: 0.4em 1em;
+        margin-right: 8px;
+        color: $editor-button-color-primary;
+        &.leftButton {
+            float: left;
+            margin-top: 1px;
+        }
+        &:not(.leftButton):not(:last-child) {
+            margin-right: 16px;
+        }
+        &:not(.primary) {
+            background: none;
+
+            &:hover {
+                color: $editor-button-color-primary;
+            }
+        }
+    }
+}
+
+.editor-tray-titlebar {
+    border-bottom: 1px solid $secondary-border-color;
+    padding: 8px;
+}
+.editor-tray-breadcrumbs {
+    list-style-type: none;
+    margin: 0;
+    padding:0;
+
+    li {
+        display: inline-block;
+        padding:0;
+        margin:0;
+
+        &:not(:last-child) {
+            color: $editor-button-color-secondary;
+            font-weight: normal;
+
+            &:after {
+                display: inline-block;
+                content: '>';
+                margin: 0 5px;
+            }
+
+        }
+    }
+}
+.editor-tray-resize-handle {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    width: 7px;
+    left: -9px;
+    background: $background-color url(images/grip.png) no-repeat 50% 50%;
+    cursor: col-resize;
+    border-left: 1px solid $primary-border-color;
+    box-shadow: -1px 0 6px rgba(0,0,0,0.1);
+}
 .editor-tray-resize-button {
     @include workspace-button;
     display: block;
-    height: 20px;
+    height: 37px;
+    line-height: 35px;
     border: none;
     border-bottom: 1px solid $secondary-border-color;
     margin: 0;
     background: $background-color;
-    color: $workspace-button-color-disabled;
+    color: $workspace-button-color;
 }
- #editor-shade, #header-shade  {
-     position: absolute;
-     top:0;
-     bottom:0;
-     left:0;
-     right:0;
-     background: rgba(220,220,220,0.5);
- }
+#editor-shade, #header-shade  {
+    position: absolute;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    background: $shade-color;
+}
 
 
 .dialog-form,#dialog-form, #dialog-config-form {
@@ -164,6 +215,7 @@
     cursor: auto;
     float: right;
     font-size: 12px !important;
+    line-height: 35px;
 }
 #node-config-dialog-scope-warning {
     display: inline-block;
@@ -175,13 +227,14 @@
     margin: 1px 0 0 0;
     padding: 0;
     height: 22px;
-    width: 110px;
+    width: 150px;
+
 }
 #node-config-dialog-user-count {
     vertical-align: middle;
     display:inline-block;
-    margin-top: 10px;
     margin-right: 20px;
     float:left;
     font-size: 12px;
+    line-height: 35px;
 }

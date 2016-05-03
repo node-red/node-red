@@ -15,6 +15,8 @@
  **/
 RED.editor = (function() {
 
+
+    var editStack = [];
     var editing_node = null;
     var editing_config_node = null;
     var subflowEditor;
@@ -417,19 +419,86 @@ RED.editor = (function() {
         }
     }
 
+    function getEditStackTitle() {
+
+        var title = '<ul class="editor-tray-breadcrumbs">';
+        for (var i=0;i<editStack.length;i++) {
+            var node = editStack[i];
+            var label = node.type;
+            if (node.type === 'subflow') {
+                label = RED._("subflow.editSubflow",{name:node.name})
+            } else if (node.type.indexOf("subflow:")===0) {
+                var subflow = RED.nodes.subflow(node.type.substring(8));
+                label = RED._("subflow.editSubflow",{name:subflow.name})
+            } else {
+                if (typeof node._def.paletteLabel !== "undefined") {
+                    try {
+                        label = (typeof node._def.paletteLabel === "function" ? node._def.paletteLabel.call(node._def) : node._def.paletteLabel)||"";
+                    } catch(err) {
+                        console.log("Definition error: "+node.type+".paletteLabel",err);
+                    }
+                }
+                if (i === editStack.length-1) {
+                    if (RED.nodes.node(node.id)) {
+                        label = RED._("editor.editNode",{type:label});
+                    } else {
+                        label = RED._("editor.addNewConfig",{type:label});
+                    }
+                }
+            }
+            title += '<li>'+label+'</li>';
+        }
+        title += '</ul>';
+        return title;
+    }
+
     function showEditDialog(node) {
         var editing_node = node;
+        editStack.push(node);
         RED.view.state(RED.state.EDITING);
         var type = node.type;
         if (node.type.substring(0,8) == "subflow:") {
             type = "subflow";
         }
         var trayOptions = {
-            title: "Edit "+type+" node",
+            title: getEditStackTitle(),
             buttons: [
                 {
+                    id: "node-dialog-cancel",
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        if (editing_node._def) {
+                            if (editing_node._def.oneditcancel) {
+                                editing_node._def.oneditcancel.call(editing_node);
+                            }
+
+                            for (var d in editing_node._def.defaults) {
+                                if (editing_node._def.defaults.hasOwnProperty(d)) {
+                                    var def = editing_node._def.defaults[d];
+                                    if (def.type) {
+                                        var configTypeDef = RED.nodes.getType(def.type);
+                                        if (configTypeDef && configTypeDef.exclusive) {
+                                            var input = $("#node-input-"+d).val()||"";
+                                            if (input !== "" && !editing_node[d]) {
+                                                // This node has an exclusive config node that
+                                                // has just been added. As the user is cancelling
+                                                // the edit, need to delete the just-added config
+                                                // node so that it doesn't get orphaned.
+                                                RED.nodes.remove(input);
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                        RED.tray.close();
+                    }
+                },
+                {
                     id: "node-dialog-ok",
-                    text: RED._("common.label.ok"),
+                    text: RED._("common.label.done"),
+                    class: "primary",
                     click: function() {
                         var changes = {};
                         var changed = false;
@@ -556,38 +625,6 @@ RED.editor = (function() {
                         RED.view.redraw(true);
                         RED.tray.close();
                     }
-                },
-                {
-                    id: "node-dialog-cancel",
-                    text: RED._("common.label.cancel"),
-                    click: function() {
-                        if (editing_node._def) {
-                            if (editing_node._def.oneditcancel) {
-                                editing_node._def.oneditcancel.call(editing_node);
-                            }
-
-                            for (var d in editing_node._def.defaults) {
-                                if (editing_node._def.defaults.hasOwnProperty(d)) {
-                                    var def = editing_node._def.defaults[d];
-                                    if (def.type) {
-                                        var configTypeDef = RED.nodes.getType(def.type);
-                                        if (configTypeDef && configTypeDef.exclusive) {
-                                            var input = $("#node-input-"+d).val()||"";
-                                            if (input !== "" && !editing_node[d]) {
-                                                // This node has an exclusive config node that
-                                                // has just been added. As the user is cancelling
-                                                // the edit, need to delete the just-added config
-                                                // node so that it doesn't get orphaned.
-                                                RED.nodes.remove(input);
-                                            }
-                                        }
-                                    }
-                                }
-
-                            }
-                        }
-                        RED.tray.close();
-                    }
                 }
             ],
             resize: function(dimensions) {
@@ -631,26 +668,6 @@ RED.editor = (function() {
                 $('<input type="text" style="display: none;" />').prependTo(dialogForm);
                 prepareEditDialog(node,node._def,"node-input");
                 dialogForm.i18n();
-
-                // var minWidth = $(this).dialog('option','minWidth');
-                // if ($(this).outerWidth() < minWidth) {
-                //     $(this).dialog('option','width',minWidth);
-                // } else {
-                //     $(this).dialog('option','width',$(this).outerWidth());
-                // }
-                // if (editing_node) {
-                //     var size = $(this).dialog('option','sizeCache-'+editing_node.type);
-                //     if (size) {
-                //         $(this).dialog('option','width',size.width);
-                //         $(this).dialog('option','height',size.height);
-                //     }
-                //     if (editing_node._def.oneditresize) {
-                //         setTimeout(function() {
-                //             var form = $("#dialog-form");
-                //             editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
-                //         },0);
-                //     }
-                // }
             },
             close: function() {
                 RED.keyboard.enable();
@@ -661,6 +678,7 @@ RED.editor = (function() {
                     RED.sidebar.info.refresh(editing_node);
                 }
                 RED.workspaces.refresh();
+                editStack.pop();
             },
             show: function() {
                 if (editing_node) {
@@ -668,14 +686,6 @@ RED.editor = (function() {
                 }
             }
         }
-        /*).parent().on('keydown', function(evt) {
-            if (evt.keyCode === $.ui.keyCode.ESCAPE && (evt.metaKey || evt.ctrlKey)) {
-                $("#node-dialog-cancel").click();
-            } else if (evt.keyCode === $.ui.keyCode.ENTER && (evt.metaKey || evt.ctrlKey)) {
-                $("#node-dialog-ok").click();
-            }
-        });
-        */
         if (editTrayWidthCache[type]) {
             trayOptions.width = editTrayWidthCache[type];
         }
@@ -683,7 +693,7 @@ RED.editor = (function() {
         if (type === 'subflow') {
             var id = editing_node.type.substring(8);
             trayOptions.buttons.unshift({
-                class: 'leftButton',
+                class: 'leftButton primary',
                 text: RED._("subflow.edit"),
                 click: function() {
                     RED.workspaces.show(id);
@@ -730,9 +740,11 @@ RED.editor = (function() {
             }
             editing_config_node["_"] = node_def._;
         }
+        editStack.push(editing_config_node);
+
         RED.view.state(RED.state.EDITING);
         var trayOptions = {
-            title: (adding?RED._("editor.addNewConfig", {type:type}):RED._("editor.editConfig", {type:type})),
+            title: getEditStackTitle(), //(adding?RED._("editor.addNewConfig", {type:type}):RED._("editor.editConfig", {type:type})),
             resize: function() {
                 if (editing_config_node && editing_config_node._def.oneditresize) {
                     var form = $("#node-config-dialog-edit-form");
@@ -745,7 +757,7 @@ RED.editor = (function() {
                 var trayFooter = tray.find(".editor-tray-footer");
 
                 trayFooter.prepend('<div id="node-config-dialog-user-count"><i class="fa fa-info-circle"></i> <span></span></div>');
-                trayHeader.append('<span id="node-config-dialog-scope-container"><span id="node-config-dialog-scope-warning" data-i18n="[title]editor.errors.scopeChange"><i class="fa fa-warning"></i></span><select id="node-config-dialog-scope"></select></span>');
+                trayFooter.append('<span id="node-config-dialog-scope-container"><span id="node-config-dialog-scope-warning" data-i18n="[title]editor.errors.scopeChange"><i class="fa fa-warning"></i></span><select id="node-config-dialog-scope"></select></span>');
 
                 RED.keyboard.disable();
 
@@ -822,6 +834,7 @@ RED.editor = (function() {
                     RED.keyboard.enable();
                 }
                 RED.workspaces.refresh();
+                editStack.pop();
             },
             show: function() {
                 if (editing_config_node) {
@@ -831,8 +844,32 @@ RED.editor = (function() {
         }
         trayOptions.buttons = [
             {
+                id: "node-config-dialog-cancel",
+                text: RED._("common.label.cancel"),
+                click: function() {
+                    var configType = type;
+                    var configId = editing_config_node.id;
+                    var configAdding = adding;
+                    var configTypeDef = RED.nodes.getType(configType);
+
+                    if (configTypeDef.oneditcancel) {
+                        // TODO: what to pass as this to call
+                        if (configTypeDef.oneditcancel) {
+                            var cn = RED.nodes.node(configId);
+                            if (cn) {
+                                configTypeDef.oneditcancel.call(cn,false);
+                            } else {
+                                configTypeDef.oneditcancel.call({id:configId},true);
+                            }
+                        }
+                    }
+                    RED.tray.close();
+                }
+            },
+            {
                 id: "node-config-dialog-ok",
                 text: adding?RED._("editor.configAdd"):RED._("editor.configUpdate"),
+                class: "primary",
                 click: function() {
                     var configProperty = name;
                     var configId = editing_config_node.id;
@@ -931,36 +968,13 @@ RED.editor = (function() {
                         updateConfigNodeSelect(configProperty,configType,editing_config_node.id,prefix);
                     });
                 }
-            },
-            {
-                id: "node-config-dialog-cancel",
-                text: RED._("common.label.cancel"),
-                click: function() {
-                    var configType = type;
-                    var configId = editing_config_node.id;
-                    var configAdding = adding;
-                    var configTypeDef = RED.nodes.getType(configType);
-
-                    if (configTypeDef.oneditcancel) {
-                        // TODO: what to pass as this to call
-                        if (configTypeDef.oneditcancel) {
-                            var cn = RED.nodes.node(configId);
-                            if (cn) {
-                                configTypeDef.oneditcancel.call(cn,false);
-                            } else {
-                                configTypeDef.oneditcancel.call({id:configId},true);
-                            }
-                        }
-                    }
-                    RED.tray.close();
-                }
             }
         ];
 
         if (!adding) {
             trayOptions.buttons.unshift({
                 class: 'leftButton',
-                text: RED._("editor.configDelete"),
+                text: RED._("editor.configDelete"), //'<i class="fa fa-trash"></i>',
                 click: function() {
                     var configProperty = name;
                     var configId = editing_config_node.id;
@@ -1067,15 +1081,24 @@ RED.editor = (function() {
 
     function showEditSubflowDialog(subflow) {
         var editing_node = subflow;
+        editStack.push(subflow);
         RED.view.state(RED.state.EDITING);
         var subflowEditor;
 
         var trayOptions = {
-            title: RED._("subflow.editSubflow",{name:subflow.name}),
+            title: getEditStackTitle(),
             buttons: [
                 {
+                    id: "node-dialog-cancel",
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        RED.tray.close();
+                    }
+                },
+                {
                     id: "node-dialog-ok",
-                    text: RED._("common.label.ok"),
+                    class: "primary",
+                    text: RED._("common.label.done"),
                     click: function() {
                         var i;
                         var changes = {};
@@ -1133,13 +1156,6 @@ RED.editor = (function() {
                         editing_node.dirty = true;
                         RED.tray.close();
                     }
-                },
-                {
-                    id: "node-dialog-cancel",
-                    text: RED._("common.label.cancel"),
-                    click: function() {
-                        RED.tray.close();
-                    }
                 }
             ],
             resize: function() {
@@ -1189,7 +1205,7 @@ RED.editor = (function() {
                 });
 
                 $("#subflow-input-name").val(subflow.name);
-                subflowEditor.getSession().setValue(subflow.info,-1);
+                subflowEditor.getSession().setValue(subflow.info||"",-1);
                 var userCount = 0;
                 var subflowType = "subflow:"+editing_node.id;
 
@@ -1209,6 +1225,7 @@ RED.editor = (function() {
                 }
                 RED.sidebar.info.refresh(editing_node);
                 RED.workspaces.refresh();
+                editStack.pop();
                 editing_node = null;
             },
             show: function() {
@@ -1222,6 +1239,15 @@ RED.editor = (function() {
     return {
         init: function() {
             RED.tray.init();
+            $(window).on('keydown', function(evt) {
+                if (evt.keyCode === $.ui.keyCode.ESCAPE && (evt.metaKey || evt.ctrlKey)) {
+                    $("#node-dialog-cancel").click();
+                    $("#node-config-dialog-cancel").click();
+                } else if (evt.keyCode === $.ui.keyCode.ENTER && (evt.metaKey || evt.ctrlKey)) {
+                    $("#node-dialog-ok").click();
+                    $("#node-config-dialog-ok").click();
+                }
+            });
         },
         edit: showEditDialog,
         editConfig: showEditConfigNodeDialog,
