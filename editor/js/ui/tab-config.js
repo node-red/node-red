@@ -17,7 +17,7 @@ RED.sidebar.config = (function() {
 
 
     var content = document.createElement("div");
-    content.className = "sidebar-node-config"
+    content.className = "sidebar-node-config";
 
     $('<div class="button-group sidebar-header">'+
       '<a class="sidebar-header-button-toggle selected" id="workspace-config-node-filter-all" href="#"><span data-i18n="sidebar.config.filterAll"></span></a>'+
@@ -34,6 +34,9 @@ RED.sidebar.config = (function() {
     var globalCategories = $("<div>").appendTo(content);
     var flowCategories = $("<div>").appendTo(content);
     var subflowCategories = $("<div>").appendTo(content);
+
+
+    var shade = $('<div class="sidebar-node-config-shade hide"></div>').appendTo(content);
 
     var showUnusedOnly = false;
 
@@ -288,6 +291,12 @@ RED.sidebar.config = (function() {
     return {
         init:init,
         show:show,
-        refresh:refreshConfigNodeList
+        refresh:refreshConfigNodeList,
+        disable: function() {
+            shade.show();
+        },
+        enable: function() {
+            shade.hide();
+        }
     }
 })();

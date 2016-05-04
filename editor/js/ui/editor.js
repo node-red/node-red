@@ -14,9 +14,14 @@
  * limitations under the License.
  **/
 RED.editor = (function() {
+
+
+    var editStack = [];
     var editing_node = null;
     var editing_config_node = null;
     var subflowEditor;
+
+    var editTrayWidthCache = {};
 
     function getCredentialsURL(nodeType, nodeID) {
         var dashedType = nodeType.replace(/\s+/g, '-');
@@ -136,6 +141,32 @@ RED.editor = (function() {
         return valid;
     }
 
+
+    function validateNodeEditor(node,prefix) {
+        for (var prop in node._def.defaults) {
+            if (node._def.defaults.hasOwnProperty(prop)) {
+                validateNodeEditorProperty(node,node._def.defaults,prop,prefix);
+            }
+        }
+        if (node._def.credentials) {
+            for (prop in node._def.credentials) {
+                if (node._def.credentials.hasOwnProperty(prop)) {
+                    validateNodeEditorProperty(node,node._def.credentials,prop,prefix);
+                }
+            }
+        }
+    }
+    function validateNodeEditorProperty(node,defaults,property,prefix) {
+        var input = $("#"+prefix+"-"+property);
+        if (input.length > 0) {
+            if (!validateNodeProperty(node, defaults, property,input.val())) {
+                input.addClass("input-error");
+            } else {
+                input.removeClass("input-error");
+            }
+        }
+    }
+
     /**
      * Called when the node's properties have changed.
      * Marks the node as dirty and needing a size check.
@@ -172,261 +203,41 @@ RED.editor = (function() {
         return removedLinks;
     }
 
-    function createDialog(){
-        $( "#dialog" ).dialog({
-                modal: true,
-                autoOpen: false,
-                dialogClass: "ui-dialog-no-close",
-                closeOnEscape: false,
-                minWidth: 500,
-                width: 'auto',
-                buttons: [
-                    {
-                        id: "node-dialog-ok",
-                        text: RED._("common.label.ok"),
-                        click: function() {
-                            if (editing_node) {
-                                var changes = {};
-                                var changed = false;
-                                var wasDirty = RED.nodes.dirty();
-                                var d;
-
-                                if (editing_node._def.oneditsave) {
-                                    var oldValues = {};
-                                    for (d in editing_node._def.defaults) {
-                                        if (editing_node._def.defaults.hasOwnProperty(d)) {
-                                            if (typeof editing_node[d] === "string" || typeof editing_node[d] === "number") {
-                                                oldValues[d] = editing_node[d];
-                                            } else {
-                                                oldValues[d] = $.extend(true,{},{v:editing_node[d]}).v;
-                                            }
-                                        }
-                                    }
-                                    var rc = editing_node._def.oneditsave.call(editing_node);
-                                    if (rc === true) {
-                                        changed = true;
-                                    }
-
-                                    for (d in editing_node._def.defaults) {
-                                        if (editing_node._def.defaults.hasOwnProperty(d)) {
-                                            if (oldValues[d] === null || typeof oldValues[d] === "string" || typeof oldValues[d] === "number") {
-                                                if (oldValues[d] !== editing_node[d]) {
-                                                    changes[d] = oldValues[d];
-                                                    changed = true;
-                                                }
-                                            } else {
-                                                if (JSON.stringify(oldValues[d]) !== JSON.stringify(editing_node[d])) {
-                                                    changes[d] = oldValues[d];
-                                                    changed = true;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (editing_node._def.defaults) {
-                                    for (d in editing_node._def.defaults) {
-                                        if (editing_node._def.defaults.hasOwnProperty(d)) {
-                                            var input = $("#node-input-"+d);
-                                            var newValue;
-                                            if (input.attr('type') === "checkbox") {
-                                                newValue = input.prop('checked');
-                                            } else {
-                                                newValue = input.val();
-                                            }
-                                            if (newValue != null) {
-                                                if (d === "outputs" && (newValue.trim() === "" || isNaN(newValue))) {
-                                                    continue;
-                                                }
-                                                if (editing_node[d] != newValue) {
-                                                    if (editing_node._def.defaults[d].type) {
-                                                        if (newValue == "_ADD_") {
-                                                            newValue = "";
-                                                        }
-                                                        // Change to a related config node
-                                                        var configNode = RED.nodes.node(editing_node[d]);
-                                                        if (configNode) {
-                                                            var users = configNode.users;
-                                                            users.splice(users.indexOf(editing_node),1);
-                                                        }
-                                                        configNode = RED.nodes.node(newValue);
-                                                        if (configNode) {
-                                                            configNode.users.push(editing_node);
-                                                        }
-                                                    }
-                                                    changes[d] = editing_node[d];
-                                                    editing_node[d] = newValue;
-                                                    changed = true;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                if (editing_node._def.credentials) {
-                                    var prefix = 'node-input';
-                                    var credDefinition = editing_node._def.credentials;
-                                    var credsChanged = updateNodeCredentials(editing_node,credDefinition,prefix);
-                                    changed = changed || credsChanged;
-                                }
-
-                                var removedLinks = updateNodeProperties(editing_node);
-                                if (changed) {
-                                    var wasChanged = editing_node.changed;
-                                    editing_node.changed = true;
-                                    RED.nodes.dirty(true);
-
-                                    var activeSubflow = RED.nodes.subflow(RED.workspaces.active());
-                                    var subflowInstances = null;
-                                    if (activeSubflow) {
-                                        subflowInstances = [];
-                                        RED.nodes.eachNode(function(n) {
-                                            if (n.type == "subflow:"+RED.workspaces.active()) {
-                                                subflowInstances.push({
-                                                    id:n.id,
-                                                    changed:n.changed
-                                                });
-                                                n.changed = true;
-                                                n.dirty = true;
-                                                updateNodeProperties(n);
-                                            }
-                                        });
-                                    }
-                                    var historyEvent = {
-                                        t:'edit',
-                                        node:editing_node,
-                                        changes:changes,
-                                        links:removedLinks,
-                                        dirty:wasDirty,
-                                        changed:wasChanged
-                                    };
-                                    if (subflowInstances) {
-                                        historyEvent.subflow = {
-                                            instances:subflowInstances
-                                        }
-                                    }
-                                    RED.history.push(historyEvent);
-                                }
-                                editing_node.dirty = true;
-                                validateNode(editing_node);
-                                RED.view.redraw(true);
-                            }
-                            $( this ).dialog( "close" );
-                        }
-                    },
-                    {
-                        id: "node-dialog-cancel",
-                        text: RED._("common.label.cancel"),
-                        click: function() {
-                            if (editing_node && editing_node._def) {
-                                if (editing_node._def.oneditcancel) {
-                                    editing_node._def.oneditcancel.call(editing_node);
-                                }
-
-                                for (var d in editing_node._def.defaults) {
-                                    if (editing_node._def.defaults.hasOwnProperty(d)) {
-                                        var def = editing_node._def.defaults[d];
-                                        if (def.type) {
-                                            var configTypeDef = RED.nodes.getType(def.type);
-                                            if (configTypeDef && configTypeDef.exclusive) {
-                                                var input = $("#node-input-"+d).val()||"";
-                                                if (input !== "" && !editing_node[d]) {
-                                                    // This node has an exclusive config node that
-                                                    // has just been added. As the user is cancelling
-                                                    // the edit, need to delete the just-added config
-                                                    // node so that it doesn't get orphaned.
-                                                    RED.nodes.remove(input);
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                }
-
-
-                            }
-                            $( this ).dialog( "close" );
-                        }
-                    }
-                ],
-                resize: function(e,ui) {
-                    if (editing_node) {
-                        $(this).dialog('option',"sizeCache-"+editing_node.type,ui.size);
-                        if (editing_node._def.oneditresize) {
-                            var form = $("#dialog-form");
-                            editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
-                        }
-                    }
-                },
-                open: function(e) {
-                    var minWidth = $(this).dialog('option','minWidth');
-                    if ($(this).outerWidth() < minWidth) {
-                        $(this).dialog('option','width',minWidth);
-                    } else {
-                        $(this).dialog('option','width',$(this).outerWidth());
-                    }
-                    RED.keyboard.disable();
-                    if (editing_node) {
-                        var size = $(this).dialog('option','sizeCache-'+editing_node.type);
-                        if (size) {
-                            $(this).dialog('option','width',size.width);
-                            $(this).dialog('option','height',size.height);
-                        }
-                        if (editing_node._def.oneditresize) {
-                            setTimeout(function() {
-                                var form = $("#dialog-form");
-                                editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
-                            },0);
-                        }
-                    }
-                },
-                close: function(e) {
-                    RED.keyboard.enable();
-
-                    if (RED.view.state() != RED.state.IMPORT_DRAGGING) {
-                        RED.view.state(RED.state.DEFAULT);
-                    }
-                    $( this ).dialog('option','height','auto');
-                    $( this ).dialog('option','width','auto');
-                    if (editing_node) {
-                        RED.sidebar.info.refresh(editing_node);
-                    }
-                    RED.workspaces.refresh();
-
-                    var buttons = $( this ).dialog("option","buttons");
-                    if (buttons.length == 3) {
-                        $( this ).dialog("option","buttons",buttons.splice(1));
-                    }
-                    editing_node = null;
-                }
-        }).parent().on('keydown', function(evt) {
-            if (evt.keyCode === $.ui.keyCode.ESCAPE && (evt.metaKey || evt.ctrlKey)) {
-                $("#node-dialog-cancel").click();
-            } else if (evt.keyCode === $.ui.keyCode.ENTER && (evt.metaKey || evt.ctrlKey)) {
-                $("#node-dialog-ok").click();
-            }
-        });
-    }
-
     /**
      * Create a config-node select box for this property
      * @param node - the node being edited
      * @param property - the name of the field
      * @param type - the type of the config-node
      */
-    function prepareConfigNodeSelect(node,property,type) {
-        var input = $("#node-input-"+property);
-        var node_def = RED.nodes.getType(type);
-
-        input.replaceWith('<select style="width: 60%;" id="node-input-'+property+'"></select>');
-        updateConfigNodeSelect(property,type,node[property]);
-        var select = $("#node-input-"+property);
-        select.after(' <a id="node-input-lookup-'+property+'" class="editor-button"><i class="fa fa-pencil"></i></a>');
-        $('#node-input-lookup-'+property).click(function(e) {
-            showEditConfigNodeDialog(property,type,select.find(":selected").val());
+    function prepareConfigNodeSelect(node,property,type,prefix) {
+        var input = $("#"+prefix+"-"+property);
+        if (input.length === 0 ) {
+            return;
+        }
+        var existingWidthCSS = input[0].style.width;
+        var newWidth;
+        if (existingWidthCSS !== '') {
+            if (/%/.test(existingWidthCSS)) {
+                newWidth = (input.width()-10)+"%";
+            } else {
+                newWidth = input.width()-50;
+            }
+        } else {
+            newWidth = "60%";
+        }
+        var select = $('<select id="'+prefix+'-'+property+'"></select>');
+        select.width(newWidth);
+        input.replaceWith(select);
+        updateConfigNodeSelect(property,type,node[property],prefix);
+        select.after(' <a id="'+prefix+'-lookup-'+property+'" class="editor-button"><i class="fa fa-pencil"></i></a>');
+        $('#'+prefix+'-lookup-'+property).click(function(e) {
+            showEditConfigNodeDialog(property,type,select.find(":selected").val(),prefix);
             e.preventDefault();
         });
         var label = "";
         var configNode = RED.nodes.node(node[property]);
+        var node_def = RED.nodes.getType(type);
+
         if (configNode && node_def.label) {
             if (typeof node_def.label == "function") {
                 label = node_def.label.call(configNode);
@@ -443,12 +254,12 @@ RED.editor = (function() {
      * @param property - the name of the field
      * @param type - the type of the config-node
      */
-    function prepareConfigNodeButton(node,property,type) {
-        var input = $("#node-input-"+property);
+    function prepareConfigNodeButton(node,property,type,prefix) {
+        var input = $("#"+prefix+"-"+property);
         input.val(node[property]);
         input.attr("type","hidden");
 
-        var button = $("<a>",{id:"node-input-edit-"+property, class:"editor-button"});
+        var button = $("<a>",{id:prefix+"-edit-"+property, class:"editor-button"});
         input.after(button);
 
         if (node[property]) {
@@ -458,7 +269,7 @@ RED.editor = (function() {
         }
 
         button.click(function(e) {
-            showEditConfigNodeDialog(property,type,input.val()||"_ADD_");
+            showEditConfigNodeDialog(property,type,input.val()||"_ADD_",prefix);
             e.preventDefault();
         });
     }
@@ -491,11 +302,7 @@ RED.editor = (function() {
      */
     function attachPropertyChangeHandler(node,definition,property,prefix) {
         $("#"+prefix+"-"+property).change(function() {
-            if (!validateNodeProperty(node, definition, property,this.value)) {
-                $(this).addClass("input-error");
-            } else {
-                $(this).removeClass("input-error");
-            }
+            validateNodeEditor(node,prefix);
         });
     }
 
@@ -523,11 +330,6 @@ RED.editor = (function() {
                     preparePropertyEditor(credData, cred, prefix);
                 }
                 attachPropertyChangeHandler(node, credDef, cred, prefix);
-            }
-        }
-        for (cred in credDef) {
-            if (credDef.hasOwnProperty(cred)) {
-                $("#" + prefix + "-" + cred).change();
             }
         }
     }
@@ -579,9 +381,9 @@ RED.editor = (function() {
                     var configTypeDef = RED.nodes.getType(definition.defaults[d].type);
                     if (configTypeDef) {
                         if (configTypeDef.exclusive) {
-                            prepareConfigNodeButton(node,d,definition.defaults[d].type);
+                            prepareConfigNodeButton(node,d,definition.defaults[d].type,prefix);
                         } else {
-                            prepareConfigNodeSelect(node,d,definition.defaults[d].type);
+                            prepareConfigNodeSelect(node,d,definition.defaults[d].type,prefix);
                         }
                     } else {
                         console.log("Unknown type:", definition.defaults[d].type);
@@ -597,11 +399,7 @@ RED.editor = (function() {
             if (definition.oneditprepare) {
                 definition.oneditprepare.call(node);
             }
-            for (var d in definition.defaults) {
-                if (definition.defaults.hasOwnProperty(d)) {
-                    $("#"+prefix+"-"+d).change();
-                }
-            }
+            validateNodeEditor(node,prefix);
         }
 
         if (definition.credentials) {
@@ -621,58 +419,301 @@ RED.editor = (function() {
         }
     }
 
+    function getEditStackTitle() {
+
+        var title = '<ul class="editor-tray-breadcrumbs">';
+        for (var i=0;i<editStack.length;i++) {
+            var node = editStack[i];
+            var label = node.type;
+            if (node.type === 'subflow') {
+                label = RED._("subflow.editSubflow",{name:node.name})
+            } else if (node.type.indexOf("subflow:")===0) {
+                var subflow = RED.nodes.subflow(node.type.substring(8));
+                label = RED._("subflow.editSubflow",{name:subflow.name})
+            } else {
+                if (typeof node._def.paletteLabel !== "undefined") {
+                    try {
+                        label = (typeof node._def.paletteLabel === "function" ? node._def.paletteLabel.call(node._def) : node._def.paletteLabel)||"";
+                    } catch(err) {
+                        console.log("Definition error: "+node.type+".paletteLabel",err);
+                    }
+                }
+                if (i === editStack.length-1) {
+                    if (RED.nodes.node(node.id)) {
+                        label = RED._("editor.editNode",{type:label});
+                    } else {
+                        label = RED._("editor.addNewConfig",{type:label});
+                    }
+                }
+            }
+            title += '<li>'+label+'</li>';
+        }
+        title += '</ul>';
+        return title;
+    }
+
     function showEditDialog(node) {
-        editing_node = node;
+        var editing_node = node;
+        editStack.push(node);
         RED.view.state(RED.state.EDITING);
         var type = node.type;
         if (node.type.substring(0,8) == "subflow:") {
             type = "subflow";
+        }
+        var trayOptions = {
+            title: getEditStackTitle(),
+            buttons: [
+                {
+                    id: "node-dialog-cancel",
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        if (editing_node._def) {
+                            if (editing_node._def.oneditcancel) {
+                                editing_node._def.oneditcancel.call(editing_node);
+                            }
+
+                            for (var d in editing_node._def.defaults) {
+                                if (editing_node._def.defaults.hasOwnProperty(d)) {
+                                    var def = editing_node._def.defaults[d];
+                                    if (def.type) {
+                                        var configTypeDef = RED.nodes.getType(def.type);
+                                        if (configTypeDef && configTypeDef.exclusive) {
+                                            var input = $("#node-input-"+d).val()||"";
+                                            if (input !== "" && !editing_node[d]) {
+                                                // This node has an exclusive config node that
+                                                // has just been added. As the user is cancelling
+                                                // the edit, need to delete the just-added config
+                                                // node so that it doesn't get orphaned.
+                                                RED.nodes.remove(input);
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                        RED.tray.close();
+                    }
+                },
+                {
+                    id: "node-dialog-ok",
+                    text: RED._("common.label.done"),
+                    class: "primary",
+                    click: function() {
+                        var changes = {};
+                        var changed = false;
+                        var wasDirty = RED.nodes.dirty();
+                        var d;
+
+                        if (editing_node._def.oneditsave) {
+                            var oldValues = {};
+                            for (d in editing_node._def.defaults) {
+                                if (editing_node._def.defaults.hasOwnProperty(d)) {
+                                    if (typeof editing_node[d] === "string" || typeof editing_node[d] === "number") {
+                                        oldValues[d] = editing_node[d];
+                                    } else {
+                                        oldValues[d] = $.extend(true,{},{v:editing_node[d]}).v;
+                                    }
+                                }
+                            }
+                            var rc = editing_node._def.oneditsave.call(editing_node);
+                            if (rc === true) {
+                                changed = true;
+                            }
+
+                            for (d in editing_node._def.defaults) {
+                                if (editing_node._def.defaults.hasOwnProperty(d)) {
+                                    if (oldValues[d] === null || typeof oldValues[d] === "string" || typeof oldValues[d] === "number") {
+                                        if (oldValues[d] !== editing_node[d]) {
+                                            changes[d] = oldValues[d];
+                                            changed = true;
+                                        }
+                                    } else {
+                                        if (JSON.stringify(oldValues[d]) !== JSON.stringify(editing_node[d])) {
+                                            changes[d] = oldValues[d];
+                                            changed = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (editing_node._def.defaults) {
+                            for (d in editing_node._def.defaults) {
+                                if (editing_node._def.defaults.hasOwnProperty(d)) {
+                                    var input = $("#node-input-"+d);
+                                    var newValue;
+                                    if (input.attr('type') === "checkbox") {
+                                        newValue = input.prop('checked');
+                                    } else {
+                                        newValue = input.val();
+                                    }
+                                    if (newValue != null) {
+                                        if (d === "outputs" && (newValue.trim() === "" || isNaN(newValue))) {
+                                            continue;
+                                        }
+                                        if (editing_node[d] != newValue) {
+                                            if (editing_node._def.defaults[d].type) {
+                                                if (newValue == "_ADD_") {
+                                                    newValue = "";
+                                                }
+                                                // Change to a related config node
+                                                var configNode = RED.nodes.node(editing_node[d]);
+                                                if (configNode) {
+                                                    var users = configNode.users;
+                                                    users.splice(users.indexOf(editing_node),1);
+                                                }
+                                                configNode = RED.nodes.node(newValue);
+                                                if (configNode) {
+                                                    configNode.users.push(editing_node);
+                                                }
+                                            }
+                                            changes[d] = editing_node[d];
+                                            editing_node[d] = newValue;
+                                            changed = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (editing_node._def.credentials) {
+                            var prefix = 'node-input';
+                            var credDefinition = editing_node._def.credentials;
+                            var credsChanged = updateNodeCredentials(editing_node,credDefinition,prefix);
+                            changed = changed || credsChanged;
+                        }
+
+                        var removedLinks = updateNodeProperties(editing_node);
+                        if (changed) {
+                            var wasChanged = editing_node.changed;
+                            editing_node.changed = true;
+                            RED.nodes.dirty(true);
+
+                            var activeSubflow = RED.nodes.subflow(RED.workspaces.active());
+                            var subflowInstances = null;
+                            if (activeSubflow) {
+                                subflowInstances = [];
+                                RED.nodes.eachNode(function(n) {
+                                    if (n.type == "subflow:"+RED.workspaces.active()) {
+                                        subflowInstances.push({
+                                            id:n.id,
+                                            changed:n.changed
+                                        });
+                                        n.changed = true;
+                                        n.dirty = true;
+                                        updateNodeProperties(n);
+                                    }
+                                });
+                            }
+                            var historyEvent = {
+                                t:'edit',
+                                node:editing_node,
+                                changes:changes,
+                                links:removedLinks,
+                                dirty:wasDirty,
+                                changed:wasChanged
+                            };
+                            if (subflowInstances) {
+                                historyEvent.subflow = {
+                                    instances:subflowInstances
+                                }
+                            }
+                            RED.history.push(historyEvent);
+                        }
+                        editing_node.dirty = true;
+                        validateNode(editing_node);
+                        RED.view.redraw(true);
+                        RED.tray.close();
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                editTrayWidthCache[type] = dimensions.width;
+                if (editing_node && editing_node._def.oneditresize) {
+                    var form = $("#dialog-form");
+                    editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
+                }
+            },
+            open: function(tray) {
+                if (editing_node) {
+                    RED.sidebar.info.refresh(editing_node);
+                }
+                var trayBody = tray.find('.editor-tray-body');
+                RED.keyboard.disable();
+                var dialogForm = $('<form id="dialog-form" class="form-horizontal"></form>').appendTo(trayBody);
+                dialogForm.html($("script[data-template-name='"+type+"']").html());
+                var ns;
+                if (node._def.set.module === "node-red") {
+                    ns = "node-red";
+                } else {
+                    ns = node._def.set.id;
+                }
+                dialogForm.find('[data-i18n]').each(function() {
+                    var current = $(this).attr("data-i18n");
+                    var keys = current.split(";");
+                    for (var i=0;i<keys.length;i++) {
+                        var key = keys[i];
+                        if (key.indexOf(":") === -1) {
+                            var prefix = "";
+                            if (key.indexOf("[")===0) {
+                                var parts = key.split("]");
+                                prefix = parts[0]+"]";
+                                key = parts[1];
+                            }
+                            keys[i] = prefix+ns+":"+key;
+                        }
+                    }
+                    $(this).attr("data-i18n",keys.join(";"));
+                });
+                $('<input type="text" style="display: none;" />').prependTo(dialogForm);
+                prepareEditDialog(node,node._def,"node-input");
+                dialogForm.i18n();
+            },
+            close: function() {
+                RED.keyboard.enable();
+                if (RED.view.state() != RED.state.IMPORT_DRAGGING) {
+                    RED.view.state(RED.state.DEFAULT);
+                }
+                if (editing_node) {
+                    RED.sidebar.info.refresh(editing_node);
+                }
+                RED.workspaces.refresh();
+                editStack.pop();
+            },
+            show: function() {
+                if (editing_node) {
+                    RED.sidebar.info.refresh(editing_node);
+                }
+            }
+        }
+        if (editTrayWidthCache[type]) {
+            trayOptions.width = editTrayWidthCache[type];
+        }
+
+        if (type === 'subflow') {
             var id = editing_node.type.substring(8);
-            var buttons = $( "#dialog" ).dialog("option","buttons");
-            buttons.unshift({
-                class: 'leftButton',
+            trayOptions.buttons.unshift({
+                class: 'leftButton primary',
                 text: RED._("subflow.edit"),
                 click: function() {
                     RED.workspaces.show(id);
                     $("#node-dialog-ok").click();
                 }
             });
-            $( "#dialog" ).dialog("option","buttons",buttons);
         }
-        $("#dialog-form").html($("script[data-template-name='"+type+"']").html());
-        var ns;
-        if (node._def.set.module === "node-red") {
-            ns = "node-red";
-        } else {
-            ns = node._def.set.id;
-        }
-        $("#dialog-form").find('[data-i18n]').each(function() {
-            var current = $(this).attr("data-i18n");
-            var keys = current.split(";");
-            for (var i=0;i<keys.length;i++) {
-                var key = keys[i];
-                if (key.indexOf(":") === -1) {
-                    var prefix = "";
-                    if (key.indexOf("[")===0) {
-                        var parts = key.split("]");
-                        prefix = parts[0]+"]";
-                        key = parts[1];
-                    }
-                    keys[i] = prefix+ns+":"+key;
-                }
-            }
-            $(this).attr("data-i18n",keys.join(";"));
-        });
-        $('<input type="text" style="display: none;" />').appendTo("#dialog-form");
-        prepareEditDialog(node,node._def,"node-input");
-        $("#dialog").i18n();
-        $( "#dialog" ).dialog("option","title","Edit "+type+" node").dialog( "open" );
-    }
 
-    function showEditConfigNodeDialog(name,type,id) {
+        RED.tray.show(trayOptions);
+    }
+    /**
+     * name - name of the property that holds this config node
+     * type - type of config node
+     * id - id of config node to edit. _ADD_ for a new one
+     * prefix - the input prefix of the parent property
+     */
+    function showEditConfigNodeDialog(name,type,id,prefix) {
         var adding = (id == "_ADD_");
         var node_def = RED.nodes.getType(type);
-        editing_config_node = RED.nodes.node(id);
+        var editing_config_node = RED.nodes.node(id);
 
         var ns;
         if (node_def.set.module === "node-red") {
@@ -680,15 +721,13 @@ RED.editor = (function() {
         } else {
             ns = node_def.set.id;
         }
-
         var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
         if (!activeWorkspace) {
             activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
         }
-
         if (editing_config_node == null) {
             editing_config_node = {
-                id: (1+Math.random()*4294967295).toString(16),
+                id: RED.nodes.id(),
                 _def: node_def,
                 type: type,
                 z: activeWorkspace.id,
@@ -701,439 +740,484 @@ RED.editor = (function() {
             }
             editing_config_node["_"] = node_def._;
         }
+        editStack.push(editing_config_node);
 
-        $("#node-config-dialog-edit-form").html($("script[data-template-name='"+type+"']").html());
-
-        $("#dialog-config-form").find('[data-i18n]').each(function() {
-            var current = $(this).attr("data-i18n");
-            if (current.indexOf(":") === -1) {
-                var prefix = "";
-                if (current.indexOf("[")===0) {
-                    var parts = current.split("]");
-                    prefix = parts[0]+"]";
-                    current = parts[1];
+        RED.view.state(RED.state.EDITING);
+        var trayOptions = {
+            title: getEditStackTitle(), //(adding?RED._("editor.addNewConfig", {type:type}):RED._("editor.editConfig", {type:type})),
+            resize: function() {
+                if (editing_config_node && editing_config_node._def.oneditresize) {
+                    var form = $("#node-config-dialog-edit-form");
+                    editing_config_node._def.oneditresize.call(editing_config_node,{width:form.width(),height:form.height()});
                 }
-                $(this).attr("data-i18n",prefix+ns+":"+current);
-            }
-        });
+            },
+            open: function(tray) {
+                var trayHeader = tray.find(".editor-tray-header");
+                var trayBody = tray.find(".editor-tray-body");
+                var trayFooter = tray.find(".editor-tray-footer");
 
+                trayFooter.prepend('<div id="node-config-dialog-user-count"><i class="fa fa-info-circle"></i> <span></span></div>');
+                trayFooter.append('<span id="node-config-dialog-scope-container"><span id="node-config-dialog-scope-warning" data-i18n="[title]editor.errors.scopeChange"><i class="fa fa-warning"></i></span><select id="node-config-dialog-scope"></select></span>');
 
-        prepareEditDialog(editing_config_node,node_def,"node-config-input");
+                RED.keyboard.disable();
 
-        var buttons = $( "#node-config-dialog" ).dialog("option","buttons");
-        if (adding) {
-            if (buttons.length == 3) {
-                buttons = buttons.splice(1);
-            }
-            buttons[0].text = "Add";
-            $("#node-config-dialog-user-count").find("span").html("").parent().hide();
-        } else {
-            if (buttons.length == 2) {
-                buttons.unshift({
-                        class: 'leftButton',
-                        text: RED._("editor.configDelete"),
-                        click: function() {
-                            var configProperty = $(this).dialog('option','node-property');
-                            var configId = $(this).dialog('option','node-id');
-                            var configType = $(this).dialog('option','node-type');
-
-                            var configTypeDef = RED.nodes.getType(configType);
-
-                            if (configTypeDef.ondelete) {
-                                configTypeDef.ondelete.call(editing_config_node);
-                            }
-                            if (configTypeDef.oneditdelete) {
-                                configTypeDef.oneditdelete.call(editing_config_node);
-                            }
-                            var historyEvent = {
-                                t:'delete',
-                                nodes:[editing_config_node],
-                                changes: {},
-                                dirty: RED.nodes.dirty()
-                            }
-                            RED.nodes.remove(configId);
-                            for (var i=0;i<editing_config_node.users.length;i++) {
-                                var user = editing_config_node.users[i];
-                                historyEvent.changes[user.id] = {
-                                    changed: user.changed,
-                                    valid: user.valid
-                                };
-                                for (var d in user._def.defaults) {
-                                    if (user._def.defaults.hasOwnProperty(d) && user[d] == configId) {
-                                        historyEvent.changes[user.id][d] = configId
-                                        user[d] = "";
-                                        user.changed = true;
-                                        user.dirty = true;
-                                    }
-                                }
-                                validateNode(user);
-                            }
-                            updateConfigNodeSelect(configProperty,configType,"");
-                            RED.nodes.dirty(true);
-                            $( this ).dialog( "close" );
-                            RED.view.redraw();
-                            RED.history.push(historyEvent);
+                var dialogForm = $('<form id="node-config-dialog-edit-form" class="form-horizontal"></form>').appendTo(trayBody);
+                dialogForm.html($("script[data-template-name='"+type+"']").html());
+                dialogForm.find('[data-i18n]').each(function() {
+                    var current = $(this).attr("data-i18n");
+                    if (current.indexOf(":") === -1) {
+                        var prefix = "";
+                        if (current.indexOf("[")===0) {
+                            var parts = current.split("]");
+                            prefix = parts[0]+"]";
+                            current = parts[1];
                         }
+                        $(this).attr("data-i18n",prefix+ns+":"+current);
+                    }
                 });
-            }
-            buttons[1].text = "Update";
-            $("#node-config-dialog-user-count").find("span").html(RED._("editor.nodesUse", {count:editing_config_node.users.length})).parent().show();
-        }
-
-        if (editing_config_node._def.exclusive) {
-            $("#node-config-dialog-scope").hide();
-        } else {
-            $("#node-config-dialog-scope").show();
-        }
-        $("#node-config-dialog-scope-warning").hide();
-
-
-        var nodeUserFlows = {};
-        editing_config_node.users.forEach(function(n) {
-            nodeUserFlows[n.z] = true;
-        });
-        var flowCount = Object.keys(nodeUserFlows).length;
-
-        var tabSelect = $("#node-config-dialog-scope").empty();
-        tabSelect.off("change");
-        tabSelect.append('<option value=""'+(!editing_config_node.z?" selected":"")+' data-i18n="sidebar.config.global"></option>');
-        tabSelect.append('<option disabled data-i18n="sidebar.config.flows"></option>');
-        RED.nodes.eachWorkspace(function(ws) {
-            var workspaceLabel = ws.label;
-            if (nodeUserFlows[ws.id]) {
-                workspaceLabel = "* "+workspaceLabel;
-            }
-            tabSelect.append('<option value="'+ws.id+'"'+(ws.id==editing_config_node.z?" selected":"")+'>'+workspaceLabel+'</option>');
-        });
-        tabSelect.append('<option disabled data-i18n="sidebar.config.subflows"></option>');
-        RED.nodes.eachSubflow(function(ws) {
-            var workspaceLabel = ws.name;
-            if (nodeUserFlows[ws.id]) {
-                workspaceLabel = "* "+workspaceLabel;
-            }
-            tabSelect.append('<option value="'+ws.id+'"'+(ws.id==editing_config_node.z?" selected":"")+'>'+workspaceLabel+'</option>');
-        });
-        if (flowCount > 0) {
-            tabSelect.on('change',function() {
-                var newScope = $(this).val();
-                if (newScope === '') {
-                    // global scope - everyone can use it
-                    $("#node-config-dialog-scope-warning").hide();
-                } else if (!nodeUserFlows[newScope] || flowCount > 1) {
-                    // a user will loose access to it
-                    $("#node-config-dialog-scope-warning").show();
+                $('<input type="text" style="display: none;" />').prependTo(dialogForm);
+                prepareEditDialog(editing_config_node,node_def,"node-config-input");
+                if (editing_config_node._def.exclusive) {
+                    $("#node-config-dialog-scope").hide();
                 } else {
-                    $("#node-config-dialog-scope-warning").hide();
+                    $("#node-config-dialog-scope").show();
                 }
-            });
-        }
+                $("#node-config-dialog-scope-warning").hide();
 
-        //tabSelect.append('<option value="'+activeWorkspace.id+'"'+(activeWorkspace.id==configNode.z?" selected":"")+'>'+workspaceLabel+'</option>');
-        tabSelect.i18n();
-
-        $( "#node-config-dialog" ).dialog("option","buttons",buttons);
-
-        $("#node-config-dialog").i18n();
-
-        $( "#node-config-dialog" )
-            .dialog("option","node-adding",adding)
-            .dialog("option","node-property",name)
-            .dialog("option","node-id",editing_config_node.id)
-            .dialog("option","node-type",type)
-            .dialog("option","title",(adding?RED._("editor.addNewConfig", {type:type}):RED._("editor.editConfig", {type:type})))
-            .dialog( "open" );
-    }
-
-    function updateConfigNodeSelect(name,type,value) {
-        var button = $("#node-input-edit-"+name);
-        if (button.length) {
-            if (value) {
-                button.text(RED._("editor.configEdit"));
-            } else {
-                button.text(RED._("editor.configAdd"));
-            }
-            $("#node-input-"+name).val(value);
-        } else {
-
-            var select = $("#node-input-"+name);
-            var node_def = RED.nodes.getType(type);
-            select.children().remove();
-
-            var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
-            if (!activeWorkspace) {
-                activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
-            }
-
-            var configNodes = [];
-
-            RED.nodes.eachConfig(function(config) {
-                if (config.type == type && (!config.z || config.z === activeWorkspace.id)) {
-                    var label = "";
-                    if (typeof node_def.label == "function") {
-                        label = node_def.label.call(config);
-                    } else {
-                        label = node_def.label;
+                var nodeUserFlows = {};
+                editing_config_node.users.forEach(function(n) {
+                    nodeUserFlows[n.z] = true;
+                });
+                var flowCount = Object.keys(nodeUserFlows).length;
+                var tabSelect = $("#node-config-dialog-scope").empty();
+                tabSelect.off("change");
+                tabSelect.append('<option value=""'+(!editing_config_node.z?" selected":"")+' data-i18n="sidebar.config.global"></option>');
+                tabSelect.append('<option disabled data-i18n="sidebar.config.flows"></option>');
+                RED.nodes.eachWorkspace(function(ws) {
+                    var workspaceLabel = ws.label;
+                    if (nodeUserFlows[ws.id]) {
+                        workspaceLabel = "* "+workspaceLabel;
                     }
-                    configNodes.push({id:config.id,label:label});
-                }
-            });
-
-            configNodes.sort(function(A,B) {
-                if (A.label < B.label) {
-                    return -1;
-                } else if (A.label > B.label) {
-                    return 1;
-                }
-                return 0;
-            });
-
-            configNodes.forEach(function(cn) {
-                select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+cn.label+'</option>');
-            });
-
-            select.append('<option value="_ADD_"'+(value===""?" selected":"")+'>'+RED._("editor.addNewType", {type:type})+'</option>');
-            window.setTimeout(function() { select.change();},50);
-        }
-    }
-
-    function createNodeConfigDialog(){
-        $( "#node-config-dialog" ).dialog({
-                modal: true,
-                autoOpen: false,
-                dialogClass: "ui-dialog-no-close",
-                minWidth: 500,
-                width: 'auto',
-                closeOnEscape: false,
-                buttons: [
-                    {
-                        id: "node-config-dialog-ok",
-                        text: RED._("common.label.ok"),
-                        click: function() {
-                            var configProperty = $(this).dialog('option','node-property');
-                            var configId = $(this).dialog('option','node-id');
-                            var configType = $(this).dialog('option','node-type');
-                            var configAdding = $(this).dialog('option','node-adding');
-                            var configTypeDef = RED.nodes.getType(configType);
-                            var d;
-                            var input;
-                            var scope = $("#node-config-dialog-scope").val();
-                            for (d in configTypeDef.defaults) {
-                                if (configTypeDef.defaults.hasOwnProperty(d)) {
-                                    input = $("#node-config-input-"+d);
-                                    if (input.attr('type') === "checkbox") {
-                                      editing_config_node[d] = input.prop('checked');
-                                    } else {
-                                      editing_config_node[d] = input.val();
-                                    }
-                                }
-                            }
-                            editing_config_node.label = configTypeDef.label;
-                            editing_config_node.z = scope;
-
-                            if (scope) {
-                                editing_config_node.users = editing_config_node.users.filter(function(n) {
-                                    var keep = true;
-                                    for (var d in n._def.defaults) {
-                                        if (n._def.defaults.hasOwnProperty(d)) {
-                                            if (n._def.defaults[d].type === editing_config_node.type &&
-                                                n[d] === editing_config_node.id &&
-                                                n.z !== scope) {
-                                                    keep = false;
-                                                    n[d] = null;
-                                                    n.dirty = true;
-                                                    n.changed = true;
-                                                    validateNode(n);
-                                            }
-                                        }
-                                    }
-                                    return keep;
-                                });
-                            }
-
-                            if (configAdding) {
-                                RED.nodes.add(editing_config_node);
-                            }
-
-                            if (configTypeDef.oneditsave) {
-                                configTypeDef.oneditsave.call(editing_config_node);
-                            }
-                            if (configTypeDef.credentials) {
-                                updateNodeCredentials(editing_config_node,configTypeDef.credentials,"node-config-input");
-                            }
-                            validateNode(editing_config_node);
-                            for (var i=0;i<editing_config_node.users.length;i++) {
-                                var user = editing_config_node.users[i];
-                                validateNode(user);
-                            }
-
-                            updateConfigNodeSelect(configProperty,configType,editing_config_node.id);
-
-                            RED.nodes.dirty(true);
-                            RED.view.redraw(true);
-                            $(this).dialog("close");
-
+                    tabSelect.append('<option value="'+ws.id+'"'+(ws.id==editing_config_node.z?" selected":"")+'>'+workspaceLabel+'</option>');
+                });
+                tabSelect.append('<option disabled data-i18n="sidebar.config.subflows"></option>');
+                RED.nodes.eachSubflow(function(ws) {
+                    var workspaceLabel = ws.name;
+                    if (nodeUserFlows[ws.id]) {
+                        workspaceLabel = "* "+workspaceLabel;
+                    }
+                    tabSelect.append('<option value="'+ws.id+'"'+(ws.id==editing_config_node.z?" selected":"")+'>'+workspaceLabel+'</option>');
+                });
+                if (flowCount > 0) {
+                    tabSelect.on('change',function() {
+                        var newScope = $(this).val();
+                        if (newScope === '') {
+                            // global scope - everyone can use it
+                            $("#node-config-dialog-scope-warning").hide();
+                        } else if (!nodeUserFlows[newScope] || flowCount > 1) {
+                            // a user will loose access to it
+                            $("#node-config-dialog-scope-warning").show();
+                        } else {
+                            $("#node-config-dialog-scope-warning").hide();
                         }
-                    },
-                    {
-                        id: "node-config-dialog-cancel",
-                        text: RED._("common.label.cancel"),
-                        click: function() {
-                            var configType = $(this).dialog('option','node-type');
-                            var configId = $(this).dialog('option','node-id');
-                            var configAdding = $(this).dialog('option','node-adding');
-                            var configTypeDef = RED.nodes.getType(configType);
-
-                            if (configTypeDef.oneditcancel) {
-                                // TODO: what to pass as this to call
-                                if (configTypeDef.oneditcancel) {
-                                    var cn = RED.nodes.node(configId);
-                                    if (cn) {
-                                        configTypeDef.oneditcancel.call(cn,false);
-                                    } else {
-                                        configTypeDef.oneditcancel.call({id:configId},true);
-                                    }
-                                }
-                            }
-                            $( this ).dialog( "close" );
-                        }
-                    }
-                ],
-                resize: function(e,ui) {
-                },
-                open: function(e) {
-                    var minWidth = $(this).dialog('option','minWidth');
-                    if ($(this).outerWidth() < minWidth) {
-                        $(this).dialog('option','width',minWidth);
-                    }
-                    if (RED.view.state() != RED.state.EDITING) {
-                        RED.keyboard.disable();
-                    }
-                },
-                close: function(e) {
-                    $(this).dialog('option','width','auto');
-                    $(this).dialog('option','height','auto');
-                    $("#node-config-dialog-edit-form").html("");
-                    if (RED.view.state() != RED.state.EDITING) {
-                        RED.keyboard.enable();
-                    }
-                    RED.workspaces.refresh();
-                },
-                create: function() {
-                    $("#node-config-dialog").parent().find("div.ui-dialog-buttonpane")
-                        .prepend('<div id="node-config-dialog-user-count"><i class="fa fa-info-circle"></i> <span></span></div>');
-
-                    $("#node-config-dialog").parent().find('.ui-dialog-titlebar').append('<span id="node-config-dialog-scope-container"><span id="node-config-dialog-scope-warning" data-i18n="[title]editor.errors.scopeChange"><i class="fa fa-warning"></i></span><select id="node-config-dialog-scope"></select></span>');
-                    $("#node-config-dialog").parent().draggable({
-                        cancel: '.ui-dialog-content, .ui-dialog-titlebar-close, #node-config-dialog-scope-container'
                     });
                 }
-        }).parent().on('keydown', function(evt) {
-            if (evt.keyCode === $.ui.keyCode.ESCAPE && (evt.metaKey || evt.ctrlKey)) {
-                $("#node-config-dialog-cancel").click();
-            } else if (evt.keyCode === $.ui.keyCode.ENTER && (evt.metaKey || evt.ctrlKey)) {
-                $("#node-config-dialog-ok").click();
+                tabSelect.i18n();
+
+                dialogForm.i18n();
+
+                $("#node-config-dialog-user-count").find("span").html(RED._("editor.nodesUse", {count:editing_config_node.users.length})).parent().show();
+
+            },
+            close: function() {
+                if (RED.view.state() != RED.state.EDITING) {
+                    RED.keyboard.enable();
+                }
+                RED.workspaces.refresh();
+                editStack.pop();
+            },
+            show: function() {
+                if (editing_config_node) {
+                    RED.sidebar.info.refresh(editing_config_node);
+                }
             }
-        });
+        }
+        trayOptions.buttons = [
+            {
+                id: "node-config-dialog-cancel",
+                text: RED._("common.label.cancel"),
+                click: function() {
+                    var configType = type;
+                    var configId = editing_config_node.id;
+                    var configAdding = adding;
+                    var configTypeDef = RED.nodes.getType(configType);
+
+                    if (configTypeDef.oneditcancel) {
+                        // TODO: what to pass as this to call
+                        if (configTypeDef.oneditcancel) {
+                            var cn = RED.nodes.node(configId);
+                            if (cn) {
+                                configTypeDef.oneditcancel.call(cn,false);
+                            } else {
+                                configTypeDef.oneditcancel.call({id:configId},true);
+                            }
+                        }
+                    }
+                    RED.tray.close();
+                }
+            },
+            {
+                id: "node-config-dialog-ok",
+                text: adding?RED._("editor.configAdd"):RED._("editor.configUpdate"),
+                class: "primary",
+                click: function() {
+                    var configProperty = name;
+                    var configId = editing_config_node.id;
+                    var configType = type;
+                    var configAdding = adding;
+                    var configTypeDef = RED.nodes.getType(configType);
+                    var d;
+                    var input;
+                    var scope = $("#node-config-dialog-scope").val();
+
+                    if (configTypeDef.oneditsave) {
+                        configTypeDef.oneditsave.call(editing_config_node);
+                    }
+
+                    for (d in configTypeDef.defaults) {
+                        if (configTypeDef.defaults.hasOwnProperty(d)) {
+                            var newValue;
+                            input = $("#node-config-input-"+d);
+                            if (input.attr('type') === "checkbox") {
+                                newValue = input.prop('checked');
+                            } else {
+                                newValue = input.val();
+                            }
+                            if (newValue !== editing_config_node[d]) {
+                                if (editing_config_node._def.defaults[d].type) {
+                                    if (newValue == "_ADD_") {
+                                        newValue = "";
+                                    }
+                                    // Change to a related config node
+                                    var configNode = RED.nodes.node(editing_config_node[d]);
+                                    if (configNode) {
+                                        var users = configNode.users;
+                                        users.splice(users.indexOf(editing_config_node),1);
+                                    }
+                                    configNode = RED.nodes.node(newValue);
+                                    if (configNode) {
+                                        configNode.users.push(editing_config_node);
+                                    }
+                                }
+                                editing_config_node[d] = newValue;
+                            }
+                        }
+                    }
+                    editing_config_node.label = configTypeDef.label;
+                    editing_config_node.z = scope;
+
+                    if (scope) {
+                        // Search for nodes that use this one that are no longer
+                        // in scope, so must be removed
+                        editing_config_node.users = editing_config_node.users.filter(function(n) {
+                            var keep = true;
+                            for (var d in n._def.defaults) {
+                                if (n._def.defaults.hasOwnProperty(d)) {
+                                    if (n._def.defaults[d].type === editing_config_node.type &&
+                                        n[d] === editing_config_node.id &&
+                                        n.z !== scope) {
+                                            keep = false;
+                                            // Remove the reference to this node
+                                            // and revalidate
+                                            n[d] = null;
+                                            n.dirty = true;
+                                            n.changed = true;
+                                            validateNode(n);
+                                    }
+                                }
+                            }
+                            return keep;
+                        });
+                    }
+
+                    if (configAdding) {
+                        RED.nodes.add(editing_config_node);
+                    }
+
+                    if (configTypeDef.credentials) {
+                        updateNodeCredentials(editing_config_node,configTypeDef.credentials,"node-config-input");
+                    }
+                    validateNode(editing_config_node);
+                    var validatedNodes = {};
+                    validatedNodes[editing_config_node.id] = true;
+
+                    var userStack = editing_config_node.users.slice();
+                    while(userStack.length > 0) {
+                        var user = userStack.pop();
+                        if (!validatedNodes[user.id]) {
+                            validatedNodes[user.id] = true;
+                            if (user.users) {
+                                userStack = userStack.concat(user.users);
+                            }
+                            validateNode(user);
+                        }
+                    }
+                    RED.nodes.dirty(true);
+                    RED.view.redraw(true);
+                    RED.tray.close(function() {
+                        updateConfigNodeSelect(configProperty,configType,editing_config_node.id,prefix);
+                    });
+                }
+            }
+        ];
+
+        if (!adding) {
+            trayOptions.buttons.unshift({
+                class: 'leftButton',
+                text: RED._("editor.configDelete"), //'<i class="fa fa-trash"></i>',
+                click: function() {
+                    var configProperty = name;
+                    var configId = editing_config_node.id;
+                    var configType = type;
+                    var configTypeDef = RED.nodes.getType(configType);
+
+                    if (configTypeDef.ondelete) {
+                        configTypeDef.ondelete.call(editing_config_node);
+                    }
+                    if (configTypeDef.oneditdelete) {
+                        configTypeDef.oneditdelete.call(editing_config_node);
+                    }
+                    var historyEvent = {
+                        t:'delete',
+                        nodes:[editing_config_node],
+                        changes: {},
+                        dirty: RED.nodes.dirty()
+                    }
+                    RED.nodes.remove(configId);
+                    for (var i=0;i<editing_config_node.users.length;i++) {
+                        var user = editing_config_node.users[i];
+                        historyEvent.changes[user.id] = {
+                            changed: user.changed,
+                            valid: user.valid
+                        };
+                        for (var d in user._def.defaults) {
+                            if (user._def.defaults.hasOwnProperty(d) && user[d] == configId) {
+                                historyEvent.changes[user.id][d] = configId
+                                user[d] = "";
+                                user.changed = true;
+                                user.dirty = true;
+                            }
+                        }
+                        validateNode(user);
+                    }
+                    RED.nodes.dirty(true);
+                    RED.view.redraw();
+                    RED.history.push(historyEvent);
+                    RED.tray.close(function() {
+                        updateConfigNodeSelect(configProperty,configType,"",prefix);
+                    });
+                }
+            });
+        }
+
+        RED.tray.show(trayOptions);
     }
 
-    function createSubflowDialog(){
-        $( "#subflow-dialog" ).dialog({
-            modal: true,
-            autoOpen: false,
-            dialogClass: "ui-dialog-no-close",
-            closeOnEscape: false,
-            minWidth: 500,
-            width: 'auto',
+
+    function updateConfigNodeSelect(name,type,value,prefix) {
+        // if prefix is null, there is no config select to update
+        if (prefix) {
+            var button = $("#"+prefix+"-edit-"+name);
+            if (button.length) {
+                if (value) {
+                    button.text(RED._("editor.configEdit"));
+                } else {
+                    button.text(RED._("editor.configAdd"));
+                }
+                $("#"+prefix+"-"+name).val(value);
+            } else {
+
+                var select = $("#"+prefix+"-"+name);
+                var node_def = RED.nodes.getType(type);
+                select.children().remove();
+
+                var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
+                if (!activeWorkspace) {
+                    activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
+                }
+
+                var configNodes = [];
+
+                RED.nodes.eachConfig(function(config) {
+                    if (config.type == type && (!config.z || config.z === activeWorkspace.id)) {
+                        var label = "";
+                        if (typeof node_def.label == "function") {
+                            label = node_def.label.call(config);
+                        } else {
+                            label = node_def.label;
+                        }
+                        configNodes.push({id:config.id,label:label});
+                    }
+                });
+
+                configNodes.sort(function(A,B) {
+                    if (A.label < B.label) {
+                        return -1;
+                    } else if (A.label > B.label) {
+                        return 1;
+                    }
+                    return 0;
+                });
+
+                configNodes.forEach(function(cn) {
+                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+cn.label+'</option>');
+                });
+
+                select.append('<option value="_ADD_"'+(value===""?" selected":"")+'>'+RED._("editor.addNewType", {type:type})+'</option>');
+                window.setTimeout(function() { select.change();},50);
+            }
+        }
+    }
+
+    function showEditSubflowDialog(subflow) {
+        var editing_node = subflow;
+        editStack.push(subflow);
+        RED.view.state(RED.state.EDITING);
+        var subflowEditor;
+
+        var trayOptions = {
+            title: getEditStackTitle(),
             buttons: [
                 {
-                    id: "subflow-dialog-ok",
-                    text: RED._("common.label.ok"),
+                    id: "node-dialog-cancel",
+                    text: RED._("common.label.cancel"),
                     click: function() {
-                        if (editing_node) {
-                            var i;
-                            var changes = {};
-                            var changed = false;
-                            var wasDirty = RED.nodes.dirty();
-
-                            var newName = $("#subflow-input-name").val();
-
-                            if (newName != editing_node.name) {
-                                changes['name'] = editing_node.name;
-                                editing_node.name = newName;
-                                changed = true;
-                                $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text(newName);
-                            }
-
-                            var newDescription = subflowEditor.getValue();
-
-                            if (newDescription != editing_node.info) {
-                                changes['info'] = editing_node.info;
-                                editing_node.info = newDescription;
-                                changed = true;
-                            }
-
-                            RED.palette.refresh();
-
-                            if (changed) {
-                                var subflowInstances = [];
-                                RED.nodes.eachNode(function(n) {
-                                    if (n.type == "subflow:"+editing_node.id) {
-                                        subflowInstances.push({
-                                            id:n.id,
-                                            changed:n.changed
-                                        })
-                                        n.changed = true;
-                                        n.dirty = true;
-                                        updateNodeProperties(n);
-                                    }
-                                });
-                                var wasChanged = editing_node.changed;
-                                editing_node.changed = true;
-                                RED.nodes.dirty(true);
-                                var historyEvent = {
-                                    t:'edit',
-                                    node:editing_node,
-                                    changes:changes,
-                                    dirty:wasDirty,
-                                    changed:wasChanged,
-                                    subflow: {
-                                        instances:subflowInstances
-                                    }
-                                };
-
-                                RED.history.push(historyEvent);
-                            }
-                            editing_node.dirty = true;
-                            RED.view.redraw(true);
-                        }
-                        $( this ).dialog( "close" );
+                        RED.tray.close();
                     }
                 },
                 {
-                    id: "subflow-dialog-cancel",
-                    text: RED._("common.label.cancel"),
+                    id: "node-dialog-ok",
+                    class: "primary",
+                    text: RED._("common.label.done"),
                     click: function() {
-                        $( this ).dialog( "close" );
-                        editing_node = null;
+                        var i;
+                        var changes = {};
+                        var changed = false;
+                        var wasDirty = RED.nodes.dirty();
+
+                        var newName = $("#subflow-input-name").val();
+
+                        if (newName != editing_node.name) {
+                            changes['name'] = editing_node.name;
+                            editing_node.name = newName;
+                            changed = true;
+                            $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text(newName);
+                        }
+
+                        var newDescription = subflowEditor.getValue();
+
+                        if (newDescription != editing_node.info) {
+                            changes['info'] = editing_node.info;
+                            editing_node.info = newDescription;
+                            changed = true;
+                        }
+
+                        RED.palette.refresh();
+
+                        if (changed) {
+                            var subflowInstances = [];
+                            RED.nodes.eachNode(function(n) {
+                                if (n.type == "subflow:"+editing_node.id) {
+                                    subflowInstances.push({
+                                        id:n.id,
+                                        changed:n.changed
+                                    })
+                                    n.changed = true;
+                                    n.dirty = true;
+                                    updateNodeProperties(n);
+                                }
+                            });
+                            var wasChanged = editing_node.changed;
+                            editing_node.changed = true;
+                            RED.nodes.dirty(true);
+                            var historyEvent = {
+                                t:'edit',
+                                node:editing_node,
+                                changes:changes,
+                                dirty:wasDirty,
+                                changed:wasChanged,
+                                subflow: {
+                                    instances:subflowInstances
+                                }
+                            };
+
+                            RED.history.push(historyEvent);
+                        }
+                        editing_node.dirty = true;
+                        RED.tray.close();
                     }
                 }
             ],
-            create: function(e) {
-                $("#subflow-dialog form" ).submit(function(e) { e.preventDefault();});
+            resize: function() {
+                var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+                var editorRow = $("#dialog-form>div.node-text-editor-row");
+                var height = $("#dialog-form").height();
+                for (var i=0;i<rows.size();i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                height -= (parseInt($("#dialog-form").css("marginTop"))+parseInt($("#dialog-form").css("marginBottom")));
+                $(".node-text-editor").css("height",height+"px");
+                subflowEditor.resize();
+            },
+            open: function(tray) {
+                if (editing_node) {
+                    RED.sidebar.info.refresh(editing_node);
+                }
+                var trayBody = tray.find('.editor-tray-body');
+                RED.keyboard.disable();
+                var dialogForm = $('<form id="dialog-form" class="form-horizontal"></form>').appendTo(trayBody);
+                dialogForm.html($("script[data-template-name='subflow-template']").html());
+                var ns = "node-red";
+                dialogForm.find('[data-i18n]').each(function() {
+                    var current = $(this).attr("data-i18n");
+                    var keys = current.split(";");
+                    for (var i=0;i<keys.length;i++) {
+                        var key = keys[i];
+                        if (key.indexOf(":") === -1) {
+                            var prefix = "";
+                            if (key.indexOf("[")===0) {
+                                var parts = key.split("]");
+                                prefix = parts[0]+"]";
+                                key = parts[1];
+                            }
+                            keys[i] = prefix+ns+":"+key;
+                        }
+                    }
+                    $(this).attr("data-i18n",keys.join(";"));
+                });
+                $('<input type="text" style="display: none;" />').prependTo(dialogForm);
+
+                dialogForm.submit(function(e) { e.preventDefault();});
                 subflowEditor = RED.editor.createEditor({
                     id: 'subflow-input-info-editor',
                     mode: 'ace/mode/markdown',
                     value: ""
                 });
+
+                $("#subflow-input-name").val(subflow.name);
+                subflowEditor.getSession().setValue(subflow.info||"",-1);
+                var userCount = 0;
+                var subflowType = "subflow:"+editing_node.id;
+
+                RED.nodes.eachNode(function(n) {
+                    if (n.type === subflowType) {
+                        userCount++;
+                    }
+                });
+                $("#subflow-dialog-user-count").html(RED._("subflow.subflowInstances", {count:userCount})).show();
+                dialogForm.i18n();
             },
-            open: function(e) {
-                RED.keyboard.disable();
-                var minWidth = $(this).dialog('option','minWidth');
-                if ($(this).outerWidth() < minWidth) {
-                    $(this).dialog('option','width',minWidth);
-                }
-            },
-            close: function(e) {
+            close: function() {
                 RED.keyboard.enable();
 
                 if (RED.view.state() != RED.state.IMPORT_DRAGGING) {
@@ -1141,55 +1225,29 @@ RED.editor = (function() {
                 }
                 RED.sidebar.info.refresh(editing_node);
                 RED.workspaces.refresh();
+                editStack.pop();
                 editing_node = null;
             },
-            resize: function(e) {
-                var rows = $("#subflow-dialog>form>div:not(.node-text-editor-row)");
-                var editorRow = $("#subflow-dialog>form>div.node-text-editor-row");
-                var height = $("#subflow-dialog").height();
-                for (var i=0;i<rows.size();i++) {
-                    height -= $(rows[i]).outerHeight(true);
-                }
-                height -= (parseInt($("#subflow-dialog>form").css("marginTop"))+parseInt($("#subflow-dialog>form").css("marginBottom")));
-                $(".node-text-editor").css("height",height+"px");
-                subflowEditor.resize();
+            show: function() {
             }
-        }).parent().on('keydown', function(evt) {
-            if (evt.keyCode === $.ui.keyCode.ESCAPE && (evt.metaKey || evt.ctrlKey)) {
-                $("#subflow-dialog-cancel").click();
-            } else if (evt.keyCode === $.ui.keyCode.ENTER && (evt.metaKey || evt.ctrlKey)) {
-                $("#subflow-dialog-ok").click();
-            }
-        });
-    }
-
-
-    function showEditSubflowDialog(subflow) {
-        editing_node = subflow;
-        RED.view.state(RED.state.EDITING);
-
-        $("#subflow-input-name").val(subflow.name);
-        subflowEditor.getSession().setValue(subflow.info,-1);
-        var userCount = 0;
-        var subflowType = "subflow:"+editing_node.id;
-
-        RED.nodes.eachNode(function(n) {
-            if (n.type === subflowType) {
-                userCount++;
-            }
-        });
-
-        $("#subflow-dialog-user-count").html(RED._("subflow.subflowInstances", {count:userCount})).show();
-        $("#subflow-dialog").dialog("option","title",RED._("subflow.editSubflow",{name:subflow.name})).dialog( "open" );
+        }
+        RED.tray.show(trayOptions);
     }
 
 
 
     return {
-        init: function(){
-            createDialog();
-            createNodeConfigDialog();
-            createSubflowDialog();
+        init: function() {
+            RED.tray.init();
+            $(window).on('keydown', function(evt) {
+                if (evt.keyCode === $.ui.keyCode.ESCAPE && (evt.metaKey || evt.ctrlKey)) {
+                    $("#node-dialog-cancel").click();
+                    $("#node-config-dialog-cancel").click();
+                } else if (evt.keyCode === $.ui.keyCode.ENTER && (evt.metaKey || evt.ctrlKey)) {
+                    $("#node-dialog-ok").click();
+                    $("#node-config-dialog-ok").click();
+                }
+            });
         },
         edit: showEditDialog,
         editConfig: showEditConfigNodeDialog,

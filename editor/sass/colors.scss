@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+$background-color: #f3f3f3;
+
 $form-placeholder-color: #bbbbbb;
 $form-text-color: #444;
 $form-input-focus-color:  rgba(85,150,230,0.8);
@@ -45,6 +47,13 @@ $workspace-button-color-hover: #666;
 $workspace-button-color-active: #666;
 $workspace-button-color-selected: #AAA;
 
+$workspace-button-color-focus-outline: rgba(85,150,230,0.2);
+
 $typedInput-button-background: #efefef;
 $typedInput-button-background-hover: #ddd;
 $typedInput-button-background-active: #e3e3e3;
+
+$editor-button-color-primary: #666;
+$editor-button-color-secondary: #999;
+
+$shade-color: rgba(220,220,220,0.5);

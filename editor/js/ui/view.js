@@ -334,7 +334,7 @@ RED.view = (function() {
                     }
                 }
 
-                var nn = { id:(1+Math.random()*4294967295).toString(16),z:RED.workspaces.active()};
+                var nn = { id:RED.nodes.id(),z:RED.workspaces.active()};
 
                 nn.type = selected_tool;
                 nn._def = RED.nodes.getType(nn.type);

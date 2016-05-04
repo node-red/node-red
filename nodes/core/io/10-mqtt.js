@@ -114,8 +114,18 @@ module.exports = function(RED) {
             this.options.protocolId = 'MQIsdp';
             this.options.protocolVersion = 3;
         }
-
-        this.options.rejectUnauthorized = (this.verifyservercert == "true" || this.verifyservercert === true)
+        if (this.usetls && n.tls) {
+            var tlsNode = RED.nodes.getNode(n.tls);
+            if (tlsNode) {
+                tlsNode.addTLSOptions(this.options);
+            }
+        }
+        // If there's no rejectUnauthorized already, then this could be an
+        // old config where this option was provided on the broker node and
+        // not the tls node
+        if (typeof this.options.rejectUnauthorized === 'undefined') {
+            this.options.rejectUnauthorized = (this.verifyservercert == "true" || this.verifyservercert === true);
+        }
 
         if (n.willTopic) {
             this.options.will = {
@@ -284,6 +294,9 @@ module.exports = function(RED) {
                     done();
                 });
                 this.client.end();
+            } if (this.connecting) {
+                node.client.end();
+                done();
             } else {
                 done();
             }

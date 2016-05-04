@@ -3,9 +3,14 @@
         "label": {
             "name": "Name",
             "ok": "Ok",
+            "done":"Done",
             "cancel": "Cancel",
             "delete": "Delete",
-            "close": "Close"
+            "close": "Close",
+            "load": "Load",
+            "save": "Save",
+            "import": "Import",
+            "export": "Export"
         }
     },
     "workspace": {
@@ -105,10 +110,10 @@
         }
     },
     "subflow": {
-        "editSubflow": "Edit flow __name__",
-        "edit": "Edit flow",
-        "subflowInstances": "There is __count__ instance of this subflow",
-        "subflowInstances_plural": "There are __count__ instances of this subflow",
+        "editSubflow": "Edit flow template: __name__",
+        "edit": "Edit flow template",
+        "subflowInstances": "There is __count__ instance of this subflow template",
+        "subflowInstances_plural": "There are __count__ instances of this subflow template",
         "editSubflowProperties": "edit properties",
         "input": "inputs:",
         "output": "outputs:",
@@ -121,12 +126,14 @@
         }
     },
     "editor": {
-        "configEdit": "edit",
-        "configAdd": "add",
+        "configEdit": "Edit",
+        "configAdd": "Add",
+        "configUpdate": "Update",
         "configDelete": "Delete",
         "nodesUse": "__count__ node uses this config",
         "nodesUse_plural": "__count__ nodes use this config",
         "addNewConfig": "Add new __type__ config node",
+        "editNode": "Edit __type__ node",
         "editConfig": "Edit __type__ config node",
         "addNewType": "Add new __type__...",
         "errors": {
@@ -193,7 +200,7 @@
     },
     "sidebar": {
         "info": {
-            "name": "Information",
+            "name": "Node information",
             "label": "info",
             "node": "Node",
             "type": "Type",

@@ -308,7 +308,7 @@ describe('flows/util', function() {
             diffResult.linked.sort().should.eql(["3"]);
         });
 
-        it('identifies config nodes changes', function() {
+        it('identifies config nodes changes, node->config', function() {
             var config = [
                 {id:"1",type:"test",foo:"configNode",wires:[["2"]]},
                 {id:"2",type:"test",bar:"b",wires:[["3"]]},
@@ -329,7 +329,30 @@ describe('flows/util', function() {
             diffResult.removed.should.have.length(0);
             diffResult.rewired.should.have.length(0);
             diffResult.linked.sort().should.eql(["2","3"]);
+        });
 
+        it('identifies config nodes changes, node->config->config', function() {
+            var config = [
+                {id:"1",type:"test",foo:"configNode1",wires:[["2"]]},
+                {id:"2",type:"test",bar:"b",wires:[["3"]]},
+                {id:"3",type:"test",foo:"a",wires:[]},
+                {id:"configNode1",foo:"configNode2",type:"testConfig"},
+                {id:"configNode2",type:"testConfig"}
+            ];
+            var newConfig = clone(config);
+            newConfig[4].foo = "bar";
+
+            var originalConfig = flowUtil.parseConfig(config);
+            var changedConfig = flowUtil.parseConfig(newConfig);
+
+            originalConfig.missingTypes.should.have.length(0);
+
+            var diffResult = flowUtil.diffConfigs(originalConfig,changedConfig);
+            diffResult.added.should.have.length(0);
+            diffResult.changed.sort().should.eql(["1","configNode1","configNode2"]);
+            diffResult.removed.should.have.length(0);
+            diffResult.rewired.should.have.length(0);
+            diffResult.linked.sort().should.eql(["2","3"]);
         });
 
         it('marks a parent subflow as changed for an internal property change', function() {
