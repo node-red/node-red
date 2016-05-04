@@ -102,6 +102,7 @@ module.exports = {
                 }
             }
         });
+        var addedTabs = {};
         config.forEach(function(n) {
             if (n.type !== 'subflow' && n.type !== 'tab') {
                 for (var prop in n) {
@@ -110,9 +111,25 @@ module.exports = {
                         flow.configs[n[prop]]._users.push(n.id)
                     }
                 }
+                if (n.z && !flow.subflows[n.z]) {
+
+                    if (!flow.flows[n.z]) {
+                        flow.flows[n.z] = {type:'tab',id:n.z};
+                        flow.flows[n.z].subflows = {};
+                        flow.flows[n.z].configs = {};
+                        flow.flows[n.z].nodes = {};
+                        addedTabs[n.z] = flow.flows[n.z];
+                    }
+                    if (addedTabs[n.z]) {
+                        if (n.hasOwnProperty('x') && n.hasOwnProperty('y')) {
+                            addedTabs[n.z].nodes[n.id] = n;
+                        } else {
+                            addedTabs[n.z].configs[n.id] = n;
+                        }
+                    }
+                }
             }
         });
-
         return flow;
     },
 
