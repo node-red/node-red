@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,6 +113,11 @@ RED.workspaces = (function() {
                 RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() == 1);
                 RED.menu.removeItem("menu-item-workspace-menu-"+tab.id.replace(".","-"));
             },
+            onreorder: function(oldOrder, newOrder) {
+                RED.history.push({t:'reorder',order:oldOrder,dirty:RED.nodes.dirty()});
+                RED.nodes.dirty(true);
+                setWorkspaceOrder(newOrder);
+            },
             minimumActiveTabWidth: 150
         });
 
@@ -218,11 +223,18 @@ RED.workspaces = (function() {
         }
     }
 
+    function setWorkspaceOrder(order) {
+        RED.nodes.setWorkspaceOrder(order.filter(function(id) {
+            return RED.nodes.workspace(id) !== undefined;
+        }));
+        workspace_tabs.order(order);
+    }
+
     return {
         init: init,
         add: addWorkspace,
         remove: removeWorkspace,
-
+        order: setWorkspaceOrder,
         edit: function(id) {
             showRenameWorkspaceDialog(id||activeWorkspace);
         },

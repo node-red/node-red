@@ -21,6 +21,7 @@ RED.nodes = (function() {
     var links = [];
     var defaultWorkspace;
     var workspaces = {};
+    var workspacesOrder =[];
     var subflows = {};
 
     var dirty = false;
@@ -271,12 +272,15 @@ RED.nodes = (function() {
 
     function addWorkspace(ws) {
         workspaces[ws.id] = ws;
+        workspacesOrder.push(ws.id);
     }
     function getWorkspace(id) {
         return workspaces[id];
     }
     function removeWorkspace(id) {
         delete workspaces[id];
+        workspacesOrder.splice(workspacesOrder.indexOf(id),1);
+
         var removedNodes = [];
         var removedLinks = [];
         var n;
@@ -539,11 +543,9 @@ RED.nodes = (function() {
     function createCompleteNodeSet() {
         var nns = [];
         var i;
-        for (i in workspaces) {
-            if (workspaces.hasOwnProperty(i)) {
-                if (workspaces[i].type == "tab") {
-                    nns.push(workspaces[i]);
-                }
+        for (i=0;i<workspacesOrder.length;i++) {
+            if (workspaces[workspacesOrder[i]].type == "tab") {
+                nns.push(workspaces[workspacesOrder[i]]);
             }
         }
         for (i in subflows) {
@@ -987,6 +989,8 @@ RED.nodes = (function() {
 
         addWorkspace: addWorkspace,
         removeWorkspace: removeWorkspace,
+        getWorkspaceOrder: function() { return workspacesOrder },
+        setWorkspaceOrder: function(order) { workspacesOrder = order; },
         workspace: getWorkspace,
 
         addSubflow: addSubflow,
@@ -1019,10 +1023,8 @@ RED.nodes = (function() {
             }
         },
         eachWorkspace: function(cb) {
-            for (var id in workspaces) {
-                if (workspaces.hasOwnProperty(id)) {
-                    cb(workspaces[id]);
-                }
+            for (var i=0;i<workspacesOrder.length;i++) {
+                cb(workspaces[workspacesOrder[i]]);
             }
         },
 

@@ -273,6 +273,10 @@ RED.history = (function() {
                             RED.nodes.addLink(ev.removedLinks[i]);
                         }
                     }
+                } else if (ev.t == "reorder") {
+                    if (ev.order) {
+                        RED.workspaces.order(ev.order);
+                    }
                 }
                 Object.keys(modifiedTabs).forEach(function(id) {
                     var subflow = RED.nodes.subflow(id);
