@@ -29,8 +29,9 @@ RED.format = (function() {
 			this.inPoints = false;
 			var prop = "";
 			for (prop in obj) {
-				if (obj.hasOwnProperty(prop))
+				if (obj.hasOwnProperty(prop)) {
 					this[prop] = obj[prop];
+                }
 			}
 		};
 		return TextSegment;
@@ -78,7 +79,9 @@ RED.format = (function() {
 		function getBounds(segment, src) {
 			var bounds = {};
 			for (var prop in src) {
-				bounds[prop] = src[prop];
+                if (src.hasOwnProperty(prop)) {
+                    bounds[prop] = src[prop];
+                }
 			}
 			var content = segment.content;
 			var usePos = bounds.usePos && bounds.startPos < content.length;
@@ -236,7 +239,9 @@ RED.format = (function() {
 				}
 				var hArgs = {};
 				for (var prop in args) {
-					hArgs[prop] = args[prop];
+                    if (args.hasOwnProperty(prop)) {
+                        hArgs[prop] = args[prop];
+                    }
 				}
 				for (var i =  0; i < cases.length; i++) {
 					if (!cases[i].handler || typeof(cases[i].handler.handle) !== "function") {
@@ -944,7 +949,9 @@ RED.format = (function() {
 				var prop = "";
 				var sArgs = Array.isArray(args)? args[0] : args;
 				for (prop in sArgs) {
-					hArgs[prop] = sArgs[prop];
+                    if (sArgs.hasOwnProperty(prop)) {
+                        hArgs[prop] = sArgs[prop];
+                    }
 				}
 				hArgs.guiDir = isRtl ? "rtl" : "ltr";
 				hArgs.dir = hArgs.dir ? hArgs.dir : hArgs.guiDir;
@@ -967,19 +974,19 @@ RED.format = (function() {
 				return "rtl";
 			}
 			return "ltr";
-		};
+		}
 		
 		function checkParameters(obj) {
-			if (obj.msgDir.length == 0) {
+			if (obj.msgDir.length === 0) {
 				obj.msgDir = getDirectionOfLanguage(obj.msgLang);
 			}
 			obj.msgDir = obj.msgDir !== "ltr" && obj.msgDir !== "rtl" && obj.msgDir != "auto"? "ltr" : obj.msgDir;
-			if (obj.guiDir.length == 0) {
+			if (obj.guiDir.length === 0) {
 				obj.guiDir = obj.msgDir;
 			}
 			obj.guiDir = obj.guiDir !== "rtl"? "ltr" : "rtl";
-			if (obj.phDir.length == 0) {
-				obj.phDir = obj.phLang.length == 0? obj.msgDir : getDirectionOfLanguage(obj.phLang);
+			if (obj.phDir.length === 0) {
+				obj.phDir = obj.phLang.length === 0? obj.msgDir : getDirectionOfLanguage(obj.phLang);
 			}
 			obj.phDir = obj.phDir !== "ltr" && obj.phDir !== "rtl" && obj.phDir != "auto"? "ltr" : obj.phDir;
 			if (typeof (obj.phPacking) === "string") {
@@ -988,11 +995,11 @@ RED.format = (function() {
 			if (obj.phPacking.length < 2) {
 				obj.phPacking = ["{","}"];
 			}
-		};
+		}
 		
 		return {
 			setDefaults: function (args) {
-				for (prop in args) {
+				for (var prop in args) {
 					if (params.hasOwnProperty(prop)) {
 						params[prop] = args[prop];
 					}
@@ -1061,11 +1068,11 @@ RED.format = (function() {
 							if (!arg.hasOwnProperty("text")) {
 								tArgs[tArgs.length-1].text = "{???}";
 							}
-							if (!arg.hasOwnProperty("dir") || arg.dir.length == 0) {
+							if (!arg.hasOwnProperty("dir") || arg.dir.length === 0) {
 								tArgs[tArgs.length-1].dir = params.phDir;
 							}
-							if (!arg.hasOwnProperty("stt") || (typeof (arg.stt) === "string" && arg.stt.length == 0) || 
-								(typeof (arg.stt) === "object" && Object.keys(arg.stt).length == 0)) {
+							if (!arg.hasOwnProperty("stt") || (typeof (arg.stt) === "string" && arg.stt.length === 0) || 
+								(typeof (arg.stt) === "object" && Object.keys(arg.stt).length === 0)) {
 								tArgs[tArgs.length-1].stt = params.phStt; 
 							}
 						}
@@ -1092,7 +1099,7 @@ RED.format = (function() {
 					}
 					else {
 						var ind = parseInt(t.text.substring(spLength, t.text.length - epLength));
-						if (ind == NaN || ind >= tArgs.length) {
+						if (isNaN(ind) || ind >= tArgs.length) {
 							segments.push(new TextSegment({content: t.text, textDirection: params.msgDir}));
 							continue;
 						}
@@ -1158,8 +1165,9 @@ RED.format = (function() {
 	
 	function isInputEventSupported(element) {
 		var agent = window.navigator.userAgent;
-		if (agent.indexOf("MSIE") >=0 || agent.indexOf("Trident") >=0 || agent.indexOf("Edge") >=0)
+		if (agent.indexOf("MSIE") >=0 || agent.indexOf("Trident") >=0 || agent.indexOf("Edge") >=0) {
 			return false;
+        }
 	    var checked = document.createElement(element.tagName);
 	    checked.contentEditable = true;
 	    var isSupported = ("oninput" in checked);
@@ -1173,8 +1181,9 @@ RED.format = (function() {
 	
 	function attachElement(element, type, args, isRtl, locale) {        
 		//if (!element || element.nodeType != 1 || !element.isContentEditable)
-        if (!element || element.nodeType != 1)
+        if (!element || element.nodeType != 1) {
 			return false;
+        }
 		if (!event) {
 			event = document.createEvent('Event');
 			event.initEvent('TF', true, true);
@@ -1216,8 +1225,9 @@ RED.format = (function() {
 	}
 	
 	function detachElement(element) {
-		if (!element || element.nodeType != 1)
+		if (!element || element.nodeType != 1) {
 			return;
+        }
 		element.removeAttribute("data-tf-type");
 		element.removeAttribute("data-tf-args");
 		element.removeAttribute("data-tf-dir");
@@ -1227,7 +1237,7 @@ RED.format = (function() {
 	
 	function displayWithStructure(element) {
 		var txt = element.textContent || "";
-		if (txt.length == 0) {
+		if (txt.length === 0) {
 			element.dispatchEvent(event);
 			return;
 		}        
@@ -1272,8 +1282,9 @@ RED.format = (function() {
 				node = parent.firstChild;
 				continue;
 			}
-			else
+			else {
 				node = node.nextSibling;
+            }
 			while (!node) {
 				if (parent === element) {
 					inEnd = true;
@@ -1282,8 +1293,9 @@ RED.format = (function() {
 				node = parent.nextSibling;
 				parent = parent.parentNode;
 			}
-			if (inEnd)
+			if (inEnd) {
 				break;
+            }
 		}
 		
 		selection.addRange(range);
