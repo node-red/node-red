@@ -28,7 +28,7 @@
     position:absolute;
     margin: 0;
     top: 0;
-    min-width: 500px;
+    //min-width: 500px;
     width: auto;
     right: -1000px;
     bottom: 0;
@@ -40,12 +40,13 @@
 .editor-tray.open {
     right: 0;
 }
-.editor-tray-body {
-    width: auto;
-    padding: 20px;
-    min-width: 500px;
+.editor-tray-body-wrapper {
+    width: 100%;
     box-sizing: border-box;
-    overflow-y: scroll;
+    overflow: auto;
+}
+.editor-tray-body {
+    margin: 20px;
 }
 .editor-tray-header {
     @include disable-selection;
@@ -68,7 +69,7 @@
 
 .editor-tray-toolbar {
     text-align: right;
-    padding: 8px;
+    padding: 6px;
 
     button {
         @include workspace-button;

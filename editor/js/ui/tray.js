@@ -16,6 +16,7 @@
 RED.tray = (function() {
 
     var stack = [];
+    var editorStack = $("#editor-stack");
 
     function resize() {
 
@@ -23,7 +24,8 @@ RED.tray = (function() {
     function showTray(options) {
         var el = $('<div class="editor-tray"></div>');
         var header = $('<div class="editor-tray-header"></div>').appendTo(el);
-        var body = $('<div class="editor-tray-body"></div>').appendTo(el);
+        var bodyWrapper = $('<div class="editor-tray-body-wrapper"></div>').appendTo(el);
+        var body = $('<div class="editor-tray-body"></div>').appendTo(bodyWrapper);
         var footer = $('<div class="editor-tray-footer"></div>').appendTo(el);
         var resizer = $('<div class="editor-tray-resize-handle"></div>').appendTo(el);
         // var growButton = $('<a class="editor-tray-resize-button" style="cursor: w-resize;"><i class="fa fa-angle-left"></i></a>').appendTo(resizer);
@@ -51,7 +53,7 @@ RED.tray = (function() {
                 }
             }
         }
-        el.appendTo("#editor-stack");
+        el.appendTo(editorStack);
         var tray = {
             tray: el,
             header: header,
@@ -68,8 +70,12 @@ RED.tray = (function() {
                     el.width('auto');
                 },
                 drag: function(event,ui) {
-                    if (ui.position.left > -tray.preferredWidth-1) {
-                        ui.position.left = -tray.preferredWidth-1;
+
+                    var absolutePosition = editorStack.position().left+ui.position.left
+                    if (absolutePosition < 7) {
+                        ui.position.left += 7-absolutePosition;
+                    } else if (ui.position.left > -tray.preferredWidth-1) {
+                        ui.position.left = -Math.min(editorStack.position().left-7,tray.preferredWidth-1);
                     } else if (tray.options.resize) {
                         setTimeout(function() {
                             tray.options.resize({width: -ui.position.left});
@@ -94,28 +100,42 @@ RED.tray = (function() {
         $("#header-shade").show();
         $("#editor-shade").show();
         RED.sidebar.config.disable();
+console.log("init width",el.width())
+        tray.preferredWidth = Math.max(el.width(),500);
+        body.css({"minWidth":tray.preferredWidth-40});
 
-        tray.preferredWidth = el.width();
         if (options.width) {
             if (options.width > $("#editor-stack").position().left-8) {
                 options.width = $("#editor-stack").position().left-8;
             }
             el.width(options.width);
+        } else {
+            el.width(tray.preferredWidth);
         }
+
+        console.log("preferred width",tray.preferredWidth)
+
+
         tray.width = el.width();
+        if (tray.width > $("#editor-stack").position().left-8) {
+            tray.width = Math.max(0/*tray.preferredWidth*/,$("#editor-stack").position().left-8);
+            console.log("setting width on create",tray.width);
+            el.width(tray.width);
+        }
+
+        // tray.body.parent().width(Math.min($("#editor-stack").position().left-8,tray.width));
+
         el.css({
             right: -(el.width()+10)+"px",
             transition: "right 0.2s ease"
         });
         $("#workspace").scrollLeft(0);
-
-        var trayHeight = el.height()-header.outerHeight()-footer.outerHeight();
-        body.height(trayHeight-40);
+        handleWindowResize();
 
         setTimeout(function() {
             setTimeout(function() {
                 if (!options.width) {
-                    el.width(tray.preferredWidth);
+                    el.width(Math.min(tray.preferredWidth,$("#editor-stack").position().left-8));
                 }
                 if (options.resize) {
                     options.resize({width:el.width()});
@@ -156,10 +176,14 @@ RED.tray = (function() {
             var tray = stack[stack.length-1];
             var trayHeight = tray.tray.height()-tray.header.outerHeight()-tray.footer.outerHeight();
             tray.body.height(trayHeight-40);
-
             if (tray.width > $("#editor-stack").position().left-8) {
-                tray.width = Math.max(tray.preferredWidth,$("#editor-stack").position().left-8);
+                tray.width = $("#editor-stack").position().left-8;
                 tray.tray.width(tray.width);
+                // tray.body.parent().width(tray.width);
+            } else if (tray.width < tray.preferredWidth) {
+                tray.width = Math.min($("#editor-stack").position().left-8,tray.preferredWidth);
+                tray.tray.width(tray.width);
+                // tray.body.parent().width(tray.width);
             }
             if (tray.options.resize) {
                 tray.options.resize({width:tray.width});
