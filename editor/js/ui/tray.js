@@ -100,7 +100,6 @@ RED.tray = (function() {
         $("#header-shade").show();
         $("#editor-shade").show();
         RED.sidebar.config.disable();
-console.log("init width",el.width())
         tray.preferredWidth = Math.max(el.width(),500);
         body.css({"minWidth":tray.preferredWidth-40});
 
@@ -113,13 +112,9 @@ console.log("init width",el.width())
             el.width(tray.preferredWidth);
         }
 
-        console.log("preferred width",tray.preferredWidth)
-
-
         tray.width = el.width();
         if (tray.width > $("#editor-stack").position().left-8) {
             tray.width = Math.max(0/*tray.preferredWidth*/,$("#editor-stack").position().left-8);
-            console.log("setting width on create",tray.width);
             el.width(tray.width);
         }
 
