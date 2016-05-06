@@ -102,21 +102,25 @@ function scanDirForNodesModules(dir,moduleName) {
         var files = fs.readdirSync(dir);
         for (var i=0;i<files.length;i++) {
             var fn = files[i];
-            if (!isExcluded(fn) && (!moduleName || fn == moduleName)) {
-                var pkgfn = path.join(dir,fn,"package.json");
-                try {
-                    var pkg = require(pkgfn);
-                    if (pkg['node-red']) {
-                        var moduleDir = path.join(dir,fn);
-                        results.push({dir:moduleDir,package:pkg});
+            if (/^@/.test(fn)) {
+                results = results.concat(scanDirForNodesModules(path.join(dir,fn),moduleName));
+            } else {
+                if (!isExcluded(fn) && (!moduleName || fn == moduleName)) {
+                    var pkgfn = path.join(dir,fn,"package.json");
+                    try {
+                        var pkg = require(pkgfn);
+                        if (pkg['node-red']) {
+                            var moduleDir = path.join(dir,fn);
+                            results.push({dir:moduleDir,package:pkg});
+                        }
+                    } catch(err) {
+                        if (err.code != "MODULE_NOT_FOUND") {
+                            // TODO: handle unexpected error
+                        }
                     }
-                } catch(err) {
-                    if (err.code != "MODULE_NOT_FOUND") {
-                        // TODO: handle unexpected error
+                    if (fn == moduleName) {
+                        break;
                     }
-                }
-                if (fn == moduleName) {
-                    break;
                 }
             }
         }
