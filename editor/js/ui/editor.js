@@ -639,7 +639,6 @@ RED.editor = (function() {
                     RED.sidebar.info.refresh(editing_node);
                 }
                 var trayBody = tray.find('.editor-tray-body');
-                RED.keyboard.disable();
                 var dialogForm = $('<form id="dialog-form" class="form-horizontal"></form>').appendTo(trayBody);
                 dialogForm.html($("script[data-template-name='"+type+"']").html());
                 var ns;
@@ -670,7 +669,6 @@ RED.editor = (function() {
                 dialogForm.i18n();
             },
             close: function() {
-                RED.keyboard.enable();
                 if (RED.view.state() != RED.state.IMPORT_DRAGGING) {
                     RED.view.state(RED.state.DEFAULT);
                 }
@@ -759,8 +757,6 @@ RED.editor = (function() {
                 trayFooter.prepend('<div id="node-config-dialog-user-count"><i class="fa fa-info-circle"></i> <span></span></div>');
                 trayFooter.append('<span id="node-config-dialog-scope-container"><span id="node-config-dialog-scope-warning" data-i18n="[title]editor.errors.scopeChange"><i class="fa fa-warning"></i></span><select id="node-config-dialog-scope"></select></span>');
 
-                RED.keyboard.disable();
-
                 var dialogForm = $('<form id="node-config-dialog-edit-form" class="form-horizontal"></form>').appendTo(trayBody);
                 dialogForm.html($("script[data-template-name='"+type+"']").html());
                 dialogForm.find('[data-i18n]').each(function() {
@@ -830,9 +826,6 @@ RED.editor = (function() {
 
             },
             close: function() {
-                if (RED.view.state() != RED.state.EDITING) {
-                    RED.keyboard.enable();
-                }
                 RED.workspaces.refresh();
                 editStack.pop();
             },
@@ -1174,7 +1167,6 @@ RED.editor = (function() {
                     RED.sidebar.info.refresh(editing_node);
                 }
                 var trayBody = tray.find('.editor-tray-body');
-                RED.keyboard.disable();
                 var dialogForm = $('<form id="dialog-form" class="form-horizontal"></form>').appendTo(trayBody);
                 dialogForm.html($("script[data-template-name='subflow-template']").html());
                 var ns = "node-red";
@@ -1218,8 +1210,6 @@ RED.editor = (function() {
                 dialogForm.i18n();
             },
             close: function() {
-                RED.keyboard.enable();
-
                 if (RED.view.state() != RED.state.IMPORT_DRAGGING) {
                     RED.view.state(RED.state.DEFAULT);
                 }

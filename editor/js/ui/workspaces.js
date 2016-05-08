@@ -162,10 +162,8 @@ RED.workspaces = (function() {
 
             ],
             open: function(e) {
-                RED.keyboard.disable();
             },
             close: function(e) {
-                RED.keyboard.enable();
             }
         });
         $( "#node-dialog-delete-workspace" ).dialog({
@@ -190,10 +188,8 @@ RED.workspaces = (function() {
                 }
             ],
             open: function(e) {
-                RED.keyboard.disable();
             },
             close: function(e) {
-                RED.keyboard.enable();
             }
 
         });

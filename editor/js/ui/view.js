@@ -436,13 +436,26 @@ RED.view = (function() {
             }
         });
 
-        RED.keyboard.add(/* z */ 90,{ctrl:true},function(){RED.history.pop();});
-        RED.keyboard.add(/* a */ 65,{ctrl:true},function(){selectAll();d3.event.preventDefault();});
-        RED.keyboard.add(/* = */ 187,{ctrl:true},function(){zoomIn();d3.event.preventDefault();});
-        RED.keyboard.add(/* - */ 189,{ctrl:true},function(){zoomOut();d3.event.preventDefault();});
-        RED.keyboard.add(/* 0 */ 48,{ctrl:true},function(){zoomZero();d3.event.preventDefault();});
-        RED.keyboard.add(/* v */ 86,{ctrl:true},function(){importNodes(clipboard);d3.event.preventDefault();});
+        RED.keyboard.add("workspace",/* backspace */ 8,function(){deleteSelection();d3.event.preventDefault();});
+        RED.keyboard.add("workspace",/* delete */ 46,function(){deleteSelection();d3.event.preventDefault();});
+        RED.keyboard.add("workspace",/* c */ 67,{ctrl:true},function(){copySelection();d3.event.preventDefault();});
+        RED.keyboard.add("workspace",/* x */ 88,{ctrl:true},function(){copySelection();deleteSelection();d3.event.preventDefault();});
 
+        RED.keyboard.add("workspace",/* z */ 90,{ctrl:true},function(){RED.history.pop();});
+        RED.keyboard.add("workspace",/* a */ 65,{ctrl:true},function(){selectAll();d3.event.preventDefault();});
+        RED.keyboard.add("*",/* = */ 187,{ctrl:true},function(){zoomIn();d3.event.preventDefault();});
+        RED.keyboard.add("*",/* - */ 189,{ctrl:true},function(){zoomOut();d3.event.preventDefault();});
+        RED.keyboard.add("*",/* 0 */ 48,{ctrl:true},function(){zoomZero();d3.event.preventDefault();});
+        RED.keyboard.add("workspace",/* v */ 86,{ctrl:true},function(){importNodes(clipboard);d3.event.preventDefault();});
+
+        RED.keyboard.add("workspace",/* up    */ 38, function() { moveSelection(0,-1);d3.event.preventDefault();},endKeyboardMove);
+        RED.keyboard.add("workspace",/* up    */ 38, {shift:true}, function() { moveSelection(0,-20); d3.event.preventDefault();},endKeyboardMove);
+        RED.keyboard.add("workspace",/* down  */ 40, function() { moveSelection(0,1);d3.event.preventDefault();},endKeyboardMove);
+        RED.keyboard.add("workspace",/* down  */ 40, {shift:true}, function() { moveSelection(0,20); d3.event.preventDefault();},endKeyboardMove);
+        RED.keyboard.add("workspace",/* left  */ 37, function() { moveSelection(-1,0);d3.event.preventDefault();},endKeyboardMove);
+        RED.keyboard.add("workspace",/* left  */ 37, {shift:true}, function() { moveSelection(-20,0); d3.event.preventDefault();},endKeyboardMove);
+        RED.keyboard.add("workspace",/* right */ 39, function() { moveSelection(1,0);d3.event.preventDefault();},endKeyboardMove);
+        RED.keyboard.add("workspace",/* right */ 39, {shift:true}, function() { moveSelection(20,0); d3.event.preventDefault();},endKeyboardMove);
     }
 
     function canvasMouseDown() {
@@ -868,29 +881,6 @@ RED.view = (function() {
     }
 
     function updateSelection() {
-        if (moving_set.length === 0 && selected_link == null) {
-            RED.keyboard.remove(/* backspace */ 8);
-            RED.keyboard.remove(/* delete */ 46);
-            RED.keyboard.remove(/* c */ 67);
-            RED.keyboard.remove(/* x */ 88);
-        } else {
-            RED.keyboard.add(/* backspace */ 8,function(){deleteSelection();d3.event.preventDefault();});
-            RED.keyboard.add(/* delete */ 46,function(){deleteSelection();d3.event.preventDefault();});
-            RED.keyboard.add(/* c */ 67,{ctrl:true},function(){copySelection();d3.event.preventDefault();});
-            RED.keyboard.add(/* x */ 88,{ctrl:true},function(){copySelection();deleteSelection();d3.event.preventDefault();});
-        }
-        if (moving_set.length === 0) {
-            RED.keyboard.remove(/* up   */ 38);
-            RED.keyboard.remove(/* down */ 40);
-            RED.keyboard.remove(/* left */ 37);
-            RED.keyboard.remove(/* right*/ 39);
-        } else {
-            RED.keyboard.add(/* up   */ 38, function() { if(d3.event.shiftKey){moveSelection(  0,-20)}else{moveSelection( 0,-1);}d3.event.preventDefault();},endKeyboardMove);
-            RED.keyboard.add(/* down */ 40, function() { if(d3.event.shiftKey){moveSelection(  0, 20)}else{moveSelection( 0, 1);}d3.event.preventDefault();},endKeyboardMove);
-            RED.keyboard.add(/* left */ 37, function() { if(d3.event.shiftKey){moveSelection(-20,  0)}else{moveSelection(-1, 0);}d3.event.preventDefault();},endKeyboardMove);
-            RED.keyboard.add(/* right*/ 39, function() { if(d3.event.shiftKey){moveSelection( 20,  0)}else{moveSelection( 1, 0);}d3.event.preventDefault();},endKeyboardMove);
-        }
-
         var selection = {};
 
         if (moving_set.length > 0) {
@@ -903,118 +893,124 @@ RED.view = (function() {
     }
 
     function endKeyboardMove() {
-        var ns = [];
-        for (var i=0;i<moving_set.length;i++) {
-            ns.push({n:moving_set[i].n,ox:moving_set[i].ox,oy:moving_set[i].oy});
-            delete moving_set[i].ox;
-            delete moving_set[i].oy;
-        }
-        RED.history.push({t:'move',nodes:ns,dirty:RED.nodes.dirty()});
-        RED.nodes.dirty(true);
-    }
-    function moveSelection(dx,dy) {
-        var minX = 0;
-        var minY = 0;
-        var node;
-
-        for (var i=0;i<moving_set.length;i++) {
-            node = moving_set[i];
-            if (node.ox == null && node.oy == null) {
-                node.ox = node.n.x;
-                node.oy = node.n.y;
-            }
-            node.n.x += dx;
-            node.n.y += dy;
-            node.n.dirty = true;
-            minX = Math.min(node.n.x-node.n.w/2-5,minX);
-            minY = Math.min(node.n.y-node.n.h/2-5,minY);
-        }
-
-        if (minX !== 0 || minY !== 0) {
-            for (var n = 0; n<moving_set.length; n++) {
-                node = moving_set[n];
-                node.n.x -= minX;
-                node.n.y -= minY;
-            }
-        }
-
-        redraw();
-    }
-    function deleteSelection() {
-        var result;
-        var removedNodes = [];
-        var removedLinks = [];
-        var removedSubflowOutputs = [];
-        var removedSubflowInputs = [];
-        var subflowInstances = [];
-
-        var startDirty = RED.nodes.dirty();
-        var startChanged = false;
         if (moving_set.length > 0) {
+            var ns = [];
             for (var i=0;i<moving_set.length;i++) {
-                var node = moving_set[i].n;
-                node.selected = false;
-                if (node.type != "subflow") {
-                    if (node.x < 0) {
-                        node.x = 25
-                    }
-                    var removedEntities = RED.nodes.remove(node.id);
-                    removedNodes.push(node);
-                    removedNodes = removedNodes.concat(removedEntities.nodes);
-                    removedLinks = removedLinks.concat(removedEntities.links);
-                } else {
-                    if (node.direction === "out") {
-                        removedSubflowOutputs.push(node);
-                    } else if (node.direction === "in") {
-                        removedSubflowInputs.push(node);
-                    }
-                    node.dirty = true;
-                }
+                ns.push({n:moving_set[i].n,ox:moving_set[i].ox,oy:moving_set[i].oy});
+                delete moving_set[i].ox;
+                delete moving_set[i].oy;
             }
-            if (removedSubflowOutputs.length > 0) {
-                result = RED.subflow.removeOutput(removedSubflowOutputs);
-                if (result) {
-                    removedLinks = removedLinks.concat(result.links);
-                }
-            }
-            // Assume 0/1 inputs
-            if (removedSubflowInputs.length == 1) {
-                result = RED.subflow.removeInput();
-                if (result) {
-                    removedLinks = removedLinks.concat(result.links);
-                }
-            }
-            var instances = RED.subflow.refresh(true);
-            if (instances) {
-                subflowInstances = instances.instances;
-            }
-            moving_set = [];
-            if (removedNodes.length > 0 || removedSubflowOutputs.length > 0 || removedSubflowInputs.length > 0) {
-                RED.nodes.dirty(true);
-            }
-        }
-        if (selected_link) {
-            RED.nodes.removeLink(selected_link);
-            removedLinks.push(selected_link);
+            RED.history.push({t:'move',nodes:ns,dirty:RED.nodes.dirty()});
             RED.nodes.dirty(true);
         }
-        var historyEvent = {
-            t:'delete',
-            nodes:removedNodes,
-            links:removedLinks,
-            subflowOutputs:removedSubflowOutputs,
-            subflowInputs:removedSubflowInputs,
-            subflow: {
-                instances: subflowInstances
-            },
-            dirty:startDirty
-        };
-        RED.history.push(historyEvent);
+    }
+    function moveSelection(dx,dy) {
+        if (moving_set.length > 0) {
+            var minX = 0;
+            var minY = 0;
+            var node;
 
-        selected_link = null;
-        updateActiveNodes();
-        updateSelection();
-        redraw();
+            for (var i=0;i<moving_set.length;i++) {
+                node = moving_set[i];
+                if (node.ox == null && node.oy == null) {
+                    node.ox = node.n.x;
+                    node.oy = node.n.y;
+                }
+                node.n.x += dx;
+                node.n.y += dy;
+                node.n.dirty = true;
+                minX = Math.min(node.n.x-node.n.w/2-5,minX);
+                minY = Math.min(node.n.y-node.n.h/2-5,minY);
+            }
+
+            if (minX !== 0 || minY !== 0) {
+                for (var n = 0; n<moving_set.length; n++) {
+                    node = moving_set[n];
+                    node.n.x -= minX;
+                    node.n.y -= minY;
+                }
+            }
+
+            redraw();
+        }
+    }
+    function deleteSelection() {
+        if (moving_set.length > 0 || selected_link != null) {
+            var result;
+            var removedNodes = [];
+            var removedLinks = [];
+            var removedSubflowOutputs = [];
+            var removedSubflowInputs = [];
+            var subflowInstances = [];
+
+            var startDirty = RED.nodes.dirty();
+            var startChanged = false;
+            if (moving_set.length > 0) {
+                for (var i=0;i<moving_set.length;i++) {
+                    var node = moving_set[i].n;
+                    node.selected = false;
+                    if (node.type != "subflow") {
+                        if (node.x < 0) {
+                            node.x = 25
+                        }
+                        var removedEntities = RED.nodes.remove(node.id);
+                        removedNodes.push(node);
+                        removedNodes = removedNodes.concat(removedEntities.nodes);
+                        removedLinks = removedLinks.concat(removedEntities.links);
+                    } else {
+                        if (node.direction === "out") {
+                            removedSubflowOutputs.push(node);
+                        } else if (node.direction === "in") {
+                            removedSubflowInputs.push(node);
+                        }
+                        node.dirty = true;
+                    }
+                }
+                if (removedSubflowOutputs.length > 0) {
+                    result = RED.subflow.removeOutput(removedSubflowOutputs);
+                    if (result) {
+                        removedLinks = removedLinks.concat(result.links);
+                    }
+                }
+                // Assume 0/1 inputs
+                if (removedSubflowInputs.length == 1) {
+                    result = RED.subflow.removeInput();
+                    if (result) {
+                        removedLinks = removedLinks.concat(result.links);
+                    }
+                }
+                var instances = RED.subflow.refresh(true);
+                if (instances) {
+                    subflowInstances = instances.instances;
+                }
+                moving_set = [];
+                if (removedNodes.length > 0 || removedSubflowOutputs.length > 0 || removedSubflowInputs.length > 0) {
+                    RED.nodes.dirty(true);
+                }
+            }
+            if (selected_link) {
+                RED.nodes.removeLink(selected_link);
+                removedLinks.push(selected_link);
+                RED.nodes.dirty(true);
+            }
+            var historyEvent = {
+                t:'delete',
+                nodes:removedNodes,
+                links:removedLinks,
+                subflowOutputs:removedSubflowOutputs,
+                subflowInputs:removedSubflowInputs,
+                subflow: {
+                    instances: subflowInstances
+                },
+                dirty:startDirty
+            };
+            RED.history.push(historyEvent);
+
+            selected_link = null;
+            updateActiveNodes();
+            updateSelection();
+            redraw();
+        }
     }
 
     function copySelection() {
@@ -2027,7 +2023,7 @@ RED.view = (function() {
                         }
                     }
 
-                    RED.keyboard.add(/* ESCAPE */ 27,function(){
+                    RED.keyboard.add("*",/* ESCAPE */ 27,function(){
                             RED.keyboard.remove(/* ESCAPE */ 27);
                             clearSelection();
                             RED.history.pop();

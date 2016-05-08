@@ -102,7 +102,7 @@ RED.sidebar = (function() {
                 sidebarSeparator.start = ui.position.left;
                 sidebarSeparator.chartWidth = $("#workspace").width();
                 sidebarSeparator.chartRight = winWidth-$("#workspace").width()-$("#workspace").offset().left-2;
-                
+
                 if (!RED.menu.isSelected("menu-item-sidebar")) {
                     sidebarSeparator.opening = true;
                     var newChartRight = 7;
@@ -196,7 +196,7 @@ RED.sidebar = (function() {
     }
 
     function init () {
-        RED.keyboard.add(/* SPACE */ 32,{ctrl:true},function(){RED.menu.setSelected("menu-item-sidebar",!RED.menu.isSelected("menu-item-sidebar"));d3.event.preventDefault();});
+        RED.keyboard.add("*",/* SPACE */ 32,{ctrl:true},function(){RED.menu.setSelected("menu-item-sidebar",!RED.menu.isSelected("menu-item-sidebar"));d3.event.preventDefault();});
         showSidebar();
         RED.sidebar.info.init();
         RED.sidebar.config.init();

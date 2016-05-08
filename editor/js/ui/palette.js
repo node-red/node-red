@@ -404,13 +404,6 @@ RED.palette = (function() {
             });
         }
 
-        $("#palette-search-input").focus(function(e) {
-            RED.keyboard.disable();
-        });
-        $("#palette-search-input").blur(function(e) {
-            RED.keyboard.enable();
-        });
-
         $("#palette-search-clear").on("click",function(e) {
             e.preventDefault();
             $("#palette-search-input").val("");

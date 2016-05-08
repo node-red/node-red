@@ -472,10 +472,8 @@ RED.library = (function() {
                     ],
                     open: function(e) {
                         $(this).parent().find(".ui-dialog-titlebar-close").hide();
-                        RED.keyboard.disable();
                     },
                     close: function(e) {
-                        RED.keyboard.enable();
                     }
                 });
             exportToLibraryDialog.children(".dialog-form").append($(
