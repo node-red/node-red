@@ -369,7 +369,7 @@ RED.palette = (function() {
             $("#palette-search-clear").show();
         }
 
-        var re = new RegExp(val,'i');
+        var re = new RegExp(val.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'),'i');
         $("#palette-container .palette_node").each(function(i,el) {
             var currentLabel = $(el).find(".palette_label").text();
             if (val === "" || re.test(el.id) || re.test(currentLabel)) {
