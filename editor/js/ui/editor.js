@@ -677,6 +677,9 @@ RED.editor = (function() {
                 }
                 RED.workspaces.refresh();
                 editStack.pop();
+                if (editStack.length === 0) {
+                    RED.view.focus();
+                }
             },
             show: function() {
                 if (editing_node) {
@@ -828,6 +831,9 @@ RED.editor = (function() {
             close: function() {
                 RED.workspaces.refresh();
                 editStack.pop();
+                if (editStack.length === 0) {
+                    RED.view.focus();
+                }
             },
             show: function() {
                 if (editing_config_node) {
@@ -1217,6 +1223,9 @@ RED.editor = (function() {
                 RED.workspaces.refresh();
                 editStack.pop();
                 editing_node = null;
+                if (editStack.length === 0) {
+                    RED.view.focus();
+                }
             },
             show: function() {
             }
