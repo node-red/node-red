@@ -112,6 +112,21 @@ function init(_server,_runtime) {
             );
             adminApp.post("/auth/revoke",needsPermission(""),auth.revoke,errorHandler);
         }
+        if (settings.httpAdminCors) {
+            var allowCrossDomain = function(req, res, next) {
+                if(settings.httpAdminCors.origin) {
+                    res.header('Access-Control-Allow-Origin', settings.httpAdminCors.origin);
+                }
+                if(settings.httpAdminCors.methods) {
+                    res.header('Access-Control-Allow-Methods', settings.httpAdminCors.methods);
+                }
+                if(settings.httpAdminCors.headers) {
+                    res.header('Access-Control-Allow-Headers', settings.httpAdminCors.headers);
+                }
+                next();
+            };
+            adminApp.use(allowCrossDomain);
+        }
 
         // Flows
         adminApp.get("/flows",needsPermission("flows.read"),flows.get,errorHandler);

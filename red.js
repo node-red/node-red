@@ -120,23 +120,6 @@ if (parsedArgs.v) {
     settings.verbose = true;
 }
 
-if(settings.globalHttpCors) {
-    var allowCrossDomain = function(req, res, next) {
-        if(settings.globalHttpCors.origin) {
-            res.header('Access-Control-Allow-Origin', settings.globalHttpCors.origin);
-        }
-        if(settings.globalHttpCors.methods) {
-            res.header('Access-Control-Allow-Methods', settings.globalHttpCors.methods);
-        }
-        if(settings.globalHttpCors.headers) {
-            res.header('Access-Control-Allow-Headers', settings.globalHttpCors.headers);
-        }
-        next();
-    };
-    app.use(allowCrossDomain);
-    console.log("Global CORS override for server is enabled");
-}
-
 if (settings.https) {
     server = https.createServer(settings.https,function(req,res){app(req,res);});
 } else {
@@ -284,6 +267,9 @@ RED.start().then(function() {
             }
             process.title = 'node-red';
             RED.log.info(RED.log._("server.now-running", {listenpath:getListenPath()}));
+            if (settings.httpAdminCors !== undefined) {
+                RED.log.info(RED.log._("server.admin-cors-enabled"));
+            }
         });
     } else {
         RED.log.info(RED.log._("server.headless-mode"));
