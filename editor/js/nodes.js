@@ -863,6 +863,16 @@ RED.nodes = (function() {
                 }
             }
         }
+        // TODO: make this a part of the node definition so it doesn't have to
+        //       be hardcoded here
+        var nodeTypeArrayReferences = {
+            "catch":"scope",
+            "status":"scope",
+            "link in":"links",
+            "link out":"links"
+        }
+
+
         // Remap all wires and config node references
         for (i=0;i<new_nodes.length;i++) {
             n = new_nodes[i];
@@ -887,6 +897,13 @@ RED.nodes = (function() {
                         if (configNode && configNode.users.indexOf(n) === -1) {
                             configNode.users.push(n);
                         }
+                    } else if (nodeTypeArrayReferences.hasOwnProperty(n.type) && nodeTypeArrayReferences[n.type] === d3) {
+                        for (var j = 0;j<n[d3].length;j++) {
+                            if (node_map[n[d3][j]]) {
+                                n[d3][j] = node_map[n[d3][j]].id;
+                            }
+                        }
+
                     }
                 }
             }
