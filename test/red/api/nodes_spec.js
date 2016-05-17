@@ -44,10 +44,10 @@ describe("nodes api", function() {
         app.use(bodyParser.json());
         app.get("/nodes",nodes.getAll);
         app.post("/nodes",nodes.post);
-        app.get("/nodes/:mod",nodes.getModule);
-        app.get("/nodes/:mod/:set",nodes.getSet);
-        app.put("/nodes/:mod",nodes.putModule);
-        app.put("/nodes/:mod/:set",nodes.putSet);
+        app.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,nodes.getModule);
+        app.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,nodes.getSet);
+        app.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,nodes.putModule);
+        app.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,nodes.putSet);
         app.delete("/nodes/:id",nodes.delete);
         sinon.stub(comms,"publish");
         sinon.stub(locales,"determineLangFromHeaders", function() {

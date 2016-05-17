@@ -126,12 +126,12 @@ function init(_server,_runtime) {
         adminApp.get("/nodes",needsPermission("nodes.read"),nodes.getAll,errorHandler);
         adminApp.post("/nodes",needsPermission("nodes.write"),nodes.post,errorHandler);
 
-        adminApp.get("/nodes/:mod",needsPermission("nodes.read"),nodes.getModule,errorHandler);
-        adminApp.put("/nodes/:mod",needsPermission("nodes.write"),nodes.putModule,errorHandler);
-        adminApp.delete("/nodes/:mod",needsPermission("nodes.write"),nodes.delete,errorHandler);
+        adminApp.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,needsPermission("nodes.read"),nodes.getModule,errorHandler);
+        adminApp.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,needsPermission("nodes.write"),nodes.putModule,errorHandler);
+        adminApp.delete(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,needsPermission("nodes.write"),nodes.delete,errorHandler);
 
-        adminApp.get("/nodes/:mod/:set",needsPermission("nodes.read"),nodes.getSet,errorHandler);
-        adminApp.put("/nodes/:mod/:set",needsPermission("nodes.write"),nodes.putSet,errorHandler);
+        adminApp.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,needsPermission("nodes.read"),nodes.getSet,errorHandler);
+        adminApp.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,needsPermission("nodes.write"),nodes.putSet,errorHandler);
 
         adminApp.get('/credentials/:type/:id', needsPermission("credentials.read"),credentials.get,errorHandler);
 
