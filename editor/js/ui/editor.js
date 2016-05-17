@@ -622,7 +622,6 @@ RED.editor = (function() {
                         }
                         editing_node.dirty = true;
                         validateNode(editing_node);
-                        RED.view.redraw(true);
                         RED.tray.close();
                     }
                 }
@@ -676,6 +675,7 @@ RED.editor = (function() {
                     RED.sidebar.info.refresh(editing_node);
                 }
                 RED.workspaces.refresh();
+                RED.view.redraw(true);
                 editStack.pop();
                 if (editStack.length === 0) {
                     RED.view.focus();
@@ -1010,7 +1010,7 @@ RED.editor = (function() {
                         validateNode(user);
                     }
                     RED.nodes.dirty(true);
-                    RED.view.redraw();
+                    RED.view.redraw(true);
                     RED.history.push(historyEvent);
                     RED.tray.close(function() {
                         updateConfigNodeSelect(configProperty,configType,"",prefix);

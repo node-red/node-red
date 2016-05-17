@@ -207,7 +207,25 @@
     fill: none;
     pointer-events: none;
 }
-
+.link_link {
+    stroke-width: 2;
+    stroke-dasharray: 10,5;
+    stroke: $link-link-color;
+    fill: none;
+    stroke-dasharray: 15,2;
+    pointer-events: none;
+}
+.link_port {
+    fill: #fff;
+    stroke: $link-link-color;
+    stroke-width: 1;
+}
+.link_group_active .link_port {
+    stroke: $link-link-active-color;
+}
+.link_group:hover {
+    cursor: pointer;
+}
 .link_subflow {
     stroke: $link-subflow-color;
     stroke-dasharray: 10,5;

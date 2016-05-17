@@ -457,7 +457,11 @@ function getFlow(id) {
         var nodeIds = Object.keys(flow.nodes);
         if (nodeIds.length > 0) {
             result.nodes = nodeIds.map(function(nodeId) {
-                return clone(flow.nodes[nodeId]);
+                var node = clone(flow.nodes[nodeId]);
+                if (node.type === 'link out') {
+                    delete node.wires;
+                }
+                return node;
             })
         }
     }

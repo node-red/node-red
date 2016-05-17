@@ -55,7 +55,29 @@ ul.red-ui-tabs li a.red-ui-tab-label {
 ul.red-ui-tabs li {
     position: relative;
 }
+.red-ui-tabs-badges {
+    position: absolute;
+    top:2px;
+    right:2px;
+}
+.red-ui-tab-closeable .red-ui-tabs-badges {
+    right: 22px;
+}
 
+.red-ui-tab.node_changed img.node_changed {
+    display: inline-block;
+}
+.red-ui-tab.node_error img.node_error {
+    display: inline-block;
+}
+
+.red-ui-tabs-badges img {
+    width: 10px;
+    height: 10px;
+    margin-right: 2px;
+    vertical-align: top;
+
+}
 .red-ui-tab-close {
     background: $tab-background-inactive;
     opacity: 0.8;
@@ -110,7 +132,7 @@ ul.red-ui-tabs li.active a {
     color: #333;
 }
 
-ul.red-ui-tabs li img {
+.red-ui-tab-icon {
     margin-left: -8px;
     margin-right: 3px;
     margin-top: -2px;
@@ -119,6 +141,6 @@ ul.red-ui-tabs li img {
     height: 20px;
     vertical-align: middle;
 }
-ul.red-ui-tabs li.active img {
+ul.red-ui-tabs li.active .red-ui-tab-icon {
     opacity: 0.2;
 }

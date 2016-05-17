@@ -20,20 +20,18 @@ module.exports = function(RED) {
     function LinkInNode(n) {
         RED.nodes.createNode(this,n);
         var node = this;
-
-        if (n.event) {
-            var handler = function(msg) {
-                msg._event = n.event;
-                node.receive(msg);
-            }
-            RED.events.on("node:"+n.event,handler);
-            this.on("input", function(msg) {
-                this.send(msg);
-            });
-            this.on("close",function() {
-                RED.events.removeListener("node:"+n.event,handler);
-            })
+        var event = "node:"+n.id;
+        var handler = function(msg) {
+            msg._event = n.event;
+            node.receive(msg);
         }
+        RED.events.on(event,handler);
+        this.on("input", function(msg) {
+            this.send(msg);
+        });
+        this.on("close",function() {
+            RED.events.removeListener(event,handler);
+        });
     }
 
     RED.nodes.registerType("link in",LinkInNode);
@@ -41,12 +39,12 @@ module.exports = function(RED) {
     function LinkOutNode(n) {
         RED.nodes.createNode(this,n);
         var node = this;
-        if (n.event) {
-            this.on("input", function(msg) {
-                msg._event = n.event;
-                RED.events.emit("node:"+n.event,msg)
-            });
-        }
+        var event = "node:"+n.id;
+        this.on("input", function(msg) {
+            msg._event = event;
+            RED.events.emit(event,msg)
+            this.send(msg);
+        });
     }
     RED.nodes.registerType("link out",LinkOutNode);
 }

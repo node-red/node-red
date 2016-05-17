@@ -67,7 +67,8 @@ module.exports = {
                 flow.subflows[n.id].instances = [];
             }
         });
-
+        var linkWires = {};
+        var linkOutNodes = [];
         config.forEach(function(n) {
             if (n.type !== 'subflow' && n.type !== 'tab') {
                 var subflowDetails = subflowInstanceRE.exec(n.type);
@@ -100,8 +101,28 @@ module.exports = {
                         flow.configs[n.id]._users = [];
                     }
                 }
+                if (n.type === 'link in' && n.links) {
+                    // Ensure wires are present in corresponding link out nodes
+                    n.links.forEach(function(id) {
+                        linkWires[id] = linkWires[id]||{};
+                        linkWires[id][n.id] = true;
+                    })
+                } else if (n.type === 'link out' && n.links) {
+                    linkWires[n.id] = linkWires[n.id]||{};
+                    n.links.forEach(function(id) {
+                        linkWires[n.id][id] = true;
+                    })
+                    linkOutNodes.push(n);
+                }
             }
         });
+        linkOutNodes.forEach(function(n) {
+            var links = linkWires[n.id];
+            var targets = Object.keys(links);
+            n.wires = [targets];
+        });
+
+
         var addedTabs = {};
         config.forEach(function(n) {
             if (n.type !== 'subflow' && n.type !== 'tab') {

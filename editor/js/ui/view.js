@@ -41,6 +41,7 @@ RED.view = (function() {
     var activeSubflow = null;
     var activeNodes = [];
     var activeLinks = [];
+    var activeFlowLinks = [];
 
     var selected_link = null,
         mousedown_link = null,
@@ -81,9 +82,9 @@ RED.view = (function() {
         });
 
     var vis = outer
-        .append('svg:g')
+        .append("svg:g")
         .on("dblclick.zoom", null)
-        .append('svg:g')
+        .append("svg:g")
         .on("mousemove", canvasMouseMove)
         .on("mousedown", canvasMouseDown)
         .on("mouseup", canvasMouseUp)
@@ -107,18 +108,18 @@ RED.view = (function() {
                 d3.event.preventDefault();
                 touch0 = d3.event.touches.item(0);
                 var touch1 = d3.event.touches.item(1);
-                var a = touch0['pageY']-touch1['pageY'];
-                var b = touch0['pageX']-touch1['pageX'];
+                var a = touch0["pageY"]-touch1["pageY"];
+                var b = touch0["pageX"]-touch1["pageX"];
 
                 var offset = $("#chart").offset();
                 var scrollPos = [$("#chart").scrollLeft(),$("#chart").scrollTop()];
                 startTouchCenter = [
-                    (touch1['pageX']+(b/2)-offset.left+scrollPos[0])/scaleFactor,
-                    (touch1['pageY']+(a/2)-offset.top+scrollPos[1])/scaleFactor
+                    (touch1["pageX"]+(b/2)-offset.left+scrollPos[0])/scaleFactor,
+                    (touch1["pageY"]+(a/2)-offset.top+scrollPos[1])/scaleFactor
                 ];
                 moveTouchCenter = [
-                    touch1['pageX']+(b/2),
-                    touch1['pageY']+(a/2)
+                    touch1["pageX"]+(b/2),
+                    touch1["pageY"]+(a/2)
                 ]
                 startTouchDistance = Math.sqrt((a*a)+(b*b));
             } else {
@@ -131,7 +132,7 @@ RED.view = (function() {
                 touchStartTime = setTimeout(function() {
                     touchStartTime = null;
                     showTouchMenu(obj,pos);
-                    //lasso = vis.append('rect')
+                    //lasso = vis.append("rect")
                     //    .attr("ox",point[0])
                     //    .attr("oy",point[1])
                     //    .attr("rx",2)
@@ -168,14 +169,14 @@ RED.view = (function() {
                 } else {
                     touch0 = d3.event.touches.item(0);
                     var touch1 = d3.event.touches.item(1);
-                    var a = touch0['pageY']-touch1['pageY'];
-                    var b = touch0['pageX']-touch1['pageX'];
+                    var a = touch0["pageY"]-touch1["pageY"];
+                    var b = touch0["pageX"]-touch1["pageX"];
                     var offset = $("#chart").offset();
                     var scrollPos = [$("#chart").scrollLeft(),$("#chart").scrollTop()];
                     var moveTouchDistance = Math.sqrt((a*a)+(b*b));
                     var touchCenter = [
-                        touch1['pageX']+(b/2),
-                        touch1['pageY']+(a/2)
+                        touch1["pageX"]+(b/2),
+                        touch1["pageY"]+(a/2)
                     ];
 
                     if (!isNaN(moveTouchDistance)) {
@@ -197,13 +198,13 @@ RED.view = (function() {
                 }
         });
 
-    var outer_background = vis.append('svg:rect')
-        .attr('width', space_width)
-        .attr('height', space_height)
-        .attr('fill','#fff');
+    var outer_background = vis.append("svg:rect")
+        .attr("width", space_width)
+        .attr("height", space_height)
+        .attr("fill","#fff");
 
     var gridScale = d3.scale.linear().range([0,space_width]).domain([0,space_width]);
-    var grid = vis.append('g');
+    var grid = vis.append("g");
 
     grid.selectAll("line.horizontal").data(gridScale.ticks(space_width/gridSize)).enter()
        .append("line")
@@ -235,7 +236,7 @@ RED.view = (function() {
            });
     grid.style("visibility","hidden");
 
-    var dragGroup = vis.append('g');
+    var dragGroup = vis.append("g");
     var drag_lines = [];
 
     function showDragLines(nodes) {
@@ -301,10 +302,10 @@ RED.view = (function() {
             redraw();
         });
 
-        $('#btn-zoom-out').click(function() {zoomOut();});
-        $('#btn-zoom-zero').click(function() {zoomZero();});
-        $('#btn-zoom-in').click(function() {zoomIn();});
-        $("#chart").on('DOMMouseScroll mousewheel', function (evt) {
+        $("#btn-zoom-out").click(function() {zoomOut();});
+        $("#btn-zoom-zero").click(function() {zoomZero();});
+        $("#btn-zoom-in").click(function() {zoomIn();});
+        $("#chart").on("DOMMouseScroll mousewheel", function (evt) {
             if ( evt.altKey ) {
                 evt.preventDefault();
                 evt.stopPropagation();
@@ -368,7 +369,7 @@ RED.view = (function() {
                 nn.h = Math.max(node_height,(nn.outputs||0) * 15);
 
                 var historyEvent = {
-                    t:'add',
+                    t:"add",
                     nodes:[nn.id],
                     dirty:RED.nodes.dirty()
                 }
@@ -398,7 +399,7 @@ RED.view = (function() {
                 nn.x = mousePos[0];
                 nn.y = mousePos[1];
 
-                var spliceLink = $(ui.helper).data('splice');
+                var spliceLink = $(ui.helper).data("splice");
                 if (spliceLink) {
                     // TODO: DRY - droppable/nodeMouseDown/canvasMouseUp
                     RED.nodes.removeLink(spliceLink);
@@ -471,7 +472,7 @@ RED.view = (function() {
 
             if (!touchStartTime) {
                 var point = d3.mouse(this);
-                lasso = vis.append('rect')
+                lasso = vis.append("rect")
                     .attr("ox",point[0])
                     .attr("oy",point[1])
                     .attr("rx",1)
@@ -678,12 +679,12 @@ RED.view = (function() {
                                 svgRect.height = 1;
                                 nodes = outer[0][0].getIntersectionList(svgRect, outer[0][0]);
                             } else {
-                                // Firefox doesn't do getIntersectionList and that
+                                // Firefox doesn"t do getIntersectionList and that
                                 // makes us sad
                                 nodes = RED.view.getLinksAtPoint(mouseX,mouseY);
                             }
                             for (var i=0;i<nodes.length;i++) {
-                                if (d3.select(nodes[i]).classed('link_background')) {
+                                if (d3.select(nodes[i]).classed("link_background")) {
                                     var length = nodes[i].getTotalLength();
                                     for (var j=0;j<length;j+=10) {
                                         var p = nodes[i].getPointAtLength(j);
@@ -696,12 +697,12 @@ RED.view = (function() {
                                 }
                             }
                             if (activeSpliceLink && activeSpliceLink !== bestLink) {
-                                d3.select(activeSpliceLink.parentNode).classed('link_splice',false);
+                                d3.select(activeSpliceLink.parentNode).classed("link_splice",false);
                             }
                             if (bestLink) {
-                                d3.select(bestLink.parentNode).classed('link_splice',true)
+                                d3.select(bestLink.parentNode).classed("link_splice",true)
                             } else {
-                                d3.select('.link_splice').classed('link_splice',false);
+                                d3.select(".link_splice").classed("link_splice",false);
                             }
                             activeSpliceLink = bestLink;
                             spliceTimer = null;
@@ -728,7 +729,7 @@ RED.view = (function() {
                 }
             }
             historyEvent = {
-                t:'delete',
+                t:"delete",
                 links: removedLinks,
                 dirty:RED.nodes.dirty()
             };
@@ -781,7 +782,7 @@ RED.view = (function() {
                 for (var j=0;j<moving_set.length;j++) {
                     ns.push({n:moving_set[j].n,ox:moving_set[j].ox,oy:moving_set[j].oy});
                 }
-                historyEvent = {t:'move',nodes:ns,dirty:RED.nodes.dirty()};
+                historyEvent = {t:"move",nodes:ns,dirty:RED.nodes.dirty()};
                 if (activeSpliceLink) {
                     // TODO: DRY - droppable/nodeMouseDown/canvasMouseUp
                     var spliceLink = d3.select(activeSpliceLink).data()[0];
@@ -889,6 +890,70 @@ RED.view = (function() {
         if (selected_link != null) {
             selection.link = selected_link;
         }
+        var activeWorkspace = RED.workspaces.active();
+        activeLinks = RED.nodes.filterLinks({
+            source:{z:activeWorkspace},
+            target:{z:activeWorkspace}
+        });
+        var tabOrder = RED.nodes.getWorkspaceOrder();
+        var currentLinks = activeLinks;
+        var addedLinkLinks = {};
+        activeFlowLinks = [];
+        for (var i=0;i<moving_set.length;i++) {
+            if (moving_set[i].n.type === "link out" || moving_set[i].n.type === "link in") {
+                var linkNode = moving_set[i].n;
+                var offFlowLinks = {};
+                linkNode.links.forEach(function(id) {
+                    var target = RED.nodes.node(id);
+                    if (target) {
+                        if (linkNode.type === "link out") {
+                            if (target.z === linkNode.z) {
+                                if (!addedLinkLinks[linkNode.id+":"+target.id]) {
+                                    activeLinks.push({
+                                        source:linkNode,
+                                        sourcePort:0,
+                                        target: target,
+                                        link: true
+                                    });
+                                    addedLinkLinks[linkNode.id+":"+target.id] = true;
+                                }
+                            } else {
+                                offFlowLinks[target.z] = offFlowLinks[target.z]||[];
+                                offFlowLinks[target.z].push(target);
+                            }
+                        } else {
+                            if (target.z === linkNode.z) {
+                                if (!addedLinkLinks[target.id+":"+linkNode.id]) {
+                                    activeLinks.push({
+                                        source:target,
+                                        sourcePort:0,
+                                        target: linkNode,
+                                        link: true
+                                    });
+                                    addedLinkLinks[target.id+":"+linkNode.id] = true;
+                                }
+                            } else {
+                                offFlowLinks[target.z] = offFlowLinks[target.z]||[];
+                                offFlowLinks[target.z].push(target);
+                            }
+                        }
+                    }
+                });
+                var offFlows = Object.keys(offFlowLinks);
+                // offFlows.sort(function(A,B) {
+                //     return tabOrder.indexOf(A) - tabOrder.indexOf(B);
+                // });
+                if (offFlows.length > 0) {
+                    activeFlowLinks.push({
+                        refresh: Math.floor(Math.random()*10000),
+                        node: linkNode,
+                        links: offFlowLinks//offFlows.map(function(i) { return {id:i,links:offFlowLinks[i]};})
+                    });
+                }
+            }
+        }
+
+
         RED.events.emit("view:selection-changed",selection);
     }
 
@@ -900,7 +965,7 @@ RED.view = (function() {
                 delete moving_set[i].ox;
                 delete moving_set[i].oy;
             }
-            RED.history.push({t:'move',nodes:ns,dirty:RED.nodes.dirty()});
+            RED.history.push({t:"move",nodes:ns,dirty:RED.nodes.dirty()});
             RED.nodes.dirty(true);
         }
     }
@@ -994,7 +1059,7 @@ RED.view = (function() {
                 RED.nodes.dirty(true);
             }
             var historyEvent = {
-                t:'delete',
+                t:"delete",
                 nodes:removedNodes,
                 links:removedLinks,
                 subflowOutputs:removedSubflowOutputs,
@@ -1019,7 +1084,7 @@ RED.view = (function() {
             for (var n=0;n<moving_set.length;n++) {
                 var node = moving_set[n].n;
                 // The only time a node.type == subflow can be selected is the
-                // input/output 'proxy' nodes. They cannot be copied.
+                // input/output "proxy" nodes. They cannot be copied.
                 if (node.type != "subflow") {
                     for (var d in node._def.defaults) {
                         if (node._def.defaults.hasOwnProperty(d)) {
@@ -1061,7 +1126,7 @@ RED.view = (function() {
         mousedown_port_type = 0;
         activeSpliceLink = null;
         spliceActive = false;
-        d3.select('.link_splice').classed('link_splice',false);
+        d3.select(".link_splice").classed("link_splice",false);
         if (spliceTimer) {
             clearTimeout(spliceTimer);
             spliceTimer = null;
@@ -1132,7 +1197,7 @@ RED.view = (function() {
             }
             if (addedLinks.length > 0 || removedLinks.length > 0) {
                 var historyEvent = {
-                    t:'add',
+                    t:"add",
                     links:addedLinks,
                     removedLinks: removedLinks,
                     dirty:RED.nodes.dirty()
@@ -1357,8 +1422,8 @@ RED.view = (function() {
                     .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== 1)));})
                     .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
 
-                outGroup.append("svg:text").attr('class','port_label').attr('x',20).attr('y',8).style("font-size","10px").text("output");
-                outGroup.append("svg:text").attr('class','port_label port_index').attr('x',20).attr('y',24).text(function(d,i){ return i+1});
+                outGroup.append("svg:text").attr("class","port_label").attr("x",20).attr("y",8).style("font-size","10px").text("output");
+                outGroup.append("svg:text").attr("class","port_label port_index").attr("x",20).attr("y",24).text(function(d,i){ return i+1});
 
                 var subflowInputs = vis.selectAll(".subflowinput").data(activeSubflow.in,function(d,i){ return d.id;});
                 subflowInputs.exit().remove();
@@ -1399,7 +1464,7 @@ RED.view = (function() {
                     .on("touchend",function(d,i){portMouseUp(d,0,i);} )
                     .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== 0) ));})
                     .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
-                inGroup.append("svg:text").attr('class','port_label').attr('x',18).attr('y',20).style("font-size","10px").text("input");
+                inGroup.append("svg:text").attr("class","port_label").attr("x",18).attr("y",20).style("font-size","10px").text("input");
 
 
 
@@ -1432,10 +1497,12 @@ RED.view = (function() {
 
             var nodeEnter = node.enter().insert("svg:g")
                 .attr("class", "node nodegroup")
-                .classed("node_subflow",function(d) { return activeSubflow != null; });
+                .classed("node_subflow",function(d) { return activeSubflow != null; })
+                .classed("node_link",function(d) { return d.type === "link in" || d.type === "link out" });
 
             nodeEnter.each(function(d,i) {
                     var node = d3.select(this);
+                    var isLink = d.type === "link in" || d.type === "link out";
                     node.attr("id",d.id);
                     var l = d._def.label;
                     try {
@@ -1444,13 +1511,18 @@ RED.view = (function() {
                         console.log("Definition error: "+d.type+".label",err);
                         l = d.type;
                     }
-                    d.w = Math.max(node_width,gridSize*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/gridSize)) );
+
+                    if (isLink) {
+                        d.w = node_height;
+                    } else {
+                        d.w = Math.max(node_width,gridSize*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/gridSize)) );
+                    }
                     d.h = Math.max(node_height,(d.outputs||0) * 15);
 
                     if (d._def.badge) {
                         var badge = node.append("svg:g").attr("class","node_badge_group");
                         var badgeRect = badge.append("rect").attr("class","node_badge").attr("rx",5).attr("ry",5).attr("width",40).attr("height",15);
-                        badge.append("svg:text").attr("class","node_badge_label").attr("x",35).attr("y",11).attr('text-anchor','end').text(d._def.badge());
+                        badge.append("svg:text").attr("class","node_badge_label").attr("x",35).attr("y",11).attr("text-anchor","end").text(d._def.badge());
                         if (d._def.onbadgeclick) {
                             badgeRect.attr("cursor","pointer")
                                 .on("click",function(d) { d._def.onbadgeclick.call(d);d3.event.preventDefault();});
@@ -1458,16 +1530,16 @@ RED.view = (function() {
                     }
 
                     if (d._def.button) {
-                        var nodeButtonGroup = node.append('svg:g')
+                        var nodeButtonGroup = node.append("svg:g")
                             .attr("transform",function(d) { return "translate("+((d._def.align == "right") ? 94 : -25)+",2)"; })
                             .attr("class",function(d) { return "node_button "+((d._def.align == "right") ? "node_right_button" : "node_left_button"); });
-                        nodeButtonGroup.append('rect')
+                        nodeButtonGroup.append("rect")
                             .attr("rx",5)
                             .attr("ry",5)
                             .attr("width",32)
                             .attr("height",node_height-4)
                             .attr("fill","#eee");//function(d) { return d._def.color;})
-                        nodeButtonGroup.append('rect')
+                        nodeButtonGroup.append("rect")
                             .attr("class","node_button_button")
                             .attr("x",function(d) { return d._def.align == "right"? 11:5})
                             .attr("y",4)
@@ -1563,11 +1635,11 @@ RED.view = (function() {
                             .attr("stroke-width","1");
 
                         if ("right" == d._def.align) {
-                            icon_group.attr('class','node_icon_group node_icon_group_'+d._def.align);
+                            icon_group.attr("class","node_icon_group node_icon_group_"+d._def.align);
                             icon_shade_border.attr("d",function(d) { return "M 0 1 l 0 "+(d.h-2)})
-                            //icon.attr('class','node_icon node_icon_'+d._def.align);
-                            //icon.attr('class','node_icon_shade node_icon_shade_'+d._def.align);
-                            //icon.attr('class','node_icon_shade_border node_icon_shade_border_'+d._def.align);
+                            //icon.attr("class","node_icon node_icon_"+d._def.align);
+                            //icon.attr("class","node_icon_shade node_icon_shade_"+d._def.align);
+                            //icon.attr("class","node_icon_shade_border node_icon_shade_border_"+d._def.align);
                         }
 
                         //if (d.inputs > 0 && d._def.align == null) {
@@ -1595,24 +1667,25 @@ RED.view = (function() {
                         //icon.style("pointer-events","none");
                         icon_group.style("pointer-events","none");
                     }
-                    var text = node.append('svg:text').attr('class','node_label').attr('x', 38).attr('dy', '.35em').attr('text-anchor','start');
-                    if (d._def.align) {
-                        text.attr('class','node_label node_label_'+d._def.align);
-                        if (d._def.align === "right") {
-                            text.attr('text-anchor','end');
+                    if (!isLink) {
+                        var text = node.append("svg:text").attr("class","node_label").attr("x", 38).attr("dy", ".35em").attr("text-anchor","start");
+                        if (d._def.align) {
+                            text.attr("class","node_label node_label_"+d._def.align);
+                            if (d._def.align === "right") {
+                                text.attr("text-anchor","end");
+                            }
                         }
+
+                        var status = node.append("svg:g").attr("class","node_status_group").style("display","none");
+
+                        var statusRect = status.append("rect").attr("class","node_status")
+                                            .attr("x",6).attr("y",1).attr("width",9).attr("height",9)
+                                            .attr("rx",2).attr("ry",2).attr("stroke-width","3");
+
+                        var statusLabel = status.append("svg:text")
+                            .attr("class","node_status_label")
+                            .attr("x",20).attr("y",9);
                     }
-
-                    var status = node.append("svg:g").attr("class","node_status_group").style("display","none");
-
-                    var statusRect = status.append("rect").attr("class","node_status")
-                                        .attr("x",6).attr("y",1).attr("width",9).attr("height",9)
-                                        .attr("rx",2).attr("ry",2).attr("stroke-width","3");
-
-                    var statusLabel = status.append("svg:text")
-                        .attr("class","node_status_label")
-                        .attr('x',20).attr('y',9);
-
                     //node.append("circle").attr({"class":"centerDot","cx":0,"cy":0,"r":5});
 
                     //node.append("path").attr("class","node_error").attr("d","M 3,-3 l 10,0 l -5,-8 z");
@@ -1622,9 +1695,10 @@ RED.view = (function() {
 
             node.each(function(d,i) {
                     if (d.dirty) {
+                        var isLink = d.type === "link in" || d.type === "link out";
                         dirtyNodes[d.id] = d;
                         //if (d.x < -50) deleteSelection();  // Delete nodes if dragged back to palette
-                        if (d.resize) {
+                        if (!isLink && d.resize) {
                             var l = d._def.label;
                             try {
                                 l = (typeof l === "function" ? l.call(d) : l)||"";
@@ -1652,8 +1726,8 @@ RED.view = (function() {
                             //thisNode.selectAll(".node-gradient-top").attr("width",function(d){return d.w});
                             //thisNode.selectAll(".node-gradient-bottom").attr("width",function(d){return d.w}).attr("y",function(d){return d.h-30});
 
-                            thisNode.selectAll(".node_icon_group_right").attr('transform', function(d){return "translate("+(d.w-30)+",0)"});
-                            thisNode.selectAll(".node_label_right").attr('x', function(d){return d.w-38});
+                            thisNode.selectAll(".node_icon_group_right").attr("transform", function(d){return "translate("+(d.w-30)+",0)"});
+                            thisNode.selectAll(".node_label_right").attr("x", function(d){return d.w-38});
                             //thisNode.selectAll(".node_icon_right").attr("x",function(d){return d.w-d3.select(this).attr("width")-1-(d.outputs>0?5:0);});
                             //thisNode.selectAll(".node_icon_shade_right").attr("x",function(d){return d.w-30;});
                             //thisNode.selectAll(".node_icon_shade_border_right").attr("d",function(d){return "M "+(d.w-30)+" 1 l 0 "+(d.h-2)});
@@ -1698,7 +1772,7 @@ RED.view = (function() {
                                         port.attr("transform", function(d) { return "translate("+x+","+((y+13*i)-5)+")";});
                                 });
                             }
-                            thisNode.selectAll('text.node_label').text(function(d,i){
+                            thisNode.selectAll("text.node_label").text(function(d,i){
                                     var l = "";
                                     if (d._def.label) {
                                         l = d._def.label;
@@ -1711,8 +1785,8 @@ RED.view = (function() {
                                     }
                                     return l;
                                 })
-                                .attr('y', function(d){return (d.h/2)-1;})
-                                .attr('class',function(d){
+                                .attr("y", function(d){return (d.h/2)-1;})
+                                .attr("class",function(d){
                                     var s = "";
                                     if (d._def.labelStyle) {
                                         s = d._def.labelStyle;
@@ -1724,8 +1798,8 @@ RED.view = (function() {
                                         }
                                         s = " "+s;
                                     }
-                                    return 'node_label'+
-                                    (d._def.align?' node_label_'+d._def.align:'')+s;
+                                    return "node_label"+
+                                    (d._def.align?" node_label_"+d._def.align:"")+s;
                             });
 
                             if (d._def.icon) {
@@ -1774,32 +1848,32 @@ RED.view = (function() {
                             thisNode.selectAll(".node_icon_shade").attr("height",function(d){return d.h;});
                             thisNode.selectAll(".node_icon_shade_border").attr("d",function(d){ return "M "+(("right" == d._def.align) ?0:30)+" 1 l 0 "+(d.h-2)});
 
-                            thisNode.selectAll('.node_button').attr("opacity",function(d) {
+                            thisNode.selectAll(".node_button").attr("opacity",function(d) {
                                 return (activeSubflow||d.changed)?0.4:1
                             });
-                            thisNode.selectAll('.node_button_button').attr("cursor",function(d) {
+                            thisNode.selectAll(".node_button_button").attr("cursor",function(d) {
                                 return (activeSubflow||d.changed)?"":"pointer";
                             });
-                            thisNode.selectAll('.node_right_button').attr("transform",function(d){
+                            thisNode.selectAll(".node_right_button").attr("transform",function(d){
                                     var x = d.w-6;
                                     if (d._def.button.toggle && !d[d._def.button.toggle]) {
                                         x = x - 8;
                                     }
                                     return "translate("+x+",2)";
                             });
-                            thisNode.selectAll('.node_right_button rect').attr("fill-opacity",function(d){
+                            thisNode.selectAll(".node_right_button rect").attr("fill-opacity",function(d){
                                     if (d._def.button.toggle) {
                                         return d[d._def.button.toggle]?1:0.2;
                                     }
                                     return 1;
                             });
 
-                            //thisNode.selectAll('.node_right_button').attr("transform",function(d){return "translate("+(d.w - d._def.button.width.call(d))+","+0+")";}).attr("fill",function(d) {
+                            //thisNode.selectAll(".node_right_button").attr("transform",function(d){return "translate("+(d.w - d._def.button.width.call(d))+","+0+")";}).attr("fill",function(d) {
                             //         return typeof d._def.button.color  === "function" ? d._def.button.color.call(d):(d._def.button.color != null ? d._def.button.color : d._def.color)
                             //});
 
-                            thisNode.selectAll('.node_badge_group').attr("transform",function(d){return "translate("+(d.w-40)+","+(d.h+3)+")";});
-                            thisNode.selectAll('text.node_badge_label').text(function(d,i) {
+                            thisNode.selectAll(".node_badge_group").attr("transform",function(d){return "translate("+(d.w-40)+","+(d.h+3)+")";});
+                            thisNode.selectAll("text.node_badge_label").text(function(d,i) {
                                 if (d._def.badge) {
                                     if (typeof d._def.badge == "function") {
                                         try {
@@ -1817,12 +1891,12 @@ RED.view = (function() {
                         }
 
                         if (!showStatus || !d.status) {
-                            thisNode.selectAll('.node_status_group').style("display","none");
+                            thisNode.selectAll(".node_status_group").style("display","none");
                         } else {
-                            thisNode.selectAll('.node_status_group').style("display","inline").attr("transform","translate(3,"+(d.h+3)+")");
+                            thisNode.selectAll(".node_status_group").style("display","inline").attr("transform","translate(3,"+(d.h+3)+")");
                             var fill = status_colours[d.status.fill]; // Only allow our colours for now
                             if (d.status.shape == null && fill == null) {
-                                thisNode.selectAll('.node_status').style("display","none");
+                                thisNode.selectAll(".node_status").style("display","none");
                             } else {
                                 var style;
                                 if (d.status.shape == null || d.status.shape == "dot") {
@@ -1834,22 +1908,23 @@ RED.view = (function() {
                                 } else if (d.status.shape == "ring" ){
                                     style = {
                                         display: "inline",
-                                        fill: '#fff',
+                                        fill: "#fff",
                                         stroke: fill
                                     }
                                 }
-                                thisNode.selectAll('.node_status').style(style);
+                                thisNode.selectAll(".node_status").style(style);
                             }
                             if (d.status.text) {
-                                thisNode.selectAll('.node_status_label').text(d.status.text);
+                                thisNode.selectAll(".node_status_label").text(d.status.text);
                             } else {
-                                thisNode.selectAll('.node_status_label').text("");
+                                thisNode.selectAll(".node_status_label").text("");
                             }
                         }
 
                         d.dirty = false;
                     }
             });
+
             var link = vis.selectAll(".link").data(
                 activeLinks,
                 function(d) {
@@ -1890,7 +1965,8 @@ RED.view = (function() {
                     })
                 l.append("svg:path").attr("class","link_outline link_path");
                 l.append("svg:path").attr("class","link_line link_path")
-                    .classed("link_subflow", function(d) { return activeSubflow });
+                    .classed("link_link", function(d) { return d.link })
+                    .classed("link_subflow", function(d) { return !d.link && activeSubflow });
             });
 
             link.exit().remove();
@@ -1937,6 +2013,123 @@ RED.view = (function() {
                 delete d.added;
                 return d.target.type == "unknown" || d.source.type == "unknown"
             });
+            var offLinks = vis.selectAll(".link_flow_link_g").data(
+                activeFlowLinks,
+                function(d) {
+                    return d.node.id+":"+d.refresh
+                }
+            );
+
+            var offLinksEnter = offLinks.enter().insert("g",".node").attr("class","link_flow_link_g");
+            offLinksEnter.each(function(d,i) {
+                var g = d3.select(this);
+                var s = 1;
+                var labelAnchor = "start";
+                if (d.node.type === "link in") {
+                    s = -1;
+                    labelAnchor = "end";
+                }
+                var stemLength = s*30;
+                var branchLength = s*20;
+                var l = g.append("svg:path").attr("class","link_flow_link")
+                        .attr("class","link_link").attr("d","M 0 0 h "+stemLength);
+                var links = d.links;
+                var flows = Object.keys(links);
+                var tabOrder = RED.nodes.getWorkspaceOrder();
+                flows.sort(function(A,B) {
+                    return tabOrder.indexOf(A) - tabOrder.indexOf(B);
+                });
+                var linkWidth = 10;
+                var h = node_height;
+                var y = -(flows.length-1)*h/2;
+                var linkGroups = g.selectAll(".link_group").data(flows);
+                var enterLinkGroups = linkGroups.enter().append("g").attr("class","link_group")
+                        .on('mouseover', function() { d3.select(this).classed('link_group_active',true)})
+                        .on('mouseout', function() { d3.select(this).classed('link_group_active',false)})
+                        .on('mousedown', function() { d3.event.preventDefault(); d3.event.stopPropagation(); })
+                        .on('mouseup', function(f) {
+                            d3.event.stopPropagation();
+                            var targets = d.links[f];
+                            RED.workspaces.show(f);
+                            targets.forEach(function(n) {
+                                n.selected = true;
+                                n.dirty = true;
+                                moving_set.push({n:n});
+                            });
+                            updateSelection();
+                            redraw();
+                        });
+                enterLinkGroups.each(function(f) {
+                    var linkG = d3.select(this);
+                    linkG.append("svg:path").attr("class","link_flow_link")
+                        .attr("class","link_link")
+                        .attr("d",
+                            "M "+stemLength+" 0 "+
+                            "C "+(stemLength+(1.7*branchLength))+" "+0+
+                            " "+(stemLength+(0.1*branchLength))+" "+y+" "+
+                            (stemLength+branchLength*1.5)+" "+y+" "
+                        );
+                    linkG.append("svg:path")
+                        .attr("class","link_port")
+                        .attr("d",
+                            "M "+(stemLength+branchLength*1.5+s*(linkWidth+7))+" "+(y-12)+" "+
+                            "h "+(-s*linkWidth)+" "+
+                            "a 3 3 45 0 "+(s===1?"0":"1")+" "+(s*-3)+" 3 "+
+                            "v 18 "+
+                            "a 3 3 45 0 "+(s===1?"0":"1")+" "+(s*3)+" 3 "+
+                            "h "+(s*linkWidth)
+                        );
+                    linkG.append("svg:path")
+                        .attr("class","link_port")
+                        .attr("d",
+                            "M "+(stemLength+branchLength*1.5+s*(linkWidth+10))+" "+(y-12)+" "+
+                            "h "+(s*(linkWidth*3))+" "+
+                            "M "+(stemLength+branchLength*1.5+s*(linkWidth+10))+" "+(y+12)+" "+
+                            "h "+(s*(linkWidth*3))
+                        ).style("stroke-dasharray","12 3 8 4 3");
+                    linkG.append("rect").attr("class","port link_port")
+                        .attr("x",stemLength+branchLength*1.5-4+(s*4))
+                        .attr("y",y-4)
+                        .attr("rx",2)
+                        .attr("ry",2)
+                        .attr("width",8)
+                        .attr("height",8);
+                    linkG.append("rect")
+                        .attr("x",stemLength+branchLength*1.5-(s===-1?node_width:0))
+                        .attr("y",y-12)
+                        .attr("width",node_width)
+                        .attr("height",24)
+                        .style("stroke","none")
+                        .style("fill","transparent")
+                    var tab = RED.nodes.workspace(f);
+                    var label;
+                    if (tab) {
+                        label = tab.label || tab.id;
+                    }
+                    linkG.append("svg:text")
+                        .attr("class","port_label")
+                        .attr("x",stemLength+branchLength*1.5+(s*15))
+                        .attr("y",y+1)
+                        .style("font-size","10px")
+                        .style("text-anchor",labelAnchor)
+                        .text(label);
+
+                    y += h;
+                });
+                linkGroups.exit().remove();
+            });
+            offLinks.exit().remove();
+            offLinks = vis.selectAll(".link_flow_link_g");
+            offLinks.each(function(d) {
+                var s = 1;
+                if (d.node.type === "link in") {
+                    s = -1;
+                }
+                var link = d3.select(this);
+                link.attr("transform", function(d) { return "translate(" + (d.node.x+(s*d.node.w/2)) + "," + (d.node.y) + ")"; });
+
+            })
+
         } else {
             // JOINING - unselect any selected links
             vis.selectAll(".link_selected").data(
@@ -1961,8 +2154,8 @@ RED.view = (function() {
     /**
      * Imports a new collection of nodes from a JSON String.
      *  - all get new IDs assigned
-     *  - all 'selected'
-     *  - attached to mouse for placing - 'IMPORT_DRAGGING'
+     *  - all "selected"
+     *  - attached to mouse for placing - "IMPORT_DRAGGING"
      */
     function importNodes(newNodesStr,touchImport) {
         try {
@@ -1977,7 +2170,7 @@ RED.view = (function() {
                 var new_workspaces = result[2];
                 var new_subflows = result[3];
 
-                var new_ms = new_nodes.filter(function(n) { return n.hasOwnProperty('x') && n.hasOwnProperty('y') && n.z == RED.workspaces.active() }).map(function(n) { return {n:n};});
+                var new_ms = new_nodes.filter(function(n) { return n.hasOwnProperty("x") && n.hasOwnProperty("y") && n.z == RED.workspaces.active() }).map(function(n) { return {n:n};});
                 var new_node_ids = new_nodes.map(function(n){ return n.id; });
 
                 // TODO: pick a more sensible root node
@@ -2034,7 +2227,7 @@ RED.view = (function() {
                 }
 
                 var historyEvent = {
-                    t:'add',
+                    t:"add",
                     nodes:new_node_ids,
                     links:new_links,
                     workspaces:new_workspaces,
@@ -2079,6 +2272,7 @@ RED.view = (function() {
         redraw: function(updateActive) {
             if (updateActive) {
                 updateActiveNodes();
+                updateSelection();
             }
             redraw();
         },
