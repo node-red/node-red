@@ -195,9 +195,6 @@ RED.nodes = (function() {
             }
             nodes.push(n);
         }
-        if (n._def.onadd) {
-            n._def.onadd.call(n);
-        }
     }
     function addLink(l) {
         links.push(l);

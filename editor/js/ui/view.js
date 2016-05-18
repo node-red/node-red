@@ -2208,6 +2208,14 @@ RED.view = (function() {
                         node.n.y -= minY;
                         node.dx -= minX;
                         node.dy -= minY;
+                        if (node.n._def.onadd) {
+                            try {
+                                node.n._def.onadd.call(node.n);
+                            } catch(err) {
+                                console.log("onadd:",err);
+                            }
+                        }
+
                     }
                     if (!touchImport) {
                         mouse_mode = RED.state.IMPORT_DRAGGING;
@@ -2218,7 +2226,6 @@ RED.view = (function() {
                                            node.n._def.outputs > 0;
                         }
                     }
-
                     RED.keyboard.add("*",/* ESCAPE */ 27,function(){
                             RED.keyboard.remove(/* ESCAPE */ 27);
                             clearSelection();

@@ -236,19 +236,24 @@
                         i = n.links.indexOf(node.id);
                         if (i > -1) {
                             n.links.splice(i,1);
-                            n.changed = true;
-                            n.dirty = true;
                         }
                     } else if (!nodeMap[id].old && nodeMap[id].new){
                         // Added id
                         i = n.links.indexOf(id);
                         if (i === -1) {
                             n.links.push(node.id);
-                            n.changed = true;
-                            n.dirty = true;
                         }
                     }
                 }
+            }
+        }
+    }
+
+    function onAdd() {
+        for (var i=0;i<this.links.length;i++) {
+            var n = RED.nodes.node(this.links[i]);
+            if (n.links.indexOf(this.id) === -1) {
+                n.links.push(this.id);
             }
         }
     }
@@ -275,6 +280,7 @@
         oneditsave: function() {
             onEditSave(this);
         },
+        onadd: onAdd,
         oneditresize: resizeNodeList
     });
 
@@ -301,6 +307,7 @@
         oneditsave: function() {
             onEditSave(this);
         },
+        onadd: onAdd,
         oneditresize: resizeNodeList
     });
 })();
