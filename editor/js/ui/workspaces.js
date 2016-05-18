@@ -173,16 +173,17 @@ RED.workspaces = (function() {
             title: RED._("workspace.confirmDelete"),
             buttons: [
                 {
-                    text: RED._("common.label.ok"),
+                    text: RED._("common.label.cancel"),
                     click: function() {
-                        var workspace = $(this).dialog('option','workspace');
-                        deleteWorkspace(workspace,true);
                         $( this ).dialog( "close" );
                     }
                 },
                 {
-                    text: RED._("common.label.cancel"),
+                    text: RED._("common.label.ok"),
+                    class: "primary",
                     click: function() {
+                        var workspace = $(this).dialog('option','workspace');
+                        deleteWorkspace(workspace,true);
                         $( this ).dialog( "close" );
                     }
                 }

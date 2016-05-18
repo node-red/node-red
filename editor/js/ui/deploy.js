@@ -83,7 +83,14 @@ RED.deploy = (function() {
                 height: "auto",
                 buttons: [
                     {
+                        text: RED._("deploy.confirm.button.cancel"),
+                        click: function() {
+                            $( this ).dialog( "close" );
+                        }
+                    },
+                    {
                         text: RED._("deploy.confirm.button.confirm"),
+                        class: "primary",
                         click: function() {
 
                             var ignoreChecked = $( "#node-dialog-confirm-deploy-hide" ).prop("checked");
@@ -91,12 +98,6 @@ RED.deploy = (function() {
                                 ignoreDeployWarnings[$( "#node-dialog-confirm-deploy-type" ).val()] = true;
                             }
                             save(true);
-                            $( this ).dialog( "close" );
-                        }
-                    },
-                    {
-                        text: RED._("deploy.confirm.button.cancel"),
-                        click: function() {
                             $( this ).dialog( "close" );
                         }
                     }
