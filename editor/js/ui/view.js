@@ -78,7 +78,7 @@ RED.view = (function() {
         .attr("pointer-events", "all")
         .style("cursor","crosshair")
         .on("mousedown", function() {
-            $(this).focus();
+            focusView();
         });
 
     var vis = outer
@@ -2148,7 +2148,10 @@ RED.view = (function() {
     }
 
     function focusView() {
+        var scrollX = window.parent.window.scrollX;
+        var scrollY = window.parent.window.scrollY;
         $("#chart svg").focus();
+        window.parent.window.scrollTo(scrollX,scrollY);
     }
 
     /**
