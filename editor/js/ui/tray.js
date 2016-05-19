@@ -70,13 +70,13 @@ RED.tray = (function() {
                     el.width('auto');
                 },
                 drag: function(event,ui) {
-
                     var absolutePosition = editorStack.position().left+ui.position.left
                     if (absolutePosition < 7) {
                         ui.position.left += 7-absolutePosition;
                     } else if (ui.position.left > -tray.preferredWidth-1) {
                         ui.position.left = -Math.min(editorStack.position().left-7,tray.preferredWidth-1);
-                    } else if (tray.options.resize) {
+                    }
+                    if (tray.options.resize) {
                         setTimeout(function() {
                             tray.options.resize({width: -ui.position.left});
                         },0);
