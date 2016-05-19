@@ -301,8 +301,10 @@ RED.editor = (function() {
      * @param prefix - the prefix to use in the input element ids (node-input|node-config-input)
      */
     function attachPropertyChangeHandler(node,definition,property,prefix) {
-        $("#"+prefix+"-"+property).change(function() {
-            validateNodeEditor(node,prefix);
+        $("#"+prefix+"-"+property).change(function(event,skipValidation) {
+            if (!skipValidation) {
+                validateNodeEditor(node,prefix);
+            }
         });
     }
 
@@ -398,6 +400,20 @@ RED.editor = (function() {
         var completePrepare = function() {
             if (definition.oneditprepare) {
                 definition.oneditprepare.call(node);
+            }
+            // Now invoke any change handlers added to the fields - passing true
+            // to prevent full node validation from being triggered each time
+            for (var d in definition.defaults) {
+                if (definition.defaults.hasOwnProperty(d)) {
+                    $("#"+prefix+"-"+d).trigger("change",[true]);
+                }
+            }
+            if (definition.credentials) {
+                for (d in definition.credentials) {
+                    if (definition.credentials.hasOwnProperty(d)) {
+                        $("#"+prefix+"-"+d).trigger("change",[true]);
+                    }
+                }
             }
             validateNodeEditor(node,prefix);
         }
