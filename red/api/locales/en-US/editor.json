@@ -232,5 +232,8 @@
             "json": "JSON",
             "date": "timestamp"
         }
+    },
+    "editableList": {
+        "add": "add"
     }
 }
