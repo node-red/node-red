@@ -894,7 +894,7 @@ RED.nodes = (function() {
                         if (configNode && configNode.users.indexOf(n) === -1) {
                             configNode.users.push(n);
                         }
-                    } else if (nodeTypeArrayReferences.hasOwnProperty(n.type) && nodeTypeArrayReferences[n.type] === d3) {
+                    } else if (nodeTypeArrayReferences.hasOwnProperty(n.type) && nodeTypeArrayReferences[n.type] === d3 && n[d3] !== null) {
                         for (var j = 0;j<n[d3].length;j++) {
                             if (node_map[n[d3][j]]) {
                                 n[d3][j] = node_map[n[d3][j]].id;
