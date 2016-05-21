@@ -122,7 +122,7 @@ RED.tray = (function() {
 
         el.css({
             right: -(el.width()+10)+"px",
-            transition: "right 0.2s ease"
+            transition: "right 0.25s ease"
         });
         $("#workspace").scrollLeft(0);
         handleWindowResize();
@@ -200,7 +200,7 @@ RED.tray = (function() {
                 setTimeout(function() {
                     oldTray.tray.detach();
                     showTray(options);
-                },200)
+                },250)
             } else {
                 showTray(options);
             }
@@ -231,7 +231,7 @@ RED.tray = (function() {
                     if (done) {
                         done();
                     }
-                },200)
+                },250)
                 if (stack.length === 0) {
                     $("#header-shade").hide();
                     $("#editor-shade").hide();
