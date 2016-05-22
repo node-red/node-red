@@ -74,7 +74,6 @@ RED.view = (function() {
         .append("svg:svg")
         .attr("width", space_width)
         .attr("height", space_height)
-        .attr("tabindex",1)
         .attr("pointer-events", "all")
         .style("cursor","crosshair")
         .on("mousedown", function() {
@@ -2150,7 +2149,7 @@ RED.view = (function() {
     function focusView() {
         var scrollX = window.parent.window.scrollX;
         var scrollY = window.parent.window.scrollY;
-        $("#chart svg").focus();
+        $("#chart").focus();
         window.parent.window.scrollTo(scrollX,scrollY);
     }
 
