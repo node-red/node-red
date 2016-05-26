@@ -34,17 +34,17 @@ var stubbedExpressApp = {
     get: function() {},
     post: function() {},
     put: function() {},
-    delete: function(){}
+    delete: function() {}
 }
 var adminApi = {
     library: {
-        register: function(){}
+        register: function() {}
     },
     auth: {
-        needsPermission: function(){}
+        needsPermission: function() {}
     },
     comms: {
-        publish: function(){}
+        publish: function() {}
     },
     adminApp: stubbedExpressApp,
     nodeApp: stubbedExpressApp,
@@ -105,16 +105,11 @@ function start() {
                 var nodeErrors = redNodes.getNodeList(function(n) { return n.err!=null;});
                 var nodeMissing = redNodes.getNodeList(function(n) { return n.module && n.enabled && !n.loaded && !n.err;});
                 if (nodeErrors.length > 0) {
-                    log.warn("------------------------------------------");
-                    if (settings.verbose) {
-                        for (i=0;i<nodeErrors.length;i+=1) {
-                            log.warn("["+nodeErrors[i].name+"] "+nodeErrors[i].err);
-                        }
-                    } else {
-                        log.warn(log._("server.errors",{count:nodeErrors.length}));
-                        log.warn(log._("server.errors-help"));
+                    log.warn("------------------------------------------------------");
+                    for (i=0;i<nodeErrors.length;i+=1) {
+                        log.warn("["+nodeErrors[i].name+"] "+nodeErrors[i].err);
                     }
-                    log.warn("------------------------------------------");
+                    log.warn("------------------------------------------------------");
                 }
                 if (nodeMissing.length > 0) {
                     log.warn(log._("server.missing-modules"));
@@ -148,7 +143,7 @@ function start() {
             }).otherwise(function(err) {
                 console.log(err);
             });
-    });
+        });
 }
 
 function reportMetrics() {
