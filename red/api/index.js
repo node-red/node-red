@@ -20,6 +20,7 @@ var util = require('util');
 var path = require('path');
 var passport = require('passport');
 var when = require('when');
+var cors = require('cors');
 
 var ui = require("./ui");
 var nodes = require("./nodes");
@@ -113,19 +114,8 @@ function init(_server,_runtime) {
             adminApp.post("/auth/revoke",needsPermission(""),auth.revoke,errorHandler);
         }
         if (settings.httpAdminCors) {
-            var allowCrossDomain = function(req, res, next) {
-                if(settings.httpAdminCors.origin) {
-                    res.header('Access-Control-Allow-Origin', settings.httpAdminCors.origin);
-                }
-                if(settings.httpAdminCors.methods) {
-                    res.header('Access-Control-Allow-Methods', settings.httpAdminCors.methods);
-                }
-                if(settings.httpAdminCors.headers) {
-                    res.header('Access-Control-Allow-Headers', settings.httpAdminCors.headers);
-                }
-                next();
-            };
-            adminApp.use(allowCrossDomain);
+            var corsHandler = cors(settings.httpAdminCors);
+            adminApp.use(corsHandler);
         }
 
         // Flows
