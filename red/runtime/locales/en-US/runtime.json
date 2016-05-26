@@ -34,7 +34,6 @@
         "uncaught-exception": "Uncaught Exception:",
         "admin-ui-disabled": "Admin UI disabled",
         "now-running": "Server now running at __listenpath__",
-        "admin-cors-enabled": "CORS is enabled on the admin routes",
         "failed-to-start": "Failed to start server:",
         "headless-mode": "Running in headless mode",
         "httpadminauth-deprecated": "use of httpAdminAuth is deprecated. Use adminAuth instead"

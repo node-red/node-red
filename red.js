@@ -267,9 +267,6 @@ RED.start().then(function() {
             }
             process.title = 'node-red';
             RED.log.info(RED.log._("server.now-running", {listenpath:getListenPath()}));
-            if (settings.httpAdminCors !== undefined) {
-                RED.log.info(RED.log._("server.admin-cors-enabled"));
-            }
         });
     } else {
         RED.log.info(RED.log._("server.headless-mode"));
