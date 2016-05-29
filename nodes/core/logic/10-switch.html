@@ -173,17 +173,17 @@
                     }
                     selectField.change();
                 },
-                deleteItem: function(opt) {
+                removeItem: function(opt) {
                     var rules = $("#node-input-rule-container").editableList('items');
                     rules.each(function(i) { $(this).find(".node-input-rule-index").html(i+1); });
                 },
                 resizeItem: resizeRule,
-                updateOrder: function(rules) {
+                sortItems: function(rules) {
                     var rules = $("#node-input-rule-container").editableList('items');
                     rules.each(function(i) { $(this).find(".node-input-rule-index").html(i+1); });
                 },
                 sortable: true,
-                deletable: true
+                removable: true
             });
 
             for (var i=0;i<this.rules.length;i++) {

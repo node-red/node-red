@@ -15,6 +15,27 @@
  **/
 (function($) {
 
+/**
+ * options:
+ *   - addButton : boolean|string - text for add label, default 'tab'
+ *   - addable : boolean (true) - whether to show the add button
+ *   - height : number|'auto'
+ *   - resize : function - called when list as a whole is resized
+ *   - resizeItem : function(item) - called to resize individual item
+ *   - sortable : boolean|string - string is the css selector for handle
+ *   - sortItems : function(items) - when order of items changes
+ *   - connectWith : css selector of other sortables
+ *   - removable : boolean - whether to display delete button on items
+ *   - addItem : function(row,index,itemData) - when an item is added
+ *   - removeItem : function(itemData) - called when an item is removed
+ * methods:
+ *   - addItem(itemData)
+ *   - removeItem(itemData)
+ *   - width(width)
+ *   - height(height)
+ *   - items()
+ *   - empty()
+ */
     $.widget( "nodered.editableList", {
         _create: function() {
             var that = this;
@@ -28,16 +49,24 @@
 
             this.topContainer.addClass('red-ui-editableList');
 
-            var addLabel = "foo";
-            if (RED && RED._) {
-                addLabel = RED._("editableList.add");
+            if (this.options.addButton !== false) {
+                var addLabel;
+                if (typeof this.options.addButton === 'string') {
+                    addLabel = this.options.addButton
+                } else {
+                    if (RED && RED._) {
+                        addLabel = RED._("editableList.add");
+                    } else {
+                        addLabel = 'add';
+                    }
+                }
+                $('<a href="#" class="editor-button editor-button-small" style="margin-top: 4px;"><i class="fa fa-plus"></i> '+addLabel+'</a>')
+                    .appendTo(this.topContainer)
+                    .click(function(evt) {
+                        evt.preventDefault();
+                        that.addItem({});
+                    });
             }
-
-            var addButton = $('<a href="#" class="editor-button editor-button-small" style="margin-top: 4px;"><i class="fa fa-plus"></i> '+addLabel+'</a>').appendTo(this.topContainer);
-            addButton.click(function(evt) {
-                evt.preventDefault();
-                that.addItem({});
-            });
 
             this.uiContainer.addClass("red-ui-editableList-container");
 
@@ -48,18 +77,37 @@
                 this.uiContainer.css("minHeight",minHeight);
                 this.element.css("minHeight",0);
             }
-
+            if (this.options.height !== 'auto') {
+                this.uiContainer.css("overflow-y","scroll");
+                if (!isNaN(this.options.height)) {
+                    this.uiHeight = this.options.height;
+                }
+            }
             if (this.options.sortable) {
-                this.element.sortable({
+                var handle = (typeof this.options.sortable === 'string')?
+                                this.options.sortable :
+                                ".red-ui-editableList-item-handle";
+                var sortOptions = {
                     axis: "y",
                     update: function( event, ui ) {
-                        if (that.options.updateOrder) {
-                            that.options.updateOrder(that.items());
+                        if (that.options.sortItems) {
+                            that.options.sortItems(that.items());
                         }
                     },
-                    handle:".red-ui-editableList-item-handle",
-                    cursor: "move"
-                });
+                    handle:handle,
+                    cursor: "move",
+                    tolerance: "pointer",
+                    forcePlaceholderSize:true,
+                    placeholder: "red-ui-editabelList-item-placeholder",
+                    start: function(e, ui){
+                        ui.placeholder.height(ui.item.height()-4);
+                    }
+                };
+                if (this.options.connectWith) {
+                    sortOptions.connectWith = this.options.connectWith;
+                }
+
+                this.element.sortable(sortOptions);
             }
 
             this._resize();
@@ -71,7 +119,9 @@
             var currentFullHeight = this.topContainer.height();
             var innerHeight = this.uiContainer.height();
             var delta = currentFullHeight - innerHeight;
-            this.uiContainer.height(this.uiHeight-delta);
+            if (this.uiHeight != 0) {
+                this.uiContainer.height(this.uiHeight-delta);
+            }
             if (this.options.resize) {
                 this.options.resize();
             }
@@ -96,22 +146,22 @@
             var that = this;
             data = data || {};
             var li = $('<li>').appendTo(this.element);
-            li.data('data',data);
             var row = $('<div/>').addClass("red-ui-editableList-item-content").appendTo(li);
-            if (this.options.sortable) {
+            row.data('data',data);
+            if (this.options.sortable === true) {
                 $('<i class="red-ui-editableList-item-handle fa fa-bars"></i>').appendTo(li);
                 li.addClass("red-ui-editableList-item-sortable");
             }
-            if (this.options.deletable) {
-                var deleteButton = $('<a/>',{href:"#",class:"red-ui-editableList-item-delete editor-button editor-button-small"}).appendTo(li);
+            if (this.options.removable) {
+                var deleteButton = $('<a/>',{href:"#",class:"red-ui-editableList-item-remove editor-button editor-button-small"}).appendTo(li);
                 $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
-                li.addClass("red-ui-editableList-item-deletable");
+                li.addClass("red-ui-editableList-item-removable");
                 deleteButton.click(function() {
                     li.addClass("red-ui-editableList-item-deleting")
                     li.fadeOut(300, function() {
                         $(this).remove();
-                        if (that.options.deleteItem) {
-                            that.options.deleteItem(li.data('data'));
+                        if (that.options.removeItem) {
+                            that.options.removeItem(row.data('data'));
                         }
                     });
                 });
@@ -123,8 +173,20 @@
                 },0);
             }
         },
+        removeItem: function(data) {
+            var items = this.element.children().filter(function(f) {
+                return data === $(this).find(".red-ui-editableList-item-content").data('data');
+            });
+            items.remove();
+            if (this.options.removeItem) {
+                this.options.removeItem(data);
+            }
+        },
         items: function() {
             return this.element.children().map(function(i) { return $(this).find(".red-ui-editableList-item-content"); });
+        },
+        empty: function() {
+            this.element.empty();
         }
     });
 })(jQuery);
