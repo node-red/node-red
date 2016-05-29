@@ -119,7 +119,7 @@
             var currentFullHeight = this.topContainer.height();
             var innerHeight = this.uiContainer.height();
             var delta = currentFullHeight - innerHeight;
-            if (this.uiHeight != 0) {
+            if (this.uiHeight !== 0) {
                 this.uiContainer.height(this.uiHeight-delta);
             }
             if (this.options.resize) {
