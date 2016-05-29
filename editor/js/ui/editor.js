@@ -545,6 +545,9 @@ RED.editor = (function() {
 
     function showEditDialog(node) {
         var editing_node = node;
+        if (editStack.length === 0) {
+            RED.events.emit("editor:open");
+        }
         editStack.push(node);
         RED.view.state(RED.state.EDITING);
         var type = node.type;
@@ -713,6 +716,7 @@ RED.editor = (function() {
                         }
                         editing_node.dirty = true;
                         validateNode(editing_node);
+                        RED.events.emit("editor:save",editing_node);
                         RED.tray.close();
                     }
                 }
@@ -770,6 +774,7 @@ RED.editor = (function() {
                 editStack.pop();
                 if (editStack.length === 0) {
                     RED.view.focus();
+                    RED.events.emit("editor:close");
                 }
             },
             show: function() {
@@ -831,6 +836,9 @@ RED.editor = (function() {
                 }
             }
             editing_config_node["_"] = node_def._;
+        }
+        if (editStack.length === 0) {
+            RED.events.emit("editor:open");
         }
         editStack.push(editing_config_node);
 
@@ -924,6 +932,7 @@ RED.editor = (function() {
                 editStack.pop();
                 if (editStack.length === 0) {
                     RED.view.focus();
+                    RED.events.emit("editor:close");
                 }
             },
             show: function() {
@@ -1054,6 +1063,9 @@ RED.editor = (function() {
                     }
                     RED.nodes.dirty(true);
                     RED.view.redraw(true);
+                    if (!configAdding) {
+                        RED.events.emit("editor:save",editing_config_node);
+                    }
                     RED.tray.close(function() {
                         updateConfigNodeSelect(configProperty,configType,editing_config_node.id,prefix);
                     });
@@ -1083,7 +1095,6 @@ RED.editor = (function() {
                         changes: {},
                         dirty: RED.nodes.dirty()
                     }
-                    RED.nodes.remove(configId);
                     for (var i=0;i<editing_config_node.users.length;i++) {
                         var user = editing_config_node.users[i];
                         historyEvent.changes[user.id] = {
@@ -1100,6 +1111,7 @@ RED.editor = (function() {
                         }
                         validateNode(user);
                     }
+                    RED.nodes.remove(configId);
                     RED.nodes.dirty(true);
                     RED.view.redraw(true);
                     RED.history.push(historyEvent);
@@ -1115,6 +1127,9 @@ RED.editor = (function() {
 
     function showEditSubflowDialog(subflow) {
         var editing_node = subflow;
+        if (editStack.length === 0) {
+            RED.events.emit("editor:open");
+        }
         editStack.push(subflow);
         RED.view.state(RED.state.EDITING);
         var subflowEditor;
@@ -1260,6 +1275,7 @@ RED.editor = (function() {
                 editing_node = null;
                 if (editStack.length === 0) {
                     RED.view.focus();
+                    RED.events.emit("editor:close");
                 }
             },
             show: function() {

@@ -195,6 +195,7 @@ RED.nodes = (function() {
             }
             nodes.push(n);
         }
+        RED.events.emit('nodes:add',n);
     }
     function addLink(l) {
         links.push(l);
@@ -220,6 +221,7 @@ RED.nodes = (function() {
         if (id in configNodes) {
             node = configNodes[id];
             delete configNodes[id];
+            RED.events.emit('nodes:remove',node);
             RED.workspaces.refresh();
         } else {
             node = getNode(id);
@@ -252,6 +254,7 @@ RED.nodes = (function() {
                 if (updatedConfigNode) {
                     RED.workspaces.refresh();
                 }
+                RED.events.emit('nodes:remove',node);
             }
         }
         if (node && node._def.onremove) {
