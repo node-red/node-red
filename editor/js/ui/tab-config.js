@@ -35,9 +35,6 @@ RED.sidebar.config = (function() {
     var flowCategories = $("<div>").appendTo(content);
     var subflowCategories = $("<div>").appendTo(content);
 
-
-    var shade = $('<div class="sidebar-node-config-shade hide"></div>').appendTo(content);
-
     var showUnusedOnly = false;
 
     var categories = {};
@@ -291,12 +288,6 @@ RED.sidebar.config = (function() {
     return {
         init:init,
         show:show,
-        refresh:refreshConfigNodeList,
-        disable: function() {
-            shade.show();
-        },
-        enable: function() {
-            shade.hide();
-        }
+        refresh:refreshConfigNodeList
     }
 })();

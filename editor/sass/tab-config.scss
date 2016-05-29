@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,6 @@
     overflow-y:auto;
     @include disable-selection;
 }
-.sidebar-node-config-shade {
-    position: absolute;
-    top:0;
-    bottom:0;
-    left:0;
-    right:0;
-    background: $shade-color;
-}
-
 
  .config-node-list {
      margin: 0;

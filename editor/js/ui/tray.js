@@ -99,7 +99,8 @@ RED.tray = (function() {
 
         $("#header-shade").show();
         $("#editor-shade").show();
-        RED.sidebar.config.disable();
+        $(".sidebar-shade").show();
+
         tray.preferredWidth = Math.max(el.width(),500);
         body.css({"minWidth":tray.preferredWidth-40});
 
@@ -235,8 +236,7 @@ RED.tray = (function() {
                 if (stack.length === 0) {
                     $("#header-shade").hide();
                     $("#editor-shade").hide();
-                    RED.sidebar.config.enable();
-
+                    $(".sidebar-shade").hide();
                 }
             }
         }

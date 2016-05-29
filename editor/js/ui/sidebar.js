@@ -24,13 +24,13 @@ RED.sidebar = (function() {
             if (tab.onchange) {
                 tab.onchange.call(tab);
             }
-            $(tab.content).show();
+            $(tab.wrapper).show();
             if (tab.toolbar) {
                 $(tab.toolbar).show();
             }
         },
         onremove: function(tab) {
-            $(tab.content).hide();
+            $(tab.wrapper).hide();
             if (tab.onremove) {
                 tab.onremove.call(tab);
             }
@@ -58,15 +58,18 @@ RED.sidebar = (function() {
             options = title;
         }
 
+        options.wrapper = $('<div>',{style:"height:100%"}).appendTo("#sidebar-content")
+        options.wrapper.append(options.content);
+        options.wrapper.hide();
 
+        if (!options.enableOnEdit) {
+            options.shade = $('<div>',{class:"sidebar-shade hide"}).appendTo(options.wrapper);
+        }
 
-        $("#sidebar-content").append(options.content);
-        $(options.content).hide();
         if (options.toolbar) {
             $("#sidebar-footer").append(options.toolbar);
             $(options.toolbar).hide();
         }
-        $(options.content).hide();
         var id = options.id;
 
         RED.menu.addItem("menu-item-view-menu",{
@@ -87,7 +90,10 @@ RED.sidebar = (function() {
 
     function removeTab(id) {
         sidebar_tabs.removeTab(id);
-        $(knownTabs[id].content).remove();
+        $(knownTabs[id].wrapper).remove();
+        if (knownTabs[id].footer) {
+            knownTabs[id].footer.remove();
+        }
         delete knownTabs[id];
         RED.menu.removeItem("menu-item-view-menu-"+id);
     }
