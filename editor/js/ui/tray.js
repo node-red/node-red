@@ -34,6 +34,7 @@ RED.tray = (function() {
             $('<div class="editor-tray-titlebar">'+options.title+'</div>').appendTo(header);
         }
         var buttonBar = $('<div class="editor-tray-toolbar"></div>').appendTo(header);
+        var primaryButton;
         if (options.buttons) {
             for (var i=0;i<options.buttons.length;i++) {
                 var button = options.buttons[i];
@@ -50,6 +51,9 @@ RED.tray = (function() {
                 }
                 if (button.class) {
                     b.addClass(button.class);
+                    if (button.class === "primary") {
+                        primaryButton = button;
+                    }
                 }
             }
         }
@@ -59,7 +63,8 @@ RED.tray = (function() {
             header: header,
             body: body,
             footer: footer,
-            options: options
+            options: options,
+            primaryButton: primaryButton
         };
         stack.push(tray);
 
@@ -191,6 +196,12 @@ RED.tray = (function() {
         init: function init() {
             $(window).resize(handleWindowResize);
             RED.events.on("sidebar:resize",handleWindowResize);
+            $("#editor-shade").click(function() {
+                var tray = stack[stack.length-1];
+                if (tray && tray.primaryButton) {
+                    tray.primaryButton.click();
+                }
+            });
         },
         show: function show(options) {
             if (stack.length > 0) {
