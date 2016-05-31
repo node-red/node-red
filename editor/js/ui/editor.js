@@ -218,39 +218,22 @@ RED.editor = (function() {
         var newWidth;
         if (existingWidthCSS !== '') {
             if (/%/.test(existingWidthCSS)) {
-                newWidth = (input.width()-20)+"%";
+                newWidth = (input.width()-10)+"%";
             } else {
-                newWidth = input.width()-80;
+                newWidth = input.width()-50;
             }
         } else {
-            newWidth = "55%";
+            newWidth = "60%";
         }
-        var select = $('<select id="'+prefix+'-'+property+'"></select>').width(newWidth);
+        var select = $('<select id="'+prefix+'-'+property+'"></select>');
+        select.width(newWidth);
         input.replaceWith(select);
         updateConfigNodeSelect(property,type,node[property],prefix);
-        var addButton = $('<a style="margin-left: 5px;" class="editor-button"><i class="fa fa-plus"></i></a>').insertAfter(select);
-        var editButton = $('<a id="'+prefix+'-lookup-'+property+'" style="margin-left: 5px;" class="editor-button"><i class="fa fa-pencil"></i></a>').insertAfter(select);
-
-        editButton.click(function(e) {
-            if (!$(this).hasClass('disabled')) {
-                showEditConfigNodeDialog(property,type,select.find(":selected").val(),prefix);
-            }
+        select.after(' <a id="'+prefix+'-lookup-'+property+'" class="editor-button"><i class="fa fa-pencil"></i></a>');
+        $('#'+prefix+'-lookup-'+property).click(function(e) {
+            showEditConfigNodeDialog(property,type,select.find(":selected").val(),prefix);
             e.preventDefault();
         });
-        addButton.click(function(e) {
-            showEditConfigNodeDialog(property,type,"_ADD_",prefix);
-            e.preventDefault();
-        });
-
-        select.change(function() {
-            var options = select.children();
-            if (options.length > 1 || $(options[0]).val() !== "_ADD_") {
-                editButton.removeClass("disabled");
-            } else {
-                editButton.addClass("disabled");
-            }
-        });
-
         var label = "";
         var configNode = RED.nodes.node(node[property]);
         var node_def = RED.nodes.getType(type);
@@ -263,64 +246,6 @@ RED.editor = (function() {
             }
         }
         input.val(label);
-    }
-
-    function updateConfigNodeSelect(name,type,value,prefix) {
-        // if prefix is null, there is no config select to update
-        if (prefix) {
-            var button = $("#"+prefix+"-edit-"+name);
-            if (button.length) {
-                if (value) {
-                    button.text(RED._("editor.configEdit"));
-                } else {
-                    button.text(RED._("editor.configAdd"));
-                }
-                $("#"+prefix+"-"+name).val(value);
-            } else {
-
-                var select = $("#"+prefix+"-"+name);
-                var node_def = RED.nodes.getType(type);
-                select.children().remove();
-
-                var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
-                if (!activeWorkspace) {
-                    activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
-                }
-
-                var configNodes = [];
-
-                RED.nodes.eachConfig(function(config) {
-                    if (config.type == type && (!config.z || config.z === activeWorkspace.id)) {
-                        var label = "";
-                        if (typeof node_def.label == "function") {
-                            label = node_def.label.call(config);
-                        } else {
-                            label = node_def.label;
-                        }
-                        configNodes.push({id:config.id,label:label});
-                    }
-                });
-
-                configNodes.sort(function(A,B) {
-                    if (A.label < B.label) {
-                        return -1;
-                    } else if (A.label > B.label) {
-                        return 1;
-                    }
-                    return 0;
-                });
-
-                configNodes.forEach(function(cn) {
-                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+cn.label+'</option>');
-                });
-
-                if (configNodes.length === 0) {
-                    select.append('<option value="_ADD_"'+(value===""?" selected":"")+'>'+RED._("editor.addNewType", {type:type})+'</option>');
-                }
-
-                window.setTimeout(function() { select.change();},50);
-            }
-        }
     }
 
     /**
@@ -1123,6 +1048,62 @@ RED.editor = (function() {
         }
 
         RED.tray.show(trayOptions);
+    }
+
+
+    function updateConfigNodeSelect(name,type,value,prefix) {
+        // if prefix is null, there is no config select to update
+        if (prefix) {
+            var button = $("#"+prefix+"-edit-"+name);
+            if (button.length) {
+                if (value) {
+                    button.text(RED._("editor.configEdit"));
+                } else {
+                    button.text(RED._("editor.configAdd"));
+                }
+                $("#"+prefix+"-"+name).val(value);
+            } else {
+
+                var select = $("#"+prefix+"-"+name);
+                var node_def = RED.nodes.getType(type);
+                select.children().remove();
+
+                var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
+                if (!activeWorkspace) {
+                    activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
+                }
+
+                var configNodes = [];
+
+                RED.nodes.eachConfig(function(config) {
+                    if (config.type == type && (!config.z || config.z === activeWorkspace.id)) {
+                        var label = "";
+                        if (typeof node_def.label == "function") {
+                            label = node_def.label.call(config);
+                        } else {
+                            label = node_def.label;
+                        }
+                        configNodes.push({id:config.id,label:label});
+                    }
+                });
+
+                configNodes.sort(function(A,B) {
+                    if (A.label < B.label) {
+                        return -1;
+                    } else if (A.label > B.label) {
+                        return 1;
+                    }
+                    return 0;
+                });
+
+                configNodes.forEach(function(cn) {
+                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+cn.label+'</option>');
+                });
+
+                select.append('<option value="_ADD_"'+(value===""?" selected":"")+'>'+RED._("editor.addNewType", {type:type})+'</option>');
+                window.setTimeout(function() { select.change();},50);
+            }
+        }
     }
 
     function showEditSubflowDialog(subflow) {
