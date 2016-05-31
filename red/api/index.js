@@ -20,6 +20,7 @@ var util = require('util');
 var path = require('path');
 var passport = require('passport');
 var when = require('when');
+var cors = require('cors');
 
 var ui = require("./ui");
 var nodes = require("./nodes");
@@ -111,6 +112,10 @@ function init(_server,_runtime) {
                 auth.errorHandler
             );
             adminApp.post("/auth/revoke",needsPermission(""),auth.revoke,errorHandler);
+        }
+        if (settings.httpAdminCors) {
+            var corsHandler = cors(settings.httpAdminCors);
+            adminApp.use(corsHandler);
         }
 
         // Flows
