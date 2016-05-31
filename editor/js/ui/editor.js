@@ -470,9 +470,6 @@ RED.editor = (function() {
 
     function showEditDialog(node) {
         var editing_node = node;
-        if (editStack.length === 0) {
-            RED.events.emit("editor:open");
-        }
         editStack.push(node);
         RED.view.state(RED.state.EDITING);
         var type = node.type;
@@ -697,10 +694,6 @@ RED.editor = (function() {
                 RED.workspaces.refresh();
                 RED.view.redraw(true);
                 editStack.pop();
-                if (editStack.length === 0) {
-                    RED.view.focus();
-                    RED.events.emit("editor:close");
-                }
             },
             show: function() {
                 if (editing_node) {
@@ -761,9 +754,6 @@ RED.editor = (function() {
                 }
             }
             editing_config_node["_"] = node_def._;
-        }
-        if (editStack.length === 0) {
-            RED.events.emit("editor:open");
         }
         editStack.push(editing_config_node);
 
@@ -855,10 +845,6 @@ RED.editor = (function() {
             close: function() {
                 RED.workspaces.refresh();
                 editStack.pop();
-                if (editStack.length === 0) {
-                    RED.view.focus();
-                    RED.events.emit("editor:close");
-                }
             },
             show: function() {
                 if (editing_config_node) {
@@ -1108,9 +1094,6 @@ RED.editor = (function() {
 
     function showEditSubflowDialog(subflow) {
         var editing_node = subflow;
-        if (editStack.length === 0) {
-            RED.events.emit("editor:open");
-        }
         editStack.push(subflow);
         RED.view.state(RED.state.EDITING);
         var subflowEditor;
@@ -1254,18 +1237,12 @@ RED.editor = (function() {
                 RED.workspaces.refresh();
                 editStack.pop();
                 editing_node = null;
-                if (editStack.length === 0) {
-                    RED.view.focus();
-                    RED.events.emit("editor:close");
-                }
             },
             show: function() {
             }
         }
         RED.tray.show(trayOptions);
     }
-
-
 
     return {
         init: function() {

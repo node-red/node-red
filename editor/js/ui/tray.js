@@ -214,6 +214,7 @@ RED.tray = (function() {
                     showTray(options);
                 },250)
             } else {
+                RED.events.emit("editor:open");
                 showTray(options);
             }
 
@@ -243,12 +244,14 @@ RED.tray = (function() {
                     if (done) {
                         done();
                     }
+                    if (stack.length === 0) {
+                        $("#header-shade").hide();
+                        $("#editor-shade").hide();
+                        $(".sidebar-shade").hide();
+                        RED.events.emit("editor:close");
+                        RED.view.focus();
+                    }
                 },250)
-                if (stack.length === 0) {
-                    $("#header-shade").hide();
-                    $("#editor-shade").hide();
-                    $(".sidebar-shade").hide();
-                }
             }
         }
     }
