@@ -272,6 +272,12 @@ RED.nodes = (function() {
 
     function addWorkspace(ws) {
         workspaces[ws.id] = ws;
+        ws._def = {
+            defaults: {
+                label: {value:""}
+            }
+        };
+
         workspacesOrder.push(ws.id);
     }
     function getWorkspace(id) {

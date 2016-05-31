@@ -47,7 +47,13 @@ RED.tray = (function() {
                     b.html(button.text);
                 }
                 if (button.click) {
-                    b.click(button.click);
+                    b.click((function(action) {
+                        return function(evt) {
+                            if (!$(this).hasClass('disabled')) {
+                                action(evt);
+                            }
+                        };
+                    })(button.click));
                 }
                 if (button.class) {
                     b.addClass(button.class);

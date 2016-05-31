@@ -86,7 +86,7 @@
         }
         &:not(.primary) {
             background: none;
-            &:hover {
+            &:not(.disabled):hover {
                 color: $editor-button-color-primary;
             }
         }

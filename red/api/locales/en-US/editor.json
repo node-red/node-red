@@ -15,7 +15,7 @@
     },
     "workspace": {
         "defaultName": "Flow __number__",
-        "renameSheet": "Rename flow",
+        "editFlow": "Edit flow: __name__",
         "confirmDelete": "Confirm delete",
         "delete": "Are you sure you want to delete '__label__'?",
         "dropFlowHere": "Drop the flow here"

@@ -129,21 +129,6 @@
         </div>
     </form>
 </div>
-<div id="node-dialog-rename-workspace" class="hide">
-    <form class="form-horizontal">
-        <div class="form-row">
-            <label for="node-input-workspace-name" ><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
-            <input type="text" id="node-input-workspace-name">
-        </div>
-    </form>
-</div>
-<div id="node-dialog-delete-workspace" class="hide">
-    <form class="form-horizontal">
-        <div style="text-align: center; padding-top: 30px;" id="node-dialog-delete-workspace-content">
-        </div>
-    </form>
-</div>
-
 <script type="text/x-red" data-template-name="subflow">
     <div class="form-row">
         <label for="node-input-name" data-i18n="[append]editor:common.label.name"><i class="fa fa-tag"></i> </label>
