@@ -539,18 +539,31 @@ RED.view = (function() {
                 if (d3.event.shiftKey) {
                     // Get all the wires we need to detach.
                     var links = [];
-                    var filter;
-                    if (mousedown_port_type === 0) {
-                        filter = {
-                            source:mousedown_node,
-                            sourcePort: mousedown_port_index
-                        }
+                    var existingLinks = [];
+                    if (selected_link &&
+                        ((mousedown_port_type === 0 &&
+                            selected_link.source === mousedown_node &&
+                            selected_link.sourcePort === mousedown_port_index
+                        ) ||
+                        (mousedown_port_type === 1 &&
+                            selected_link.target === mousedown_node
+                        ))
+                    ) {
+                        existingLinks = [selected_link];
                     } else {
-                        filter = {
-                            target: mousedown_node
+                        var filter;
+                        if (mousedown_port_type === 0) {
+                            filter = {
+                                source:mousedown_node,
+                                sourcePort: mousedown_port_index
+                            }
+                        } else {
+                            filter = {
+                                target: mousedown_node
+                            }
                         }
+                        existingLinks = RED.nodes.filterLinks(filter);
                     }
-                    var existingLinks = RED.nodes.filterLinks(filter);
                     for (i=0;i<existingLinks.length;i++) {
                         var link = existingLinks[i];
                         RED.nodes.removeLink(link);
@@ -569,6 +582,7 @@ RED.view = (function() {
                 } else {
                     showDragLines([{node:mousedown_node,port:mousedown_port_index,portType:mousedown_port_type}]);
                 }
+                selected_link = null;
             }
             mousePos = mouse_position;
             for (i=0;i<drag_lines.length;i++) {
@@ -1137,7 +1151,6 @@ RED.view = (function() {
         // disable zoom
         //vis.call(d3.behavior.zoom().on("zoom"), null);
         mousedown_node = d;
-        selected_link = null;
         mouse_mode = RED.state.JOINING;
         mousedown_port_type = portType;
         mousedown_port_index = portIndex || 0;
