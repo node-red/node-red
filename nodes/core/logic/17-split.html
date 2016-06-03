@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<!--
+  Copyright 2016 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="split">
+    <div class="form-row">
+        <label for="node-input-splt"><i class="fa fa-scissors"></i> Split</label>
+        <input type="text" id="node-input-splt" placeholder="character to split strings on : e.g. \n">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="split">
+    <p>A function that splits the <code>msg.payload</code> in various ways to create multiple messages out.</p>
+    <p><ul>
+        <li>splits an <b>array</b> into individual messages, one element per message.</li>
+        <li>splits a <b>string</b> on a character - default is <code>""</code>, split on every character. A typical
+        use would be <code>\n</code> to split on line breaks. Split is actually a regex value so use <code>\.</code> to
+        split on a full stop .</li>
+        <li>splits an <b>object</b> into individual messages, promoting each property value to the <code>msg.payload</code>,
+        and saving each property key name as <code>msg.parts.key</code>.
+    </ul></p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('split',{
+        category: 'function',
+        color:"#E2D96E",
+        defaults: {
+            name: {value:""},
+            splt: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "switch.png",
+        align: "right",
+        label: function() {
+            return this.name||"split";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="join">
+    <div class="form-row">
+        <label for="node-input-out"><i class="fa fa-long-arrow-right"></i> Output</label>
+        <select id="node-input-out" style="width:70%; margin-right:5px;">
+            <option value="auto">automatic</option>
+            <option value="str">a String of joined properties</option>
+            <option value="arr">an Array of properties</option>
+            <option value="obj">an Object of key/property pairs</option>
+        </select>
+    </div>
+    <div class="form-row node-row-key">
+        <label for="node-input-key" style="padding-right: 10px; box-sizing: border-box; text-align: right;">Key</label>
+        <input type="text" id="node-input-key">
+    </div>
+    <div class="form-row node-row-property">
+        <label for="node-input-property" style="padding-right: 10px; box-sizing: border-box; text-align: right;">Property</label>
+        <input type="text" id="node-input-property">
+        <input type="hidden" id="node-input-propertyType">
+    </div>
+    <div class="form-row node-row-join">
+        <label for="node-input-join" style="padding-right: 10px; box-sizing: border-box; text-align: right;">joined using</label>
+        <input type="text" id="node-input-join" style="width: 40px">
+    </div>
+
+    <div class="form-row node-row-trigger">
+        <label style="width: auto;">Send the message:</label>
+        <div style="height: 40px;">
+            <label style="margin-left: 40px; width: auto;"><input type="checkbox" style="width: auto;margin-bottom: 5px;"> after a fixed number of messages: <input type="text" style="width: 75px;"></label>
+        </div>
+        <div style="height: 40px;">
+            <label style="margin-left: 40px; width: auto;"><input type="checkbox" style="width: auto;margin-bottom: 5px;"> after a timeout following the first message: <input placeholder="seconds" type="text" style="width: 75px;"></label>
+        </div>
+        <div style="height: 40px; padding-top: 6px;" class="node-row-accumulate">
+            <label style="margin-left: 40px; width: auto;"><input type="checkbox" style="width: auto;margin-bottom: 5px;"> whenever a property is updated</label>
+        </div>
+    </div>
+
+    <div class="form-tips form-tips-auto hide">This mode assumes this node is either
+    paired with a <i>split</i> node or the received messages will have a properly
+    configured <code>msg.parts</code> property.</div>
+
+</script>
+
+<script type="text/x-red" data-help-name="join">
+    <p>A function that joins <code>msg.payload</code> from multiple msgs to create a single msg out.</p>
+    <p>Other properties of the msg are not guaranteed as they could come from any of the incoming msgs.</p>
+    <p>An optional <i>count</i> can be set that waits for that many <code>payload</code> to arrive before passing on the new message.</p>
+    <p>An optional <i>timeout</i> can be set that can then send the incomplete message, drop the message or raise a catchable error.</p>
+    <p>An optional <i>join character</i> can be set that can be used for joining multiple payloads together and returns a
+    string rather than an array.</p>
+    <p>When used with a <b>split</b> node the <i>count</i> and <i>join character</i> are automatically set - but can be
+    overridden by values in the configuration.</p>
+    <p>Messages can be joined into an <i>array</i> or <i>object</i>. To be joined into an object the incoming message must
+    have either a <code>msg.key</code> or <code>msg.topic</code> property - or <code>msg.payload</code> should
+    be an object with properties.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('join',{
+        category: 'function',
+        color:"#E2D96E",
+        defaults: {
+            name: {value:""},
+            out: { value:"auto"},
+            property: { value: "payload"},
+            timeout: {value:""},
+            timerr: {value:"send"},
+            count: {value:""},
+            joiner: {value:""},
+            build: {value:"array"}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "join.png",
+        label: function() {
+            return this.name||"join";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            $("#node-input-out").change(function(e) {
+                var val = $(this).val();
+                $(".node-row-key").toggle(val==='obj');
+                $(".node-row-property").toggle(val!=='auto');
+                $(".node-row-join").toggle(val==='str');
+                $(".node-row-trigger").toggle(val!=='auto');
+                $(".node-row-accumulate").toggle(val==='obj');
+                $(".form-tips-auto").toggle(val==='auto');
+            })
+
+            $("#node-input-property").typedInput({
+                typeField: $("#node-input-propertyType"),
+                types:['msg', {value:"full",label:"complete message",hasValue:false}]
+            })
+            $("#node-input-key").typedInput({
+                types:['msg']
+            })
+
+            $("#node-input-out").change();
+        }
+    });
+</script>

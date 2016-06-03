@@ -150,7 +150,11 @@
                 this.typeField = $("<input>",{type:'hidden'}).appendTo(this.uiSelect);
             }
 
-            this.selectTrigger = $('<a href="#"><i class="fa fa-sort-desc"></i></a>').prependTo(this.uiSelect);
+            this.selectTrigger = $('<a href="#"></a>').prependTo(this.uiSelect);
+            $('<i class="fa fa-sort-desc"></i>').appendTo(this.selectTrigger);
+            if (this.types.length === 1) {
+                this.selectTrigger.addClass("disabled");
+            }
             this.selectLabel = $('<span></span>').appendTo(this.selectTrigger);
 
             this.element.on('focus', function() {
@@ -162,11 +166,17 @@
             this.element.on('change', function() {
                 that.validate();
             })
-
-            this.selectTrigger.click(function(event) {
-                event.preventDefault();
-                that._showMenu(that.menu,that.selectTrigger);
-            });
+            if (this.types.length > 1) {
+                this.selectTrigger.click(function(event) {
+                    event.preventDefault();
+                    that._showMenu(that.menu,that.selectTrigger);
+                });
+            } else {
+                this.selectTrigger.click(function(event) {
+                    event.preventDefault();
+                    that.element.focus();
+                })
+            }
 
 
             if (hasSubOptions) {
