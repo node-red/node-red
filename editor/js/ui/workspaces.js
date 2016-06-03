@@ -90,7 +90,6 @@ RED.workspaces = (function() {
                                 node: workspace,
                                 dirty: RED.nodes.dirty()
                             }
-                            console.log(workspace);
                             RED.history.push(historyEvent);
                             workspace_tabs.renameTab(workspace.id,label);
                             RED.nodes.dirty(true);
