@@ -81,14 +81,17 @@ RED.tabs = (function() {
             if (tabWidth < 50) {
                 ul.find(".red-ui-tab-close").hide();
                 ul.find(".red-ui-tab-icon").hide();
+                ul.find(".red-ui-tab-label").css({paddingLeft:Math.min(12,Math.max(0,tabWidth-38))+"px"})
             } else {
                 ul.find(".red-ui-tab-close").show();
                 ul.find(".red-ui-tab-icon").show();
+                ul.find(".red-ui-tab-label").css({paddingLeft:""})
             }
             if (currentActiveTabWidth !== 0) {
                 ul.find("li.red-ui-tab.active").css({"width":options.minimumActiveTabWidth});
                 ul.find("li.red-ui-tab.active .red-ui-tab-close").show();
                 ul.find("li.red-ui-tab.active .red-ui-tab-icon").show();
+                ul.find("li.red-ui-tab.active .red-ui-tab-label").css({paddingLeft:""})
             }
 
         }
