@@ -17,6 +17,7 @@ RED.tray = (function() {
 
     var stack = [];
     var editorStack = $("#editor-stack");
+    var openingTray = false;
 
     function resize() {
 
@@ -138,7 +139,7 @@ RED.tray = (function() {
         });
         $("#workspace").scrollLeft(0);
         handleWindowResize();
-
+        openingTray = true;
         setTimeout(function() {
             setTimeout(function() {
                 if (!options.width) {
@@ -150,6 +151,10 @@ RED.tray = (function() {
                 if (options.show) {
                     options.show();
                 }
+                setTimeout(function() {
+                    // Delay resetting the flag, so we don't close prematurely
+                    openingTray = false;
+                },200);
             },150);
             el.css({right:0});
         },0);
@@ -203,9 +208,11 @@ RED.tray = (function() {
             $(window).resize(handleWindowResize);
             RED.events.on("sidebar:resize",handleWindowResize);
             $("#editor-shade").click(function() {
-                var tray = stack[stack.length-1];
-                if (tray && tray.primaryButton) {
-                    tray.primaryButton.click();
+                if (!openingTray) {
+                    var tray = stack[stack.length-1];
+                    if (tray && tray.primaryButton) {
+                        tray.primaryButton.click();
+                    }
                 }
             });
         },
