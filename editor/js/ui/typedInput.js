@@ -124,21 +124,11 @@
 
             this.options.types = this.options.types||Object.keys(allOptions);
 
-            var hasSubOptions = false;
-            this.typeMap = {};
-            this.types = this.options.types.map(function(opt) {
-                var result;
-                if (typeof opt === 'string') {
-                    result = allOptions[opt];
-                } else {
-                    result = opt;
-                }
-                that.typeMap[result.value] = result;
-                if (result.options) {
-                    hasSubOptions = true;
-                }
-                return result;
-            });
+            this.selectTrigger = $('<a href="#"></a>').prependTo(this.uiSelect);
+            $('<i class="fa fa-sort-desc"></i>').appendTo(this.selectTrigger);
+            this.selectLabel = $('<span></span>').appendTo(this.selectTrigger);
+
+            this.types(this.options.types);
 
             if (this.options.typeField) {
                 this.typeField = $(this.options.typeField).hide();
@@ -150,13 +140,6 @@
                 this.typeField = $("<input>",{type:'hidden'}).appendTo(this.uiSelect);
             }
 
-            this.selectTrigger = $('<a href="#"></a>').prependTo(this.uiSelect);
-            $('<i class="fa fa-sort-desc"></i>').appendTo(this.selectTrigger);
-            if (this.types.length === 1) {
-                this.selectTrigger.addClass("disabled");
-            }
-            this.selectLabel = $('<span></span>').appendTo(this.selectTrigger);
-
             this.element.on('focus', function() {
                 that.uiSelect.addClass('red-ui-typedInput-focus');
             });
@@ -166,36 +149,29 @@
             this.element.on('change', function() {
                 that.validate();
             })
-            if (this.types.length > 1) {
-                this.selectTrigger.click(function(event) {
-                    event.preventDefault();
+            this.selectTrigger.click(function(event) {
+                event.preventDefault();
+                if (that.typeList.length > 1) {
                     that._showMenu(that.menu,that.selectTrigger);
-                });
-            } else {
-                this.selectTrigger.click(function(event) {
-                    event.preventDefault();
+                } else {
                     that.element.focus();
-                })
-            }
+                }
+            });
 
+            // explicitly set optionSelectTrigger display to inline-block otherwise jQ sets it to 'inline'
+            this.optionSelectTrigger = $('<a href="#" class="red-ui-typedInput-option-trigger" style="display:inline-block"><i class="fa fa-sort-desc"></i></a>').appendTo(this.uiSelect);
+            this.optionSelectLabel = $('<span></span>').prependTo(this.optionSelectTrigger);
+            this.optionSelectTrigger.click(function(event) {
+                event.preventDefault();
+                if (that.optionMenu) {
+                    that.optionMenu.css({
+                        minWidth:that.optionSelectLabel.width()
+                    });
 
-            if (hasSubOptions) {
-                // explicitly set optionSelectTrigger display to inline-block otherwise jQ sets it to 'inline'
-                this.optionSelectTrigger = $('<a href="#" class="red-ui-typedInput-option-trigger" style="display:inline-block"><i class="fa fa-sort-desc"></i></a>').appendTo(this.uiSelect);
-                this.optionSelectLabel = $('<span></span>').prependTo(this.optionSelectTrigger);
-                this.optionSelectTrigger.click(function(event) {
-                    event.preventDefault();
-                    if (that.optionMenu) {
-                        that.optionMenu.css({
-                            minWidth:that.optionSelectLabel.width()
-                        });
-
-                        that._showMenu(that.optionMenu,that.optionSelectLabel)
-                    }
-                });
-            }
-            this.menu = this._createMenu(this.types, function(v) { that.type(v) });
-            this.type(this.options.default||this.types[0].value);
+                    that._showMenu(that.optionMenu,that.optionSelectLabel)
+                }
+            });
+            this.type(this.options.default||this.typeList[0].value);
         },
         _hideMenu: function(menu) {
             $(document).off("mousedown.close-property-select");
@@ -278,7 +254,6 @@
             return labelWidth;
         },
         _resize: function() {
-
             if (this.typeMap[this.propertyType] && this.typeMap[this.propertyType].hasValue === false) {
                 this.selectTrigger.width(this.uiWidth+5);
             } else {
@@ -297,6 +272,29 @@
         },
         _destroy: function() {
             this.menu.remove();
+        },
+        types: function(types) {
+            var that = this;
+            var currentType = this.type();
+            this.typeMap = {};
+            this.typeList = types.map(function(opt) {
+                var result;
+                if (typeof opt === 'string') {
+                    result = allOptions[opt];
+                } else {
+                    result = opt;
+                }
+                that.typeMap[result.value] = result;
+                return result;
+            });
+            this.selectTrigger.toggleClass("disabled", this.typeList.length === 1);
+            if (this.menu) {
+                this.menu.remove();
+            }
+            this.menu = this._createMenu(this.typeList, function(v) { that.type(v) });
+            if (currentType && !this.typeMap.hasOwnProperty(currentType)) {
+                this.type(this.typeList[0].value);
+            }
         },
         width: function(desiredWidth) {
             this.uiWidth = desiredWidth;
@@ -359,9 +357,14 @@
                             this.optionSelectTrigger.hide();
                         }
                         if (opt.hasValue === false) {
+                            this.oldValue = this.element.val();
                             this.element.val("");
                             this.element.hide();
                         } else {
+                            if (this.oldValue !== undefined) {
+                                this.element.val(this.oldValue);
+                                delete this.oldValue;
+                            }
                             this.element.show();
                         }
                         this.element.trigger('change');

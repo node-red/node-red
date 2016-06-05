@@ -68,6 +68,9 @@ module.exports = function(RED) {
 
     function JoinNode(n) {
         RED.nodes.createNode(this,n);
+        this.property = n.property||"payload";
+        this.propertyType = n.propertyType||"msg";
+        this.key = n.key||"topic";
         this.timer = Number(n.timeout || 0);
         this.timerr = n.timerr || "send";
         this.count = Number(n.count || 0);
@@ -77,10 +80,6 @@ module.exports = function(RED) {
         var inflight = {};
         var misc = (this.build === "array") ? [] : {};
         var tout;
-
-        function isObject (item) {
-            return (typeof item === "object" && !Array.isArray(item)&& ! Buffer.isBuffer(item) && item !== null);
-        }
 
         // if array came from a string then reassemble it and send it
         var sendIt = function(m) {
@@ -116,80 +115,93 @@ module.exports = function(RED) {
                 m.payload = misc.join(node.joiner.replace(/\\n/,"\n").replace(/\\r/,"\r").replace(/\\t/,"\t").replace(/\\e/,"\e").replace(/\\f/,"\c").replace(/\\0/,"\0"));
             }
             if (node.build === "array") { misc = []; }
-            if (node.build === "object") { misc = {}; }
+            else if (node.build === "object") { misc = {}; }
             node.send(m);
         }
 
         this.on("input", function(msg) {
-            if (msg.hasOwnProperty("payload")) {
-                if (msg.hasOwnProperty("parts")) { // only act if it has parts
-                    var count = node.count || msg.parts.count || 1;
-                    if (msg.parts.hasOwnProperty("index")) { // it's a numbered part (from a split node)
-                        if (!inflight[msg.parts.id]) { // New message - create new empty array of correct size
-                            if (msg.parts.type === "object") {
-                                inflight[msg.parts.id] = {i:0, a:{}, c:msg.parts.count, ch:msg.parts.ch, t:msg.parts.type};
-                            } else { // it's an array or string
-                                inflight[msg.parts.id] = {i:0, a:new Array(msg.parts.count), ch:msg.parts.ch, t:msg.parts.type};
-                            }
-                            if (node.timer !== 0) { // If there is a timer to set start it now
-                                inflight[msg.parts.id].timeout = setTimeout(function() {
-                                    if (node.timerr === "send") { sendIt(msg); }
-                                    if (node.timerr === "error") { node.error("Incomplete",msg); }
-                                    delete inflight[msg.parts.id];
-                                }, node.timer);
-                            }
-                        }
+            var property;
+            if (node.propertyType == "full") {
+                property = msg;
+            } else {
+                try {
+                    property = RED.util.getMessageProperty(msg,node.property);
+                } catch(err) {
+                    node.warn("Message property "+node.property+" not found");
+                    return;
+                }
+            }
+            if (msg.hasOwnProperty("parts")) {
+                // only act if it has parts
+                var count = node.count || msg.parts.count || 1;
+                if (msg.parts.hasOwnProperty("index")) {
+                    // it's a numbered part (from a split node)
+                    if (!inflight[msg.parts.id]) {
+                        // New message - create new empty array of correct size
                         if (msg.parts.type === "object") {
-                            inflight[msg.parts.id].a[msg.parts.key] = msg.payload; // Add to the tracking array
-                            inflight[msg.parts.id].i = Object.keys(inflight[msg.parts.id].a).length;
-                        } else { // it's an array or string
-                            inflight[msg.parts.id].a[msg.parts.index] = msg.payload; // Add to the tracking array
-                            inflight[msg.parts.id].i += 1;                         // Increment the count
+                            inflight[msg.parts.id] = {i:0, a:{}, c:msg.parts.count, ch:msg.parts.ch, t:msg.parts.type};
+                        } else {
+                            // it's an array or string
+                            inflight[msg.parts.id] = {i:0, a:new Array(msg.parts.count), ch:msg.parts.ch, t:msg.parts.type};
                         }
-                        if (inflight[msg.parts.id].i >= count) { sendIt(msg); } // All arrived - send
-                    } // otherwise ignore it
-                    if (msg.hasOwnProperty("complete")) { // if set then send right away anyway...
-                        delete(msg.complete);
+                        if (node.timer !== 0) { // If there is a timer to set start it now
+                            inflight[msg.parts.id].timeout = setTimeout(function() {
+                                if (node.timerr === "send") { sendIt(msg); }
+                                else if (node.timerr === "error") { node.error("Incomplete",msg); }
+                                delete inflight[msg.parts.id];
+                            }, node.timer);
+                        }
+                    }
+                    if (msg.parts.type === "object") {
+                        // Add to the tracking array
+                        inflight[msg.parts.id].a[msg.parts.key] = property;
+                        inflight[msg.parts.id].i = Object.keys(inflight[msg.parts.id].a).length;
+                    } else {
+                        // it's an array or string
+                        // Add to the tracking array
+                        inflight[msg.parts.id].a[msg.parts.index] = property;
+                        // Increment the count
+                        inflight[msg.parts.id].i += 1;
+                    }
+                    if (inflight[msg.parts.id].i >= count) {
+                        // All arrived - send
                         sendIt(msg);
                     }
+                } // otherwise ignore it
+                if (msg.hasOwnProperty("complete")) { // if set then send right away anyway...
+                    delete(msg.complete);
+                    sendIt(msg);
                 }
-
+            } else {
                 // The case for any messages arriving without parts - ie random messages you want to join.
-                else {
-                    var l;
-                    if (node.build === "array") {   // simple case of build the array
-                        misc.push(msg.payload);     // Add the payload to an array
-                        l = misc.length;
-                    } else {  // OK so let's build an object
-                        if ((msg.key === undefined) && ((msg.topic === undefined) || (msg.topic === ''))) {
-                            if (isObject(msg.payload)) {  // if it's already an object (and no topic or key) just append it
-                                misc = Object.assign(misc,msg.payload);
-                                l = Object.keys(misc).length;
-                            }
-                            else { // if no topic or key and not an object then warn and drop it.
-                                node.warn("key or topic not defined");
-                                return;
-                            }
-                        }
-                        else { // if it's got a msg.key or msg.topic then use key||topic as the property name 
-                            misc[ msg.key || msg.topic ] = msg.payload;
-                            //if (msg.topic) { msg.topic = (msg.topic.split('/')).slice(0,-1).join('/'); }
-                            l = Object.keys(misc).length;
-                        }
+                var l;
+                if (node.build === "array" || node.build === "string") {
+                    // simple case of build the array
+                    // Add the payload to an array
+                    misc.push(property);
+                    l = misc.length;
+                } else {
+                    // OK so let's build an object
+                    if (msg.hasOwnProperty(node.key) && msg[node.key] !== "") {
+                        misc[msg[node.key]] = property;
                     }
-                    if (l >= node.count) { sendMisc(msg); } // if it's long enough send it
-                    else if (msg.hasOwnProperty("complete")) { // if set then send right away anyway...
-                        delete(msg.complete);
-                        sendMisc(msg);
-                    }
-                    else if ((node.timer !== 0) && !tout) { // if not start the timer if there is one.
-                        tout = setTimeout(function() {
-                            if (node.timerr === "send") { sendMisc(msg); }
-                            if (node.timerr === "error") { node.error("Timeout",msg); }
-                            if (node.build === "array") { misc = []; }
-                            if (node.build === "object") { misc = {}; }
-                        }, node.timer);
-                    }
+                    l = Object.keys(misc).length;
+                }
+                if (l >= node.count) {
+                    // if it's long enough send it
+                    sendMisc(msg);
+                } else if (msg.hasOwnProperty("complete")) {
+                    // if set then send right away anyway...
+                    delete(msg.complete);
+                    sendMisc(msg);
+                } else if ((node.timer !== 0) && !tout) {
+                    // if not start the timer if there is one.
+                    tout = setTimeout(function() {
+                        if (node.timerr === "send") { sendMisc(msg); }
+                        else if (node.timerr === "error") { node.error("Timeout",msg); }
+                        if (node.build === "array") { misc = []; }
+                        else if (node.build === "object") { misc = {}; }
+                    }, node.timer);
                 }
             }
         });

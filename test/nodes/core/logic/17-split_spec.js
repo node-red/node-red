@@ -181,8 +181,9 @@ describe('JOIN node', function() {
                     msg.payload.should.have.property("b","2");
                     msg.payload.should.have.property("c",true);
                     msg.payload.should.have.property("d");
-                    msg.payload.d.should.have.property("e",5);
-                    msg.payload.should.have.property("f",6);
+                    msg.payload.d.should.have.property("e",7);
+                    msg.payload.should.have.property("g");
+                    msg.payload.g.should.have.property("f",6);
                     done();
                 }
                 catch(e) { }//console.log(e); }
@@ -191,7 +192,8 @@ describe('JOIN node', function() {
             n1.receive({payload:"2", topic:"b"});
             n1.receive({payload:true, topic:"c"});
             n1.receive({payload:{e:5}, topic:"d"});
-            n1.receive({payload:{f:6}});
+            n1.receive({payload:{e:7}, topic:"d"});
+            n1.receive({payload:{f:6}, topic:"g"});
         });
     });
 
