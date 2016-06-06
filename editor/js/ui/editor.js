@@ -399,7 +399,11 @@ RED.editor = (function() {
         }
         var completePrepare = function() {
             if (definition.oneditprepare) {
-                definition.oneditprepare.call(node);
+                try {
+                    definition.oneditprepare.call(node);
+                } catch(err) {
+                    console.log("oneditprepare",node.id,node.type,err.toString());
+                }
             }
             // Now invoke any change handlers added to the fields - passing true
             // to prevent full node validation from being triggered each time
@@ -485,7 +489,11 @@ RED.editor = (function() {
                     click: function() {
                         if (editing_node._def) {
                             if (editing_node._def.oneditcancel) {
-                                editing_node._def.oneditcancel.call(editing_node);
+                                try {
+                                    editing_node._def.oneditcancel.call(editing_node);
+                                } catch(err) {
+                                    console.log("oneditcancel",editing_node.id,editing_node.type,err.toString());
+                                }
                             }
 
                             for (var d in editing_node._def.defaults) {
@@ -532,9 +540,13 @@ RED.editor = (function() {
                                     }
                                 }
                             }
-                            var rc = editing_node._def.oneditsave.call(editing_node);
-                            if (rc === true) {
-                                changed = true;
+                            try {
+                                var rc = editing_node._def.oneditsave.call(editing_node);
+                                if (rc === true) {
+                                    changed = true;
+                                }
+                            } catch(err) {
+                                console.log("oneditsave",editing_node.id,editing_node.type,err.toString());
                             }
 
                             for (d in editing_node._def.defaults) {
@@ -647,7 +659,11 @@ RED.editor = (function() {
                 editTrayWidthCache[type] = dimensions.width;
                 if (editing_node && editing_node._def.oneditresize) {
                     var form = $("#dialog-form");
-                    editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
+                    try {
+                        editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
+                    } catch(err) {
+                        console.log("oneditresize",editing_node.id,editing_node.type,err.toString());
+                    }
                 }
             },
             open: function(tray) {
@@ -763,7 +779,11 @@ RED.editor = (function() {
             resize: function() {
                 if (editing_config_node && editing_config_node._def.oneditresize) {
                     var form = $("#node-config-dialog-edit-form");
-                    editing_config_node._def.oneditresize.call(editing_config_node,{width:form.width(),height:form.height()});
+                    try {
+                        editing_config_node._def.oneditresize.call(editing_config_node,{width:form.width(),height:form.height()});
+                    } catch(err) {
+                        console.log("oneditresize",editing_node.id,editing_node.type,err.toString());
+                    }
                 }
             },
             open: function(tray) {
@@ -867,9 +887,17 @@ RED.editor = (function() {
                         if (configTypeDef.oneditcancel) {
                             var cn = RED.nodes.node(configId);
                             if (cn) {
-                                configTypeDef.oneditcancel.call(cn,false);
+                                try {
+                                    configTypeDef.oneditcancel.call(cn,false);
+                                } catch(err) {
+                                    console.log("oneditcancel",cn.id,cn.type,err.toString());
+                                }
                             } else {
-                                configTypeDef.oneditcancel.call({id:configId},true);
+                                try {
+                                    configTypeDef.oneditcancel.call({id:configId},true);
+                                } catch(err) {
+                                    console.log("oneditcancel",configId,configType,err.toString());
+                                }
                             }
                         }
                     }
@@ -891,7 +919,11 @@ RED.editor = (function() {
                     var scope = $("#node-config-dialog-scope").val();
 
                     if (configTypeDef.oneditsave) {
-                        configTypeDef.oneditsave.call(editing_config_node);
+                        try {
+                            configTypeDef.oneditsave.call(editing_config_node);
+                        } catch(err) {
+                            console.log("oneditsave",editing_config_node.id,editing_config_node.type,err.toString());
+                        }
                     }
 
                     for (d in configTypeDef.defaults) {
@@ -994,12 +1026,20 @@ RED.editor = (function() {
                     var configType = type;
                     var configTypeDef = RED.nodes.getType(configType);
 
-                    if (configTypeDef.ondelete) {
-                        configTypeDef.ondelete.call(editing_config_node);
+                    try {
+
+                        if (configTypeDef.ondelete) {
+                            // Deprecated: never documented but used by some early nodes
+                            console.log("Deprecated API warning: config node type ",configType," has an ondelete function - should be oneditdelete");
+                            configTypeDef.ondelete.call(editing_config_node);
+                        }
+                        if (configTypeDef.oneditdelete) {
+                            configTypeDef.oneditdelete.call(editing_config_node);
+                        }
+                    } catch(err) {
+                        console.log("oneditdelete",editing_config_node.id,editing_config_node.type,err.toString());
                     }
-                    if (configTypeDef.oneditdelete) {
-                        configTypeDef.oneditdelete.call(editing_config_node);
-                    }
+
                     var historyEvent = {
                         t:'delete',
                         nodes:[editing_config_node],
