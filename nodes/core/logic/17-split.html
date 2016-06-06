@@ -61,43 +61,53 @@
 
 <script type="text/x-red" data-template-name="join">
     <div class="form-row">
-        <label for="node-input-build"><i class="fa fa-long-arrow-right"></i> Output</label>
-        <select id="node-input-build" style="width:70%; margin-right:5px;">
+        <label>Mode</label>
+        <select id="node-input-mode" style="width:200px;">
             <option value="auto">automatic</option>
-            <option value="string">a String of joined properties</option>
-            <option value="array">an Array of properties</option>
-            <option value="object">an Object of key/property pairs</option>
+            <option value="custom">manual</option>
         </select>
     </div>
-    <div class="form-row node-row-key">
-        <label for="node-input-key" style="padding-right: 10px; box-sizing: border-box; text-align: right;">Key</label>
-        <input type="text" id="node-input-key">
-    </div>
-    <div class="form-row node-row-property">
-        <label for="node-input-property" style="padding-right: 10px; box-sizing: border-box; text-align: right;">Property</label>
-        <input type="text" id="node-input-property">
-        <input type="hidden" id="node-input-propertyType">
-    </div>
-    <div class="form-row node-row-joiner">
-        <label for="node-input-joiner" style="padding-right: 10px; box-sizing: border-box; text-align: right;">joined using</label>
-        <input type="text" id="node-input-joiner" style="width: 40px">
-    </div>
+    <div class="node-row-custom">
+        <div class="form-row node-row-property">
+            <label>Join each </label>
+            <input type="text" id="node-input-property" style="width:300px;">
+            <input type="hidden" id="node-input-propertyType">
+        </div>
+        <div class="form-row">
+            <label>to create </label>
+            <select id="node-input-build" style="width:200px;">
+                <option id="node-input-build-string" value="string">a String</option>
+                <option value="array">an Array</option>
+                <option value="object">an Object</option>
+            </select>
+        </div>
+        <div class="form-row node-row-key">
+            <label style="vertical-align: top; margin-top: 7px;">using</label>
+            <div style="display:inline-block">
+                <input type="text" id="node-input-key"  style="width:300px;">
+                <div style="margin-top: 7px;">as the property key</div>
+            </div>
+        </div>
+        <div class="form-row node-row-joiner">
+            <label for="node-input-joiner">joined using</label>
+            <input type="text" id="node-input-joiner" style="width: 40px">
+        </div>
 
-    <div class="form-row node-row-trigger">
-        <label style="width: auto;">Send the message:</label>
-        <ul>
-            <li style="height: 40px;">
-                <label style="width: 280px;" for="node-input-count">After a fixed number of messages:</label> <input id="node-input-count" placeholder="count" type="text" style="width: 75px;">
-            </li>
-            <li style="height: 40px;">
-                <label style="width: 280px;" for="node-input-timeout">After a timeout following the first message:</label> <input id="node-input-timeout" placeholder="seconds" type="text" style="width: 75px;">
-            </li>
-            <li style="height: 40px; padding-top: 6px;" class="node-row-accumulate">
-                <label style="width: auto;"><input type="checkbox" id="node-input-accumulate" style="width: auto;margin-bottom: 5px;margin-right: 5px;"> whenever a property is updated</label>
-            </li>
-        </ul>
+        <div class="form-row node-row-trigger">
+            <label style="width: auto;">Send the message:</label>
+            <ul>
+                <li style="height: 40px;">
+                    <label style="width: 280px;" for="node-input-count">After a fixed number of messages:</label> <input id="node-input-count" placeholder="count" type="text" style="width: 75px;">
+                </li>
+                <li style="height: 40px;">
+                    <label style="width: 280px;" for="node-input-timeout">After a timeout following the first message:</label> <input id="node-input-timeout" placeholder="seconds" type="text" style="width: 75px;">
+                </li>
+                <li style="height: 40px;">
+                    <label style="width: auto; padding-top: 6px;">After a message with the <code>msg.complete</code> property set</label>
+                </li>
+            </ul>
+        </div>
     </div>
-
     <div class="form-tips form-tips-auto hide">This mode assumes this node is either
     paired with a <i>split</i> node or the received messages will have a properly
     configured <code>msg.parts</code> property.</div>
@@ -124,14 +134,14 @@
         color:"#E2D96E",
         defaults: {
             name: {value:""},
-            build: { value:"auto"},
+            mode: {value:"auto"},
+            build: { value:"string"},
             property: { value: "payload"},
             propertyType: { value:"msg"},
             key: {value:"topic"},
             joiner: { value:"\\n"},
             timeout: {value:""},
-            count: {value:""},
-            accumulate: {value: false}
+            count: {value:""}
         },
         inputs:1,
         outputs:1,
@@ -143,17 +153,20 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+            $("#node-input-mode").change(function(e) {
+                var val = $(this).val();
+                $(".node-row-custom").toggle(val==='custom');
+                $(".form-tips-auto").toggle(val==='auto');
+            });
+
             $("#node-input-build").change(function(e) {
                 var val = $(this).val();
-                $(".node-row-key").toggle(val==='obj');
-                $(".node-row-property").toggle(val!=='auto');
-                $(".node-row-joiner").toggle(val==='str');
+                $(".node-row-key").toggle(val==='object');
+                $(".node-row-joiner").toggle(val==='string');
                 $(".node-row-trigger").toggle(val!=='auto');
-                $(".node-row-accumulate").toggle(val==='obj');
-                $(".form-tips-auto").toggle(val==='auto');
-                if (val === 'str') {
+                if (val === 'string') {
                     $("#node-input-property").typedInput('types',['msg']);
-                } else if (val !== 'auto') {
+                } else {
                     $("#node-input-property").typedInput('types',['msg', {value:"full",label:"complete message",hasValue:false}]);
                 }
             })
@@ -167,6 +180,7 @@
             })
 
             $("#node-input-build").change();
+            $("#node-input-mode").change();
         }
     });
 </script>
