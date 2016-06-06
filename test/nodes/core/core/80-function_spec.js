@@ -135,6 +135,30 @@ describe('function node', function() {
         });
     });
 
+    it('should handle null amongst valid messages', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"return [[msg,null,msg],null]"},
+                {id:"n2", type:"helper"},
+                {id:"n3", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var n3 = helper.getNode("n3");
+            var n2MsgCount = 0;
+            var n3MsgCount = 0;
+            n2.on("input", function(msg) {
+                n2MsgCount++;
+            });
+            n3.on("input", function(msg) {
+                n3MsgCount++;
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+            setTimeout(function() {
+                n2MsgCount.should.equal(2);
+                n3MsgCount.should.equal(0);
+                done();
+            },100);
+        });
+    });
     it('should handle and log script error', function(done) {
         var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"retunr"}];
         helper.load(functionNode, flow, function() {

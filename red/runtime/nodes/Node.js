@@ -157,16 +157,18 @@ Node.prototype.send = function(msg) {
                         // for each msg to send eg. [[m1, m2, ...], ...]
                         for (k = 0; k < msgs.length; k++) {
                             var m = msgs[k];
-                            /* istanbul ignore else */
-                            if (!sentMessageId) {
-                                sentMessageId = m._msgid;
-                            }
-                            if (msgSent) {
-                                var clonedmsg = redUtil.cloneMessage(m);
-                                sendEvents.push({n:node,m:clonedmsg});
-                            } else {
-                                sendEvents.push({n:node,m:m});
-                                msgSent = true;
+                            if (m !== null && m !== undefined) {
+                                /* istanbul ignore else */
+                                if (!sentMessageId) {
+                                    sentMessageId = m._msgid;
+                                }
+                                if (msgSent) {
+                                    var clonedmsg = redUtil.cloneMessage(m);
+                                    sendEvents.push({n:node,m:clonedmsg});
+                                } else {
+                                    sendEvents.push({n:node,m:m});
+                                    msgSent = true;
+                                }
                             }
                         }
                     }
