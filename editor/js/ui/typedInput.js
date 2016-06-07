@@ -14,10 +14,79 @@
  * limitations under the License.
  **/
 (function($) {
+    function validateExpression(str) {
+        var length = str.length;
+        var start = 0;
+        var inString = false;
+        var inBox = false;
+        var quoteChar;
+        var v;
+        for (var i=0;i<length;i++) {
+            var c = str[i];
+            if (!inString) {
+                if (c === "'" || c === '"') {
+                    if (!inBox) {
+                        return false;
+                    }
+                    inString = true;
+                    quoteChar = c;
+                    start = i+1;
+                } else if (c === '.') {
+                    if (i===length-1) {
+                        return false;
+                    }
+                    // Next char is a-z
+                    if (!/[a-z0-9]/i.test(str[i+1])) {
+                        return false;
+                    }
+                    start = i+1;
+                } else if (c === '[') {
+                    if (i === 0) {
+                        return false;
+                    }
+                    if (i===length-1) {
+                        return false;
+                    }
+                    // Next char is either a quote or a number
+                    if (!/["'\d]/.test(str[i+1])) {
+                        return false;
+                    }
+                    start = i+1;
+                    inBox = true;
+                } else if (c === ']') {
+                    if (!inBox) {
+                        return false;
+                    }
+                    if (start != i) {
+                        v = str.substring(start,i);
+                        if (!/^\d+$/.test(v)) {
+                            return false;
+                        }
+                    }
+                    start = i+1;
+                    inBox = false;
+                }
+            } else {
+                if (c === quoteChar) {
+                    // Next char must be a ]
+                    if (!/\]/.test(str[i+1])) {
+                        return false;
+                    }
+                    start = i+1;
+                    inString = false;
+                }
+            }
+
+        }
+        if (inBox || inString) {
+            return false;
+        }
+        return true;
+    }
     var allOptions = {
-        msg: {value:"msg",label:"msg.",validate:/^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]+)*/i},
-        flow: {value:"flow",label:"flow.",validate:/^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]+)*/i},
-        global: {value:"global",label:"global.",validate:/^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]+)*/i},
+        msg: {value:"msg",label:"msg.",validate:validateExpression},
+        flow: {value:"flow",label:"flow.",validate:validateExpression},
+        global: {value:"global",label:"global.",validate:validateExpression},
         str: {value:"str",label:"string",icon:"red/images/typedInput/az.png"},
         num: {value:"num",label:"number",icon:"red/images/typedInput/09.png",validate:/^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/},
         bool: {value:"bool",label:"boolean",icon:"red/images/typedInput/bool.png",options:["true","false"]},
