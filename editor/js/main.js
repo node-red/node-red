@@ -151,6 +151,17 @@ var RED = (function() {
         });
     }
 
+    function showAbout() {
+        $.get('red/about', function(data) {
+            var aboutHeader = '<div style="text-align:center;">'+
+                                '<img width="50px" src="red/images/node-red-icon.svg" />'+
+                              '</div>';
+
+            RED.sidebar.info.set(aboutHeader+marked(data));
+            RED.sidebar.info.show();
+        });
+    }
+
     var statusEnabled = false;
     function toggleStatus(state) {
         statusEnabled = state;
@@ -194,7 +205,7 @@ var RED = (function() {
                     label: RED.settings.theme("menu.menu-item-help.label","Node-RED Website"),
                     href: RED.settings.theme("menu.menu-item-help.url","http://nodered.org/docs")
                 },
-                {id:"menu-item-node-red-version", label:"v"+RED.settings.version}
+                {id:"menu-item-node-red-version", label:"v"+RED.settings.version, onselect: showAbout }
             ]
         });
 

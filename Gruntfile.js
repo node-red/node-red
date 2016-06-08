@@ -228,6 +228,12 @@ module.exports = function(grunt) {
                     'red/runtime/locales/en-US/runtime.json'
                 ],
                 tasks: ['jsonlint:messages']
+            },
+            misc: {
+                files: [
+                    'CHANGELOG.md'
+                ],
+                tasks: ['copy:build']
             }
         },
 
@@ -285,7 +291,12 @@ module.exports = function(grunt) {
                     src: ['editor/index.html','editor/favicon.ico'],
                     dest: 'public/',
                     flatten: true
-                }]
+                },
+                {
+                    src: 'CHANGELOG.md',
+                    dest: 'public/red/about'
+                }
+                ]
             },
             release: {
                 files: [{
