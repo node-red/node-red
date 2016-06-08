@@ -186,7 +186,7 @@ module.exports = function(RED) {
             this.callback = function(req,res) {
                 var msgid = RED.util.generateId();
                 res._msgid = msgid;
-                if (node.method.match(/(^post$|^delete$|^put$|^options$)/)) {
+                if (node.method.match(/^(post|delete|put|options|patch)$/)) {
                     node.send({_msgid:msgid,req:req,res:createResponseWrapper(node,res),payload:req.body});
                 } else if (node.method == "get") {
                     node.send({_msgid:msgid,req:req,res:createResponseWrapper(node,res),payload:req.query});
@@ -229,6 +229,8 @@ module.exports = function(RED) {
                 RED.httpNode.post(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "put") {
                 RED.httpNode.put(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+            } else if (this.method == "patch") {
+                RED.httpNode.patch(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "delete") {
                 RED.httpNode.delete(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             }
