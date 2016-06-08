@@ -1,3 +1,68 @@
+#### 0.14.0: Milestone Release
+
+Editor
+
+ - Replace edit dialog with edit tray
+ - Enable shift-drag detach of just the selected link
+ - Allow workspace tabs to be re-ordered
+ - Scope keyboard shortcuts to dom elements
+ - Ensure parent nodes marked as changed due to child config node changes
+ - Validate all edit dialog inputs when one changes
+ - Add editableList widget and update Switch/Change nodes to use it
+ - Add option to filter Debug sidebar by flow and highlight subflow-emitting nodes
+ - Back off comms reconnect attempts after prolonged failures
+ - Prompt for login if comms reconnect fails authentication
+ - Enable finer grained permissions in adminAuth
+ - Change style of nodes in subflow template view
+ - Add CHANGELOG.md and make it accessible from menu
+
+Runtime
+
+ - Always log node warnings on start without requiring -v
+ - Add support for loading scoped node modules. Closes #885
+ - Add process.env.PORT to settings.js
+
+Nodes
+
+ - Enable config nodes to reference other config nodes
+ - Add Split/Join nodes
+ - Add Link nodes
+ - Add support to HTTP In node for PATCH requests. Closes #904
+ - Add cookie handling to HTTP In and HTTP Response nodes
+ - Add repeat indicator to inject node label. Closes #887
+ - Add javascript highlighter to template node
+ - Add optional timeout to exec node
+ - Add TLS node and update MQTT/HTTP nodes to use it
+ - Let trigger node also send last payload to arrive
+ - Add timestamp as a default typedInput and update Inject and change nodes to match,
+ - Add QoS option to MQTT In node
+ - Add status to exec spawn mode
+ - Add Move capability to Change node
+ - Update Serial node to support custom baud rates
+ - Add support for array-syntax in typedInput msg properties
+
+
+Fixes
+
+ - Add error handling to all node definition api calls
+ - Handle null return from Function node in array of messages
+ - Defer loading of token sessions until they are accessed. Fixes #895
+ - set pi gpio pin status correctly if set on start
+ - Prevent parent window scrolling when view is focused. Fixes #635
+ - Handle missing tab nodes in a loaded flow config
+ - Ensure typedInput dropdown doesn't fall off the page
+ - Protect against node types with reserved names such as toString. Fixes #880
+ - Do not rely on the HTML file to identify where nodes are registered from
+ - Preserve node properties on import
+ - Fix regression in delay node. topic based queue was emptying all the time instead of spreading out messages.
+ - Throw an error if a Function node adds an input event listener
+ - Fix hang on partial deploy with disconnected mqtt node
+ - TypedInput: preload type icons to ensure width calc correct
+ - Ensure tcp node creates a buffer of size 1 at least
+ - Return editorTheme default if value is undefined
+ - Fix RED.util.compareObjects for Function created objects and Buffers
+
+
 #### 0.13.4: Maintenance Release
 
  - Add timed release mode to delay node
