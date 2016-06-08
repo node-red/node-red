@@ -30,6 +30,7 @@
         "body-parser": "1.15.0",
         "cheerio":"0.19.0",
         "clone": "1.0.2",
+        "cookie-parser": "1.4.3",
         "cors":"2.7.1",
         "cron":"1.1.0",
         "express": "4.13.4",
