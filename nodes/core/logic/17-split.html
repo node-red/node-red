@@ -27,15 +27,13 @@
 </script>
 
 <script type="text/x-red" data-help-name="split">
-    <p>A function that splits the <code>msg.payload</code> in various ways to create multiple messages out.</p>
-    <p><ul>
-        <li>splits an <b>array</b> into individual messages, one element per message.</li>
-        <li>splits a <b>string</b> on a character - default is <code>""</code>, split on every character. A typical
-        use would be <code>\n</code> to split on line breaks. Split is actually a regex value so use <code>\.</code> to
-        split on a full stop .</li>
-        <li>splits an <b>object</b> into individual messages, promoting each property value to the <code>msg.payload</code>,
-        and saving each property key name as <code>msg.parts.key</code>.
-    </ul></p>
+    <p>A function that splits <code>msg.payload</code> into multiple messages.</p>
+    <p>The behaviour is determined by the type of <code>msg.payload</code>:</p>
+    <ul>
+        <li><b>string</b> - a message is sent for each part of the string after it is split using the specified character, by default a newline (<code>\n</code>).
+        <li><b>array</b> - a message is sent for each element of the array</li>
+        <li><b>object</b> - a message is sent for each key/value pair of the object. <code>msg.parts.key</code> is set to the key of the property.</li>
+    </ul>
 </script>
 
 <script type="text/javascript">
