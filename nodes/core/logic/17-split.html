@@ -34,6 +34,18 @@
         <li><b>array</b> - a message is sent for each element of the array</li>
         <li><b>object</b> - a message is sent for each key/value pair of the object. <code>msg.parts.key</code> is set to the key of the property.</li>
     </ul>
+    <p>Each message is sent with the <code>msg.parts</code> property set. This is
+    an object that provides any subsequent <i>join</i> node the necessary information
+    for it to reassemble the messages back into a single one. The object has the following
+    properties:</p>
+    <ul>
+        <li><b>id</b> - an identifier for the group of messages</li>
+        <li><b>index</b> - the position within the group</li>
+        <li><b>count</b> - the total number of messages in the group</li>
+        <li><b>type</b> - the type of message - string/array/object</li>
+        <li><b>ch</b> - for a string, the character used to split</li>
+        <li><b>key</b> - for an object, the key of the property this message was created from</li>
+    </ul>
 </script>
 
 <script type="text/javascript">
@@ -67,7 +79,7 @@
     </div>
     <div class="node-row-custom">
         <div class="form-row node-row-property">
-            <label>Join each </label>
+            <label>Combine each </label>
             <input type="text" id="node-input-property" style="width:300px;">
             <input type="hidden" id="node-input-propertyType">
         </div>
@@ -113,17 +125,30 @@
 </script>
 
 <script type="text/x-red" data-help-name="join">
-    <p>A function that joins <code>msg.payload</code> from multiple msgs to create a single msg out.</p>
-    <p>Other properties of the msg are not guaranteed as they could come from any of the incoming msgs.</p>
-    <p>An optional <i>count</i> can be set that waits for that many <code>payload</code> to arrive before passing on the new message.</p>
-    <p>An optional <i>timeout</i> can be set that can then send the incomplete message, drop the message or raise a catchable error.</p>
-    <p>An optional <i>join character</i> can be set that can be used for joining multiple payloads together and returns a
-    string rather than an array.</p>
-    <p>When used with a <b>split</b> node the <i>count</i> and <i>join character</i> are automatically set - but can be
-    overridden by values in the configuration.</p>
-    <p>Messages can be joined into an <i>array</i> or <i>object</i>. To be joined into an object the incoming message must
-    have either a <code>msg.key</code> or <code>msg.topic</code> property - or <code>msg.payload</code> should
-    be an object with properties.</p>
+    <p>A function that joins the a sequence of messages into a single message.</p>
+    <p>When paired with the <b>split</b> node, it will automatically join the messages
+    to reverse the split that was performed.</p>
+    <p>It can be used without the split node by configuring the required behaviour.</p>
+    <p>The type of the resulting message property can be a string, array or object. All of the other message
+    properties are taken from the last message received before the message is sent.</p>
+    <p>A <i>count</i> can be set for how many messages should be received before generating the output message</p>
+    <p>A <i>timeout</i> can be set to trigger sending the new message using whatever has been received so far.</p>
+    <p>If the node is set to construct a string, a <i>join character</i> can be set.</p>
+    <p>If the node is set to construct an object, the key used to store each received property can be taken from
+       an identified message property.</p>
+    <p>The automatic behaviour relies on the received messages to have <b>msg.parts</b> set.
+       The object has the following properties:</p>
+       <ul>
+           <li><b>id</b> - an identifier for the group of messages</li>
+           <li><b>index</b> - the position within the group</li>
+           <li><b>count</b> - the total number of messages in the group</li>
+           <li><b>type</b> - the type of message - string/array/object</li>
+           <li><b>ch</b> - for a string, the character used to split</li>
+           <li><b>key</b> - for an object, the key of the property this message was created from</li>
+       </ul>
+
+
+
 </script>
 
 <script type="text/javascript">
@@ -174,7 +199,7 @@
                 types:['msg', {value:"full",label:"complete message",hasValue:false}]
             })
             $("#node-input-key").typedInput({
-                types:['msg']
+                types:['msg', {value:"merge",label:"",hasValue: false}]
             })
 
             $("#node-input-build").change();

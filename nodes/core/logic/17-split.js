@@ -38,7 +38,7 @@ module.exports = function(RED) {
                         msg.payload = a[i];
                         msg.parts.index = i;
                         msg.parts.count = a.length;
-                        node.send(msg);
+                        node.send(RED.util.cloneMessage(msg));
                     }
                 }
                 else if ((typeof msg.payload === "object") && !Buffer.isBuffer(msg.payload)) {
@@ -52,7 +52,7 @@ module.exports = function(RED) {
                             msg.parts.key = p;
                             msg.parts.index = j;
                             msg.parts.count = l;
-                            node.send(msg);
+                            node.send(RED.util.cloneMessage(msg));
                             j += 1;
                         }
                     }
@@ -70,8 +70,11 @@ module.exports = function(RED) {
         this.mode = n.mode||"auto";
         this.property = n.property||"payload";
         this.propertyType = n.propertyType||"msg";
+        if (this.propertyType === 'full') {
+            this.property = "payload";
+        }
         this.key = n.key||"topic";
-        this.timer = (this.mode === "auto") ? 0 : Number(n.timeout || 0);
+        this.timer = (this.mode === "auto") ? 0 : Number(n.timeout || 0)*1000;
         this.timerr = n.timerr || "send";
         this.count = Number(n.count || 0);
         this.joiner = (n.joiner||"").replace(/\\n/g,"\n").replace(/\\r/g,"\r").replace(/\\t/g,"\t").replace(/\\e/g,"\e").replace(/\\f/g,"\f").replace(/\\0/g,"\0");
@@ -85,9 +88,9 @@ module.exports = function(RED) {
             delete inflight[partId];
 
             if (group.type === 'string') {
-                group.msg.payload = group.payload.join(group.joinChar);
+                RED.util.setMessageProperty(group.msg,node.property,group.payload.join(group.joinChar));
             } else {
-                group.msg.payload = group.payload;
+                RED.util.setMessageProperty(group.msg,node.property,group.payload);
             }
             if (group.msg.hasOwnProperty('parts') && group.msg.parts.hasOwnProperty('parts')) {
                 group.msg.parts = group.msg.parts;
@@ -101,7 +104,7 @@ module.exports = function(RED) {
 try {
             var property;
             if (node.mode === 'auto' && (!msg.hasOwnProperty("parts")||!msg.parts.hasOwnProperty("id"))) {
-                // TODO: log warning - no msg.parts in auto mode, ignoring
+                node.warn("Message missing msg.parts property - cannot join in 'auto' mode")
                 return;
             }
             if (node.propertyType == "full") {
@@ -143,7 +146,11 @@ try {
                 }
             }
             if (payloadType === 'object' && (propertyKey === null || propertyKey === undefined || propertyKey === "")) {
-                //TODO: log error - no key property found for object
+                if (node.mode === "auto") {
+                    node.warn("Message missing 'msg.parts.key' property - cannot add to object");
+                } else {
+                    node.warn("Message missing key property 'msg."+node.key+"' '- cannot add to object")
+                }
                 return;
             }
             if (!inflight.hasOwnProperty(partId)) {

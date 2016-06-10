@@ -58,7 +58,7 @@ describe('SPLIT node', function() {
         });
     });
 
-    it('should split a string into characters', function(done) {
+    it('should split a string into new-lines', function(done) {
         var flow = [{id:"sn1", type:"split", wires:[["sn2"]]},
                     {id:"sn2", type:"helper"}];
         helper.load(splitNode, flow, function() {
@@ -74,7 +74,7 @@ describe('SPLIT node', function() {
                 if (msg.parts.index === 2) { msg.payload.should.equal("v"); }
                 if (msg.parts.index === 3) { msg.payload.should.equal("e"); done(); }
             });
-            sn1.receive({payload:"Dave"});
+            sn1.receive({payload:"D\na\nv\ne"});
         });
     });
 
@@ -146,7 +146,7 @@ describe('JOIN node', function() {
     });
 
     it('should join things into an array after a count', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:3, joiner:","},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:3, joiner:",",mode:"custom"},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -160,7 +160,7 @@ describe('JOIN node', function() {
                     //msg.payload[2].a.should.equal(1);
                     done();
                 }
-                catch(e) { }//console.log(e); }
+                catch(e) {done(e);}
             });
             n1.receive({payload:1});
             n1.receive({payload:true});
@@ -169,7 +169,7 @@ describe('JOIN node', function() {
     });
 
     it('should join things into an object after a count', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:5, build:"object"},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:5, build:"object",mode:"custom"},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -186,7 +186,7 @@ describe('JOIN node', function() {
                     msg.payload.g.should.have.property("f",6);
                     done();
                 }
-                catch(e) { }//console.log(e); }
+                catch(e) { done(e)}
             });
             n1.receive({payload:1, topic:"a"});
             n1.receive({payload:"2", topic:"b"});
@@ -198,7 +198,7 @@ describe('JOIN node', function() {
     });
 
     it('should join strings with a specifed character after a timeout', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], timeout:50, count:10, joiner:","},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"string", timeout:0.05, count:10, joiner:",",mode:"custom"},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -209,7 +209,7 @@ describe('JOIN node', function() {
                     msg.payload.should.equal("a,b,c");
                     done();
                 }
-                catch(e) { console.log(e); }
+                catch(e) { done(e) }
             });
             n1.receive({payload:"a"});
             n1.receive({payload:"b"});
@@ -218,7 +218,7 @@ describe('JOIN node', function() {
     });
 
     it('should join strings with a specifed character and complete when told to', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], timeout:5000, count:100, joiner:"\n"},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"string", timeout:5, count:100, joiner:"\n",mode:"custom"},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -229,7 +229,7 @@ describe('JOIN node', function() {
                     msg.payload.should.equal("Hello\nNodeRED\nWorld\n");
                     done();
                 }
-                catch(e) { console.log(e); }
+                catch(e) { done(e) }
             });
             n1.receive({payload:"Hello"});
             n1.receive({payload:"NodeRED"});
@@ -254,7 +254,7 @@ describe('JOIN node', function() {
                     msg.payload[3].should.equal(4);
                     done();
                 }
-                catch(e) { console.log(e); }
+                catch(e) { done(e); }
             });
             n1.receive({payload:3, parts:{index:2, count:4, id:111}});
             n1.receive({payload:2, parts:{index:1, count:4, id:111}});
@@ -278,7 +278,7 @@ describe('JOIN node', function() {
                     msg.payload.should.have.property("d",4);
                     done();
                 }
-                catch(e) { console.log(e); }
+                catch(e) { done(e); }
             });
             n1.receive({payload:3, parts:{index:2, count:4, id:222, key:"c", type:"object"}});
             n1.receive({payload:2, parts:{index:1, count:4, id:222, key:"b", type:"object"}});
@@ -287,31 +287,8 @@ describe('JOIN node', function() {
         });
     });
 
-    it.skip('should join split things, missing some after a timeout', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], timeout:50},
-                    {id:"n2", type:"helper"}];
-        helper.load(joinNode, flow, function() {
-            var n1 = helper.getNode("n1");
-            var n2 = helper.getNode("n2");
-            n2.on("input", function(msg) {
-                try {
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.an.Array;
-                    (msg.payload[0] === undefined).should.be.true;
-                    msg.payload[1].should.equal(2);
-                    msg.payload[2].should.equal(3);
-                    (msg.payload[3] === undefined).should.be.true;
-                    done();
-                }
-                catch(e) { console.log(e); }
-            });
-            n1.receive({payload:3, parts:{index:2, count:4, id:333}});
-            n1.receive({payload:2, parts:{index:1, count:4, id:333}});
-        });
-    });
-
     it('should join split things, send when told complete', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], timeout:250},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], timeout:0.250},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -326,7 +303,7 @@ describe('JOIN node', function() {
                     msg.payload[3].should.equal(4);
                     done();
                 }
-                catch(e) { console.log(e); }
+                catch(e) { done(e); }
             });
             n1.receive({payload:3, parts:{index:2, count:4, id:444} });
             n1.receive({payload:2, parts:{index:1, count:4, id:444} });
@@ -335,7 +312,7 @@ describe('JOIN node', function() {
     });
 
     it('should join split strings back into a word', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]]},
+        var flow = [{id:"n1", type:"join", mode:"auto", wires:[["n2"]]},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -347,35 +324,12 @@ describe('JOIN node', function() {
                     msg.payload.should.equal("abcd");
                     done();
                 }
-                catch(e) { console.log(e); }
+                catch(e) { done(e); }
             });
-            n1.receive({payload:"a", parts:{index:0, count:4, ch:"", id:555}});
-            n1.receive({payload:"d", parts:{index:3, count:4, ch:"", id:555}});
-            n1.receive({payload:"c", parts:{index:2, count:4, ch:"", id:555}});
-            n1.receive({payload:"b", parts:{index:1, count:4, ch:"", id:555}});
+            n1.receive({payload:"a", parts:{type:'string',index:0, count:4, ch:"", id:555}});
+            n1.receive({payload:"d", parts:{type:'string',index:3, count:4, ch:"", id:555}});
+            n1.receive({payload:"c", parts:{type:'string',index:2, count:4, ch:"", id:555}});
+            n1.receive({payload:"b", parts:{type:'string',index:1, count:4, ch:"", id:555}});
         });
     });
-
-    it('should join split strings back overriding the join char', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], joiner:":"},
-                    {id:"n2", type:"helper"}];
-        helper.load(joinNode, flow, function() {
-            var n1 = helper.getNode("n1");
-            var n2 = helper.getNode("n2");
-            n2.on("input", function(msg) {
-                try {
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.an.Array;
-                    msg.payload.should.equal("a:b:c:d");
-                    done();
-                }
-                catch(e) { console.log(e); }
-            });
-            n1.receive({payload:"a", parts:{index:0, count:4, ch:"", id:666}});
-            n1.receive({payload:"d", parts:{index:3, count:4, ch:"", id:666}});
-            n1.receive({payload:"c", parts:{index:2, count:4, ch:"", id:666}});
-            n1.receive({payload:"b", parts:{index:1, count:4, ch:"", id:666}});
-        });
-    });
-
 });
