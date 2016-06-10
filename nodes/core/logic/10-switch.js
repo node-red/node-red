@@ -44,21 +44,27 @@ module.exports = function(RED) {
         for (var i=0; i<this.rules.length; i+=1) {
             var rule = this.rules[i];
             if (!rule.vt) {
-                rule.vt = 'str';
+                if (!isNaN(Number(rule.v))) {
+                    rule.vt = 'num';
+                } else {
+                    rule.vt = 'str';
+                }
             }
-            if (rule.vt === 'str' || rule.vt === 'num') {
+            if (rule.vt === 'num') {
                 if (!isNaN(Number(rule.v))) {
                     rule.v = Number(rule.v);
                 }
             }
             if (typeof rule.v2 !== 'undefined') {
                 if (!rule.v2t) {
-                    rule.v2t = 'str';
-                }
-                if (rule.v2t === 'str' || rule.v2t === 'num') {
                     if (!isNaN(Number(rule.v2))) {
-                        rule.v2 = Number(rule.v2);
+                        rule.v2t = 'num';
+                    } else {
+                        rule.v2t = 'str';
                     }
+                }
+                if (rule.v2t === 'num') {
+                    rule.v2 = Number(rule.v2);
                 }
             }
         }
