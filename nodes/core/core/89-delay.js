@@ -101,6 +101,7 @@ module.exports = function(RED) {
             });
 
         } else if (node.pauseType === "rate") {
+            var olddepth = 0;
             node.on("input", function(msg) {
                 if (!node.drop) {
                     if ( node.intervalID !== -1) {
@@ -108,8 +109,13 @@ module.exports = function(RED) {
                         if (node.buffer.length > 0) {
                             node.status({text:node.buffer.length});
                         }
-                        if (node.buffer.length > 1000) {
+                        if ((node.buffer.length > 1000) && (olddepth < 1000)) {
+                            olddepth = 1000;
                             node.warn(node.name + " " + RED._("delay.error.buffer"));
+                        }
+                        if ((node.buffer.length > 10000) && (olddepth < 10000)) {
+                            olddepth = 10000;
+                            node.warn(node.name + " " + RED._("delay.error.buffer1"));
                         }
                     } else {
                         node.send(msg);
@@ -119,9 +125,9 @@ module.exports = function(RED) {
                                 node.intervalID = -1;
                                 node.status({});
                             }
-
                             if (node.buffer.length > 0) {
                                 node.send(node.buffer.shift());
+                                if (node.buffer.length < 1000) { olddepth = 0; }
                                 node.status({text:node.buffer.length});
                             }
                         },node.rate);
@@ -190,14 +196,13 @@ module.exports = function(RED) {
                 }, wait);
                 node.idList.push(id);
             });
-
+            
             node.on("close", function() {
                 for (var i=0; i<node.idList.length; i++ ) {
                     clearTimeout(node.idList[i]);
                 }
                 node.idList = [];
             });
-
         }
     }
     RED.nodes.registerType("delay",DelayNode);

@@ -203,7 +203,8 @@
             "timed": "releases per"
         },
         "error": {
-            "buffer": "buffer exceeded 1000 messages"
+            "buffer": "buffer exceeded 1000 messages",
+            "buffer1": "buffer exceeded 10000 messages"
         }
     },
     "trigger": {
