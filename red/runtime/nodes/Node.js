@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2015 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,8 +99,15 @@ Node.prototype.close = function() {
         }
     }
     if (promises.length > 0) {
-        return when.settle(promises);
+        return when.settle(promises).then(function() {
+            if (this._context) {
+                 context.delete(this._alias||this.id,this.z);
+            }
+        });
     } else {
+        if (this._context) {
+             context.delete(this._alias||this.id,this.z);
+        }
         return;
     }
 };
