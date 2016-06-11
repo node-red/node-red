@@ -197,6 +197,33 @@ describe('JOIN node', function() {
         });
     });
 
+    it('should merge objects', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:6, build:"merged",mode:"custom"},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.have.property("a",6);
+                    msg.payload.should.have.property("b",2);
+                    msg.payload.should.have.property("c",3);
+                    msg.payload.should.have.property("d",4);
+                    msg.payload.should.have.property("e",5);
+                    done();
+                }
+                catch(e) { done(e)}
+            });
+            n1.receive({payload:{a:1}, topic:"a"});
+            n1.receive({payload:{b:2}, topic:"b"});
+            n1.receive({payload:{c:3}, topic:"c"});
+            n1.receive({payload:{d:4}, topic:"d"});
+            n1.receive({payload:{e:5}, topic:"e"});
+            n1.receive({payload:{a:6}, topic:"f"});
+        });
+    });
+
     it('should join strings with a specifed character after a timeout', function(done) {
         var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"string", timeout:0.05, count:10, joiner:",",mode:"custom"},
                     {id:"n2", type:"helper"}];

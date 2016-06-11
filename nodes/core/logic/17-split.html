@@ -88,7 +88,8 @@
             <select id="node-input-build" style="width:200px;">
                 <option id="node-input-build-string" value="string">a String</option>
                 <option value="array">an Array</option>
-                <option value="object">an Object</option>
+                <option value="object">a key/value Object</option>
+                <option value="merged">a merged Object</option>
             </select>
         </div>
         <div class="form-row node-row-key">
@@ -128,27 +129,30 @@
     <p>A function that joins the a sequence of messages into a single message.</p>
     <p>When paired with the <b>split</b> node, it will automatically join the messages
     to reverse the split that was performed.</p>
-    <p>It can be used without the split node by configuring the required behaviour.</p>
-    <p>The type of the resulting message property can be a string, array or object. All of the other message
-    properties are taken from the last message received before the message is sent.</p>
+    <p>The node can join either a specific property of each received message or,
+    if the output type is not string, the entire message.</p>
+    <p>The type of the resulting message property can be:</p>
+    <ul>
+        <li>a <b>string</b> - created by joining the property of each message with the specified join character.</li>
+        <li>an <b>array</b>.</li>
+        <li>a <b>key/value object</b> - created by using a property of each message to determine the key under which
+        the required value is stored.</li>
+        <li>a <b>merged object</b> - created by merging the property of each message under a single object.</li>
+    </ul>
+    The other properties of the output message are taken from the last message received before the result is sent.</p>
     <p>A <i>count</i> can be set for how many messages should be received before generating the output message</p>
     <p>A <i>timeout</i> can be set to trigger sending the new message using whatever has been received so far.</p>
-    <p>If the node is set to construct a string, a <i>join character</i> can be set.</p>
-    <p>If the node is set to construct an object, the key used to store each received property can be taken from
-       an identified message property.</p>
-    <p>The automatic behaviour relies on the received messages to have <b>msg.parts</b> set.
-       The object has the following properties:</p>
-       <ul>
-           <li><b>id</b> - an identifier for the group of messages</li>
-           <li><b>index</b> - the position within the group</li>
-           <li><b>count</b> - the total number of messages in the group</li>
-           <li><b>type</b> - the type of message - string/array/object</li>
-           <li><b>ch</b> - for a string, the character used to split</li>
-           <li><b>key</b> - for an object, the key of the property this message was created from</li>
-       </ul>
-
-
-
+    <p>If a message is received with the <b>msg.complete</b> property set, the output message is sent.</p>
+    <p>The automatic behaviour relies on the received messages to have <b>msg.parts</b> set. The split node generates
+    this property, but can be manually created. It has the following properties:</p>
+   <ul>
+       <li><b>id</b> - an identifier for the group of messages</li>
+       <li><b>index</b> - the position within the group</li>
+       <li><b>count</b> - the total number of messages in the group</li>
+       <li><b>type</b> - the type of message - string/array/object</li>
+       <li><b>ch</b> - for a string, the character used to split</li>
+       <li><b>key</b> - for an object, the key of the property this message was created from</li>
+   </ul>
 </script>
 
 <script type="text/javascript">

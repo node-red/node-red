@@ -154,7 +154,7 @@ try {
                 return;
             }
             if (!inflight.hasOwnProperty(partId)) {
-                if (payloadType === 'object') {
+                if (payloadType === 'object' || payloadType === 'merged') {
                     inflight[partId] = {
                         currentCount:0,
                         payload:{},
@@ -186,6 +186,17 @@ try {
             if (payloadType === 'object') {
                 group.payload[propertyKey] = property;
                 group.currentCount = Object.keys(group.payload).length;
+            } else if (payloadType === 'merged') {
+                if (Array.isArray(property) || typeof property !== 'object') {
+                    node.warn("Cannot merge non-object types");
+                } else {
+                    for (propertyKey in property) {
+                        if (property.hasOwnProperty(propertyKey)) {
+                            group.payload[propertyKey] = property[propertyKey];
+                        }
+                    }
+                    group.currentCount++;
+                }
             } else {
                 if (!isNaN(propertyIndex)) {
                     group.payload[propertyIndex] = property;
