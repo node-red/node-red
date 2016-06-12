@@ -247,6 +247,9 @@ function Flow(global,flow) {
                             count: count
                         }
                     };
+                    if (logMessage.hasOwnProperty('stack')) {
+                        errorMessage.error.stack = logMessage.stack;
+                    }
                     targetCatchNode.receive(errorMessage);
                     handled = true;
                 });
