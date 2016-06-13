@@ -21,6 +21,7 @@ Runtime
  - Always log node warnings on start without requiring -v
  - Add support for loading scoped node modules. Closes #885
  - Add process.env.PORT to settings.js
+ - Clear node context on deploy. Closes #870
 
 Nodes
 
@@ -40,6 +41,8 @@ Nodes
  - Add Move capability to Change node
  - Update Serial node to support custom baud rates
  - Add support for array-syntax in typedInput msg properties
+ - Add RED.util to Function node sandbox
+ - Capture error stack on node.error. Closes #879
 
 
 Fixes
