@@ -32,7 +32,7 @@
                     quoteChar = c;
                     start = i+1;
                 } else if (c === '.') {
-                    if (i===length-1) {
+                    if (i===0 || i===length-1) {
                         return false;
                     }
                     // Next char is a-z
@@ -65,6 +65,8 @@
                     }
                     start = i+1;
                     inBox = false;
+                } else if (c === ' ') {
+                    return false;
                 }
             } else {
                 if (c === quoteChar) {

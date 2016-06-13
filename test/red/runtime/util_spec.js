@@ -346,6 +346,9 @@ describe("red/util", function() {
         it("fail [0]",function() { testInvalid("[0]"); })
         it("fail a[0",function() { testInvalid("a[0"); })
         it("fail a.",function() { testInvalid("a."); })
+        it("fail .a",function() { testInvalid(".a"); })
+        it("fail a. b",function() { testInvalid("a. b"); })
+        it("fail  a.b",function() { testInvalid(" a.b"); })
         it("fail a[0].[1]",function() { testInvalid("a[0].[1]"); })
     });
 });
