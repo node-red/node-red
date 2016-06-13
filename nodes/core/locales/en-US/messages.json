@@ -609,7 +609,7 @@
     },
     "rpi-gpio": {
         "label": {
-            "gpiopin": "GPIO Pin",
+            "gpiopin": "GPIO",
             "selectpin": "select pin",
             "resistor": "Resistor?",
             "readinitial": "Read initial state of pin on deploy/restart?",
