@@ -73,6 +73,9 @@ module.exports = function(RED) {
             console:console,
             util:util,
             Buffer:Buffer,
+            RED: {
+                util: RED.util
+            },
             __node__: {
                 log: function() {
                     node.log.apply(node, arguments);
