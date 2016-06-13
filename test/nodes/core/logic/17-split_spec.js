@@ -359,4 +359,27 @@ describe('JOIN node', function() {
             n1.receive({payload:"b", parts:{type:'string',index:1, count:4, ch:"", id:555}});
         });
     });
+
+    it('should allow chained split-split-join-join sequences', function(done) {
+        var flow = [{id:"s1", type:"split",wires:[["s2"]]},
+                    {id:"s2", type:"split",wires:[["j1"]]},
+                    {id:"j1", type:"join", mode:"auto", wires:[["j2"]]},
+                    {id:"j2", type:"join", mode:"auto", wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var s1 = helper.getNode("s1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.eql([[1,2,3],"a\nb\nc",[7,8,9]]);
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            s1.receive({payload:[[1,2,3],"a\nb\nc",[7,8,9]]});
+        });
+    })
+
+
 });

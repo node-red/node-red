@@ -93,7 +93,7 @@ module.exports = function(RED) {
                 RED.util.setMessageProperty(group.msg,node.property,group.payload);
             }
             if (group.msg.hasOwnProperty('parts') && group.msg.parts.hasOwnProperty('parts')) {
-                group.msg.parts = group.msg.parts;
+                group.msg.parts = group.msg.parts.parts;
             } else {
                 delete group.msg.parts;
             }
