@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -280,7 +280,7 @@ function mapEnvVarProperties(obj,prop) {
         }
     } else {
         for (var p in obj[prop]) {
-            if (obj[prop].hasOwnProperty) {
+            if (obj[prop].hasOwnProperty(p)) {
                 mapEnvVarProperties(obj[prop],p);
             }
         }
