@@ -76,19 +76,39 @@
         font-size: 14px;
         padding: 6px 14px;
         margin-right: 8px;
-        color: $editor-button-color-primary;
+        color: $editor-button-color;
+        background: $editor-button-background;
+
+        &.primary {
+            border-color: $editor-button-background-primary;
+            color: $editor-button-color-primary;
+            background: $editor-button-background-primary;
+
+            &:hover {
+                border-color: $editor-button-background-primary-hover;
+                background: $editor-button-background-primary-hover;
+                color: $editor-button-color-primary !important;
+            }
+        }
+        &:not(.disabled):hover {
+            //color: $editor-button-color;
+        }
+        &.disabled {
+            background: none;
+        }
+        &.disabled:focus {
+            outline: none;
+        }
+
+
+
+
         &.leftButton {
             float: left;
             margin-top: 1px;
         }
         &:not(.leftButton):not(:last-child) {
             margin-right: 16px;
-        }
-        &:not(.primary) {
-            background: none;
-            &:not(.disabled):hover {
-                color: $editor-button-color-primary;
-            }
         }
     }
 }
@@ -108,7 +128,7 @@
         margin:0;
 
         &:not(:last-child) {
-            color: $editor-button-color-secondary;
+            color: $editor-button-color;
             font-weight: normal;
 
             &:after {
