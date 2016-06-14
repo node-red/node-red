@@ -112,7 +112,7 @@ module.exports = function(RED) {
                         var first = true; // is this the first line
                         var line = msg.payload;
                         var tmp = "";
-                        var reg = new RegExp("^[-]?[0-9.]+[\.]?[0-9]+$");
+                        var reg = new RegExp("^[-]?[0-9.]*[\.]?[0-9]*$");
 
                         // For now we are just going to assume that any \r or \n means an end of line...
                         //   got to be a weird csv that has singleton \r \n in it for another reason...
