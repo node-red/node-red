@@ -254,7 +254,7 @@ function mapEnvVarProperties(obj,prop) {
         }
     } else {
         for (var p in obj[prop]) {
-            if (obj[prop].hasOwnProperty) {
+            if (obj[prop].hasOwnProperty(p)) {
                 mapEnvVarProperties(obj[prop],p);
             }
         }
