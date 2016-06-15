@@ -313,7 +313,7 @@
                     this.optionSelectLabel.text(value);
                 }
                 this.element.val(value);
-                this.element.trigger('change');
+                this.element.trigger('change',this.type(),value);
             }
         },
         type: function(type) {
@@ -369,7 +369,7 @@
                             }
                             this.element.show();
                         }
-                        this.element.trigger('change');
+                        this.element.trigger('change',this.propertyType,this.value());
                     }
                     if (image) {
                         image.onload = function() { that._resize(); }
