@@ -12,7 +12,6 @@ Editor
  - Add option to filter Debug sidebar by flow and highlight subflow-emitting nodes
  - Back off comms reconnect attempts after prolonged failures
  - Prompt for login if comms reconnect fails authentication
- - Enable finer grained permissions in adminAuth
  - Change style of nodes in subflow template view
  - Add CHANGELOG.md and make it accessible from menu
 
@@ -22,6 +21,7 @@ Runtime
  - Add support for loading scoped node modules. Closes #885
  - Add process.env.PORT to settings.js
  - Clear node context on deploy. Closes #870
+ - Enable finer grained permissions in adminAuth
 
 Nodes
 
