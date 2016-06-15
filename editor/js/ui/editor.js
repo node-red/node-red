@@ -724,7 +724,7 @@ RED.editor = (function() {
         if (type === 'subflow') {
             var id = editing_node.type.substring(8);
             trayOptions.buttons.unshift({
-                class: 'leftButton primary',
+                class: 'leftButton',
                 text: RED._("subflow.edit"),
                 click: function() {
                     RED.workspaces.show(id);
