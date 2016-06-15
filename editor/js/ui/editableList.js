@@ -17,8 +17,7 @@
 
 /**
  * options:
- *   - addButton : boolean|string - text for add label, default 'tab'
- *   - addable : boolean (true) - whether to show the add button
+ *   - addButton : boolean|string - text for add label, default 'add'
  *   - height : number|'auto'
  *   - resize : function - called when list as a whole is resized
  *   - resizeItem : function(item) - called to resize individual item
@@ -128,7 +127,7 @@
             if (this.options.resizeItem) {
                 var that = this;
                 this.element.children().each(function(i) {
-                    that.options.resizeItem($(this).find(".red-ui-editableList-item-content"));
+                    that.options.resizeItem($(this).find(".red-ui-editableList-item-content"),i);
                 });
             }
         },
