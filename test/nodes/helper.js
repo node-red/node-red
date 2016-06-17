@@ -82,10 +82,10 @@ module.exports = {
                 // do nothing
             },
         };
+
         var settings = {
             available: function() { return false; }
         };
-
 
         var red = {};
         for (var i in RED) {
@@ -115,6 +115,7 @@ module.exports = {
             cb();
         });
     },
+
     unload: function() {
         // TODO: any other state to remove between tests?
         redNodes.clearRegistry();
@@ -137,7 +138,7 @@ module.exports = {
     },
 
     startServer: function(done) {
-        server = http.createServer(function(req,res){app(req,res);});
+        server = http.createServer(function(req,res) { app(req,res); });
         RED.init(server, {
             SKIP_BUILD_CHECK: true,
             logging:{console:{level:'off'}}
@@ -150,9 +151,10 @@ module.exports = {
             done();
         });
     },
+
     //TODO consider saving TCP handshake/server reinit on start/stop/start sequences
     stopServer: function(done) {
-        if(server) {
+        if (server) {
             try {
                 server.close(done);
             } catch(e) {

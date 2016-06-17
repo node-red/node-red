@@ -15,5 +15,5 @@
  **/
 
 describe("locales api", function() {
-    it.skip("works",function(){});
+    it.skip("works",function() {});
 });
