@@ -293,6 +293,9 @@ module.exports = function(RED) {
                         msg.res._res.set('content-length', len);
                     }
 
+                    if (typeof msg.payload === "number") {
+                        msg.payload = ""+msg.payload;
+                    }
                     msg.res._res.status(statusCode).send(msg.payload);
                 }
             } else {
