@@ -81,7 +81,7 @@ if (parsedArgs.settings) {
         // NODE_RED_HOME contains user data - use its settings.js
         settingsFile = path.join(process.env.NODE_RED_HOME,"settings.js");
     } else {
-        var userDir = path.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE,".node-red");
+        var userDir = path.join(parsedArgs.userDir || process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE,".node-red");
         var userSettingsFile = path.join(userDir,"settings.js");
         if (fs.existsSync(userSettingsFile)) {
             // $HOME/.node-red/settings.js exists
