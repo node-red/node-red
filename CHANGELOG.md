@@ -64,6 +64,7 @@ Fixes
  - Ensure tcp node creates a buffer of size 1 at least
  - Return editorTheme default if value is undefined
  - Fix RED.util.compareObjects for Function created objects and Buffers
+ - Ensure default settings copied to command-line specified userDir
 
 
 #### 0.13.4: Maintenance Release
