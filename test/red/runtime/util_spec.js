@@ -58,6 +58,7 @@ describe("red/util", function() {
         it('Buffer', function() {
             util.compareObjects(new Buffer("hello"),new Buffer("hello")).should.equal(true);
             util.compareObjects(new Buffer("hello"),new Buffer("hello ")).should.equal(false);
+            util.compareObjects(new Buffer("hello"),"hello").should.equal(false);
         });
 
     });
@@ -157,7 +158,16 @@ describe("red/util", function() {
             (function() {
                 util.getMessageProperty({a:"foo"},"msg.a.b.c");
             }).should.throw();
-        })
+        });
+        it('retrieves a property with array syntax', function() {
+            var v = util.getMessageProperty({a:["foo","bar"]},"msg.a[0]");
+            v.should.eql("foo");
+            var v2 = util.getMessageProperty({a:[null,{b:"foo"}]},"a[1].b");
+            v2.should.eql("foo");
+            var v3 = util.getMessageProperty({a:[[["foo"]]]},"a[0][0][0]");
+            v3.should.eql("foo");
+        });
+
     });
 
     describe('setMessageProperty', function() {
@@ -190,7 +200,48 @@ describe("red/util", function() {
             var msg = {a:{}};
             util.setMessageProperty(msg,"msg.a.b.c",undefined);
             should.not.exist(msg.a.b);
+        });
+        it('sets a property with array syntax', function() {
+            var msg = {a:{b:["foo",{c:["",""]}]}};
+            util.setMessageProperty(msg,"msg.a.b[1].c[1]","bar");
+            msg.a.b[1].c[1].should.eql('bar');
+        });
+        it('creates missing array elements - final property', function() {
+            var msg = {a:[]};
+            util.setMessageProperty(msg,"msg.a[2]","bar");
+            msg.a.should.have.length(3);
+            msg.a[2].should.eql("bar");
+        });
+        it('creates missing array elements - mid property', function() {
+            var msg = {};
+            util.setMessageProperty(msg,"msg.a[2].b","bar");
+            msg.a.should.have.length(3);
+            msg.a[2].b.should.eql("bar");
+        });
+        it('creates missing array elements - multi-arrays', function() {
+            var msg = {};
+            util.setMessageProperty(msg,"msg.a[2][2]","bar");
+            msg.a.should.have.length(3);
+            msg.a.should.be.instanceOf(Array);
+            msg.a[2].should.have.length(3);
+            msg.a[2].should.be.instanceOf(Array);
+            msg.a[2][2].should.eql("bar");
+        });
+        it('does not create missing array elements - final property', function() {
+            var msg = {a:{}};
+            util.setMessageProperty(msg,"msg.a.b[2]","bar",false);
+            should.not.exist(msg.a.b);
+            // check it has not been misinterpreted
+            msg.a.should.not.have.property("b[2]");
+        });
+        it('deletes property inside array if value is undefined', function() {
+            var msg = {a:[1,2,3]};
+            util.setMessageProperty(msg,"msg.a[1]",undefined);
+            msg.a.should.have.length(2);
+            msg.a[0].should.eql(1);
+            msg.a[1].should.eql(3);
         })
+
     });
 
     describe('evaluateNodeProperty', function() {
@@ -209,6 +260,20 @@ describe("red/util", function() {
         it('returns regex',function() {
             var result = util.evaluateNodeProperty('^abc$','re');
             result.toString().should.eql("/^abc$/");
+        });
+        it('returns boolean',function() {
+            var result = util.evaluateNodeProperty('true','bool');
+            result.should.be.true();
+            result = util.evaluateNodeProperty('TrUe','bool');
+            result.should.be.true();
+            result = util.evaluateNodeProperty('false','bool');
+            result.should.be.false();
+            result = util.evaluateNodeProperty('','bool');
+            result.should.be.false();
+        });
+        it('returns date',function() {
+            var result = util.evaluateNodeProperty('','date');
+            (Date.now() - result).should.be.approximately(0,50);
         });
         it('returns msg property',function() {
             var result = util.evaluateNodeProperty('foo.bar','msg',{},{foo:{bar:"123"}});
@@ -242,7 +307,48 @@ describe("red/util", function() {
             },{});
             result.should.eql("123");
         });
+    });
 
+    describe('normalisePropertyExpression', function() {
+        function testABC(input,expected) {
+            var result = util.normalisePropertyExpression(input);
+            // console.log("+",input);
+            // console.log(result);
+            result.should.eql(expected);
+        }
 
-    })
+        function testInvalid(input) {
+            /*jshint immed: false */
+            (function() {
+                util.normalisePropertyExpression(input);
+            }).should.throw();
+        }
+        it('pass a.b.c',function() { testABC('a.b.c',['a','b','c']); })
+        it('pass a["b"]["c"]',function() { testABC('a["b"]["c"]',['a','b','c']); })
+        it('pass a["b"].c',function() { testABC('a["b"].c',['a','b','c']); })
+        it("pass a['b'].c",function() { testABC("a['b'].c",['a','b','c']); })
+
+        it("pass a[0].c",function() { testABC("a[0].c",['a',0,'c']); })
+        it("pass a.0.c",function() { testABC("a.0.c",['a',0,'c']); })
+        it("pass a['a.b[0]'].c",function() { testABC("a['a.b[0]'].c",['a','a.b[0]','c']); })
+        it("pass a[0][0][0]",function() { testABC("a[0][0][0]",['a',0,0,0]); })
+
+        it("fail a'b'.c",function() { testInvalid("a'b'.c"); })
+        it("fail a['b'.c",function() { testInvalid("a['b'.c"); })
+        it("fail a[]",function() { testInvalid("a[]"); })
+        it("fail a]",function() { testInvalid("a]"); })
+        it("fail a[",function() { testInvalid("a["); })
+        it("fail a[0d]",function() { testInvalid("a[0d]"); })
+        it("fail a['",function() { testInvalid("a['"); })
+        it("fail a[']",function() { testInvalid("a[']"); })
+        it("fail a[0']",function() { testInvalid("a[0']"); })
+        it("fail a.[0]",function() { testInvalid("a.[0]"); })
+        it("fail [0]",function() { testInvalid("[0]"); })
+        it("fail a[0",function() { testInvalid("a[0"); })
+        it("fail a.",function() { testInvalid("a."); })
+        it("fail .a",function() { testInvalid(".a"); })
+        it("fail a. b",function() { testInvalid("a. b"); })
+        it("fail  a.b",function() { testInvalid(" a.b"); })
+        it("fail a[0].[1]",function() { testInvalid("a[0].[1]"); })
+    });
 });

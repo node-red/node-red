@@ -30,7 +30,7 @@ describe('template node', function() {
 
 
     it('should modify payload', function(done) {
-        var flow = [{id:"n1", type:"template", field: "payload", template: "payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];
+        var flow = [{id:"n1", type:"template", field:"payload", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];
         helper.load(templateNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
@@ -39,6 +39,50 @@ describe('template node', function() {
                 msg.should.have.property('payload', 'payload=foo');
                 done();
             });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should modify payload in plain text mode', function(done) {
+        var flow = [{id:"n1", type:"template", field:"payload", syntax:"plain", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'payload={{payload}}');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    xit('should modify flow context', function(done) {
+        var flow = [{id:"n1", type:"template", field:"payload", fieldType:"flow", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            setTimeout( function() {
+                console.log(n2);
+                console.log(n2.context().global.get("payload"));
+                //c.should.equal(1); // should only have had one output.
+                done();
+            },50);
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    xit('should modify global context', function(done) {
+        var flow = [{id:"n1", type:"template", field:"payload", fieldType:"global", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            setTimeout( function() {
+                console.log(n2);
+                console.log(n2.context().global.get("payload"));
+                //c.should.equal(1); // should only have had one output.
+                done();
+            },50);
             n1.receive({payload:"foo",topic: "bar"});
         });
     });

@@ -17,6 +17,7 @@
 module.exports = function(RED) {
     "use strict";
     var bodyParser = require("body-parser");
+    var cookieParser = require("cookie-parser");
     var getBody = require('raw-body');
     var cors = require('cors');
     var jsonParser = bodyParser.json();
@@ -185,7 +186,7 @@ module.exports = function(RED) {
             this.callback = function(req,res) {
                 var msgid = RED.util.generateId();
                 res._msgid = msgid;
-                if (node.method.match(/(^post$|^delete$|^put$|^options$)/)) {
+                if (node.method.match(/^(post|delete|put|options|patch)$/)) {
                     node.send({_msgid:msgid,req:req,res:createResponseWrapper(node,res),payload:req.body});
                 } else if (node.method == "get") {
                     node.send({_msgid:msgid,req:req,res:createResponseWrapper(node,res),payload:req.query});
@@ -223,13 +224,15 @@ module.exports = function(RED) {
             }
 
             if (this.method == "get") {
-                RED.httpNode.get(this.url,httpMiddleware,corsHandler,metricsHandler,this.callback,this.errorHandler);
+                RED.httpNode.get(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,this.callback,this.errorHandler);
             } else if (this.method == "post") {
-                RED.httpNode.post(this.url,httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+                RED.httpNode.post(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "put") {
-                RED.httpNode.put(this.url,httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+                RED.httpNode.put(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+            } else if (this.method == "patch") {
+                RED.httpNode.patch(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "delete") {
-                RED.httpNode.delete(this.url,httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+                RED.httpNode.delete(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             }
 
             this.on("close",function() {
@@ -254,6 +257,23 @@ module.exports = function(RED) {
             if (msg.res) {
                 if (msg.headers) {
                     msg.res._res.set(msg.headers);
+                }
+                if (msg.cookies) {
+                    for (var name in msg.cookies) {
+                        if (msg.cookies.hasOwnProperty(name)) {
+                            if (msg.cookies[name] === null || msg.cookies[name].value === null) {
+                                if (msg.cookies[name]!==null) {
+                                    msg.res._res.clearCookie('name',msg.cookies[name]);
+                                } else {
+                                    msg.res._res.clearCookie('name');
+                                }
+                            } else  if (typeof msg.cookies[name] === 'object') {
+                                msg.res._res.cookie(name,msg.cookies[name].value,msg.cookies[name]);
+                            } else {
+                                msg.res._res.cookie(name,msg.cookies[name]);
+                            }
+                        }
+                    }
                 }
                 var statusCode = msg.statusCode || 200;
                 if (typeof msg.payload == "object" && !Buffer.isBuffer(msg.payload)) {

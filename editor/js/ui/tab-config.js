@@ -17,7 +17,7 @@ RED.sidebar.config = (function() {
 
 
     var content = document.createElement("div");
-    content.className = "sidebar-node-config"
+    content.className = "sidebar-node-config";
 
     $('<div class="button-group sidebar-header">'+
       '<a class="sidebar-header-button-toggle selected" id="workspace-config-node-filter-all" href="#"><span data-i18n="sidebar.config.filterAll"></span></a>'+

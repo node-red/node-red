@@ -57,21 +57,26 @@
             margin-top: 1px;
             vertical-align: middle;
         }
-
+        &.disabled {
+            cursor: default;
+            i {
+                color: #bbb;
+            }
+        }
         span {
             display: inline-block;
             height: 100%;
             padding: 0 1px 0 5px;
         }
 
-        &:hover {
+        &:not(.disabled):hover {
             text-decoration: none;
             background: $typedInput-button-background-hover;
         }
         &:focus {
             text-decoration: none;
         }
-        &:active {
+        &:not(.disabled):active {
             background: $typedInput-button-background-active;
             text-decoration: none;
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2013,2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,16 @@ module.exports = function(RED) {
             if (msgs[m]) {
                 if (util.isArray(msgs[m])) {
                     for (var n=0; n < msgs[m].length; n++) {
-                        msgs[m][n]._msgid = _msgid;
-                        msgCount++;
+                        if (msgs[m][n] !== null && msgs[m][n] !== undefined) {
+                            msgs[m][n]._msgid = _msgid;
+                            msgCount++;
+                        }
                     }
                 } else {
-                    msgs[m]._msgid = _msgid;
-                    msgCount++;
+                    if (msgs[m] !== null && msgs[m] !== undefined) {
+                        msgs[m]._msgid = _msgid;
+                        msgCount++;
+                    }
                 }
             }
         }
@@ -69,6 +73,9 @@ module.exports = function(RED) {
             console:console,
             util:util,
             Buffer:Buffer,
+            RED: {
+                util: RED.util
+            },
             __node__: {
                 log: function() {
                     node.log.apply(node, arguments);
@@ -83,6 +90,9 @@ module.exports = function(RED) {
                     sendResults(node, id, msgs);
                 },
                 on: function() {
+                    if (arguments[0] === "input") {
+                        throw new Error(RED._("function.error.inputListener"));
+                    }
                     node.on.apply(node, arguments);
                 },
                 status: function() {
@@ -206,10 +216,10 @@ module.exports = function(RED) {
                 }
             });
             this.on("close", function() {
-                while(node.outstandingTimers.length > 0) {
+                while (node.outstandingTimers.length > 0) {
                     clearTimeout(node.outstandingTimers.pop())
                 }
-                while(node.outstandingIntervals.length > 0) {
+                while (node.outstandingIntervals.length > 0) {
                     clearInterval(node.outstandingIntervals.pop())
                 }
             })

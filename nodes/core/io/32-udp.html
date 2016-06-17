@@ -112,7 +112,6 @@
             $("#node-input-port").change(function() {
                 var portnew = $("#node-input-port").val();
                 if (portsInUse.hasOwnProperty($("#node-input-port").val())) {
-                    console.log($("#node-input-port").val());
                     RED.notify(alreadyused+" "+$("#node-input-port").val(),"warn");
                 }
             });

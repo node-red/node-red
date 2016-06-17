@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 var should = require("should");
 var when = require("when");
 var sinon = require("sinon");
@@ -24,16 +24,11 @@ var Tokens = require("../../../../red/api/auth/tokens");
 describe("Tokens", function() {
     describe("#init",function() {
         it('loads sessions', function(done) {
-            Tokens.init({},{
-                getSessions:function() {
-                    done();
-                    return when.resolve();
-                }
-            });
+            Tokens.init({}).then(done);
         });
     });
-    
-    
+
+
     describe("#get",function() {
         it('returns a valid token', function(done) {
             Tokens.init({},{
@@ -51,7 +46,7 @@ describe("Tokens", function() {
                 });
             });
         });
-        
+
         it('returns null for an invalid token', function(done) {
             Tokens.init({},{
                 getSessions:function() {
@@ -98,7 +93,7 @@ describe("Tokens", function() {
             });
         });
     });
-    
+
     describe("#create",function() {
         it('creates a token', function(done) {
             var savedSession;
@@ -112,14 +107,14 @@ describe("Tokens", function() {
                 }
             });
             var expectedExpiryTime = Date.now()+10000;
-            
-            
+
+
             Tokens.create("user","client","scope").then(function(token) {
                 try {
                     should.exist(savedSession);
                     var sessionKeys = Object.keys(savedSession);
                     sessionKeys.should.have.lengthOf(1);
-                    
+
                     token.should.have.a.property('accessToken',sessionKeys[0]);
                     savedSession[sessionKeys[0]].should.have.a.property('user','user');
                     savedSession[sessionKeys[0]].should.have.a.property('client','client');
@@ -133,7 +128,7 @@ describe("Tokens", function() {
             });
         });
     });
-    
+
     describe("#revoke", function() {
         it('revokes a token', function(done) {
             var savedSession;
@@ -157,5 +152,5 @@ describe("Tokens", function() {
             });
         });
     });
-    
+
 });

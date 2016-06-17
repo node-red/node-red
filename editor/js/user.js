@@ -99,6 +99,9 @@ RED.user = (function() {
                         }).done(function(data,textStatus,xhr) {
                             RED.settings.set("auth-tokens",data);
                             $("#node-dialog-login").dialog('destroy').remove();
+                            if (opts.updateMenu) {
+                                updateUserMenu();
+                            }
                             done();
                         }).fail(function(jqXHR,textStatus,errorThrown) {
                             RED.settings.remove("auth-tokens");
@@ -133,7 +136,7 @@ RED.user = (function() {
     }
 
     function updateUserMenu() {
-        $("#usermenu-submenu li").remove();
+        $("#btn-usermenu-submenu li").remove();
         if (RED.settings.user.anonymous) {
             RED.menu.addItem("btn-usermenu",{
                 id:"usermenu-item-login",
@@ -162,8 +165,6 @@ RED.user = (function() {
         }
 
     }
-
-
 
     function init() {
         if (RED.settings.user) {

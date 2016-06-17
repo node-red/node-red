@@ -21,6 +21,7 @@ RED.nodes = (function() {
     var links = [];
     var defaultWorkspace;
     var workspaces = {};
+    var workspacesOrder =[];
     var subflows = {};
 
     var dirty = false;
@@ -173,8 +174,10 @@ RED.nodes = (function() {
                         if (type && type.category == "config") {
                             var configNode = configNodes[n[d]];
                             if (configNode) {
-                                updatedConfigNode = true;
-                                configNode.users.push(n);
+                                if (configNode.users.indexOf(n) === -1) {
+                                    updatedConfigNode = true;
+                                    configNode.users.push(n);
+                                }
                             }
                         }
                     }
@@ -192,9 +195,7 @@ RED.nodes = (function() {
             }
             nodes.push(n);
         }
-        if (n._def.onadd) {
-            n._def.onadd.call(n);
-        }
+        RED.events.emit('nodes:add',n);
     }
     function addLink(l) {
         links.push(l);
@@ -220,6 +221,7 @@ RED.nodes = (function() {
         if (id in configNodes) {
             node = configNodes[id];
             delete configNodes[id];
+            RED.events.emit('nodes:remove',node);
             RED.workspaces.refresh();
         } else {
             node = getNode(id);
@@ -252,6 +254,7 @@ RED.nodes = (function() {
                 if (updatedConfigNode) {
                     RED.workspaces.refresh();
                 }
+                RED.events.emit('nodes:remove',node);
             }
         }
         if (node && node._def.onremove) {
@@ -269,12 +272,21 @@ RED.nodes = (function() {
 
     function addWorkspace(ws) {
         workspaces[ws.id] = ws;
+        ws._def = {
+            defaults: {
+                label: {value:""}
+            }
+        };
+
+        workspacesOrder.push(ws.id);
     }
     function getWorkspace(id) {
         return workspaces[id];
     }
     function removeWorkspace(id) {
         delete workspaces[id];
+        workspacesOrder.splice(workspacesOrder.indexOf(id),1);
+
         var removedNodes = [];
         var removedLinks = [];
         var n;
@@ -517,7 +529,7 @@ RED.nodes = (function() {
                         if ((exportable == null || exportable)) {
                             if (!(node[d] in exportedConfigNodes)) {
                                 exportedConfigNodes[node[d]] = true;
-                                nns.unshift(RED.nodes.convertNode(confNode));
+                                set.push(confNode);
                             }
                         } else {
                             convertedNode[d] = "";
@@ -537,11 +549,9 @@ RED.nodes = (function() {
     function createCompleteNodeSet() {
         var nns = [];
         var i;
-        for (i in workspaces) {
-            if (workspaces.hasOwnProperty(i)) {
-                if (workspaces[i].type == "tab") {
-                    nns.push(workspaces[i]);
-                }
+        for (i=0;i<workspacesOrder.length;i++) {
+            if (workspaces[workspacesOrder[i]].type == "tab") {
+                nns.push(workspaces[workspacesOrder[i]]);
             }
         }
         for (i in subflows) {
@@ -663,6 +673,9 @@ RED.nodes = (function() {
         var new_links = [];
         var nid;
         var def;
+        var configNode;
+
+        // Find all tabs and subflow templates
         for (i=0;i<newNodes.length;i++) {
             n = newNodes[i];
             // TODO: remove workspace in next release+1
@@ -706,6 +719,8 @@ RED.nodes = (function() {
                 addSubflow(n,createNewIds);
             }
         }
+
+        // Add a tab if there isn't one there already
         if (defaultWorkspace == null) {
             defaultWorkspace = { type:"tab", id:getID(), label:RED._('workspace.defaultName',{number:1})};
             addWorkspace(defaultWorkspace);
@@ -714,6 +729,7 @@ RED.nodes = (function() {
             activeWorkspace = RED.workspaces.active();
         }
 
+        // Find all config nodes and add them
         for (i=0;i<newNodes.length;i++) {
             n = newNodes[i];
             def = registry.getNodeType(n.type);
@@ -750,7 +766,7 @@ RED.nodes = (function() {
                 }
 
                 if (!existingConfigNode) { //} || !compareNodes(existingConfigNode,n,true) || existingConfigNode._def.exclusive || existingConfigNode.z !== n.z) {
-                    var configNode = {id:n.id, z:n.z, type:n.type, users:[]};
+                    configNode = {id:n.id, z:n.z, type:n.type, users:[]};
                     for (var d in def.defaults) {
                         if (def.defaults.hasOwnProperty(d)) {
                             configNode[d] = n[d];
@@ -768,6 +784,7 @@ RED.nodes = (function() {
             }
         }
 
+        // Find regular flow nodes and subflow instances
         for (i=0;i<newNodes.length;i++) {
             n = newNodes[i];
             // TODO: remove workspace in next release+1
@@ -838,15 +855,7 @@ RED.nodes = (function() {
                             node.outputs = n.outputs||node._def.outputs;
                             for (var d2 in node._def.defaults) {
                                 if (node._def.defaults.hasOwnProperty(d2)) {
-                                    if (node._def.defaults[d2].type) {
-                                        if (node_map[n[d2]]) {
-                                            node[d2] = node_map[n[d2]].id;
-                                        } else {
-                                            node[d2] = n[d2];
-                                        }
-                                    } else {
-                                        node[d2] = n[d2];
-                                    }
+                                    node[d2] = n[d2];
                                 }
                             }
                         }
@@ -860,6 +869,17 @@ RED.nodes = (function() {
                 }
             }
         }
+        // TODO: make this a part of the node definition so it doesn't have to
+        //       be hardcoded here
+        var nodeTypeArrayReferences = {
+            "catch":"scope",
+            "status":"scope",
+            "link in":"links",
+            "link out":"links"
+        }
+
+
+        // Remap all wires and config node references
         for (i=0;i<new_nodes.length;i++) {
             n = new_nodes[i];
             if (n.wires) {
@@ -875,6 +895,26 @@ RED.nodes = (function() {
                 }
                 delete n.wires;
             }
+            for (var d3 in n._def.defaults) {
+                if (n._def.defaults.hasOwnProperty(d3)) {
+                    if (n._def.defaults[d3].type && node_map[n[d3]]) {
+                        n[d3] = node_map[n[d3]].id;
+                        configNode = RED.nodes.node(n[d3]);
+                        if (configNode && configNode.users.indexOf(n) === -1) {
+                            configNode.users.push(n);
+                        }
+                    } else if (nodeTypeArrayReferences.hasOwnProperty(n.type) && nodeTypeArrayReferences[n.type] === d3 && n[d3] !== null) {
+                        for (var j = 0;j<n[d3].length;j++) {
+                            if (node_map[n[d3][j]]) {
+                                n[d3][j] = node_map[n[d3][j]].id;
+                            }
+                        }
+
+                    }
+                }
+            }
+
+
         }
         for (i=0;i<new_subflows.length;i++) {
             n = new_subflows[i];
@@ -972,6 +1012,8 @@ RED.nodes = (function() {
 
         addWorkspace: addWorkspace,
         removeWorkspace: removeWorkspace,
+        getWorkspaceOrder: function() { return workspacesOrder },
+        setWorkspaceOrder: function(order) { workspacesOrder = order; },
         workspace: getWorkspace,
 
         addSubflow: addSubflow,
@@ -1004,10 +1046,8 @@ RED.nodes = (function() {
             }
         },
         eachWorkspace: function(cb) {
-            for (var id in workspaces) {
-                if (workspaces.hasOwnProperty(id)) {
-                    cb(workspaces[id]);
-                }
+            for (var i=0;i<workspacesOrder.length;i++) {
+                cb(workspaces[workspacesOrder[i]]);
             }
         },
 

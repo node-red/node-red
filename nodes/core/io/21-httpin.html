@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013 IBM Corp.
+  Copyright 2013, 2016 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
         <option value="post">POST</option>
         <option value="put">PUT</option>
         <option value="delete">DELETE</option>
+        <option value="patch">PATCH</option>
         </select>
     </div>
     <div class="form-row">
@@ -81,7 +82,33 @@
         <li><code>statusCode</code>, if set, is used as the response status code (default: 200)</li>
         <li><code>headers</code>, if set, should be an object containing field/value
         pairs to be added as response headers.</li>
+        <li><code>cookies</code>, if set, can be used to set or delete cookies.
     </ul>
+    <h3>Cookie handling</h3>
+    <p>The <code>cookies</code> property must be an object of name/value pairs.
+    The value can be either a string to set the value of the cookie with default
+    options, or it can be an object of options.<p>
+    <p>The following example sets two cookies - one called <code>name</code> with
+    a value of <code>nick</code>, the other called <code>session</code> with a
+    value of <code>1234</code> and an expiry set to 15 minutes.</p>
+    <pre>
+msg.cookies = {
+    name: 'nick',
+    session: {
+        value: '1234',
+        maxAge: 900000
+    }
+}</pre>
+    <p>The valid options include:</p>
+    <ul>
+    <li><code>domain</code> - (String) domain name for the cookie</li>
+    <li><code>expires</code> - (Date) expiry date in GMT. If not specified or set to 0, creates a session cookie</li>
+    <li><code>maxAge</code> - (String) expiry date as relative to the current time in milliseconds</li>
+    <li><code>path</code> - (String) path for the cookie. Defaults to /</li>
+    <li><code>value</code> - (String) the value to use for the cookie</li>
+    </ul>
+    <p>To delete a cookie, set its <code>value</code> to <code>null</code>.</p>
+
 </script>
 
 <script type="text/javascript">

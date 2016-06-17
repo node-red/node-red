@@ -48,6 +48,14 @@ RED.notify = (function() {
                 });
             };
         })();
+
+        n.update = (function() {
+            var nn = n;
+            return function(msg) {
+                nn.innerHTML = msg;
+            }
+        })();
+        
         if (!fixed) {
             $(n).click((function() {
                 var nn = n;

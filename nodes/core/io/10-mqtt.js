@@ -114,8 +114,18 @@ module.exports = function(RED) {
             this.options.protocolId = 'MQIsdp';
             this.options.protocolVersion = 3;
         }
-
-        this.options.rejectUnauthorized = (this.verifyservercert == "true" || this.verifyservercert === true)
+        if (this.usetls && n.tls) {
+            var tlsNode = RED.nodes.getNode(n.tls);
+            if (tlsNode) {
+                tlsNode.addTLSOptions(this.options);
+            }
+        }
+        // If there's no rejectUnauthorized already, then this could be an
+        // old config where this option was provided on the broker node and
+        // not the tls node
+        if (typeof this.options.rejectUnauthorized === 'undefined') {
+            this.options.rejectUnauthorized = (this.verifyservercert == "true" || this.verifyservercert === true);
+        }
 
         if (n.willTopic) {
             this.options.will = {
@@ -143,8 +153,11 @@ module.exports = function(RED) {
                 return done();
             }
             if (Object.keys(node.users).length === 0) {
-                if (node.client) {
+                if (node.client && node.client.connected) {
                     return node.client.end(done);
+                } else {
+                    node.client.end();
+                    done();
                 }
             }
             done();
@@ -281,6 +294,9 @@ module.exports = function(RED) {
                     done();
                 });
                 this.client.end();
+            } if (this.connecting) {
+                node.client.end();
+                done();
             } else {
                 done();
             }
@@ -298,6 +314,8 @@ module.exports = function(RED) {
     function MQTTInNode(n) {
         RED.nodes.createNode(this,n);
         this.topic = n.topic;
+        this.qos = parseInt(n.qos===undefined?"2":n.qos);
+
         this.broker = n.broker;
         this.brokerConn = RED.nodes.getNode(this.broker);
         if (!/^(#$|(\+|[^+#]*)(\/(\+|[^+#]*))*(\/(\+|#|[^+#]*))?$)/.test(this.topic)) {
@@ -308,7 +326,7 @@ module.exports = function(RED) {
             this.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
             if (this.topic) {
                 node.brokerConn.register(this);
-                this.brokerConn.subscribe(this.topic,2,function(topic,payload,packet) {
+                this.brokerConn.subscribe(this.topic,this.qos,function(topic,payload,packet) {
                     if (isUtf8(payload)) { payload = payload.toString(); }
                     var msg = {topic:topic,payload:payload, qos: packet.qos, retain: packet.retain};
                     if ((node.brokerConn.broker === "localhost")||(node.brokerConn.broker === "127.0.0.1")) {

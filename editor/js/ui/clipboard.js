@@ -23,7 +23,7 @@ RED.clipboard = (function() {
     var importNodesDialog;
 
     function setupDialogs() {
-        dialog = $('<div id="clipboard-dialog" class="hide"><form class="dialog-form form-horizontal"></form></div>')
+        dialog = $('<div id="clipboard-dialog" class="hide node-red-dialog"><form class="dialog-form form-horizontal"></form></div>')
             .appendTo("body")
             .dialog({
                 modal: true,
@@ -31,14 +31,6 @@ RED.clipboard = (function() {
                 width: 500,
                 resizable: false,
                 buttons: [
-                    {
-                        id: "clipboard-dialog-ok",
-                        text: RED._("common.label.ok"),
-                        click: function() {
-                            RED.view.importNodes($("#clipboard-import").val());
-                            $( this ).dialog( "close" );
-                        }
-                    },
                     {
                         id: "clipboard-dialog-cancel",
                         text: RED._("common.label.cancel"),
@@ -48,18 +40,26 @@ RED.clipboard = (function() {
                     },
                     {
                         id: "clipboard-dialog-close",
+                        class: "primary",
                         text: RED._("common.label.close"),
                         click: function() {
+                            $( this ).dialog( "close" );
+                        }
+                    },
+                    {
+                        id: "clipboard-dialog-ok",
+                        class: "primary",
+                        text: RED._("common.label.import"),
+                        click: function() {
+                            RED.view.importNodes($("#clipboard-import").val());
                             $( this ).dialog( "close" );
                         }
                     }
                 ],
                 open: function(e) {
                     $(this).parent().find(".ui-dialog-titlebar-close").hide();
-                    RED.keyboard.disable();
                 },
                 close: function(e) {
-                    RED.keyboard.enable();
                 }
             });
 
@@ -157,13 +157,13 @@ RED.clipboard = (function() {
                     RED.menu.setDisabled("menu-item-export-library",false);
                 }
             });
-            RED.keyboard.add(/* e */ 69,{ctrl:true},function(){exportNodes();d3.event.preventDefault();});
-            RED.keyboard.add(/* i */ 73,{ctrl:true},function(){importNodes();d3.event.preventDefault();});
+            RED.keyboard.add("workspace", /* e */ 69,{ctrl:true},function(){exportNodes();d3.event.preventDefault();});
+            RED.keyboard.add("workspace", /* i */ 73,{ctrl:true},function(){importNodes();d3.event.preventDefault();});
 
             $('#chart').on("dragenter",function(event) {
                 if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
                     $("#dropTarget").css({display:'table'});
-                    RED.keyboard.add(/* ESCAPE */ 27,hideDropTarget);
+                    RED.keyboard.add("*", /* ESCAPE */ 27,hideDropTarget);
                 }
             });
 

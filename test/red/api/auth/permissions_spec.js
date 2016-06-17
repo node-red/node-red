@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,22 @@ describe("Auth permissions", function() {
             permissions.hasPermission(["read"],"node.read").should.be.true;
             permissions.hasPermission(["read"],"write").should.be.false;
             permissions.hasPermission(["read"],"node.write").should.be.false;
+            permissions.hasPermission(["*.read"],"read").should.be.true;
+            permissions.hasPermission(["*.read"],"node.read").should.be.true;
+            permissions.hasPermission(["*.read"],"write").should.be.false;
+            permissions.hasPermission(["*.read"],"node.write").should.be.false;
         });
         it('a user with foo permissions',function() {
-            permissions.hasPermission("foo","foo").should.be.false;
+            permissions.hasPermission("foo","foo").should.be.true;
         });
         it('an array of permissions', function() {
             permissions.hasPermission(["*"],["foo.read","foo.write"]).should.be.true;
             permissions.hasPermission("read",["foo.read","foo.write"]).should.be.false;
             permissions.hasPermission("read",["foo.read","bar.read"]).should.be.true;
+            permissions.hasPermission(["flows.read"],["flows.read"]).should.be.true;
+            permissions.hasPermission(["flows.read"],["flows.write"]).should.be.false;
+            permissions.hasPermission(["flows.read","nodes.write"],["flows.write"]).should.be.false;
+            permissions.hasPermission(["flows.read","nodes.write"],["nodes.write"]).should.be.true;
         });
         it('permits an empty permission', function() {
             permissions.hasPermission("*","").should.be.true;

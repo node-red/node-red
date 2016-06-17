@@ -38,42 +38,42 @@ describe('flows/util', function() {
 
     describe('#diffNodes',function() {
         it('handles a null old node', function() {
-            flowUtil.diffNodes(null,{}).should.be.true;
+            flowUtil.diffNodes(null,{}).should.be.true();
         });
         it('ignores x/y changes', function() {
-            flowUtil.diffNodes({x:10,y:10},{x:20,y:10}).should.be.false;
-            flowUtil.diffNodes({x:10,y:10},{x:10,y:20}).should.be.false;
+            flowUtil.diffNodes({x:10,y:10},{x:20,y:10}).should.be.false();
+            flowUtil.diffNodes({x:10,y:10},{x:10,y:20}).should.be.false();
         });
         it('ignores wiring changes', function() {
-            flowUtil.diffNodes({wires:[]},{wires:[1,2,3]}).should.be.false;
+            flowUtil.diffNodes({wires:[]},{wires:[1,2,3]}).should.be.false();
         });
         it('spots existing property change - string', function() {
-            flowUtil.diffNodes({a:"foo"},{a:"bar"}).should.be.true;
+            flowUtil.diffNodes({a:"foo"},{a:"bar"}).should.be.true();
         });
         it('spots existing property change - number', function() {
-            flowUtil.diffNodes({a:0},{a:1}).should.be.true;
+            flowUtil.diffNodes({a:0},{a:1}).should.be.true();
         });
         it('spots existing property change - boolean', function() {
-            flowUtil.diffNodes({a:true},{a:false}).should.be.true;
+            flowUtil.diffNodes({a:true},{a:false}).should.be.true();
         });
         it('spots existing property change - truthy', function() {
-            flowUtil.diffNodes({a:true},{a:1}).should.be.true;
+            flowUtil.diffNodes({a:true},{a:1}).should.be.true();
         });
         it('spots existing property change - falsey', function() {
-            flowUtil.diffNodes({a:false},{a:0}).should.be.true;
+            flowUtil.diffNodes({a:false},{a:0}).should.be.true();
         });
         it('spots existing property change - array', function() {
-            flowUtil.diffNodes({a:[0,1,2]},{a:[0,2,3]}).should.be.true;
+            flowUtil.diffNodes({a:[0,1,2]},{a:[0,2,3]}).should.be.true();
         });
         it('spots existing property change - object', function() {
-            flowUtil.diffNodes({a:{a:[0,1,2]}},{a:{a:[0,2,3]}}).should.be.true;
-            flowUtil.diffNodes({a:{a:[0,1,2]}},{a:{b:[0,1,2]}}).should.be.true;
+            flowUtil.diffNodes({a:{a:[0,1,2]}},{a:{a:[0,2,3]}}).should.be.true();
+            flowUtil.diffNodes({a:{a:[0,1,2]}},{a:{b:[0,1,2]}}).should.be.true();
         });
         it('spots added property', function() {
-            flowUtil.diffNodes({a:"foo"},{a:"foo",b:"bar"}).should.be.true;
+            flowUtil.diffNodes({a:"foo"},{a:"foo",b:"bar"}).should.be.true();
         });
         it('spots removed property', function() {
-            flowUtil.diffNodes({a:"foo",b:"bar"},{a:"foo"}).should.be.true;
+            flowUtil.diffNodes({a:"foo",b:"bar"},{a:"foo"}).should.be.true();
         });
 
 
@@ -88,8 +88,7 @@ describe('flows/util', function() {
             ];
             var parsedConfig = flowUtil.parseConfig(originalConfig);
             var expectedConfig = {"allNodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]},"t1":{"id":"t1","type":"tab"}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]}}}},"missingTypes":[]};
-
-            redUtil.compareObjects(parsedConfig,expectedConfig).should.be.true;
+            parsedConfig.should.eql(expectedConfig);
         });
 
         it('parses a single-tab flow with global config node', function() {
@@ -100,7 +99,7 @@ describe('flows/util', function() {
             ];
             var parsedConfig = flowUtil.parseConfig(originalConfig);
             var expectedConfig = {"allNodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]},"cn":{"id":"cn","type":"test"},"t1":{"id":"t1","type":"tab"}},"subflows":{},"configs":{"cn":{"id":"cn","type":"test","_users":["t1-1"]}},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]}}}},"missingTypes":[]};
-            redUtil.compareObjects(parsedConfig,expectedConfig).should.be.true;
+            parsedConfig.should.eql(expectedConfig);
         });
 
         it('parses a multi-tab flow', function() {
@@ -112,8 +111,7 @@ describe('flows/util', function() {
             ];
             var parsedConfig = flowUtil.parseConfig(originalConfig);
             var expectedConfig = {"allNodes":{"t1":{"id":"t1","type":"tab"},"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]},"t2":{"id":"t2","type":"tab"},"t2-1":{"id":"t2-1","x":10,"y":10,"z":"t2","type":"test","wires":[]}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]}}},"t2":{"id":"t2","type":"tab","subflows":{},"configs":{},"nodes":{"t2-1":{"id":"t2-1","x":10,"y":10,"z":"t2","type":"test","wires":[]}}}},"missingTypes":[]};
-
-            redUtil.compareObjects(parsedConfig,expectedConfig).should.be.true;
+            parsedConfig.should.eql(expectedConfig);
         });
 
         it('parses a subflow flow', function() {
@@ -125,8 +123,7 @@ describe('flows/util', function() {
             ];
             var parsedConfig = flowUtil.parseConfig(originalConfig);
             var expectedConfig = {"allNodes":{"t1":{"id":"t1","type":"tab"},"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"subflow:sf1","wires":[]},"sf1":{"id":"sf1","type":"subflow"},"sf1-1":{"id":"sf1-1","x":10,"y":10,"z":"sf1","type":"test","wires":[]}},"subflows":{"sf1":{"id":"sf1","type":"subflow","configs":{},"nodes":{"sf1-1":{"id":"sf1-1","x":10,"y":10,"z":"sf1","type":"test","wires":[]}},"instances":[{"id":"t1-1","x":10,"y":10,"z":"t1","type":"subflow:sf1","wires":[],"subflow":"sf1"}]}},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"subflow:sf1","wires":[],"subflow":"sf1"}}}},"missingTypes":[]};
-
-            redUtil.compareObjects(parsedConfig,expectedConfig).should.be.true;
+            parsedConfig.should.eql(expectedConfig);
         });
 
         it('parses a flow with a missing type', function() {
@@ -138,7 +135,17 @@ describe('flows/util', function() {
             var parsedConfig = flowUtil.parseConfig(originalConfig);
             parsedConfig.missingTypes.should.eql(['missing']);
             var expectedConfig = {"allNodes":{"t1":{"id":"t1","type":"tab"},"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"sf1","wires":[]},"t1-2":{"id":"t1-2","x":10,"y":10,"z":"t1","type":"missing","wires":[]}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"sf1","wires":[]},'t1-2': { id: 't1-2', x: 10, y: 10, z: 't1', type: 'missing', wires: [] }}}},"missingTypes":["missing"]};
-            redUtil.compareObjects(parsedConfig,expectedConfig).should.be.true;
+            redUtil.compareObjects(parsedConfig,expectedConfig).should.be.true();
+        });
+
+        it('parses a flow with a missing flow', function() {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",foo:"cn", wires:[]},
+                {id:"cn",type:"test"},
+            ];
+            var parsedConfig = flowUtil.parseConfig(originalConfig);
+            var expectedConfig = {"allNodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]},"cn":{"id":"cn","type":"test"}},"subflows":{},"configs":{"cn":{"id":"cn","type":"test","_users":["t1-1"]}},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]}}}},"missingTypes":[]};
+            parsedConfig.should.eql(expectedConfig);
         });
 
 
@@ -308,7 +315,7 @@ describe('flows/util', function() {
             diffResult.linked.sort().should.eql(["3"]);
         });
 
-        it('identifies config nodes changes', function() {
+        it('identifies config nodes changes, node->config', function() {
             var config = [
                 {id:"1",type:"test",foo:"configNode",wires:[["2"]]},
                 {id:"2",type:"test",bar:"b",wires:[["3"]]},
@@ -329,7 +336,30 @@ describe('flows/util', function() {
             diffResult.removed.should.have.length(0);
             diffResult.rewired.should.have.length(0);
             diffResult.linked.sort().should.eql(["2","3"]);
+        });
 
+        it('identifies config nodes changes, node->config->config', function() {
+            var config = [
+                {id:"1",type:"test",foo:"configNode1",wires:[["2"]]},
+                {id:"2",type:"test",bar:"b",wires:[["3"]]},
+                {id:"3",type:"test",foo:"a",wires:[]},
+                {id:"configNode1",foo:"configNode2",type:"testConfig"},
+                {id:"configNode2",type:"testConfig"}
+            ];
+            var newConfig = clone(config);
+            newConfig[4].foo = "bar";
+
+            var originalConfig = flowUtil.parseConfig(config);
+            var changedConfig = flowUtil.parseConfig(newConfig);
+
+            originalConfig.missingTypes.should.have.length(0);
+
+            var diffResult = flowUtil.diffConfigs(originalConfig,changedConfig);
+            diffResult.added.should.have.length(0);
+            diffResult.changed.sort().should.eql(["1","configNode1","configNode2"]);
+            diffResult.removed.should.have.length(0);
+            diffResult.rewired.should.have.length(0);
+            diffResult.linked.sort().should.eql(["2","3"]);
         });
 
         it('marks a parent subflow as changed for an internal property change', function() {

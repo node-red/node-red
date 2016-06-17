@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,13 @@ module.exports = function(RED) {
         RED.nodes.createNode(this, n);
 
         this.rules = n.rules;
-
         if (!this.rules) {
             var rule = {
                 t:(n.action=="replace"?"set":n.action),
                 p:n.property||""
             }
 
-            if (rule.t === "set") {
+            if ((rule.t === "set")||(rule.t === "move")) {
                 rule.to = n.to||"";
             } else if (rule.t === "change") {
                 rule.from = n.from||"";
@@ -38,10 +37,7 @@ module.exports = function(RED) {
             this.rules = [rule];
         }
 
-        this.actions = [];
-
         var valid = true;
-
         for (var i=0;i<this.rules.length;i++) {
             var rule = this.rules[i];
             // Migrate to type-aware rules
@@ -104,8 +100,9 @@ module.exports = function(RED) {
                     value = node.context().flow.get(rule.to);
                 } else if (rule.tot === 'global') {
                     value = node.context().global.get(rule.to);
+                } else if (rule.tot === 'date') {
+                    value = Date.now();
                 }
-
                 if (rule.t === 'change') {
                     if (rule.fromt === 'msg' || rule.fromt === 'flow' || rule.fromt === 'global') {
                         if (rule.fromt === "msg") {
@@ -130,9 +127,8 @@ module.exports = function(RED) {
                             } catch (e) {
                                 valid = false;
                                 node.error(RED._("change.errors.invalid-from",{error:e.message}));
-                                return
+                                return;
                             }
-
                         } else {
                             node.error(RED._("change.errors.invalid-from",{error:"unsupported type: "+(typeof fromValue)}));
                             return
@@ -203,7 +199,6 @@ module.exports = function(RED) {
                             }
                         }
                     }
-
                 }
             } catch(err) {/*console.log(err.stack)*/}
             return msg;
@@ -212,7 +207,13 @@ module.exports = function(RED) {
             var node = this;
             this.on('input', function(msg) {
                 for (var i=0;i<this.rules.length;i++) {
-                    msg = applyRule(msg,this.rules[i]);
+                    if (this.rules[i].t === "move") {
+                        var r = this.rules[i];
+                        msg = applyRule(msg,{t:"set", p:r.to, pt:r.tot, to:r.p, tot:r.pt});
+                        applyRule(msg,{t:"delete", p:r.p, pt:r.pt});
+                    } else {
+                        msg = applyRule(msg,this.rules[i]);
+                    }
                     if (msg === null) {
                         return;
                     }

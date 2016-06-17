@@ -39,7 +39,8 @@ RED.sidebar.info = (function() {
             id: "info",
             label: RED._("sidebar.info.label"),
             name: RED._("sidebar.info.name"),
-            content: content
+            content: content,
+            enableOnEdit: true
         });
 
     }

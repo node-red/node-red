@@ -160,11 +160,12 @@ module.exports = function(RED) {
         if (node.pin !== undefined) {
             if (node.set && (node.out === "out")) {
                 node.child = spawn(gpioCommand, [node.out,node.pin,node.level]);
+                node.status({fill:"green",shape:"dot",text:node.level});
             } else {
                 node.child = spawn(gpioCommand, [node.out,node.pin]);
+                node.status({fill:"green",shape:"dot",text:"common.status.ok"});
             }
             node.running = true;
-            node.status({fill:"green",shape:"dot",text:"common.status.ok"});
 
             node.on("input", inputlistener);
 

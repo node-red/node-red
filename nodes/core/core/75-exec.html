@@ -31,7 +31,11 @@
     <div class="form-row">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-useSpawn" placeholder="spawn" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-useSpawn" style="width: 70%;"><span data-i18n="exec.spawn"></span></label>
+        <label for="node-input-useSpawn" style="width:70%;"><span data-i18n="exec.spawn"></span></label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-timer"><i class="fa fa-clock-o"></i> <span data-i18n="exec.label.timeout"></span></label>
+        <input type="text" id="node-input-timer" style="width:50px; text-align:end;" data-i18n="[placeholder]exec.label.timeoutplace"> seconds
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
@@ -59,6 +63,7 @@
             addpay: {value:true},
             append: {value:""},
             useSpawn: {value:""},
+            timer: {value:""},
             name: {value:""}
         },
         inputs:1,

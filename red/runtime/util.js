@@ -127,14 +127,108 @@ function compareObjects(obj1,obj2) {
     return true;
 }
 
+function normalisePropertyExpression(str) {
+    var length = str.length;
+    var parts = [];
+    var start = 0;
+    var inString = false;
+    var inBox = false;
+    var quoteChar;
+    var v;
+    for (var i=0;i<length;i++) {
+        var c = str[i];
+        if (!inString) {
+            if (c === "'" || c === '"') {
+                if (!inBox) {
+                    throw new Error("Invalid property expression: unexpected "+c+" at position "+i);
+                }
+                inString = true;
+                quoteChar = c;
+                start = i+1;
+            } else if (c === '.') {
+                if (i===0) {
+                    throw new Error("Invalid property expression: unexpected . at position 0");
+                }
+                if (start != i) {
+                    v = str.substring(start,i);
+                    if (/^\d+$/.test(v)) {
+                        parts.push(parseInt(v));
+                    } else {
+                        parts.push(v);
+                    }
+                }
+                if (i===length-1) {
+                    throw new Error("Invalid property expression: unterminated expression");
+                }
+                // Next char is a-z
+                if (!/[a-z0-9]/i.test(str[i+1])) {
+                    throw new Error("Invalid property expression: unexpected "+str[i+1]+" at position "+(i+1));
+                }
+                start = i+1;
+            } else if (c === '[') {
+                if (i === 0) {
+                    throw new Error("Invalid property expression: unexpected "+c+" at position "+i);
+                }
+                if (start != i) {
+                    parts.push(str.substring(start,i));
+                }
+                if (i===length-1) {
+                    throw new Error("Invalid property expression: unterminated expression");
+                }
+                // Next char is either a quote or a number
+                if (!/["'\d]/.test(str[i+1])) {
+                    throw new Error("Invalid property expression: unexpected "+str[i+1]+" at position "+(i+1));
+                }
+                start = i+1;
+                inBox = true;
+            } else if (c === ']') {
+                if (!inBox) {
+                    throw new Error("Invalid property expression: unexpected "+c+" at position "+i);
+                }
+                if (start != i) {
+                    v = str.substring(start,i);
+                    if (/^\d+$/.test(v)) {
+                        parts.push(parseInt(v));
+                    } else {
+                        throw new Error("Invalid property expression: unexpected array expression at position "+start);
+                    }
+                }
+                start = i+1;
+                inBox = false;
+            } else if (c === ' ') {
+                throw new Error("Invalid property expression: unexpected ' ' at position "+i);
+            }
+        } else {
+            if (c === quoteChar) {
+                parts.push(str.substring(start,i));
+                // Next char must be a ]
+                if (!/\]/.test(str[i+1])) {
+                    throw new Error("Invalid property expression: unexpected array expression at position "+start);
+                }
+                start = i+1;
+                inString = false;
+            }
+        }
+
+    }
+    if (inBox || inString) {
+        throw new Error("Invalid property expression: unterminated expression");
+    }
+    if (start < length) {
+        parts.push(str.substring(start));
+    }
+    return parts;
+}
+
 function getMessageProperty(msg,expr) {
     var result = null;
     if (expr.indexOf('msg.')===0) {
         expr = expr.substring(4);
     }
-    var msgPropParts = expr.split(".");
-    msgPropParts.reduce(function(obj, i) {
-        result = (typeof obj[i] !== "undefined" ? obj[i] : undefined);
+    var msgPropParts = normalisePropertyExpression(expr);
+    var m;
+    msgPropParts.reduce(function(obj, key) {
+        result = (typeof obj[key] !== "undefined" ? obj[key] : undefined);
         return result;
     }, msg);
     return result;
@@ -147,30 +241,54 @@ function setMessageProperty(msg,prop,value,createMissing) {
     if (prop.indexOf('msg.')===0) {
         prop = prop.substring(4);
     }
-    var msgPropParts = prop.split(".");
+    var msgPropParts = normalisePropertyExpression(prop);
     var depth = 0;
-    msgPropParts.reduce(function(obj, i) {
-        if (obj === null) {
-            return null;
-        }
-        depth++;
-        if (depth === msgPropParts.length) {
-            if (typeof value === "undefined") {
-                delete obj[i];
-            } else {
-                obj[i] = value;
-            }
-        } else {
-            if (!obj[i]) {
-                if (createMissing) {
-                    obj[i] = {};
+    var length = msgPropParts.length;
+    var obj = msg;
+    var key;
+    for (var i=0;i<length-1;i++) {
+        key = msgPropParts[i];
+        if (typeof key === 'string' || (typeof key === 'number' && !Array.isArray(obj))) {
+            if (obj.hasOwnProperty(key)) {
+                obj = obj[key];
+            } else if (createMissing) {
+                if (typeof msgPropParts[i+1] === 'string') {
+                    obj[key] = {};
                 } else {
-                    return null;
+                    obj[key] = [];
                 }
+                obj = obj[key];
+            } else {
+                return null;
             }
-            return obj[i];
+        } else if (typeof key === 'number') {
+            // obj is an array
+            if (obj[key] === undefined) {
+                if (createMissing) {
+                    if (typeof msgPropParts[i+1] === 'string') {
+                        obj[key] = {};
+                    } else {
+                        obj[key] = [];
+                    }
+                    obj = obj[key];
+                } else {
+                    return null
+                }
+            } else {
+                obj = obj[key];
+            }
         }
-    }, msg);
+    }
+    key = msgPropParts[length-1];
+    if (typeof value === "undefined") {
+        if (typeof key === 'number' && Array.isArray(obj)) {
+            obj.splice(key,1);
+        } else {
+            delete obj[key]
+        }
+    } else {
+        obj[key] = value;
+    }
 }
 
 function evaluateNodeProperty(value, type, node, msg) {
@@ -182,6 +300,8 @@ function evaluateNodeProperty(value, type, node, msg) {
         return JSON.parse(value);
     } else if (type === 're') {
         return new RegExp(value);
+    } else if (type === 'date') {
+        return Date.now();
     } else if (type === 'msg' && msg) {
         return getMessageProperty(msg,value);
     } else if (type === 'flow' && node) {
@@ -203,5 +323,6 @@ module.exports = {
     generateId: generateId,
     getMessageProperty: getMessageProperty,
     setMessageProperty: setMessageProperty,
-    evaluateNodeProperty: evaluateNodeProperty
+    evaluateNodeProperty: evaluateNodeProperty,
+    normalisePropertyExpression: normalisePropertyExpression
 };

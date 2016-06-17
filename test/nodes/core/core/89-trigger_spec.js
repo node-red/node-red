@@ -235,6 +235,64 @@ describe('trigger Node', function() {
         });
     });
 
+    it('should be able to extend the delay and output the 2nd payload', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1type:"nul", op2type:"payl", op1:"false", op2:"true", duration:200, wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                if (c === 0) {
+                    msg.should.have.a.property("payload", "Goodbye");
+                    c += 1;
+                }
+                else {
+                    msg.should.have.a.property("payload", "World");
+                    (Date.now() - ss).should.be.greaterThan(380);
+                    done();
+                }
+            });
+            var ss = Date.now();
+            n1.emit("input", {payload:"Hello"});
+            setTimeout( function() {
+                n1.emit("input", {payload:"Goodbye"});
+            },100);
+            setTimeout( function() {
+                n1.emit("input", {payload:"World"});
+            },400);
+        });
+    });
+
+    it('should be able output the 2nd payload', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"false", op1type:"nul", op2type:"payl", op1:"false", op2:"true", duration:200, wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                if (c === 0) {
+                    msg.should.have.a.property("payload", "Goodbye");
+                    c += 1;
+                }
+                else {
+                    msg.should.have.a.property("payload", "World");
+                    (Date.now() - ss).should.be.greaterThan(380);
+                    done();
+                }
+            });
+            var ss = Date.now();
+            n1.emit("input", {payload:"Hello"});
+            setTimeout( function() {
+                n1.emit("input", {payload:"Goodbye"});
+            },100);
+            setTimeout( function() {
+                n1.emit("input", {payload:"World"});
+            },400);
+        });
+    });
+
     it('should be able to apply mustache templates to payloads', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1type:"val", op2type:"val", op1:"{{payload}}",  op2:"{{topic}}", duration:50, wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
@@ -257,7 +315,7 @@ describe('trigger Node', function() {
     });
 
     it('should handle string null as null', function(done) {
-        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op2type:"pay", op1:"null",  op2:"null", duration:30, wires:[["n2"]] },
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1type:"val", op2type:"pay", op1:"null", op2:"null", duration:40, wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
         helper.load(triggerNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -285,13 +343,39 @@ describe('trigger Node', function() {
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
+                c += 1;
                 msg.should.have.a.property("payload", 1);
             });
             setTimeout( function() {
-                n1.emit("input", {reset:true});
-                done();
-            },500);
-            n1.emit("input", {payload:null});
+                if (c === 2) { done(); }
+            },100);
+            n1.emit("input", {payload:null});   // trigger
+            n1.emit("input", {payload:null});   // blocked
+            n1.emit("input", {payload:null});   // blocked
+            n1.emit("input", {reset:true});     // clear the blockage
+            n1.emit("input", {payload:null});   // trigger
+        });
+    });
+
+    it('should be able to set infinite timeout, and clear timeout by message', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", reset:"boo", duration:-5, wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                c += 1;
+                msg.should.have.a.property("payload", 1);
+            });
+            setTimeout( function() {
+                if (c === 2) { done(); }
+            },100);
+            n1.emit("input", {payload:null});   // trigger
+            n1.emit("input", {payload:null});   // blocked
+            n1.emit("input", {payload:null});   // blocked
+            n1.emit("input", {payload:"boo"});  // clear the blockage
+            n1.emit("input", {payload:null});   // trigger
         });
     });
 

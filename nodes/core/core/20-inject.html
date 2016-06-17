@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013,2015 IBM Corp.
+  Copyright 2013, 2016 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -200,28 +200,32 @@
         outputs:1,
         icon: "inject.png",
         label: function() {
+            var suffix = "";
+            if (this.repeat || this.crontab) {
+                suffix = " ↻";
+            }
             if (this.name) {
-                return this.name;
+                return this.name+suffix;
             } else if (this.payloadType === "string" ||
                     this.payloadType === "str" ||
                     this.payloadType === "num" ||
                     this.payloadType === "bool" ||
                     this.payloadType === "json") {
                 if ((this.topic !== "") && ((this.topic.length + this.payload.length) <= 32)) {
-                    return this.topic + ":" + this.payload;
+                    return this.topic + ":" + this.payload+suffix;
                 } else if (this.payload.length > 0 && this.payload.length < 24) {
-                    return this.payload;
+                    return this.payload+suffix;
                 } else {
-                    return this._("inject.inject");
+                    return this._("inject.inject")+suffix;
                 }
             } else if (this.payloadType === 'date') {
-                return this._("inject.timestamp")
+                return this._("inject.timestamp")+suffix;
             } else if (this.payloadType === 'flow' && this.payload.length < 19) {
-                return 'flow.'+this.payload;
+                return 'flow.'+this.payload+suffix;
             } else if (this.payloadType === 'global' && this.payload.length < 17) {
-                return 'global.'+this.payload;
+                return 'global.'+this.payload+suffix;
             } else {
-                return this._("inject.inject");
+                return this._("inject.inject")+suffix;
             }
         },
         labelStyle: function() {
@@ -242,7 +246,7 @@
             $("#node-input-payload").typedInput({
                 default: 'str',
                 typeField: $("#node-input-payloadType"),
-                types:['flow','global','str','num','bool','json',{value:"date",label:this._("inject.timestamp"),hasValue:false}]
+                types:['flow','global','str','num','bool','json','date']
             });
 
             $("#inject-time-type-select").change(function() {

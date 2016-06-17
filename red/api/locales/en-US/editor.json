@@ -3,14 +3,19 @@
         "label": {
             "name": "Name",
             "ok": "Ok",
+            "done":"Done",
             "cancel": "Cancel",
             "delete": "Delete",
-            "close": "Close"
+            "close": "Close",
+            "load": "Load",
+            "save": "Save",
+            "import": "Import",
+            "export": "Export"
         }
     },
     "workspace": {
         "defaultName": "Flow __number__",
-        "renameSheet": "Rename flow",
+        "editFlow": "Edit flow: __name__",
         "confirmDelete": "Confirm delete",
         "delete": "Are you sure you want to delete '__label__'?",
         "dropFlowHere": "Drop the flow here"
@@ -47,7 +52,8 @@
     "user": {
         "loggedInAs": "Logged in as __name__",
         "login": "Login",
-        "loginFailed": "Login failed"
+        "loginFailed": "Login failed",
+        "notAuthorized": "Not authorized"
     },
     "notification": {
         "warning": "<strong>Warning</strong>: __message__",
@@ -58,7 +64,9 @@
 
         "error": "<strong>Error</strong>: __message__",
         "errors": {
-            "lostConnection": "Lost connection to server",
+            "lostConnection": "Lost connection to server, reconnecting...",
+            "lostConnectionReconnect": "Lost connection to server, reconnecting in __time__s.",
+            "lostConnectionTry": "Try now",
             "cannotAddSubflowToItself": "Cannot add subflow to itself",
             "cannotAddCircularReference": "Cannot add subflow - circular reference detected"
         }
@@ -84,6 +92,7 @@
         "modifiedNodes": "Modified Nodes",
         "modifiedNodesDesc": "Only deploys nodes that have changed",
         "successfulDeploy": "Successfully deployed",
+        "deployFailed": "Deploy failed: __message__",
         "unusedConfigNodes":"You have some unused configuration nodes.",
         "unusedConfigNodesLink":"Click here to see them",
         "errors": {
@@ -101,10 +110,10 @@
         }
     },
     "subflow": {
-        "editSubflow": "Edit flow __name__",
-        "edit": "Edit flow",
-        "subflowInstances": "There is __count__ instance of this subflow",
-        "subflowInstances_plural": "There are __count__ instances of this subflow",
+        "editSubflow": "Edit flow template: __name__",
+        "edit": "Edit flow template",
+        "subflowInstances": "There is __count__ instance of this subflow template",
+        "subflowInstances_plural": "There are __count__ instances of this subflow template",
         "editSubflowProperties": "edit properties",
         "input": "inputs:",
         "output": "outputs:",
@@ -117,12 +126,14 @@
         }
     },
     "editor": {
-        "configEdit": "edit",
-        "configAdd": "add",
+        "configEdit": "Edit",
+        "configAdd": "Add",
+        "configUpdate": "Update",
         "configDelete": "Delete",
         "nodesUse": "__count__ node uses this config",
         "nodesUse_plural": "__count__ nodes use this config",
         "addNewConfig": "Add new __type__ config node",
+        "editNode": "Edit __type__ node",
         "editConfig": "Edit __type__ config node",
         "addNewType": "Add new __type__...",
         "errors": {
@@ -189,7 +200,7 @@
     },
     "sidebar": {
         "info": {
-            "name": "Information",
+            "name": "Node information",
             "label": "info",
             "node": "Node",
             "type": "Type",
@@ -218,7 +229,11 @@
             "num": "number",
             "re": "regular expression",
             "bool": "boolean",
-            "json": "JSON"
+            "json": "JSON",
+            "date": "timestamp"
         }
+    },
+    "editableList": {
+        "add": "add"
     }
 }

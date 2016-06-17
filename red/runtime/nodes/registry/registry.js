@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,11 +67,13 @@ function filterNodeInfo(n) {
 
 
 function getModule(id) {
-    return id.split("/")[0];
+    var parts = id.split("/");
+    return parts.slice(0,parts.length-1).join("/");
 }
 
 function getNode(id) {
-    return id.split("/")[1];
+    var parts = id.split("/");
+    return parts[parts.length-1];
 }
 
 function saveNodeList() {
@@ -223,7 +225,7 @@ function removeModule(module) {
 
 function getNodeInfo(typeOrId) {
     var id = typeOrId;
-    if (nodeTypeToId[typeOrId]) {
+    if (nodeTypeToId.hasOwnProperty(typeOrId)) {
         id = nodeTypeToId[typeOrId];
     }
     /* istanbul ignore else */
@@ -248,7 +250,7 @@ function getFullNodeInfo(typeOrId) {
     // Used by index.enableNodeSet so that .file can be retrieved to pass
     // to loader.loadNodeSet
     var id = typeOrId;
-    if (nodeTypeToId[typeOrId]) {
+    if (nodeTypeToId.hasOwnProperty(typeOrId)) {
         id = nodeTypeToId[typeOrId];
     }
     /* istanbul ignore else */
@@ -326,14 +328,49 @@ function getCaller(){
     return stack[0].getFileName();
 }
 
-function registerNodeConstructor(type,constructor) {
-    if (nodeConstructors[type]) {
+function inheritNode(constructor) {
+    if(Object.getPrototypeOf(constructor.prototype) === Object.prototype) {
+        util.inherits(constructor,Node);
+    } else {
+        var proto = constructor.prototype;
+        while(Object.getPrototypeOf(proto) !== Object.prototype) {
+            proto = Object.getPrototypeOf(proto);
+        }
+        //TODO: This is a partial implementation of util.inherits >= node v5.0.0
+        //      which should be changed when support for node < v5.0.0 is dropped
+        //      see: https://github.com/nodejs/node/pull/3455
+        proto.constructor.super_ = Node;
+        if(Object.setPrototypeOf) {
+            Object.setPrototypeOf(proto, Node.prototype);
+        } else {
+            // hack for node v0.10
+            proto.__proto__ = Node.prototype;
+        }
+    }
+}
+
+function registerNodeConstructor(nodeSet,type,constructor) {
+    if (nodeConstructors.hasOwnProperty(type)) {
         throw new Error(type+" already registered");
     }
     //TODO: Ensure type is known - but doing so will break some tests
     //      that don't have a way to register a node template ahead
     //      of registering the constructor
-    util.inherits(constructor,Node);
+    if(!(constructor.prototype instanceof Node)) {
+        inheritNode(constructor);
+    }
+
+    var nodeSetInfo = getFullNodeInfo(nodeSet);
+    if (nodeSetInfo) {
+        if (nodeSetInfo.types.indexOf(type) === -1) {
+            // A type is being registered for a known set, but for some reason
+            // we didn't spot it when parsing the HTML file.
+            // Registered a type is the definitive action - not the presence
+            // of an edit template. Ensure it is on the list of known types.
+            nodeSetInfo.types.push(type);
+        }
+    }
+
     nodeConstructors[type] = constructor;
     events.emit("type-registered",type);
 }
@@ -405,7 +442,11 @@ function clear() {
 }
 
 function getTypeId(type) {
-    return nodeTypeToId[type];
+    if (nodeTypeToId.hasOwnProperty(type)) {
+        return nodeTypeToId[type];
+    } else {
+        return null;
+    }
 }
 
 function enableNodeSet(typeOrId) {
@@ -414,7 +455,7 @@ function enableNodeSet(typeOrId) {
     }
 
     var id = typeOrId;
-    if (nodeTypeToId[typeOrId]) {
+    if (nodeTypeToId.hasOwnProperty(typeOrId)) {
         id = nodeTypeToId[typeOrId];
     }
     var config;
@@ -436,7 +477,7 @@ function disableNodeSet(typeOrId) {
         throw new Error("Settings unavailable");
     }
     var id = typeOrId;
-    if (nodeTypeToId[typeOrId]) {
+    if (nodeTypeToId.hasOwnProperty(typeOrId)) {
         id = nodeTypeToId[typeOrId];
     }
     var config;

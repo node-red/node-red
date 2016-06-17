@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,16 @@ module.exports = function(RED) {
 
     function HTTPRequest(n) {
         RED.nodes.createNode(this,n);
+        var node = this;
         var nodeUrl = n.url;
         var isTemplatedUrl = (nodeUrl||"").indexOf("{{") != -1;
         var nodeMethod = n.method || "GET";
+        if (n.tls) {
+            var tlsNode = RED.nodes.getNode(n.tls);
+        }
         this.ret = n.ret || "txt";
         if (RED.settings.httpRequestTimeout) { this.reqTimeout = parseInt(RED.settings.httpRequestTimeout) || 120000; }
         else { this.reqTimeout = 120000; }
-        var node = this;
 
         var prox, noprox;
         if (process.env.http_proxy != null) { prox = process.env.http_proxy; }
@@ -54,7 +57,11 @@ module.exports = function(RED) {
             }
             // url must start http:// or https:// so assume http:// if not set
             if (!((url.indexOf("http://") === 0) || (url.indexOf("https://") === 0))) {
-                url = "http://"+url;
+                if (tlsNode) {
+                    url = "https://"+url;
+                } else {
+                    url = "http://"+url;
+                }
             }
 
             var method = nodeMethod.toUpperCase() || "GET";
@@ -133,6 +140,9 @@ module.exports = function(RED) {
                 }
                 else { node.warn("Bad proxy url: "+process.env.http_proxy); }
             }
+            if (tlsNode) {
+                tlsNode.addTLSOptions(opts);
+            }
             var req = ((/^https/.test(urltotest))?https:http).request(opts,function(res) {
                 (node.ret === "bin") ? res.setEncoding('binary') : res.setEncoding('utf8');
                 msg.statusCode = res.statusCode;
@@ -172,6 +182,7 @@ module.exports = function(RED) {
                 req.abort();
             });
             req.on('error',function(err) {
+                node.error(err,msg);
                 msg.payload = err.toString() + " : " + url;
                 msg.statusCode = err.code;
                 node.send(msg);

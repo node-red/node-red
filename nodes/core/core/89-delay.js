@@ -78,38 +78,44 @@ module.exports = function(RED) {
         this.drop = n.drop;
         var node = this;
 
-        if (this.pauseType === "delay") {
-            this.on("input", function(msg) {
+        if (node.pauseType === "delay") {
+            node.on("input", function(msg) {
                 var id;
                 id = setTimeout(function() {
                     node.idList.splice(node.idList.indexOf(id),1);
                     if (node.idList.length === 0) { node.status({}); }
                     node.send(msg);
                 }, node.timeout);
-                this.idList.push(id);
+                node.idList.push(id);
                 if ((node.timeout > 1000) && (node.idList.length !== 0)) {
                     node.status({fill:"blue",shape:"dot",text:" "});
                 }
             });
 
-            this.on("close", function() {
-                for (var i=0; i<this.idList.length; i++ ) {
-                    clearTimeout(this.idList[i]);
+            node.on("close", function() {
+                for (var i=0; i<node.idList.length; i++ ) {
+                    clearTimeout(node.idList[i]);
                 }
-                this.idList = [];
-                this.status({});
+                node.idList = [];
+                node.status({});
             });
 
-        } else if (this.pauseType === "rate") {
-            this.on("input", function(msg) {
+        } else if (node.pauseType === "rate") {
+            var olddepth = 0;
+            node.on("input", function(msg) {
                 if (!node.drop) {
                     if ( node.intervalID !== -1) {
                         node.buffer.push(msg);
                         if (node.buffer.length > 0) {
                             node.status({text:node.buffer.length});
                         }
-                        if (node.buffer.length > 1000) {
-                            node.warn(this.name + " " + RED._("delay.error.buffer"));
+                        if ((node.buffer.length > 1000) && (olddepth < 1000)) {
+                            olddepth = 1000;
+                            node.warn(node.name + " " + RED._("delay.error.buffer"));
+                        }
+                        if ((node.buffer.length > 10000) && (olddepth < 10000)) {
+                            olddepth = 10000;
+                            node.warn(node.name + " " + RED._("delay.error.buffer1"));
                         }
                     } else {
                         node.send(msg);
@@ -119,9 +125,9 @@ module.exports = function(RED) {
                                 node.intervalID = -1;
                                 node.status({});
                             }
-
                             if (node.buffer.length > 0) {
                                 node.send(node.buffer.shift());
+                                if (node.buffer.length < 1000) { olddepth = 0; }
                                 node.status({text:node.buffer.length});
                             }
                         },node.rate);
@@ -141,15 +147,15 @@ module.exports = function(RED) {
                 }
             });
 
-            this.on("close", function() {
-                clearInterval(this.intervalID);
-                this.buffer = [];
+            node.on("close", function() {
+                clearInterval(node.intervalID);
+                node.buffer = [];
                 node.status({});
             });
 
-        } else if ((this.pauseType === "queue") || (this.pauseType === "timed")) {
-            this.intervalID = setInterval(function() {
-                if (this.pauseType === "queue") {
+        } else if ((node.pauseType === "queue") || (node.pauseType === "timed")) {
+            node.intervalID = setInterval(function() {
+                if (node.pauseType === "queue") {
                     if (node.buffer.length > 0) {
                         node.send(node.buffer.shift()); // send the first on the queue
                     }
@@ -162,7 +168,7 @@ module.exports = function(RED) {
                 node.status({text:node.buffer.length});
             },node.rate);
 
-            this.on("input", function(msg) {
+            node.on("input", function(msg) {
                 if (!msg.hasOwnProperty("topic")) { msg.topic = "_none_"; }
                 var hit = false;
                 for (var b in node.buffer) { // check if already in queue
@@ -175,29 +181,28 @@ module.exports = function(RED) {
                 node.status({text:node.buffer.length});
             });
 
-            this.on("close", function() {
-                clearInterval(this.intervalID);
-                this.buffer = [];
+            node.on("close", function() {
+                clearInterval(node.intervalID);
+                node.buffer = [];
                 node.status({});
             });
 
-        } else if (this.pauseType === "random") {
-            this.on("input", function(msg) {
+        } else if (node.pauseType === "random") {
+            node.on("input", function(msg) {
                 var wait = node.randomFirst + (node.diff * Math.random());
                 var id = setTimeout(function() {
                     node.idList.splice(node.idList.indexOf(id),1);
                     node.send(msg);
                 }, wait);
-                this.idList.push(id);
+                node.idList.push(id);
             });
-
-            this.on("close", function() {
-                for (var i=0; i<this.idList.length; i++ ) {
-                    clearTimeout(this.idList[i]);
+            
+            node.on("close", function() {
+                for (var i=0; i<node.idList.length; i++ ) {
+                    clearTimeout(node.idList[i]);
                 }
-                this.idList = [];
+                node.idList = [];
             });
-
         }
     }
     RED.nodes.registerType("delay",DelayNode);

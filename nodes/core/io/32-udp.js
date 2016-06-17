@@ -83,7 +83,6 @@ module.exports = function(RED) {
         });
 
         node.on("close", function() {
-            console.log("ID=",node.id);
             if (udpInputPortsInUse[node.port] === node.id) {
                 delete udpInputPortsInUse[node.port];
             }

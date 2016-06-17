@@ -45,7 +45,7 @@ describe('Flow', function() {
 
     var TestNode = function(n) {
         Node.call(this,n);
-        createCount++;
+        this._index = createCount++;
         this.scope = n.scope;
         var node = this;
         this.foo = n.foo;
@@ -173,6 +173,61 @@ describe('Flow', function() {
         });
 
 
+        it("instantiates config nodes in the right order",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"4",z:"t1",type:"test",foo:"5"}, // This node depends on #5
+                {id:"5",z:"t1",type:"test"}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+            flow.start();
+
+            Object.keys(flow.getActiveNodes()).should.have.length(5);
+
+
+            currentNodes.should.have.a.property("1");
+            currentNodes.should.have.a.property("2");
+            currentNodes.should.have.a.property("3");
+            currentNodes.should.have.a.property("4");
+            currentNodes.should.have.a.property("5");
+
+            currentNodes["1"].should.have.a.property("_index",2);
+            currentNodes["2"].should.have.a.property("_index",3);
+            currentNodes["3"].should.have.a.property("_index",4);
+            currentNodes["4"].should.have.a.property("_index",1);
+            currentNodes["5"].should.have.a.property("_index",0);
+
+            flow.stop().then(function() {
+                currentNodes.should.not.have.a.property("1");
+                currentNodes.should.not.have.a.property("2");
+                currentNodes.should.not.have.a.property("3");
+                currentNodes.should.not.have.a.property("4");
+                currentNodes.should.not.have.a.property("5");
+                stoppedNodes.should.have.a.property("1");
+                stoppedNodes.should.have.a.property("2");
+                stoppedNodes.should.have.a.property("3");
+                stoppedNodes.should.have.a.property("4");
+                stoppedNodes.should.have.a.property("5");
+                done();
+            });
+        });
+
+
+        it("detects dependency loops in config nodes",function() {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"node1",z:"t1",type:"test",foo:"node2"}, // This node depends on #5
+                {id:"node2",z:"t1",type:"test",foo:"node1"}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+            /*jshint immed: false */
+            (function(){
+                flow.start();
+            }).should.throw("Circular config node dependency detected: node1");
+        });
         it("instantiates a subflow and stops it",function(done) {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},

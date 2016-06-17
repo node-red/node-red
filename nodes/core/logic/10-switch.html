@@ -1,5 +1,5 @@
 <!--
-  Copyright 2013, 2015 IBM Corp.
+  Copyright 2013, 2016 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -22,13 +22,8 @@
     <div class="form-row">
         <span data-i18n="switch.label.property"></span> <input type="text" id="node-input-property" style="width: 300px;"/>
     </div>
-    <div class="form-row node-input-rule-container-row" style="margin-bottom: 0px;">
-        <div id="node-input-rule-container-div" style="box-sizing: border-box; border-radius: 5px; height: 310px; padding: 5px; border: 1px solid #ccc; overflow-y:scroll;">
-            <ol id="node-input-rule-container" style=" list-style-type:none; margin: 0;"></ol>
-        </div>
-    </div>
-    <div class="form-row">
-        <a href="#" class="editor-button editor-button-small" id="node-input-add-rule" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span data-i18n="switch.label.rule"></span></a>
+    <div class="form-row node-input-rule-container-row">
+        <ol id="node-input-rule-container"></ol>
     </div>
     <div class="form-row">
         <select id="node-input-checkall" style="width:100%; margin-right:5px;">
@@ -89,9 +84,10 @@
             var andLabel = this._("switch.and");
             var caseLabel = this._("switch.ignorecase");
 
-            this.resizeRule = function(rule,newWidth) {
+            function resizeRule(rule) {
+                var newWidth = rule.width();
                 var selectField = rule.find("select");
-                var type = selectField.children("option:selected").val();
+                var type = selectField.children("option:selected").val()||"";
                 var valueField = rule.find(".node-input-rule-value");
                 var btwnField1 = rule.find(".node-input-rule-btwn-value");
                 var btwnField2 = rule.find(".node-input-rule-btwn-value2");
@@ -104,129 +100,99 @@
                     selectWidth = 120;
                 }
                 selectField.width(selectWidth);
-
                 if (type === "btwn") {
-                    var labelWidth = rule.find(".node-input-rule-btwn-label").width();
-                    btwnField1.typedInput("width",(newWidth-selectWidth-120));
-                    btwnField2.typedInput("width",(newWidth-selectWidth-120));
+                    btwnField1.typedInput("width",(newWidth-selectWidth-80));
+                    btwnField2.typedInput("width",(newWidth-selectWidth-80));
                 } else {
                     if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
                         // valueField.hide();
                     } else {
-                        valueField.typedInput("width",(newWidth-selectWidth-120));
+                        valueField.typedInput("width",(newWidth-selectWidth-80));
                     }
                 }
             }
 
-            function generateRule(i,rule) {
-                var container = $('<li/>',{style:"background: #fff; margin:0; padding:8px 0px; border-bottom: 1px solid #ccc;"});
-                var row = $('<div/>').appendTo(container);
-                var row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
-                var row3 = $('<div/>',{style:"padding-top: 5px; padding-left: 120px;"}).appendTo(container);
+            $("#node-input-rule-container").css('min-height','300px').css('min-width','450px').editableList({
+                addItem: function(container,i,opt) {
+                    var rule = opt||{t:"",v:"",v2:""};
+                    var row = $('<div/>').appendTo(container);
+                    var row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
+                    var row3 = $('<div/>',{style:"padding-top: 5px; padding-left: 102px;"}).appendTo(container);
+                    var selectField = $('<select/>',{style:"width:120px; margin-left: 5px; text-align: center;"}).appendTo(row);
+                    for (var d in operators) {
+                        selectField.append($("<option></option>").val(operators[d].v).text(operators[d].t));
+                    }
+                    var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px; width: 145px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num',previousValueType]});
+                    var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num',previousValueType]});
+                    var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
+                    var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num',previousValueType]});
+                    var finalspan = $('<span/>',{style:"float: right;margin-top: 6px;margin-right: 10px;"}).appendTo(row);
+                    finalspan.append(' &#8594; <span class="node-input-rule-index">'+(i+1)+'</span> ');
+                    var caseSensitive = $('<input/>',{id:"node-input-rule-case-"+i,class:"node-input-rule-case",type:"checkbox",style:"width:auto;vertical-align:top"}).appendTo(row2);
+                    $('<label/>',{for:"node-input-rule-case-"+i,style:"margin-left: 3px;"}).text(caseLabel).appendTo(row2);
+                    selectField.change(function() {
+                        resizeRule(container);
+                        var type = selectField.children("option:selected").val();
 
-                $('<i style="color: #eee; cursor: move;" class="node-input-rule-handle fa fa-bars"></i>').appendTo(row);
-
-                var selectField = $('<select/>',{style:"width:120px; margin-left: 5px; text-align: center;"}).appendTo(row);
-                for (var d in operators) {
-                    selectField.append($("<option></option>").val(operators[d].v).text(operators[d].t));
-                }
-
-                var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px; width: 145px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num',previousValueType]});
-                var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num',previousValueType]});
-                var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
-                var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num',previousValueType]});
-
-                var finalspan = $('<span/>',{style:"float: right;margin-right: 10px;"}).appendTo(row);
-                finalspan.append(' &#8594; <span class="node-input-rule-index">'+i+'</span> ');
-
-                var deleteButton = $('<a/>',{href:"#",class:"editor-button editor-button-small", style:"margin-top: 7px; margin-left: 5px;"}).appendTo(finalspan);
-                $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
-
-                var caseSensitive = $('<input/>',{id:"node-input-rule-case-"+i,class:"node-input-rule-case",type:"checkbox",style:"width:auto;vertical-align:top"}).appendTo(row2);
-                $('<label/>',{for:"node-input-rule-case-"+i,style:"margin-left: 3px;"}).text(caseLabel).appendTo(row2);
-                selectField.change(function() {
-                    var width = $("#node-input-rule-container").width();
-                    var type = selectField.children("option:selected").val();
-                    node.resizeRule(container,width);
-                    if (type === "btwn") {
-                        valueField.parent().hide();
-                        btwnValueField.parent().show();
-                    } else {
-                        btwnValueField.parent().hide();
-                        if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
+                        if (type === "btwn") {
                             valueField.parent().hide();
+                            btwnValueField.parent().show();
                         } else {
-                            valueField.parent().show();
+                            btwnValueField.parent().hide();
+                            if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
+                                valueField.parent().hide();
+                            } else {
+                                valueField.parent().show();
+                            }
                         }
-                    }
-                    if (type === "regex") {
-                        row2.show();
-                        row3.hide();
-                    } else if (type === "btwn"){
-                        row2.hide();
-                        row3.show();
-                    } else {
-                        row2.hide();
-                        row3.hide();
-                    }
-                });
-
-                deleteButton.click(function() {
-                    container.css({"background":"#fee"});
-                    container.fadeOut(300, function() {
-                        $(this).remove();
-                        $("#node-input-rule-container").children().each(function(i) {
-                            $(this).find(".node-input-rule-index").html(i+1);
-                        });
-
+                        if (type === "regex") {
+                            row2.show();
+                            row3.hide();
+                        } else if (type === "btwn"){
+                            row2.hide();
+                            row3.show();
+                        } else {
+                            row2.hide();
+                            row3.hide();
+                        }
                     });
-                });
-
-                $("#node-input-rule-container").append(container);
-
-                selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
-                if (rule.t == "btwn") {
-                    btwnValueField.typedInput('value',rule.v);
-                    btwnValueField.typedInput('type',rule.vt||'num');
-                    btwnValue2Field.typedInput('value',rule.v2);
-                    btwnValue2Field.typedInput('type',rule.v2t||'num');
-                } else if (typeof rule.v != "undefined") {
-                    valueField.typedInput('value',rule.v);
-                    valueField.typedInput('type',rule.vt||'str');
-                }
-                if (rule.case) {
-                    caseSensitive.prop('checked',true);
-                } else {
-                    caseSensitive.prop('checked',false);
-                }
-                selectField.change();
-            }
-
-            $("#node-input-add-rule").click(function() {
-                generateRule($("#node-input-rule-container").children().length+1,{t:"",v:"",v2:""});
-                $("#node-input-rule-container-div").scrollTop($("#node-input-rule-container-div").get(0).scrollHeight);
+                    selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
+                    if (rule.t == "btwn") {
+                        btwnValueField.typedInput('value',rule.v);
+                        btwnValueField.typedInput('type',rule.vt||'num');
+                        btwnValue2Field.typedInput('value',rule.v2);
+                        btwnValue2Field.typedInput('type',rule.v2t||'num');
+                    } else if (typeof rule.v != "undefined") {
+                        valueField.typedInput('value',rule.v);
+                        valueField.typedInput('type',rule.vt||'str');
+                    }
+                    if (rule.case) {
+                        caseSensitive.prop('checked',true);
+                    } else {
+                        caseSensitive.prop('checked',false);
+                    }
+                    selectField.change();
+                },
+                removeItem: function(opt) {
+                    var rules = $("#node-input-rule-container").editableList('items');
+                    rules.each(function(i) { $(this).find(".node-input-rule-index").html(i+1); });
+                },
+                resizeItem: resizeRule,
+                sortItems: function(rules) {
+                    var rules = $("#node-input-rule-container").editableList('items');
+                    rules.each(function(i) { $(this).find(".node-input-rule-index").html(i+1); });
+                },
+                sortable: true,
+                removable: true
             });
 
             for (var i=0;i<this.rules.length;i++) {
                 var rule = this.rules[i];
-                generateRule(i+1,rule);
+                $("#node-input-rule-container").editableList('addItem',rule);
             }
-
-            $( "#node-input-rule-container" ).sortable({
-                axis: "y",
-                update: function( event, ui ) {
-                    var rules = $("#node-input-rule-container").children();
-                    rules.each(function(i) {
-                        $(this).find(".node-input-rule-index").html(i+1);
-                    });
-                },
-                handle:".node-input-rule-handle",
-                cursor: "move"
-            });
-            $( "#node-input-rule-container .node-input-rule-handle" ).disableSelection();
         },
         oneditsave: function() {
-            var rules = $("#node-input-rule-container").children();
+            var rules = $("#node-input-rule-container").editableList('items');
             var ruleset;
             var node = this;
             node.rules= [];
@@ -261,14 +227,7 @@
             }
             var editorRow = $("#dialog-form>div.node-input-rule-container-row");
             height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
-            $("#node-input-rule-container-div").css("height",height+"px");
-
-            var rules = $("#node-input-rule-container").children();
-            var newWidth = $("#node-input-rule-container").width();
-            var node = this;
-            rules.each(function(i) {
-                node.resizeRule($(this),newWidth);
-            })
+            $("#node-input-rule-container").editableList('height',height);
         }
     });
 </script>

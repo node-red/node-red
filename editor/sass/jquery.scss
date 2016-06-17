@@ -73,6 +73,47 @@
 .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
     float: none;
 }
+
+.ui-dialog-buttonset button {
+    @include workspace-button;
+    font-size: 14px;
+    padding: 6px 14px;
+    margin-right: 8px;
+    color: $editor-button-color;
+    background: $editor-button-background;
+
+    &.leftButton {
+        float: left;
+        margin-top: 7px;
+    }
+    &:not(.leftButton):not(:last-child) {
+        margin-right: 16px;
+    }
+
+    &.primary {
+        border-color: $editor-button-background-primary;
+        color: $editor-button-color-primary;
+        background: $editor-button-background-primary;
+        &:not(.disabled):hover {
+            border-color: $editor-button-background-primary-hover;
+            background: $editor-button-background-primary-hover;
+            color: $editor-button-color-primary !important;
+        }
+    }
+    &.disabled {
+        background: none;
+    }
+    &.disabled {
+        background: none;
+    }
+    &.disabled:focus {
+        outline: none;
+    }
+    .ui-button-text {
+        padding: 0;
+    }
+}
+
 .ui-dialog .ui-dialog-buttonpane {
     padding: .3em 1em .5em 1em;
 }

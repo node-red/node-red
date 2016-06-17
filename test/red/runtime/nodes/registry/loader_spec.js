@@ -114,7 +114,8 @@ describe("red/nodes/registry/loader",function() {
                 registry.addNodeSet.lastCall.args[1].should.not.have.a.property('err');
 
                 nodes.registerType.calledOnce.should.be.true;
-                nodes.registerType.lastCall.args[0].should.eql('test-node-1');
+                nodes.registerType.lastCall.args[0].should.eql('node-red/TestNode1');
+                nodes.registerType.lastCall.args[1].should.eql('test-node-1');
 
                 done();
             }).otherwise(function(err) {
@@ -162,8 +163,10 @@ describe("red/nodes/registry/loader",function() {
                 registry.addNodeSet.lastCall.args[1].should.not.have.a.property('err');
 
                 nodes.registerType.calledTwice.should.be.true;
-                nodes.registerType.firstCall.args[0].should.eql('test-node-multiple-1a');
-                nodes.registerType.secondCall.args[0].should.eql('test-node-multiple-1b');
+                nodes.registerType.firstCall.args[0].should.eql('node-red/MultipleNodes1');
+                nodes.registerType.firstCall.args[1].should.eql('test-node-multiple-1a');
+                nodes.registerType.secondCall.args[0].should.eql('node-red/MultipleNodes1');
+                nodes.registerType.secondCall.args[1].should.eql('test-node-multiple-1b');
 
                 done();
             }).otherwise(function(err) {
@@ -212,7 +215,8 @@ describe("red/nodes/registry/loader",function() {
                 registry.addNodeSet.lastCall.args[1].should.not.have.a.property('err');
 
                 nodes.registerType.calledOnce.should.be.true;
-                nodes.registerType.lastCall.args[0].should.eql('test-node-2');
+                nodes.registerType.lastCall.args[0].should.eql('node-red/TestNode2');
+                nodes.registerType.lastCall.args[1].should.eql('test-node-2');
 
                 done();
             }).otherwise(function(err) {

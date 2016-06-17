@@ -112,6 +112,7 @@ module.exports = function(RED) {
                         var first = true; // is this the first line
                         var line = msg.payload;
                         var tmp = "";
+                        var reg = new RegExp("^[-]?[0-9.]*[\.]?[0-9]*$");
 
                         // For now we are just going to assume that any \r or \n means an end of line...
                         //   got to be a weird csv that has singleton \r \n in it for another reason...
@@ -134,7 +135,7 @@ module.exports = function(RED) {
                                 else if ((line[i] === node.sep) && f) { // if we are outside of quote (ie valid separator
                                     if (!node.goodtmpl) { node.template[j] = "col"+(j+1); }
                                     if ( node.template[j] && (node.template[j] !== "") && (k[j] !== "" ) ) {
-                                        if ( (k[j].charAt(0) !== "+") && !isNaN(Number(k[j])) ) { k[j] = Number(k[j]); }
+                                        if ( reg.test(k[j]) ) { k[j] = parseFloat(k[j]); }
                                         o[node.template[j]] = k[j];
                                     }
                                     j += 1;
@@ -144,7 +145,7 @@ module.exports = function(RED) {
                                     //console.log(j,k,o,k[j]);
                                     if (!node.goodtmpl) { node.template[j] = "col"+(j+1); }
                                     if ( node.template[j] && (node.template[j] !== "") && (k[j] !== "") ) {
-                                        if ( (k[j].charAt(0) !== "+") && !isNaN(Number(k[j])) ) { k[j] = Number(k[j]); }
+                                        if ( reg.test(k[j]) ) { k[j] = parseFloat(k[j]); }
                                         else { k[j].replace(/\r$/,''); }
                                         o[node.template[j]] = k[j];
                                     }
@@ -169,7 +170,7 @@ module.exports = function(RED) {
                         //console.log(j,k,o,k[j]);
                         if (!node.goodtmpl) { node.template[j] = "col"+(j+1); }
                         if ( node.template[j] && (node.template[j] !== "") && (k[j] !== "") ) {
-                            if ( (k[j].charAt(0) !== "+") && !isNaN(Number(k[j])) ) { k[j] = Number(k[j]); }
+                            if ( reg.test(k[j]) ) { k[j] = parseFloat(k[j]); }
                             else { k[j].replace(/\r$/,''); }
                             o[node.template[j]] = k[j];
                         }

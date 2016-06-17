@@ -89,6 +89,7 @@ function start() {
                     } else {
                         var completeConnection = function(userScope,sendAck) {
                             if (!userScope || !Permissions.hasPermission(userScope,"status.read")) {
+                                ws.send(JSON.stringify({auth:"fail"}));
                                 ws.close();
                             } else {
                                 pendingAuth = false;

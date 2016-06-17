@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,32 @@ function Flow(global,flow) {
         var id;
         catchNodeMap = {};
         statusNodeMap = {};
-        for (id in flow.configs) {
-            if (flow.configs.hasOwnProperty(id)) {
-                node = flow.configs[id];
-                if (!activeNodes[id]) {
+
+        var configNodes = Object.keys(flow.configs);
+        var configNodeAttempts = {};
+        while(configNodes.length > 0) {
+            id = configNodes.shift();
+            node = flow.configs[id];
+            if (!activeNodes[id]) {
+                var readyToCreate = true;
+                // This node doesn't exist.
+                // Check it doesn't reference another non-existent config node
+                for (var prop in node) {
+                    if (node.hasOwnProperty(prop) && prop !== 'id' && prop !== 'wires' && prop !== '_users' && flow.configs[node[prop]]) {
+                        if (!activeNodes[node[prop]]) {
+                            // References a non-existent config node
+                            // Add it to the back of the list to try again later
+                            configNodes.push(id);
+                            configNodeAttempts[id] = (configNodeAttempts[id]||0)+1;
+                            if (configNodeAttempts[id] === 100) {
+                                throw new Error("Circular config node dependency detected: "+id);
+                            }
+                            readyToCreate = false;
+                            break;
+                        }
+                    }
+                }
+                if (readyToCreate) {
                     newNode = createNode(node.type,node);
                     if (newNode) {
                         activeNodes[id] = newNode;
@@ -47,6 +69,7 @@ function Flow(global,flow) {
                 }
             }
         }
+
         if (diff && diff.rewired) {
             for (var j=0;j<diff.rewired.length;j++) {
                 var rewireNode = activeNodes[diff.rewired[j]];
@@ -224,6 +247,9 @@ function Flow(global,flow) {
                             count: count
                         }
                     };
+                    if (logMessage.hasOwnProperty('stack')) {
+                        errorMessage.error.stack = logMessage.stack;
+                    }
                     targetCatchNode.receive(errorMessage);
                     handled = true;
                 });
@@ -254,7 +280,7 @@ function mapEnvVarProperties(obj,prop) {
         }
     } else {
         for (var p in obj[prop]) {
-            if (obj[prop].hasOwnProperty) {
+            if (obj[prop].hasOwnProperty(p)) {
                 mapEnvVarProperties(obj[prop],p);
             }
         }

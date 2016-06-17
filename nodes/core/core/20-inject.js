@@ -46,7 +46,7 @@ module.exports = function(RED) {
         }
 
         if (this.once) {
-            setTimeout( function(){ node.emit("input",{}); }, 100);
+            setTimeout( function() { node.emit("input",{}); }, 100 );
         }
 
         this.on("input",function(msg) {

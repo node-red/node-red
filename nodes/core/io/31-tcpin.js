@@ -396,7 +396,10 @@ module.exports = function(RED) {
         else { this.splitc = this.splitc.replace("\\n",0x0A).replace("\\r",0x0D).replace("\\t",0x09).replace("\\e",0x1B).replace("\\f",0x0C).replace("\\0",0x00); } // jshint ignore:line
 
         var buf;
-        if (this.out == "count") { buf = new Buffer(this.splitc); }
+        if (this.out == "count") {
+            if (this.splitc === 0) { buf = new Buffer(1); }
+            else { buf = new Buffer(this.splitc); }
+        }
         else { buf = new Buffer(65536); } // set it to 64k... hopefully big enough for most TCP packets.... but only hopefully
 
         this.connected = false;
@@ -437,7 +440,7 @@ module.exports = function(RED) {
                     }
                     else {
                         for (var j = 0; j < data.length; j++ ) {
-                            if (node.out === "time")  {
+                            if (node.out === "time") {
                                 // do the timer thing
                                 if (node.tout) {
                                     i += 1;
@@ -523,7 +526,6 @@ module.exports = function(RED) {
         this.on("close", function(done) {
             node.done = done;
             if (client) {
-                buf = null;
                 client.destroy();
             }
             node.status({});

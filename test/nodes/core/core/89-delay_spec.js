@@ -28,7 +28,6 @@ var secondsToMinutes = 60;
 var secondsToHours = 3600;
 var secondsToDays = 86400;
 
-
 describe('delay Node', function() {
 
     beforeEach(function(done) {
@@ -71,11 +70,11 @@ describe('delay Node', function() {
     });
 
     var TimeUnitEnum = {
-            MILLIS : "milliseconds",
-            SECONDS : "seconds",
-            MINUTES : "minutes",
-            HOURS : "hours",
-            DAYS : "days"
+        MILLIS : "milliseconds",
+        SECONDS : "seconds",
+        MINUTES : "minutes",
+        HOURS : "hours",
+        DAYS : "days"
     }
 
     /**
@@ -90,7 +89,7 @@ describe('delay Node', function() {
         var minExpected = expectedValue - toleranceFraction;
         var maxExpected = expectedValue + toleranceFraction;
 
-        if(actualValue >= minExpected && actualValue <= maxExpected) {
+        if (actualValue >= minExpected && actualValue <= maxExpected) {
             toReturn = true;
         } else {
             toReturn = false;
@@ -117,23 +116,23 @@ describe('delay Node', function() {
                     var aTimeoutUnifiedToSeconds;
 
                     // calculating the timeout in seconds
-                    if(aTimeoutUnit == TimeUnitEnum.MILLIS) {
+                    if (aTimeoutUnit == TimeUnitEnum.MILLIS) {
                         aTimeoutUnifiedToSeconds = aTimeout / millisToSeconds;
-                    } else if(aTimeoutUnit == TimeUnitEnum.SECONDS) {
+                    } else if (aTimeoutUnit == TimeUnitEnum.SECONDS) {
                         aTimeoutUnifiedToSeconds = aTimeout;
-                    } else if(aTimeoutUnit == TimeUnitEnum.MINUTES) {
+                    } else if (aTimeoutUnit == TimeUnitEnum.MINUTES) {
                         aTimeoutUnifiedToSeconds = aTimeout * secondsToMinutes;
-                    } else if(aTimeoutUnit == TimeUnitEnum.HOURS) {
+                    } else if (aTimeoutUnit == TimeUnitEnum.HOURS) {
                         aTimeoutUnifiedToSeconds = aTimeout * secondsToHours;
-                    } else if(aTimeoutUnit == TimeUnitEnum.DAYS) {
+                    } else if (aTimeoutUnit == TimeUnitEnum.DAYS) {
                         aTimeoutUnifiedToSeconds = aTimeout * secondsToDays;
                     }
 
-                    if(closeEnough(runtimeSeconds, aTimeoutUnifiedToSeconds, GRACE_PERCENTAGE)) {
+                    if (closeEnough(runtimeSeconds, aTimeoutUnifiedToSeconds, GRACE_PERCENTAGE)) {
                         done();
                     } else {
                         try {
-                            should.fail(null, null, "Delayed runtime seconds " +  runtimeSeconds + " was not close enough to exlected timeout seconds: " + aTimeoutUnifiedToSeconds);
+                            should.fail(null, null, "Delayed runtime seconds " + runtimeSeconds + " was not close enough to exlected timeout seconds: " + aTimeoutUnifiedToSeconds);
                         } catch (err) {
                             done(err);
                         }
@@ -188,7 +187,7 @@ describe('delay Node', function() {
             var receiveTimestamp;
 
             helperNode1.on("input", function(msg) {
-                if(receiveTimestamp) {
+                if (receiveTimestamp) {
                     var elapse = process.hrtime(receiveTimestamp);
                     var receiveInterval = (elapse[0] * 1000) + ((elapse[1] / nanosToSeconds) * 1000);
                     receiveInterval.should.be.above(rate * 0.9);
@@ -200,16 +199,16 @@ describe('delay Node', function() {
             var possibleMaxMessageCount = Math.ceil(aLimit * (runtimeInMillis / 1000) + aLimit); // +aLimit as at the start of the 2nd period, we're allowing the 3rd burst
 
             var i = 0;
-            for(; i < possibleMaxMessageCount + 1; i++) {
+            for (; i < possibleMaxMessageCount + 1; i++) {
                 delayNode1.receive({payload:i});
             }
 
             setTimeout(function() {
                 try {
                     receivedMessagesStack.length.should.be.lessThan(possibleMaxMessageCount);
-                    for(var j = 0; j < receivedMessagesStack.length; j++) {
-                        if(receivedMessagesStack[j].payload === j) {
-                            if(j === (receivedMessagesStack.length -1)) { // last message, all matched so far
+                    for (var j = 0; j < receivedMessagesStack.length; j++) {
+                        if (receivedMessagesStack[j].payload === j) {
+                            if (j === (receivedMessagesStack.length -1)) { // last message, all matched so far
                                 done();
                             }
                         } else {
@@ -250,7 +249,7 @@ describe('delay Node', function() {
             var receiveTimestamp;
 
             helperNode1.on("input", function(msg) {
-                if(receiveTimestamp) {
+                if (receiveTimestamp) {
                     var elapse = process.hrtime(receiveTimestamp);
                     var receiveInterval = (elapse[0] * 1000) + ((elapse[1] / nanosToSeconds) * 1000);
                     receiveInterval.should.be.above(rate * 0.9);
@@ -264,9 +263,9 @@ describe('delay Node', function() {
             var i = 0;
             delayNode1.receive({payload:i});
             i++;
-            for(; i < possibleMaxMessageCount + 1; i++) {
+            for (; i < possibleMaxMessageCount + 1; i++) {
                 setTimeout(function() {
-                   delayNode1.receive({payload:i});
+                    delayNode1.receive({payload:i});
                 }, 2 * ((rate * i) / possibleMaxMessageCount) );
             }
 
@@ -281,9 +280,9 @@ describe('delay Node', function() {
                     receivedMessagesStack.length.should.be.greaterThan(2); // ensure that we receive more than 1st and last message
                     receivedMessagesStack[0].payload.should.be.exactly(0); // means we received the last message injected just before test termination
                     var foundAtLeastOneDrop = false;
-                    for(var i = 0; i < receivedMessagesStack.length; i++) {
-                        if(i > 0) {
-                            if(receivedMessagesStack[i].payload - receivedMessagesStack[i - 1].payload > 1) {
+                    for (var i = 0; i < receivedMessagesStack.length; i++) {
+                        if (i > 0) {
+                            if (receivedMessagesStack[i].payload - receivedMessagesStack[i - 1].payload > 1) {
                                 foundAtLeastOneDrop = true;
                             }
                         }
@@ -317,11 +316,11 @@ describe('delay Node', function() {
      * @param allowedGracePercent - The percentage of grace allowed
      */
     function inBetweenDelays(timeoutFrom, timeoutTo, actualTimeout, allowedGracePercent) {
-        if(closeEnough(actualTimeout, timeoutFrom, allowedGracePercent)) {
+        if (closeEnough(actualTimeout, timeoutFrom, allowedGracePercent)) {
             return true;
-        } else if(closeEnough(actualTimeout, timeoutTo, allowedGracePercent)) {
+        } else if (closeEnough(actualTimeout, timeoutTo, allowedGracePercent)) {
             return true;
-        } else if(timeoutFrom < actualTimeout && timeoutTo > actualTimeout) {
+        } else if (timeoutFrom < actualTimeout && timeoutTo > actualTimeout) {
             return true;
         } else {
             return false;
@@ -349,28 +348,28 @@ describe('delay Node', function() {
                     var aTimeoutToUnifiedToSeconds;
 
                     // calculating the timeout in seconds
-                    if(aTimeoutUnit == TimeUnitEnum.MILLIS) {
+                    if (aTimeoutUnit == TimeUnitEnum.MILLIS) {
                         aTimeoutFromUnifiedToSeconds = aTimeoutFrom / millisToSeconds;
                         aTimeoutToUnifiedToSeconds = aTimeoutTo / millisToSeconds;
-                    } else if(aTimeoutUnit == TimeUnitEnum.SECONDS) {
+                    } else if (aTimeoutUnit == TimeUnitEnum.SECONDS) {
                         aTimeoutFromUnifiedToSeconds = aTimeoutFrom;
                         aTimeoutToUnifiedToSeconds = aTimeoutTo;
-                    } else if(aTimeoutUnit == TimeUnitEnum.MINUTES) {
+                    } else if (aTimeoutUnit == TimeUnitEnum.MINUTES) {
                         aTimeoutFromUnifiedToSeconds = aTimeoutFrom * secondsToMinutes;
                         aTimeoutToUnifiedToSeconds = aTimeoutTo * secondsToMinutes;
-                    } else if(aTimeoutUnit == TimeUnitEnum.HOURS) {
+                    } else if (aTimeoutUnit == TimeUnitEnum.HOURS) {
                         aTimeoutFromUnifiedToSeconds = aTimeoutFrom * secondsToHours;
                         aTimeoutToUnifiedToSeconds = aTimeoutTo * secondsToHours;
-                    } else if(aTimeoutUnit == TimeUnitEnum.DAYS) {
+                    } else if (aTimeoutUnit == TimeUnitEnum.DAYS) {
                         aTimeoutFromUnifiedToSeconds = aTimeoutFrom * secondsToDays;
                         aTimeoutToUnifiedToSeconds = aTimeoutTo * secondsToDays;
                     }
 
-                    if(inBetweenDelays(aTimeoutFromUnifiedToSeconds, aTimeoutToUnifiedToSeconds, runtimeSeconds, GRACE_PERCENTAGE)) {
+                    if (inBetweenDelays(aTimeoutFromUnifiedToSeconds, aTimeoutToUnifiedToSeconds, runtimeSeconds, GRACE_PERCENTAGE)) {
                         done();
                     } else {
                         try {
-                            should.fail(null, null, "Delayed runtime seconds " +  runtimeSeconds + " was not \"in between enough\" enough to expected values of: " + aTimeoutFromUnifiedToSeconds + " and " + aTimeoutToUnifiedToSeconds);
+                            should.fail(null, null, "Delayed runtime seconds " + runtimeSeconds + " was not \"in between enough\" enough to expected values of: " + aTimeoutFromUnifiedToSeconds + " and " + aTimeoutToUnifiedToSeconds);
                         } catch (err) {
                             done(err);
                         }
@@ -404,118 +403,119 @@ describe('delay Node', function() {
         randomDelayTest(0.0000046296, 0.0000092593, "days", done);
     });
 
-    it.skip('handles bursts using a buffer', function(done) {
-        // routinely timesout on Travis - needs fixing
-        this.timeout(8000);
+    it('handles bursts using a buffer', function(done) {
+        this.timeout(10000);
 
         var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":5,"timeoutUnits":"seconds","rate":1000,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
             var helperNode1 = helper.getNode("helperNode1");
-
             var sinon = require('sinon');
-
             var receivedWarning = false;
-            var messageBurstSize = 1500;
+            var messageBurstSize = 1200;
 
             // we ensure that we note that a warning is received for buffer growth
-            sinon.stub(delayNode1, 'warn', function(warning){
-                if(warning.indexOf("buffer exceeded 1000 messages" > -1)) {
+            sinon.stub(delayNode1, 'warn', function(warning) {
+                if (warning.indexOf("buffer exceeded 1000 messages" > -1)) {
                     receivedWarning = true;
                 }
             });
-
             // we ensure that the warning is received for buffer size and that we get the last message
             helperNode1.on("input", function(msg) {
-                if(msg.payload === (messageBurstSize - 1) && receivedWarning === true) {
+                if (msg.payload === (messageBurstSize - 1) && receivedWarning === true) {
                     done(); // it will timeout if we don't receive the last message
                 }
             });
-            // send 1500 messages as quickly as possible
-            for(var i = 0; i < messageBurstSize; i++) {
+            // send messages as quickly as possible
+            for (var i = 0; i < messageBurstSize; i++) {
                 delayNode1.receive({payload:i});
             }
         });
     });
 
     it('handles delay queue', function(done) {
-        this.timeout(6000);
-
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"queue","timeout":5,"timeoutUnits":"seconds","rate":1000,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+        this.timeout(2000);
+        var flow = [{id:"delayNode1", type :"delay","name":"delayNode","pauseType":"queue","timeout":1,"timeoutUnits":"seconds","rate":4,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
             var helperNode1 = helper.getNode("helperNode1");
-            var messages = 2;
-            var c = 0;
-
+            var t = Date.now();
             helperNode1.on("input", function(msg) {
-                c += 1;
                 msg.should.have.a.property('payload');
                 msg.should.have.a.property('topic');
-                if (msg.topic === "A") {
-                    msg.payload.should.equal(4);
-                }
-                else {
-                    msg.topic.should.equal("_none_");
-                    msg.payload.should.equal(2);
-                }
-                if (c == 2) {
-                    done(); // it will timeout if we don't receive both messages
+                try {
+                    if (msg.topic === "_none_") {
+                        msg.payload.should.equal(2);
+                        (Date.now() - t).should.be.approximately(500,50);
+                    }
+                    else if (msg.topic === "A") {
+                        msg.payload.should.equal(4);
+                        (Date.now() - t).should.be.approximately(750,50);
+                    }
+                    else {
+                        msg.topic.should.equal("B");
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(1000,50);
+                        done();
+                    }
+                } catch(e) {
+                    done(e);
                 }
             });
-
-            // send test messages
-            delayNode1.receive({payload:1,topic:"A"});
-            delayNode1.receive({payload:1});
-            delayNode1.receive({payload:2,topic:"A"});
-            delayNode1.receive({payload:3,topic:"A"});
-            delayNode1.receive({payload:2});            // only this should get out
-            delayNode1.receive({payload:4,topic:"A"});  // and this one also
-
+            setTimeout(function() {
+                // send test messages
+                delayNode1.receive({payload:1});            // send something with blank topic
+                delayNode1.receive({payload:1,topic:"A"});  // and something with a fixed topic
+                delayNode1.receive({payload:1,topic:"B"});  // and something else with a fixed topic (3rd tick)
+                delayNode1.receive({payload:2,topic:"A"});  // these should replace them in queue
+                delayNode1.receive({payload:3,topic:"A"});  //  ditto
+                delayNode1.receive({payload:2});            // so only this should get out on first tick
+                delayNode1.receive({payload:4,topic:"A"});  // and this one on second tick
+            }, 275);  // wait one tick beofre starting.. (to test no messages in queue path.)
         });
     });
 
     it('handles timed queue', function(done) {
-        this.timeout(6000);
-
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"timed","timeout":5,"timeoutUnits":"seconds","rate":1000,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"timed","timeout":1,"timeoutUnits":"seconds","rate":2,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
             var helperNode1 = helper.getNode("helperNode1");
-            var messages = 2;
-            var c = 0;
-
+            var t = Date.now();
             helperNode1.on("input", function(msg) {
-                c += 1;
-                if (c === 1) {
-                    msg.should.have.property("topic","A");
-                    msg.should.have.property("payload",3);
-                }
-                else if (c === 2) {
-                    msg.should.have.property("topic","_none_");
-                    msg.should.have.property("payload",2);
-                }
-                else if (c === 3) {
-                    msg.should.have.property("topic","_none_");
-                    msg.should.have.property("payload","Biscuit");
-                    done();
+                msg.should.have.a.property('payload');
+                msg.should.have.a.property('topic');
+                try {
+                    if (msg.topic === "_none_") {
+                        msg.payload.should.equal(2);
+                        (Date.now() - t).should.be.approximately(500,50);
+                    }
+                    else if (msg.topic === "A") {
+                        msg.payload.should.equal(4);
+                        (Date.now() - t).should.be.approximately(500,50);
+                    }
+                    else {
+                        msg.topic.should.equal("B");
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(500,50);
+                        done();
+                    }
+                } catch(e) {
+                    done(e);
                 }
             });
 
             // send test messages
-            delayNode1.receive({payload:1,topic:"A"});
-            delayNode1.receive({payload:1});
-            delayNode1.receive({payload:2,topic:"A"});
-            delayNode1.receive({payload:3,topic:"A"});      // should get this
-            delayNode1.receive({payload:2});                // and this
-            setTimeout( function() {
-                delayNode1.receive({payload:"Biscuit"});    // and then this
-            },2000);
-
+            delayNode1.receive({payload:1});            // send something with blank topic
+            delayNode1.receive({payload:1,topic:"A"});  // and something with a fixed topic
+            delayNode1.receive({payload:1,topic:"B"});  // and something else with a fixed topic
+            delayNode1.receive({payload:2,topic:"A"});  // these should replace them in queue
+            delayNode1.receive({payload:3,topic:"A"});  //  ditto
+            delayNode1.receive({payload:2});            // so all should go on first tick
+            delayNode1.receive({payload:4,topic:"A"});  //  and nothing on second
         });
     });
-
 });

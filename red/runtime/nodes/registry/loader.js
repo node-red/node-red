@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,10 +67,14 @@ function createNodeApi(node) {
         nodes: {},
         log: {},
         settings: {},
+        events: runtime.events,
         util: runtime.util,
         version: runtime.version,
     }
-    copyObjectProperties(runtime.nodes,red.nodes,["createNode","getNode","eachNode","registerType","addCredentials","getCredentials","deleteCredentials" ]);
+    copyObjectProperties(runtime.nodes,red.nodes,["createNode","getNode","eachNode","addCredentials","getCredentials","deleteCredentials" ]);
+    red.nodes.registerType = function(type,constructor,opts) {
+        runtime.nodes.registerType(node.id,type,constructor,opts);
+    }
     copyObjectProperties(runtime.log,red.log,null,["init"]);
     copyObjectProperties(runtime.settings,red.settings,null,["init","load","reset"]);
     if (runtime.adminApi) {

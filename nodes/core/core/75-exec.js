@@ -27,65 +27,74 @@ module.exports = function(RED) {
         this.addpay = n.addpay;
         this.append = (n.append || "").trim();
         this.useSpawn = n.useSpawn;
+        this.timer = Number(n.timer || 0)*1000;
         this.activeProcesses = {};
+
+        var cleanup = function(p) {
+            //console.log("CLEANUP!!!",p);
+            node.activeProcesses[p].kill();
+            node.status({fill:"red",shape:"dot",text:"timeout"});
+            node.error("Exec node timeout");
+        }
 
         var node = this;
         this.on("input", function(msg) {
+            var child;
             node.status({fill:"blue",shape:"dot",text:" "});
             if (this.useSpawn === true) {
                 // make the extra args into an array
                 // then prepend with the msg.payload
-
                 var arg = node.cmd;
-                if (node.addpay) {
-                    arg += " "+msg.payload;
-                }
+                if (node.addpay) { arg += " "+msg.payload; }
                 arg += " "+node.append;
                 // slice whole line by spaces (trying to honour quotes);
                 arg = arg.match(/(?:[^\s"]+|"[^"]*")+/g);
                 var cmd = arg.shift();
+                /* istanbul ignore else  */
                 if (RED.settings.verbose) { node.log(cmd+" ["+arg+"]"); }
-                if (cmd.indexOf(" ") == -1) {
-                    var ex = spawn(cmd,arg);
-                    node.activeProcesses[ex.pid] = ex;
-                    ex.stdout.on('data', function (data) {
-                        //console.log('[exec] stdout: ' + data);
-                        if (isUtf8(data)) { msg.payload = data.toString(); }
-                        else { msg.payload = data; }
-                        node.send([msg,null,null]);
-                    });
-                    ex.stderr.on('data', function (data) {
-                        //console.log('[exec] stderr: ' + data);
-                        if (isUtf8(data)) { msg.payload = data.toString(); }
-                        else { msg.payload = new Buffer(data); }
-                        node.send([null,msg,null]);
-                    });
-                    ex.on('close', function (code) {
-                        //console.log('[exec] result: ' + code);
-                        delete node.activeProcesses[ex.pid];
-                        msg.payload = code;
-                        node.status({});
-                        node.send([null,null,msg]);
-                    });
-                    ex.on('error', function (code) {
-                        delete node.activeProcesses[ex.pid];
-                        node.error(code,msg);
-                    });
+                child = spawn(cmd,arg);
+                if (node.timer !== 0) {
+                    child.tout = setTimeout(function() { cleanup(child.pid); }, node.timer);
                 }
-                else { node.error(RED._("exec.spawnerr")); }
+                node.activeProcesses[child.pid] = child;
+                child.stdout.on('data', function (data) {
+                    //console.log('[exec] stdout: ' + data);
+                    if (isUtf8(data)) { msg.payload = data.toString(); }
+                    else { msg.payload = data; }
+                    node.send([msg,null,null]);
+                });
+                child.stderr.on('data', function (data) {
+                    //console.log('[exec] stderr: ' + data);
+                    if (isUtf8(data)) { msg.payload = data.toString(); }
+                    else { msg.payload = new Buffer(data); }
+                    node.send([null,msg,null]);
+                });
+                child.on('close', function (code) {
+                    //console.log('[exec] result: ' + code);
+                    delete node.activeProcesses[child.pid];
+                    if (child.tout) { clearTimeout(child.tout); }
+                    msg.payload = code;
+                    if (code === 0) { node.status({}); }
+                    if (code === null) { node.status({fill:"red",shape:"dot",text:"timeout"}); }
+                    else if (code < 0) { node.status({fill:"red",shape:"dot",text:"rc: "+code}); }
+                    else { node.status({fill:"yellow",shape:"dot",text:"rc: "+code}); }
+                    node.send([null,null,msg]);
+                });
+                child.on('error', function (code) {
+                    delete node.activeProcesses[child.pid];
+                    if (child.tout) { clearTimeout(child.tout); }
+                    node.error(code,msg);
+                });
             }
             else {
                 var cl = node.cmd;
-                if ((node.addpay === true) && ((msg.payload.toString() || "").trim() !== "")) { cl += " "+msg.payload; }
+                if ((node.addpay === true) && ((msg.payload || "").toString().trim() !== "")) { cl += " "+msg.payload; }
                 if (node.append.trim() !== "") { cl += " "+node.append; }
+                /* istanbul ignore else  */
                 if (RED.settings.verbose) { node.log(cl); }
-                var child = exec(cl, {encoding: 'binary', maxBuffer:10000000}, function (error, stdout, stderr) {
+                child = exec(cl, {encoding: 'binary', maxBuffer:10000000}, function (error, stdout, stderr) {
                     msg.payload = new Buffer(stdout,"binary");
-                    try {
-                        if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
-                    } catch(e) {
-                        node.log(RED._("exec.badstdout"));
-                    }
+                    if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
                     var msg2 = {payload:stderr};
                     var msg3 = null;
                     //console.log('[exec] stdout: ' + stdout);
@@ -96,19 +105,26 @@ module.exports = function(RED) {
                     }
                     node.status({});
                     node.send([msg,msg2,msg3]);
+                    if (child.tout) { clearTimeout(child.tout); }
                     delete node.activeProcesses[child.pid];
                 });
-                child.on('error',function(){})
+                child.on('error',function() {});
+                if (node.timer !== 0) {
+                    child.tout = setTimeout(function() { cleanup(child.pid); }, node.timer);
+                }
                 node.activeProcesses[child.pid] = child;
             }
         });
         this.on('close',function() {
             for (var pid in node.activeProcesses) {
+                /* istanbul ignore else  */
                 if (node.activeProcesses.hasOwnProperty(pid)) {
+                    if (node.activeProcesses[pid].tout) { clearTimeout(node.activeProcesses[pid].tout); }
                     node.activeProcesses[pid].kill();
                 }
             }
             node.activeProcesses = {};
+            node.status({});
         });
     }
     RED.nodes.registerType("exec",ExecNode);
