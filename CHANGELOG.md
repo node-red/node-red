@@ -1,3 +1,9 @@
+#### xxx: unreleased
+
+Fixes
+
+ - Create default setting.js in user-specified directory. Fixes #908
+
 #### 0.14.2: Maintenance Release
 
 Fixes
