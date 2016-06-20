@@ -39,8 +39,7 @@ RED.tray = (function() {
         if (options.buttons) {
             for (var i=0;i<options.buttons.length;i++) {
                 var button = options.buttons[i];
-
-                var b = $('<button>').appendTo(buttonBar);
+                var b = $('<button>').button().appendTo(buttonBar);
                 if (button.id) {
                     b.attr('id',button.id);
                 }

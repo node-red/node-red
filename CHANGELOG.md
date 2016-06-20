@@ -1,7 +1,8 @@
-#### xxx: unreleased
+#### 0.14.2: Maintenance Release
 
 Fixes
 
+ - Cannot add new twitter credentials. Fixes #913
  - Support array references in Debug property field
 
 #### 0.14.1: Maintenance Release

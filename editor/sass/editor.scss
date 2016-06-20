@@ -83,8 +83,12 @@
             border-color: $editor-button-background-primary;
             color: $editor-button-color-primary;
             background: $editor-button-background-primary;
-
-            &:not(.disabled):hover {
+            &.disabled, &.ui-state-disabled {
+                background: none;
+                color: $editor-button-color;
+                border-color: $form-input-border-color;
+            }
+            &:not(.disabled):not(.ui-button-disabled):hover {
                 border-color: $editor-button-background-primary-hover;
                 background: $editor-button-background-primary-hover;
                 color: $editor-button-color-primary !important;
@@ -101,14 +105,15 @@
         }
 
 
-
-
         &.leftButton {
             float: left;
             margin-top: 1px;
         }
         &:not(.leftButton):not(:last-child) {
             margin-right: 16px;
+        }
+        &.ui-state-disabled {
+            opacity: 1;
         }
     }
 }
