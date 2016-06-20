@@ -29,6 +29,7 @@ module.exports = function(RED) {
         this.useSpawn = n.useSpawn;
         this.timer = Number(n.timer || 0)*1000;
         this.activeProcesses = {};
+        var node = this;
 
         var cleanup = function(p) {
             //console.log("CLEANUP!!!",p);
@@ -37,7 +38,6 @@ module.exports = function(RED) {
             node.error("Exec node timeout");
         }
 
-        var node = this;
         this.on("input", function(msg) {
             var child;
             node.status({fill:"blue",shape:"dot",text:" "});
@@ -45,8 +45,8 @@ module.exports = function(RED) {
                 // make the extra args into an array
                 // then prepend with the msg.payload
                 var arg = node.cmd;
-                if (node.addpay) { arg += " "+msg.payload; }
-                arg += " "+node.append;
+                if ((node.addpay === true) && msg.hasOwnProperty("payload")) { arg += " "+msg.payload; }
+                if (node.append.trim() !== "") { arg += " "+node.append; }
                 // slice whole line by spaces (trying to honour quotes);
                 arg = arg.match(/(?:[^\s"]+|"[^"]*")+/g);
                 var cmd = arg.shift();
@@ -88,7 +88,7 @@ module.exports = function(RED) {
             }
             else {
                 var cl = node.cmd;
-                if ((node.addpay === true) && ((msg.payload || "").toString().trim() !== "")) { cl += " "+msg.payload; }
+                if ((node.addpay === true) && msg.hasOwnProperty("payload")) { cl += " "+msg.payload; }
                 if (node.append.trim() !== "") { cl += " "+node.append; }
                 /* istanbul ignore else  */
                 if (RED.settings.verbose) { node.log(cl); }
