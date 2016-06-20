@@ -1,3 +1,9 @@
+#### xxx: unreleased
+
+Fixes
+
+ - Support array references in Debug property field
+
 #### 0.14.1: Maintenance Release
 
 Fixes

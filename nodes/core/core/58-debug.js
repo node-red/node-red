@@ -50,12 +50,9 @@ module.exports = function(RED) {
                 var output = msg[property];
                 if (this.complete !== "false" && typeof this.complete !== "undefined") {
                     property = this.complete;
-                    var propertyParts = property.split(".");
                     try {
-                        output = propertyParts.reduce(function (obj, i) {
-                            return obj[i];
-                        }, msg);
-                    } catch (err) {
+                        output = RED.util.getMessageProperty(msg,this.complete);
+                    } catch(err) {
                         output = undefined;
                     }
                 }
