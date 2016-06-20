@@ -148,7 +148,7 @@
 
                 if (subWindow) {
                     try {
-                        subWindow.postMessage(JSON.stringify(o),"*")
+                        subWindow.postMessage(o,"*")
                     } catch(err) {
                         console.log(err);
                     }

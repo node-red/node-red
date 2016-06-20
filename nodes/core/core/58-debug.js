@@ -160,7 +160,6 @@ module.exports = function(RED) {
             root: __dirname + '/lib/debug/',
             dotfiles: 'deny'
         };
-        console.log("SERVING UP",req.params[0]);
         res.sendFile(req.params[0], options);
     });
 };
