@@ -46,7 +46,8 @@
 </script>
 
 <script type="text/javascript">
-
+(function() {
+    var subWindow = null;
     RED.nodes.registerType('debug',{
         category: 'output',
         defaults: {
@@ -104,7 +105,8 @@
                     '<a class="sidebar-header-button-toggle selected" id="debug-tab-filter-all" href="#"><span data-i18n="node-red:debug.sidebar.filterAll"></span></a>'+
                     '<a class="sidebar-header-button-toggle" id="debug-tab-filter-current" href="#"><span data-i18n="node-red:debug.sidebar.filterCurrent"></span></a> '+
                 '</span>'+
-                '<span><a id="debug-tab-clear" title="clear log" class="sidebar-header-button" href="#"><i class="fa fa-trash"></i></a></span></div>').appendTo(content);
+                '<span class="button-group"><a id="debug-tab-open" title="open in new window" class="sidebar-header-button" href="#"><i class="fa fa-desktop"></i></a></span> ' +
+                '<span class="button-group"><a id="debug-tab-clear" title="clear log" class="sidebar-header-button" href="#"><i class="fa fa-trash"></i></a></span></div>').appendTo(content);
 
             var messages = $('<div id="debug-content"/>').appendTo(content);
             content.i18n();
@@ -143,6 +145,14 @@
             }
 
             this.handleDebugMessage = function(t,o) {
+
+                if (subWindow) {
+                    try {
+                        subWindow.postMessage(JSON.stringify(o),"*")
+                    } catch(err) {
+                        console.log(err);
+                    }
+                }
                 var msg = document.createElement("div");
 
                 var sourceNode = RED.nodes.node(o.id) || RED.nodes.node(o.z);
@@ -245,7 +255,10 @@
                 }
             });
             RED.events.on("workspace:change", refreshMessageList);
-
+            $("#debug-tab-open").click(function(e) {
+                e.preventDefault();
+                subWindow = window.open(document.location.toString().replace(/#$/,"")+"debug/view/view.html","nodeREDDebugView","menubar=no,location=no,toolbar=no,chrome,height=500,width=600");
+            });
         },
         onpaletteremove: function() {
             RED.comms.unsubscribe("debug",this.handleDebugMessage);
@@ -282,58 +295,7 @@
         }
 
     });
+})();
 </script>
 
-<style>
-    #debug-content {
-        position: absolute;
-        top: 43px;
-        bottom: 0px;
-        left:0px;
-        right: 0px;
-        overflow-y: scroll;
-    }
-    .debug-message {
-        cursor: pointer;
-        border-bottom: 1px solid #eee;
-        border-left: 8px solid #eee;
-        border-right: 8px solid #eee;
-        padding: 2px;
-    }
-    .debug-message-date {
-        background: #fff;
-        font-size: 9px;
-        color: #aaa;
-        padding: 1px 5px 1px 1px;
-    }
-    .debug-message-topic {
-        display: block;
-        background: #fff;
-        padding: 1px;
-        font-size: 10px;
-        color: #a66;
-    }
-    .debug-message-name {
-        background: #fff;
-        padding: 1px 5px;
-        font-size: 9px;
-        color: #aac;
-    }
-    .debug-message-payload {
-        display: block;
-        padding: 2px;
-        background: #fff;
-    }
-    .debug-message-level-log {
-        border-left-color: #eee;
-        border-right-color: #eee;
-    }
-    .debug-message-level-30 {
-        border-left-color: #ffdf9d;
-        border-right-color: #ffdf9d;
-    }
-    .debug-message-level-20 {
-        border-left-color: #f99;
-        border-right-color: #f99;
-    }
-</style>
+<link rel="stylesheet" href="debug/view/style.css">

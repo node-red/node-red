@@ -18,6 +18,7 @@ module.exports = function(RED) {
     "use strict";
     var util = require("util");
     var events = require("events");
+    var path = require("path");
     var debuglength = RED.settings.debugMaxLength||1000;
     var useColors = false;
     // util.inspect.styles.boolean = "red";
@@ -152,5 +153,14 @@ module.exports = function(RED) {
         } else {
             res.sendStatus(404);
         }
+    });
+
+    RED.httpAdmin.get("/debug/view/*",RED.auth.needsPermission("debug.read"),function(req,res) {
+        var options = {
+            root: __dirname + '/lib/debug/',
+            dotfiles: 'deny'
+        };
+        console.log("SERVING UP",req.params[0]);
+        res.sendFile(req.params[0], options);
     });
 };
