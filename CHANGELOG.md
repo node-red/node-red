@@ -1,3 +1,11 @@
+#### 0.14.1: Maintenance Release
+
+Fixes
+
+ - Handle undefined property that led to missing wires in the editor
+ - Remove duplicate 'Delete' entry in keyboard shortcut window. Closes #911
+ - Add 'exec' to node-red-pi launch script. Closes #910
+
 #### 0.14.0: Milestone Release
 
 Editor
