@@ -1,8 +1,10 @@
-#### xxx: unreleased
+#### 0.14.3: Maintenance Release
 
 Fixes
 
  - Create default setting.js in user-specified directory. Fixes #908
+ - MQTT In subscription qos not defaulting properly
+ - Let exec node handle 0 as well as "0"
 
 #### 0.14.2: Maintenance Release
 
