@@ -314,8 +314,10 @@ module.exports = function(RED) {
     function MQTTInNode(n) {
         RED.nodes.createNode(this,n);
         this.topic = n.topic;
-        this.qos = parseInt(n.qos===undefined?"2":n.qos);
-
+        this.qos = parseInt(n.qos);
+        if (isNaN(this.qos) || this.qos < 0 || this.qos > 2) {
+            this.qos = 2;
+        }
         this.broker = n.broker;
         this.brokerConn = RED.nodes.getNode(this.broker);
         if (!/^(#$|(\+|[^+#]*)(\/(\+|[^+#]*))*(\/(\+|#|[^+#]*))?$)/.test(this.topic)) {
