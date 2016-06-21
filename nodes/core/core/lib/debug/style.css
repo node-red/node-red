@@ -3,6 +3,9 @@
     margin:0;
     background: #fff;
 }
+.debug-window .debug-message-payload {
+    font-size: 12px;
+}
 #debug-content {
     position: absolute;
     top: 43px;
@@ -53,4 +56,32 @@
 .debug-message-level-20 {
     border-left-color: #f99;
     border-right-color: #f99;
+}
+.debug-message-object-entry {
+    padding-left: 15px;
+    padding-bottom: 3px;
+}
+
+.debug-message-object-key {
+    color: #a66;
+}
+.debug-message-object-value {
+
+}
+.debug-message-object-handle {
+    color: #999;
+    font-size: 0.8em;
+    width: 1em;
+    margin-left: -1em;
+    text-align: center;
+    transition: transform 0.2s ease-in-out;
+    transform: rotate(90deg);
+}
+
+.debug-message-object-entry.collapsed>.debug-message-object-handle {
+    transform: rotate(0deg);
+}
+
+.debug-message-object-entry.collapsed .debug-message-object-entry {
+    display:none;
 }

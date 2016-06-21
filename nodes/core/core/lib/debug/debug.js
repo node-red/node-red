@@ -68,10 +68,55 @@ $(function() {
 
                             '</span>';
         }
-        msg.innerHTML += '<span class="debug-message-payload">'+ payload+ '</span>';
+        if (format !== 'Object') {
+            msg.innerHTML += '<span class="debug-message-payload">'+ payload+ '</span>';
+        } else {
+            var el = $('<span class="debug-message-payload"></span>').appendTo(msg);
+            buildMessageElement(JSON.parse(payload)).appendTo(el);
+        }
         $("#debug-content").append(msg);
+        $("#debug-content").scrollTop($("#debug-content")[0].scrollHeight);
+    },false);
 
-
-
-    },false)
+    function buildMessageElement(obj) {
+        var i;
+        var e;
+        var entryObj;
+        var element = $('<span class="debug-message-element"></span>');
+        if (Array.isArray(obj)) {
+            $('<span>').html('Array['+obj.length+']').appendTo(element);
+            for (i=0;i<obj.length;i++) {
+                entryObj = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
+                if (typeof obj[i] === 'object') {
+                    $('<i class="fa fa-caret-right"></i> ').click(function(e) {
+                        $(this).parent().toggleClass('collapsed');
+                    }).appendTo(entryObj);
+                }
+                $('<span class="debug-message-object-key"></span>').text(i).appendTo(entryObj);
+                $('<span>: </span>').appendTo(entryObj);
+                e = $('<span class="debug-message-object-value"></span>').appendTo(entryObj);
+                buildMessageElement(obj[i]).appendTo(e);
+            }
+        } else if (typeof obj === 'object') {
+            $('<span>').html('Object').appendTo(element);
+            var keys = Object.keys(obj);
+            for (i=0;i<keys.length;i++) {
+                entryObj = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
+                if (typeof obj[keys[i]] === 'object') {
+                    $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').click(function(e) {
+                        $(this).parent().toggleClass('collapsed');
+                    }).appendTo(entryObj);
+                }
+                $('<span class="debug-message-object-key"></span>').text(keys[i]).appendTo(entryObj);
+                $('<span>: </span>').appendTo(entryObj);
+                e = $('<span class="debug-message-object-value"></span>').appendTo(entryObj);
+                buildMessageElement(obj[keys[i]]).appendTo(e);
+            }
+        } else if (typeof obj === 'string') {
+            $('<span class="debug-message-object-value"></span>').text('"'+obj+'"').appendTo(element);
+        } else {
+            $('<span class="debug-message-object-value"></span>').text(""+obj).appendTo(element);
+        }
+        return element;
+    }
 });
