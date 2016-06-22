@@ -4,7 +4,7 @@
     background: #fff;
 }
 .debug-window .debug-message-payload {
-    font-size: 12px;
+    font-size: 14px;
 }
 #debug-content {
     position: absolute;
@@ -15,7 +15,6 @@
     overflow-y: scroll;
 }
 .debug-message {
-    cursor: pointer;
     border-bottom: 1px solid #eee;
     border-left: 8px solid #eee;
     border-right: 8px solid #eee;
@@ -60,28 +59,47 @@
 .debug-message-object-entry {
     padding-left: 15px;
     padding-bottom: 3px;
+    padding-top: 3px;
 }
-
+.debug-message-element {
+    color: #333;
+}
 .debug-message-object-key {
-    color: #a66;
+    color: #792e90;
 }
 .debug-message-object-value {
 
 }
 .debug-message-object-handle {
-    color: #999;
-    font-size: 0.8em;
+    color: #666;
+    font-size: 1em;
     width: 1em;
-    margin-left: -1em;
     text-align: center;
-    transition: transform 0.2s ease-in-out;
+    transition: transform 0.1s ease-in-out;
     transform: rotate(90deg);
 }
-
-.debug-message-object-entry.collapsed>.debug-message-object-handle {
+.debug-message-object-entry>span>.debug-message-object-handle {
+    margin-left: -1em;
+}
+.debug-message-object-entry.collapsed>span>.debug-message-object-handle {
+    transform: rotate(0deg);
+}
+.debug-message-element.collapsed>span>.debug-message-object-handle {
     transform: rotate(0deg);
 }
 
 .debug-message-object-entry.collapsed .debug-message-object-entry {
     display:none;
+}
+
+.debug-message-element.collapsed .debug-message-object-entry {
+    display:none;
+}
+
+.debug-message-type-other { color: #2033d6; }
+.debug-message-type-string { color: #b72828; }
+.debug-message-type-null { color: #666; font-style: italic;}
+
+.debug-message-expandable {
+    cursor: pointer;
 }
