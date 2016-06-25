@@ -17,18 +17,18 @@
 <script type="text/x-red" data-template-name="inject">
     <div class="form-row">
         <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="common.label.payload"></span></label>
-        <input type="text" id="node-input-payload" style="width:300px">
+        <input type="text" id="node-input-payload" style="width:73%">
         <input type="hidden" id="node-input-payloadType">
     </div>
 
     <div class="form-row">
         <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
-        <input type="text" id="node-input-topic" style="width: 70%x">
+        <input type="text" id="node-input-topic" style="width:70%">
     </div>
 
     <div class="form-row">
         <label for=""><i class="fa fa-repeat"></i> <span data-i18n="inject.label.repeat"></span></label>
-        <select id="inject-time-type-select" style="width: 73%">
+        <select id="inject-time-type-select" style="width:73%">
             <option value="none" data-i18n="inject.none"></option>
             <option value="interval" data-i18n="inject.interval"></option>
             <option value="interval-time" data-i18n="inject.interval-time"></option>
@@ -49,7 +49,7 @@
     </div>
 
     <div class="form-row inject-time-row hidden" id="inject-time-row-interval-time">
-        <span data-i18n="inject.every"></span> <select style="width: 90px" id="inject-time-interval-time-units" class="inject-time-int-count" value="1">
+        <span data-i18n="inject.every"></span> <select style="width:90px" id="inject-time-interval-time-units" class="inject-time-int-count" value="1">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -66,7 +66,7 @@
         <span data-i18n="inject.between"></span> <select id="inject-time-interval-time-start" class="inject-time-times"></select>
         <span data-i18n="inject.and"></span> <select id="inject-time-interval-time-end" class="inject-time-times"></select><br/>
         <div id="inject-time-interval-time-days" class="inject-time-days">
-            <div style="display: inline-block; vertical-align: top;margin-right: 5px;" data-i18n="inject.on">on</div>
+            <div style="display: inline-block; vertical-align: top;margin-right:5px;" data-i18n="inject.on">on</div>
             <div style="display:inline-block;">
                 <div>
                     <label><input type='checkbox' checked value='1'/> <span data-i18n="inject.days.0"></span></label>
@@ -147,6 +147,9 @@
     }
     .inject-time-count {
         width: 40px !important;
+    }
+    .red-ui-typedInput-container {
+        width: 73%;
     }
 </style>
 <script type="text/x-red" data-help-name="inject">
