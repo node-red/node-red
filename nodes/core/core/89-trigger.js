@@ -70,8 +70,9 @@ module.exports = function(RED) {
                     if (node.duration === 0) { tout = 0; }
                     else {
                         tout = setTimeout(function() {
-                            msg.payload = m2;
-                            if (node.op2type !== "nul") { node.send(msg); }
+                            var msg2 = RED.util.cloneMessage(msg);
+                            msg2.payload = m2;
+                            if (node.op2type !== "nul") { node.send(msg2); }
                             tout = null;
                             node.status({});
                         },node.duration);
@@ -82,8 +83,9 @@ module.exports = function(RED) {
                     clearTimeout(tout);
                     if (node.op2type === "payl") { m2 = msg.payload; }
                     tout = setTimeout(function() {
-                        msg.payload = m2;
-                        if (node.op2type !== "nul") { node.send(msg); }
+                        var msg2 = RED.util.cloneMessage(msg);
+                        msg2.payload = m2;
+                        if (node.op2type !== "nul") { node.send(msg2); }
                         tout = null;
                         node.status({});
                     },node.duration);
