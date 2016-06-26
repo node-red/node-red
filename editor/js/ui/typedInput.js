@@ -256,7 +256,7 @@
                     top:0,
                     left:-1000
                 }).appendTo(document.body);
-                var newTrigger = label.clone().appendTo(container);;
+                var newTrigger = label.clone().appendTo(container);
                 labelWidth = newTrigger.outerWidth();
                 container.remove();
             }
