@@ -112,11 +112,18 @@
 
             this.disarmClick = false;
             this.element.addClass('red-ui-typedInput');
-            this.uiWidth = this.element.width();
-            this.uiSelect = this.element
-                .wrap( "<div>" )
-                .parent();
-
+            this.uiWidth = this.element.outerWidth();
+            this.elementDiv = this.element.wrap("<div>").parent().addClass('red-ui-typedInput-input');
+            this.uiSelect = this.elementDiv.wrap( "<div>" ).parent();
+            var attrStyle = this.element.attr('style');
+            var m;
+            if ((m = /width\s*:\s*(\d+%)/i.exec(attrStyle)) !== null) {
+                this.element.css('width','100%');
+                this.uiSelect.width(m[1]);
+                this.uiWidth = null;
+            } else {
+                this.uiSelect.width(this.uiWidth);
+            }
             ["Right","Left"].forEach(function(d) {
                 var m = that.element.css("margin"+d);
                 that.uiSelect.css("margin"+d,m);
@@ -242,33 +249,31 @@
             });
         },
         _getLabelWidth: function(label) {
-            var labelWidth = label.width();
+            var labelWidth = label.outerWidth();
             if (labelWidth === 0) {
-                var newTrigger = label.clone();
-                newTrigger.css({
+                var container = $('<div class="red-ui-typedInput-container"></div>').css({
                     position:"absolute",
                     top:0,
                     left:-1000
                 }).appendTo(document.body);
-                labelWidth = newTrigger.width()+4;
-                newTrigger.remove();
+                var newTrigger = label.clone().appendTo(container);;
+                labelWidth = newTrigger.outerWidth();
+                container.remove();
             }
             return labelWidth;
         },
         _resize: function() {
+            if (this.uiWidth !== null) {
+                this.uiSelect.width(this.uiWidth);
+            }
             if (this.typeMap[this.propertyType] && this.typeMap[this.propertyType].hasValue === false) {
-                this.selectTrigger.width(this.uiWidth+5);
+                this.selectTrigger.css('width',"100%");
             } else {
                 this.selectTrigger.width('auto');
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
-
-                var newWidth = this.uiWidth-labelWidth+4;
-                this.element.width(newWidth);
-
+                this.elementDiv.css('left',labelWidth+"px");
                 if (this.optionSelectTrigger) {
-                    var triggerWidth = this._getLabelWidth(this.optionSelectTrigger);
-                    labelWidth = this._getLabelWidth(this.optionSelectLabel)-4;
-                    this.optionSelectLabel.width(labelWidth+(newWidth-triggerWidth));
+                    this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
                 }
             }
         },
@@ -338,7 +343,7 @@
                     if (opt.options) {
                         if (this.optionSelectTrigger) {
                             this.optionSelectTrigger.show();
-                            this.element.hide();
+                            this.elementDiv.hide();
                             this.optionMenu = this._createMenu(opt.options,function(v){
                                 that.optionSelectLabel.text(v);
                                 that.value(v);
@@ -361,13 +366,13 @@
                         if (opt.hasValue === false) {
                             this.oldValue = this.element.val();
                             this.element.val("");
-                            this.element.hide();
+                            this.elementDiv.hide();
                         } else {
                             if (this.oldValue !== undefined) {
                                 this.element.val(this.oldValue);
                                 delete this.oldValue;
                             }
-                            this.element.show();
+                            this.elementDiv.show();
                         }
                         this.element.trigger('change',this.propertyType,this.value());
                     }
@@ -400,6 +405,13 @@
                 this.uiSelect.addClass('input-error');
             }
             return result;
+        },
+        show: function() {
+            this.uiSelect.show();
+            this._resize();
+        },
+        hide: function() {
+            this.uiSelect.hide();
         }
     });
 })(jQuery);

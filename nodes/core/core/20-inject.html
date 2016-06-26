@@ -17,18 +17,18 @@
 <script type="text/x-red" data-template-name="inject">
     <div class="form-row">
         <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="common.label.payload"></span></label>
-        <input type="text" id="node-input-payload" style="width:73%">
+        <input type="text" id="node-input-payload" style="width:70%">
         <input type="hidden" id="node-input-payloadType">
     </div>
 
     <div class="form-row">
         <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
-        <input type="text" id="node-input-topic" style="width:70%">
+        <input type="text" id="node-input-topic">
     </div>
 
     <div class="form-row">
         <label for=""><i class="fa fa-repeat"></i> <span data-i18n="inject.label.repeat"></span></label>
-        <select id="inject-time-type-select" style="width:73%">
+        <select id="inject-time-type-select">
             <option value="none" data-i18n="inject.none"></option>
             <option value="interval" data-i18n="inject.interval"></option>
             <option value="interval-time" data-i18n="inject.interval-time"></option>
@@ -147,9 +147,6 @@
     }
     .inject-time-count {
         width: 40px !important;
-    }
-    .red-ui-typedInput-container {
-        width: 73%;
     }
 </style>
 <script type="text/x-red" data-help-name="inject">

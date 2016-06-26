@@ -214,22 +214,29 @@ RED.editor = (function() {
         if (input.length === 0 ) {
             return;
         }
-        var existingWidthCSS = input[0].style.width;
-        var newWidth;
-        if (existingWidthCSS !== '') {
-            if (/%/.test(existingWidthCSS)) {
-                newWidth = (input.width()-10)+"%";
-            } else {
-                newWidth = input.width()-50;
-            }
+        var newWidth = input.width();
+        var attrStyle = input.attr('style');
+        var m;
+        if ((m = /width\s*:\s*(\d+(%|[a-z]+))/i.exec(attrStyle)) !== null) {
+            newWidth = m[1];
         } else {
-            newWidth = "60%";
+            newWidth = "70%";
         }
-        var select = $('<select id="'+prefix+'-'+property+'"></select>');
-        select.width(newWidth);
-        input.replaceWith(select);
+        var outerWrap = $("<div></div>").css({display:'inline-block',position:'relative'});
+        var selectWrap = $("<div></div>").css({position:'absolute',left:0,right:'40px'}).appendTo(outerWrap);
+        var select = $('<select id="'+prefix+'-'+property+'"></select>').appendTo(selectWrap);
+
+        outerWrap.width(newWidth).height(input.height());
+        if (outerWrap.width() === 0) {
+            outerWrap.width("70%");
+        }
+        input.replaceWith(outerWrap);
+        // set the style attr directly - using width() on FF causes a value of 114%...
+        select.attr('style',"width:100%");
         updateConfigNodeSelect(property,type,node[property],prefix);
-        select.after(' <a id="'+prefix+'-lookup-'+property+'" class="editor-button"><i class="fa fa-pencil"></i></a>');
+        $('<a id="'+prefix+'-lookup-'+property+'" class="editor-button"><i class="fa fa-pencil"></i></a>')
+            .css({position:'absolute',right:0,top:0})
+            .appendTo(outerWrap);
         $('#'+prefix+'-lookup-'+property).click(function(e) {
             showEditConfigNodeDialog(property,type,select.find(":selected").val(),prefix);
             e.preventDefault();

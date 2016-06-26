@@ -20,7 +20,8 @@
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
     <div class="form-row">
-        <span data-i18n="switch.label.property"></span> <input type="text" id="node-input-property" style="width: 300px;"/>
+        <label data-i18n="switch.label.property"></label>
+        <input type="text" id="node-input-property" style="width: 70%"/>
     </div>
     <div class="form-row node-input-rule-container-row">
         <ol id="node-input-rule-container"></ol>
@@ -101,18 +102,18 @@
                 }
                 selectField.width(selectWidth);
                 if (type === "btwn") {
-                    btwnField1.typedInput("width",(newWidth-selectWidth-80));
-                    btwnField2.typedInput("width",(newWidth-selectWidth-80));
+                    btwnField1.typedInput("width",(newWidth-selectWidth-70));
+                    btwnField2.typedInput("width",(newWidth-selectWidth-70));
                 } else {
                     if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
                         // valueField.hide();
                     } else {
-                        valueField.typedInput("width",(newWidth-selectWidth-80));
+                        valueField.typedInput("width",(newWidth-selectWidth-70));
                     }
                 }
             }
 
-            $("#node-input-rule-container").css('min-height','300px').css('min-width','450px').editableList({
+            $("#node-input-rule-container").css('min-height','250px').css('min-width','450px').editableList({
                 addItem: function(container,i,opt) {
                     var rule = opt||{t:"",v:"",v2:""};
                     var row = $('<div/>').appendTo(container);
@@ -126,7 +127,7 @@
                     var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num',previousValueType]});
                     var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
                     var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num',previousValueType]});
-                    var finalspan = $('<span/>',{style:"float: right;margin-top: 6px;margin-right: 10px;"}).appendTo(row);
+                    var finalspan = $('<span/>',{style:"float: right;margin-top: 6px;"}).appendTo(row);
                     finalspan.append(' &#8594; <span class="node-input-rule-index">'+(i+1)+'</span> ');
                     var caseSensitive = $('<input/>',{id:"node-input-rule-case-"+i,class:"node-input-rule-case",type:"checkbox",style:"width:auto;vertical-align:top"}).appendTo(row2);
                     $('<label/>',{for:"node-input-rule-case-"+i,style:"margin-left: 3px;"}).text(caseLabel).appendTo(row2);
@@ -135,14 +136,14 @@
                         var type = selectField.children("option:selected").val();
 
                         if (type === "btwn") {
-                            valueField.parent().hide();
-                            btwnValueField.parent().show();
+                            valueField.typedInput('hide');
+                            btwnValueField.typedInput('show');
                         } else {
-                            btwnValueField.parent().hide();
+                            btwnValueField.typedInput('hide');
                             if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
-                                valueField.parent().hide();
+                                valueField.typedInput('hide');
                             } else {
-                                valueField.parent().show();
+                                valueField.typedInput('show');
                             }
                         }
                         if (type === "regex") {
