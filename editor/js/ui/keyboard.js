@@ -113,6 +113,12 @@ RED.keyboard = (function() {
                         '<tr><td>&nbsp;</td><td></td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">i</span></td><td>'+RED._("keyboard.importNode")+'</td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">e</span></td><td>'+RED._("keyboard.exportNode")+'</td></tr>'+
+                        '<tr><td>&nbsp;</td><td></td></tr>'+
+                        '<tr><td><span class="help-key"> &#x2190; </span> <span class="help-key"> &#x2191; </span> <span class="help-key"> &#x2192; </span> <span class="help-key"> &#x2193; </span></td><td>'+RED._("keyboard.nudgeNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key"> &#x2190; </span></td><td rowspan="4">'+RED._("keyboard.moveNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key"> &#x2191; </span></td></tr>'+
+                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key"> &#x2192; </span></td></tr>'+
+                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key"> &#x2193; </span></td></tr>'+
                     '</table>'+
                 '</div>'+
                 '<div style="vertical-align: top;display:inline-block; box-sizing: border-box; width:50%; padding: 10px;">'+

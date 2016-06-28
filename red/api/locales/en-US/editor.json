@@ -147,6 +147,8 @@
         "deleteSelected": "Delete selected nodes or link",
         "importNode": "Import nodes",
         "exportNode": "Export selected nodes",
+        "nudgeNode": "Move selected node(s) by a small amount",
+        "moveNode": "Move selected node(s) by a large amount",
         "toggleSidebar": "Toggle sidebar",
         "deleteNode": "Delete selected nodes or link",
         "copyNode": "Copy selected nodes",
