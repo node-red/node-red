@@ -158,7 +158,6 @@
         "saveToLibrary": "Save to Library...",
         "typeLibrary": "__type__ library",
         "unnamedType": "Unnamed __type__",
-        "saveToLibrary": "Save to Library",
         "exportToLibrary": "Export nodes to library",
         "dialogSaveOverwrite": "A __libraryType__ called __libraryName__ already exists. Overwrite?",
         "invalidFilename": "Invalid filename",
