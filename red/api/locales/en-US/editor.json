@@ -151,7 +151,8 @@
         "deleteNode": "Delete selected nodes or link",
         "copyNode": "Copy selected nodes",
         "cutNode": "Cut selected nodes",
-        "pasteNode": "Paste nodes"
+        "pasteNode": "Paste nodes",
+        "undoChange": "Undo the last change performed"
     },
     "library": {
         "openLibrary": "Open Library...",
