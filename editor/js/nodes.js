@@ -165,27 +165,7 @@ RED.nodes = (function() {
                 }
             }
             n.dirty = true;
-            var updatedConfigNode = false;
-            for (var d in n._def.defaults) {
-                if (n._def.defaults.hasOwnProperty(d)) {
-                    var property = n._def.defaults[d];
-                    if (property.type) {
-                        var type = registry.getNodeType(property.type);
-                        if (type && type.category == "config") {
-                            var configNode = configNodes[n[d]];
-                            if (configNode) {
-                                if (configNode.users.indexOf(n) === -1) {
-                                    updatedConfigNode = true;
-                                    configNode.users.push(n);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (updatedConfigNode) {
-                // TODO: refresh config tab?
-            }
+            updateConfigNodeUsers(n);
             if (n._def.category == "subflows" && typeof n.i === "undefined") {
                 var nextId = 0;
                 RED.nodes.eachNode(function(node) {
@@ -990,6 +970,26 @@ RED.nodes = (function() {
         return result;
     }
 
+    // Update any config nodes referenced by the provided node to ensure their 'users' list is correct
+    function updateConfigNodeUsers(n) {
+        for (var d in n._def.defaults) {
+            if (n._def.defaults.hasOwnProperty(d)) {
+                var property = n._def.defaults[d];
+                if (property.type) {
+                    var type = registry.getNodeType(property.type);
+                    if (type && type.category == "config") {
+                        var configNode = configNodes[n[d]];
+                        if (configNode) {
+                            if (configNode.users.indexOf(n) === -1) {
+                                configNode.users.push(n);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     return {
         registry:registry,
         setNodeList: registry.setNodeList,
@@ -1061,6 +1061,7 @@ RED.nodes = (function() {
         getAllFlowNodes: getAllFlowNodes,
         createExportableNodeSet: createExportableNodeSet,
         createCompleteNodeSet: createCompleteNodeSet,
+        updateConfigNodeUsers: updateConfigNodeUsers,
         id: getID,
         dirty: function(d) {
             if (d == null) {
