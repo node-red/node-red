@@ -118,6 +118,20 @@ module.exports = {
     // API, use either the httpRoot or httpAdminRoot properties
     //disableEditor: false,
 
+    // the following property can be used to change the editor's browser page title
+    // and the editor's header title (top-left of page). In addition to the titles,
+    // the browser page icon and app logo can also be overridden.
+    //editorTheme: {
+    //    page: {
+    //        title: "My Node-RED Title",
+    //        favicon: "favicon.ico"
+    //    },
+    //    header: {
+    //        title: "My Node-RED Header",
+    //        image: "red/images/node-red.png"
+    //    }
+    //},
+
     // The following property can be used to configure cross-origin resource sharing
     // in the HTTP nodes.
     // See https://github.com/troygoode/node-cors#configuration-options for
