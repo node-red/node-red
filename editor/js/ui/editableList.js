@@ -82,6 +82,14 @@
                     this.uiHeight = this.options.height;
                 }
             }
+            this.element.height('auto');
+
+            var attrStyle = this.element.attr('style');
+            var m;
+            if ((m = /width\s*:\s*(\d+%)/i.exec(attrStyle)) !== null) {
+                this.element.width('100%');
+                this.uiContainer.width(m[1]);
+            }
             if (this.options.sortable) {
                 var handle = (typeof this.options.sortable === 'string')?
                                 this.options.sortable :
@@ -169,6 +177,9 @@
                 var index = that.element.children().length-1;
                 setTimeout(function() {
                     that.options.addItem(row,index,data);
+                    setTimeout(function() {
+                        that.uiContainer.scrollTop(that.element.height());
+                    },0);
                 },0);
             }
         },
