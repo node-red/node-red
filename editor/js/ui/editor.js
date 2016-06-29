@@ -798,7 +798,9 @@ RED.editor = (function() {
                 var trayBody = tray.find(".editor-tray-body");
                 var trayFooter = tray.find(".editor-tray-footer");
 
-                trayFooter.prepend('<div id="node-config-dialog-user-count"><i class="fa fa-info-circle"></i> <span></span></div>');
+                if (node_def.hasUsers !== false) {
+                    trayFooter.prepend('<div id="node-config-dialog-user-count"><i class="fa fa-info-circle"></i> <span></span></div>');
+                }
                 trayFooter.append('<span id="node-config-dialog-scope-container"><span id="node-config-dialog-scope-warning" data-i18n="[title]editor.errors.scopeChange"><i class="fa fa-warning"></i></span><select id="node-config-dialog-scope"></select></span>');
 
                 var dialogForm = $('<form id="node-config-dialog-edit-form" class="form-horizontal"></form>').appendTo(trayBody);
@@ -865,9 +867,9 @@ RED.editor = (function() {
                 tabSelect.i18n();
 
                 dialogForm.i18n();
-
-                $("#node-config-dialog-user-count").find("span").html(RED._("editor.nodesUse", {count:editing_config_node.users.length})).parent().show();
-
+                if (node_def.hasUsers !== false) {
+                    $("#node-config-dialog-user-count").find("span").html(RED._("editor.nodesUse", {count:editing_config_node.users.length})).parent().show();
+                }
             },
             close: function() {
                 RED.workspaces.refresh();

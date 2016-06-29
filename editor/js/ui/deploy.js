@@ -182,7 +182,7 @@ RED.deploy = (function() {
 
                 var unusedConfigNodes = [];
                 RED.nodes.eachConfig(function(node) {
-                    if (node.users.length === 0) {
+                    if (node.users.length === 0 && (node._def.hasUsers !== false)) {
                         unusedConfigNodes.push(getNodeInfo(node));
                         hasUnusedConfig = true;
                     }
