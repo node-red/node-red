@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -381,6 +381,17 @@ RED.nodes = (function() {
         return nns;
     }
 
+    function convertWorkspace(n) {
+        var node = {};
+        node.id = n.id;
+        node.type = n.type;
+        for (var d in n._def.defaults) {
+            if (n._def.defaults.hasOwnProperty(d)) {
+                node[d] = n[d];
+            }
+        }
+        return node;
+    }
     /**
      * Converts a node to an exportable JSON Object
      **/
@@ -531,7 +542,7 @@ RED.nodes = (function() {
         var i;
         for (i=0;i<workspacesOrder.length;i++) {
             if (workspaces[workspacesOrder[i]].type == "tab") {
-                nns.push(workspaces[workspacesOrder[i]]);
+                nns.push(convertWorkspace(workspaces[workspacesOrder[i]]));
             }
         }
         for (i in subflows) {
