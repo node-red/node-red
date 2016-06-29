@@ -773,7 +773,7 @@ RED.editor = (function() {
             }
             for (var d in node_def.defaults) {
                 if (node_def.defaults[d].value) {
-                    editing_config_node[d] = node_def.defaults[d].value;
+                    editing_config_node[d] = JSON.parse(JSON.stringify(node_def.defaults[d].value));
                 }
             }
             editing_config_node["_"] = node_def._;

@@ -345,7 +345,9 @@ RED.view = (function() {
 
                     for (var d in nn._def.defaults) {
                         if (nn._def.defaults.hasOwnProperty(d)) {
-                            nn[d] = nn._def.defaults[d].value;
+                            if (nn._def.defaults[d].value !== undefined) {
+                                nn[d] = JSON.parse(JSON.stringify(nn._def.defaults[d].value));
+                            }
                         }
                     }
 
