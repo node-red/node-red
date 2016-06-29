@@ -724,7 +724,7 @@ RED.editor = (function() {
                 }
             }
         }
-        if (editTrayWidthCache[type]) {
+        if (editTrayWidthCache.hasOwnProperty(type)) {
             trayOptions.width = editTrayWidthCache[type];
         }
 
