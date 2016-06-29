@@ -944,7 +944,7 @@ RED.editor = (function() {
                             } else {
                                 newValue = input.val();
                             }
-                            if (newValue !== editing_config_node[d]) {
+                            if (newValue != null && newValue !== editing_config_node[d]) {
                                 if (editing_config_node._def.defaults[d].type) {
                                     if (newValue == "_ADD_") {
                                         newValue = "";
