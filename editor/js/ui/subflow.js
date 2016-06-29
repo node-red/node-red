@@ -420,7 +420,7 @@ RED.subflow = (function() {
             RED.notify(RED._("subflow.errors.noNodesSelected"),"error");
             return;
         }
-        var i;
+        var i,n;
         var nodes = {};
         var new_links = [];
         var removedLinks = [];
@@ -436,7 +436,7 @@ RED.subflow = (function() {
             selection.nodes[0].y];
 
         for (i=0;i<selection.nodes.length;i++) {
-            var n = selection.nodes[i];
+            n = selection.nodes[i];
             nodes[n.id] = {n:n,outputs:{}};
             boundingBox = [
                 Math.min(boundingBox[0],n.x),
@@ -573,7 +573,23 @@ RED.subflow = (function() {
         }
 
         for (i=0;i<selection.nodes.length;i++) {
-            selection.nodes[i].z = subflow.id;
+            n = selection.nodes[i];
+            if (/^link /.test(n.type)) {
+                n.links = n.links.filter(function(id) {
+                    var isLocalLink = nodes.hasOwnProperty(id);
+                    if (!isLocalLink) {
+                        var otherNode = RED.nodes.node(id);
+                        if (otherNode && otherNode.links) {
+                            var i = otherNode.links.indexOf(n.id);
+                            if (i > -1) {
+                                otherNode.links.splice(i,1);
+                            }
+                        }
+                    }
+                    return isLocalLink;
+                });
+            }
+            n.z = subflow.id;
         }
 
         RED.history.push({
@@ -589,7 +605,7 @@ RED.subflow = (function() {
 
             dirty:RED.nodes.dirty()
         });
-
+        RED.view.select(null);
         RED.editor.validateNode(subflow);
         RED.nodes.dirty(true);
         RED.view.redraw(true);

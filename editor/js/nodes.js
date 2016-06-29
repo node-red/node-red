@@ -904,8 +904,14 @@ RED.nodes = (function() {
                     }
                 }
             }
-
-
+            // If importing into a subflow, ensure an outbound-link doesn't
+            // get added
+            if (activeSubflow && /^link /.test(n.type) && n.links) {
+                n.links = n.links.filter(function(id) {
+                    var otherNode = RED.nodes.node(id);
+                    return (otherNode && otherNode.z === activeWorkspace)
+                });
+            }
         }
         for (i=0;i<new_subflows.length;i++) {
             n = new_subflows[i];
