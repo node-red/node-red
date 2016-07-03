@@ -35,6 +35,7 @@ var flows = require("../../red/runtime/nodes/flows");
 var credentials = require("../../red/runtime/nodes/credentials");
 var comms = require("../../red/api/comms.js");
 var log = require("../../red/runtime/log.js");
+var context = require("../../red/runtime/nodes/context.js");
 
 var http = require('http');
 var express = require('express');
@@ -53,6 +54,8 @@ function helperNode(n) {
 
 module.exports = {
     load: function(testNode, testFlows, testCredentials, cb) {
+        var i;
+
         logSpy = sinon.spy(log,"log");
         logSpy.FATAL = log.FATAL;
         logSpy.ERROR = log.ERROR;
@@ -88,7 +91,7 @@ module.exports = {
         };
 
         var red = {};
-        for (var i in RED) {
+        for (i in RED) {
             if (RED.hasOwnProperty(i) && !/^(init|start|stop)$/.test(i)) {
                 var propDescriptor = Object.getOwnPropertyDescriptor(RED,i);
                 Object.defineProperty(red,i,propDescriptor);
@@ -103,7 +106,7 @@ module.exports = {
         credentials.init(storage,express());
         RED.nodes.registerType("helper", helperNode);
         if (Array.isArray(testNode)) {
-            for (var i = 0; i < testNode.length; i++) {
+            for (i = 0; i < testNode.length; i++) {
                 testNode[i](red);
             }
         } else {
@@ -120,6 +123,7 @@ module.exports = {
         // TODO: any other state to remove between tests?
         redNodes.clearRegistry();
         logSpy.restore();
+        context.clean({allNodes:[]});
         return flows.stopFlows();
     },
 
