@@ -113,17 +113,25 @@ RED.keyboard = (function() {
                         '<tr><td>&nbsp;</td><td></td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">i</span></td><td>'+RED._("keyboard.importNode")+'</td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">e</span></td><td>'+RED._("keyboard.exportNode")+'</td></tr>'+
+                        '<tr><td>&nbsp;</td><td></td></tr>'+
+                        '<tr><td><span class="help-key"> &#x2190; </span> <span class="help-key"> &#x2191; </span> <span class="help-key"> &#x2192; </span> <span class="help-key"> &#x2193; </span></td><td>'+RED._("keyboard.nudgeNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key"> &#x2190; </span></td><td rowspan="4">'+RED._("keyboard.moveNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key"> &#x2191; </span></td></tr>'+
+                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key"> &#x2192; </span></td></tr>'+
+                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key"> &#x2193; </span></td></tr>'+
                     '</table>'+
                 '</div>'+
                 '<div style="vertical-align: top;display:inline-block; box-sizing: border-box; width:50%; padding: 10px;">'+
                     '<table class="keyboard-shortcuts">'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">Space</span></td><td>'+RED._("keyboard.toggleSidebar")+'</td></tr>'+
                         '<tr><td></td><td></td></tr>'+
-                        '<tr><td><span class="help-key">Delete</span></td><td>'+RED._("keyboard.deleteNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Delete</span></td><td rowspan="2">'+RED._("keyboard.deleteSelected")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Backspace</span></td></tr>'+
                         '<tr><td></td><td></td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">c</span></td><td>'+RED._("keyboard.copyNode")+'</td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">x</span></td><td>'+RED._("keyboard.cutNode")+'</td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">v</span></td><td>'+RED._("keyboard.pasteNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">z</span></td><td>'+RED._("keyboard.undoChange")+'</td></tr>'+
                     '</table>'+
                 '</div>'+
                 '</div>')
