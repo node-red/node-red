@@ -140,7 +140,7 @@
             });
 
             $("#node-input-intype").change(function() {
-                var newtype = $("#node-input-intype option:selected").val();
+                var newtype = $("#node-input-intype").val();
                 if ((pinsInUse.hasOwnProperty(pinnow)) && (pinsInUse[pinnow] !== newtype)) {
                     RED.notify(pinname+" "+pinnow+" "+alreadyset+" "+pinsInUse[pinnow],"error");
                 }
@@ -286,7 +286,7 @@
             });
 
             $("#node-input-out").change(function() {
-                var newtype = $("#node-input-out option:selected").val();
+                var newtype = $("#node-input-out").val();
                 if ((pinsInUse.hasOwnProperty(pinnow)) && (pinsInUse[pinnow] !== newtype)) {
                     RED.notify(pinname+" "+pinnow+" "+alreadyset+" "+pinsInUse[pinnow],"error");
                 }

@@ -90,7 +90,7 @@
         },
         oneditprepare: function() {
             $("#node-input-multicast").change(function() {
-                var id = $("#node-input-multicast option:selected").val();
+                var id = $("#node-input-multicast").val();
                 if (id == "false") {
                     $(".node-input-group").hide();
                     $(".node-input-iface").hide();
@@ -202,12 +202,10 @@
             var bindtarget = this._("udp.bind.target");
 
             var type = this.outport==""?"random":"fixed";
-            $("#node-input-outport-type option").filter(function() {
-                return $(this).val() == type;
-            }).attr('selected',true);
+            $("#node-input-outport-type").val(type);
 
             $("#node-input-outport-type").change(function() {
-                var type = $(this).children("option:selected").val();
+                var type = $(this).val();
                 if (type == "random") {
                     $("#node-input-outport").val("").hide();
                 } else {
@@ -217,7 +215,7 @@
             $("#node-input-outport-type").change();
 
             $("#node-input-multicast").change(function() {
-                var id = $("#node-input-multicast option:selected").val();
+                var id = $("#node-input-multicast").val();
                 if (id === "multi") {
                     $(".node-input-iface").show();
                     $("#node-input-addr-label").html('<i class="fa fa-list"></i> ' + grouplabel);
@@ -233,7 +231,7 @@
                     $("#node-input-addr-label").html('<i class="fa fa-list"></i> ' + addresslabel);
                     $("#node-input-addr")[0].placeholder = addressph;
                 }
-                var type = $(this).children("option:selected").val();
+                var type = $(this).val();
                 if (type == "false") {
                     $("#node-input-outport-type-random").html(bindrandom);
                 } else {

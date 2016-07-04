@@ -242,7 +242,7 @@
 
 
             $("#node-input-scope-select").change(function(e) {
-                var scope = $(this).children("option:selected").val();
+                var scope = $(this).val();
                 if (scope === "target") {
                     createNodeList();
                     $(".node-input-target-row").show();
@@ -259,7 +259,7 @@
             $("#node-input-scope-select").change();
         },
         oneditsave: function() {
-            var scope = $("#node-input-scope-select").children("option:selected").val();
+            var scope = $("#node-input-scope-select").val();
             if (scope === 'all') {
                 this.scope = null;
             } else {

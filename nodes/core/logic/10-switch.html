@@ -88,7 +88,7 @@
             function resizeRule(rule) {
                 var newWidth = rule.width();
                 var selectField = rule.find("select");
-                var type = selectField.children("option:selected").val()||"";
+                var type = selectField.val()||"";
                 var valueField = rule.find(".node-input-rule-value");
                 var btwnField1 = rule.find(".node-input-rule-btwn-value");
                 var btwnField2 = rule.find(".node-input-rule-btwn-value2");
@@ -115,7 +115,10 @@
 
             $("#node-input-rule-container").css('min-height','250px').css('min-width','450px').editableList({
                 addItem: function(container,i,opt) {
-                    var rule = opt||{t:"",v:"",v2:""};
+                    var rule = opt;
+                    if (!rule.hasOwnProperty('t')) {
+                        rule.t = 'eq';
+                    }
                     var row = $('<div/>').appendTo(container);
                     var row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
                     var row3 = $('<div/>',{style:"padding-top: 5px; padding-left: 102px;"}).appendTo(container);
@@ -133,8 +136,7 @@
                     $('<label/>',{for:"node-input-rule-case-"+i,style:"margin-left: 3px;"}).text(caseLabel).appendTo(row2);
                     selectField.change(function() {
                         resizeRule(container);
-                        var type = selectField.children("option:selected").val();
-
+                        var type = selectField.val();
                         if (type === "btwn") {
                             valueField.typedInput('hide');
                             btwnValueField.typedInput('show');
@@ -157,7 +159,7 @@
                             row3.hide();
                         }
                     });
-                    selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
+                    selectField.val(rule.t);
                     if (rule.t == "btwn") {
                         btwnValueField.typedInput('value',rule.v);
                         btwnValueField.typedInput('type',rule.vt||'num');
@@ -199,7 +201,7 @@
             node.rules= [];
             rules.each(function(i) {
                 var rule = $(this);
-                var type = rule.find("select option:selected").val();
+                var type = rule.find("select").val();
                 var r = {t:type};
                 if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else")) {
                     if (type === "btwn") {

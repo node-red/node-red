@@ -86,14 +86,14 @@
         },
         oneditprepare: function() {
             var updateOptions = function() {
-                var sockettype = $("#node-input-server option:selected").val();
+                var sockettype = $("#node-input-server").val();
                 if (sockettype == "client") {
                     $("#node-input-host-row").show();
                 } else {
                     $("#node-input-host-row").hide();
                 }
-                var datamode = $("#node-input-datamode option:selected").val();
-                var datatype = $("#node-input-datatype option:selected").val();
+                var datamode = $("#node-input-datamode").val();
+                var datatype = $("#node-input-datatype").val();
                 if (datamode == "stream") {
                     if (datatype == "utf8") {
                         $("#node-row-newline").show();
@@ -181,7 +181,7 @@
         },
         oneditprepare: function() {
             var updateOptions = function() {
-                var sockettype = $("#node-input-beserver option:selected").val();
+                var sockettype = $("#node-input-beserver").val();
                 if (sockettype == "reply") {
                     $("#node-input-port-row").hide();
                     $("#node-input-host-row").hide();

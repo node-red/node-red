@@ -108,7 +108,10 @@
             }
             $('#node-input-rule-container').css('min-height','300px').css('min-width','450px').editableList({
                 addItem: function(container,i,opt) {
-                    var rule = opt||{t:"replace",p:"payload"};
+                    var rule = opt;
+                    if (!rule.hasOwnProperty('t')) {
+                        rule = {t:"set",p:"payload",to:"",tot:"str"};
+                    }
                     if (rule.t === "change" && rule.re) {
                         rule.fromt = 're';
                         delete rule.re;
@@ -193,7 +196,7 @@
                         resizeRule(container);
                     });
 
-                    selectField.find("option").filter(function() {return $(this).val() == rule.t;}).attr('selected',true);
+                    selectField.val(rule.t);
                     propertyName.typedInput('value',rule.p);
                     propertyName.typedInput('type',rule.pt);
                     propertyValue.typedInput('value',rule.to);
@@ -250,7 +253,7 @@
             node.rules= [];
             rules.each(function(i) {
                 var rule = $(this);
-                var type = rule.find(".node-input-rule-type option:selected").val();
+                var type = rule.find(".node-input-rule-type").val();
                 var r = {
                     t:type,
                     p:rule.find(".node-input-rule-property-name").typedInput('value'),
