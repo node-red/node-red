@@ -111,7 +111,8 @@
        blank, set by <code>msg.qos</code> and <code>msg.retain</code> respectively.
        By default, messages are published at QoS 0 with the retain flag set to false.</p>
     <p>If <code>msg.payload</code> contains an object it will be converted to JSON
-       before being sent.</p>
+       before being sent, any other properties of the message are discarded before it is sent 
++       to the queue.</p>
 </script>
 
 <script type="text/javascript">
