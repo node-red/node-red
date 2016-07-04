@@ -105,13 +105,14 @@
 
 <script type="text/x-red" data-help-name="mqtt out">
     <p>Connects to a MQTT broker and publishes messages.</p>
+    <p><code>msg.payload</code> is used as the payload of the published message.
+    If it contains an Object it will be converted to JSON before being sent.
+    </p>
     <p>The topic used can be configured in the node or, if left blank, can be set
        by <code>msg.topic</code>.</p>
     <p>Likewise the QoS and retain values can be configured in the node or, if left
        blank, set by <code>msg.qos</code> and <code>msg.retain</code> respectively.
        By default, messages are published at QoS 0 with the retain flag set to false.</p>
-    <p>If <code>msg.payload</code> contains an object it will be converted to JSON
-       before being sent.</p>
 </script>
 
 <script type="text/javascript">
