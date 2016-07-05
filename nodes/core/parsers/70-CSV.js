@@ -132,7 +132,7 @@ module.exports = function(RED) {
                                     if (line[i-1] === node.quo) { k[j] += '\"'; } // if it's a quotequote then it's actually a quote
                                     //if ((line[i-1] !== node.sep) && (line[i+1] !== node.sep)) { k[j] += line[i]; }
                                 }
-                                else if ((line[i] === node.sep) && f) { // if we are outside of quote (ie valid separator
+                                else if ((line[i] === node.sep)) { // if it is the end of the line then finish
                                     if (!node.goodtmpl) { node.template[j] = "col"+(j+1); }
                                     if ( node.template[j] && (node.template[j] !== "") && (k[j] !== "" ) ) {
                                         if ( reg.test(k[j]) ) { k[j] = parseFloat(k[j]); }
@@ -140,6 +140,7 @@ module.exports = function(RED) {
                                     }
                                     j += 1;
                                     k[j] = "";
+                                    f = true; // reset in/out flag ready for next line.
                                 }
                                 else if (f && ((line[i] === "\n") || (line[i] === "\r"))) { // handle multiple lines
                                     //console.log(j,k,o,k[j]);
