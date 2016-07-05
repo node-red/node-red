@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -231,16 +231,16 @@ RED.menu = (function() {
         var opt = menuItems[id];
         if (opt) {
             opt.onselect = action;
-            $("#"+id).click(function() {
-                if ($(this).parent().hasClass("disabled")) {
-                    return;
-                }
-                if (menuItems[id].toggle) {
-                    setSelected(id,!isSelected(id));
-                } else {
-                    menuItems[id].onselect.call(menuItems[id]);
-                }
-            });
+            // $("#"+id).click(function() {
+            //     if ($(this).parent().hasClass("disabled")) {
+            //         return;
+            //     }
+            //     if (menuItems[id].toggle) {
+            //         setSelected(id,!isSelected(id));
+            //     } else {
+            //         menuItems[id].onselect.call(menuItems[id]);
+            //     }
+            // });
         }
     }
 
