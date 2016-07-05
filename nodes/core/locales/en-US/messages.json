@@ -228,12 +228,13 @@
             "h": "Hours"
         },
         "extend": " extend delay if new message arrives",
-        "tip": "The node can also be reset by sending a message with the <code>msg.reset</code> property set to any value.",
         "label": {
             "trigger": "trigger",
             "trigger-block": "trigger & block",
-            "reset": "and reset if msg.payload == ",
-            "resetprompt": "(optional reset value)"
+            "reset": "Reset the trigger if:",
+            "resetMessage":"msg.reset is set",
+            "resetPayload":"msg.payload equals",
+            "resetprompt": "optional"
         }
     },
     "comment": {
