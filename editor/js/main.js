@@ -27,7 +27,7 @@ var RED = (function() {
                 RED.nodes.setNodeList(data);
 
                 var nsCount = 0;
-                for(var i=0;i<data.length;i++) {
+                for (var i=0;i<data.length;i++) {
                     var ns = data[i];
                     if (ns.module != "node-red") {
                         nsCount++;
@@ -81,7 +81,7 @@ var RED = (function() {
                     var parts = topic.split("/");
                     var node = RED.nodes.node(parts[1]);
                     if (node) {
-                        if (msg.text) {
+                        if (msg.hasOwnProperty("text")) {
                             msg.text = node._(msg.text.toString(),{defaultValue:msg.text.toString()});
                         }
                         node.status = msg;
@@ -188,7 +188,7 @@ var RED = (function() {
                     {id:"menu-item-export-library",label:RED._("menu.label.library"),disabled:true,onselect:RED.library.export}
                 ]},
                 null,
-                {id:"menu-item-config-nodes",label:RED._("menu.label.displayConfig"),onselect:function(){}},
+                {id:"menu-item-config-nodes",label:RED._("menu.label.displayConfig"),onselect:function() {}},
                 {id:"menu-item-workspace",label:RED._("menu.label.flows"),options:[
                     {id:"menu-item-workspace-add",label:RED._("menu.label.add"),onselect:RED.workspaces.add},
                     {id:"menu-item-workspace-edit",label:RED._("menu.label.rename"),onselect:RED.workspaces.edit},
@@ -222,7 +222,7 @@ var RED = (function() {
 
         RED.deploy.init(RED.settings.theme("deployButton",null));
 
-        RED.keyboard.add("workspace", /* ? */ 191,{shift:true},function(){RED.keyboard.showHelp();d3.event.preventDefault();});
+        RED.keyboard.add("workspace", /* ? */ 191,{shift:true},function() {RED.keyboard.showHelp();d3.event.preventDefault();});
         RED.comms.connect();
 
         $("#main-container").show();

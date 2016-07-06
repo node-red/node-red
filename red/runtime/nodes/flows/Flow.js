@@ -39,7 +39,7 @@ function Flow(global,flow) {
 
         var configNodes = Object.keys(flow.configs);
         var configNodeAttempts = {};
-        while(configNodes.length > 0) {
+        while (configNodes.length > 0) {
             id = configNodes.shift();
             node = flow.configs[id];
             if (!activeNodes[id]) {
@@ -176,7 +176,7 @@ function Flow(global,flow) {
         var targetStatusNodes = null;
         var reportingNode = node;
         var handled = false;
-        while(reportingNode && !handled) {
+        while (reportingNode && !handled) {
             targetStatusNodes = statusNodeMap[reportingNode.z];
             if (targetStatusNodes) {
                 targetStatusNodes.forEach(function(targetStatusNode) {
@@ -193,8 +193,8 @@ function Flow(global,flow) {
                             }
                         }
                     };
-                    if (statusMessage.text) {
-                        message.status.text = statusMessage.text;
+                    if (statusMessage.hasOwnProperty("text")) {
+                        message.status.text = statusMessage.text.toString();
                     }
                     targetStatusNode.receive(message);
                     handled = true;
@@ -485,7 +485,7 @@ function createSubflow(sf,sfn,subflows,globalSubflows,activeNodes) {
     subflowNode.instanceNodes = {};
 
     nodes.forEach(function(node) {
-       subflowNode.instanceNodes[node.id] = node;
+        subflowNode.instanceNodes[node.id] = node;
     });
     return nodes;
 }
