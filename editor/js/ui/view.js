@@ -2162,10 +2162,19 @@ RED.view = (function() {
     }
 
     function focusView() {
-        var scrollX = window.parent.window.scrollX;
-        var scrollY = window.parent.window.scrollY;
-        $("#chart").focus();
-        window.parent.window.scrollTo(scrollX,scrollY);
+        try {
+            // Workaround for browser unexpectedly scrolling iframe into full
+            // view - record the parent scroll position and restore it after
+            // setting the focus
+            var scrollX = window.parent.window.scrollX;
+            var scrollY = window.parent.window.scrollY;
+            $("#chart").focus();
+            window.parent.window.scrollTo(scrollX,scrollY);
+        } catch(err) {
+            // In case we're iframed into a page of a different origin, just focus
+            // the view following the inevitable DOMException
+            $("#chart").focus();
+        }
     }
 
     /**
