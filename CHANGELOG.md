@@ -1,3 +1,37 @@
+#### 0.14.4: Maintenance Release
+
+Nodes
+
+ - Update trigger node ui to use typedInputs
+ - Better handling of quotes in CSV node
+ - Clarify the MQTT node sends msg.payload - closes #929
+ - Inject node should reuse the message it is triggered with Closes #914
+ - Stop trigger node re-using old message
+ - Allow node.status text to be 'falsey' values
+ 
+Fixes
+
+ - Handle DOMException when embedded in an iframe of different origin Fixes #932
+ - Fix double firing of menu actions
+ - Fix select box handling in Safari - fixes #928
+ - Clear context in node test helper Fixes #858
+ - Allow node properties to be same as existing object functions Fixes #880
+ - Handle comms link closing whilst completing the initial connect
+ - Protect against node type names that clash with Object property names Fixes #917
+ - Clone default node properties to avoid reference leakage
+ - Strip tab node definition when exporting
+ - Check for null config properties in editor before over-writing them
+ - Add hasUsers flag to config nodes
+
+Editor
+
+ - Add sql mode to ace editor
+ - Keyboard shortcuts dialog update (#923)
+ - Ensure importing link nodes to a subflow doesn't add outbound links Fixes #921
+ - Add updateConfigNodeUsers function to editor
+ - Scroll to bottom when item added to editableList
+ - Form input widths behave more consistently when resizing Fixes #919 #920
+
 #### 0.14.3: Maintenance Release
 
 Fixes
