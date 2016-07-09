@@ -160,7 +160,6 @@ module.exports = function(RED) {
                     done();
                 }
             }
-            done();
         };
 
         this.connect = function () {
@@ -294,7 +293,7 @@ module.exports = function(RED) {
                     done();
                 });
                 this.client.end();
-            } if (this.connecting) {
+            } else if (this.connecting) {
                 node.client.end();
                 done();
             } else {
