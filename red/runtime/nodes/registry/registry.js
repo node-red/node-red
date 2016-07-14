@@ -35,17 +35,20 @@ var moduleNodes = {};
 function init(_settings,_loader) {
     settings = _settings;
     loader = _loader;
-    if (settings.available()) {
-        moduleConfigs = loadNodeConfigs();
-    } else {
-        moduleConfigs = {};
-    }
     moduleNodes = {};
     nodeTypeToId = {};
     nodeConstructors = {};
     nodeList = [];
     nodeConfigCache = null;
     Node = require("../Node");
+}
+
+function load() {
+    if (settings.available()) {
+        moduleConfigs = loadNodeConfigs();
+    } else {
+        moduleConfigs = {};
+    }
 }
 
 function filterNodeInfo(n) {
@@ -535,6 +538,7 @@ function cleanModuleList() {
 
 var registry = module.exports = {
     init: init,
+    load: load,
     clear: clear,
 
     registerNodeConstructor: registerNodeConstructor,

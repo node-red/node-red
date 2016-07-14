@@ -75,9 +75,11 @@ describe("red/nodes/registry/registry",function() {
 
 
 
-    describe('#init', function() {
+    describe('#init/load', function() {
         it('loads initial config', function(done) {
             typeRegistry.init(settingsWithStorageAndInitialConfig);
+            typeRegistry.getNodeList().should.have.lengthOf(0);
+            typeRegistry.load();
             typeRegistry.getNodeList().should.have.lengthOf(1);
             done();
         });
@@ -113,6 +115,7 @@ describe("red/nodes/registry/registry",function() {
             };
             var expected = JSON.parse('{"node-red":{"name":"node-red","nodes":{"sentiment":{"name":"sentiment","types":["sentiment"],"enabled":true,"module":"node-red"},"inject":{"name":"inject","types":["inject"],"enabled":true,"module":"node-red"}}},"testModule":{"name":"testModule","nodes":{"a-module.js":{"name":"a-module.js","types":["example"],"enabled":true,"module":"testModule"}}}}');
             typeRegistry.init(legacySettings);
+            typeRegistry.load();
             legacySettings.set.calledOnce.should.be.true;
             legacySettings.set.args[0][1].should.eql(expected);
             done();
