@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,11 +102,13 @@ RED.sidebar.info = (function() {
             if (node._def) {
                 for (var n in node._def.defaults) {
                     if (n != "name" && node._def.defaults.hasOwnProperty(n)) {
-                        var val = node[n]||"";
+                        var val = node[n];
                         var type = typeof val;
-                        if (type === "string") {
+                        if (val === null || val === undefined) {
+                            val = '<span style="font-style: italic; color: #ccc;">'+RED._("sidebar.info.null")+'</span>';
+                        } else if (type === "string") {
                             if (val.length === 0) {
-                                val += '<span style="font-style: italic; color: #ccc;">'+RED._("sidebar.info.blank")+'</span>';
+                                val = '<span style="font-style: italic; color: #ccc;">'+RED._("sidebar.info.blank")+'</span>';
                             } else {
                                 if (val.length > 30) {
                                     val = val.substring(0,30)+" ...";

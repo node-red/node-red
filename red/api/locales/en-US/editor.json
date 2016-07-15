@@ -212,6 +212,7 @@
             "instances": "Instances",
             "properties": "Properties",
             "blank": "blank",
+            "null": "null",
             "arrayItems": "__count__ items"
         },
         "config": {
