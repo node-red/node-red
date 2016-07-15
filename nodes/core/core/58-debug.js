@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,11 @@ module.exports = function(RED) {
             msg.msg = msg.msg.toString('hex');
         } else if (msg.msg && typeof msg.msg === 'object') {
             var seen = [];
-            msg.format = msg.msg.constructor.name || "Object";
+            try {
+                msg.format = msg.msg.constructor.name || "Object";
+            } catch(err) {
+                msg.format = "Object";
+            }
             var isArray = util.isArray(msg.msg);
             if (isArray) {
                 msg.format = "array ["+msg.msg.length+"]";
