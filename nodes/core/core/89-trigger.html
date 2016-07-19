@@ -16,68 +16,66 @@
 
 <script type="text/x-red" data-template-name="trigger">
     <div class="form-row">
-        <span data-i18n="trigger.send"></span>
-        <select id="node-input-op1type" style="width:200px !important">
-            <option value="val" data-i18n="trigger.output.string"></option>
-            <option value="num" data-i18n="trigger.output.number"></option>
-            <option value="pay" data-i18n="trigger.output.existing"></option>
-            <option value="nul" data-i18n="trigger.output.nothing"></option>
-        </select>
-        <input style="width: 180px !important" type="text" id="node-input-op1">
+        <label data-i18n="trigger.send" for="node-input-op1"></label>
+        <input type="hidden" id="node-input-op1type">
+        <input style="width: 70%" type="text" id="node-input-op1">
     </div>
     <div class="form-row">
-        <span data-i18n="trigger.then"></span>
-        <select id="node-then-type" style="width:150px;">
+        <label data-i18n="trigger.then"></label>
+        <select id="node-then-type" style="width:70%;">
             <option value="block" data-i18n="trigger.wait-reset"></option>
             <option value="wait" data-i18n="trigger.wait-for"></option>
         </select>
-        <span class="node-type-wait">
-            <input type="text" id="node-input-duration" style="text-align:right; width:70px !important">
-            <select id="node-input-units" style="width:140px !important">
-                <option value="ms" data-i18n="trigger.duration.ms"></option>
-                <option value="s" data-i18n="trigger.duration.s"></option>
-                <option value="min" data-i18n="trigger.duration.m"></option>
-                <option value="hr" data-i18n="trigger.duration.h"></option>
-            </select>
-       </span>
     </div>
     <div class="form-row node-type-wait">
-        <span data-i18n="trigger.then-send"></span>
-        <select id="node-input-op2type" style="width:200px !important">
-            <option value="val" data-i18n="trigger.output.string"></option>
-            <option value="num" data-i18n="trigger.output.number"></option>
-            <option value="pay" data-i18n="trigger.output.existing"></option>
-            <option value="nul" data-i18n="trigger.output.nothing"></option>
+        <label></label>
+        <input type="text" id="node-input-duration" style="text-align:end; width:70px !important">
+        <select id="node-input-units" style="width:140px !important">
+            <option value="ms" data-i18n="trigger.duration.ms"></option>
+            <option value="s" data-i18n="trigger.duration.s"></option>
+            <option value="min" data-i18n="trigger.duration.m"></option>
+            <option value="hr" data-i18n="trigger.duration.h"></option>
         </select>
-        <input style="width: 145px !important" type="text" id="node-input-op2">
     </div>
     <div class="form-row node-type-wait">
+    <label></label>
         <input type="checkbox" id="node-input-extend" style="margin-left: 0px; vertical-align: top; width: auto !important;"> <label style="width:auto !important;" for="node-input-extend" data-i18n="trigger.extend"></label>
     </div>
+    <div class="form-row node-type-wait">
+        <label data-i18n="trigger.then-send"></label>
+        <input type="hidden" id="node-input-op2type">
+        <input style="width: 70%" type="text" id="node-input-op2">
+    </div>
     <div class="form-row">
-        <span data-i18n="trigger.label.reset"></span><input type="text" id="node-input-reset" style="width:240px" data-i18n="[placeholder]trigger.label.resetprompt">
+        <label data-i18n="trigger.label.reset" style="width:auto"></label>
+        <div style="display:inline-block; width:70%;vertical-align:top">
+        <ul>
+            <li data-i18n="trigger.label.resetMessage"></li>
+            <li><span data-i18n="trigger.label.resetPayload"></span> <input type="text" id="node-input-reset" style="width:150px" data-i18n="[placeholder]trigger.label.resetprompt"></li>
+        </ul>
     </div>
     <br/>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name"></input>
     </div>
-    <div class="form-tips" data-i18n="[html]trigger.tip"></div>
 </script>
 
 <script type="text/x-red" data-help-name="trigger">
-    <p>Creates two messages on the output separated by a timeout whenever ANY <b>msg</b> arrives on the input.</p>
+    <p>Creates two messages on the output separated by a timeout whenever <i>any</i> <code>msg</code> arrives on the input.</p>
     <p>For example, this can be used to toggle a Raspberry PI GPIO pin on and off.</p>
     <p>The two output states can be specified as can the duration of the timer.
     Either output can be set to a value, or templated from the inbound
-    <b>msg</b> using mustache syntax. <pre>The payload is {{payload}}</pre></p>
-    <p>If the payload is an object then setting the output to <i>existing payload</i> will pass the complete payload object through.</p>
+    <code>msg</code> using mustache syntax. <pre>The payload is {{payload}}</pre></p>
+    <p>If the <code>msg.payload</code> is an object then setting the output to
+    <i>existing payload</i> will pass the complete payload object through.</p>
     <p>Optionally the timer can be extended by being retriggered... or not.</p>
     <p>By setting the first output to <i>nothing</i>, and selecting extend timer - a watchdog timer can be created.
     No output will happen as long as repeated inputs occur within the timeout period.</p>
     <p>Setting the timer to 0 creates an "infinite" timeout - the first output will happen but the second
     never will, and neither can the first be retriggered - so a true one shot.</p>
-    <p>If a <b>msg.reset</b> property is present any timeout currently in progress
+    <p>If a <code>msg.reset</code> property is present, or the <code>msg.payload</code>
+    matches the optional reset value, any timeout currently in progress
     will be cleared and the second output will not happen.</p>
     <p>The blue status icon will be visible while the node is active.</p>
 </script>
@@ -115,34 +113,48 @@
             $("#node-then-type").change(function() {
                 if ($(this).val() == "block") {
                     $(".node-type-wait").hide();
-                    $(".form-tips").show();
                 } else {
                     $(".node-type-wait").show();
-                    $(".form-tips").hide();
                 }
             });
-            $("#node-input-op1type").change(function() {
-                if (($(this).val() == "val")||($(this).val() == "num")) {
-                    $("#node-input-op1").show();
-                } else {
-                    $("#node-input-op1").hide();
-                }
+
+            if (this.op1type === 'val') {
+                $("#node-input-op1type").val('str');
+            }
+            if (this.op2type === 'val') {
+                $("#node-input-op2type").val('str');
+            }
+
+            var optionNothing = {value:"nul",label:this._("trigger.output.nothing"),hasValue:false};
+            var optionPayload = {value:"pay",label:this._("trigger.output.existing"),hasValue:false}
+
+            var optionOriginalPayload = {value:"pay",label:this._("trigger.output.original"),hasValue:false}
+            var optionLatestPayload = {value:"payl",label:this._("trigger.output.latest"),hasValue:false}
+
+            $("#node-input-op1").typedInput({
+                default: 'str',
+                typeField: $("#node-input-op1type"),
+                types:['flow','global','str','num','bool','json',
+                    optionPayload,
+                    optionNothing
+                ]
             });
-            $("#node-input-op2type").change(function() {
-                if (($(this).val() == "val")||($(this).val() == "num")) {
-                    $("#node-input-op2").show();
-                } else {
-                    $("#node-input-op2").hide();
-                }
+            $("#node-input-op2").typedInput({
+                default: 'str',
+                typeField: $("#node-input-op2type"),
+                types:['flow','global','str','num','bool','json',
+                    optionOriginalPayload,
+                    optionLatestPayload,
+                    optionNothing
+                ]
             });
+
             if (this.duration == "0") {
                 $("#node-then-type").val("block");
             } else {
                 $("#node-then-type").val("wait");
             }
             $("#node-then-type").change();
-            $("#node-input-op1type").change();
-            $("#node-input-op2type").change();
 
             if (this.extend === "true" || this.extend === true) {
                 $("#node-input-extend").prop("checked",true);

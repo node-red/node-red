@@ -7,6 +7,10 @@ We welcome contributions, but request you follow these guidelines.
  - [Pull-Requests](#pull-requests)
    - [Contributor License Agreement](#contributor-license-agreement)
 
+This project adheres to the [Contributor Covenant 1.4](http://contributor-covenant.org/version/1/4/).
+By participating, you are expected to uphold this code. Please report unacceptable
+behavior to any of the [project's core team](https://github.com/orgs/node-red/teams/core).
+
 ## Raising issues
 
 Please raise any bug reports on the relevant project's issue tracker. Be sure to

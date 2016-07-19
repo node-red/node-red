@@ -44,11 +44,12 @@
 </script>
 
 <script type="text/x-red" data-help-name="file">
-    <p>Writes <b>msg.payload</b> to the file specified, e.g. to create a log.</p>
-    <p>The filename can be configured in the node, if left blank it should be set in an incoming message on <b>msg.filename</b>.</p>
+    <p>Writes <code>msg.payload</code> to the file specified, for example to create a log.</p>
+    <p>The filename can be configured in the node. If left blank it should be
+    set by <code>msg.filename</code> on the incoming message.</p>
     <p>A newline is added to every message. But this can be turned off if required, for example, to allow binary files to be written.</p>
     <p>The default behaviour is to append to the file. This can be changed to overwrite the file each time, for example if you want to output a "static" web page or report.</p>
-    <p>This node can also be configured to delete a file if required. <i>Note:</i> Using msg.delete is now deprecated.</p>
+    <p>This node can also be configured to delete a file if required.</p>
 </script>
 
 <script type="text/x-red" data-template-name="file in">
@@ -70,8 +71,10 @@
 </script>
 
 <script type="text/x-red" data-help-name="file in">
-    <p>Reads the specified file and sends the content as <b>msg.payload</b>, and the filename as <b>msg.filename</b>.</p>
-    <p>The filename can be configured in the node, if left blank it should be set in an incoming message on <b>msg.filename</b>.</p>
+    <p>Reads the specified file and sends the content as <code>msg.payload</code>,
+    and the filename as <code>msg.filename</code>.</p>
+    <p>The filename can be configured in the node. If left blank it should be
+    set by <code>msg.filename</code> on the incoming message.</p>
 </script>
 
 <script type="text/javascript">

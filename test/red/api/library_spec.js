@@ -80,6 +80,10 @@ describe("library api", function() {
                     libraryEntries[type][path] = body;
                     return when.resolve();
                 }
+            },
+            events: {
+                on: function(){},
+                removeListener: function(){}
             }
         });
     }

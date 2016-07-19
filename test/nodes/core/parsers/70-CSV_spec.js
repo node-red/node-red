@@ -54,7 +54,7 @@ describe('CSV node', function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    msg.should.have.property('payload',  { a: 1, b: 2, c: 3, d: 4 });
+                    msg.should.have.property('payload', { a: 1, b: 2, c: 3, d: 4 });
                     done();
                 });
                 var testString = "1,2,3,4"+String.fromCharCode(10);
@@ -69,7 +69,7 @@ describe('CSV node', function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    msg.should.have.property('payload',  { a: 1, b: 2, c: 3, d: 4 });
+                    msg.should.have.property('payload', { a: 1, b: 2, c: 3, d: 4 });
                     done();
                 });
                 var testString = "1,2,3,4"+String.fromCharCode(10);
@@ -84,7 +84,7 @@ describe('CSV node', function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    msg.should.have.property('payload',  { col1: 1, col2: 2, col3: 3, col4: 4 });
+                    msg.should.have.property('payload', { col1: 1, col2: 2, col3: 3, col4: 4 });
                     done();
                 });
                 var testString = "1,2,3,4"+String.fromCharCode(10);
@@ -99,7 +99,7 @@ describe('CSV node', function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    msg.should.have.property('payload',  { a: 1, d: 4 });
+                    msg.should.have.property('payload', { a: 1, d: 4 });
                     done();
                 });
                 var testString = "1,2,3,4"+String.fromCharCode(10);
@@ -115,10 +115,29 @@ describe('CSV node', function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
+                    //console.log(msg);
                     msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: 4, e: -5, f: 'ab"cd', g: 'with,a,comma' });
                     done();
                 });
                 var testString = '"1","-2","+3","04","-05",ab""cd,"with,a,comma"'+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
+        it('should recover from an odd number of quotes in the input', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    //console.log(msg);
+                    msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: 4, e: -5, f: 'ab"cd', g: 'with,a,comma' });
+                    done();
+                });
+                var testString = '"with,a"n,odd",num"ber,of"quotes'+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+                testString = '"1","-2","+3","04","-05",ab""cd,"with,a,comma"'+String.fromCharCode(10);
                 n1.emit("input", {payload:testString});
             });
         });
@@ -133,11 +152,11 @@ describe('CSV node', function() {
                 n2.on("input", function(msg) {
                     //console.log(msg);
                     if (c === 0) {
-                        msg.should.have.property('payload',  { w: 1, x: 2, y: 3, z: 4 });
+                        msg.should.have.property('payload', { w: 1, x: 2, y: 3, z: 4 });
                         c += 1;
                     }
-                    else  {
-                        msg.should.have.property('payload',  { w: 5, x: 6, y: 7, z: 8 });
+                    else {
+                        msg.should.have.property('payload', { w: 5, x: 6, y: 7, z: 8 });
                         done();
                     }
                 });
@@ -153,8 +172,7 @@ describe('CSV node', function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    //console.log(msg);
-                    msg.should.have.property('payload',  [ { a: 1, b: 2, c: 3, d: 4 },{ a: 5, b: -6, c: 7, d: '+8' },{ a: 9, b: 0, c: 'a', d: 'b' },{ a: 'c', b: 'd', c: 'e', d: 'f' } ]);
+                    msg.should.have.property('payload', [ { a: 1, b: 2, c: 3, d: 4 },{ a: 5, b: -6, c: 7, d: '+8' },{ a: 9, b: 0, c: 'a', d: 'b' },{ a: 'c', b: 'd', c: 'e', d: 'f' } ]);
                     done();
                 });
                 var testString = "1,2,3,4\n5,-6,07,+8\n9,0,a,b\nc,d,e,f";
@@ -219,7 +237,7 @@ describe('CSV node', function() {
             });
         });
 
-        it('should convert aan array of arrays back to a multi-line csv', function(done) {
+        it('should convert an array of arrays back to a multi-line csv', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
                     {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
@@ -281,15 +299,15 @@ describe('CSV node', function() {
         helper.load(csvNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
-                n2.on("input", function(msg) {
-                    try {
-                        msg.should.have.property('topic', { a: 4, b: 3, c: 2, d: 1 });
-                        msg.should.not.have.property('payload');
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property('topic', { a: 4, b: 3, c: 2, d: 1 });
+                    msg.should.not.have.property('payload');
 
-                        done();
-                    }
-                    catch(e) { done(e); }
-                });
+                    done();
+                }
+                catch(e) { done(e); }
+            });
             var testJson = { d: 1, b: 3, c: 2, a: 4 };
             n1.emit("input", {topic:testJson});
         });

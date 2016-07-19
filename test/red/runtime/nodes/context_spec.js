@@ -108,4 +108,15 @@ describe('context', function() {
         context2.global.get("foo").should.eql("test");
     });
 
+    it('deletes context',function() {
+        var context = Context.get("1","flowA");
+        should.not.exist(context.get("foo"));
+        context.set("foo","abc");
+        context.get("foo").should.eql("abc");
+
+        Context.delete("1","flowA");
+        context = Context.get("1","flowA");
+        should.not.exist(context.get("foo"));
+    })
+
 });

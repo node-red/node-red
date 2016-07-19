@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,12 +50,9 @@ module.exports = function(RED) {
                 var output = msg[property];
                 if (this.complete !== "false" && typeof this.complete !== "undefined") {
                     property = this.complete;
-                    var propertyParts = property.split(".");
                     try {
-                        output = propertyParts.reduce(function (obj, i) {
-                            return obj[i];
-                        }, msg);
-                    } catch (err) {
+                        output = RED.util.getMessageProperty(msg,this.complete);
+                    } catch(err) {
                         output = undefined;
                     }
                 }
@@ -69,7 +66,7 @@ module.exports = function(RED) {
                     }
                 }
                 if (this.active) {
-                    sendDebug({id:this.id,name:this.name,topic:msg.topic,property:property,msg:output,_path:msg._path});
+                    sendDebug({id:this.id,z:this.z,name:this.name,topic:msg.topic,property:property,msg:output,_path:msg._path});
                 }
             }
         });
@@ -86,7 +83,11 @@ module.exports = function(RED) {
             msg.msg = msg.msg.toString('hex');
         } else if (msg.msg && typeof msg.msg === 'object') {
             var seen = [];
-            msg.format = msg.msg.constructor.name || "Object";
+            try {
+                msg.format = msg.msg.constructor.name || "Object";
+            } catch(err) {
+                msg.format = "Object";
+            }
             var isArray = util.isArray(msg.msg);
             if (isArray) {
                 msg.format = "array ["+msg.msg.length+"]";

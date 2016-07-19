@@ -1,0 +1,73 @@
+<!--
+  Copyright 2016 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="tls-config">
+    <div class="form-row">
+        <label style="width: 120px;" for="node-config-input-cert"><i class="fa fa-file-text-o"></i> <span data-i18n="tls.label.cert"></span></label>
+        <input style="width: 60%;" type="text" id="node-config-input-cert" data-i18n="[placeholder]tls.placeholder.cert">
+    </div>
+    <div class="form-row">
+        <label style="width: 120px;" for="node-config-input-key"><i class="fa fa-file-text-o"></i> <span data-i18n="tls.label.key"></span></label>
+        <input style="width: 60%;" type="text" id="node-config-input-key" data-i18n="[placeholder]tls.placeholder.key">
+    </div>
+    <div class="form-row">
+        <label style="width: 120px;" for="node-config-input-ca"><i class="fa fa-file-text-o"></i> <span data-i18n="tls.label.ca"></span></label>
+        <input style="width: 60%;" type="text" id="node-config-input-ca" data-i18n="[placeholder]tls.placeholder.ca">
+    </div>
+    <div class="form-row">
+        <input type="checkbox" id="node-config-input-verifyservercert" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-config-input-verifyservercert" style="width: 70%;" data-i18n="tls.label.verify-server-cert"></label>
+    </div>
+    <div class="form-row">
+        <label style="width: 120px;" for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input style="width: 60%;" type="text" id="node-config-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="tls-config">
+    <p>Configuration options for TLS connections.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('tls-config',{
+        category: 'config',
+        defaults: {
+            name: {value:""},
+            cert: {value:"", validate: function(v) {
+                var currentKey = $("#node-config-input-key").val();
+                if (currentKey === undefined) {
+                    currentKey = this.key;
+                }
+                return currentKey === '' || v != '';
+            }},
+            key: {value:"", validate: function(v) {
+                var currentCert = $("#node-config-input-cert").val();
+                if (currentCert === undefined) {
+                    currentCert = this.cert;
+                }
+                return currentCert === '' || v != '';
+            }},
+            ca: {value:""},
+            verifyservercert: {value: true}
+        },
+        label: function() {
+            return this.name || this._("tls.tls");
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>

@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ RED.library = (function() {
                 var li;
                 var a;
                 var ul = document.createElement("ul");
-                ul.id = "menu-item-import-library-submenu";
+                if (root === "") {
+                    ul.id = "menu-item-import-library-submenu";
+                }
                 ul.className = "dropdown-menu";
                 if (data.d) {
                     for (i in data.d) {
@@ -36,7 +38,8 @@ RED.library = (function() {
                             li.className = "dropdown-submenu pull-left";
                             a = document.createElement("a");
                             a.href="#";
-                            a.innerHTML = i;
+                            var label = i.replace(/^node-red-contrib-/,"").replace(/^node-red-node-/,"").replace(/-/," ").replace(/_/," ");
+                            a.innerHTML = label;
                             li.appendChild(a);
                             li.appendChild(buildMenu(data.d[i],root+(root!==""?"/":"")+i));
                             ul.appendChild(li);
@@ -53,7 +56,7 @@ RED.library = (function() {
                             a.flowName = root+(root!==""?"/":"")+data.f[i];
                             a.onclick = function() {
                                 $.get('library/flows/'+this.flowName, function(data) {
-                                        RED.view.importNodes(data);
+                                    RED.view.importNodes(data);
                                 });
                             };
                             li.appendChild(a);
@@ -63,7 +66,17 @@ RED.library = (function() {
                 }
                 return ul;
             };
+            var examples;
+            if (data.d && data.d._examples_) {
+                examples = data.d._examples_;
+                delete data.d._examples_;
+            }
             var menu = buildMenu(data,"");
+            $("#menu-item-import-examples").remove();
+            if (examples) {
+                RED.menu.addItem("menu-item-import",{id:"menu-item-import-examples",label:RED._("menu.label.examples"),options:[]})
+                $("#menu-item-import-examples-submenu").replaceWith(buildMenu(examples,"_examples_"));
+            }
             //TODO: need an api in RED.menu for this
             $("#menu-item-import-library-submenu").replaceWith(menu);
         });
@@ -117,7 +130,7 @@ RED.library = (function() {
                             $(".active",bc).removeClass("active");
                             bc.append(bcli);
                             $.getJSON("library/"+options.url+root+dirName,function(data) {
-                                    $("#node-select-library").children().first().replaceWith(buildFileList(root+dirName+"/",data));
+                                $("#node-select-library").children().first().replaceWith(buildFileList(root+dirName+"/",data));
                             });
                         }
                     })();
@@ -125,20 +138,20 @@ RED.library = (function() {
                     ul.appendChild(li);
                 } else {
                     // file
-                   li = buildFileListItem(v);
-                   li.innerHTML = v.name;
-                   li.onclick = (function() {
-                       var item = v;
-                       return function(e) {
-                           $(".list-selected",ul).removeClass("list-selected");
-                           $(this).addClass("list-selected");
-                           $.get("library/"+options.url+root+item.fn, function(data) {
-                                   selectedLibraryItem = item;
-                                   libraryEditor.setValue(data,-1);
-                           });
-                       }
-                   })();
-                   ul.appendChild(li);
+                    li = buildFileListItem(v);
+                    li.innerHTML = v.name;
+                    li.onclick = (function() {
+                        var item = v;
+                        return function(e) {
+                            $(".list-selected",ul).removeClass("list-selected");
+                            $(this).addClass("list-selected");
+                            $.get("library/"+options.url+root+item.fn, function(data) {
+                                selectedLibraryItem = item;
+                                libraryEditor.setValue(data,-1);
+                            });
+                        }
+                    })();
+                    ul.appendChild(li);
                 }
             }
             return ul;
@@ -241,7 +254,14 @@ RED.library = (function() {
             height: 450,
             buttons: [
                 {
-                    text: RED._("common.label.ok"),
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        $( this ).dialog( "close" );
+                    }
+                },
+                {
+                    text: RED._("common.label.load"),
+                    class: "primary",
                     click: function() {
                         if (selectedLibraryItem) {
                             for (var i=0;i<options.fields.length;i++) {
@@ -250,12 +270,6 @@ RED.library = (function() {
                             }
                             options.editor.setValue(libraryEditor.getValue(),-1);
                         }
-                        $( this ).dialog( "close" );
-                    }
-                },
-                {
-                    text: RED._("common.label.cancel"),
-                    click: function() {
                         $( this ).dialog( "close" );
                     }
                 }
@@ -331,7 +345,11 @@ RED.library = (function() {
             }).done(function(data,textStatus,xhr) {
                 RED.notify(RED._("library.savedType", {type:options.type}),"success");
             }).fail(function(xhr,textStatus,err) {
-                RED.notify(RED._("library.saveFailed",{message:xhr.responseText}),"error");
+                if (xhr.status === 401) {
+                    RED.notify(RED._("library.saveFailed",{message:RED._("user.notAuthorized")}),"error");
+                } else {
+                    RED.notify(RED._("library.saveFailed",{message:xhr.responseText}),"error");
+                }
             });
         }
         $( "#node-dialog-library-save-confirm" ).dialog({
@@ -342,15 +360,16 @@ RED.library = (function() {
             height: 230,
             buttons: [
                 {
-                    text: RED._("common.label.ok"),
+                    text: RED._("common.label.cancel"),
                     click: function() {
-                        saveToLibrary(true);
                         $( this ).dialog( "close" );
                     }
                 },
                 {
-                    text: RED._("common.label.cancel"),
+                    text: RED._("common.label.save"),
+                    class: "primary",
                     click: function() {
+                        saveToLibrary(true);
                         $( this ).dialog( "close" );
                     }
                 }
@@ -364,15 +383,16 @@ RED.library = (function() {
             height: 230,
             buttons: [
                 {
-                    text: RED._("common.label.ok"),
+                    text: RED._("common.label.cancel"),
                     click: function() {
-                        saveToLibrary(false);
                         $( this ).dialog( "close" );
                     }
                 },
                 {
-                    text: RED._("common.label.cancel"),
+                    text: RED._("common.label.save"),
+                    class: "primary",
                     click: function() {
+                        saveToLibrary(false);
                         $( this ).dialog( "close" );
                     }
                 }
@@ -416,8 +436,16 @@ RED.library = (function() {
                     title: RED._("library.exportToLibrary"),
                     buttons: [
                         {
+                            id: "library-dialog-cancel",
+                            text: RED._("common.label.cancel"),
+                            click: function() {
+                                $( this ).dialog( "close" );
+                            }
+                        },
+                        {
                             id: "library-dialog-ok",
-                            text: RED._("common.label.ok"),
+                            class: "primary",
+                            text: RED._("common.label.export"),
                             click: function() {
                                 //TODO: move this to RED.library
                                 var flowName = $("#node-input-library-filename").val();
@@ -428,31 +456,26 @@ RED.library = (function() {
                                         data: $("#node-input-library-filename").attr('nodes'),
                                         contentType: "application/json; charset=utf-8"
                                     }).done(function() {
-                                            RED.library.loadFlowLibrary();
-                                            RED.notify(RED._("library.savedNodes"),"success");
+                                        RED.library.loadFlowLibrary();
+                                        RED.notify(RED._("library.savedNodes"),"success");
                                     }).fail(function(xhr,textStatus,err) {
-                                        RED.notify(RED._("library.saveFailed",{message:xhr.responseText}),"error");
+                                        if (xhr.status === 401) {
+                                            RED.notify(RED._("library.saveFailed",{message:RED._("user.notAuthorized")}),"error");
+                                        } else {
+                                            RED.notify(RED._("library.saveFailed",{message:xhr.responseText}),"error");
+                                        }
                                     });
                                 }
-                                $( this ).dialog( "close" );
-                            }
-                        },
-                        {
-                            id: "library-dialog-cancel",
-                            text: RED._("common.label.cancel"),
-                            click: function() {
                                 $( this ).dialog( "close" );
                             }
                         }
                     ],
                     open: function(e) {
                         $(this).parent().find(".ui-dialog-titlebar-close").hide();
-                        RED.keyboard.disable();
                     },
                     close: function(e) {
-                        RED.keyboard.enable();
                     }
-            });
+                });
             exportToLibraryDialog.children(".dialog-form").append($(
                 '<div class="form-row">'+
                 '<label for="node-input-library-filename" data-i18n="[append]editor:library.filename"><i class="fa fa-file"></i> </label>'+

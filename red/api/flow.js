@@ -54,7 +54,6 @@ module.exports = {
                 log.audit({event: "flow.update",id:id},req);
                 res.json({id:id});
             }).otherwise(function(err) {
-                console.log(err.stack);
                 log.audit({event: "flow.update",error:err.code||"unexpected_error",message:err.toString()},req);
                 res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
             })
@@ -63,7 +62,6 @@ module.exports = {
                 log.audit({event: "flow.update",id:id,error:"not_found"},req);
                 res.status(404).end();
             } else {
-                console.log(err.stack);
                 log.audit({event: "flow.update",error:err.code||"unexpected_error",message:err.toString()},req);
                 res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
             }

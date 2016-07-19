@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,6 +174,8 @@ function uninstallModule(module) {
                 } else {
                     log.info(log._("server.install.uninstalled",{name:module}));
                     reportRemovedModules(list);
+                    // TODO: tidy up internal event names
+                    events.emit("node-module-uninstalled",module)
                     resolve(list);
                 }
             }

@@ -35,6 +35,7 @@ var flows = require("../../red/runtime/nodes/flows");
 var credentials = require("../../red/runtime/nodes/credentials");
 var comms = require("../../red/api/comms.js");
 var log = require("../../red/runtime/log.js");
+var context = require("../../red/runtime/nodes/context.js");
 
 var http = require('http');
 var express = require('express');
@@ -53,6 +54,8 @@ function helperNode(n) {
 
 module.exports = {
     load: function(testNode, testFlows, testCredentials, cb) {
+        var i;
+
         logSpy = sinon.spy(log,"log");
         logSpy.FATAL = log.FATAL;
         logSpy.ERROR = log.ERROR;
@@ -82,13 +85,13 @@ module.exports = {
                 // do nothing
             },
         };
+
         var settings = {
             available: function() { return false; }
         };
 
-
         var red = {};
-        for (var i in RED) {
+        for (i in RED) {
             if (RED.hasOwnProperty(i) && !/^(init|start|stop)$/.test(i)) {
                 var propDescriptor = Object.getOwnPropertyDescriptor(RED,i);
                 Object.defineProperty(red,i,propDescriptor);
@@ -103,7 +106,7 @@ module.exports = {
         credentials.init(storage,express());
         RED.nodes.registerType("helper", helperNode);
         if (Array.isArray(testNode)) {
-            for (var i = 0; i < testNode.length; i++) {
+            for (i = 0; i < testNode.length; i++) {
                 testNode[i](red);
             }
         } else {
@@ -115,10 +118,12 @@ module.exports = {
             cb();
         });
     },
+
     unload: function() {
         // TODO: any other state to remove between tests?
         redNodes.clearRegistry();
         logSpy.restore();
+        context.clean({allNodes:[]});
         return flows.stopFlows();
     },
 
@@ -137,7 +142,7 @@ module.exports = {
     },
 
     startServer: function(done) {
-        server = http.createServer(function(req,res){app(req,res);});
+        server = http.createServer(function(req,res) { app(req,res); });
         RED.init(server, {
             SKIP_BUILD_CHECK: true,
             logging:{console:{level:'off'}}
@@ -150,9 +155,10 @@ module.exports = {
             done();
         });
     },
+
     //TODO consider saving TCP handshake/server reinit on start/stop/start sequences
     stopServer: function(done) {
-        if(server) {
+        if (server) {
             try {
                 server.close(done);
             } catch(e) {

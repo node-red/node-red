@@ -14,21 +14,21 @@
   limitations under the License.
 -->
 
-<!-- First, the content of the edit dialog is defined.                       -->
 <script type="text/x-red" data-template-name="delay">
 
     <div class="form-row">
         <label for="node-input-pauseType"><i class="fa fa-tasks"></i> <span data-i18n="delay.action"></span></label>
         <select id="node-input-pauseType" style="width:270px !important">
-          <option value="delay" data-i18n="delay.delaymsg"></option>
-          <option value="random" data-i18n="delay.randomdelay"></option>
-          <option value="rate" data-i18n="delay.limitrate"></option>
-          <option value="queue" data-i18n="delay.fairqueue"></option>
+            <option value="delay" data-i18n="delay.delaymsg"></option>
+            <option value="random" data-i18n="delay.randomdelay"></option>
+            <option value="rate" data-i18n="delay.limitrate"></option>
+            <option value="queue" data-i18n="delay.fairqueue"></option>
+            <option value="timed" data-i18n="delay.timedqueue"></option>
         </select>
     </div>
     <div id="delay-details" class="form-row">
         <label for="node-input-timeout"><i class="fa fa-clock-o"></i> <span data-i18n="delay.for"></span></label>
-        <input type="text" id="node-input-timeout" placeholder="Time" style="direction:rtl; width:50px !important">
+        <input type="text" id="node-input-timeout" placeholder="Time" style="text-align:end; width:50px !important">
         <select id="node-input-timeoutUnits" style="width:200px !important">
           <option value="milliseconds" data-i18n="delay.milisecs"></option>
           <option value="seconds" data-i18n="delay.secs"></option>
@@ -40,7 +40,7 @@
 
     <div id="rate-details" class="form-row">
         <label for="node-input-rate"><i class="fa fa-clock-o"></i> <span data-i18n="delay.rate"></span></label>
-        <input type="text" id="node-input-rate" placeholder="1" style="direction:rtl; width:30px !important">
+        <input type="text" id="node-input-rate" placeholder="1" style="text-align:end; width:30px !important">
         <label for="node-input-rateUnits"><span data-i18n="delay.msgper"></span></label>
         <select id="node-input-rateUnits" style="width:140px !important">
           <option value="second" data-i18n="delay.sec"></option>
@@ -55,9 +55,9 @@
 
     <div id="random-details" class="form-row">
         <label for="node-input-randomFirst"><i class="fa fa-clock-o"></i> <span data-i18n="delay.between"></span></label>
-        <input type="text" id="node-input-randomFirst" placeholder="" style="directon:rtl; width:30px !important">
-        <label for="node-input-randomLast" style="width:20px"> &amp; </label>
-        <input type="text" id="node-input-randomLast" placeholder="" style="directon:rtl; width:30px !important">
+        <input type="text" id="node-input-randomFirst" placeholder="" style="text-align:end; width:30px !important">
+        &nbsp;&nbsp;&amp;&nbsp;&nbsp;
+        <input type="text" id="node-input-randomLast" placeholder="" style="text-align:end; width:30px !important">
         <select id="node-input-randomUnits" style="width:140px !important">
           <option value="milliseconds" data-i18n="delay.milisecs"></option>
           <option value="seconds" data-i18n="delay.secs"></option>
@@ -74,25 +74,26 @@
 
 </script>
 
-<!-- Next, some simple help text is provided for the node.                   -->
 <script type="text/x-red" data-help-name="delay">
     <p>Introduces a delay into a flow or rate limits messages.</p>
     <p>The default delay is 5 seconds and rate limit of 1 msg/second, but both can be configured.</p>
     <p>When set to rate limit messages, they are spread across the configured time period. It can
     also be set to discard any intermediate messages that arrive.</p>
-    <p>The "topic based fair queue" adds messages to a release queue tagged by their <b>msg.topic</b> property.
+    <p>The "topic based fair queue" adds messages to a release queue tagged by their <code>msg.topic</code> property.
     At each "tick", derived from the rate, the next "topic" is released.
     Any messages arriving on the same topic before release replace those in that position in the queue.
     So each "topic" gets a turn - but the most recent value is always the one sent.</p>
+    <p>The "timed release queue" adds messages to an array based on their <code>msg.topic</code> property.
+    At each "tick", all the latest messages are released. Any new messages arriving before release will
+    replace those of the same topic.</p>
 </script>
 
-<!-- Finally, the node type is registered along with all of its properties   -->
 <script type="text/javascript">
     RED.nodes.registerType('delay',{
-        category: 'function',      // the palette category
+        category: 'function',
         color:"#E6E0F8",
-        defaults: {             // defines the editable properties of the node
-            name: {value:""},   //  along with default values.
+        defaults: {
+            name: {value:""},
             pauseType: {value:"delay", required:true},
             timeout: {value:"5", required:true, validate:RED.validators.number()},
             timeoutUnits: {value:"seconds"},
@@ -103,10 +104,10 @@
             randomUnits: {value: "seconds"},
             drop: {value:false}
         },
-        inputs:1,                // set the number of inputs - only 0 or 1
-        outputs:1,               // set the number of outputs - 0 to n
-        icon: "timer.png",    // set the icon (held in public/icons)
-        label: function() {      // sets the default label contents
+        inputs:1,
+        outputs:1,
+        icon: "timer.png",
+        label: function() {
             if (this.pauseType == "delay") {
               var units = this.timeoutUnits ? this.timeoutUnits.charAt(0) : "s";
               if (this.timeoutUnits == "milliseconds") { units = "ms"; }
@@ -117,12 +118,15 @@
             } else if (this.pauseType == "random") {
               return this.name || this._("delay.label.random");
             }
+            else if (this.pauseType == "timed") {
+                return this.name || this.rate+" "+this._("delay.label.timed")+" "+this.rateUnits;
+            }
             else {
                 var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
                 return this.name || this._("delay.label.queue")+" "+this.rate+" msg/"+units;
             }
         },
-        labelStyle: function() { // sets the class to apply to the label
+        labelStyle: function() {
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
@@ -148,6 +152,11 @@
             $("#random-details").show();
             $("#node-input-dr").hide();
           } else if (this.pauseType == "queue") {
+            $("#delay-details").hide();
+            $("#rate-details").show();
+            $("#random-details").hide();
+            $("#node-input-dr").hide();
+          } else if (this.pauseType == "timed") {
             $("#delay-details").hide();
             $("#rate-details").show();
             $("#random-details").hide();
@@ -183,6 +192,11 @@
               $("#random-details").show();
               $("#node-input-dr").hide();
             } else if (this.value == "queue") {
+              $("#delay-details").hide();
+              $("#rate-details").show();
+              $("#random-details").hide();
+              $("#node-input-dr").hide();
+            } else if (this.value == "timed") {
               $("#delay-details").hide();
               $("#rate-details").show();
               $("#random-details").hide();

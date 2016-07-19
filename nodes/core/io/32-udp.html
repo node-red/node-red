@@ -18,7 +18,7 @@
 <script type="text/x-red" data-template-name="udp in">
     <div class="form-row">
         <label for="node-input-port"><i class="fa fa-sign-in"></i> <span data-i18n="udp.label.listen"></span></label>
-        <select id="node-input-multicast" style='width:62%'>
+        <select id="node-input-multicast" style='width:70%'>
           <option value="false" data-i18n="udp.udpmsgs"></option>
           <option value="true" data-i18n="udp.mcmsgs"></option>
         </select>
@@ -29,7 +29,7 @@
     </div>
     <div class="form-row node-input-iface">
         <label for="node-input-iface"><i class="fa fa-random"></i> <span data-i18n="udp.label.interface"></span></label>
-        <input type="text" id="node-input-iface" data-i18n="[placeholder]udp.label.interface">
+        <input type="text" id="node-input-iface" data-i18n="[placeholder]udp.label.interfaceprompt">
     </div>
     <div class="form-row">
         <label for="node-input-port"><i class="fa fa-sign-in"></i> <span data-i18n="udp.label.onport"></span></label>
@@ -56,9 +56,11 @@
 </script>
 
 <script type="text/x-red" data-help-name="udp in">
-    <p>A udp input node, that produces a <b>msg.payload</b> containing a <i>BUFFER</i>, string, or base64 encoded string. Supports multicast.</p>
-    <p>It also provides <b>msg.ip</b> and <b>msg.port</b> to the ip address and port from which the message was received.</p>
-    <p>On some systems you may need to be root to use ports below 1024 and/or broadcast.</p>
+    <p>A UDP input node, that produces a <code>msg.payload</code> containing a
+    Buffer, string, or base64 encoded string. Supports multicast.</p>
+    <p>It also provides <code>msg.ip</code> and <code>msg.port</code> set to the
+    ip address and port from which the message was received.</p>
+    <p><b>Note</b>: On some systems you may need to be root to use ports below 1024 and/or broadcast.</p>
 </script>
 
 <script type="text/javascript">
@@ -88,7 +90,7 @@
         },
         oneditprepare: function() {
             $("#node-input-multicast").change(function() {
-                var id = $("#node-input-multicast option:selected").val();
+                var id = $("#node-input-multicast").val();
                 if (id == "false") {
                     $(".node-input-group").hide();
                     $(".node-input-iface").hide();
@@ -110,7 +112,6 @@
             $("#node-input-port").change(function() {
                 var portnew = $("#node-input-port").val();
                 if (portsInUse.hasOwnProperty($("#node-input-port").val())) {
-                    console.log($("#node-input-port").val());
                     RED.notify(alreadyused+" "+$("#node-input-port").val(),"warn");
                 }
             });
@@ -163,10 +164,10 @@
 </script>
 
 <script type="text/x-red" data-help-name="udp out">
-    <p>This node sends <b>msg.payload</b> to the designated udp host and port. Supports multicast.</p>
-    <p>You may also use <b>msg.ip</b> and <b>msg.port</b> to set the destination values.<br/><b>Note</b>: the statically configured values have precedence.</p>
+    <p>This node sends <code>msg.payload</code> to the designated UDP host and port. Supports multicast.</p>
+    <p>You may also use <code>msg.ip</code> and <code>msg.port</code> to set the destination values, but the statically configured values have precedence.</p>
     <p>If you select broadcast either set the address to the local broadcast ip address, or maybe try 255.255.255.255, which is the global broadcast address.</p>
-    <p>On some systems you may need to be root to use ports below 1024 and/or broadcast.</p>
+    <p><b>Note</b>: On some systems you may need to be root to use ports below 1024 and/or broadcast.</p>
 </script>
 
 <script type="text/javascript">
@@ -201,12 +202,10 @@
             var bindtarget = this._("udp.bind.target");
 
             var type = this.outport==""?"random":"fixed";
-            $("#node-input-outport-type option").filter(function() {
-                return $(this).val() == type;
-            }).attr('selected',true);
+            $("#node-input-outport-type").val(type);
 
             $("#node-input-outport-type").change(function() {
-                var type = $(this).children("option:selected").val();
+                var type = $(this).val();
                 if (type == "random") {
                     $("#node-input-outport").val("").hide();
                 } else {
@@ -216,7 +215,7 @@
             $("#node-input-outport-type").change();
 
             $("#node-input-multicast").change(function() {
-                var id = $("#node-input-multicast option:selected").val();
+                var id = $("#node-input-multicast").val();
                 if (id === "multi") {
                     $(".node-input-iface").show();
                     $("#node-input-addr-label").html('<i class="fa fa-list"></i> ' + grouplabel);
@@ -232,7 +231,7 @@
                     $("#node-input-addr-label").html('<i class="fa fa-list"></i> ' + addresslabel);
                     $("#node-input-addr")[0].placeholder = addressph;
                 }
-                var type = $(this).children("option:selected").val();
+                var type = $(this).val();
                 if (type == "false") {
                     $("#node-input-outport-type-random").html(bindrandom);
                 } else {

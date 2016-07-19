@@ -23,6 +23,9 @@ RED.history = (function() {
                 undo_history[i].dirty = true;
             }
         },
+        list: function() {
+            return undo_history
+        },
         depth: function() {
             return undo_history.length;
         },
@@ -270,6 +273,10 @@ RED.history = (function() {
                             RED.nodes.addLink(ev.removedLinks[i]);
                         }
                     }
+                } else if (ev.t == "reorder") {
+                    if (ev.order) {
+                        RED.workspaces.order(ev.order);
+                    }
                 }
                 Object.keys(modifiedTabs).forEach(function(id) {
                     var subflow = RED.nodes.subflow(id);
@@ -284,6 +291,9 @@ RED.history = (function() {
                 RED.workspaces.refresh();
                 RED.sidebar.config.refresh();
             }
+        },
+        peek: function() {
+            return undo_history[undo_history.length-1];
         }
     }
 

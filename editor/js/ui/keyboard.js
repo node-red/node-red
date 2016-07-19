@@ -15,35 +15,47 @@
  **/
 RED.keyboard = (function() {
 
-    var active = true;
     var handlers = {};
 
-    d3.select(window).on("keydown",function() {
-        if (!active) { return; }
-        var handler = handlers[d3.event.keyCode];
-        if (handler && handler.ondown) {
-            if (!handler.modifiers ||
-                ((!handler.modifiers.shift || d3.event.shiftKey) &&
-                 (!handler.modifiers.ctrl  || d3.event.ctrlKey || d3.event.metaKey) &&
-                 (!handler.modifiers.alt   || d3.event.altKey) )) {
-                handler.ondown();
+    function resolveKeyEvent(evt) {
+        var slot = handlers;
+        if (evt.ctrlKey || evt.metaKey) {
+            slot = slot.ctrl;
+        }
+        if (slot && evt.shiftKey) {
+            slot = slot.shift;
+        }
+        if (slot && evt.altKey) {
+            slot = slot.alt;
+        }
+        if (slot && slot[evt.keyCode]) {
+            var handler = slot[evt.keyCode];
+            if (handler.scope && handler.scope !== "*") {
+                var target = evt.target;
+                while (target.nodeName !== 'BODY' && target.id !== handler.scope) {
+                    target = target.parentElement;
+                }
+                if (target.nodeName === 'BODY') {
+                    handler = null;
+                }
             }
+            return handler;
+        }
+    }
+    d3.select(window).on("keydown",function() {
+        var handler = resolveKeyEvent(d3.event);
+        if (handler && handler.ondown) {
+            handler.ondown();
+        }
+    });
+    d3.select(window).on("keyup",function() {
+        var handler = resolveKeyEvent(d3.event);
+        if (handler && handler.onup) {
+            handler.onup();
         }
     });
 
-    d3.select(window).on("keyup",function() {
-        if (!active) { return; }
-        var handler = handlers[d3.event.keyCode];
-        if (handler && handler.onup) {
-            if (!handler.modifiers ||
-                ((!handler.modifiers.shift || d3.event.shiftKey) &&
-                 (!handler.modifiers.ctrl  || d3.event.ctrlKey || d3.event.metaKey) &&
-                 (!handler.modifiers.alt   || d3.event.altKey) )) {
-                handler.onup();
-            }
-        }
-    });
-    function addHandler(key,modifiers,ondown,onup) {
+    function addHandler(scope,key,modifiers,ondown,onup) {
         var mod = modifiers;
         var cbdown = ondown;
         var cbup = onup;
@@ -52,15 +64,41 @@ RED.keyboard = (function() {
             cbdown = modifiers;
             cbup = ondown;
         }
-        handlers[key] = {modifiers:mod, ondown:cbdown, onup:cbup};
+        var slot = handlers;
+        if (mod.ctrl) {
+            slot.ctrl = slot.ctrl||{};
+            slot = slot.ctrl;
+        }
+        if (mod.shift) {
+            slot.shift = slot.shift||{};
+            slot = slot.shift;
+        }
+        if (mod.alt) {
+            slot.alt = slot.alt||{};
+            slot = slot.alt;
+        }
+        slot[key] = {scope: scope, ondown:cbdown, onup:cbup};
     }
-    function removeHandler(key) {
-        delete handlers[key];
+
+    function removeHandler(key,modifiers) {
+        var mod = modifiers || {};
+        var slot = handlers;
+        if (mod.ctrl) {
+            slot = slot.ctrl;
+        }
+        if (slot && mod.shift) {
+            slot = slot.shift;
+        }
+        if (slot && mod.alt) {
+            slot = slot.alt;
+        }
+        if (slot) {
+            delete slot[key];
+        }
     }
-    
-    
+
     var dialog = null;
-    
+
     function showKeyboardHelp() {
         if (!RED.settings.theme("menu.menu-item-keyboard-shortcuts",true)) {
             return;
@@ -72,21 +110,28 @@ RED.keyboard = (function() {
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">a</span></td><td>'+RED._("keyboard.selectAll")+'</td></tr>'+
                         '<tr><td><span class="help-key">Shift</span> + <span class="help-key">Click</span></td><td>'+RED._("keyboard.selectAllConnected")+'</td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">Click</span></td><td>'+RED._("keyboard.addRemoveNode")+'</td></tr>'+
-                        '<tr><td><span class="help-key">Delete</span></td><td>'+RED._("keyboard.deleteSelected")+'</td></tr>'+
                         '<tr><td>&nbsp;</td><td></td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">i</span></td><td>'+RED._("keyboard.importNode")+'</td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">e</span></td><td>'+RED._("keyboard.exportNode")+'</td></tr>'+
+                        '<tr><td>&nbsp;</td><td></td></tr>'+
+                        '<tr><td><span class="help-key"> &#x2190; </span> <span class="help-key"> &#x2191; </span> <span class="help-key"> &#x2192; </span> <span class="help-key"> &#x2193; </span></td><td>'+RED._("keyboard.nudgeNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key"> &#x2190; </span></td><td rowspan="4">'+RED._("keyboard.moveNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key"> &#x2191; </span></td></tr>'+
+                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key"> &#x2192; </span></td></tr>'+
+                        '<tr><td><span class="help-key">Shift</span> + <span class="help-key"> &#x2193; </span></td></tr>'+
                     '</table>'+
                 '</div>'+
                 '<div style="vertical-align: top;display:inline-block; box-sizing: border-box; width:50%; padding: 10px;">'+
                     '<table class="keyboard-shortcuts">'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">Space</span></td><td>'+RED._("keyboard.toggleSidebar")+'</td></tr>'+
                         '<tr><td></td><td></td></tr>'+
-                        '<tr><td><span class="help-key">Delete</span></td><td>'+RED._("keyboard.deleteNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Delete</span></td><td rowspan="2">'+RED._("keyboard.deleteSelected")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Backspace</span></td></tr>'+
                         '<tr><td></td><td></td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">c</span></td><td>'+RED._("keyboard.copyNode")+'</td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">x</span></td><td>'+RED._("keyboard.cutNode")+'</td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">v</span></td><td>'+RED._("keyboard.pasteNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">z</span></td><td>'+RED._("keyboard.undoChange")+'</td></tr>'+
                     '</table>'+
                 '</div>'+
                 '</div>')
@@ -96,25 +141,16 @@ RED.keyboard = (function() {
                 autoOpen: false,
                 width: "800",
                 title:"Keyboard shortcuts",
-                resizable: false,
-                open: function() {
-                    RED.keyboard.disable();
-                },
-                close: function() {
-                    RED.keyboard.enable();
-                }
+                resizable: false
             });
         }
-        
+
         dialog.dialog("open");
     }
-    
+
     return {
         add: addHandler,
         remove: removeHandler,
-        disable: function(){ active = false;},
-        enable: function(){ active = true; },
-        
         showHelp: showKeyboardHelp
     }
 

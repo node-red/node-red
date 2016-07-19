@@ -29,7 +29,12 @@ function init(runtime) {
     settings = runtime.settings;
     installer.init(runtime.settings);
     loader.init(runtime);
-    registry.init(runtime.settings,loader);
+    registry.init(settings,loader);
+}
+
+function load() {
+    registry.load();
+    return loader.load();
 }
 
 function addModule(module) {
@@ -52,7 +57,7 @@ function enableNodeSet(typeOrId) {
 
 module.exports = {
     init:init,
-    load:loader.load,
+    load:load,
     clear: registry.clear,
     registerType: registry.registerNodeConstructor,
 

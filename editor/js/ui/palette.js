@@ -66,7 +66,7 @@ RED.palette = (function() {
         var lineHeight = 20;
         var portHeight = 10;
 
-        var words = label.split(" ");
+        var words = label.split(/[ -]/);
 
         var displayLines = [];
 
@@ -134,14 +134,14 @@ RED.palette = (function() {
             d.id = "palette_node_"+nodeTypeId;
             d.type = nt;
 
-            var label;
-
-            if (typeof def.paletteLabel === "undefined") {
-                label = /^(.*?)([ -]in|[ -]out)?$/.exec(nt)[1];
-            } else {
-                label = (typeof def.paletteLabel === "function" ? def.paletteLabel.call(def) : def.paletteLabel)||"";
+            var label = /^(.*?)([ -]in|[ -]out)?$/.exec(nt)[1];
+            if (typeof def.paletteLabel !== "undefined") {
+                try {
+                    label = (typeof def.paletteLabel === "function" ? def.paletteLabel.call(def) : def.paletteLabel)||"";
+                } catch(err) {
+                    console.log("Definition error: "+nt+".paletteLabel",err);
+                }
             }
-
 
             $('<div/>',{class:"palette_label"+(def.align=="right"?" palette_label_right":"")}).appendTo(d);
 
@@ -149,7 +149,12 @@ RED.palette = (function() {
 
 
             if (def.icon) {
-                var icon_url = (typeof def.icon === "function" ? def.icon.call({}) : def.icon);
+                var icon_url = "arrow-in.png";
+                try {
+                    icon_url = (typeof def.icon === "function" ? def.icon.call({}) : def.icon);
+                } catch(err) {
+                    console.log("Definition error: "+nt+".icon",err);
+                }
                 var iconContainer = $('<div/>',{class:"palette_icon_container"+(def.align=="right"?" palette_icon_container_right":"")}).appendTo(d);
                 $('<div/>',{class:"palette_icon",style:"background-image: url(icons/"+icon_url+")"}).appendTo(iconContainer);
             }
@@ -227,10 +232,12 @@ RED.palette = (function() {
                 drag: function(e,ui) {
                     // TODO: this is the margin-left of palette node. Hard coding
                     // it here makes me sad
+                    //console.log(ui.helper.position());
                     ui.position.left += 17.5;
                     if (def.inputs > 0 && def.outputs > 0) {
-                        mouseX = e.clientX - chartOffset.left+chart.scrollLeft();
-                        mouseY = e.clientY-chartOffset.top +chart.scrollTop();
+                        mouseX = ui.position.left+(ui.helper.width()/2) - chartOffset.left + chart.scrollLeft();
+                        mouseY = ui.position.top+(ui.helper.height()/2) - chartOffset.top + chart.scrollTop();
+
 
                         if (!spliceTimer) {
                             spliceTimer = setTimeout(function() {
@@ -362,7 +369,7 @@ RED.palette = (function() {
             $("#palette-search-clear").show();
         }
 
-        var re = new RegExp(val,'i');
+        var re = new RegExp(val.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'),'i');
         $("#palette-container .palette_node").each(function(i,el) {
             var currentLabel = $(el).find(".palette_label").text();
             if (val === "" || re.test(el.id) || re.test(currentLabel)) {
@@ -396,13 +403,6 @@ RED.palette = (function() {
                 createCategoryContainer(category, RED._("palette.label."+category,{defaultValue:category}));
             });
         }
-
-        $("#palette-search-input").focus(function(e) {
-            RED.keyboard.disable();
-        });
-        $("#palette-search-input").blur(function(e) {
-            RED.keyboard.enable();
-        });
 
         $("#palette-search-clear").on("click",function(e) {
             e.preventDefault();

@@ -17,27 +17,27 @@
 <script type="text/x-red" data-template-name="xml">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name" style="width:280px !important">
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
     <div class="form-row" id="advanced">
     </div>
     <div id="advanced-options">
         <div class="form-row">
-            <i class="fa fa-key"></i> <span data-i18n="xml.label.represent"></span> <input type="text" id="node-input-attr" style="width:20px !important" placeholder="$">
+            <i class="fa fa-key"></i> <span data-i18n="xml.label.represent"></span> <input type="text" id="node-input-attr" style="text-align:center; width:40px" placeholder="$">
         </div>
         <div class="form-row">
-            <i class="fa fa-key"></i> <span data-i18n="xml.label.prefix"></span> <input type="text" id="node-input-chr" style="width:20px !important" placeholder="_">
+            <i class="fa fa-key"></i> <span data-i18n="xml.label.prefix"></span> <input type="text" id="node-input-chr" style="text-align:center; width:40px" placeholder="_">
         </div>
         <div class="form-tips"><span data-i18n="xml.tip"></span></div>
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="xml">
-    <p>A function that parses the <b>msg.payload</b> to convert xml to/from a javascript object. Places the result in the payload.</p>
+    <p>A function that parses the <code>msg.payload</code> to convert xml to/from a javascript object. Places the result in the payload.</p>
     <p>If the input is a string it tries to parse it as XML and creates a javascript object.</p>
     <p>If the input is a javascript object it tries to build an XML string.</p>
-    <p>You can also pass in a <b>msg.options</b> object to overide all the multitude of parameters. See
-    <a href="https://github.com/Leonidas-from-XIV/node-xml2js/blob/master/README.md" target="_new">the xml2js docs <i>here</i></a>
+    <p>You can also pass in a <code>msg.options</code> object to overide all the multitude of parameters. See
+    <a href="https://github.com/Leonidas-from-XIV/node-xml2js/blob/master/README.md#options" target="_new">the xml2js docs</a>
      for more information.</p>
      <p>If set, options in the edit dialogue override those passed in on the msg.options object.</p>
 </script>
@@ -53,7 +53,7 @@
         },
         inputs:1,
         outputs:1,
-        icon: "arrow-in.png",
+        icon: "parser-xml.png",
         label: function() {
             return this.name||"xml";
         },

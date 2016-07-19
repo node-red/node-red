@@ -71,11 +71,17 @@ describe('file Nodes', function() {
                 n1.emit("input", {payload:"test2"});    // string
                 setTimeout(function() {
                     n1.emit("input", {payload:true});       // boolean
-                },50);
+                },30);
+                setTimeout(function() {
+                    n1.emit("input", {payload:999});        // number
+                },60);
+                setTimeout(function() {
+                    n1.emit("input", {payload:[2]});        // object (array)
+                },90);
                 setTimeout(function() {
                     var f = fs.readFileSync(fileToTest).toString();
-                    f.should.have.length(11);
-                    f.should.equal("test2\ntrue\n");
+                    f.should.have.length(19);
+                    f.should.equal("test2\ntrue\n999\n[2]\n");
                     done();
                 },wait);
             });

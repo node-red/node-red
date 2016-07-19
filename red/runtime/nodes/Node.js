@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2015 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,8 +99,15 @@ Node.prototype.close = function() {
         }
     }
     if (promises.length > 0) {
-        return when.settle(promises);
+        return when.settle(promises).then(function() {
+            if (this._context) {
+                 context.delete(this._alias||this.id,this.z);
+            }
+        });
     } else {
+        if (this._context) {
+             context.delete(this._alias||this.id,this.z);
+        }
         return;
     }
 };
@@ -157,16 +164,18 @@ Node.prototype.send = function(msg) {
                         // for each msg to send eg. [[m1, m2, ...], ...]
                         for (k = 0; k < msgs.length; k++) {
                             var m = msgs[k];
-                            /* istanbul ignore else */
-                            if (!sentMessageId) {
-                                sentMessageId = m._msgid;
-                            }
-                            if (msgSent) {
-                                var clonedmsg = redUtil.cloneMessage(m);
-                                sendEvents.push({n:node,m:clonedmsg});
-                            } else {
-                                sendEvents.push({n:node,m:m});
-                                msgSent = true;
+                            if (m !== null && m !== undefined) {
+                                /* istanbul ignore else */
+                                if (!sentMessageId) {
+                                    sentMessageId = m._msgid;
+                                }
+                                if (msgSent) {
+                                    var clonedmsg = redUtil.cloneMessage(m);
+                                    sendEvents.push({n:node,m:clonedmsg});
+                                } else {
+                                    sendEvents.push({n:node,m:m});
+                                    msgSent = true;
+                                }
                             }
                         }
                     }

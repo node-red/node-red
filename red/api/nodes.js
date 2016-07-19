@@ -87,7 +87,7 @@ module.exports = {
             res.status(400).json({error:"settings_unavailable", message:"Settings unavailable"});
             return;
         }
-        var mod = req.params.mod;
+        var mod = req.params[0];
         try {
             var promise = null;
             var module = redNodes.getModuleInfo(mod);
@@ -114,7 +114,7 @@ module.exports = {
     },
 
     getSet: function(req,res) {
-        var id = req.params.mod + "/" + req.params.set;
+        var id = req.params[0] + "/" + req.params[2];
         var result = null;
         if (req.get("accept") === "application/json") {
             result = redNodes.getNodeInfo(id);
@@ -140,7 +140,7 @@ module.exports = {
     },
 
     getModule: function(req,res) {
-        var module = req.params.mod;
+        var module = req.params[0];
         var result = redNodes.getModuleInfo(module);
         if (result) {
             log.audit({event: "nodes.module.get",module:module},req);
@@ -163,7 +163,7 @@ module.exports = {
             res.status(400).json({error:"invalid_request", message:"Invalid request"});
             return;
         }
-        var id = req.params.mod + "/" + req.params.set;
+        var id = req.params[0] + "/" + req.params[2];
         try {
             var node = redNodes.getNodeInfo(id);
             var info;
@@ -195,7 +195,7 @@ module.exports = {
             res.status(400).json({error:"invalid_request", message:"Invalid request"});
             return;
         }
-        var mod = req.params.mod;
+        var mod = req.params[0];
         try {
             var module = redNodes.getModuleInfo(mod);
             if (!module) {

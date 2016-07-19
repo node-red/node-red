@@ -111,15 +111,41 @@
         },
         "sidebar": {
             "label": "debug",
-            "name": "Debug messages"
+            "name": "Debug messages",
+            "filterAll": "all flows",
+            "filterCurrent": "current flow"
+        }
+    },
+    "link": {
+        "linkIn": "link in",
+        "linkOut": "link out",
+        "label": {
+            "event": "Event name"
+        }
+    },
+    "tls": {
+        "tls": "TLS configuration",
+        "label": {
+            "cert": "Certificate",
+            "key": "Private Key",
+            "ca": "CA Certificate",
+            "verify-server-cert":"Verify server certificate"
+        },
+        "placeholder": {
+            "cert":"path to certificate (PEM format)",
+            "key":"path to private key (PEM format)",
+            "ca":"path to CA certificate (PEM format)"
+        },
+        "error": {
+            "missing-file": "No certificate/key file provided"
         }
     },
     "exec": {
-        "spawnerr": "Spawn command must be just the command - no spaces or extra parameters",
-        "badstdout": "Bad STDOUT",
         "label": {
             "command": "Command",
-            "append": "Append"
+            "append": "Append",
+            "timeout": "Timeout",
+            "timeoutplace": "optional"
         },
         "placeholder": {
             "extraparams": "extra input parameters"
@@ -131,6 +157,9 @@
         "label": {
             "function": "Function",
             "outputs": "Outputs"
+        },
+        "error": {
+            "inputListener":"Cannot add listener to 'input' event within Function"
         },
         "tip": "See the Info tab for help writing functions."
     },
@@ -152,6 +181,7 @@
         "randomdelay": "Random delay",
         "limitrate": "Limit rate to",
         "fairqueue": "Topic based fair queue",
+        "timedqueue": "Timed release queue",
         "milisecs": "Miliseconds",
         "secs": "Seconds",
         "sec": "Second",
@@ -169,10 +199,12 @@
             "delay": "delay",
             "limit": "limit",
             "random": "random",
-            "queue": "queue"
+            "queue": "queue",
+            "timed": "releases per"
         },
         "error": {
-            "buffer": "buffer exceeded 1000 messages"
+            "buffer": "buffer exceeded 1000 messages",
+            "buffer1": "buffer exceeded 10000 messages"
         }
     },
     "trigger": {
@@ -183,6 +215,8 @@
             "string": "the string",
             "number": "the number",
             "existing": "the existing msg.payload",
+            "original": "the original msg.payload",
+            "latest": "the latest msg.payload",
             "nothing": "nothing"
         },
         "wait-reset": "wait to be reset",
@@ -194,12 +228,13 @@
             "h": "Hours"
         },
         "extend": " extend delay if new message arrives",
-        "tip": "The node can also be reset by sending a message with the <b>msg.reset</b> property set to any value.",
         "label": {
             "trigger": "trigger",
             "trigger-block": "trigger & block",
-            "reset": "and reset if msg.payload == ",
-            "resetprompt": "(optional reset value)"
+            "reset": "Reset the trigger if:",
+            "resetMessage":"msg.reset is set",
+            "resetPayload":"msg.payload equals",
+            "resetprompt": "optional"
         }
     },
     "comment": {
@@ -224,6 +259,7 @@
             "keepalive": "Keep alive time (s)",
             "cleansession": "Use clean session",
             "use-tls": "Enable secure (SSL/TLS) connection",
+            "tls-config":"TLS Configuration",
             "verify-server-cert":"Verify server certificate",
             "compatmode": "Use legacy MQTT 3.1 support"
         },
@@ -263,7 +299,9 @@
             "return": "Return"
         },
         "setby": "- set by msg.method -",
-        "basicauth": "Use basic authentication?",
+        "basicauth": "Use basic authentication",
+        "use-tls": "Enable secure (SSL/TLS) connection",
+        "tls-config":"TLS Configuration",
         "utf8": "a UTF-8 string",
         "binary": "a binary buffer",
         "json": "a parsed JSON object",
@@ -377,7 +415,8 @@
             "using": "using",
             "output": "Output",
             "group": "Group",
-            "interface": "Interface",
+            "interface": "Local IP",
+            "interfaceprompt": "(optional) local ip address to bind to",
             "send": "Send a",
             "toport": "to port",
             "address": "Address",
@@ -404,7 +443,7 @@
         },
         "tip": {
             "in": "Tip: Make sure your firewall will allow the data in.",
-            "out": "Tip: leave address and port blank if you want to set using <b>msg.ip</b> and <b>msg.port</b>.",
+            "out": "Tip: leave address and port blank if you want to set using <code>msg.ip</code> and <code>msg.port</code>.",
             "port": "Ports already in use: "
         },
         "status": {
@@ -455,6 +494,7 @@
             "set": "set __property__",
             "change": "change __property__",
             "delete": "delete __property__",
+            "move": "move __property__",
             "changeCount": "change: __count__ rules",
             "regex": "Use regular expressions"
         },
@@ -462,6 +502,7 @@
             "set": "Set",
             "change": "Change",
             "delete": "Delete",
+            "move": "Move",
             "to": "to",
             "search": "Search for",
             "replace": "Replace with"
@@ -569,7 +610,7 @@
     },
     "rpi-gpio": {
         "label": {
-            "gpiopin": "GPIO Pin",
+            "gpiopin": "GPIO",
             "selectpin": "select pin",
             "resistor": "Resistor?",
             "readinitial": "Read initial state of pin on deploy/restart?",
@@ -636,7 +677,12 @@
     "tail": {
         "label": {
             "filename": "Filename",
+            "type": "File type",
             "splitlines": "Split lines on \\n?"
+        },
+        "action": {
+            "text": "Text - returns String",
+            "binary": "Binary - returns Buffer"
         },
         "errors": {
             "windowsnotsupport": "Not currently supported on Windows."

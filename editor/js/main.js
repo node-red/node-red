@@ -27,7 +27,7 @@ var RED = (function() {
                 RED.nodes.setNodeList(data);
 
                 var nsCount = 0;
-                for(var i=0;i<data.length;i++) {
+                for (var i=0;i<data.length;i++) {
                     var ns = data[i];
                     if (ns.module != "node-red") {
                         nsCount++;
@@ -81,7 +81,7 @@ var RED = (function() {
                     var parts = topic.split("/");
                     var node = RED.nodes.node(parts[1]);
                     if (node) {
-                        if (msg.text) {
+                        if (msg.hasOwnProperty("text")) {
                             msg.text = node._(msg.text.toString(),{defaultValue:msg.text.toString()});
                         }
                         node.status = msg;
@@ -103,8 +103,10 @@ var RED = (function() {
                             var id = m.id;
                             RED.nodes.addNodeSet(m);
                             addedTypes = addedTypes.concat(m.types);
-                            $.get('nodes/'+id, function(data) {
-                                $("body").append(data);
+                            RED.i18n.loadCatalog(id, function() {
+                                $.get('nodes/'+id, function(data) {
+                                    $("body").append(data);
+                                });
                             });
                         }
                         if (addedTypes.length) {
@@ -142,8 +144,21 @@ var RED = (function() {
                             RED.notify(RED._("palette.event.nodeDisabled", {count:msg.types.length})+typeList,"success");
                         }
                     }
+                    // Refresh flow library to ensure any examples are updated
+                    RED.library.loadFlowLibrary();
                 });
             }
+        });
+    }
+
+    function showAbout() {
+        $.get('red/about', function(data) {
+            var aboutHeader = '<div style="text-align:center;">'+
+                                '<img width="50px" src="red/images/node-red-icon.svg" />'+
+                              '</div>';
+
+            RED.sidebar.info.set(aboutHeader+marked(data));
+            RED.sidebar.info.show();
         });
     }
 
@@ -173,7 +188,7 @@ var RED = (function() {
                     {id:"menu-item-export-library",label:RED._("menu.label.library"),disabled:true,onselect:RED.library.export}
                 ]},
                 null,
-                {id:"menu-item-config-nodes",label:RED._("menu.label.displayConfig"),onselect:function(){}},
+                {id:"menu-item-config-nodes",label:RED._("menu.label.displayConfig"),onselect:function() {}},
                 {id:"menu-item-workspace",label:RED._("menu.label.flows"),options:[
                     {id:"menu-item-workspace-add",label:RED._("menu.label.add"),onselect:RED.workspaces.add},
                     {id:"menu-item-workspace-edit",label:RED._("menu.label.rename"),onselect:RED.workspaces.edit},
@@ -190,7 +205,7 @@ var RED = (function() {
                     label: RED.settings.theme("menu.menu-item-help.label","Node-RED Website"),
                     href: RED.settings.theme("menu.menu-item-help.url","http://nodered.org/docs")
                 },
-                {id:"menu-item-node-red-version", label:"v"+RED.settings.version}
+                {id:"menu-item-node-red-version", label:"v"+RED.settings.version, onselect: showAbout }
             ]
         });
 
@@ -207,7 +222,7 @@ var RED = (function() {
 
         RED.deploy.init(RED.settings.theme("deployButton",null));
 
-        RED.keyboard.add(/* ? */ 191,{shift:true},function(){RED.keyboard.showHelp();d3.event.preventDefault();});
+        RED.keyboard.add("workspace", /* ? */ 191,{shift:true},function() {RED.keyboard.showHelp();d3.event.preventDefault();});
         RED.comms.connect();
 
         $("#main-container").show();

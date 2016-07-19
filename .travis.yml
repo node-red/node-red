@@ -12,9 +12,9 @@ addons:
 matrix:
   allow_failures:
   - node_js: "5"
-before_install:
-  - npm install -g npm@latest-2
+  - node_js: "6"
 node_js:
+  - "6"
   - "5"
   - "4"
   - "0.12"

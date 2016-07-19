@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2015 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ var util = require('util');
 var path = require('path');
 var passport = require('passport');
 var when = require('when');
+var cors = require('cors');
 
 var ui = require("./ui");
 var nodes = require("./nodes");
@@ -40,6 +41,7 @@ var log;
 var adminApp;
 var nodeApp;
 var server;
+var runtime;
 
 var errorHandler = function(err,req,res,next) {
     if (err.message === "request entity too large") {
@@ -51,8 +53,18 @@ var errorHandler = function(err,req,res,next) {
     res.status(400).json({error:"unexpected_error", message:err.toString()});
 };
 
-function init(_server,runtime) {
+var ensureRuntimeStarted = function(req,res,next) {
+    if (!runtime.isStarted()) {
+        log.error("Node-RED runtime not started");
+        res.status(503).send("Not started");
+    } else {
+        next();
+    }
+}
+
+function init(_server,_runtime) {
     server = _server;
+    runtime = _runtime;
     var settings = runtime.settings;
     i18n = runtime.i18n;
     log = runtime.log;
@@ -75,7 +87,7 @@ function init(_server,runtime) {
         if (!settings.disableEditor) {
             ui.init(runtime);
             var editorApp = express();
-            editorApp.get("/",ui.ensureSlash,ui.editor);
+            editorApp.get("/",ensureRuntimeStarted,ui.ensureSlash,ui.editor);
             editorApp.get("/icons/:icon",ui.icon);
             theme.init(runtime);
             if (settings.editorTheme) {
@@ -101,6 +113,10 @@ function init(_server,runtime) {
             );
             adminApp.post("/auth/revoke",needsPermission(""),auth.revoke,errorHandler);
         }
+        if (settings.httpAdminCors) {
+            var corsHandler = cors(settings.httpAdminCors);
+            adminApp.use(corsHandler);
+        }
 
         // Flows
         adminApp.get("/flows",needsPermission("flows.read"),flows.get,errorHandler);
@@ -115,12 +131,12 @@ function init(_server,runtime) {
         adminApp.get("/nodes",needsPermission("nodes.read"),nodes.getAll,errorHandler);
         adminApp.post("/nodes",needsPermission("nodes.write"),nodes.post,errorHandler);
 
-        adminApp.get("/nodes/:mod",needsPermission("nodes.read"),nodes.getModule,errorHandler);
-        adminApp.put("/nodes/:mod",needsPermission("nodes.write"),nodes.putModule,errorHandler);
-        adminApp.delete("/nodes/:mod",needsPermission("nodes.write"),nodes.delete,errorHandler);
+        adminApp.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,needsPermission("nodes.read"),nodes.getModule,errorHandler);
+        adminApp.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,needsPermission("nodes.write"),nodes.putModule,errorHandler);
+        adminApp.delete(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,needsPermission("nodes.write"),nodes.delete,errorHandler);
 
-        adminApp.get("/nodes/:mod/:set",needsPermission("nodes.read"),nodes.getSet,errorHandler);
-        adminApp.put("/nodes/:mod/:set",needsPermission("nodes.write"),nodes.putSet,errorHandler);
+        adminApp.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,needsPermission("nodes.read"),nodes.getSet,errorHandler);
+        adminApp.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,needsPermission("nodes.write"),nodes.putSet,errorHandler);
 
         adminApp.get('/credentials/:type/:id', needsPermission("credentials.read"),credentials.get,errorHandler);
 

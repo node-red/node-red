@@ -40,4 +40,4 @@ SCRIPT_PATH="`pwd`";
 cd $CURRENT_PATH
 
 # Run Node-RED
-/usr/bin/env node $OPTIONS $SCRIPT_PATH/../red.js $ARGS
+exec /usr/bin/env node $OPTIONS $SCRIPT_PATH/../red.js $ARGS

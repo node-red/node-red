@@ -106,6 +106,45 @@ describe('LocalFileSystem', function() {
         });
     });
 
+    it('should handle empty flow file, no backup',function(done) {
+        localfilesystem.init({userDir:userDir}).then(function() {
+            var flowFile = 'flows_'+require('os').hostname()+'.json';
+            var flowFilePath = path.join(userDir,flowFile);
+            var flowFileBackupPath = path.join(userDir,"."+flowFile+".backup");
+            fs.closeSync(fs.openSync(flowFilePath, 'w'));
+            fs.existsSync(flowFilePath).should.be.true;
+            localfilesystem.getFlows().then(function(flows) {
+                flows.should.eql([]);
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+
+    it('should handle empty flow file, restores backup',function(done) {
+        localfilesystem.init({userDir:userDir}).then(function() {
+            var flowFile = 'flows_'+require('os').hostname()+'.json';
+            var flowFilePath = path.join(userDir,flowFile);
+            var flowFileBackupPath = path.join(userDir,"."+flowFile+".backup");
+            fs.closeSync(fs.openSync(flowFilePath, 'w'));
+            fs.existsSync(flowFilePath).should.be.true;
+            fs.existsSync(flowFileBackupPath).should.be.false;
+            fs.writeFileSync(flowFileBackupPath,JSON.stringify(testFlow));
+            fs.existsSync(flowFileBackupPath).should.be.true;
+            localfilesystem.getFlows().then(function(flows) {
+                flows.should.eql(testFlow);
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+
     it('should save flows to the default file',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             var flowFile = 'flows_'+require('os').hostname()+'.json';

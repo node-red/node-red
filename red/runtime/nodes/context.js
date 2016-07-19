@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 IBM Corp.
+ * Copyright 2015, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ function getContext(localId,flowId) {
     if (flowId) {
         contextId = localId+":"+flowId;
     }
-    if (contexts[contextId]) {
+    if (contexts.hasOwnProperty(contextId)) {
         return contexts[contextId];
     }
     var newContext = createContext(contextId);
@@ -65,7 +65,7 @@ function clean(flowConfig) {
     for (var id in contexts) {
         if (contexts.hasOwnProperty(id)) {
             var idParts = id.split(":");
-            if (!flowConfig.allNodes[idParts[0]]) {
+            if (!flowConfig.allNodes.hasOwnProperty(idParts[0])) {
                 delete contexts[id];
             }
         }
@@ -76,5 +76,6 @@ module.exports = {
         globalContext = createContext("global",settings.functionGlobalContext || {});
     },
     get: getContext,
+    delete: deleteContext,
     clean:clean
 };

@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 module.exports = {
     // the tcp port that the Node-RED web server is listening on
-    uiPort: 1880,
+    uiPort: process.env.PORT || 1880,
 
     // By default, the Node-RED UI accepts connections on all IPv4 interfaces.
     // The following property can be used to listen on a specific interface. For
@@ -39,6 +39,10 @@ module.exports = {
     // Timeout in milliseconds for TCP server socket connections
     //  defaults to no timeout
     //socketTimeout: 120000,
+
+    // Timeout in milliseconds for HTTP request connections
+    //  defaults to 120 seconds
+    //httpRequestTimeout: 120000,
 
     // The maximum length, in characters, of any message sent to the debug sidebar tab
     debugMaxLength: 1000,
@@ -76,7 +80,7 @@ module.exports = {
     // When httpAdminRoot is used to move the UI to a different root path, the
     // following property can be used to identify a directory of static content
     // that should be served at http://localhost:1880/.
-    //httpStatic: '/home/nol/node-red-dashboard/',
+    //httpStatic: '/home/nol/node-red-static/',
 
     // Securing Node-RED
     // -----------------
@@ -171,7 +175,6 @@ module.exports = {
             // debug - record information which is more verbose than info + info + warn + error + fatal errors
             // trace - record very detailed logging + debug + info + warn + error + fatal errors
             level: "info",
-
             // Whether or not to include metric events in the log output
             metrics: false,
             // Whether or not to include audit events in the log output

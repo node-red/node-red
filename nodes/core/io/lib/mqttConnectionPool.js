@@ -17,6 +17,8 @@ var util = require("util");
 var mqtt = require("./mqtt");
 var settings = require(process.env.NODE_RED_HOME+"/red/red").settings;
 
+util.log("[warn] nodes/core/io/lib/mqttConnectionPool.js is deprecated and will be removed in a future release of Node-RED. Please report this usage to the Node-RED mailing list.");
+
 var connections = {};
 
 function matchTopic(ts,t) {
@@ -60,7 +62,7 @@ module.exports = {
                     subscribe: function(topic,qos,callback,ref) {
                         ref = ref||0;
                         subscriptions[topic] = subscriptions[topic]||{};
-                        
+
                         var sub = {
                             topic:topic,
                             qos:qos,
@@ -104,7 +106,7 @@ module.exports = {
                         }
                     },
                     disconnect: function(ref) {
-                        
+
                         this._instances -= 1;
                         if (this._instances == 0) {
                             client.disconnect();

@@ -36,6 +36,7 @@ describe("flows api", function() {
 
     it('returns flow', function(done) {
         flows.init({
+            settings: {},
             log:{warn:function(){},_:function(){},audit:function(){}},
             nodes:{
                 getFlows: function() { return [1,2,3]; }
@@ -49,7 +50,8 @@ describe("flows api", function() {
                 if (err) {
                     return done(err);
                 }
-                res.body.should.be.an.Array.and.have.lengthOf(3);
+                res.body.should.be.an.Array;
+                res.body.should.have.lengthOf(3);
                 done();
             });
     });

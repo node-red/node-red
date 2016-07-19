@@ -20,7 +20,11 @@ var sinon = require("sinon");
 
 var typeRegistry = require("../../../../../red/runtime/nodes/registry/registry");
 
+var Node = require("../../../../../red/runtime/nodes/Node");
+
 var events = require("../../../../../red/runtime/events");
+
+var inherits = require("util").inherits;
 
 describe("red/nodes/registry/registry",function() {
 
@@ -71,9 +75,11 @@ describe("red/nodes/registry/registry",function() {
 
 
 
-    describe('#init', function() {
+    describe('#init/load', function() {
         it('loads initial config', function(done) {
             typeRegistry.init(settingsWithStorageAndInitialConfig);
+            typeRegistry.getNodeList().should.have.lengthOf(0);
+            typeRegistry.load();
             typeRegistry.getNodeList().should.have.lengthOf(1);
             done();
         });
@@ -109,6 +115,7 @@ describe("red/nodes/registry/registry",function() {
             };
             var expected = JSON.parse('{"node-red":{"name":"node-red","nodes":{"sentiment":{"name":"sentiment","types":["sentiment"],"enabled":true,"module":"node-red"},"inject":{"name":"inject","types":["inject"],"enabled":true,"module":"node-red"}}},"testModule":{"name":"testModule","nodes":{"a-module.js":{"name":"a-module.js","types":["example"],"enabled":true,"module":"testModule"}}}}');
             typeRegistry.init(legacySettings);
+            typeRegistry.load();
             legacySettings.set.calledOnce.should.be.true;
             legacySettings.set.args[0][1].should.eql(expected);
             done();
@@ -428,29 +435,52 @@ describe("red/nodes/registry/registry",function() {
     });
 
     describe('#registerNodeConstructor', function() {
+        var TestNodeConstructor;
         beforeEach(function() {
+            TestNodeConstructor = function TestNodeConstructor() {
+            };
             sinon.stub(events,'emit');
         });
         afterEach(function() {
             events.emit.restore();
         });
         it('registers a node constructor', function() {
-            typeRegistry.registerNodeConstructor('node-type',{});
+            typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
             events.emit.calledOnce.should.be.true;
             events.emit.lastCall.args[0].should.eql('type-registered');
             events.emit.lastCall.args[1].should.eql('node-type');
         })
         it('throws error on duplicate node registration', function() {
-            typeRegistry.registerNodeConstructor('node-type',{});
+            typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
             events.emit.calledOnce.should.be.true;
             events.emit.lastCall.args[0].should.eql('type-registered');
             events.emit.lastCall.args[1].should.eql('node-type');
             /*jshint immed: false */
             (function(){
-                typeRegistry.registerNodeConstructor('node-type',{});
+                typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
             }).should.throw("node-type already registered");
             events.emit.calledOnce.should.be.true;
-        })
+        });
+        it('extends a constructor with the Node constructor', function() {
+            TestNodeConstructor.prototype.should.not.be.an.instanceOf(Node);
+            typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
+        });
+        it('does not override a constructor\'s prototype', function() {
+            function Foo(){};
+            inherits(TestNodeConstructor,Foo);
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
+            TestNodeConstructor.prototype.should.not.be.an.instanceOf(Node);
+
+            typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
+
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
+
+            typeRegistry.registerNodeConstructor('node-set','node-type2',TestNodeConstructor);
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
+            TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
+        });
     });
 
 });

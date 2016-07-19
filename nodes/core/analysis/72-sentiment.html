@@ -22,10 +22,11 @@
 </script>
 
 <script type="text/x-red" data-help-name="sentiment">
-    <p>Analyses the <b>msg.payload</b> and adds a <b>msg.sentiment</b> object that contains the resulting AFINN-111 sentiment score as <b>msg.sentiment.score</b>.</p>
+    <p>Analyses the <code>msg.payload</code> and adds a <code>msg.sentiment</code> object
+    that contains the resulting AFINN-111 sentiment score as <code>msg.sentiment.score</code>.</p>
     <p>A score greater than zero is positive and less than zero is negative.</p>
     <p>The score typically ranges from -5 to +5, but can go higher and lower.</p>
-    <p>An object of word score overrides can be supplied as <b>msg.overrides</b>.</p>
+    <p>An object of word score overrides can be supplied as <code>msg.overrides</code>.</p>
     <p>See <a href="https://github.com/thisandagain/sentiment/blob/master/README.md" target="_new">the Sentiment docs here</a>.</p>
 </script>
 

@@ -56,7 +56,7 @@ function needsPermission(permission) {
                 if (permissions.hasPermission(req.authInfo.scope,permission)) {
                     return next();
                 }
-                log.audit({event: "permission.fail"},req);
+                log.audit({event: "permission.fail", permissions: permission},req);
                 return res.status(401).end();
             });
         } else {

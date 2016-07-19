@@ -88,15 +88,21 @@ function start() {
                         }
                     } else {
                         var completeConnection = function(userScope,sendAck) {
-                            if (!userScope || !Permissions.hasPermission(userScope,"status.read")) {
-                                ws.close();
-                            } else {
-                                pendingAuth = false;
-                                removePendingConnection(ws);
-                                activeConnections.push(ws);
-                                if (sendAck) {
-                                    ws.send(JSON.stringify({auth:"ok"}));
+                            try {
+                                if (!userScope || !Permissions.hasPermission(userScope,"status.read")) {
+                                    ws.send(JSON.stringify({auth:"fail"}));
+                                    ws.close();
+                                } else {
+                                    pendingAuth = false;
+                                    removePendingConnection(ws);
+                                    activeConnections.push(ws);
+                                    if (sendAck) {
+                                        ws.send(JSON.stringify({auth:"ok"}));
+                                    }
                                 }
+                            } catch(err) {
+                                // Just in case the socket closes before we attempt
+                                // to send anything.
                             }
                         }
                         if (msg.auth) {

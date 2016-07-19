@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,25 @@ var settings;
 
 /**
  * Registers a node constructor
+ * @param nodeSet - the nodeSet providing the node (module/set)
  * @param type - the string type name
  * @param constructor - the constructor function for this node type
  * @param opts - optional additional options for the node
  */
-function registerType(type,constructor,opts) {
+function registerType(nodeSet,type,constructor,opts) {
+    if (typeof type !== "string") {
+        // This is someone calling the api directly, rather than via the
+        // RED object provided to a node. Log a warning
+        log.warn("Deprecated call to RED.runtime.nodes.registerType - node-set name must be provided as first argument");
+        opts = constructor;
+        constructor = type;
+        type = nodeSet;
+        nodeSet = "";
+    }
     if (opts && opts.credentials) {
         credentials.register(type,opts.credentials);
     }
-    registry.registerType(type,constructor);
+    registry.registerType(nodeSet,type,constructor);
 }
 
 /**

@@ -17,11 +17,11 @@
 <script type="text/x-red" data-template-name="html">
     <div class="form-row">
         <label for="node-input-tag"><i class="fa fa-filter"></i> <span data-i18n="html.label.select"></span></label>
-        <input type="text" id="node-input-tag" style="width:73% !important" placeholder="h1">
+        <input type="text" id="node-input-tag" placeholder="h1">
     </div>
     <div class="form-row">
         <label for="node-input-ret"><i class="fa fa-sign-out"></i> <span data-i18n="html.label.output"></span></label>
-        <select id="node-input-ret" style="width:76% !important">
+        <select id="node-input-ret" style="width:70%">
             <option value="html" data-i18n="html.output.html"></option>
             <option value="text" data-i18n="html.output.text"></option>
             <option value="attr" data-i18n="html.output.attr"></option>
@@ -30,7 +30,7 @@
     </div>
     <div class="form-row">
         <label for="node-input-as">&nbsp;</label>
-        <select id="node-input-as" style="width:76% !important">
+        <select id="node-input-as" style="width:70%">
             <option value="single" data-i18n="html.format.single"></option>
             <option value="multi" data-i18n="html.format.multi"></option>
         </select>
@@ -38,13 +38,13 @@
     <br/>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
-        <input type="text" id="node-input-name" style="width:73% !important" data-i18n="[placeholder]common.label.name">
+        <input type="text" id="node-input-name" style="width:70%" data-i18n="[placeholder]common.label.name">
     </div>
     <div class="form-tips"><span data-i18n="[html]html.tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="html">
-    <p>Extracts elements from an html document held in <b>msg.payload</b> using a selector.</p>
+    <p>Extracts elements from an html document held in <code>msg.payload</code> using a selector.</p>
     <p>The selector uses <a href=="https://github.com/cheeriojs/cheerio/blob/master/Readme.md" target="_new">Cheerio</a>
      which uses the <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_new">CSS selector</a> syntax.</p>
     <p>The result can be either a single message with a payload containing an array of the matched elements, or multiple
@@ -63,7 +63,7 @@
         },
         inputs:1,
         outputs:1,
-        icon: "jq.png",
+        icon: "parser-html.png",
         label: function() {
             return this.name||this.tag||"html";
         },
