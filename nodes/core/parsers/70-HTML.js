@@ -20,16 +20,18 @@ module.exports = function(RED) {
 
     function CheerioNode(n) {
         RED.nodes.createNode(this,n);
-        this.tag = n.tag || "h1";
+        this.tag = n.tag;
         this.ret = n.ret || "html";
         this.as = n.as || "single";
         var node = this;
         this.on("input", function(msg) {
             if (msg.hasOwnProperty("payload")) {
+                var tag = node.tag;
+                if (msg.hasOwnProperty("select")) { tag = node.tag || msg.select; }
                 try {
                     var $ = cheerio.load(msg.payload);
                     var pay = [];
-                    $(node.tag).each(function() {
+                    $(tag).each(function() {
                         if (node.as === "multi") {
                             var pay2 = null;
                             if (node.ret === "html") { pay2 = cheerio.load($(this).html().trim()).xml(); }
