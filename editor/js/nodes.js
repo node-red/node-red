@@ -912,6 +912,10 @@ RED.nodes = (function() {
                     return (otherNode && otherNode.z === activeWorkspace)
                 });
             }
+
+            // With all properties now remapped to point at valid nodes,
+            // we can validate the node
+            RED.editor.validateNode(n);
         }
         for (i=0;i<new_subflows.length;i++) {
             n = new_subflows[i];
