@@ -48,7 +48,7 @@ describe('html node', function() {
         });
     });
 
-    it('should retrieve header contents as default', function(done) {
+    it('should retrieve header contents if asked to by msg.select', function(done) {
         fs.readFile(file, 'utf8', function(err, data) {
             var flow = [{id:"n1",type:"html",wires:[["n2"]],func:"return msg;"},
                         {id:"n2", type:"helper"}];
@@ -61,7 +61,7 @@ describe('html node', function() {
                     should.equal(msg.payload, 'This is a test page for node 70-HTML');
                     done();
                 });
-                n1.receive({payload:data,topic: "bar"});
+                n1.receive({payload:data,topic:"bar",select:"h1"});
             });
         });
     });
