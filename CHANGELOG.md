@@ -1,3 +1,14 @@
+#### 0.14.5: Maintenance Release
+
+Fixes
+
+ - Cannot clear cookies with http nodes
+ - let HTML parse node allow msg.select set select
+ - Validate nodes on import after any references have been remapped
+ - Debug node handles objects without constructor property Fixes #933
+ - Ensure 'false' property values are displayed in info panel Fixes #940
+ - Fix node enable/disable over restart - load configs after settings init
+
 #### 0.14.4: Maintenance Release
 
 Nodes
@@ -8,7 +19,7 @@ Nodes
  - Inject node should reuse the message it is triggered with Closes #914
  - Stop trigger node re-using old message
  - Allow node.status text to be 'falsey' values
- 
+
 Fixes
 
  - Handle DOMException when embedded in an iframe of different origin Fixes #932
