@@ -263,9 +263,9 @@ module.exports = function(RED) {
                         if (msg.cookies.hasOwnProperty(name)) {
                             if (msg.cookies[name] === null || msg.cookies[name].value === null) {
                                 if (msg.cookies[name]!==null) {
-                                    msg.res._res.clearCookie('name',msg.cookies[name]);
+                                    msg.res._res.clearCookie(name,msg.cookies[name]);
                                 } else {
-                                    msg.res._res.clearCookie('name');
+                                    msg.res._res.clearCookie(name);
                                 }
                             } else  if (typeof msg.cookies[name] === 'object') {
                                 msg.res._res.cookie(name,msg.cookies[name].value,msg.cookies[name]);
