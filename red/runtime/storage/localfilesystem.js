@@ -122,6 +122,53 @@ function writeFile(path,content) {
     });
 }
 
+
+function readFile(path,backupPath,emptyResponse,type) {
+    return when.promise(function(resolve) {
+        fs.readFile(path,'utf8',function(err,data) {
+            if (!err) {
+                if (data.length === 0) {
+                    log.warn(log._("storage.localfilesystem.empty",{type:type}));
+                    try {
+                        var backupStat = fs.statSync(backupPath);
+                        if (backupStat.size === 0) {
+                            // Empty flows, empty backup - return empty flow
+                            return resolve(emptyResponse);
+                        }
+                        // Empty flows, restore backup
+                        log.warn(log._("storage.localfilesystem.restore",{path:backupPath,type:type}));
+                        fs.copy(backupPath,path,function(backupCopyErr) {
+                            if (backupCopyErr) {
+                                // Restore backup failed
+                                log.warn(log._("storage.localfilesystem.restore-fail",{message:backupCopyErr.toString(),type:type}));
+                                resolve([]);
+                            } else {
+                                // Loop back in to load the restored backup
+                                resolve(readFile(path,backupPath,emptyResponse,type));
+                            }
+                        });
+                        return;
+                    } catch(backupStatErr) {
+                        // Empty flow file, no back-up file
+                        return resolve(emptyResponse);
+                    }
+                }
+                try {
+                    return resolve(JSON.parse(data));
+                } catch(parseErr) {
+                    log.warn(log._("storage.localfilesystem.invalid",{type:type}));
+                    return resolve(emptyResponse);
+                }
+            } else {
+                if (type === 'flow') {
+                    log.info(log._("storage.localfilesystem.create",{type:type}));
+                }
+                resolve(emptyResponse);
+            }
+        });
+    });
+}
+
 var localfilesystem = {
     init: function(_settings) {
         settings = _settings;
@@ -191,52 +238,12 @@ var localfilesystem = {
     },
 
     getFlows: function() {
-        return when.promise(function(resolve) {
-            if (!initialFlowLoadComplete) {
-                initialFlowLoadComplete = true;
-                log.info(log._("storage.localfilesystem.user-dir",{path:settings.userDir}));
-                log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));
-            }
-            fs.readFile(flowsFullPath,'utf8',function(err,data) {
-                if (!err) {
-                    if (data.length === 0) {
-                        log.warn(log._("storage.localfilesystem.empty"));
-                        try {
-                            var backupStat = fs.statSync(flowsFileBackup);
-                            if (backupStat.size === 0) {
-                                // Empty flows, empty backup - return empty flow
-                                return resolve([]);
-                            }
-                            // Empty flows, restore backup
-                            log.warn(log._("storage.localfilesystem.restore",{path:flowsFileBackup}));
-                            fs.copy(flowsFileBackup,flowsFullPath,function(backupCopyErr) {
-                                if (backupCopyErr) {
-                                    // Restore backup failed
-                                    log.warn(log._("storage.localfilesystem.restore-fail",{message:backupCopyErr.toString()}));
-                                    resolve([]);
-                                } else {
-                                    // Loop back in to load the restored backup
-                                    resolve(localfilesystem.getFlows());
-                                }
-                            });
-                            return;
-                        } catch(backupStatErr) {
-                            // Empty flow file, no back-up file
-                            return resolve([]);
-                        }
-                    }
-                    try {
-                        return resolve(JSON.parse(data));
-                    } catch(parseErr) {
-                        log.warn(log._("storage.localfilesystem.invalid"));
-                        return resolve([]);
-                    }
-                } else {
-                    log.info(log._("storage.localfilesystem.create"));
-                    resolve([]);
-                }
-            });
-        });
+        if (!initialFlowLoadComplete) {
+            initialFlowLoadComplete = true;
+            log.info(log._("storage.localfilesystem.user-dir",{path:settings.userDir}));
+            log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));
+        }
+        return readFile(flowsFullPath,flowsFileBackup,[],'flow');
     },
 
     saveFlows: function(flows) {
@@ -260,21 +267,7 @@ var localfilesystem = {
     },
 
     getCredentials: function() {
-        return when.promise(function(resolve) {
-            fs.readFile(credentialsFile,'utf8',function(err,data) {
-                if (!err) {
-                    resolve(JSON.parse(data));
-                } else {
-                    fs.readFile(oldCredentialsFile,'utf8',function(err,data) {
-                        if (!err) {
-                            resolve(JSON.parse(data));
-                        } else {
-                            resolve({});
-                        }
-                    });
-                }
-            });
-        });
+        return readFile(credentialsFile,credentialsFileBackup,{},'credentials');
     },
 
     saveCredentials: function(credentials) {
