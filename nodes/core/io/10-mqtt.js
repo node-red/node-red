@@ -85,13 +85,13 @@ module.exports = function(RED) {
         }
 
         // Create the URL to pass in to the MQTT.js library
-        if (this.brokerurl == "") {
+        if (this.brokerurl === "") {
             if (this.usetls) {
                 this.brokerurl="mqtts://";
             } else {
                 this.brokerurl="mqtt://";
             }
-            if (this.broker != "") {
+            if (this.broker !== "") {
                 this.brokerurl = this.brokerurl+this.broker+":"+this.port;
             } else {
                 this.brokerurl = this.brokerurl+"localhost:1883";
@@ -157,7 +157,7 @@ module.exports = function(RED) {
                     return node.client.end(done);
                 } else {
                     node.client.end();
-                    done();
+                    return done();
                 }
             }
             done();
@@ -183,14 +183,18 @@ module.exports = function(RED) {
 
                     // Re-subscribe to stored topics
                     for (var s in node.subscriptions) {
-                        var topic = s;
-                        var qos = 0;
-                        for (var r in node.subscriptions[s]) {
-                            qos = Math.max(qos,node.subscriptions[s][r].qos);
-                            node.client.on('message',node.subscriptions[s][r].handler);
+                        if (node.subscriptions.hasOwnProperty(s)) {
+                            var topic = s;
+                            var qos = 0;
+                            for (var r in node.subscriptions[s]) {
+                                if (node.subscriptions[s].hasOwnProperty(r)) {
+                                    qos = Math.max(qos,node.subscriptions[s][r].qos);
+                                    node.client.on('message',node.subscriptions[s][r].handler);
+                                }
+                            }
+                            var options = {qos: qos};
+                            node.client.subscribe(topic, options);
                         }
-                        var options = {qos: qos};
-                        node.client.subscribe(topic, options);
                     }
 
                     // Send any birth message
@@ -260,7 +264,7 @@ module.exports = function(RED) {
                     node.client.removeListener('message',sub[ref].handler);
                     delete sub[ref];
                 }
-                if (Object.keys(sub).length == 0) {
+                if (Object.keys(sub).length === 0) {
                     delete node.subscriptions[topic];
                     if (node.connected){
                         node.client.unsubscribe(topic);
@@ -294,7 +298,7 @@ module.exports = function(RED) {
                     done();
                 });
                 this.client.end();
-            } if (this.connecting) {
+            } else if (this.connecting) {
                 node.client.end();
                 done();
             } else {

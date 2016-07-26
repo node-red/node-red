@@ -87,7 +87,7 @@ MQTTClient.prototype.connect = function(options) {
                    }
              });
              client.on('connack',function(packet) {
-                   if (packet.returnCode == 0) {
+                   if (packet.returnCode === 0) {
                       self.watchdog = setInterval(function(self) {
                             var now = (new Date()).getTime();
 
@@ -230,7 +230,7 @@ MQTTClient.prototype.publish = function(topic,payload,qos,retain) {
          qos: qos||0,
          retain:retain||false
       };
-      if (options.qos != 0) {
+      if (options.qos !== 0) {
          options.messageId = self._nextMessageId();
       }
       this.lastOutbound = (new Date()).getTime()
