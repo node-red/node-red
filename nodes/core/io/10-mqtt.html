@@ -247,9 +247,9 @@
             clientid: {value:"", validate: function(v) {
                     if ($("#node-config-input-clientid").length) {
                         // Currently editing the node
-                        return $("#node-config-input-cleansession").is(":checked") || v.length > 0;
+                        return $("#node-config-input-cleansession").is(":checked") || (v||"").length > 0;
                     } else {
-                        return this.cleansession || v.length > 0;
+                        return (this.cleansession===undefined || this.cleansession) || (v||"").length > 0;
                     }
                 }},
             usetls: {value: false},
