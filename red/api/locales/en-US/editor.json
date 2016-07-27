@@ -225,6 +225,10 @@
             "filterUnused":"unused",
             "filterAll":"all",
             "filtered": "__count__ hidden"
+        },
+        "palette": {
+            "name": "Palette management",
+            "label": "palette"
         }
     },
     "typedInput": {
