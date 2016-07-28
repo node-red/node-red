@@ -115,6 +115,7 @@ function loadNodeFiles(nodeFiles) {
             if (nodeFiles[module].redVersion &&
                 !semver.satisfies(runtime.version().replace("-git",""), nodeFiles[module].redVersion)) {
                 //TODO: log it
+                runtime.log.warn("["+module+"] "+runtime.log._("server.node-version-mismatch",{version:nodeFiles[module].redVersion}));
                 continue;
             }
             if (module == "node-red" || !registry.getModuleInfo(module)) {

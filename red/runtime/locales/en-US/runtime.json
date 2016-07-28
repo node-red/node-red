@@ -13,6 +13,7 @@
         "errors_plural": "Failed to register __count__ node types",
         "errors-help": "Run with -v for details",
         "missing-modules": "Missing node modules:",
+        "node-version-mismatch": "Node module cannot be loaded on this version. Requires: __version__ ",
         "removing-modules": "Removing modules from config",
         "added-types": "Added node types:",
         "removed-types": "Removed node types:",

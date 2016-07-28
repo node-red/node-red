@@ -424,7 +424,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return "a node list" }));
             stubs.push(sinon.stub(registry,"addNodeSet", function(){ return }));
             stubs.push(sinon.stub(nodes,"registerType"));
-            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},version: function() { return "0.12.0"}, settings:{available:function(){return true;}}});
+            loader.init({log:{"_":function(){},warn:function(){}},nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},version: function() { return "0.12.0"}, settings:{available:function(){return true;}}});
             loader.addModule("TestNodeModule").then(function(result) {
                 result.should.eql("a node list");
                 registry.addNodeSet.called.should.be.false;

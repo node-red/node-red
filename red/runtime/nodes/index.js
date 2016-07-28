@@ -42,7 +42,7 @@ function registerType(nodeSet,type,constructor,opts) {
     if (typeof type !== "string") {
         // This is someone calling the api directly, rather than via the
         // RED object provided to a node. Log a warning
-        log.warn("Deprecated call to RED.runtime.nodes.registerType - node-set name must be provided as first argument");
+        log.warn("["+nodeSet+"] Deprecated call to RED.runtime.nodes.registerType - node-set name must be provided as first argument");
         opts = constructor;
         constructor = type;
         type = nodeSet;
