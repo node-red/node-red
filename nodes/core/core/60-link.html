@@ -29,10 +29,22 @@
     <div class="form-row node-input-link-row"></div>
 </script>
 <script type="text/x-red" data-help-name="link in">
-    <p>Receive messages from any link nodes that send the specified event.</p>
+    <p>Create virtual wires between flows.</p>
+    <p>The node can be connected to any <b>link out</b> node that exists on any tab.
+       Once connected, they behave as if they were wired together.</p>
+    <p>The wires between link nodes are only displayed when a link node is selected.
+       If there are any wires to other tabs, a virtual node is show that can be clicked
+       on to jump to the appropriate tab.</p>
+    <p>Links cannot be created going into, or out of, a subflow.</p>
 </script>
 <script type="text/x-red" data-help-name="link out">
-    <p>Send a message to any link input nodes listening for a given event.</p>
+    <p>Create virtual wires between flows.</p>
+    <p>The node can be connected to any <b>link in</b> node that exists on any tab.
+       Once connected, they behave as if they were wired together.</p>
+    <p>The wires between link nodes are only displayed when a link node is selected.
+       If there are any wires to other tabs, a virtual node is show that can be clicked
+       on to jump to the appropriate tab.</p>
+    <p>Links cannot be created going into, or out of, a subflow.</p>
 </script>
 <style>
 #node-input-link-container {
