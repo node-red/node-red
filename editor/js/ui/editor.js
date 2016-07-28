@@ -128,7 +128,11 @@ RED.editor = (function() {
             valid = value !== "";
         }
         if (valid && "validate" in definition[property]) {
-            valid = definition[property].validate.call(node,value);
+            try {
+                valid = definition[property].validate.call(node,value);
+            } catch(err) {
+                console.log("Validation error:",node.type,node.id,"property: "+property,"value:",value,err);
+            }
         }
         if (valid && definition[property].type && RED.nodes.getType(definition[property].type) && !("validate" in definition[property])) {
             if (!value || value == "_ADD_") {
@@ -247,7 +251,12 @@ RED.editor = (function() {
 
         if (configNode && node_def.label) {
             if (typeof node_def.label == "function") {
-                label = node_def.label.call(configNode);
+                try {
+                    label = node_def.label.call(configNode);
+                } catch(err) {
+                    console.log("Definition error: "+node_def.type+".label",err);
+                    label = node_def.type;
+                }
             } else {
                 label = node_def.label;
             }
@@ -1085,6 +1094,14 @@ RED.editor = (function() {
         RED.tray.show(trayOptions);
     }
 
+    function defaultConfigNodeSort(A,B) {
+        if (A.__label__ < B.__label__) {
+            return -1;
+        } else if (A.__label__ > B.__label__) {
+            return 1;
+        }
+        return 0;
+    }
 
     function updateConfigNodeSelect(name,type,value,prefix) {
         // if prefix is null, there is no config select to update
@@ -1114,25 +1131,32 @@ RED.editor = (function() {
                     if (config.type == type && (!config.z || config.z === activeWorkspace.id)) {
                         var label = "";
                         if (typeof node_def.label == "function") {
-                            label = node_def.label.call(config);
+                            try {
+                                label = node_def.label.call(config);
+                            } catch(err) {
+                                console.log("Definition error: "+node_def.type+".label",err);
+                                label = node_def.type;
+                            }
                         } else {
                             label = node_def.label;
                         }
-                        configNodes.push({id:config.id,label:label});
+                        config.__label__ = label;
+                        configNodes.push(config);
                     }
                 });
-
-                configNodes.sort(function(A,B) {
-                    if (A.label < B.label) {
-                        return -1;
-                    } else if (A.label > B.label) {
-                        return 1;
-                    }
-                    return 0;
-                });
+                var configSortFn = defaultConfigNodeSort;
+                if (typeof node_def.sort == "function") {
+                    configSortFn = node_def.sort;
+                }
+                try {
+                    configNodes.sort(configSortFn);
+                } catch(err) {
+                    console.log("Definition error: "+node_def.type+".sort",err);
+                }
 
                 configNodes.forEach(function(cn) {
-                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+cn.label+'</option>');
+                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+cn.__label__+'</option>');
+                    delete cn.__label__;
                 });
 
                 select.append('<option value="_ADD_"'+(value===""?" selected":"")+'>'+RED._("editor.addNewType", {type:type})+'</option>');
