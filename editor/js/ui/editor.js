@@ -1360,6 +1360,14 @@ RED.editor = (function() {
             if (options.value) {
                 session.setValue(options.value,-1);
             }
+            if (options.globals) {
+                setTimeout(function() {
+                    if (!!session.$worker) {
+                        session.$worker.send("setOptions", [{globals: options.globals}]);
+                    }
+                },100);
+            }
+
             return editor;
         }
     }
