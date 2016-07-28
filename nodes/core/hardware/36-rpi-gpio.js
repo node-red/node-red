@@ -30,10 +30,16 @@ module.exports = function(RED) {
     }
 
     try {
-        fs.statSync("/usr/share/doc/python-rpi.gpio");
+        fs.statSync("/usr/share/doc/python-rpi.gpio"); // test on Raspbian
+        // /usr/lib/python2.7/dist-packages/RPi/GPIO
     } catch(err) {
-        RED.log.warn(RED._("rpi-gpio.errors.libnotfound"));
-        throw "Warning : "+RED._("rpi-gpio.errors.libnotfound");
+        try {
+            fs.statSync("/usr/lib/python2.7/site-packages/RPi/GPIO"); // test on Arch
+        }
+        catch(err) {
+            RED.log.warn(RED._("rpi-gpio.errors.libnotfound"));
+            throw "Warning : "+RED._("rpi-gpio.errors.libnotfound");
+        }
     }
 
     if ( !(1 & parseInt((fs.statSync(gpioCommand).mode & parseInt("777", 8)).toString(8)[0]) )) {
