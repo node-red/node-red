@@ -11,6 +11,7 @@ Fixes
  - Allow config nodes to provide a sort function for their select list
  - Add log warning if node module required version cannot be satisfied
  - Handle empty credentials file. Closes #937
+ - Add RPi.GPIO lib test for ArchLinux
 
 #### 0.14.5: Maintenance Release
 
