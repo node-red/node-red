@@ -1,3 +1,17 @@
+#### 0.14.6: Maintenance Release
+
+Fixes
+
+ - Tell ace about Function node globals. Closes #927
+ - Tidy up mqtt nodes - linting and done handling. Closes #935
+ - Fix invalid html in TCP and HTML node edit templates
+ - Add proper help text to link nodes
+ - Handle importing old mqtt-broker configs that lack properties
+ - Update ace to 1.2.4
+ - Allow config nodes to provide a sort function for their select list
+ - Add log warning if node module required version cannot be satisfied
+ - Handle empty credentials file. Closes #937
+
 #### 0.14.5: Maintenance Release
 
 Fixes
