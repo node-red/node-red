@@ -89,7 +89,6 @@ module.exports = function(RED) {
                     } else if (typeof v2 !== 'undefined') {
                         v2 = RED.util.evaluateNodeProperty(rule.v2,rule.v2t,node,msg);
                     }
-                    node.previousValue = prop;
                     if (rule.t == "else") { test = elseflag; elseflag = true; }
                     if (operators[rule.t](test,v1,v2,rule.case)) {
                         onward.push(msg);
@@ -99,6 +98,7 @@ module.exports = function(RED) {
                         onward.push(null);
                     }
                 }
+                node.previousValue = prop;
                 this.send(onward);
             } catch(err) {
                 node.warn(err);
