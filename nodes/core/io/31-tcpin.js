@@ -394,10 +394,20 @@ module.exports = function(RED) {
 
         if (this.out != "char") { this.splitc = Number(this.splitc); }
         else {
-            this.splitc = this.splitc.replace("\\n",0x0A).replace("\\r",0x0D).replace("\\t",0x09).replace("\\e",0x1B).replace("\\f",0x0C).replace("\\0",0x00);
-            if (typeof this.splitc == "string") { this.splitc = this.splitc.charCodeAt(0); }
+            if (this.splitc[0] == '\\') {
+                this.splitc = parseInt(this.splitc.replace("\\n",0x0A).replace("\\r",0x0D).replace("\\t",0x09).replace("\\e",0x1B).replace("\\f",0x0C).replace("\\0",0x00));
+            }
+
+            if (typeof this.splitc == "string") {
+                if (this.splitc.substr(0,2) == "0x") {
+                    this.splitc = parseInt(this.splitc);
+                }
+                else {
+                    this.splitc = this.splitc.charCodeAt(0);
+                }
+            }
         } // jshint ignore:line
-        
+
         var buf;
         if (this.out == "count") {
             if (this.splitc === 0) { buf = new Buffer(1); }
