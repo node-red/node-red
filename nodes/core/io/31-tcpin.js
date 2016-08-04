@@ -396,8 +396,7 @@ module.exports = function(RED) {
         else {
             if (this.splitc[0] == '\\') {
                 this.splitc = parseInt(this.splitc.replace("\\n",0x0A).replace("\\r",0x0D).replace("\\t",0x09).replace("\\e",0x1B).replace("\\f",0x0C).replace("\\0",0x00));
-            }
-
+            } // jshint ignore:line
             if (typeof this.splitc == "string") {
                 if (this.splitc.substr(0,2) == "0x") {
                     this.splitc = parseInt(this.splitc);
@@ -405,8 +404,8 @@ module.exports = function(RED) {
                 else {
                     this.splitc = this.splitc.charCodeAt(0);
                 }
-            }
-        } // jshint ignore:line
+            } // jshint ignore:line
+        }
 
         var buf;
         if (this.out == "count") {
@@ -418,8 +417,10 @@ module.exports = function(RED) {
         this.connected = false;
         var node = this;
         var client;
+        var m;
 
         this.on("input", function(msg) {
+            m = msg;
             var i = 0;
             if ((!Buffer.isBuffer(msg.payload)) && (typeof msg.payload !== "string")) {
                 msg.payload = msg.payload.toString();
@@ -444,8 +445,8 @@ module.exports = function(RED) {
 
                 client.on('data', function(data) {
                     if (node.out == "sit") { // if we are staying connected just send the buffer
-                        msg.payload = data;
-                        node.send(msg);
+                        m.payload = data;
+                        node.send(m);
                     }
                     else if (node.splitc === 0) {
                         msg.payload = data;
