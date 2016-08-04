@@ -206,7 +206,6 @@ RED.sidebar = (function() {
         showSidebar();
         RED.sidebar.info.init();
         RED.sidebar.config.init();
-        RED.sidebar.palette.init();
         // hide info bar at start if screen rather narrow...
         if ($(window).width() < 600) { toggleSidebar(); }
     }

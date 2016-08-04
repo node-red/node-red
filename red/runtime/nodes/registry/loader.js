@@ -188,7 +188,8 @@ function loadNodeConfig(fileInfo) {
             template: file.replace(/\.js$/,".html"),
             enabled: isEnabled,
             loaded:false,
-            version: version
+            version: version,
+            local: fileInfo.local
         };
         if (fileInfo.hasOwnProperty("types")) {
             node.types = fileInfo.types;

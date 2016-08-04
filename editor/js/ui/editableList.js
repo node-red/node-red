@@ -67,6 +67,20 @@
                     });
             }
 
+            if (this.element.css("position") === "absolute") {
+                this.element.css("position","static");
+                this.topContainer.css("position","absolute");
+                this.uiContainer.css("position","absolute");
+
+                ["top","left","bottom","right"].forEach(function(s) {
+                    var v = that.element.css(s);
+                    if (s!=="auto" && s!=="") {
+                        that.topContainer.css(s,v);
+                        that.uiContainer.css(s,"0");
+                        that.element.css(s,'auto');
+                    }
+                })
+            }
             this.uiContainer.addClass("red-ui-editableList-container");
 
             this.uiHeight = this.element.height();
@@ -152,7 +166,23 @@
         addItem: function(data) {
             var that = this;
             data = data || {};
-            var li = $('<li>').appendTo(this.element);
+            var li = $('<li>');
+            var added = false;
+            if (this.options.sort) {
+                var items = this.items();
+                var skip = false;
+                items.each(function(i,el) {
+                    if (added) { return }
+                    var itemData = el.data('data');
+                    if (that.options.sort(data,itemData) < 0) {
+                         li.insertBefore(el.closest("li"));
+                         added = true;
+                    }
+                });
+            }
+            if (!added) {
+                li.appendTo(this.element);
+            }
             var row = $('<div/>').addClass("red-ui-editableList-item-content").appendTo(li);
             row.data('data',data);
             if (this.options.sortable === true) {

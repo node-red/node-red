@@ -393,6 +393,49 @@ RED.palette = (function() {
     }
 
     function init() {
+
+        RED.events.on('registry:node-type-added', function(nodeType) {
+            var def = RED.nodes.getType(nodeType);
+            addNodeType(nodeType,def);
+            if (def.onpaletteadd && typeof def.onpaletteadd === "function") {
+                def.onpaletteadd.call(def);
+            }
+        });
+        RED.events.on('registry:node-type-removed', function(nodeType) {
+            removeNodeType(nodeType);
+        });
+
+        RED.events.on('registry:node-set-enabled', function(nodeSet) {
+            for (var j=0;j<nodeSet.types.length;j++) {
+                showNodeType(nodeSet.types[j]);
+                var def = RED.nodes.getType(nodeSet.types[j]);
+                if (def.onpaletteadd && typeof def.onpaletteadd === "function") {
+                    def.onpaletteadd.call(def);
+                }
+            }
+        });
+        RED.events.on('registry:node-set-disabled', function(nodeSet) {
+            for (var j=0;j<nodeSet.types.length;j++) {
+                hideNodeType(nodeSet.types[j]);
+                var def = RED.nodes.getType(nodeSet.types[j]);
+                if (def.onpaletteremove && typeof def.onpaletteremove === "function") {
+                    def.onpaletteremove.call(def);
+                }
+            }
+        });
+        RED.events.on('registry:node-set-removed', function(nodeSet) {
+            if (nodeSet.added) {
+                for (var j=0;j<nodeSet.types.length;j++) {
+                    removeNodeType(nodeSet.types[j]);
+                    var def = RED.nodes.getType(nodeSet.types[j]);
+                    if (def.onpaletteremove && typeof def.onpaletteremove === "function") {
+                        def.onpaletteremove.call(def);
+                    }
+                }
+            }
+        });
+
+
         $(".palette-spinner").show();
         if (RED.settings.paletteCategories) {
             RED.settings.paletteCategories.forEach(function(category){
@@ -438,6 +481,8 @@ RED.palette = (function() {
                 }
             }
         });
+
+        RED.palette.editor.init();
     }
 
     return {

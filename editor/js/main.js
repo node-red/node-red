@@ -56,11 +56,9 @@ var RED = (function() {
             success: function(data) {
                 $("body").append(data);
                 $("body").i18n();
-
-
                 $(".palette-spinner").hide();
-                $(".palette-scroll").show();
-                $("#palette-search").show();
+                $(".palette-scroll").removeClass("hide");
+                $("#palette-search").removeClass("hide");
                 loadFlows();
             }
         });

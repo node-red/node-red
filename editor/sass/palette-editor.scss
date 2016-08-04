@@ -1,0 +1,158 @@
+/**
+ * Copyright 2016 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+#palette-editor {
+    text-align: left;
+    display: none;
+    position: absolute;
+    top: 0px;
+    right: 0;
+    bottom: 25px;
+    left:0;
+    padding: 0;
+    box-sizing:border-box;
+    background: #fff;
+
+    .red-ui-editableList-container {
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+        border-radius: 0;
+        padding: 0px;
+
+
+        li {
+            // border: none;
+            // border-top: 1px solid $primary-border-color;
+            padding: 0px;
+            .disabled {
+                background: #f3f3f3;
+            }
+            .red-ui-editableList-item-content {
+                padding: 12px 8px;
+            }
+            &:last-child {
+                // border-bottom: 1px solid $primary-border-color;
+            }
+        }
+
+    }
+    .palette-module-button-group {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        a {
+            margin-left: 5px;
+        }
+    }
+    .palette-module-meta {
+        overflow: hidden;
+        color: #666;
+        position: relative;
+        &.disabled {
+            color: #ccc;
+        }
+
+        .fa {
+            width: 15px;
+            text-align: center;
+            margin-right: 5px;
+        }
+    }
+    .palette-module-name {
+        white-space: nowrap;
+        @include enable-selection;
+    }
+    .palette-module-version {
+        font-style:italic;
+        font-size: 0.8em;
+        @include enable-selection;
+    }
+    .palette-module-set-button-group {
+    }
+    .palette-module-count {
+        border-radius: 4px;
+        background: #eee;
+        padding: 2px 8px;
+        font-size: 12px;
+    }
+    .palette-module-content {
+        display: none;
+        padding: 10px 3px;
+    }
+    i.fa.palette-module-node-chevron {
+        width: 8px;
+        margin-right: 0;
+        transform: rotate(0deg);
+        transition: transform 0.2s ease-in-out;
+    }
+    .expanded {
+        i.fa.palette-module-node-chevron {
+            transform: rotate(90deg);
+        }
+
+        .palette-module-set-button {
+            background:#f3f3f3 !important;
+        }
+    }
+    .palette-module-set {
+        border:1px solid $secondary-border-color;
+        border-radius: 0;
+        padding: 5px;
+        position: relative;
+        &:not(:last-child) {
+            border-bottom: none;
+        }
+        &:first-child {
+            border-top-right-radius: 2px;
+            border-top-left-radius: 2px;
+        }
+        &:last-child {
+            border-bottom-right-radius: 2px;
+            border-bottom-left-radius: 2px;
+        }
+    }
+
+    .palette-module-type {
+        color: #666;
+        padding-left: 5px;
+        font-size: 0.9em;
+        @include enable-selection;
+    }
+    .palette-module-type-swatch {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        vertical-align: middle;
+        margin-right: 5px;
+        background: #fff;
+        border: 1px solid #fff;
+    }
+    .palette-module-set-button-group {
+        position: absolute;
+        right: 4px;
+        top: 4px;
+    }
+
+    .palette-module-set-disabled {
+        background: #eee;
+        .palette-module-type {
+            color: #999;
+        }
+    }
+
+}

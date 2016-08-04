@@ -141,7 +141,8 @@ function scanTreeForNodesModules(moduleName) {
 
     if (settings.userDir) {
         userDir = path.join(settings.userDir,"node_modules");
-        results = results.concat(scanDirForNodesModules(userDir,moduleName));
+        results = scanDirForNodesModules(userDir,moduleName);
+        results.forEach(function(r) { r.local = true; });
     }
 
     if (dir) {
@@ -240,12 +241,14 @@ function getNodeFiles(disableNodePathScan) {
             nodeList[moduleFile.package.name] = {
                 name: moduleFile.package.name,
                 version: moduleFile.package.version,
+                local: moduleFile.local||false,
                 nodes: {}
             };
             if (moduleFile.package['node-red'].version) {
                 nodeList[moduleFile.package.name].redVersion = moduleFile.package['node-red'].version;
             }
             nodeModuleFiles.forEach(function(node) {
+                node.local = moduleFile.local||false;
                 nodeList[moduleFile.package.name].nodes[node.name] = node;
             });
             nodeFiles = nodeFiles.concat(nodeModuleFiles);

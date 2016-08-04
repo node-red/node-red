@@ -32,12 +32,22 @@ RED.nodes = (function() {
     }
 
     var registry = (function() {
+        var moduleList = {};
         var nodeList = [];
         var nodeSets = {};
         var typeToId = {};
         var nodeDefinitions = {};
 
         var exports = {
+            getModule: function(module) {
+                return moduleList[module];
+            },
+            getNodeSetForType: function(nodeType) {
+                return exports.getNodeSet(typeToId[nodeType]);
+            },
+            getModuleList: function() {
+                return moduleList;
+            },
             getNodeList: function() {
                 return nodeList;
             },
@@ -55,27 +65,38 @@ RED.nodes = (function() {
                     typeToId[ns.types[j]] = ns.id;
                 }
                 nodeList.push(ns);
+
+                moduleList[ns.module] = moduleList[ns.module] || {
+                    name:ns.module,
+                    version:ns.version,
+                    local:ns.local,
+                    sets:{}
+                };
+                moduleList[ns.module].sets[ns.name] = ns;
+                RED.events.emit("registry:node-set-added",ns);
             },
             removeNodeSet: function(id) {
                 var ns = nodeSets[id];
                 for (var j=0;j<ns.types.length;j++) {
-                    if (ns.added) {
-                        // TODO: too tightly coupled into palette UI
-                        RED.palette.remove(ns.types[j]);
-                        var def = nodeDefinitions[ns.types[j]];
-                        if (def.onpaletteremove && typeof def.onpaletteremove === "function") {
-                            def.onpaletteremove.call(def);
-                        }
-                    }
                     delete typeToId[ns.types[j]];
                 }
                 delete nodeSets[id];
                 for (var i=0;i<nodeList.length;i++) {
-                    if (nodeList[i].id == id) {
+                    if (nodeList[i].id === id) {
                         nodeList.splice(i,1);
                         break;
                     }
                 }
+                for (i=0;i<moduleList[ns.module].sets.length;i++) {
+                    if (moduleList[ns.module].sets[i].id === id) {
+                        moduleList[ns.module].sets[i].splice(i,1);
+                        break;
+                    }
+                }
+                if (moduleList[ns.module].sets.length === 0) {
+                    delete moduleList[ns.module];
+                }
+                RED.events.emit("registry:node-set-removed",ns);
                 return ns;
             },
             getNodeSet: function(id) {
@@ -84,32 +105,19 @@ RED.nodes = (function() {
             enableNodeSet: function(id) {
                 var ns = nodeSets[id];
                 ns.enabled = true;
-                for (var j=0;j<ns.types.length;j++) {
-                    // TODO: too tightly coupled into palette UI
-                    RED.palette.show(ns.types[j]);
-                    var def = nodeDefinitions[ns.types[j]];
-                    if (def.onpaletteadd && typeof def.onpaletteadd === "function") {
-                        def.onpaletteadd.call(def);
-                    }
-                }
+                RED.events.emit("registry:node-set-enabled",ns);
             },
             disableNodeSet: function(id) {
                 var ns = nodeSets[id];
                 ns.enabled = false;
-                for (var j=0;j<ns.types.length;j++) {
-                    // TODO: too tightly coupled into palette UI
-                    RED.palette.hide(ns.types[j]);
-                    var def = nodeDefinitions[ns.types[j]];
-                    if (def.onpaletteremove && typeof def.onpaletteremove === "function") {
-                        def.onpaletteremove.call(def);
-                    }
-                }
+                RED.events.emit("registry:node-set-disabled",ns);
             },
             registerNodeType: function(nt,def) {
                 nodeDefinitions[nt] = def;
                 if (def.category != "subflows") {
                     def.set = nodeSets[typeToId[nt]];
                     nodeSets[typeToId[nt]].added = true;
+                    nodeSets[typeToId[nt]].enabled = true;
 
                     var ns;
                     if (def.set.module === "node-red") {
@@ -127,10 +135,7 @@ RED.nodes = (function() {
 
                     // TODO: too tightly coupled into palette UI
                 }
-                RED.palette.add(nt,def);
-                if (def.onpaletteadd && typeof def.onpaletteadd === "function") {
-                    def.onpaletteadd.call(def);
-                }
+                RED.events.emit("registry:node-type-added",nt);
             },
             removeNodeType: function(nt) {
                 if (nt.substring(0,8) != "subflow:") {
@@ -138,7 +143,7 @@ RED.nodes = (function() {
                     throw new Error("this api is subflow only. called with:",nt);
                 }
                 delete nodeDefinitions[nt];
-                RED.palette.remove(nt);
+                RED.events.emit("registry:node-type-removed",nt);
             },
             getNodeType: function(nt) {
                 return nodeDefinitions[nt];
