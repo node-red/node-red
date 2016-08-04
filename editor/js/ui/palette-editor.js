@@ -155,6 +155,10 @@ RED.palette.editor = (function() {
         $("#header-shade").hide();
         $("#editor-shade").hide();
         $("#sidebar-shade").hide();
+        $("#palette-editor").find('.expanded').each(function(i,el) {
+            $(el).find(".palette-module-content").slideUp();
+            $(el).removeClass('expanded');
+        });
     }
 
     function init() {
