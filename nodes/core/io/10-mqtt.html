@@ -147,7 +147,7 @@
         <div id="mqtt-broker-tab-connection" style="display:none">
             <div class="form-row node-input-broker">
                 <label for="node-config-input-broker"><i class="fa fa-globe"></i> <span data-i18n="mqtt.label.broker"></span></label>
-                <input class="input-append-left" type="text" id="node-config-input-broker" placeholder="localhost" style="width: 40%;" >
+                <input class="input-append-left" type="text" id="node-config-input-broker" placeholder="e.g. localhost" style="width: 40%;" >
                 <label for="node-config-input-port" style="margin-left: 10px; width: 35px; "> <span data-i18n="mqtt.label.port"></span></label>
                 <input type="text" id="node-config-input-port" data-i18n="[placeholder]mqtt.label.port" style="width:45px">
             </div>
@@ -271,8 +271,9 @@
             password: {type: "password"}
         },
         label: function() {
-            if (this.broker === "") { this.broker = "localhost"; }
-            return (this.clientid?this.clientid+"@":"")+this.broker+":"+this.port;
+            var b = this.broker;
+            if (b === "") { b = "undefined"; }
+            return (this.clientid?this.clientid+"@":"")+b+":"+this.port;
         },
         oneditprepare: function () {
             var tabs = RED.tabs.create({
