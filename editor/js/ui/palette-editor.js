@@ -17,10 +17,10 @@ RED.palette.editor = (function() {
 
     var nodeList;
     var typesInUse = {};
-
     var nodeEntries = {};
-
     var eventTimers = {};
+
+    var activeFilter = "";
 
     function delayCallback(start,callback) {
         var delta = Date.now() - start;
@@ -96,6 +96,15 @@ RED.palette.editor = (function() {
     function _refreshNodeModule(module) {
         if (!nodeEntries.hasOwnProperty(module)) {
             nodeEntries[module] = {info:RED.nodes.registry.getModule(module)};
+            var index = [module];
+            for (var s in nodeEntries[module].info.sets) {
+                if (nodeEntries[module].info.sets.hasOwnProperty(s)) {
+                    index.push(s);
+                    index = index.concat(nodeEntries[module].info.sets[s].types)
+                }
+            }
+            nodeEntries[module].index = index.join(",").toLowerCase();
+
             nodeList.editableList('addItem', nodeEntries[module]);
             //console.log(nodeList.editableList('items'));
 
@@ -188,6 +197,19 @@ RED.palette.editor = (function() {
             $(el).find(".palette-module-content").slideUp();
             $(el).removeClass('expanded');
         });
+        $("#palette-editor-search input").val("");
+        filterChange("");
+    }
+
+    function filterChange(val) {
+        if (val === "") {
+            $("#palette-editor-search a").hide();
+            activeFilter = val;
+        } else {
+            $("#palette-editor-search a").show();
+            activeFilter = val.toLowerCase();
+        }
+        nodeList.editableList('filter');
     }
 
     function init() {
@@ -209,10 +231,38 @@ RED.palette.editor = (function() {
 
         var divTabs = $('<div>',{style:"position:absolute;top:80px;left:0;right:0;bottom:0"}).appendTo("#palette-editor");
 
-        nodeList = $('<ol>',{id:"palette-module-list", style:"position: absolute;top: 0;bottom: 0;left: 0;right: 0px;"}).appendTo(divTabs).editableList({
+        var searchDiv = $('<div>',{id:"palette-editor-search",class:"palette-search"}).appendTo(divTabs);
+        $('<i class="fa fa-search"></i><input type="text" data-i18n="[placeholder]palette.filter"><a href="#" class="palette-search-clear"><i class="fa fa-times"></i></a></input>').appendTo(searchDiv)
+
+        $("#palette-editor-search a").on("click",function(e) {
+            e.preventDefault();
+            $("#palette-editor-search input").val("");
+            filterChange("");
+            $("#palette-editor-search input").focus();
+        });
+
+        $("#palette-editor-search input").val("");
+        $("#palette-editor-search input").on("keyup",function() {
+            filterChange($(this).val());
+        });
+
+        $("#palette-editor-search input").on("focus",function() {
+            $("body").one("mousedown",function() {
+                $("#palette-editor-search input").blur();
+            });
+        });
+
+        nodeList = $('<ol>',{id:"palette-module-list", style:"position: absolute;top: 35px;bottom: 0;left: 0;right: 0px;"}).appendTo(divTabs).editableList({
             addButton: false,
             sort: function(A,B) {
                 return A.info.name.localeCompare(B.info.name);
+            },
+            filter: function(data) {
+                if (activeFilter === "" ) {
+                    return true;
+                }
+
+                return (activeFilter==="")||(data.index.indexOf(activeFilter) > -1);
             },
             addItem: function(container,i,object) {
                 var entry = object.info;

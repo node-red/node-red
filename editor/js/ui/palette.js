@@ -361,12 +361,11 @@ RED.palette = (function() {
         });
     }
 
-    function filterChange() {
-        var val = $("#palette-search-input").val();
+    function filterChange(val) {
         if (val === "") {
-            $("#palette-search-clear").hide();
+            $("#palette-search a").hide();
         } else {
-            $("#palette-search-clear").show();
+            $("#palette-search a").show();
         }
 
         var re = new RegExp(val.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'),'i');
@@ -447,21 +446,21 @@ RED.palette = (function() {
             });
         }
 
-        $("#palette-search-clear").on("click",function(e) {
+        $("#palette-search a").on("click",function(e) {
             e.preventDefault();
-            $("#palette-search-input").val("");
-            filterChange();
-            $("#palette-search-input").focus();
+            $("#palette-search input").val("");
+            filterChange("");
+            $("#palette-search input").focus();
         });
 
-        $("#palette-search-input").val("");
-        $("#palette-search-input").on("keyup",function() {
-            filterChange();
+        $("#palette-search input").val("");
+        $("#palette-search input").on("keyup",function() {
+            filterChange($(this).val());
         });
 
-        $("#palette-search-input").on("focus",function() {
+        $("#palette-search input").on("focus",function() {
             $("body").one("mousedown",function() {
-                $("#palette-search-input").blur();
+                $("#palette-search input").blur();
             });
         });
 

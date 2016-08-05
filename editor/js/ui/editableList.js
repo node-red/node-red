@@ -85,6 +85,8 @@
 
             this.uiHeight = this.element.height();
 
+            this.activeFilter = this.options.filter||null;
+
             var minHeight = this.element.css("minHeight");
             if (minHeight !== '0px') {
                 this.uiContainer.css("minHeight",minHeight);
@@ -155,6 +157,26 @@
         },
         _destroy: function() {
         },
+        _refreshFilter: function() {
+            var that = this;
+            if (!this.activeFilter) {
+                this.element.children().show();
+            }
+            var items = this.items();
+            items.each(function (i,el) {
+                var data = el.data('data');
+                try {
+                    if (that.activeFilter(data)) {
+                        el.parent().show();
+                    } else {
+                        el.parent().hide();
+                    }
+                } catch(err) {
+                    console.log(err);
+                    el.parent().show();
+                }
+            });
+        },
         width: function(desiredWidth) {
             this.uiWidth = desiredWidth;
             this._resize();
@@ -207,6 +229,15 @@
                 var index = that.element.children().length-1;
                 setTimeout(function() {
                     that.options.addItem(row,index,data);
+                    if (that.activeFilter) {
+                        try {
+                            if (!that.activeFilter(data)) {
+                                li.hide();
+                            }
+                        } catch(err) {
+                        }
+                    }
+
                     if (!that.options.sort) {
                         setTimeout(function() {
                             that.uiContainer.scrollTop(that.element.height());
@@ -229,6 +260,12 @@
         },
         empty: function() {
             this.element.empty();
+        },
+        filter: function(filter) {
+            if (filter !== undefined) {
+                this.activeFilter = filter;
+            }
+            this._refreshFilter();
         }
     });
 })(jQuery);
