@@ -22,7 +22,20 @@ RED.palette.editor = (function() {
 
     var eventTimers = {};
 
-    function changeNodeState(id,state,callback) {
+    function delayCallback(start,callback) {
+        var delta = Date.now() - start;
+        if (delta < 300) {
+            delta = 300;
+        } else {
+            delta = 0;
+        }
+        setTimeout(function() {
+            callback();
+        },delta);
+    }
+    function changeNodeState(id,state,shade,callback) {
+        shade.show();
+        var start = Date.now();
         $.ajax({
             url:"nodes/"+id,
             type: "PUT",
@@ -30,6 +43,22 @@ RED.palette.editor = (function() {
                 enabled: state
             }),
             contentType: "application/json; charset=utf-8"
+        }).done(function(data,textStatus,xhr) {
+            delayCallback(start,function() {
+                shade.hide();
+                callback();
+            });
+        }).fail(function(xhr,textStatus,err) {
+            delayCallback(start,function() {
+                shade.hide();
+                callback(xhr);
+            });
+        })
+    }
+    function removeNodeModule(id,callback) {
+        $.ajax({
+            url:"nodes/"+id,
+            type: "DELETE"
         }).done(function(data,textStatus,xhr) {
             callback();
         }).fail(function(xhr,textStatus,err) {
@@ -208,16 +237,27 @@ RED.palette.editor = (function() {
                 var removeButton = $('<a href="#" class="editor-button editor-button-small"></a>').html('remove').appendTo(buttonGroup);
                 if (!entry.local) {
                     removeButton.hide();
+                } else {
+                    removeButton.click(function() {
+                        shade.show();
+                        removeNodeModule(entry.name, function(xhr) {
+                            console.log(xhr);
+                        })
+                    })
                 }
                 var enableButton = $('<a href="#" class="editor-button editor-button-small"></a>').html('disable all').appendTo(buttonGroup);
 
                 var contentRow = $('<div>',{class:"palette-module-content"}).appendTo(container);
+                var shade = $('<div>',{class:"palette-module-shade hide"}).appendTo(container);
+                $('<img src="red/images/spin.svg" class="palette-spinner"/>').appendTo(shade);
+
 
                 object.elements = {
                     removeButton: removeButton,
                     enableButton: enableButton,
                     setCount: setCount,
                     container: container,
+                    shade: shade,
                     sets: {}
                 }
                 setButton.click(function() {
@@ -249,7 +289,8 @@ RED.palette.editor = (function() {
                     enableButton.click(function(evt) {
                         if (object.setUseCount[setName] === 0) {
                             var currentSet = RED.nodes.registry.getNodeSet(set.id);
-                            changeNodeState(set.id,!currentSet.enabled,function(xhr){
+                            shade.show();
+                            changeNodeState(set.id,!currentSet.enabled,shade,function(xhr){
                                 console.log(xhr)
                             });
                         }
@@ -264,7 +305,7 @@ RED.palette.editor = (function() {
                 });
                 enableButton.click(function(evt) {
                     if (object.totalUseCount === 0) {
-                        changeNodeState(entry.name,(container.hasClass('disabled')),function(xhr){
+                        changeNodeState(entry.name,(container.hasClass('disabled')),shade,function(xhr){
                             console.log(xhr)
                         });
                     }
@@ -292,7 +333,14 @@ RED.palette.editor = (function() {
             refreshNodeModule(ns.module);
         });
         RED.events.on('registry:node-set-removed', function(ns) {
-            refreshNodeModule(ns.module);
+            var module = RED.nodes.registry.getModule(ns.module);
+            if (!module) {
+                var entry = nodeEntries[ns.module];
+                if (entry) {
+                    nodeList.editableList('removeItem', entry);
+                    delete nodeEntries[ns.module];
+                }
+            }
         });
         RED.events.on('nodes:add', function(n) {
             typesInUse[n.type] = (typesInUse[n.type]||0)+1;

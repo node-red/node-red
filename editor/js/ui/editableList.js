@@ -207,9 +207,11 @@
                 var index = that.element.children().length-1;
                 setTimeout(function() {
                     that.options.addItem(row,index,data);
-                    setTimeout(function() {
-                        that.uiContainer.scrollTop(that.element.height());
-                    },0);
+                    if (!that.options.sort) {
+                        setTimeout(function() {
+                            that.uiContainer.scrollTop(that.element.height());
+                        },0);
+                    }
                 },0);
             }
         },

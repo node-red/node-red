@@ -87,13 +87,8 @@ RED.nodes = (function() {
                         break;
                     }
                 }
-                for (i=0;i<moduleList[ns.module].sets.length;i++) {
-                    if (moduleList[ns.module].sets[i].id === id) {
-                        moduleList[ns.module].sets[i].splice(i,1);
-                        break;
-                    }
-                }
-                if (moduleList[ns.module].sets.length === 0) {
+                delete moduleList[ns.module].sets[ns.name];
+                if (Object.keys(moduleList[ns.module].sets).length === 0) {
                     delete moduleList[ns.module];
                 }
                 RED.events.emit("registry:node-set-removed",ns);
