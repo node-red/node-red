@@ -43,8 +43,9 @@
 @import "palette-editor";
 
 
-@import "typedInput";
-@import "editableList";
+@import "ui/common/editableList";
+@import "ui/common/searchBox";
+@import "ui/common/typedInput";
 
 @import "dragdrop";
 

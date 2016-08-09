@@ -159,6 +159,7 @@
         },
         _refreshFilter: function() {
             var that = this;
+            var count = 0;
             if (!this.activeFilter) {
                 this.element.children().show();
             }
@@ -168,14 +169,17 @@
                 try {
                     if (that.activeFilter(data)) {
                         el.parent().show();
+                        count++;
                     } else {
                         el.parent().hide();
                     }
                 } catch(err) {
                     console.log(err);
                     el.parent().show();
+                    count++;
                 }
             });
+            return count;
         },
         width: function(desiredWidth) {
             this.uiWidth = desiredWidth;
@@ -265,7 +269,10 @@
             if (filter !== undefined) {
                 this.activeFilter = filter;
             }
-            this._refreshFilter();
+            return this._refreshFilter();
+        },
+        length: function() {
+            return this.element.children().length;
         }
     });
 })(jQuery);
