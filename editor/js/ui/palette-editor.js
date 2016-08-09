@@ -15,11 +15,17 @@
  **/
 RED.palette.editor = (function() {
 
+    var editorTabs;
+    var filterInput;
+    var searchInput;
     var nodeList;
+    var packageList;
+    var loadedList = [];
+    var filteredList = [];
+
     var typesInUse = {};
     var nodeEntries = {};
     var eventTimers = {};
-
     var activeFilter = "";
 
     function delayCallback(start,callback) {
@@ -54,6 +60,23 @@ RED.palette.editor = (function() {
                 callback(xhr);
             });
         })
+    }
+    function installNodeModule(id,shade,callback) {
+        shade.show();
+        $.ajax({
+            url:"nodes",
+            type: "POST",
+            data: JSON.stringify({
+                module: id
+            }),
+            contentType: "application/json; charset=utf-8"
+        }).done(function(data,textStatus,xhr) {
+            shade.hide();
+            callback();
+        }).fail(function(xhr,textStatus,err) {
+            shade.hide();
+            callback(xhr);
+        });
     }
     function removeNodeModule(id,callback) {
         $.ajax({
@@ -90,6 +113,70 @@ RED.palette.editor = (function() {
             }
         }
         return rgbColor;
+    }
+
+    function formatUpdatedAt(dateString) {
+        var now = new Date();
+        var d = new Date(dateString);
+        var delta = now.getTime() - d.getTime();
+
+        delta /= 1000;
+
+        if (delta < 60) {
+            return "seconds ago";
+        }
+
+        delta = Math.floor(delta/60);
+
+        if (delta < 10) {
+            return "minutes ago";
+        }
+        if (delta < 60) {
+            return delta+" minutes ago";
+        }
+
+        delta = Math.floor(delta/60);
+
+        if (delta < 24) {
+            return delta+" hour"+(delta>1?"s":"")+" ago";
+        }
+
+        delta = Math.floor(delta/24);
+
+        if (delta < 7) {
+            return delta+" day"+(delta>1?"s":"")+" ago";
+        }
+        var weeks = Math.floor(delta/7);
+        var days = delta%7;
+
+        if (weeks < 4) {
+            if (days === 0) {
+                return weeks+" week"+(weeks>1?"s":"")+" ago";
+            } else {
+                return weeks+" week"+(weeks>1?"s":"")+", "+days+" day"+(days>1?"s":"")+" ago";
+            }
+        }
+
+        var months = Math.floor(weeks/4);
+        weeks = weeks%4;
+
+        if (months < 12) {
+            if (weeks === 0) {
+                return months+" month"+(months>1?"s":"")+" ago";
+            } else {
+                return months+" month"+(months>1?"s":"")+", "+weeks+" week"+(weeks>1?"s":"")+" ago";
+            }
+        }
+
+        var years = Math.floor(months/12);
+        months = months%12;
+
+        if (months === 0) {
+            return years+" year"+(years>1?"s":"")+" ago";
+        } else {
+            return years+" year"+(years>1?"s":"")+", "+months+" month"+(months>1?"s":"")+" ago";
+        }
+
     }
 
 
@@ -187,6 +274,10 @@ RED.palette.editor = (function() {
         $("#editor-shade").show();
         $("#sidebar-shade").show();
         $("#main-container").addClass("palette-expanded");
+        setTimeout(function() {
+            editorTabs.resize();
+        },250);
+
     }
     function hidePaletteEditor() {
         $("#main-container").removeClass("palette-expanded");
@@ -197,22 +288,59 @@ RED.palette.editor = (function() {
             $(el).find(".palette-module-content").slideUp();
             $(el).removeClass('expanded');
         });
-        $("#palette-editor-search input").val("");
-        filterChange("");
+        filterInput.searchBox('value',"");
     }
 
     function filterChange(val) {
+        activeFilter = val.toLowerCase();
+        var visible = nodeList.editableList('filter');
+        var size = nodeList.editableList('length');
         if (val === "") {
-            $("#palette-editor-search a").hide();
-            activeFilter = val;
+            filterInput.searchBox('count');
         } else {
-            $("#palette-editor-search a").show();
-            activeFilter = val.toLowerCase();
+            filterInput.searchBox('count',visible+" / "+size);
         }
-        nodeList.editableList('filter');
     }
 
+    function initInstallTab() {
+        $("#palette-module-install-shade").show();
+        $.getJSON('http://catalog.nodered.org/catalog.json',function(v) {
+            loadedList = v;
+            searchInput.searchBox('count',loadedList.length);
+            loadedList.forEach(function(m) {
+                m.index = [m.id];
+                if (m.keywords) {
+                    m.index = m.index.concat(m.keywords);
+                }
+                m.index = m.index.join(",").toLowerCase();
+            })
+            $("#palette-module-install-shade").hide();
+
+        })
+
+    }
     function init() {
+
+        editorTabs = RED.tabs.create({
+            id:"palette-editor-tabs",
+            onchange:function(tab) {
+                $("#palette-editor .palette-editor-tab").hide();
+                tab.content.show();
+                if (tab.id === 'install') {
+                    initInstallTab();
+                    if (searchInput) {
+                        searchInput.focus();
+                    }
+                } else {
+                    if (filterInput) {
+                        filterInput.focus();
+                    }
+                }
+            },
+            minimumActiveTabWidth: 110
+        });
+
+
         $("#editor-shade").click(function() {
             if ($("#main-container").hasClass("palette-expanded")) {
                 hidePaletteEditor();
@@ -229,30 +357,27 @@ RED.palette.editor = (function() {
             hidePaletteEditor();
         })
 
-        var divTabs = $('<div>',{style:"position:absolute;top:80px;left:0;right:0;bottom:0"}).appendTo("#palette-editor");
+        var modulesTab = $('<div>',{class:"palette-editor-tab"}).appendTo("#palette-editor");
 
-        var searchDiv = $('<div>',{id:"palette-editor-search",class:"palette-search"}).appendTo(divTabs);
-        $('<i class="fa fa-search"></i><input type="text" data-i18n="[placeholder]palette.filter"><a href="#" class="palette-search-clear"><i class="fa fa-times"></i></a></input>').appendTo(searchDiv)
+        editorTabs.addTab({
+            id: 'nodes',
+            label: 'Nodes',
+            name: 'Nodes',
+            content: modulesTab
+        })
 
-        $("#palette-editor-search a").on("click",function(e) {
-            e.preventDefault();
-            $("#palette-editor-search input").val("");
-            filterChange("");
-            $("#palette-editor-search input").focus();
-        });
-
-        $("#palette-editor-search input").val("");
-        $("#palette-editor-search input").on("keyup",function() {
-            filterChange($(this).val());
-        });
-
-        $("#palette-editor-search input").on("focus",function() {
-            $("body").one("mousedown",function() {
-                $("#palette-editor-search input").blur();
+        var filterDiv = $('<div>',{class:"palette-search"}).appendTo(modulesTab);
+        filterInput = $('<input type="text" data-i18n="[placeholder]palette.filter"></input>')
+            .appendTo(filterDiv)
+            .searchBox({
+                delay: 200,
+                change: function() {
+                    filterChange($(this).val());
+                }
             });
-        });
 
-        nodeList = $('<ol>',{id:"palette-module-list", style:"position: absolute;top: 35px;bottom: 0;left: 0;right: 0px;"}).appendTo(divTabs).editableList({
+
+        nodeList = $('<ol>',{id:"palette-module-list", style:"position: absolute;top: 35px;bottom: 0;left: 0;right: 0px;"}).appendTo(modulesTab).editableList({
             addButton: false,
             sort: function(A,B) {
                 return A.info.name.localeCompare(B.info.name);
@@ -266,41 +391,29 @@ RED.palette.editor = (function() {
             },
             addItem: function(container,i,object) {
                 var entry = object.info;
-
                 var headerRow = $('<div>',{class:"palette-module-header"}).appendTo(container);
-
-                var titleRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
-                var chevron = $('<i class="fa fa-cube">').appendTo(titleRow);
-                var title = $('<span>',{class:"palette-module-name"}).html(entry.name).appendTo(titleRow);
-
-                var metaRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
-                var version = $('<span class="palette-module-version"><i class="fa fa-tag"></i></span>').appendTo(metaRow);
-                $('<span>').html(entry.version).appendTo(version);
-
-
+                var titleRow = $('<div class="palette-module-meta"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
+                $('<span>',{class:"palette-module-name"}).html(entry.name).appendTo(titleRow);
+                var metaRow = $('<div class="palette-module-meta"><span class="palette-module-version"><i class="fa fa-tag"></i></span></div>').appendTo(headerRow);
+                $('<span>').html(entry.version).appendTo(metaRow.find(".palette-module-version"));
                 var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
-
                 var setButton = $('<a href="#" class="editor-button editor-button-small palette-module-set-button"><i class="fa fa-angle-right palette-module-node-chevron"></i> </a>').appendTo(buttonRow);
                 var setCount = $('<span>').appendTo(setButton);
-
                 var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
                 var removeButton = $('<a href="#" class="editor-button editor-button-small"></a>').html('remove').appendTo(buttonGroup);
+                removeButton.click(function() {
+                    shade.show();
+                    removeNodeModule(entry.name, function(xhr) {
+                        console.log(xhr);
+                    })
+                })
                 if (!entry.local) {
                     removeButton.hide();
-                } else {
-                    removeButton.click(function() {
-                        shade.show();
-                        removeNodeModule(entry.name, function(xhr) {
-                            console.log(xhr);
-                        })
-                    })
                 }
                 var enableButton = $('<a href="#" class="editor-button editor-button-small"></a>').html('disable all').appendTo(buttonGroup);
 
                 var contentRow = $('<div>',{class:"palette-module-content"}).appendTo(container);
-                var shade = $('<div>',{class:"palette-module-shade hide"}).appendTo(container);
-                $('<img src="red/images/spin.svg" class="palette-spinner"/>').appendTo(shade);
-
+                var shade = $('<div class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(container);
 
                 object.elements = {
                     removeButton: removeButton,
@@ -365,6 +478,100 @@ RED.palette.editor = (function() {
             }
         });
 
+
+
+        var installTab = $('<div>',{class:"palette-editor-tab hide"}).appendTo("#palette-editor");
+
+        editorTabs.addTab({
+            id: 'install',
+            label: 'Install',
+            name: 'Install',
+            content: installTab
+        })
+
+        var searchDiv = $('<div>',{class:"palette-search"}).appendTo(installTab);
+        searchInput = $('<input type="text" data-i18n="[placeholder]palette.search"></input>')
+            .appendTo(searchDiv)
+            .searchBox({
+                delay: 300,
+                minimumLength: 2,
+                change: function() {
+                    var searchTerm = $(this).val();
+                    packageList.editableList('empty');
+                    if (searchTerm.length >= 2) {
+                        filteredList = loadedList.filter(function(m) {
+                            return (m.index.indexOf(searchTerm) > -1);
+                        }).map(function(f) { return {info:f}});
+                        for (var i=0;i<Math.min(10,filteredList.length);i++) {
+                            packageList.editableList('addItem',filteredList[i]);
+                        }
+                        if (filteredList.length > 10) {
+                            packageList.editableList('addItem',{start:10,more:filteredList.length-10})
+                        }
+                        searchInput.searchBox('count',filteredList.length+" / "+loadedList.length);
+                    } else {
+                        searchInput.searchBox('count',loadedList.length);
+                    }
+                }
+            });
+
+        $('<div id="palette-module-install-shade" class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(installTab);
+
+
+        packageList = $('<ol>',{id:"palette-module-list", style:"position: absolute;top: 35px;bottom: 0;left: 0;right: 0px;"}).appendTo(installTab).editableList({
+           addButton: false,
+        //    sort: function(A,B) {
+        //        return A.info.name.localeCompare(B.info.name);
+        //    },
+           addItem: function(container,i,object) {
+               if (object.more) {
+                   container.addClass('palette-module-more');
+                   var moreRow = $('<div>',{class:"palette-module-header palette-module"}).appendTo(container);
+                   var moreLink = $('<a href="#"></a>').html("+ "+object.more+" more").appendTo(moreRow);
+                   moreLink.click(function(e) {
+                       e.preventDefault();
+                       packageList.editableList('removeItem',object);
+                       for (var i=object.start;i<Math.min(object.start+10,object.start+object.more);i++) {
+                           packageList.editableList('addItem',filteredList[i]);
+                       }
+                       if (object.more > 10) {
+                           packageList.editableList('addItem',{start:object.start+10, more:object.more-10})
+                       }
+                   })
+                   return;
+               }
+               var entry = object.info;
+               var headerRow = $('<div>',{class:"palette-module-header"}).appendTo(container);
+               var titleRow = $('<div class="palette-module-meta"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
+               $('<span>',{class:"palette-module-name"}).html(entry.name||entry.id).appendTo(titleRow);
+               $('<a target="_blank" class="palette-module-link"><i class="fa fa-external-link"></i></a>').attr('href',entry.url).appendTo(titleRow);
+               var descRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
+               $('<div>',{class:"palette-module-description"}).html(entry.description).appendTo(descRow);
+
+               var metaRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
+               $('<span class="palette-module-version"><i class="fa fa-tag"></i> '+entry.version+'</span>').appendTo(metaRow);
+               $('<span class="palette-module-updated"><i class="fa fa-calendar"></i> '+formatUpdatedAt(entry.updated_at)+'</span>').appendTo(metaRow);
+               var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
+               var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
+               var shade = $('<div class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(container);
+               var installButton = $('<a href="#" class="editor-button editor-button-small"></a>').html('install').appendTo(buttonGroup);
+               installButton.click(function(e) {
+                   e.preventDefault();
+                   installNodeModule(entry.id,shade,function(xhr) {
+                       console.log(xhr);
+                   })
+               })
+               if (nodeEntries.hasOwnProperty(entry.id)) {
+                   installButton.hide();
+               }
+
+               object.elements = {
+                   installButton:installButton
+               }
+           }
+       });
+
+
         RED.events.on('registry:node-set-enabled', function(ns) {
             refreshNodeModule(ns.module);
         });
@@ -381,6 +588,12 @@ RED.palette.editor = (function() {
         });
         RED.events.on('registry:node-set-added', function(ns) {
             refreshNodeModule(ns.module);
+            for (var i=0;i<filteredList.length;i++) {
+                if (filteredList[i].info.id === ns.module) {
+                    filteredList[i].elements.installButton.hide();
+                    break;
+                }
+            }
         });
         RED.events.on('registry:node-set-removed', function(ns) {
             var module = RED.nodes.registry.getModule(ns.module);
@@ -389,6 +602,12 @@ RED.palette.editor = (function() {
                 if (entry) {
                     nodeList.editableList('removeItem', entry);
                     delete nodeEntries[ns.module];
+                    for (var i=0;i<filteredList.length;i++) {
+                        if (filteredList[i].info.id === ns.module) {
+                            filteredList[i].elements.installButton.show();
+                            break;
+                        }
+                    }
                 }
             }
         });

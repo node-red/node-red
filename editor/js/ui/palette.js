@@ -362,12 +362,6 @@ RED.palette = (function() {
     }
 
     function filterChange(val) {
-        if (val === "") {
-            $("#palette-search a").hide();
-        } else {
-            $("#palette-search a").show();
-        }
-
         var re = new RegExp(val.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'),'i');
         $("#palette-container .palette_node").each(function(i,el) {
             var currentLabel = $(el).find(".palette_label").text();
@@ -435,7 +429,15 @@ RED.palette = (function() {
         });
 
 
-        $(".palette-spinner").show();
+        $("#palette > .palette-spinner").show();
+
+        $("#palette-search input").searchBox({
+            delay: 100,
+            change: function() {
+                filterChange($(this).val());
+            }
+        })
+
         if (RED.settings.paletteCategories) {
             RED.settings.paletteCategories.forEach(function(category){
                 createCategoryContainer(category, RED._("palette.label."+category,{defaultValue:category}));
@@ -445,24 +447,6 @@ RED.palette = (function() {
                 createCategoryContainer(category, RED._("palette.label."+category,{defaultValue:category}));
             });
         }
-
-        $("#palette-search a").on("click",function(e) {
-            e.preventDefault();
-            $("#palette-search input").val("");
-            filterChange("");
-            $("#palette-search input").focus();
-        });
-
-        $("#palette-search input").val("");
-        $("#palette-search input").on("keyup",function() {
-            filterChange($(this).val());
-        });
-
-        $("#palette-search input").on("focus",function() {
-            $("body").one("mousedown",function() {
-                $("#palette-search input").blur();
-            });
-        });
 
         $("#palette-collapse-all").on("click", function(e) {
             e.preventDefault();

@@ -180,6 +180,7 @@
     "palette": {
         "noInfo": "no information available",
         "filter": "filter nodes",
+        "search": "search modules",
         "label": {
             "subflows": "subflows",
             "input": "input",

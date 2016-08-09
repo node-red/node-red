@@ -56,7 +56,7 @@ var RED = (function() {
             success: function(data) {
                 $("body").append(data);
                 $("body").i18n();
-                $(".palette-spinner").hide();
+                $("#palette > .palette-spinner").hide();
                 $(".palette-scroll").removeClass("hide");
                 $("#palette-search").removeClass("hide");
                 loadFlows();

@@ -27,9 +27,7 @@
     background: #fff;
 
     .red-ui-editableList-container {
-        border-left: none;
-        border-right: none;
-        border-bottom: none;
+        border: none;
         border-radius: 0;
         padding: 0px;
 
@@ -50,6 +48,14 @@
         }
 
     }
+    .palette-editor-tab {
+        position:absolute;
+        top:115px;
+        left:0;
+        right:0;
+        bottom:0
+    }
+
     .palette-module-button-group {
         position: absolute;
         right: 0;
@@ -68,7 +74,6 @@
         text-align: center;
     }
     .palette-module-meta {
-        overflow: hidden;
         color: #666;
         position: relative;
         &.disabled {
@@ -85,10 +90,24 @@
         white-space: nowrap;
         @include enable-selection;
     }
-    .palette-module-version {
+    .palette-module-version, .palette-module-updated, .palette-module-link {
         font-style:italic;
         font-size: 0.8em;
         @include enable-selection;
+    }
+    .palette-module-updated {
+        margin-left: 10px;
+    }
+    .palette-module-link {
+        margin-left: 5px;
+    }
+
+    .palette-module-description {
+        margin-left: 20px;
+        font-size: 0.9em;
+        color: #999;
+    }
+    .palette-module-link {
     }
     .palette-module-set-button-group {
     }
@@ -161,6 +180,23 @@
         background: #eee;
         .palette-module-type {
             color: #999;
+        }
+    }
+    .palette-module-more {
+        padding: 0 !important;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        background: $tab-background-inactive;
+        a {
+            display: block;
+            text-align: center;
+            padding: 12px 8px;
+            color: #AD1625;
+
+            &:hover {
+                text-decoration: none;
+                background: $tab-background-hover;
+            }
         }
     }
 

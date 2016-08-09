@@ -59,10 +59,11 @@
     <div id="palette">
         <img src="red/images/spin.svg" class="palette-spinner hide"/>
         <div id="palette-search" class="palette-search hide">
-            <i class="fa fa-search"></i><input type="text" data-i18n="[placeholder]palette.filter"><a href="#" class="palette-search-clear"><i class="fa fa-times"></i></a></input>
+            <input type="text" data-i18n="[placeholder]palette.filter"></input>
         </div>
         <div id="palette-editor">
             <div class="editor-tray-header"><div class="editor-tray-titlebar"><ul class="editor-tray-breadcrumbs"><li>Manage palette</li></ul></div><div class="editor-tray-toolbar"><button id="palette-editor-close" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only primary" role="button" aria-disabled="false">Done</button></div></div>
+            <ul id="palette-editor-tabs"></ul>
         </div>
         <div id="palette-container" class="palette-scroll hide"></div>
         <div id="palette-footer">
