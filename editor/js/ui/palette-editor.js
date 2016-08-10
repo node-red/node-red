@@ -304,7 +304,8 @@ RED.palette.editor = (function() {
 
     function initInstallTab() {
         $("#palette-module-install-shade").show();
-        $.getJSON('http://catalog.nodered.org/catalog.json',function(v) {
+        
+        $.getJSON('http://catalogue.nodered.org/catalogue.json',function(v) {
             loadedList = v;
             searchInput.searchBox('count',loadedList.length);
             loadedList.forEach(function(m) {
@@ -320,6 +321,8 @@ RED.palette.editor = (function() {
 
     }
     function init() {
+
+        $(".palette-editor-button").show();
 
         editorTabs = RED.tabs.create({
             id:"palette-editor-tabs",

@@ -17,7 +17,7 @@
 RED.palette = (function() {
 
     var exclusion = ['config','unknown','deprecated'];
-    var core = ['subflows', 'input', 'output', 'function', 'social', 'mobile', 'storage', 'analysis', 'advanced'];
+    var coreCategories = ['subflows', 'input', 'output', 'function', 'social', 'mobile', 'storage', 'analysis', 'advanced'];
 
     var categoryContainers = {};
 
@@ -174,7 +174,7 @@ RED.palette = (function() {
             }
 
             if ($("#palette-base-category-"+rootCategory).length === 0) {
-                if(core.indexOf(rootCategory) !== -1){
+                if(coreCategories.indexOf(rootCategory) !== -1){
                     createCategoryContainer(rootCategory, RED._("node-red:palette.label."+rootCategory, {defaultValue:rootCategory}));
                 } else {
                     var ns = def.set.id;
@@ -438,15 +438,18 @@ RED.palette = (function() {
             }
         })
 
+        var categoryList = coreCategories;
         if (RED.settings.paletteCategories) {
-            RED.settings.paletteCategories.forEach(function(category){
-                createCategoryContainer(category, RED._("palette.label."+category,{defaultValue:category}));
-            });
-        } else {
-            core.forEach(function(category){
-                createCategoryContainer(category, RED._("palette.label."+category,{defaultValue:category}));
-            });
+            categoryList = RED.settings.paletteCategories;
+        } else if (RED.settings.theme('palette.categories')) {
+            categoryList = RED.settings.theme('palette.categories');
         }
+        if (!Array.isArray(categoryList)) {
+            categoryList = coreCategories
+        }
+        categoryList.forEach(function(category){
+            createCategoryContainer(category, RED._("palette.label."+category,{defaultValue:category}));
+        });
 
         $("#palette-collapse-all").on("click", function(e) {
             e.preventDefault();
@@ -465,7 +468,9 @@ RED.palette = (function() {
             }
         });
 
-        RED.palette.editor.init();
+        if (RED.settings.theme('palette.editable') !== false) {
+            RED.palette.editor.init();
+        }
     }
 
     return {

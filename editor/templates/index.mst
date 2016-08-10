@@ -67,7 +67,7 @@
         </div>
         <div id="palette-container" class="palette-scroll hide"></div>
         <div id="palette-footer">
-            <div style="float:left">
+            <div style="float:left" class="palette-editor-button hide">
                 <a class="palette-button palette-button-left" id="palette-edit" href="#"><i class="fa fa-cog"></i></a>
             </div>
             <a class="palette-button" id="palette-collapse-all" href="#"><i class="fa fa-angle-double-up"></i></a>
