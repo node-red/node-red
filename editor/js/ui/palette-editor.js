@@ -304,9 +304,9 @@ RED.palette.editor = (function() {
 
     function initInstallTab() {
         $("#palette-module-install-shade").show();
-        
+
         $.getJSON('http://catalogue.nodered.org/catalogue.json',function(v) {
-            loadedList = v;
+            loadedList = v.modules;
             searchInput.searchBox('count',loadedList.length);
             loadedList.forEach(function(m) {
                 m.index = [m.id];
