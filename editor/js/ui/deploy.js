@@ -138,7 +138,12 @@ RED.deploy = (function() {
         }
         var label = "";
         if (typeof node._def.label == "function") {
-            label = node._def.label.call(node);
+            try {
+                label = node._def.label.call(node);
+            } catch(err) {
+                console.log("Definition error: "+node_def.type+".label",err);
+                label = node_def.type;
+            }
         } else {
             label = node._def.label;
         }
