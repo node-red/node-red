@@ -53,15 +53,11 @@
     overflow-y: auto;
     box-sizing:border-box;
 }
-.palette-spinner {
-    padding-top: 40px;
+#palette > .palette-spinner {
+    padding-top: 80px;
 }
-
 .palette-search {
-    position: absolute;
-    top: 0;
-    left:0;
-    right:0;
+    position: relative;
     overflow: hidden;
     background: #ffffff;
     text-align: center;

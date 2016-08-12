@@ -86,6 +86,7 @@
             this.uiHeight = this.element.height();
 
             this.activeFilter = this.options.filter||null;
+            this.activeSort = this.options.sort||null;
 
             var minHeight = this.element.css("minHeight");
             if (minHeight !== '0px') {
@@ -181,6 +182,18 @@
             });
             return count;
         },
+        _refreshSort: function() {
+            if (this.activeSort) {
+                var items = this.element.children();
+                var that = this;
+                items.sort(function(A,B) {
+                    return that.activeSort($(A).find(".red-ui-editableList-item-content").data('data'),$(B).find(".red-ui-editableList-item-content").data('data'));
+                });
+                $.each(items,function(idx,li) {
+                    that.element.append(li);
+                })
+            }
+        },
         width: function(desiredWidth) {
             this.uiWidth = desiredWidth;
             this._resize();
@@ -194,13 +207,13 @@
             data = data || {};
             var li = $('<li>');
             var added = false;
-            if (this.options.sort) {
+            if (this.activeSort) {
                 var items = this.items();
                 var skip = false;
                 items.each(function(i,el) {
                     if (added) { return }
                     var itemData = el.data('data');
-                    if (that.options.sort(data,itemData) < 0) {
+                    if (that.activeSort(data,itemData) < 0) {
                          li.insertBefore(el.closest("li"));
                          added = true;
                     }
@@ -242,7 +255,7 @@
                         }
                     }
 
-                    if (!that.options.sort) {
+                    if (!that.activeSort) {
                         setTimeout(function() {
                             that.uiContainer.scrollTop(that.element.height());
                         },0);
@@ -270,6 +283,12 @@
                 this.activeFilter = filter;
             }
             return this._refreshFilter();
+        },
+        sort: function(sort) {
+            if (sort !== undefined) {
+                this.activeSort = sort;
+            }
+            return this._refreshSort();
         },
         length: function() {
             return this.element.children().length;

@@ -38,6 +38,17 @@
             padding: 0px;
             .disabled {
                 background: #f3f3f3;
+
+                .palette-module-name {
+                    font-style: italic;
+                    color: #aaa;
+                }
+                .palette-module-version {
+                    color: #aaa;
+                }
+
+
+
             }
             .red-ui-editableList-item-content {
                 padding: 12px 8px;
@@ -55,7 +66,17 @@
         right:0;
         bottom:0
     }
+    .palette-editor-toolbar {
+        background: #f3f3f3;
+        box-sizing: border-box;
+        padding: 8px 10px;
+        border-bottom: 1px solid $primary-border-color;
+        text-align: right;
 
+        .button-group {
+            margin-right: 10px;
+        }
+    }
     .palette-module-button-group {
         position: absolute;
         right: 0;
@@ -72,7 +93,15 @@
         right:0;
         background: rgba(255,255,255,0.8);
         text-align: center;
+        padding-top: 20px;
     }
+    #palette-module-install-shade {
+        padding-top: 80px;
+    }
+    .palette-module-shade-status {
+        color: #666;
+    }
+
     .palette-module-meta {
         color: #666;
         position: relative;

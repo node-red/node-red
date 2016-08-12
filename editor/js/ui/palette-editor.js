@@ -289,6 +289,7 @@ RED.palette.editor = (function() {
             $(el).removeClass('expanded');
         });
         filterInput.searchBox('value',"");
+        searchInput.searchBox('value',"");
     }
 
     function filterChange(val) {
@@ -302,24 +303,78 @@ RED.palette.editor = (function() {
         }
     }
 
-    function initInstallTab() {
-        $("#palette-module-install-shade").show();
 
-        $.getJSON('http://catalogue.nodered.org/catalogue.json',function(v) {
-            loadedList = v.modules;
-            searchInput.searchBox('count',loadedList.length);
-            loadedList.forEach(function(m) {
+    var catalogueCount;
+    var catalogueLoadStatus = [];
+    var catalogueLoadStart;
+
+    var activeSort = sortModulesAZ;
+
+    function handleCatalogResponse(catalog,index,v) {
+        catalogueLoadStatus.push(v);
+        if (v.modules) {
+            v.modules.forEach(function(m) {
                 m.index = [m.id];
                 if (m.keywords) {
                     m.index = m.index.concat(m.keywords);
                 }
+                if (m.updated_at) {
+                    m.timestamp = new Date(m.updated_at).getTime();
+                } else {
+                    m.timestamp = 0;
+                }
                 m.index = m.index.join(",").toLowerCase();
             })
-            $("#palette-module-install-shade").hide();
-
-        })
-
+            loadedList = loadedList.concat(v.modules);
+        }
+        searchInput.searchBox('count',loadedList.length);
+        if (catalogueCount > 1) {
+            $(".palette-module-shade-status").html("Loading catalogues...<br>"+catalogueLoadStatus.length+"/"+catalogueCount);
+        }
+        if (catalogueLoadStatus.length === catalogueCount) {
+            var delta = 250-(Date.now() - catalogueLoadStart);
+            setTimeout(function() {
+                $("#palette-module-install-shade").hide();
+            },Math.max(delta,0));
+        }
     }
+
+    function initInstallTab() {
+        loadedList = [];
+        packageList.editableList('empty');
+        $(".palette-module-shade-status").html("Loading catalogues...");
+        var catalogues = RED.settings.theme('palette.catalogues')||['http://catalogue.nodered.org/catalogue.json'];
+        catalogueLoadStatus = [];
+        catalogueCount = catalogues.length;
+        if (catalogues.length > 1) {
+            $(".palette-module-shade-status").html("Loading catalogues...<br>0/"+catalogues.length);
+        }
+        $("#palette-module-install-shade").show();
+        catalogueLoadStart = Date.now();
+        catalogues.forEach(function(catalog,index) {
+            $.getJSON(catalog, {_: new Date().getTime()},function(v) {
+                handleCatalogResponse(catalog,index,v);
+            })
+        });
+    }
+
+    function refreshFilteredItems() {
+        packageList.editableList('empty');
+        filteredList.sort(activeSort);
+        for (var i=0;i<Math.min(10,filteredList.length);i++) {
+            packageList.editableList('addItem',filteredList[i]);
+        }
+        if (filteredList.length > 10) {
+            packageList.editableList('addItem',{start:10,more:filteredList.length-10})
+        }
+    }
+    function sortModulesAZ(A,B) {
+        return A.info.id.localeCompare(B.info.id);
+    }
+    function sortModulesRecent(A,B) {
+        return -1 * (A.info.timestamp-B.info.timestamp);
+    }
+
     function init() {
 
         $(".palette-editor-button").show();
@@ -329,6 +384,12 @@ RED.palette.editor = (function() {
             onchange:function(tab) {
                 $("#palette-editor .palette-editor-tab").hide();
                 tab.content.show();
+                if (filterInput) {
+                    filterInput.searchBox('value',"");
+                }
+                if (searchInput) {
+                    searchInput.searchBox('value',"");
+                }
                 if (tab.id === 'install') {
                     initInstallTab();
                     if (searchInput) {
@@ -395,10 +456,10 @@ RED.palette.editor = (function() {
             addItem: function(container,i,object) {
                 var entry = object.info;
                 var headerRow = $('<div>',{class:"palette-module-header"}).appendTo(container);
-                var titleRow = $('<div class="palette-module-meta"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
-                $('<span>',{class:"palette-module-name"}).html(entry.name).appendTo(titleRow);
-                var metaRow = $('<div class="palette-module-meta"><span class="palette-module-version"><i class="fa fa-tag"></i></span></div>').appendTo(headerRow);
-                $('<span>').html(entry.version).appendTo(metaRow.find(".palette-module-version"));
+                var titleRow = $('<div class="palette-module-meta palette-module-name"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
+                $('<span>').html(entry.name).appendTo(titleRow);
+                var metaRow = $('<div class="palette-module-meta palette-module-version"><i class="fa fa-tag"></i></div>').appendTo(headerRow);
+                $('<span>').html(entry.version).appendTo(metaRow);
                 var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
                 var setButton = $('<a href="#" class="editor-button editor-button-small palette-module-set-button"><i class="fa fa-angle-right palette-module-node-chevron"></i> </a>').appendTo(buttonRow);
                 var setCount = $('<span>').appendTo(setButton);
@@ -492,6 +553,8 @@ RED.palette.editor = (function() {
             content: installTab
         })
 
+        var toolBar = $('<div>',{class:"palette-editor-toolbar"}).appendTo(installTab);
+
         var searchDiv = $('<div>',{class:"palette-search"}).appendTo(installTab);
         searchInput = $('<input type="text" data-i18n="[placeholder]palette.search"></input>')
             .appendTo(searchDiv)
@@ -500,17 +563,11 @@ RED.palette.editor = (function() {
                 minimumLength: 2,
                 change: function() {
                     var searchTerm = $(this).val();
-                    packageList.editableList('empty');
                     if (searchTerm.length >= 2) {
                         filteredList = loadedList.filter(function(m) {
                             return (m.index.indexOf(searchTerm) > -1);
                         }).map(function(f) { return {info:f}});
-                        for (var i=0;i<Math.min(10,filteredList.length);i++) {
-                            packageList.editableList('addItem',filteredList[i]);
-                        }
-                        if (filteredList.length > 10) {
-                            packageList.editableList('addItem',{start:10,more:filteredList.length-10})
-                        }
+                        refreshFilteredItems();
                         searchInput.searchBox('count',filteredList.length+" / "+loadedList.length);
                     } else {
                         searchInput.searchBox('count',loadedList.length);
@@ -518,14 +575,44 @@ RED.palette.editor = (function() {
                 }
             });
 
-        $('<div id="palette-module-install-shade" class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(installTab);
+
+        $('<span>').html('sort: ').appendTo(toolBar);
+        var sortGroup = $('<span class="button-group"></span> ').appendTo(toolBar);
+        var sortAZ = $('<a href="#" class="sidebar-header-button-toggle selected">a-z</a>').appendTo(sortGroup);
+        var sortRecent = $('<a href="#" class="sidebar-header-button-toggle">recent</a>').appendTo(sortGroup);
+
+        sortAZ.click(function(e) {
+            e.preventDefault();
+            if ($(this).hasClass("selected")) {
+                return;
+            }
+            $(this).addClass("selected");
+            sortRecent.removeClass("selected");
+            activeSort = sortModulesAZ;
+            refreshFilteredItems();
+        });
+
+        sortRecent.click(function(e) {
+            e.preventDefault();
+            if ($(this).hasClass("selected")) {
+                return;
+            }
+            $(this).addClass("selected");
+            sortAZ.removeClass("selected");
+            activeSort = sortModulesRecent;
+            refreshFilteredItems();
+        });
 
 
-        packageList = $('<ol>',{id:"palette-module-list", style:"position: absolute;top: 35px;bottom: 0;left: 0;right: 0px;"}).appendTo(installTab).editableList({
+        var refreshSpan = $('<span>').appendTo(toolBar);
+        var refreshButton = $('<a href="#" class="sidebar-header-button"><i class="fa fa-refresh"></i></a>').appendTo(refreshSpan);
+        refreshButton.click(function(e) {
+            e.preventDefault();
+            initInstallTab();
+        })
+
+        packageList = $('<ol>',{id:"palette-module-list", style:"position: absolute;top: 78px;bottom: 0;left: 0;right: 0px;"}).appendTo(installTab).editableList({
            addButton: false,
-        //    sort: function(A,B) {
-        //        return A.info.name.localeCompare(B.info.name);
-        //    },
            addItem: function(container,i,object) {
                if (object.more) {
                    container.addClass('palette-module-more');
@@ -561,7 +648,11 @@ RED.palette.editor = (function() {
                installButton.click(function(e) {
                    e.preventDefault();
                    installNodeModule(entry.id,shade,function(xhr) {
-                       console.log(xhr);
+                       if (xhr) {
+                           if (xhr.responseJSON) {
+                               RED.notify("Failed to install: "+entry.id+"<br>"+xhr.responseJSON.message+"<br>Check the log for more information","error",false,8000);
+                           }
+                       }
                    })
                })
                if (nodeEntries.hasOwnProperty(entry.id)) {
@@ -574,6 +665,7 @@ RED.palette.editor = (function() {
            }
        });
 
+       $('<div id="palette-module-install-shade" class="palette-module-shade hide"><div class="palette-module-shade-status"></div><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(installTab);
 
         RED.events.on('registry:node-set-enabled', function(ns) {
             refreshNodeModule(ns.module);
