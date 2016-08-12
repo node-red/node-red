@@ -83,12 +83,14 @@
     @include workspace-button;
     color: $workspace-button-color-selected;
     background:$workspace-button-background-active;
-
+    transition: all 0.1s ease-in-out;
+    margin-bottom: 1px;
     &.selected:not(.disabled) {
         color: $workspace-button-color;
         background: $workspace-button-background;
         border-bottom-width: 2px;
         border-bottom-color: $form-input-border-selected-color;
+        margin-bottom: 0;
     }
 }
 

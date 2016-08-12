@@ -340,22 +340,24 @@ RED.palette.editor = (function() {
     }
 
     function initInstallTab() {
-        loadedList = [];
-        packageList.editableList('empty');
-        $(".palette-module-shade-status").html("Loading catalogues...");
-        var catalogues = RED.settings.theme('palette.catalogues')||['http://catalogue.nodered.org/catalogue.json'];
-        catalogueLoadStatus = [];
-        catalogueCount = catalogues.length;
-        if (catalogues.length > 1) {
-            $(".palette-module-shade-status").html("Loading catalogues...<br>0/"+catalogues.length);
+        if (loadedList.length === 0) {
+            loadedList = [];
+            packageList.editableList('empty');
+            $(".palette-module-shade-status").html("Loading catalogues...");
+            var catalogues = RED.settings.theme('palette.catalogues')||['http://catalogue.nodered.org/catalogue.json'];
+            catalogueLoadStatus = [];
+            catalogueCount = catalogues.length;
+            if (catalogues.length > 1) {
+                $(".palette-module-shade-status").html("Loading catalogues...<br>0/"+catalogues.length);
+            }
+            $("#palette-module-install-shade").show();
+            catalogueLoadStart = Date.now();
+            catalogues.forEach(function(catalog,index) {
+                $.getJSON(catalog, {_: new Date().getTime()},function(v) {
+                    handleCatalogResponse(catalog,index,v);
+                })
+            });
         }
-        $("#palette-module-install-shade").show();
-        catalogueLoadStart = Date.now();
-        catalogues.forEach(function(catalog,index) {
-            $.getJSON(catalog, {_: new Date().getTime()},function(v) {
-                handleCatalogResponse(catalog,index,v);
-            })
-        });
     }
 
     function refreshFilteredItems() {
@@ -571,6 +573,9 @@ RED.palette.editor = (function() {
                         searchInput.searchBox('count',filteredList.length+" / "+loadedList.length);
                     } else {
                         searchInput.searchBox('count',loadedList.length);
+                        if (searchTerm.length === 0) {
+                            packageList.editableList('empty');
+                        }
                     }
                 }
             });
@@ -608,6 +613,7 @@ RED.palette.editor = (function() {
         var refreshButton = $('<a href="#" class="sidebar-header-button"><i class="fa fa-refresh"></i></a>').appendTo(refreshSpan);
         refreshButton.click(function(e) {
             e.preventDefault();
+            loadedList = [];
             initInstallTab();
         })
 
