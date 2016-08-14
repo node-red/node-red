@@ -200,6 +200,49 @@
             "nodeEnabled_plural": "Nodes enabled:",
             "nodeDisabled": "Node disabled:",
             "nodeDisabled_plural": "Nodes disabled:"
+        },
+        "editor": {
+            "title": "Manage palette",
+            "times": {
+                "seconds": "seconds ago",
+                "minutes": "minutes ago",
+                "minutesV": "__count__ minutes ago",
+                "hoursV": "__count__ hour ago",
+                "hoursV_plural": "__count__ hours ago",
+                "daysV": "__count__ day ago",
+                "daysV_plural": "__count__ days ago",
+                "weeksV": "__count__ week ago",
+                "weeksV_plural": "__count__ weeks ago",
+                "monthsV": "__count__ month ago",
+                "monthsV_plural": "__count__ months ago",
+                "yearsV": "__count__ year ago",
+                "yearsV_plural": "__count__ years ago",
+
+                "yearMonthsV": "__y__ year, __count__ month ago",
+                "yearMonthsV_plural": "__y__ year, __count__ months ago",
+                "yearsMonthsV": "__y__ years, __count__ month ago",
+                "yearsMonthsV_plural": "__y__ years, __count__ months ago"
+            },
+            "nodeCount": "__label__ node",
+            "nodeCount_plural": "__label__ nodes",
+            "inuse": "in use",
+            "enableall": "enable all",
+            "disableall": "disable all",
+            "enable": "enable",
+            "disable": "disable",
+            "remove": "remove",
+            "install": "install",
+            "loading": "Loading catalogues...",
+            "tab-nodes": "Nodes",
+            "tab-install": "Install",
+            "sort": "sort:",
+            "sortAZ": "a-z",
+            "sortRecent": "recent",
+            "more": "+ __count__ more",
+            "errors": {
+                "installFailed": "Failed to install: __module__<br>__message__<br>Check the log for more information"
+            }
+
         }
     },
     "sidebar": {

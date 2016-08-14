@@ -118,65 +118,51 @@ RED.palette.editor = (function() {
     function formatUpdatedAt(dateString) {
         var now = new Date();
         var d = new Date(dateString);
-        var delta = now.getTime() - d.getTime();
-
-        delta /= 1000;
+        var delta = (Date.now() - new Date(dateString).getTime())/1000;
 
         if (delta < 60) {
-            return "seconds ago";
+            return RED._('palette.editor.times.seconds');
         }
-
         delta = Math.floor(delta/60);
-
         if (delta < 10) {
-            return "minutes ago";
+            return RED._('palette.editor.times.minutes');
         }
         if (delta < 60) {
-            return delta+" minutes ago";
+            return RED._('palette.editor.times.minutesV',{count:delta});
         }
 
         delta = Math.floor(delta/60);
 
         if (delta < 24) {
-            return delta+" hour"+(delta>1?"s":"")+" ago";
+            return RED._('palette.editor.times.hoursV',{count:delta});
         }
 
         delta = Math.floor(delta/24);
 
         if (delta < 7) {
-            return delta+" day"+(delta>1?"s":"")+" ago";
+            return RED._('palette.editor.times.daysV',{count:delta})
         }
         var weeks = Math.floor(delta/7);
         var days = delta%7;
 
         if (weeks < 4) {
-            if (days === 0) {
-                return weeks+" week"+(weeks>1?"s":"")+" ago";
-            } else {
-                return weeks+" week"+(weeks>1?"s":"")+", "+days+" day"+(days>1?"s":"")+" ago";
-            }
+            return RED._('palette.editor.times.weeksV',{count:weeks})
         }
 
         var months = Math.floor(weeks/4);
         weeks = weeks%4;
 
         if (months < 12) {
-            if (weeks === 0) {
-                return months+" month"+(months>1?"s":"")+" ago";
-            } else {
-                return months+" month"+(months>1?"s":"")+", "+weeks+" week"+(weeks>1?"s":"")+" ago";
-            }
+            return RED._('palette.editor.times.monthsV',{count:months})
         }
-
         var years = Math.floor(months/12);
         months = months%12;
 
         if (months === 0) {
-            return years+" year"+(years>1?"s":"")+" ago";
+            return RED._('palette.editor.times.yearsV',{count:years})
         } else {
-            return years+" year"+(years>1?"s":"")+", "+months+" month"+(months>1?"s":"")+" ago";
+            return RED._('palette.editor.times.year'+(years>1?'s':'')+'MonthsV',{y:years,count:months})
         }
-
     }
 
 
@@ -235,33 +221,33 @@ RED.palette.editor = (function() {
                         nodeEntries[module].totalUseCount += inUseCount;
 
                         if (inUseCount > 0) {
-                            setElements.enableButton.html('in use');
+                            setElements.enableButton.html(RED._('palette.editor.inuse'));
                             setElements.enableButton.addClass('disabled');
                         } else {
                             setElements.enableButton.removeClass('disabled');
                             if (set.enabled) {
-                                setElements.enableButton.html('disable');
+                                setElements.enableButton.html(RED._('palette.editor.disable'));
                             } else {
-                                setElements.enableButton.html('enable');
+                                setElements.enableButton.html(RED._('palette.editor.enable'));
                             }
                         }
                         setElements.setRow.toggleClass("palette-module-set-disabled",!set.enabled);
                     }
                 }
                 var nodeCount = (activeTypeCount === typeCount)?typeCount:activeTypeCount+" / "+typeCount;
-                nodeEntry.setCount.html(nodeCount+" node"+(typeCount>1?"s":""));
+                nodeEntry.setCount.html(RED._('palette.editor.nodeCount',{count:typeCount,label:nodeCount}));
 
                 if (nodeEntries[module].totalUseCount > 0) {
-                    nodeEntry.enableButton.html("in use");
+                    nodeEntry.enableButton.html(RED._('palette.editor.inuse'));
                     nodeEntry.enableButton.addClass('disabled');
                     nodeEntry.removeButton.hide();
                 } else {
                     nodeEntry.enableButton.removeClass('disabled');
                     nodeEntry.removeButton.show();
                     if (activeTypeCount === 0) {
-                        nodeEntry.enableButton.html("enable all");
+                        nodeEntry.enableButton.html(RED._('palette.editor.enableall'));
                     } else {
-                        nodeEntry.enableButton.html("disable all");
+                        nodeEntry.enableButton.html(RED._('palette.editor.disableall'));
                     }
                     nodeEntry.container.toggleClass("disabled",(activeTypeCount === 0));
                 }
@@ -329,7 +315,7 @@ RED.palette.editor = (function() {
         }
         searchInput.searchBox('count',loadedList.length);
         if (catalogueCount > 1) {
-            $(".palette-module-shade-status").html("Loading catalogues...<br>"+catalogueLoadStatus.length+"/"+catalogueCount);
+            $(".palette-module-shade-status").html(RED._('palette.editor.loading')+"<br>"+catalogueLoadStatus.length+"/"+catalogueCount);
         }
         if (catalogueLoadStatus.length === catalogueCount) {
             var delta = 250-(Date.now() - catalogueLoadStart);
@@ -343,12 +329,12 @@ RED.palette.editor = (function() {
         if (loadedList.length === 0) {
             loadedList = [];
             packageList.editableList('empty');
-            $(".palette-module-shade-status").html("Loading catalogues...");
+            $(".palette-module-shade-status").html(RED._('palette.editor.loading'));
             var catalogues = RED.settings.theme('palette.catalogues')||['http://catalogue.nodered.org/catalogue.json'];
             catalogueLoadStatus = [];
             catalogueCount = catalogues.length;
             if (catalogues.length > 1) {
-                $(".palette-module-shade-status").html("Loading catalogues...<br>0/"+catalogues.length);
+                $(".palette-module-shade-status").html(RED._('palette.editor.loading')+"<br>0/"+catalogues.length);
             }
             $("#palette-module-install-shade").show();
             catalogueLoadStart = Date.now();
@@ -427,8 +413,7 @@ RED.palette.editor = (function() {
 
         editorTabs.addTab({
             id: 'nodes',
-            label: 'Nodes',
-            name: 'Nodes',
+            label: RED._('palette.editor.tab-nodes'),
             content: modulesTab
         })
 
@@ -466,7 +451,7 @@ RED.palette.editor = (function() {
                 var setButton = $('<a href="#" class="editor-button editor-button-small palette-module-set-button"><i class="fa fa-angle-right palette-module-node-chevron"></i> </a>').appendTo(buttonRow);
                 var setCount = $('<span>').appendTo(setButton);
                 var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
-                var removeButton = $('<a href="#" class="editor-button editor-button-small"></a>').html('remove').appendTo(buttonGroup);
+                var removeButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.remove')).appendTo(buttonGroup);
                 removeButton.click(function() {
                     shade.show();
                     removeNodeModule(entry.name, function(xhr) {
@@ -476,7 +461,7 @@ RED.palette.editor = (function() {
                 if (!entry.local) {
                     removeButton.hide();
                 }
-                var enableButton = $('<a href="#" class="editor-button editor-button-small"></a>').html('disable all').appendTo(buttonGroup);
+                var enableButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.disableall')).appendTo(buttonGroup);
 
                 var contentRow = $('<div>',{class:"palette-module-content"}).appendTo(container);
                 var shade = $('<div class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(container);
@@ -550,8 +535,7 @@ RED.palette.editor = (function() {
 
         editorTabs.addTab({
             id: 'install',
-            label: 'Install',
-            name: 'Install',
+            label: RED._('palette.editor.tab-install'),
             content: installTab
         })
 
@@ -581,10 +565,10 @@ RED.palette.editor = (function() {
             });
 
 
-        $('<span>').html('sort: ').appendTo(toolBar);
+        $('<span>').html(RED._("palette.editor.sort")+' ').appendTo(toolBar);
         var sortGroup = $('<span class="button-group"></span> ').appendTo(toolBar);
-        var sortAZ = $('<a href="#" class="sidebar-header-button-toggle selected">a-z</a>').appendTo(sortGroup);
-        var sortRecent = $('<a href="#" class="sidebar-header-button-toggle">recent</a>').appendTo(sortGroup);
+        var sortAZ = $('<a href="#" class="sidebar-header-button-toggle selected" data-i18n="palette.editor.sortAZ"></a>').appendTo(sortGroup);
+        var sortRecent = $('<a href="#" class="sidebar-header-button-toggle" data-i18n="palette.editor.sortRecent"></a>').appendTo(sortGroup);
 
         sortAZ.click(function(e) {
             e.preventDefault();
@@ -623,7 +607,7 @@ RED.palette.editor = (function() {
                if (object.more) {
                    container.addClass('palette-module-more');
                    var moreRow = $('<div>',{class:"palette-module-header palette-module"}).appendTo(container);
-                   var moreLink = $('<a href="#"></a>').html("+ "+object.more+" more").appendTo(moreRow);
+                   var moreLink = $('<a href="#"></a>').html(RED._('palette.editor.more',{count:object.more})).appendTo(moreRow);
                    moreLink.click(function(e) {
                        e.preventDefault();
                        packageList.editableList('removeItem',object);
@@ -650,13 +634,13 @@ RED.palette.editor = (function() {
                var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
                var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
                var shade = $('<div class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(container);
-               var installButton = $('<a href="#" class="editor-button editor-button-small"></a>').html('install').appendTo(buttonGroup);
+               var installButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.install')).appendTo(buttonGroup);
                installButton.click(function(e) {
                    e.preventDefault();
                    installNodeModule(entry.id,shade,function(xhr) {
                        if (xhr) {
                            if (xhr.responseJSON) {
-                               RED.notify("Failed to install: "+entry.id+"<br>"+xhr.responseJSON.message+"<br>Check the log for more information","error",false,8000);
+                               RED.notify(RED._('palette.editor.errors.installFailed',{module: entry.id,message:xhr.responseJSON.message}));
                            }
                        }
                    })
