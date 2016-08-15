@@ -126,7 +126,8 @@ RED.tabs = (function() {
                 if (tab.icon) {
                     $('<img src="'+tab.icon+'" class="red-ui-tab-icon"/>').appendTo(link);
                 }
-                $('<span/>').text(tab.label).appendTo(link);
+                var span = $('<span/>',{class:"bidiAware"}).text(tab.label).appendTo(link);
+                span.attr('dir', RED.bidi.resolveBaseTextDir(tab.label));               
 
                 link.on("click",onTabClick);
                 link.on("dblclick",onTabDblClick);
@@ -239,7 +240,7 @@ RED.tabs = (function() {
                 tabs[id].label = label;
                 var tab = ul.find("a[href='#"+id+"']");
                 tab.attr("title",label);
-                tab.find("span").text(label);
+                tab.find("span").text(label).attr('dir', RED.bidi.resolveBaseTextDir(label));
                 updateTabWidths();
             },
             order: function(order) {
