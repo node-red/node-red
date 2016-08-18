@@ -61,7 +61,7 @@ This project adheres to the [Contributor Covenant 1.4](http://contributor-covena
 
 ## Authors
 
-Node-RED is a creation of [IBM Emerging Technology](http://ibm.com/blogs/et).
+Node-RED is a creation of [IBM Emerging Technology](https://www.ibm.com/blogs/emerging-technology/).
 
 * Nick O'Leary [@knolleary](http://twitter.com/knolleary)
 * Dave Conway-Jones [@ceejay](http://twitter.com/ceejay)
