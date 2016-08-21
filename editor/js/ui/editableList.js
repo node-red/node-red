@@ -164,11 +164,12 @@
                 $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
                 li.addClass("red-ui-editableList-item-removable");
                 deleteButton.click(function() {
+                    var data = row.data('data');
                     li.addClass("red-ui-editableList-item-deleting")
                     li.fadeOut(300, function() {
                         $(this).remove();
                         if (that.options.removeItem) {
-                            that.options.removeItem(row.data('data'));
+                            that.options.removeItem(data);
                         }
                     });
                 });
