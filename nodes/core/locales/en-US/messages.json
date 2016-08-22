@@ -156,7 +156,8 @@
     "function": {
         "label": {
             "function": "Function",
-            "outputs": "Outputs"
+            "outputs": "Outputs",
+            "inputs": "Inputs"
         },
         "error": {
             "inputListener":"Cannot add listener to 'input' event within Function"
