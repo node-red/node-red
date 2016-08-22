@@ -139,6 +139,9 @@ RED.history = (function() {
                             while (n.outputs > n.ports.length) {
                                 n.ports.push(n.ports.length);
                             }
+                            while (n.inputs > n.inputPorts.length) {
+                                n.inputPorts.push(n.inputPorts.length);
+                            }
                             n.resize = true;
                             n.dirty = true;
                         });

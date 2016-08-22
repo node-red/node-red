@@ -159,11 +159,18 @@ RED.nodes = (function() {
             configNodes[n.id] = n;
         } else {
             n.ports = [];
+            n.inputPorts = [];
+            if (n.inputs) {
+              for (var i=0;i<n.inputs;i++) {
+                  n.inputPorts.push(i);
+              }
+            }
             if (n.outputs) {
                 for (var i=0;i<n.outputs;i++) {
                     n.ports.push(i);
                 }
             }
+
             n.dirty = true;
             updateConfigNodeUsers(n);
             if (n._def.category == "subflows" && typeof n.i === "undefined") {
@@ -444,7 +451,8 @@ RED.nodes = (function() {
             for (var j=0;j<wires.length;j++) {
                 var w = wires[j];
                 if (w.target.type != "subflow") {
-                    node.wires[w.sourcePort].push(w.target.id);
+                    var wireObj = { node: w.target.id, port: w.target.inputs - 1 }; // hard coded port right now...
+                    node.wires[w.sourcePort].push(wireObj);
                 }
             }
         }
@@ -877,8 +885,8 @@ RED.nodes = (function() {
                 for (var w1=0;w1<n.wires.length;w1++) {
                     var wires = (n.wires[w1] instanceof Array)?n.wires[w1]:[n.wires[w1]];
                     for (var w2=0;w2<wires.length;w2++) {
-                        if (wires[w2] in node_map) {
-                            var link = {source:n,sourcePort:w1,target:node_map[wires[w2]]};
+                        if (wires[w2].node in node_map) {
+                            var link = {source:n,sourcePort:w1,target:node_map[wires[w2].node]};
                             addLink(link);
                             new_links.push(link);
                         }
