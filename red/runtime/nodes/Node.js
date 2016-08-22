@@ -123,11 +123,12 @@ Node.prototype.send = function(msg) {
             // A single message and a single wire on output 0
             // TODO: pre-load flows.get calls - cannot do in constructor
             //       as not all nodes are defined at that point
+            msg.port = this._wire.port;
             if (!msg._msgid) {
                 msg._msgid = redUtil.generateId();
             }
             this.metric("send",msg);
-            node = flows.get(this._wire);
+            node = flows.get(this._wire.node);
             /* istanbul ignore else */
             if (node) {
                 node.receive(msg);
@@ -159,12 +160,14 @@ Node.prototype.send = function(msg) {
                 var k = 0;
                 // for each recipent node of that output
                 for (var j = 0; j < wires.length; j++) {
-                    node = flows.get(wires[j]); // node at end of wire j
+                    node = flows.get(wires[j].node); // node at end of wire j
+                    var wirePort = wires[j].port;
                     if (node) {
                         // for each msg to send eg. [[m1, m2, ...], ...]
                         for (k = 0; k < msgs.length; k++) {
                             var m = msgs[k];
                             if (m !== null && m !== undefined) {
+                                m.port = wirePort;
                                 /* istanbul ignore else */
                                 if (!sentMessageId) {
                                     sentMessageId = m._msgid;
