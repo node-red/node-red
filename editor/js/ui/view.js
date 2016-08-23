@@ -407,12 +407,14 @@ RED.view = (function() {
                     var link1 = {
                         source:spliceLink.source,
                         sourcePort:spliceLink.sourcePort,
-                        target: nn
+                        target: nn,
+                        targetPort: 0
                     };
                     var link2 = {
                         source:nn,
                         sourcePort:0,
-                        target: spliceLink.target
+                        target: spliceLink.target,
+                        targetPort:spliceLink.targetPort,
                     };
                     RED.nodes.addLink(link1);
                     RED.nodes.addLink(link2);
@@ -590,7 +592,7 @@ RED.view = (function() {
             mousePos = mouse_position;
             for (i=0;i<drag_lines.length;i++) {
                 var drag_line = drag_lines[i];
-                var numOutputs = (drag_line.portType === 0)?(drag_line.node.outputs || 1):1;
+                var numOutputs = (drag_line.portType === 0)?(drag_line.node.outputs || 1):(drag_line.node.inputs || 1);
                 var sourcePort = drag_line.port;
                 var portY = -((numOutputs-1)/2)*13 +13*sourcePort;
 
@@ -632,7 +634,8 @@ RED.view = (function() {
                 spliceActive = false;
                 if (moving_set.length === 1) {
                     node = moving_set[0];
-                    spliceActive = node.n._def.inputs > 0 &&
+                    spliceActive = !!node.n._def &&
+                                   node.n._def.inputs > 0 &&
                                    node.n._def.outputs > 0 &&
                                    RED.nodes.filterLinks({ source: node.n }).length === 0 &&
                                    RED.nodes.filterLinks({ target: node.n }).length === 0;
@@ -1150,7 +1153,7 @@ RED.view = (function() {
     }
 
     function portMouseDown(d,portType,portIndex) {
-        console.log(d,portType,portIndex);
+        // console.log(d,portType,portIndex);
         // disable zoom
         //vis.call(d3.behavior.zoom().on("zoom"), null);
         mousedown_node = d;
@@ -1195,16 +1198,18 @@ RED.view = (function() {
                     var src,dst,src_port;
                     if (drag_line.portType === 0) {
                         src = drag_line.node;
-                        src_port = drag_line.port;
                         dst = mouseup_node;
+                        src_port = drag_line.port;
+                        target_port = portIndex;
                     } else if (drag_line.portType == 1) {
                         src = mouseup_node;
                         dst = drag_line.node;
                         src_port = portIndex;
+                        target_port = drag_line.port;
                     }
-                    var existingLink = RED.nodes.filterLinks({source:src,target:dst,sourcePort: src_port}).length !== 0;
+                    var existingLink = RED.nodes.filterLinks({source:src,target:dst,sourcePort: src_port,targetPort: target_port}).length !== 0;
                     if (!existingLink) {
-                        var link = {source: src, sourcePort:src_port, target: dst};
+                        var link = {source: src, sourcePort:src_port, target: dst, targetPort: target_port};
                         RED.nodes.addLink(link);
                         addedLinks.push(link);
                     }
@@ -1269,12 +1274,14 @@ RED.view = (function() {
                 var link1 = {
                     source:spliceLink.source,
                     sourcePort:spliceLink.sourcePort,
+                    targetPort:spliceLink.targetPort,
                     target: moving_set[0].n
                 };
                 var link2 = {
                     source:moving_set[0].n,
                     sourcePort:0,
-                    target: spliceLink.target
+                    target: spliceLink.target,
+                    targetPort:spliceLink.targetPort
                 };
                 RED.nodes.addLink(link1);
                 RED.nodes.addLink(link2);
@@ -1430,10 +1437,10 @@ RED.view = (function() {
                     });
 
                 outGroup.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",10).attr("height",10).attr("x",-5).attr("y",15)
-                    .on("mousedown", function(d,i){portMouseDown(d,1,0);} )
-                    .on("touchstart", function(d,i){portMouseDown(d,1,0);} )
-                    .on("mouseup", function(d,i){portMouseUp(d,1,0);})
-                    .on("touchend",function(d,i){portMouseUp(d,1,0);} )
+                    .on("mousedown", function(d,i){portMouseDown(d,1,i);} )
+                    .on("touchstart", function(d,i){portMouseDown(d,1,i);} )
+                    .on("mouseup", function(d,i){portMouseUp(d,1,i);})
+                    .on("touchend",function(d,i){portMouseUp(d,1,i);} )
                     .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== 1)));})
                     .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
 
@@ -1759,11 +1766,11 @@ RED.view = (function() {
                                 var inputGroup = d._inputPorts.enter().append("g").attr("class","port_input");
 
                                 inputGroup.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",10).attr("height",10)
-                                    .on("mousedown",(function(){var node = d; return function(d,i){portMouseDown(node,1,i);}})() )
-                                    .on("touchstart",(function(){var node = d; return function(d,i){portMouseDown(node,1,i);}})() )
-                                    .on("mouseup",(function(){var node = d; return function(d,i){portMouseUp(node,1,i);}})() )
-                                    .on("touchend",(function(){var node = d; return function(d,i){portMouseUp(node,1,i);}})() )
-                                    .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== 0) ));})
+                                    .on("mousedown",(function(){var node = d; return function(d,i){portMouseDown(node,1,i);}})(i) )
+                                    .on("touchstart",(function(){var node = d; return function(d,i){portMouseDown(node,1,i);}})(i) )
+                                    .on("mouseup",(function(){var node = d; return function(d,i){portMouseUp(node,1,i);}})(i) )
+                                    .on("touchend",(function(){var node = d; return function(d,i){portMouseUp(node,1,i);}})(i) )
+                                    .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== 1) ));})
                                     .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
 
                                 d._inputPorts.exit().remove();
@@ -2013,8 +2020,12 @@ RED.view = (function() {
                         var numOutputs = d.source.outputs || 1;
                         var sourcePort = d.sourcePort || 0;
                         var y = -((numOutputs-1)/2)*13 +13*sourcePort;
+                        var numInputs = d.target.inputs || 1;
+                        var targetPort = d.targetPort || 0;
+                        var ytarget = -((numInputs-1)/2)*13 +13*targetPort;
 
-                        var dy = d.target.y-(d.source.y+y);
+                        // var dy = d.target.y-(d.source.y+y);
+                        var dy = (d.target.y+ytarget)-(d.source.y+y);
                         var dx = (d.target.x-d.target.w/2)-(d.source.x+d.source.w/2);
                         var delta = Math.sqrt(dy*dy+dx*dx);
                         var scale = lineCurveScale;
@@ -2033,12 +2044,13 @@ RED.view = (function() {
                         d.x1 = d.source.x+d.source.w/2;
                         d.y1 = d.source.y+y;
                         d.x2 = d.target.x-d.target.w/2;
-                        d.y2 = d.target.y;
+                        // d.y2 = d.target.y;
+                        d.y2 = d.target.y+ytarget;
 
-                        return "M "+(d.source.x+d.source.w/2)+" "+(d.source.y+y)+
-                            " C "+(d.source.x+d.source.w/2+scale*node_width)+" "+(d.source.y+y+scaleY*node_height)+" "+
-                            (d.target.x-d.target.w/2-scale*node_width)+" "+(d.target.y-scaleY*node_height)+" "+
-                            (d.target.x-d.target.w/2)+" "+d.target.y;
+                        return "M "+(d.x1)+" "+(d.y1)+
+                        					" C "+(d.x1+scale*node_width)+" "+(d.y1+scaleY*node_height)+" "+
+                        					(d.x2-scale*node_width)+" "+(d.y2-scaleY*node_height)+" "+
+                        					(d.x2)+" "+d.y2;
                     });
                 }
             })
