@@ -28,6 +28,10 @@
         <div style="height: 250px; min-height:150px;" class="node-text-editor" id="node-input-func-editor" ></div>
     </div>
     <div class="form-row">
+        <label for="node-input-inputs"><i class="fa fa-random"></i> <span data-i18n="function.label.inputs"></span></label>
+        <input id="node-input-inputs" style="width: 60px;" value="1">
+    </div>
+    <div class="form-row">
         <label for="node-input-outputs"><i class="fa fa-random"></i> <span data-i18n="function.label.outputs"></span></label>
         <input id="node-input-outputs" style="width: 60px;" value="1">
     </div>
@@ -73,6 +77,7 @@
         defaults: {
             name: {value:""},
             func: {value:"\nreturn msg;"},
+            inputs: {value:1},
             outputs: {value:1},
             noerr: {value:0,required:true,validate:function(v){ return ((!v) || (v === 0)) ? true : false; }}
         },
@@ -84,6 +89,9 @@
         },
         oneditprepare: function() {
             var that = this;
+            $( "#node-input-inputs" ).spinner({
+                min:1
+            });
             $( "#node-input-outputs" ).spinner({
                 min:1
             });
@@ -113,7 +121,7 @@
                 type:"function", // the type of object the library is for
                 editor:this.editor, // the field name the main text body goes to
                 mode:"ace/mode/javascript",
-                fields:['name','outputs']
+                fields:['name', 'inputs', 'outputs']
             });
             this.editor.focus();
         },

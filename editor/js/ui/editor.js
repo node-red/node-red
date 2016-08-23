@@ -198,6 +198,22 @@ RED.editor = (function() {
                 }
             }
         }
+        if (node.inputPorts) {
+            if (node.inputs < node.inputPorts.length) {
+                while (node.inputs < node.inputPorts.length) {
+                    node.inputPorts.pop();
+                }
+                RED.nodes.eachLink(function(l) {
+                    if (l.source === node && l.sourcePort >= node.inputs) {
+                        removedLinks.push(l);
+                    }
+                });
+            } else if (node.inputs > node.inputPorts.length) {
+                while (node.inputs > node.inputPorts.length) {
+                    node.inputPorts.push(node.inputPorts.length);
+                }
+            }
+        }
         if (node.inputs === 0) {
             removedLinks.concat(RED.nodes.filterLinks({target:node}));
         }
