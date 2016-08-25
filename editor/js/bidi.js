@@ -65,6 +65,10 @@ RED.bidi = (function() {
         }            
     }
     
+	/**
+     * Determines the text direction of a given string.
+     * @param value - the string     
+     */
     function resolveBaseTextDir(value) {
         if (textDir == "auto") {
             if (isRTLValue(value)) {
@@ -82,10 +86,18 @@ RED.bidi = (function() {
         $(this).attr("dir", resolveBaseTextDir($(this).val()));       
     }
 
+	/**
+     * Listens to keyup, paste and cut events of a given input field. Upon one of these events the text direction is computed again
+     * @param input - the input field    
+     */
 	function initInputEvents(input) {
         input.on("keyup",onInputChange).on("paste",onInputChange).on("cut",onInputChange);
     }
     
+	/**
+     * Enforces the text direction of a given string by adding UCC (Unicode Control Characters)
+     * @param value - the string   
+     */
     function enforceTextDirectionWithUCC(value) {
         if (value) {
             var dir = resolveBaseTextDir(value);
@@ -99,6 +111,9 @@ RED.bidi = (function() {
         return value;
     }
     
+	/**
+     * Enforces the text direction for all the spans with style bidiAware under workpsace or sidebar div
+     */
     function enforceTextDirectionOnPage() {                  
         $("#workspace").find('span.bidiAware').each(function() {                       			    
             $(this).attr("dir", resolveBaseTextDir($(this).html()));
@@ -108,6 +123,10 @@ RED.bidi = (function() {
 	    });
     }
     
+	/**
+     * Sets the text direction preference
+     * @param dir - the text direction preference  
+     */
     function setTextDirection(dir) {
         textDir = dir;
     }

@@ -1306,9 +1306,25 @@ RED.format = (function() {
 		getString:  function (text, type, args, isRtl, locale) {
 			return getHandler(type).format(text, args, isRtl, false, locale);
 		},
+		/**
+		* Returns the HTML representation of a given structured text
+		* @param text - the structured text   
+		* @param type - could be one of filepath, url, email 
+		* @param args - pass additional arguments to the handler. generally null. 
+		* @param isRtl - indicates if the GUI is mirrored
+		* @param locale - the browser locale
+		*/
 	    getHtml: function (text, type, args, isRtl, locale) {
 			return getHandler(type).format(text, args, isRtl, true, locale);
 	    },
+		/**
+		* Handle Structured text correct display for a given HTML element. 
+		* @param element - the element  : should be of type div contenteditable=true
+		* @param type - could be one of filepath, url, email 
+		* @param args - pass additional arguments to the handler. generally null. 
+		* @param isRtl - indicates if the GUI is mirrored
+		* @param locale - the browser locale
+		*/
 	    attach: function (element, type, args, isRtl, locale) {
 	    	return attachElement(element, type, args, isRtl, locale);
 	    },
