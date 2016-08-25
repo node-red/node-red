@@ -139,7 +139,7 @@ RED.sidebar.info = (function() {
         }
         table += "</tbody></table><hr/>";
         if (!subflowNode && node.type != "comment") {
-            var helpText = $("script[data-help-name|='"+node.type+"']").html()||"";
+            var helpText = $("script[data-help-name$='"+node.type+"']").html()||"";
             table  += '<div class="node-help">'+helpText+"</div>";
         }
         if (subflowNode) {
