@@ -1302,10 +1302,7 @@ RED.format = (function() {
 		element.dispatchEvent(event);
 	}
 	
-	return {
-		getString:  function (text, type, args, isRtl, locale) {
-			return getHandler(type).format(text, args, isRtl, false, locale);
-		},
+	return {		
 		/**
 		* Returns the HTML representation of a given structured text
 		* @param text - the structured text   
@@ -1327,11 +1324,6 @@ RED.format = (function() {
 		*/
 	    attach: function (element, type, args, isRtl, locale) {
 	    	return attachElement(element, type, args, isRtl, locale);
-	    },
-	    detach: function (element) {
-	    	detachElement(element);
-	    },
-	    message: message,
-	    utils: misc
+	    }	    
 	};
 })();
