@@ -94,7 +94,7 @@ RED.workspaces = (function() {
                             workspace_tabs.renameTab(workspace.id,label);
                             RED.nodes.dirty(true);
                             RED.sidebar.config.refresh();
-                            $("#menu-item-workspace-menu-"+workspace.id.replace(".","-")).text(RED.bidi.enforceTextDirectionWithUCC(label));
+                            $("#menu-item-workspace-menu-"+workspace.id.replace(".","-")).text(RED.text.bidi.enforceTextDirectionWithUCC(label));
                         }
                         RED.tray.close();
                     }
@@ -109,8 +109,8 @@ RED.workspaces = (function() {
                 '</div>').appendTo(dialogForm);
                 $('<input type="text" style="display: none;" />').prependTo(dialogForm);
                 dialogForm.submit(function(e) { e.preventDefault();});
-                $("#node-input-name").val(workspace.label).attr("dir", RED.bidi.resolveBaseTextDir(workspace.label));
-				RED.bidi.initInputEvents($("#node-input-name"));
+                $("#node-input-name").val(workspace.label).attr("dir", RED.text.bidi.resolveBaseTextDir(workspace.label));
+				RED.text.bidi.initInputEvents($("#node-input-name"));
                 dialogForm.i18n();
             },
             close: function() {
@@ -226,7 +226,7 @@ RED.workspaces = (function() {
         refresh: function() {
             RED.nodes.eachWorkspace(function(ws) {
                 workspace_tabs.renameTab(ws.id,ws.label);
-                $("#menu-item-workspace-menu-"+ws.id.replace(".","-")).text(RED.bidi.enforceTextDirectionWithUCC(ws.label));
+                $("#menu-item-workspace-menu-"+ws.id.replace(".","-")).text(RED.text.bidi.enforceTextDirectionWithUCC(ws.label));
 
             })
             RED.nodes.eachSubflow(function(sf) {

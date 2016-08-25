@@ -301,19 +301,19 @@ RED.editor = (function() {
         var input = $("#"+prefix+"-"+property);
         if (input.attr('type') === "checkbox") {
             input.prop('checked',node[property]);
-        } 
+        }
         else {
             var val = node[property];
             if (val == null) {
                 val = "";
             }
-            if ("format" in definition[property] && definition[property].format !== "" && input[0].nodeName === "DIV") {
-                input.html(RED.format.getHtml(val, definition[property].format, {}, false, "en"));
-                RED.format.attach(input[0], definition[property].format, {}, false, "en");                         
+            if (definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0].nodeName === "DIV") {
+                input.html(RED.text.format.getHtml(val, definition[property].format, {}, false, "en"));
+                RED.text.format.attach(input[0], definition[property].format, {}, false, "en");
             } else {
-                input.val(val).attr("dir", RED.bidi.resolveBaseTextDir(val));
-                RED.bidi.initInputEvents(input);
-            }                
+                input.val(val).attr("dir", RED.text.bidi.resolveBaseTextDir(val));
+                RED.text.bidi.initInputEvents(input);
+            }
         }
     }
 
@@ -1205,7 +1205,7 @@ RED.editor = (function() {
                             changes['name'] = editing_node.name;
                             editing_node.name = newName;
                             changed = true;
-                            $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text(RED.bidi.enforceTextDirectionWithUCC(newName));
+                            $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text(RED.text.bidi.enforceTextDirectionWithUCC(newName));
                         }
 
                         var newDescription = subflowEditor.getValue();
@@ -1297,8 +1297,8 @@ RED.editor = (function() {
                     value: ""
                 });
 
-                $("#subflow-input-name").val(subflow.name).attr("dir", RED.bidi.resolveBaseTextDir(subflow.name));
-				RED.bidi.initInputEvents($("#subflow-input-name"));
+                $("#subflow-input-name").val(subflow.name).attr("dir", RED.text.bidi.resolveBaseTextDir(subflow.name));
+				RED.text.bidi.initInputEvents($("#subflow-input-name"));
                 subflowEditor.getSession().setValue(subflow.info||"",-1);
                 var userCount = 0;
                 var subflowType = "subflow:"+editing_node.id;

@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-
-RED.bidi = (function() {
+RED.text = {};
+RED.text.bidi = (function() {
     var textDir = "";
     var LRE = "\u202A",
         RLE = "\u202B",
         PDF = "\u202C";
-        
+
     function isRTLValue(stringValue) {
         for (var ch in stringValue) {
             if (isBidiChar(stringValue.charCodeAt(ch))) {
@@ -27,7 +27,7 @@ RED.bidi = (function() {
             }
             else if(isLatinChar(stringValue.charCodeAt(ch))) {
                 return false;
-            }                
+            }
          }
          return false;
     }
@@ -60,14 +60,14 @@ RED.bidi = (function() {
         if((c > 64 && c < 91)||(c > 96 && c < 123)) {
              return true;
         }
-        else {    
+        else {
             return false;
-        }            
+        }
     }
-    
-	/**
+
+    /**
      * Determines the text direction of a given string.
-     * @param value - the string     
+     * @param value - the string
      */
     function resolveBaseTextDir(value) {
         if (textDir == "auto") {
@@ -76,27 +76,27 @@ RED.bidi = (function() {
             } else {
                 return "ltr";
             }
-        } 
+        }
         else {
             return textDir;
         }
     }
-    
+
     function onInputChange() {
-        $(this).attr("dir", resolveBaseTextDir($(this).val()));       
+        $(this).attr("dir", resolveBaseTextDir($(this).val()));
     }
 
-	/**
+    /**
      * Listens to keyup, paste and cut events of a given input field. Upon one of these events the text direction is computed again
-     * @param input - the input field    
+     * @param input - the input field
      */
-	function initInputEvents(input) {
+    function initInputEvents(input) {
         input.on("keyup",onInputChange).on("paste",onInputChange).on("cut",onInputChange);
     }
-    
-	/**
+
+    /**
      * Enforces the text direction of a given string by adding UCC (Unicode Control Characters)
-     * @param value - the string   
+     * @param value - the string
      */
     function enforceTextDirectionWithUCC(value) {
         if (value) {
@@ -110,27 +110,27 @@ RED.bidi = (function() {
         }
         return value;
     }
-    
-	/**
+
+    /**
      * Enforces the text direction for all the spans with style bidiAware under workpsace or sidebar div
      */
-    function enforceTextDirectionOnPage() {                  
-        $("#workspace").find('span.bidiAware').each(function() {                       			    
+    function enforceTextDirectionOnPage() {
+        $("#workspace").find('span.bidiAware').each(function() {
             $(this).attr("dir", resolveBaseTextDir($(this).html()));
-	    });
-        $("#sidebar").find('span.bidiAware').each(function() {                       			    
+        });
+        $("#sidebar").find('span.bidiAware').each(function() {
             $(this).attr("dir", resolveBaseTextDir($(this).text()));
-	    });
+        });
     }
-    
-	/**
+
+    /**
      * Sets the text direction preference
-     * @param dir - the text direction preference  
+     * @param dir - the text direction preference
      */
     function setTextDirection(dir) {
         textDir = dir;
     }
-    
+
     return {
         setTextDirection: setTextDirection,
         enforceTextDirectionOnPage: enforceTextDirectionOnPage,
