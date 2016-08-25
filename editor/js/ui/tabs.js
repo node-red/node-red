@@ -127,7 +127,7 @@ RED.tabs = (function() {
                     $('<img src="'+tab.icon+'" class="red-ui-tab-icon"/>').appendTo(link);
                 }
                 var span = $('<span/>',{class:"bidiAware"}).text(tab.label).appendTo(link);
-                span.attr('dir', RED.text.bidi.resolveBaseTextDir(tab.label));               
+                span.attr('dir', RED.text.bidi.resolveBaseTextDir(tab.label));
 
                 link.on("click",onTabClick);
                 link.on("dblclick",onTabDblClick);

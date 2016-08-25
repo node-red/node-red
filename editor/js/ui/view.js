@@ -1792,7 +1792,7 @@ RED.view = (function() {
                                         l = d._def.label;
                                         try {
                                             l = (typeof l === "function" ? l.call(d) : l)||"";
-											l = RED.text.bidi.enforceTextDirectionWithUCC(l);
+                                            l = RED.text.bidi.enforceTextDirectionWithUCC(l);
                                         } catch(err) {
                                             console.log("Definition error: "+d.type+".label",err);
                                             l = d.type;
@@ -2155,8 +2155,8 @@ RED.view = (function() {
             ).classed("link_selected", false);
         }
 
-		RED.text.bidi.enforceTextDirectionOnPage();
-		
+        RED.text.bidi.enforceTextDirectionOnPage();
+
         if (d3.event) {
             d3.event.preventDefault();
         }
@@ -2360,11 +2360,11 @@ RED.view = (function() {
             snapGrid = state;
             redraw();
         },
-		toggleTextDir: function(value) {
+        toggleTextDir: function(value) {
             RED.text.bidi.setTextDirection(value);
             RED.nodes.eachNode(function(n) { n.dirty = true;});
             redraw();
-            RED.palette.refresh();         
+            RED.palette.refresh();
         },
         scale: function() {
             return scaleFactor;

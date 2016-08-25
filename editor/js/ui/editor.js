@@ -295,7 +295,7 @@ RED.editor = (function() {
      * @param node - the node being edited
      * @param property - the name of the field
      * @param prefix - the prefix to use in the input element ids (node-input|node-config-input)
-	 * @param definition - the definition of the field
+     * @param definition - the definition of the field
      */
     function preparePropertyEditor(node,property,prefix,definition) {
         var input = $("#"+prefix+"-"+property);
@@ -1298,7 +1298,7 @@ RED.editor = (function() {
                 });
 
                 $("#subflow-input-name").val(subflow.name).attr("dir", RED.text.bidi.resolveBaseTextDir(subflow.name));
-				RED.text.bidi.initInputEvents($("#subflow-input-name"));
+                RED.text.bidi.initInputEvents($("#subflow-input-name"));
                 subflowEditor.getSession().setValue(subflow.info||"",-1);
                 var userCount = 0;
                 var subflowType = "subflow:"+editing_node.id;

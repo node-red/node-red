@@ -21,11 +21,12 @@ RED.text.bidi = (function() {
         PDF = "\u202C";
 
     function isRTLValue(stringValue) {
-        for (var ch in stringValue) {
-            if (isBidiChar(stringValue.charCodeAt(ch))) {
+        var length = stringValue.length;
+        for (var i=0;i<length;i++) {
+            if (isBidiChar(stringValue.charCodeAt(i))) {
                 return true;
             }
-            else if(isLatinChar(stringValue.charCodeAt(ch))) {
+            else if(isLatinChar(stringValue.charCodeAt(i))) {
                 return false;
             }
          }
@@ -33,36 +34,16 @@ RED.text.bidi = (function() {
     }
 
     function isBidiChar(c)  {
-        if (c >= 0x05d0 && c <= 0x05ff) {
-            return true;
-        }
-        else if (c >= 0x0600 && c <= 0x065f) {
-            return true;
-        }
-        else if (c >= 0x066a && c <= 0x06ef) {
-            return true;
-        }
-        else if (c >= 0x06fa && c <= 0x07ff) {
-            return true;
-        }
-        else if (c >= 0xfb1d && c <= 0xfdff) {
-            return true;
-        }
-        else if (c >= 0xfe70 && c <= 0xfefc) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return (c >= 0x05d0 && c <= 0x05ff)||
+               (c >= 0x0600 && c <= 0x065f)||
+               (c >= 0x066a && c <= 0x06ef)||
+               (c >= 0x06fa && c <= 0x07ff)||
+               (c >= 0xfb1d && c <= 0xfdff)||
+               (c >= 0xfe70 && c <= 0xfefc);
     }
 
     function isLatinChar(c){
-        if((c > 64 && c < 91)||(c > 96 && c < 123)) {
-             return true;
-        }
-        else {
-            return false;
-        }
+        return (c > 64 && c < 91)||(c > 96 && c < 123)
     }
 
     /**
@@ -87,7 +68,8 @@ RED.text.bidi = (function() {
     }
 
     /**
-     * Listens to keyup, paste and cut events of a given input field. Upon one of these events the text direction is computed again
+     * Listens to keyup, paste and cut events of a given input field. Upon one
+     * of these events the text direction is computed again
      * @param input - the input field
      */
     function initInputEvents(input) {
@@ -95,7 +77,8 @@ RED.text.bidi = (function() {
     }
 
     /**
-     * Enforces the text direction of a given string by adding UCC (Unicode Control Characters)
+     * Enforces the text direction of a given string by adding
+     * UCC (Unicode Control Characters)
      * @param value - the string
      */
     function enforceTextDirectionWithUCC(value) {
@@ -112,7 +95,8 @@ RED.text.bidi = (function() {
     }
 
     /**
-     * Enforces the text direction for all the spans with style bidiAware under workpsace or sidebar div
+     * Enforces the text direction for all the spans with style bidiAware under
+     * workspace or sidebar div
      */
     function enforceTextDirectionOnPage() {
         $("#workspace").find('span.bidiAware').each(function() {

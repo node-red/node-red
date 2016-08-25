@@ -475,7 +475,7 @@ RED.text.format = (function() {
         //   handler: main handler (default - dbidi/stt/handlers/common)
         //   guiDir: GUI direction (default - "ltr")
         //   dir: main stt direction (default - guiDir)
-        //	 subDir: direction of subsegments
+        //   subDir: direction of subsegments
         //   points: array of delimiters (default - [])
         //   bounds: array of definitions of bounds in which handler works
         //   subs: object defines special handling for some substring if found
