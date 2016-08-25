@@ -113,11 +113,14 @@ RED.text.bidi = (function() {
      */
     function setTextDirection(dir) {
         textDir = dir;
+        RED.nodes.eachNode(function(n) { n.dirty = true;});
+        RED.view.redraw();
+        RED.palette.refresh();
+        enforceTextDirectionOnPage();
     }
 
     return {
         setTextDirection: setTextDirection,
-        enforceTextDirectionOnPage: enforceTextDirectionOnPage,
         enforceTextDirectionWithUCC: enforceTextDirectionWithUCC,
         resolveBaseTextDir: resolveBaseTextDir,
         initInputEvents: initInputEvents

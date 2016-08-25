@@ -2155,8 +2155,6 @@ RED.view = (function() {
             ).classed("link_selected", false);
         }
 
-        RED.text.bidi.enforceTextDirectionOnPage();
-
         if (d3.event) {
             d3.event.preventDefault();
         }
@@ -2359,12 +2357,6 @@ RED.view = (function() {
         toggleSnapGrid: function(state) {
             snapGrid = state;
             redraw();
-        },
-        toggleTextDir: function(value) {
-            RED.text.bidi.setTextDirection(value);
-            RED.nodes.eachNode(function(n) { n.dirty = true;});
-            redraw();
-            RED.palette.refresh();
         },
         scale: function() {
             return scaleFactor;
