@@ -641,6 +641,8 @@ RED.view = (function() {
             mousePos = mouse_position;
             var minX = 0;
             var minY = 0;
+            var maxX = space_width;
+            var maxY = space_height;
             for (var n = 0; n<moving_set.length; n++) {
                 node = moving_set[n];
                 if (d3.event.shiftKey) {
@@ -652,12 +654,21 @@ RED.view = (function() {
                 node.n.dirty = true;
                 minX = Math.min(node.n.x-node.n.w/2-5,minX);
                 minY = Math.min(node.n.y-node.n.h/2-5,minY);
+                maxX = Math.max(node.n.x+node.n.w/2+5,maxX);
+                maxY = Math.max(node.n.y+node.n.h/2+5,maxY);
             }
             if (minX !== 0 || minY !== 0) {
                 for (i = 0; i<moving_set.length; i++) {
                     node = moving_set[i];
                     node.n.x -= minX;
                     node.n.y -= minY;
+                }
+            }
+            if (maxX !== space_width || maxY !== space_height) {
+                for (i = 0; i<moving_set.length; i++) {
+                    node = moving_set[i];
+                    node.n.x -= (maxX - space_width);
+                    node.n.y -= (maxY - space_height);
                 }
             }
             if (snapGrid != d3.event.shiftKey && moving_set.length > 0) {
