@@ -109,8 +109,8 @@ RED.workspaces = (function() {
                 '</div>').appendTo(dialogForm);
                 $('<input type="text" style="display: none;" />').prependTo(dialogForm);
                 dialogForm.submit(function(e) { e.preventDefault();});
-                $("#node-input-name").val(workspace.label).attr("dir", RED.text.bidi.resolveBaseTextDir(workspace.label));
-                RED.text.bidi.initInputEvents($("#node-input-name"));
+                $("#node-input-name").val(workspace.label);
+                RED.text.bidi.prepareInput($("#node-input-name"))
                 dialogForm.i18n();
             },
             close: function() {

@@ -64,16 +64,19 @@ RED.text.bidi = (function() {
     }
 
     function onInputChange() {
+        console.log("ic");
         $(this).attr("dir", resolveBaseTextDir($(this).val()));
     }
 
     /**
-     * Listens to keyup, paste and cut events of a given input field. Upon one
-     * of these events the text direction is computed again
+     * Adds event listeners to the Input to ensure its text-direction attribute
+     * is properly set based on its content.
      * @param input - the input field
      */
-    function initInputEvents(input) {
+    function prepareInput(input) {
         input.on("keyup",onInputChange).on("paste",onInputChange).on("cut",onInputChange);
+        // Set the initial text direction
+        onInputChange.call(input);
     }
 
     /**
@@ -123,6 +126,6 @@ RED.text.bidi = (function() {
         setTextDirection: setTextDirection,
         enforceTextDirectionWithUCC: enforceTextDirectionWithUCC,
         resolveBaseTextDir: resolveBaseTextDir,
-        initInputEvents: initInputEvents
+        prepareInput: prepareInput
     }
 })();

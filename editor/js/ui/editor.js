@@ -307,12 +307,12 @@ RED.editor = (function() {
             if (val == null) {
                 val = "";
             }
-            if (definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0].nodeName === "DIV") {
+            if (definition !== undefined && definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0].nodeName === "DIV") {
                 input.html(RED.text.format.getHtml(val, definition[property].format, {}, false, "en"));
                 RED.text.format.attach(input[0], definition[property].format, {}, false, "en");
             } else {
-                input.val(val).attr("dir", RED.text.bidi.resolveBaseTextDir(val));
-                RED.text.bidi.initInputEvents(input);
+                input.val(val);
+                RED.text.bidi.prepareInput(input);
             }
         }
     }
@@ -1297,8 +1297,8 @@ RED.editor = (function() {
                     value: ""
                 });
 
-                $("#subflow-input-name").val(subflow.name).attr("dir", RED.text.bidi.resolveBaseTextDir(subflow.name));
-                RED.text.bidi.initInputEvents($("#subflow-input-name"));
+                $("#subflow-input-name").val(subflow.name);
+                RED.text.bidi.prepareInput($("#subflow-input-name"));
                 subflowEditor.getSession().setValue(subflow.info||"",-1);
                 var userCount = 0;
                 var subflowType = "subflow:"+editing_node.id;
