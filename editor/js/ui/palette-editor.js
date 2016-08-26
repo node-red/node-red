@@ -664,12 +664,16 @@ RED.palette.editor = (function() {
             refreshNodeModule(ns.module);
         });
         RED.events.on('registry:node-type-added', function(nodeType) {
-            var ns = RED.nodes.registry.getNodeSetForType(nodeType);
-            refreshNodeModule(ns.module);
+            if (!/^subflow:/.test(nodeType)) {
+                var ns = RED.nodes.registry.getNodeSetForType(nodeType);
+                refreshNodeModule(ns.module);
+            }
         });
         RED.events.on('registry:node-type-removed', function(nodeType) {
-            var ns = RED.nodes.registry.getNodeSetForType(nodeType);
-            refreshNodeModule(ns.module);
+            if (!/^subflow:/.test(nodeType)) {
+                var ns = RED.nodes.registry.getNodeSetForType(nodeType);
+                refreshNodeModule(ns.module);
+            }
         });
         RED.events.on('registry:node-set-added', function(ns) {
             refreshNodeModule(ns.module);
