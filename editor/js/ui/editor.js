@@ -776,16 +776,17 @@ RED.editor = (function() {
         } else {
             ns = node_def.set.id;
         }
-        var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
-        if (!activeWorkspace) {
-            activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
+        var configNodeScope = ""; // default to global
+        var activeSubflow = RED.nodes.subflow(RED.workspaces.active());
+        if (activeSubflow) {
+            configNodeScope = activeSubflow.id;
         }
         if (editing_config_node == null) {
             editing_config_node = {
                 id: RED.nodes.id(),
                 _def: node_def,
                 type: type,
-                z: activeWorkspace.id,
+                z: configNodeScope,
                 users: []
             }
             for (var d in node_def.defaults) {

@@ -267,7 +267,7 @@
         "config": {
             "name": "Configuration nodes",
             "label": "config",
-            "global": "Global",
+            "global": "On all flows",
             "none": "none",
             "subflows": "subflows",
             "flows": "flows",
