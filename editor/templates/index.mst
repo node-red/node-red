@@ -43,19 +43,6 @@
     <div id="header-shade" class="hide"></div>
 </div>
 <div id="main-container" class="sidebar-closed hide">
-    <div id="palette">
-        <img src="red/images/spin.svg" class="palette-spinner hide"/>
-        <div id="palette-search">
-            <i class="fa fa-search"></i><input id="palette-search-input" type="text" data-i18n="[placeholder]palette.filter"><a href="#" id="palette-search-clear"><i class="fa fa-times"></i></a></input>
-        </div>
-        <div id="palette-container" class="palette-scroll"></div>
-        <div id="palette-footer">
-            <a class="palette-button" id="palette-collapse-all" href="#"><i class="fa fa-angle-double-up"></i></a>
-            <a class="palette-button" id="palette-expand-all" href="#"><i class="fa fa-angle-double-down"></i></a>
-        </div>
-
-    </div><!-- /palette -->
-
     <div id="workspace">
         <ul id="workspace-tabs"></ul>
         <div id="workspace-add-tab"><a id="btn-workspace-add-tab" href="#"><i class="fa fa-plus"></i></a></div>
@@ -66,13 +53,33 @@
             <a class="workspace-footer-button" id="btn-zoom-zero" href="#"><i class="fa fa-circle-o"></i></a>
             <a class="workspace-footer-button" id="btn-zoom-in" href="#"><i class="fa fa-plus"></i></a>
         </div>
+        <div id="editor-shade" class="hide"></div>
     </div>
-    <div id="editor-shade" class="hide"></div>
     <div id="editor-stack"></div>
+    <div id="palette">
+        <img src="red/images/spin.svg" class="palette-spinner hide"/>
+        <div id="palette-search" class="palette-search hide">
+            <input type="text" data-i18n="[placeholder]palette.filter"></input>
+        </div>
+        <div id="palette-editor">
+            <div class="editor-tray-header"><div class="editor-tray-titlebar"><ul class="editor-tray-breadcrumbs"><li data-i18n="palette.editor.title"></li></ul></div><div class="editor-tray-toolbar"><button id="palette-editor-close" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only primary" role="button" aria-disabled="false" data-i18n="common.label.done"></button></div></div>
+            <ul id="palette-editor-tabs"></ul>
+        </div>
+        <div id="palette-container" class="palette-scroll hide"></div>
+        <div id="palette-footer">
+            <div style="float:left" class="palette-editor-button hide">
+                <a class="palette-button palette-button-left" id="palette-edit" href="#"><i class="fa fa-cog"></i></a>
+            </div>
+            <a class="palette-button" id="palette-collapse-all" href="#"><i class="fa fa-angle-double-up"></i></a>
+            <a class="palette-button" id="palette-expand-all" href="#"><i class="fa fa-angle-double-down"></i></a>
+        </div>
+        <div id="palette-shade" class="hide"></div>
+    </div><!-- /palette -->
     <div id="sidebar">
         <ul id="sidebar-tabs"></ul>
         <div id="sidebar-content"></div>
         <div id="sidebar-footer"></div>
+        <div id="sidebar-shade" class="hide"></div>
     </div>
 
     <div id="sidebar-separator"></div>

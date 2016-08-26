@@ -67,9 +67,26 @@
                     });
             }
 
+            if (this.element.css("position") === "absolute") {
+                this.element.css("position","static");
+                this.topContainer.css("position","absolute");
+                this.uiContainer.css("position","absolute");
+
+                ["top","left","bottom","right"].forEach(function(s) {
+                    var v = that.element.css(s);
+                    if (s!=="auto" && s!=="") {
+                        that.topContainer.css(s,v);
+                        that.uiContainer.css(s,"0");
+                        that.element.css(s,'auto');
+                    }
+                })
+            }
             this.uiContainer.addClass("red-ui-editableList-container");
 
             this.uiHeight = this.element.height();
+
+            this.activeFilter = this.options.filter||null;
+            this.activeSort = this.options.sort||null;
 
             var minHeight = this.element.css("minHeight");
             if (minHeight !== '0px') {
@@ -141,6 +158,42 @@
         },
         _destroy: function() {
         },
+        _refreshFilter: function() {
+            var that = this;
+            var count = 0;
+            if (!this.activeFilter) {
+                this.element.children().show();
+            }
+            var items = this.items();
+            items.each(function (i,el) {
+                var data = el.data('data');
+                try {
+                    if (that.activeFilter(data)) {
+                        el.parent().show();
+                        count++;
+                    } else {
+                        el.parent().hide();
+                    }
+                } catch(err) {
+                    console.log(err);
+                    el.parent().show();
+                    count++;
+                }
+            });
+            return count;
+        },
+        _refreshSort: function() {
+            if (this.activeSort) {
+                var items = this.element.children();
+                var that = this;
+                items.sort(function(A,B) {
+                    return that.activeSort($(A).find(".red-ui-editableList-item-content").data('data'),$(B).find(".red-ui-editableList-item-content").data('data'));
+                });
+                $.each(items,function(idx,li) {
+                    that.element.append(li);
+                })
+            }
+        },
         width: function(desiredWidth) {
             this.uiWidth = desiredWidth;
             this._resize();
@@ -152,7 +205,23 @@
         addItem: function(data) {
             var that = this;
             data = data || {};
-            var li = $('<li>').appendTo(this.element);
+            var li = $('<li>');
+            var added = false;
+            if (this.activeSort) {
+                var items = this.items();
+                var skip = false;
+                items.each(function(i,el) {
+                    if (added) { return }
+                    var itemData = el.data('data');
+                    if (that.activeSort(data,itemData) < 0) {
+                         li.insertBefore(el.closest("li"));
+                         added = true;
+                    }
+                });
+            }
+            if (!added) {
+                li.appendTo(this.element);
+            }
             var row = $('<div/>').addClass("red-ui-editableList-item-content").appendTo(li);
             row.data('data',data);
             if (this.options.sortable === true) {
@@ -177,9 +246,20 @@
                 var index = that.element.children().length-1;
                 setTimeout(function() {
                     that.options.addItem(row,index,data);
-                    setTimeout(function() {
-                        that.uiContainer.scrollTop(that.element.height());
-                    },0);
+                    if (that.activeFilter) {
+                        try {
+                            if (!that.activeFilter(data)) {
+                                li.hide();
+                            }
+                        } catch(err) {
+                        }
+                    }
+
+                    if (!that.activeSort) {
+                        setTimeout(function() {
+                            that.uiContainer.scrollTop(that.element.height());
+                        },0);
+                    }
                 },0);
             }
         },
@@ -197,6 +277,21 @@
         },
         empty: function() {
             this.element.empty();
+        },
+        filter: function(filter) {
+            if (filter !== undefined) {
+                this.activeFilter = filter;
+            }
+            return this._refreshFilter();
+        },
+        sort: function(sort) {
+            if (sort !== undefined) {
+                this.activeSort = sort;
+            }
+            return this._refreshSort();
+        },
+        length: function() {
+            return this.element.children().length;
         }
     });
 })(jQuery);

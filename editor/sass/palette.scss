@@ -25,10 +25,25 @@
     text-align: center;
     @include disable-selection;
     @include component-border;
-
+    transition: width 0.2s ease-in-out;
 }
+
+.palette-expanded {
+    & #palette {
+        width: 380px;
+        box-shadow: 1px 0 6px rgba(0,0,0,0.1);
+    }
+    & #workspace { left: 379px !important; }
+    & #palette-collapse-all { display: none; }
+    & #palette-expand-all { display: none; }
+    & #palette-container { display: none !important; }
+    & #palette-search { display: none !important; }
+    & #palette-edit { background: $workspace-button-background-active }
+    & #palette-editor { display: block !important }
+}
+
+
 .palette-scroll {
-    display: none;
     position: absolute;
     top: 35px;
     right: 0;
@@ -38,15 +53,11 @@
     overflow-y: auto;
     box-sizing:border-box;
 }
-.palette-spinner {
-    padding-top: 40px;
+#palette > .palette-spinner {
+    padding-top: 80px;
 }
-#palette-search {
-    position: absolute;
-    display: none;
-    top: 0;
-    left:0;
-    right:0;
+.palette-search {
+    position: relative;
     overflow: hidden;
     background: #ffffff;
     text-align: center;
@@ -55,48 +66,7 @@
     border-bottom: 1px solid $primary-border-color;
     box-sizing:border-box;
 }
-#palette-search i {
-    font-size: 10px;
-    color: #666;
-}
-#palette-search i.fa-search {
-    position: absolute;
-    pointer-events: none;
-    left: 12px;
-    top: 12px;
-}
-#palette-search i.fa-times {
-    position: absolute;
-    right: 7px;
-    top: 12px;
-}
 
-#palette-search-clear {
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 20px;
-    display: none;
-}
-
-#palette-search input {
-    border-radius: 0;
-    border: none;
-    width: 100%;
-    box-shadow: none;
-    -webkit-box-shadow: none;
-    padding: 3px 17px 3px 22px;
-    margin: 0px;
-    height: 30px;
-    box-sizing:border-box;
-}
-
-#palette-search input:focus {
-    border: none;
-    box-shadow: none;
-    -webkit-box-shadow: none;
-}
 #palette-footer {
     @include component-footer;
 }
