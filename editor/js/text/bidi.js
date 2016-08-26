@@ -64,7 +64,6 @@ RED.text.bidi = (function() {
     }
 
     function onInputChange() {
-        console.log("ic");
         $(this).attr("dir", resolveBaseTextDir($(this).val()));
     }
 
