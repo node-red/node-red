@@ -631,7 +631,8 @@ RED.view = (function() {
                 spliceActive = false;
                 if (moving_set.length === 1) {
                     node = moving_set[0];
-                    spliceActive = node.n._def.inputs > 0 &&
+                    spliceActive = node.n.hasOwnProperty("_def") &&
+                                   node.n._def.inputs > 0 &&
                                    node.n._def.outputs > 0 &&
                                    RED.nodes.filterLinks({ source: node.n }).length === 0 &&
                                    RED.nodes.filterLinks({ target: node.n }).length === 0;
@@ -2245,7 +2246,8 @@ RED.view = (function() {
                         spliceActive = false;
                         if (new_ms.length === 1) {
                             node = new_ms[0];
-                            spliceActive = node.n._def.inputs > 0 &&
+                            spliceActive = node.n.hasOwnProperty("_def") &&
+                                           node.n._def.inputs > 0 &&
                                            node.n._def.outputs > 0;
                         }
                     }
