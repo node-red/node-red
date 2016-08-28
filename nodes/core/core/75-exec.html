@@ -46,12 +46,17 @@
 <script type="text/x-red" data-help-name="exec">
     <p>Calls out to a system command.<br/></p>
     <p>Provides 3 outputs: stdout, stderr, and return code.</p>
-    <p>By default uses the <code>exec</code> system call which calls the command, then gets a callback on completion, returning the complete result in one message, along with any errors.</p>
-    <p>Optionally can use <code>spawn</code> instead, which returns the output from stdout and stderr as the command runs (usually one line at a time). On completion it then returns a return code (on the 3rd output).</p>
-    <p>The optional append gets added to the command after <code>msg.payload</code> - so you can do things like pipe the result to another command.</p>
+    <p>By default uses the <code>exec</code> system call which calls the command, then gets a callback
+    on completion, returning the complete result in one message, along with any errors.</p>
+    <p>Optionally can use <code>spawn</code> instead, which returns the output from stdout and stderr
+    as the command runs (usually one line at a time). On completion it then returns a return code
+    (on the 3rd output).</p>
+    <p>The optional append gets added to the command after <code>msg.payload</code> - so you can do
+    things like pipe the result to another command.</p>
     <p>Parameters with spaces should be enclosed in quotes - <i>"This is a single parameter"</i></p>
     <p>If stdout is binary a <i>buffer</i> is returned - otherwise returns a <i>string</i>.</p>
     <p>The blue status icon will be visible while the node is active.</p>
+    <p>If running a Python app you may need to use the <code>-u</code> parameter to stop the output being buffered.</p>
 </script>
 
 <script type="text/javascript">
