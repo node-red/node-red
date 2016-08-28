@@ -82,6 +82,10 @@ module.exports = {
     // that should be served at http://localhost:1880/.
     //httpStatic: '/home/nol/node-red-static/',
 
+    // If you installed the optional node-red-dashboard you can set it's path 
+    // relative to httpRoot
+    //ui: { path: "ui" },
+
     // Securing Node-RED
     // -----------------
     // To password protect the Node-RED editor and admin API, the following
@@ -138,9 +142,10 @@ module.exports = {
     // in front of all http in nodes. This allows custom authentication to be
     // applied to all http in nodes, or any other sort of common request processing.
     //httpNodeMiddleware: function(req,res,next) {
-    //   // Handle/reject the request, or pass it on to the http in node
-    //   // by calling next();
-    //   next();
+    //    // Handle/reject the request, or pass it on to the http in node by calling next();
+    //    // Optionally skip our rawBodyParser by setting this to true;
+    //    //req.skipRawBodyParser = true;
+    //    next();
     //},
 
     // Anything in this hash is globally available to all functions.

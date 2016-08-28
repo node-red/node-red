@@ -27,6 +27,7 @@ module.exports = function(RED) {
     var isUtf8 = require('is-utf8');
 
     function rawBodyParser(req, res, next) {
+        if (req.skipRawBodyParser) { next(); } // don't parse this if told to skip
         if (req._body) { return next(); }
         req.body = "";
         req._body = true;
@@ -55,7 +56,6 @@ module.exports = function(RED) {
             if (!isText && checkUTF && isUtf8(buf)) {
                 buf = buf.toString()
             }
-
             req.body = buf;
             next();
         });
@@ -204,7 +204,6 @@ module.exports = function(RED) {
             }
 
             var metricsHandler = function(req,res,next) { next(); }
-
             if (this.metric()) {
                 metricsHandler = function(req, res, next) {
                     var startAt = process.hrtime();
@@ -267,7 +266,7 @@ module.exports = function(RED) {
                                 } else {
                                     msg.res._res.clearCookie(name);
                                 }
-                            } else  if (typeof msg.cookies[name] === 'object') {
+                            } else if (typeof msg.cookies[name] === 'object') {
                                 msg.res._res.cookie(name,msg.cookies[name].value,msg.cookies[name]);
                             } else {
                                 msg.res._res.cookie(name,msg.cookies[name]);
