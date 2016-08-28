@@ -670,6 +670,25 @@ describe('change Node', function() {
                 changeNode1.receive({topic:{foo:{bar:1}}, payload:"String"});
             });
         });
+        it('moves the value of a message property object to a sub-property', function(done) {
+            var flow = [{"id":"changeNode1","type":"change","rules":[{"t":"move","p":"payload","pt":"msg","to":"payload.foo","tot":"msg"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload');
+                        msg.payload.should.have.property('foo');
+                        msg.payload.foo.should.equal("bar");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:"bar"});
+            });
+        });
     });
 
     describe('- multiple rules', function() {
