@@ -209,8 +209,16 @@ module.exports = function(RED) {
                 for (var i=0;i<this.rules.length;i++) {
                     if (this.rules[i].t === "move") {
                         var r = this.rules[i];
-                        msg = applyRule(msg,{t:"set", p:r.to, pt:r.tot, to:r.p, tot:r.pt});
-                        applyRule(msg,{t:"delete", p:r.p, pt:r.pt});
+                        if (r.to.indexOf(r.pt) !== -1) {
+                            msg = applyRule(msg,{t:"set", p:r.to, pt:r.tot, to:r.p, tot:r.pt});
+                            applyRule(msg,{t:"delete", p:r.p, pt:r.pt});
+                        }
+                        else { // 2 step move if we are moving to a child
+                            msg = applyRule(msg,{t:"set", p:"_temp_move", pt:r.tot, to:r.p, tot:r.pt});
+                            applyRule(msg,{t:"delete", p:r.p, pt:r.pt});
+                            msg = applyRule(msg,{t:"set", p:r.to, pt:r.tot, to:"_temp_move", tot:r.pt});
+                            applyRule(msg,{t:"delete", p:"_temp_move", pt:r.pt});
+                        }
                     } else {
                         msg = applyRule(msg,this.rules[i]);
                     }
