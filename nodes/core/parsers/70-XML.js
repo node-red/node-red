@@ -31,6 +31,11 @@ module.exports = function(RED) {
                     var options = {};
                     if (msg.hasOwnProperty("options") && typeof msg.options === "object") { options = msg.options; }
                     options.async = false;
+
+		    //Explicitly create new builder object with options to enforce user specified options.
+		    // Ignoring "renderOpts" set initially, as user may choose to override.
+                    builder = new xml2js.Builder (options);
+
                     msg.payload = builder.buildObject(msg.payload, options);
                     node.send(msg);
                 }
