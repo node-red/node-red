@@ -151,6 +151,7 @@ input[type="url"],
 input[type="search"],
 input[type="tel"],
 input[type="color"],
+div[contenteditable="true"],
 .uneditable-input {
   box-sizing: border-box;
   display: inline-block;
@@ -956,6 +957,9 @@ input.search-query {
 .form-search input,
 .form-inline input,
 .form-horizontal input,
+.form-search div[contenteditable="true"],
+.form-inline div[contenteditable="true"],
+.form-horizontal div[contenteditable="true"],
 .form-search textarea,
 .form-inline textarea,
 .form-horizontal textarea,

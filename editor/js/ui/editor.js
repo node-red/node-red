@@ -163,7 +163,7 @@ RED.editor = (function() {
     function validateNodeEditorProperty(node,defaults,property,prefix) {
         var input = $("#"+prefix+"-"+property);
         if (input.length > 0) {
-            if (!validateNodeProperty(node, defaults, property,input.val())) {
+            if (!validateNodeProperty(node, defaults, property,input.text())) {
                 input.addClass("input-error");
             } else {
                 input.removeClass("input-error");
@@ -307,11 +307,11 @@ RED.editor = (function() {
             if (val == null) {
                 val = "";
             }
-            if (definition !== undefined && definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0].nodeName === "DIV") {
-                input.html(RED.text.format.getHtml(val, definition[property].format, {}, false, "en"));
+            if (definition !== undefined && definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0].nodeName === "DIV") {				
+                input.html(RED.text.format.getHtml(val, definition[property].format, {}, false, "en"));				
                 RED.text.format.attach(input[0], definition[property].format, {}, false, "en");
             } else {
-                input.val(val);
+                input.val(val);				
                 RED.text.bidi.prepareInput(input);
             }
         }
@@ -325,11 +325,20 @@ RED.editor = (function() {
      * @param prefix - the prefix to use in the input element ids (node-input|node-config-input)
      */
     function attachPropertyChangeHandler(node,definition,property,prefix) {
-        $("#"+prefix+"-"+property).change(function(event,skipValidation) {
-            if (!skipValidation) {
-                validateNodeEditor(node,prefix);
-            }
-        });
+		var input = $("#"+prefix+"-"+property);
+        if (definition !== undefined && "format" in definition[property] && definition[property].format !== "" && input[0].nodeName === "DIV") {
+            $("#"+prefix+"-"+property).on('change keyup', function(event,skipValidation) {
+                if (!skipValidation) {
+                    validateNodeEditor(node,prefix);
+                }
+            });
+        } else {
+            $("#"+prefix+"-"+property).change(function(event,skipValidation) {
+                if (!skipValidation) {
+                    validateNodeEditor(node,prefix);
+                }
+            });
+        }
     }
 
     /**
@@ -353,7 +362,7 @@ RED.editor = (function() {
                         $('#' + prefix + '-' + cred).val('');
                     }
                 } else {
-                    preparePropertyEditor(credData, cred, prefix);
+                    preparePropertyEditor(credData, cred, prefix, credDef);
                 }
                 attachPropertyChangeHandler(node, credDef, cred, prefix);
             }
@@ -413,10 +422,10 @@ RED.editor = (function() {
                         }
                     } else {
                         console.log("Unknown type:", definition.defaults[d].type);
-                        preparePropertyEditor(node,d,prefix);
+                        preparePropertyEditor(node,d,prefix,definition.defaults);
                     }
                 } else {
-                    preparePropertyEditor(node,d,prefix);
+                    preparePropertyEditor(node,d,prefix,definition.defaults);
                 }
                 attachPropertyChangeHandler(node,definition.defaults,d,prefix);
             }
@@ -597,6 +606,8 @@ RED.editor = (function() {
                                     var newValue;
                                     if (input.attr('type') === "checkbox") {
                                         newValue = input.prop('checked');
+                                    } else if ("format" in editing_node._def.defaults[d] && editing_node._def.defaults[d].format !== "" && input[0].nodeName === "DIV") {
+                                        newValue = input.text();
                                     } else {
                                         newValue = input.val();
                                     }
