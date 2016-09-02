@@ -701,10 +701,12 @@ RED.palette.editor = (function() {
             }
         });
         RED.events.on('nodes:add', function(n) {
-            typesInUse[n.type] = (typesInUse[n.type]||0)+1;
-            if (typesInUse[n.type] === 1) {
-                var ns = RED.nodes.registry.getNodeSetForType(n.type);
-                refreshNodeModule(ns.module);
+            if (!/^subflow:/.test(n.type)) {
+                typesInUse[n.type] = (typesInUse[n.type]||0)+1;
+                if (typesInUse[n.type] === 1) {
+                    var ns = RED.nodes.registry.getNodeSetForType(n.type);
+                    refreshNodeModule(ns.module);
+                }
             }
         })
         RED.events.on('nodes:remove', function(n) {
