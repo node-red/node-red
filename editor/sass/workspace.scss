@@ -27,6 +27,11 @@
    transition: right 0.2s ease;
 }
 
+[dir="rtl"] #chart {
+	direction: rtl;
+	text-align: right;
+}
+
 #chart:focus {
     outline: none;
 }
@@ -44,6 +49,11 @@
 
 }
 
+[dir="rtl"] #workspace {
+	left: 322px;
+    right: 179px;
+}
+
 .workspace-footer-button {
     @include component-footer-button;
 }
@@ -52,7 +62,10 @@
     margin-right: 35px;
 }
 
-
+[dir="rtl"] #workspace-tabs {
+    margin-left: 35px;
+    margin-right: initial;
+}
 
 #workspace-add-tab {
     position: absolute;
@@ -63,6 +76,11 @@
     width: 35px;
     background: #fff;
     border-bottom: 1px solid $primary-border-color;
+}
+
+[dir="rtl"] #workspace-add-tab {
+	left: 0px;
+	right: initial;
 }
 
 #btn-workspace-add-tab {

@@ -28,6 +28,11 @@
     transition: width 0.2s ease-in-out;
 }
 
+[dir="rtl"] #palette {
+	left: initial;
+	right: 0px;
+}
+
 .palette-expanded {
     & #palette {
         width: 380px;
@@ -74,7 +79,9 @@
     @include component-footer-button;
 }
 
-
+[dir="rtl"] .palette-button {
+	float: left;
+}
 .palette-category {
     border-bottom: 1px solid #ccc;
 }
@@ -95,6 +102,11 @@
     text-overflow: ellipsis;
 
 }
+
+[dir="rtl"] .palette-header {
+	text-align: right;
+}
+
 .palette-header i {
     margin: 3px 10px 3px 3px;
     -webkit-transition: all 0.2s ease-in-out;
@@ -104,6 +116,11 @@
     -moz-transform: rotate(-90deg);
     -o-transform: rotate(-90deg);
 }
+
+[dir="rtl"] .palette-header i {
+	transform: rotate(90deg);
+}
+
 .palette-header i.expanded {
     -webkit-transform: rotate(0deg);
     -moz-transform: rotate(0deg);

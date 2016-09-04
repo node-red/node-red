@@ -65,6 +65,12 @@ span.logo {
 
 }
 
+[dir="rtl"] span.logo {
+	float: right;
+    direction: ltr;
+    padding-right: 18px;
+}
+
 .header-toolbar {
     padding: 0;
     margin: 0;
@@ -78,6 +84,10 @@ span.logo {
         position: relative;
 
     }
+}
+
+[dir="rtl"] .header-toolbar {
+	float: left;
 }
 
 .button {
@@ -117,6 +127,10 @@ span.logo {
     text-decoration: none;
     padding: 4px 8px;
     margin: 0;
+}
+
+[dir="rtl"] #header .button-group > a {
+	float: right;
 }
 
 .deploy-button {
@@ -217,11 +231,20 @@ span.logo {
     display: inline-block;
     text-indent: 0px;
 }
+
+[dir="rtl"] #header ul.dropdown-menu li a span.menu-label {
+	text-indent: 20px;
+} 
+
 #header ul.dropdown-menu li a span.menu-sublabel {
     color: #aeaeae;
     font-size: 13px;
     display: inline-block;
     text-indent: 0px;
+}
+
+[dir="rtl"] #header ul.dropdown-menu li a span.menu-sublabel {
+	text-indent: 15px;
 }
 
 #header ul.dropdown-menu > li:hover > a,
@@ -251,6 +274,11 @@ span.logo {
     display: inline-block;
     text-indent: 0px;
 }
+
+[dir="rtl"] #header ul#btn-deploy-options-submenu li a span.menu-label {
+	text-indent: 20px;
+}
+
 #header ul#btn-deploy-options-submenu li a {
     padding: 10px 30px;
     color: #fff;

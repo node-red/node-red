@@ -52,6 +52,12 @@ ul.red-ui-tabs li a.red-ui-tab-label {
     height: 100%;
     color: #666;
 }
+
+[dir="rtl"] ul.red-ui-tabs li a.red-ui-tab-label {
+	padding-left: 0px;
+	padding-right: 12px;
+}
+
 ul.red-ui-tabs li {
     position: relative;
 }

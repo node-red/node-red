@@ -24,6 +24,11 @@
     width: 0;
     z-index: 5;
 }
+
+[dir="rtl"] #editor-stack {
+	right: 180px;
+}
+
 .editor-tray {
     position:absolute;
     margin: 0;
@@ -116,6 +121,16 @@
             opacity: 1;
         }
     }
+}
+
+[dir="rtl"] .editor-tray-toolbar {
+	text-align: left;
+		
+		button {
+			 &.leftButton {
+            float: left;
+        	}
+		}
 }
 
 .editor-tray-titlebar {

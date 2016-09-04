@@ -25,19 +25,41 @@
     margin-left: -25px;
     margin-top: 3px;
 }
+
+[dir="rtl"] .dropdown-menu * .fa-check-square {
+	float: right;
+	margin-left: initial;
+	margin-right: -8px;
+}
+
 .dropdown-menu * a.active > .fa-check-square {
     display: inline-block;
 }
+
+[dir="rtl"] .dropdown-menu * a.active > .fa-check-square {
+	float: right;
+}
+
 .dropdown-menu * .fa-square {
     display: inline-block;
     color: #e0e0e0;
     margin-left: -25px;
     margin-top: 3px;
 }
+
+[dir="rtl"] .dropdown-menu * .fa-square {
+	float: right;
+	margin-left: initial;
+	margin-right: -8px;
+} 
+
 .dropdown-menu * a.active > .fa-square {
     display: none;
 }
 
+[dir="rtl"] .dropdown-menu * a.active > .fa-square {
+	float: right;
+}
 
 .dropdown-menu>li.disabled>a:hover>[class^="icon-"] {
     background-image: url("vendor/bootstrap/img/glyphicons-halflings.png") !important;
@@ -48,6 +70,12 @@
     width: 200px !important;
     margin-left: 0px !important;
 }
+
+[dir="rtl"] .dropdown-menu{
+	right: auto;
+    left: 0;
+}
+
 .dropdown-menu > li > a > i {
     width: 10px;
     text-align: center;
@@ -76,9 +104,18 @@
     content: " ";
 }
 
+[dir="rtl"] .dropdown-submenu>a:before {
+	float : right;
+	transform: rotate(180deg);
+}
+
 .dropdown-submenu.disabled > a:before {
     border-right-color: #444;
 }
 .dropdown-submenu.pull-left>.dropdown-menu {
     border-radius: 0;
+}
+
+[dir="rtl"] .dropdown-submenu.pull-left>.dropdown-menu {
+	right: -250px;
 }

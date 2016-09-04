@@ -68,6 +68,10 @@
     @include disable-selection;
 }
 
+[dir="rtl"] .node_label {
+	direction: ltr;
+}
+
 .port_label {
     stroke-width: 0;
     fill: #888;

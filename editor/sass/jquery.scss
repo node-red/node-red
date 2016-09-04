@@ -49,6 +49,11 @@
 .ui-dialog .ui-dialog-title {
     width: auto;
 }
+
+[dir="rtl"] .ui-dialog .ui-dialog-title {
+	text-align: right;
+}
+
 .ui-dialog .ui-dialog-titlebar {
     padding: 10px;
     background: #f3f3f3;
@@ -59,15 +64,25 @@
 .ui-corner-all {
     border-radius: 1px;
 }
+
+[dir="rtl"] .ui-corner-all {
+	float: left;
+}
+
 .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
     background: #f3f3f3;
 }
+
 .ui-dialog-no-close .ui-dialog-titlebar-close {
     display: none;
 }
 
 .ui-dialog-buttonset {
     text-align: right;
+}
+
+[dir="rtl"] .ui-dialog-buttonset {
+    text-align: left;
 }
 
 .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
@@ -112,6 +127,12 @@
     .ui-button-text {
         padding: 0;
     }
+}
+
+[dir="rtl"] .ui-dialog-buttonset button {
+	&.leftButton {
+        float: right;
+        }
 }
 
 .ui-dialog .ui-dialog-buttonpane {
