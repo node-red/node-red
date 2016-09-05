@@ -122,6 +122,19 @@
         }
     }
 }
+
+[dir="rtl"] .red-ui-typedInput-container {
+	.red-ui-typedInput-input {
+        left:0 !important;
+        right:52px !important;
+	}
+	a {
+		span {
+			padding: 0 5px 0 1px;
+		}
+	}
+}
+
 .red-ui-typedInput-options {
     @include component-shadow;
     position: absolute;
@@ -147,4 +160,8 @@
 
 
     }
+}
+
+[dir="rtl"] .red-ui-typedInput-options{
+	left: 1512px !important;
 }

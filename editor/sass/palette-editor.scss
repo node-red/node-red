@@ -230,3 +230,98 @@
     }
 
 }
+
+[dir="rtl"] #palette-editor {
+	right: 0px;
+	text-align: right;
+
+    .red-ui-editableList-container {
+
+        li {
+            .red-ui-editableList-item-content {
+                padding: 8px 12px;
+            }
+
+        }
+
+    }
+    .palette-editor-tab {
+        left:initial;
+    }
+    .palette-editor-toolbar {
+        padding: 10px 8px;
+        text-align: left;
+
+        .button-group {
+            margin-right: 0px;
+			margin-left: 10px;
+        }
+    }
+    .palette-module-button-group {
+        right: inital;
+		left:0;
+        a {
+            margin-left: 0px;
+			margin-right: 5px;
+        }
+    }
+    .palette-module-shade {
+        left:0;
+        right:0;
+    }
+
+    .palette-module-meta {
+
+        .fa {
+            margin-left: 5px;
+			margin-right: 0px;
+        }
+    }
+
+    .palette-module-updated {
+        margin-right: 10px;
+		margin-left: 0px;
+    }
+    .palette-module-link {
+        margin-right: 5px;
+		margin-left: 0px;
+    }
+
+    .palette-module-description {
+        margin-right: 20px;
+		margin-left: 0px;
+    }
+    .palette-module-count {
+        padding: 8px 2px;
+    }
+    .palette-module-content {
+        padding: 3px 10px;
+    }
+
+    .palette-module-type {
+        padding-right: 5px;
+		padding-left: 0px;
+    }
+    .palette-module-type-swatch {
+        margin-left: 5px;
+		margin-right: 0px;
+    }
+    .palette-module-set-button-group {
+        left: 4px;
+        right: inital;
+    }
+
+    .palette-module-more {
+        a {
+            padding: 8px 12px;
+        }
+    }
+}
+
+.palette-editor-button { 
+	float:left;
+}
+
+[dir="rtl"] .palette-editor-button { 
+	float:right;
+}

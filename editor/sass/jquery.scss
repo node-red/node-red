@@ -51,6 +51,7 @@
 }
 
 [dir="rtl"] .ui-dialog .ui-dialog-title {
+	float: right;
 	text-align: right;
 }
 
@@ -65,9 +66,6 @@
     border-radius: 1px;
 }
 
-[dir="rtl"] .ui-corner-all {
-	float: left;
-}
 
 .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
     background: #f3f3f3;
@@ -75,6 +73,10 @@
 
 .ui-dialog-no-close .ui-dialog-titlebar-close {
     display: none;
+}
+
+[dir="rtl"] .ui-dialog-titlebar-close{
+	float: left;
 }
 
 .ui-dialog-buttonset {

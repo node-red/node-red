@@ -96,3 +96,7 @@
 #workspace-footer {
     @include component-footer;
 }
+
+[dir="rtl"] #workspace-footer {
+	text-align: left;
+}

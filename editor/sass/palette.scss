@@ -47,6 +47,16 @@
     & #palette-editor { display: block !important }
 }
 
+[dir="rtl"] .palette-expanded {
+    & #palette {
+        width: 380px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+    }
+    & #workspace { 
+		left: 379px !important;
+        right: 150px !important;
+		}
+}
 
 .palette-scroll {
     position: absolute;
@@ -118,6 +128,7 @@
 }
 
 [dir="rtl"] .palette-header i {
+	margin: 3px 3px 3px 10px;
 	transform: rotate(90deg);
 }
 
@@ -136,6 +147,7 @@
     overflow: hidden;
     text-align: center;
 }
+
 .palette_label_right {
     margin: 4px 28px 4px 0;
 }
