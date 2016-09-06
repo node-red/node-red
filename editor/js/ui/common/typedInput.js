@@ -208,10 +208,10 @@
                     }
                 } else {
                     if (opt.icon) {
-                	    $('<img>',{src:opt.icon,style:"margin-right: 4px; height: 18px;"}).prependTo(op);
-                	} else {
+                        $('<img>',{src:opt.icon,style:"margin-right: 4px; height: 18px;"}).prependTo(op);
+                    } else {
                 	    op.css({paddingLeft: "18px"});
-                	}
+                    }
                 }
                 op.click(function(event) {
                     event.preventDefault();
@@ -290,15 +290,15 @@
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
                 // reverse property direction in case of right directionality
                 if ($("body").attr("dir") == "rtl") {
-                	this.elementDiv.css('right',labelWidth+"px");
-                	if (this.optionSelectTrigger) {
-                		this.optionSelectTrigger.css('right',(labelWidth+5)+"px");
-                	}
+                    this.elementDiv.css('right',labelWidth+"px");
+                    if (this.optionSelectTrigger) {
+                	    this.optionSelectTrigger.css('right',(labelWidth+5)+"px");
+                    }
                 } else {
-                	this.elementDiv.css('left',labelWidth+"px");
-                	if (this.optionSelectTrigger) {
-                		this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
-                	}
+                    this.elementDiv.css('left',labelWidth+"px");
+                    if (this.optionSelectTrigger) {
+                	    this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
+                    }
                 }
             }
         },
