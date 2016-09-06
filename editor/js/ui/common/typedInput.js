@@ -200,7 +200,7 @@
                 if (opt.label) {
                     op.text(opt.label);
                 }
-                // next if-else Added by Ayah
+                // reverse property direction in case of right directionality
 				if($("body").attr("dir") == "rtl"){
 					if (opt.icon) {
 						$('<img>',{src:opt.icon,style:"margin-left: 4px; height: 18px;"}).prependTo(op);
@@ -241,14 +241,14 @@
             if (top+menuHeight > $(window).height()) {
                 top -= (top+menuHeight)-$(window).height()+5;
             }
-			// next if-else Added by Ayah
+			// reverse property direction in case of right directionality
 			if($("body").attr("dir") == "rtl"){
-				menu.css({ // change has to applied here
+				menu.css({ 
 					top: top+"px",
 					right: (2+pos.right)+"px",
 				});
 			} else {
-				menu.css({ // change has to applied here
+				menu.css({ 
 					top: top+"px",
 					left: (2+pos.left)+"px",
 				});
@@ -267,7 +267,7 @@
                 })
             });
         },
-        _getLabelWidth: function(label) { // change has to applied here
+        _getLabelWidth: function(label) { 
             var labelWidth = label.outerWidth();
             if (labelWidth === 0) {
                 var container = $('<div class="red-ui-typedInput-container"></div>').css({
@@ -281,7 +281,7 @@
             }
             return labelWidth;
         },
-        _resize: function() { // change has to applied here
+        _resize: function() { 
             if (this.uiWidth !== null) {
                 this.uiSelect.width(this.uiWidth);
             }
@@ -290,7 +290,7 @@
             } else {
                 this.selectTrigger.width('auto');
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
-				// next if-else Added by Ayah
+				// reverse property direction in case of right directionality
 				if($("body").attr("dir") == "rtl"){
 					this.elementDiv.css('right',labelWidth+"px");
 					if (this.optionSelectTrigger) {
