@@ -124,12 +124,11 @@
             } else {
                 this.uiSelect.width(this.uiWidth);
             }
-
-			["Right","Left"].forEach(function(d) {
-				var m = that.element.css("margin"+d);
-				that.uiSelect.css("margin"+d,m);
-				that.element.css("margin"+d,0);
-			});
+            ["Right","Left"].forEach(function(d) {
+                var m = that.element.css("margin"+d);
+                that.uiSelect.css("margin"+d,m);
+                that.element.css("margin"+d,0);
+            });
 
             this.uiSelect.addClass("red-ui-typedInput-container");
 
@@ -201,13 +200,13 @@
                     op.text(opt.label);
                 }
                 // reverse property direction in case of right directionality
-                if($("body").attr("dir") == "rtl"){
-                	if (opt.icon) {
-                		$('<img>',{src:opt.icon,style:"margin-left: 4px; height: 18px;"}).prependTo(op);
-                	} else {
+                if ($("body").attr("dir") == "rtl") {
+                    if (opt.icon) {
+                    	$('<img>',{src:opt.icon,style:"margin-left: 4px; height: 18px;"}).prependTo(op);
+                    } else {
                 		op.css({paddingRight: "18px"});
-                			}
-                } else{
+                	}
+                } else {
                 	if (opt.icon) {
                 		$('<img>',{src:opt.icon,style:"margin-right: 4px; height: 18px;"}).prependTo(op);
                 	} else {
@@ -241,11 +240,11 @@
                 top -= (top+menuHeight)-$(window).height()+5;
             }
             // reverse property direction in case of right directionality
-            if($("body").attr("dir") == "rtl"){
-            	menu.css({ 
-            		top: top+"px",
-            		right: (2+pos.right)+"px",
-            	});
+            if ($("body").attr("dir") == "rtl") {
+                menu.css({ 
+                	 top: top+"px",
+                	 right: (2+pos.right)+"px",
+                });
             } else {
             	menu.css({ 
             		top: top+"px",
@@ -290,18 +289,18 @@
                 this.selectTrigger.width('auto');
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
                 // reverse property direction in case of right directionality
-                if($("body").attr("dir") == "rtl"){
+                if ($("body").attr("dir") == "rtl") {
                 	this.elementDiv.css('right',labelWidth+"px");
                 	if (this.optionSelectTrigger) {
                 		this.optionSelectTrigger.css('right',(labelWidth+5)+"px");
-                		}
-                	} else {
-                		this.elementDiv.css('left',labelWidth+"px");
-                		if (this.optionSelectTrigger) {
-                			this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
-                		}
+                	}
+                } else {
+                	this.elementDiv.css('left',labelWidth+"px");
+                	if (this.optionSelectTrigger) {
+                		this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
+                	}
                 }
-           }
+            }
         },
         _destroy: function() {
             this.menu.remove();
