@@ -201,20 +201,19 @@
                     op.text(opt.label);
                 }
                 // reverse property direction in case of right directionality
-				if($("body").attr("dir") == "rtl"){
-					if (opt.icon) {
-						$('<img>',{src:opt.icon,style:"margin-left: 4px; height: 18px;"}).prependTo(op);
-					} else {
-						op.css({paddingRight: "18px"});
-					}
-				} else{
-					if (opt.icon) {
-						$('<img>',{src:opt.icon,style:"margin-right: 4px; height: 18px;"}).prependTo(op);
-					} else {
-						op.css({paddingLeft: "18px"});
-					}
-				}
-
+                if($("body").attr("dir") == "rtl"){
+                	if (opt.icon) {
+                		$('<img>',{src:opt.icon,style:"margin-left: 4px; height: 18px;"}).prependTo(op);
+                	} else {
+                		op.css({paddingRight: "18px"});
+                			}
+                } else{
+                	if (opt.icon) {
+                		$('<img>',{src:opt.icon,style:"margin-right: 4px; height: 18px;"}).prependTo(op);
+                	} else {
+                		op.css({paddingLeft: "18px"});
+                	}
+                }
                 op.click(function(event) {
                     event.preventDefault();
                     callback(opt.value);
@@ -241,18 +240,18 @@
             if (top+menuHeight > $(window).height()) {
                 top -= (top+menuHeight)-$(window).height()+5;
             }
-			// reverse property direction in case of right directionality
-			if($("body").attr("dir") == "rtl"){
-				menu.css({ 
-					top: top+"px",
-					right: (2+pos.right)+"px",
-				});
-			} else {
-				menu.css({ 
-					top: top+"px",
-					left: (2+pos.left)+"px",
-				});
-			}
+            // reverse property direction in case of right directionality
+            if($("body").attr("dir") == "rtl"){
+            	menu.css({ 
+            		top: top+"px",
+            		right: (2+pos.right)+"px",
+            	});
+            } else {
+            	menu.css({ 
+            		top: top+"px",
+            		left: (2+pos.left)+"px",
+            	});
+            }
             menu.slideDown(100);
             this._delay(function() {
                 that.uiSelect.addClass('red-ui-typedInput-focus');
@@ -290,19 +289,19 @@
             } else {
                 this.selectTrigger.width('auto');
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
-				// reverse property direction in case of right directionality
-				if($("body").attr("dir") == "rtl"){
-					this.elementDiv.css('right',labelWidth+"px");
-					if (this.optionSelectTrigger) {
-						this.optionSelectTrigger.css('right',(labelWidth+5)+"px");
-					}
-				} else {
-					this.elementDiv.css('left',labelWidth+"px");
-					if (this.optionSelectTrigger) {
-						this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
-					}
-				}
-            }
+                // reverse property direction in case of right directionality
+                if($("body").attr("dir") == "rtl"){
+                	this.elementDiv.css('right',labelWidth+"px");
+                	if (this.optionSelectTrigger) {
+                		this.optionSelectTrigger.css('right',(labelWidth+5)+"px");
+                		}
+                	} else {
+                		this.elementDiv.css('left',labelWidth+"px");
+                		if (this.optionSelectTrigger) {
+                			this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
+                		}
+                }
+           }
         },
         _destroy: function() {
             this.menu.remove();
