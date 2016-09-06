@@ -124,11 +124,13 @@
             } else {
                 this.uiSelect.width(this.uiWidth);
             }
-            ["Right","Left"].forEach(function(d) {
-                var m = that.element.css("margin"+d);
-                that.uiSelect.css("margin"+d,m);
-                that.element.css("margin"+d,0);
-            });
+
+			["Right","Left"].forEach(function(d) {
+				var m = that.element.css("margin"+d);
+				that.uiSelect.css("margin"+d,m);
+				that.element.css("margin"+d,0);
+			});
+
             this.uiSelect.addClass("red-ui-typedInput-container");
 
             this.options.types = this.options.types||Object.keys(allOptions);
@@ -198,11 +200,20 @@
                 if (opt.label) {
                     op.text(opt.label);
                 }
-                if (opt.icon) {
-                    $('<img>',{src:opt.icon,style:"margin-right: 4px; height: 18px;"}).prependTo(op);
-                } else {
-                    op.css({paddingLeft: "18px"});
-                }
+                // next if-else Added by Ayah
+				if($("body").attr("dir") == "rtl"){
+					if (opt.icon) {
+						$('<img>',{src:opt.icon,style:"margin-left: 4px; height: 18px;"}).prependTo(op);
+					} else {
+						op.css({paddingRight: "18px"});
+					}
+				} else{
+					if (opt.icon) {
+						$('<img>',{src:opt.icon,style:"margin-right: 4px; height: 18px;"}).prependTo(op);
+					} else {
+						op.css({paddingLeft: "18px"});
+					}
+				}
 
                 op.click(function(event) {
                     event.preventDefault();
@@ -230,10 +241,18 @@
             if (top+menuHeight > $(window).height()) {
                 top -= (top+menuHeight)-$(window).height()+5;
             }
-            menu.css({
-                top: top+"px",
-                left: (2+pos.left)+"px",
-            });
+			// next if-else Added by Ayah
+			if($("body").attr("dir") == "rtl"){
+				menu.css({ // change has to applied here
+					top: top+"px",
+					right: (2+pos.right)+"px",
+				});
+			} else {
+				menu.css({ // change has to applied here
+					top: top+"px",
+					left: (2+pos.left)+"px",
+				});
+			}
             menu.slideDown(100);
             this._delay(function() {
                 that.uiSelect.addClass('red-ui-typedInput-focus');
@@ -248,7 +267,7 @@
                 })
             });
         },
-        _getLabelWidth: function(label) {
+        _getLabelWidth: function(label) { // change has to applied here
             var labelWidth = label.outerWidth();
             if (labelWidth === 0) {
                 var container = $('<div class="red-ui-typedInput-container"></div>').css({
@@ -262,7 +281,7 @@
             }
             return labelWidth;
         },
-        _resize: function() {
+        _resize: function() { // change has to applied here
             if (this.uiWidth !== null) {
                 this.uiSelect.width(this.uiWidth);
             }
@@ -271,10 +290,18 @@
             } else {
                 this.selectTrigger.width('auto');
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
-                this.elementDiv.css('left',labelWidth+"px");
-                if (this.optionSelectTrigger) {
-                    this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
-                }
+				// next if-else Added by Ayah
+				if($("body").attr("dir") == "rtl"){
+					this.elementDiv.css('right',labelWidth+"px");
+					if (this.optionSelectTrigger) {
+						this.optionSelectTrigger.css('right',(labelWidth+5)+"px");
+					}
+				} else {
+					this.elementDiv.css('left',labelWidth+"px");
+					if (this.optionSelectTrigger) {
+						this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
+					}
+				}
             }
         },
         _destroy: function() {
@@ -336,7 +363,11 @@
                         image = new Image();
                         image.name = opt.icon;
                         image.src = opt.icon;
-                        $('<img>',{src:opt.icon,style:"margin-right: 4px;height: 18px;"}).prependTo(this.selectLabel);
+						if($("body").attr("dir") == "rtl"){
+							$('<img>',{src:opt.icon,style:"margin-left: 4px;height: 18px;"}).prependTo(this.selectLabel);
+						} else {
+							$('<img>',{src:opt.icon,style:"margin-right: 4px;height: 18px;"}).prependTo(this.selectLabel);
+						}
                     } else {
                         this.selectLabel.text(opt.label);
                     }
