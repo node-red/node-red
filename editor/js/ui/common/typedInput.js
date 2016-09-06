@@ -210,7 +210,7 @@
                     if (opt.icon) {
                         $('<img>',{src:opt.icon,style:"margin-right: 4px; height: 18px;"}).prependTo(op);
                     } else {
-                	    op.css({paddingLeft: "18px"});
+                        op.css({paddingLeft: "18px"});
                     }
                 }
                 op.click(function(event) {
@@ -248,7 +248,7 @@
             } else {
                 menu.css({ 
                     top: top+"px",
-            	    left: (2+pos.left)+"px",
+                    left: (2+pos.left)+"px",
             	});
             }
             menu.slideDown(100);
@@ -292,12 +292,12 @@
                 if ($("body").attr("dir") == "rtl") {
                     this.elementDiv.css('right',labelWidth+"px");
                     if (this.optionSelectTrigger) {
-                	    this.optionSelectTrigger.css('right',(labelWidth+5)+"px");
+                        this.optionSelectTrigger.css('right',(labelWidth+5)+"px");
                     }
                 } else {
                     this.elementDiv.css('left',labelWidth+"px");
                     if (this.optionSelectTrigger) {
-                	    this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
+                        this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
                     }
                 }
             }
