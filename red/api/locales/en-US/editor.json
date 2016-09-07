@@ -30,7 +30,11 @@
                 "defaultDir": "Default",
                 "ltr": "Left-to-right",
                 "rtl": "Right-to-left",
-                "auto": "Contextual"
+                "auto": "Contextual",
+                "calendar": "National Calendar",
+                "defaultCalendar": "Gregorian",
+                "hijri": "Hijri",
+                "hebrew": "Hebrew"
             },
             "sidebar": {
                 "show": "Show sidebar"

@@ -121,10 +121,24 @@ RED.text.bidi = (function() {
         enforceTextDirectionOnPage();
     }
 
+    /**
+     * Sets the national calendar preference
+     * @param val - the calendar type hijri, hebrew or gregorian
+     */
+    function setCalendarType(val) {
+    	calendarType = val;
+    }
+
+    function getCalendarType() {
+    	return calendarType;
+    }
+
     return {
         setTextDirection: setTextDirection,
         enforceTextDirectionWithUCC: enforceTextDirectionWithUCC,
         resolveBaseTextDir: resolveBaseTextDir,
-        prepareInput: prepareInput
+        prepareInput: prepareInput,
+        setCalendarType: setCalendarType,
+        getCalendarType: getCalendarType
     }
 })();

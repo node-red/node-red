@@ -180,6 +180,11 @@ var RED = (function() {
                         {id:"menu-item-bidi-rtl",toggle:"text-direction",label:RED._("menu.label.view.rtl"), onselect:function(s) { if(s){RED.text.bidi.setTextDirection("rtl")}}},
                         {id:"menu-item-bidi-auto",toggle:"text-direction",label:RED._("menu.label.view.auto"), onselect:function(s) { if(s){RED.text.bidi.setTextDirection("auto")}}}
                     ]},
+                    {id:"menu-item-calendars",label:RED._("menu.label.view.calendar"),options:[
+                       {id:"menu-item-calendars-default",toggle:"calendar-type",label:RED._("menu.label.view.defaultCalendar"),selected: true, onselect:function(s) { if(s){RED.text.bidi.setCalendarType("gregorian")}}},
+                       {id:"menu-item-calendars-hijri",toggle:"calendar-type",label:RED._("menu.label.view.hijri"), onselect:function(s) { if(s){RED.text.bidi.setCalendarType("hijri")}}},
+                       {id:"menu-item-calendars-hebrew",toggle:"calendar-type",label:RED._("menu.label.view.hebrew"), onselect:function(s) { if(s){RED.text.bidi.setCalendarType("hebrew")}}}
+                    ]},
                     null,
                     {id:"menu-item-sidebar",label:RED._("menu.label.sidebar.show"),toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true}
                 ]},
