@@ -133,6 +133,19 @@ RED.text.bidi = (function() {
     function getCalendarType() {
     	return calendarType;
     }
+    /**
+     * Formats the date according to the current selected calendar 
+     * @param date - the date object to be formatted
+     */
+    function getNationalDate(date){
+    	var options = {};
+        var lang = "en-US";
+        if(calendarType === "hijri")
+        	options = lang + "-u-ca-islamic";
+        else if(calendarType === "hebrew")
+        	options = lang + "-u-ca-hebrew";
+        return date.toLocaleString(options);
+    }
 
     return {
         setTextDirection: setTextDirection,
@@ -140,6 +153,7 @@ RED.text.bidi = (function() {
         resolveBaseTextDir: resolveBaseTextDir,
         prepareInput: prepareInput,
         setCalendarType: setCalendarType,
-        getCalendarType: getCalendarType
+        getCalendarType: getCalendarType,
+        getNationalDate: getNationalDate
     }
 })();

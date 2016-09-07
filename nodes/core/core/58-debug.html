@@ -119,13 +119,7 @@
 
             function getTimestamp() {
                 var d = new Date();
-                var options = {};
-                var lang = "en-US";
-                if(RED.text.bidi.getCalendarType() === "hijri")
-                	options = lang + "-u-ca-islamic";
-                else if(RED.text.bidi.getCalendarType() === "hebrew")
-                	options = lang + "-u-ca-hebrew";
-                return d.toLocaleString(options);
+                return RED.text.bidi.getNationalDate(d);
             }
 
             var sbc = document.getElementById("debug-content");
