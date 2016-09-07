@@ -163,7 +163,11 @@ RED.editor = (function() {
     function validateNodeEditorProperty(node,defaults,property,prefix) {
         var input = $("#"+prefix+"-"+property);
         if (input.length > 0) {
-            if (!validateNodeProperty(node, defaults, property,input.text())) {
+		    var value = input.val();
+			if (defaults[property].hasOwnProperty("format") && defaults[property].format !== "" && input[0].nodeName === "DIV") {
+			    value = input.text();
+			}
+            if (!validateNodeProperty(node, defaults, property,value)) {
                 input.addClass("input-error");
             } else {
                 input.removeClass("input-error");
