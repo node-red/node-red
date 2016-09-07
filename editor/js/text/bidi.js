@@ -140,10 +140,11 @@ RED.text.bidi = (function() {
     function getNationalDate(date){
     	var options = {};
         var lang = "en-US";
-        if(calendarType === "hijri")
+        if (calendarType === "hijri") {
         	options = lang + "-u-ca-islamic";
-        else if(calendarType === "hebrew")
+        } else if (calendarType === "hebrew") {
         	options = lang + "-u-ca-hebrew";
+        }
         return date.toLocaleString(options);
     }
 
