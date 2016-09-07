@@ -19,6 +19,7 @@ RED.text.bidi = (function() {
     var LRE = "\u202A",
         RLE = "\u202B",
         PDF = "\u202C";
+    var calendarType = "gregorian";
 
     function isRTLValue(stringValue) {
         var length = stringValue.length;
