@@ -27,9 +27,9 @@
 }
 
 [dir="rtl"] .dropdown-menu * .fa-check-square {
-	float: right;
-	margin-left: initial;
-	margin-right: -8px;
+    float: right;
+    margin-left: initial;
+    margin-right: -8px;
 }
 
 .dropdown-menu * a.active > .fa-check-square {
@@ -37,7 +37,7 @@
 }
 
 [dir="rtl"] .dropdown-menu * a.active > .fa-check-square {
-	float: right;
+    float: right;
 }
 
 .dropdown-menu * .fa-square {
@@ -48,9 +48,9 @@
 }
 
 [dir="rtl"] .dropdown-menu * .fa-square {
-	float: right;
-	margin-left: initial;
-	margin-right: -8px;
+    float: right;
+    margin-left: initial;
+    margin-right: -8px;
 } 
 
 .dropdown-menu * a.active > .fa-square {
@@ -58,7 +58,7 @@
 }
 
 [dir="rtl"] .dropdown-menu * a.active > .fa-square {
-	float: right;
+    float: right;
 }
 
 .dropdown-menu>li.disabled>a:hover>[class^="icon-"] {
@@ -72,7 +72,7 @@
 }
 
 [dir="rtl"] .dropdown-menu{
-	right: auto;
+    right: auto;
     left: 0;
 }
 
@@ -105,8 +105,8 @@
 }
 
 [dir="rtl"] .dropdown-submenu>a:before {
-	float : right;
-	transform: rotate(180deg);
+    float : right;
+    transform: rotate(180deg);
 }
 
 .dropdown-submenu.disabled > a:before {
@@ -117,5 +117,5 @@
 }
 
 [dir="rtl"] .dropdown-submenu.pull-left>.dropdown-menu {
-	right: -250px;
+    right: -250px;
 }

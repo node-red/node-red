@@ -66,7 +66,7 @@ span.logo {
 }
 
 [dir="rtl"] span.logo {
-	float: right;
+    float: right;
     direction: ltr;
     padding-right: 18px;
 }
@@ -87,7 +87,7 @@ span.logo {
 }
 
 [dir="rtl"] .header-toolbar {
-	float: left;
+    float: left;
 }
 
 .button {
@@ -130,7 +130,7 @@ span.logo {
 }
 
 [dir="rtl"] #header .button-group > a {
-	float: right;
+    float: right;
 }
 
 .deploy-button {
@@ -233,7 +233,7 @@ span.logo {
 }
 
 [dir="rtl"] #header ul.dropdown-menu li a span.menu-label {
-	text-indent: 20px;
+    text-indent: 20px;
 } 
 
 #header ul.dropdown-menu li a span.menu-sublabel {
@@ -244,7 +244,7 @@ span.logo {
 }
 
 [dir="rtl"] #header ul.dropdown-menu li a span.menu-sublabel {
-	text-indent: 15px;
+    text-indent: 15px;
 }
 
 #header ul.dropdown-menu > li:hover > a,
@@ -276,7 +276,7 @@ span.logo {
 }
 
 [dir="rtl"] #header ul#btn-deploy-options-submenu li a span.menu-label {
-	text-indent: 20px;
+    text-indent: 20px;
 }
 
 #header ul#btn-deploy-options-submenu li a {

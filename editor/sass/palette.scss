@@ -29,8 +29,8 @@
 }
 
 [dir="rtl"] #palette {
-	left: initial;
-	right: 0px;
+    left: initial;
+    right: 0px;
 }
 
 .palette-expanded {
@@ -48,14 +48,16 @@
 }
 
 [dir="rtl"] .palette-expanded {
+    
     & #palette {
         width: 380px;
         box-shadow: 0 1px 6px rgba(0,0,0,0.1);
     }
-    & #workspace { 
-		left: 379px !important;
+    
+    & #workspace {
+        left: 379px !important;
         right: 150px !important;
-		}
+    }
 }
 
 .palette-scroll {
@@ -90,7 +92,7 @@
 }
 
 [dir="rtl"] .palette-button {
-	float: left;
+    float: left;
 }
 .palette-category {
     border-bottom: 1px solid #ccc;
@@ -114,7 +116,7 @@
 }
 
 [dir="rtl"] .palette-header {
-	text-align: right;
+    text-align: right;
 }
 
 .palette-header i {
@@ -128,8 +130,8 @@
 }
 
 [dir="rtl"] .palette-header i {
-	margin: 3px 3px 3px 10px;
-	transform: rotate(90deg);
+    margin: 3px 3px 3px 10px;
+    transform: rotate(90deg);
 }
 
 .palette-header i.expanded {

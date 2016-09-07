@@ -51,8 +51,8 @@
 }
 
 [dir="rtl"] .ui-dialog .ui-dialog-title {
-	float: right;
-	text-align: right;
+    float: right;
+    text-align: right;
 }
 
 .ui-dialog .ui-dialog-titlebar {
@@ -76,7 +76,7 @@
 }
 
 [dir="rtl"] .ui-dialog-titlebar-close{
-	float: left;
+    float: left;
 }
 
 .ui-dialog-buttonset {
@@ -132,9 +132,9 @@
 }
 
 [dir="rtl"] .ui-dialog-buttonset button {
-	&.leftButton {
+    &.leftButton {
         float: right;
-        }
+    }
 }
 
 .ui-dialog .ui-dialog-buttonpane {

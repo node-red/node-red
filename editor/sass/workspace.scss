@@ -28,8 +28,8 @@
 }
 
 [dir="rtl"] #chart {
-	direction: rtl;
-	text-align: right;
+    direction: rtl;
+    text-align: right;
 }
 
 #chart:focus {
@@ -50,7 +50,7 @@
 }
 
 [dir="rtl"] #workspace {
-	left: 322px;
+    left: 322px;
     right: 179px;
 }
 
@@ -79,8 +79,8 @@
 }
 
 [dir="rtl"] #workspace-add-tab {
-	left: 0px;
-	right: initial;
+    left: 0px;
+    right: initial;
 }
 
 #btn-workspace-add-tab {
@@ -98,5 +98,5 @@
 }
 
 [dir="rtl"] #workspace-footer {
-	text-align: left;
+    text-align: left;
 }

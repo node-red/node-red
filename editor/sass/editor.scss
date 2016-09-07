@@ -26,7 +26,7 @@
 }
 
 [dir="rtl"] #editor-stack {
-	right: 180px;
+    right: 180px;
 }
 
 .editor-tray {
@@ -124,13 +124,13 @@
 }
 
 [dir="rtl"] .editor-tray-toolbar {
-	text-align: left;
-		
-		button {
-			 &.leftButton {
+    text-align: left;
+    
+    button {
+        &.leftButton {
             float: left;
-        	}
-		}
+        }
+    }
 }
 
 .editor-tray-titlebar {
