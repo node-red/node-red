@@ -53,6 +53,21 @@
 .editor-tray-body {
     margin: 20px;
 }
+
+[dir="rtl"] .fa-tag,
+[dir="rtl"] .fa-tags,
+[dir="rtl"] .fa-repeat {
+    transform: rotate(90deg);
+}
+
+[dir="rtl"] .fa-random,
+[dir="rtl"] .fa-tasks,
+[dir="rtl"] .fa-list,
+[dir="rtl"] .fa-sign-out,
+[dir="rtl"] .fa-sign-in {
+    transform: rotate(180deg);
+}
+
 .editor-tray-header {
     @include disable-selection;
     position: relative;
@@ -260,6 +275,9 @@
     font-size: 12px !important;
     line-height: 35px;
 }
+[dir="rtl"] #node-config-dialog-scope-container {
+    float: left;
+}
 #node-config-dialog-scope-warning {
     display: inline-block;
     margin-right: 5px;
@@ -280,4 +298,9 @@
     float:left;
     font-size: 12px;
     line-height: 35px;
+}
+[dir="rtl"] #node-config-dialog-user-count {
+    float: right;
+    margin-right: 0;
+    margin-left: 20px;
 }

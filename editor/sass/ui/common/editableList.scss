@@ -69,3 +69,16 @@
      }
 
  }
+
+[dir="rtl"] .red-ui-editableList-container {
+    li {
+        .red-ui-editableList-item-handle {
+            left: auto;
+            right: 2px;
+        }
+        .red-ui-editableList-item-remove {
+            right: auto;
+            left: 0px;
+        }
+    }
+}
