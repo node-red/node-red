@@ -48,7 +48,7 @@
     </div>
     <div class="form-row">
         <label data-i18n="trigger.label.reset" style="width:auto"></label>
-        <div style="display:inline-block; width:70%;vertical-align:top">
+        <div id="trigger-reset-options-div" >
         <ul>
             <li data-i18n="trigger.label.resetMessage"></li>
             <li><span data-i18n="trigger.label.resetPayload"></span> <input type="text" id="node-input-reset" style="width:150px" data-i18n="[placeholder]trigger.label.resetprompt"></li>
@@ -171,3 +171,13 @@
         }
     });
 </script>
+<style>
+#trigger-reset-options-div {
+    display:inline-block;
+    width:70%;
+    vertical-align:top;
+}
+[dir="rtl"] #trigger-reset-options-div {
+    padding-right: 13px;
+}
+</style>
