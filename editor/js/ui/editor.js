@@ -163,10 +163,10 @@ RED.editor = (function() {
     function validateNodeEditorProperty(node,defaults,property,prefix) {
         var input = $("#"+prefix+"-"+property);
         if (input.length > 0) {
-		    var value = input.val();
-			if (defaults[property].hasOwnProperty("format") && defaults[property].format !== "" && input[0].nodeName === "DIV") {
-			    value = input.text();
-			}
+            var value = input.val();
+            if (defaults[property].hasOwnProperty("format") && defaults[property].format !== "" && input[0].nodeName === "DIV") {
+                value = input.text();
+            }
             if (!validateNodeProperty(node, defaults, property,value)) {
                 input.addClass("input-error");
             } else {
@@ -311,11 +311,11 @@ RED.editor = (function() {
             if (val == null) {
                 val = "";
             }
-            if (definition !== undefined && definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0].nodeName === "DIV") {				
-                input.html(RED.text.format.getHtml(val, definition[property].format, {}, false, "en"));				
+            if (definition !== undefined && definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0].nodeName === "DIV") {
+                input.html(RED.text.format.getHtml(val, definition[property].format, {}, false, "en"));
                 RED.text.format.attach(input[0], definition[property].format, {}, false, "en");
             } else {
-                input.val(val);				
+                input.val(val);
                 RED.text.bidi.prepareInput(input);
             }
         }
@@ -329,7 +329,7 @@ RED.editor = (function() {
      * @param prefix - the prefix to use in the input element ids (node-input|node-config-input)
      */
     function attachPropertyChangeHandler(node,definition,property,prefix) {
-		var input = $("#"+prefix+"-"+property);
+        var input = $("#"+prefix+"-"+property);
         if (definition !== undefined && "format" in definition[property] && definition[property].format !== "" && input[0].nodeName === "DIV") {
             $("#"+prefix+"-"+property).on('change keyup', function(event,skipValidation) {
                 if (!skipValidation) {
