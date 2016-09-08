@@ -129,7 +129,6 @@
                 that.uiSelect.css("margin"+d,m);
                 that.element.css("margin"+d,0);
             });
-
             this.uiSelect.addClass("red-ui-typedInput-container");
 
             this.options.types = this.options.types||Object.keys(allOptions);
@@ -265,7 +264,7 @@
                 })
             });
         },
-        _getLabelWidth: function(label) { 
+        _getLabelWidth: function(label) {
             var labelWidth = label.outerWidth();
             if (labelWidth === 0) {
                 var container = $('<div class="red-ui-typedInput-container"></div>').css({
@@ -279,7 +278,7 @@
             }
             return labelWidth;
         },
-        _resize: function() { 
+        _resize: function() {
             if (this.uiWidth !== null) {
                 this.uiSelect.width(this.uiWidth);
             }
