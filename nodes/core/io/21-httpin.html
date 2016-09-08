@@ -27,7 +27,7 @@
     </div>
     <div class="form-row">
         <label for="node-input-url"><i class="fa fa-globe"></i> <span data-i18n="httpin.label.url"></span></label>
-        <input type="text" id="node-input-url" placeholder="/url">
+        <div id="node-input-url" contenteditable="true" placeholder="/url"></div>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
@@ -117,7 +117,7 @@ msg.cookies = {
         color:"rgb(231, 231, 174)",
         defaults: {
             name: {value:""},
-            url: {value:"",required:true},
+            url: {value:"",required:true,format:"url"},
             method: {value:"get",required:true},
             swaggerDoc: {type:"swagger-doc", required:false}
         },
