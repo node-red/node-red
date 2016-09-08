@@ -54,20 +54,6 @@
     margin: 20px;
 }
 
-[dir="rtl"] .fa-tag,
-[dir="rtl"] .fa-tags,
-[dir="rtl"] .fa-repeat {
-    transform: rotate(90deg);
-}
-
-[dir="rtl"] .fa-random,
-[dir="rtl"] .fa-tasks,
-[dir="rtl"] .fa-list,
-[dir="rtl"] .fa-sign-out,
-[dir="rtl"] .fa-sign-in {
-    transform: rotate(180deg);
-}
-
 .editor-tray-header {
     @include disable-selection;
     position: relative;
@@ -303,4 +289,24 @@
     float: right;
     margin-right: 0;
     margin-left: 20px;
+}
+
+/*
+* some icons have to be rotated in case of rtl dir
+*/
+[dir="rtl"] .fa-tag,
+[dir="rtl"] .fa-tags,
+[dir="rtl"] .fa-repeat {
+    transform: rotate(90deg);
+}
+
+/*
+* some icons have to be rotated in case of rtl dir
+*/
+[dir="rtl"] .fa-random,
+[dir="rtl"] .fa-tasks,
+[dir="rtl"] .fa-list,
+[dir="rtl"] .fa-sign-out,
+[dir="rtl"] .fa-sign-in {
+    transform: rotate(180deg);
 }
