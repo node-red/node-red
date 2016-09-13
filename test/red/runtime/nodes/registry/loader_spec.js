@@ -496,7 +496,7 @@ describe("red/nodes/registry/loader",function() {
             loader.getNodeHelp(node,"fr").should.eql("bar");
             node.help['fr'].should.eql("bar");
             fs.readFileSync.calledOnce.should.be.true;
-            fs.readFileSync.lastCall.args[0].should.eql("/tmp/node/directory/locales/fr/file.html");
+            fs.readFileSync.lastCall.args[0].should.eql(path.normalize("/tmp/node/directory/locales/fr/file.html"));
             loader.getNodeHelp(node,"fr").should.eql("bar");
             fs.readFileSync.calledOnce.should.be.true;
         });
@@ -513,7 +513,7 @@ describe("red/nodes/registry/loader",function() {
             loader.getNodeHelp(node,"fr").should.eql("foo");
             node.help['fr'].should.eql("foo");
             fs.readFileSync.calledOnce.should.be.true;
-            fs.readFileSync.lastCall.args[0].should.eql("/tmp/node/directory/locales/fr/file.html");
+            fs.readFileSync.lastCall.args[0].should.eql(path.normalize("/tmp/node/directory/locales/fr/file.html"));
             loader.getNodeHelp(node,"fr").should.eql("foo");
             fs.readFileSync.calledOnce.should.be.true;
         });
