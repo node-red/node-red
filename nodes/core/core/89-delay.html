@@ -121,10 +121,10 @@
               return this.name || this._("delay.label.random");
             }
             else if (this.pauseType == "timed") {
-                return this.name || this.rate+" "+this._("delay.label.timed")+" "+this.rateUnits;
+                return this.name || this.rate+" "+this._("delay.label.timed")+" "+ (this.nbRateUnits > 1 ? this.nbRateUnits + ' ' : '') +this.rateUnits;
             }
             else {
-                var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
+                var units = this.rateUnits ? (this.nbRateUnits > 1 ? this.nbRateUnits : '') + this.rateUnits.charAt(0) : "s";
                 return this.name || this._("delay.label.queue")+" "+this.rate+" msg/"+units;
             }
         },
