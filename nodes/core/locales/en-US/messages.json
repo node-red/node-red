@@ -202,10 +202,22 @@
             "queue": "queue",
             "timed": "releases per",
             "units" : {
-                "second": "second(s)",
-                "minute": "minute(s)",
-                "hour": "hour(s)",
-                "day": "day(s)"
+                "second": {
+                    "plural" : "Seconds",
+                    "singular": "Second"
+                },
+                "minute": {
+                    "plural" : "Minutes",
+                    "singular": "Minute"
+                },
+                "hour": {
+                    "plural" : "Hours",
+                    "singular": "Hour"
+                },
+                "day": {
+                    "plural" : "Days",
+                    "singular": "Day"
+                }
             }
         },
         "error": {
