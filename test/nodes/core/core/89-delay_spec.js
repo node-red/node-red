@@ -40,7 +40,7 @@ describe('delay Node', function() {
     });
 
     it('should be loaded', function(done) {
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","rateUnits":"day","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[[]]}];
+        var flow = [{"id":"delayNode1","type":"delay", "nbRateUnits":"1", "name":"delayNode","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","rateUnits":"day","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[[]]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
             delayNode1.should.have.property('name', 'delayNode');
@@ -50,7 +50,7 @@ describe('delay Node', function() {
     });
 
     it('should be able to set rate to hour', function(done) {
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","rateUnits":"hour","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[[]]}];
+        var flow = [{"id":"delayNode1","type":"delay", "nbRateUnits":"1", "name":"delayNode","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","rateUnits":"hour","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[[]]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
             delayNode1.should.have.property('name', 'delayNode');
@@ -60,7 +60,7 @@ describe('delay Node', function() {
     });
 
     it('should be able to set rate to minute', function(done) {
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","rateUnits":"minute","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[[]]}];
+        var flow = [{"id":"delayNode1","type":"delay", "nbRateUnits":"1", "name":"delayNode","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","rateUnits":"minute","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[[]]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
             delayNode1.should.have.property('name', 'delayNode');
@@ -176,7 +176,7 @@ describe('delay Node', function() {
      * @param runtimeInMillis - when to terminate run and count messages received
      */
     function genericRateLimitSECONDSTest(aLimit, runtimeInMillis, done) {
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":5,"timeoutUnits":"seconds","rate":aLimit,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+        var flow = [{"id":"delayNode1","type":"delay","nbRateUnits":"1","name":"delayNode","pauseType":"rate","timeout":5,"timeoutUnits":"seconds","rate":aLimit,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
@@ -237,7 +237,7 @@ describe('delay Node', function() {
      * @param runtimeInMillis - when to terminate run and count messages received
      */
     function dropRateLimitSECONDSTest(aLimit, runtimeInMillis, done) {
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":5,"timeoutUnits":"seconds","rate":aLimit,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":true,"wires":[["helperNode1"]]},
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":5,"nbRateUnits":"1","timeoutUnits":"seconds","rate":aLimit,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":true,"wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
@@ -436,7 +436,7 @@ describe('delay Node', function() {
 
     it('handles delay queue', function(done) {
         this.timeout(2000);
-        var flow = [{id:"delayNode1", type :"delay","name":"delayNode","pauseType":"queue","timeout":1,"timeoutUnits":"seconds","rate":4,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+        var flow = [{id:"delayNode1", type :"delay","name":"delayNode","nbRateUnits":"1","pauseType":"queue","timeout":1,"timeoutUnits":"seconds","rate":4,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
