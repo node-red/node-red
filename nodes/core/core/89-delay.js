@@ -51,6 +51,8 @@ module.exports = function(RED) {
             this.rate = 1000/n.rate;
         }
 
+        this.rate *= (n.nbRateUnits > 0 ? n.nbRateUnits : 1);
+
         if (n.randomUnits === "milliseconds") {
             this.randomFirst = n.randomFirst * 1;
             this.randomLast = n.randomLast * 1;
