@@ -44,10 +44,10 @@
         <label for="node-input-rateUnits"><span data-i18n="delay.msgper"></span></label>
         <input type="text" id="node-input-nbRateUnits" placeholder="1" style="text-align:end; width:30px !important">
         <select id="node-input-rateUnits" style="width:110px !important">
-          <option value="second" data-i18n="delay.sec"></option>
-          <option value="minute" data-i18n="delay.min"></option>
-          <option value="hour" data-i18n="delay.hour"></option>
-          <option value="day" data-i18n="delay.day"></option>
+          <option value="second" data-i18n="delay.label.units.second"></option>
+          <option value="minute" data-i18n="delay.label.units.minute"></option>
+          <option value="hour" data-i18n="delay.label.units.hour"></option>
+          <option value="day" data-i18n="delay.label.units.day"></option>
         </select>
         <br/>
         <div id="node-input-dr"><input style="margin: 20px 0 20px 100px; width: 30px;" type="checkbox" id="node-input-drop"><label style="width: 250px;" for="node-input-drop"><span data-i18n="delay.dropmsg"></span></label></div>
@@ -121,7 +121,7 @@
               return this.name || this._("delay.label.random");
             }
             else if (this.pauseType == "timed") {
-                return this.name || this.rate+" "+this._("delay.label.timed")+" "+ (this.nbRateUnits > 1 ? this.nbRateUnits + ' ' : '') +this.rateUnits;
+                return this.name || this.rate + " " + this._("delay.label.timed") + " " + (this.nbRateUnits > 1 ? this.nbRateUnits + ' ' : '') + this._("delay.label.units." + this.rateUnits);
             }
             else {
                 var units = this.rateUnits ? (this.nbRateUnits > 1 ? this.nbRateUnits : '') + this.rateUnits.charAt(0) : "s";

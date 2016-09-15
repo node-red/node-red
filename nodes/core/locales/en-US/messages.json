@@ -200,7 +200,13 @@
             "limit": "limit",
             "random": "random",
             "queue": "queue",
-            "timed": "releases per"
+            "timed": "releases per",
+            "units" : {
+                "second": "second(s)",
+                "minute": "minute(s)",
+                "hour": "hour(s)",
+                "day": "day(s)"
+            }
         },
         "error": {
             "buffer": "buffer exceeded 1000 messages",

@@ -227,7 +227,7 @@ describe('delay Node', function() {
         genericRateLimitSECONDSTest(1, 1, 1500, done);
     });
 
-    it('limits the message rate to 1 per 2 second', function(done) {
+    it('limits the message rate to 1 per 2 seconds', function(done) {
         this.timeout(6000);
         genericRateLimitSECONDSTest(1, 2, 3000, done);
     });
