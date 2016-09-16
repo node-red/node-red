@@ -42,11 +42,12 @@
         <label for="node-input-rate"><i class="fa fa-clock-o"></i> <span data-i18n="delay.rate"></span></label>
         <input type="text" id="node-input-rate" placeholder="1" style="text-align:end; width:30px !important">
         <label for="node-input-rateUnits"><span data-i18n="delay.msgper"></span></label>
-        <select id="node-input-rateUnits" style="width:140px !important">
-          <option value="second" data-i18n="delay.sec"></option>
-          <option value="minute" data-i18n="delay.min"></option>
-          <option value="hour" data-i18n="delay.hour"></option>
-          <option value="day" data-i18n="delay.day"></option>
+        <input type="text" id="node-input-nbRateUnits" placeholder="1" style="text-align:end; width:30px !important">
+        <select id="node-input-rateUnits" style="width:110px !important">
+          <option value="second" data-i18n="delay.label.units.second.singular"></option>
+          <option value="minute" data-i18n="delay.label.units.minute.singular"></option>
+          <option value="hour" data-i18n="delay.label.units.hour.singular"></option>
+          <option value="day" data-i18n="delay.label.units.day.singular"></option>
         </select>
         <br/>
         <div id="node-input-dr"><input style="margin: 20px 0 20px 100px; width: 30px;" type="checkbox" id="node-input-drop"><label style="width: 250px;" for="node-input-drop"><span data-i18n="delay.dropmsg"></span></label></div>
@@ -98,6 +99,7 @@
             timeout: {value:"5", required:true, validate:RED.validators.number()},
             timeoutUnits: {value:"seconds"},
             rate: {value:"1", required:true, validate:RED.validators.number()},
+            nbRateUnits: {value:"1", required:true, validate:RED.validators.number()},
             rateUnits: {value: "second"},
             randomFirst: {value:"1", required:true, validate:RED.validators.number()},
             randomLast: {value:"5", required:true, validate:RED.validators.number()},
@@ -113,16 +115,22 @@
               if (this.timeoutUnits == "milliseconds") { units = "ms"; }
               return this.name||this._("delay.label.delay")+" "+this.timeout+" "+units;
             } else if (this.pauseType == "rate") {
-              var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
+              var units = this.rateUnits ? (this.nbRateUnits > 1 ? this.nbRateUnits : '') + this.rateUnits.charAt(0) : "s";
               return this.name||this._("delay.label.limit")+" "+this.rate+" msg/"+units;
             } else if (this.pauseType == "random") {
               return this.name || this._("delay.label.random");
             }
             else if (this.pauseType == "timed") {
-                return this.name || this.rate+" "+this._("delay.label.timed")+" "+this.rateUnits;
+                var units = '';
+                if (this.nbRateUnits > 1) {
+                    units = this.nbRateUnits + ' ' + this._("delay.label.units." + this.rateUnits + ".plural");
+                } else {
+                    units = this._("delay.label.units." + this.rateUnits + ".singular");
+                }
+                return this.name || this.rate + " " + this._("delay.label.timed") + ' ' + units;
             }
             else {
-                var units = this.rateUnits ? this.rateUnits.charAt(0) : "s";
+                var units = this.rateUnits ? (this.nbRateUnits > 1 ? this.nbRateUnits : '') + this.rateUnits.charAt(0) : "s";
                 return this.name || this._("delay.label.queue")+" "+this.rate+" msg/"+units;
             }
         },
@@ -130,11 +138,38 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+          var node = this;
           $( "#node-input-timeout" ).spinner({min:1});
           $( "#node-input-rate" ).spinner({min:1});
+          $( "#node-input-nbRateUnits" ).spinner({min:1});
 
           $( "#node-input-randomFirst" ).spinner({min:0});
           $( "#node-input-randomLast" ).spinner({min:1});
+
+          $('.ui-spinner-button').click(function() {
+              $(this).siblings('input').change();
+          });
+
+          $( "#node-input-nbRateUnits" ).on('change keyup', function() {
+            var $this = $(this);
+            var val = parseInt($this.val());
+            var type = "singular";
+            if(val > 1) {
+                type = "plural";
+            }
+            if($this.attr("data-type") == type) {
+                return;
+            }
+            $this.attr("data-type", type);
+            $("#node-input-rateUnits option").each(function () {
+                var $option = $(this);
+                var key = "delay.label.units." + $option.val() + "." + type;
+                $option.attr('data-i18n', 'node-red:' + key);
+                $option.html(node._(key));
+            })
+          });
+
+
 
           if (this.pauseType == "delay") {
             $("#delay-details").show();

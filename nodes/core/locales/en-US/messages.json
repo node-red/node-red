@@ -200,7 +200,25 @@
             "limit": "limit",
             "random": "random",
             "queue": "queue",
-            "timed": "releases per"
+            "timed": "releases per",
+            "units" : {
+                "second": {
+                    "plural" : "Seconds",
+                    "singular": "Second"
+                },
+                "minute": {
+                    "plural" : "Minutes",
+                    "singular": "Minute"
+                },
+                "hour": {
+                    "plural" : "Hours",
+                    "singular": "Hour"
+                },
+                "day": {
+                    "plural" : "Days",
+                    "singular": "Day"
+                }
+            }
         },
         "error": {
             "buffer": "buffer exceeded 1000 messages",
