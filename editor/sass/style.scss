@@ -82,11 +82,13 @@ code, pre {
 }
 
 code {
-  padding: 0px 4px 2px 4px;
+  padding: 0px 3px 2px 3px;
+  margin: 1px;
   color: #AD1625;
   white-space: nowrap;
   background-color: #f7f7f9;
   border: 1px solid #e1e1e8;
+  border-radius: 2px;
 }
 
 pre {
