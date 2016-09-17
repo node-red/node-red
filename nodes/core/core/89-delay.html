@@ -99,7 +99,7 @@
             timeout: {value:"5", required:true, validate:RED.validators.number()},
             timeoutUnits: {value:"seconds"},
             rate: {value:"1", required:true, validate:RED.validators.number()},
-            nbRateUnits: {value:"1", required:true, validate:RED.validators.number()},
+            nbRateUnits: {value:"1", required:false, validate:RED.validators.regex(/\d+|/)},
             rateUnits: {value: "second"},
             randomFirst: {value:"1", required:true, validate:RED.validators.number()},
             randomLast: {value:"5", required:true, validate:RED.validators.number()},
