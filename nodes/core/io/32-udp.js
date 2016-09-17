@@ -29,11 +29,18 @@ module.exports = function(RED) {
         this.multicast = n.multicast;
         this.ipv = n.ipv || "udp4";
         var node = this;
+
+        var opts = {type:node.ipv, reuseAddr:true};
+        if (process.version.indexOf("v0.10") === 0) { opts = node.ipv; }
+        var server;
+
         if (!udpInputPortsInUse.hasOwnProperty(this.port)) {
-            udpInputPortsInUse[this.port] = n.id;
+            server = dgram.createSocket(opts);  // default to udp4
+            udpInputPortsInUse[this.port] = server;
         }
         else {
             node.warn(RED._("udp.errors.alreadyused",node.port));
+            server = udpInputPortsInUse[this.port];  // re-use existing
         }
 
         var opts = {type:node.ipv, reuseAddr:true};
@@ -83,23 +90,25 @@ module.exports = function(RED) {
         });
 
         node.on("close", function() {
-            if (udpInputPortsInUse[node.port] === node.id) {
+            if (udpInputPortsInUse.hasOwnProperty(node.port)) {
                 delete udpInputPortsInUse[node.port];
             }
             try {
                 server.close();
                 node.log(RED._("udp.status.listener-stopped"));
             } catch (err) {
-                node.error(err);
+                //node.error(err);
             }
         });
 
-        server.bind(node.port,node.iface);
+        try { server.bind(node.port,node.iface); }
+        catch(e) { } // Don't worry if already bound
     }
     RED.httpAdmin.get('/udp-ports/:id', RED.auth.needsPermission('udp-in.read'), function(req,res) {
-        res.json(udpInputPortsInUse);
+        res.json(Object.keys(udpInputPortsInUse));
     });
     RED.nodes.registerType("udp in",UDPin);
+
 
     // The Output Node
     function UDPout(n) {
@@ -116,7 +125,15 @@ module.exports = function(RED) {
 
         var opts = {type:node.ipv, reuseAddr:true};
         if (process.version.indexOf("v0.10") === 0) { opts = node.ipv; }
-        var sock = dgram.createSocket(opts);  // default to udp4
+
+        var sock;
+        if (udpInputPortsInUse[this.outport]) {
+            sock = udpInputPortsInUse[this.outport];
+        }
+        else {
+            sock = dgram.createSocket(opts);  // default to udp4
+            udpInputPortsInUse[this.outport] = sock;
+        }
 
         sock.on("error", function(err) {
             // Any async error will also get reported in the sock.send call.
@@ -125,7 +142,7 @@ module.exports = function(RED) {
             // down.
         });
         if (node.multicast != "false") {
-            if (node.outport == "") { node.outport = node.port; }
+            if (node.outport === "") { node.outport = node.port; }
             sock.bind(node.outport, function() {    // have to bind before you can enable broadcast...
                 sock.setBroadcast(true);            // turn on broadcast
                 if (node.multicast == "multi") {
@@ -146,11 +163,9 @@ module.exports = function(RED) {
                     node.log(RED._("udp.status.bc-ready",{outport:node.outport,host:node.addr,port:node.port}));
                 }
             });
-        } else if (node.outport != "") {
-            setTimeout( function() {
-                sock.bind(node.outport);
-                node.log(RED._("udp.status.ready",{outport:node.outport,host:node.addr,port:node.port}));
-            }, 250);
+        } else if ((node.outport !== "") && (!udpInputPortsInUse[this.outport])) {
+            sock.bind(node.outport);
+            node.log(RED._("udp.status.ready",{outport:node.outport,host:node.addr,port:node.port}));
         } else {
             node.log(RED._("udp.status.ready-nolocal",{host:node.addr,port:node.port}));
         }
@@ -159,9 +174,9 @@ module.exports = function(RED) {
             if (msg.hasOwnProperty("payload")) {
                 var add = node.addr || msg.ip || "";
                 var por = node.port || msg.port || 0;
-                if (add == "") {
+                if (add === "") {
                     node.warn(RED._("udp.errors.ip-notset"));
-                } else if (por == 0) {
+                } else if (por === 0) {
                     node.warn(RED._("udp.errors.port-notset"));
                 } else if (isNaN(por) || (por < 1) || (por > 65535)) {
                     node.warn(RED._("udp.errors.port-invalid"));
@@ -185,11 +200,14 @@ module.exports = function(RED) {
         });
 
         node.on("close", function() {
+            if (udpInputPortsInUse.hasOwnProperty(node.outport)) {
+                delete udpInputPortsInUse[node.outport];
+            }
             try {
                 sock.close();
                 node.log(RED._("udp.status.output-stopped"));
             } catch (err) {
-                node.error(err);
+                //node.error(err);
             }
         });
     }
