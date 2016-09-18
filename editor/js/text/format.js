@@ -1237,11 +1237,12 @@ RED.text.format = (function() {
 
     function displayWithStructure(element) {
         var txt = element.textContent || "";
-        if (txt.length === 0) {
+        var selection = document.getSelection();
+        if (txt.length === 0 || !selection || selection.rangeCount <= 0) {
             element.dispatchEvent(event);
             return;
         }
-        var selection = document.getSelection();
+        
         var range = selection.getRangeAt(0);
         var tempRange = range.cloneRange(), startNode, startOffset;
         startNode = range.startContainer;
