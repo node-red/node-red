@@ -1237,7 +1237,7 @@ RED.text.format = (function() {
 
     function displayWithStructure(element) {
         var txt = element.textContent || "";
-		var selection = document.getSelection();
+        var selection = document.getSelection();
         if (txt.length === 0 || !selection || selection.rangeCount <= 0) {
             element.dispatchEvent(event);
             return;
