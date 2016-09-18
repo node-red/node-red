@@ -1082,3 +1082,8 @@ legend + .control-group {
 .form-horizontal .form-actions {
   padding-left: 180px;
 }
+
+.form-row div[contenteditable="true"] { 
+   white-space: nowrap;
+   overflow: hidden;
+}

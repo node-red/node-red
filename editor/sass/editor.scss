@@ -196,7 +196,7 @@
     display: inline-block;
     width: 100px;
 }
-.form-row input .form-row div[contenteditable="true"] {
+.form-row input, .form-row div[contenteditable="true"] {
     width:70%;
 }
 
