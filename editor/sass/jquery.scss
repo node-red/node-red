@@ -92,7 +92,7 @@
 
     &.primary {
         border-color: $editor-button-background-primary;
-        color: $editor-button-color-primary;
+        color: $editor-button-color-primary !important;
         background: $editor-button-background-primary;
         &:not(.disabled):hover {
             border-color: $editor-button-background-primary-hover;

@@ -77,16 +77,25 @@
         }
     },
     "clipboard": {
-        "nodes": "Nodes:",
+        "nodes": "Nodes",
         "selectNodes": "Select the text above and copy to the clipboard.",
         "pasteNodes": "Paste nodes here",
         "importNodes": "Import nodes",
         "exportNodes": "Export nodes to clipboard",
         "importUnrecognised": "Imported unrecognised type:",
         "importUnrecognised_plural": "Imported unrecognised types:",
+        "nodesExported": "Nodes exported to clipboard",
         "nodeCopied": "__count__ node copied",
         "nodeCopied_plural": "__count__ nodes copied",
-        "invalidFlow": "Invalid flow: __message__"
+        "invalidFlow": "Invalid flow: __message__",
+        "export": {
+            "selected":"selected nodes",
+            "current":"current flow",
+            "all":"all flows",
+            "compact":"compact",
+            "formatted":"formatted",
+            "copy": "Export to clipboard"
+        }
     },
     "deploy": {
         "deploy": "Deploy",

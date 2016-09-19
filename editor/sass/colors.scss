@@ -43,12 +43,16 @@ $palette-header-background: #f3f3f3;
 $workspace-button-background: #fff;
 $workspace-button-background-hover: #ddd;
 $workspace-button-background-active: #efefef;
-$workspace-button-color: #999;
+$workspace-button-color: #888;
 $workspace-button-color-disabled: #ccc;
 $workspace-button-color-focus: #999;
 $workspace-button-color-hover: #666;
 $workspace-button-color-active: #666;
 $workspace-button-color-selected: #AAA;
+
+$workspace-button-toggle-color: #999;
+$workspace-button-toggle-color-selected: #888;
+$workspace-button-toggle-color-disabled: #ddd;
 
 $workspace-button-color-focus-outline: rgba(85,150,230,0.2);
 

@@ -537,7 +537,10 @@ RED.nodes = (function() {
     }
 
     //TODO: rename this (createCompleteNodeSet)
-    function createCompleteNodeSet() {
+    function createCompleteNodeSet(exportCredentials) {
+        if (exportCredentials === undefined) {
+            exportCredentials = true;
+        }
         var nns = [];
         var i;
         for (i=0;i<workspacesOrder.length;i++) {
@@ -552,12 +555,12 @@ RED.nodes = (function() {
         }
         for (i in configNodes) {
             if (configNodes.hasOwnProperty(i)) {
-                nns.push(convertNode(configNodes[i], true));
+                nns.push(convertNode(configNodes[i], exportCredentials));
             }
         }
         for (i=0;i<nodes.length;i++) {
             var node = nodes[i];
-            nns.push(convertNode(node, true));
+            nns.push(convertNode(node, exportCredentials));
         }
         return nns;
     }

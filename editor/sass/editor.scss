@@ -76,16 +76,16 @@
         font-size: 14px;
         padding: 6px 14px;
         margin-right: 8px;
-        color: $editor-button-color;
+        color: $editor-button-color !important;
         background: $editor-button-background;
 
         &.primary {
             border-color: $editor-button-background-primary;
-            color: $editor-button-color-primary;
+            color: $editor-button-color-primary !important;
             background: $editor-button-background-primary;
             &.disabled, &.ui-state-disabled {
                 background: none;
-                color: $editor-button-color;
+                color: $editor-button-color !important;
                 border-color: $form-input-border-color;
             }
             &:not(.disabled):not(.ui-button-disabled):hover {
@@ -230,13 +230,29 @@
     font-size: 13px;
     border-radius: 4px;
     padding: 0 10px;
+    &.toggle {
+        @include workspace-button-toggle;
+    }
 }
+
+
 .editor-button-small {
     height: 20px;
     line-height: 18px;
     font-size: 10px;
     border-radius: 2px;
     padding: 0 5px;
+}
+
+.dialog-form {
+    .button-group {
+        .editor-button {
+            &:first-child {
+
+            }
+        }
+    }
+
 }
 
 #node-config-dialog-scope-container {
