@@ -215,7 +215,7 @@ input[type="url"]:focus,
 input[type="search"]:focus,
 input[type="tel"]:focus,
 input[type="color"]:focus,
-div[contenteditable="true"],
+div[contenteditable="true"]:focus,
 .uneditable-input:focus {
   border-color: $form-input-focus-color;
   outline: 0;
@@ -1083,7 +1083,7 @@ legend + .control-group {
   padding-left: 180px;
 }
 
-.form-row div[contenteditable="true"] { 
+.form-row div[contenteditable="true"] {
    white-space: nowrap;
    overflow: hidden;
 }
