@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,18 +72,8 @@ module.exports = {
 
         var storage = {
             getFlows: function() {
-                var defer = when.defer();
-                defer.resolve(testFlows);
-                return defer.promise;
-            },
-            getCredentials: function() {
-                var defer = when.defer();
-                defer.resolve(testCredentials);
-                return defer.promise;
-            },
-            saveCredentials: function() {
-                // do nothing
-            },
+                return when.resolve({flows:testFlows,credentials:testCredentials});
+            }
         };
 
         var settings = {
@@ -103,7 +93,6 @@ module.exports = {
         };
 
         redNodes.init({settings:settings, storage:storage});
-        credentials.init(storage,express());
         RED.nodes.registerType("helper", helperNode);
         if (Array.isArray(testNode)) {
             for (i = 0; i < testNode.length; i++) {
