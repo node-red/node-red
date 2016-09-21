@@ -21,7 +21,7 @@ RED.text.bidi = (function() {
         PDF = "\u202C";
 
     function isRTLValue(stringValue) {
-        var length = stringValue.length;
+        var length = (stringValue ? stringValue.length : 0);
         for (var i=0;i<length;i++) {
             if (isBidiChar(stringValue.charCodeAt(i))) {
                 return true;
