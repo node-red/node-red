@@ -119,7 +119,7 @@ describe('flows/index', function() {
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
                 {id:"t1",type:"tab"}
             ];
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.setFlows(originalConfig).then(function() {
                 credentialsExtract.called.should.be.false;
                 credentialsClean.called.should.be.true;
@@ -134,7 +134,7 @@ describe('flows/index', function() {
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
                 {id:"t1",type:"tab"}
             ];
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.setFlows(originalConfig,"load").then(function() {
                 credentialsExtract.called.should.be.false;
                 credentialsClean.called.should.be.true;
@@ -151,7 +151,7 @@ describe('flows/index', function() {
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[],credentials:{}},
                 {id:"t1",type:"tab"}
             ];
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.setFlows(originalConfig).then(function() {
                 credentialsExtract.called.should.be.true;
                 credentialsClean.called.should.be.true;
@@ -188,7 +188,7 @@ describe('flows/index', function() {
                 })
             });
 
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -217,7 +217,7 @@ describe('flows/index', function() {
                 })
             });
 
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -234,7 +234,7 @@ describe('flows/index', function() {
             storage.getFlows = function() {
                 return when.resolve(originalConfig);
             }
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 credentialsExtract.called.should.be.false;
                 credentialsLoad.called.should.be.true;
@@ -262,7 +262,7 @@ describe('flows/index', function() {
                 done();
             });
 
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -277,7 +277,7 @@ describe('flows/index', function() {
                 return when.resolve(originalConfig);
             }
 
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
                 flowCreate.called.should.be.false;
@@ -295,7 +295,7 @@ describe('flows/index', function() {
             storage.getFlows = function() {
                 return when.resolve(originalConfig);
             }
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
                 flowCreate.called.should.be.false;
@@ -329,7 +329,7 @@ describe('flows/index', function() {
             storage.getFlows = function() {
                 return when.resolve(originalConfig);
             }
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 var c = 0;
                 flows.eachNode(function(node) {
@@ -360,7 +360,7 @@ describe('flows/index', function() {
                 done();
             });
 
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -391,7 +391,7 @@ describe('flows/index', function() {
                 }
             });
 
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -413,7 +413,7 @@ describe('flows/index', function() {
                 done();
             });
 
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -445,7 +445,7 @@ describe('flows/index', function() {
                 }
             });
 
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -473,7 +473,7 @@ describe('flows/index', function() {
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
                 {id:"t1",type:"tab"}
             ];
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.setFlows(originalConfig).then(function() {
                 flows.checkTypeInUse("unused-module");
                 done();
@@ -484,7 +484,7 @@ describe('flows/index', function() {
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
                 {id:"t1",type:"tab"}
             ];
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.setFlows(originalConfig).then(function() {
                 /*jshint immed: false */
                 try {
@@ -507,7 +507,7 @@ describe('flows/index', function() {
             storage.getFlows = function() {
                 return when.resolve(originalConfig);
             }
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 flows.addFlow({
                     label:'new flow',
@@ -534,7 +534,7 @@ describe('flows/index', function() {
             storage.setFlows = function() {
                 return when.resolve();
             }
-            flows.init({},storage);
+            flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 return flows.startFlows();
             }).then(function() {

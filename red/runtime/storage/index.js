@@ -18,6 +18,7 @@ var when = require('when');
 var Path = require('path');
 var log = require("../log");
 
+var runtime;
 var storageModule;
 var settingsAvailable;
 var sessionsAvailable;
@@ -42,15 +43,16 @@ function is_malicious(path) {
 }
 
 var storageModuleInterface = {
-        init: function(settings) {
+        init: function(_runtime) {
+            runtime = _runtime;
             try {
-                storageModule = moduleSelector(settings);
+                storageModule = moduleSelector(runtime.settings);
                 settingsAvailable = storageModule.hasOwnProperty("getSettings") && storageModule.hasOwnProperty("saveSettings");
                 sessionsAvailable = storageModule.hasOwnProperty("getSessions") && storageModule.hasOwnProperty("saveSessions");
             } catch (e) {
                 return when.reject(e);
             }
-            return storageModule.init(settings);
+            return storageModule.init(runtime.settings);
         },
         getFlows: function() {
             return storageModule.getFlows();

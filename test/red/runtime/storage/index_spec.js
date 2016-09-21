@@ -22,7 +22,9 @@ describe("red/storage/index", function() {
     it('rejects the promise when settings suggest loading a bad module', function(done) {
 
         var wrongModule = {
+            settings:{
                 storageModule : "thisaintloading"
+            }
         };
 
        storage.init(wrongModule).then( function() {
@@ -42,13 +44,15 @@ describe("red/storage/index", function() {
         var initSetsMeToTrue = false;
 
         var moduleWithBooleanSettingInit = {
-                init : function() {
-                    initSetsMeToTrue = true;
-                }
+            init : function() {
+                initSetsMeToTrue = true;
+            }
         };
 
         var setsBooleanModule = {
+            settings: {
                 storageModule : moduleWithBooleanSettingInit
+            }
         };
 
         storage.init(setsBooleanModule);
@@ -116,7 +120,9 @@ describe("red/storage/index", function() {
         };
 
         var moduleToLoad = {
-            storageModule : interfaceCheckerModule
+            settings: {
+                storageModule : interfaceCheckerModule
+            }
         };
 
         storage.init(moduleToLoad);
@@ -172,7 +178,9 @@ describe("red/storage/index", function() {
         };
 
         var moduleToLoad = {
-            storageModule : interfaceCheckerModule
+            settings: {
+                storageModule : interfaceCheckerModule
+            }
         };
         before(function() {
             storage.init(moduleToLoad);
@@ -220,7 +228,7 @@ describe("red/storage/index", function() {
             var interfaceCheckerModule = {
                 init : function () {}
             };
-            storage.init({storageModule: interfaceCheckerModule});
+            storage.init({settings:{storageModule: interfaceCheckerModule}});
         });
 
         it('defaults missing getSettings',function(done) {

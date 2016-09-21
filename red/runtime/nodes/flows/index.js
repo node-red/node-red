@@ -43,12 +43,12 @@ var subflowInstanceNodeMap = {};
 
 var typeEventRegistered = false;
 
-function init(_settings, _storage) {
+function init(runtime) {
     if (started) {
         throw new Error("Cannot init without a stop");
     }
-    settings = _settings;
-    storage = _storage;
+    settings = runtime.settings;
+    storage = runtime.storage;
     started = false;
     if (!typeEventRegistered) {
         events.on('type-registered',function(type) {
