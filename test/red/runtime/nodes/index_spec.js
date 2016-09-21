@@ -1,5 +1,5 @@
 /**
- * Copyright 2014 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,19 +40,13 @@ describe("red/nodes/index", function() {
 
     var testFlows = [{"type":"test","id":"tab1","label":"Sheet 1"}];
     var storage = {
-            getFlows: function() {
-                return when(testFlows);
-            },
-            getCredentials: function() {
-                return when({"tab1":{"b":1,"c":2}});
-            },
-            saveFlows: function(conf) {
-                should.deepEqual(testFlows, conf);
-                return when();
-            },
-            saveCredentials: function(creds) {
-                return when(true);
-            }
+        getFlows: function() {
+            return when({flows:testFlows,credentials:{"tab1":{"b":1,"c":2}}});
+        },
+        saveFlows: function(conf) {
+            should.deepEqual(testFlows, conf.flows);
+            return when();
+        }
     };
 
     var settings = {

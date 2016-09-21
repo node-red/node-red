@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2015 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@ describe('flows/index', function() {
 
     var storage;
     var eventsOn;
-    var credentialsExtract;
-    var credentialsSave;
     var credentialsClean;
     var credentialsLoad;
 
@@ -50,13 +48,10 @@ describe('flows/index', function() {
 
     beforeEach(function() {
         eventsOn = sinon.spy(events,"on");
-        credentialsExtract = sinon.stub(credentials,"extract",function(conf) {
-            delete conf.credentials;
-        });
-        credentialsSave = sinon.stub(credentials,"save",function() {
-            return when.resolve();
-        });
         credentialsClean = sinon.stub(credentials,"clean",function(conf) {
+            conf.forEach(function(n) {
+                delete n.credentials;
+            });
             return when.resolve();
         });
         credentialsLoad = sinon.stub(credentials,"load",function() {
@@ -97,8 +92,6 @@ describe('flows/index', function() {
 
     afterEach(function(done) {
         eventsOn.restore();
-        credentialsExtract.restore();
-        credentialsSave.restore();
         credentialsClean.restore();
         credentialsLoad.restore();
         flowCreate.restore();
@@ -121,7 +114,6 @@ describe('flows/index', function() {
             ];
             flows.init({settings:{},storage:storage});
             flows.setFlows(originalConfig).then(function() {
-                credentialsExtract.called.should.be.false;
                 credentialsClean.called.should.be.true;
                 storage.hasOwnProperty('conf').should.be.true;
                 flows.getFlows().should.eql(originalConfig);
@@ -136,8 +128,7 @@ describe('flows/index', function() {
             ];
             flows.init({settings:{},storage:storage});
             flows.setFlows(originalConfig,"load").then(function() {
-                credentialsExtract.called.should.be.false;
-                credentialsClean.called.should.be.true;
+                credentialsClean.called.should.be.false;
                 // 'load' type does not trigger a save
                 storage.hasOwnProperty('conf').should.be.false;
                 flows.getFlows().should.eql(originalConfig);
@@ -148,18 +139,17 @@ describe('flows/index', function() {
 
         it('extracts credentials from the full flow', function(done) {
             var originalConfig = [
-                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[],credentials:{}},
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[],credentials:{"a":1}},
                 {id:"t1",type:"tab"}
             ];
             flows.init({settings:{},storage:storage});
             flows.setFlows(originalConfig).then(function() {
-                credentialsExtract.called.should.be.true;
                 credentialsClean.called.should.be.true;
                 storage.hasOwnProperty('conf').should.be.true;
                 var cleanedFlows = flows.getFlows();
-                storage.conf.should.eql(cleanedFlows);
+                storage.conf.flows.should.eql(cleanedFlows);
                 cleanedFlows.should.not.eql(originalConfig);
-                cleanedFlows[0].credentials = {};
+                cleanedFlows[0].credentials = {"a":1};
                 cleanedFlows.should.eql(originalConfig);
                 done();
             });
@@ -175,7 +165,7 @@ describe('flows/index', function() {
             newConfig.push({id:"t2",type:"tab"});
             newConfig.push({id:"t2-1",x:10,y:10,z:"t2",type:"test",wires:[]});
             storage.getFlows = function() {
-                return when.resolve(originalConfig);
+                return when.resolve({flows:originalConfig});
             }
 
             events.once('nodes-started',function() {
@@ -204,7 +194,7 @@ describe('flows/index', function() {
             newConfig.push({id:"t2",type:"tab"});
             newConfig.push({id:"t2-1",x:10,y:10,z:"t2",type:"test",wires:[]});
             storage.getFlows = function() {
-                return when.resolve(originalConfig);
+                return when.resolve({flows:originalConfig});
             }
 
             events.once('nodes-started',function() {
@@ -232,13 +222,11 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve(originalConfig);
+                return when.resolve({flows:originalConfig});
             }
             flows.init({settings:{},storage:storage});
             flows.load().then(function() {
-                credentialsExtract.called.should.be.false;
                 credentialsLoad.called.should.be.true;
-                credentialsClean.called.should.be.true;
                 // 'load' type does not trigger a save
                 storage.hasOwnProperty('conf').should.be.false;
                 flows.getFlows().should.eql(originalConfig);
@@ -254,7 +242,7 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve(originalConfig);
+                return when.resolve({flows:originalConfig});
             }
 
             events.once('nodes-started',function() {
@@ -274,7 +262,7 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve(originalConfig);
+                return when.resolve({flows:originalConfig});
             }
 
             flows.init({settings:{},storage:storage});
@@ -293,7 +281,7 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve(originalConfig);
+                return when.resolve({flows:originalConfig});
             }
             flows.init({settings:{},storage:storage});
             flows.load().then(function() {
@@ -316,7 +304,7 @@ describe('flows/index', function() {
 
     });
 
-    describe('#get',function() {
+    describe.skip('#get',function() {
 
     });
 
@@ -327,7 +315,7 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve(originalConfig);
+                return when.resolve({flows:originalConfig});
             }
             flows.init({settings:{},storage:storage});
             flows.load().then(function() {
@@ -351,7 +339,7 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve(originalConfig);
+                return when.resolve({flows:originalConfig});
             }
 
             events.once('nodes-started',function() {
@@ -376,7 +364,7 @@ describe('flows/index', function() {
                 {id:"t3-1",x:10,y:10,z:"t3",type:"test",config:"configNode",wires:[]}
             ];
             storage.getFlows = function() {
-                return when.resolve(originalConfig);
+                return when.resolve({flows:originalConfig});
             }
 
             events.once('nodes-started',function() {
@@ -404,7 +392,7 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve(originalConfig);
+                return when.resolve({flows:originalConfig});
             }
 
             events.once('nodes-started',function() {
@@ -430,7 +418,7 @@ describe('flows/index', function() {
                 {id:"t3-1",x:10,y:10,z:"t3",type:"test",config:"configNode",wires:[]}
             ];
             storage.getFlows = function() {
-                return when.resolve(originalConfig);
+                return when.resolve({flows:originalConfig});
             }
 
             events.once('nodes-started',function() {
@@ -505,7 +493,7 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve(originalConfig);
+                return when.resolve({flows:originalConfig});
             }
             flows.init({settings:{},storage:storage});
             flows.load().then(function() {
@@ -529,7 +517,7 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve(originalConfig);
+                return when.resolve({flows:originalConfig});
             }
             storage.setFlows = function() {
                 return when.resolve();

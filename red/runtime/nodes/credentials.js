@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2015 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,34 +19,40 @@ var when = require("when");
 var log = require("../log");
 
 var credentialCache = {};
-var storage = null;
 var credentialsDef = {};
+var dirty = false;
 
-module.exports = {
-    init: function (_storage) {
-        storage = _storage;
+var api = module.exports = {
+    init: function() {
+        dirty = false;
+        credentialCache = {};
+        credentialsDef = {};
     },
 
     /**
-     * Loads the credentials from storage.
+     * Sets the credentials from storage.
      */
-    load: function () {
-        return storage.getCredentials().then(function (creds) {
-            credentialCache = creds;
-        }).otherwise(function (err) {
-            log.warn(log._("nodes.credentials.error",{message: err}));
-        });
+    load: function (credentials) {
+        credentialCache = credentials;
+        dirty = false;
+        return when.resolve();
+        // return storage.getCredentials().then(function (creds) {
+        //     credentialCache = creds;
+        // }).otherwise(function (err) {
+        //     log.warn(log._("nodes.credentials.error",{message: err}));
+        // });
     },
 
     /**
      * Adds a set of credentials for the given node id.
      * @param id the node id for the credentials
      * @param creds an object of credential key/value pairs
-     * @return a promise for the saving of credentials to storage
+     * @return a promise for backwards compatibility TODO: can this be removed?
      */
     add: function (id, creds) {
         credentialCache[id] = creds;
-        return storage.saveCredentials(credentialCache);
+        dirty = true;
+        return when.resolve();
     },
 
     /**
@@ -65,7 +71,7 @@ module.exports = {
      */
     delete: function (id) {
         delete credentialCache[id];
-        storage.saveCredentials(credentialCache);
+        dirty = true;
     },
 
     /**
@@ -77,6 +83,9 @@ module.exports = {
         var existingIds = {};
         config.forEach(function(n) {
             existingIds[n.id] = true;
+            if (n.credentials) {
+                api.extract(n);
+            }
         });
         var deletedCredentials = false;
         for (var c in credentialCache) {
@@ -88,10 +97,9 @@ module.exports = {
             }
         }
         if (deletedCredentials) {
-            return storage.saveCredentials(credentialCache);
-        } else {
-            return when.resolve();
+            dirty = true;
         }
+        return when.resolve();
     },
 
     /**
@@ -146,15 +154,8 @@ module.exports = {
                 }
             }
             credentialCache[nodeID] = savedCredentials;
+            dirty = true;
         }
-    },
-
-    /**
-     * Saves the credentials to storage
-     * @return a promise for the saving of credentials to storage
-     */
-    save: function () {
-        return storage.saveCredentials(credentialCache);
     },
 
     /**
@@ -164,5 +165,14 @@ module.exports = {
      */
     getDefinition: function (type) {
         return credentialsDef[type];
+    },
+
+    dirty: function() {
+        return dirty;
+    },
+
+    export: function() {
+        dirty = false;
+        return when.resolve(credentialCache);
     }
 }

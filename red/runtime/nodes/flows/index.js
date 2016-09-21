@@ -67,9 +67,9 @@ function init(runtime) {
     }
 }
 function load() {
-    return storage.getFlows().then(function(flows) {
-        return credentials.load().then(function() {
-            return setConfig(flows,"load");
+    return storage.getFlows().then(function(config) {
+        return credentials.load(config.credentials).then(function() {
+            return setConfig(config.flows,"load");
         });
     }).otherwise(function(err) {
         log.warn(log._("nodes.flows.error",{message:err.toString()}));
@@ -81,8 +81,6 @@ function setConfig(_config,type,muteLog) {
     var config = clone(_config);
     type = type||"full";
 
-    var credentialsChanged = false;
-    var credentialSavePromise = null;
     var configSavePromise = null;
 
     var diff;
@@ -90,23 +88,20 @@ function setConfig(_config,type,muteLog) {
     if (type !== 'full' && type !== 'load') {
         diff = flowUtil.diffConfigs(activeFlowConfig,newFlowConfig);
     }
-    config.forEach(function(node) {
-        if (node.credentials) {
-            credentials.extract(node);
-            credentialsChanged = true;
-        }
-    });
-    if (credentialsChanged) {
-        credentialSavePromise = credentials.save();
-    } else {
-        credentialSavePromise = when.resolve();
-    }
+
     if (type === 'load') {
-        configSavePromise = credentialSavePromise;
         type = 'full';
+        configSavePromise = when.resolve();
     } else {
-        configSavePromise = credentialSavePromise.then(function() {
-            return storage.saveFlows(config);
+        credentials.clean(config);
+        var credsDirty = credentials.dirty();
+        configSavePromise = credentials.export().then(function(creds) {
+            var saveConfig = {
+                flows: config,
+                credentialsDirty:credsDirty,
+                credentials: creds
+            }
+            storage.saveFlows(saveConfig);
         });
     }
 
@@ -114,15 +109,13 @@ function setConfig(_config,type,muteLog) {
         .then(function() {
             activeConfig = config;
             activeFlowConfig = newFlowConfig;
-            return credentials.clean(activeConfig).then(function() {
-                if (started) {
-                    return stop(type,diff,muteLog).then(function() {
-                        context.clean(activeFlowConfig);
-                        start(type,diff,muteLog);
-                    }).otherwise(function(err) {
-                    })
-                }
-            });
+            if (started) {
+                return stop(type,diff,muteLog).then(function() {
+                    context.clean(activeFlowConfig);
+                    start(type,diff,muteLog);
+                }).otherwise(function(err) {
+                })
+            }
         });
 }
 

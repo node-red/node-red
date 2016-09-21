@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2015 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,12 +75,14 @@ describe("red/storage/index", function() {
                 },
                 getFlows : function() {
                     calledFlagGetFlows = true;
+                    return when.resolve([]);
                 },
                 saveFlows : function (flows) {
                     flows.should.be.true;
                 },
                 getCredentials : function() {
                     calledFlagGetCredentials = true;
+                    return when.resolve({});
                 },
                 saveCredentials : function(credentials) {
                     credentials.should.be.true;
@@ -127,9 +129,7 @@ describe("red/storage/index", function() {
 
         storage.init(moduleToLoad);
         storage.getFlows();
-        storage.saveFlows(true);
-        storage.getCredentials();
-        storage.saveCredentials(true);
+        storage.saveFlows({flows:[],credentials:{}});
         storage.getSettings();
         storage.saveSettings(true);
         storage.getSessions();

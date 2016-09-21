@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,17 +55,35 @@ var storageModuleInterface = {
             return storageModule.init(runtime.settings);
         },
         getFlows: function() {
-            return storageModule.getFlows();
+            return storageModule.getFlows().then(function(flows) {
+                return storageModule.getCredentials().then(function(creds) {
+                    return {
+                        flows: flows,
+                        credentials: creds
+                    }
+                })
+            });
         },
-        saveFlows: function(flows) {
-            return storageModule.saveFlows(flows);
+        saveFlows: function(config) {
+            var flows = config.flows;
+            var credentials = config.credentials;
+            var credentialSavePromise;
+            if (config.credentialsDirty) {
+                credentialSavePromise = storageModule.saveCredentials(credentials);
+            } else {
+                credentialSavePromise = when.resolve();
+            }
+
+            return credentialSavePromise.then(function() {
+                return storageModule.saveFlows(flows);
+            });
         },
-        getCredentials: function() {
-            return storageModule.getCredentials();
-        },
-        saveCredentials: function(credentials) {
-            return storageModule.saveCredentials(credentials);
-        },
+        // getCredentials: function() {
+        //     return storageModule.getCredentials();
+        // },
+        // saveCredentials: function(credentials) {
+        //     return storageModule.saveCredentials(credentials);
+        // },
         getSettings: function() {
             if (settingsAvailable) {
                 return storageModule.getSettings();

@@ -77,7 +77,7 @@ function createNode(node,def) {
 
 function init(runtime) {
     settings = runtime.settings;
-    credentials.init(runtime.storage);
+    credentials.init();
     flows.init(runtime);
     registry.init(runtime);
     context.init(runtime.settings);
