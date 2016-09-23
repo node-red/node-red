@@ -92,7 +92,7 @@ module.exports = {
             return messageId;
         };
 
-        redNodes.init({settings:settings, storage:storage});
+        redNodes.init({settings:settings, storage:storage,log:log});
         RED.nodes.registerType("helper", helperNode);
         if (Array.isArray(testNode)) {
             for (i = 0; i < testNode.length; i++) {
