@@ -37,6 +37,7 @@ module.exports = function(RED) {
 
         function startconn() {    // Connect to remote endpoint
             var socket = new ws(node.path);
+            socket.setMaxListeners(0);
             node.server = socket; // keep for closing
             handleConnection(socket);
         }
@@ -95,7 +96,7 @@ module.exports = function(RED) {
             // Workaround https://github.com/einaros/ws/pull/253
             // Stop listening for new listener events
             RED.server.removeListener('newListener',storeListener);
-
+            node.server.setMaxListeners(0);
             node.server.on('connection', handleConnection);
         }
         else {
@@ -163,9 +164,10 @@ module.exports = function(RED) {
     }
 
     WebSocketListenerNode.prototype.broadcast = function(data) {
+        var i;
         try {
-            if(this.isServer) {
-                for (var i = 0; i < this.server.clients.length; i++) {
+            if (this.isServer) {
+                for (i = 0; i < this.server.clients.length; i++) {
                     this.server.clients[i].send(data);
                 }
             }
