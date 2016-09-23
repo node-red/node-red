@@ -63,7 +63,7 @@ RED.clipboard = (function() {
                         class: "primary",
                         text: RED._("common.label.import"),
                         click: function() {
-                            RED.view.importNodes($("#clipboard-import").val());
+                            RED.view.importNodes($("#clipboard-import").val(),$("#import-tab > a.selected").attr('id') === 'import-tab-new');
                             $( this ).dialog( "close" );
                         }
                     }
@@ -79,7 +79,7 @@ RED.clipboard = (function() {
 
         exportNodesDialog =
             '<div class="form-row">'+
-                '<label style="width:auto;margin-right: 10px;">Export to clipboard</label>'+
+                '<label style="width:auto;margin-right: 10px;" data-i18n="clipboard.export.copy"></label>'+
                 '<span id="export-range-group" class="button-group">'+
                     '<a id="export-range-selected" class="editor-button toggle" href="#" data-i18n="clipboard.export.selected"></a>'+
                     '<a id="export-range-flow" class="editor-button toggle" href="#" data-i18n="clipboard.export.current"></a>'+
@@ -100,6 +100,13 @@ RED.clipboard = (function() {
             '<textarea style="resize: none; width: 100%; border-radius: 0px;font-family: monospace; font-size: 12px; background:#eee; padding-left: 0.5em; box-sizing:border-box;" id="clipboard-import" rows="5" placeholder="'+
             RED._("clipboard.pasteNodes")+
             '"></textarea>'+
+            '</div>'+
+            '<div class="form-row">'+
+            '<label style="width:auto;margin-right: 10px;" data-i18n="clipboard.import.import"></label>'+
+            '<span id="import-tab" class="button-group">'+
+                '<a id="import-tab-current" class="editor-button toggle selected" href="#" data-i18n="clipboard.export.current"></a>'+
+                '<a id="import-tab-new" class="editor-button toggle" href="#" data-i18n="clipboard.import.newFlow"></a>'+
+            '</span>'+
             '</div>';
     }
 
@@ -123,6 +130,8 @@ RED.clipboard = (function() {
     function importNodes() {
         dialogContainer.empty();
         dialogContainer.append($(importNodesDialog));
+        dialogContainer.i18n();
+
         $("#clipboard-dialog-ok").show();
         $("#clipboard-dialog-cancel").show();
         $("#clipboard-dialog-close").hide();
@@ -130,6 +139,15 @@ RED.clipboard = (function() {
         $("#clipboard-dialog-ok").button("disable");
         $("#clipboard-import").keyup(validateImport);
         $("#clipboard-import").on('paste',function() { setTimeout(validateImport,10)});
+
+        $("#import-tab > a").click(function(evt) {
+            evt.preventDefault();
+            if ($(this).hasClass('disabled') || $(this).hasClass('selected')) {
+                return;
+            }
+            $(this).parent().children().removeClass('selected');
+            $(this).addClass('selected');
+        });
 
         dialog.dialog("option","title",RED._("clipboard.importNodes")).dialog("open");
     }

@@ -594,7 +594,7 @@ RED.nodes = (function() {
         return true;
     }
 
-    function importNodes(newNodesObj,createNewIds) {
+    function importNodes(newNodesObj,createNewIds,createMissingWorkspace) {
         var i;
         var n;
         var newNodes;
@@ -668,6 +668,7 @@ RED.nodes = (function() {
         var nid;
         var def;
         var configNode;
+        var missingWorkspace = null;
 
         // Find all tabs and subflow templates
         for (i=0;i<newNodes.length;i++) {
@@ -736,7 +737,15 @@ RED.nodes = (function() {
                         } else {
                             n.z = workspace_map[n.z];
                             if (!workspaces[n.z]) {
-                                n.z = activeWorkspace;
+                                if (createMissingWorkspace) {
+                                    if (missingWorkspace === null) {
+                                        missingWorkspace = RED.workspaces.add(null,true);
+                                        new_workspaces.push(missingWorkspace);
+                                    }
+                                    n.z = missingWorkspace.id;
+                                } else {
+                                    n.z = activeWorkspace;
+                                }
                             }
                         }
                     }
@@ -792,14 +801,30 @@ RED.nodes = (function() {
                         } else {
                             node.z = workspace_map[node.z];
                             if (!workspaces[node.z]) {
-                                node.z = activeWorkspace;
+                                if (createMissingWorkspace) {
+                                    if (missingWorkspace === null) {
+                                        missingWorkspace = RED.workspaces.add(null,true);
+                                        new_workspaces.push(missingWorkspace);
+                                    }
+                                    node.z = missingWorkspace.id;
+                                } else {
+                                    node.z = activeWorkspace;
+                                }
                             }
                         }
                         node.id = getID();
                     } else {
                         node.id = n.id;
                         if (node.z == null || (!workspaces[node.z] && !subflow_map[node.z])) {
-                            node.z = activeWorkspace;
+                            if (createMissingWorkspace) {
+                                if (missingWorkspace === null) {
+                                    missingWorkspace = RED.workspaces.add(null,true);
+                                    new_workspaces.push(missingWorkspace);
+                                }
+                                node.z = missingWorkspace.id;
+                            } else {
+                                node.z = activeWorkspace;
+                            }
                         }
                     }
                     node.type = n.type;
@@ -946,7 +971,7 @@ RED.nodes = (function() {
         }
 
         RED.workspaces.refresh();
-        return [new_nodes,new_links,new_workspaces,new_subflows];
+        return [new_nodes,new_links,new_workspaces,new_subflows,missingWorkspace];
     }
 
     // TODO: supports filter.z|type

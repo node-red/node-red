@@ -20,7 +20,7 @@ RED.workspaces = (function() {
     var activeWorkspace = 0;
     var workspaceIndex = 0;
 
-    function addWorkspace(ws) {
+    function addWorkspace(ws,skipHistoryEntry) {
         if (ws) {
             workspace_tabs.addTab(ws);
             workspace_tabs.resize();
@@ -34,9 +34,12 @@ RED.workspaces = (function() {
             RED.nodes.addWorkspace(ws);
             workspace_tabs.addTab(ws);
             workspace_tabs.activateTab(tabId);
-            RED.history.push({t:'add',workspaces:[ws],dirty:RED.nodes.dirty()});
-            RED.nodes.dirty(true);
+            if (!skipHistoryEntry) {
+                RED.history.push({t:'add',workspaces:[ws],dirty:RED.nodes.dirty()});
+                RED.nodes.dirty(true);
+            }
         }
+        return ws;
     }
     function deleteWorkspace(ws) {
         if (workspace_tabs.count() == 1) {

@@ -95,6 +95,10 @@
             "compact":"compact",
             "formatted":"formatted",
             "copy": "Export to clipboard"
+        },
+        "import": {
+            "import": "Import to",
+            "newFlow": "new flow"
         }
     },
     "deploy": {

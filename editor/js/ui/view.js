@@ -1389,7 +1389,7 @@ RED.view = (function() {
         options.push({name:"delete",disabled:(moving_set.length===0 && selected_link === null),onselect:function() {deleteSelection();}});
         options.push({name:"cut",disabled:(moving_set.length===0),onselect:function() {copySelection();deleteSelection();}});
         options.push({name:"copy",disabled:(moving_set.length===0),onselect:function() {copySelection();}});
-        options.push({name:"paste",disabled:(clipboard.length===0),onselect:function() {importNodes(clipboard,true);}});
+        options.push({name:"paste",disabled:(clipboard.length===0),onselect:function() {importNodes(clipboard,false,true);}});
         options.push({name:"edit",disabled:(moving_set.length != 1),onselect:function() { RED.editor.edit(mdn);}});
         options.push({name:"select",onselect:function() {selectAll();}});
         options.push({name:"undo",disabled:(RED.history.depth() === 0),onselect:function() {RED.history.pop();}});
@@ -2194,19 +2194,22 @@ RED.view = (function() {
      *  - all "selected"
      *  - attached to mouse for placing - "IMPORT_DRAGGING"
      */
-    function importNodes(newNodesStr,touchImport) {
+    function importNodes(newNodesStr,addNewFlow,touchImport) {
         try {
             var activeSubflowChanged;
             if (activeSubflow) {
                 activeSubflowChanged = activeSubflow.changed;
             }
-            var result = RED.nodes.import(newNodesStr,true);
+            var result = RED.nodes.import(newNodesStr,true,addNewFlow);
             if (result) {
                 var new_nodes = result[0];
                 var new_links = result[1];
                 var new_workspaces = result[2];
                 var new_subflows = result[3];
-
+                var new_default_workspace = result[4];
+                if (addNewFlow && new_default_workspace) {
+                    RED.workspaces.show(new_default_workspace.id);
+                }
                 var new_ms = new_nodes.filter(function(n) { return n.hasOwnProperty("x") && n.hasOwnProperty("y") && n.z == RED.workspaces.active() }).map(function(n) { return {n:n};});
                 var new_node_ids = new_nodes.map(function(n){ return n.id; });
 
