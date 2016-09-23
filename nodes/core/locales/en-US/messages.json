@@ -150,8 +150,7 @@
         "placeholder": {
             "extraparams": "extra input parameters"
         },
-        "spawn": "Use spawn() instead of exec()?",
-        "tip": "Tip: <i>spawn</i> expects only one command word - and appended args to be comma separated."
+        "spawn": "Use spawn() instead of exec()?"
     },
     "function": {
         "label": {
@@ -661,8 +660,8 @@
         "tip": {
             "pin": "<b>Pins in Use</b>: ",
             "in": "Tip: Only Digital Input is supported - input must be 0 or 1.",
-            "dig": "<b>Tip</b>: For digital output - input must be 0 or 1.",
-            "pwm": "<b>Tip</b>: For PWM output - input must be between 0 to 100."
+            "dig": "Tip: For digital output - input must be 0 or 1.",
+            "pwm": "Tip: For PWM output - input must be between 0 to 100."
         },
         "types": {
             "digout": "digital output",
@@ -737,6 +736,7 @@
             "writefail": "failed to write to file: __error__",
             "appendfail": "failed to append to file: __error__",
             "createfail": "failed to create file: __error__"
-        }
+        },
+        "tip": "Tip: You should fully path the Filename."
     }
 }
