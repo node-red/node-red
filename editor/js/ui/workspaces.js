@@ -137,6 +137,7 @@ RED.workspaces = (function() {
                 activeWorkspace = tab.id;
                 event.workspace = activeWorkspace;
                 RED.events.emit("workspace:change",event);
+                window.location.hash = 'flow/'+tab.id;
                 RED.sidebar.config.refresh();
             },
             ondblclick: function(tab) {
@@ -222,6 +223,8 @@ RED.workspaces = (function() {
                 var sf = RED.nodes.subflow(id);
                 if (sf) {
                     addWorkspace({type:"subflow",id:id,icon:"red/images/subflow_tab.png",label:sf.name, closeable: true});
+                } else {
+                    return;
                 }
             }
             workspace_tabs.activateTab(id);

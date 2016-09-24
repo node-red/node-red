@@ -72,9 +72,13 @@ var RED = (function() {
             cache: false,
             url: 'flows',
             success: function(nodes) {
+                var currentHash = window.location.hash;
                 RED.nodes.import(nodes);
                 RED.nodes.dirty(false);
                 RED.view.redraw(true);
+                if (/^#flow\/.+$/.test(currentHash)) {
+                    RED.workspaces.show(currentHash.substring(6));
+                }
                 RED.comms.subscribe("status/#",function(topic,msg) {
                     var parts = topic.split("/");
                     var node = RED.nodes.node(parts[1]);
