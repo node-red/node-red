@@ -565,6 +565,45 @@ RED.nodes = (function() {
         return nns;
     }
 
+    function checkForMatchingSubflow(subflow,subflowNodes) {
+        var i;
+        var match = null;
+        try {
+            RED.nodes.eachSubflow(function(sf) {
+                if (sf.name != subflow.name ||
+                    sf.info != subflow.info ||
+                    sf.in.length != subflow.in.length ||
+                    sf.out.length != subflow.out.length) {
+                        return;
+                }
+                var sfNodes = RED.nodes.filterNodes({z:sf.id});
+                if (sfNodes.length != subflowNodes.length) {
+                    return;
+                }
+
+                var subflowNodeSet = [subflow].concat(subflowNodes);
+                var sfNodeSet = [sf].concat(sfNodes);
+
+                var exportableSubflowNodes = JSON.stringify(subflowNodeSet);
+                var exportableSFNodes = JSON.stringify(createExportableNodeSet(sfNodeSet));
+                var nodeMap = {};
+                for (i=0;i<sfNodes.length;i++) {
+                    exportableSubflowNodes = exportableSubflowNodes.replace(new RegExp("\""+subflowNodes[i].id+"\"","g"),'"'+sfNodes[i].id+'"');
+                }
+                exportableSubflowNodes = exportableSubflowNodes.replace(new RegExp("\""+subflow.id+"\"","g"),'"'+sf.id+'"');
+
+                if (exportableSubflowNodes !== exportableSFNodes) {
+                    return;
+                }
+
+                match = sf;
+                throw new Error();
+            });
+        } catch(err) {
+            console.log(err.stack);
+        }
+        return match;
+    }
     function compareNodes(nodeA,nodeB,idMustMatch) {
         if (idMustMatch && nodeA.id != nodeB.id) {
             return false;
@@ -598,6 +637,7 @@ RED.nodes = (function() {
         var i;
         var n;
         var newNodes;
+        var nodeZmap = {};
         if (typeof newNodesObj === "string") {
             if (newNodesObj === "") {
                 return;
@@ -628,6 +668,11 @@ RED.nodes = (function() {
                 unknownTypes.indexOf(n.type)==-1) {
                     unknownTypes.push(n.type);
             }
+            if (n.z) {
+                nodeZmap[n.z] = nodeZmap[n.z] || [];
+                nodeZmap[n.z].push(n);
+            }
+
         }
         if (unknownTypes.length > 0) {
             var typeList = "<ul><li>"+unknownTypes.join("</li><li>")+"</li></ul>";
@@ -662,6 +707,7 @@ RED.nodes = (function() {
         var workspace_map = {};
         var new_subflows = [];
         var subflow_map = {};
+        var subflow_blacklist = {};
         var node_map = {};
         var new_nodes = [];
         var new_links = [];
@@ -690,28 +736,33 @@ RED.nodes = (function() {
                 RED.workspaces.add(n);
                 new_workspaces.push(n);
             } else if (n.type === "subflow") {
-                subflow_map[n.id] = n;
-                if (createNewIds) {
-                    nid = getID();
-                    n.id = nid;
+                var matchingSubflow = checkForMatchingSubflow(n,nodeZmap[n.id]);
+                if (matchingSubflow) {
+                    subflow_blacklist[n.id] = matchingSubflow;
+                } else {
+                    subflow_map[n.id] = n;
+                    if (createNewIds) {
+                        nid = getID();
+                        n.id = nid;
+                    }
+                    // TODO: handle createNewIds - map old to new subflow ids
+                    n.in.forEach(function(input,i) {
+                        input.type = "subflow";
+                        input.direction = "in";
+                        input.z = n.id;
+                        input.i = i;
+                        input.id = getID();
+                    });
+                    n.out.forEach(function(output,i) {
+                        output.type = "subflow";
+                        output.direction = "out";
+                        output.z = n.id;
+                        output.i = i;
+                        output.id = getID();
+                    });
+                    new_subflows.push(n);
+                    addSubflow(n,createNewIds);
                 }
-                // TODO: handle createNewIds - map old to new subflow ids
-                n.in.forEach(function(input,i) {
-                    input.type = "subflow";
-                    input.direction = "in";
-                    input.z = n.id;
-                    input.i = i;
-                    input.id = getID();
-                });
-                n.out.forEach(function(output,i) {
-                    output.type = "subflow";
-                    output.direction = "out";
-                    output.z = n.id;
-                    output.i = i;
-                    output.id = getID();
-                });
-                new_subflows.push(n);
-                addSubflow(n,createNewIds);
             }
         }
 
@@ -732,7 +783,9 @@ RED.nodes = (function() {
                 var existingConfigNode = null;
                 if (createNewIds) {
                     if (n.z) {
-                        if (subflow_map[n.z]) {
+                        if (subflow_blacklist[n.z]) {
+                            continue;
+                        } else if (subflow_map[n.z]) {
                             n.z = subflow_map[n.z].id;
                         } else {
                             n.z = workspace_map[n.z];
@@ -796,7 +849,9 @@ RED.nodes = (function() {
                 if (!def || def.category != "config") {
                     var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires,changed:false};
                     if (createNewIds) {
-                        if (subflow_map[node.z]) {
+                        if (subflow_blacklist[n.z]) {
+                            continue;
+                        } else if (subflow_map[node.z]) {
                             node.z = subflow_map[node.z].id;
                         } else {
                             node.z = workspace_map[node.z];
@@ -831,7 +886,7 @@ RED.nodes = (function() {
                     node._def = def;
                     if (n.type.substring(0,7) === "subflow") {
                         var parentId = n.type.split(":")[1];
-                        var subflow = subflow_map[parentId]||getSubflow(parentId);
+                        var subflow = subflow_blacklist[parentId]||subflow_map[parentId]||getSubflow(parentId);
                         if (createNewIds) {
                             parentId = subflow.id;
                             node.type = "subflow:"+parentId;
