@@ -264,8 +264,8 @@ RED.tabs = (function() {
                             }
                         },
                         drag: function(event,ui) {
-                            ui.position.left += tabElements[tabDragIndex].left;
-                            var tabCenter = ui.position.left + tabElements[tabDragIndex].width/2;
+                            ui.position.left += tabElements[tabDragIndex].left+scrollContainer.scrollLeft();
+                            var tabCenter = ui.position.left + tabElements[tabDragIndex].width/2 - scrollContainer.scrollLeft();
                             for (var i=0;i<tabElements.length;i++) {
                                 if (i === tabDragIndex) {
                                     continue;
