@@ -45,7 +45,6 @@
 <div id="main-container" class="sidebar-closed hide">
     <div id="workspace">
         <ul id="workspace-tabs"></ul>
-        <div id="workspace-add-tab"><a id="btn-workspace-add-tab" href="#"><i class="fa fa-plus"></i></a></div>
         <div id="chart" tabindex="1"></div>
         <div id="workspace-toolbar"></div>
         <div id="workspace-footer">

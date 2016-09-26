@@ -166,13 +166,16 @@ RED.workspaces = (function() {
                 RED.nodes.dirty(true);
                 setWorkspaceOrder(newOrder);
             },
-            minimumActiveTabWidth: 150
+            minimumActiveTabWidth: 150,
+            scrollable: true,
+            addButton: function() {
+                addWorkspace();
+            }
         });
     }
 
     function init() {
         createWorkspaceTabs();
-        $('#btn-workspace-add-tab').on("click",function(e) {addWorkspace(); e.preventDefault()});
         RED.events.on("sidebar:resize",workspace_tabs.resize);
 
         RED.menu.setAction('menu-item-workspace-delete',function() {

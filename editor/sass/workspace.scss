@@ -48,33 +48,6 @@
     @include component-footer-button;
 }
 
-#workspace-tabs {
-    margin-right: 35px;
-}
-
-
-
-#workspace-add-tab {
-    position: absolute;
-    box-sizing: border-box;
-    top: 0;
-    right: 0;
-    height: 35px;
-    width: 35px;
-    background: #fff;
-    border-bottom: 1px solid $primary-border-color;
-}
-
-#btn-workspace-add-tab {
-    @include workspace-button;
-    line-height: 32px;
-    height: 32px;
-    width: 32px;
-    margin-top: 3px;
-    margin-right:3px;
-    border: 1px solid $primary-border-color;
-}
-
 #workspace-footer {
     @include component-footer;
 }
