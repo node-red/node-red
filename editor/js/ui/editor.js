@@ -311,7 +311,7 @@ RED.editor = (function() {
             if (val == null) {
                 val = "";
             }
-            if (definition !== undefined && definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0].nodeName === "DIV") {
+            if (definition !== undefined && definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0] && input[0].nodeName === "DIV") {
                 input.html(RED.text.format.getHtml(val, definition[property].format, {}, false, "en"));
                 RED.text.format.attach(input[0], definition[property].format, {}, false, "en");
             } else {
