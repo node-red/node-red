@@ -316,7 +316,9 @@ RED.editor = (function() {
                 RED.text.format.attach(input[0], definition[property].format, {}, false, "en");
             } else {
                 input.val(val);
-                RED.text.bidi.prepareInput(input);
+				if (val.length !== undefined) {
+                    RED.text.bidi.prepareInput(input);
+                }
             }
         }
     }
