@@ -197,6 +197,8 @@ var RED = (function() {
                     {id:"menu-item-export-library",label:RED._("menu.label.library"),disabled:true,onselect:RED.library.export}
                 ]},
                 null,
+                {id:"menu-item-search",label:RED._("menu.label.search"),onselect:RED.search.show},
+                null,
                 {id:"menu-item-config-nodes",label:RED._("menu.label.displayConfig"),onselect:function() {}},
                 {id:"menu-item-workspace",label:RED._("menu.label.flows"),options:[
                     {id:"menu-item-workspace-add",label:RED._("menu.label.add"),onselect:RED.workspaces.add},
@@ -226,6 +228,7 @@ var RED = (function() {
         RED.subflow.init();
         RED.workspaces.init();
         RED.clipboard.init();
+        RED.search.init();
         RED.view.init();
         RED.editor.init();
 

@@ -309,7 +309,14 @@ RED.nodes = (function() {
             });
             sf.name = subflowName;
         }
-
+        sf._def = {
+            defaults:{},
+            icon:"subflow.png",
+            category: "subflows",
+            color: "#da9",
+            inputs: sf.in.length,
+            outputs: sf.out.length
+        }
         subflows[sf.id] = sf;
         RED.nodes.registerType("subflow:"+sf.id, {
             defaults:{name:{value:""}},

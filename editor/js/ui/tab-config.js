@@ -149,7 +149,7 @@ RED.sidebar.config = (function() {
                     currentType = node.type;
                 }
 
-                var entry = $('<li class="palette_node config_node"></li>').appendTo(list);
+                var entry = $('<li class="palette_node config_node palette_node_id_'+node.id.replace(/\./g,"-")+'"></li>').appendTo(list);
                 $('<div class="palette_label"></div>').text(label).appendTo(entry);
 
                 var iconContainer = $('<div/>',{class:"palette_icon_container  palette_icon_container_right"}).text(node.users.length).appendTo(entry);
@@ -280,8 +280,8 @@ RED.sidebar.config = (function() {
 
 
     }
-    function show(unused) {
-        if (unused !== undefined) {
+    function show(id) {
+        if (typeof id === 'boolean') {
             if (unused) {
                 $('#workspace-config-node-filter-unused').click();
             } else {
@@ -289,6 +289,36 @@ RED.sidebar.config = (function() {
             }
         }
         refreshConfigNodeList();
+        if (typeof id === "string") {
+            $('#workspace-config-node-filter-all').click();
+            id = id.replace(/\./g,"-");
+            setTimeout(function() {
+                var node = $(".palette_node_id_"+id);
+                var y = node.position().top;
+                var h = node.height();
+                var scrollWindow = $(".sidebar-node-config");
+                var scrollHeight = scrollWindow.height();
+
+                if (y+h > scrollHeight) {
+                    scrollWindow.animate({scrollTop: '-='+(scrollHeight-(y+h)-30)},150);
+                } else if (y<0) {
+                    scrollWindow.animate({scrollTop: '+='+(y-10)},150);
+                }
+                var flash = 21;
+                var flashFunc = function() {
+                    if ((flash%2)===0) {
+                        node.removeClass('node_highlighted');
+                    } else {
+                        node.addClass('node_highlighted');
+                    }
+                    flash--;
+                    if (flash >= 0) {
+                        setTimeout(flashFunc,100);
+                    }
+                }
+                flashFunc();
+            },100);
+        }
         RED.sidebar.show("config");
     }
     return {

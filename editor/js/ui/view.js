@@ -2385,6 +2385,46 @@ RED.view = (function() {
                 }
             }
             return result;
+        },
+        reveal: function(id) {
+            if (RED.nodes.workspace(id) || RED.nodes.subflow(id)) {
+                RED.workspaces.show(id);
+            } else {
+                var node = RED.nodes.node(id);
+                if (node._def.category !== 'config' && node.z) {
+                    node.highlighted = true;
+                    node.dirty = true;
+                    RED.workspaces.show(node.z);
+                    RED.view.redraw();
+
+                    var screenSize = [$("#chart").width(),$("#chart").height()];
+                    var scrollPos = [$("#chart").scrollLeft(),$("#chart").scrollTop()];
+
+                    if (node.x < scrollPos[0] || node.y < scrollPos[1] || node.x > screenSize[0]+scrollPos[0] || node.y > screenSize[1]+scrollPos[1]) {
+                        var deltaX = '-='+((scrollPos[0] - node.x) + screenSize[0]/2);
+                        var deltaY = '-='+((scrollPos[1] - node.y) + screenSize[1]/2);
+                        $("#chart").animate({
+                            scrollLeft: deltaX,
+                            scrollTop: deltaY
+                        },200);
+                    }
+
+                    var flash = 22;
+                    var flashFunc = function() {
+                        flash--;
+                        node.highlighted = !node.highlighted;
+                        node.dirty = true;
+                        RED.view.redraw();
+                        if (flash >= 0) {
+                            setTimeout(flashFunc,100);
+                        }
+                    }
+                    flashFunc();
+                } else if (node._def.category === 'config') {
+                    RED.sidebar.config.show(id);
+                }
+            }
         }
+
     };
 })();

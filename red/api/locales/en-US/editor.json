@@ -39,6 +39,7 @@
             "displayConfig": "Configuration nodes",
             "import": "Import",
             "export": "Export",
+            "search": "Find",
             "clipboard": "Clipboard",
             "library": "Library",
             "examples": "Examples",
@@ -164,7 +165,7 @@
         "addRemoveNode": "Add/remove node from selection",
         "deleteSelected": "Delete selected nodes or link",
         "importNode": "Import nodes",
-        "exportNode": "Export selected nodes",
+        "exportNode": "Export nodes",
         "nudgeNode": "Move selected node(s) by a small amount",
         "moveNode": "Move selected node(s) by a large amount",
         "toggleSidebar": "Toggle sidebar",
@@ -172,7 +173,8 @@
         "copyNode": "Copy selected nodes",
         "cutNode": "Cut selected nodes",
         "pasteNode": "Paste nodes",
-        "undoChange": "Undo the last change performed"
+        "undoChange": "Undo the last change performed",
+        "searchBox": "Open search box"
     },
     "library": {
         "openLibrary": "Open Library...",
@@ -305,5 +307,8 @@
     },
     "editableList": {
         "add": "add"
+    },
+    "search": {
+        "empty": "No matches found"
     }
 }
