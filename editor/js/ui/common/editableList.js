@@ -87,7 +87,10 @@
 
             this.activeFilter = this.options.filter||null;
             this.activeSort = this.options.sort||null;
-
+            this.scrollOnAdd = this.options.scrollOnAdd;
+            if (this.scrollOnAdd === undefined) {
+                this.scrollOnAdd = true;
+            }
             var minHeight = this.element.css("minHeight");
             if (minHeight !== '0px') {
                 this.uiContainer.css("minHeight",minHeight);
@@ -255,7 +258,7 @@
                         }
                     }
 
-                    if (!that.activeSort) {
+                    if (!that.activeSort && that.scrollOnAdd) {
                         setTimeout(function() {
                             that.uiContainer.scrollTop(that.element.height());
                         },0);
