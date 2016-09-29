@@ -168,7 +168,7 @@
                 msg.onclick = function() {
                     var node = RED.nodes.node(o.id) || RED.nodes.node(o.z);
                     if (node) {
-                        RED.workspaces.show(node.z);
+                        RED.view.reveal(node.id);
                     }
 
                 };
