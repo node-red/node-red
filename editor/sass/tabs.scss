@@ -122,7 +122,7 @@
     height: 35px;
     background: #fff;
     border-bottom: 1px solid $primary-border-color;
-    z-index: 3;
+    z-index: 2;
 
     a {
         @include workspace-button;
@@ -133,7 +133,7 @@
         margin-right:3px;
         margin-left:3px;
         border: 1px solid $primary-border-color;
-        z-index: 3;
+        z-index: 2;
     }
 }
 

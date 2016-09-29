@@ -43,9 +43,9 @@ RED.tabs = (function() {
             scrollContainer.addClass("red-ui-tabs-scroll-container");
             scrollContainer.scroll(updateScroll);
             scrollLeft = $('<div class="red-ui-tab-button red-ui-tab-scroll red-ui-tab-scroll-left"><a href="#" style="display:none;"><i class="fa fa-caret-left"></i></a></div>').appendTo(wrapper).find("a");
-            scrollLeft.on('mousedown',function(evt) { scrollEventHandler(evt,'-=150') });
+            scrollLeft.on('mousedown',function(evt) { scrollEventHandler(evt,'-=150') }).on('click',function(evt){ evt.preventDefault();});
             scrollRight = $('<div class="red-ui-tab-button red-ui-tab-scroll red-ui-tab-scroll-right"><a href="#" style="display:none;"><i class="fa fa-caret-right"></i></a></div>').appendTo(wrapper).find("a");
-            scrollRight.on('mousedown',function(evt) { scrollEventHandler(evt,'+=150') });
+            scrollRight.on('mousedown',function(evt) { scrollEventHandler(evt,'+=150') }).on('click',function(evt){ evt.preventDefault();});
         }
         function scrollEventHandler(evt,dir) {
             evt.preventDefault();
