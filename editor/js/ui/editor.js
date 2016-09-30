@@ -311,12 +311,14 @@ RED.editor = (function() {
             if (val == null) {
                 val = "";
             }
-            if (definition !== undefined && definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0].nodeName === "DIV") {
+            if (definition !== undefined && definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0] && input[0].nodeName === "DIV") {
                 input.html(RED.text.format.getHtml(val, definition[property].format, {}, false, "en"));
                 RED.text.format.attach(input[0], definition[property].format, {}, false, "en");
             } else {
                 input.val(val);
-                RED.text.bidi.prepareInput(input);
+                if (input.val() !== undefined) {
+                    RED.text.bidi.prepareInput(input);
+                }
             }
         }
     }
@@ -1179,7 +1181,7 @@ RED.editor = (function() {
                 }
 
                 configNodes.forEach(function(cn) {
-                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+cn.__label__+'</option>');
+                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+RED.text.bidi.enforceTextDirectionWithUCC(cn.__label__)+'</option>');
                     delete cn.__label__;
                 });
 
