@@ -113,15 +113,17 @@ RED.search = (function() {
     }
     function ensureSelectedIsVisible() {
         var selectedEntry = searchResults.find("li.selected");
-        var scrollWindow = searchResults.parent();
-        var scrollHeight = scrollWindow.height();
-        var scrollOffset = scrollWindow.scrollTop();
-        var y = selectedEntry.position().top;
-        var h = selectedEntry.height();
-        if (y+h > scrollHeight) {
-            scrollWindow.animate({scrollTop: '-='+(scrollHeight-(y+h)-10)},50);
-        } else if (y<0) {
-            scrollWindow.animate({scrollTop: '+='+(y-10)},50);
+        if (selectedEntry.length === 1) {
+            var scrollWindow = searchResults.parent();
+            var scrollHeight = scrollWindow.height();
+            var scrollOffset = scrollWindow.scrollTop();
+            var y = selectedEntry.position().top;
+            var h = selectedEntry.height();
+            if (y+h > scrollHeight) {
+                scrollWindow.animate({scrollTop: '-='+(scrollHeight-(y+h)-10)},50);
+            } else if (y<0) {
+                scrollWindow.animate({scrollTop: '+='+(y-10)},50);
+            }
         }
     }
 
