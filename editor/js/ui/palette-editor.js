@@ -601,7 +601,7 @@ RED.palette.editor = (function() {
             initInstallTab();
         })
 
-        packageList = $('<ol>',{id:"palette-module-list", style:"position: absolute;top: 78px;bottom: 0;left: 0;right: 0px;"}).appendTo(installTab).editableList({
+        packageList = $('<ol>',{style:"position: absolute;top: 78px;bottom: 0;left: 0;right: 0px;"}).appendTo(installTab).editableList({
            addButton: false,
            addItem: function(container,i,object) {
                if (object.more) {

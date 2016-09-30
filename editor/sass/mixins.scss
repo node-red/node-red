@@ -90,7 +90,6 @@
     @include workspace-button;
     color: $workspace-button-toggle-color !important;
     background:$workspace-button-background-active;
-    transition: all 0.1s ease-in-out;
     margin-bottom: 1px;
     &.selected:not(.disabled) {
         color: $workspace-button-toggle-color-selected !important;

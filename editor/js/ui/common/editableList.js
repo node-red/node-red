@@ -66,12 +66,7 @@
                         that.addItem({});
                     });
             }
-
             if (this.element.css("position") === "absolute") {
-                this.element.css("position","static");
-                this.topContainer.css("position","absolute");
-                this.uiContainer.css("position","absolute");
-
                 ["top","left","bottom","right"].forEach(function(s) {
                     var v = that.element.css(s);
                     if (s!=="auto" && s!=="") {
@@ -80,6 +75,10 @@
                         that.element.css(s,'auto');
                     }
                 })
+                this.element.css("position","static");
+                this.topContainer.css("position","absolute");
+                this.uiContainer.css("position","absolute");
+
             }
             this.uiContainer.addClass("red-ui-editableList-container");
 
