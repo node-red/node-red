@@ -1221,7 +1221,6 @@ RED.editor = (function() {
                             changes['name'] = editing_node.name;
                             editing_node.name = newName;
                             changed = true;
-                            $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text(RED.text.bidi.enforceTextDirectionWithUCC(newName));
                         }
 
                         var newDescription = subflowEditor.getValue();

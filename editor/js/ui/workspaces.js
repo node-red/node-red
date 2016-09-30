@@ -97,7 +97,6 @@ RED.workspaces = (function() {
                             workspace_tabs.renameTab(workspace.id,label);
                             RED.nodes.dirty(true);
                             RED.sidebar.config.refresh();
-                            $("#menu-item-workspace-menu-"+workspace.id.replace(".","-")).text(RED.text.bidi.enforceTextDirectionWithUCC(label));
                         }
                         RED.tray.close();
                     }
@@ -148,18 +147,10 @@ RED.workspaces = (function() {
                 }
             },
             onadd: function(tab) {
-                RED.menu.addItem("menu-item-workspace",{
-                    id:"menu-item-workspace-menu-"+tab.id.replace(".","-"),
-                    label:tab.label,
-                    onselect:function() {
-                        workspace_tabs.activateTab(tab.id);
-                    }
-                });
                 RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() == 1);
             },
             onremove: function(tab) {
                 RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() == 1);
-                RED.menu.removeItem("menu-item-workspace-menu-"+tab.id.replace(".","-"));
             },
             onreorder: function(oldOrder, newOrder) {
                 RED.history.push({t:'reorder',order:oldOrder,dirty:RED.nodes.dirty()});
@@ -235,7 +226,6 @@ RED.workspaces = (function() {
         refresh: function() {
             RED.nodes.eachWorkspace(function(ws) {
                 workspace_tabs.renameTab(ws.id,ws.label);
-                $("#menu-item-workspace-menu-"+ws.id.replace(".","-")).text(RED.text.bidi.enforceTextDirectionWithUCC(ws.label));
 
             })
             RED.nodes.eachSubflow(function(sf) {

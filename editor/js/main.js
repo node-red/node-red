@@ -203,8 +203,7 @@ var RED = (function() {
         menuOptions.push({id:"menu-item-workspace",label:RED._("menu.label.flows"),options:[
             {id:"menu-item-workspace-add",label:RED._("menu.label.add"),onselect:RED.workspaces.add},
             {id:"menu-item-workspace-edit",label:RED._("menu.label.rename"),onselect:RED.workspaces.edit},
-            {id:"menu-item-workspace-delete",label:RED._("menu.label.delete"),onselect:RED.workspaces.remove},
-            null
+            {id:"menu-item-workspace-delete",label:RED._("menu.label.delete"),onselect:RED.workspaces.remove}
         ]});
         menuOptions.push({id:"menu-item-subflow",label:RED._("menu.label.subflows"), options: [
             {id:"menu-item-subflow-create",label:RED._("menu.label.createSubflow"),onselect:RED.subflow.createSubflow},
