@@ -50,9 +50,10 @@
             "add": "Add",
             "rename": "Rename",
             "delete": "Delete",
-            "keyboardShortcuts": "Keyboard Shortcuts",
+            "keyboardShortcuts": "Keyboard shortcuts",
             "login": "Login",
-            "logout": "Logout"
+            "logout": "Logout",
+            "editPalette":"Manage palette"
         }
     },
     "user": {

@@ -256,6 +256,9 @@ RED.palette.editor = (function() {
 
     }
     function showPaletteEditor() {
+        if (RED.settings.theme('palette.editable') === false) {
+            return;
+        }
         $("#header-shade").show();
         $("#editor-shade").show();
         $("#sidebar-shade").show();
@@ -368,8 +371,9 @@ RED.palette.editor = (function() {
     }
 
     function init() {
-
-        $(".palette-editor-button").show();
+        if (RED.settings.theme('palette.editable') === false) {
+            return;
+        }
 
         editorTabs = RED.tabs.create({
             id:"palette-editor-tabs",
@@ -402,13 +406,7 @@ RED.palette.editor = (function() {
                 hidePaletteEditor();
             }
         });
-        $("#palette-edit").on("click",function(e) {
-            if ($("#main-container").hasClass("palette-expanded")) {
-                hidePaletteEditor();
-            } else {
-                showPaletteEditor();
-            }
-        });
+
         $("#palette-editor-close").on("click", function(e) {
             hidePaletteEditor();
         })
@@ -737,5 +735,6 @@ RED.palette.editor = (function() {
 
     return {
         init: init,
+        show: showPaletteEditor
     }
 })();
