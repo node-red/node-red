@@ -426,11 +426,12 @@ RED.nodes = (function() {
                 for (var cred in n._def.credentials) {
                     if (n._def.credentials.hasOwnProperty(cred)) {
                         if (n._def.credentials[cred].type == 'password') {
-                            if (n.credentials["has_"+cred] != n.credentials._["has_"+cred] ||
+                            if (!n.credentials._ ||
+                                n.credentials["has_"+cred] != n.credentials._["has_"+cred] ||
                                 (n.credentials["has_"+cred] && n.credentials[cred])) {
                                 credentialSet[cred] = n.credentials[cred];
                             }
-                        } else if (n.credentials[cred] != null && n.credentials[cred] != n.credentials._[cred]) {
+                        } else if (n.credentials[cred] != null && (!n.credentials._ || n.credentials[cred] != n.credentials._[cred])) {
                             credentialSet[cred] = n.credentials[cred];
                         }
                     }
@@ -722,6 +723,7 @@ RED.nodes = (function() {
         var def;
         var configNode;
         var missingWorkspace = null;
+        var d;
 
         // Find all tabs and subflow templates
         for (i=0;i<newNodes.length;i++) {
@@ -830,9 +832,17 @@ RED.nodes = (function() {
 
                 if (!existingConfigNode) { //} || !compareNodes(existingConfigNode,n,true) || existingConfigNode._def.exclusive || existingConfigNode.z !== n.z) {
                     configNode = {id:n.id, z:n.z, type:n.type, users:[]};
-                    for (var d in def.defaults) {
+                    for (d in def.defaults) {
                         if (def.defaults.hasOwnProperty(d)) {
                             configNode[d] = n[d];
+                        }
+                    }
+                    if (def.hasOwnProperty('credentials') && n.hasOwnProperty('credentials')) {
+                        configNode.credentials = {};
+                        for (d in def.credentials) {
+                            if (def.credentials.hasOwnProperty(d) && n.credentials.hasOwnProperty(d)) {
+                                configNode.credentials[d] = n.credentials[d];
+                            }
                         }
                     }
                     configNode.label = def.label;
@@ -934,12 +944,23 @@ RED.nodes = (function() {
                         if (node._def.category != "config") {
                             node.inputs = n.inputs||node._def.inputs;
                             node.outputs = n.outputs||node._def.outputs;
-                            for (var d2 in node._def.defaults) {
-                                if (node._def.defaults.hasOwnProperty(d2)) {
-                                    node[d2] = n[d2];
+                            for (d in node._def.defaults) {
+                                if (node._def.defaults.hasOwnProperty(d)) {
+                                    node[d] = n[d];
+                                }
+                            }
+                            if (node._def.hasOwnProperty('credentials') && n.hasOwnProperty('credentials')) {
+                                node.credentials = {};
+                                for (d in node._def.credentials) {
+                                    if (node._def.credentials.hasOwnProperty(d) && n.credentials.hasOwnProperty(d)) {
+                                        node.credentials[d] = n.credentials[d];
+                                    }
                                 }
                             }
                         }
+                    }
+                    if (node.credentials) {
+                        console.log(node);
                     }
                     addNode(node);
                     RED.editor.validateNode(node);

@@ -2281,6 +2281,9 @@ RED.view = (function() {
                     subflows:new_subflows,
                     dirty:RED.nodes.dirty()
                 };
+                if (new_ms.length === 0) {
+                    RED.nodes.dirty(true);
+                }
                 if (activeSubflow) {
                     var subflowRefresh = RED.subflow.refresh(true);
                     if (subflowRefresh) {
