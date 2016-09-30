@@ -303,6 +303,9 @@ RED.editor = (function() {
      */
     function preparePropertyEditor(node,property,prefix,definition) {
         var input = $("#"+prefix+"-"+property);
+        if (input.length === 0) {
+            return;
+        }
         if (input.attr('type') === "checkbox") {
             input.prop('checked',node[property]);
         }
@@ -316,7 +319,9 @@ RED.editor = (function() {
                 RED.text.format.attach(input[0], definition[property].format, {}, false, "en");
             } else {
                 input.val(val);
-                RED.text.bidi.prepareInput(input);
+                if (input[0].nodeName === 'INPUT' || input[0].nodeName === 'TEXTAREA') {
+                    RED.text.bidi.prepareInput(input);
+                }
             }
         }
     }
@@ -1179,7 +1184,7 @@ RED.editor = (function() {
                 }
 
                 configNodes.forEach(function(cn) {
-                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+cn.__label__+'</option>');
+                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+RED.text.bidi.enforceTextDirectionWithUCC(cn.__label__)+'</option>');
                     delete cn.__label__;
                 });
 
