@@ -352,6 +352,10 @@ RED.palette.editor = (function() {
         for (var i=0;i<Math.min(10,filteredList.length);i++) {
             packageList.editableList('addItem',filteredList[i]);
         }
+        if (filteredList.length === 0) {
+            packageList.editableList('addItem',{});
+        }
+
         if (filteredList.length > 10) {
             packageList.editableList('addItem',{start:10,more:filteredList.length-10})
         }
@@ -430,6 +434,7 @@ RED.palette.editor = (function() {
 
         nodeList = $('<ol>',{id:"palette-module-list", style:"position: absolute;top: 35px;bottom: 0;left: 0;right: 0px;"}).appendTo(modulesTab).editableList({
             addButton: false,
+            scrollOnAdd: false,
             sort: function(A,B) {
                 return A.info.name.localeCompare(B.info.name);
             },
@@ -442,90 +447,94 @@ RED.palette.editor = (function() {
             },
             addItem: function(container,i,object) {
                 var entry = object.info;
-                var headerRow = $('<div>',{class:"palette-module-header"}).appendTo(container);
-                var titleRow = $('<div class="palette-module-meta palette-module-name"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
-                $('<span>').html(entry.name).appendTo(titleRow);
-                var metaRow = $('<div class="palette-module-meta palette-module-version"><i class="fa fa-tag"></i></div>').appendTo(headerRow);
-                $('<span>').html(entry.version).appendTo(metaRow);
-                var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
-                var setButton = $('<a href="#" class="editor-button editor-button-small palette-module-set-button"><i class="fa fa-angle-right palette-module-node-chevron"></i> </a>').appendTo(buttonRow);
-                var setCount = $('<span>').appendTo(setButton);
-                var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
-                var removeButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.remove')).appendTo(buttonGroup);
-                removeButton.click(function() {
-                    shade.show();
-                    removeNodeModule(entry.name, function(xhr) {
-                        console.log(xhr);
+                if (entry) {
+                    var headerRow = $('<div>',{class:"palette-module-header"}).appendTo(container);
+                    var titleRow = $('<div class="palette-module-meta palette-module-name"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
+                    $('<span>').html(entry.name).appendTo(titleRow);
+                    var metaRow = $('<div class="palette-module-meta palette-module-version"><i class="fa fa-tag"></i></div>').appendTo(headerRow);
+                    $('<span>').html(entry.version).appendTo(metaRow);
+                    var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
+                    var setButton = $('<a href="#" class="editor-button editor-button-small palette-module-set-button"><i class="fa fa-angle-right palette-module-node-chevron"></i> </a>').appendTo(buttonRow);
+                    var setCount = $('<span>').appendTo(setButton);
+                    var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
+                    var removeButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.remove')).appendTo(buttonGroup);
+                    removeButton.click(function() {
+                        shade.show();
+                        removeNodeModule(entry.name, function(xhr) {
+                            console.log(xhr);
+                        })
                     })
-                })
-                if (!entry.local) {
-                    removeButton.hide();
-                }
-                var enableButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.disableall')).appendTo(buttonGroup);
-
-                var contentRow = $('<div>',{class:"palette-module-content"}).appendTo(container);
-                var shade = $('<div class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(container);
-
-                object.elements = {
-                    removeButton: removeButton,
-                    enableButton: enableButton,
-                    setCount: setCount,
-                    container: container,
-                    shade: shade,
-                    sets: {}
-                }
-                setButton.click(function() {
-                    if (container.hasClass('expanded')) {
-                        container.removeClass('expanded');
-                        contentRow.slideUp();
-                    } else {
-                        container.addClass('expanded');
-                        contentRow.slideDown();
+                    if (!entry.local) {
+                        removeButton.hide();
                     }
-                })
+                    var enableButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.disableall')).appendTo(buttonGroup);
 
-                var setList = Object.keys(entry.sets)
-                setList.sort(function(A,B) {
-                    return A.toLowerCase().localeCompare(B.toLowerCase());
-                });
-                setList.forEach(function(setName) {
-                    var set = entry.sets[setName];
-                    var setRow = $('<div>',{class:"palette-module-set"}).appendTo(contentRow);
-                    var buttonGroup = $('<div>',{class:"palette-module-set-button-group"}).appendTo(setRow);
-                    var typeSwatches = {};
-                    set.types.forEach(function(t) {
-                        var typeDiv = $('<div>',{class:"palette-module-type"}).appendTo(setRow);
-                        typeSwatches[t] = $('<span>',{class:"palette-module-type-swatch"}).appendTo(typeDiv);
-                        $('<span>',{class:"palette-module-type-node"}).html(t).appendTo(typeDiv);
+                    var contentRow = $('<div>',{class:"palette-module-content"}).appendTo(container);
+                    var shade = $('<div class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(container);
+
+                    object.elements = {
+                        removeButton: removeButton,
+                        enableButton: enableButton,
+                        setCount: setCount,
+                        container: container,
+                        shade: shade,
+                        sets: {}
+                    }
+                    setButton.click(function() {
+                        if (container.hasClass('expanded')) {
+                            container.removeClass('expanded');
+                            contentRow.slideUp();
+                        } else {
+                            container.addClass('expanded');
+                            contentRow.slideDown();
+                        }
                     })
 
-                    var enableButton = $('<a href="#" class="editor-button editor-button-small"></a>').appendTo(buttonGroup);
+                    var setList = Object.keys(entry.sets)
+                    setList.sort(function(A,B) {
+                        return A.toLowerCase().localeCompare(B.toLowerCase());
+                    });
+                    setList.forEach(function(setName) {
+                        var set = entry.sets[setName];
+                        var setRow = $('<div>',{class:"palette-module-set"}).appendTo(contentRow);
+                        var buttonGroup = $('<div>',{class:"palette-module-set-button-group"}).appendTo(setRow);
+                        var typeSwatches = {};
+                        set.types.forEach(function(t) {
+                            var typeDiv = $('<div>',{class:"palette-module-type"}).appendTo(setRow);
+                            typeSwatches[t] = $('<span>',{class:"palette-module-type-swatch"}).appendTo(typeDiv);
+                            $('<span>',{class:"palette-module-type-node"}).html(t).appendTo(typeDiv);
+                        })
+
+                        var enableButton = $('<a href="#" class="editor-button editor-button-small"></a>').appendTo(buttonGroup);
+                        enableButton.click(function(evt) {
+                            if (object.setUseCount[setName] === 0) {
+                                var currentSet = RED.nodes.registry.getNodeSet(set.id);
+                                shade.show();
+                                changeNodeState(set.id,!currentSet.enabled,shade,function(xhr){
+                                    console.log(xhr)
+                                });
+                            }
+                            evt.preventDefault();
+                        })
+
+                        object.elements.sets[set.name] = {
+                            setRow: setRow,
+                            enableButton: enableButton,
+                            swatches: typeSwatches
+                        };
+                    });
                     enableButton.click(function(evt) {
-                        if (object.setUseCount[setName] === 0) {
-                            var currentSet = RED.nodes.registry.getNodeSet(set.id);
-                            shade.show();
-                            changeNodeState(set.id,!currentSet.enabled,shade,function(xhr){
+                        if (object.totalUseCount === 0) {
+                            changeNodeState(entry.name,(container.hasClass('disabled')),shade,function(xhr){
                                 console.log(xhr)
                             });
                         }
                         evt.preventDefault();
                     })
-
-                    object.elements.sets[set.name] = {
-                        setRow: setRow,
-                        enableButton: enableButton,
-                        swatches: typeSwatches
-                    };
-                });
-                enableButton.click(function(evt) {
-                    if (object.totalUseCount === 0) {
-                        changeNodeState(entry.name,(container.hasClass('disabled')),shade,function(xhr){
-                            console.log(xhr)
-                        });
-                    }
-                    evt.preventDefault();
-                })
-                refreshNodeModule(entry.name);
+                    refreshNodeModule(entry.name);
+                } else {
+                    $('<div>',{class:"red-ui-search-empty"}).html(RED._('search.empty')).appendTo(container);
+                }
             }
         });
 
@@ -546,10 +555,9 @@ RED.palette.editor = (function() {
             .appendTo(searchDiv)
             .searchBox({
                 delay: 300,
-                minimumLength: 2,
                 change: function() {
                     var searchTerm = $(this).val();
-                    if (searchTerm.length >= 2) {
+                    if (searchTerm.length > 0) {
                         filteredList = loadedList.filter(function(m) {
                             return (m.index.indexOf(searchTerm) > -1);
                         }).map(function(f) { return {info:f}});
@@ -557,9 +565,7 @@ RED.palette.editor = (function() {
                         searchInput.searchBox('count',filteredList.length+" / "+loadedList.length);
                     } else {
                         searchInput.searchBox('count',loadedList.length);
-                        if (searchTerm.length === 0) {
-                            packageList.editableList('empty');
-                        }
+                        packageList.editableList('empty');
                     }
                 }
             });
@@ -603,7 +609,9 @@ RED.palette.editor = (function() {
 
         packageList = $('<ol>',{style:"position: absolute;top: 78px;bottom: 0;left: 0;right: 0px;"}).appendTo(installTab).editableList({
            addButton: false,
+           scrollOnAdd: false,
            addItem: function(container,i,object) {
+
                if (object.more) {
                    container.addClass('palette-module-more');
                    var moreRow = $('<div>',{class:"palette-module-header palette-module"}).appendTo(container);
@@ -620,37 +628,41 @@ RED.palette.editor = (function() {
                    })
                    return;
                }
-               var entry = object.info;
-               var headerRow = $('<div>',{class:"palette-module-header"}).appendTo(container);
-               var titleRow = $('<div class="palette-module-meta"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
-               $('<span>',{class:"palette-module-name"}).html(entry.name||entry.id).appendTo(titleRow);
-               $('<a target="_blank" class="palette-module-link"><i class="fa fa-external-link"></i></a>').attr('href',entry.url).appendTo(titleRow);
-               var descRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
-               $('<div>',{class:"palette-module-description"}).html(entry.description).appendTo(descRow);
+               if (object.info) {
+                   var entry = object.info;
+                   var headerRow = $('<div>',{class:"palette-module-header"}).appendTo(container);
+                   var titleRow = $('<div class="palette-module-meta"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
+                   $('<span>',{class:"palette-module-name"}).html(entry.name||entry.id).appendTo(titleRow);
+                   $('<a target="_blank" class="palette-module-link"><i class="fa fa-external-link"></i></a>').attr('href',entry.url).appendTo(titleRow);
+                   var descRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
+                   $('<div>',{class:"palette-module-description"}).html(entry.description).appendTo(descRow);
 
-               var metaRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
-               $('<span class="palette-module-version"><i class="fa fa-tag"></i> '+entry.version+'</span>').appendTo(metaRow);
-               $('<span class="palette-module-updated"><i class="fa fa-calendar"></i> '+formatUpdatedAt(entry.updated_at)+'</span>').appendTo(metaRow);
-               var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
-               var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
-               var shade = $('<div class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(container);
-               var installButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.install')).appendTo(buttonGroup);
-               installButton.click(function(e) {
-                   e.preventDefault();
-                   installNodeModule(entry.id,shade,function(xhr) {
-                       if (xhr) {
-                           if (xhr.responseJSON) {
-                               RED.notify(RED._('palette.editor.errors.installFailed',{module: entry.id,message:xhr.responseJSON.message}));
+                   var metaRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
+                   $('<span class="palette-module-version"><i class="fa fa-tag"></i> '+entry.version+'</span>').appendTo(metaRow);
+                   $('<span class="palette-module-updated"><i class="fa fa-calendar"></i> '+formatUpdatedAt(entry.updated_at)+'</span>').appendTo(metaRow);
+                   var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
+                   var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
+                   var shade = $('<div class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(container);
+                   var installButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.install')).appendTo(buttonGroup);
+                   installButton.click(function(e) {
+                       e.preventDefault();
+                       installNodeModule(entry.id,shade,function(xhr) {
+                           if (xhr) {
+                               if (xhr.responseJSON) {
+                                   RED.notify(RED._('palette.editor.errors.installFailed',{module: entry.id,message:xhr.responseJSON.message}));
+                               }
                            }
-                       }
+                       })
                    })
-               })
-               if (nodeEntries.hasOwnProperty(entry.id)) {
-                   installButton.hide();
-               }
+                   if (nodeEntries.hasOwnProperty(entry.id)) {
+                       installButton.hide();
+                   }
 
-               object.elements = {
-                   installButton:installButton
+                   object.elements = {
+                       installButton:installButton
+                   }
+               } else {
+                   $('<div>',{class:"red-ui-search-empty"}).html(RED._('search.empty')).appendTo(container);
                }
            }
        });
