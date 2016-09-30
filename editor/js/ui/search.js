@@ -20,6 +20,7 @@ RED.search = (function() {
     var searchInput;
     var searchResults;
     var selected = -1;
+    var visible = false;
 
     var index = {};
     var keys = [];
@@ -232,16 +233,8 @@ RED.search = (function() {
     function reveal(node) {
         hide();
         RED.view.reveal(node.id);
-        // if (node.type === 'tab' || node.type === 'subflow') {
-        //     RED.workspaces.show(node.id);
-        // } else {
-        //     if (node._def.category !== 'config' && node.z) {
-        //         RED.workspaces.show(node.z);
-        //     }
-        // }
     }
 
-    var visible = false;
     function show() {
         if (!visible) {
             RED.keyboard.add("*",/* ESCAPE */ 27,function(){hide();d3.event.preventDefault();});
@@ -276,6 +269,10 @@ RED.search = (function() {
 
     function init() {
         RED.keyboard.add("*",/* . */ 190,{ctrl:true},function(){show();d3.event.preventDefault();});
+        $("#header-shade").on('mousedown',hide);
+        $("#editor-shade").on('mousedown',hide);
+        $("#palette-shade").on('mousedown',hide);
+        $("#sidebar-shade").on('mousedown',hide);
     }
 
     return {
