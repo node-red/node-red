@@ -1392,7 +1392,7 @@ RED.editor = (function() {
             if (options.globals) {
                 setTimeout(function() {
                     if (!!session.$worker) {
-                        session.$worker.send("setOptions", [{globals: options.globals}]);
+                        session.$worker.send("setOptions", [{globals: options.globals, esversion:6}]);
                     }
                 },100);
             }
