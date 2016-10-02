@@ -16,6 +16,7 @@
 
 
 .red-ui-searchBox-container {
+    position: relative;
     i {
         font-size: 10px;
         color: #666;
@@ -23,13 +24,13 @@
     i.fa-search {
         position: absolute;
         pointer-events: none;
-        left: 12px;
-        top: 12px;
+        left: 8px;
+        top: 9px;
     }
     i.fa-times {
         position: absolute;
-        right: 7px;
-        top: 12px;
+        right: 5px;
+        top: 9px;
     }
     input {
         border-radius: 0;
@@ -58,8 +59,8 @@
     }
     .red-ui-searchBox-resultCount {
         position: absolute;
-        right: 22px;
-        top: 7px;
+        right: 18px;
+        top: 4px;
         background: #eee;
         color: #666;
         padding: 1px 8px;

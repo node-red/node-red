@@ -17,15 +17,58 @@
 
 
 RED.tabs = (function() {
-
-
     function createTabs(options) {
         var tabs = {};
         var currentTabWidth;
         var currentActiveTabWidth = 0;
 
         var ul = $("#"+options.id);
-        ul.addClass("red-ui-tabs");
+        var wrapper = ul.wrap( "<div>" ).parent();
+        var scrollContainer = ul.wrap( "<div>" ).parent();
+        wrapper.addClass("red-ui-tabs");
+        if (options.addButton && typeof options.addButton === 'function') {
+            wrapper.addClass("red-ui-tabs-add");
+            var addButton = $('<div class="red-ui-tab-button"><a href="#"><i class="fa fa-plus"></i></a></div>').appendTo(wrapper);
+            addButton.find('a').click(function(evt) {
+                evt.preventDefault();
+                options.addButton();
+            })
+
+        }
+        var scrollLeft;
+        var scrollRight;
+
+        if (options.scrollable) {
+            wrapper.addClass("red-ui-tabs-scrollable");
+            scrollContainer.addClass("red-ui-tabs-scroll-container");
+            scrollContainer.scroll(updateScroll);
+            scrollLeft = $('<div class="red-ui-tab-button red-ui-tab-scroll red-ui-tab-scroll-left"><a href="#" style="display:none;"><i class="fa fa-caret-left"></i></a></div>').appendTo(wrapper).find("a");
+            scrollLeft.on('mousedown',function(evt) { scrollEventHandler(evt,'-=150') }).on('click',function(evt){ evt.preventDefault();});
+            scrollRight = $('<div class="red-ui-tab-button red-ui-tab-scroll red-ui-tab-scroll-right"><a href="#" style="display:none;"><i class="fa fa-caret-right"></i></a></div>').appendTo(wrapper).find("a");
+            scrollRight.on('mousedown',function(evt) { scrollEventHandler(evt,'+=150') }).on('click',function(evt){ evt.preventDefault();});
+        }
+        function scrollEventHandler(evt,dir) {
+            evt.preventDefault();
+            if ($(this).hasClass('disabled')) {
+                return;
+            }
+            var currentScrollLeft = scrollContainer.scrollLeft();
+            scrollContainer.animate( { scrollLeft: dir }, 300);
+            var interval = setInterval(function() {
+                var newScrollLeft = scrollContainer.scrollLeft()
+                if (newScrollLeft === currentScrollLeft) {
+                    clearInterval(interval);
+                    return;
+                }
+                currentScrollLeft = newScrollLeft;
+                scrollContainer.animate( { scrollLeft: dir }, 300);
+            },300);
+            $(this).one('mouseup',function() {
+                clearInterval(interval);
+            })
+        }
+
+
         ul.children().first().addClass("active");
         ul.children().addClass("red-ui-tab");
 
@@ -34,6 +77,23 @@ RED.tabs = (function() {
             return false;
         }
 
+        function updateScroll() {
+            if (ul.children().length !== 0) {
+                var sl = scrollContainer.scrollLeft();
+                var scWidth = scrollContainer.width();
+                var ulWidth = ul.width();
+                if (sl === 0) {
+                    scrollLeft.hide();
+                } else {
+                    scrollLeft.show();
+                }
+                if (sl === ulWidth-scWidth) {
+                    scrollRight.hide();
+                } else {
+                    scrollRight.show();
+                }
+            }
+        }
         function onTabDblClick() {
             if (options.ondblclick) {
                 options.ondblclick(tabs[$(this).attr('href').slice(1)]);
@@ -49,6 +109,14 @@ RED.tabs = (function() {
                 ul.children().removeClass("active");
                 ul.children().css({"transition": "width 100ms"});
                 link.parent().addClass("active");
+                if (options.scrollable) {
+                    var pos = link.parent().position().left;
+                    if (pos-21 < 0) {
+                        scrollContainer.animate( { scrollLeft: '+='+(pos-50) }, 300);
+                    } else if (pos + 120 > scrollContainer.width()) {
+                        scrollContainer.animate( { scrollLeft: '+='+(pos + 140-scrollContainer.width()) }, 300);
+                    }
+                }
                 if (options.onchange) {
                     options.onchange(tabs[link.attr('href').slice(1)]);
                 }
@@ -61,23 +129,29 @@ RED.tabs = (function() {
 
         function updateTabWidths() {
             var tabs = ul.find("li.red-ui-tab");
-            var width = ul.width();
+            var width = wrapper.width();
             var tabCount = tabs.size();
             var tabWidth = (width-12-(tabCount*6))/tabCount;
-            currentTabWidth = 100*tabWidth/width;
+            currentTabWidth = (100*tabWidth/width)+"%";
             currentActiveTabWidth = currentTabWidth+"%";
-
-            if (options.hasOwnProperty("minimumActiveTabWidth")) {
+            if (options.scrollable) {
+                tabWidth = Math.max(tabWidth,140);
+                currentTabWidth = tabWidth+"px";
+                currentActiveTabWidth = 0;
+                var listWidth = Math.max(wrapper.width(),12+(tabWidth+6)*tabCount);
+                ul.width(listWidth);
+                updateScroll();
+            } else if (options.hasOwnProperty("minimumActiveTabWidth")) {
                 if (tabWidth < options.minimumActiveTabWidth) {
                     tabCount -= 1;
                     tabWidth = (width-12-options.minimumActiveTabWidth-(tabCount*6))/tabCount;
-                    currentTabWidth = 100*tabWidth/width;
+                    currentTabWidth = (100*tabWidth/width)+"%";
                     currentActiveTabWidth = options.minimumActiveTabWidth+"px";
                 } else {
                     currentActiveTabWidth = 0;
                 }
             }
-            tabs.css({width:currentTabWidth+"%"});
+            tabs.css({width:currentTabWidth});
             if (tabWidth < 50) {
                 ul.find(".red-ui-tab-close").hide();
                 ul.find(".red-ui-tab-icon").hide();
@@ -97,7 +171,9 @@ RED.tabs = (function() {
         }
 
         ul.find("li.red-ui-tab a").on("click",onTabClick).on("dblclick",onTabDblClick);
-        updateTabWidths();
+        setTimeout(function() {
+            updateTabWidths();
+        },0);
 
 
         function removeTab(id) {
@@ -188,8 +264,8 @@ RED.tabs = (function() {
                             }
                         },
                         drag: function(event,ui) {
-                            ui.position.left += tabElements[tabDragIndex].left;
-                            var tabCenter = ui.position.left + tabElements[tabDragIndex].width/2;
+                            ui.position.left += tabElements[tabDragIndex].left+scrollContainer.scrollLeft();
+                            var tabCenter = ui.position.left + tabElements[tabDragIndex].width/2 - scrollContainer.scrollLeft();
                             for (var i=0;i<tabElements.length;i++) {
                                 if (i === tabDragIndex) {
                                     continue;
@@ -210,8 +286,6 @@ RED.tabs = (function() {
                                     break;
                                 }
                             }
-
-                            // console.log(ui.position.left,ui.offset.left);
                         },
                         stop: function(event,ui) {
                             ul.children().css({position:"relative",left:"",transition:""});

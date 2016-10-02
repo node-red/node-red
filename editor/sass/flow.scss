@@ -157,6 +157,8 @@
     stroke: $node-selected-color !important;
 }
 .node_highlighted {
+    border-color: #dd1616 !important;
+    border-style: dashed !important;
     stroke: #dd1616;
     stroke-width: 2;
     stroke-dasharray: 10, 4;

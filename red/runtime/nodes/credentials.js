@@ -15,32 +15,142 @@
  **/
 
 var when = require("when");
+var crypto = require('crypto');
+var settings;
+var log;
 
-var log = require("../log");
-
+var encryptedCredentials = null;
 var credentialCache = {};
 var credentialsDef = {};
 var dirty = false;
 
+var removeDefaultKey = false;
+var encryptionEnabled = null;
+var encryptionAlgorithm = "aes-256-ctr";
+var encryptionKey;
+
+function decryptCredentials(key,credentials) {
+    var creds = credentials["$"];
+    var initVector = new Buffer(creds.substring(0, 32),'hex');
+    creds = creds.substring(32);
+    var decipher = crypto.createDecipheriv(encryptionAlgorithm, key, initVector);
+    var decrypted = decipher.update(creds, 'base64', 'utf8') + decipher.final('utf8');
+    return JSON.parse(decrypted);
+}
+
 var api = module.exports = {
-    init: function() {
+    init: function(runtime) {
+        log = runtime.log;
+        settings = runtime.settings;
         dirty = false;
         credentialCache = {};
         credentialsDef = {};
+        encryptionEnabled = null;
     },
 
     /**
      * Sets the credentials from storage.
      */
     load: function (credentials) {
-        credentialCache = credentials;
         dirty = false;
-        return when.resolve();
-        // return storage.getCredentials().then(function (creds) {
-        //     credentialCache = creds;
-        // }).otherwise(function (err) {
-        //     log.warn(log._("nodes.credentials.error",{message: err}));
-        // });
+        /*
+          - if encryptionEnabled === null, check the current configuration
+        */
+        var credentialsEncrypted = credentials.hasOwnProperty("$") && Object.keys(credentials).length === 1;
+        var setupEncryptionPromise = when.resolve();
+        if (encryptionEnabled === null) {
+            var defaultKey;
+            try {
+                defaultKey = settings.get('_credentialSecret');
+            } catch(err) {
+            }
+            if (defaultKey) {
+                defaultKey = crypto.createHash('sha256').update(defaultKey).digest();
+            }
+            var userKey;
+            try {
+                userKey = settings.get('credentialSecret');
+            } catch(err) {
+                userKey = false;
+            }
+            if (userKey === false) {
+                log.debug("red/runtime/nodes/credentials.load : user disabled encryption");
+                // User has disabled encryption
+                encryptionEnabled = false;
+                // Check if we have a generated _credSecret to decrypt with and remove
+                if (defaultKey) {
+                    log.debug("red/runtime/nodes/credentials.load : default key present. Will migrate");
+                    if (credentialsEncrypted) {
+                        try {
+                            credentials = decryptCredentials(defaultKey,credentials)
+                        } catch(err) {
+                            credentials = {};
+                            log.warn(log._("nodes.credentials.error",{message:err.toString()}))
+                        }
+                    }
+                    dirty = true;
+                    removeDefaultKey = true;
+                }
+            } else if (typeof userKey === 'string') {
+                log.debug("red/runtime/nodes/credentials.load : user provided key");
+                // User has provided own encryption key, get the 32-byte hash of it
+                encryptionKey = crypto.createHash('sha256').update(userKey).digest();
+                encryptionEnabled = true;
+
+                if (defaultKey) {
+                    log.debug("red/runtime/nodes/credentials.load : default key present. Will migrate");
+                    // User has provided their own key, but we already have a default key
+                    // Decrypt using default key
+                    if (credentialsEncrypted) {
+                        try {
+                            credentials = decryptCredentials(defaultKey,credentials)
+                        } catch(err) {
+                            credentials = {};
+                            log.warn(log._("nodes.credentials.error",{message:err.toString()}))
+                        }
+                    }
+                    dirty = true;
+                    removeDefaultKey = true;
+                }
+            } else {
+                log.debug("red/runtime/nodes/credentials.load : no user key present");
+                // User has not provide their own key
+                encryptionKey = defaultKey;
+                encryptionEnabled = true;
+                if (encryptionKey === undefined) {
+                    log.debug("red/runtime/nodes/credentials.load : no default key present - generating one");
+                    // No user-provided key, no generated key
+                    // Generate a new key
+                    defaultKey = crypto.randomBytes(32).toString('hex');
+                    try {
+                        setupEncryptionPromise = settings.set('_credentialSecret',defaultKey);
+                        encryptionKey = crypto.createHash('sha256').update(defaultKey).digest();
+                    } catch(err) {
+                        log.debug("red/runtime/nodes/credentials.load : settings unavailable - disabling encryption");
+                        // Settings unavailable
+                        encryptionEnabled = false;
+                        encryptionKey = null;
+                    }
+                    dirty = true;
+                } else {
+                    log.debug("red/runtime/nodes/credentials.load : using default key");
+                }
+            }
+        }
+        return setupEncryptionPromise.then(function() {
+            if (credentials.hasOwnProperty("$")) {
+                // These are encrypted credentials
+                try {
+                    credentialCache = decryptCredentials(encryptionKey,credentials)
+                } catch(err) {
+                    credentialCache = {};
+                    dirty = true;
+                    log.warn(log._("nodes.credentials.error",{message:err.toString()}))
+                }
+            } else {
+                credentialCache = credentials;
+            }
+        });
     },
 
     /**
@@ -172,7 +282,26 @@ var api = module.exports = {
     },
 
     export: function() {
+        var result = credentialCache;
+        if (dirty && encryptionEnabled) {
+            try {
+                log.debug("red/runtime/nodes/credentials.export : encrypting");
+                var initVector = crypto.randomBytes(16);
+                var cipher = crypto.createCipheriv(encryptionAlgorithm, encryptionKey, initVector);
+                result = {"$":initVector.toString('hex') + cipher.update(JSON.stringify(credentialCache), 'utf8', 'base64') + cipher.final('base64')};
+            } catch(err) {
+                log.warn(log._("nodes.credentials.error-saving",{message:err.toString()}))
+            }
+        }
         dirty = false;
-        return when.resolve(credentialCache);
+        if (removeDefaultKey) {
+            log.debug("red/runtime/nodes/credentials.export : removing unused default key");
+            return settings.delete('_credentialSecret').then(function() {
+                removeDefaultKey = false;
+                return result;
+            })
+        } else {
+            return when.resolve(result);
+        }
     }
 }

@@ -234,10 +234,6 @@ RED.history = (function() {
                             n.outputs = ev.node.out.length;
                             RED.editor.updateNodeProperties(n);
                         });
-
-                        if (ev.node.type === 'subflow') {
-                            $("#menu-item-workspace-menu-"+ev.node.id.replace(".","-")).text(RED.text.bidi.enforceTextDirectionWithUCC(ev.node.name));
-                        }
                     } else {
                         RED.editor.updateNodeProperties(ev.node);
                         RED.editor.validateNode(ev.node);

@@ -130,6 +130,7 @@ module.exports = function(grunt) {
                     "editor/js/ui/clipboard.js",
                     "editor/js/ui/library.js",
                     "editor/js/ui/notifications.js",
+                    "editor/js/ui/search.js",
                     "editor/js/ui/subflow.js",
                     "editor/js/ui/touch/radialMenu.js"
                 ],

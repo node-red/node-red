@@ -467,10 +467,6 @@ RED.palette = (function() {
                 }
             }
         });
-
-        if (RED.settings.theme('palette.editable') !== false) {
-            RED.palette.editor.init();
-        }
     }
 
     return {

@@ -50,12 +50,14 @@ describe("red/nodes/index", function() {
     };
 
     var settings = {
-        available: function() { return false }
+        available: function() { return false },
+        get: function() { return false }
     };
 
     var runtime = {
         settings: settings,
-        storage: storage
+        storage: storage,
+        log: {debug:function(){},warn:function(){}}
     };
 
     function TestNode(n) {

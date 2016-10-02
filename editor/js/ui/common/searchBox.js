@@ -37,7 +37,12 @@
             this.resultCount = $('<span>',{class:"red-ui-searchBox-resultCount hide"}).appendTo(this.uiContainer);
 
             this.element.val("");
-            this.element.on("keyup",function() {
+            this.element.on("keydown",function(evt) {
+                if (evt.keyCode === 27) {
+                    that.element.val("");
+                }
+            })
+            this.element.on("keyup",function(evt) {
                 that._change($(this).val());
             });
 
@@ -57,11 +62,14 @@
                 this.clearButton.show();
                 fireEvent = (val.length >= (this.options.minimumLength||0));
             }
+            var current = this.element.val();
+            fireEvent = fireEvent && current !== this.lastSent;
             if (fireEvent) {
                 if (!instant && this.options.delay > 0) {
                     clearTimeout(this.currentTimeout);
                     var that = this;
                     this.currentTimeout = setTimeout(function() {
+                        that.lastSent = that.element.val();
                         that._trigger("change");
                     },this.options.delay);
                 } else {

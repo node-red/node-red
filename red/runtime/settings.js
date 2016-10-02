@@ -71,6 +71,19 @@ var persistentSettings = {
             return storage.saveSettings(globalSettings);
         }
     },
+    delete: function(prop) {
+        if (userSettings.hasOwnProperty(prop)) {
+            throw new Error(log._("settings.property-read-only", {prop:prop}));
+        }
+        if (globalSettings === null) {
+            throw new Error(log._("settings.not-available"));
+        }
+        if (globalSettings.hasOwnProperty(prop)) {
+            delete globalSettings[prop];
+            return storage.saveSettings(globalSettings);
+        }
+        return when.resolve();
+    },
 
     available: function() {
         return (globalSettings !== null);
