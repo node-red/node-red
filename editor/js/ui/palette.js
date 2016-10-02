@@ -227,17 +227,19 @@ RED.palette = (function() {
                 appendTo: 'body',
                 revert: true,
                 revertDuration: 50,
+                containment:'#main-container',
                 start: function() {RED.view.focus();},
                 stop: function() { d3.select('.link_splice').classed('link_splice',false); if (spliceTimer) { clearTimeout(spliceTimer); spliceTimer = null;}},
                 drag: function(e,ui) {
+
                     // TODO: this is the margin-left of palette node. Hard coding
                     // it here makes me sad
                     //console.log(ui.helper.position());
                     ui.position.left += 17.5;
+                    
                     if (def.inputs > 0 && def.outputs > 0) {
                         mouseX = ui.position.left+(ui.helper.width()/2) - chartOffset.left + chart.scrollLeft();
                         mouseY = ui.position.top+(ui.helper.height()/2) - chartOffset.top + chart.scrollTop();
-
 
                         if (!spliceTimer) {
                             spliceTimer = setTimeout(function() {
