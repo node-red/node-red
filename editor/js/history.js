@@ -176,6 +176,7 @@ RED.history = (function() {
                         n.n.x = n.ox;
                         n.n.y = n.oy;
                         n.n.dirty = true;
+                        n.n.changed = n.changed;
                     }
                     // A move could have caused a link splice
                     if (ev.links) {
