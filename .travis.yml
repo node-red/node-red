@@ -11,13 +11,11 @@ addons:
     - gcc-4.8
 matrix:
   allow_failures:
-  - node_js: "5"
-  - node_js: "6"
+  - node_js: "7"
 node_js:
+  - "7"
   - "6"
-  - "5"
   - "4"
-  - "0.12"
   - "0.10"
 script:
   - istanbul cover ./node_modules/.bin/grunt --report lcovonly && istanbul report text && ( cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js || true ) && rm -rf coverage

@@ -61,7 +61,7 @@
         "node-red-node-rbe":"0.1.*"
     },
     "optionalDependencies": {
-        "node-red-node-serialport":"0.2.*",
+        "node-red-node-serialport":"0.3.*",
         "bcrypt":"0.8.7"
     },
     "devDependencies": {
