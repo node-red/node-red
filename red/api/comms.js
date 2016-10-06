@@ -29,6 +29,10 @@ var retained = {};
 var heartbeatTimer;
 var lastSentTime;
 
+function getServer(){
+    return wsServer;
+}
+
 function handleStatus(event) {
     publish("status/"+event.id,event.status,true);
 }
