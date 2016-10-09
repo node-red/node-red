@@ -262,23 +262,27 @@ RED.palette.editor = (function() {
         $("#header-shade").show();
         $("#editor-shade").show();
         $("#sidebar-shade").show();
+        $("#sidebar-separator").hide();
         $("#main-container").addClass("palette-expanded");
         setTimeout(function() {
             editorTabs.resize();
         },250);
-
+        RED.events.emit("palette-editor:open");
     }
     function hidePaletteEditor() {
         $("#main-container").removeClass("palette-expanded");
         $("#header-shade").hide();
         $("#editor-shade").hide();
         $("#sidebar-shade").hide();
+        $("#sidebar-separator").show();
         $("#palette-editor").find('.expanded').each(function(i,el) {
             $(el).find(".palette-module-content").slideUp();
             $(el).removeClass('expanded');
         });
         filterInput.searchBox('value',"");
         searchInput.searchBox('value',"");
+        RED.events.emit("palette-editor:close");
+
     }
 
     function filterChange(val) {

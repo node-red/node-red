@@ -15,7 +15,7 @@
  **/
 RED.search = (function() {
 
-
+    var disabled = false;
     var dialog = null;
     var searchInput;
     var searchResults;
@@ -244,6 +244,7 @@ RED.search = (function() {
             $("#editor-shade").show();
             $("#palette-shade").show();
             $("#sidebar-shade").show();
+            $("#sidebar-separator").hide();
             indexWorkspace();
             if (dialog === null) {
                 createDialog();
@@ -261,6 +262,7 @@ RED.search = (function() {
             $("#editor-shade").hide();
             $("#palette-shade").hide();
             $("#sidebar-shade").hide();
+            $("#sidebar-separator").show();
             if (dialog !== null) {
                 dialog.slideUp(200,function() {
                     searchInput.searchBox('value','');
@@ -270,7 +272,14 @@ RED.search = (function() {
     }
 
     function init() {
-        RED.keyboard.add("*",/* . */ 190,{ctrl:true},function(){show();d3.event.preventDefault();});
+        RED.keyboard.add("*",/* . */ 190,{ctrl:true},function(){if (!disabled) { show(); } d3.event.preventDefault();});
+        RED.events.on("editor:open",function() { disabled = true; });
+        RED.events.on("editor:close",function() { disabled = false; });
+        RED.events.on("palette-editor:open",function() { disabled = true; });
+        RED.events.on("palette-editor:close",function() { disabled = false; });
+
+
+
         $("#header-shade").on('mousedown',hide);
         $("#editor-shade").on('mousedown',hide);
         $("#palette-shade").on('mousedown',hide);

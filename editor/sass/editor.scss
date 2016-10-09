@@ -176,6 +176,11 @@
     background: $shade-color;
     z-index: 2;
 }
+#sidebar-shade  {
+    left: -8px;
+    top: -1px;
+    bottom: -1px;
+}
 
 
 .dialog-form,#dialog-form, #dialog-config-form {
