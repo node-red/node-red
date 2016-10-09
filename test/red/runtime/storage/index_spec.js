@@ -79,6 +79,7 @@ describe("red/storage/index", function() {
                 },
                 saveFlows : function (flows) {
                     flows.should.be.true;
+                    return when.resolve("");
                 },
                 getCredentials : function() {
                     calledFlagGetCredentials = true;

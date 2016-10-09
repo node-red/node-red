@@ -39,13 +39,14 @@ describe("red/nodes/index", function() {
     });
 
     var testFlows = [{"type":"test","id":"tab1","label":"Sheet 1"}];
+    var testCredentials = {"tab1":{"b":1,"c":2}};
     var storage = {
         getFlows: function() {
-            return when({flows:testFlows,credentials:{"tab1":{"b":1,"c":2}}});
+            return when({red:123,flows:testFlows,credentials:testCredentials});
         },
         saveFlows: function(conf) {
             should.deepEqual(testFlows, conf.flows);
-            return when();
+            return when.resolve(123);
         }
     };
 
@@ -84,7 +85,9 @@ describe("red/nodes/index", function() {
    it('flows should be initialised',function(done) {
         index.init(runtime);
         index.loadFlows().then(function() {
-            should.deepEqual(testFlows, index.getFlows());
+            console.log(testFlows);
+            console.log(index.getFlows());
+            should.deepEqual(testFlows, index.getFlows().flows);
             done();
         }).otherwise(function(err) {
             done(err);
@@ -173,8 +176,8 @@ describe("red/nodes/index", function() {
             index.registerType('test', TestNode);
             index.loadFlows().then(function() {
                 var info = index.disableNode("5678");
-                registry.disableNode.calledOnce.should.be.true;
-                registry.disableNode.calledWith("5678").should.be.true;
+                registry.disableNode.calledOnce.should.be.true();
+                registry.disableNode.calledWith("5678").should.be.true();
                 info.should.eql(randomNodeInfo);
                 done();
             }).otherwise(function(err) {

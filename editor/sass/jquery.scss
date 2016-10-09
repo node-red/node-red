@@ -99,6 +99,11 @@
             background: $editor-button-background-primary-hover;
             color: $editor-button-color-primary !important;
         }
+        &.disabled {
+            border-color: $form-input-border-color;
+            color: $workspace-button-color-disabled !important;
+            background: $editor-button-background;
+        }
     }
     &.disabled {
         background: none;

@@ -16,6 +16,8 @@
 
 var when = require('when');
 var Path = require('path');
+var crypto = require('crypto');
+
 var log = require("../log");
 
 var runtime;
@@ -57,10 +59,12 @@ var storageModuleInterface = {
         getFlows: function() {
             return storageModule.getFlows().then(function(flows) {
                 return storageModule.getCredentials().then(function(creds) {
-                    return {
+                    var result = {
                         flows: flows,
                         credentials: creds
-                    }
+                    };
+                    result.rev = crypto.createHash('md5').update(JSON.stringify(result)).digest("hex");
+                    return result;
                 })
             });
         },
@@ -73,9 +77,12 @@ var storageModuleInterface = {
             } else {
                 credentialSavePromise = when.resolve();
             }
+            delete config.credentialsDirty;
 
             return credentialSavePromise.then(function() {
-                return storageModule.saveFlows(flows);
+                return storageModule.saveFlows(flows).then(function() {
+                    return crypto.createHash('md5').update(JSON.stringify(config)).digest("hex");
+                })
             });
         },
         // getCredentials: function() {

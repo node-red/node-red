@@ -23,11 +23,22 @@ RED.nodes = (function() {
     var workspaces = {};
     var workspacesOrder =[];
     var subflows = {};
+    var loadedFlowVersion = null;
+    var pending = {
+        deleted: {},
+        added: {}
+    };
 
     var dirty = false;
 
     function setDirty(d) {
         dirty = d;
+        if (!d) {
+            pending = {
+                deleted: {},
+                added: {}
+            };
+        }
         RED.events.emit("nodes:change",{dirty:dirty});
     }
 
@@ -175,6 +186,8 @@ RED.nodes = (function() {
             }
             nodes.push(n);
         }
+        delete pending.deleted[n.id];
+        pending.added[n.id] = true;
         RED.events.emit('nodes:add',n);
     }
     function addLink(l) {
@@ -240,6 +253,12 @@ RED.nodes = (function() {
         if (node && node._def.onremove) {
             node._def.onremove.call(n);
         }
+        delete pending.added[id];
+        pending.deleted[id] = true;
+        removedNodes.forEach(function(node) {
+            delete pending.added[node.id];
+            pending.deleted[node.id] = true;
+        });
         return {links:removedLinks,nodes:removedNodes};
     }
 
@@ -252,6 +271,8 @@ RED.nodes = (function() {
 
     function addWorkspace(ws) {
         workspaces[ws.id] = ws;
+        pending.added[ws.id] = true;
+        delete pending.deleted[ws.id];
         ws._def = {
             defaults: {
                 label: {value:""}
@@ -289,6 +310,8 @@ RED.nodes = (function() {
             var result = removeNode(removedNodes[n].id);
             removedLinks = removedLinks.concat(result.links);
         }
+        pending.deleted[id] = true;
+        delete pending.added[id]
         return {nodes:removedNodes,links:removedLinks};
     }
 
@@ -318,6 +341,8 @@ RED.nodes = (function() {
             outputs: sf.out.length
         }
         subflows[sf.id] = sf;
+        delete pending.deleted[sf.id];
+        pending.added[sf.id] = true;
         RED.nodes.registerType("subflow:"+sf.id, {
             defaults:{name:{value:""}},
             info: sf.info,
@@ -341,6 +366,8 @@ RED.nodes = (function() {
     }
     function removeSubflow(sf) {
         delete subflows[sf.id];
+        delete pending.added[sf.id];
+        pending.deleted[sf.id] = true;
         registry.removeNodeType("subflow:"+sf.id);
     }
 
@@ -831,10 +858,11 @@ RED.nodes = (function() {
                 }
 
                 if (!existingConfigNode) { //} || !compareNodes(existingConfigNode,n,true) || existingConfigNode._def.exclusive || existingConfigNode.z !== n.z) {
-                    configNode = {id:n.id, z:n.z, type:n.type, users:[]};
+                    configNode = {id:n.id, z:n.z, type:n.type, users:[], _config:{}};
                     for (d in def.defaults) {
                         if (def.defaults.hasOwnProperty(d)) {
                             configNode[d] = n[d];
+                            configNode._config[d] = JSON.stringify(n[d]);
                         }
                     }
                     if (def.hasOwnProperty('credentials') && n.hasOwnProperty('credentials')) {
@@ -864,7 +892,7 @@ RED.nodes = (function() {
             if (n.type !== "workspace" && n.type !== "tab" && n.type !== "subflow") {
                 def = registry.getNodeType(n.type);
                 if (!def || def.category != "config") {
-                    var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires,changed:false};
+                    var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires,changed:false,_config:{}};
                     if (createNewIds) {
                         if (subflow_blacklist[n.z]) {
                             continue;
@@ -947,8 +975,11 @@ RED.nodes = (function() {
                             for (d in node._def.defaults) {
                                 if (node._def.defaults.hasOwnProperty(d)) {
                                     node[d] = n[d];
+                                    node._config[d] = JSON.stringify(n[d]);
                                 }
                             }
+                            node._config.x = node.x;
+                            node._config.y = node.y;
                             if (node._def.hasOwnProperty('credentials') && n.hasOwnProperty('credentials')) {
                                 node.credentials = {};
                                 for (d in node._def.credentials) {
@@ -958,9 +989,6 @@ RED.nodes = (function() {
                                 }
                             }
                         }
-                    }
-                    if (node.credentials) {
-                        console.log(node);
                     }
                     addNode(node);
                     RED.editor.validateNode(node);
@@ -1122,6 +1150,14 @@ RED.nodes = (function() {
         }
     }
 
+    function flowVersion(version) {
+        if (version !== undefined) {
+            loadedFlowVersion = version;
+        } else {
+            return loadedFlowVersion;
+        }
+    }
+
     return {
         registry:registry,
         setNodeList: registry.setNodeList,
@@ -1185,10 +1221,14 @@ RED.nodes = (function() {
 
         node: getNode,
 
+        version: flowVersion,
+
         filterNodes: filterNodes,
         filterLinks: filterLinks,
 
         import: importNodes,
+
+        pending: function() { return pending },
 
         getAllFlowNodes: getAllFlowNodes,
         createExportableNodeSet: createExportableNodeSet,

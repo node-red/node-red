@@ -66,33 +66,47 @@ function init(runtime) {
         typeEventRegistered = true;
     }
 }
-function load() {
+
+function loadFlows() {
     return storage.getFlows().then(function(config) {
         return credentials.load(config.credentials).then(function() {
-            return setConfig(config.flows,"load");
+            return config;
         });
     }).otherwise(function(err) {
         log.warn(log._("nodes.flows.error",{message:err.toString()}));
         console.log(err.stack);
     });
 }
+function load() {
+    return setFlows(null,"load",false);
+}
 
-function setConfig(_config,type,muteLog) {
-    var config = clone(_config);
+/*
+ * _config - new node array configuration
+ * type - full/nodes/flows/load (default full)
+ * muteLog - don't emit the standard log messages (used for individual flow api)
+ */
+function setFlows(_config,type,muteLog) {
     type = type||"full";
 
     var configSavePromise = null;
-
+    var config = null;
     var diff;
-    var newFlowConfig = flowUtil.parseConfig(clone(config));
-    if (type !== 'full' && type !== 'load') {
-        diff = flowUtil.diffConfigs(activeFlowConfig,newFlowConfig);
-    }
+    var newFlowConfig;
 
-    if (type === 'load') {
-        type = 'full';
-        configSavePromise = when.resolve();
+    if (type === "load") {
+        configSavePromise = loadFlows().then(function(_config) {
+            config = clone(_config.flows);
+            newFlowConfig = flowUtil.parseConfig(clone(config));
+            type = "full";
+            return _config.rev;
+        });
     } else {
+        config = clone(_config);
+        newFlowConfig = flowUtil.parseConfig(clone(config));
+        if (type !== 'full') {
+            diff = flowUtil.diffConfigs(activeFlowConfig,newFlowConfig);
+        }
         credentials.clean(config);
         var credsDirty = credentials.dirty();
         configSavePromise = credentials.export().then(function(creds) {
@@ -101,18 +115,22 @@ function setConfig(_config,type,muteLog) {
                 credentialsDirty:credsDirty,
                 credentials: creds
             }
-            storage.saveFlows(saveConfig);
+            return storage.saveFlows(saveConfig);
         });
     }
 
     return configSavePromise
-        .then(function() {
-            activeConfig = config;
+        .then(function(flowRevision) {
+            activeConfig = {
+                flows:config,
+                rev:flowRevision
+            };
             activeFlowConfig = newFlowConfig;
             if (started) {
                 return stop(type,diff,muteLog).then(function() {
                     context.clean(activeFlowConfig);
                     start(type,diff,muteLog);
+                    return flowRevision;
                 }).otherwise(function(err) {
                 })
             }
@@ -143,7 +161,7 @@ function eachNode(cb) {
     }
 }
 
-function getConfig() {
+function getFlows() {
     return activeConfig;
 }
 
@@ -341,8 +359,8 @@ function checkTypeInUse(id) {
         throw new Error(log._("nodes.index.unrecognised-id", {id:id}));
     } else {
         var inUse = {};
-        var config = getConfig();
-        config.forEach(function(n) {
+        var config = getFlows();
+        config.flows.forEach(function(n) {
             inUse[n.type] = (inUse[n.type]||0)+1;
         });
         var nodesInUse = [];
@@ -418,10 +436,10 @@ function addFlow(flow) {
             nodes.push(node);
         }
     }
-    var newConfig = clone(activeConfig);
+    var newConfig = clone(activeConfig.flows);
     newConfig = newConfig.concat(nodes);
 
-    return setConfig(newConfig,'flows',true).then(function() {
+    return setFlows(newConfig,'flows',true).then(function() {
         log.info(log._("nodes.flows.added-flow",{label:(flow.label?flow.label+" ":"")+"["+flow.id+"]"}));
         return flow.id;
     });
@@ -501,7 +519,7 @@ function updateFlow(id,newFlow) {
         }
         label = activeFlowConfig.flows[id].label;
     }
-    var newConfig = clone(activeConfig);
+    var newConfig = clone(activeConfig.flows);
     var nodes;
 
     if (id === 'global') {
@@ -539,7 +557,7 @@ function updateFlow(id,newFlow) {
     }
 
     newConfig = newConfig.concat(nodes);
-    return setConfig(newConfig,'flows',true).then(function() {
+    return setFlows(newConfig,'flows',true).then(function() {
         log.info(log._("nodes.flows.updated-flow",{label:(label?label+" ":"")+"["+id+"]"}));
     })
 }
@@ -556,12 +574,12 @@ function removeFlow(id) {
         throw e;
     }
 
-    var newConfig = clone(activeConfig);
+    var newConfig = clone(activeConfig.flows);
     newConfig = newConfig.filter(function(node) {
         return node.z !== id && node.id !== id;
     });
 
-    return setConfig(newConfig,'flows',true).then(function() {
+    return setFlows(newConfig,'flows',true).then(function() {
         log.info(log._("nodes.flows.removed-flow",{label:(flow.label?flow.label+" ":"")+"["+flow.id+"]"}));
     });
 }
@@ -581,7 +599,7 @@ module.exports = {
     /**
      * Gets the current flow configuration
      */
-    getFlows: getConfig,
+    getFlows: getFlows,
 
     /**
      * Sets the current active config.
@@ -589,7 +607,7 @@ module.exports = {
      * @param type the type of deployment to do: full (default), nodes, flows, load
      * @return a promise for the saving/starting of the new flow
      */
-    setFlows: setConfig,
+    setFlows: setFlows,
 
     /**
      * Starts the current flow configuration

@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <!--
-  Copyright 2013, 2015 IBM Corp.
+  Copyright 2013, 2016 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -93,7 +93,12 @@
         <div id="node-dialog-confirm-deploy-unknown" style="text-align: left; padding-top: 10px;" data-i18n="[prepend]deploy.confirm.unknown;[append]deploy.confirm.confirm">
             <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-unknown-list"></ul>
         </div>
+        <div id="node-dialog-confirm-deploy-conflict" style="text-align: left; padding-top: 10px;" data-i18n="[prepend]deploy.confirm.conflict;[append]deploy.confirm.confirm">
+        </div>
     </form>
+</div>
+<div id="node-dialog-view-diff" class="hide">
+    <ol id="node-dialog-view-diff-diff"></ol>
 </div>
 
 <div id="node-dialog-library-save-confirm" class="hide">
