@@ -256,6 +256,7 @@
             "disable": "disable",
             "remove": "remove",
             "install": "install",
+            "installed": "installed",
             "loading": "Loading catalogues...",
             "tab-nodes": "Nodes",
             "tab-install": "Install",

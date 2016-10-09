@@ -456,7 +456,8 @@ RED.palette.editor = (function() {
                     var setCount = $('<span>').appendTo(setButton);
                     var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
                     var removeButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.remove')).appendTo(buttonGroup);
-                    removeButton.click(function() {
+                    removeButton.click(function(evt) {
+                        evt.preventDefault();
                         shade.show();
                         removeNodeModule(entry.name, function(xhr) {
                             console.log(xhr);
@@ -478,7 +479,8 @@ RED.palette.editor = (function() {
                         shade: shade,
                         sets: {}
                     }
-                    setButton.click(function() {
+                    setButton.click(function(evt) {
+                        evt.preventDefault();
                         if (container.hasClass('expanded')) {
                             container.removeClass('expanded');
                             contentRow.slideUp();
@@ -505,6 +507,7 @@ RED.palette.editor = (function() {
 
                         var enableButton = $('<a href="#" class="editor-button editor-button-small"></a>').appendTo(buttonGroup);
                         enableButton.click(function(evt) {
+                            evt.preventDefault();
                             if (object.setUseCount[setName] === 0) {
                                 var currentSet = RED.nodes.registry.getNodeSet(set.id);
                                 shade.show();
@@ -512,7 +515,6 @@ RED.palette.editor = (function() {
                                     console.log(xhr)
                                 });
                             }
-                            evt.preventDefault();
                         })
 
                         object.elements.sets[set.name] = {
@@ -522,12 +524,12 @@ RED.palette.editor = (function() {
                         };
                     });
                     enableButton.click(function(evt) {
+                        evt.preventDefault();
                         if (object.totalUseCount === 0) {
                             changeNodeState(entry.name,(container.hasClass('disabled')),shade,function(xhr){
                                 console.log(xhr)
                             });
                         }
-                        evt.preventDefault();
                     })
                     refreshNodeModule(entry.name);
                 } else {
@@ -644,16 +646,19 @@ RED.palette.editor = (function() {
                    var installButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.install')).appendTo(buttonGroup);
                    installButton.click(function(e) {
                        e.preventDefault();
-                       installNodeModule(entry.id,shade,function(xhr) {
-                           if (xhr) {
-                               if (xhr.responseJSON) {
-                                   RED.notify(RED._('palette.editor.errors.installFailed',{module: entry.id,message:xhr.responseJSON.message}));
+                       if (!$(this).hasClass('disabled')) {
+                           installNodeModule(entry.id,shade,function(xhr) {
+                               if (xhr) {
+                                   if (xhr.responseJSON) {
+                                       RED.notify(RED._('palette.editor.errors.installFailed',{module: entry.id,message:xhr.responseJSON.message}));
+                                   }
                                }
-                           }
-                       })
+                           })
+                       }
                    })
                    if (nodeEntries.hasOwnProperty(entry.id)) {
-                       installButton.hide();
+                       installButton.addClass('disabled');
+                       installButton.html(RED._('palette.editor.installed'));
                    }
 
                    object.elements = {
