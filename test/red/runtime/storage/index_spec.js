@@ -1,5 +1,5 @@
 /**
- * Copyright 2014, 2015 IBM Corp.
+ * Copyright 2014, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ describe("red/storage/index", function() {
     it('rejects the promise when settings suggest loading a bad module', function(done) {
 
         var wrongModule = {
+            settings:{
                 storageModule : "thisaintloading"
+            }
         };
 
        storage.init(wrongModule).then( function() {
@@ -42,13 +44,15 @@ describe("red/storage/index", function() {
         var initSetsMeToTrue = false;
 
         var moduleWithBooleanSettingInit = {
-                init : function() {
-                    initSetsMeToTrue = true;
-                }
+            init : function() {
+                initSetsMeToTrue = true;
+            }
         };
 
         var setsBooleanModule = {
+            settings: {
                 storageModule : moduleWithBooleanSettingInit
+            }
         };
 
         storage.init(setsBooleanModule);
@@ -71,12 +75,15 @@ describe("red/storage/index", function() {
                 },
                 getFlows : function() {
                     calledFlagGetFlows = true;
+                    return when.resolve([]);
                 },
                 saveFlows : function (flows) {
                     flows.should.be.true;
+                    return when.resolve("");
                 },
                 getCredentials : function() {
                     calledFlagGetCredentials = true;
+                    return when.resolve({});
                 },
                 saveCredentials : function(credentials) {
                     credentials.should.be.true;
@@ -116,14 +123,14 @@ describe("red/storage/index", function() {
         };
 
         var moduleToLoad = {
-            storageModule : interfaceCheckerModule
+            settings: {
+                storageModule : interfaceCheckerModule
+            }
         };
 
         storage.init(moduleToLoad);
         storage.getFlows();
-        storage.saveFlows(true);
-        storage.getCredentials();
-        storage.saveCredentials(true);
+        storage.saveFlows({flows:[],credentials:{}});
         storage.getSettings();
         storage.saveSettings(true);
         storage.getSessions();
@@ -172,7 +179,9 @@ describe("red/storage/index", function() {
         };
 
         var moduleToLoad = {
-            storageModule : interfaceCheckerModule
+            settings: {
+                storageModule : interfaceCheckerModule
+            }
         };
         before(function() {
             storage.init(moduleToLoad);
@@ -220,7 +229,7 @@ describe("red/storage/index", function() {
             var interfaceCheckerModule = {
                 init : function () {}
             };
-            storage.init({storageModule: interfaceCheckerModule});
+            storage.init({settings:{storageModule: interfaceCheckerModule}});
         });
 
         it('defaults missing getSettings',function(done) {

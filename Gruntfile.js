@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2015 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,30 +104,35 @@ module.exports = function(grunt) {
                     "editor/js/settings.js",
                     "editor/js/user.js",
                     "editor/js/comms.js",
+                    "editor/js/text/bidi.js",
+                    "editor/js/text/format.js",
                     "editor/js/ui/state.js",
                     "editor/js/nodes.js",
                     "editor/js/history.js",
                     "editor/js/validators.js",
+                    "editor/js/ui/common/editableList.js",
+                    "editor/js/ui/common/menu.js",
+                    "editor/js/ui/common/popover.js",
+                    "editor/js/ui/common/searchBox.js",
+                    "editor/js/ui/common/tabs.js",
+                    "editor/js/ui/common/typedInput.js",
                     "editor/js/ui/deploy.js",
-                    "editor/js/ui/menu.js",
                     "editor/js/ui/keyboard.js",
-                    "editor/js/ui/tabs.js",
-                    "editor/js/ui/popover.js",
                     "editor/js/ui/workspaces.js",
                     "editor/js/ui/view.js",
                     "editor/js/ui/sidebar.js",
                     "editor/js/ui/palette.js",
                     "editor/js/ui/tab-info.js",
                     "editor/js/ui/tab-config.js",
+                    "editor/js/ui/palette-editor.js",
                     "editor/js/ui/editor.js",
                     "editor/js/ui/tray.js",
                     "editor/js/ui/clipboard.js",
                     "editor/js/ui/library.js",
                     "editor/js/ui/notifications.js",
+                    "editor/js/ui/search.js",
                     "editor/js/ui/subflow.js",
-                    "editor/js/ui/touch/radialMenu.js",
-                    "editor/js/ui/typedInput.js",
-                    "editor/js/ui/editableList.js"
+                    "editor/js/ui/touch/radialMenu.js"
                 ],
                 dest: "public/red/red.js"
             },

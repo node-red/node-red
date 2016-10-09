@@ -17,7 +17,7 @@
 RED.palette = (function() {
 
     var exclusion = ['config','unknown','deprecated'];
-    var core = ['subflows', 'input', 'output', 'function', 'social', 'mobile', 'storage', 'analysis', 'advanced'];
+    var coreCategories = ['subflows', 'input', 'output', 'function', 'social', 'mobile', 'storage', 'analysis', 'advanced'];
 
     var categoryContainers = {};
 
@@ -91,15 +91,15 @@ RED.palette = (function() {
         el.css({height:multiLineNodeHeight+"px"});
 
         var labelElement = el.find(".palette_label");
-        labelElement.html(lines);
+        labelElement.html(lines).attr('dir', RED.text.bidi.resolveBaseTextDir(lines));
 
         el.find(".palette_port").css({top:(multiLineNodeHeight/2-5)+"px"});
 
         var popOverContent;
         try {
-            var l = "<p><b>"+label+"</b></p>";
+            var l = "<p><b>"+RED.text.bidi.enforceTextDirectionWithUCC(label)+"</b></p>";
             if (label != type) {
-                l = "<p><b>"+label+"</b><br/><i>"+type+"</i></p>";
+                l = "<p><b>"+RED.text.bidi.enforceTextDirectionWithUCC(label)+"</b><br/><i>"+type+"</i></p>";
             }
             popOverContent = $(l+(info?info:$("script[data-help-name$='"+type+"']").html()||"<p>"+RED._("palette.noInfo")+"</p>").trim())
                                 .filter(function(n) {
@@ -174,7 +174,7 @@ RED.palette = (function() {
             }
 
             if ($("#palette-base-category-"+rootCategory).length === 0) {
-                if(core.indexOf(rootCategory) !== -1){
+                if(coreCategories.indexOf(rootCategory) !== -1){
                     createCategoryContainer(rootCategory, RED._("node-red:palette.label."+rootCategory, {defaultValue:rootCategory}));
                 } else {
                     var ns = def.set.id;
@@ -363,14 +363,7 @@ RED.palette = (function() {
         });
     }
 
-    function filterChange() {
-        var val = $("#palette-search-input").val();
-        if (val === "") {
-            $("#palette-search-clear").hide();
-        } else {
-            $("#palette-search-clear").show();
-        }
-
+    function filterChange(val) {
         var re = new RegExp(val.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'),'i');
         $("#palette-container .palette_node").each(function(i,el) {
             var currentLabel = $(el).find(".palette_label").text();
@@ -395,33 +388,69 @@ RED.palette = (function() {
     }
 
     function init() {
-        $(".palette-spinner").show();
+
+        RED.events.on('registry:node-type-added', function(nodeType) {
+            var def = RED.nodes.getType(nodeType);
+            addNodeType(nodeType,def);
+            if (def.onpaletteadd && typeof def.onpaletteadd === "function") {
+                def.onpaletteadd.call(def);
+            }
+        });
+        RED.events.on('registry:node-type-removed', function(nodeType) {
+            removeNodeType(nodeType);
+        });
+
+        RED.events.on('registry:node-set-enabled', function(nodeSet) {
+            for (var j=0;j<nodeSet.types.length;j++) {
+                showNodeType(nodeSet.types[j]);
+                var def = RED.nodes.getType(nodeSet.types[j]);
+                if (def.onpaletteadd && typeof def.onpaletteadd === "function") {
+                    def.onpaletteadd.call(def);
+                }
+            }
+        });
+        RED.events.on('registry:node-set-disabled', function(nodeSet) {
+            for (var j=0;j<nodeSet.types.length;j++) {
+                hideNodeType(nodeSet.types[j]);
+                var def = RED.nodes.getType(nodeSet.types[j]);
+                if (def.onpaletteremove && typeof def.onpaletteremove === "function") {
+                    def.onpaletteremove.call(def);
+                }
+            }
+        });
+        RED.events.on('registry:node-set-removed', function(nodeSet) {
+            if (nodeSet.added) {
+                for (var j=0;j<nodeSet.types.length;j++) {
+                    removeNodeType(nodeSet.types[j]);
+                    var def = RED.nodes.getType(nodeSet.types[j]);
+                    if (def.onpaletteremove && typeof def.onpaletteremove === "function") {
+                        def.onpaletteremove.call(def);
+                    }
+                }
+            }
+        });
+
+
+        $("#palette > .palette-spinner").show();
+
+        $("#palette-search input").searchBox({
+            delay: 100,
+            change: function() {
+                filterChange($(this).val());
+            }
+        })
+
+        var categoryList = coreCategories;
         if (RED.settings.paletteCategories) {
-            RED.settings.paletteCategories.forEach(function(category){
-                createCategoryContainer(category, RED._("palette.label."+category,{defaultValue:category}));
-            });
-        } else {
-            core.forEach(function(category){
-                createCategoryContainer(category, RED._("palette.label."+category,{defaultValue:category}));
-            });
+            categoryList = RED.settings.paletteCategories;
+        } else if (RED.settings.theme('palette.categories')) {
+            categoryList = RED.settings.theme('palette.categories');
         }
-
-        $("#palette-search-clear").on("click",function(e) {
-            e.preventDefault();
-            $("#palette-search-input").val("");
-            filterChange();
-            $("#palette-search-input").focus();
-        });
-
-        $("#palette-search-input").val("");
-        $("#palette-search-input").on("keyup",function() {
-            filterChange();
-        });
-
-        $("#palette-search-input").on("focus",function() {
-            $("body").one("mousedown",function() {
-                $("#palette-search-input").blur();
-            });
+        if (!Array.isArray(categoryList)) {
+            categoryList = coreCategories
+        }
+        categoryList.forEach(function(category){
+            createCategoryContainer(category, RED._("palette.label."+category,{defaultValue:category}));
         });
 
         $("#palette-collapse-all").on("click", function(e) {

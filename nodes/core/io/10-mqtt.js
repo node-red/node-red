@@ -175,7 +175,7 @@ module.exports = function(RED) {
                     node.log(RED._("mqtt.state.connected",{broker:(node.clientid?node.clientid+"@":"")+node.brokerurl}));
                     for (var id in node.users) {
                         if (node.users.hasOwnProperty(id)) {
-                            node.users[id].status({fill:"green",shape:"dot",text:"common.status.connected"});
+                            node.users[id].status({fill:"green",shape:"dot",text:"node-red:common.status.connected"});
                         }
                     }
                     // Remove any existing listeners before resubscribing to avoid duplicates in the event of a re-connection
@@ -205,7 +205,7 @@ module.exports = function(RED) {
                 node.client.on("reconnect", function() {
                     for (var id in node.users) {
                         if (node.users.hasOwnProperty(id)) {
-                            node.users[id].status({fill:"yellow",shape:"ring",text:"common.status.connecting"});
+                            node.users[id].status({fill:"yellow",shape:"ring",text:"node-red:common.status.connecting"});
                         }
                     }
                 })
@@ -216,7 +216,7 @@ module.exports = function(RED) {
                         node.log(RED._("mqtt.state.disconnected",{broker:(node.clientid?node.clientid+"@":"")+node.brokerurl}));
                         for (var id in node.users) {
                             if (node.users.hasOwnProperty(id)) {
-                                node.users[id].status({fill:"red",shape:"ring",text:"common.status.disconnected"});
+                                node.users[id].status({fill:"red",shape:"ring",text:"node-red:common.status.disconnected"});
                             }
                         }
                     } else if (node.connecting) {
@@ -329,7 +329,7 @@ module.exports = function(RED) {
         }
         var node = this;
         if (this.brokerConn) {
-            this.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
+            this.status({fill:"red",shape:"ring",text:"node-red:common.status.disconnected"});
             if (this.topic) {
                 node.brokerConn.register(this);
                 this.brokerConn.subscribe(this.topic,this.qos,function(topic,payload,packet) {
@@ -341,7 +341,7 @@ module.exports = function(RED) {
                     node.send(msg);
                 }, this.id);
                 if (this.brokerConn.connected) {
-                    node.status({fill:"green",shape:"dot",text:"common.status.connected"});
+                    node.status({fill:"green",shape:"dot",text:"node-red:common.status.connected"});
                 }
             }
             else {
@@ -369,7 +369,7 @@ module.exports = function(RED) {
         var node = this;
 
         if (this.brokerConn) {
-            this.status({fill:"red",shape:"ring",text:"common.status.disconnected"});
+            this.status({fill:"red",shape:"ring",text:"node-red:common.status.disconnected"});
             this.on("input",function(msg) {
                 if (msg.qos) {
                     msg.qos = parseInt(msg.qos);
@@ -391,7 +391,7 @@ module.exports = function(RED) {
                 }
             });
             if (this.brokerConn.connected) {
-                node.status({fill:"green",shape:"dot",text:"common.status.connected"});
+                node.status({fill:"green",shape:"dot",text:"node-red:common.status.connected"});
             }
             node.brokerConn.register(node);
             this.on('close', function(done) {

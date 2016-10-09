@@ -56,7 +56,8 @@ function filterNodeInfo(n) {
         id: n.id||n.module+"/"+n.name,
         name: n.name,
         types: n.types,
-        enabled: n.enabled
+        enabled: n.enabled,
+        local: n.local||false
     };
     if (n.hasOwnProperty("module")) {
         r.module = n.module;
@@ -90,6 +91,7 @@ function saveNodeList() {
                     moduleList[module] = {
                         name: module,
                         version: moduleConfigs[module].version,
+                        local: moduleConfigs[module].local||false,
                         nodes: {}
                     };
                 }
@@ -179,6 +181,7 @@ function addNodeSet(id,set,version) {
     if (version) {
         moduleConfigs[set.module].version = version;
     }
+    moduleConfigs[set.module].local = set.local;
 
     moduleConfigs[set.module].nodes[set.name] = set;
     nodeList.push(id);
@@ -306,6 +309,7 @@ function getModuleInfo(module) {
         var m = {
             name: module,
             version: moduleConfigs[module].version,
+            local: moduleConfigs[module].local,
             nodes: []
         };
         for (var i = 0; i < nodes.length; ++i) {

@@ -25,7 +25,12 @@
             "view": {
                 "view": "View",
                 "showGrid": "Show grid",
-                "snapGrid": "Snap to grid"
+                "snapGrid": "Snap to grid",
+                "textDir": "Text Direction",
+                "defaultDir": "Default",
+                "ltr": "Left-to-right",
+                "rtl": "Right-to-left",
+                "auto": "Contextual"
             },
             "sidebar": {
                 "show": "Show sidebar"
@@ -34,6 +39,7 @@
             "displayConfig": "Configuration nodes",
             "import": "Import",
             "export": "Export",
+            "search": "Search flows",
             "clipboard": "Clipboard",
             "library": "Library",
             "examples": "Examples",
@@ -44,9 +50,10 @@
             "add": "Add",
             "rename": "Rename",
             "delete": "Delete",
-            "keyboardShortcuts": "Keyboard Shortcuts",
+            "keyboardShortcuts": "Keyboard shortcuts",
             "login": "Login",
-            "logout": "Logout"
+            "logout": "Logout",
+            "editPalette":"Manage palette"
         }
     },
     "user": {
@@ -72,16 +79,29 @@
         }
     },
     "clipboard": {
-        "nodes": "Nodes:",
+        "nodes": "Nodes",
         "selectNodes": "Select the text above and copy to the clipboard.",
         "pasteNodes": "Paste nodes here",
         "importNodes": "Import nodes",
         "exportNodes": "Export nodes to clipboard",
         "importUnrecognised": "Imported unrecognised type:",
         "importUnrecognised_plural": "Imported unrecognised types:",
+        "nodesExported": "Nodes exported to clipboard",
         "nodeCopied": "__count__ node copied",
         "nodeCopied_plural": "__count__ nodes copied",
-        "invalidFlow": "Invalid flow: __message__"
+        "invalidFlow": "Invalid flow: __message__",
+        "export": {
+            "selected":"selected nodes",
+            "current":"current flow",
+            "all":"all flows",
+            "compact":"compact",
+            "formatted":"formatted",
+            "copy": "Export to clipboard"
+        },
+        "import": {
+            "import": "Import to",
+            "newFlow": "new flow"
+        }
     },
     "deploy": {
         "deploy": "Deploy",
@@ -101,12 +121,15 @@
         "confirm": {
             "button": {
                 "confirm": "Confirm deploy",
-                "cancel": "Cancel"
+                "review": "Review differences",
+                "cancel": "Cancel",
+                "merge": "Merge changes"
             },
             "undeployedChanges": "You have undeployed changes.\n\nLeaving this page will lose these changes.",
             "improperlyConfigured": "The workspace contains some nodes that are not properly configured:",
             "unknown": "The workspace contains some unknown node types:",
-            "confirm": "Are you sure you want to deploy?"
+            "confirm": "Are you sure you want to deploy?",
+            "conflict": "The server is running a more recent set of flows."
         }
     },
     "subflow": {
@@ -146,7 +169,7 @@
         "addRemoveNode": "Add/remove node from selection",
         "deleteSelected": "Delete selected nodes or link",
         "importNode": "Import nodes",
-        "exportNode": "Export selected nodes",
+        "exportNode": "Export nodes",
         "nudgeNode": "Move selected node(s) by a small amount",
         "moveNode": "Move selected node(s) by a large amount",
         "toggleSidebar": "Toggle sidebar",
@@ -154,7 +177,8 @@
         "copyNode": "Copy selected nodes",
         "cutNode": "Cut selected nodes",
         "pasteNode": "Paste nodes",
-        "undoChange": "Undo the last change performed"
+        "undoChange": "Undo the last change performed",
+        "searchBox": "Open search box"
     },
     "library": {
         "openLibrary": "Open Library...",
@@ -180,6 +204,7 @@
     "palette": {
         "noInfo": "no information available",
         "filter": "filter nodes",
+        "search": "search modules",
         "label": {
             "subflows": "subflows",
             "input": "input",
@@ -199,6 +224,50 @@
             "nodeEnabled_plural": "Nodes enabled:",
             "nodeDisabled": "Node disabled:",
             "nodeDisabled_plural": "Nodes disabled:"
+        },
+        "editor": {
+            "title": "Manage palette",
+            "times": {
+                "seconds": "seconds ago",
+                "minutes": "minutes ago",
+                "minutesV": "__count__ minutes ago",
+                "hoursV": "__count__ hour ago",
+                "hoursV_plural": "__count__ hours ago",
+                "daysV": "__count__ day ago",
+                "daysV_plural": "__count__ days ago",
+                "weeksV": "__count__ week ago",
+                "weeksV_plural": "__count__ weeks ago",
+                "monthsV": "__count__ month ago",
+                "monthsV_plural": "__count__ months ago",
+                "yearsV": "__count__ year ago",
+                "yearsV_plural": "__count__ years ago",
+
+                "yearMonthsV": "__y__ year, __count__ month ago",
+                "yearMonthsV_plural": "__y__ year, __count__ months ago",
+                "yearsMonthsV": "__y__ years, __count__ month ago",
+                "yearsMonthsV_plural": "__y__ years, __count__ months ago"
+            },
+            "nodeCount": "__label__ node",
+            "nodeCount_plural": "__label__ nodes",
+            "inuse": "in use",
+            "enableall": "enable all",
+            "disableall": "disable all",
+            "enable": "enable",
+            "disable": "disable",
+            "remove": "remove",
+            "install": "install",
+            "installed": "installed",
+            "loading": "Loading catalogues...",
+            "tab-nodes": "Nodes",
+            "tab-install": "Install",
+            "sort": "sort:",
+            "sortAZ": "a-z",
+            "sortRecent": "recent",
+            "more": "+ __count__ more",
+            "errors": {
+                "installFailed": "Failed to install: __module__<br>__message__<br>Check the log for more information"
+            }
+
         }
     },
     "sidebar": {
@@ -218,13 +287,17 @@
         "config": {
             "name": "Configuration nodes",
             "label": "config",
-            "global": "Global",
+            "global": "On all flows",
             "none": "none",
             "subflows": "subflows",
             "flows": "flows",
             "filterUnused":"unused",
             "filterAll":"all",
             "filtered": "__count__ hidden"
+        },
+        "palette": {
+            "name": "Palette management",
+            "label": "palette"
         }
     },
     "typedInput": {
@@ -239,5 +312,8 @@
     },
     "editableList": {
         "add": "add"
+    },
+    "search": {
+        "empty": "No matches found"
     }
 }

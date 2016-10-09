@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <!--
-  Copyright 2013, 2015 IBM Corp.
+  Copyright 2013, 2016 IBM Corp.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -43,22 +43,8 @@
     <div id="header-shade" class="hide"></div>
 </div>
 <div id="main-container" class="sidebar-closed hide">
-    <div id="palette">
-        <img src="red/images/spin.svg" class="palette-spinner hide"/>
-        <div id="palette-search">
-            <i class="fa fa-search"></i><input id="palette-search-input" type="text" data-i18n="[placeholder]palette.filter"><a href="#" id="palette-search-clear"><i class="fa fa-times"></i></a></input>
-        </div>
-        <div id="palette-container" class="palette-scroll"></div>
-        <div id="palette-footer">
-            <a class="palette-button" id="palette-collapse-all" href="#"><i class="fa fa-angle-double-up"></i></a>
-            <a class="palette-button" id="palette-expand-all" href="#"><i class="fa fa-angle-double-down"></i></a>
-        </div>
-
-    </div><!-- /palette -->
-
     <div id="workspace">
         <ul id="workspace-tabs"></ul>
-        <div id="workspace-add-tab"><a id="btn-workspace-add-tab" href="#"><i class="fa fa-plus"></i></a></div>
         <div id="chart" tabindex="1"></div>
         <div id="workspace-toolbar"></div>
         <div id="workspace-footer">
@@ -66,13 +52,30 @@
             <a class="workspace-footer-button" id="btn-zoom-zero" href="#"><i class="fa fa-circle-o"></i></a>
             <a class="workspace-footer-button" id="btn-zoom-in" href="#"><i class="fa fa-plus"></i></a>
         </div>
+        <div id="editor-shade" class="hide"></div>
     </div>
-    <div id="editor-shade" class="hide"></div>
     <div id="editor-stack"></div>
+    <div id="palette">
+        <img src="red/images/spin.svg" class="palette-spinner hide"/>
+        <div id="palette-search" class="palette-search hide">
+            <input type="text" data-i18n="[placeholder]palette.filter"></input>
+        </div>
+        <div id="palette-editor">
+            <div class="editor-tray-header"><div class="editor-tray-titlebar"><ul class="editor-tray-breadcrumbs"><li data-i18n="palette.editor.title"></li></ul></div><div class="editor-tray-toolbar"><button id="palette-editor-close" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only primary" role="button" aria-disabled="false" data-i18n="common.label.done"></button></div></div>
+            <ul id="palette-editor-tabs"></ul>
+        </div>
+        <div id="palette-container" class="palette-scroll hide"></div>
+        <div id="palette-footer">
+            <a class="palette-button" id="palette-collapse-all" href="#"><i class="fa fa-angle-double-up"></i></a>
+            <a class="palette-button" id="palette-expand-all" href="#"><i class="fa fa-angle-double-down"></i></a>
+        </div>
+        <div id="palette-shade" class="hide"></div>
+    </div><!-- /palette -->
     <div id="sidebar">
         <ul id="sidebar-tabs"></ul>
         <div id="sidebar-content"></div>
         <div id="sidebar-footer"></div>
+        <div id="sidebar-shade" class="hide"></div>
     </div>
 
     <div id="sidebar-separator"></div>
@@ -90,7 +93,12 @@
         <div id="node-dialog-confirm-deploy-unknown" style="text-align: left; padding-top: 10px;" data-i18n="[prepend]deploy.confirm.unknown;[append]deploy.confirm.confirm">
             <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-unknown-list"></ul>
         </div>
+        <div id="node-dialog-confirm-deploy-conflict" style="text-align: left; padding-top: 10px;" data-i18n="[prepend]deploy.confirm.conflict;[append]deploy.confirm.confirm">
+        </div>
     </form>
+</div>
+<div id="node-dialog-view-diff" class="hide">
+    <ol id="node-dialog-view-diff-diff"></ol>
 </div>
 
 <div id="node-dialog-library-save-confirm" class="hide">

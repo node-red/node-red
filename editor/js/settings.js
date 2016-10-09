@@ -84,6 +84,7 @@ RED.settings = (function () {
                     if (auth_tokens) {
                         jqXHR.setRequestHeader("Authorization","Bearer "+auth_tokens.access_token);
                     }
+                    jqXHR.setRequestHeader("Node-RED-API-Version","v2");
                 }
             }
         });

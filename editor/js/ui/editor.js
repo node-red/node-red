@@ -163,7 +163,11 @@ RED.editor = (function() {
     function validateNodeEditorProperty(node,defaults,property,prefix) {
         var input = $("#"+prefix+"-"+property);
         if (input.length > 0) {
-            if (!validateNodeProperty(node, defaults, property,input.val())) {
+            var value = input.val();
+            if (defaults[property].hasOwnProperty("format") && defaults[property].format !== "" && input[0].nodeName === "DIV") {
+                value = input.text();
+            }
+            if (!validateNodeProperty(node, defaults, property,value)) {
                 input.addClass("input-error");
             } else {
                 input.removeClass("input-error");
@@ -295,17 +299,30 @@ RED.editor = (function() {
      * @param node - the node being edited
      * @param property - the name of the field
      * @param prefix - the prefix to use in the input element ids (node-input|node-config-input)
+     * @param definition - the definition of the field
      */
-    function preparePropertyEditor(node,property,prefix) {
+    function preparePropertyEditor(node,property,prefix,definition) {
         var input = $("#"+prefix+"-"+property);
+        if (input.length === 0) {
+            return;
+        }
         if (input.attr('type') === "checkbox") {
             input.prop('checked',node[property]);
-        } else {
+        }
+        else {
             var val = node[property];
             if (val == null) {
                 val = "";
             }
-            input.val(val);
+            if (definition !== undefined && definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0].nodeName === "DIV") {
+                input.html(RED.text.format.getHtml(val, definition[property].format, {}, false, "en"));
+                RED.text.format.attach(input[0], definition[property].format, {}, false, "en");
+            } else {
+                input.val(val);
+                if (input[0].nodeName === 'INPUT' || input[0].nodeName === 'TEXTAREA') {
+                    RED.text.bidi.prepareInput(input);
+                }
+            }
         }
     }
 
@@ -317,11 +334,20 @@ RED.editor = (function() {
      * @param prefix - the prefix to use in the input element ids (node-input|node-config-input)
      */
     function attachPropertyChangeHandler(node,definition,property,prefix) {
-        $("#"+prefix+"-"+property).change(function(event,skipValidation) {
-            if (!skipValidation) {
-                validateNodeEditor(node,prefix);
-            }
-        });
+        var input = $("#"+prefix+"-"+property);
+        if (definition !== undefined && "format" in definition[property] && definition[property].format !== "" && input[0].nodeName === "DIV") {
+            $("#"+prefix+"-"+property).on('change keyup', function(event,skipValidation) {
+                if (!skipValidation) {
+                    validateNodeEditor(node,prefix);
+                }
+            });
+        } else {
+            $("#"+prefix+"-"+property).change(function(event,skipValidation) {
+                if (!skipValidation) {
+                    validateNodeEditor(node,prefix);
+                }
+            });
+        }
     }
 
     /**
@@ -345,7 +371,7 @@ RED.editor = (function() {
                         $('#' + prefix + '-' + cred).val('');
                     }
                 } else {
-                    preparePropertyEditor(credData, cred, prefix);
+                    preparePropertyEditor(credData, cred, prefix, credDef);
                 }
                 attachPropertyChangeHandler(node, credDef, cred, prefix);
             }
@@ -405,10 +431,10 @@ RED.editor = (function() {
                         }
                     } else {
                         console.log("Unknown type:", definition.defaults[d].type);
-                        preparePropertyEditor(node,d,prefix);
+                        preparePropertyEditor(node,d,prefix,definition.defaults);
                     }
                 } else {
-                    preparePropertyEditor(node,d,prefix);
+                    preparePropertyEditor(node,d,prefix,definition.defaults);
                 }
                 attachPropertyChangeHandler(node,definition.defaults,d,prefix);
             }
@@ -589,6 +615,8 @@ RED.editor = (function() {
                                     var newValue;
                                     if (input.attr('type') === "checkbox") {
                                         newValue = input.prop('checked');
+                                    } else if ("format" in editing_node._def.defaults[d] && editing_node._def.defaults[d].format !== "" && input[0].nodeName === "DIV") {
+                                        newValue = input.text();
                                     } else {
                                         newValue = input.val();
                                     }
@@ -768,16 +796,17 @@ RED.editor = (function() {
         } else {
             ns = node_def.set.id;
         }
-        var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
-        if (!activeWorkspace) {
-            activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
+        var configNodeScope = ""; // default to global
+        var activeSubflow = RED.nodes.subflow(RED.workspaces.active());
+        if (activeSubflow) {
+            configNodeScope = activeSubflow.id;
         }
         if (editing_config_node == null) {
             editing_config_node = {
                 id: RED.nodes.id(),
                 _def: node_def,
                 type: type,
-                z: activeWorkspace.id,
+                z: configNodeScope,
                 users: []
             }
             for (var d in node_def.defaults) {
@@ -1155,7 +1184,7 @@ RED.editor = (function() {
                 }
 
                 configNodes.forEach(function(cn) {
-                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+cn.__label__+'</option>');
+                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+RED.text.bidi.enforceTextDirectionWithUCC(cn.__label__)+'</option>');
                     delete cn.__label__;
                 });
 
@@ -1197,7 +1226,6 @@ RED.editor = (function() {
                             changes['name'] = editing_node.name;
                             editing_node.name = newName;
                             changed = true;
-                            $("#menu-item-workspace-menu-"+editing_node.id.replace(".","-")).text(newName);
                         }
 
                         var newDescription = subflowEditor.getValue();
@@ -1290,6 +1318,7 @@ RED.editor = (function() {
                 });
 
                 $("#subflow-input-name").val(subflow.name);
+                RED.text.bidi.prepareInput($("#subflow-input-name"));
                 subflowEditor.getSession().setValue(subflow.info||"",-1);
                 var userCount = 0;
                 var subflowType = "subflow:"+editing_node.id;
@@ -1363,7 +1392,7 @@ RED.editor = (function() {
             if (options.globals) {
                 setTimeout(function() {
                     if (!!session.$worker) {
-                        session.$worker.send("setOptions", [{globals: options.globals}]);
+                        session.$worker.send("setOptions", [{globals: options.globals, esversion:6}]);
                     }
                 },100);
             }

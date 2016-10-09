@@ -1,0 +1,106 @@
+/**
+ * Copyright 2016 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+.red-ui-search {
+    z-index:1000;
+    display: none;
+    position: absolute;
+    width: 500px;
+    background: white;
+    left: 50%;
+    margin-left: -250px;
+    top: 0px;
+    border: 1px solid $primary-border-color;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+
+    ol {
+    }
+}
+.red-ui-search-container {
+    padding: 3px;
+    border-bottom: 1px solid $secondary-border-color;
+}
+.red-ui-search-results-container {
+    position:relative;
+    height: 300px;
+    padding: 5px;
+    background: $background-color;
+    .red-ui-editableList-container {
+        background: white;
+        border-radius: 2px;
+        padding: 0;
+        background: $background-color;
+        li {
+            padding: 0;
+
+            &.selected .red-ui-search-result {
+                    border-color: $primary-border-color;
+            }
+
+        }
+    }
+}
+.red-ui-search-result {
+    padding: 8px 2px 8px 5px;
+    display: block;
+    cursor: pointer;
+    color: $form-text-color;
+    border: 2px solid white;
+    &:hover {
+        text-decoration: none;
+        border-color: $primary-border-color;
+        color: $form-text-color;
+    }
+}
+
+.red-ui-search-result-node {
+    display: inline-block;
+    width: 30px;
+    float:left;
+    height: 25px;
+    background: #ddd;
+    border-radius: 5px;
+    border: 1px solid #999;
+    background-position: 5% 50%;
+    background-repeat: no-repeat;
+    background-size: contain;
+    position: relative;
+}
+.red-ui-search-result-description {
+    margin-left: 40px;
+    margin-right: 5px;
+}
+.red-ui-search-result-node-label {
+    color: #222;
+}
+.red-ui-search-result-node-type {
+    font-style: italic;
+    font-size: 0.9em;
+}
+.red-ui-search-result-node-flow {
+    float:right;
+    font-size: 0.8em;
+}
+.red-ui-search-result-node-id {
+    display:none;
+    font-size: 0.8em;
+}
+.red-ui-search-empty {
+    padding: 10px;
+    text-align: center;
+    font-style: italic;
+    color: $form-placeholder-color;
+}

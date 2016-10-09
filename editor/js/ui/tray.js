@@ -110,6 +110,7 @@ RED.tray = (function() {
 
         $("#header-shade").show();
         $("#editor-shade").show();
+        $("#palette-shade").show();
         $(".sidebar-shade").show();
 
         tray.preferredWidth = Math.max(el.width(),500);
@@ -259,6 +260,7 @@ RED.tray = (function() {
                     if (stack.length === 0) {
                         $("#header-shade").hide();
                         $("#editor-shade").hide();
+                        $("#palette-shade").hide();
                         $(".sidebar-shade").hide();
                         RED.events.emit("editor:close");
                         RED.view.focus();

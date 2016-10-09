@@ -1,0 +1,165 @@
+/**
+ * Copyright 2016 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+
+#node-dialog-view-diff {
+    height: 600px;
+
+    .red-ui-editableList-container {
+        border-radius:1px;
+        padding:0;
+    }
+    ol {
+        position: absolute;
+        top:10px;
+        bottom:10px;
+        left:10px;
+        right:10px;
+        li {
+            padding: 0px;
+            border: none;
+        }
+
+    }
+    .red-ui-editableList-item-content {
+        padding: 5px;
+    }
+
+}
+.node-diff-tab {
+    border: 1px solid $secondary-border-color;
+    border-radius: 3px;
+
+    &.collapsed {
+        .node-diff-tab-title > .node-diff-chevron {
+            transform: rotate(-90deg);
+        }
+        .node-diff-node-entry {
+            display: none;
+        }
+    }
+}
+.node-diff-tab-stats {
+    position: absolute;
+    left: 50%;
+}
+
+.node-diff-chevron {
+    width: 15px;
+    text-align: center;
+    margin: 3px 5px 3px 5px;
+    transition: transform 0.1s ease-in-out;
+
+}
+.node-diff-node-entry {
+    padding: 0 0 0 5px;
+    &:not(:last-child) {
+        border-bottom: 1px solid $secondary-border-color;
+    }
+
+    &.collapsed {
+        .node-diff-chevron {
+            transform: rotate(-90deg);
+        }
+        .node-diff-node-entry-properties {
+            display: none;
+        }
+    }
+
+    table {
+         border-collapse: collapse;
+         width: 100%;
+         table-layout:fixed;
+    }
+    td, th {
+        border: 1px solid $secondary-border-color;
+        padding: 3px 5px;
+        text-align: left;
+    }
+
+    td:nth-child(1) {
+        width: 150px;
+    }
+    td:not(:first-child) {
+        width: calc(50% - 150px);
+    }
+}
+.node-diff-column {
+    display:inline-block;
+    height:100%;
+    width:50%;
+    box-sizing: border-box;
+    white-space:nowrap;
+    overflow: hidden;
+    &:first-child {
+        border-right: 1px solid $secondary-border-color
+    }
+}
+.node-diff-tab-title {
+    padding: 3px 3px 3px 0;
+    background: #f6f6f6;
+    cursor: pointer;
+}
+
+.node-diff-node-entry-node {
+    vertical-align: middle;
+    display: inline-block;
+    margin: 5px;
+    width: 24px;
+    height: 20px;
+    background: #ddd;
+    border-radius: 2px;
+    border: 1px solid #999;
+    background-position: 5% 50%;
+    background-repeat: no-repeat;
+    background-size: contain;
+    position: relative;
+
+    .palette-icon {
+        width: 16px;
+    }
+    .palette_icon_container {
+        width: 24px;
+    }
+}
+.node-diff-node-entry-title {
+    cursor: pointer;
+}
+.node-diff-node-entry-properties {
+    margin-left: 30px;
+    margin-right: 8px;
+    margin-bottom:8px;
+    color: #666;
+}
+.node-diff-node-description {
+    color: $form-text-color;
+    margin-left: 5px;
+    margin-right: 5px;
+    padding-top: 5px;
+    display: inline-block;
+    &:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+}
+
+
+.node-diff-count { color: #999}
+.node-diff-added { color: #009900}
+.node-diff-deleted { color: #f80000}
+.node-diff-changed { color: #f89406}
+.node-diff-conflicted { color: purple}

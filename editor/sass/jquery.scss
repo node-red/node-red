@@ -18,11 +18,11 @@
     font-size: 14px !important;
     font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
 }
-.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
+.ui-widget input, .ui-widget div[contenteditable="true"], .ui-widget select, .ui-widget textarea, .ui-widget button {
     font-size: 14px !important;
     font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
 }
-.ui-widget input {
+.ui-widget input, .ui-widget div[contenteditable="true"] {
     box-shadow: none;
 }
 
@@ -92,12 +92,17 @@
 
     &.primary {
         border-color: $editor-button-background-primary;
-        color: $editor-button-color-primary;
+        color: $editor-button-color-primary !important;
         background: $editor-button-background-primary;
         &:not(.disabled):hover {
             border-color: $editor-button-background-primary-hover;
             background: $editor-button-background-primary-hover;
             color: $editor-button-color-primary !important;
+        }
+        &.disabled {
+            border-color: $form-input-border-color;
+            color: $workspace-button-color-disabled !important;
+            background: $editor-button-background;
         }
     }
     &.disabled {

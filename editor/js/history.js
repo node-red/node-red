@@ -176,6 +176,7 @@ RED.history = (function() {
                         n.n.x = n.ox;
                         n.n.y = n.oy;
                         n.n.dirty = true;
+                        n.n.changed = n.changed;
                     }
                     // A move could have caused a link splice
                     if (ev.links) {
@@ -234,10 +235,6 @@ RED.history = (function() {
                             n.outputs = ev.node.out.length;
                             RED.editor.updateNodeProperties(n);
                         });
-
-                        if (ev.node.type === 'subflow') {
-                            $("#menu-item-workspace-menu-"+ev.node.id.replace(".","-")).text(ev.node.name);
-                        }
                     } else {
                         RED.editor.updateNodeProperties(ev.node);
                         RED.editor.validateNode(ev.node);

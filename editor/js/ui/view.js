@@ -642,6 +642,8 @@ RED.view = (function() {
             mousePos = mouse_position;
             var minX = 0;
             var minY = 0;
+            var maxX = space_width;
+            var maxY = space_height;
             for (var n = 0; n<moving_set.length; n++) {
                 node = moving_set[n];
                 if (d3.event.shiftKey) {
@@ -653,12 +655,21 @@ RED.view = (function() {
                 node.n.dirty = true;
                 minX = Math.min(node.n.x-node.n.w/2-5,minX);
                 minY = Math.min(node.n.y-node.n.h/2-5,minY);
+                maxX = Math.max(node.n.x+node.n.w/2+5,maxX);
+                maxY = Math.max(node.n.y+node.n.h/2+5,maxY);
             }
             if (minX !== 0 || minY !== 0) {
                 for (i = 0; i<moving_set.length; i++) {
                     node = moving_set[i];
                     node.n.x -= minX;
                     node.n.y -= minY;
+                }
+            }
+            if (maxX !== space_width || maxY !== space_height) {
+                for (i = 0; i<moving_set.length; i++) {
+                    node = moving_set[i];
+                    node.n.x -= (maxX - space_width);
+                    node.n.y -= (maxY - space_height);
                 }
             }
             if (snapGrid != d3.event.shiftKey && moving_set.length > 0) {
@@ -796,7 +807,9 @@ RED.view = (function() {
             if (moving_set.length > 0) {
                 var ns = [];
                 for (var j=0;j<moving_set.length;j++) {
-                    ns.push({n:moving_set[j].n,ox:moving_set[j].ox,oy:moving_set[j].oy});
+                    ns.push({n:moving_set[j].n,ox:moving_set[j].ox,oy:moving_set[j].oy,changed:moving_set[j].n.changed});
+                    moving_set[j].n.dirty = true;
+                    moving_set[j].n.changed = true;
                 }
                 historyEvent = {t:"move",nodes:ns,dirty:RED.nodes.dirty()};
                 if (activeSpliceLink) {
@@ -977,10 +990,13 @@ RED.view = (function() {
         if (moving_set.length > 0) {
             var ns = [];
             for (var i=0;i<moving_set.length;i++) {
-                ns.push({n:moving_set[i].n,ox:moving_set[i].ox,oy:moving_set[i].oy});
+                ns.push({n:moving_set[i].n,ox:moving_set[i].ox,oy:moving_set[i].oy,changed:moving_set[i].n.changed});
+                moving_set[i].n.changed = true;
+                moving_set[i].n.dirty = true;
                 delete moving_set[i].ox;
                 delete moving_set[i].oy;
             }
+            redraw();
             RED.history.push({t:"move",nodes:ns,dirty:RED.nodes.dirty()});
             RED.nodes.dirty(true);
         }
@@ -1379,7 +1395,7 @@ RED.view = (function() {
         options.push({name:"delete",disabled:(moving_set.length===0 && selected_link === null),onselect:function() {deleteSelection();}});
         options.push({name:"cut",disabled:(moving_set.length===0),onselect:function() {copySelection();deleteSelection();}});
         options.push({name:"copy",disabled:(moving_set.length===0),onselect:function() {copySelection();}});
-        options.push({name:"paste",disabled:(clipboard.length===0),onselect:function() {importNodes(clipboard,true);}});
+        options.push({name:"paste",disabled:(clipboard.length===0),onselect:function() {importNodes(clipboard,false,true);}});
         options.push({name:"edit",disabled:(moving_set.length != 1),onselect:function() { RED.editor.edit(mdn);}});
         options.push({name:"select",onselect:function() {selectAll();}});
         options.push({name:"undo",disabled:(RED.history.depth() === 0),onselect:function() {RED.history.pop();}});
@@ -1793,6 +1809,7 @@ RED.view = (function() {
                                         l = d._def.label;
                                         try {
                                             l = (typeof l === "function" ? l.call(d) : l)||"";
+                                            l = RED.text.bidi.enforceTextDirectionWithUCC(l);
                                         } catch(err) {
                                             console.log("Definition error: "+d.type+".label",err);
                                             l = d.type;
@@ -2155,7 +2172,6 @@ RED.view = (function() {
             ).classed("link_selected", false);
         }
 
-
         if (d3.event) {
             d3.event.preventDefault();
         }
@@ -2184,19 +2200,22 @@ RED.view = (function() {
      *  - all "selected"
      *  - attached to mouse for placing - "IMPORT_DRAGGING"
      */
-    function importNodes(newNodesStr,touchImport) {
+    function importNodes(newNodesStr,addNewFlow,touchImport) {
         try {
             var activeSubflowChanged;
             if (activeSubflow) {
                 activeSubflowChanged = activeSubflow.changed;
             }
-            var result = RED.nodes.import(newNodesStr,true);
+            var result = RED.nodes.import(newNodesStr,true,addNewFlow);
             if (result) {
                 var new_nodes = result[0];
                 var new_links = result[1];
                 var new_workspaces = result[2];
                 var new_subflows = result[3];
-
+                var new_default_workspace = result[4];
+                if (addNewFlow && new_default_workspace) {
+                    RED.workspaces.show(new_default_workspace.id);
+                }
                 var new_ms = new_nodes.filter(function(n) { return n.hasOwnProperty("x") && n.hasOwnProperty("y") && n.z == RED.workspaces.active() }).map(function(n) { return {n:n};});
                 var new_node_ids = new_nodes.map(function(n){ return n.id; });
 
@@ -2269,6 +2288,9 @@ RED.view = (function() {
                     subflows:new_subflows,
                     dirty:RED.nodes.dirty()
                 };
+                if (new_ms.length === 0) {
+                    RED.nodes.dirty(true);
+                }
                 if (activeSubflow) {
                     var subflowRefresh = RED.subflow.refresh(true);
                     if (subflowRefresh) {
@@ -2373,6 +2395,46 @@ RED.view = (function() {
                 }
             }
             return result;
+        },
+        reveal: function(id) {
+            if (RED.nodes.workspace(id) || RED.nodes.subflow(id)) {
+                RED.workspaces.show(id);
+            } else {
+                var node = RED.nodes.node(id);
+                if (node._def.category !== 'config' && node.z) {
+                    node.highlighted = true;
+                    node.dirty = true;
+                    RED.workspaces.show(node.z);
+                    RED.view.redraw();
+
+                    var screenSize = [$("#chart").width(),$("#chart").height()];
+                    var scrollPos = [$("#chart").scrollLeft(),$("#chart").scrollTop()];
+
+                    if (node.x < scrollPos[0] || node.y < scrollPos[1] || node.x > screenSize[0]+scrollPos[0] || node.y > screenSize[1]+scrollPos[1]) {
+                        var deltaX = '-='+((scrollPos[0] - node.x) + screenSize[0]/2);
+                        var deltaY = '-='+((scrollPos[1] - node.y) + screenSize[1]/2);
+                        $("#chart").animate({
+                            scrollLeft: deltaX,
+                            scrollTop: deltaY
+                        },200);
+                    }
+
+                    var flash = 22;
+                    var flashFunc = function() {
+                        flash--;
+                        node.highlighted = !node.highlighted;
+                        node.dirty = true;
+                        RED.view.redraw();
+                        if (flash >= 0) {
+                            setTimeout(flashFunc,100);
+                        }
+                    }
+                    flashFunc();
+                } else if (node._def.category === 'config') {
+                    RED.sidebar.config.show(id);
+                }
+            }
         }
+
     };
 })();
