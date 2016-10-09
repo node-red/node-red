@@ -103,7 +103,7 @@ module.exports = {
         }
         flows.load().then(function() {
             flows.startFlows();
-            should.deepEqual(testFlows, flows.getFlows());
+            should.deepEqual(testFlows, flows.getFlows().flows);
             cb();
         });
     },
