@@ -21,8 +21,9 @@ module.exports = function(RED) {
         RED.nodes.createNode(this, n);
 
         this.rules = n.rules;
+        var rule;
         if (!this.rules) {
-            var rule = {
+            rule = {
                 t:(n.action=="replace"?"set":n.action),
                 p:n.property||""
             }
@@ -39,7 +40,7 @@ module.exports = function(RED) {
 
         var valid = true;
         for (var i=0;i<this.rules.length;i++) {
-            var rule = this.rules[i];
+            rule = this.rules[i];
             // Migrate to type-aware rules
             if (!rule.pt) {
                 rule.pt = "msg";
@@ -76,7 +77,8 @@ module.exports = function(RED) {
                 rule.to = Number(rule.to);
             } else if (rule.tot === 'json') {
                 try {
-                    rule.to = JSON.parse(rule.to);
+                    // check this is parsable JSON
+                    JSON.parse(rule.to);
                 } catch(e2) {
                     valid = false;
                     this.error(RED._("change.errors.invalid-json"));
@@ -90,6 +92,9 @@ module.exports = function(RED) {
             try {
                 var property = rule.p;
                 var value = rule.to;
+                if (rule.tot === 'json') {
+                    value = JSON.parse(rule.to);
+                }
                 var current;
                 var fromValue;
                 var fromType;
