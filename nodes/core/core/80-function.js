@@ -222,6 +222,7 @@ module.exports = function(RED) {
                 while (node.outstandingIntervals.length > 0) {
                     clearInterval(node.outstandingIntervals.pop())
                 }
+                this.status({});
             })
         } catch(err) {
             // eg SyntaxError - which v8 doesn't include line number information

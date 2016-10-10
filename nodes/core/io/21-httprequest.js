@@ -205,6 +205,10 @@ module.exports = function(RED) {
             }
             req.end();
         });
+
+        this.on("close",function() {
+            node.status({});
+        });
     }
 
     RED.nodes.registerType("http request",HTTPRequest,{

@@ -91,6 +91,9 @@ module.exports = function(RED) {
                 }
             }
         });
+        this.on('close', function() {
+            node.status({});
+        });
     }
     RED.nodes.registerType("file",FileNode);
 
@@ -126,6 +129,9 @@ module.exports = function(RED) {
                     node.send(msg);
                 });
             }
+        });
+        this.on('close', function() {
+            node.status({});
         });
     }
     RED.nodes.registerType("file in",FileInNode);

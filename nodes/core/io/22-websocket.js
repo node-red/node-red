@@ -52,16 +52,16 @@ module.exports = function(RED) {
                 if (node.isServer) { delete node._clients[id]; node.emit('closed',Object.keys(node._clients).length); }
                 else { node.emit('closed'); }
                 if (!node.closing && !node.isServer) {
-                    node.tout = setTimeout(function(){ startconn(); }, 3000); // try to reconnect every 3 secs... bit fast ?
+                    node.tout = setTimeout(function() { startconn(); }, 3000); // try to reconnect every 3 secs... bit fast ?
                 }
             });
-            socket.on('message',function(data,flags){
+            socket.on('message',function(data,flags) {
                 node.handleEvent(id,socket,'message',data,flags);
             });
             socket.on('error', function(err) {
                 node.emit('erro');
                 if (!node.closing && !node.isServer) {
-                    node.tout = setTimeout(function(){ startconn(); }, 3000); // try to reconnect every 3 secs... bit fast ?
+                    node.tout = setTimeout(function() { startconn(); }, 3000); // try to reconnect every 3 secs... bit fast ?
                 }
             });
         }
@@ -74,8 +74,8 @@ module.exports = function(RED) {
             // Listen for 'newListener' events from RED.server
             node._serverListeners = {};
 
-            var storeListener = function(/*String*/event,/*function*/listener){
-                if(event == "error" || event == "upgrade" || event == "listening"){
+            var storeListener = function(/*String*/event,/*function*/listener) {
+                if (event == "error" || event == "upgrade" || event == "listening") {
                     node._serverListeners[event] = listener;
                 }
             }
@@ -143,7 +143,7 @@ module.exports = function(RED) {
         });
     }
 
-    WebSocketListenerNode.prototype.handleEvent = function(id,/*socket*/socket,/*String*/event,/*Object*/data,/*Object*/flags){
+    WebSocketListenerNode.prototype.handleEvent = function(id,/*socket*/socket,/*String*/event,/*Object*/data,/*Object*/flags) {
         var msg;
         if (this.wholemsg) {
             try {
@@ -205,11 +205,10 @@ module.exports = function(RED) {
         } else {
             this.error(RED._("websocket.errors.missing-conf"));
         }
-
         this.on('close', function() {
             node.serverConfig.removeInputNode(node);
+            node.status({});
         });
-
     }
     RED.nodes.registerType("websocket in",WebSocketInNode);
 
@@ -244,13 +243,16 @@ module.exports = function(RED) {
                 if (msg._session && msg._session.type == "websocket") {
                     node.serverConfig.reply(msg._session.id,payload);
                 } else {
-                    node.serverConfig.broadcast(payload,function(error){
+                    node.serverConfig.broadcast(payload,function(error) {
                         if (!!error) {
                             node.warn(RED._("websocket.errors.send-error")+inspect(error));
                         }
                     });
                 }
             }
+        });
+        this.on('close', function() {
+            node.status({});
         });
     }
     RED.nodes.registerType("websocket out",WebSocketOutNode);
