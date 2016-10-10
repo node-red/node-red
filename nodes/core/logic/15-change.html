@@ -35,9 +35,11 @@
         <li><b>Set</b> - set a property. The value can be a variety of different types, or
             can be taken from an existing message or context property.</li>
         <li><b>Change</b> - search &amp; replace parts of the property. If regular expressions
-            are enabled, the <b>replace with</b> property can include capture groups, for example <code>$1</code></li>
+            are enabled, the <b>replace with</b> property can include capture groups, for
+            example <code>$1</code>. Replace will only change the <b>type</b> if there
+            is a complete match.</li>
         <li><b>Delete</b> - delete a property.</li>
-        <li><b>Move</b> - move or rename a property. Equivalent to set and delete in one operation.
+        <li><b>Move</b> - move or rename a property.
     </ul>
 </script>
 
@@ -135,7 +137,7 @@
 
                     var selectField = $('<select/>',{class:"node-input-rule-type",style:"width:110px; margin-right:10px;"}).appendTo(row1);
                     var selectOptions = [{v:"set",l:set},{v:"change",l:change},{v:"delete",l:del},{v:"move",l:move}];
-                    for (var i=0;i<4;i++) {
+                    for (var i=0; i<4; i++) {
                         selectField.append($("<option></option>").val(selectOptions[i].v).text(selectOptions[i].l));
                     }
 
@@ -241,7 +243,7 @@
                 this.rules = [rule];
             }
 
-            for (var i=0;i<this.rules.length;i++) {
+            for (var i=0; i<this.rules.length; i++) {
                 var rule = this.rules[i];
                 $("#node-input-rule-container").editableList('addItem',rule);
             }
@@ -277,7 +279,7 @@
         oneditresize: function(size) {
             var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");
             var height = size.height;
-            for (var i=0;i<rows.size();i++) {
+            for (var i=0; i<rows.size(); i++) {
                 height -= $(rows[i]).outerHeight(true);
             }
             var editorRow = $("#dialog-form>div.node-input-rule-container-row");

@@ -152,7 +152,7 @@ module.exports = function(RED) {
                     } else if (rule.t === 'change') {
                         current = RED.util.getMessageProperty(msg,property);
                         if (typeof current === 'string') {
-                            if ((fromType === 'num' || fromType === 'bool') && current === fromValue) {
+                            if ((fromType === 'num' || fromType === 'bool' || fromType === 'str') && current === fromValue) {
                                 // str representation of exact from number/boolean
                                 // only replace if they match exactly
                                 RED.util.setMessageProperty(msg,property,value);
@@ -170,7 +170,8 @@ module.exports = function(RED) {
                             }
                         }
                     }
-                } else {
+                }
+                else {
                     var target;
                     if (rule.pt === 'flow') {
                         target = node.context().flow;
@@ -185,7 +186,7 @@ module.exports = function(RED) {
                         } else if (rule.t === 'change') {
                             current = target.get(msg,property);
                             if (typeof current === 'string') {
-                                if ((fromType === 'num' || fromType === 'bool') && current === fromValue) {
+                                if ((fromType === 'num' || fromType === 'bool' || fromType === 'str') && current === fromValue) {
                                     // str representation of exact from number/boolean
                                     // only replace if they match exactly
                                     target.set(property,value);
@@ -211,14 +212,14 @@ module.exports = function(RED) {
         if (valid) {
             var node = this;
             this.on('input', function(msg) {
-                for (var i=0;i<this.rules.length;i++) {
+                for (var i=0; i<this.rules.length; i++) {
                     if (this.rules[i].t === "move") {
                         var r = this.rules[i];
-                        if (r.to.indexOf(r.pt) !== -1) {
+                        if ((r.tot !== r.pt) || (r.p.indexOf(r.to) !== -1)) {
                             msg = applyRule(msg,{t:"set", p:r.to, pt:r.tot, to:r.p, tot:r.pt});
                             applyRule(msg,{t:"delete", p:r.p, pt:r.pt});
                         }
-                        else { // 2 step move if we are moving to a child
+                        else { // 2 step move if we are moving from a child
                             msg = applyRule(msg,{t:"set", p:"_temp_move", pt:r.tot, to:r.p, tot:r.pt});
                             applyRule(msg,{t:"delete", p:r.p, pt:r.pt});
                             msg = applyRule(msg,{t:"set", p:r.to, pt:r.tot, to:"_temp_move", tot:r.pt});

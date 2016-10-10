@@ -47,7 +47,7 @@ describe('change Node', function() {
         });
     });
     it('should load defaults if set to change', function(done) {
-        var flow = [{ id: "c1", type: "change", name:"change1", action:"change"  }];
+        var flow = [{ id: "c1", type: "change", name:"change1", action:"change" }];
         helper.load(changeNode, flow, function() {
             //console.log(helper.getNode("c1"));
             helper.getNode("c1").should.have.property("name", "change1");
@@ -687,6 +687,25 @@ describe('change Node', function() {
                     }
                 });
                 changeNode1.receive({payload:"bar"});
+            });
+        });
+        it('moves the value of a message sub-property object to a property', function(done) {
+            var flow = [{"id":"changeNode1","type":"change","rules":[{"t":"move","p":"payload.foo","pt":"msg","to":"payload","tot":"msg"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload');
+                        msg.payload.should.equal("bar");
+                        (typeof msg.payload).should.equal("string");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:{foo:"bar"}});
             });
         });
     });
