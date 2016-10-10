@@ -77,6 +77,27 @@ describe('change Node', function() {
             });
         });
 
+        it('sets the value and type of the message property', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "set", "p": "payload", "pt": "msg", "to": "12345", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                var rule = helper.getNode("changeNode1").rules[0];
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal(12345);
+                        var t = typeof(msg.payload);
+                        t.should.equal("number");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:"changeMe"});
+            });
+        });
+
         it('sets the value of an already set multi-level message property', function(done) {
             var flow = [{"id":"changeNode1","type":"change","action":"replace","property":"foo.bar","from":"","to":"bar","reg":false,"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
@@ -314,6 +335,48 @@ describe('change Node', function() {
                     }
                 });
                 changeNode1.receive({payload:"Hello World!"});
+            });
+        });
+
+        it('changes the value and doesnt change type of the message property for partial match', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload", "pt": "msg", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                var rule = helper.getNode("changeNode1").rules[0];
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal("Change456Me");
+                        var t = typeof(msg.payload);
+                        t.should.equal("string");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:"Change123Me"});
+            });
+        });
+
+        it('changes the value and type of the message property if a complete match', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload", "pt": "msg", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                var rule = helper.getNode("changeNode1").rules[0];
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal(456);
+                        var t = typeof(msg.payload);
+                        t.should.equal("number");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:"123"});
             });
         });
 
@@ -626,8 +689,6 @@ describe('change Node', function() {
             });
         });
     });
-
-//[{"id":"d5df2b27.7443a8","type":"change","z":"b0e25b28.3c7e88","name":"","rules":[{"t":"move","p":"topic","pt":"msg","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":242.5,"y":541,"wires":[[]]}]
 
     describe("#move", function() {
         it('moves the value of the message property', function(done) {
