@@ -1,3 +1,64 @@
+#### 0.15.0: Milestone Release
+
+Runtime
+
+ - Increase default apiMaxLength to 5mb and add to default settings Closes #1001
+ - Add v2 /flows api and deploy-overwrite protection
+ - Encrypt credentials by default
+ - Ensure errors thrown by RED.events handlers don't percolate up
+
+Editor
+
+ - Mark nodes as changed when they are moved
+ - Added parent containment option for draggable. (#1006)
+ - Ignore bidi event handling on non-existent and non-Input elements Closes #999
+ - Remove list of flows from menu
+ - Allow nodes to be imported with their credentials
+ - Add workspace search option
+ - Add scrollOnAdd option to editableList
+ - Add swift markup to editor for open whisk node
+ - Scrollable tabs 👍
+ - Allow linking to individual flow via url hash
+ - Avoid duplicating existing subflows on import
+ - Add import-to-new-tab option
+ - Add new options to export-nodes dialog
+ - Stop nodes being added beyond the outer bounds of the workspace
+ - Default config nodes to global scope unless in a subflow Closes #972
+ - Bidi support for Text Direction and Structured Text (#961)
+ - Fix jQuery selector, selecting more than one help pane/popover and displaying incorrectly. (#970)
+ - Fixes removeItem not passing row data to callback. (#965)
+ - Move common components and add searchBox
+ - Add initial palette sidebar
+
+Nodes
+
+ - Let change node set type if total match
+ - Clean up status on close for several core nodes.
+ - Change node: re-parse JSON set value each time to avoid pass-by-ref
+ - Better handle HTTP Request header capitalisation
+ - Enable ES6 parsing in Function editor by default Fixes #985
+ - Update debug sidebar to use RED.view.reveal to show debug nodes
+ - Add full path tip to file node, And tidy up Pi node tips
+ - Remove WebSocket node maxlistener warning
+ - Update mqtt-broker node to use fully name-space qualified status messages
+ - Let UDP node better share same port instance if required
+ - Add number of units to the delay node (rate) (#994)
+ - Allow http middleware to skip rawBodyParser
+ - Let change node move property to sub-property.
+ - Add info to exec warning about buffered output if using python
+ - TCP node: pass on latest input msg properties
+ - Make sure MQTT broker is really set
+ - Fix escape character catch in TCPGet + support 0x?? sequences
+ - Fix split character in TCP Request node
+ - Add CSS highlighting to the template node (#950)
+ - Only update switch previous value after all rules are run
+
+Other
+
+ - Add npm build/test scripts Closes #946 #660
+ - Move travis to node 6 and 7 - drop 5 and 0.12
+
+
 #### 0.14.6: Maintenance Release
 
 Fixes
