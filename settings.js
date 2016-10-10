@@ -90,7 +90,11 @@ module.exports = {
     // that should be served at http://localhost:1880/.
     //httpStatic: '/home/nol/node-red-static/',
 
-    // If you installed the optional node-red-dashboard you can set it's path 
+    // The maximum size of HTTP request that will be accepted by the runtime api.
+    // Default: 5mb
+    //apiMaxLength: '5mb',
+
+    // If you installed the optional node-red-dashboard you can set it's path
     // relative to httpRoot
     //ui: { path: "ui" },
 

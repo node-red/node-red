@@ -96,7 +96,7 @@ function init(_server,_runtime) {
             editorApp.use("/",ui.editorResources);
             adminApp.use(editorApp);
         }
-        var maxApiRequestSize = settings.apiMaxLength || '1mb';
+        var maxApiRequestSize = settings.apiMaxLength || '5mb';
         adminApp.use(bodyParser.json({limit:maxApiRequestSize}));
         adminApp.use(bodyParser.urlencoded({limit:maxApiRequestSize,extended:true}));
 
