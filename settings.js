@@ -47,6 +47,9 @@ module.exports = {
     // The maximum length, in characters, of any message sent to the debug sidebar tab
     debugMaxLength: 1000,
 
+    // The maximum length in byte of request size to control the limit of the body parser
+    // apiMaxLength: "1mb",
+
     // The file containing the flows. If not set, it defaults to flows_<hostname>.json
     //flowFile: 'flows.json',
 
