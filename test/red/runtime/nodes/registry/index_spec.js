@@ -43,9 +43,9 @@ describe('red/nodes/registry/index', function() {
             stubs.push(sinon.stub(typeRegistry,"init"));
 
             registry.init({});
-            installer.init.called.should.be.true;
-            loader.init.called.should.be.true;
-            typeRegistry.init.called.should.be.true;
+            installer.init.called.should.be.true();
+            loader.init.called.should.be.true();
+            typeRegistry.init.called.should.be.true();
         })
     });
 
@@ -87,7 +87,7 @@ describe('red/nodes/registry/index', function() {
                 return {id:"node-set",loaded:true};
             }));
             registry.enableNode("node-set").then(function(ns) {
-                typeRegistry.enableNodeSet.called.should.be.true;
+                typeRegistry.enableNodeSet.called.should.be.true();
                 ns.should.have.a.property('id','node-set');
                 done();
             }).otherwise(function(err) { done(err); });
@@ -116,8 +116,8 @@ describe('red/nodes/registry/index', function() {
             stubs.push(sinon.stub(typeRegistry,"getFullNodeInfo"));
 
             registry.enableNode("node-set").then(function(ns) {
-                typeRegistry.enableNodeSet.called.should.be.true;
-                loader.loadNodeSet.called.should.be.true;
+                typeRegistry.enableNodeSet.called.should.be.true();
+                loader.loadNodeSet.called.should.be.true();
                 ns.should.have.a.property('id','node-set');
                 ns.should.have.a.property('loaded',true);
                 done();

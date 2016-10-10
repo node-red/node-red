@@ -44,7 +44,7 @@ describe("Auth strategies", function() {
             strategies.passwordTokenExchange({},"user","password","scope",function(err,token) {
                 try {
                     should.not.exist(err);
-                    token.should.be.false;
+                    token.should.be.false();
                     done();
                 } catch(e) {
                     done(e);
@@ -60,7 +60,7 @@ describe("Auth strategies", function() {
             strategies.passwordTokenExchange({},"user","password","*",function(err,token) {
                 try {
                     should.not.exist(err);
-                    token.should.be.false;
+                    token.should.be.false();
                     done();
                 } catch(e) {
                     done(e);
@@ -138,7 +138,7 @@ describe("Auth strategies", function() {
             strategies.bearerStrategy("1234",function(err,user) {
                 try {
                     should.not.exist(err);
-                    user.should.be.false;
+                    user.should.be.false();
                     done();
                 } catch(e) {
                     done(e);
@@ -221,7 +221,7 @@ describe("Auth strategies", function() {
             strategies.clientPasswordStrategy(testClient.id,"invalid_secret",function(err,client) {
                 try {
                     should.not.exist(err);
-                    client.should.be.false;
+                    client.should.be.false();
                     done();
                 } catch(e) {
                     done(e);
@@ -237,7 +237,7 @@ describe("Auth strategies", function() {
             strategies.clientPasswordStrategy("invalid_id","invalid_secret",function(err,client) {
                 try {
                     should.not.exist(err);
-                    client.should.be.false;
+                    client.should.be.false();
                     done();
                 } catch(e) {
                     done(e);
@@ -259,7 +259,7 @@ describe("Auth strategies", function() {
             strategies.passwordTokenExchange({},"user","badpassword","scope",function(err,token) {
                 try {
                     err.toString().should.equal("Error: Too many login attempts. Wait 10 minutes and try again");
-                    token.should.be.false;
+                    token.should.be.false();
                     done();
                 } catch(e) {
                     done(e);

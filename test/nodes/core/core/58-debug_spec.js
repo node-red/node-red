@@ -69,7 +69,7 @@ describe('debug node', function() {
                 count++;
             }, function() {
                 try {
-                    helper.log().called.should.be.true;
+                    helper.log().called.should.be.true();
                     var logEvents = helper.log().args.filter(function(evt) {
                         return evt[0].type == "debug";
                     });

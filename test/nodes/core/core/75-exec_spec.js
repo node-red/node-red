@@ -66,7 +66,7 @@ describe('exec node', function() {
                 n2.on("input", function(msg) {
                     //console.log(msg);
                     msg.should.have.property("payload");
-                    msg.payload.should.be.a.String;
+                    msg.payload.should.be.a.String();
                     msg.payload.should.equal("echo");
                 });
                 n3.on("input", function(msg) {
@@ -99,13 +99,13 @@ describe('exec node', function() {
                 n2.on("input", function(msg) {
                     //console.log(msg);
                     msg.should.have.property("payload");
-                    msg.payload.should.be.a.String;
+                    msg.payload.should.be.a.String();
                     msg.payload.should.equal("echo and more");
                 });
                 n3.on("input", function(msg) {
                     //console.log(msg);
                     msg.should.have.property("payload");
-                    msg.payload.should.be.a.String;
+                    msg.payload.should.be.a.String();
                     msg.payload.should.equal("ECHO AND MORE");
                     done();
                     child_process.exec.restore();
@@ -130,11 +130,15 @@ describe('exec node', function() {
                 var n4 = helper.getNode("n4");
                 n2.on("input", function(msg) {
                     //console.log("n2",msg);
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.a.Buffer;
-                    msg.payload.length.should.equal(4);
-                    done();
-                    child_process.exec.restore();
+                    try {
+                        msg.should.have.property("payload");
+                        Buffer.isBuffer(msg.payload).should.be.true();
+                        msg.payload.length.should.equal(4);
+                        child_process.exec.restore();
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
                 });
                 n1.receive({});
             });
@@ -183,10 +187,14 @@ describe('exec node', function() {
                 var n4 = helper.getNode("n4");
                 n2.on("input", function(msg) {
                     //console.log(msg);
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.a.String;
-                    msg.payload.should.equal("hello world\n");
-                    done();
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.equal("hello world\n");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
                 });
                 n1.receive({payload:"hello world"});
             });
@@ -204,7 +212,7 @@ describe('exec node', function() {
                 n2.on("input", function(msg) {
                     //console.log(msg);
                     msg.should.have.property("payload");
-                    msg.payload.should.be.a.String;
+                    msg.payload.should.be.a.String();
                     msg.payload.should.equal("12345 deg C\n");
                     done();
                 });
@@ -222,16 +230,20 @@ describe('exec node', function() {
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
                 n2.on("input", function(msg) {
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.a.Buffer;
-                    msg.payload.length.should.equal(7);
-                    done();
+                    try {
+                        msg.should.have.property("payload");
+                        Buffer.isBuffer(msg.payload).should.be.true();
+                        msg.payload.length.should.equal(7);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
                 });
                 n1.receive({payload:new Buffer([0x01,0x02,0x03,0x88])});
             });
         });
 
-        it('should now work if passed multiple words to spawn command', function(done) {
+        it('should work if passed multiple words to spawn command', function(done) {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo this now works", addpay:false, append:"", useSpawn:true},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             helper.load(execNode, flow, function() {
@@ -241,14 +253,18 @@ describe('exec node', function() {
                 var n4 = helper.getNode("n4");
                 n2.on("input", function(msg) {
                     msg.should.have.property("payload");
-                    msg.payload.should.be.a.String;
+                    msg.payload.should.be.a.String();
                     msg.payload.should.equal("this now works\n");
                 });
                 n4.on("input", function(msg) {
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.a.String;
-                    msg.payload.should.equal(0);
-                    done();
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.a.Number();
+                        msg.payload.should.equal(0);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
                 });
                 n1.receive({payload:null});
             });
@@ -264,7 +280,7 @@ describe('exec node', function() {
                 var n4 = helper.getNode("n4");
                 n4.on("input", function(msg) {
                     msg.should.have.property("payload");
-                    msg.payload.should.be.a.Number;
+                    msg.payload.should.be.a.Number();
                     msg.payload.should.be.below(0);
                     done();
                 });
@@ -282,12 +298,12 @@ describe('exec node', function() {
                 var n4 = helper.getNode("n4");
                 n3.on("input", function(msg) {
                     msg.should.have.property("payload");
-                    msg.payload.should.be.a.String;
+                    msg.payload.should.be.a.String();
                     msg.payload.should.equal("mkdir: /foo/bar/doo: No such file or directory\n");
                 });
                 n4.on("input", function(msg) {
                     msg.should.have.property("payload");
-                    msg.payload.should.be.a.String;
+                    msg.payload.should.be.a.Number();
                     msg.payload.should.equal(1);
                     done();
                 });

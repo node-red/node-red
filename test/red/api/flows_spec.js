@@ -119,7 +119,7 @@ describe("flows api", function() {
                 if (err) {
                     return done(err);
                 }
-                setFlows.calledOnce.should.be.true;
+                setFlows.calledOnce.should.be.true();
                 setFlows.lastCall.args[1].should.eql('full');
                 done();
             });
@@ -141,7 +141,7 @@ describe("flows api", function() {
                 if (err) {
                     return done(err);
                 }
-                setFlows.calledOnce.should.be.true;
+                setFlows.calledOnce.should.be.true();
                 setFlows.lastCall.args[1].should.eql('nodes');
                 done();
             });
@@ -254,7 +254,7 @@ describe("flows api", function() {
                 if (err) {
                     return done(err);
                 }
-                loadFlows.called.should.be.true;
+                loadFlows.called.should.be.true();
                 done();
             });
     });

@@ -76,7 +76,7 @@ describe("nodes api", function() {
                     if (err) {
                         throw err;
                     }
-                    res.body.should.be.an.Array;
+                    res.body.should.be.an.Array();
                     res.body.should.have.lengthOf(3);
                     done();
                 });
@@ -583,8 +583,8 @@ describe("nodes api", function() {
                         if (err) {
                             throw err;
                         }
-                        enableNodeCalled.should.be.false;
-                        disableNodeCalled.should.be.false;
+                        enableNodeCalled.should.be.false();
+                        disableNodeCalled.should.be.false();
                         res.body.should.have.property("id","123");
                         res.body.should.have.property("enabled",state);
 
@@ -744,8 +744,8 @@ describe("nodes api", function() {
                         if (err) {
                             throw err;
                         }
-                        enableNodeCalled.should.be.false;
-                        disableNodeCalled.should.be.false;
+                        enableNodeCalled.should.be.false();
+                        disableNodeCalled.should.be.false();
                         res.body.should.have.property("name","node-red");
                         res.body.should.have.property("nodes");
                         res.body.nodes[0].should.have.property("enabled",state);

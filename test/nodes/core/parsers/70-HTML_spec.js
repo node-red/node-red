@@ -32,7 +32,7 @@ describe('html node', function() {
     });
 
     beforeEach(function() {
-        fs.existsSync(file).should.be.true;
+        fs.existsSync(file).should.be.true();
     });
 
     afterEach(function() {
@@ -170,7 +170,7 @@ describe('html node', function() {
                     var n1 = helper.getNode("n1");
                     var n2 = helper.getNode("n2");
                     n1.receive({payload:null,topic: "bar"});
-                    helper.log().called.should.be.true;
+                    helper.log().called.should.be.true();
                     var logEvents = helper.log().args.filter(function(evt) {
                         return evt[0].type == "html";
                     });

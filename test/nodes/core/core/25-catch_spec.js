@@ -32,7 +32,7 @@ describe('catch Node', function() {
             var n2 = helper.getNode("n2");
             n1.should.have.property('name', 'catch');
             n2.on("input", function(msg) {
-                msg.should.be.a.Error;
+                msg.should.be.a.Error();
                 msg.toString().should.equal("Error: big error");
                 done();
             });

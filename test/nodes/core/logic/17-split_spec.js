@@ -154,7 +154,7 @@ describe('JOIN node', function() {
             n2.on("input", function(msg) {
                 try {
                     msg.should.have.property("payload");
-                    msg.payload.should.be.an.Array;
+                    msg.payload.should.be.an.Array();
                     msg.payload[0].should.equal(1);
                     msg.payload[1].should.equal(true);
                     //msg.payload[2].a.should.equal(1);
@@ -274,7 +274,7 @@ describe('JOIN node', function() {
             n2.on("input", function(msg) {
                 try {
                     msg.should.have.property("payload");
-                    msg.payload.should.be.an.Array;
+                    msg.payload.should.be.an.Array();
                     msg.payload[0].should.equal(1);
                     msg.payload[1].should.equal(2);
                     msg.payload[2].should.equal(3);
@@ -323,8 +323,8 @@ describe('JOIN node', function() {
             n2.on("input", function(msg) {
                 try {
                     msg.should.have.property("payload");
-                    msg.payload.should.be.an.Array;
-                    (msg.payload[0] === undefined).should.be.true;
+                    msg.payload.should.be.an.Array();
+                    (msg.payload[0] === undefined).should.be.true();
                     msg.payload[1].should.equal(2);
                     msg.payload[2].should.equal(3);
                     msg.payload[3].should.equal(4);
@@ -347,7 +347,7 @@ describe('JOIN node', function() {
             n2.on("input", function(msg) {
                 try {
                     msg.should.have.property("payload");
-                    msg.payload.should.be.an.Array;
+                    msg.payload.should.be.an.String();
                     msg.payload.should.equal("abcd");
                     done();
                 }

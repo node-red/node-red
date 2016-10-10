@@ -165,7 +165,7 @@ describe('function node', function() {
             var n1 = helper.getNode("n1");
             n1.receive({payload:"foo",topic: "bar"});
             try {
-                helper.log().called.should.be.true;
+                helper.log().called.should.be.true();
                 var logEvents = helper.log().args.filter(function(evt) {
                     return evt[0].type == "function";
                 });
@@ -188,7 +188,7 @@ describe('function node', function() {
                 var n1 = helper.getNode("n1");
                 n1.receive({payload: "foo", topic: "bar"});
                 try {
-                    helper.log().called.should.be.true;
+                    helper.log().called.should.be.true();
                     var logEvents = helper.log().args.filter(function (evt) {
                         return evt[0].type == "function";
                     });
@@ -210,7 +210,7 @@ describe('function node', function() {
                 var n1 = helper.getNode("n1");
                 n1.receive({payload: "foo", topic: "bar"});
                 try {
-                    helper.log().called.should.be.true;
+                    helper.log().called.should.be.true();
                     var logEvents = helper.log().args.filter(function (evt) {
                         return evt[0].type == "function";
                     });
@@ -232,7 +232,7 @@ describe('function node', function() {
                 var n1 = helper.getNode("n1");
                 n1.receive({payload: "foo", topic: "bar"});
                 try {
-                    helper.log().called.should.be.true;
+                    helper.log().called.should.be.true();
                     var logEvents = helper.log().args.filter(function (evt) {
                         return evt[0].type == "function";
                     });

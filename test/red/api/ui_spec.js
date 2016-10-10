@@ -95,7 +95,7 @@ describe("ui api", function() {
                     if (err){
                         return done(err);
                     }
-                    Buffer.isBuffer(res.body).should.be.true;
+                    Buffer.isBuffer(res.body).should.be.true();
                     compareBuffers(res.body,defaultIcon);
                     done();
                 });
@@ -112,7 +112,7 @@ describe("ui api", function() {
                     if (err){
                         return done(err);
                     }
-                    Buffer.isBuffer(res.body).should.be.true;
+                    Buffer.isBuffer(res.body).should.be.true();
                     compareBuffers(res.body,injectIcon);
                     done();
                 });
@@ -130,7 +130,7 @@ describe("ui api", function() {
                     if (err){
                         return done(err);
                     }
-                    Buffer.isBuffer(res.body).should.be.true;
+                    Buffer.isBuffer(res.body).should.be.true();
                     compareBuffers(res.body,testIcon);
                     done();
                 });

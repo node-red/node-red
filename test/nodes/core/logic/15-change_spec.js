@@ -217,7 +217,7 @@ describe('change Node', function() {
                 var helperNode1 = helper.getNode("helperNode1");
                 helperNode1.on("input", function(msg) {
                     try {
-                        (msg.payload === null).should.be.true;
+                        (msg.payload === null).should.be.true();
                         done();
                     } catch(err) {
                         done(err);

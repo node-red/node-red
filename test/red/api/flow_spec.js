@@ -162,7 +162,7 @@ describe("flow api", function() {
                         return done(err);
                     }
                     res.body.should.has.a.property('id','123');
-                    nodes.updateFlow.calledOnce.should.be.true;
+                    nodes.updateFlow.calledOnce.should.be.true();
                     nodes.updateFlow.lastCall.args[0].should.eql('123');
                     nodes.updateFlow.lastCall.args[1].should.eql({id:'123'});
                     nodes.updateFlow.restore();
@@ -247,7 +247,7 @@ describe("flow api", function() {
                     if (err) {
                         return done(err);
                     }
-                    nodes.removeFlow.calledOnce.should.be.true;
+                    nodes.removeFlow.calledOnce.should.be.true();
                     nodes.removeFlow.lastCall.args[0].should.eql('123');
                     nodes.removeFlow.restore();
                     done();

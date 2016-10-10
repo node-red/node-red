@@ -63,7 +63,7 @@ describe("runtime/log", function() {
         metrics.msgid = "12345";
         metrics.value = "the metric payload";
         var ret = log.log(metrics);
-        util.log.calledOnce.should.be.true;
+        util.log.calledOnce.should.be.true();
         util.log.firstCall.args[0].indexOf("[metric] ").should.equal(0);
         var body = JSON.parse(util.log.firstCall.args[0].substring(9));
         body.should.have.a.property("nodeid","testid");
@@ -83,12 +83,12 @@ describe("runtime/log", function() {
 
     it('it logs node type and name if provided',function() {
         log.log({level:log.INFO,type:"nodeType",msg:"test",name:"nodeName",id:"nodeId"});
-        util.log.calledOnce.should.be.true;
+        util.log.calledOnce.should.be.true();
         util.log.firstCall.args[0].indexOf("[nodeType:nodeName]").should.not.equal(-1);
     });
     it('it logs node type and id if no name provided',function() {
         log.log({level:log.INFO,type:"nodeType",msg:"test",id:"nodeId"});
-        util.log.calledOnce.should.be.true;
+        util.log.calledOnce.should.be.true();
         util.log.firstCall.args[0].indexOf("[nodeType:nodeId]").should.not.equal(-1);
     });
 

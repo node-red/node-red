@@ -294,7 +294,7 @@ describe('delay Node', function() {
                             }
                         }
                     }
-                    foundAtLeastOneDrop.should.be.true;
+                    foundAtLeastOneDrop.should.be.true();
                     done();
                 } catch (err) {
                     done(err);

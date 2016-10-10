@@ -116,7 +116,7 @@ describe("red/nodes/registry/registry",function() {
             var expected = JSON.parse('{"node-red":{"name":"node-red","nodes":{"sentiment":{"name":"sentiment","types":["sentiment"],"enabled":true,"module":"node-red"},"inject":{"name":"inject","types":["inject"],"enabled":true,"module":"node-red"}}},"testModule":{"name":"testModule","nodes":{"a-module.js":{"name":"a-module.js","types":["example"],"enabled":true,"module":"testModule"}}}}');
             typeRegistry.init(legacySettings);
             typeRegistry.load();
-            legacySettings.set.calledOnce.should.be.true;
+            legacySettings.set.calledOnce.should.be.true();
             legacySettings.set.args[0][1].should.eql(expected);
             done();
         });
@@ -242,7 +242,7 @@ describe("red/nodes/registry/registry",function() {
         it('returns nothing for an unregistered type config', function(done) {
             typeRegistry.init(settings);
             var config = typeRegistry.getNodeConfig("imaginary-shark");
-            (config === null).should.be.true;
+            (config === null).should.be.true();
             done();
         });
     });
@@ -261,7 +261,7 @@ describe("red/nodes/registry/registry",function() {
             typeRegistry.addNodeSet("test-module/test-name",testNodeSet1, "0.0.1");
             typeRegistry.addNodeSet("test-module/test-name-2",testNodeSet2WithError, "0.0.1");
             typeRegistry.saveNodeList().then(function() {
-                s.set.called.should.be.true;
+                s.set.called.should.be.true();
                 s.set.lastCall.args[0].should.eql('nodes');
                 var nodes = s.set.lastCall.args[1];
                 nodes.should.have.property('test-module');
@@ -446,20 +446,20 @@ describe("red/nodes/registry/registry",function() {
         });
         it('registers a node constructor', function() {
             typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
-            events.emit.calledOnce.should.be.true;
+            events.emit.calledOnce.should.be.true();
             events.emit.lastCall.args[0].should.eql('type-registered');
             events.emit.lastCall.args[1].should.eql('node-type');
         })
         it('throws error on duplicate node registration', function() {
             typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
-            events.emit.calledOnce.should.be.true;
+            events.emit.calledOnce.should.be.true();
             events.emit.lastCall.args[0].should.eql('type-registered');
             events.emit.lastCall.args[1].should.eql('node-type');
             /*jshint immed: false */
             (function(){
                 typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
             }).should.throw("node-type already registered");
-            events.emit.calledOnce.should.be.true;
+            events.emit.calledOnce.should.be.true();
         });
         it('extends a constructor with the Node constructor', function() {
             TestNodeConstructor.prototype.should.not.be.an.instanceOf(Node);

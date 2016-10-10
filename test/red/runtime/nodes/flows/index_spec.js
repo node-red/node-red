@@ -102,7 +102,7 @@ describe('flows/index', function() {
     // describe('#init',function() {
     //     it('registers the type-registered handler', function() {
     //         flows.init({},{});
-    //         eventsOn.calledOnce.should.be.true;
+    //         eventsOn.calledOnce.should.be.true();
     //     });
     // });
 
@@ -114,8 +114,8 @@ describe('flows/index', function() {
             ];
             flows.init({settings:{},storage:storage});
             flows.setFlows(originalConfig).then(function() {
-                credentialsClean.called.should.be.true;
-                storage.hasOwnProperty('conf').should.be.true;
+                credentialsClean.called.should.be.true();
+                storage.hasOwnProperty('conf').should.be.true();
                 flows.getFlows().flows.should.eql(originalConfig);
                 done();
             });
@@ -137,9 +137,9 @@ describe('flows/index', function() {
             }
             flows.init({settings:{},storage:loadStorage});
             flows.setFlows(originalConfig,"load").then(function() {
-                credentialsClean.called.should.be.false;
+                credentialsClean.called.should.be.false();
                 // 'load' type does not trigger a save
-                loadStorage.hasOwnProperty('conf').should.be.false;
+                loadStorage.hasOwnProperty('conf').should.be.false();
                 flows.getFlows().flows.should.eql(originalConfig);
                 done();
             });
@@ -153,8 +153,8 @@ describe('flows/index', function() {
             ];
             flows.init({settings:{},storage:storage});
             flows.setFlows(originalConfig).then(function() {
-                credentialsClean.called.should.be.true;
-                storage.hasOwnProperty('conf').should.be.true;
+                credentialsClean.called.should.be.true();
+                storage.hasOwnProperty('conf').should.be.true();
                 var cleanedFlows = flows.getFlows();
                 storage.conf.flows.should.eql(cleanedFlows.flows);
                 cleanedFlows.flows.should.not.eql(originalConfig);
@@ -180,9 +180,9 @@ describe('flows/index', function() {
             events.once('nodes-started',function() {
                 flows.setFlows(newConfig,"nodes").then(function() {
                     flows.getFlows().flows.should.eql(newConfig);
-                    flowCreate.flows['t1'].update.called.should.be.true;
-                    flowCreate.flows['t2'].start.called.should.be.true;
-                    flowCreate.flows['_GLOBAL_'].update.called.should.be.true;
+                    flowCreate.flows['t1'].update.called.should.be.true();
+                    flowCreate.flows['t2'].start.called.should.be.true();
+                    flowCreate.flows['_GLOBAL_'].update.called.should.be.true();
                     done();
                 })
             });
@@ -209,9 +209,9 @@ describe('flows/index', function() {
             events.once('nodes-started',function() {
                 flows.setFlows(newConfig,"nodes").then(function() {
                     flows.getFlows().flows.should.eql(newConfig);
-                    flowCreate.flows['t1'].update.called.should.be.true;
-                    flowCreate.flows['t2'].start.called.should.be.true;
-                    flowCreate.flows['_GLOBAL_'].update.called.should.be.true;
+                    flowCreate.flows['t1'].update.called.should.be.true();
+                    flowCreate.flows['t2'].start.called.should.be.true();
+                    flowCreate.flows['_GLOBAL_'].update.called.should.be.true();
                     flows.stopFlows().then(done);
                 })
             });
@@ -235,9 +235,9 @@ describe('flows/index', function() {
             }
             flows.init({settings:{},storage:storage});
             flows.load().then(function() {
-                credentialsLoad.called.should.be.true;
+                credentialsLoad.called.should.be.true();
                 // 'load' type does not trigger a save
-                storage.hasOwnProperty('conf').should.be.false;
+                storage.hasOwnProperty('conf').should.be.false();
                 flows.getFlows().flows.should.eql(originalConfig);
                 done();
             });
@@ -277,7 +277,7 @@ describe('flows/index', function() {
             flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
-                flowCreate.called.should.be.false;
+                flowCreate.called.should.be.false();
                 done();
             });
         });
@@ -295,14 +295,14 @@ describe('flows/index', function() {
             flows.init({settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
-                flowCreate.called.should.be.false;
+                flowCreate.called.should.be.false();
 
                 events.emit("type-registered","missing");
                 setTimeout(function() {
-                    flowCreate.called.should.be.false;
+                    flowCreate.called.should.be.false();
                     events.emit("type-registered","missing2");
                     setTimeout(function() {
-                        flowCreate.called.should.be.true;
+                        flowCreate.called.should.be.true();
                         done();
                     },10);
                 },10);
@@ -353,7 +353,7 @@ describe('flows/index', function() {
 
             events.once('nodes-started',function() {
                 flows.handleError(originalConfig[0],"message",{});
-                flowCreate.flows['t1'].handleError.called.should.be.true;
+                flowCreate.flows['t1'].handleError.called.should.be.true();
                 done();
             });
 
@@ -379,9 +379,9 @@ describe('flows/index', function() {
             events.once('nodes-started',function() {
                 flows.handleError(originalConfig[0],"message",{});
                 try {
-                    flowCreate.flows['t1'].handleError.called.should.be.true;
-                    flowCreate.flows['t2'].handleError.called.should.be.false;
-                    flowCreate.flows['t3'].handleError.called.should.be.true;
+                    flowCreate.flows['t1'].handleError.called.should.be.true();
+                    flowCreate.flows['t2'].handleError.called.should.be.false();
+                    flowCreate.flows['t3'].handleError.called.should.be.true();
                     done();
                 } catch(err) {
                     done(err);
@@ -406,7 +406,7 @@ describe('flows/index', function() {
 
             events.once('nodes-started',function() {
                 flows.handleStatus(originalConfig[0],"message");
-                flowCreate.flows['t1'].handleStatus.called.should.be.true;
+                flowCreate.flows['t1'].handleStatus.called.should.be.true();
                 done();
             });
 
@@ -433,9 +433,9 @@ describe('flows/index', function() {
             events.once('nodes-started',function() {
                 flows.handleStatus(originalConfig[0],"message");
                 try {
-                    flowCreate.flows['t1'].handleStatus.called.should.be.true;
-                    flowCreate.flows['t2'].handleStatus.called.should.be.false;
-                    flowCreate.flows['t3'].handleStatus.called.should.be.true;
+                    flowCreate.flows['t1'].handleStatus.called.should.be.true();
+                    flowCreate.flows['t2'].handleStatus.called.should.be.false();
+                    flowCreate.flows['t3'].handleStatus.called.should.be.true();
                     done();
                 } catch(err) {
                     done(err);

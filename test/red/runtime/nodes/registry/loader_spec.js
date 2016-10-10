@@ -45,7 +45,7 @@ describe("red/nodes/registry/loader",function() {
     describe("#init",function() {
         it("init",function() {
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}}});
-            localfilesystem.init.called.should.be.true;
+            localfilesystem.init.called.should.be.true();
         });
     });
 
@@ -55,10 +55,10 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return {};}));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return false;}}});
             loader.load("foo",true).then(function() {
-                localfilesystem.getNodeFiles.called.should.be.true;
+                localfilesystem.getNodeFiles.called.should.be.true();
                 localfilesystem.getNodeFiles.lastCall.args[0].should.eql('foo');
-                localfilesystem.getNodeFiles.lastCall.args[1].should.be.true;
-                registry.saveNodeList.called.should.be.false;
+                localfilesystem.getNodeFiles.lastCall.args[1].should.be.true();
+                registry.saveNodeList.called.should.be.false();
                 done();
             })
         });
@@ -67,7 +67,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return {};}));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
             loader.load("foo",true).then(function() {
-                registry.saveNodeList.called.should.be.true;
+                registry.saveNodeList.called.should.be.true();
                 done();
             }).otherwise(function(err) {
                 done(err);
@@ -98,7 +98,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
-                registry.addNodeSet.called.should.be.true;
+                registry.addNodeSet.called.should.be.true();
                 registry.addNodeSet.lastCall.args[0].should.eql("node-red/TestNode1");
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"node-red/TestNode1");
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"node-red");
@@ -113,7 +113,7 @@ describe("red/nodes/registry/loader",function() {
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('namespace','node-red');
                 registry.addNodeSet.lastCall.args[1].should.not.have.a.property('err');
 
-                nodes.registerType.calledOnce.should.be.true;
+                nodes.registerType.calledOnce.should.be.true();
                 nodes.registerType.lastCall.args[0].should.eql('node-red/TestNode1');
                 nodes.registerType.lastCall.args[1].should.eql('test-node-1');
 
@@ -146,7 +146,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
-                registry.addNodeSet.called.should.be.true;
+                registry.addNodeSet.called.should.be.true();
                 registry.addNodeSet.lastCall.args[0].should.eql("node-red/MultipleNodes1");
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"node-red/MultipleNodes1");
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"node-red");
@@ -162,7 +162,7 @@ describe("red/nodes/registry/loader",function() {
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('namespace','node-red');
                 registry.addNodeSet.lastCall.args[1].should.not.have.a.property('err');
 
-                nodes.registerType.calledTwice.should.be.true;
+                nodes.registerType.calledTwice.should.be.true();
                 nodes.registerType.firstCall.args[0].should.eql('node-red/MultipleNodes1');
                 nodes.registerType.firstCall.args[1].should.eql('test-node-multiple-1a');
                 nodes.registerType.secondCall.args[0].should.eql('node-red/MultipleNodes1');
@@ -199,7 +199,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
-                registry.addNodeSet.called.should.be.true;
+                registry.addNodeSet.called.should.be.true();
                 registry.addNodeSet.lastCall.args[0].should.eql("node-red/TestNode2");
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"node-red/TestNode2");
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"node-red");
@@ -214,7 +214,7 @@ describe("red/nodes/registry/loader",function() {
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('namespace','node-red');
                 registry.addNodeSet.lastCall.args[1].should.not.have.a.property('err');
 
-                nodes.registerType.calledOnce.should.be.true;
+                nodes.registerType.calledOnce.should.be.true();
                 nodes.registerType.lastCall.args[0].should.eql('node-red/TestNode2');
                 nodes.registerType.lastCall.args[1].should.eql('test-node-2');
 
@@ -249,7 +249,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
-                registry.addNodeSet.called.should.be.true;
+                registry.addNodeSet.called.should.be.true();
                 registry.addNodeSet.lastCall.args[0].should.eql("node-red/TestNode3");
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"node-red/TestNode3");
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"node-red");
@@ -264,7 +264,7 @@ describe("red/nodes/registry/loader",function() {
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('namespace','node-red');
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('err','fail');
 
-                nodes.registerType.calledOnce.should.be.false;
+                nodes.registerType.calledOnce.should.be.false();
 
                 done();
             }).otherwise(function(err) {
@@ -296,7 +296,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
-                registry.addNodeSet.called.should.be.true;
+                registry.addNodeSet.called.should.be.true();
                 registry.addNodeSet.lastCall.args[0].should.eql("node-red/DoesNotExist");
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"node-red/DoesNotExist");
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"node-red");
@@ -310,7 +310,7 @@ describe("red/nodes/registry/loader",function() {
                 registry.addNodeSet.lastCall.args[1].should.not.have.a.property('namespace','node-red');
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('err');
 
-                nodes.registerType.calledOnce.should.be.false;
+                nodes.registerType.calledOnce.should.be.false();
 
                 done();
             }).otherwise(function(err) {
@@ -377,7 +377,7 @@ describe("red/nodes/registry/loader",function() {
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
             loader.addModule("TestNodeModule").then(function(result) {
                 result.should.eql("a node list");
-                registry.addNodeSet.calledOnce.should.be.true;
+                registry.addNodeSet.calledOnce.should.be.true();
                 registry.addNodeSet.lastCall.args[0].should.eql("TestNodeModule/TestNode1");
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"TestNodeModule/TestNode1");
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"TestNodeModule");
@@ -392,7 +392,7 @@ describe("red/nodes/registry/loader",function() {
                 registry.addNodeSet.lastCall.args[1].should.have.a.property('namespace','TestNodeModule');
                 registry.addNodeSet.lastCall.args[1].should.not.have.a.property('err');
 
-                nodes.registerType.calledOnce.should.be.true;
+                nodes.registerType.calledOnce.should.be.true();
                 done();
             }).otherwise(function(err) {
                 done(err);
@@ -427,8 +427,8 @@ describe("red/nodes/registry/loader",function() {
             loader.init({log:{"_":function(){},warn:function(){}},nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},version: function() { return "0.12.0"}, settings:{available:function(){return true;}}});
             loader.addModule("TestNodeModule").then(function(result) {
                 result.should.eql("a node list");
-                registry.addNodeSet.called.should.be.false;
-                nodes.registerType.called.should.be.false;
+                registry.addNodeSet.called.should.be.false();
+                nodes.registerType.called.should.be.false();
                 done();
             }).otherwise(function(err) {
                 done(err);
@@ -448,8 +448,8 @@ describe("red/nodes/registry/loader",function() {
                 "name": "TestNode1",
                 "enabled": false
             }).then(function(node) {
-                node.enabled.should.be.false;
-                nodes.registerType.called.should.be.false;
+                node.enabled.should.be.false();
+                nodes.registerType.called.should.be.false();
                 done();
             }).otherwise(function(err) {
                 done(err);
@@ -464,8 +464,8 @@ describe("red/nodes/registry/loader",function() {
                 "name": "TestNode4",
                 "enabled": true
             }).then(function(node) {
-                node.enabled.should.be.true;
-                nodes.registerType.called.should.be.false;
+                node.enabled.should.be.true();
+                nodes.registerType.called.should.be.false();
                 node.should.have.property('err');
                 node.err.message.should.eql("fail to require");
 
@@ -495,10 +495,10 @@ describe("red/nodes/registry/loader",function() {
             };
             loader.getNodeHelp(node,"fr").should.eql("bar");
             node.help['fr'].should.eql("bar");
-            fs.readFileSync.calledOnce.should.be.true;
+            fs.readFileSync.calledOnce.should.be.true();
             fs.readFileSync.lastCall.args[0].should.eql(path.normalize("/tmp/node/directory/locales/fr/file.html"));
             loader.getNodeHelp(node,"fr").should.eql("bar");
-            fs.readFileSync.calledOnce.should.be.true;
+            fs.readFileSync.calledOnce.should.be.true();
         });
         it("loads help, defaulting to en-US content", function() {
             stubs.push(sinon.stub(fs,"readFileSync", function(path) {
@@ -512,10 +512,10 @@ describe("red/nodes/registry/loader",function() {
 
             loader.getNodeHelp(node,"fr").should.eql("foo");
             node.help['fr'].should.eql("foo");
-            fs.readFileSync.calledOnce.should.be.true;
+            fs.readFileSync.calledOnce.should.be.true();
             fs.readFileSync.lastCall.args[0].should.eql(path.normalize("/tmp/node/directory/locales/fr/file.html"));
             loader.getNodeHelp(node,"fr").should.eql("foo");
-            fs.readFileSync.calledOnce.should.be.true;
+            fs.readFileSync.calledOnce.should.be.true();
         });
 
     });

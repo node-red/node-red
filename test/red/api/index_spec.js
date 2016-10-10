@@ -119,7 +119,7 @@ describe("api index", function() {
                         return done(err);
                     }
                     res.text.should.eql("Not started");
-                    errorLog.calledOnce.should.be.true;
+                    errorLog.calledOnce.should.be.true();
                     done();
                 });
         });

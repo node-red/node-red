@@ -54,14 +54,14 @@ describe("runtime", function() {
 
         it("initialises components", function() {
             runtime.init({testSettings: true, httpAdminRoot:"/"});
-            log.init.called.should.be.true;
-            settings.init.called.should.be.true;
-            redNodes.init.called.should.be.true;
+            log.init.called.should.be.true();
+            settings.init.called.should.be.true();
+            redNodes.init.called.should.be.true();
         });
 
         it("returns version", function() {
             runtime.init({testSettings: true, httpAdminRoot:"/"});
-            /^\d+\.\d+\.\d+(-git)?$/.test(runtime.version()).should.be.true;
+            /^\d+\.\d+\.\d+(-git)?$/.test(runtime.version()).should.be.true();
 
         })
     });
@@ -117,15 +117,15 @@ describe("runtime", function() {
             runtime.start().then(function() {
                 console.log.restore();
                 try {
-                    storageInit.calledOnce.should.be.true;
-                    redNodesInit.calledOnce.should.be.true;
-                    redNodesLoad.calledOnce.should.be.true;
-                    redNodesLoadFlows.calledOnce.should.be.true;
+                    storageInit.calledOnce.should.be.true();
+                    redNodesInit.calledOnce.should.be.true();
+                    redNodesLoad.calledOnce.should.be.true();
+                    redNodesLoadFlows.calledOnce.should.be.true();
 
                     logWarn.calledWithMatch("Failed to register 1 node type");
                     logWarn.calledWithMatch("Missing node modules");
                     logWarn.calledWithMatch(" - module: typeA, typeB");
-                    redNodesCleanModuleList.calledOnce.should.be.true;
+                    redNodesCleanModuleList.calledOnce.should.be.true();
                     done();
                 } catch(err) {
                     done(err);
@@ -151,8 +151,8 @@ describe("runtime", function() {
                     logWarn.calledWithMatch("Missing node modules");
                     logWarn.calledWithMatch(" - module: typeA, typeB");
                     logWarn.calledWithMatch(" - node-red: typeC, typeD");
-                    redNodesCleanModuleList.calledOnce.should.be.false;
-                    serverInstallModule.calledOnce.should.be.true;
+                    redNodesCleanModuleList.calledOnce.should.be.false();
+                    serverInstallModule.calledOnce.should.be.true();
                     serverInstallModule.calledWithMatch("module");
                     done();
                 } catch(err) {
@@ -217,7 +217,7 @@ describe("runtime", function() {
     it("stops components", function() {
         var stopFlows = sinon.stub(redNodes,"stopFlows",function() {} );
         runtime.stop();
-        stopFlows.called.should.be.true;
+        stopFlows.called.should.be.true();
         stopFlows.restore();
     });
 });

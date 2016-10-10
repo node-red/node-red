@@ -56,11 +56,11 @@ describe("red/storage/index", function() {
         };
 
         storage.init(setsBooleanModule);
-        initSetsMeToTrue.should.be.true;
+        initSetsMeToTrue.should.be.true();
         done();
     });
 
-    it('respects storage interface', function() {
+    it('respects storage interface', function(done) {
         var calledFlagGetFlows = false;
         var calledFlagGetCredentials = false;
         var calledFlagGetAllFlows = false;
@@ -70,7 +70,7 @@ describe("red/storage/index", function() {
 
         var interfaceCheckerModule = {
                 init : function (settings) {
-                    settings.should.be.an.Object;
+                    settings.should.be.an.Object();
                     calledInit = true;
                 },
                 getFlows : function() {
@@ -78,7 +78,8 @@ describe("red/storage/index", function() {
                     return when.resolve([]);
                 },
                 saveFlows : function (flows) {
-                    flows.should.be.true;
+                    flows.should.be.an.Array();
+                    flows.should.have.lengthOf(0);
                     return when.resolve("");
                 },
                 getCredentials : function() {
@@ -86,19 +87,19 @@ describe("red/storage/index", function() {
                     return when.resolve({});
                 },
                 saveCredentials : function(credentials) {
-                    credentials.should.be.true;
+                    credentials.should.be.true();
                 },
                 getSettings : function() {
                     calledFlagGetSettings = true;
                 },
                 saveSettings : function(settings) {
-                    settings.should.be.true;
+                    settings.should.be.true();
                 },
                 getSessions : function() {
                     calledFlagGetSessions = true;
                 },
                 saveSessions : function(sessions) {
-                    sessions.should.be.true;
+                    sessions.should.be.true();
                 },
                 getAllFlows : function() {
                     calledFlagGetAllFlows = true;
@@ -108,17 +109,17 @@ describe("red/storage/index", function() {
                 },
                 saveFlow : function(fn, data) {
                     fn.should.equal("name");
-                    data.should.be.true;
+                    data.should.be.true();
                 },
                 getLibraryEntry : function(type, path) {
-                    type.should.be.true;
+                    type.should.be.true();
                     path.should.equal("name");
                 },
                 saveLibraryEntry : function(type, path, meta, body) {
-                    type.should.be.true;
+                    type.should.be.true();
                     path.should.equal("name");
-                    meta.should.be.true;
-                    body.should.be.true;
+                    meta.should.be.true();
+                    body.should.be.true();
                 }
         };
 
@@ -128,9 +129,10 @@ describe("red/storage/index", function() {
             }
         };
 
+        var promises = [];
         storage.init(moduleToLoad);
-        storage.getFlows();
-        storage.saveFlows({flows:[],credentials:{}});
+        promises.push(storage.getFlows());
+        promises.push(storage.saveFlows({flows:[],credentials:{}}));
         storage.getSettings();
         storage.saveSettings(true);
         storage.getSessions();
@@ -141,10 +143,17 @@ describe("red/storage/index", function() {
         storage.getLibraryEntry(true, "name");
         storage.saveLibraryEntry(true, "name", true, true);
 
-        calledInit.should.be.true;
-        calledFlagGetFlows.should.be.true;
-        calledFlagGetCredentials.should.be.true;
-        calledFlagGetAllFlows.should.be.true;
+        when.settle(promises).then(function() {
+            try {
+                calledInit.should.be.true();
+                calledFlagGetFlows.should.be.true();
+                calledFlagGetCredentials.should.be.true();
+                calledFlagGetAllFlows.should.be.true();
+                done();
+            } catch(err) {
+                done(err);
+            }
+        });
     });
 
     describe('respects deprecated flow library functions', function() {
@@ -156,7 +165,7 @@ describe("red/storage/index", function() {
 
         var interfaceCheckerModule = {
                 init : function (settings) {
-                    settings.should.be.an.Object;
+                    settings.should.be.an.Object();
                 },
                 getLibraryEntry : function(type, path) {
                     if (type === "flows") {

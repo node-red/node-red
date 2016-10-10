@@ -156,7 +156,7 @@ describe('tail Node', function() {
                 msg.should.have.property('topic', fileToTail);
                 inputCounter++;
                 if (inputCounter === 1) {
-                    warned.should.be.false;
+                    warned.should.be.false();
                     msg.payload.should.equal("Tail message line append");
                 } else if (inputCounter === 2) {
                     msg.payload.should.equal("Tail message line truncate");
@@ -166,7 +166,7 @@ describe('tail Node', function() {
 
                 if (inputCounter === 5) {
                     setTimeout(function() {
-                        warned.should.be.true;
+                        warned.should.be.true();
                         done();
                     },100);
                 }

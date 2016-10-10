@@ -79,7 +79,7 @@ describe("Tokens", function() {
                             Tokens.get("1234").then(function(token) {
                                 try {
                                     should.not.exist(token);
-                                    saveSessions.calledOnce.should.be.true;
+                                    saveSessions.calledOnce.should.be.true();
                                     done();
                                 } catch(err) {
                                     done(err);
