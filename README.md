@@ -29,24 +29,23 @@ For further help, or general discussion, please use the
 
 If you want to run the latest code from git, here's how to get started:
 
-1. Install grunt, the build tool
-
-        npm install -g grunt-cli
-
-2. Clone the code:
+1. Clone the code:
 
         git clone https://github.com/node-red/node-red.git
         cd node-red
 
-3. Install the node-red dependencies
+2. Install the node-red dependencies
 
         npm install
 
-4. Build the code
+3. Build the code
 
-        grunt build
+        npm run build
 
-5. Run
+4. Run
+
+        npm start
+   or
 
         node red.js
 
