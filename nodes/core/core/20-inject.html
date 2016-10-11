@@ -219,7 +219,11 @@
                     return this._("inject.inject")+suffix;
                 }
             } else if (this.payloadType === 'date') {
-                return this._("inject.timestamp")+suffix;
+                if ((this.topic !== "") && (this.topic.length <= 16)) {
+                    return this.topic + ":" + this._("inject.timestamp")+suffix;
+                } else {
+                    return this._("inject.timestamp")+suffix;
+                }
             } else if (this.payloadType === 'flow' && this.payload.length < 19) {
                 return 'flow.'+this.payload+suffix;
             } else if (this.payloadType === 'global' && this.payload.length < 17) {
