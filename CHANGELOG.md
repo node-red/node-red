@@ -32,6 +32,7 @@ Editor
 
 Nodes
 
+ - Inject node label - show topic for timestamp mode if short 
  - Let change node set type if total match
  - Clean up status on close for several core nodes.
  - Change node: re-parse JSON set value each time to avoid pass-by-ref
