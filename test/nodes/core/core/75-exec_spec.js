@@ -58,24 +58,42 @@ describe('exec node', function() {
                     arg3(null,arg1,arg1.toUpperCase());
                 });
 
-            helper.load(execNode, flow, function() {
-                var n1 = helper.getNode("n1");
-                var n2 = helper.getNode("n2");
-                var n3 = helper.getNode("n3");
-                var n4 = helper.getNode("n4");
-                n2.on("input", function(msg) {
-                    //console.log(msg);
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.a.String();
-                    msg.payload.should.equal("echo");
-                });
-                n3.on("input", function(msg) {
-                    //console.log(msg);
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.a.String,
-                    msg.payload.should.equal("ECHO");
-                    child_process.exec.restore();
-                    done();
+                helper.load(execNode, flow, function() {
+                    var n1 = helper.getNode("n1");
+                    var n2 = helper.getNode("n2");
+                    var n3 = helper.getNode("n3");
+                    var n4 = helper.getNode("n4");
+                    var received = 0;
+                    var messages = [null,null];
+                    var completeTest = function() {
+                        received++;
+                        if (received < 2) {
+                            return;
+                        }
+                        try{
+                            var msg = messages[0];
+                            msg.should.have.property("payload");
+                            msg.payload.should.be.a.String();
+                            msg.payload.should.equal("echo");
+
+                            msg = messages[1];
+                            msg.should.have.property("payload");
+                            msg.payload.should.be.a.String,
+                            msg.payload.should.equal("ECHO");
+                            child_process.exec.restore();
+                            done();
+                        } catch(err) {
+                            child_process.exec.restore();
+                            done(err);
+                        }
+                    };
+                    n2.on("input", function(msg) {
+                        messages[0] = msg;
+                        completeTest();
+                    });
+                    n3.on("input", function(msg) {
+                        messages[1] = msg;
+                        completeTest();
                 });
                 n1.receive({payload:"and"});
             });
@@ -96,19 +114,39 @@ describe('exec node', function() {
                 var n2 = helper.getNode("n2");
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
+                var received = 0;
+                var messages = [null,null];
+                var completeTest = function() {
+                    received++;
+                    if (received < 2) {
+                        return;
+                    }
+                    try{
+                        var msg = messages[0];
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.equal("echo and more");
+
+                        msg = messages[1];
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.equal("ECHO AND MORE");
+                        child_process.exec.restore();
+                        done();
+                    } catch(err) {
+                        child_process.exec.restore();
+                        done(err);
+                    }
+                };
+
+
                 n2.on("input", function(msg) {
-                    //console.log(msg);
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.a.String();
-                    msg.payload.should.equal("echo and more");
+                    messages[0] = msg;
+                    completeTest();
                 });
                 n3.on("input", function(msg) {
-                    //console.log(msg);
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.a.String();
-                    msg.payload.should.equal("ECHO AND MORE");
-                    child_process.exec.restore();
-                    done();
+                    messages[1] = msg;
+                    completeTest();
                 });
                 n1.receive({payload:"and"});
             });
@@ -252,15 +290,21 @@ describe('exec node', function() {
                 var n2 = helper.getNode("n2");
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
-                n2.on("input", function(msg) {
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.a.String();
-                    msg.payload.should.equal("this now works\n");
-                });
-                n4.on("input", function(msg) {
-                    try {
+                var received = 0;
+                var messages = [null,null];
+                var completeTest = function() {
+                    received++;
+                    if (received < 2) {
+                        return;
+                    }
+                    try{
+                        var msg = messages[0];
                         msg.should.have.property("payload");
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.equal("this now works\n");
 
+                        msg = messages[1];
+                        msg.should.have.property("payload");
                         should.exist(msg.payload);
                         msg.payload.should.be.a.Number();
                         msg.payload.should.equal(0);
@@ -268,8 +312,18 @@ describe('exec node', function() {
                     } catch(err) {
                         done(err);
                     }
+                };
+
+
+                n2.on("input", function(msg) {
+                    messages[0] = msg;
+                    completeTest();
                 });
-                n1.receive({payload:null});
+                n4.on("input", function(msg) {
+                    messages[1] = msg;
+                    completeTest();
+                });
+                n1.receive({payload:null,fred:123});
             });
         });
 

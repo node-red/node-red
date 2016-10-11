@@ -1,5 +1,5 @@
 /**
- * Copyright 2013,2015 IBM Corp.
+ * Copyright 2013,2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,13 +61,13 @@ module.exports = function(RED) {
                     //console.log('[exec] stdout: ' + data);
                     if (isUtf8(data)) { msg.payload = data.toString(); }
                     else { msg.payload = data; }
-                    node.send([msg,null,null]);
+                    node.send([RED.util.cloneMessage(msg),null,null]);
                 });
                 child.stderr.on('data', function (data) {
                     //console.log('[exec] stderr: ' + data);
                     if (isUtf8(data)) { msg.payload = data.toString(); }
                     else { msg.payload = new Buffer(data); }
-                    node.send([null,msg,null]);
+                    node.send([null,RED.util.cloneMessage(msg),null]);
                 });
                 child.on('close', function (code) {
                     //console.log('[exec] result: ' + code);
@@ -78,12 +78,12 @@ module.exports = function(RED) {
                     if (code === null) { node.status({fill:"red",shape:"dot",text:"timeout"}); }
                     else if (code < 0) { node.status({fill:"red",shape:"dot",text:"rc: "+code}); }
                     else { node.status({fill:"yellow",shape:"dot",text:"rc: "+code}); }
-                    node.send([null,null,msg]);
+                    node.send([null,null,RED.util.cloneMessage(msg)]);
                 });
                 child.on('error', function (code) {
                     delete node.activeProcesses[child.pid];
                     if (child.tout) { clearTimeout(child.tout); }
-                    node.error(code,msg);
+                    node.error(code,RED.util.cloneMessage(msg));
                 });
             }
             else {
