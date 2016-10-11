@@ -137,6 +137,9 @@ var api = module.exports = {
                 }
             }
         }
+        if (encryptionEnabled && !dirty) {
+            encryptedCredentials = credentials;
+        }
         return setupEncryptionPromise.then(function() {
             if (credentials.hasOwnProperty("$")) {
                 // These are encrypted credentials
@@ -160,8 +163,10 @@ var api = module.exports = {
      * @return a promise for backwards compatibility TODO: can this be removed?
      */
     add: function (id, creds) {
-        credentialCache[id] = creds;
-        dirty = true;
+        if (!credentialCache.hasOwnProperty(id) || JSON.stringify(creds) !== JSON.stringify(credentialCache[id])) {
+            credentialCache[id] = creds;
+            dirty = true;
+        }
         return when.resolve();
     },
 
@@ -258,13 +263,16 @@ var api = module.exports = {
                     }
                     if (0 === newCreds[cred].length || /^\s*$/.test(newCreds[cred])) {
                         delete savedCredentials[cred];
+                        dirty = true;
                         continue;
                     }
-                    savedCredentials[cred] = newCreds[cred];
+                    if (!savedCredentials.hasOwnProperty(cred) || JSON.stringify(savedCredentials[cred]) !== JSON.stringify(newCreds[cred])) {
+                        savedCredentials[cred] = newCreds[cred];
+                        dirty = true;
+                    }
                 }
             }
             credentialCache[nodeID] = savedCredentials;
-            dirty = true;
         }
     },
 
@@ -283,14 +291,18 @@ var api = module.exports = {
 
     export: function() {
         var result = credentialCache;
-        if (dirty && encryptionEnabled) {
-            try {
-                log.debug("red/runtime/nodes/credentials.export : encrypting");
-                var initVector = crypto.randomBytes(16);
-                var cipher = crypto.createCipheriv(encryptionAlgorithm, encryptionKey, initVector);
-                result = {"$":initVector.toString('hex') + cipher.update(JSON.stringify(credentialCache), 'utf8', 'base64') + cipher.final('base64')};
-            } catch(err) {
-                log.warn(log._("nodes.credentials.error-saving",{message:err.toString()}))
+        if (encryptionEnabled) {
+            if (dirty) {
+                try {
+                    log.debug("red/runtime/nodes/credentials.export : encrypting");
+                    var initVector = crypto.randomBytes(16);
+                    var cipher = crypto.createCipheriv(encryptionAlgorithm, encryptionKey, initVector);
+                    result = {"$":initVector.toString('hex') + cipher.update(JSON.stringify(credentialCache), 'utf8', 'base64') + cipher.final('base64')};
+                } catch(err) {
+                    log.warn(log._("nodes.credentials.error-saving",{message:err.toString()}))
+                }
+            } else {
+                result = encryptedCredentials;
             }
         }
         dirty = false;
