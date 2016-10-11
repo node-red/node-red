@@ -430,6 +430,9 @@ RED.nodes = (function() {
      * Converts a node to an exportable JSON Object
      **/
     function convertNode(n, exportCreds) {
+        if (n.type === 'tab') {
+            return convertWorkspace(n);
+        }
         exportCreds = exportCreds || false;
         var node = {};
         node.id = n.id;
