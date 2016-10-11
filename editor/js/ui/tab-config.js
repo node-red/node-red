@@ -282,7 +282,7 @@ RED.sidebar.config = (function() {
     }
     function show(id) {
         if (typeof id === 'boolean') {
-            if (unused) {
+            if (id) {
                 $('#workspace-config-node-filter-unused').click();
             } else {
                 $('#workspace-config-node-filter-all').click();
