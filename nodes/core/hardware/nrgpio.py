@@ -89,7 +89,10 @@ if len(sys.argv) > 2:
                 GPIO.cleanup(pin)
                 sys.exit(0)
             except:
-                data = 0
+                if len(sys.argv) == 4:
+                   data = int(sys.argv[3])
+                else:
+                   data = 0
             if data != 0:
                 data = 1
             GPIO.output(pin,data)
