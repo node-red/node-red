@@ -74,8 +74,8 @@ describe('exec node', function() {
                     msg.should.have.property("payload");
                     msg.payload.should.be.a.String,
                     msg.payload.should.equal("ECHO");
-                    done();
                     child_process.exec.restore();
+                    done();
                 });
                 n1.receive({payload:"and"});
             });
@@ -107,8 +107,8 @@ describe('exec node', function() {
                     msg.should.have.property("payload");
                     msg.payload.should.be.a.String();
                     msg.payload.should.equal("ECHO AND MORE");
-                    done();
                     child_process.exec.restore();
+                    done();
                 });
                 n1.receive({payload:"and"});
             });
@@ -137,6 +137,7 @@ describe('exec node', function() {
                         child_process.exec.restore();
                         done();
                     } catch(err) {
+                        child_process.exec.restore();
                         done(err);
                     }
                 });
