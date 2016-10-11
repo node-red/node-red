@@ -32,7 +32,6 @@ module.exports = function(RED) {
         var node = this;
 
         var cleanup = function(p) {
-            //console.log("CLEANUP!!!",p);
             node.activeProcesses[p].kill();
             node.status({fill:"red",shape:"dot",text:"timeout"});
             node.error("Exec node timeout");
@@ -53,37 +52,44 @@ module.exports = function(RED) {
                 /* istanbul ignore else  */
                 if (RED.settings.verbose) { node.log(cmd+" ["+arg+"]"); }
                 child = spawn(cmd,arg);
+                var unknownCommand = (child.pid === undefined);
                 if (node.timer !== 0) {
                     child.tout = setTimeout(function() { cleanup(child.pid); }, node.timer);
                 }
                 node.activeProcesses[child.pid] = child;
                 child.stdout.on('data', function (data) {
-                    //console.log('[exec] stdout: ' + data);
-                    if (isUtf8(data)) { msg.payload = data.toString(); }
-                    else { msg.payload = data; }
-                    node.send([RED.util.cloneMessage(msg),null,null]);
+                    if (node.activeProcesses.hasOwnProperty(child.pid) && node.activeProcesses[child.pid] !== null) {
+                        // console.log('[exec] stdout: ' + data,child.pid);
+                        if (isUtf8(data)) { msg.payload = data.toString(); }
+                        else { msg.payload = data; }
+                        node.send([RED.util.cloneMessage(msg),null,null]);
+                    }
                 });
                 child.stderr.on('data', function (data) {
-                    //console.log('[exec] stderr: ' + data);
-                    if (isUtf8(data)) { msg.payload = data.toString(); }
-                    else { msg.payload = new Buffer(data); }
-                    node.send([null,RED.util.cloneMessage(msg),null]);
+                    if (node.activeProcesses.hasOwnProperty(child.pid) && node.activeProcesses[child.pid] !== null) {
+                        if (isUtf8(data)) { msg.payload = data.toString(); }
+                        else { msg.payload = new Buffer(data); }
+                        node.send([null,RED.util.cloneMessage(msg),null]);
+                    }
                 });
                 child.on('close', function (code) {
-                    //console.log('[exec] result: ' + code);
-                    delete node.activeProcesses[child.pid];
-                    if (child.tout) { clearTimeout(child.tout); }
-                    msg.payload = code;
-                    if (code === 0) { node.status({}); }
-                    if (code === null) { node.status({fill:"red",shape:"dot",text:"timeout"}); }
-                    else if (code < 0) { node.status({fill:"red",shape:"dot",text:"rc: "+code}); }
-                    else { node.status({fill:"yellow",shape:"dot",text:"rc: "+code}); }
-                    node.send([null,null,RED.util.cloneMessage(msg)]);
+                    if (unknownCommand || (node.activeProcesses.hasOwnProperty(child.pid) && node.activeProcesses[child.pid] !== null)) {
+                        delete node.activeProcesses[child.pid];
+                        if (child.tout) { clearTimeout(child.tout); }
+                        msg.payload = code;
+                        if (code === 0) { node.status({}); }
+                        if (code === null) { node.status({fill:"red",shape:"dot",text:"timeout"}); }
+                        else if (code < 0) { node.status({fill:"red",shape:"dot",text:"rc: "+code}); }
+                        else { node.status({fill:"yellow",shape:"dot",text:"rc: "+code}); }
+                        node.send([null,null,RED.util.cloneMessage(msg)]);
+                    }
                 });
                 child.on('error', function (code) {
-                    delete node.activeProcesses[child.pid];
                     if (child.tout) { clearTimeout(child.tout); }
-                    node.error(code,RED.util.cloneMessage(msg));
+                    delete node.activeProcesses[child.pid];
+                    if (node.activeProcesses.hasOwnProperty(child.pid) && node.activeProcesses[child.pid] !== null) {
+                        node.error(code,RED.util.cloneMessage(msg));
+                    }
                 });
             }
             else {
@@ -120,7 +126,10 @@ module.exports = function(RED) {
                 /* istanbul ignore else  */
                 if (node.activeProcesses.hasOwnProperty(pid)) {
                     if (node.activeProcesses[pid].tout) { clearTimeout(node.activeProcesses[pid].tout); }
-                    node.activeProcesses[pid].kill();
+                    // console.log("KILLLING",pid);
+                    var process = node.activeProcesses[pid];
+                    node.activeProcesses[pid] = null;
+                    process.kill();
                 }
             }
             node.activeProcesses = {};

@@ -327,23 +327,31 @@ describe('exec node', function() {
             });
         });
 
-        it('should return an error for a bad command', function(done) {
-            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"madeupcommandshouldfail", addpay:false, append:"", useSpawn:true},
-                        {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-            helper.load(execNode, flow, function() {
-                var n1 = helper.getNode("n1");
-                var n2 = helper.getNode("n2");
-                var n3 = helper.getNode("n3");
-                var n4 = helper.getNode("n4");
-                n4.on("input", function(msg) {
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.a.Number();
-                    msg.payload.should.be.below(0);
-                    done();
+        if (!/^v0.10/.test(process.version)) {
+            it('should return an error for a bad command', function(done) {
+                var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"madeupcommandshouldfail", addpay:false, append:"", useSpawn:true},
+                {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+                helper.load(execNode, flow, function() {
+                    var n1 = helper.getNode("n1");
+                    var n2 = helper.getNode("n2");
+                    var n3 = helper.getNode("n3");
+                    var n4 = helper.getNode("n4");
+                    n4.on("input", function(msg) {
+                        if (/^v0.10/.test(process.version)) {
+                            msg.should.have.property("payload");
+                            msg.payload.should.be.a.Number();
+                            msg.payload.should.be.below(0);
+                        } else {
+                            msg.should.have.property("payload");
+                            msg.payload.should.be.a.Number();
+                            msg.payload.should.be.below(0);
+                        }
+                        done();
+                    });
+                    n1.receive({payload:null});
                 });
-                n1.receive({payload:null});
             });
-        });
+        }
 
         it('should return an error for a failing command', function(done) {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"mkdir /foo/bar/doo/dah", addpay:false, append:"", useSpawn:true},
