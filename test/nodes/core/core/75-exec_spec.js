@@ -259,6 +259,7 @@ describe('exec node', function() {
                 n4.on("input", function(msg) {
                     try {
                         msg.should.have.property("payload");
+                        should.not.be.null(msg.payload);
                         msg.payload.should.be.a.Number();
                         msg.payload.should.equal(0);
                         done();
