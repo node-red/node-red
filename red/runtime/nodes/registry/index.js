@@ -34,7 +34,7 @@ function init(runtime) {
 
 function load() {
     registry.load();
-    return loader.load();
+    return installer.checkPrereq().then(loader.load);
 }
 
 function addModule(module) {
@@ -80,5 +80,7 @@ module.exports = {
     installModule: installer.installModule,
     uninstallModule: installer.uninstallModule,
 
-    cleanModuleList: registry.cleanModuleList
+    cleanModuleList: registry.cleanModuleList,
+
+    paletteEditorEnabled: installer.paletteEditorEnabled
 };

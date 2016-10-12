@@ -30,7 +30,9 @@ describe("api index", function() {
         before(function() {
             api.init({},{
                 settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:true},
-                events: {on:function(){},removeListener: function(){}}
+                events: {on:function(){},removeListener: function(){}},
+                log: {info:function(){},_:function(){}},
+                nodes: {paletteEditorEnabled: function(){return true}}
             });
             app = api.adminApp;
         });

@@ -9,6 +9,10 @@
 
     "server": {
         "loading": "Loading palette nodes",
+        "palette-editor": {
+            "disabled": "Palette editor disabled : user settings",
+            "npm-not-found": "Palette editor disabled : npm command not found"
+        },
         "errors": "Failed to register __count__ node type",
         "errors_plural": "Failed to register __count__ node types",
         "errors-help": "Run with -v for details",

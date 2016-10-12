@@ -98,7 +98,6 @@ function start() {
             }
             log.info(log._("runtime.version",{component:"Node.js ",version:process.version}));
             log.info(os.type()+" "+os.release()+" "+os.arch()+" "+os.endianness());
-            log.info(log._("server.loading"));
             return redNodes.load().then(function() {
 
                 var i;

@@ -44,7 +44,7 @@ describe("red/nodes/registry/loader",function() {
     })
     describe("#init",function() {
         it("init",function() {
-            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}}});
+            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){},log:{info:function(){},_:function(){}}}});
             localfilesystem.init.called.should.be.true();
         });
     });
@@ -53,7 +53,7 @@ describe("red/nodes/registry/loader",function() {
         it("load empty set without settings available", function(done) {
             stubs.push(sinon.stub(localfilesystem,"getNodeFiles", function(){ return {};}));
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return {};}));
-            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return false;}}});
+            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return false;}}});
             loader.load("foo",true).then(function() {
                 localfilesystem.getNodeFiles.called.should.be.true();
                 localfilesystem.getNodeFiles.lastCall.args[0].should.eql('foo');
@@ -65,7 +65,7 @@ describe("red/nodes/registry/loader",function() {
         it("load empty set with settings available triggers registery save", function(done) {
             stubs.push(sinon.stub(localfilesystem,"getNodeFiles", function(){ return {};}));
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return {};}));
-            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
+            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.load("foo",true).then(function() {
                 registry.saveNodeList.called.should.be.true();
                 done();
@@ -96,7 +96,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
 
             stubs.push(sinon.stub(nodes,"registerType"));
-            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
+            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
                 registry.addNodeSet.called.should.be.true();
                 registry.addNodeSet.lastCall.args[0].should.eql("node-red/TestNode1");
@@ -144,7 +144,7 @@ describe("red/nodes/registry/loader",function() {
             // This module isn't already loaded
             stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
             stubs.push(sinon.stub(nodes,"registerType"));
-            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
+            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
                 registry.addNodeSet.called.should.be.true();
                 registry.addNodeSet.lastCall.args[0].should.eql("node-red/MultipleNodes1");
@@ -197,7 +197,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
 
             stubs.push(sinon.stub(nodes,"registerType"));
-            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
+            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
                 registry.addNodeSet.called.should.be.true();
                 registry.addNodeSet.lastCall.args[0].should.eql("node-red/TestNode2");
@@ -247,7 +247,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
 
             stubs.push(sinon.stub(nodes,"registerType"));
-            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
+            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
                 registry.addNodeSet.called.should.be.true();
                 registry.addNodeSet.lastCall.args[0].should.eql("node-red/TestNode3");
@@ -294,7 +294,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
 
             stubs.push(sinon.stub(nodes,"registerType"));
-            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
+            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
                 registry.addNodeSet.called.should.be.true();
                 registry.addNodeSet.lastCall.args[0].should.eql("node-red/DoesNotExist");
@@ -321,7 +321,7 @@ describe("red/nodes/registry/loader",function() {
 
     describe("#addModule",function() {
         it("throws error if settings unavailable", function() {
-            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return false;}}});
+            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return false;}}});
             /*jshint immed: false */
             (function(){
                 loader.addModule("test-module");
@@ -330,7 +330,7 @@ describe("red/nodes/registry/loader",function() {
 
         it("returns rejected error if module already loaded", function(done) {
             stubs.push(sinon.stub(registry,"getModuleInfo",function(){return{}}));
-            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
+            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
 
             loader.addModule("test-module").otherwise(function(err) {
                 err.code.should.eql("module_already_loaded");
@@ -342,7 +342,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(localfilesystem,"getModuleFiles",function() {
                 throw new Error("failure");
             }));
-            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
+            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.addModule("test-module").otherwise(function(err) {
                 err.message.should.eql("failure");
                 done();
@@ -374,7 +374,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return "a node list" }));
             stubs.push(sinon.stub(registry,"addNodeSet", function(){ return }));
             stubs.push(sinon.stub(nodes,"registerType"));
-            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},settings:{available:function(){return true;}}});
+            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.addModule("TestNodeModule").then(function(result) {
                 result.should.eql("a node list");
                 registry.addNodeSet.calledOnce.should.be.true();

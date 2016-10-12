@@ -25,6 +25,8 @@ var log = require("../../log");
 var events = require("../../events");
 
 var child_process = require('child_process');
+var npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+var paletteEditorEnabled = false;
 
 var settings;
 
@@ -86,7 +88,7 @@ function installModule(module) {
         log.info(log._("server.install.installing",{name: module}));
 
         var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
-        var child = child_process.execFile('npm',['install','--production',installName],
+        var child = child_process.execFile(npmCommand,['install','--production',installName],
             {
                 cwd: installDir
             },
@@ -160,7 +162,7 @@ function uninstallModule(module) {
 
         var list = registry.removeModule(module);
         log.info(log._("server.install.uninstalling",{name:module}));
-        var child = child_process.execFile('npm',['remove',module],
+        var child = child_process.execFile(npmCommand,['remove',module],
             {
                 cwd: installDir
             },
@@ -183,9 +185,35 @@ function uninstallModule(module) {
     });
 }
 
+function checkPrereq() {
+    if (settings.hasOwnProperty('editorTheme') &&
+        settings.editorTheme.hasOwnProperty('palette') &&
+        settings.editorTheme.palette.hasOwnProperty('editable') &&
+        settings.editorTheme.palette.editable === false
+    ) {
+        log.info(log._("server.palette-editor.disabled"));
+        paletteEditorEnabled = false;
+        return when.resolve();
+    } else {
+        return when.promise(function(resolve) {
+            child_process.execFile(npmCommand,['-v'],function(err) {
+                if (err) {
+                    log.info(log._("server.palette-editor.npm-not-found"));
+                    paletteEditorEnabled = false;
+                } else {
+                    paletteEditorEnabled = true;
+                }
+                resolve();
+            });
+        })
+    }
+}
 module.exports = {
     init: init,
-
+    checkPrereq: checkPrereq,
     installModule: installModule,
-    uninstallModule: uninstallModule
+    uninstallModule: uninstallModule,
+    paletteEditorEnabled: function() {
+        return paletteEditorEnabled
+    }
 }

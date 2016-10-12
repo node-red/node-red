@@ -38,6 +38,7 @@ var defaultContext = {
 var theme = null;
 var themeContext = clone(defaultContext);
 var themeSettings = null;
+var runtime = null;
 
 function serveFile(app,baseUrl,file) {
     try {

@@ -110,6 +110,7 @@ module.exports = {
     getNode: flows.get,
     eachNode: flows.eachNode,
 
+    paletteEditorEnabled: registry.paletteEditorEnabled,
     installModule: registry.installModule,
     uninstallModule: uninstallModule,
 

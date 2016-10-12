@@ -28,14 +28,6 @@ describe("info api", function() {
     describe("settings handler", function() {
         before(function() {
             sinon.stub(theme,"settings",function() { return { test: 456 };});
-            info.init({
-                settings: {
-                    foo: 123,
-                    httpNodeRoot: "testHttpNodeRoot",
-                    version: "testVersion",
-                    paletteCategories :["red","blue","green"]
-                }
-            })
             app = express();
             app.get("/settings",info.settings);
         });
@@ -45,6 +37,17 @@ describe("info api", function() {
         });
 
         it('returns the filtered settings', function(done) {
+            info.init({
+                settings: {
+                    foo: 123,
+                    httpNodeRoot: "testHttpNodeRoot",
+                    version: "testVersion",
+                    paletteCategories :["red","blue","green"]
+                },
+                nodes: {
+                    paletteEditorEnabled: function() { return true; }
+                }
+            });
             request(app)
                 .get("/settings")
                 .expect(200)
@@ -60,6 +63,35 @@ describe("info api", function() {
                     done();
                 });
         });
+        it('overrides palette editable if runtime says it is disabled', function(done) {
+            info.init({
+                settings: {
+                    httpNodeRoot: "testHttpNodeRoot",
+                    version: "testVersion",
+                    paletteCategories :["red","blue","green"]
+
+                },
+                nodes: {
+                    paletteEditorEnabled: function() { return false; }
+                }
+            });
+            request(app)
+                .get("/settings")
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    res.body.should.have.property("httpNodeRoot","testHttpNodeRoot");
+                    res.body.should.have.property("version","testVersion");
+                    res.body.should.have.property("paletteCategories",["red","blue","green"]);
+                    res.body.should.have.property("editorTheme");
+                    res.body.editorTheme.should.have.property("test",456);
+
+                    res.body.editorTheme.should.have.property("palette",{editable:false});
+                    done();
+                });
+        })
     });
 
 });
