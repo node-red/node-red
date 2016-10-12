@@ -560,7 +560,7 @@ RED.palette.editor = (function() {
             .searchBox({
                 delay: 300,
                 change: function() {
-                    var searchTerm = $(this).val();
+                    var searchTerm = $(this).val().toLowerCase();
                     if (searchTerm.length > 0) {
                         filteredList = loadedList.filter(function(m) {
                             return (m.index.indexOf(searchTerm) > -1);
