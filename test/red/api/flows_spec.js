@@ -96,7 +96,7 @@ describe("flows api", function() {
                     return done(err);
                 }
                 try {
-                    res.body.should.have.a.property('error','bad_api_version');
+                    res.body.should.have.a.property('code','invalid_api_version');
                     done();
                 } catch(e) {
                     return done(e);
@@ -167,7 +167,7 @@ describe("flows api", function() {
                 if (err) {
                     return done(err);
                 }
-                res.body.should.have.property("error","version_mismatch");
+                res.body.should.have.property("code","version_mismatch");
                 done();
             });
     });
@@ -230,7 +230,7 @@ describe("flows api", function() {
                     return done(err);
                 }
                 try {
-                    res.body.should.have.a.property('error','bad_api_version');
+                    res.body.should.have.a.property('code','invalid_api_version');
                     done();
                 } catch(e) {
                     return done(e);
