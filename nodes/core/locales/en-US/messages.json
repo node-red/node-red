@@ -259,7 +259,7 @@
             "title": "Title",
             "body": "Body"
         },
-        "tip": "Tip: The text can be styled as <a href=\"https://help.github.com/articles/markdown-basics/\" target=\"_new\">Github flavoured Markdown</a>"
+        "tip": "Tip: The text can be styled as <a href=\"https://help.github.com/articles/markdown-basics/\" target=\"_blank\">Github flavoured Markdown</a>"
     },
     "unknown": {
         "label": {
@@ -605,7 +605,7 @@
             "single": "as a single message containing an array",
             "multi": "as multiple messages, one for each element"
         },
-        "tip": "Tip: The <b>Select</b> value is a <a href=\"https://github.com/fb55/CSSselect#user-content-supported-selectors\" target=\"_new\"><i><u>CSS Selector</u></i></a>, similar to a jQuery selector."
+        "tip": "Tip: The <b>Select</b> value is a <a href=\"https://github.com/fb55/CSSselect#user-content-supported-selectors\" target=\"_blank\"><i><u>CSS Selector</u></i></a>, similar to a jQuery selector."
     },
     "json": {
         "errors": {
