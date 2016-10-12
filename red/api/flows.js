@@ -33,8 +33,8 @@ module.exports = {
             log.audit({event: "flows.get",version:"v2"},req);
             res.json(redNodes.getFlows());
         } else {
-            log.audit({event: "flows.get",version:version,error:"bad_api_version"},req);
-            res.status(400).json({error:"bad_api_version"});
+            log.audit({event: "flows.get",version:version,error:"invalid_api_version"},req);
+            res.status(400).json({code:"invalid_api_version", message:"Invalid API Version requested"});
         }
     },
     post: function(req,res) {
@@ -58,12 +58,12 @@ module.exports = {
                     var currentVersion = redNodes.getFlows().rev;
                     if (currentVersion !== flows.rev) {
                         //TODO: log warning
-                        return res.status(409).json({error:"version_mismatch"});
+                        return res.status(409).json({code:"version_mismatch"});
                     }
                 }
             } else if (version !== 'v1') {
-                log.audit({event: "flows.set",version:version,error:"bad_api_version"},req);
-                return res.status(400).json({error:"bad_api_version"});
+                log.audit({event: "flows.set",version:version,error:"invalid_api_version"},req);
+                res.status(400).json({code:"invalid_api_version", message:"Invalid API Version requested"});
             }
             redNodes.setFlows(flowConfig,deploymentType).then(function(flowId) {
                 if (version === "v1") {
