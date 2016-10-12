@@ -979,6 +979,8 @@ RED.editor = (function() {
                             input = $("#node-config-input-"+d);
                             if (input.attr('type') === "checkbox") {
                                 newValue = input.prop('checked');
+                            } else if ("format" in configTypeDef.defaults[d] && configTypeDef.defaults[d].format !== "" && input[0].nodeName === "DIV") {
+                                newValue = input.text();
                             } else {
                                 newValue = input.val();
                             }
