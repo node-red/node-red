@@ -1,3 +1,11 @@
+#### 0.15.1: Maintenance Release
+
+ - Update default palette catalogue to use https
+ - Disable palette editor if npm not found - and fix for Windows
+ - Searching package catalogue should be case-insensitive Fixes #1010
+ - contenteditable fields not handled in config nodes Fixes #1011
+ - Change html link refs from `_new` to `_blank` to be standards compliant
+
 #### 0.15.0: Milestone Release
 
 Runtime
@@ -32,7 +40,7 @@ Editor
 
 Nodes
 
- - Inject node label - show topic for timestamp mode if short 
+ - Inject node label - show topic for timestamp mode if short
  - Let change node set type if total match
  - Clean up status on close for several core nodes.
  - Change node: re-parse JSON set value each time to avoid pass-by-ref
