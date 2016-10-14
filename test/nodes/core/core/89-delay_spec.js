@@ -429,14 +429,17 @@ describe('delay Node', function() {
 
             // we ensure that we note that a warning is received for buffer growth
             sinon.stub(delayNode1, 'warn', function(warning) {
-                if (warning.indexOf("buffer exceeded 1000 messages" > -1)) {
-                    receivedWarning = true;
-                }
+                receivedWarning = true;
             });
             // we ensure that the warning is received for buffer size and that we get the last message
             helperNode1.on("input", function(msg) {
-                if (msg.payload === (messageBurstSize - 1) && receivedWarning === true) {
-                    done(); // it will timeout if we don't receive the last message
+                if (msg.payload === (messageBurstSize - 1)) {
+                    try {
+                        receivedWarning.should.be.true();
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
                 }
             });
             // send messages as quickly as possible
