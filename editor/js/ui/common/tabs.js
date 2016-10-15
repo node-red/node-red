@@ -53,7 +53,7 @@ RED.tabs = (function() {
                 return;
             }
             var currentScrollLeft = scrollContainer.scrollLeft();
-            scrollContainer.animate( { scrollLeft: dir }, 300);
+            scrollContainer.animate( { scrollLeft: dir }, 100);
             var interval = setInterval(function() {
                 var newScrollLeft = scrollContainer.scrollLeft()
                 if (newScrollLeft === currentScrollLeft) {
@@ -61,8 +61,8 @@ RED.tabs = (function() {
                     return;
                 }
                 currentScrollLeft = newScrollLeft;
-                scrollContainer.animate( { scrollLeft: dir }, 300);
-            },300);
+                scrollContainer.animate( { scrollLeft: dir }, 100);
+            },100);
             $(this).one('mouseup',function() {
                 clearInterval(interval);
             })
