@@ -28,7 +28,7 @@ RED.bidiUtil = (function() {
 	
     /**
      * Check if browser language is RTL language
-     **/
+     */
     function _isMirroringEnabled() {
         return (new RegExp("^(ar|he)").test(navigator.language));
     }
@@ -98,8 +98,7 @@ RED.bidiUtil = (function() {
             } else {
                 return "ltr";
             }
-        }
-        else {
+        } else {
             return textDir;
         }
     }
@@ -120,7 +119,7 @@ RED.bidiUtil = (function() {
     }
     
     /**
-     * to refresh the view whenever changing the user preferences
+     * Refreshes the view whenever changing the user preferences
      */
     function _refreshView() {
         RED.nodes.eachNode(function(n) { n.dirty = true;});
