@@ -84,7 +84,7 @@ RED.palette = (function() {
                 currentLineWidth = RED.view.calculateTextWidth(currentLine, "palette_label", 0);
             }
         }
-        displayLines.push(currentLine);
+        displayLines.push(RED.bidiUtil.applyBidiSupport(currentLine, BidiFlags.NS));
 
         var lines = displayLines.join("<br/>");
         var multiLineNodeHeight = 8+(lineHeight*displayLines.length);
