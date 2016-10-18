@@ -236,6 +236,10 @@ var RED = (function() {
 
         RED.menu.init({id:"btn-sidemenu",options: menuOptions});
 
+        //apply rtl direction on body tag in case of 
+        if (RED.bidiUtil.isMirroringEnabled())
+            $("body").attr("dir","rtl");
+        
         RED.user.init();
 
         RED.library.init();
