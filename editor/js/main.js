@@ -180,10 +180,10 @@ var RED = (function() {
             {id:"menu-item-status",label:RED._("menu.label.displayStatus"),toggle:true,onselect:toggleStatus, selected: true},
             null,
             {id:"menu-item-bidi",label:RED._("menu.label.view.textDir"),options:[
-                {id:"menu-item-bidi-default",toggle:"text-direction",label:RED._("menu.label.view.defaultDir"),selected: true, onselect:function(s) { if (s) {RED.bidiUti.setTextDirection("")}}},
-                {id:"menu-item-bidi-ltr",toggle:"text-direction",label:RED._("menu.label.view.ltr"), onselect:function(s) { if (s) {RED.bidiUti.setTextDirection("ltr")}}},
-                {id:"menu-item-bidi-rtl",toggle:"text-direction",label:RED._("menu.label.view.rtl"), onselect:function(s) { if (s) {RED.bidiUti.setTextDirection("rtl")}}},
-                {id:"menu-item-bidi-auto",toggle:"text-direction",label:RED._("menu.label.view.auto"), onselect:function(s) { if (s) {RED.bidiUti.setTextDirection("auto")}}}
+                {id:"menu-item-bidi-default",toggle:"text-direction",label:RED._("menu.label.view.defaultDir"),selected: true, onselect:function(s) { if (s) {RED.bidiUtil.setTextDirection("")}}},
+                {id:"menu-item-bidi-ltr",toggle:"text-direction",label:RED._("menu.label.view.ltr"), onselect:function(s) { if (s) {RED.bidiUtil.setTextDirection("ltr")}}},
+                {id:"menu-item-bidi-rtl",toggle:"text-direction",label:RED._("menu.label.view.rtl"), onselect:function(s) { if (s) {RED.bidiUtil.setTextDirection("rtl")}}},
+                {id:"menu-item-bidi-auto",toggle:"text-direction",label:RED._("menu.label.view.auto"), onselect:function(s) { if (s) {RED.bidiUtil.setTextDirection("auto")}}}
             ]},
             null,
             {id:"menu-item-numerals",label:RED._("menu.label.view.numericShaping"),options:[
