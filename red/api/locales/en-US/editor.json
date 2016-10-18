@@ -30,7 +30,16 @@
                 "defaultDir": "Default",
                 "ltr": "Left-to-right",
                 "rtl": "Right-to-left",
-                "auto": "Contextual"
+                "auto": "Contextual",
+                "defaultNumeral":"Nominal",
+                "nominal":"Nominal",
+                "national":"National",
+                "contextual":"Contextual",
+                "numeral":"Numeral",
+                "calendar": "National Calendar",
+                "defaultCalendar": "Gregorian",
+                "hijri": "Hijri",
+                "hebrew": "Hebrew"
             },
             "sidebar": {
                 "show": "Show sidebar"

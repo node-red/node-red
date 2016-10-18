@@ -180,10 +180,22 @@ var RED = (function() {
             {id:"menu-item-status",label:RED._("menu.label.displayStatus"),toggle:true,onselect:toggleStatus, selected: true},
             null,
             {id:"menu-item-bidi",label:RED._("menu.label.view.textDir"),options:[
-                {id:"menu-item-bidi-default",toggle:"text-direction",label:RED._("menu.label.view.defaultDir"),selected: true, onselect:function(s) { if(s){RED.text.bidi.setTextDirection("")}}},
-                {id:"menu-item-bidi-ltr",toggle:"text-direction",label:RED._("menu.label.view.ltr"), onselect:function(s) { if(s){RED.text.bidi.setTextDirection("ltr")}}},
-                {id:"menu-item-bidi-rtl",toggle:"text-direction",label:RED._("menu.label.view.rtl"), onselect:function(s) { if(s){RED.text.bidi.setTextDirection("rtl")}}},
-                {id:"menu-item-bidi-auto",toggle:"text-direction",label:RED._("menu.label.view.auto"), onselect:function(s) { if(s){RED.text.bidi.setTextDirection("auto")}}}
+                {id:"menu-item-bidi-default",toggle:"text-direction",label:RED._("menu.label.view.defaultDir"),selected: true, onselect:function(s) { if(s){RED.bidiUti.setTextDirection("")}}},
+                {id:"menu-item-bidi-ltr",toggle:"text-direction",label:RED._("menu.label.view.ltr"), onselect:function(s) { if(s){RED.bidiUti.setTextDirection("ltr")}}},
+                {id:"menu-item-bidi-rtl",toggle:"text-direction",label:RED._("menu.label.view.rtl"), onselect:function(s) { if(s){RED.bidiUti.setTextDirection("rtl")}}},
+                {id:"menu-item-bidi-auto",toggle:"text-direction",label:RED._("menu.label.view.auto"), onselect:function(s) { if(s){RED.bidiUti.setTextDirection("auto")}}}
+            ]},
+            null,
+            {id:"menu-item-numerals",label:RED._("menu.label.view.numeral"),options:[
+            {id:"menu-item-numerals-default",toggle:"numeral-type",label:RED._("menu.label.view.defaultNumeral"),selected: true, onselect:function(s) { if(s){RED.bidiUtil.setNumericShapingType("Nominal")}}},
+            {id:"menu-item-numerals-national",toggle:"numeral-type",label:RED._("menu.label.view.national"), onselect:function(s) { if(s){RED.bidiUtil.setNumericShapingType("National")}}},
+            {id:"menu-item-numerals-contextual",toggle:"numeral-type",label:RED._("menu.label.view.contextual"), onselect:function(s) { if(s){RED.bidiUtil.setNumericShapingType("Contextual")}}} 
+            ]},
+            null,
+            {id:"menu-item-calendars",label:RED._("menu.label.view.calendar"),options:[
+            {id:"menu-item-calendars-default",toggle:"calendar-type",label:RED._("menu.label.view.defaultCalendar"),selected: true, onselect:function(s) { if(s){RED.bidiUtil.setCalendarType("gregorian")}}},
+            {id:"menu-item-calendars-hijri",toggle:"calendar-type",label:RED._("menu.label.view.hijri"), onselect:function(s) { if(s){RED.bidiUtil.setCalendarType("hijri")}}},
+            {id:"menu-item-calendars-hebrew",toggle:"calendar-type",label:RED._("menu.label.view.hebrew"), onselect:function(s) { if(s){RED.bidiUtil.setCalendarType("hebrew")}}}
             ]},
             null,
             {id:"menu-item-sidebar",label:RED._("menu.label.sidebar.show"),toggle:true,onselect:RED.sidebar.toggleSidebar, selected: true}
