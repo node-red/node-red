@@ -109,7 +109,7 @@ RED.bidiUtil = (function() {
      * @param input - the input field
      */
     function _prepareInput(input) {
-        input.on("keyup",onInputChange).on("paste",_onInputChange).on("cut",_onInputChange);
+        input.on("keyup",_onInputChange).on("paste",_onInputChange).on("cut",_onInputChange);
         // Set the initial text direction
         _onInputChange.call(input);
     }
