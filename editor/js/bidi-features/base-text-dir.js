@@ -23,8 +23,7 @@ RED.baseTextDir = (function() {
         for (var i=0;i<length;i++) {
             if (_isBidiChar(stringValue.charCodeAt(i))) {
                 return true;
-            }
-            else if(_isLatinChar(stringValue.charCodeAt(i))) {
+            } else if (_isLatinChar(stringValue.charCodeAt(i))) {
                 return false;
             }
          }
@@ -41,7 +40,7 @@ RED.baseTextDir = (function() {
     }
 
     function _isLatinChar(c){
-        return (c > 64 && c < 91)||(c > 96 && c < 123)
+        return (c > 64 && c < 91)||(c > 96 && c < 123);
     }
 
     /**
@@ -54,8 +53,7 @@ RED.baseTextDir = (function() {
             var dir = RED.bidiUtil.resolveBaseTextDir(value);
             if (dir == "ltr") {
                return LRE + value + PDF;
-            }
-            else if (dir == "rtl") {
+            } else if (dir == "rtl") {
                return RLE + value + PDF;
             }
         }

@@ -25,11 +25,11 @@ RED.numericShaping = (function(){
         if (!text) 
             return text;
         switch (shaperType) {
-            case "National":
-                return _shapeArabic(text);
-            case "Nominal":
+            case "defaultNumeral":
                 return _shapeEuropean(text);
-            case "Contextual":
+            case "national":
+                return _shapeArabic(text);
+            case "contextual":
                 return _shapeContextual(text, textDir === "rtl" ? 2 : 1);
             default: 
                 return text;	
