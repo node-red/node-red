@@ -20,7 +20,7 @@ RED.baseTextDir = (function() {
 
     function _isRTLValue(stringValue) {
         var length = stringValue.length;
-        for (var i=0;i<length;i++) {
+        for (var i = 0 ; i < length; i++) {
             if (_isBidiChar(stringValue.charCodeAt(i))) {
                 return true;
             } else if (_isLatinChar(stringValue.charCodeAt(i))) {
@@ -30,7 +30,7 @@ RED.baseTextDir = (function() {
          return false;
     }
 
-    function _isBidiChar(c)  {
+    function _isBidiChar(c) {
         return (c >= 0x05d0 && c <= 0x05ff)||
                (c >= 0x0600 && c <= 0x065f)||
                (c >= 0x066a && c <= 0x06ef)||
@@ -39,8 +39,8 @@ RED.baseTextDir = (function() {
                (c >= 0xfe70 && c <= 0xfefc);
     }
 
-    function _isLatinChar(c){
-        return (c > 64 && c < 91)||(c > 96 && c < 123);
+    function _isLatinChar(c) {
+        return (c > 64 && c < 91) || (c > 96 && c < 123);
     }
 
     /**
