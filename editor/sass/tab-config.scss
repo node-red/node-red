@@ -49,6 +49,14 @@
          border-bottom-right-radius: 4px;
      }
 }
+[dir="rtl"] .config_node {
+    .palette_label {
+       margin-left: 0px;
+       margin-right: 8px;
+       text-align: right;
+
+   } 
+}
 .config_node_type {
     color: #999;
     text-align: right;
@@ -57,10 +65,20 @@
         margin-top: 20px;
     }
 }
+[dir="rtl"] .config_node_type {
+    text-align: left;
+    padding-right: 0px;
+    padding-left: 3px;
+}
 .config_node_none {
     color: #ddd;
     text-align:right;
     padding-right: 3px;
+}
+[dir="rtl"] .config_node_none {
+    text-align: left;
+    padding-right: 0px;
+    padding-left: 3px;
 }
 .config_node_unused {
     border-color: #aaa;

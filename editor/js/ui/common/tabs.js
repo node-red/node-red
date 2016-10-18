@@ -202,9 +202,8 @@ RED.tabs = (function() {
                 if (tab.icon) {
                     $('<img src="'+tab.icon+'" class="red-ui-tab-icon"/>').appendTo(link);
                 }
-                var span = $('<span/>',{class:"bidiAware"}).text(tab.label).appendTo(link);
-                span.attr('dir', RED.text.bidi.resolveBaseTextDir(tab.label));
-
+                var span = $('<span/>',{class:"bidiAware"});
+                span.attr('dir', RED.bidi.resolveBaseTextDir(tab.label)).text(RED.bidi.applyBidiSupport(tab.label,RED.bidi.flags.NS)).appendTo(link);
                 link.on("click",onTabClick);
                 link.on("dblclick",onTabDblClick);
                 if (tab.closeable) {
@@ -314,7 +313,7 @@ RED.tabs = (function() {
                 tabs[id].label = label;
                 var tab = ul.find("a[href='#"+id+"']");
                 tab.attr("title",label);
-                tab.find("span").text(label).attr('dir', RED.text.bidi.resolveBaseTextDir(label));
+                tab.find("span").attr('dir', RED.bidi.resolveBaseTextDir(label)).text(RED.bidi.applyBidiSupport(label,RED.bidi.flags.NS));
                 updateTabWidths();
             },
             order: function(order) {

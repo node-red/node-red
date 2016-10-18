@@ -75,7 +75,7 @@ RED.menu = (function() {
                 linkContent += '<span class="menu-label-container"><span class="menu-label">'+opt.label+'</span>'+
                                '<span class="menu-sublabel">'+opt.sublabel+'</span></span>'
             } else {
-                linkContent += '<span class="menu-label">'+opt.label+'</span>'
+                linkContent += '<span class="menu-label">'+RED.bidi.applyBidiSupport(opt.label, RED.bidi.flags.NS)+'</span>'
             }
 
             linkContent += '</a>';

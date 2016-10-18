@@ -89,6 +89,7 @@
             if (val === undefined || val === null || val === "") {
                 this.resultCount.text("").hide();
             } else {
+            	val = RED.bidi.applyBidiSupport(val,RED.bidi.flags.NS);
                 this.resultCount.text(val).show();
             }
         }

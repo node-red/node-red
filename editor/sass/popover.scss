@@ -28,6 +28,12 @@
      line-height: 1.4em;
      @include component-shadow;
  }
+ [dir="rtl"] .red-ui-popover {
+     transform: rotateY(180deg);
+     p {
+         transform: rotateY(180deg);
+     }
+ }
  .red-ui-popover:after, .red-ui-popover:before {
  	right: 100%;
  	top: 50%;

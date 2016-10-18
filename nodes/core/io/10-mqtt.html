@@ -148,7 +148,7 @@
             <div class="form-row node-input-broker">
                 <label for="node-config-input-broker"><i class="fa fa-globe"></i> <span data-i18n="mqtt.label.broker"></span></label>
                 <input class="input-append-left" type="text" id="node-config-input-broker" placeholder="e.g. localhost" style="width: 40%;" >
-                <label for="node-config-input-port" style="margin-left: 10px; width: 35px; "> <span data-i18n="mqtt.label.port"></span></label>
+                <label for="node-config-input-port" id="node-config-label-port"> <span data-i18n="mqtt.label.port"></span></label>
                 <input type="text" id="node-config-input-port" data-i18n="[placeholder]mqtt.label.port" style="width:45px">
             </div>
             <div class="form-row">
@@ -165,7 +165,7 @@
             <div class="form-row">
                 <label for="node-config-input-keepalive" style="width: auto"><i class="fa fa-clock-o"></i> <span data-i18n="mqtt.label.keepalive"></span></label>
                 <input type="text" id="node-config-input-keepalive" style="width: 50px">
-                <input type="checkbox" id="node-config-input-cleansession" style="margin-left: 30px; height: 1em;display: inline-block; width: auto; vertical-align: middle;">
+                <input type="checkbox" id="node-config-input-cleansession">
                 <label for="node-config-input-cleansession" style="width: auto;" data-i18n="mqtt.label.cleansession"></label>
             </div>
             <div class="form-row">
@@ -357,3 +357,25 @@
         }
     });
 </script>
+
+<style>
+#node-config-label-port {
+    margin-left: 10px;
+    width: 35px;
+}
+[dir="rtl"] #node-config-label-port{
+    margin-left: 0;
+    margin-right: 10px;
+}
+#node-config-input-cleansession {
+    margin-left: 30px;
+    height: 1em;
+    display: inline-block;
+    width: auto;
+    vertical-align: middle;
+}
+[dir="rtl"] #node-config-input-cleansession {
+    margin-left: 0px;
+    margin-right: 30px;
+}
+</style>
