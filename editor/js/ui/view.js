@@ -1454,7 +1454,7 @@ RED.view = (function() {
                     .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
 
                 outGroup.append("svg:text").attr("class","port_label").attr("x",20).attr("y",8).style("font-size","10px").text("output");
-                outGroup.append("svg:text").attr("class","port_label port_index").attr("x",20).attr("y",24).text(function(d,i){ return i+1});
+                outGroup.append("svg:text").attr("class","port_label port_index").attr("x",20).attr("y",24).text(function(d,i){ return RED.bidiUtil.applyBidiSupport(i+1,BidiFlags.NS)});
 
                 var subflowInputs = vis.selectAll(".subflowinput").data(activeSubflow.in,function(d,i){ return d.id;});
                 subflowInputs.exit().remove();
@@ -1809,7 +1809,7 @@ RED.view = (function() {
                                         l = d._def.label;
                                         try {
                                             l = (typeof l === "function" ? l.call(d) : l)||"";
-                                            l = RED.text.bidi.enforceTextDirectionWithUCC(l);
+                                            l = RED.bidiUtil.applyBidiSupport(l,BidiFlags.BTD & BidiFlags.NS);
                                         } catch(err) {
                                             console.log("Definition error: "+d.type+".label",err);
                                             l = d.type;
