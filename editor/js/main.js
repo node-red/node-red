@@ -185,13 +185,11 @@ var RED = (function() {
                 {id:"menu-item-bidi-rtl",toggle:"text-direction",label:RED._("menu.label.view.rtl"), onselect:function(s) { if (s) {RED.bidiUtil.setTextDirection("rtl")}}},
                 {id:"menu-item-bidi-auto",toggle:"text-direction",label:RED._("menu.label.view.auto"), onselect:function(s) { if (s) {RED.bidiUtil.setTextDirection("auto")}}}
             ]},
-            null,
             {id:"menu-item-numerals",label:RED._("menu.label.view.numericShaping"),options:[
             {id:"menu-item-numerals-default",toggle:"numeral-type",label:RED._("menu.label.view.defaultNumeral"),selected: true, onselect:function(s) { if(s){RED.bidiUtil.setNumericShapingType("defaultNumeral")}}},
             {id:"menu-item-numerals-national",toggle:"numeral-type",label:RED._("menu.label.view.national"), onselect:function(s) { if (s) {RED.bidiUtil.setNumericShapingType("national")}}},
             {id:"menu-item-numerals-contextual",toggle:"numeral-type",label:RED._("menu.label.view.contextual"), onselect:function(s) { if (s){RED.bidiUtil.setNumericShapingType("contextual")}}} 
             ]},
-            null,
             {id:"menu-item-calendars",label:RED._("menu.label.view.calendar"),options:[
             {id:"menu-item-calendars-default",toggle:"calendar-type",label:RED._("menu.label.view.defaultCalendar"),selected: true, onselect:function(s) { if(s) {RED.bidiUtil.setCalendarType("gregorian")}}},
             {id:"menu-item-calendars-hijri",toggle:"calendar-type",label:RED._("menu.label.view.hijri"), onselect:function(s) { if (s) {RED.bidiUtil.setCalendarType("hijri")}}},
