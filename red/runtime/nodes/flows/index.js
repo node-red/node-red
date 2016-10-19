@@ -192,6 +192,8 @@ function handleError(node,logMessage,msg) {
 function delegateStatus(node,statusMessage) {
     if (activeFlows[node.z]) {
         activeFlows[node.z].handleStatus(node,statusMessage);
+    } else if (activeNodesToFlow[node.z]) {
+        activeFlows[activeNodesToFlow[node.z]].handleStatus(node,statusMessage);
     }
 }
 function handleStatus(node,statusMessage) {
