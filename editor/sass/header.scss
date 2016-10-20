@@ -111,6 +111,7 @@ span.logo {
 }
 #header .button-group > a {
     display: inline-block;
+    position: relative;
     float: left;
     line-height: 22px;
     font-size: 14px;
@@ -133,6 +134,20 @@ span.logo {
     }
 }
 
+.deploy-button-spinner {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    text-align: center;
+
+    img {
+        opacity: 0.8;
+        height: 100%;
+    }
+}
+
 #btn-deploy {
 
     padding: 4px 12px;
@@ -142,7 +157,7 @@ span.logo {
         background: $deployDisabledButton;
         color: #999 !important;
 
-        img {
+        .deploy-button-content>img {
             opacity: 0.3;
         }
 
@@ -158,7 +173,7 @@ span.logo {
         }
     }
 
-    img {
+    .deploy-button-content>img {
         margin-right: 8px;
     }
 }

@@ -32,7 +32,7 @@ RED.deploy = (function() {
 
     function changeDeploymentType(type) {
         deploymentType = type;
-        $("#btn-deploy img").attr("src",deploymentTypes[type].img);
+        $("#btn-deploy-icon").attr("src",deploymentTypes[type].img);
     }
 
     var currentDiff = null;
@@ -50,7 +50,15 @@ RED.deploy = (function() {
 
         if (type == "default") {
             $('<li><span class="deploy-button-group button-group">'+
-              '<a id="btn-deploy" class="deploy-button disabled" href="#"><img id="btn-deploy-icon" src="red/images/deploy-full-o.png"> <span>'+RED._("deploy.deploy")+'</span></a>'+
+              '<a id="btn-deploy" class="deploy-button disabled" href="#">'+
+                '<span class="deploy-button-content">'+
+                 '<img id="btn-deploy-icon" src="red/images/deploy-full-o.png"> '+
+                 '<span>'+RED._("deploy.deploy")+'</span>'+
+                '</span>'+
+                '<span class="deploy-button-spinner hide">'+
+                 '<img src="red/images/spin.svg"/>'+
+                '</span>'+
+              '</a>'+
               '<a id="btn-deploy-options" data-toggle="dropdown" class="deploy-button" href="#"><i class="fa fa-caret-down"></i></a>'+
               '</span></li>').prependTo(".header-toolbar");
               RED.menu.init({id:"btn-deploy-options",
@@ -69,8 +77,14 @@ RED.deploy = (function() {
 
             $('<li><span class="deploy-button-group button-group">'+
               '<a id="btn-deploy" class="deploy-button disabled" href="#">'+
-              (icon?'<img id="btn-deploy-icon" src="'+icon+'"> ':'')+
-              '<span>'+label+'</span></a>'+
+                '<span class="deploy-button-content">'+
+                  (icon?'<img id="btn-deploy-icon" src="'+icon+'"> ':'')+
+                  '<span>'+label+'</span>'+
+                '</span>'+
+                '<span class="deploy-button-spinner hide">'+
+                 '<img src="red/images/spin.svg"/>'+
+                '</span>'+
+              '</a>'+
               '</span></li>').prependTo(".header-toolbar");
         }
 
@@ -519,9 +533,7 @@ RED.deploy = (function() {
 
 
     function save(skipValidation,force) {
-        if (RED.nodes.dirty()) {
-            //$("#debug-tab-clear").click();  // uncomment this to auto clear debug on deploy
-
+        if (!$("#btn-deploy").hasClass("disabled")) {
             if (!skipValidation) {
                 var hasUnknown = false;
                 var hasInvalid = false;
@@ -590,8 +602,9 @@ RED.deploy = (function() {
 
             var nns = RED.nodes.createCompleteNodeSet();
 
-            $("#btn-deploy-icon").removeClass('fa-download');
-            $("#btn-deploy-icon").addClass('spinner');
+            $(".deploy-button-content").css('opacity',0);
+            $(".deploy-button-spinner").show();
+            $("#btn-deploy").addClass("disabled");
 
             var data = {flows:nns};
 
@@ -641,6 +654,7 @@ RED.deploy = (function() {
                 RED.events.emit("deploy");
             }).fail(function(xhr,textStatus,err) {
                 RED.nodes.dirty(true);
+                $("#btn-deploy").removeClass("disabled");
                 if (xhr.status === 401) {
                     RED.notify(RED._("deploy.deployFailed",{message:RED._("user.notAuthorized")}),"error");
                 } else if (xhr.status === 409) {
@@ -651,8 +665,8 @@ RED.deploy = (function() {
                     RED.notify(RED._("deploy.deployFailed",{message:RED._("deploy.errors.noResponse")}),"error");
                 }
             }).always(function() {
-                $("#btn-deploy-icon").removeClass('spinner');
-                $("#btn-deploy-icon").addClass('fa-download');
+                $(".deploy-button-content").css('opacity',1);
+                $(".deploy-button-spinner").hide();
             });
         }
     }
