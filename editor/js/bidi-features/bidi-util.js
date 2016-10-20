@@ -55,7 +55,7 @@ RED.bidiUtil = (function() {
      */
     function _getGlobalizedDate(date) {
         var options = {};
-        var lang = "en-US";
+        var lang = navigator.language;
         if (calendarType === "hijri") {
             options = lang + "-u-ca-islamic";
         } else if (calendarType === "hebrew") {
