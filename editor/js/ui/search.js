@@ -250,6 +250,7 @@ RED.search = (function() {
                 createDialog();
             }
             dialog.slideDown();
+            RED.events.emit("search:open");
             visible = true;
         }
         searchInput.focus();
@@ -268,6 +269,7 @@ RED.search = (function() {
                     searchInput.searchBox('value','');
                 });
             }
+            RED.events.emit("search:close");
         }
     }
 

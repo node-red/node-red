@@ -15,6 +15,8 @@
  **/
 RED.palette.editor = (function() {
 
+    var disabled = false;
+
     var editorTabs;
     var filterInput;
     var searchInput;
@@ -259,6 +261,11 @@ RED.palette.editor = (function() {
         if (RED.settings.theme('palette.editable') === false) {
             return;
         }
+        if (disabled) {
+            return;
+        }
+        
+        initInstallTab();
         $("#header-shade").show();
         $("#editor-shade").show();
         $("#sidebar-shade").show();
@@ -379,6 +386,13 @@ RED.palette.editor = (function() {
             return;
         }
 
+        RED.events.on("editor:open",function() { disabled = true; });
+        RED.events.on("editor:close",function() { disabled = false; });
+        RED.events.on("search:open",function() { disabled = true; });
+        RED.events.on("search:close",function() { disabled = false; });
+
+        RED.keyboard.add("*", /* p */ 80,{shift:true,ctrl:true},function() {RED.palette.editor.show();d3.event.preventDefault();});
+
         editorTabs = RED.tabs.create({
             id:"palette-editor-tabs",
             onchange:function(tab) {
@@ -391,7 +405,6 @@ RED.palette.editor = (function() {
                     searchInput.searchBox('value',"");
                 }
                 if (tab.id === 'install') {
-                    initInstallTab();
                     if (searchInput) {
                         searchInput.focus();
                     }

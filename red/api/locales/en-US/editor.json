@@ -178,7 +178,8 @@
         "cutNode": "Cut selected nodes",
         "pasteNode": "Paste nodes",
         "undoChange": "Undo the last change performed",
-        "searchBox": "Open search box"
+        "searchBox": "Open search box",
+        "managePalette": "Manage palette"
     },
     "library": {
         "openLibrary": "Open Library...",

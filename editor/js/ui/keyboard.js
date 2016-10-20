@@ -125,6 +125,7 @@ RED.keyboard = (function() {
                     '<table class="keyboard-shortcuts">'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">Space</span></td><td>'+RED._("keyboard.toggleSidebar")+'</td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">.</span></td><td>'+RED._("keyboard.searchBox")+'</td></tr>'+
+                        '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">Shift</span> + <span class="help-key">p</span></td><td>'+RED._("keyboard.managePalette")+'</td></tr>'+
                         '<tr><td></td><td></td></tr>'+
                         '<tr><td><span class="help-key">Delete</span></td><td rowspan="2">'+RED._("keyboard.deleteSelected")+'</td></tr>'+
                         '<tr><td><span class="help-key">Backspace</span></td></tr>'+
