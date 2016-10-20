@@ -114,6 +114,12 @@ var log = module.exports = {
     addHandler: function(func) {
         logHandlers.push(func);
     },
+    removeHandler: function(func) {
+        var index = logHandlers.indexOf(func);
+        if (index > -1) {
+            logHandlers.splice(index,1);
+        }
+    },
     log: function(msg) {
         msg.timestamp = Date.now();
         logHandlers.forEach(function(handler) {

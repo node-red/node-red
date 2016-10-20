@@ -16,7 +16,6 @@
 var should = require("should");
 var sinon = require("sinon");
 var util = require("util");
-
 var log = require("../../../red/runtime/log");
 
 describe("runtime/log", function() {
@@ -156,4 +155,70 @@ describe("runtime/log", function() {
         sinon.assert.neverCalledWithMatch(util.log,"[trace] This is a trace");
         sinon.assert.neverCalledWithMatch(util.log,"[metric] ");
     });
+
+    it('add a custom log handler directly', function() {
+        var settings = {};
+        log.init(settings);
+
+        var logEvents = [];
+        var loggerOne = {
+            emit: function(event,msg) {
+                logEvents.push({logger:1,msg:msg});
+            }
+        };
+        var loggerTwo = {
+            emit: function(event,msg) {
+                logEvents.push({logger:2,msg:msg});
+            }
+        };
+        log.addHandler(loggerOne);
+        log.addHandler(loggerTwo);
+
+        log.error("This is an error");
+        log.warn("This is a warn");
+        log.info("This is an info");
+        log.debug("This is a debug");
+        log.trace("This is a trace");
+        log.log({level:log.METRIC,msg:"testMetric"});
+
+        logEvents.filter(function(evt) { return evt.logger === 1}).should.have.lengthOf(6);
+        logEvents.filter(function(evt) { return evt.logger === 2}).should.have.lengthOf(6);
+    });
+
+    it('remove a custom log handler directly', function() {
+        var settings = {};
+        log.init(settings);
+
+        var logEvents = [];
+        var loggerOne = {
+            emit: function(event,msg) {
+                logEvents.push({logger:1,msg:msg});
+            }
+        };
+        var loggerTwo = {
+            emit: function(event,msg) {
+                logEvents.push({logger:2,msg:msg});
+            }
+        };
+        log.addHandler(loggerOne);
+        log.addHandler(loggerTwo);
+
+        log.info("This is an info");
+        logEvents.filter(function(evt) { return evt.logger === 1}).should.have.lengthOf(1);
+        logEvents.filter(function(evt) { return evt.logger === 2}).should.have.lengthOf(1);
+
+
+        log.removeHandler(loggerTwo);
+        log.info("This is an info");
+        logEvents.filter(function(evt) { return evt.logger === 1}).should.have.lengthOf(2);
+        logEvents.filter(function(evt) { return evt.logger === 2}).should.have.lengthOf(1);
+
+        log.removeHandler(loggerOne);
+        log.info("This is an info");
+        logEvents.filter(function(evt) { return evt.logger === 1}).should.have.lengthOf(2);
+        logEvents.filter(function(evt) { return evt.logger === 2}).should.have.lengthOf(1);
+
+
+    });
+
 });
