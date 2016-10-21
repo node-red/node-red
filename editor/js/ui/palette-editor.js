@@ -24,6 +24,7 @@ RED.palette.editor = (function() {
     var packageList;
     var loadedList = [];
     var filteredList = [];
+    var loadedIndex = {};
 
     var typesInUse = {};
     var nodeEntries = {};
@@ -90,6 +91,15 @@ RED.palette.editor = (function() {
             callback(xhr);
         })
     }
+
+    function refreshNodeModuleList() {
+        for (var id in nodeEntries) {
+            if (nodeEntries.hasOwnProperty(id)) {
+                _refreshNodeModule(id);
+            }
+        }
+    }
+
     function refreshNodeModule(module) {
         if (!eventTimers.hasOwnProperty(module)) {
             eventTimers[module] = setTimeout(function() {
@@ -254,6 +264,19 @@ RED.palette.editor = (function() {
                     nodeEntry.container.toggleClass("disabled",(activeTypeCount === 0));
                 }
             }
+
+            nodeEntry.updateButton.hide();
+            // if (loadedIndex.hasOwnProperty(module)) {
+            //     if (moduleInfo.version !== loadedIndex[module].version) {
+            //         nodeEntry.updateButton.show();
+            //         nodeEntry.updateButton.html(RED._('palette.editor.update',{version:loadedIndex[module].version}));
+            //     } else {
+            //         nodeEntry.updateButton.hide();
+            //     }
+            //
+            // } else {
+            //     nodeEntry.updateButton.hide();
+            // }
         }
 
     }
@@ -264,19 +287,25 @@ RED.palette.editor = (function() {
         if (disabled) {
             return;
         }
-        
+
         initInstallTab();
         $("#header-shade").show();
         $("#editor-shade").show();
         $("#sidebar-shade").show();
         $("#sidebar-separator").hide();
+
+        editorTabs.activateTab('nodes');
+
         $("#main-container").addClass("palette-expanded");
         setTimeout(function() {
             editorTabs.resize();
+            filterInput.focus();
         },250);
         RED.events.emit("palette-editor:open");
+        RED.keyboard.add("*",/* ESCAPE */ 27,function(){hidePaletteEditor();d3.event.preventDefault();});
     }
     function hidePaletteEditor() {
+        RED.keyboard.remove("*");
         $("#main-container").removeClass("palette-expanded");
         $("#header-shade").hide();
         $("#editor-shade").hide();
@@ -314,6 +343,7 @@ RED.palette.editor = (function() {
         catalogueLoadStatus.push(v);
         if (v.modules) {
             v.modules.forEach(function(m) {
+                loadedIndex[m.id] = m;
                 m.index = [m.id];
                 if (m.keywords) {
                     m.index = m.index.concat(m.keywords);
@@ -342,6 +372,7 @@ RED.palette.editor = (function() {
     function initInstallTab() {
         if (loadedList.length === 0) {
             loadedList = [];
+            loadedIndex = {};
             packageList.editableList('empty');
             $(".palette-module-shade-status").html(RED._('palette.editor.loading'));
             var catalogues = RED.settings.theme('palette.catalogues')||['https://catalogue.nodered.org/catalogue.json'];
@@ -355,6 +386,7 @@ RED.palette.editor = (function() {
             catalogues.forEach(function(catalog,index) {
                 $.getJSON(catalog, {_: new Date().getTime()},function(v) {
                     handleCatalogResponse(catalog,index,v);
+                    refreshNodeModuleList();
                 })
             });
         }
@@ -472,6 +504,13 @@ RED.palette.editor = (function() {
                     var setButton = $('<a href="#" class="editor-button editor-button-small palette-module-set-button"><i class="fa fa-angle-right palette-module-node-chevron"></i> </a>').appendTo(buttonRow);
                     var setCount = $('<span>').appendTo(setButton);
                     var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
+
+                    var updateButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.update')).appendTo(buttonGroup);
+                    updateButton.click(function(evt) {
+                        evt.preventDefault();
+                    })
+
+
                     var removeButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.remove')).appendTo(buttonGroup);
                     removeButton.click(function(evt) {
                         evt.preventDefault();
@@ -489,6 +528,7 @@ RED.palette.editor = (function() {
                     var shade = $('<div class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(container);
 
                     object.elements = {
+                        updateButton: updateButton,
                         removeButton: removeButton,
                         enableButton: enableButton,
                         setCount: setCount,
@@ -621,6 +661,7 @@ RED.palette.editor = (function() {
         refreshButton.click(function(e) {
             e.preventDefault();
             loadedList = [];
+            loadedIndex = {};
             initInstallTab();
         })
 
