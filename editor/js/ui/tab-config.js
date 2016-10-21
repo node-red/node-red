@@ -136,8 +136,8 @@ RED.sidebar.config = (function() {
                     try {
                         label = node._def.label.call(node);
                     } catch(err) {
-                        console.log("Definition error: "+node_def.type+".label",err);
-                        label = node_def.type;
+                        console.log("Definition error: "+node._def.type+".label",err);
+                        label = node._def.type;
                     }
 
                 } else {
