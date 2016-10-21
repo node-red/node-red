@@ -257,7 +257,7 @@
             RED.events.on("workspace:change", refreshMessageList);
             $("#debug-tab-open").click(function(e) {
                 e.preventDefault();
-                subWindow = window.open(document.location.toString().replace(/#$/,"")+"debug/view/view.html","nodeREDDebugView","menubar=no,location=no,toolbar=no,chrome,height=500,width=600");
+                subWindow = window.open(document.location.toString().replace(/#.*$/,"")+"debug/view/view.html","nodeREDDebugView","menubar=no,location=no,toolbar=no,chrome,height=500,width=600");
             });
         },
         onpaletteremove: function() {
