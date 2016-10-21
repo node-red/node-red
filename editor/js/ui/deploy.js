@@ -602,6 +602,7 @@ RED.deploy = (function() {
 
             var nns = RED.nodes.createCompleteNodeSet();
 
+            var startTime = Date.now();
             $(".deploy-button-content").css('opacity',0);
             $(".deploy-button-spinner").show();
             $("#btn-deploy").addClass("disabled");
@@ -665,8 +666,11 @@ RED.deploy = (function() {
                     RED.notify(RED._("deploy.deployFailed",{message:RED._("deploy.errors.noResponse")}),"error");
                 }
             }).always(function() {
-                $(".deploy-button-content").css('opacity',1);
-                $(".deploy-button-spinner").hide();
+                var delta = Math.max(0,300-(Date.now()-startTime));
+                setTimeout(function() {
+                    $(".deploy-button-content").css('opacity',1);
+                    $(".deploy-button-spinner").hide();
+                },delta);
             });
         }
     }
