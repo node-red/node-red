@@ -143,6 +143,9 @@ module.exports = {
             comms.start();
             done();
         });
+        server.on('close', function() {
+            comms.stop();
+        });
     },
 
     //TODO consider saving TCP handshake/server reinit on start/stop/start sequences
