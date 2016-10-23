@@ -131,7 +131,7 @@
                     var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
                     var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num',previousValueType]});
                     // reverse float property in case of right directionality
-                    if ($("body").attr("dir") == "rtl") {
+                    if (RED.bidiUtil.isMirroringEnabled()) {
                         var finalspan = $('<span/>',{style:"float: left;margin-top: 6px;"}).appendTo(row);	
                     } else {
                         var finalspan = $('<span/>',{style:"float: right;margin-top: 6px;"}).appendTo(row);
