@@ -1503,7 +1503,7 @@ RED.view = (function() {
                     if (d.dirty) {
                         var output = d3.select(this);
                         output.selectAll(".subflowport").classed("node_selected",function(d) { return d.selected; })
-                        output.selectAll(".port_index").text(function(d){ return d.i+1});
+                        output.selectAll(".port_index").text(function(d){ return RED.bidiUtil.applyBidiSupport(d.i+1, BidiFlags.NS)});
                         output.attr("transform", function(d) { return "translate(" + (d.x-d.w/2) + "," + (d.y-d.h/2) + ")"; });
                         dirtyNodes[d.id] = d;
                         d.dirty = false;

@@ -73,7 +73,7 @@ RED.sidebar.info = (function() {
             table += '<tr><td>'+RED._("common.label.name")+'</td><td>&nbsp;<span class="bidiAware" dir="'+RED.bidiUtil.resolveBaseTextDir(node.name)+'">'+RED.bidiUtil.applyBidiSupport(node.name,BidiFlags.NS)+'</span></td></tr>';
         }
         table += "<tr><td>"+RED._("sidebar.info.type")+"</td><td>&nbsp;"+node.type+"</td></tr>";
-        table += "<tr><td>"+RED._("sidebar.info.id")+"</td><td>&nbsp;"+node.id+"</td></tr>";
+        table += "<tr><td>"+RED._("sidebar.info.id")+"</td><td>&nbsp;"+RED.bidiUtil.applyBidiSupport(node.id,BidiFlags.NS)+"</td></tr>";
 
         var m = /^subflow(:(.+))?$/.exec(node.type);
         var subflowNode;
