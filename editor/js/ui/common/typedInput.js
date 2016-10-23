@@ -199,7 +199,7 @@
                     op.text(opt.label);
                 }
                 // reverse property direction in case of right directionality
-                if (uiDir == "rtl") {
+                if (RED.bidiUtil.isMirroringEnabled()) {
                     if (opt.icon) {
                     	$('<img>',{src:opt.icon,style:"margin-left: 4px; height: 18px;"}).prependTo(op);
                     } else {
@@ -239,7 +239,7 @@
                 top -= (top+menuHeight)-$(window).height()+5;
             }
             // reverse property direction in case of right directionality
-            if (uiDir == "rtl") {
+            if (RED.bidiUtil.isMirroringEnabled()) {
                 menu.css({ 
                     top: top+"px",
                     right: (2+pos.right)+"px",
@@ -288,7 +288,7 @@
                 this.selectTrigger.width('auto');
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
                 // reverse property direction in case of right directionality
-                if (uiDir == "rtl") {
+                if (RED.bidiUtil.isMirroringEnabled()) {
                     this.elementDiv.css('right',labelWidth+"px");
                     if (this.optionSelectTrigger) {
                         this.optionSelectTrigger.css('right',(labelWidth+5)+"px");
@@ -360,7 +360,7 @@
                         image = new Image();
                         image.name = opt.icon;
                         image.src = opt.icon;
-                        if (uiDir == "rtl"){
+                        if (RED.bidiUtil.isMirroringEnabled()){
                             $('<img>',{src:opt.icon,style:"margin-left: 4px;height: 18px;"}).prependTo(this.selectLabel);
                         } else {
                             $('<img>',{src:opt.icon,style:"margin-right: 4px;height: 18px;"}).prependTo(this.selectLabel);
