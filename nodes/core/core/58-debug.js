@@ -82,6 +82,9 @@ module.exports = function(RED) {
         } else if (msg.msg instanceof Buffer) {
             msg.format = "buffer ["+msg.msg.length+"]";
             msg.msg = msg.msg.toString('hex');
+            if (msg.msg.length > debuglength) {
+                msg.msg = msg.msg.substring(0,debuglength);
+            }
         } else if (msg.msg && typeof msg.msg === 'object') {
             var seen = [];
             try {
@@ -95,6 +98,12 @@ module.exports = function(RED) {
             }
             if (isArray || (msg.format === "Object")) {
                 msg.msg = JSON.stringify(msg.msg, function(key, value) {
+                    if (key[0] === '_' && key !== "_msgid") {
+                        return undefined;
+                    }
+                    if (key === '_req' || key === '_res') {
+                        return "[internal]"
+                    }
                     if (typeof value === 'object' && value !== null) {
                         if (seen.indexOf(value) !== -1) { return "[circular]"; }
                         seen.push(value);
@@ -123,9 +132,9 @@ module.exports = function(RED) {
             msg.msg = msg.msg;
         }
 
-        if (msg.msg.length > debuglength) {
-            msg.msg = msg.msg.substr(0,debuglength) +" ....";
-        }
+        // if (msg.msg.length > debuglength) {
+        //     msg.msg = msg.msg.substr(0,debuglength) +" ....";
+        // }
         RED.comms.publish("debug",msg);
     }
 

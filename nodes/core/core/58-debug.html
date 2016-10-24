@@ -44,7 +44,6 @@
     <p>Optionally can show the complete <code>msg</code> object, and send messages to the console log.</p>
     <p>In addition any calls to node.warn or node.error will appear here.</p>
 </script>
-
 <script type="text/javascript">
 (function() {
     var subWindow = null;
@@ -175,14 +174,12 @@
                     }
                     RED.view.redraw();
                 };
-                msg.onclick = function() {
+                $(msg).click(function() {
                     var node = RED.nodes.node(o.id) || RED.nodes.node(o.z);
                     if (node) {
                         RED.view.reveal(node.id);
                     }
-
-                };
-                //console.log(o);
+                });
                 var name = sanitize(((o.name?o.name:o.id)||"").toString());
                 var topic = sanitize((o.topic||"").toString());
                 var property = sanitize(o.property?o.property:'');
@@ -212,7 +209,21 @@
 
                                     '</span>';
                 }
-                msg.innerHTML += '<span class="debug-message-payload">'+ payload+ '</span>';
+                if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
+                    payload = JSON.parse(payload);
+                } else if (format === 'null') {
+                    payload = null;
+                } else if (format === 'undefined') {
+                    payload = undefined;
+                } else if (/^buffer/.test(format)) {
+                    var buffer = payload;
+                    payload = [];
+                    for (var c = 0; c < buffer.length; c += 2) {
+                        payload.push(parseInt(buffer.substr(c, 2), 16));
+                    }
+                }
+                var el = $('<span class="debug-message-payload"></span>').appendTo(msg);
+                RED.debug.buildMessageElement(payload,true).appendTo(el);
                 var atBottom = (sbc.scrollHeight-messages.height()-sbc.scrollTop) < 5;
                 messageCount++;
                 messages.append(msg);
@@ -297,5 +308,5 @@
     });
 })();
 </script>
-
+<script src="debug/view/debug-utils.js"></script>
 <link rel="stylesheet" href="debug/view/style.css">

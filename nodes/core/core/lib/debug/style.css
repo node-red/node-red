@@ -63,6 +63,9 @@
 }
 .debug-message-element {
     color: #333;
+    font-family: Menlo, monospace;
+    font-size: 12px !important;
+    line-height: 1.3em;
 }
 .debug-message-object-key {
     color: #792e90;
@@ -95,11 +98,26 @@
 .debug-message-element.collapsed .debug-message-object-entry {
     display:none;
 }
+.debug-message-element:not(.collapsed) .debug-message-object-header {
+    display:none;
+}
+
+.debug-message-element.collapsed .debug-message-object-type-header {
+    display:none;
+}
+
 
 .debug-message-type-other { color: #2033d6; }
 .debug-message-type-string { color: #b72828; }
 .debug-message-type-null { color: #666; font-style: italic;}
+.debug-message-type-meta { color: #666; font-style: italic;}
 
 .debug-message-expandable {
     cursor: pointer;
+}
+.debug-message-expandable:hover {
+    background: #fefefe;
+}
+.debug-message-expandable:hover .debug-message-object-handle {
+    color: #b72828 !important;
 }

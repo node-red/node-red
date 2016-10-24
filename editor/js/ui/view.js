@@ -2405,7 +2405,6 @@ RED.view = (function() {
                     node.highlighted = true;
                     node.dirty = true;
                     RED.workspaces.show(node.z);
-                    RED.view.redraw();
 
                     var screenSize = [$("#chart").width(),$("#chart").height()];
                     var scrollPos = [$("#chart").scrollLeft(),$("#chart").scrollTop()];
@@ -2419,17 +2418,22 @@ RED.view = (function() {
                         },200);
                     }
 
-                    var flash = 22;
-                    var flashFunc = function() {
-                        flash--;
-                        node.highlighted = !node.highlighted;
-                        node.dirty = true;
-                        RED.view.redraw();
-                        if (flash >= 0) {
-                            setTimeout(flashFunc,100);
+                    if (!node._flashing) {
+                        node._flashing = true;
+                        var flash = 22;
+                        var flashFunc = function() {
+                            flash--;
+                            node.highlighted = !node.highlighted;
+                            node.dirty = true;
+                            RED.view.redraw();
+                            if (flash >= 0) {
+                                setTimeout(flashFunc,100);
+                            } else {
+                                delete node._flashing;
+                            }
                         }
+                        flashFunc();
                     }
-                    flashFunc();
                 } else if (node._def.category === 'config') {
                     RED.sidebar.config.show(id);
                 }
