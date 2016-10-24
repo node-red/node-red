@@ -224,15 +224,15 @@ RED.subflow = (function() {
         var toolbar = $("#workspace-toolbar");
         toolbar.empty();
 
-        $('<a class="button" id="workspace-subflow-edit" href="#" data-i18n="[append]subflow.editSubflowProperties"><i class="fa fa-pencil"></i> </a>').appendTo(toolbar);
-        $('<span style="margin-left: 5px;" data-i18n="subflow.input"></span> '+
-            '<div style="display: inline-block;" class="button-group">'+
-            '<a id="workspace-subflow-input-remove" class="button active" href="#">0</a>'+
+        $('<a class="button subflow-toolbar" id="workspace-subflow-edit" href="#" data-i18n="[append]subflow.editSubflowProperties"><i class="fa fa-pencil"></i> </a>').appendTo(toolbar);
+        $('<span class="workspace-subflow-label" data-i18n="subflow.input"></span> '+
+            '<div style="display: inline-block;" class="button-group subflow-toolbar">'+
+            '<a id="workspace-subflow-input-remove" class="button active subflow-toolbar" href="#">0</a>'+
             '<a id="workspace-subflow-input-add" class="button" href="#">1</a>'+
             '</div>').appendTo(toolbar);
 
-        $('<span style="margin-left: 5px;" data-i18n="subflow.output"></span> <div id="workspace-subflow-output" style="display: inline-block;" class="button-group spinner-group">'+
-            '<a id="workspace-subflow-output-remove" class="button" href="#"><i class="fa fa-minus"></i></a>'+
+        $('<span class="workspace-subflow-label" data-i18n="subflow.output"></span> <div id="workspace-subflow-output" style="display: inline-block;" class="button-group spinner-group">'+
+            '<a id="workspace-subflow-output-remove" class="button subflow-toolbar" href="#"><i class="fa fa-minus"></i></a>'+
             '<div class="spinner-value">3</div>'+
             '<a id="workspace-subflow-output-add" class="button" href="#"><i class="fa fa-plus"></i></a>'+
             '</div>').appendTo(toolbar);
