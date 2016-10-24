@@ -245,7 +245,7 @@
     }
     
     .palette-module-button-group {
-        right: inital;
+        right: initial;
         left:0;
         
         a {
@@ -295,7 +295,7 @@
     
     .palette-module-set-button-group {
         left: 4px;
-        right: inital;
+        right: initial;
     }
     
     i.fa.palette-module-node-chevron {
@@ -306,12 +306,4 @@
             transform: rotate(90deg);
         }
     }
-}
-
-.palette-editor-button { 
-	float:left;
-}
-
-[dir="rtl"] .palette-editor-button { 
-    float:right;
 }
