@@ -27,6 +27,11 @@
    transition: right 0.2s ease;
 }
 
+[dir="rtl"] #chart {
+    direction: rtl;
+    text-align: right;
+}
+
 #chart:focus {
     outline: none;
 }
@@ -44,10 +49,19 @@
 
 }
 
+[dir="rtl"] #workspace {
+    left: 322px;
+    right: 179px;
+}
+
 .workspace-footer-button {
     @include component-footer-button;
 }
 
 #workspace-footer {
     @include component-footer;
+}
+
+[dir="rtl"] #workspace-footer {
+    text-align: left;
 }

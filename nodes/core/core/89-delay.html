@@ -50,7 +50,7 @@
           <option value="day" data-i18n="delay.label.units.day.singular"></option>
         </select>
         <br/>
-        <div id="node-input-dr"><input style="margin: 20px 0 20px 100px; width: 30px;" type="checkbox" id="node-input-drop"><label style="width: 250px;" for="node-input-drop"><span data-i18n="delay.dropmsg"></span></label></div>
+        <div id="node-input-dr"><input type="checkbox" id="node-input-drop"><label style="width: 250px;" for="node-input-drop"><span data-i18n="delay.dropmsg"></span></label></div>
     </div>
 
 
@@ -241,3 +241,12 @@
         }
     });
 </script>
+<style>
+#node-input-drop {
+    margin: 20px 0 20px 100px;
+    width: 30px;"
+}
+[dir="rtl"] #node-input-drop {
+    margin: 20px 100px 20px 0;
+}
+</style>

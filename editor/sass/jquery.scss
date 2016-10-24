@@ -49,6 +49,12 @@
 .ui-dialog .ui-dialog-title {
     width: auto;
 }
+
+[dir="rtl"] .ui-dialog .ui-dialog-title {
+    float: right;
+    text-align: right;
+}
+
 .ui-dialog .ui-dialog-titlebar {
     padding: 10px;
     background: #f3f3f3;
@@ -66,8 +72,16 @@
     display: none;
 }
 
+[dir="rtl"] .ui-dialog-titlebar-close{
+    float: left;
+}
+
 .ui-dialog-buttonset {
     text-align: right;
+}
+
+[dir="rtl"] .ui-dialog-buttonset {
+    text-align: left;
 }
 
 .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
@@ -116,6 +130,12 @@
     }
     .ui-button-text {
         padding: 0;
+    }
+}
+
+[dir="rtl"] .ui-dialog-buttonset button {
+    &.leftButton {
+        float: right;
     }
 }
 
