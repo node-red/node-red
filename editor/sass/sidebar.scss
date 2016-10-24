@@ -26,6 +26,11 @@
     @include component-border;
 }
 
+[dir="rtl"] #sidebar {
+    right: initial;
+    left: 0px;
+}
+
 #sidebar.closing {
     background: #eee;
     border-color: #900;
@@ -52,8 +57,14 @@
     cursor: col-resize;
 }
 
+[dir="rtl"] #sidebar-separator {
+    left: 315px;
+    right: initial;
+}
+
 .sidebar-closed > #sidebar { display: none; }
 .sidebar-closed > #sidebar-separator { right: 0px !important; }
+[dir="rtl"] .sidebar-closed > #sidebar-separator { left: 0px !important; }
 .sidebar-closed > #workspace { right: 7px !important; }
 .sidebar-closed > #editor-stack { right: 8px !important; }
 
@@ -71,6 +82,10 @@
     padding: 8px 10px;
     background: #f3f3f3;
     border-bottom: 1px solid $secondary-border-color;
+}
+
+[dir="rtl"] .sidebar-header {
+    text-align: left;
 }
 
 #sidebar-footer {
