@@ -235,10 +235,6 @@
     right: 0px;
     text-align: right;
     
-    .palette-editor-tab {
-        left:initial;
-    }
-    
     .palette-editor-toolbar {
         text-align: left;
 
@@ -255,6 +251,7 @@
         a {
             margin-left: 0px;
             margin-right: 5px;
+            float : left;
         }
     }
     
@@ -299,6 +296,15 @@
     .palette-module-set-button-group {
         left: 4px;
         right: inital;
+    }
+    
+    i.fa.palette-module-node-chevron {
+        transform: rotate(180deg);
+    }
+    .expanded {
+        i.fa.palette-module-node-chevron {
+            transform: rotate(90deg);
+        }
     }
 }
 
