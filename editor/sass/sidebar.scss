@@ -111,6 +111,11 @@
     border-left: none;
 }
 
+[dir="rtl"] .button-group .sidebar-header-button:not(:first-child) {
+    border-left: solid 1px;
+    border-right: none;
+}
+
 .sidebar-shade {
     position: absolute;
     top:0;

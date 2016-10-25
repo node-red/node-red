@@ -241,6 +241,11 @@
         .button-group {
             margin-right: 0px;
             margin-left: 10px;
+            
+            .sidebar-header-button:not(:first-child) {
+                border-left: solid 1px;
+                border-right: none;
+            }
         }
     }
     

@@ -183,6 +183,10 @@
     text-anchor:start;
 }
 
+[dir="rtl"] .node_status_label {
+    direction: ltr;
+}
+
 .port_hovered {
     stroke: $port-selected-color;
     fill:  $port-selected-color;
