@@ -108,6 +108,11 @@ module.exports = function(RED) {
                         if (seen.indexOf(value) !== -1) { return "[circular]"; }
                         seen.push(value);
                     }
+                    if (typeof value === 'string') {
+                        if (value.length > debuglength) {
+                            return value.substring(0,debuglength)+"...";
+                        }
+                    }
                     return value;
                 }," ");
             } else {
@@ -129,7 +134,9 @@ module.exports = function(RED) {
             msg.msg = "(undefined)";
         } else {
             msg.format = "string ["+msg.msg.length+"]";
-            msg.msg = msg.msg;
+            if (msg.msg.length > debuglength) {
+                msg.msg = msg.msg.substring(0,debuglength)+"...";
+            }
         }
 
         // if (msg.msg.length > debuglength) {

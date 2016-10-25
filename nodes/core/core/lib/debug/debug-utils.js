@@ -120,7 +120,11 @@ RED.debug = (function() {
                                     $('<span class="debug-message-object-value debug-message-type-meta">object</span>').appendTo(headerHead);
                                 }
                             } else if (typeof value === 'string') {
-                                $('<span class="debug-message-object-value debug-message-type-string"></span>').text('"'+value+'"').appendTo(headerHead);
+                                var subvalue = value;
+                                if (subvalue.length > 20) {
+                                    subvalue = subvalue.substring(0,50)+"...";
+                                }
+                                $('<span class="debug-message-object-value debug-message-type-string"></span>').text('"'+subvalue+'"').appendTo(headerHead);
                             } else {
                                 $('<span class="debug-message-object-value debug-message-type-other"></span>').text(""+value).appendTo(headerHead);
                             }
