@@ -34,7 +34,7 @@ RED.bidiUtil = (function() {
     }
 
     /**
-     * @param val - the numeric shaping type: Nominal , National or contextual
+     * @param val - the numeric shaping type: None , National or contextual
      */
     function _setNumericShapingType(val) {
         shaperType = val;
