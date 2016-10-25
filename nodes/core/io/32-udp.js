@@ -43,9 +43,7 @@ module.exports = function(RED) {
             server = udpInputPortsInUse[this.port];  // re-use existing
         }
 
-        var opts = {type:node.ipv, reuseAddr:true};
         if (process.version.indexOf("v0.10") === 0) { opts = node.ipv; }
-        var server = dgram.createSocket(opts);  // default to udp4
 
         server.on("error", function (err) {
             if ((err.code == "EACCES") && (node.port < 1024)) {
