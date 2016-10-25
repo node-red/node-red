@@ -77,14 +77,14 @@ module.exports = function(RED) {
             node.status({fill:"green",shape:"dot",text:"common.status.ok"});
 
             node.child.stdout.on('data', function (data) {
-                data = data.toString().trim();
-                if (data.length > 0) {
-                    if (node.running && node.buttonState !== -1) {
-                        node.send({ topic:"pi/"+node.pin, payload:Number(data) });
+                var d = data.toString().trim().split("\n");
+                for (var i = 0; i < d.length; i++) {
+                    if (node.running && node.buttonState !== -1 && !isNaN(Number(d[i]))) {
+                        node.send({ topic:"pi/"+node.pin, payload:Number(d[i]) });
                     }
-                    node.buttonState = data;
-                    node.status({fill:"green",shape:"dot",text:data});
-                    if (RED.settings.verbose) { node.log("out: "+data+" :"); }
+                    node.buttonState = d[i];
+                    node.status({fill:"green",shape:"dot",text:d[i]});
+                    if (RED.settings.verbose) { node.log("out: "+d[i]+" :"); }
                 }
             });
 
@@ -229,8 +229,8 @@ module.exports = function(RED) {
 
         node.child.stdout.on('data', function (data) {
             data = Number(data);
-            if (data === 0) { node.send({ topic:"pi/mouse", button:data, payload:0 }); }
-            else { node.send({ topic:"pi/mouse", button:data, payload:1 }); }
+            if (data === 1) { node.send({ topic:"pi/mouse", button:data, payload:1 }); }
+            else { node.send({ topic:"pi/mouse", button:data, payload:0 }); }
         });
 
         node.child.stderr.on('data', function (data) {
