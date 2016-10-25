@@ -45,6 +45,9 @@ module.exports = function(RED) {
                 isText = false;
             } else if (parsedType.subtype !== "octet-stream") {
                 checkUTF = true;
+            } else {
+                // applicatino/octet-stream
+                isText = false;
             }
         }
 
