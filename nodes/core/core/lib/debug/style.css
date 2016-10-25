@@ -2,11 +2,12 @@
     padding:0;
     margin:0;
     background: #fff;
+    line-height: 20px;
 }
 .debug-window .debug-message-payload {
     font-size: 14px;
 }
-#debug-content {
+.debug-content {
     position: absolute;
     top: 43px;
     bottom: 0px;
@@ -14,6 +15,20 @@
     right: 0px;
     overflow-y: scroll;
 }
+.debug-filter-box {
+    position:absolute;
+    top: 42px;
+    left: 0px;
+    right: 0px;
+    background: #fff;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.debug-filter-row {
+    text-align: right;
+}
+
 .debug-message {
     border-bottom: 1px solid #eee;
     border-left: 8px solid #eee;

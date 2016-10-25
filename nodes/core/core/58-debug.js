@@ -80,7 +80,7 @@ module.exports = function(RED) {
             msg.format = "error";
             msg.msg = msg.msg.toString();
         } else if (msg.msg instanceof Buffer) {
-            msg.format = "buffer ["+msg.msg.length+"]";
+            msg.format = "buffer["+msg.msg.length+"]";
             msg.msg = msg.msg.toString('hex');
             if (msg.msg.length > debuglength) {
                 msg.msg = msg.msg.substring(0,debuglength);
@@ -94,7 +94,7 @@ module.exports = function(RED) {
             }
             var isArray = util.isArray(msg.msg);
             if (isArray) {
-                msg.format = "array ["+msg.msg.length+"]";
+                msg.format = "array["+msg.msg.length+"]";
             }
             if (isArray || (msg.format === "Object")) {
                 msg.msg = JSON.stringify(msg.msg, function(key, value) {

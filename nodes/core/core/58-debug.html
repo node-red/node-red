@@ -100,14 +100,31 @@
         onpaletteadd: function() {
             var content = $("<div>").css({"position":"relative","height":"100%"});
             var toolbar = $('<div class="sidebar-header">'+
+                '<span class="button-group"><a id="debug-tab-filter" class="sidebar-header-button" href="#"><i class="fa fa-filter"></i></a></span>'+
+                '<span class="button-group"><a id="debug-tab-clear" title="clear log" class="sidebar-header-button" href="#"><i class="fa fa-trash"></i></a></span></div>').appendTo(content);
+
+
+            var footerToolbar = $('<div>'+
+                '<span class="button-group">'+
+                    '<a class="sidebar-footer-button-toggle text-button selected" id="debug-tab-view-list" href="#"><span data-i18n="">list</span></a>'+
+                    '<a class="sidebar-footer-button-toggle text-button" id="debug-tab-view-table" href="#"><span data-i18n="">table</span></a> '+
+                '</span>'+
+                '<span class="button-group"><a id="debug-tab-open" title="open in new window" class="sidebar-footer-button" href="#"><i class="fa fa-desktop"></i></a></span> ' +
+                '</div>');
+
+            var messageList = $('<div class="debug-content debug-content-list"/>').appendTo(content);
+            var messageTable = $('<div class="debug-content  debug-content-table hide"/>').appendTo(content);
+
+            var filterDialog = $('<div class="debug-filter-box hide">'+
+                '<div class="debug-filter-row">'+
                 '<span class="button-group">'+
                     '<a class="sidebar-header-button-toggle selected" id="debug-tab-filter-all" href="#"><span data-i18n="node-red:debug.sidebar.filterAll"></span></a>'+
                     '<a class="sidebar-header-button-toggle" id="debug-tab-filter-current" href="#"><span data-i18n="node-red:debug.sidebar.filterCurrent"></span></a> '+
                 '</span>'+
-                '<span class="button-group"><a id="debug-tab-open" title="open in new window" class="sidebar-header-button" href="#"><i class="fa fa-desktop"></i></a></span> ' +
-                '<span class="button-group"><a id="debug-tab-clear" title="clear log" class="sidebar-header-button" href="#"><i class="fa fa-trash"></i></a></span></div>').appendTo(content);
+                '</div>'+
+            '</div>').appendTo(content);
 
-            var messages = $('<div id="debug-content"/>').appendTo(content);
+
             content.i18n();
 
             RED.sidebar.addTab({
@@ -115,6 +132,7 @@
                 label: this._("debug.sidebar.label"),
                 name: this._("debug.sidebar.name"),
                 content: content,
+                toolbar: footerToolbar,
                 enableOnEdit: true
             });
 
@@ -123,9 +141,12 @@
                 return d.toLocaleString();
             }
 
-            var sbc = document.getElementById("debug-content");
+            var sbc = messageList[0];
             var filter = false;
-            var messageCount = 0;
+            var view = 'list';
+            var messages = [];
+            var messagesByNode = {};
+
             var that = this;
             RED._debug = function(msg) {
                 that.handleDebugMessage("",{
@@ -137,10 +158,45 @@
                 return m.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
             }
 
-            var refreshMessageList = function() {
+            function refreshMessageList() {
                 $(".debug-message").each(function() {
                     $(this).toggleClass('hide',filter&&!$(this).hasClass('debug-message-flow-'+RED.workspaces.active()));
                 });
+            }
+            function refreshMessageTable() {
+
+            }
+
+            function showMessageList() {
+                view = 'list';
+                messageTable.hide();
+                messageTable.empty();
+
+                messages.forEach(function(m) {
+                    messageList.append(m.el);
+                })
+                messageList.show();
+            }
+            function showMessageTable() {
+                view = 'table';
+                messageList.hide();
+                messageList.empty();
+
+                Object.keys(messagesByNode).forEach(function(id) {
+                    var m = messagesByNode[id];
+                    var msg = m.el;
+                    var sourceNode = m.source;
+                    if (sourceNode) {
+                        var wrapper = $("<div>",{id:"debug-message-source-"+sourceNode.id.replace(/\./g,"_")}).appendTo(messageTable);
+                        wrapper.append(msg);
+                    }
+                });
+                messageTable.show();
+            }
+
+
+            function showFilterDialog() {
+                filterDialog.slideDown();
             }
 
             this.handleDebugMessage = function(t,o) {
@@ -223,17 +279,37 @@
                     }
                 }
                 var el = $('<span class="debug-message-payload"></span>').appendTo(msg);
-                RED.debug.buildMessageElement(payload,true).appendTo(el);
-                var atBottom = (sbc.scrollHeight-messages.height()-sbc.scrollTop) < 5;
-                messageCount++;
-                messages.append(msg);
+                RED.debug.buildMessageElement(payload,true,format).appendTo(el);
+                var atBottom = (sbc.scrollHeight-messageList.height()-sbc.scrollTop) < 5;
+                var m = {
+                    el: msg
+                };
+                messages.push(m);
+                if (sourceNode) {
+                    m.source = sourceNode;
+                    messagesByNode[sourceNode.id] = m;
+                }
+                if (view == "list") {
+                    messageList.append(msg);
+                } else {
+                    if (sourceNode) {
+                        var wrapper = $("#debug-message-source-"+sourceNode.id.replace(/\./g,"_"));
+                        if (wrapper.length === 0 ) {
+                            wrapper = $("<div>",{id:"debug-message-source-"+sourceNode.id.replace(/\./g,"_")}).appendTo(messageTable);
+                        }
+                        wrapper.empty();
+                        wrapper.append(msg);
+                    }
+                }
 
-                if (messageCount > 200) {
-                    $("#debug-content .debug-message:first").remove();
-                    messageCount--;
+                if (messages.length === 100) {
+                    var m = messages.shift();
+                    if (view === "list") {
+                        m.el.remove();
+                    }
                 }
                 if (atBottom) {
-                    $(sbc).scrollTop(sbc.scrollHeight);
+                    messageList.scrollTop(sbc.scrollHeight);
                 }
             };
             RED.comms.subscribe("debug",this.handleDebugMessage);
@@ -265,6 +341,37 @@
                     refreshMessageList();
                 }
             });
+            $('#debug-tab-view-list').on("click",function(e) {
+                e.preventDefault();
+                if (!$(this).hasClass('selected')) {
+                    $(this).addClass('selected');
+                    $('#debug-tab-view-table').removeClass('selected');
+                    showMessageList();
+                }
+            });
+            $('#debug-tab-view-table').on("click",function(e) {
+                e.preventDefault();
+                if (!$(this).hasClass('selected')) {
+                    $(this).addClass('selected');
+                    $('#debug-tab-view-list').removeClass('selected');
+                    showMessageTable();
+                }
+            });
+
+
+            $('#debug-tab-filter').on("click",function(e) {
+                e.preventDefault();
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                    filterDialog.slideUp(200);
+                } else {
+                    $(this).addClass('selected');
+                    filterDialog.slideDown(200);
+                }
+            })
+
+
+
             RED.events.on("workspace:change", refreshMessageList);
             $("#debug-tab-open").click(function(e) {
                 e.preventDefault();

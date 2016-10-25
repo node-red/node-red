@@ -629,7 +629,7 @@ RED.palette.editor = (function() {
 
 
         $('<span>').html(RED._("palette.editor.sort")+' ').appendTo(toolBar);
-        var sortGroup = $('<span class="button-group"></span> ').appendTo(toolBar);
+        var sortGroup = $('<span class="button-group"></span>').appendTo(toolBar);
         var sortAZ = $('<a href="#" class="sidebar-header-button-toggle selected" data-i18n="palette.editor.sortAZ"></a>').appendTo(sortGroup);
         var sortRecent = $('<a href="#" class="sidebar-header-button-toggle" data-i18n="palette.editor.sortRecent"></a>').appendTo(sortGroup);
 

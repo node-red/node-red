@@ -70,7 +70,6 @@
     &.selected:not(.disabled) {
         color: $workspace-button-color-selected !important;
         background: $workspace-button-background-active;
-        cursor: default;
     }
     .button-group &:not(:first-child) {
         border-left: none;
@@ -86,6 +85,12 @@
         outline: 1px solid $workspace-button-color-focus-outline;
     }
 }
+
+.button-group:not(:last-child) {
+    margin-right: 10px;
+}
+
+
 @mixin workspace-button-toggle {
     @include workspace-button;
     color: $workspace-button-toggle-color !important;
@@ -97,6 +102,7 @@
         border-bottom-width: 2px;
         border-bottom-color: $form-input-border-selected-color;
         margin-bottom: 0;
+        cursor: default;
     }
     &.disabled {
         color: $workspace-button-toggle-color-disabled !important;
@@ -115,6 +121,12 @@
     height: 25px;
     line-height: 23px;
     padding: 0 10px;
+
+
+    .button-group:not(:last-child) {
+        margin-right: 5px;
+    }
+
 }
 
 @mixin component-footer-button {
@@ -122,6 +134,16 @@
     font-size: 11px;
     line-height: 17px;
     width: 18px;
+    height: 18px;
+    &.text-button {
+        width: auto;
+        padding: 0 5px;
+    }
+}
+@mixin component-footer-button-toggle {
+    @include workspace-button-toggle;
+    font-size: 11px;
+    line-height: 17px;
     height: 18px;
     &.text-button {
         width: auto;

@@ -1,3 +1,4 @@
+var RED = {};
 $(function() {
 
     $("#debug-tab-clear").click(function() {
@@ -80,12 +81,21 @@ $(function() {
 
                             '</span>';
         }
-        if (format !== 'Object') {
-            msg.innerHTML += '<span class="debug-message-payload">'+ payload+ '</span>';
-        } else {
-            var el = $('<span class="debug-message-payload"></span>').appendTo(msg);
-            buildMessageElement(JSON.parse(payload),true).appendTo(el);
+        if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
+            payload = JSON.parse(payload);
+        } else if (format === 'null') {
+            payload = null;
+        } else if (format === 'undefined') {
+            payload = undefined;
+        } else if (/^buffer/.test(format)) {
+            var buffer = payload;
+            payload = [];
+            for (var c = 0; c < buffer.length; c += 2) {
+                payload.push(parseInt(buffer.substr(c, 2), 16));
+            }
         }
+        var el = $('<span class="debug-message-payload"></span>').appendTo(msg);
+        RED.debug.buildMessageElement(payload,true,format).appendTo(el);
         $("#debug-content").append(msg);
         $("#debug-content").scrollTop($("#debug-content")[0].scrollHeight);
     },false);

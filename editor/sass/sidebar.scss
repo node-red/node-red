@@ -71,6 +71,7 @@
     padding: 8px 10px;
     background: #f3f3f3;
     border-bottom: 1px solid $secondary-border-color;
+    white-space: nowrap;
 }
 
 #sidebar-footer {
@@ -79,6 +80,9 @@
 
 .sidebar-footer-button {
     @include component-footer-button;
+}
+.sidebar-footer-button-toggle {
+    @include component-footer-button-toggle;
 }
 .sidebar-header-button {
     @include workspace-button;

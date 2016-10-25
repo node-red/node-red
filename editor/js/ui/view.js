@@ -2423,14 +2423,15 @@ RED.view = (function() {
                         var flash = 22;
                         var flashFunc = function() {
                             flash--;
-                            node.highlighted = !node.highlighted;
                             node.dirty = true;
-                            RED.view.redraw();
                             if (flash >= 0) {
+                                node.highlighted = !node.highlighted;
                                 setTimeout(flashFunc,100);
                             } else {
+                                node.highlighted = false;
                                 delete node._flashing;
                             }
+                            RED.view.redraw();
                         }
                         flashFunc();
                     }
