@@ -96,7 +96,6 @@ RED.tray = (function() {
                 },
                 stop:function(event,ui) {
                     el.width(-ui.position.left);
-                    //el.css({left:''});
                     el.css(RED.bidiUtil.leftProparty,"");
                     if (tray.options.resize) {
                         tray.options.resize({width: -ui.position.left});
@@ -155,7 +154,6 @@ RED.tray = (function() {
                     openingTray = false;
                 },200);
             },150);
-            //el.css({right:0});
             el.css(RED.bidiUtil.rightProparty,0);
         },0);
 
