@@ -207,6 +207,12 @@
     border-right: none;
     border-left: 1px solid rgba(0,0,0,0.1);
 }
+[dir="rtl"] .palette_icon_container_right {
+    left: 0;
+    right: auto;
+    border-left: none;
+    border-right: 1px solid rgba(0,0,0,0.1);
+}
 .palette_icon {
     display: inline-block;
     width: 20px;

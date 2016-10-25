@@ -25,14 +25,14 @@ RED.bidiUtil = (function() {
     var textDir = "";
     var shaperType = "";
     var calendarType = "";
-	
+    
     /**
      * Check if browser language is RTL language
      */
     function _isMirroringEnabled() {
         return (new RegExp("^(ar|he)").test(navigator.language));
     }
-
+    
     /**
      * @param val - the numeric shaping type: Nominal , National or contextual
      */
@@ -161,6 +161,9 @@ RED.bidiUtil = (function() {
         setTextDirection : _setTextDirection,
         applyBidiSupport : _applyBidiSupport,
         resolveBaseTextDir : _resolveBaseTextDir,
-        prepareInput: _prepareInput
+        prepareInput: _prepareInput,
+        // reverse direction in case of mirroring is enabled
+        leftProparty : (_isMirroringEnabled())? "right" : "left",
+        rightProparty : (_isMirroringEnabled())? "left" : "right",
 	 }
  })();

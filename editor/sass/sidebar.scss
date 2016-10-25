@@ -64,9 +64,25 @@
 
 .sidebar-closed > #sidebar { display: none; }
 .sidebar-closed > #sidebar-separator { right: 0px !important; }
-[dir="rtl"] .sidebar-closed > #sidebar-separator { left: 0px !important; }
+
+[dir="rtl"] .sidebar-closed > #sidebar-separator { 
+    left: 0px !important; 
+    right: initial !important; 
+}
+
 .sidebar-closed > #workspace { right: 7px !important; }
+
+[dir="rtl"] .sidebar-closed > #workspace { 
+    left: 7px !important; 
+    right: 179px !important; 
+}
+
 .sidebar-closed > #editor-stack { right: 8px !important; }
+
+[dir="rtl"] .sidebar-closed > #editor-stack { 
+    left: 8px !important;
+    right: initial !important;
+}
 
 #sidebar .button {
     @include workspace-button;

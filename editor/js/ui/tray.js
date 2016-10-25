@@ -96,7 +96,8 @@ RED.tray = (function() {
                 },
                 stop:function(event,ui) {
                     el.width(-ui.position.left);
-                    el.css({left:''});
+                    //el.css({left:''});
+                    el.css(RED.bidiUtil.leftProparty,"");
                     if (tray.options.resize) {
                         tray.options.resize({width: -ui.position.left});
                     }
@@ -133,10 +134,8 @@ RED.tray = (function() {
 
         // tray.body.parent().width(Math.min($("#editor-stack").position().left-8,tray.width));
 
-        el.css({
-            right: -(el.width()+10)+"px",
-            transition: "right 0.25s ease"
-        });
+        el.css(RED.bidiUtil.rightProparty, -(el.width()+10)+"px");
+        el.css("transition", RED.bidiUtil.rightProparty +" 0.25s ease");
         $("#workspace").scrollLeft(0);
         handleWindowResize();
         openingTray = true;
@@ -156,7 +155,8 @@ RED.tray = (function() {
                     openingTray = false;
                 },200);
             },150);
-            el.css({right:0});
+            //el.css({right:0});
+            el.css(RED.bidiUtil.rightProparty,0);
         },0);
 
         // growButton.click(function(e) {
@@ -235,9 +235,7 @@ RED.tray = (function() {
         close: function close(done) {
             if (stack.length > 0) {
                 var tray = stack.pop();
-                tray.tray.css({
-                    right: -(tray.tray.width()+10)+"px"
-                });
+                tray.tray.css(RED.bidiUtil.rightProparty, -(tray.tray.width()+10)+"px");
                 setTimeout(function() {
                     if (tray.options.close) {
                         tray.options.close();
