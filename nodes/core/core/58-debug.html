@@ -44,6 +44,8 @@
     <p>Optionally can show the complete <code>msg</code> object, and send messages to the console log.</p>
     <p>In addition any calls to node.warn or node.error will appear here.</p>
 </script>
+<script src="debug/view/debug-utils.js"></script>
+
 <script type="text/javascript">
 (function() {
     var subWindow = null;
@@ -98,54 +100,54 @@
             }
         },
         onpaletteadd: function() {
-            var content = $("<div>").css({"position":"relative","height":"100%"});
-            var toolbar = $('<div class="sidebar-header">'+
-                '<span class="button-group"><a id="debug-tab-filter" class="sidebar-header-button" href="#"><i class="fa fa-filter"></i></a></span>'+
-                '<span class="button-group"><a id="debug-tab-clear" title="clear log" class="sidebar-header-button" href="#"><i class="fa fa-trash"></i></a></span></div>').appendTo(content);
 
+            var options = {
+                messageMouseOver: function(sourceId) {
+                    //msg.style.borderRightColor = "#999";
+                    if (sourceId) {
+                        var n = RED.nodes.node(sourceId);
+                        if (n) {
+                            n.highlighted = true;
+                            n.dirty = true;
+                        }
+                        RED.view.redraw();
+                    }
+                },
+                messageMouseOut: function(sourceId) {
+                    //msg.style.borderRightColor = "";
+                    if (sourceId) {
+                        var n = RED.nodes.node(sourceId);
+                        if (n) {
+                            n.highlighted = false;
+                            n.dirty = true;
+                        }
+                        RED.view.redraw();
+                    }
+                },
+                messageSourceClick: function(sourceId) {
+                    RED.view.reveal(sourceId);
+                },
+                clear: function() {
+                    RED.nodes.eachNode(function(node) {
+                        node.highlighted = false;
+                        node.dirty = true;
+                    });
+                    RED.view.redraw();
+                }
+            }
 
-            var footerToolbar = $('<div>'+
-                // '<span class="button-group">'+
-                //     '<a class="sidebar-footer-button-toggle text-button selected" id="debug-tab-view-list" href="#"><span data-i18n="">list</span></a>'+
-                //     '<a class="sidebar-footer-button-toggle text-button" id="debug-tab-view-table" href="#"><span data-i18n="">table</span></a> '+
-                // '</span>'+
-                '<span class="button-group"><a id="debug-tab-open" title="open in new window" class="sidebar-footer-button" href="#"><i class="fa fa-desktop"></i></a></span> ' +
-                '</div>');
-
-            var messageList = $('<div class="debug-content debug-content-list"/>').appendTo(content);
-            var messageTable = $('<div class="debug-content  debug-content-table hide"/>').appendTo(content);
-
-            var filterDialog = $('<div class="debug-filter-box hide">'+
-                '<div class="debug-filter-row">'+
-                '<span class="button-group">'+
-                    '<a class="sidebar-header-button-toggle selected" id="debug-tab-filter-all" href="#"><span data-i18n="node-red:debug.sidebar.filterAll"></span></a>'+
-                    '<a class="sidebar-header-button-toggle" id="debug-tab-filter-current" href="#"><span data-i18n="node-red:debug.sidebar.filterCurrent"></span></a> '+
-                '</span>'+
-                '</div>'+
-            '</div>').appendTo(content);
-
-
-            content.i18n();
+            var uiComponents = RED.debug.init(options);
 
             RED.sidebar.addTab({
                 id: "debug",
                 label: this._("debug.sidebar.label"),
                 name: this._("debug.sidebar.name"),
-                content: content,
-                toolbar: footerToolbar,
+                content: uiComponents.content,
+                toolbar: uiComponents.footer,
                 enableOnEdit: true
             });
 
-            function getTimestamp() {
-                var d = new Date();
-                return d.toLocaleString();
-            }
 
-            var sbc = messageList[0];
-            var filter = false;
-            var view = 'list';
-            var messages = [];
-            var messagesByNode = {};
 
             var that = this;
             RED._debug = function(msg) {
@@ -154,53 +156,14 @@
                     msg:msg
                 });
             }
-            function sanitize(m) {
-                return m.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-            }
 
-            function refreshMessageList() {
-                $(".debug-message").each(function() {
-                    $(this).toggleClass('hide',filter&&!$(this).hasClass('debug-message-flow-'+RED.workspaces.active()));
-                });
-            }
-            function refreshMessageTable() {
-
-            }
-
-            function showMessageList() {
-                view = 'list';
-                messageTable.hide();
-                messageTable.empty();
-
-                messages.forEach(function(m) {
-                    messageList.append(m.el);
-                })
-                messageList.show();
-            }
-            function showMessageTable() {
-                view = 'table';
-                messageList.hide();
-                messageList.empty();
-
-                Object.keys(messagesByNode).forEach(function(id) {
-                    var m = messagesByNode[id];
-                    var msg = m.el;
-                    var sourceNode = m.source;
-                    if (sourceNode) {
-                        var wrapper = $("<div>",{id:"debug-message-source-"+sourceNode.id.replace(/\./g,"_")}).appendTo(messageTable);
-                        wrapper.append(msg);
-                    }
-                });
-                messageTable.show();
-            }
-
-
-            function showFilterDialog() {
-                filterDialog.slideDown();
+            this.refreshMessageList = function() {
+                RED.debug.refreshMessageList(RED.workspaces.active());
             }
 
             this.handleDebugMessage = function(t,o) {
-
+                o.sourceNode = RED.nodes.node(o.id) || RED.nodes.node(o.z);
+                RED.debug.handleDebugMessage(o);
                 if (subWindow) {
                     try {
                         subWindow.postMessage(o,"*")
@@ -208,171 +171,10 @@
                         console.log(err);
                     }
                 }
-                var msg = document.createElement("div");
-
-                var sourceNode = RED.nodes.node(o.id) || RED.nodes.node(o.z);
-
-                msg.onmouseover = function() {
-                    msg.style.borderRightColor = "#999";
-                    var n = RED.nodes.node(o.id) || RED.nodes.node(o.z);
-                    if (n) {
-                        n.highlighted = true;
-                        n.dirty = true;
-                    }
-                    RED.view.redraw();
-                };
-                msg.onmouseout = function() {
-                    msg.style.borderRightColor = "";
-                    var n = RED.nodes.node(o.id) || RED.nodes.node(o.z);
-                    if (n) {
-                        n.highlighted = false;
-                        n.dirty = true;
-                    }
-                    RED.view.redraw();
-                };
-                var name = sanitize(((o.name?o.name:o.id)||"").toString());
-                var topic = sanitize((o.topic||"").toString());
-                var property = sanitize(o.property?o.property:'');
-                var payload = sanitize((o.msg||"").toString());
-                var format = sanitize((o.format||"").toString());
-
-                msg.className = 'debug-message'+(o.level?(' debug-message-level-'+o.level):'') +
-                                ((sourceNode&&sourceNode.z)?((" debug-message-flow-"+sourceNode.z+((filter&&(RED.workspaces.active()!==sourceNode.z))?" hide":""))):"");
-                $('<span class="debug-message-date">'+ getTimestamp()+'</span>').appendTo(msg);
-                if (sourceNode) {
-                    $('<a>',{href:"#",class:"debug-message-name"}).html('node: '+sourceNode.id)
-                        .appendTo(msg)
-                        .click(function(evt) {
-                            evt.preventDefault();
-                            RED.view.reveal(sourceNode.id);
-                        });
-                } else if (name) {
-                    $('<span class="debug-message-name">'+name+'</span>').appendTo(msg);
-                }
-                // NOTE: relying on function error to have a "type" that all other msgs don't
-                if (o.hasOwnProperty("type") && (o.type === "function")) {
-                    var errorLvlType = 'error';
-                    var errorLvl = 20;
-                    if (o.hasOwnProperty("level") && o.level === 30) {
-                        errorLvl = 30;
-                        errorLvlType = 'warn';
-                    }
-                    msg.className = 'debug-message debug-message-level-' + errorLvl;
-                    $('<span class="debug-message-topic">function : (' + errorLvlType + ')</span>').appendTo(msg);
-                } else {
-                    $('<span class="debug-message-topic">'+
-                                    (o.topic?topic+' : ':'')+
-                                    (o.property?'msg.'+property:'msg')+" : "+format+
-                                    '</span>').appendTo(msg);
-                }
-                if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
-                    payload = JSON.parse(payload);
-                } else if (format === 'null') {
-                    payload = null;
-                } else if (format === 'undefined') {
-                    payload = undefined;
-                } else if (/^buffer/.test(format)) {
-                    var buffer = payload;
-                    payload = [];
-                    for (var c = 0; c < buffer.length; c += 2) {
-                        payload.push(parseInt(buffer.substr(c, 2), 16));
-                    }
-                }
-                var el = $('<span class="debug-message-payload"></span>').appendTo(msg);
-                RED.debug.buildMessageElement(payload,true,format).appendTo(el);
-                var atBottom = (sbc.scrollHeight-messageList.height()-sbc.scrollTop) < 5;
-                var m = {
-                    el: msg
-                };
-                messages.push(m);
-                if (sourceNode) {
-                    m.source = sourceNode;
-                    messagesByNode[sourceNode.id] = m;
-                }
-                if (view == "list") {
-                    messageList.append(msg);
-                } else {
-                    if (sourceNode) {
-                        var wrapper = $("#debug-message-source-"+sourceNode.id.replace(/\./g,"_"));
-                        if (wrapper.length === 0 ) {
-                            wrapper = $("<div>",{id:"debug-message-source-"+sourceNode.id.replace(/\./g,"_")}).appendTo(messageTable);
-                        }
-                        wrapper.empty();
-                        wrapper.append(msg);
-                    }
-                }
-
-                if (messages.length === 100) {
-                    var m = messages.shift();
-                    if (view === "list") {
-                        m.el.remove();
-                    }
-                }
-                if (atBottom) {
-                    messageList.scrollTop(sbc.scrollHeight);
-                }
             };
             RED.comms.subscribe("debug",this.handleDebugMessage);
 
-            $("#debug-tab-clear").click(function() {
-                $(".debug-message").remove();
-                messageCount = 0;
-                RED.nodes.eachNode(function(node) {
-                    node.highlighted = false;
-                    node.dirty = true;
-                });
-                RED.view.redraw();
-            });
-            $('#debug-tab-filter-all').on("click",function(e) {
-                e.preventDefault();
-                if (filter) {
-                    $(this).addClass('selected');
-                    $('#debug-tab-filter-current').removeClass('selected');
-                    filter = !filter;
-                    refreshMessageList();
-                }
-            });
-            $('#debug-tab-filter-current').on("click",function(e) {
-                e.preventDefault();
-                if (!filter) {
-                    $(this).addClass('selected');
-                    $('#debug-tab-filter-all').removeClass('selected');
-                    filter = !filter;
-                    refreshMessageList();
-                }
-            });
-            $('#debug-tab-view-list').on("click",function(e) {
-                e.preventDefault();
-                if (!$(this).hasClass('selected')) {
-                    $(this).addClass('selected');
-                    $('#debug-tab-view-table').removeClass('selected');
-                    showMessageList();
-                }
-            });
-            $('#debug-tab-view-table').on("click",function(e) {
-                e.preventDefault();
-                if (!$(this).hasClass('selected')) {
-                    $(this).addClass('selected');
-                    $('#debug-tab-view-list').removeClass('selected');
-                    showMessageTable();
-                }
-            });
-
-
-            $('#debug-tab-filter').on("click",function(e) {
-                e.preventDefault();
-                if ($(this).hasClass('selected')) {
-                    $(this).removeClass('selected');
-                    filterDialog.slideUp(200);
-                } else {
-                    $(this).addClass('selected');
-                    filterDialog.slideDown(200);
-                }
-            })
-
-
-
-            RED.events.on("workspace:change", refreshMessageList);
+            RED.events.on("workspace:change", this.refreshMessageList);
             $("#debug-tab-open").click(function(e) {
                 e.preventDefault();
                 subWindow = window.open(document.location.toString().replace(/#.*$/,"")+"debug/view/view.html","nodeREDDebugView","menubar=no,location=no,toolbar=no,chrome,height=500,width=600");
@@ -381,7 +183,7 @@
         onpaletteremove: function() {
             RED.comms.unsubscribe("debug",this.handleDebugMessage);
             RED.sidebar.removeTab("debug");
-            RED.events.off("workspace:change", refreshMessageList);
+            RED.events.off("workspace:change", this.refreshMessageList);
             delete RED._debug;
         },
         oneditprepare: function() {
@@ -415,5 +217,4 @@
     });
 })();
 </script>
-<script src="debug/view/debug-utils.js"></script>
 <link rel="stylesheet" href="debug/view/style.css">
