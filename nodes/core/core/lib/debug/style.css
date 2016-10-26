@@ -20,10 +20,10 @@
     top: 42px;
     left: 0px;
     right: 0px;
-    background: #fff;
+    background: #f9f9f9;
     padding: 10px;
     border-bottom: 1px solid #ddd;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 .debug-filter-row {
     text-align: right;

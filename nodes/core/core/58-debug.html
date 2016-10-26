@@ -105,10 +105,10 @@
 
 
             var footerToolbar = $('<div>'+
-                '<span class="button-group">'+
-                    '<a class="sidebar-footer-button-toggle text-button selected" id="debug-tab-view-list" href="#"><span data-i18n="">list</span></a>'+
-                    '<a class="sidebar-footer-button-toggle text-button" id="debug-tab-view-table" href="#"><span data-i18n="">table</span></a> '+
-                '</span>'+
+                // '<span class="button-group">'+
+                //     '<a class="sidebar-footer-button-toggle text-button selected" id="debug-tab-view-list" href="#"><span data-i18n="">list</span></a>'+
+                //     '<a class="sidebar-footer-button-toggle text-button" id="debug-tab-view-table" href="#"><span data-i18n="">table</span></a> '+
+                // '</span>'+
                 '<span class="button-group"><a id="debug-tab-open" title="open in new window" class="sidebar-footer-button" href="#"><i class="fa fa-desktop"></i></a></span> ' +
                 '</div>');
 
@@ -230,12 +230,6 @@
                     }
                     RED.view.redraw();
                 };
-                $(msg).click(function() {
-                    var node = RED.nodes.node(o.id) || RED.nodes.node(o.z);
-                    if (node) {
-                        RED.view.reveal(node.id);
-                    }
-                });
                 var name = sanitize(((o.name?o.name:o.id)||"").toString());
                 var topic = sanitize((o.topic||"").toString());
                 var property = sanitize(o.property?o.property:'');
@@ -244,10 +238,17 @@
 
                 msg.className = 'debug-message'+(o.level?(' debug-message-level-'+o.level):'') +
                                 ((sourceNode&&sourceNode.z)?((" debug-message-flow-"+sourceNode.z+((filter&&(RED.workspaces.active()!==sourceNode.z))?" hide":""))):"");
-                msg.innerHTML = '<span class="debug-message-date">'+
-                                getTimestamp()+'</span>'+
-                                (name?'<span class="debug-message-name">'+name:'')+
-                                '</span>';
+                $('<span class="debug-message-date">'+ getTimestamp()+'</span>').appendTo(msg);
+                if (sourceNode) {
+                    $('<a>',{href:"#",class:"debug-message-name"}).html('node: '+sourceNode.id)
+                        .appendTo(msg)
+                        .click(function(evt) {
+                            evt.preventDefault();
+                            RED.view.reveal(sourceNode.id);
+                        });
+                } else if (name) {
+                    $('<span class="debug-message-name">'+name+'</span>').appendTo(msg);
+                }
                 // NOTE: relying on function error to have a "type" that all other msgs don't
                 if (o.hasOwnProperty("type") && (o.type === "function")) {
                     var errorLvlType = 'error';
@@ -257,13 +258,12 @@
                         errorLvlType = 'warn';
                     }
                     msg.className = 'debug-message debug-message-level-' + errorLvl;
-                    msg.innerHTML += '<span class="debug-message-topic">function : (' + errorLvlType + ')</span>';
+                    $('<span class="debug-message-topic">function : (' + errorLvlType + ')</span>').appendTo(msg);
                 } else {
-                    msg.innerHTML += '<span class="debug-message-topic">'+
+                    $('<span class="debug-message-topic">'+
                                     (o.topic?topic+' : ':'')+
                                     (o.property?'msg.'+property:'msg')+" : "+format+
-
-                                    '</span>';
+                                    '</span>').appendTo(msg);
                 }
                 if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
                     payload = JSON.parse(payload);

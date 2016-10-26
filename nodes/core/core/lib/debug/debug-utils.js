@@ -19,6 +19,7 @@ RED.debug = (function() {
                     header.addClass("debug-message-expandable");
                     header.click(function(e) {
                         $(this).parent().toggleClass('collapsed');
+                        //e.stopPropagation();
                         e.preventDefault();
                     });
                 }
@@ -26,8 +27,6 @@ RED.debug = (function() {
                 headerHead = $('<span class="debug-message-object-header"></span>').appendTo(header);
                 $('<span>[ </span>').appendTo(headerHead);
             }
-
-
             for (i=0;i<length;i++) {
                 if (topLevel) {
                     value = obj[i];
@@ -57,6 +56,7 @@ RED.debug = (function() {
                     header.addClass("debug-message-expandable");
                     header.click(function(e) {
                         $(this).parent().toggleClass('collapsed');
+                        //e.stopPropagation();
                         e.preventDefault();
                     });
                 }
@@ -92,6 +92,7 @@ RED.debug = (function() {
                         header.addClass("debug-message-expandable");
                         header.click(function(e) {
                             $(this).parent().toggleClass('collapsed');
+                            //e.stopPropagation();
                             e.preventDefault();
                         });
                     }
@@ -143,6 +144,7 @@ RED.debug = (function() {
                         entryHeader.addClass("debug-message-expandable");
                         entryHeader.click(function(e) {
                             $(this).parent().toggleClass('collapsed');
+                            //e.stopPropagation();
                             e.preventDefault();
                         });
                     }
