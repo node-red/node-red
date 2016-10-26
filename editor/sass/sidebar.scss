@@ -79,11 +79,6 @@
 
 .sidebar-closed > #editor-stack { right: 8px !important; }
 
-[dir="rtl"] .sidebar-closed > #editor-stack { 
-    left: 8px !important;
-    right: initial !important;
-}
-
 #sidebar .button {
     @include workspace-button;
     line-height: 18px;
