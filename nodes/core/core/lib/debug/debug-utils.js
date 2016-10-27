@@ -166,7 +166,9 @@ RED.debug = (function() {
         });
         messageTable.show();
     }
-
+    function formatString(str) {
+        return str.replace(/\n/g,"&crarr;").replace(/\t/g,"&rarr;");
+    }
 
 
     function buildMessageElement(obj,topLevel,typeHint) {
@@ -175,7 +177,7 @@ RED.debug = (function() {
         var entryObj;
         var header;
         var headerHead;
-        var value;
+        var value,subvalue;
         var element = $('<span class="debug-message-element"></span>').toggleClass('collapsed',topLevel);
         if (Array.isArray(obj)) {
             var length = Math.min(obj.length,10);
@@ -210,7 +212,11 @@ RED.debug = (function() {
                             $('<span class="debug-message-object-value debug-message-type-meta">object</span>').appendTo(headerHead);
                         }
                     } else if (typeof value === 'string') {
-                        $('<span class="debug-message-object-value debug-message-type-string"></span>').text('"'+value+'"').appendTo(headerHead);
+                        subvalue = value;
+                        if (subvalue.length > 50) {
+                            subvalue = subvalue.substring(0,50)+"...";
+                        }
+                        $('<span class="debug-message-object-value debug-message-type-string"></span>').html('"'+formatString(subvalue)+'"').appendTo(headerHead);
                     } else {
                         $('<span class="debug-message-object-value debug-message-type-other"></span>').text(""+value).appendTo(headerHead);
                     }
@@ -290,11 +296,11 @@ RED.debug = (function() {
                                     $('<span class="debug-message-object-value debug-message-type-meta">object</span>').appendTo(headerHead);
                                 }
                             } else if (typeof value === 'string') {
-                                var subvalue = value;
-                                if (subvalue.length > 20) {
+                                subvalue = value;
+                                if (subvalue.length > 50) {
                                     subvalue = subvalue.substring(0,50)+"...";
                                 }
-                                $('<span class="debug-message-object-value debug-message-type-string"></span>').text('"'+subvalue+'"').appendTo(headerHead);
+                                $('<span class="debug-message-object-value debug-message-type-string"></span>').html('"'+formatString(subvalue)+'"').appendTo(headerHead);
                             } else {
                                 $('<span class="debug-message-object-value debug-message-type-other"></span>').text(""+value).appendTo(headerHead);
                             }
@@ -333,7 +339,7 @@ RED.debug = (function() {
                 }
             }
         } else if (typeof obj === 'string') {
-            $('<span class="debug-message-object-value debug-message-type-string"></span>').text('"'+obj+'"').appendTo(element);
+            $('<span class="debug-message-object-value debug-message-type-string"></span>').html('"'+formatString(obj)+'"').appendTo(element);
         } else {
             $('<span class="debug-message-object-value debug-message-type-other"></span>').text(""+obj).appendTo(element);
         }
