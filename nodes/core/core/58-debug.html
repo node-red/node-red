@@ -194,6 +194,16 @@
                 */
             });
 
+            $(window).unload(function() {
+                if (subWindow) {
+                    try {
+                        subWindow.close()
+                    } catch(err) {
+                        console.log(err);
+                    }
+                }
+            });
+
             this.handleWindowMessage = function(evt) {
                 var msg = evt.data;
                 if (msg.event === "mouseEnter") {
