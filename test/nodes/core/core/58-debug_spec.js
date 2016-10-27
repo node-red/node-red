@@ -194,7 +194,7 @@ describe('debug node', function() {
             }, function(msg) {
                 JSON.parse(msg).should.eql({
                     topic:"debug",
-                    data:{id:"n1",msg: '[\n 0,\n 1,\n 2,\n 3\n]',format:"array [4]",
+                    data:{id:"n1",msg: '[\n 0,\n 1,\n 2,\n 3\n]',format:"array[4]",
                     property:"payload"}
                 });
             }, done);
@@ -222,7 +222,7 @@ describe('debug node', function() {
         });
     });
 
-    it('should truncated a long message', function(done) {
+    it('should truncate a long message', function(done) {
         var flow = [{id:"n1", type:"debug" }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -234,7 +234,7 @@ describe('debug node', function() {
                     topic:"debug",
                     data:{
                         id:"n1",
-                        msg: Array(1001).join("X")+' ....',
+                        msg: Array(1001).join("X")+'...',
                         property:"payload",
                         format:"string [1001]"
                     }
@@ -256,7 +256,7 @@ describe('debug node', function() {
                         id:"n1",
                         msg: '48454c4c4f',
                         property:"payload",
-                        format: "buffer [5]"
+                        format: "buffer[5]"
                     }
                 });
             }, done);
