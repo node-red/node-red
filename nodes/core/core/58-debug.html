@@ -102,8 +102,7 @@
         onpaletteadd: function() {
 
             var options = {
-                messageMouseOver: function(sourceId) {
-                    //msg.style.borderRightColor = "#999";
+                messageMouseEnter: function(sourceId) {
                     if (sourceId) {
                         var n = RED.nodes.node(sourceId);
                         if (n) {
@@ -113,8 +112,7 @@
                         RED.view.redraw();
                     }
                 },
-                messageMouseOut: function(sourceId) {
-                    //msg.style.borderRightColor = "";
+                messageMouseLeave: function(sourceId) {
                     if (sourceId) {
                         var n = RED.nodes.node(sourceId);
                         if (n) {
@@ -159,14 +157,25 @@
 
             this.refreshMessageList = function() {
                 RED.debug.refreshMessageList(RED.workspaces.active());
+                if (subWindow) {
+                    try {
+                        subWindow.postMessage({event:"workspaceChange",activeWorkspace:RED.workspaces.active()},"*")
+                    } catch(err) {
+                        console.log(err);
+                    }
+                }
             }
 
             this.handleDebugMessage = function(t,o) {
-                o.sourceNode = RED.nodes.node(o.id) || RED.nodes.node(o.z);
+                var sourceNode = RED.nodes.node(o.id) || RED.nodes.node(o.z);
+                if (sourceNode) {
+                    o._source = {id:sourceNode.id,z:sourceNode.z};
+
+                }
                 RED.debug.handleDebugMessage(o);
                 if (subWindow) {
                     try {
-                        subWindow.postMessage(o,"*")
+                        subWindow.postMessage({event:"message",msg:o},"*")
                     } catch(err) {
                         console.log(err);
                     }
@@ -178,12 +187,32 @@
             $("#debug-tab-open").click(function(e) {
                 e.preventDefault();
                 subWindow = window.open(document.location.toString().replace(/#.*$/,"")+"debug/view/view.html","nodeREDDebugView","menubar=no,location=no,toolbar=no,chrome,height=500,width=600");
+                /*
+                * Message format:
+                *
+                *
+                */
             });
+
+            this.handleWindowMessage = function(evt) {
+                var msg = evt.data;
+                if (msg.event === "mouseEnter") {
+                    options.messageMouseEnter(msg.id);
+                } else if (msg.event === "mouseLeave") {
+                    options.messageMouseLeave(msg.id);
+                } else if (msg.event === "mouseClick") {
+                    options.messageSourceClick(msg.id);
+                } else if (msg.event === "clear") {
+                    options.clear();
+                }
+            }
+            window.addEventListener('message',this.handleWindowMessage);
         },
         onpaletteremove: function() {
             RED.comms.unsubscribe("debug",this.handleDebugMessage);
             RED.sidebar.removeTab("debug");
             RED.events.off("workspace:change", this.refreshMessageList);
+            window.removeEventListener("message",this.handleWindowMessage);
             delete RED._debug;
         },
         oneditprepare: function() {

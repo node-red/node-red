@@ -1,4 +1,6 @@
-
+if (!RED) {
+    var RED = {}
+}
 RED.debug = (function() {
     var config;
     var messageList;
@@ -11,8 +13,8 @@ RED.debug = (function() {
     var activeWorkspace;
 
     /**
-     * messageMouseOver
-     * messageMouseOut
+     * messageMouseEnter
+     * messageMouseLeave
      * messageSourceClick
      * clear
      *
@@ -41,13 +43,17 @@ RED.debug = (function() {
         var filterDialog = $('<div class="debug-filter-box hide">'+
             '<div class="debug-filter-row">'+
             '<span class="button-group">'+
-                '<a class="sidebar-header-button-toggle selected" id="debug-tab-filter-all" href="#"><span data-i18n="node-red:debug.sidebar.filterAll"></span></a>'+
-                '<a class="sidebar-header-button-toggle" id="debug-tab-filter-current" href="#"><span data-i18n="node-red:debug.sidebar.filterCurrent"></span></a> '+
+                '<a class="sidebar-header-button-toggle selected" id="debug-tab-filter-all" href="#"><span data-i18n="node-red:debug.sidebar.filterAll">all flows</span></a>'+
+                '<a class="sidebar-header-button-toggle" id="debug-tab-filter-current" href="#"><span data-i18n="node-red:debug.sidebar.filterCurrent">current flow</span></a> '+
             '</span>'+
             '</div>'+
         '</div>').appendTo(content);
 
-        content.i18n();
+        try {
+            content.i18n();
+        } catch(err) {
+            console.log("TODO: i18n library support");
+        }
 
 
         filterDialog.find('#debug-tab-filter-all').on("click",function(e) {
@@ -337,18 +343,18 @@ RED.debug = (function() {
     function handleDebugMessage(o) {
         var msg = document.createElement("div");
 
-        var sourceNode = o.sourceNode;
+        var sourceNode = o._source;
 
-        msg.onmouseover = function() {
+        msg.onmouseenter = function() {
             msg.style.borderRightColor = "#999";
-            if (o.sourceNode) {
-                config.messageMouseOver(o.sourceNode.id);
+            if (o._source) {
+                config.messageMouseEnter(o._source.id);
             }
         };
-        msg.onmouseout = function() {
+        msg.onmouseleave = function() {
             msg.style.borderRightColor = "";
-            if (o.sourceNode) {
-                config.messageMouseOut(o.sourceNode.id);
+            if (o._source) {
+                config.messageMouseLeave(o._source.id);
             }
         };
         var name = sanitize(((o.name?o.name:o.id)||"").toString());
