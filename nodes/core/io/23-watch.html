@@ -17,7 +17,7 @@
 <script type="text/x-red" data-template-name="watch">
     <div class="form-row node-input-filename">
          <label for="node-input-files"><i class="fa fa-file"></i> <span data-i18n="watch.label.files"></span></label>
-         <div id="node-input-files" contenteditable="true" tabindex="1" data-i18n="[placeholder]watch.placeholder.files"></div>
+         <input id="node-input-files" type="text" tabindex="1" data-i18n="[placeholder]watch.placeholder.files">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
@@ -46,7 +46,7 @@
         category: 'advanced-input',
         defaults: {
             name: {value:""},
-            files: {value:"",required:true, format:"filepath"}
+            files: {value:"",required:true}
         },
         color:"BurlyWood",
         inputs:0,

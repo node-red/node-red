@@ -17,7 +17,7 @@
 <script type="text/x-red" data-template-name="tail">
     <div class="form-row">
          <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="tail.label.filename"></span></label>
-         <div id="node-input-filename" contenteditable="true"></div>
+         <input id="node-input-filename" type="text">
     </div>
     <div class="form-row">
         <label for="node-input-filetype"><i class="fa fa-file-text-o"></i> <span data-i18n="tail.label.type"></span></label>
@@ -50,7 +50,7 @@
             name: {value:""},
             filetype: {value:"text"},
             split: {value:false},
-            filename: {value:"",required:true,format:"filepath"}
+            filename: {value:"",required:true}
         },
         color:"BurlyWood",
         inputs:0,

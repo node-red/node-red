@@ -17,7 +17,7 @@
 <script type="text/x-red" data-template-name="file">
     <div class="form-row node-input-filename">
          <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="file.label.filename"></span></label>
-         <div id="node-input-filename" contenteditable="true"></div>
+         <input id="node-input-filename" type="text">
     </div>
     <div class="form-row">
         <label for="node-input-overwriteFile"><i class="fa fa-random"></i> <span data-i18n="file.label.action"></span></label>
@@ -56,7 +56,7 @@
 <script type="text/x-red" data-template-name="file in">
     <div class="form-row">
          <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="file.label.filename"></span></label>
-         <div id="node-input-filename" contenteditable="true" data-i18n="[placeholder]file.label.filename"></div>
+         <input id="node-input-filename" type="text" data-i18n="[placeholder]file.label.filename">
     </div>
     <div class="form-row">
         <label for="node-input-format"><i class="fa fa-sign-out"></i> <span data-i18n="file.label.outputas"></span></label>
@@ -83,7 +83,7 @@
         category: 'storage-output',
         defaults: {
             name: {value:""},
-            filename: {value:"",format:"filepath"},
+            filename: {value:""},
             appendNewline: {value:true},
             createDir: {value:false},
             overwriteFile: {value:"false"}
@@ -115,7 +115,7 @@
         category: 'storage-input',
         defaults: {
             name: {value:""},
-            filename: {value:"",format:"filepath"},
+            filename: {value:""},
             format: {value:"utf8"},
         },
         color:"BurlyWood",
