@@ -22,6 +22,7 @@ var redUtil = require("../util");
 var Log = require("../log");
 var context = require("./context");
 var flows = require("./flows");
+var router = require("./router");
 
 function Node(n) {
     this.id = n.id;
@@ -41,28 +42,10 @@ function Node(n) {
 util.inherits(Node, EventEmitter);
 
 Node.prototype.updateWires = function(wires) {
-    //console.log("UPDATE",this.id);
+    router.add(this,wires);
     this.wires = wires || [];
-    delete this._wire;
-
-    var wc = 0;
-    this.wires.forEach(function(w) {
-        wc+=w.length;
-    });
-    this._wireCount = wc;
-    if (wc === 0) {
-        // With nothing wired to the node, no-op send
-        this.send = function(msg) {}
-    } else {
-        this.send = Node.prototype.send;
-        if (this.wires.length === 1 && this.wires[0].length === 1) {
-            // Single wire, so we can shortcut the send when
-            // a single message is sent
-            this._wire = this.wires[0][0];
-        }
-    }
-
 }
+
 Node.prototype.context = function() {
     if (!this._context) {
          this._context = context.get(this._alias||this.id,this.z);
@@ -100,103 +83,22 @@ Node.prototype.close = function() {
     }
     if (promises.length > 0) {
         return when.settle(promises).then(function() {
+            router.remove(this);
             if (this._context) {
-                 context.delete(this._alias||this.id,this.z);
+                context.delete(this._alias||this.id,this.z);
             }
         });
     } else {
+        router.remove(this);
         if (this._context) {
-             context.delete(this._alias||this.id,this.z);
+            context.delete(this._alias||this.id,this.z);
         }
         return;
     }
 };
 
 Node.prototype.send = function(msg) {
-    var msgSent = false;
-    var node;
-
-    if (msg === null || typeof msg === "undefined") {
-        return;
-    } else if (!util.isArray(msg)) {
-        if (this._wire) {
-            // A single message and a single wire on output 0
-            // TODO: pre-load flows.get calls - cannot do in constructor
-            //       as not all nodes are defined at that point
-            if (!msg._msgid) {
-                msg._msgid = redUtil.generateId();
-            }
-            this.metric("send",msg);
-            node = flows.get(this._wire);
-            /* istanbul ignore else */
-            if (node) {
-                node.receive(msg);
-            }
-            return;
-        } else {
-            msg = [msg];
-        }
-    }
-
-    var numOutputs = this.wires.length;
-
-    // Build a list of send events so that all cloning is done before
-    // any calls to node.receive
-    var sendEvents = [];
-
-    var sentMessageId = null;
-
-    // for each output of node eg. [msgs to output 0, msgs to output 1, ...]
-    for (var i = 0; i < numOutputs; i++) {
-        var wires = this.wires[i]; // wires leaving output i
-        /* istanbul ignore else */
-        if (i < msg.length) {
-            var msgs = msg[i]; // msgs going to output i
-            if (msgs !== null && typeof msgs !== "undefined") {
-                if (!util.isArray(msgs)) {
-                    msgs = [msgs];
-                }
-                var k = 0;
-                // for each recipent node of that output
-                for (var j = 0; j < wires.length; j++) {
-                    node = flows.get(wires[j]); // node at end of wire j
-                    if (node) {
-                        // for each msg to send eg. [[m1, m2, ...], ...]
-                        for (k = 0; k < msgs.length; k++) {
-                            var m = msgs[k];
-                            if (m !== null && m !== undefined) {
-                                /* istanbul ignore else */
-                                if (!sentMessageId) {
-                                    sentMessageId = m._msgid;
-                                }
-                                if (msgSent) {
-                                    var clonedmsg = redUtil.cloneMessage(m);
-                                    sendEvents.push({n:node,m:clonedmsg});
-                                } else {
-                                    sendEvents.push({n:node,m:m});
-                                    msgSent = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    /* istanbul ignore else */
-    if (!sentMessageId) {
-        sentMessageId = redUtil.generateId();
-    }
-    this.metric("send",{_msgid:sentMessageId});
-
-    for (i=0;i<sendEvents.length;i++) {
-        var ev = sendEvents[i];
-        /* istanbul ignore else */
-        if (!ev.m._msgid) {
-            ev.m._msgid = sentMessageId;
-        }
-        ev.n.receive(ev.m);
-    }
+    router.send(this,msg);
 };
 
 Node.prototype.receive = function(msg) {

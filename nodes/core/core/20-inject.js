@@ -67,20 +67,19 @@ module.exports = function(RED) {
                 this.error(err,msg);
             }
         });
+        this.on('close', function() {
+            if (node.interval_id != null) {
+                clearInterval(node.interval_id);
+                if (RED.settings.verbose) { node.log(RED._("inject.stopped")); }
+            } else if (node.cronjob != null) {
+                node.cronjob.stop();
+                if (RED.settings.verbose) { node.log(RED._("inject.stopped")); }
+                delete node.cronjob;
+            }
+        });
     }
 
     RED.nodes.registerType("inject",InjectNode);
-
-    InjectNode.prototype.close = function() {
-        if (this.interval_id != null) {
-            clearInterval(this.interval_id);
-            if (RED.settings.verbose) { this.log(RED._("inject.stopped")); }
-        } else if (this.cronjob != null) {
-            this.cronjob.stop();
-            if (RED.settings.verbose) { this.log(RED._("inject.stopped")); }
-            delete this.cronjob;
-        }
-    }
 
     RED.httpAdmin.post("/inject/:id", RED.auth.needsPermission("inject.write"), function(req,res) {
         var node = RED.nodes.getNode(req.params.id);

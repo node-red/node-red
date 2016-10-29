@@ -149,11 +149,18 @@ describe('Node', function() {
     });
 
     describe('#send', function() {
+        var flowGet;
+        afterEach(function() {
+            if (flowGet && flowGet.restore) {
+                flowGet.restore();
+                flowGet = null;
+            }
+        });
 
         it('emits a single message', function(done) {
             var n1 = new RedNode({id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({id:'n2',type:'abc'});
-            var flowGet = sinon.stub(flows,"get",function(id) {
+            flowGet = sinon.stub(flows,"get",function(id) {
                 return {'n1':n1,'n2':n2}[id];
             });
             var message = {payload:"hello world"};
@@ -172,7 +179,7 @@ describe('Node', function() {
         it('emits multiple messages on a single output', function(done) {
             var n1 = new RedNode({id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({id:'n2',type:'abc'});
-            var flowGet = sinon.stub(flows,"get",function(id) {
+            flowGet = sinon.stub(flows,"get",function(id) {
                 return {'n1':n1,'n2':n2}[id];
             });
 
@@ -206,7 +213,7 @@ describe('Node', function() {
             var n3 = new RedNode({id:'n3',type:'abc'});
             var n4 = new RedNode({id:'n4',type:'abc'});
             var n5 = new RedNode({id:'n5',type:'abc'});
-            var flowGet = sinon.stub(flows,"get",function(id) {
+            flowGet = sinon.stub(flows,"get",function(id) {
                 return {'n1':n1,'n2':n2,'n3':n3,'n4':n4,'n5':n5}[id];
             });
 
@@ -264,7 +271,7 @@ describe('Node', function() {
         it('emits no messages', function(done) {
             var n1 = new RedNode({id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({id:'n2',type:'abc'});
-            var flowGet = sinon.stub(flows,"get",function(id) {
+            flowGet = sinon.stub(flows,"get",function(id) {
                 return {'n1':n1,'n2':n2}[id];
             });
 
@@ -283,7 +290,7 @@ describe('Node', function() {
         it('emits messages ignoring non-existent nodes', function(done) {
             var n1 = new RedNode({id:'n1',type:'abc',wires:[['n9'],['n2']]});
             var n2 = new RedNode({id:'n2',type:'abc'});
-            var flowGet = sinon.stub(flows,"get",function(id) {
+            flowGet = sinon.stub(flows,"get",function(id) {
                 return {'n1':n1,'n2':n2}[id];
             });
 
@@ -307,7 +314,7 @@ describe('Node', function() {
             var n1 = new RedNode({id:'n1',type:'abc',wires:[[['n2'],['n3']]]});
             var n2 = new RedNode({id:'n2',type:'abc'});
             var n3 = new RedNode({id:'n3',type:'abc'});
-            var flowGet = sinon.stub(flows,"get",function(id) {
+            flowGet = sinon.stub(flows,"get",function(id) {
                 return {'n1':n1,'n2':n2,'n3':n3}[id];
             });
 
@@ -349,7 +356,7 @@ describe('Node', function() {
         });
 
          it("logs the uuid for all messages sent", function(done) {
-            var flowGet = sinon.stub(flows,"get",function(id) {
+            flowGet = sinon.stub(flows,"get",function(id) {
                 return {'n1':sender,'n2':receiver1,'n3':receiver2}[id];
             });
             var logHandler = {
