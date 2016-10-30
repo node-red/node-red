@@ -27,7 +27,7 @@
 }
 
 [dir="rtl"] #sidebar {
-    right: initial;
+    right: auto;
     left: 0px;
 }
 
@@ -59,7 +59,7 @@
 
 [dir="rtl"] #sidebar-separator {
     left: 315px;
-    right: initial;
+    right: auto;
 }
 
 .sidebar-closed > #sidebar { display: none; }
@@ -67,13 +67,14 @@
 
 [dir="rtl"] .sidebar-closed > #sidebar-separator { 
     left: 0px !important; 
-    right: initial !important; 
+    right: auto !important; 
 }
 
 .sidebar-closed > #workspace { right: 7px !important; }
 
 [dir="rtl"] .sidebar-closed > #workspace { 
-    left: 7px !important; 
+    left: 7px !important;
+    right: 179px !important;
 }
 
 .sidebar-closed > #editor-stack { right: 8px !important; }

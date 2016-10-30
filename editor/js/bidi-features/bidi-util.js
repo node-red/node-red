@@ -21,9 +21,9 @@ var BidiFlags = {
     STT_GETHTML : 16
 };
 
-//reverse direction in case of mirroring is enabled
-RED.leftProparty = "";
-RED.rightProparty = "";
+//Reverse direction in case of mirroring is enabled
+RED.leftProperty = "";
+RED.rightProperty = "";
 
 RED.bidiUtil = (function() {
     var textDir = "";
@@ -34,16 +34,16 @@ RED.bidiUtil = (function() {
      * Check if browser language is RTL language
      */
     function _isMirroringEnabled() {
-    	var isRTLLang = new RegExp("^(ar|he)").test(navigator.language);
-    	if (isRTLLang) {
-    		RED.leftProparty = "right";
-    	    RED.rightProparty = "left";
-    	    return true;
-    	} else {
-    		RED.leftProparty = "left";
-    	    RED.rightProparty = "right";
-    	    return false;
-    	}
+        var isRTLLang = new RegExp("^(ar|he)").test(navigator.language);
+        if (isRTLLang) {
+            RED.leftProperty = "right";
+            RED.rightProperty = "left";
+            return true;
+        } else {
+            RED.leftProperty = "left";
+            RED.rightProperty = "right";
+            return false;
+        }
     }
    
     /**
@@ -175,5 +175,5 @@ RED.bidiUtil = (function() {
         applyBidiSupport : _applyBidiSupport,
         resolveBaseTextDir : _resolveBaseTextDir,
         prepareInput: _prepareInput
-	 }
+    }
  })();

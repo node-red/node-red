@@ -55,7 +55,7 @@
     }
     
     & #workspace {
-        left: 379px !important;
+        left: 315px !important;
         right: 380px !important;
     }
 }
@@ -153,6 +153,10 @@
     margin: 4px 28px 4px 0;
 }
 
+[dir="rtl"] .palette_label_right {
+    margin: 4px 0 4px 28px;
+}
+
 .palette_node {
     cursor:move;
     background: #ddd;
@@ -169,6 +173,9 @@
 .palette_node:hover {
     border-color: $node-selected-color;
     background-color: #eee;
+}
+[dir="rtl"] .palette_node:hover {
+	direction: rtl;
 }
 .palette_port {
     position: absolute;

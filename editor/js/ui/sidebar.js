@@ -106,14 +106,14 @@ RED.sidebar = (function() {
                 sidebarSeparator.opening = false;
                 var winWidth = $(window).width();
                 sidebarSeparator.start = ui.position.left;
-                sidebarSeparator.chartWidth = $("#workspace").width();
+                sidebarSeparator.chartWidth = $("#workspace").width();                
                 sidebarSeparator.chartRight = winWidth-$("#workspace").width()-$("#workspace").offset().left-2;
 
                 if (!RED.menu.isSelected("menu-item-sidebar")) {
                     sidebarSeparator.opening = true;
                     var newChartRight = 7;
                     $("#sidebar").addClass("closing");
-                    $("#workspace").css(RED.rightProparty,newChartRight);
+                    $("#workspace").css(RED.rightProperty,newChartRight);
                     $("#editor-stack").css("right",newChartRight+1);
                     $("#sidebar").width(0);
                     RED.menu.setSelected("menu-item-sidebar",true);
@@ -123,16 +123,21 @@ RED.sidebar = (function() {
             },
             drag: function(event,ui) {
                 var d = ui.position.left-sidebarSeparator.start;
-                var newSidebarWidth = sidebarSeparator.width-d;
+                // using to handle sidebar width at both RTL and LTR UIs
+                var newSidebarWidth = (RED.bidiUtil.isMirroringEnabled() ? sidebarSeparator.width + d : sidebarSeparator.width - d);
                 if (sidebarSeparator.opening) {
                     newSidebarWidth -= 3;
                 }
 
                 if (newSidebarWidth > 150) {
-                    if (sidebarSeparator.chartWidth+d < 200) {
+                	// to handle sidebar width at both RTL and LTR UIs
+                	var tempValue = (RED.bidiUtil.isMirroringEnabled() ? sidebarSeparator.chartWidth - d : sidebarSeparator.chartWidth + d);
+                    if (tempValue < 200) {
+                    	
                         ui.position.left = 200+sidebarSeparator.start-sidebarSeparator.chartWidth;
                         d = ui.position.left-sidebarSeparator.start;
-                        newSidebarWidth = sidebarSeparator.width-d;
+                        // to handle sidebar width at both RTL and LTR UIs
+                        newSidebarWidth = (RED.bidiUtil.isMirroringEnabled() ? sidebarSeparator.width + d : sidebarSeparator.width - d);
                     }
                 }
 
@@ -151,8 +156,9 @@ RED.sidebar = (function() {
                     $("#sidebar").removeClass("closing");
                 }
 
-                var newChartRight = sidebarSeparator.chartRight-d;
-                $("#workspace").css(RED.rightProparty,newChartRight);
+                //to handle workspace css right property at both RTL and LTR UIs
+                var newChartRight = (RED.bidiUtil.isMirroringEnabled() ? $("#editor-stack").css("right") : sidebarSeparator.chartRight-d);
+                $("#workspace").css(RED.rightProperty,(RED.bidiUtil.isMirroringEnabled() ? newSidebarWidth+2 : newChartRight));
                 $("#editor-stack").css("right",newChartRight+1);
                 $("#sidebar").width(newSidebarWidth);
 
@@ -169,8 +175,8 @@ RED.sidebar = (function() {
                         ("#editor-stack").css("right",188);
                     }
                 }
-                $("#sidebar-separator").css(RED.leftProparty,"auto");
-                $("#sidebar-separator").css(RED.rightProparty,($("#sidebar").width()+2)+"px");
+                $("#sidebar-separator").css(RED.leftProperty,"auto");
+                $("#sidebar-separator").css(RED.rightProperty,($("#sidebar").width()+2)+"px");
                 RED.events.emit("sidebar:resize");
             }
     });

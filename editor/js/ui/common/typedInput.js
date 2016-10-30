@@ -200,9 +200,9 @@
                 }
                 // reverse property direction in case of right directionality
                 if (opt.icon) {
-                    $('<img>',{src:opt.icon,style:"margin-"+RED.rightProparty+": 4px; height: 18px;"}).prependTo(op);
+                    $('<img>',{src:opt.icon,style:"margin-"+RED.rightProperty+": 4px; height: 18px;"}).prependTo(op);
                 } else {
-                	op.css("padding-"+RED.leftProparty, "18px");
+                	op.css("padding-"+RED.leftProperty, "18px");
                 }
                 op.click(function(event) {
                     event.preventDefault();
@@ -272,9 +272,9 @@
                 this.selectTrigger.width('auto');
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
                 // reverse property direction in case of right directionality
-                this.elementDiv.css(RED.leftProparty,labelWidth+"px");
+                this.elementDiv.css(RED.leftProperty,labelWidth+"px");
                 if (this.optionSelectTrigger) {
-                    this.optionSelectTrigger.css(RED.leftProparty,(labelWidth+5)+"px");
+                    this.optionSelectTrigger.css(RED.leftProperty,(labelWidth+5)+"px");
                 }
             }
         },
@@ -337,7 +337,7 @@
                         image = new Image();
                         image.name = opt.icon;
                         image.src = opt.icon;
-                        $('<img>',{src:opt.icon,style:"margin-"+RED.rightProparty+": 4px;height: 18px;"}).prependTo(this.selectLabel);
+                        $('<img>',{src:opt.icon,style:"margin-"+RED.rightProperty+": 4px;height: 18px;"}).prependTo(this.selectLabel);
                     } else {
                         this.selectLabel.text(opt.label);
                     }
