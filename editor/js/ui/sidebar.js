@@ -106,7 +106,7 @@ RED.sidebar = (function() {
                 sidebarSeparator.opening = false;
                 var winWidth = $(window).width();
                 sidebarSeparator.start = ui.position.left;
-                sidebarSeparator.chartWidth = $("#workspace").width();                
+                sidebarSeparator.chartWidth = $("#workspace").width();
                 sidebarSeparator.chartRight = winWidth-$("#workspace").width()-$("#workspace").offset().left-2;
 
                 if (!RED.menu.isSelected("menu-item-sidebar")) {
@@ -172,7 +172,7 @@ RED.sidebar = (function() {
                     if ($("#sidebar").width() < 180) {
                         $("#sidebar").width(180);
                         $("#workspace").css(RED.rightProparty,187);
-                        ("#editor-stack").css("right",188);
+                        $("#editor-stack").css("right",188);
                     }
                 }
                 $("#sidebar-separator").css(RED.leftProperty,"auto");
