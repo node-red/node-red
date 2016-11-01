@@ -29,6 +29,7 @@ function Node(n) {
     this.type = n.type;
     this.z = n.z;
     this._closeCallbacks = [];
+    this._config = n;
 
     if (n.name) {
         this.name = n.name;

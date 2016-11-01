@@ -37,7 +37,8 @@ var knownOpts = {
     "userDir":[path],
     "port": Number,
     "v": Boolean,
-    "help": Boolean
+    "help": Boolean,
+    "debug": Boolean
 };
 var shortHands = {
     "s":["--settings"],
@@ -118,6 +119,10 @@ try {
 
 if (parsedArgs.v) {
     settings.verbose = true;
+}
+
+if (parsedArgs.debug) {
+    settings.enableDebugger = true;
 }
 
 if (settings.https) {

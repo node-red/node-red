@@ -19,7 +19,9 @@ var credentials = require("./credentials");
 var flows = require("./flows");
 var context = require("./context");
 var Node = require("./Node");
+var router = require("./router");
 var log = require("../log");
+var nrdb = require("./debugger");
 
 var events = require("../events");
 
@@ -77,6 +79,10 @@ function init(runtime) {
     flows.init(runtime);
     registry.init(runtime);
     context.init(runtime.settings);
+    router.init(runtime);
+    if (settings.enableDebugger) {
+        nrdb.init(runtime,{router:router});
+    }
 }
 
 function disableNode(id) {
@@ -134,6 +140,7 @@ module.exports = {
     stopFlows:  flows.stopFlows,
     setFlows:   flows.setFlows,
     getFlows:   flows.getFlows,
+    listFlows:  flows.listFlows,
 
     addFlow:     flows.addFlow,
     getFlow:     flows.getFlow,
@@ -142,10 +149,12 @@ module.exports = {
     // disableFlow: flows.disableFlow,
     // enableFlow:  flows.enableFlow,
 
-
     // Credentials
     addCredentials: credentials.add,
     getCredentials: credentials.get,
     deleteCredentials: credentials.delete,
     getCredentialDefinition: credentials.getDefinition
+
+    // Router
+
 };

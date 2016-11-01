@@ -586,6 +586,10 @@ function removeFlow(id) {
     });
 }
 
+function listFlows() {
+    return Object.keys(activeFlows);
+}
+
 module.exports = {
     init: init,
 
@@ -633,6 +637,7 @@ module.exports = {
     getFlow: getFlow,
     updateFlow: updateFlow,
     removeFlow: removeFlow,
+    listFlows: listFlows,
     disableFlow:null,
     enableFlow:null
 
