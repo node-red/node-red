@@ -92,32 +92,52 @@ module.exports = function(RED) {
             } catch(err) {
                 msg.format = "Object";
             }
-            var isArray = util.isArray(msg.msg);
-            if (isArray) {
-                msg.format = "array["+msg.msg.length+"]";
-            }
-            if (isArray || (msg.format === "Object")) {
-                msg.msg = JSON.stringify(msg.msg, function(key, value) {
-                    if (key[0] === '_' && key !== "_msgid") {
-                        return undefined;
-                    }
-                    if (key === '_req' || key === '_res') {
-                        return "[internal]"
-                    }
-                    if (typeof value === 'object' && value !== null) {
-                        if (seen.indexOf(value) !== -1) { return "[circular]"; }
-                        seen.push(value);
-                    }
-                    if (typeof value === 'string') {
-                        if (value.length > debuglength) {
-                            return value.substring(0,debuglength)+"...";
-                        }
-                    }
-                    return value;
-                }," ");
+            if (/error/i.test(msg.format)) {
+                msg.msg = JSON.stringify({
+                    name: msg.msg.name,
+                    message: msg.msg.message
+                });
             } else {
-                try { msg.msg = msg.msg.toString(); }
-                catch(e) { msg.msg = "[Type not printable]"; }
+                var isArray = util.isArray(msg.msg);
+                if (isArray) {
+                    msg.format = "array["+msg.msg.length+"]";
+                    if (msg.msg.length > debuglength) {
+                        msg.msg = msg.msg.slice(0,debuglength);
+                    }
+                }
+                if (isArray || (msg.format === "Object")) {
+                    msg.msg = JSON.stringify(msg.msg, function(key, value) {
+                        if (key[0] === '_' && key !== "_msgid") {
+                            return undefined;
+                        }
+                        if (key === '_req' || key === '_res') {
+                            return "[internal]"
+                        }
+                        if (value instanceof Error) {
+                            return value.toString()
+                        }
+                        if (util.isArray(value) && value.length > debuglength) {
+                            value = {
+                                type: "array",
+                                data: value.slice(0,debuglength),
+                                length: value.length
+                            }
+                        }
+                        if (typeof value === 'object' && value !== null) {
+                            if (seen.indexOf(value) !== -1) { return "[circular]"; }
+                            seen.push(value);
+                        }
+                        if (typeof value === 'string') {
+                            if (value.length > debuglength) {
+                                return value.substring(0,debuglength)+"...";
+                            }
+                        }
+                        return value;
+                    }," ");
+                } else {
+                    try { msg.msg = msg.msg.toString(); }
+                    catch(e) { msg.msg = "[Type not printable]"; }
+                }
             }
             seen = null;
         } else if (typeof msg.msg === "boolean") {
@@ -138,7 +158,6 @@ module.exports = function(RED) {
                 msg.msg = msg.msg.substring(0,debuglength)+"...";
             }
         }
-
         // if (msg.msg.length > debuglength) {
         //     msg.msg = msg.msg.substr(0,debuglength) +" ....";
         // }

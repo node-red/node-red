@@ -96,7 +96,10 @@
     transition: transform 0.1s ease-in-out;
     transform: rotate(90deg);
 }
-.debug-message-object-entry>span>.debug-message-object-handle {
+.debug-message-element:not(.debug-message-top-level)>.debug-message-expandable>.debug-message-object-handle {
+    margin-left: -1em;
+}
+.debug-message-object-entry>.debug-message-expandable>.debug-message-object-handle {
     margin-left: -1em;
 }
 .debug-message-object-entry.collapsed>span>.debug-message-object-handle {
@@ -106,7 +109,7 @@
     transform: rotate(0deg);
 }
 
-.debug-message-object-entry.collapsed .debug-message-object-entry {
+.debug-message-object-entry.collapsed > .debug-message-object-entry {
     display:none;
 }
 
@@ -126,6 +129,7 @@
 .debug-message-type-string { color: #b72828; }
 .debug-message-type-null { color: #666; font-style: italic;}
 .debug-message-type-meta { color: #666; font-style: italic;}
+.debug-message-type-number { color: #2033d6;cursor: pointer;}
 
 .debug-message-expandable {
     cursor: pointer;
