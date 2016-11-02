@@ -351,6 +351,8 @@ RED.debug = (function() {
                 $('<span>{ </span>').appendTo(headerHead);
                 var keysLength = Math.min(keys.length,5);
                 for (i=0;i<keysLength;i++) {
+                    $('<span class="debug-message-object-key"></span>').text(keys[i]).appendTo(headerHead);
+                    $('<span>: </span>').appendTo(headerHead);
                     buildMessageSummaryValue(obj[keys[i]]).appendTo(headerHead);
                     if (i < keysLength-1) {
                         $('<span>, </span>').appendTo(headerHead);
