@@ -287,39 +287,46 @@ RED.debug = (function() {
 
             if (originalLength > 0) {
                 $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
+                var arrayRows = $('<div class="debug-message-array-rows"></div>').appendTo(element);
                 makeExpandable(header,function() {
                     if (!key) {
-                        var headerHead = $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(header);
-                        if (type === 'buffer') {
-                            // var bufferOpts = $('<span class="debug-message-buffer-opts"></span>').appendTo(headerHead);
-                            // //dec hex string
-                            // $('<a href="#"></a>').addClass('selected').html('dec').appendTo(bufferOpts).click(function(e) {
-                            //     $(this).addClass('selected').siblings().removeClass('selected');
-                            //     e.preventDefault();
-                            //     e.stopPropagation();
-                            // })
-                            // $('<a href="#"></a>').html('hex').appendTo(bufferOpts).click(function(e) {
-                            //     $(this).addClass('selected').siblings().removeClass('selected');
-                            //     e.preventDefault();
-                            //     e.stopPropagation();
-                            // })
-                            // $('<a href="#"></a>').html('string').appendTo(bufferOpts).click(function(e) {
-                            //     $(this).addClass('selected').siblings().removeClass('selected');
-                            //     e.preventDefault();
-                            //     e.stopPropagation();
-                            // })
+                        headerHead = $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(header);
+                    }
+                    if (type === 'buffer') {
+                        var stringRow = $('<div class="debug-message-object-entry collapsed"></div>').hide().appendTo(element);
+                        var sr = $('<div class="debug-message-array-rows"></div>').appendTo(stringRow);
+                        var stringEncoding = "";
+                        try {
+                            stringEncoding = String.fromCharCode.apply(null, new Uint16Array(data))
+                        } catch(err) {
+                            console.log(err);
                         }
+                        $('<pre class="debug-message-type-string"></pre>').html(stringEncoding).appendTo(sr);
+                        var bufferOpts = $('<span class="debug-message-buffer-opts"></span>').appendTo(headerHead);
+                        $('<a href="#"></a>').addClass('selected').html('raw').appendTo(bufferOpts).click(function(e) {
+                            if ($(this).text() === 'raw') {
+                                $(this).text('string');
+                                arrayRows.hide();
+                                stringRow.show();
+                            } else {
+                                $(this).text('raw');
+                                arrayRows.show();
+                                stringRow.hide();
+                            }
+                            e.preventDefault();
+                            e.stopPropagation();
+                        })
                     }
                     var row;
                     if (fullLength <= 10) {
                         for (i=0;i<fullLength;i++) {
-                            row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
+                            row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(arrayRows);
                             buildMessageElement(data[i],""+i,false).appendTo(row);
                         }
                     } else {
                         for (i=0;i<fullLength;i+=10) {
                             var minRange = i;
-                            row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
+                            row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(arrayRows);
                             header = $('<span></span>').appendTo(row);
                             $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').appendTo(header);
                             makeExpandable(header, (function() {
@@ -336,13 +343,13 @@ RED.debug = (function() {
                             $('<span class="debug-message-object-key"></span>').html("["+minRange+" &hellip; "+Math.min(fullLength-1,(minRange+9))+"]").appendTo(header);
                         }
                         if (fullLength < originalLength) {
-                             $('<div class="debug-message-object-entry collapsed"><span class="debug-message-object-key">['+fullLength+' &hellip; '+originalLength+']</span></div>').appendTo(element);
+                             $('<div class="debug-message-object-entry collapsed"><span class="debug-message-object-key">['+fullLength+' &hellip; '+originalLength+']</span></div>').appendTo(arrayRows);
                         }
                     }
                 });
             }
             if (key) {
-                $('<span class="debug-message-type-meta"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(entryObj);
+                headerHead = $('<span class="debug-message-type-meta f"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(entryObj);
             } else {
                 headerHead = $('<span class="debug-message-object-header"></span>').appendTo(entryObj);
                 $('<span>[ </span>').appendTo(headerHead);

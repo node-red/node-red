@@ -119,6 +119,9 @@
 .debug-message-element:not(.collapsed)>.debug-message-expandable>.debug-message-object-value>.debug-message-object-header {
     display:none;
 }
+.debug-message-element.collapsed .debug-message-buffer-opts {
+    display: none;
+}
 
 .debug-message-element.collapsed .debug-message-object-type-header {
     display:none;
@@ -153,11 +156,6 @@
     border-radius: 2px;
     padding: 2px 5px;
     margin-left: 5px;
-}
-.debug-message-buffer-opts a.selected {
-    background: #eee;
-    color: #999;
-    border: 1px solid #999;
 }
 .debug-message-buffer-opts a:hover {
     text-decoration: none;
