@@ -153,7 +153,7 @@ module.exports = function(RED) {
             msg.format = (msg.msg === null)?"null":"undefined";
             msg.msg = "(undefined)";
         } else {
-            msg.format = "string ["+msg.msg.length+"]";
+            msg.format = "string["+msg.msg.length+"]";
             if (msg.msg.length > debuglength) {
                 msg.msg = msg.msg.substring(0,debuglength)+"...";
             }

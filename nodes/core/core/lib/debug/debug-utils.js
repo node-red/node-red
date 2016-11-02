@@ -185,8 +185,8 @@ RED.debug = (function() {
             }
         } else if (typeof value === 'string') {
             subvalue = value;
-            if (subvalue.length > 50) {
-                subvalue = subvalue.substring(0,50)+"&hellip;";
+            if (subvalue.length > 30) {
+                subvalue = subvalue.substring(0,30)+"&hellip;";
             }
             result = $('<span class="debug-message-object-value debug-message-type-string"></span>').html('"'+formatString(subvalue)+'"');
         } else {
@@ -241,7 +241,16 @@ RED.debug = (function() {
         if (obj === null || obj === undefined) {
             $('<span class="debug-message-type-null">'+obj+'</span>').appendTo(entryObj);
         } else if (typeof obj === 'string') {
-            $('<span class="debug-message-type-string"></span>').html('"'+formatString(obj)+'"').appendTo(entryObj);
+            element.addClass('collapsed');
+            $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
+            $('<span class="debug-message-type-string debug-message-object-header"></span>').html('"'+formatString(obj)+'"').appendTo(entryObj);
+            makeExpandable(header, function() {
+                $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||'string').appendTo(header);
+                var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
+                $('<pre class="debug-message-type-string"></pre>').html(obj).appendTo(row);
+            });
+
+
         } else if (typeof obj === 'number') {
             e = $('<span class="debug-message-type-number"></span>').text(""+obj).appendTo(entryObj);
             e.click(function(evt) {
@@ -271,6 +280,8 @@ RED.debug = (function() {
                     originalLength = data.length;
                 }
                 type = obj.type.toLowerCase();
+            } else if (/buffer/.test(typeHint)) {
+                type = 'buffer';
             }
             var fullLength = data.length;
 
@@ -278,7 +289,26 @@ RED.debug = (function() {
                 $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
                 makeExpandable(header,function() {
                     if (!key) {
-                        $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(header);
+                        var headerHead = $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(header);
+                        if (type === 'buffer') {
+                            // var bufferOpts = $('<span class="debug-message-buffer-opts"></span>').appendTo(headerHead);
+                            // //dec hex string
+                            // $('<a href="#"></a>').addClass('selected').html('dec').appendTo(bufferOpts).click(function(e) {
+                            //     $(this).addClass('selected').siblings().removeClass('selected');
+                            //     e.preventDefault();
+                            //     e.stopPropagation();
+                            // })
+                            // $('<a href="#"></a>').html('hex').appendTo(bufferOpts).click(function(e) {
+                            //     $(this).addClass('selected').siblings().removeClass('selected');
+                            //     e.preventDefault();
+                            //     e.stopPropagation();
+                            // })
+                            // $('<a href="#"></a>').html('string').appendTo(bufferOpts).click(function(e) {
+                            //     $(this).addClass('selected').siblings().removeClass('selected');
+                            //     e.preventDefault();
+                            //     e.stopPropagation();
+                            // })
+                        }
                     }
                     var row;
                     if (fullLength <= 10) {
@@ -304,6 +334,9 @@ RED.debug = (function() {
                                 }
                             })());
                             $('<span class="debug-message-object-key"></span>').html("["+minRange+" &hellip; "+Math.min(fullLength-1,(minRange+9))+"]").appendTo(header);
+                        }
+                        if (fullLength < originalLength) {
+                             $('<div class="debug-message-object-entry collapsed"><span class="debug-message-object-key">['+fullLength+' &hellip; '+originalLength+']</span></div>').appendTo(element);
                         }
                     }
                 });
@@ -332,7 +365,7 @@ RED.debug = (function() {
         } else if (typeof obj === 'object') {
             element.addClass('collapsed');
             var keys = Object.keys(obj);
-            if (keys.length > 0) {
+            if (key || keys.length > 0) {
                 $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
                 makeExpandable(header, function() {
                     if (!key) {
@@ -341,6 +374,9 @@ RED.debug = (function() {
                     for (i=0;i<keys.length;i++) {
                         var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
                         buildMessageElement(obj[keys[i]],keys[i],false).appendTo(row);
+                    }
+                    if (keys.length === 0) {
+                        $('<div class="debug-message-object-entry debug-message-type-meta collapsed"></div>').text("empty").appendTo(element);
                     }
                 });
             }
@@ -365,202 +401,11 @@ RED.debug = (function() {
                     $('<span class="debug-message-type-meta">empty</span>').appendTo(headerHead);
                 }
                 $('<span> }</span>').appendTo(headerHead);
-
-
-                // $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html('object').appendTo(header);
-                // headerHead = $('<span class="debug-message-object-header"></span>').appendTo(header);
-                // $('<span>{ </span>').appendTo(headerHead);
-                // for (i=0;i<keys.length;i++) {
-                //     if (!key) {
-                //         if (i < 5) {
-                //             $('<span class="debug-message-object-key"></span>').text(keys[i]).appendTo(headerHead);
-                //             $('<span>: </span>').appendTo(headerHead);
-                //             buildMessageSummaryValue(obj[keys[i]]).appendTo(headerHead);
-                //             if (i < keys.length -1) {
-                //                 $('<span>, </span>').appendTo(headerHead);
-                //             }
-                //         }
-                //         if (i === 5) {
-                //             $('<span> &hellip;</span>').appendTo(headerHead);
-                //         }
-                //     }
-                //     entryObj = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
-                //     var entryHeader = $('<span></span>').appendTo(entryObj);
-                //     $('<span class="debug-message-object-key"></span>').text(keys[i]).appendTo(entryHeader);
-                //     $('<span>: </span>').appendTo(entryHeader);
-                //     e = $('<span class="debug-message-object-value"></span>').appendTo(entryObj);
-                //     buildMessageElement(obj[keys[i]],keys[i]).appendTo(e);
-                // }
-                // $('<div class="debug-message-object-entry"><span class="debug-message-object-key">&hellip;</span></div>').appendTo(element);
-            }
-            if (keys.length === 0) {
-                $('<div class="debug-message-object-entry debug-message-type-meta collapsed"></div>').text("empty").appendTo(element);
             }
         } else {
             $('<span class="debug-message-type-other"></span>').text(""+obj).appendTo(entryObj);
         }
         return element;
-    }
-
-
-
-    // function buildMessageElement(obj,topLevel,typeHint) {
-    //     var i;
-    //     var e;
-    //     var entryObj;
-    //     var header;
-    //     var headerHead;
-    //     var value,subvalue;
-    //     var element = $('<span class="debug-message-element"></span>').toggleClass('collapsed',topLevel);
-    //     if (Array.isArray(obj)) {
-    //         var originalLength = obj.length;
-    //         if (typeHint) {
-    //             var m = /\[(\d+)\]/.exec(typeHint);
-    //             if (m) {
-    //                 originalLength = parseInt(m[1]);
-    //             }
-    //         }
-    //         var fullLength = obj.length;
-    //         var length = Math.min(obj.length,10);
-    //         if (!topLevel) {
-    //             header = $('<span class="debug-message-type-meta"></span>').html(typeHint||('array['+obj.length+']')).appendTo(element);
-    //         } else {
-    //             header = $('<span>').appendTo(element);
-    //             if (length > 0) {
-    //                 $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
-    //                 makeExpandable(header);
-    //             }
-    //             $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||('array['+obj.length+']')).appendTo(header);
-    //             headerHead = $('<span class="debug-message-object-header"></span>').appendTo(header);
-    //             $('<span>[ </span>').appendTo(headerHead);
-    //         }
-    //         var row;
-    //         for (i=0;i<fullLength;i++) {
-    //             if (topLevel) {
-    //                 if (i<length) {
-    //                     buildMessageSummaryValue(obj[i]).appendTo(headerHead);
-    //                     if (i < length -1) {
-    //                         $('<span>, </span>').appendTo(headerHead);
-    //                     }
-    //                 }
-    //             }
-    //             if (fullLength < 10) {
-    //                 row = element;
-    //             } else if (fullLength > 10 && (i%10) === 0) {
-    //                 var minRange = 10*Math.floor(i/10);
-    //                 row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
-    //                 header = $('<span></span>').appendTo(row);
-    //                 $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').appendTo(header);
-    //                 makeExpandable(header);
-    //                 $('<span class="debug-message-object-key"></span>').html("["+minRange+" &hellip; "+Math.min(fullLength-1,(minRange+9))+"]").appendTo(header);
-    //             }
-    //             entryObj = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(row);
-    //
-    //             header = $('<span></span>').appendTo(entryObj);
-    //             if (typeof obj[i] === 'object' && obj[i] !== null) {
-    //                 $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').appendTo(header);
-    //                 makeExpandable(header);
-    //             }
-    //             $('<span class="debug-message-object-key"></span>').text(i).appendTo(header);
-    //
-    //             $('<span>: </span>').appendTo(entryObj);
-    //             e = $('<span class="debug-message-object-value"></span>').appendTo(entryObj);
-    //             buildMessageElement(obj[i],false).appendTo(e);
-    //         }
-    //         if (length < obj.length) {
-    //             if (topLevel) {
-    //                 $('<span> &hellip;</span>').appendTo(headerHead);
-    //             }
-    //             //$('<div class="debug-message-object-entry"><span class="debug-message-object-key">&hellip;</span></div>').appendTo(element);
-    //         }
-    //         if (fullLength < originalLength) {
-    //             row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
-    //             $('<span> &hellip;</span>').appendTo(row);
-    //         }
-    //         if (topLevel) {
-    //             if (length === 0) {
-    //                 $('<span class="debug-message-type-meta">empty</span>').appendTo(headerHead);
-    //             }
-    //             $('<span> ]</span>').appendTo(headerHead);
-    //         }
-    //     } else if (obj === null || obj === undefined) {
-    //         $('<span class="debug-message-object-value debug-message-type-null">'+obj+'</span>').appendTo(element);
-    //     } else if (typeof obj === 'object') {
-    //         if (obj.hasOwnProperty('type') && obj.type === 'Buffer' && obj.hasOwnProperty('data')) {
-    //             buildMessageElement(obj.data,false,'buffer['+obj.data.length+']').appendTo(element);
-    //
-    //         } else {
-    //             var keys = Object.keys(obj);
-    //             if (topLevel) {
-    //                 header = $('<span>').appendTo(element);
-    //                 if (keys.length > 0) {
-    //                     $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
-    //                     makeExpandable(header);
-    //                 }
-    //             } else {
-    //                 header = $('<span class="debug-message-type-meta"></span>').html('object').appendTo(element);
-    //             }
-    //             if (topLevel) {
-    //                 $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html('object').appendTo(header);
-    //                 headerHead = $('<span class="debug-message-object-header"></span>').appendTo(header);
-    //                 $('<span>{ </span>').appendTo(headerHead);
-    //             }
-    //             for (i=0;i<keys.length;i++) {
-    //                 if (topLevel) {
-    //                     if (i < 5) {
-    //                         $('<span class="debug-message-object-key"></span>').text(keys[i]).appendTo(headerHead);
-    //                         $('<span>: </span>').appendTo(headerHead);
-    //                         buildMessageSummaryValue(obj[keys[i]]).appendTo(headerHead);
-    //                         if (i < keys.length -1) {
-    //                             $('<span>, </span>').appendTo(headerHead);
-    //                         }
-    //                     }
-    //                     if (i === 5) {
-    //                         $('<span> &hellip;</span>').appendTo(headerHead);
-    //                     }
-    //                 }
-    //                 entryObj = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
-    //                 var entryHeader = $('<span></span>').appendTo(entryObj);
-    //                 $('<span class="debug-message-object-key"></span>').text(keys[i]).appendTo(entryHeader);
-    //                 $('<span>: </span>').appendTo(entryHeader);
-    //                 e = $('<span class="debug-message-object-value"></span>').appendTo(entryObj);
-    //                 if (typeof obj[keys[i]] === 'object' && obj[keys[i]] !== null) {
-    //                     $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(entryHeader);
-    //                     makeExpandable(entryHeader);
-    //                 }
-    //                 buildMessageElement(obj[keys[i]],false).appendTo(e);
-    //             }
-    //             if (keys.length === 0) {
-    //                 $('<div class="debug-message-object-entry debug-message-type-meta collapsed"></div>').text("empty").appendTo(element);
-    //             }
-    //             if (topLevel) {
-    //                 if (keys.length === 0) {
-    //                     $('<span class="debug-message-type-meta">empty</span>').appendTo(headerHead);
-    //                 }
-    //                 $('<span> }</span>').appendTo(headerHead);
-    //             }
-    //         }
-    //     } else if (typeof obj === 'string') {
-    //         $('<span class="debug-message-object-value debug-message-type-string"></span>').html('"'+formatString(obj)+'"').appendTo(element);
-    //     } else if (typeof obj === 'number') {
-    //         e = $('<span class="debug-message-object-value debug-message-type-number"></span>').text(""+obj).appendTo(element);
-    //         e.click(function(evt) {
-    //             var format = $(this).data('format');
-    //             if (format === 'hex') {
-    //                 $(this).text(""+obj).data('format','dec');
-    //             } else {
-    //                 $(this).text("0x"+(obj).toString(16)).data('format','hex');
-    //             }
-    //             evt.preventDefault();
-    //         });
-    //     } else {
-    //         $('<span class="debug-message-object-value debug-message-type-other"></span>').text(""+obj).appendTo(element);
-    //     }
-    //     return element;
-    // }
-
-    function buildMessageBody(obj,el) {
-
     }
 
     function handleDebugMessage(o) {

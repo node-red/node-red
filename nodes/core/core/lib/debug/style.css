@@ -116,14 +116,19 @@
 .debug-message-element.collapsed .debug-message-object-entry {
     display:none;
 }
-.debug-message-element:not(.collapsed) .debug-message-object-header {
+.debug-message-element:not(.collapsed)>.debug-message-expandable>.debug-message-object-value>.debug-message-object-header {
     display:none;
 }
 
 .debug-message-element.collapsed .debug-message-object-type-header {
     display:none;
 }
-
+.debug-message-object-entry pre {
+    font-family: Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.4em;
+    margin: 0 0 0 -1em;
+}
 
 .debug-message-type-other { color: #2033d6; }
 .debug-message-type-string { color: #b72828; }
@@ -139,4 +144,24 @@
 }
 .debug-message-expandable:hover .debug-message-object-handle {
     color: #b72828 !important;
+}
+
+.debug-message-buffer-opts a {
+    font-size: 9px;
+    color: #bbb;
+    border: 1px solid #bbb;
+    border-radius: 2px;
+    padding: 2px 5px;
+    margin-left: 5px;
+}
+.debug-message-buffer-opts a.selected {
+    background: #eee;
+    color: #999;
+    border: 1px solid #999;
+}
+.debug-message-buffer-opts a:hover {
+    text-decoration: none;
+    color: #999;
+    border: 1px solid #999;
+    background: #f3f3f3;
 }
