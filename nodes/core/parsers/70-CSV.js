@@ -58,7 +58,7 @@ module.exports = function(RED) {
                             if ((Array.isArray(msg.payload[s])) || (typeof msg.payload[s] !== "object")) {
                                 if (typeof msg.payload[s] !== "object") { msg.payload = [ msg.payload ]; }
                                 for (var t = 0; t < msg.payload[s].length; t++) {
-                                    if (!msg.payload[s][t]) { msg.payload[s][t] = ""; }
+                                    if (!msg.payload[s][t] && (msg.payload[s][t] !== 0)) { msg.payload[s][t] = ""; }
                                     if (msg.payload[s][t].toString().indexOf(node.quo) !== -1) { // add double quotes if any quotes
                                         msg.payload[s][t] = msg.payload[s][t].toString().replace(/"/g, '""');
                                         msg.payload[s][t] = node.quo + msg.payload[s][t].toString() + node.quo;
