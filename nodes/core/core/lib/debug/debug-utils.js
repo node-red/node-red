@@ -288,13 +288,14 @@ RED.debug = (function() {
             if (originalLength > 0) {
                 $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
                 var arrayRows = $('<div class="debug-message-array-rows"></div>').appendTo(element);
+                element.addClass('debug-message-buffer-raw');
                 makeExpandable(header,function() {
                     if (!key) {
                         headerHead = $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(header);
                     }
                     if (type === 'buffer') {
-                        var stringRow = $('<div class="debug-message-object-entry collapsed"></div>').hide().appendTo(element);
-                        var sr = $('<div class="debug-message-array-rows"></div>').appendTo(stringRow);
+                        var stringRow = $('<div class="debug-message-string-rows"></div>').appendTo(element);
+                        var sr = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(stringRow);
                         var stringEncoding = "";
                         try {
                             stringEncoding = String.fromCharCode.apply(null, new Uint16Array(data))
@@ -306,12 +307,10 @@ RED.debug = (function() {
                         $('<a href="#"></a>').addClass('selected').html('raw').appendTo(bufferOpts).click(function(e) {
                             if ($(this).text() === 'raw') {
                                 $(this).text('string');
-                                arrayRows.hide();
-                                stringRow.show();
+                                element.addClass('debug-message-buffer-string').removeClass('debug-message-buffer-raw');
                             } else {
                                 $(this).text('raw');
-                                arrayRows.show();
-                                stringRow.hide();
+                                element.removeClass('debug-message-buffer-string').addClass('debug-message-buffer-raw');
                             }
                             e.preventDefault();
                             e.stopPropagation();

@@ -163,3 +163,9 @@
     border: 1px solid #999;
     background: #f3f3f3;
 }
+.debug-message-buffer-raw > .debug-message-string-rows {
+    display: none;
+}
+.debug-message-buffer-string > .debug-message-array-rows {
+    display: none;
+}
