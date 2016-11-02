@@ -92,14 +92,16 @@ RED.utils = (function() {
         if (obj === null || obj === undefined) {
             $('<span class="debug-message-type-null">'+obj+'</span>').appendTo(entryObj);
         } else if (typeof obj === 'string') {
-            element.addClass('collapsed');
-            $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
+            if (/[\t\n\r]/.test(obj)) {
+                element.addClass('collapsed');
+                $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
+                makeExpandable(header, function() {
+                    $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||'string').appendTo(header);
+                    var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
+                    $('<pre class="debug-message-type-string"></pre>').html(obj).appendTo(row);
+                });
+            }
             $('<span class="debug-message-type-string debug-message-object-header"></span>').html('"'+formatString(obj)+'"').appendTo(entryObj);
-            makeExpandable(header, function() {
-                $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||'string').appendTo(header);
-                var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
-                $('<pre class="debug-message-type-string"></pre>').html(obj).appendTo(row);
-            });
 
 
         } else if (typeof obj === 'number') {
