@@ -163,6 +163,7 @@
 <script src="vendor/ace/ace.js"></script>
 <script src="vendor/ace/ext-language_tools.js"></script>
 <script src="{{ asset.red }}"></script>
+<script src="{{ asset.main }}"></script>
 
 </body>
 </html>

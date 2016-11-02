@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-var RED = (function() {
+(function() {
 
 
     function loadNodeList() {
@@ -261,8 +261,4 @@ var RED = (function() {
             RED.settings.init(loadEditor);
         })
     });
-
-
-    return {
-    };
 })();
