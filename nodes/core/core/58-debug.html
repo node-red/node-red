@@ -187,11 +187,9 @@
             $("#debug-tab-open").click(function(e) {
                 e.preventDefault();
                 subWindow = window.open(document.location.toString().replace(/#.*$/,"")+"debug/view/view.html","nodeREDDebugView","menubar=no,location=no,toolbar=no,chrome,height=500,width=600");
-                /*
-                * Message format:
-                *
-                *
-                */
+                subWindow.onload = function() {
+                    subWindow.postMessage({event:"workspaceChange",activeWorkspace:RED.workspaces.active()},"*");
+                }
             });
 
             $(window).unload(function() {
@@ -256,4 +254,3 @@
     });
 })();
 </script>
-<link rel="stylesheet" href="debug/view/style.css">
