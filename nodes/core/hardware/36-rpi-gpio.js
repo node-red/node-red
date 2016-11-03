@@ -23,9 +23,9 @@ module.exports = function(RED) {
     var gpioCommand = __dirname+'/nrgpio';
 
     try {
-        fs.statSync("/dev/ttyAMA0"); // unlikely if not on a Pi
+        var cpuinfo = fs.readFileSync("/proc/cpuinfo").toString();
+        if (cpuinfo.indexOf(": BCM") === -1) { throw "Info : "+RED._("rpi-gpio.errors.ignorenode"); }
     } catch(err) {
-        //RED.log.info(RED._("rpi-gpio.errors.ignorenode"));
         throw "Info : "+RED._("rpi-gpio.errors.ignorenode");
     }
 
