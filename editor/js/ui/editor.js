@@ -526,6 +526,33 @@ RED.editor = (function() {
             title: getEditStackTitle(),
             buttons: [
                 {
+                    id: "node-dialog-delete",
+                    class: 'leftButton',
+                    text: RED._("common.label.delete"),
+                    click: function() {
+                        var startDirty = RED.nodes.dirty();
+                        var removedNodes = [];
+                        var removedLinks = [];
+                        var removedEntities = RED.nodes.remove(editing_node.id);
+                        removedNodes.push(editing_node);
+                        removedNodes = removedNodes.concat(removedEntities.nodes);
+                        removedLinks = removedLinks.concat(removedEntities.links);
+
+                        var historyEvent = {
+                            t:'delete',
+                            nodes:removedNodes,
+                            links:removedLinks,
+                            changes: {},
+                            dirty: startDirty
+                        }
+
+                        RED.nodes.dirty(true);
+                        RED.view.redraw(true);
+                        RED.history.push(historyEvent);
+                        RED.tray.close();
+                    }
+                },
+                {
                     id: "node-dialog-cancel",
                     text: RED._("common.label.cancel"),
                     click: function() {
