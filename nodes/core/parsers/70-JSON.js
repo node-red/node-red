@@ -16,7 +16,6 @@
 
 module.exports = function(RED) {
     "use strict";
-    var util = require("util");
 
     function JSONNode(n) {
         RED.nodes.createNode(this,n);
@@ -36,9 +35,7 @@ module.exports = function(RED) {
                             msg.payload = JSON.stringify(msg.payload);
                             node.send(msg);
                         }
-                        catch(e) {
-                            node.error(RED._("json.errors.dropped-error"));
-                        }
+                        catch(e) { node.error(RED._("json.errors.dropped-error")); }
                     }
                     else { node.warn(RED._("json.errors.dropped-object")); }
                 }
