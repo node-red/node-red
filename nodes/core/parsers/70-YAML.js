@@ -14,10 +14,10 @@
  * limitations under the License.
  **/
 
-yaml = require('js-yaml');
 
 module.exports = function(RED) {
     "use strict";
+    var yaml = require('js-yaml');
     function YAMLNode(n) {
         RED.nodes.createNode(this,n);
         var node = this;
