@@ -1177,7 +1177,8 @@ RED.view = (function() {
     }
 
     function disableQuickJoinEventHandler(evt) {
-        if (evt.keyCode === 17 || evt.keyCode === 91) {
+        // Check for ctrl (all browsers), "Meta" (Chrome/FF), keyCode 91 (Safari)
+        if (evt.keyCode === 17 || evt.key === "Meta" || evt.keyCode === 91) {
             resetMouseVars();
             hideDragLines();
             redraw();
