@@ -247,7 +247,10 @@ RED.view = (function() {
     }
     function hideDragLines() {
         while(drag_lines.length) {
-            (drag_lines.pop()).el.remove();
+            var line = drag_lines.pop();
+            if (line.el) {
+                line.el.remove();
+            }
         }
     }
 
@@ -535,7 +538,7 @@ RED.view = (function() {
         }
 
         var mousePos;
-        if (mouse_mode == RED.state.JOINING) {
+        if (mouse_mode == RED.state.JOINING || mouse_mode === RED.state.QUICK_JOINING) {
             // update drag line
             if (drag_lines.length === 0) {
                 if (d3.event.shiftKey) {
@@ -576,11 +579,16 @@ RED.view = (function() {
                             portType: (mousedown_port_type===0)?1:0
                         })
                     }
-                    showDragLines(links);
-                    mouse_mode = 0;
-                    updateActiveNodes();
-                    redraw();
-                    mouse_mode = RED.state.JOINING;
+                    if (links.length === 0) {
+                        resetMouseVars();
+                        redraw();
+                    } else {
+                        showDragLines(links);
+                        mouse_mode = 0;
+                        updateActiveNodes();
+                        redraw();
+                        mouse_mode = RED.state.JOINING;
+                    }
                 } else {
                     showDragLines([{node:mousedown_node,port:mousedown_port_index,portType:mousedown_port_type}]);
                 }
@@ -748,6 +756,9 @@ RED.view = (function() {
     function canvasMouseUp() {
         var i;
         var historyEvent;
+        if (mouse_mode === RED.state.QUICK_JOINING) {
+            return;
+        }
         if (mousedown_node && mouse_mode == RED.state.JOINING) {
             var removedLinks = [];
             for (i=0;i<drag_lines.length;i++) {
@@ -1165,22 +1176,43 @@ RED.view = (function() {
         }
     }
 
+    function disableQuickJoinEventHandler(evt) {
+        if (evt.keyCode === 17 || evt.keyCode === 91) {
+            resetMouseVars();
+            hideDragLines();
+            redraw();
+            $(window).off('keyup',disableQuickJoinEventHandler);
+        }
+    }
+
     function portMouseDown(d,portType,portIndex) {
         //console.log(d,portType,portIndex);
         // disable zoom
         //vis.call(d3.behavior.zoom().on("zoom"), null);
         mousedown_node = d;
-        mouse_mode = RED.state.JOINING;
         mousedown_port_type = portType;
         mousedown_port_index = portIndex || 0;
-        document.body.style.cursor = "crosshair";
+        if (mouse_mode !== RED.state.QUICK_JOINING) {
+            mouse_mode = RED.state.JOINING;
+            document.body.style.cursor = "crosshair";
+            if (d3.event.ctrlKey || d3.event.metaKey) {
+                mouse_mode = RED.state.QUICK_JOINING;
+                showDragLines([{node:mousedown_node,port:mousedown_port_index,portType:mousedown_port_type}]);
+                $(window).on('keyup',disableQuickJoinEventHandler);
+            }
+        }
         d3.event.preventDefault();
     }
 
     function portMouseUp(d,portType,portIndex) {
         var i;
+        if (mouse_mode === RED.state.QUICK_JOINING) {
+            if (drag_lines[0].node===d) {
+                return
+            }
+        }
         document.body.style.cursor = "";
-        if (mouse_mode == RED.state.JOINING && drag_lines.length > 0) {
+        if (mouse_mode == RED.state.JOINING || mouse_mode == RED.state.QUICK_JOINING) {
             if (typeof TouchEvent != "undefined" && d3.event instanceof TouchEvent) {
                 RED.nodes.eachNode(function(n) {
                     if (n.z == RED.workspaces.active()) {
@@ -1247,6 +1279,21 @@ RED.view = (function() {
                 updateActiveNodes();
                 RED.nodes.dirty(true);
             }
+            if (mouse_mode === RED.state.QUICK_JOINING) {
+                if (addedLinks.length > 0) {
+                    hideDragLines();
+                    if (portType === 1 && d.outputs > 0) {
+                        showDragLines([{node:d,port:0,portType:0}]);
+                    } else if (portType === 0 && d.inputs > 0) {
+                        showDragLines([{node:d,port:0,portType:1}]);
+                    } else {
+                        resetMouseVars();
+                    }
+                }
+                redraw();
+                return;
+            }
+
             resetMouseVars();
             hideDragLines();
             selected_link = null;
@@ -1305,6 +1352,8 @@ RED.view = (function() {
             redraw();
             resetMouseVars();
             d3.event.stopPropagation();
+            return;
+        } else if (mouse_mode == RED.state.QUICK_JOINING) {
             return;
         }
         mousedown_node = d;

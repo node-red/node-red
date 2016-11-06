@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 IBM Corp.
+ * Copyright 2013, 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,5 +22,6 @@ RED.state = {
     EDITING: 5,
     EXPORT: 6,
     IMPORT: 7,
-    IMPORT_DRAGGING: 8
+    IMPORT_DRAGGING: 8,
+    QUICK_JOINING: 9
 }
