@@ -323,70 +323,12 @@ RED.view = (function() {
             drop: function( event, ui ) {
                 d3.event = event;
                 var selected_tool = ui.draggable[0].type;
-                var m = /^subflow:(.+)$/.exec(selected_tool);
-
-                if (activeSubflow && m) {
-                    var subflowId = m[1];
-                    if (subflowId === activeSubflow.id) {
-                        RED.notify(RED._("notification.error",{message: RED._("notification.errors.cannotAddSubflowToItself")}),"error");
-                        return;
-                    }
-                    if (RED.nodes.subflowContains(m[1],activeSubflow.id)) {
-                        RED.notify(RED._("notification.error",{message: RED._("notification.errors.cannotAddCircularReference")}),"error");
-                        return;
-                    }
+                var result = addNode(selected_tool);
+                if (!result) {
+                    return;
                 }
-
-                var nn = { id:RED.nodes.id(),z:RED.workspaces.active()};
-
-                nn.type = selected_tool;
-                nn._def = RED.nodes.getType(nn.type);
-
-                if (!m) {
-                    nn.inputs = nn._def.inputs || 0;
-                    nn.outputs = nn._def.outputs;
-
-                    for (var d in nn._def.defaults) {
-                        if (nn._def.defaults.hasOwnProperty(d)) {
-                            if (nn._def.defaults[d].value !== undefined) {
-                                nn[d] = JSON.parse(JSON.stringify(nn._def.defaults[d].value));
-                            }
-                        }
-                    }
-
-                    if (nn._def.onadd) {
-                        try {
-                            nn._def.onadd.call(nn);
-                        } catch(err) {
-                            console.log("onadd:",err);
-                        }
-                    }
-                } else {
-                    var subflow = RED.nodes.subflow(m[1]);
-                    nn.inputs = subflow.in.length;
-                    nn.outputs = subflow.out.length;
-                }
-
-                nn.changed = true;
-
-                nn.w = node_width;
-                nn.h = Math.max(node_height,(nn.outputs||0) * 15);
-
-                var historyEvent = {
-                    t:"add",
-                    nodes:[nn.id],
-                    dirty:RED.nodes.dirty()
-                }
-                if (activeSubflow) {
-                    var subflowRefresh = RED.subflow.refresh(true);
-                    if (subflowRefresh) {
-                        historyEvent.subflow = {
-                            id:activeSubflow.id,
-                            changed: activeSubflow.changed,
-                            instances: subflowRefresh.instances
-                        }
-                    }
-                }
+                var historyEvent = result.historyEvent;
+                var nn = result.node;
 
                 var helperOffset = d3.touches(ui.helper.get(0))[0]||d3.mouse(ui.helper.get(0));
                 var mousePos = d3.touches(this)[0]||d3.mouse(this);
@@ -463,6 +405,79 @@ RED.view = (function() {
         RED.keyboard.add("workspace",/* right */ 39, {shift:true}, function() { moveSelection(20,0); d3.event.preventDefault();},endKeyboardMove);
     }
 
+
+    function addNode(type,x,y) {
+        var m = /^subflow:(.+)$/.exec(type);
+
+        if (activeSubflow && m) {
+            var subflowId = m[1];
+            if (subflowId === activeSubflow.id) {
+                RED.notify(RED._("notification.error",{message: RED._("notification.errors.cannotAddSubflowToItself")}),"error");
+                return;
+            }
+            if (RED.nodes.subflowContains(m[1],activeSubflow.id)) {
+                RED.notify(RED._("notification.error",{message: RED._("notification.errors.cannotAddCircularReference")}),"error");
+                return;
+            }
+        }
+
+        var nn = { id:RED.nodes.id(),z:RED.workspaces.active()};
+
+        nn.type = type;
+        nn._def = RED.nodes.getType(nn.type);
+
+        if (!m) {
+            nn.inputs = nn._def.inputs || 0;
+            nn.outputs = nn._def.outputs;
+
+            for (var d in nn._def.defaults) {
+                if (nn._def.defaults.hasOwnProperty(d)) {
+                    if (nn._def.defaults[d].value !== undefined) {
+                        nn[d] = JSON.parse(JSON.stringify(nn._def.defaults[d].value));
+                    }
+                }
+            }
+
+            if (nn._def.onadd) {
+                try {
+                    nn._def.onadd.call(nn);
+                } catch(err) {
+                    console.log("onadd:",err);
+                }
+            }
+        } else {
+            var subflow = RED.nodes.subflow(m[1]);
+            nn.inputs = subflow.in.length;
+            nn.outputs = subflow.out.length;
+        }
+
+        nn.changed = true;
+
+        nn.w = node_width;
+        nn.h = Math.max(node_height,(nn.outputs||0) * 15);
+
+        var historyEvent = {
+            t:"add",
+            nodes:[nn.id],
+            dirty:RED.nodes.dirty()
+        }
+        if (activeSubflow) {
+            var subflowRefresh = RED.subflow.refresh(true);
+            if (subflowRefresh) {
+                historyEvent.subflow = {
+                    id:activeSubflow.id,
+                    changed: activeSubflow.changed,
+                    instances: subflowRefresh.instances
+                }
+            }
+        }
+        return {
+            node: nn,
+            historyEvent: historyEvent
+        }
+
+    }
+
     function canvasMouseDown() {
         if (!mousedown_node && !mousedown_link) {
             selected_link = null;
@@ -473,20 +488,58 @@ RED.view = (function() {
                 lasso.remove();
                 lasso = null;
             }
+            var point;
+            if (d3.event.metaKey || d3.event.ctrlKey) {
+                point = d3.mouse(this);
+                d3.event.stopPropagation();
+                var mainPos = $("#main-container").position();
+                RED.typeSearch.show({
+                    x:d3.event.clientX-mainPos.left-node_width/2,
+                    y:d3.event.clientY-mainPos.top-node_height/2,
+                    add: function(type) {
+                        var result = addNode(type);
+                        if (!result) {
+                            return;
+                        }
+                        var nn = result.node;
+                        var historyEvent = result.historyEvent;
+                        nn.x = point[0];
+                        nn.y = point[1];
+                        RED.history.push(historyEvent);
+                        RED.nodes.add(nn);
+                        RED.editor.validateNode(nn);
+                        RED.nodes.dirty(true);
+                        // auto select dropped node - so info shows (if visible)
+                        clearSelection();
+                        nn.selected = true;
+                        moving_set.push({n:nn});
+                        updateActiveNodes();
+                        updateSelection();
+                        redraw();
+                        if (nn._def.autoedit) {
+                            RED.editor.edit(nn);
+                        }
+                    }
+                });
 
-            if (!touchStartTime) {
-                var point = d3.mouse(this);
-                lasso = vis.append("rect")
-                    .attr("ox",point[0])
-                    .attr("oy",point[1])
-                    .attr("rx",1)
-                    .attr("ry",1)
-                    .attr("x",point[0])
-                    .attr("y",point[1])
-                    .attr("width",0)
-                    .attr("height",0)
-                    .attr("class","lasso");
-                d3.event.preventDefault();
+                updateActiveNodes();
+                updateSelection();
+                redraw();
+            } else {
+                if (!touchStartTime) {
+                    point = d3.mouse(this);
+                    lasso = vis.append("rect")
+                        .attr("ox",point[0])
+                        .attr("oy",point[1])
+                        .attr("rx",1)
+                        .attr("ry",1)
+                        .attr("x",point[0])
+                        .attr("y",point[1])
+                        .attr("width",0)
+                        .attr("height",0)
+                        .attr("class","lasso");
+                    d3.event.preventDefault();
+                }
             }
         }
     }
@@ -1673,14 +1726,14 @@ RED.view = (function() {
                             nodeMouseUp.call(this,d);
                         })
                         .on("mouseover",function(d) {
-                                if (mouse_mode === 0) {
-                                    var node = d3.select(this);
-                                    node.classed("node_hovered",true);
-                                }
+                            if (mouse_mode === 0) {
+                                var node = d3.select(this);
+                                node.classed("node_hovered",true);
+                            }
                         })
                         .on("mouseout",function(d) {
-                                var node = d3.select(this);
-                                node.classed("node_hovered",false);
+                            var node = d3.select(this);
+                            node.classed("node_hovered",false);
                         });
 
                    //node.append("rect").attr("class", "node-gradient-top").attr("rx", 6).attr("ry", 6).attr("height",30).attr("stroke","none").attr("fill","url(#gradient-top)").style("pointer-events","none");

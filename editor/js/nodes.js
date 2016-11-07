@@ -62,6 +62,9 @@ RED.nodes = (function() {
             getNodeList: function() {
                 return nodeList;
             },
+            getNodeTypes: function() {
+                return Object.keys(nodeDefinitions);
+            },
             setNodeList: function(list) {
                 nodeList = [];
                 for(var i=0;i<list.length;i++) {
