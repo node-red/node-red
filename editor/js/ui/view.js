@@ -385,6 +385,8 @@ RED.view = (function() {
 
         RED.keyboard.add("workspace",/* backspace */ 8,function(){deleteSelection();d3.event.preventDefault();});
         RED.keyboard.add("workspace",/* delete */ 46,function(){deleteSelection();d3.event.preventDefault();});
+        RED.keyboard.add("workspace",/* enter */ 13, function() { editSelection(); d3.event.preventDefault();});
+
         RED.keyboard.add("workspace",/* c */ 67,{ctrl:true},function(){copySelection();d3.event.preventDefault();});
         RED.keyboard.add("workspace",/* x */ 88,{ctrl:true},function(){copySelection();deleteSelection();d3.event.preventDefault();});
 
@@ -1093,6 +1095,16 @@ RED.view = (function() {
             }
 
             redraw();
+        }
+    }
+    function editSelection() {
+        if (moving_set.length > 0) {
+            var node = moving_set[0].n;
+            if (node.type === "subflow") {
+                RED.editor.editSubflow(activeSubflow);
+            } else {
+                RED.editor.edit(node);
+            }
         }
     }
     function deleteSelection() {
