@@ -133,7 +133,7 @@
 
             this.options.types = this.options.types||Object.keys(allOptions);
 
-            this.selectTrigger = $('<a href="#"></a>').prependTo(this.uiSelect);
+            this.selectTrigger = $('<button tabindex="0"></button>').prependTo(this.uiSelect);
             $('<i class="fa fa-sort-desc"></i>').appendTo(this.selectTrigger);
             this.selectLabel = $('<span></span>').appendTo(this.selectTrigger);
 
@@ -160,32 +160,72 @@
             })
             this.selectTrigger.click(function(event) {
                 event.preventDefault();
-                if (that.typeList.length > 1) {
-                    that._showMenu(that.menu,that.selectTrigger);
-                } else {
-                    that.element.focus();
-                }
+                that._showTypeMenu();
             });
+            this.selectTrigger.on('keydown',function(evt) {
+                if (evt.keyCode === 40) {
+                    // Down
+                    that._showTypeMenu();
+                }
+            }).on('focus', function() {
+                that.uiSelect.addClass('red-ui-typedInput-focus');
+            })
 
             // explicitly set optionSelectTrigger display to inline-block otherwise jQ sets it to 'inline'
-            this.optionSelectTrigger = $('<a href="#" class="red-ui-typedInput-option-trigger" style="display:inline-block"><i class="fa fa-sort-desc"></i></a>').appendTo(this.uiSelect);
-            this.optionSelectLabel = $('<span></span>').prependTo(this.optionSelectTrigger);
+            this.optionSelectTrigger = $('<button tabindex="0" class="red-ui-typedInput-option-trigger" style="display:inline-block"><span class="red-ui-typedInput-option-caret"><i class="fa fa-sort-desc"></i></span></button>').appendTo(this.uiSelect);
+            this.optionSelectLabel = $('<span class="red-ui-typedInput-option-label"></span>').prependTo(this.optionSelectTrigger);
             this.optionSelectTrigger.click(function(event) {
                 event.preventDefault();
-                if (that.optionMenu) {
-                    that.optionMenu.css({
-                        minWidth:that.optionSelectLabel.width()
-                    });
-
-                    that._showMenu(that.optionMenu,that.optionSelectLabel)
+                that._showOptionSelectMenu();
+            }).on('keydown', function(evt) {
+                if (evt.keyCode === 40) {
+                    // Down
+                    that._showOptionSelectMenu();
                 }
+            }).on('blur', function() {
+                that.uiSelect.removeClass('red-ui-typedInput-focus');
+            }).on('focus', function() {
+                that.uiSelect.addClass('red-ui-typedInput-focus');
             });
+
+
+
+
             this.type(this.options.default||this.typeList[0].value);
+        },
+        _showTypeMenu: function() {
+            if (this.typeList.length > 1) {
+                this._showMenu(this.menu,this.selectTrigger);
+                this.menu.find("[value='"+this.propertyType+"']").focus();
+            } else {
+                this.element.focus();
+            }
+        },
+        _showOptionSelectMenu: function() {
+            if (this.optionMenu) {
+                this.optionMenu.css({
+                    minWidth:this.optionSelectLabel.width()
+                });
+
+                this._showMenu(this.optionMenu,this.optionSelectLabel);
+                var selectedOption = this.optionMenu.find("[value='"+this.value()+"']");
+                if (selectedOption.length === 0) {
+                    selectedOption = this.optionMenu.children(":first");
+                }
+                selectedOption.focus();
+
+            }
         },
         _hideMenu: function(menu) {
             $(document).off("mousedown.close-property-select");
             menu.hide();
-            this.element.focus();
+            if (this.elementDiv.is(":visible")) {
+                this.element.focus();
+            } else if (this.optionSelectTrigger.is(":visible")){
+                this.optionSelectTrigger.focus();
+            } else {
+                this.selectTrigger.focus();
+            }
         },
         _createMenu: function(opts,callback) {
             var that = this;
@@ -194,7 +234,7 @@
                 if (typeof opt === 'string') {
                     opt = {value:opt,label:opt};
                 }
-                var op = $('<a href="#">').attr("value",opt.value).appendTo(menu);
+                var op = $('<a href="#"></a>').attr("value",opt.value).appendTo(menu);
                 if (opt.label) {
                     op.text(opt.label);
                 }
@@ -214,6 +254,21 @@
                 display: "none",
             });
             menu.appendTo(document.body);
+
+            menu.on('keydown', function(evt) {
+                if (evt.keyCode === 40) {
+                    // DOWN
+                    $(this).children(":focus").next().focus();
+                } else if (evt.keyCode === 38) {
+                    // UP
+                    $(this).children(":focus").prev().focus();
+                } else if (evt.keyCode === 27) {
+                    that._hideMenu(menu);
+                }
+            })
+
+
+
             return menu;
 
         },
@@ -273,7 +328,7 @@
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
                 this.elementDiv.css('left',labelWidth+"px");
                 if (this.optionSelectTrigger) {
-                    this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
+                    this.optionSelectTrigger.css({'left':(labelWidth)+"px",'width':'calc( 100% - '+labelWidth+'px )'});
                 }
             }
         },
