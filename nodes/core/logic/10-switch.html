@@ -115,7 +115,10 @@
 
             $("#node-input-rule-container").css('min-height','250px').css('min-width','450px').editableList({
                 addItem: function(container,i,opt) {
-                    var rule = opt;
+                    if (!opt.hasOwnProperty('r')) {
+                        opt.r = {};
+                    }
+                    var rule = opt.r;
                     if (!rule.hasOwnProperty('t')) {
                         rule.t = 'eq';
                     }
@@ -177,6 +180,12 @@
                     selectField.change();
                 },
                 removeItem: function(opt) {
+                    if (opt.hasOwnProperty('i')) {
+                        var removedList = $("#node-input-rule-container").data('removedList')||[];
+                        removedList.push(opt.i);
+                        $("#node-input-rule-container").data('removedList',removedList);
+                    }
+
                     var rules = $("#node-input-rule-container").editableList('items');
                     rules.each(function(i) { $(this).find(".node-input-rule-index").html(i+1); });
                 },
@@ -191,15 +200,21 @@
 
             for (var i=0;i<this.rules.length;i++) {
                 var rule = this.rules[i];
-                $("#node-input-rule-container").editableList('addItem',rule);
+                $("#node-input-rule-container").editableList('addItem',{r:rule,i:i});
             }
         },
         oneditsave: function() {
             var rules = $("#node-input-rule-container").editableList('items');
             var ruleset;
             var node = this;
-            node.rules= [];
+            node.rules = [];
+            var changedOutputs = {};
+            var removedList = $("#node-input-rule-container").data('removedList')||[];
+            removedList.forEach(function(i) {
+                changedOutputs[i] = -1;
+            });
             rules.each(function(i) {
+                var ruleData = $(this).data('data');
                 var rule = $(this);
                 var type = rule.find("select").val();
                 var r = {t:type};
@@ -217,8 +232,14 @@
                         r.case = rule.find(".node-input-rule-case").prop("checked");
                     }
                 }
+                if (ruleData.hasOwnProperty('i')) {
+                    if (ruleData.i !== i) {
+                        changedOutputs[ruleData.i] = i;
+                    }
+                }
                 node.rules.push(r);
             });
+            this._outputs = changedOutputs;
             this.outputs = node.rules.length;
             this.propertyType = $("#node-input-property").typedInput('type');
         },
