@@ -183,6 +183,7 @@ RED.typeSearch = (function() {
         dialog.css({left:opts.x+"px",top:opts.y+"px"}).show();
         searchResultsDiv.slideDown();
         setTimeout(function() {
+            searchResultsDiv.find(".red-ui-editableList-container").scrollTop(0);
             searchInput.focus();
         },100);
     }
@@ -208,7 +209,6 @@ RED.typeSearch = (function() {
         searchResults.editableList('empty');
         searchInput.searchBox('value','');
         selected = -1;
-        searchResults.parent().scrollTop(0);
         var common = {
             "debug"   : false,
             "inject"  : false,
