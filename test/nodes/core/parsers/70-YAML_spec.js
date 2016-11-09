@@ -44,13 +44,15 @@ describe('YAML node', function() {
             var yn1 = helper.getNode("yn1");
             var yn2 = helper.getNode("yn2");
             yn2.on("input", function(msg) {
+                console.log('msg', msg);
+                console.log('payload', msg.payload.employees[0]);
                 msg.should.have.property('topic', 'bar');
                 msg.payload.should.have.property('employees');
                 msg.payload.employees[0].should.have.property('firstName', 'John');
                 msg.payload.employees[0].should.have.property('lastName', 'Smith');
                 done();
             });
-            var yamlString = 'employees:\n  - firstName: John\n  - lastName: Smith\n';
+            var yamlString = "employees:\n  - firstName: John\n    lastName: Smith\n";
             yn1.receive({payload:yamlString,topic: "bar"});
         });
     });
@@ -62,7 +64,7 @@ describe('YAML node', function() {
             var yn1 = helper.getNode("yn1");
             var yn2 = helper.getNode("yn2");
             yn2.on("input", function(msg) {
-                should.equal(msg.payload, 'employees:\n  - firstName: John\n  - lastName: Smith\n');
+                should.equal(msg.payload, "employees:\n  - firstName: John\n    lastName: Smith\n");
                 done();
             });
             var obj = {employees:[{firstName:"John", lastName:"Smith"}]};
