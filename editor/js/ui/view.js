@@ -694,7 +694,7 @@ RED.view = (function() {
                         redraw();
                         mouse_mode = RED.state.JOINING;
                     }
-                } else {
+                } else if (mousedown_node) {
                     showDragLines([{node:mousedown_node,port:mousedown_port_index,portType:mousedown_port_type}]);
                 }
                 selected_link = null;
