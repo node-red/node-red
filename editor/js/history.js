@@ -236,7 +236,16 @@ RED.history = (function() {
                             RED.editor.updateNodeProperties(n);
                         });
                     } else {
-                        RED.editor.updateNodeProperties(ev.node);
+                        var outputMap;
+                        if (ev.outputMap) {
+                            outputMap = {};
+                            for (var port in ev.outputMap) {
+                                if (ev.outputMap.hasOwnProperty(port) && ev.outputMap[port] !== -1) {
+                                    outputMap[ev.outputMap[port]] = port;
+                                }
+                            }
+                        }
+                        RED.editor.updateNodeProperties(ev.node,outputMap);
                         RED.editor.validateNode(ev.node);
                     }
                     if (ev.links) {

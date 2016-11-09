@@ -141,14 +141,14 @@
                         selectField.append($("<option></option>").val(selectOptions[i].v).text(selectOptions[i].l));
                     }
 
-                    var propertyName = $('<input/>',{style:"width:250px",class:"node-input-rule-property-name",type:"text"})
+                    var propertyName = $('<input/>',{class:"node-input-rule-property-name",type:"text"})
                         .appendTo(row1)
                         .typedInput({types:['msg','flow','global']});
 
                     $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
                         .text(to)
                         .appendTo(row2);
-                    var propertyValue = $('<input/>',{style:"width:250px",class:"node-input-rule-property-value",type:"text"})
+                    var propertyValue = $('<input/>',{class:"node-input-rule-property-value",type:"text"})
                         .appendTo(row2)
                         .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json','date']});
 
@@ -156,7 +156,7 @@
                     $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
                         .text(search)
                         .appendTo(row3_1);
-                    var fromValue = $('<input/>',{style:"width:250px",class:"node-input-rule-property-search-value",type:"text"})
+                    var fromValue = $('<input/>',{class:"node-input-rule-property-search-value",type:"text"})
                         .appendTo(row3_1)
                         .typedInput({default:'str',types:['msg','flow','global','str','re','num','bool']});
 
@@ -164,14 +164,14 @@
                     $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
                         .text(replace)
                         .appendTo(row3_2);
-                    var toValue = $('<input/>',{style:"width:250px",class:"node-input-rule-property-replace-value",type:"text"})
+                    var toValue = $('<input/>',{class:"node-input-rule-property-replace-value",type:"text"})
                         .appendTo(row3_2)
                         .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json']});
 
                     $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
                         .text(to)
                         .appendTo(row4);
-                    var moveValue = $('<input/>',{style:"width:250px",class:"node-input-rule-property-move-value",type:"text"})
+                    var moveValue = $('<input/>',{class:"node-input-rule-property-move-value",type:"text"})
                         .appendTo(row4)
                         .typedInput({default:'msg',types:['msg','flow','global']});
 

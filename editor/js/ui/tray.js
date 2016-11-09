@@ -155,6 +155,8 @@ RED.tray = (function() {
                     // Delay resetting the flag, so we don't close prematurely
                     openingTray = false;
                 },200);
+                body.find(":focusable:first").focus();
+
             },150);
             el.css({right:0});
         },0);

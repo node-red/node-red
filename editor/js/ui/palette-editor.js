@@ -422,6 +422,8 @@ RED.palette.editor = (function() {
         RED.events.on("editor:close",function() { disabled = false; });
         RED.events.on("search:open",function() { disabled = true; });
         RED.events.on("search:close",function() { disabled = false; });
+        RED.events.on("type-search:open",function() { disabled = true; });
+        RED.events.on("type-search:close",function() { disabled = false; });
 
         RED.keyboard.add("*", /* p */ 80,{shift:true,ctrl:true},function() {RED.palette.editor.show();d3.event.preventDefault();});
 

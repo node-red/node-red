@@ -168,12 +168,7 @@
     color: $workspace-button-color;
 }
 #palette-shade, #editor-shade, #header-shade, #sidebar-shade  {
-    position: absolute;
-    top:0;
-    bottom:0;
-    left:0;
-    right:0;
-    background: $shade-color;
+    @include shade;
     z-index: 2;
 }
 #sidebar-shade  {

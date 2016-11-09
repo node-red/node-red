@@ -234,7 +234,8 @@
                 var deleteButton = $('<a/>',{href:"#",class:"red-ui-editableList-item-remove editor-button editor-button-small"}).appendTo(li);
                 $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
                 li.addClass("red-ui-editableList-item-removable");
-                deleteButton.click(function() {
+                deleteButton.click(function(evt) {
+                    evt.preventDefault();
                     var data = row.data('data');
                     li.addClass("red-ui-editableList-item-deleting")
                     li.fadeOut(300, function() {

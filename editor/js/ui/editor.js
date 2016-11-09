@@ -180,19 +180,31 @@ RED.editor = (function() {
      * Marks the node as dirty and needing a size check.
      * Removes any links to non-existant outputs.
      * @param node - the node that has been updated
+     * @param outputMap - (optional) a map of old->new port numbers if wires should be moved
      * @returns {array} the links that were removed due to this update
      */
-    function updateNodeProperties(node) {
+    function updateNodeProperties(node, outputMap) {
         node.resize = true;
         node.dirty = true;
         var removedLinks = [];
         if (node.ports) {
+            if (outputMap) {
+                RED.nodes.eachLink(function(l) {
+                    if (l.source === node && outputMap.hasOwnProperty(l.sourcePort)) {
+                        if (outputMap[l.sourcePort] === -1) {
+                            removedLinks.push(l);
+                        } else {
+                            l.sourcePort = outputMap[l.sourcePort];
+                        }
+                    }
+                });
+            }
             if (node.outputs < node.ports.length) {
                 while (node.outputs < node.ports.length) {
                     node.ports.pop();
                 }
                 RED.nodes.eachLink(function(l) {
-                    if (l.source === node && l.sourcePort >= node.outputs) {
+                    if (l.source === node && l.sourcePort >= node.outputs && removedLinks.indexOf(l) === -1) {
                         removedLinks.push(l);
                     }
                 });
@@ -597,6 +609,7 @@ RED.editor = (function() {
                         var changed = false;
                         var wasDirty = RED.nodes.dirty();
                         var d;
+                        var outputMap;
 
                         if (editing_node._def.oneditsave) {
                             var oldValues = {};
@@ -681,8 +694,14 @@ RED.editor = (function() {
                             var credsChanged = updateNodeCredentials(editing_node,credDefinition,prefix);
                             changed = changed || credsChanged;
                         }
-
-                        var removedLinks = updateNodeProperties(editing_node);
+                        if (editing_node.hasOwnProperty("_outputs")) {
+                            outputMap = editing_node._outputs;
+                            delete editing_node._outputs;
+                            if (Object.keys(outputMap).length > 0) {
+                                changed = true;
+                            }
+                        }
+                        var removedLinks = updateNodeProperties(editing_node,outputMap);
                         if (changed) {
                             var wasChanged = editing_node.changed;
                             editing_node.changed = true;
@@ -712,6 +731,9 @@ RED.editor = (function() {
                                 dirty:wasDirty,
                                 changed:wasChanged
                             };
+                            if (outputMap) {
+                                historyEvent.outputMap = outputMap;
+                            }
                             if (subflowInstances) {
                                 historyEvent.subflow = {
                                     instances:subflowInstances
