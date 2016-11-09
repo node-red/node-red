@@ -137,7 +137,7 @@ msg.cookies = {
                 } else {
                     root += this.url;
                 }
-                return "["+this.method+"] "+root;
+                return RED.text.format.getString("["+this.method+"] "+root, "url", {}, false, "en");
             } else {
                 return "http";
             }

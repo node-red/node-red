@@ -53,7 +53,7 @@
         outputs:1,
         icon: "watch.png",
         label: function() {
-            return this.name||this.files;
+            return this.name||RED.text.format.getString(this.files, "filepath", {}, false, "en");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";

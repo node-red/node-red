@@ -758,7 +758,7 @@ RED.text.format = (function() {
                 {
                         guiDir: isRtl ? "rtl" : "ltr",
                         dir: "ltr",
-                        points: "/\\:."
+                        points: "/\\:.&<>"
                 };
                 if (!parseOnly) {
                     return stext.parseAndDisplayStructure(text, fArgs, !!isHtml, locale);
@@ -876,7 +876,7 @@ RED.text.format = (function() {
                 {
                         guiDir: isRtl ? "rtl" : "ltr",
                         dir: "ltr",
-                        points: ":?#/@.[]="
+                        points: ":?#/@.[]=&<>"
                 };
                 if (!parseOnly) {
                     return stext.parseAndDisplayStructure(text, fArgs, !!isHtml, locale);
@@ -1304,6 +1304,18 @@ RED.text.format = (function() {
     }
 
     return {
+	    /**
+        * Returns the string representation of a given structured text
+        * @param text - the structured text
+        * @param type - could be one of filepath, url, email
+        * @param args - pass additional arguments to the handler. generally null.
+        * @param isRtl - indicates if the GUI is mirrored
+        * @param locale - the browser locale
+        */
+        getString:  function (text, type, args, isRtl, locale) {
+            return getHandler(type).format(text, args, isRtl, false, locale);
+        },
+
         /**
         * Returns the HTML representation of a given structured text
         * @param text - the structured text

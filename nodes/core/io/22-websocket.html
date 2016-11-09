@@ -160,7 +160,7 @@
             } else {
                 root += this.path;
             }
-            return root;
+            return RED.text.format.getString(root, "filepath", {}, false, "en");
         },
         oneditprepare: function() {
             var root = RED.settings.httpNodeRoot;
@@ -185,7 +185,7 @@
         inputs:0,
         outputs:0,
         label: function() {
-            return this.path;
+            return RED.text.format.getString(this.path, "filepath", {}, false, "en");
         }
     });
 
