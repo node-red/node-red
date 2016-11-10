@@ -439,7 +439,9 @@ module.exports = function(RED) {
                         //node.log(RED._("tcpin.errors.client-connected"));
                         node.status({fill:"green",shape:"dot",text:"common.status.connected"});
                         node.connected = true;
-                        clients[cid].write(msg.payload);
+                        if (clients[cid]) {
+                            clients[cid].write(msg.payload);
+                        }
                     });
                 }
                 else {
@@ -459,7 +461,7 @@ module.exports = function(RED) {
                         for (var j = 0; j < data.length; j++ ) {
                             if (node.out === "time") {
                                 // do the timer thing
-                                if (clients[cid].timeout) {
+                                if (clients[cid] && clients[cid].timeout) {
                                     i += 1;
                                     buf[i] = data[j];
                                 }
