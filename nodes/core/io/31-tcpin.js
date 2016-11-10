@@ -83,7 +83,7 @@ module.exports = function(RED) {
                     }
                 });
                 client.on('end', function() {
-                    if (!node.stream || (node.datatype == "utf8" && node.newline != "" && buffer.length > 0)) {
+                    if (!node.stream || (node.datatype == "utf8" && node.newline !== "" && buffer.length > 0)) {
                         var msg = {topic:node.topic, payload:buffer};
                         msg._session = {type:"tcp",id:id};
                         if (buffer.length !== 0) {
