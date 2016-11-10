@@ -44,8 +44,6 @@ describe('YAML node', function() {
             var yn1 = helper.getNode("yn1");
             var yn2 = helper.getNode("yn2");
             yn2.on("input", function(msg) {
-                console.log('msg', msg);
-                console.log('payload', msg.payload.employees[0]);
                 msg.should.have.property('topic', 'bar');
                 msg.payload.should.have.property('employees');
                 msg.payload.employees[0].should.have.property('firstName', 'John');

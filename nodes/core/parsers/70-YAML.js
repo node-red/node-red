@@ -1,3 +1,4 @@
+
 module.exports = function(RED) {
     "use strict";
     var yaml = require('js-yaml');
