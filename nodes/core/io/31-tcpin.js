@@ -385,8 +385,6 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType("tcp out",TcpOut);
 
-    var clients = {};
-
     function TcpGet(n) {
         RED.nodes.createNode(this,n);
         this.server = n.server;
@@ -411,6 +409,8 @@ module.exports = function(RED) {
 
         this.connected = false;
         var node = this;
+
+        var clients = {};
 
         this.on("input", function(msg) {
             var i = 0;
