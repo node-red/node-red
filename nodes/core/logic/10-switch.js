@@ -16,6 +16,9 @@
 
 module.exports = function(RED) {
     "use strict";
+
+    var jsonata = require('jsonata');
+
     var operators = {
         'eq': function(a, b) { return a == b; },
         'neq': function(a, b) { return a != b; },
@@ -38,9 +41,20 @@ module.exports = function(RED) {
         this.rules = n.rules || [];
         this.property = n.property;
         this.propertyType = n.propertyType || "msg";
+
+        if (this.propertyType === 'jsonata') {
+            try {
+                this.property = jsonata(this.property);
+            } catch(err) {
+                this.error(RED._("switch.errors.invalid-expr",{error:err.message}));
+                return;
+            }
+        }
+
         this.checkall = n.checkall || "true";
         this.previousValue = null;
         var node = this;
+        var valid = true;
         for (var i=0; i<this.rules.length; i+=1) {
             var rule = this.rules[i];
             if (!rule.vt) {
@@ -54,6 +68,13 @@ module.exports = function(RED) {
                 if (!isNaN(Number(rule.v))) {
                     rule.v = Number(rule.v);
                 }
+            } else if (rule.vt === "jsonata") {
+                try {
+                    rule.v = jsonata(rule.v);
+                } catch(err) {
+                    this.error(RED._("switch.errors.invalid-expr",{error:err.message}));
+                    valid = false;
+                }
             }
             if (typeof rule.v2 !== 'undefined') {
                 if (!rule.v2t) {
@@ -65,14 +86,30 @@ module.exports = function(RED) {
                 }
                 if (rule.v2t === 'num') {
                     rule.v2 = Number(rule.v2);
+                } else if (rule.v2t === 'jsonata') {
+                    try {
+                        rule.v2 = jsonata(rule.v2);
+                    } catch(err) {
+                        this.error(RED._("switch.errors.invalid-expr",{error:err.message}));
+                        valid = false;
+                    }
                 }
             }
+        }
+
+        if (!valid) {
+            return;
         }
 
         this.on('input', function (msg) {
             var onward = [];
             try {
-                var prop = RED.util.evaluateNodeProperty(node.property,node.propertyType,node,msg);
+                var prop;
+                if (node.propertyType === 'jsonata') {
+                    prop = node.property.evaluate({msg:msg});
+                } else {
+                    prop = RED.util.evaluateNodeProperty(node.property,node.propertyType,node,msg);
+                }
                 var elseflag = true;
                 for (var i=0; i<node.rules.length; i+=1) {
                     var rule = node.rules[i];
@@ -80,12 +117,26 @@ module.exports = function(RED) {
                     var v1,v2;
                     if (rule.vt === 'prev') {
                         v1 = node.previousValue;
+                    } else if (rule.vt === 'jsonata') {
+                        try {
+                            v1 = rule.v.evaluate({msg:msg});
+                        } catch(err) {
+                            node.error(RED._("switch.errors.invalid-expr",{error:err.message}));
+                            return;
+                        }
                     } else {
                         v1 = RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg);
                     }
                     v2 = rule.v2;
                     if (rule.v2t === 'prev') {
                         v2 = node.previousValue;
+                    } else if (rule.v2t === 'jsonata') {
+                        try {
+                            v2 = rule.v2.evaluate({msg:msg});
+                        } catch(err) {
+                            node.error(RED._("switch.errors.invalid-expr",{error:err.message}));
+                            return;
+                        }
                     } else if (typeof v2 !== 'undefined') {
                         v2 = RED.util.evaluateNodeProperty(rule.v2,rule.v2t,node,msg);
                     }

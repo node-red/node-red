@@ -94,7 +94,8 @@
         bool: {value:"bool",label:"boolean",icon:"red/images/typedInput/bool.png",options:["true","false"]},
         json: {value:"json",label:"JSON",icon:"red/images/typedInput/json.png", validate: function(v) { try{JSON.parse(v);return true;}catch(e){return false;}}},
         re: {value:"re",label:"regular expression",icon:"red/images/typedInput/re.png"},
-        date: {value:"date",label:"timestamp",hasValue:false}
+        date: {value:"date",label:"timestamp",hasValue:false},
+        jsonata: {value:"jsonata",label:"expression",icon:"red/images/typedInput/expr.png", validate: function(v) { try{jsonata(v);return true;}catch(e){return false;}}},
     };
     var nlsd = false;
 

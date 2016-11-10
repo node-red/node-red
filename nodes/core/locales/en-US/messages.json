@@ -502,6 +502,9 @@
             "null":"is null",
             "nnull":"is not null",
             "else":"otherwise"
+        },
+        "errors": {
+            "invalid-expr": "Invalid expression: __error__"
         }
     },
     "change": {

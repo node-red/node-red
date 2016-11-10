@@ -40,6 +40,7 @@
         "fs.notify":"0.0.4",
         "i18next":"1.10.6",
         "is-utf8":"0.2.1",
+        "jsonata":"1.0.7",
         "media-typer": "0.3.0",
         "mqtt": "1.14.1",
         "mustache": "2.2.1",

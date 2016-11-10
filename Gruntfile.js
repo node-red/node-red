@@ -160,7 +160,8 @@ module.exports = function(grunt) {
             build: {
                 files: {
                     'public/red/red.min.js': 'public/red/red.js',
-                    'public/red/main.min.js': 'public/red/main.js'
+                    'public/red/main.min.js': 'public/red/main.js',
+                    'public/vendor/jsonata/jsonata.min.js': 'editor/vendor/jsonata/jsonata.js'
                 }
             }
         },
