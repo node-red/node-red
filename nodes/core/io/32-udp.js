@@ -102,7 +102,7 @@ module.exports = function(RED) {
         try { server.bind(node.port,node.iface); }
         catch(e) { } // Don't worry if already bound
     }
-    RED.httpAdmin.get('/udp-ports/:id', RED.auth.needsPermission('udp-in.read'), function(req,res) {
+    RED.httpAdmin.get('/udp-ports/:id', RED.auth.needsPermission('udp-ports.read'), function(req,res) {
         res.json(Object.keys(udpInputPortsInUse));
     });
     RED.nodes.registerType("udp in",UDPin);
