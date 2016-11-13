@@ -73,6 +73,22 @@ describe('template node', function() {
         });
     });
 
+    it('should handle missing node context', function(done) {
+        // this is artificial test because in flow there is missing z property (probably never happen in real usage)
+        var flow = [{id:"n1",type:"template", field:"payload", template:"payload={{flow.value}},{{global.value}}",wires:[["n2"]]},{id:"n2",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'payload=,');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+
     it('should modify payload in plain text mode', function(done) {
         var flow = [{id:"n1", type:"template", field:"payload", syntax:"plain", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];
         helper.load(templateNode, flow, function() {

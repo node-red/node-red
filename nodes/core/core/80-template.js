@@ -42,10 +42,10 @@ module.exports = function(RED) {
             var contextName = name.substr(0, dot);
             var variableName = name.substr(dot + 1);
 
-            if (contextName === "flow") {
+            if (contextName === "flow" && this.nodeContext.flow) {
                 return this.nodeContext.flow.get(variableName);
             }
-            else if (contextName === "global") {
+            else if (contextName === "global" && this.nodeContext.global) {
                 return this.nodeContext.global.get(variableName);
             }
         }
