@@ -43,6 +43,36 @@ describe('template node', function() {
         });
     });
 
+    it('should modify payload from flow context', function(done) {
+        var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:"payload={{flow.value}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().flow.set("value","foo");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'payload=foo');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should modify payload from global context', function(done) {
+        var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:"payload={{global.value}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().global.set("value","foo");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'payload=foo');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
     it('should modify payload in plain text mode', function(done) {
         var flow = [{id:"n1", type:"template", field:"payload", syntax:"plain", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];
         helper.load(templateNode, flow, function() {
