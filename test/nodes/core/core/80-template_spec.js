@@ -57,32 +57,36 @@ describe('template node', function() {
         });
     });
 
-    xit('should modify flow context', function(done) {
-        var flow = [{id:"n1", type:"template", field:"payload", fieldType:"flow", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];
+    it('should modify flow context', function(done) {
+        var flow = [{id:"n1",z:"t1", type:"template", field:"payload", fieldType:"flow", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
         helper.load(templateNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
-            setTimeout( function() {
-                console.log(n2);
-                console.log(n2.context().global.get("payload"));
-                //c.should.equal(1); // should only have had one output.
+            n2.on("input", function(msg) {
+                // mesage is intact
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                // result is in flow context
+                n2.context().flow.get("payload").should.equal("payload=foo");
                 done();
-            },50);
+            });
             n1.receive({payload:"foo",topic: "bar"});
         });
     });
 
-    xit('should modify global context', function(done) {
-        var flow = [{id:"n1", type:"template", field:"payload", fieldType:"global", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];
+    it('should modify global context', function(done) {
+        var flow = [{id:"n1",z:"t1", type:"template", field:"payload", fieldType:"global", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
         helper.load(templateNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
-            setTimeout( function() {
-                console.log(n2);
-                console.log(n2.context().global.get("payload"));
-                //c.should.equal(1); // should only have had one output.
+            n2.on("input", function(msg) {
+                // mesage is intact
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                // result is in global context
+                n2.context().global.get("payload").should.equal("payload=foo");
                 done();
-            },50);
+            });
             n1.receive({payload:"foo",topic: "bar"});
         });
     });
