@@ -420,7 +420,13 @@ module.exports = function(RED) {
 
             var host = node.server || msg.host;
             var port = node.port || msg.port;
+
+            // Store client information independently
+            // the clients object will have:
+            // clients[id].client, clients[id].msg, clients[id].timeout
             var connection_id = host + ":" + port;
+            clients[connection_id] = clients[connection_id] || {};
+            clients[connection_id].msg = msg;
 
             if (!node.connected) {
                 var buf;
@@ -430,16 +436,16 @@ module.exports = function(RED) {
                 }
                 else { buf = new Buffer(65536); } // set it to 64k... hopefully big enough for most TCP packets.... but only hopefully
 
-                clients[connection_id] = net.Socket();
-                if (socketTimeout !== null) { clients[connection_id].setTimeout(socketTimeout);}
+                clients[connection_id].client = net.Socket();
+                if (socketTimeout !== null) { clients[connection_id].client.setTimeout(socketTimeout);}
 
                 if (host && port) {
-                    clients[connection_id].connect(port, host, function() {
+                    clients[connection_id].client.connect(port, host, function() {
                         //node.log(RED._("tcpin.errors.client-connected"));
                         node.status({fill:"green",shape:"dot",text:"common.status.connected"});
                         node.connected = true;
-                        if (clients[connection_id]) {
-                            clients[connection_id].write(msg.payload);
+                        if (clients[connection_id].client) {
+                            clients[connection_id].client.write(clients[connection_id].msg.payload);
                         }
                     });
                 }
@@ -447,14 +453,14 @@ module.exports = function(RED) {
                     node.warn(RED._("tcpin.errors.no-host"));
                 }
 
-                clients[connection_id].on('data', function(data) {
+                clients[connection_id].client.on('data', function(data) {
                     if (node.out == "sit") { // if we are staying connected just send the buffer
-                        msg.payload = data;
-                        node.send(RED.util.cloneMessage(msg));
+                        clients[connection_id].msg.payload = data;
+                        node.send(clients[connection_id].msg);
                     }
                     else if (node.splitc === 0) {
-                        msg.payload = data;
-                        node.send(RED.util.cloneMessage(msg));
+                        clients[connection_id].msg.payload = data;
+                        node.send(clients[connection_id].msg);
                     }
                     else {
                         for (var j = 0; j < data.length; j++ ) {
@@ -467,11 +473,11 @@ module.exports = function(RED) {
                                 else {
                                     clients[connection_id].timeout = setTimeout(function () {
                                         clients[connection_id].timeout = null;
-                                        msg.payload = new Buffer(i+1);
-                                        buf.copy(msg.payload,0,0,i+1);
-                                        node.send(msg);
-                                        if (clients[connection_id]) {
-                                            node.status({}); clients[connection_id].destroy();
+                                        clients[connection_id].msg.payload = new Buffer(i+1);
+                                        buf.copy(clients[connection_id].msg.payload,0,0,i+1);
+                                        node.send(clients[connection_id].msg);
+                                        if (clients[connection_id].client) {
+                                            node.status({}); clients[connection_id].client.destroy();
                                             delete clients[connection_id];
                                         }
                                     }, node.splitc);
@@ -484,11 +490,11 @@ module.exports = function(RED) {
                                 buf[i] = data[j];
                                 i += 1;
                                 if ( i >= node.splitc) {
-                                    msg.payload = new Buffer(i);
-                                    buf.copy(msg.payload,0,0,i);
-                                    node.send(msg);
-                                    if (clients[connection_id]) {
-                                        node.status({}); clients[connection_id].destroy();
+                                    clients[connection_id].msg.payload = new Buffer(i);
+                                    buf.copy(clients[connection_id].msg.payload,0,0,i);
+                                    node.send(clients[connection_id].msg);
+                                    if (clients[connection_id].client) {
+                                        node.status({}); clients[connection_id].client.destroy();
                                         delete clients[connection_id];
                                     }
                                     i = 0;
@@ -499,11 +505,11 @@ module.exports = function(RED) {
                                 buf[i] = data[j];
                                 i += 1;
                                 if (data[j] == node.splitc) {
-                                    msg.payload = new Buffer(i);
-                                    buf.copy(msg.payload,0,0,i);
-                                    node.send(msg);
-                                    if (clients[connection_id]) {
-                                        node.status({}); clients[connection_id].destroy();
+                                    clients[connection_id].msg.payload = new Buffer(i);
+                                    buf.copy(clients[connection_id].msg.payload,0,0,i);
+                                    node.send(clients[connection_id].msg);
+                                    if (clients[connection_id].client) {
+                                        node.status({}); clients[connection_id].client.destroy();
                                         delete clients[connection_id];
                                     }
                                     i = 0;
@@ -513,36 +519,36 @@ module.exports = function(RED) {
                     }
                 });
 
-                clients[connection_id].on('end', function() {
+                clients[connection_id].client.on('end', function() {
                     //console.log("END");
                     node.connected = false;
                     node.status({fill:"grey",shape:"ring",text:"common.status.disconnected"});
-                    clients[connection_id] = null;
+                    clients[connection_id].client = null;
                 });
 
-                clients[connection_id].on('close', function() {
+                clients[connection_id].client.on('close', function() {
                     //console.log("CLOSE");
                     node.connected = false;
                     if (node.done) { node.done(); }
                 });
 
-                clients[connection_id].on('error', function() {
+                clients[connection_id].client.on('error', function() {
                     //console.log("ERROR");
                     node.connected = false;
                     node.status({fill:"red",shape:"ring",text:"common.status.error"});
                     node.error(RED._("tcpin.errors.connect-fail"),msg);
-                    if (clients[connection_id]) {
-                        clients[connection_id].destroy();
+                    if (clients[connection_id].client) {
+                        clients[connection_id].client.destroy();
                         delete clients[connection_id];
                     }
                 });
 
-                clients[connection_id].on('timeout',function() {
+                clients[connection_id].client.on('timeout',function() {
                     node.connected = false;
                     node.status({fill:"grey",shape:"dot",text:"tcpin.errors.connect-timeout"});
                     //node.warn(RED._("tcpin.errors.connect-timeout"));
-                    if (clients[connection_id]) {
-                        clients[connection_id].connect(port, host, function() {
+                    if (clients[connection_id].client) {
+                        clients[connection_id].client.connect(port, host, function() {
                             node.connected = true;
                             node.status({fill:"green",shape:"dot",text:"common.status.connected"});
                         });
@@ -550,14 +556,14 @@ module.exports = function(RED) {
                 });
             }
             else {
-                clients[connection_id].write(msg.payload);
+                clients[connection_id].client.write(clients[connection_id].msg.payload);
             }
         });
 
         this.on("close", function(done) {
             node.done = done;
             for (var client in clients) {
-                clients[client].destroy();
+                clients[client].client.destroy();
             }
             clients = {};
             node.status({});
