@@ -1,0 +1,16 @@
+{
+    "info": {
+        "tip0" : "Use the <code>delete</code> key to remove a node.",
+        "tip1" : "Press the <code>Deploy</code> button above to start the flow running. You can choose to deploy the whole flow or just the changes.",
+        "tip2" : "Options like <b>Show grid</b> and <b>Snap to grid</b> are under the menu icon<br/><i class='fa fa-bars'></i> <i class='fa fa-caret-right'></i> <b>View</b>",
+        "tip3" : "<code>ctrl .</code> or <code>⌘ .</code> can be used to search for nodes and tabs.",
+        "tip4" : "<i class='fa fa-bars'></i> <i class='fa fa-caret-right'></i> <b>Manage palette</b> can be used to find, add and remove extra nodes.",
+        "tip5" : "Nodes may install examples under<br/><i class='fa fa-bars'></i> <i class='fa fa-caret-right'></i> <b>Import</b> <i class='fa fa-caret-right'></i> <b>Examples</b>",
+        "tip6" : "Lots of example flows can be found on <a href='http://flows.nodered.org' target='_blank'>flows.nodered.org</a><br/>They can then be imported by drag and drop to the workspace.",
+        "tip7" : "<b>Shift-click and drag</b> on a connector to move all the attached wires in one go.",
+        "tip8" : "The <b>Node-RED Dashboard</b> package can be used to create simple User Interfaces.",
+        "tip9" : "<code>ctrl</code><code>space</code> will toggle the view of this sidebar.",
+        "tip10": "Got a question?<br/>Join us on <a href='https://node-red.slack.com/' target='_blank'>Slack</a><br/>or the<br/><a href='https://groups.google.com/forum/#!forum/node-red' target='_blank'>Node-RED Google group</a>"
+    },
+    "infoLength": "11"
+}

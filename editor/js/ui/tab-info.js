@@ -127,7 +127,6 @@ RED.sidebar.info = (function() {
             //$('<div class="node-help">'+(typeof info === "function" ? info.call(node) : info)+'</div>';
         }
 
-
         $(".node-info-property-header").click(function(e) {
             var icon = $(this).find("i");
             if (icon.hasClass("fa-caret-right")) {
@@ -146,8 +145,14 @@ RED.sidebar.info = (function() {
         });
     }
 
+    var infotimeout;
     function clear() {
-        $(content).html("");
+        //$(content).html("");
+        if (!infotimeout) {
+            var r = parseInt(Math.random() * RED._("infotips:infoLength"));
+            $(content).html('<div class="node-info-tip">'+RED._("infotips:info.tip"+r)+'</div>');
+            infotimeout = setTimeout(function() { infotimeout=null; }, 20000);
+        }
     }
 
     function set(html) {
@@ -177,7 +182,7 @@ RED.sidebar.info = (function() {
     return {
         init: init,
         show: show,
-        refresh:refresh,
+        refresh: refresh,
         clear: clear,
         set: set
     }
