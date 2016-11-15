@@ -161,7 +161,9 @@ module.exports = function(grunt) {
                 files: {
                     'public/red/red.min.js': 'public/red/red.js',
                     'public/red/main.min.js': 'public/red/main.js',
-                    'public/vendor/jsonata/jsonata.min.js': 'editor/vendor/jsonata/jsonata.js'
+                    'public/vendor/jsonata/jsonata.min.js': 'editor/vendor/jsonata/jsonata.js',
+                    'public/vendor/ace/mode-jsonata.js': 'editor/vendor/jsonata/mode-jsonata.js',
+                    'public/vendor/ace/worker-jsonata.js': 'editor/vendor/jsonata/worker-jsonata.js'
                 }
             }
         },

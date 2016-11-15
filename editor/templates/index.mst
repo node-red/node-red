@@ -159,6 +159,13 @@
     <div class="form-row form-tips" id="subflow-dialog-user-count"></div>
 </script>
 
+<script type="text/x-red" data-template-name="_expression">
+    <div class="form-row node-text-editor-row">
+        <div style="height: 250px;" class="node-text-editor" id="node-input-expression"></div>
+    </div>
+</script>
+
+
 <script src="vendor/vendor.js"></script>
 <script src="vendor/jsonata/jsonata.min.js"></script>
 <script src="vendor/ace/ace.js"></script>

@@ -494,12 +494,13 @@ RED.editor = (function() {
     }
 
     function getEditStackTitle() {
-
         var title = '<ul class="editor-tray-breadcrumbs">';
         for (var i=0;i<editStack.length;i++) {
             var node = editStack[i];
             var label = node.type;
-            if (node.type === 'subflow') {
+            if (node.type === '_expression') {
+                label = "Expression editor";
+            } else if (node.type === 'subflow') {
                 label = RED._("subflow.editSubflow",{name:node.name})
             } else if (node.type.indexOf("subflow:")===0) {
                 var subflow = RED.nodes.subflow(node.type.substring(8));
@@ -524,6 +525,33 @@ RED.editor = (function() {
         }
         title += '</ul>';
         return title;
+    }
+
+    function buildEditForm(tray,formId,type,ns) {
+        var trayBody = tray.find('.editor-tray-body');
+        var dialogForm = $('<form id="'+formId+'" class="form-horizontal"></form>').appendTo(trayBody);
+        dialogForm.html($("script[data-template-name='"+type+"']").html());
+        ns = ns||"node-red";
+        dialogForm.find('[data-i18n]').each(function() {
+            var current = $(this).attr("data-i18n");
+            var keys = current.split(";");
+            for (var i=0;i<keys.length;i++) {
+                var key = keys[i];
+                if (key.indexOf(":") === -1) {
+                    var prefix = "";
+                    if (key.indexOf("[")===0) {
+                        var parts = key.split("]");
+                        prefix = parts[0]+"]";
+                        key = parts[1];
+                    }
+                    keys[i] = prefix+ns+":"+key;
+                }
+            }
+            $(this).attr("data-i18n",keys.join(";"));
+        });
+        $('<input type="text" style="display: none;" />').prependTo(dialogForm);
+        dialogForm.submit(function(e) { e.preventDefault();});
+        return dialogForm;
     }
 
     function showEditDialog(node) {
@@ -763,33 +791,13 @@ RED.editor = (function() {
                 if (editing_node) {
                     RED.sidebar.info.refresh(editing_node);
                 }
-                var trayBody = tray.find('.editor-tray-body');
-                var dialogForm = $('<form id="dialog-form" class="form-horizontal"></form>').appendTo(trayBody);
-                dialogForm.html($("script[data-template-name='"+type+"']").html());
                 var ns;
                 if (node._def.set.module === "node-red") {
                     ns = "node-red";
                 } else {
                     ns = node._def.set.id;
                 }
-                dialogForm.find('[data-i18n]').each(function() {
-                    var current = $(this).attr("data-i18n");
-                    var keys = current.split(";");
-                    for (var i=0;i<keys.length;i++) {
-                        var key = keys[i];
-                        if (key.indexOf(":") === -1) {
-                            var prefix = "";
-                            if (key.indexOf("[")===0) {
-                                var parts = key.split("]");
-                                prefix = parts[0]+"]";
-                                key = parts[1];
-                            }
-                            keys[i] = prefix+ns+":"+key;
-                        }
-                    }
-                    $(this).attr("data-i18n",keys.join(";"));
-                });
-                $('<input type="text" style="display: none;" />').prependTo(dialogForm);
+                var dialogForm = buildEditForm(tray,"dialog-form",type,ns);
                 prepareEditDialog(node,node._def,"node-input");
                 dialogForm.i18n();
             },
@@ -882,7 +890,6 @@ RED.editor = (function() {
             },
             open: function(tray) {
                 var trayHeader = tray.find(".editor-tray-header");
-                var trayBody = tray.find(".editor-tray-body");
                 var trayFooter = tray.find(".editor-tray-footer");
 
                 if (node_def.hasUsers !== false) {
@@ -890,21 +897,8 @@ RED.editor = (function() {
                 }
                 trayFooter.append('<span id="node-config-dialog-scope-container"><span id="node-config-dialog-scope-warning" data-i18n="[title]editor.errors.scopeChange"><i class="fa fa-warning"></i></span><select id="node-config-dialog-scope"></select></span>');
 
-                var dialogForm = $('<form id="node-config-dialog-edit-form" class="form-horizontal"></form>').appendTo(trayBody);
-                dialogForm.html($("script[data-template-name='"+type+"']").html());
-                dialogForm.find('[data-i18n]').each(function() {
-                    var current = $(this).attr("data-i18n");
-                    if (current.indexOf(":") === -1) {
-                        var prefix = "";
-                        if (current.indexOf("[")===0) {
-                            var parts = current.split("]");
-                            prefix = parts[0]+"]";
-                            current = parts[1];
-                        }
-                        $(this).attr("data-i18n",prefix+ns+":"+current);
-                    }
-                });
-                $('<input type="text" style="display: none;" />').prependTo(dialogForm);
+                var dialogForm = buildEditForm(tray,"node-config-dialog-edit-form",type,ns);
+
                 prepareEditDialog(editing_config_node,node_def,"node-config-input");
                 if (editing_config_node._def.exclusive) {
                     $("#node-config-dialog-scope").hide();
@@ -1338,30 +1332,7 @@ RED.editor = (function() {
                 if (editing_node) {
                     RED.sidebar.info.refresh(editing_node);
                 }
-                var trayBody = tray.find('.editor-tray-body');
-                var dialogForm = $('<form id="dialog-form" class="form-horizontal"></form>').appendTo(trayBody);
-                dialogForm.html($("script[data-template-name='subflow-template']").html());
-                var ns = "node-red";
-                dialogForm.find('[data-i18n]').each(function() {
-                    var current = $(this).attr("data-i18n");
-                    var keys = current.split(";");
-                    for (var i=0;i<keys.length;i++) {
-                        var key = keys[i];
-                        if (key.indexOf(":") === -1) {
-                            var prefix = "";
-                            if (key.indexOf("[")===0) {
-                                var parts = key.split("]");
-                                prefix = parts[0]+"]";
-                                key = parts[1];
-                            }
-                            keys[i] = prefix+ns+":"+key;
-                        }
-                    }
-                    $(this).attr("data-i18n",keys.join(";"));
-                });
-                $('<input type="text" style="display: none;" />').prependTo(dialogForm);
-
-                dialogForm.submit(function(e) { e.preventDefault();});
+                var dialogForm = buildEditForm(tray,"dialog-form","subflow-template");
                 subflowEditor = RED.editor.createEditor({
                     id: 'subflow-input-info-editor',
                     mode: 'ace/mode/markdown',
@@ -1397,6 +1368,78 @@ RED.editor = (function() {
         RED.tray.show(trayOptions);
     }
 
+
+    function editExpression(options) {
+        var value = options.value;
+        var onComplete = options.complete;
+        var type = "_expression"
+        editStack.push({type:type});
+        RED.view.state(RED.state.EDITING);
+        var expressionEditor;
+
+        var trayOptions = {
+            title: getEditStackTitle(),
+            buttons: [
+                {
+                    id: "node-dialog-cancel",
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        RED.tray.close();
+                    }
+                },
+                {
+                    id: "node-dialog-ok",
+                    text: RED._("common.label.done"),
+                    class: "primary",
+                    click: function() {
+                        onComplete(expressionEditor.getValue());
+                        RED.tray.close();
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                editTrayWidthCache[type] = dimensions.width;
+
+                var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+                var editorRow = $("#dialog-form>div.node-text-editor-row");
+                var height = $("#dialog-form").height();
+                for (var i=0;i<rows.size();i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                height -= (parseInt($("#dialog-form").css("marginTop"))+parseInt($("#dialog-form").css("marginBottom")));
+                $(".node-text-editor").css("height",height+"px");
+                expressionEditor.resize();
+            },
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var dialogForm = buildEditForm(tray,'dialog-form','_expression');
+
+                expressionEditor = RED.editor.createEditor({
+                    id: 'node-input-expression',
+                    value: "",
+                    mode:"ace/mode/jsonata",
+                    options: {
+                        enableBasicAutocompletion:true,
+                        enableSnippets:false,
+                        enableLiveAutocompletion: true
+                    }
+                });
+                expressionEditor.getSession().setValue(value||"",-1);
+
+                dialogForm.i18n();
+
+            },
+            close: function() {
+                editStack.pop();
+            },
+            show: function() {}
+        }
+        if (editTrayWidthCache.hasOwnProperty(type)) {
+            trayOptions.width = editTrayWidthCache[type];
+        }
+        RED.tray.show(trayOptions);
+    }
+
     return {
         init: function() {
             RED.tray.init();
@@ -1413,6 +1456,7 @@ RED.editor = (function() {
         edit: showEditDialog,
         editConfig: showEditConfigNodeDialog,
         editSubflow: showEditSubflowDialog,
+        editExpression: editExpression,
         validateNode: validateNode,
         updateNodeProperties: updateNodeProperties, // TODO: only exposed for edit-undo
 
