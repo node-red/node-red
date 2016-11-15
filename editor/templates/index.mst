@@ -161,7 +161,13 @@
 
 <script type="text/x-red" data-template-name="_expression">
     <div class="form-row node-text-editor-row">
-        <div style="height: 250px;" class="node-text-editor" id="node-input-expression"></div>
+        <div style="height: 200px;min-height: 150px;" class="node-text-editor" id="node-input-expression"></div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-expression-func" data-i18n="expressionEditor.functions"></label>
+        <select id="node-input-expression-func"></select>
+
+        <div style="min-height: 200px;" id="node-input-expression-help"></div>
     </div>
 </script>
 

@@ -85,6 +85,7 @@
         }
         return true;
     }
+
     var allOptions = {
         msg: {value:"msg",label:"msg.",validate:validateExpression},
         flow: {value:"flow",label:"flow.",validate:validateExpression},
@@ -103,9 +104,9 @@
             expand:function() {
                 var that = this;
                 RED.editor.editExpression({
-                    value: this.value(),
+                    value: jsonata.format(this.value()),
                     complete: function(v) {
-                        that.value(v);
+                        that.value(v.replace(/\s*\n\s*/g," "));
                     }
                 })
             }

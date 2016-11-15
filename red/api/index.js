@@ -155,6 +155,8 @@ function init(_server,_runtime) {
     }
 }
 function start() {
+    i18n.registerMessageCatalog("jsonata",path.resolve(path.join(__dirname,"locales")),"jsonata.json")
+
     return i18n.registerMessageCatalog("editor",path.resolve(path.join(__dirname,"locales")),"editor.json").then(function(){
         comms.start();
     });

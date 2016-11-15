@@ -1392,6 +1392,7 @@ RED.editor = (function() {
                     text: RED._("common.label.done"),
                     class: "primary",
                     click: function() {
+                        $("#node-input-expression-help").html("");
                         onComplete(expressionEditor.getValue());
                         RED.tray.close();
                     }
@@ -1412,8 +1413,19 @@ RED.editor = (function() {
             },
             open: function(tray) {
                 var trayBody = tray.find('.editor-tray-body');
-                var dialogForm = buildEditForm(tray,'dialog-form','_expression');
+                var dialogForm = buildEditForm(tray,'dialog-form','_expression','editor');
+                var funcSelect = $("#node-input-expression-func");
+                jsonata.functions.forEach(function(f) {
+                    funcSelect.append($("<option></option>").val(f).text(f));
+                })
+                funcSelect.change(function(e) {
+                    var f = $(this).val();
+                    var args = RED._('jsonata:'+f+".args",{defaultValue:''});
+                    var title = "<h4>"+f+"("+args+")</h4>";
+                    var body = marked(RED._('jsonata:'+f+'.desc',{defaultValue:''}));
+                    $("#node-input-expression-help").html(title+"<p>"+body+"</p>");
 
+                })
                 expressionEditor = RED.editor.createEditor({
                     id: 'node-input-expression',
                     value: "",
@@ -1425,6 +1437,15 @@ RED.editor = (function() {
                     }
                 });
                 expressionEditor.getSession().setValue(value||"",-1);
+
+                expressionEditor.on("changeSelection", function() {
+                    var c = expressionEditor.getCursorPosition();
+                    var token = expressionEditor.getSession().getTokenAt(c.row,c.column);
+                    //console.log(token);
+                    if (token && token.type === 'keyword') {
+                        funcSelect.val(token.value).change();
+                    }
+                });
 
                 dialogForm.i18n();
 

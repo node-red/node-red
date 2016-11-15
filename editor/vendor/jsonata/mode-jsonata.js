@@ -1,8 +1,10 @@
 define("ace/mode/jsonata",["require","exports","module","ace/lib/oop","ace/mode/text_highlight_rules","ace/worker/worker_client","ace/mode/text"], function(require, exports, module) {
+
     "use strict";
 
     var oop = require("../lib/oop");
     var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
+
     var WorkerClient = require("../worker/worker_client").WorkerClient;
 
     var JSONataHighlightRules = function() {
@@ -12,6 +14,8 @@ define("ace/mode/jsonata",["require","exports","module","ace/lib/oop","ace/mode/
                 "and|or|in",
             "constant.language":
                 "null|Infinity|NaN|undefined",
+            "constant.language.boolean":
+                "true|false",
             "storage.type":
                 "function",
             "keyword":
@@ -39,16 +43,12 @@ define("ace/mode/jsonata",["require","exports","module","ace/lib/oop","ace/mode/
                     token : "constant.numeric", // float
                     regex : /[+-]?\d[\d_]*(?:(?:\.\d*)?(?:[eE][+-]?\d+)?)?\b/
                 },
-                {
-                    token : keywordMapper,
-                    regex : "[a-zA-Z\\$_\u00a1-\uffff][a-zA-Z\\d\\$_\u00a1-\uffff]*"
-                },
                 {   token: "keyword",
                     regex: /λ/
                 },
                 {
-                    token: "constant.language.boolean",
-                    regex: "true|false"
+                    token : keywordMapper,
+                    regex : "[a-zA-Z\\$_\u00a1-\uffff][a-zA-Z\\d\\$_\u00a1-\uffff]*"
                 },
                 {
                     token : "punctuation.operator",
@@ -119,8 +119,6 @@ define("ace/mode/jsonata",["require","exports","module","ace/lib/oop","ace/mode/
 
             return worker;
         };
-
-
         this.$id = "ace/mode/jsonata";
     }).call(Mode.prototype);
 

@@ -318,5 +318,8 @@
     },
     "search": {
         "empty": "No matches found"
+    },
+    "expressionEditor": {
+        "functions": "Functions"
     }
 }
