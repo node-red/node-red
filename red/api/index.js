@@ -93,7 +93,7 @@ function init(_server,_runtime) {
                     if (req.secure) {
                         next();
                     } else {
-                        res.redirect('https://' + req.headers.host + req.url);
+                        res.redirect('https://' + req.headers.host + req.originalUrl);
                     }
                 });
             }
