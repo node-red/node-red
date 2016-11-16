@@ -104,9 +104,9 @@
             expand:function() {
                 var that = this;
                 RED.editor.editExpression({
-                    value: jsonata.format(this.value()),
+                    value: this.value().replace(/\t/g,"\n"),
                     complete: function(v) {
-                        that.value(v.replace(/\s*\n\s*/g," "));
+                        that.value(v.replace(/\n/g,"\t"));
                     }
                 })
             }
