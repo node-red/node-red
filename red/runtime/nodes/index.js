@@ -69,6 +69,20 @@ function createNode(node,def) {
     var creds = credentials.get(id);
     if (creds) {
         //console.log("Attaching credentials to ",node.id);
+        // allow $(foo) syntax to substitute env variables for credentials also...
+        var EnvVarPropertyRE = /^\$\((\S+)\)$/;
+        var loopOver = function (obj) {
+            for (var o in obj) {
+                if (typeof obj[o] === "object" && obj[o] !== null) { loopOver(obj[o]); }
+                else {
+                    var m;
+                    if ( (m = EnvVarPropertyRE.exec(obj[o])) !== null ) {
+                        if (process.env.hasOwnProperty(m[1])) { obj[o] = process.env[m[1]]; }
+                    }
+                }
+            }
+        }
+        loopOver(creds);
         node.credentials = creds;
     } else if (credentials.getDefinition(node.type)) {
         node.credentials = {};
