@@ -95,9 +95,9 @@
         align: "right",
         label: function() {
             if (this.overwriteFile === "delete") {
-                return this.name||this._("file.label.deletelabel",{file:this.filename})
+                return this.name||this._("file.label.deletelabel",{file:RED.text.format.getString(this.filename, "filepath", {}, false, "en")})
             } else {
-                return this.name||this.filename||this._("file.label.filelabel");
+                return this.name||RED.text.format.getString(this.filename, "filepath", {}, false, "en")||this._("file.label.filelabel");
             }
         },
         labelStyle: function() {
@@ -123,7 +123,7 @@
         outputs:1,
         icon: "file.png",
         label: function() {
-            return this.name||this.filename||this._("file.label.filelabel");
+            return this.name||RED.text.format.getString(this.filename, "filepath", {}, false, "en")||this._("file.label.filelabel");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
