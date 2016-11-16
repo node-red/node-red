@@ -87,7 +87,7 @@ function init(_server,_runtime) {
         if (!settings.disableEditor) {
             ui.init(runtime);
             var editorApp = express();
-            if (settings.insecureRedirect) {
+            if (settings.requireHttps === true) {
                 editorApp.enable('trust proxy');
                 editorApp.use(function (req, res, next) {
                     if (req.secure) {
