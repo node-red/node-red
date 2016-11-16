@@ -68,6 +68,10 @@
     @include disable-selection;
 }
 
+[dir="rtl"] .node_label {
+    direction: ltr;
+}
+
 .port_label {
     stroke-width: 0;
     fill: #888;
@@ -177,6 +181,10 @@
     font-size:9pt;
     stroke:#000;
     text-anchor:start;
+}
+
+[dir="rtl"] .node_status_label {
+    direction: ltr;
 }
 
 .port_hovered {

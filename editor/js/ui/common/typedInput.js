@@ -198,12 +198,12 @@
                 if (opt.label) {
                     op.text(opt.label);
                 }
+                // reverse property direction in case of right directionality
                 if (opt.icon) {
-                    $('<img>',{src:opt.icon,style:"margin-right: 4px; height: 18px;"}).prependTo(op);
+                    $('<img>',{src:opt.icon,style:"margin-"+RED.rightProperty+": 4px; height: 18px;"}).prependTo(op);
                 } else {
-                    op.css({paddingLeft: "18px"});
+                	op.css("padding-"+RED.bidiUtil.UI.leftProperty, "18px");
                 }
-
                 op.click(function(event) {
                     event.preventDefault();
                     callback(opt.value);
@@ -271,9 +271,10 @@
             } else {
                 this.selectTrigger.width('auto');
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
-                this.elementDiv.css('left',labelWidth+"px");
+                // reverse property direction in case of right directionality
+                this.elementDiv.css(RED.bidiUtil.UI.leftProperty,labelWidth+"px");
                 if (this.optionSelectTrigger) {
-                    this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
+                    this.optionSelectTrigger.css(RED.bidiUtil.UI.leftProperty,(labelWidth+5)+"px");
                 }
             }
         },
@@ -336,7 +337,7 @@
                         image = new Image();
                         image.name = opt.icon;
                         image.src = opt.icon;
-                        $('<img>',{src:opt.icon,style:"margin-right: 4px;height: 18px;"}).prependTo(this.selectLabel);
+                        $('<img>',{src:opt.icon,style:"margin-"+RED.rightProperty+": 4px;height: 18px;"}).prependTo(this.selectLabel);
                     } else {
                         this.selectLabel.text(opt.label);
                     }

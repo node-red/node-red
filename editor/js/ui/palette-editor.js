@@ -235,6 +235,7 @@ RED.palette.editor = (function() {
                     }
                 }
                 var nodeCount = (activeTypeCount === typeCount)?typeCount:activeTypeCount+" / "+typeCount;
+                nodeCount = RED.bidiUtil.applyBidiSupport(nodeCount,RED.bidiUtil.BidiFlags.NS);
                 nodeEntry.setCount.html(RED._('palette.editor.nodeCount',{count:typeCount,label:nodeCount}));
 
                 if (nodeEntries[module].totalUseCount > 0) {
@@ -454,7 +455,7 @@ RED.palette.editor = (function() {
                     var titleRow = $('<div class="palette-module-meta palette-module-name"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
                     $('<span>').html(entry.name).appendTo(titleRow);
                     var metaRow = $('<div class="palette-module-meta palette-module-version"><i class="fa fa-tag"></i></div>').appendTo(headerRow);
-                    $('<span>').html(entry.version).appendTo(metaRow);
+                    $('<span>').html(RED.bidiUtil.applyBidiSupport(entry.version,RED.bidiUtil.BidiFlags.NS)).appendTo(metaRow);
                     var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
                     var setButton = $('<a href="#" class="editor-button editor-button-small palette-module-set-button"><i class="fa fa-angle-right palette-module-node-chevron"></i> </a>').appendTo(buttonRow);
                     var setCount = $('<span>').appendTo(setButton);

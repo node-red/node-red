@@ -139,7 +139,7 @@ RED.subflow = (function() {
         RED.view.select();
         RED.nodes.dirty(true);
         RED.view.redraw();
-        $("#workspace-subflow-output .spinner-value").html(subflow.out.length);
+        $("#workspace-subflow-output .spinner-value").html(RED.bidiUtil.applyBidiSupport(subflow.out.length,RED.bidiUtil.BidiFlags.NS));
     }
 
     function removeSubflowOutput(removedSubflowOutputs) {
@@ -216,7 +216,7 @@ RED.subflow = (function() {
             $("#workspace-subflow-input-add").toggleClass("active", activeSubflow.in.length !== 0);
             $("#workspace-subflow-input-remove").toggleClass("active",activeSubflow.in.length === 0);
 
-            $("#workspace-subflow-output .spinner-value").html(activeSubflow.out.length);
+            $("#workspace-subflow-output .spinner-value").html(RED.bidiUtil.applyBidiSupport(activeSubflow.out.length,RED.bidiUtil.BidiFlags.NS));
         }
     }
 
@@ -224,15 +224,15 @@ RED.subflow = (function() {
         var toolbar = $("#workspace-toolbar");
         toolbar.empty();
 
-        $('<a class="button" id="workspace-subflow-edit" href="#" data-i18n="[append]subflow.editSubflowProperties"><i class="fa fa-pencil"></i> </a>').appendTo(toolbar);
-        $('<span style="margin-left: 5px;" data-i18n="subflow.input"></span> '+
-            '<div style="display: inline-block;" class="button-group">'+
-            '<a id="workspace-subflow-input-remove" class="button active" href="#">0</a>'+
+        $('<a class="button subflow-toolbar" id="workspace-subflow-edit" href="#" data-i18n="[append]subflow.editSubflowProperties"><i class="fa fa-pencil"></i> </a>').appendTo(toolbar);
+        $('<span class="workspace-subflow-label" data-i18n="subflow.input"></span> '+
+            '<div style="display: inline-block;" class="button-group subflow-toolbar">'+
+            '<a id="workspace-subflow-input-remove" class="button active subflow-toolbar" href="#">0</a>'+
             '<a id="workspace-subflow-input-add" class="button" href="#">1</a>'+
             '</div>').appendTo(toolbar);
 
-        $('<span style="margin-left: 5px;" data-i18n="subflow.output"></span> <div id="workspace-subflow-output" style="display: inline-block;" class="button-group spinner-group">'+
-            '<a id="workspace-subflow-output-remove" class="button" href="#"><i class="fa fa-minus"></i></a>'+
+        $('<span class="workspace-subflow-label" data-i18n="subflow.output"></span> <div id="workspace-subflow-output" style="display: inline-block;" class="button-group spinner-group">'+
+            '<a id="workspace-subflow-output-remove" class="button subflow-toolbar" href="#"><i class="fa fa-minus"></i></a>'+
             '<div class="spinner-value">3</div>'+
             '<a id="workspace-subflow-output-add" class="button" href="#"><i class="fa fa-plus"></i></a>'+
             '</div>').appendTo(toolbar);
@@ -243,6 +243,11 @@ RED.subflow = (function() {
         toolbar.i18n();
 
 
+        var subflow_add = RED.bidiUtil.applyBidiSupport($("#workspace-subflow-input-add").text(),RED.bidiUtil.BidiFlags.NS);
+        var subflow_remove = RED.bidiUtil.applyBidiSupport($("#workspace-subflow-input-remove").text(),RED.bidiUtil.BidiFlags.NS);
+        $("#workspace-subflow-input-add").html(subflow_add);
+        $("#workspace-subflow-input-remove").html(subflow_remove);
+        
         $("#workspace-subflow-output-remove").click(function(event) {
             event.preventDefault();
             var wasDirty = RED.nodes.dirty();

@@ -68,3 +68,18 @@
         border-radius: 4px;
     }
 }
+
+[dir="rtl"] .red-ui-searchBox-container {
+    input {
+        text-indent: 6px;
+    }
+    i.fa-search {
+        left: initial;
+        right: 8px
+    }
+    .red-ui-searchBox-resultCount {
+        left: 18px;
+        right: initial;
+    }
+}
+

@@ -87,13 +87,13 @@
 
 <div id="node-dialog-confirm-deploy" class="hide">
     <form class="form-horizontal">
-        <div id="node-dialog-confirm-deploy-config" style="text-align: left; padding-top: 30px;" data-i18n="[prepend]deploy.confirm.improperlyConfigured;[append]deploy.confirm.confirm">
-            <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-invalid-list"></ul>
+        <div id="node-dialog-confirm-deploy-config" class="node-dialog-confirm-deploy-config-style" data-i18n="[prepend]deploy.confirm.improperlyConfigured;[append]deploy.confirm.confirm">
+            <ul class="node-dialog-confirm-deploy" style="" id="node-dialog-confirm-deploy-invalid-list"></ul>
         </div>
         <div id="node-dialog-confirm-deploy-unknown" style="text-align: left; padding-top: 10px;" data-i18n="[prepend]deploy.confirm.unknown;[append]deploy.confirm.confirm">
-            <ul style="font-size: 0.9em; width: 400px; margin: 10px auto; text-align: left;" id="node-dialog-confirm-deploy-unknown-list"></ul>
+            <ul class="node-dialog-confirm-deploy" id="node-dialog-confirm-deploy-unknown-list"></ul>
         </div>
-        <div id="node-dialog-confirm-deploy-conflict" style="text-align: left; padding-top: 10px;" data-i18n="[prepend]deploy.confirm.conflict;[append]deploy.confirm.confirm">
+        <div id="node-dialog-confirm-deploy-conflict" class="node-dialog-confirm-deploy-conflict-style" data-i18n="[prepend]deploy.confirm.conflict;[append]deploy.confirm.confirm">
         </div>
     </form>
 </div>
@@ -164,5 +164,30 @@
 <script src="vendor/ace/ext-language_tools.js"></script>
 <script src="{{ asset.red }}"></script>
 
+<style>
+.node-dialog-confirm-deploy {
+    font-size: 0.9em;
+    width: 400px;
+    margin: 10px auto;
+    text-align: left;
+}
+[dir="rtl"] .node-dialog-confirm-deploy {
+    text-align: right;
+}
+.node-dialog-confirm-deploy-conflict-style {
+    text-align: left;
+    padding-top: 10px;
+}
+[dir="rtl"] .node-dialog-confirm-deploy-conflict-style {
+    text-align: right;
+}
+.node-dialog-confirm-deploy-config-style {
+    text-align: left;
+    padding-top: 30px;
+}
+[dir="rtl"] .node-dialog-confirm-deploy-config-style {
+    text-align: right;
+}
+</style>
 </body>
 </html>

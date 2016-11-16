@@ -28,6 +28,11 @@
     transition: width 0.2s ease-in-out;
 }
 
+[dir="rtl"] #palette {
+    left: initial;
+    right: 0px;
+}
+
 .palette-expanded {
     & #palette {
         width: 380px;
@@ -42,6 +47,18 @@
     & #palette-editor { display: block !important }
 }
 
+[dir="rtl"] .palette-expanded {
+    
+    & #palette {
+        width: 380px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+    }
+    
+    & #workspace {
+        left: 315px !important;
+        right: 380px !important;
+    }
+}
 
 .palette-scroll {
     position: absolute;
@@ -74,7 +91,9 @@
     @include component-footer-button;
 }
 
-
+[dir="rtl"] .palette-button {
+    float: left;
+}
 .palette-category {
     border-bottom: 1px solid #ccc;
 }
@@ -95,6 +114,11 @@
     text-overflow: ellipsis;
 
 }
+
+[dir="rtl"] .palette-header {
+    text-align: right;
+}
+
 .palette-header i {
     margin: 3px 10px 3px 3px;
     -webkit-transition: all 0.2s ease-in-out;
@@ -104,6 +128,12 @@
     -moz-transform: rotate(-90deg);
     -o-transform: rotate(-90deg);
 }
+
+[dir="rtl"] .palette-header i {
+    margin: 3px 3px 3px 10px;
+    transform: rotate(90deg);
+}
+
 .palette-header i.expanded {
     -webkit-transform: rotate(0deg);
     -moz-transform: rotate(0deg);
@@ -123,6 +153,10 @@
     margin: 4px 28px 4px 0;
 }
 
+[dir="rtl"] .palette_label_right {
+    margin: 4px 0 4px 28px;
+}
+
 .palette_node {
     cursor:move;
     background: #ddd;
@@ -139,6 +173,9 @@
 .palette_node:hover {
     border-color: $node-selected-color;
     background-color: #eee;
+}
+[dir="rtl"] .palette_node:hover {
+	direction: rtl;
 }
 .palette_port {
     position: absolute;
@@ -176,6 +213,12 @@
     right: 0;
     border-right: none;
     border-left: 1px solid rgba(0,0,0,0.1);
+}
+[dir="rtl"] .palette_icon_container_right {
+    left: 0;
+    right: auto;
+    border-left: none;
+    border-right: 1px solid rgba(0,0,0,0.1);
 }
 .palette_icon {
     display: inline-block;

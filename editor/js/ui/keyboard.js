@@ -105,7 +105,7 @@ RED.keyboard = (function() {
         }
         if (!dialog) {
             dialog = $('<div id="keyboard-help-dialog" class="hide">'+
-                '<div style="vertical-align: top;display:inline-block; box-sizing: border-box; width:50%; padding: 10px;">'+
+                '<div id="keyboard-help-dialog-div1">'+
                     '<table class="keyboard-shortcuts">'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">a</span></td><td>'+RED._("keyboard.selectAll")+'</td></tr>'+
                         '<tr><td><span class="help-key">Shift</span> + <span class="help-key">Click</span></td><td>'+RED._("keyboard.selectAllConnected")+'</td></tr>'+
@@ -121,7 +121,7 @@ RED.keyboard = (function() {
                         '<tr><td><span class="help-key">Shift</span> + <span class="help-key"> &#x2193; </span></td></tr>'+
                     '</table>'+
                 '</div>'+
-                '<div style="vertical-align: top;display:inline-block; box-sizing: border-box; width:50%; padding: 10px;">'+
+                '<div id="keyboard-help-dialog-div2">'+
                     '<table class="keyboard-shortcuts">'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">Space</span></td><td>'+RED._("keyboard.toggleSidebar")+'</td></tr>'+
                         '<tr><td><span class="help-key">Ctrl/&#8984;</span> + <span class="help-key">.</span></td><td>'+RED._("keyboard.searchBox")+'</td></tr>'+
