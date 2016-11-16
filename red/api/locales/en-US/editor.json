@@ -320,6 +320,7 @@
         "empty": "No matches found"
     },
     "expressionEditor": {
-        "functions": "Functions"
+        "functions": "Functions",
+        "insert": "Insert"
     }
 }

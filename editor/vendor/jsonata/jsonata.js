@@ -2788,6 +2788,9 @@ var jsonata = (function() {
             },
             assign: function (name, value) {
                 environment.bind(name, value);
+            },
+            ast: function() {
+                return ast;
             }
         };
     }

@@ -1421,7 +1421,7 @@ RED.editor = (function() {
                 funcSelect.change(function(e) {
                     var f = $(this).val();
                     var args = RED._('jsonata:'+f+".args",{defaultValue:''});
-                    var title = "<h4>"+f+"("+args+")</h4>";
+                    var title = "<h5>"+f+"("+args+")</h5>";
                     var body = marked(RED._('jsonata:'+f+'.desc',{defaultValue:''}));
                     $("#node-input-expression-help").html(title+"<p>"+body+"</p>");
 
@@ -1432,7 +1432,7 @@ RED.editor = (function() {
                     mode:"ace/mode/jsonata",
                     options: {
                         enableBasicAutocompletion:true,
-                        enableSnippets:false,
+                        enableSnippets:true,
                         enableLiveAutocompletion: true
                     }
                 });
@@ -1441,14 +1441,23 @@ RED.editor = (function() {
                 expressionEditor.on("changeSelection", function() {
                     var c = expressionEditor.getCursorPosition();
                     var token = expressionEditor.getSession().getTokenAt(c.row,c.column);
-                    //console.log(token);
+                    // console.log(token);
                     if (token && token.type === 'keyword') {
                         funcSelect.val(token.value).change();
                     }
                 });
 
                 dialogForm.i18n();
-
+                $("#node-input-expression-func-insert").click(function(e) {
+                    e.preventDefault();
+                    var pos = expressionEditor.getCursorPosition();
+                    var f = funcSelect.val();
+                    var args = RED._('jsonata:'+f+".args",{defaultValue:''});
+                    expressionEditor.insert(f+"("+args+")");
+                    pos.column += f.length+1;
+                    expressionEditor.moveCursorToPosition(pos);
+                    expressionEditor.focus();
+                })
             },
             close: function() {
                 editStack.pop();
