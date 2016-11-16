@@ -202,16 +202,17 @@ RED.debug = (function() {
         var format = sanitize((o.format||"").toString());
         msg.className = 'debug-message'+(o.level?(' debug-message-level-'+o.level):'') +
         ((sourceNode&&sourceNode.z)?((" debug-message-flow-"+sourceNode.z+((filter&&(activeWorkspace!==sourceNode.z))?" hide":""))):"");
-        $('<span class="debug-message-date">'+ getTimestamp()+'</span>').appendTo(msg);
+        var metaRow = $('<div class="debug-message-meta"></div>').appendTo(msg);
+        $('<span class="debug-message-date">'+ getTimestamp()+'</span>').appendTo(metaRow);
         if (sourceNode) {
             $('<a>',{href:"#",class:"debug-message-name"}).html('node: '+sourceNode.id)
-            .appendTo(msg)
+            .appendTo(metaRow)
             .click(function(evt) {
                 evt.preventDefault();
                 config.messageSourceClick(sourceNode.id);
             });
         } else if (name) {
-            $('<span class="debug-message-name">'+name+'</span>').appendTo(msg);
+            $('<span class="debug-message-name">'+name+'</span>').appendTo(metaRow);
         }
         // NOTE: relying on function error to have a "type" that all other msgs don't
         if (o.hasOwnProperty("type") && (o.type === "function")) {
@@ -222,12 +223,12 @@ RED.debug = (function() {
                 errorLvlType = 'warn';
             }
             $(msg).addClass('debug-message-level-' + errorLvl);
-            $('<span class="debug-message-topic">function : (' + errorLvlType + ')</span>').appendTo(msg);
+            $('<span class="debug-message-topic">function : (' + errorLvlType + ')</span>').appendTo(metaRow);
         } else {
             $('<span class="debug-message-topic">'+
-            (o.topic?topic+' : ':'')+
-            (o.property?'msg.'+property:'msg')+" : "+format+
-            '</span>').appendTo(msg);
+                (o.topic?topic+' : ':'')+
+                (o.property?'msg.'+property:'msg')+" : "+format+
+                '</span>').appendTo(metaRow);
         }
         if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number'||/error/i.test(format) ) {
             payload = JSON.parse(payload);
