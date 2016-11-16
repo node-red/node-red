@@ -175,7 +175,7 @@ RED.sidebar = (function() {
                         $("#editor-stack").css("right",188);
                     }
                 }
-                $("#sidebar-separator").css(RED.leftProperty,"auto");
+                $("#sidebar-separator").css(RED.bidiUtil.UI.leftProperty,"auto");
                 $("#sidebar-separator").css(RED.rightProperty,($("#sidebar").width()+2)+"px");
                 RED.events.emit("sidebar:resize");
             }

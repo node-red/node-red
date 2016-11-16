@@ -1454,7 +1454,7 @@ RED.view = (function() {
                     .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
 
                 outGroup.append("svg:text").attr("class","port_label").attr("x",20).attr("y",8).style("font-size","10px").text("output");
-                outGroup.append("svg:text").attr("class","port_label port_index").attr("x",20).attr("y",24).text(function(d,i){ return RED.bidiUtil.applyBidiSupport(i+1,BidiFlags.NS)});
+                outGroup.append("svg:text").attr("class","port_label port_index").attr("x",20).attr("y",24).text(function(d,i){ return RED.bidiUtil.applyBidiSupport(i+1,RED.bidiUtil.BidiFlags.NS)});
 
                 var subflowInputs = vis.selectAll(".subflowinput").data(activeSubflow.in,function(d,i){ return d.id;});
                 subflowInputs.exit().remove();
@@ -1503,7 +1503,7 @@ RED.view = (function() {
                     if (d.dirty) {
                         var output = d3.select(this);
                         output.selectAll(".subflowport").classed("node_selected",function(d) { return d.selected; })
-                        output.selectAll(".port_index").text(function(d){ return RED.bidiUtil.applyBidiSupport(d.i+1, BidiFlags.NS)});
+                        output.selectAll(".port_index").text(function(d){ return RED.bidiUtil.applyBidiSupport(d.i+1, RED.bidiUtil.BidiFlags.NS)});
                         output.attr("transform", function(d) { return "translate(" + (d.x-d.w/2) + "," + (d.y-d.h/2) + ")"; });
                         dirtyNodes[d.id] = d;
                         d.dirty = false;
@@ -1809,7 +1809,7 @@ RED.view = (function() {
                                         l = d._def.label;
                                         try {
                                             l = (typeof l === "function" ? l.call(d) : l)||"";
-                                            l = RED.bidiUtil.applyBidiSupport(l,BidiFlags.BTD & BidiFlags.NS);
+                                            l = RED.bidiUtil.applyBidiSupport(l,RED.bidiUtil.BidiFlags.BTD & RED.bidiUtil.BidiFlags.NS);
                                         } catch(err) {
                                             console.log("Definition error: "+d.type+".label",err);
                                             l = d.type;

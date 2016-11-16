@@ -17,7 +17,7 @@ RED.notify = (function() {
     var currentNotifications = [];
     var c = 0;
     return function(msg,type,fixed,timeout) {
-        msg = RED.bidiUtil.applyBidiSupport(msg ,BidiFlags.NS);
+        msg = RED.bidiUtil.applyBidiSupport(msg ,RED.bidiUtil.BidiFlags.NS);
         if (currentNotifications.length > 4) {
             var ll = currentNotifications.length;
             for (var i = 0;ll > 4 && i<currentNotifications.length;i+=1) {

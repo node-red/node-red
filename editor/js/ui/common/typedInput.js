@@ -202,7 +202,7 @@
                 if (opt.icon) {
                     $('<img>',{src:opt.icon,style:"margin-"+RED.rightProperty+": 4px; height: 18px;"}).prependTo(op);
                 } else {
-                	op.css("padding-"+RED.leftProperty, "18px");
+                	op.css("padding-"+RED.bidiUtil.UI.leftProperty, "18px");
                 }
                 op.click(function(event) {
                     event.preventDefault();
@@ -272,9 +272,9 @@
                 this.selectTrigger.width('auto');
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
                 // reverse property direction in case of right directionality
-                this.elementDiv.css(RED.leftProperty,labelWidth+"px");
+                this.elementDiv.css(RED.bidiUtil.UI.leftProperty,labelWidth+"px");
                 if (this.optionSelectTrigger) {
-                    this.optionSelectTrigger.css(RED.leftProperty,(labelWidth+5)+"px");
+                    this.optionSelectTrigger.css(RED.bidiUtil.UI.leftProperty,(labelWidth+5)+"px");
                 }
             }
         },

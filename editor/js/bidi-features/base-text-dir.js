@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-RED.baseTextDir = (function() {
+RED.bidiFeatures = {};
+RED.bidiFeatures.baseTextDir = (function() {
     var LRE = "\u202A",
         RLE = "\u202B",
         PDF = "\u202C";
@@ -27,7 +28,7 @@ RED.baseTextDir = (function() {
                 return false;
             }
          }
-         return false;
+            return RED.bidiUtil.isMirroringEnabled();
     }
 
     function _isBidiChar(c) {

@@ -315,8 +315,8 @@ RED.editor = (function() {
                 val = "";
             }
             if (definition !== undefined && definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0].nodeName === "DIV") {
-                input.html(RED.bidiUtil.applyBidiSupport(val, BidiFlags.STT_GETHTML, definition[property].format, {}));
-                RED.bidiUtil.applyBidiSupport(input[0],BidiFlags.STT_ATTACH, definition[property].format, {});
+                input.html(RED.bidiUtil.applyBidiSupport(val, RED.bidiUtil.BidiFlags.STT_GETHTML, definition[property].format, {}));
+                RED.bidiUtil.applyBidiSupport(input[0],RED.bidiUtil.BidiFlags.STT_ATTACH, definition[property].format, {});
             } else {
                 input.val(val);
                 if (input[0].nodeName === 'INPUT' || input[0].nodeName === 'TEXTAREA') {
@@ -1186,7 +1186,7 @@ RED.editor = (function() {
                 }
 
                 configNodes.forEach(function(cn) {
-                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+RED.bidiUtil.applyBidiSupport(cn.__label__,BidiFlags.BTD & BidiFlags.NS)+'</option>');
+                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+RED.bidiUtil.applyBidiSupport(cn.__label__,RED.bidiUtil.BidiFlags.BTD & RED.bidiUtil.BidiFlags.NS)+'</option>');
                     delete cn.__label__;
                 });
 

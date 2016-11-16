@@ -139,7 +139,7 @@ RED.subflow = (function() {
         RED.view.select();
         RED.nodes.dirty(true);
         RED.view.redraw();
-        $("#workspace-subflow-output .spinner-value").html(RED.bidiUtil.applyBidiSupport(subflow.out.length,BidiFlags.NS));
+        $("#workspace-subflow-output .spinner-value").html(RED.bidiUtil.applyBidiSupport(subflow.out.length,RED.bidiUtil.BidiFlags.NS));
     }
 
     function removeSubflowOutput(removedSubflowOutputs) {
@@ -216,7 +216,7 @@ RED.subflow = (function() {
             $("#workspace-subflow-input-add").toggleClass("active", activeSubflow.in.length !== 0);
             $("#workspace-subflow-input-remove").toggleClass("active",activeSubflow.in.length === 0);
 
-            $("#workspace-subflow-output .spinner-value").html(RED.bidiUtil.applyBidiSupport(activeSubflow.out.length,BidiFlags.NS));
+            $("#workspace-subflow-output .spinner-value").html(RED.bidiUtil.applyBidiSupport(activeSubflow.out.length,RED.bidiUtil.BidiFlags.NS));
         }
     }
 
@@ -243,8 +243,8 @@ RED.subflow = (function() {
         toolbar.i18n();
 
 
-        var subflow_add = RED.bidiUtil.applyBidiSupport($("#workspace-subflow-input-add").text(),BidiFlags.NS);
-        var subflow_remove = RED.bidiUtil.applyBidiSupport($("#workspace-subflow-input-remove").text(),BidiFlags.NS);
+        var subflow_add = RED.bidiUtil.applyBidiSupport($("#workspace-subflow-input-add").text(),RED.bidiUtil.BidiFlags.NS);
+        var subflow_remove = RED.bidiUtil.applyBidiSupport($("#workspace-subflow-input-remove").text(),RED.bidiUtil.BidiFlags.NS);
         $("#workspace-subflow-input-add").html(subflow_add);
         $("#workspace-subflow-input-remove").html(subflow_remove);
         

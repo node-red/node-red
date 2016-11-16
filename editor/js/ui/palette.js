@@ -84,9 +84,11 @@ RED.palette = (function() {
                 currentLineWidth = RED.view.calculateTextWidth(currentLine, "palette_label", 0);
             }
         }
-        displayLines.push(RED.bidiUtil.applyBidiSupport(currentLine, BidiFlags.NS));
+        displayLines.push(currentLine);
 
-        var lines = displayLines.join("<br/>");
+        var tempLines = displayLines.join("^&%");
+        tempLines =RED.bidiUtil.applyBidiSupport(tempLines, RED.bidiUtil.BidiFlags.NS);
+        var lines = tempLines.replace("^&%", "<br/>");
         var multiLineNodeHeight = 8+(lineHeight*displayLines.length);
         el.css({height:multiLineNodeHeight+"px"});
 
@@ -97,9 +99,9 @@ RED.palette = (function() {
 
         var popOverContent;
         try {
-            var l = "<p><b>"+RED.bidiUtil.applyBidiSupport(label,BidiFlags.BTD & BidiFlags.NS)+"</b></p>";
+            var l = "<p><b>"+RED.bidiUtil.applyBidiSupport(label,RED.bidiUtil.BidiFlags.BTD & RED.bidiUtil.BidiFlags.NS)+"</b></p>";
             if (label != type) {
-                l = "<p><b>"+RED.bidiUtil.applyBidiSupport(label,BidiFlags.BTD & BidiFlags.NS)+"</b><br/><i>"+type+"</i></p>";
+                l = "<p><b>"+RED.bidiUtil.applyBidiSupport(label,RED.bidiUtil.BidiFlags.BTD & RED.bidiUtil.BidiFlags.NS)+"</b><br/><i>"+type+"</i></p>";
             }
             popOverContent = $(l+(info?info:$("script[data-help-name$='"+type+"']").html()||"<p>"+RED._("palette.noInfo")+"</p>").trim())
                                 .filter(function(n) {

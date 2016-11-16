@@ -119,7 +119,7 @@
 
             function getTimestamp() {
                 var d = new Date();
-                return RED.bidiUtil.applyBidiSupport(d,BidiFlags.CALENDAR);
+                return RED.bidiUtil.applyBidiSupport(d,RED.bidiUtil.BidiFlags.CALENDAR);
             }
 
             var sbc = document.getElementById("debug-content");
@@ -198,11 +198,11 @@
                 } else {
                     msg.innerHTML += '<span class="debug-message-topic">'+
                                     (o.topic?topic+' : ':'')+
-                                    (o.property?'msg.'+property:'msg')+" : "+format+
+                                    (o.property?'msg.'+property:'msg')+" : "+RED.bidiUtil.applyBidiSupport(format,RED.bidiUtil.BidiFlags.NS)+
 
                                     '</span>';
                 }
-                payload = RED.bidiUtil.applyBidiSupport(payload,BidiFlags.NS);
+                payload = RED.bidiUtil.applyBidiSupport(payload,RED.bidiUtil.BidiFlags.NS);
                 msg.innerHTML += '<span class="debug-message-payload">'+ payload+ '</span>';
                 var atBottom = (sbc.scrollHeight-messages.height()-sbc.scrollTop) < 5;
                 messageCount++;

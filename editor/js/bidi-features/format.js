@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-RED.format = (function() {
+
+RED.bidiFeatures.format = (function() {
 
     var TextSegment = (function() {
         var TextSegment = function (obj) {
