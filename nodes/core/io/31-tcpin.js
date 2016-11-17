@@ -444,7 +444,7 @@ module.exports = function(RED) {
                         //node.log(RED._("tcpin.errors.client-connected"));
                         node.status({fill:"green",shape:"dot",text:"common.status.connected"});
                         node.connected = true;
-                        if (clients[connection_id].client) {
+                        if (clients[connection_id] && clients[connection_id].client) {
                             clients[connection_id].client.write(clients[connection_id].msg.payload);
                         }
                     });
@@ -455,8 +455,10 @@ module.exports = function(RED) {
 
                 clients[connection_id].client.on('data', function(data) {
                     if (node.out == "sit") { // if we are staying connected just send the buffer
-                        clients[connection_id].msg.payload = data;
-                        node.send(clients[connection_id].msg);
+                        if (clients[connection_id]) {
+                            clients[connection_id].msg.payload = data;
+                            node.send(clients[connection_id].msg);
+                        }
                     }
                     else if (node.splitc === 0) {
                         clients[connection_id].msg.payload = data;
@@ -523,7 +525,9 @@ module.exports = function(RED) {
                     //console.log("END");
                     node.connected = false;
                     node.status({fill:"grey",shape:"ring",text:"common.status.disconnected"});
-                    clients[connection_id].client = null;
+                    if (clients[connection_id] && clients[connection_id].client) {
+                        clients[connection_id].client = null;
+                    }
                 });
 
                 clients[connection_id].client.on('close', function() {
@@ -537,7 +541,7 @@ module.exports = function(RED) {
                     node.connected = false;
                     node.status({fill:"red",shape:"ring",text:"common.status.error"});
                     node.error(RED._("tcpin.errors.connect-fail"),msg);
-                    if (clients[connection_id].client) {
+                    if (clients[connection_id] && clients[connection_id].client) {
                         clients[connection_id].client.destroy();
                         delete clients[connection_id];
                     }
@@ -547,7 +551,7 @@ module.exports = function(RED) {
                     node.connected = false;
                     node.status({fill:"grey",shape:"dot",text:"tcpin.errors.connect-timeout"});
                     //node.warn(RED._("tcpin.errors.connect-timeout"));
-                    if (clients[connection_id].client) {
+                    if (clients[connection_id] && clients[connection_id].client) {
                         clients[connection_id].client.connect(port, host, function() {
                             node.connected = true;
                             node.status({fill:"green",shape:"dot",text:"common.status.connected"});
