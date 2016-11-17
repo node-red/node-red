@@ -89,6 +89,20 @@ RED.deploy = (function() {
         }
 
         $('#btn-deploy').click(function() { save(); });
+        
+        $(document).on('keypress', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch (event.key){
+                    case 's':
+                        event.preventDefault();
+                        //save();
+                        $("#btn-deploy").trigger( "click" );
+                        $("#debug-tab-clear").trigger( "click" );
+                    break;
+                   }
+                }
+           });
+
 
         $( "#node-dialog-confirm-deploy" ).dialog({
                 title: RED._('deploy.confirm.button.confirm'),
