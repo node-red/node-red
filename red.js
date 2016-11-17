@@ -33,17 +33,20 @@ var settingsFile;
 var flowFile;
 
 var knownOpts = {
-    "settings":[path],
-    "userDir":[path],
+    "help": Boolean,
     "port": Number,
-    "v": Boolean,
-    "help": Boolean
+    "settings": [path],
+    "title": String,
+    "userDir": [path],
+    "verbose": Boolean
 };
 var shortHands = {
-    "s":["--settings"],
-    "u":["--userDir"],
+    "?":["--help"],
     "p":["--port"],
-    "?":["--help"]
+    "s":["--settings"],
+    "t":["--help"],
+    "u":["--userDir"],
+    "v":["--verbose"]
 };
 nopt.invalidHandler = function(k,v,t) {
     // TODO: console.log(k,v,t);
@@ -54,14 +57,15 @@ var parsedArgs = nopt(knownOpts,shortHands,process.argv,2)
 if (parsedArgs.help) {
     console.log("Node-RED v"+RED.version());
     console.log("Usage: node-red [-v] [-?] [--settings settings.js] [--userDir DIR]");
-    console.log("                [--port PORT] [flows.json]");
+    console.log("                [--port PORT] [--title TITLE] [flows.json]");
     console.log("");
     console.log("Options:");
-    console.log("  -s, --settings FILE  use specified settings file");
-    console.log("  -u, --userDir  DIR   use specified user directory");
     console.log("  -p, --port     PORT  port to listen on");
-    console.log("  -v                   enable verbose output");
-    console.log("  -?, --help           show usage");
+    console.log("  -s, --settings FILE  use specified settings file");
+    console.log("      --title    TITLE process window title");
+    console.log("  -u, --userDir  DIR   use specified user directory");
+    console.log("  -v, --verbose        enable verbose output");
+    console.log("  -?, --help           show this help");
     console.log("");
     console.log("Documentation can be found at http://nodered.org");
     process.exit();
@@ -121,9 +125,9 @@ if (parsedArgs.v) {
 }
 
 if (settings.https) {
-    server = https.createServer(settings.https,function(req,res){app(req,res);});
+    server = https.createServer(settings.https,function(req,res) {app(req,res);});
 } else {
-    server = http.createServer(function(req,res){app(req,res);});
+    server = http.createServer(function(req,res) {app(req,res);});
 }
 server.setMaxListeners(0);
 
@@ -224,7 +228,6 @@ if (settings.httpNodeRoot !== false && settings.httpNodeAuth) {
 if (settings.httpNodeRoot !== false) {
     app.use(settings.httpNodeRoot,RED.httpNode);
 }
-
 if (settings.httpStatic) {
     settings.httpStaticAuth = settings.httpStaticAuth || settings.httpAuth;
     if (settings.httpStaticAuth) {
@@ -265,7 +268,7 @@ RED.start().then(function() {
             if (settings.httpAdminRoot === false) {
                 RED.log.info(RED.log._("server.admin-ui-disabled"));
             }
-            process.title = 'node-red';
+            process.title = parsedArgs.title || 'node-red';
             RED.log.info(RED.log._("server.now-running", {listenpath:getListenPath()}));
         });
     } else {
@@ -279,7 +282,6 @@ RED.start().then(function() {
         RED.log.error(err);
     }
 });
-
 
 process.on('uncaughtException',function(err) {
     util.log('[red] Uncaught Exception:');
