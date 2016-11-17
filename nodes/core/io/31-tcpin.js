@@ -492,14 +492,16 @@ module.exports = function(RED) {
                                 buf[i] = data[j];
                                 i += 1;
                                 if ( i >= node.splitc) {
-                                    clients[connection_id].msg.payload = new Buffer(i);
-                                    buf.copy(clients[connection_id].msg.payload,0,0,i);
-                                    node.send(clients[connection_id].msg);
-                                    if (clients[connection_id].client) {
-                                        node.status({}); clients[connection_id].client.destroy();
-                                        delete clients[connection_id];
+                                    if (clients[connection_id]) {
+                                        clients[connection_id].msg.payload = new Buffer(i);
+                                        buf.copy(clients[connection_id].msg.payload,0,0,i);
+                                        node.send(clients[connection_id].msg);
+                                        if (clients[connection_id].client) {
+                                            node.status({}); clients[connection_id].client.destroy();
+                                            delete clients[connection_id];
+                                        }
+                                        i = 0;
                                     }
-                                    i = 0;
                                 }
                             }
                             // look for a char
@@ -507,14 +509,16 @@ module.exports = function(RED) {
                                 buf[i] = data[j];
                                 i += 1;
                                 if (data[j] == node.splitc) {
-                                    clients[connection_id].msg.payload = new Buffer(i);
-                                    buf.copy(clients[connection_id].msg.payload,0,0,i);
-                                    node.send(clients[connection_id].msg);
-                                    if (clients[connection_id].client) {
-                                        node.status({}); clients[connection_id].client.destroy();
-                                        delete clients[connection_id];
+                                    if (clients[connection_id]) {
+                                        clients[connection_id].msg.payload = new Buffer(i);
+                                        buf.copy(clients[connection_id].msg.payload,0,0,i);
+                                        node.send(clients[connection_id].msg);
+                                        if (clients[connection_id].client) {
+                                            node.status({}); clients[connection_id].client.destroy();
+                                            delete clients[connection_id];
+                                        }
+                                        i = 0;
                                     }
-                                    i = 0;
                                 }
                             }
                         }
@@ -560,7 +564,9 @@ module.exports = function(RED) {
                 });
             }
             else {
-                clients[connection_id].client.write(clients[connection_id].msg.payload);
+                if (clients[connection_id] && clients[connection_id].client) {
+                    clients[connection_id].client.write(clients[connection_id].msg.payload);
+                }
             }
         });
 
