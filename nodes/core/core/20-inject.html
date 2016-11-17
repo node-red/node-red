@@ -201,6 +201,11 @@
         icon: "inject.png",
         label: function() {
             var suffix = "";
+            // if fire once then add small indication
+            if (this.once) {
+                suffix = " ¹";
+            }
+            // but replace with repeat one if set to repeat
             if (this.repeat || this.crontab) {
                 suffix = " ↻";
             }
