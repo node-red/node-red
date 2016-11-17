@@ -37,9 +37,35 @@ function diffNodes(oldNode,newNode) {
     return false;
 }
 
+var EnvVarPropertyRE = /^\$\((\S+)\)$/;
+
+function mapEnvVarProperties(obj,prop) {
+    if (Buffer.isBuffer(obj[prop])) {
+        return;
+    } else if (Array.isArray(obj[prop])) {
+        for (var i=0;i<obj[prop].length;i++) {
+            mapEnvVarProperties(obj[prop],i);
+        }
+    } else if (typeof obj[prop] === 'string') {
+        var m;
+        if ( (m = EnvVarPropertyRE.exec(obj[prop])) !== null) {
+            if (process.env.hasOwnProperty(m[1])) {
+                obj[prop] = process.env[m[1]];
+            }
+        }
+    } else {
+        for (var p in obj[prop]) {
+            if (obj[prop].hasOwnProperty(p)) {
+                mapEnvVarProperties(obj[prop],p);
+            }
+        }
+    }
+}
+
 module.exports = {
 
     diffNodes: diffNodes,
+    mapEnvVarProperties: mapEnvVarProperties,
 
     parseConfig: function(config) {
         var flow = {};
@@ -301,7 +327,7 @@ module.exports = {
                     }
                 }
             }
-        } while(madeChange===true)
+        } while (madeChange===true)
 
         // Find any nodes that exist on a subflow template and remove from changed
         // list as the parent subflow will now be marked as containing a change
@@ -316,7 +342,7 @@ module.exports = {
 
         // Recursively mark all instances of changed subflows as changed
         var changedSubflowStack = Object.keys(changedSubflows);
-        while(changedSubflowStack.length > 0) {
+        while (changedSubflowStack.length > 0) {
             var subflowId = changedSubflowStack.pop();
             for (id in newConfig.allNodes) {
                 if (newConfig.allNodes.hasOwnProperty(id)) {
@@ -350,7 +376,7 @@ module.exports = {
         // Traverse the links of all modified nodes to mark the connected nodes
         var modifiedNodes = diff.added.concat(diff.changed).concat(diff.removed).concat(diff.rewired);
         var visited = {};
-        while(modifiedNodes.length > 0) {
+        while (modifiedNodes.length > 0) {
             node = modifiedNodes.pop();
             if (!visited[node]) {
                 visited[node] = true;

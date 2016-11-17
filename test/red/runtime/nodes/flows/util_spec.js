@@ -34,7 +34,20 @@ describe('flows/util', function() {
         getType.restore();
     });
 
-
+    describe('#mapEnvVarProperties',function() {
+        it('handles ENV substitutions in an object', function() {
+            process.env.foo1 = "bar1";
+            process.env.foo2 = "bar2";
+            process.env.foo3 = "bar3";
+            var foo = {a:"$(foo1)",b:"$(foo2)",c:{d:"$(foo3)"}};
+            for (var p in foo) {
+                if (foo.hasOwnProperty(p)) {
+                    flowUtil.mapEnvVarProperties(foo,p);
+                }
+            }
+            foo.should.eql({ a: 'bar1', b: 'bar2', c: { d: 'bar3' } } );
+        });
+    });
 
     describe('#diffNodes',function() {
         it('handles a null old node', function() {
@@ -189,7 +202,7 @@ describe('flows/util', function() {
 
         });
         it('identifies nodes with changed properties, including upstream linked', function() {
-            var config =    [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[["1"]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var config = [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[["1"]]},{id:"3",type:"test",foo:"a",wires:[]}];
             var newConfig = clone(config);
             newConfig[1].bar = "c";
 
@@ -207,7 +220,7 @@ describe('flows/util', function() {
         });
 
         it('identifies nodes with changed credentials, including downstream linked', function() {
-            var config =    [{id:"1",type:"test",wires:[]},{id:"2",type:"test",bar:"b",wires:[["1"]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var config = [{id:"1",type:"test",wires:[]},{id:"2",type:"test",bar:"b",wires:[["1"]]},{id:"3",type:"test",foo:"a",wires:[]}];
             var newConfig = clone(config);
             newConfig[0].credentials = {};
 
@@ -225,7 +238,7 @@ describe('flows/util', function() {
         });
 
         it('identifies nodes with changed wiring', function() {
-            var config =    [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[["1"]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var config = [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[["1"]]},{id:"3",type:"test",foo:"a",wires:[]}];
             var newConfig = clone(config);
             newConfig[1].wires[0][0] = "3";
 
@@ -243,7 +256,7 @@ describe('flows/util', function() {
         });
 
         it('identifies nodes with changed wiring - second connection added', function() {
-            var config =    [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[["1"]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var config = [{id:"1",type:"test",foo:"a",wires:[]},{id:"2",type:"test",bar:"b",wires:[["1"]]},{id:"3",type:"test",foo:"a",wires:[]}];
             var newConfig = clone(config);
             newConfig[1].wires[0].push("1");
 
@@ -261,7 +274,7 @@ describe('flows/util', function() {
         });
 
         it('identifies nodes with changed wiring - node connected', function() {
-            var config =  [{id:"1",type:"test",foo:"a",wires:[["2"]]},{id:"2",type:"test",bar:"b",wires:[[]]},{id:"3",type:"test",foo:"a",wires:[]}];
+            var config = [{id:"1",type:"test",foo:"a",wires:[["2"]]},{id:"2",type:"test",bar:"b",wires:[[]]},{id:"3",type:"test",foo:"a",wires:[]}];
             var newConfig = clone(config);
             newConfig[1].wires.push("3");
 

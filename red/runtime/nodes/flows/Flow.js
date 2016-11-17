@@ -259,32 +259,6 @@ function Flow(global,flow) {
             }
         }
     }
-
-}
-
-var EnvVarPropertyRE = /^\$\((\S+)\)$/;
-
-function mapEnvVarProperties(obj,prop) {
-    if (Buffer.isBuffer(obj[prop])) {
-        return;
-    } else if (Array.isArray(obj[prop])) {
-        for (var i=0;i<obj[prop].length;i++) {
-            mapEnvVarProperties(obj[prop],i);
-        }
-    } else if (typeof obj[prop] === 'string') {
-        var m;
-        if ( (m = EnvVarPropertyRE.exec(obj[prop])) !== null) {
-            if (process.env.hasOwnProperty(m[1])) {
-                obj[prop] = process.env[m[1]];
-            }
-        }
-    } else {
-        for (var p in obj[prop]) {
-            if (obj[prop].hasOwnProperty(p)) {
-                mapEnvVarProperties(obj[prop],p);
-            }
-        }
-    }
 }
 
 function createNode(type,config) {
@@ -295,7 +269,7 @@ function createNode(type,config) {
         delete conf.credentials;
         for (var p in conf) {
             if (conf.hasOwnProperty(p)) {
-                mapEnvVarProperties(conf,p);
+                flowUtil.mapEnvVarProperties(conf,p);
             }
         }
         try {
