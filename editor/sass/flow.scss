@@ -120,13 +120,28 @@
     fill: #ddd;
     cursor: crosshair;
 }
+.port_breakpoint {
+    rect {
+        stroke: #fff;
+        stroke-width: 1;
+        fill:  #666;
 
-.port_highlight {
-    stroke: #6DA332;
-    stroke-width: 3;
-    fill: #fff;
-    pointer-events:none;
-    fill-opacity: 0.5;
+    }
+}
+.port_breakpoint_inactive {
+    rect {
+        fill: #ddd;
+    }
+}
+.port_breakpoint_active {
+    rect {
+        fill: #5386de;
+    }
+}
+.port_breakpoint_triggered {
+    rect {
+        fill: #f77d7d;
+    }
 }
 
 .node_error {

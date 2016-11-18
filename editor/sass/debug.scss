@@ -31,6 +31,15 @@
     right: 0px;
     overflow-y: scroll;
 }
+.debug-dbgr-content {
+    top: 0px;
+}
+.debug-dbgr-content-disabled {
+    padding-top: 40px;
+    text-align: center;
+    background: #f3f3f3;
+    color: #999;
+}
 .debug-filter-box {
     position:absolute;
     top: 42px;
@@ -44,6 +53,18 @@
 .debug-filter-row {
     text-align: right;
 }
+
+.debug-debugger-box {
+    position:absolute;
+    top: 42px;
+    left: 0px;
+    right: 0px;
+    background: #f9f9f9;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
 
 .debug-message {
     border-bottom: 1px solid #eee;
@@ -181,4 +202,12 @@
 }
 .debug-message-buffer-string > .debug-message-array-rows {
     display: none;
+}
+
+.debug-dbgr-content {
+    .red-ui-editableList {
+    }
+    .red-ui-editableList-container {
+        border-radius: 3px;
+    }
 }

@@ -1570,6 +1570,29 @@ RED.view = (function() {
         RED.touch.radialMenu.show(obj,pos,options);
         resetMouseVars();
     }
+
+
+    function createBreakpoint(port,type) {
+        var breakPointGroup = port.append("g").attr("class","port_breakpoint");
+        breakPointGroup.append("rect").attr("class","port_highlight").attr("x",0).attr("y",0).attr("rx",1).attr("ry",1).attr("width",3).attr("height",14);
+        breakPointGroup.append("rect").attr("class","port_highlight").attr("x",4).attr("y",0).attr("rx",1).attr("ry",1).attr("width",3).attr("height",14);
+
+        switch(Math.floor(Math.random()*3)) {
+            case 0: breakPointGroup.classed("port_breakpoint_active",true); break;
+            case 1: breakPointGroup.classed("port_breakpoint_inactive",true); break;
+            case 2: breakPointGroup.classed("port_breakpoint_triggered",true); break;
+        }
+
+        if (type === 0) {
+            breakPointGroup.attr("transform","translate(-9,-2)");
+        } else if (type === 1) {
+            breakPointGroup.attr("transform","translate(12,-2)");
+        }
+
+
+
+    }
+
     function redraw() {
         vis.attr("transform","scale("+scaleFactor+")");
         outer.attr("width", space_width*scaleFactor).attr("height", space_height*scaleFactor);
@@ -1931,6 +1954,7 @@ RED.view = (function() {
                             //thisNode.selectAll(".node_icon_shade_border_right").attr("d",function(d){return "M "+(d.w-30)+" 1 l 0 "+(d.h-2)});
 
                             var inputPorts = thisNode.selectAll(".port_input");
+                            var breakPointGroup;
                             if (d.inputs === 0 && !inputPorts.empty()) {
                                 inputPorts.remove();
                                 //nodeLabel.attr("x",30);
@@ -1943,6 +1967,8 @@ RED.view = (function() {
                                     .on("touchend",function(d){portMouseUp(d,1,0);} )
                                     .on("mouseover",function(d) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== 1) ));})
                                     .on("mouseout",function(d) { var port = d3.select(this); port.classed("port_hovered",false);})
+
+                                createBreakpoint(inputGroup,0);
                             }
 
                             var numOutputs = d.outputs;
@@ -1959,15 +1985,17 @@ RED.view = (function() {
                                 .on("mouseover",function(d,i) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== 0) ));})
                                 .on("mouseout",function(d,i) { var port = d3.select(this); port.classed("port_hovered",false);});
 
+                            createBreakpoint(output_group,1);
+
                             d._ports.exit().remove();
                             if (d._ports) {
                                 numOutputs = d.outputs || 1;
                                 y = (d.h/2)-((numOutputs-1)/2)*13;
                                 var x = d.w - 5;
-                                d._ports.each(function(d,i) {
-                                        var port = d3.select(this);
-                                        //port.attr("y",(y+13*i)-5).attr("x",x);
-                                        port.attr("transform", function(d) { return "translate("+x+","+((y+13*i)-5)+")";});
+                                d._ports.each(function(n,i) {
+                                    var port = d3.select(this);
+                                    //port.attr("y",(y+13*i)-5).attr("x",x);
+                                    port.attr("transform", function(d) { return "translate("+x+","+((y+13*i)-5)+")";});
                                 });
                             }
                             thisNode.selectAll("text.node_label").text(function(d,i){

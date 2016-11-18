@@ -21,6 +21,7 @@ RED.debug = (function() {
     var config;
     var messageList;
     var messageTable;
+    var debuggerView;
     var filter = false;
     var view = 'list';
     var messages = [];
@@ -30,31 +31,65 @@ RED.debug = (function() {
 
     function init(_config) {
         config = _config;
-
         var content = $("<div>").css({"position":"relative","height":"100%"});
         var toolbar = $('<div class="sidebar-header">'+
-            '<span class="button-group"><a id="debug-tab-filter" class="sidebar-header-button" href="#"><i class="fa fa-filter"></i></a></span>'+
-            '<span class="button-group"><a id="debug-tab-clear" title="clear log" class="sidebar-header-button" href="#"><i class="fa fa-trash"></i></a></span></div>').appendTo(content);
-
+            '<span class="button-group" style="float: left"><button id="debug-tab-view-console" class="sidebar-header-button-toggle selected">console</button><button id="debug-tab-view-debugger" class="sidebar-header-button-toggle">debugger</button></span>'+
+            '<span class="debug-tab-view-console-buttons">'+
+                '<span class="button-group"><button id="debug-tab-filter" class="sidebar-header-button"><i class="fa fa-filter"></i></button></span>'+
+                '<span class="button-group"><button id="debug-tab-clear" title="clear log" class="sidebar-header-button"><i class="fa fa-trash"></i></button></span>'+
+            '</span>'+
+            '<span class="debug-tab-view-dbgr-buttons hide">'+
+                '<span class="button-group"><button id="debug-tab-dbgr-toggle" class="sidebar-header-button"><i class="fa fa-toggle-off"></i></button></span>'+
+            '</span>'+
+            '</div>').appendTo(content);
 
         var footerToolbar = $('<div>'+
             // '<span class="button-group">'+
             //     '<a class="sidebar-footer-button-toggle text-button selected" id="debug-tab-view-list" href="#"><span data-i18n="">list</span></a>'+
             //     '<a class="sidebar-footer-button-toggle text-button" id="debug-tab-view-table" href="#"><span data-i18n="">table</span></a> '+
             // '</span>'+
-            '<span class="button-group"><a id="debug-tab-open" title="open in new window" class="sidebar-footer-button" href="#"><i class="fa fa-desktop"></i></a></span> ' +
+            '<span class="button-group"><button id="debug-tab-open" title="open in new window" class="sidebar-footer-button"><i class="fa fa-desktop"></i></button></span> ' +
             '</div>');
 
         messageList = $('<div class="debug-content debug-content-list"/>').appendTo(content);
         sbc = messageList[0];
         messageTable = $('<div class="debug-content  debug-content-table hide"/>').appendTo(content);
 
+        debuggerView = $('<div class="debug-content hide"/>').appendTo(content);
+
+        var dbgrDisabled = $('<div class="debug-content debug-dbgr-content debug-dbgr-content-disabled">Debugger is disabled</div>').appendTo(debuggerView);
+        var dbgrPanel = $('<div class="debug-content debug-dbgr-content"></div>').hide().appendTo(debuggerView);
+
+        var dbgrToolbar = $('<div class="sidebar-header" style="text-align:left">'+
+            '<span>'+
+                '<button id="" class="sidebar-header-button"><i class="fa fa-pause"></i></button>'+
+                '<button id="" class="sidebar-header-button"><i class="fa fa-play"></i></button>'+
+                '<button id="" class="sidebar-header-button"><i class="fa fa-step-forward"></i></button>'+
+            '</span>'+
+        '</div>').appendTo(dbgrPanel);
+        var dbgrContent = $('<div>',{style:"padding: 10px;"}).appendTo(dbgrPanel);
+        var breakpointPanel = $('<div>',{style:"position:relative;"}).appendTo(dbgrContent);
+
+        $("<label></label>").html("Breakpoints").appendTo(breakpointPanel);
+        var buttonGroup = $('<div>').css({position:"absolute", right: 0,top:0}).appendTo(breakpointPanel);
+        $('<button class="editor-button editor-button-small"><i class="fa fa-plus"></i> breakpoint</button>')
+            .click(function(evt) {
+                breakpointList.editableList('addItem',{});
+            })
+            .appendTo(buttonGroup);
+
+
+
+        var breakpointList = $("<ol>").css({height: "200px"}).appendTo(breakpointPanel).editableList({
+            addButton: false
+        });
+
         var filterDialog = $('<div class="debug-filter-box hide">'+
             '<div class="debug-filter-row">'+
-            '<span class="button-group">'+
-                '<a class="sidebar-header-button-toggle selected" id="debug-tab-filter-all" href="#"><span data-i18n="node-red:debug.sidebar.filterAll">all flows</span></a>'+
-                '<a class="sidebar-header-button-toggle" id="debug-tab-filter-current" href="#"><span data-i18n="node-red:debug.sidebar.filterCurrent">current flow</span></a> '+
-            '</span>'+
+                '<span class="button-group">'+
+                    '<button class="sidebar-header-button-toggle selected" id="debug-tab-filter-all"><span data-i18n="node-red:debug.sidebar.filterAll">all flows</span></button>'+
+                    '<button class="sidebar-header-button-toggle" id="debug-tab-filter-current"><span data-i18n="node-red:debug.sidebar.filterCurrent">current flow</span></button> '+
+                '</span>'+
             '</div>'+
         '</div>').appendTo(content);
 
@@ -65,7 +100,7 @@ RED.debug = (function() {
         }
 
 
-        filterDialog.find('#debug-tab-filter-all').on("click",function(e) {
+        toolbar.find('#debug-tab-filter-all').on("click",function(e) {
             e.preventDefault();
             if (filter) {
                 $(this).addClass('selected');
@@ -74,7 +109,7 @@ RED.debug = (function() {
                 refreshMessageList();
             }
         });
-        filterDialog.find('#debug-tab-filter-current').on("click",function(e) {
+        toolbar.find('#debug-tab-filter-current').on("click",function(e) {
             e.preventDefault();
             if (!filter) {
                 $(this).addClass('selected');
@@ -111,6 +146,50 @@ RED.debug = (function() {
                 filterDialog.slideDown(200);
             }
         })
+
+
+
+        toolbar.find('#debug-tab-view-debugger').on("click",function(e) {
+            if ($(messageList).is(":visible")) {
+                messageList.hide();
+                debuggerView.show();
+                toolbar.find(".debug-tab-view-console-buttons").hide();
+                toolbar.find(".debug-tab-view-dbgr-buttons").show();
+                $(this).siblings().removeClass('selected');
+                $(this).addClass('selected');
+
+            }
+        });
+        toolbar.find('#debug-tab-view-console').on("click",function(e) {
+            if ($(debuggerView).is(":visible")) {
+                messageList.show();
+                debuggerView.hide();
+                toolbar.find(".debug-tab-view-console-buttons").show();
+                toolbar.find(".debug-tab-view-dbgr-buttons").hide();
+                $(this).siblings().removeClass('selected');
+                $(this).addClass('selected');
+
+            }
+        });
+
+        toolbar.find('#debug-tab-dbgr-toggle').on("click",function(e) {
+            var i = $(this).find("i");
+            if (i.hasClass('fa-toggle-off')) {
+                i.addClass('fa-toggle-on');
+                i.removeClass('fa-toggle-off');
+                dbgrPanel.show();
+                dbgrDisabled.hide();
+                RED.view.state(RED.state.EDIT_BREAKPOINT);
+
+            } else {
+                i.addClass('fa-toggle-off');
+                i.removeClass('fa-toggle-on');
+                dbgrPanel.hide();
+                dbgrDisabled.show();
+                RED.view.state(RED.state.DEFAULT);
+            }
+        })
+
 
         toolbar.find("#debug-tab-clear").click(function(e) {
             e.preventDefault();
