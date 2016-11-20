@@ -43,12 +43,12 @@ RED.bidiUtil = (function() {
     function _isMirroringEnabled() {
         var isRTLLang = new RegExp("^(ar|he)").test(navigator.language);
         if (isRTLLang) {
-        	_ui.leftProperty = "right";
-        	_ui.rightProperty = "left";
+            _ui.leftProperty = "right";
+            _ui.rightProperty = "left";
             return true;
         } else {
-        	_ui.leftProperty = "left";
-        	_ui.rightProperty = "right";
+            _ui.leftProperty = "left";
+            _ui.rightProperty = "right";
             return false;
         }
     }
