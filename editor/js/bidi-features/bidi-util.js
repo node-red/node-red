@@ -19,7 +19,12 @@ RED.bidiUtil = (function() {
     var calendarType = "";
     
     /**
-     * Indicates the type of bidi-support (Base-text-dir ,Numeric-shaping ,Calendar ,STT)
+     * Indicates the type of bidi-support
+     * BTD : Base text direction
+     * NS : Numeric Shaping
+     * CALENDAR : National Calendar
+     * STT_ATTACH : Structure Text Support, it is using to call attach function located at format.js
+     * STT_GETHTML : STT_ATTACH : Structure Text Support, it is using to call getHtml function located at format.js
      */
     var _bidiFlags = {
         BTD: 1,
