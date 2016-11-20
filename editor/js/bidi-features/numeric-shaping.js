@@ -21,11 +21,13 @@ RED.bidiFeatures.numericShaping = (function(){
      * the shaperType & the textDir.
      */
     function _shape(text, shaperType, textDir) {
-        text = new String(text);
-        if(textDir === "auto")
+        text = text.toString();
+        if(textDir === "auto"){
         	textDir = RED.bidiUtil.resolveBaseTextDir(text);
-        if (!text) 
+        }
+        if (!text) { 
             return text;
+        }
         switch (shaperType) {
             case "defaultNumeral":
                 return _shapeEuropean(text);
@@ -67,13 +69,9 @@ RED.bidiFeatures.numericShaping = (function(){
     function _shapeContextual(text, context) {
         return text.replace(regex, function(match, latinDigit, arabicDigit, strongArabic, strongLatin){
             if (latinDigit) {
-                return (context === 2)
-                    ? String.fromCharCode(parseInt(latinDigit) + 1632)
-                    : latinDigit;
+                return (context === 2) ? String.fromCharCode(parseInt(latinDigit) + 1632) : latinDigit;
             } else if (arabicDigit) {
-                return (context === 1)
-                ? arabicDigit.charCodeAt(0) - 1632
-                : arabicDigit;
+                return (context === 1) ? arabicDigit.charCodeAt(0) - 1632 : arabicDigit;
             } else if (strongArabic) {
                 context = 2;
             } else if (strongLatin) {
