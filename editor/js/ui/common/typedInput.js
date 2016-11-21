@@ -36,7 +36,7 @@
                         return false;
                     }
                     // Next char is a-z
-                    if (!/[a-z0-9]/i.test(str[i+1])) {
+                    if (!/[a-z0-9\$\_]/i.test(str[i+1])) {
                         return false;
                     }
                     start = i+1;
