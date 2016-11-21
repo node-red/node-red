@@ -28,7 +28,7 @@ RED.bidiFeatures.baseTextDir = (function() {
                 return false;
             }
          }
-            return RED.bidiUtil.isMirroringEnabled();
+           return RED.bidiUtil.isMirroringEnabled();
     }
 
     function _isBidiChar(c) {
