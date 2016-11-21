@@ -200,7 +200,7 @@
                 }
                 // reverse property direction in case of right directionality
                 if (opt.icon) {
-                    $('<img>',{src:opt.icon,style:"margin-"+RED.rightProperty+": 4px; height: 18px;"}).prependTo(op);
+                    $('<img>',{src:opt.icon,style:"margin-"+RED.bidiUtil.UI.rightProperty+": 4px; height: 18px;"}).prependTo(op);
                 } else {
                 	op.css("padding-"+RED.bidiUtil.UI.leftProperty, "18px");
                 }
@@ -225,15 +225,19 @@
             var that = this;
             var pos = relativeTo.offset();
             var height = relativeTo.height();
+            var width = relativeTo.outerWidth();
             var menuHeight = menu.height();
             var top = (height+pos.top-3);
             if (top+menuHeight > $(window).height()) {
                 top -= (top+menuHeight)-$(window).height()+5;
             }
+            
+            var menuPos = ((RED.bidiUtil.isMirroringEnabled()) ? ((pos.left + width) - (menu.offset().left + menu.outerWidth())) : (2+pos.left));
             menu.css({
                 top: top+"px",
-                left: (2+pos.left)+"px",
+                left: menuPos+"px",
             });
+            
             menu.slideDown(100);
             this._delay(function() {
                 that.uiSelect.addClass('red-ui-typedInput-focus');
@@ -337,7 +341,7 @@
                         image = new Image();
                         image.name = opt.icon;
                         image.src = opt.icon;
-                        $('<img>',{src:opt.icon,style:"margin-"+RED.rightProperty+": 4px;height: 18px;"}).prependTo(this.selectLabel);
+                        $('<img>',{src:opt.icon,style:"margin-"+RED.bidiUtil.UI.rightProperty+": 4px;height: 18px;"}).prependTo(this.selectLabel);
                     } else {
                         this.selectLabel.text(opt.label);
                     }
