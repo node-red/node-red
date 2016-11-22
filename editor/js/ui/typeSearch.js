@@ -13,6 +13,8 @@ RED.typeSearch = (function() {
     var activeFilter = "";
     var addCallback;
 
+    var typesUsed = {};
+
     function search(val) {
         activeFilter = val.toLowerCase();
         var visible = searchResults.editableList('filter');
@@ -93,12 +95,17 @@ RED.typeSearch = (function() {
                 if (activeFilter === "" ) {
                     return true;
                 }
-
+                if (data.recent) {
+                    return false;
+                }
                 return (activeFilter==="")||(data.index.indexOf(activeFilter) > -1);
             },
             addItem: function(container,i,object) {
                 var def = object.def;
                 object.index = object.type.toLowerCase();
+                if (object.separator) {
+                    container.addClass("red-ui-search-result-separator")
+                }
                 var div = $('<a>',{href:'#',class:"red-ui-search-result"}).appendTo(container);
 
                 var nodeDiv = $('<div>',{class:"red-ui-search-result-node"}).appendTo(div);
@@ -118,19 +125,17 @@ RED.typeSearch = (function() {
                 var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(nodeDiv);
                 $('<div/>',{class:"palette_icon",style:"background-image: url(icons/"+icon_url+")"}).appendTo(iconContainer);
 
-                var contentDiv = $('<div>',{class:"red-ui-search-result-description"}).appendTo(div);
-
-                var label = object.type;
-                if (typeof def.paletteLabel !== "undefined") {
-                    try {
-                        label = (typeof def.paletteLabel === "function" ? def.paletteLabel.call(def) : def.paletteLabel)||"";
-                        label += " ("+object.type+")";
-                        object.index += "|"+label.toLowerCase();
-                    } catch(err) {
-                        console.log("Definition error: "+object.type+".paletteLabel",err);
-                    }
+                if (def.inputs > 0) {
+                    $('<div/>',{class:"red-ui-search-result-node-port"}).appendTo(nodeDiv);
+                }
+                if (def.outputs > 0) {
+                    $('<div/>',{class:"red-ui-search-result-node-port red-ui-search-result-node-output"}).appendTo(nodeDiv);
                 }
 
+                var contentDiv = $('<div>',{class:"red-ui-search-result-description"}).appendTo(div);
+
+                var label = object.label;
+                object.index += "|"+label.toLowerCase();
 
                 $('<div>',{class:"red-ui-search-result-node-label"}).html(label).appendTo(contentDiv);
 
@@ -145,6 +150,7 @@ RED.typeSearch = (function() {
     }
     function confirm(def) {
         hide();
+        typesUsed[def.type] = Date.now();
         addCallback(def.type);
     }
 
@@ -205,41 +211,83 @@ RED.typeSearch = (function() {
             $(document).off('click.type-search');
         }
     }
+
+    function getTypeLabel(type, def) {
+        var label = type;
+        if (typeof def.paletteLabel !== "undefined") {
+            try {
+                label = (typeof def.paletteLabel === "function" ? def.paletteLabel.call(def) : def.paletteLabel)||"";
+                label += " ("+type+")";
+            } catch(err) {
+                console.log("Definition error: "+type+".paletteLabel",err);
+            }
+        }
+        return label;
+    }
+
     function refreshTypeList() {
+        var i;
         searchResults.editableList('empty');
         searchInput.searchBox('value','');
         selected = -1;
-        var common = {
-            "debug"   : false,
-            "inject"  : false,
-            "function": false
-        };
-        var nodeTypes = RED.nodes.registry.getNodeTypes().filter(function(n) {
-            if (common.hasOwnProperty(n)) {
-                common[n] = true;
-                return false;
-            }
-            return true;
+        var common = [
+            'debug','inject','function','change','switch'
+        ];
+
+        var recentlyUsed = Object.keys(typesUsed);
+        recentlyUsed.sort(function(a,b) {
+            return typesUsed[b]-typesUsed[a];
         });
-        // Just in case a core node has been disabled
-        if (common["function"]) {
-            nodeTypes.unshift("function");
-        }
-        if (common["inject"]) {
-            nodeTypes.unshift("inject");
-        }
-        if (common["debug"]) {
-            nodeTypes.unshift("debug");
-        }
+        recentlyUsed = recentlyUsed.filter(function(t) {
+            return common.indexOf(t) === -1;
+        });
 
-
-        var i;
-        for (i=0;i<nodeTypes.length;i++) {
-            var t = nodeTypes[i];
+        var items = [];
+        RED.nodes.registry.getNodeTypes().forEach(function(t) {
             var def = RED.nodes.getType(t);
             if (def.category !== 'config' && t !== 'unknown') {
-                searchResults.editableList('addItem',{type:t,def: def})
+                items.push({type:t,def: def, label:getTypeLabel(t,def)});
             }
+        });
+        items.sort(function(a,b) {
+            var al = a.label.toLowerCase();
+            var bl = b.label.toLowerCase();
+            if (al < bl) {
+                return -1;
+            } else if (al === bl) {
+                return 0;
+            } else {
+                return 1;
+            }
+        })
+
+        var commonCount = 0;
+        var item;
+        for(i=0;i<common.length;i++) {
+            item = {
+                type: common[i],
+                def: RED.nodes.getType(common[i])
+            };
+            item.label = getTypeLabel(item.type,item.def);
+            if (i === common.length-1) {
+                item.separator = true;
+            }
+            searchResults.editableList('addItem', item);
+        }
+        for(i=0;i<Math.min(5,recentlyUsed.length);i++) {
+            item = {
+                type:recentlyUsed[i],
+                def: RED.nodes.getType(recentlyUsed[i]),
+                recent: true
+            };
+            item.label = getTypeLabel(item.type,item.def);
+            if (i === recentlyUsed.length-1) {
+                item.separator = true;
+            }
+            searchResults.editableList('addItem', item);
+        }
+        for (i=0;i<items.length;i++) {
+            searchResults.editableList('addItem', items[i]);
         }
         setTimeout(function() {
             selected = 0;
@@ -247,23 +295,7 @@ RED.typeSearch = (function() {
         },100);
     }
 
-    function init() {
-        // RED.keyboard.add("*",/* . */ 190,{ctrl:true},function(){if (!disabled) { show(); } d3.event.preventDefault();});
-        // RED.events.on("editor:open",function() { disabled = true; });
-        // RED.events.on("editor:close",function() { disabled = false; });
-        // RED.events.on("palette-editor:open",function() { disabled = true; });
-        // RED.events.on("palette-editor:close",function() { disabled = false; });
-        //
-        //
-        //
-        // $("#header-shade").on('mousedown',hide);
-        // $("#editor-shade").on('mousedown',hide);
-        // $("#palette-shade").on('mousedown',hide);
-        // $("#sidebar-shade").on('mousedown',hide);
-    }
-
     return {
-        init: init,
         show: show,
         hide: hide
     };

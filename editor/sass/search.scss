@@ -60,12 +60,31 @@
     .red-ui-search-result {
         padding: 2px 2px 2px 5px;
         font-size: 13px;
-        border-left-width: 2px;
-        border-right-width: 2px;
+        border-left-width: 3px;
+        border-right-width: 3px;
+    }
+    .red-ui-search-result-separator {
+        border-bottom: 3px solid #ddd;
     }
     .red-ui-search-result-node {
+        position: relative;
         width: 18px;
         height: 15px;
+        margin-top: 1px;
+    }
+    .red-ui-search-result-node-port {
+        position: absolute;
+        border-radius: 2px;
+        border: 1px solid #999;
+        width: 6px;
+        height: 7px;
+        top:4px;
+        left:-4px;
+        background: #eee;
+        box-sizing: border-box;
+    }
+    .red-ui-search-result-node-output{
+        left: 16px;
     }
     .palette_icon_container {
         width: 18px;
