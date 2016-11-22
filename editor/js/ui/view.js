@@ -56,6 +56,7 @@ RED.view = (function() {
         lasso = null,
         showStatus = false,
         lastClickNode = null,
+        lastClickPort = null,
         dblClickPrimed = null,
         clickTime = 0,
         clickElapsed = 0;
@@ -259,6 +260,10 @@ RED.view = (function() {
         var activeWorkspace = RED.workspaces.active();
 
         activeNodes = RED.nodes.filterNodes({z:activeWorkspace});
+
+        activeNodes.forEach(function(n) {
+            n.dirty = true;
+        });
 
         activeLinks = RED.nodes.filterLinks({
             source:{z:activeWorkspace},
@@ -1317,6 +1322,15 @@ RED.view = (function() {
                 $(window).on('keyup',disableQuickJoinEventHandler);
             }
         }
+
+        var now = Date.now();
+        clickElapsed = now-clickTime;
+        clickTime = now;
+
+        dblClickPrimed = (lastClickNode === mousedown_node && lastClickPort === mousedown_port_index);
+        lastClickNode = mousedown_node;
+        lastClickPort = mousedown_port_index;
+
         d3.event.stopPropagation();
         d3.event.preventDefault();
     }
@@ -1328,6 +1342,14 @@ RED.view = (function() {
                 return
             }
         }
+
+        if (dblClickPrimed && mousedown_node == d && lastClickPort === portIndex && clickElapsed > 0 && clickElapsed < 750) {
+            RED.debug.toggleBreakpoint(mousedown_node,portType,portIndex);
+            redraw();
+            return;
+        }
+
+
         document.body.style.cursor = "";
         if (mouse_mode == RED.state.JOINING || mouse_mode == RED.state.QUICK_JOINING) {
             if (typeof TouchEvent != "undefined" && d3.event instanceof TouchEvent) {
@@ -1573,24 +1595,11 @@ RED.view = (function() {
 
 
     function createBreakpoint(port,type) {
-        var breakPointGroup = port.append("g").attr("class","port_breakpoint");
-        breakPointGroup.append("rect").attr("class","port_highlight").attr("x",0).attr("y",0).attr("rx",1).attr("ry",1).attr("width",3).attr("height",14);
-        breakPointGroup.append("rect").attr("class","port_highlight").attr("x",4).attr("y",0).attr("rx",1).attr("ry",1).attr("width",3).attr("height",14);
-
-        switch(Math.floor(Math.random()*3)) {
-            case 0: breakPointGroup.classed("port_breakpoint_active",true); break;
-            case 1: breakPointGroup.classed("port_breakpoint_inactive",true); break;
-            case 2: breakPointGroup.classed("port_breakpoint_triggered",true); break;
-        }
-
-        if (type === 0) {
-            breakPointGroup.attr("transform","translate(-9,-2)");
-        } else if (type === 1) {
-            breakPointGroup.attr("transform","translate(12,-2)");
-        }
-
-
-
+        var breakPointGroup = port.append("g").attr("class","port_breakpoint").classed("port_breakpoint_inactive",true);
+        breakPointGroup.append("rect")
+            .attr("x",2).attr("y",2)
+            .attr("rx",2).attr("ry",2)
+            .attr("width",6).attr("height",6);
     }
 
     function redraw() {
@@ -1945,17 +1954,23 @@ RED.view = (function() {
                             if (d.inputs === 0 && !inputPorts.empty()) {
                                 inputPorts.remove();
                                 //nodeLabel.attr("x",30);
-                            } else if (d.inputs === 1 && inputPorts.empty()) {
-                                var inputGroup = thisNode.append("g").attr("class","port_input");
-                                inputGroup.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",10).attr("height",10)
-                                    .on("mousedown",function(d){portMouseDown(d,1,0);})
-                                    .on("touchstart",function(d){portMouseDown(d,1,0);})
-                                    .on("mouseup",function(d){portMouseUp(d,1,0);} )
-                                    .on("touchend",function(d){portMouseUp(d,1,0);} )
-                                    .on("mouseover",function(d) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== 1) ));})
-                                    .on("mouseout",function(d) { var port = d3.select(this); port.classed("port_hovered",false);})
+                            } else if (d.inputs === 1) {
+                                if  (inputPorts.empty()) {
+                                    var inputGroup = thisNode.append("g").attr("class","port_input");
+                                    inputGroup.append("rect").attr("class","port").attr("rx",3).attr("ry",3).attr("width",10).attr("height",10)
+                                        .on("mousedown",function(d){portMouseDown(d,1,0);})
+                                        .on("touchstart",function(d){portMouseDown(d,1,0);})
+                                        .on("mouseup",function(d){portMouseUp(d,1,0);} )
+                                        .on("touchend",function(d){portMouseUp(d,1,0);} )
+                                        .on("mouseover",function(d) { var port = d3.select(this); port.classed("port_hovered",(mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== 1) ));})
+                                        .on("mouseout",function(d) { var port = d3.select(this); port.classed("port_hovered",false);})
 
-                                createBreakpoint(inputGroup,0);
+                                    createBreakpoint(inputGroup,0);
+                                } else {
+                                    var breakpointState = RED.debug.checkBreakpoint(d,1,0);
+                                    inputPorts.selectAll(".port_breakpoint").classed("port_breakpoint_active",breakpointState);
+                                    inputPorts.selectAll(".port_breakpoint").classed("port_breakpoint_inactive",!breakpointState);
+                                }
                             }
 
                             var numOutputs = d.outputs;
@@ -1983,22 +1998,14 @@ RED.view = (function() {
                                     var port = d3.select(this);
                                     //port.attr("y",(y+13*i)-5).attr("x",x);
                                     port.attr("transform", function(d) { return "translate("+x+","+((y+13*i)-5)+")";});
+                                    var breakpointState = RED.debug.checkBreakpoint(d,0,i);
+                                    port.selectAll(".port_breakpoint").classed("port_breakpoint_active",breakpointState);
+                                    port.selectAll(".port_breakpoint").classed("port_breakpoint_inactive",!breakpointState);
+
                                 });
                             }
-                            thisNode.selectAll("text.node_label").text(function(d,i){
-                                    var l = "";
-                                    if (d._def.label) {
-                                        l = d._def.label;
-                                        try {
-                                            l = (typeof l === "function" ? l.call(d) : l)||"";
-                                            l = RED.text.bidi.enforceTextDirectionWithUCC(l);
-                                        } catch(err) {
-                                            console.log("Definition error: "+d.type+".label",err);
-                                            l = d.type;
-                                        }
-                                    }
-                                    return l;
-                                })
+                            thisNode.selectAll("text.node_label")
+                                .text(function(d,i){ return RED.utils.getNodeLabel(d); })
                                 .attr("y", function(d){return (d.h/2)-1;})
                                 .attr("class",function(d){
                                     var s = "";

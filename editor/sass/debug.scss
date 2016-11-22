@@ -203,11 +203,34 @@
 .debug-message-buffer-string > .debug-message-array-rows {
     display: none;
 }
-
+.debug-dbgr-breakpoints {
+    background: #f9f9f9;
+    padding: 0;
+}
 .debug-dbgr-content {
     .red-ui-editableList {
+        background: none;
+        input {
+            vertical-align: middle;
+            margin: 0 8px 0 4px;
+        }
+        li {
+            padding: 0;
+        }
+        label {
+            padding: 6px 2px;
+            &:hover {
+                background: #f3f3f3;
+            }
+            margin: 0;
+        }
+        .red-ui-search-result-node-type {
+            margin-left: 26px;
+        }
     }
     .red-ui-editableList-container {
-        border-radius: 3px;
+        border: none;
+        border-radius: 0;
+        padding: 0;
     }
 }

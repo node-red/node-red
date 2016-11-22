@@ -121,16 +121,16 @@
     cursor: crosshair;
 }
 .port_breakpoint {
+    pointer-events: none;
     rect {
-        stroke: #fff;
-        stroke-width: 1;
+        stroke: #666;
+        stroke-width: 0;
         fill:  #666;
-
     }
 }
 .port_breakpoint_inactive {
     rect {
-        fill: #ddd;
+        fill: none;
     }
 }
 .port_breakpoint_active {
@@ -140,7 +140,7 @@
 }
 .port_breakpoint_triggered {
     rect {
-        fill: #f77d7d;
+        fill: #ff1010;
     }
 }
 

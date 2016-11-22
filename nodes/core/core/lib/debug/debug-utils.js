@@ -28,6 +28,9 @@ RED.debug = (function() {
     var messagesByNode = {};
     var sbc;
     var activeWorkspace;
+    var breakpointList;
+
+    var debuggerEnabled = false;
 
     function init(_config) {
         config = _config;
@@ -55,6 +58,17 @@ RED.debug = (function() {
         sbc = messageList[0];
         messageTable = $('<div class="debug-content  debug-content-table hide"/>').appendTo(content);
 
+        var filterDialog = $('<div class="debug-filter-box hide">'+
+            '<div class="debug-filter-row">'+
+                '<span class="button-group">'+
+                    '<button class="sidebar-header-button-toggle selected" id="debug-tab-filter-all"><span data-i18n="node-red:debug.sidebar.filterAll">all flows</span></button>'+
+                    '<button class="sidebar-header-button-toggle" id="debug-tab-filter-current"><span data-i18n="node-red:debug.sidebar.filterCurrent">current flow</span></button> '+
+                '</span>'+
+            '</div>'+
+        '</div>').appendTo(content);
+
+
+
         debuggerView = $('<div class="debug-content hide"/>').appendTo(content);
 
         var dbgrDisabled = $('<div class="debug-content debug-dbgr-content debug-dbgr-content-disabled">Debugger is disabled</div>').appendTo(debuggerView);
@@ -67,37 +81,140 @@ RED.debug = (function() {
                 '<button id="" class="sidebar-header-button"><i class="fa fa-step-forward"></i></button>'+
             '</span>'+
         '</div>').appendTo(dbgrPanel);
-        var dbgrContent = $('<div>',{style:"padding: 10px;"}).appendTo(dbgrPanel);
-        var breakpointPanel = $('<div>',{style:"position:relative;"}).appendTo(dbgrContent);
 
-        $("<label></label>").html("Breakpoints").appendTo(breakpointPanel);
-        var buttonGroup = $('<div>').css({position:"absolute", right: 0,top:0}).appendTo(breakpointPanel);
-        $('<button class="editor-button editor-button-small"><i class="fa fa-plus"></i> breakpoint</button>')
-            .click(function(evt) {
-                breakpointList.editableList('addItem',{});
-            })
-            .appendTo(buttonGroup);
+        /************ Breakpoints ************/
 
-
-
-        var breakpointList = $("<ol>").css({height: "200px"}).appendTo(breakpointPanel).editableList({
-            addButton: false
-        });
-
-        var filterDialog = $('<div class="debug-filter-box hide">'+
-            '<div class="debug-filter-row">'+
-                '<span class="button-group">'+
-                    '<button class="sidebar-header-button-toggle selected" id="debug-tab-filter-all"><span data-i18n="node-red:debug.sidebar.filterAll">all flows</span></button>'+
-                    '<button class="sidebar-header-button-toggle" id="debug-tab-filter-current"><span data-i18n="node-red:debug.sidebar.filterCurrent">current flow</span></button> '+
-                '</span>'+
+        var breakpointPanel = $('<div class="palette-category">'+
+            '<div class="palette-header">'+
+                '<i class="fa fa-angle-down expanded"></i>'+
+                '<span>Breakpoints</span>'+
+                '<span id="debug-dbgr-breakpoint-count" class="config-node-filter-info"></span>'+
             '</div>'+
-        '</div>').appendTo(content);
+        '</div>').appendTo(dbgrPanel);
+
+
+
+        var breakPointContent = $('<div>',{class:"palette-content debug-dbgr-breakpoints"}).appendTo(breakpointPanel);
+
+        // var buttonGroup = $('<div>').css({position:"absolute", right: 0,top:0}).appendTo(breakPointContent);
+        // $('<button class="editor-button editor-button-small"><i class="fa fa-plus"></i> breakpoint</button>')
+        //     .click(function(evt) {
+        //         breakpointList.editableList('addItem',{});
+        //     })
+        //     .appendTo(buttonGroup);
+
+        var emptyItem = {};
+
+        breakpointList = $("<ol>").css({height: "200px"}).appendTo(breakPointContent).editableList({
+            addButton: false,
+            addItem: function(container,i,breakpoint) {
+                if (breakpoint === emptyItem) {
+                    $('<div>',{class:"red-ui-search-empty"}).html('Double click on a port to add a breakpoint').appendTo(container);
+                    return;
+                }
+                var currentCount = breakpointList.find('.debug-dbgr-breakpoint').length;
+                if (currentCount === 0) {
+                    console.log("out with the old")
+                    breakpointList.editableList('removeItem',emptyItem);
+                }
+                var id = "breakpoint_"+breakpoint.key;
+                var label = $('<label>',{for:id}).appendTo(container);
+                var cb = $('<input class="debug-dbgr-breakpoint" id="'+id+'" type="checkbox" checked></input>').appendTo(label);
+
+
+                $('<span>').html(RED.utils.getNodeLabel(breakpoint.node,breakpoint.node.id)).appendTo(label);
+
+                var workspace = RED.nodes.workspace(breakpoint.node.z);
+                if (!workspace) {
+                    workspace = RED.nodes.subflow(breakpoint.node.z);
+                    workspace = "subflow:"+workspace.name;
+                } else {
+                    workspace = "flow:"+workspace.label;
+                }
+                var flowMeta = $('<div>',{class:"red-ui-search-result-node-flow"}).appendTo(label);
+
+                $('<div>').html(workspace).appendTo(flowMeta);
+                $('<div>').html((breakpoint.portType === 0?"output":"input")+" "+(breakpoint.portIndex+1)).appendTo(flowMeta);
+
+
+                $('<div>',{class:"red-ui-search-result-node-type"}).html(breakpoint.node.type).appendTo(label);
+
+                //+" : "+breakpoint.portType+" : "+breakpoint.portIndex).appendTo(label);
+                cb.on('change',function(evt) {
+                    if ($(this).is(":checked")) {
+                        delete breakpoint.disabled;
+                    } else {
+                        breakpoint.disabled = true;
+                    }
+                    breakpoint.node.dirty = true;
+                    RED.view.redraw();
+                    refreshBreakpointCount();
+                });
+                label.on('mouseenter',function() {
+                    config.messageMouseEnter(breakpoint.node.id);
+                });
+                label.on('mouseleave',function() {
+                    config.messageMouseLeave(breakpoint.node.id);
+                });
+                refreshBreakpointCount();
+                console.log(breakpointList.editableList('length'));
+            },
+            removeItem: function(breakpoint) {
+                refreshBreakpointCount();
+                if (breakpoint !== emptyItem) {
+                    var currentCount = breakpointList.find('.debug-dbgr-breakpoint').length;
+                    if (currentCount === 0) {
+                        breakpointList.editableList('addItem',emptyItem);
+                    }
+                }
+
+            }
+        });
+        breakpointList.editableList('addItem',emptyItem);
+
+
+
+        /************ Something else ************/
+
+        $('<div class="palette-category">'+
+            '<div class="palette-header">'+
+                '<i class="fa fa-angle-down expanded"></i>'+
+                '<span>Messages</span>'+
+            '</div>'+
+            '<div class="palette-content"></div>'+
+        '</div>').appendTo(dbgrPanel);
+
+        /************ Something else ************/
+
+        $('<div class="palette-category">'+
+            '<div class="palette-header">'+
+                '<i class="fa fa-angle-down expanded"></i>'+
+                '<span>Context</span>'+
+            '</div>'+
+            '<div class="palette-content"></div>'+
+        '</div>').appendTo(dbgrPanel);
+
+
+        /****************************************/
+
 
         try {
             content.i18n();
         } catch(err) {
             console.log("TODO: i18n library support");
         }
+
+        dbgrPanel.find(".palette-header").on('click', function(e) {
+            var icon = $(this).find("i");
+            var content = $(this).next();
+            if (icon.hasClass("expanded")) {
+                icon.removeClass("expanded");
+                content.slideUp();
+            } else {
+                icon.addClass("expanded");
+                content.slideDown();
+            }
+        });
 
 
         toolbar.find('#debug-tab-filter-all').on("click",function(e) {
@@ -179,15 +296,15 @@ RED.debug = (function() {
                 i.removeClass('fa-toggle-off');
                 dbgrPanel.show();
                 dbgrDisabled.hide();
-                RED.view.state(RED.state.EDIT_BREAKPOINT);
-
+                debuggerEnabled = true;
             } else {
                 i.addClass('fa-toggle-off');
                 i.removeClass('fa-toggle-on');
                 dbgrPanel.hide();
                 dbgrDisabled.show();
-                RED.view.state(RED.state.DEFAULT);
+                debuggerEnabled = false;
             }
+            RED.view.redraw(true);
         })
 
 
@@ -356,9 +473,72 @@ RED.debug = (function() {
             messageList.scrollTop(sbc.scrollHeight);
         }
     }
+
+    var breakpoints = {};
+
+    function getBreakpointKey(node,portType,portIndex) {
+        return (node.id+"_"+portType+"_"+portIndex).replace(/\./,"_");
+    }
+    function toggleBreakpoint(node,portType,portIndex) {
+        if (!debuggerEnabled) {
+            return false;
+        }
+        var key = getBreakpointKey(node,portType,portIndex);
+        if (breakpoints.hasOwnProperty(key)) {
+            node.dirty = true;
+            if (breakpoints[key].disabled) {
+                delete breakpoints[key].disabled;
+                $("#breakpoint_"+key).prop('checked',true);
+                refreshBreakpointCount();
+                return true;
+            } else {
+                breakpointList.editableList('removeItem',breakpoints[key]);
+                delete breakpoints[key];
+                return false;
+            }
+        } else {
+            breakpoints[key] = {
+                key: key,
+                node: node,
+                portType: portType,
+                portIndex: portIndex
+            }
+            breakpointList.editableList('addItem',breakpoints[key]);
+            node.dirty = true;
+            return true;
+        }
+    }
+    function checkBreakpoint(node,portType,portIndex) {
+        var key = getBreakpointKey(node,portType,portIndex);
+        return debuggerEnabled && breakpoints.hasOwnProperty(key) && !breakpoints[key].disabled;
+    }
+    function refreshBreakpointCount() {
+        var total = 0;
+        var checked = 0;
+        breakpointList.find('.debug-dbgr-breakpoint').each(function() {
+            total++;
+            if ($(this).is(":checked")) {
+                checked++;
+            }
+        });
+        var label = "";
+        if (total > 0) {
+            if (total === checked) {
+                label = total;
+            } else {
+                label = checked+"/"+total;
+            }
+        }
+        $("#debug-dbgr-breakpoint-count").html(label);
+
+    }
+
+
     return {
         init: init,
         refreshMessageList:refreshMessageList,
-        handleDebugMessage: handleDebugMessage
+        handleDebugMessage: handleDebugMessage,
+        toggleBreakpoint: toggleBreakpoint,
+        checkBreakpoint: checkBreakpoint
     }
 })();
