@@ -174,9 +174,6 @@
     border-color: $node-selected-color;
     background-color: #eee;
 }
-[dir="rtl"] .palette_node:hover {
-	direction: rtl;
-}
 .palette_port {
     position: absolute;
     top:8px;
