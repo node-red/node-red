@@ -389,9 +389,22 @@ RED.utils = (function() {
         return "icons/"+def.set.module+"/"+icon_url;
     }
 
+    function getNodeLabel(node,defaultLabel) {
+        defaultLabel = defaultLabel||"";
+        var l = node._def.label;
+        try {
+            l = (typeof l === "function" ? l.call(node) : l)||defaultLabel;
+        } catch(err) {
+            console.log("Definition error: "+node.type+".label",err);
+            l = defaultLabel;
+        }
+        return RED.text.bidi.enforceTextDirectionWithUCC(l);
+    }
+
     return {
         createObjectElement: buildMessageElement,
         validatePropertyExpression: validatePropertyExpression,
-        getNodeIcon: getNodeIcon
+        getNodeIcon: getNodeIcon,
+        getNodeLabel: getNodeLabel
     }
 })();

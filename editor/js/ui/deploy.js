@@ -212,18 +212,7 @@ RED.deploy = (function() {
                 tabLabel = tab.label;
             }
         }
-        var label = "";
-        if (typeof node._def.label == "function") {
-            try {
-                label = node._def.label.call(node);
-            } catch(err) {
-                console.log("Definition error: "+node_def.type+".label",err);
-                label = node_def.type;
-            }
-        } else {
-            label = node._def.label;
-        }
-        label = label || node.id;
+        var label = RED.utils.getNodeLabel(node,node.id);
         return {tab:tabLabel,type:node.type,label:label};
     }
     function sortNodeInfo(A,B) {

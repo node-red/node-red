@@ -1730,14 +1730,7 @@ RED.view = (function() {
                     var node = d3.select(this);
                     var isLink = d.type === "link in" || d.type === "link out";
                     node.attr("id",d.id);
-                    var l = d._def.label;
-                    try {
-                        l = (typeof l === "function" ? l.call(d) : l)||"";
-                    } catch(err) {
-                        console.log("Definition error: "+d.type+".label",err);
-                        l = d.type;
-                    }
-
+                    var l = RED.utils.getNodeLabel(d);
                     if (isLink) {
                         d.w = node_height;
                     } else {
@@ -1927,13 +1920,7 @@ RED.view = (function() {
                         dirtyNodes[d.id] = d;
                         //if (d.x < -50) deleteSelection();  // Delete nodes if dragged back to palette
                         if (!isLink && d.resize) {
-                            var l = d._def.label;
-                            try {
-                                l = (typeof l === "function" ? l.call(d) : l)||"";
-                            } catch(err) {
-                                console.log("Definition error: "+d.type+".label",err);
-                                l = d.type;
-                            }
+                            var l = RED.utils.getNodeLabel(d);
                             var ow = d.w;
                             d.w = Math.max(node_width,gridSize*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/gridSize)) );
                             d.h = Math.max(node_height,(d.outputs||0) * 15);

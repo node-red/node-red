@@ -265,17 +265,8 @@ RED.editor = (function() {
         var configNode = RED.nodes.node(node[property]);
         var node_def = RED.nodes.getType(type);
 
-        if (configNode && node_def.label) {
-            if (typeof node_def.label == "function") {
-                try {
-                    label = node_def.label.call(configNode);
-                } catch(err) {
-                    console.log("Definition error: "+node_def.type+".label",err);
-                    label = node_def.type;
-                }
-            } else {
-                label = node_def.label;
-            }
+        if (configNode) {
+            label = RED.utils.getNodeLabel(configNode,configNode.id);
         }
         input.val(label);
     }
@@ -1207,17 +1198,7 @@ RED.editor = (function() {
 
                 RED.nodes.eachConfig(function(config) {
                     if (config.type == type && (!config.z || config.z === activeWorkspace.id)) {
-                        var label = "";
-                        if (typeof node_def.label == "function") {
-                            try {
-                                label = node_def.label.call(config);
-                            } catch(err) {
-                                console.log("Definition error: "+node_def.type+".label",err);
-                                label = node_def.type;
-                            }
-                        } else {
-                            label = node_def.label;
-                        }
+                        var label = RED.utils.getNodeLabel(config,config.id);
                         config.__label__ = label;
                         configNodes.push(config);
                     }
