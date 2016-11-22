@@ -131,19 +131,7 @@ RED.sidebar.config = (function() {
         } else {
             var currentType = "";
             nodes.forEach(function(node) {
-                var label = "";
-                if (typeof node._def.label == "function") {
-                    try {
-                        label = node._def.label.call(node);
-                    } catch(err) {
-                        console.log("Definition error: "+node._def.type+".label",err);
-                        label = node._def.type;
-                    }
-
-                } else {
-                    label = node._def.label;
-                }
-                label = label || node.id;
+                var label = RED.utils.getNodeLabel(node,node.id);
                 if (node.type != currentType) {
                     $('<li class="config_node_type">'+node.type+'</li>').appendTo(list);
                     currentType = node.type;

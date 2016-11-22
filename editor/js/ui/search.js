@@ -27,19 +27,11 @@ RED.search = (function() {
     var results = [];
 
     function indexNode(n) {
-        var l = "";
-        if (n._def && n._def.label) {
-            l = n._def.label;
-            try {
-                l = (typeof l === "function" ? l.call(n) : l);
-                if (l) {
-                    l = (""+l).toLowerCase();
-                    index[l] = index[l] || {};
-                    index[l][n.id] = {node:n,label:l}
-                }
-            } catch(err) {
-                console.log("Definition error: "+n.type+".label",err);
-            }
+        var l = RED.utils.getNodeLabel(n);
+        if (l) {
+            l = (""+l).toLowerCase();
+            index[l] = index[l] || {};
+            index[l][n.id] = {node:n,label:l}
         }
         l = l||n.label||n.name||n.id||"";
 
