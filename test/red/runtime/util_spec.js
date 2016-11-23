@@ -333,6 +333,11 @@ describe("red/util", function() {
         it("pass a['a.b[0]'].c",function() { testABC("a['a.b[0]'].c",['a','a.b[0]','c']); })
         it("pass a[0][0][0]",function() { testABC("a[0][0][0]",['a',0,0,0]); })
 
+        it('pass a.$b.c',function() { testABC('a.$b.c',['a','$b','c']); })
+        it('pass a["$b"].c',function() { testABC('a["$b"].c',['a','$b','c']); })
+        it('pass a._b.c',function() { testABC('a._b.c',['a','_b','c']); })
+        it('pass a["_b"].c',function() { testABC('a["_b"].c',['a','_b','c']); })
+
         it("fail a'b'.c",function() { testInvalid("a'b'.c"); })
         it("fail a['b'.c",function() { testInvalid("a['b'.c"); })
         it("fail a[]",function() { testInvalid("a[]"); })
