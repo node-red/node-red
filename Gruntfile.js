@@ -154,7 +154,7 @@ module.exports = function(grunt) {
                         //       bootstrap/FA/jquery
                     ],
                     "public/vendor/jsonata/jsonata.js": [
-                        "editor/vendor/jsonata/jsonata.js",
+                        "node_modules/jsonata/jsonata.js",
                         "editor/vendor/jsonata/formatter.js"
                     ]
                 }

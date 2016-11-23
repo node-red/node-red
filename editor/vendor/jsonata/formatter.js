@@ -105,5 +105,43 @@
     }
 
     jsonata.format = formatExpression;
-    jsonata.functions = ["$sum", "$count", "$max", "$min", "$average", "$string", "$substring", "$substringBefore", "$substringAfter", "$lowercase", "$uppercase", "$length", "$split", "$join", "$number", "$boolean", "$not", "$map", "$reduce", "$keys", "$lookup", "$append", "$exists", "$spread"]
+    jsonata.functions =
+    {
+        '$append':{ args:['array','array'] },
+        '$average':{ args:['value'] },
+        '$boolean':{ args:['value'] },
+        '$count':{ args:['array'] },
+        '$exists':{ args:['value'] },
+        '$join':{ args:['array','separator'] },
+        '$keys':{ args:['object'] },
+        '$length':{ args:['string'] },
+        '$lookup':{ args:['object','key'] },
+        '$lowercase':{ args:['string'] },
+        '$map':{ args:[] },
+        '$max':{ args:['array'] },
+        '$min':{ args:['array'] },
+        '$not':{ args:['value'] },
+        '$number':{ args:['value'] },
+        '$reduce':{ args:[] },
+        '$split':{ args:['string','separator','limit'] },
+        '$spread':{ args:['object'] },
+        '$string':{ args:['value'] },
+        '$substring':{ args:['string','start','length'] },
+        '$substringAfter':{ args:['string','chars'] },
+        '$substringBefore':{ args:['string','chars'] },
+        '$sum':{ args:['array'] },
+        '$uppercase':{ args:['string'] }
+    }
+    jsonata.getFunctionSnippet = function(fn) {
+        var snippetText = "";
+        if (jsonata.functions.hasOwnProperty(fn)) {
+            var def = jsonata.functions[fn];
+            snippetText = "\\"+fn+"(";
+            if (def.args) {
+                snippetText += def.args.map(function(a,i) { return "${"+(i+1)+":"+a+"}"}).join(", ");
+            }
+            snippetText += ")\n"
+        }
+        return snippetText;
+    }
 })();

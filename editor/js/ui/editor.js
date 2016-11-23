@@ -1415,7 +1415,7 @@ RED.editor = (function() {
                 var trayBody = tray.find('.editor-tray-body');
                 var dialogForm = buildEditForm(tray,'dialog-form','_expression','editor');
                 var funcSelect = $("#node-input-expression-func");
-                jsonata.functions.forEach(function(f) {
+                Object.keys(jsonata.functions).forEach(function(f) {
                     funcSelect.append($("<option></option>").val(f).text(f));
                 })
                 funcSelect.change(function(e) {
@@ -1436,14 +1436,75 @@ RED.editor = (function() {
                         enableLiveAutocompletion: true
                     }
                 });
-                expressionEditor.getSession().setValue(value||"",-1);
+                var currentToken = null;
+                var currentTokenPos = -1;
+                var currentFunctionMarker = null;
 
+                expressionEditor.getSession().setValue(value||"",-1);
                 expressionEditor.on("changeSelection", function() {
                     var c = expressionEditor.getCursorPosition();
                     var token = expressionEditor.getSession().getTokenAt(c.row,c.column);
-                    // console.log(token);
-                    if (token && token.type === 'keyword') {
-                        funcSelect.val(token.value).change();
+                    if (token !== currentToken || (token && /paren/.test(token.type) && c.column !== currentTokenPos)) {
+                        currentToken = token;
+                        var r,p;
+                        var scopedFunction = null;
+                        if (token && token.type === 'keyword') {
+                            r = c.row;
+                            scopedFunction = token;
+                        } else {
+                            var depth = 0;
+                            var next = false;
+                            if (token) {
+                                if (token.type === 'paren.rparen') {
+                                    // If this is a block of parens ')))', set
+                                    // depth to offset against the cursor position
+                                    // within the block
+                                    currentTokenPos = c.column;
+                                    depth = c.column - (token.start + token.value.length);
+                                }
+                                r = c.row;
+                                p = token.index;
+                            } else {
+                                r = c.row-1;
+                                p = -1;
+                            }
+                            while ( scopedFunction === null && r > -1) {
+                                var rowTokens = expressionEditor.getSession().getTokens(r);
+                                if (p === -1) {
+                                    p = rowTokens.length-1;
+                                }
+                                while (p > -1) {
+                                    var type = rowTokens[p].type;
+                                    if (next) {
+                                        if (type === 'keyword') {
+                                            scopedFunction = rowTokens[p];
+                                            // console.log("HIT",scopedFunction);
+                                            break;
+                                        }
+                                        next = false;
+                                    }
+                                    if (type === 'paren.lparen') {
+                                        depth-=rowTokens[p].value.length;
+                                    } else if (type === 'paren.rparen') {
+                                        depth+=rowTokens[p].value.length;
+                                    }
+                                    if (depth < 0) {
+                                        next = true;
+                                        depth = 0;
+                                    }
+                                    // console.log(r,p,depth,next,rowTokens[p]);
+                                    p--;
+                                }
+                                if (!scopedFunction) {
+                                    r--;
+                                }
+                            }
+                        }
+                        expressionEditor.session.removeMarker(currentFunctionMarker);
+                        if (scopedFunction) {
+                        //console.log(token,.map(function(t) { return t.type}));
+                            funcSelect.val(scopedFunction.value).change();
+                        }
                     }
                 });
 
@@ -1452,10 +1513,8 @@ RED.editor = (function() {
                     e.preventDefault();
                     var pos = expressionEditor.getCursorPosition();
                     var f = funcSelect.val();
-                    var args = RED._('jsonata:'+f+".args",{defaultValue:''});
-                    expressionEditor.insert(f+"("+args+")");
-                    pos.column += f.length+1;
-                    expressionEditor.moveCursorToPosition(pos);
+                    var snippet = jsonata.getFunctionSnippet(f);
+                    expressionEditor.insertSnippet(snippet);
                     expressionEditor.focus();
                 })
             },
@@ -1521,7 +1580,6 @@ RED.editor = (function() {
                     }
                 },100);
             }
-
             return editor;
         }
     }

@@ -6,6 +6,13 @@ define("ace/mode/jsonata",["require","exports","module","ace/lib/oop","ace/mode/
     var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 
     var WorkerClient = require("../worker/worker_client").WorkerClient;
+    var jsonataFunctions = Object.keys(jsonata.functions);
+    // sort in length order (long->short) otherwise substringAfter gets matched
+    // as substring etc.
+    jsonataFunctions.sort(function(A,B) {
+        return B.length-A.length;
+    });
+    jsonataFunctions = jsonataFunctions.join("|").replace(/\$/g,"\\$");
 
     var JSONataHighlightRules = function() {
 
@@ -17,11 +24,7 @@ define("ace/mode/jsonata",["require","exports","module","ace/lib/oop","ace/mode/
             "constant.language.boolean":
                 "true|false",
             "storage.type":
-                "function",
-            "keyword":
-                "$sum|$count|$max|$min|$average|$string|$substring|$substringBefore|"+
-                "$substringAfter|$lowercase|$uppercase|$length|$split|$join|$number|"+
-                "$boolean|$not|$map|$reduce|$keys|$lookup|$append|$exists|$spread"
+                "function"
         }, "identifier");
         this.$rules = {
             "start" : [
@@ -45,6 +48,10 @@ define("ace/mode/jsonata",["require","exports","module","ace/lib/oop","ace/mode/
                 },
                 {   token: "keyword",
                     regex: /λ/
+                },
+                {
+                    token: "keyword",
+                    regex: jsonataFunctions
                 },
                 {
                     token : keywordMapper,
