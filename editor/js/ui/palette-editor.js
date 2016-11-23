@@ -754,7 +754,9 @@ RED.palette.editor = (function() {
             refreshNodeModule(ns.module);
             for (var i=0;i<filteredList.length;i++) {
                 if (filteredList[i].info.id === ns.module) {
-                    filteredList[i].elements.installButton.hide();
+                    var installButton = filteredList[i].elements.installButton;
+                    installButton.addClass('disabled');
+                    installButton.html(RED._('palette.editor.installed'));
                     break;
                 }
             }
@@ -768,7 +770,9 @@ RED.palette.editor = (function() {
                     delete nodeEntries[ns.module];
                     for (var i=0;i<filteredList.length;i++) {
                         if (filteredList[i].info.id === ns.module) {
-                            filteredList[i].elements.installButton.show();
+                            var installButton = filteredList[i].elements.installButton;
+                            installButton.removeClass('disabled');
+                            installButton.html(RED._('palette.editor.install'));
                             break;
                         }
                     }
