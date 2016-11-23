@@ -200,9 +200,9 @@
                 }
                 // reverse property direction in case of right directionality
                 if (opt.icon) {
-                    $('<img>',{src:opt.icon,style:"margin-"+RED.bidiUtil.UI.rightProperty+": 4px; height: 18px;"}).prependTo(op);
+                    $('<img>',{src:opt.icon,style:"margin-"+RED.bidi.componentPos.right+": 4px; height: 18px;"}).prependTo(op);
                 } else {
-                	op.css("padding-"+RED.bidiUtil.UI.leftProperty, "18px");
+                	op.css("padding-"+RED.bidi.componentPos.left, "18px");
                 }
                 op.click(function(event) {
                     event.preventDefault();
@@ -232,7 +232,7 @@
                 top -= (top+menuHeight)-$(window).height()+5;
             }
             
-            var menuPos = ((RED.bidiUtil.isMirroringEnabled()) ? ((pos.left + width) - (menu.offset().left + menu.outerWidth())) : (2+pos.left));
+            var menuPos = ((RED.bidi.isMirroringEnabled()) ? ((pos.left + width) - (menu.offset().left + menu.outerWidth())) : (2+pos.left));
             menu.css({
                 top: top+"px",
                 left: menuPos+"px",
@@ -276,9 +276,9 @@
                 this.selectTrigger.width('auto');
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
                 // reverse property direction in case of right directionality
-                this.elementDiv.css(RED.bidiUtil.UI.leftProperty,labelWidth+"px");
+                this.elementDiv.css(RED.bidi.componentPos.left,labelWidth+"px");
                 if (this.optionSelectTrigger) {
-                    this.optionSelectTrigger.css(RED.bidiUtil.UI.leftProperty,(labelWidth+5)+"px");
+                    this.optionSelectTrigger.css(RED.bidi.componentPos.left,(labelWidth+5)+"px");
                 }
             }
         },
@@ -341,7 +341,7 @@
                         image = new Image();
                         image.name = opt.icon;
                         image.src = opt.icon;
-                        $('<img>',{src:opt.icon,style:"margin-"+RED.bidiUtil.UI.rightProperty+": 4px;height: 18px;"}).prependTo(this.selectLabel);
+                        $('<img>',{src:opt.icon,style:"margin-"+RED.bidi.componentPos.right+": 4px;height: 18px;"}).prependTo(this.selectLabel);
                     } else {
                         this.selectLabel.text(opt.label);
                     }

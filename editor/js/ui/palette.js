@@ -87,21 +87,21 @@ RED.palette = (function() {
         displayLines.push(currentLine);
 
         var tempLines = displayLines.join("^&%");
-        tempLines =RED.bidiUtil.applyBidiSupport(tempLines, RED.bidiUtil.BidiFlags.NS);
+        tempLines =RED.bidi.applyBidiSupport(tempLines, RED.bidi.flags.NS);
         var lines = tempLines.replace("^&%", "<br/>");
         var multiLineNodeHeight = 8+(lineHeight*displayLines.length);
         el.css({height:multiLineNodeHeight+"px"});
 
         var labelElement = el.find(".palette_label");
-        labelElement.html(lines).attr('dir', RED.bidiUtil.resolveBaseTextDir(lines));
+        labelElement.html(lines).attr('dir', RED.bidi.resolveBaseTextDir(lines));
 
         el.find(".palette_port").css({top:(multiLineNodeHeight/2-5)+"px"});
 
         var popOverContent;
         try {
-            var l = "<p><b>"+RED.bidiUtil.applyBidiSupport(label,RED.bidiUtil.BidiFlags.BTD & RED.bidiUtil.BidiFlags.NS)+"</b></p>";
+            var l = "<p><b>"+RED.bidi.applyBidiSupport(label,RED.bidi.flags.BTD & RED.bidi.flags.NS)+"</b></p>";
             if (label != type) {
-                l = "<p><b>"+RED.bidiUtil.applyBidiSupport(label,RED.bidiUtil.BidiFlags.BTD & RED.bidiUtil.BidiFlags.NS)+"</b><br/><i>"+type+"</i></p>";
+                l = "<p><b>"+RED.bidi.applyBidiSupport(label,RED.bidi.flags.BTD & RED.bidi.flags.NS)+"</b><br/><i>"+type+"</i></p>";
             }
             popOverContent = $(l+(info?info:$("script[data-help-name$='"+type+"']").html()||"<p>"+RED._("palette.noInfo")+"</p>").trim())
                                 .filter(function(n) {

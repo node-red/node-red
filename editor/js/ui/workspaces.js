@@ -113,7 +113,7 @@ RED.workspaces = (function() {
                 $('<input type="text" style="display: none;" />').prependTo(dialogForm);
                 dialogForm.submit(function(e) { e.preventDefault();});
                 $("#node-input-name").val(workspace.label);
-                RED.bidiUtil.prepareInput($("#node-input-name"))
+                RED.bidi.prepareInput($("#node-input-name"))
                 dialogForm.i18n();
             },
             close: function() {

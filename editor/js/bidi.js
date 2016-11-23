@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-RED.bidiUtil = (function() {
+RED.bidi = (function() {
     var textDir = "";
     var shaperType = "";
     var calendarType = "";
@@ -26,7 +26,7 @@ RED.bidiUtil = (function() {
      * STT_ATTACH : Structure Text Support, it is using to call attach function located at format.js
      * STT_GETHTML : STT_ATTACH : Structure Text Support, it is using to call getHtml function located at format.js
      */
-    var _bidiFlags = {
+    var _flags = {
         BTD: 1,
         NS: 2,
         CALENDAR: 4,
@@ -35,12 +35,9 @@ RED.bidiUtil = (function() {
     };
     
    /**
-    * Reverse direction in case of mirroring is enabled
+    * Reverse component position when mirroring is enabled
     */
-    var _ui = {
-    	leftProperty: "",
-    	rightProperty: ""
-    };
+    var _componentPos = {};
     
     /**
      * Check if browser language is RTL language
@@ -48,12 +45,12 @@ RED.bidiUtil = (function() {
     function _isMirroringEnabled() {
         var isRTLLang = new RegExp("^(ar|he)").test(navigator.language);
         if (isRTLLang) {
-            _ui.leftProperty = "right";
-            _ui.rightProperty = "left";
+        	_componentPos.left = "right";
+        	_componentPos.right = "left";
             return true;
         } else {
-            _ui.leftProperty = "left";
-            _ui.rightProperty = "right";
+        	_componentPos.left = "left";
+        	_componentPos.right = "right";
             return false;
         }
     }
@@ -118,7 +115,7 @@ RED.bidiUtil = (function() {
      */
     function _resolveBaseTextDir(value) {
         if (textDir == "auto") {
-            if (RED.bidiFeatures.baseTextDir.isRTLValue(value)) {
+            if (RED.bidi.baseTextDir.isRTLValue(value)) {
                 return "rtl";
             } else {
                 return "ltr";
@@ -162,18 +159,18 @@ RED.bidiUtil = (function() {
     function _applyBidiSupport(value, flag, type, args) {
         switch (flag) {
         case 0:
-            value = RED.bidiFeatures.baseTextDir.enforceTextDirectionWithUCC(value);
-            return RED.bidiFeatures.numericShaping.shape(value, shaperType, textDir);
+            value = RED.bidi.baseTextDir.enforceTextDirectionWithUCC(value);
+            return RED.bidi.numericShaping.shape(value, shaperType, textDir);
         case 1:
-            return RED.bidiFeatures.baseTextDir.enforceTextDirectionWithUCC(value);
+            return RED.bidi.baseTextDir.enforceTextDirectionWithUCC(value);
         case 2:
-            return RED.bidiFeatures.numericShaping.shape(value, shaperType, textDir);
+            return RED.bidi.numericShaping.shape(value, shaperType, textDir);
         case 4:
             return _getGlobalizedDate(value);
         case 8:
-            return RED.bidiFeatures.format.attach(value, type, args, _isMirroringEnabled(), navigator.language);
+            return RED.bidi.format.attach(value, type, args, _isMirroringEnabled(), navigator.language);
         case 16:
-            return RED.bidiFeatures.format.getHtml(value, type, args, _isMirroringEnabled(), navigator.language);
+            return RED.bidi.format.getHtml(value, type, args, _isMirroringEnabled(), navigator.language);
         default:
             return value;
         }
@@ -186,7 +183,7 @@ RED.bidiUtil = (function() {
         applyBidiSupport : _applyBidiSupport,
         resolveBaseTextDir : _resolveBaseTextDir,
         prepareInput: _prepareInput,
-        BidiFlags: _bidiFlags,
-        UI: _ui
+        flags: _flags,
+        componentPos: _componentPos
     }
  })();

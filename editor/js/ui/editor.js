@@ -315,12 +315,12 @@ RED.editor = (function() {
                 val = "";
             }
             if (definition !== undefined && definition[property].hasOwnProperty("format") && definition[property].format !== "" && input[0].nodeName === "DIV") {
-                input.html(RED.bidiUtil.applyBidiSupport(val, RED.bidiUtil.BidiFlags.STT_GETHTML, definition[property].format, {}));
-                RED.bidiUtil.applyBidiSupport(input[0],RED.bidiUtil.BidiFlags.STT_ATTACH, definition[property].format, {});
+                input.html(RED.bidi.applyBidiSupport(val, RED.bidi.flags.STT_GETHTML, definition[property].format, {}));
+                RED.bidi.applyBidiSupport(input[0],RED.bidi.flags.STT_ATTACH, definition[property].format, {});
             } else {
                 input.val(val);
                 if (input[0].nodeName === 'INPUT' || input[0].nodeName === 'TEXTAREA') {
-                    RED.bidiUtil.prepareInput(input);
+                	RED.bidi.prepareInput(input);
                 }
             }
         }
@@ -1186,7 +1186,7 @@ RED.editor = (function() {
                 }
 
                 configNodes.forEach(function(cn) {
-                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+RED.bidiUtil.applyBidiSupport(cn.__label__,RED.bidiUtil.BidiFlags.BTD & RED.bidiUtil.BidiFlags.NS)+'</option>');
+                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+RED.bidi.applyBidiSupport(cn.__label__,RED.bidi.flags.BTD & RED.bidi.flags.NS)+'</option>');
                     delete cn.__label__;
                 });
 
@@ -1320,7 +1320,7 @@ RED.editor = (function() {
                 });
 
                 $("#subflow-input-name").val(subflow.name);
-                RED.bidiUtil.prepareInput($("#subflow-input-name"));
+                RED.bidi.prepareInput($("#subflow-input-name"));
                 subflowEditor.getSession().setValue(subflow.info||"",-1);
                 var userCount = 0;
                 var subflowType = "subflow:"+editing_node.id;

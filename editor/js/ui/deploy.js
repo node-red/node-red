@@ -114,7 +114,7 @@ RED.deploy = (function() {
                 ],
                 create: function() {
                     $("#node-dialog-confirm-deploy").parent().find("div.ui-dialog-buttonpane")
-                        .prepend('<div style="height:0; vertical-align: middle; display:inline-block; margin-top: 13px; float:'+RED.bidiUtil.UI.leftProperty+';">'+
+                        .prepend('<div style="height:0; vertical-align: middle; display:inline-block; margin-top: 13px; float:'+RED.bidi.componentPos.left+';">'+
                                    '<input style="vertical-align:top;" type="checkbox" id="node-dialog-confirm-deploy-hide">'+
                                    '<label style="display:inline;" for="node-dialog-confirm-deploy-hide"> do not warn about this again</label>'+
                                    '<input type="hidden" id="node-dialog-confirm-deploy-type">'+
@@ -570,7 +570,7 @@ RED.deploy = (function() {
                     $( "#node-dialog-confirm-deploy-config" ).show();
                     invalidNodes.sort(sortNodeInfo);
                     $( "#node-dialog-confirm-deploy-invalid-list" )
-                        .html("<li>"+invalidNodes.map(function(A) { return (A.tab?"["+RED.bidiUtil.applyBidiSupport(A.tab, RED.bidiUtil.BidiFlags.NS)+"] ":"")+RED.bidiUtil.applyBidiSupport(A.label, RED.bidiUtil.BidiFlags.NS)+" ("+A.type+")"}).join("</li><li>")+"</li>");
+                        .html("<li>"+invalidNodes.map(function(A) { return (A.tab?"["+RED.bidi.applyBidiSupport(A.tab, RED.bidi.flags.NS)+"] ":"")+RED.bidi.applyBidiSupport(A.label, RED.bidi.flags.NS)+" ("+A.type+")"}).join("</li><li>")+"</li>");
 
                 } else if (hasUnusedConfig && !ignoreDeployWarnings.unusedConfig) {
                     // showWarning = true;

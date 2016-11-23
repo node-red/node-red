@@ -34,7 +34,7 @@ RED.popover = (function() {
                 var targetHeight = target.height();
 
                 var divHeight = div.height();
-                var popoverPos = ((RED.bidiUtil.isMirroringEnabled()) ? targetPos.left-targetWidth-210 : targetPos.left+targetWidth+17);
+                var popoverPos = ((RED.bidi.isMirroringEnabled()) ? targetPos.left-targetWidth-210 : targetPos.left+targetWidth+17);
                 div.css({top: targetPos.top+targetHeight/2-divHeight/2-10,left:popoverPos});
                 div.fadeIn("fast");
             }

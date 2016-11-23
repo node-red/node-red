@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-RED.bidiFeatures = {};
-RED.bidiFeatures.baseTextDir = (function() {
+RED.bidi.baseTextDir = (function() {
     var LRE = "\u202A",
         RLE = "\u202B",
         PDF = "\u202C";
@@ -28,7 +27,7 @@ RED.bidiFeatures.baseTextDir = (function() {
                 return false;
             }
          }
-           return RED.bidiUtil.isMirroringEnabled();
+           return RED.bidi.isMirroringEnabled();
     }
 
     function _isBidiChar(c) {
@@ -51,7 +50,7 @@ RED.bidiFeatures.baseTextDir = (function() {
      */
     function _enforceTextDirectionWithUCC(value) {
         if (value) {
-            var dir = RED.bidiUtil.resolveBaseTextDir(value);
+            var dir = RED.bidi.resolveBaseTextDir(value);
             if (dir == "ltr") {
                return LRE + value + PDF;
             } else if (dir == "rtl") {

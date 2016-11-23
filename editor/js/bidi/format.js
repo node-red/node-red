@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-RED.bidiFeatures.format = (function() {
+RED.bidi.format = (function() {
 
     var TextSegment = (function() {
         var TextSegment = function (obj) {
