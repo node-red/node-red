@@ -41,6 +41,7 @@
         "i18next":"1.10.6",
         "is-utf8":"0.2.1",
         "js-yaml": "3.6.1",
+        "jsonata":"1.0.10",
         "media-typer": "0.3.0",
         "mqtt": "1.14.1",
         "mustache": "2.2.1",

@@ -23,7 +23,7 @@ RED.i18n = (function() {
                 dynamicLoad: false,
                 load:'current',
                 ns: {
-                    namespaces: ["editor","node-red"],
+                    namespaces: ["editor","node-red","jsonata"],
                     defaultNs: "editor"
                 },
                 fallbackLng: ['en-US'],
