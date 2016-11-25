@@ -541,7 +541,19 @@ module.exports = function(RED) {
                     if (clients[connection_id]) {
                         clients[connection_id].connected  = false;
                     }
-                    if (node.done) { node.done(); }
+
+                    var anyConnected = false;
+
+                    for (var client in clients) {
+                        if (clients[client].connected) {
+                            anyConnected = true;
+                            break;
+                        }
+                    }
+                    if (node.done && !anyConnected) {
+                        clients = {};
+                        node.done();
+                    }
                 });
 
                 clients[connection_id].client.on('error', function() {
@@ -556,6 +568,7 @@ module.exports = function(RED) {
                 });
 
                 clients[connection_id].client.on('timeout',function() {
+                    //console.log("TIMEOUT");
                     clients[connection_id].connected = false;
                     node.status({fill:"grey",shape:"dot",text:"tcpin.errors.connect-timeout"});
                     //node.warn(RED._("tcpin.errors.connect-timeout"));
@@ -579,9 +592,20 @@ module.exports = function(RED) {
             for (var client in clients) {
                 clients[client].client.destroy();
             }
-            clients = {};
             node.status({});
-            done();
+
+            var anyConnected = false;
+            for (var c in clients) {
+                if (clients[c].connected) {
+                    anyConnected = true;
+                    break;
+                }
+            }
+
+            if (!anyConnected) {
+                clients = {};
+                done();
+            }
         });
 
     }
