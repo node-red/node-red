@@ -467,26 +467,28 @@ module.exports = function(RED) {
                     else {
                         for (var j = 0; j < data.length; j++ ) {
                             if (node.out === "time") {
-                                // do the timer thing
-                                if (clients[connection_id] && clients[connection_id].timeout) {
-                                    i += 1;
-                                    buf[i] = data[j];
-                                }
-                                else {
-                                    clients[connection_id].timeout = setTimeout(function () {
-                                        if (clients[connection_id]) {
-                                            clients[connection_id].timeout = null;
-                                            clients[connection_id].msg.payload = new Buffer(i+1);
-                                            buf.copy(clients[connection_id].msg.payload,0,0,i+1);
-                                            node.send(clients[connection_id].msg);
-                                            if (clients[connection_id].client) {
-                                                node.status({}); clients[connection_id].client.destroy();
-                                                delete clients[connection_id];
+                                if (clients[connection_id]) {
+                                    // do the timer thing
+                                    if (clients[connection_id].timeout) {
+                                        i += 1;
+                                        buf[i] = data[j];
+                                    }
+                                    else {
+                                        clients[connection_id].timeout = setTimeout(function () {
+                                            if (clients[connection_id]) {
+                                                clients[connection_id].timeout = null;
+                                                clients[connection_id].msg.payload = new Buffer(i+1);
+                                                buf.copy(clients[connection_id].msg.payload,0,0,i+1);
+                                                node.send(clients[connection_id].msg);
+                                                if (clients[connection_id].client) {
+                                                    node.status({}); clients[connection_id].client.destroy();
+                                                    delete clients[connection_id];
+                                                }
                                             }
-                                        }
-                                    }, node.splitc);
-                                    i = 0;
-                                    buf[0] = data[j];
+                                        }, node.splitc);
+                                        i = 0;
+                                        buf[0] = data[j];
+                                    }
                                 }
                             }
                             // count bytes into a buffer...
