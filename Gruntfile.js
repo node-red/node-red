@@ -104,7 +104,7 @@ module.exports = function(grunt) {
                     "editor/js/settings.js",
                     "editor/js/user.js",
                     "editor/js/comms.js",
-                    "editor/js/bidi.js",
+                    "editor/js/bidi/bidi.js",
                     "editor/js/bidi/base-text-dir.js",
                     "editor/js/bidi/format.js",
                     "editor/js/bidi/numeric-shaping.js",
