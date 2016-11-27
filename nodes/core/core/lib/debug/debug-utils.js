@@ -198,7 +198,7 @@ RED.debug = (function() {
         var name = sanitize(((o.name?o.name:o.id)||"").toString());
         var topic = sanitize((o.topic||"").toString());
         var property = sanitize(o.property?o.property:'');
-        var payload = sanitize((o.msg||"").toString());
+        var payload = o.msg;
         var format = sanitize((o.format||"").toString());
         msg.className = 'debug-message'+(o.level?(' debug-message-level-'+o.level):'') +
         ((sourceNode&&sourceNode.z)?((" debug-message-flow-"+sourceNode.z+((filter&&(activeWorkspace!==sourceNode.z))?" hide":""))):"");

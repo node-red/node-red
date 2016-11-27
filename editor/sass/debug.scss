@@ -150,7 +150,8 @@
 .debug-message-type-string { color: #b72828; }
 .debug-message-type-null { color: #666; font-style: italic;}
 .debug-message-type-meta { color: #666; font-style: italic;}
-.debug-message-type-number { color: #2033d6;cursor: pointer;}
+.debug-message-type-number { color: #2033d6; };
+.debug-message-type-number-toggle { cursor: pointer;}
 
 .debug-message-expandable {
     cursor: pointer;
