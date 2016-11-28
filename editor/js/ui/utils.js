@@ -111,14 +111,18 @@ RED.utils = (function() {
 
         } else if (typeof obj === 'number') {
             e = $('<span class="debug-message-type-number"></span>').text(""+obj).appendTo(entryObj);
-            if ((obj^0)===obj) {
+            if (Number.isInteger(obj) && (obj >= 0)) { // if it's a +ve integer
                 e.addClass("debug-message-type-number-toggle");
                 e.click(function(evt) {
-                    var format = $(this).data('format');
-                    if (format === 'hex') {
-                        $(this).text(""+obj).data('format','dec');
+                    var format = $(this).data('format') || "date";
+                    if (format === 'dec') {
+                        $(this).text(""+obj).data('format','date');
+                    } else if ((format === 'date') && (obj.toString().length===13) && (obj<=2147483647000)) {
+                        $(this).text((new Date(obj)).toISOString()).data('format','hex');
+                    } else if ((format === 'date') && (obj.toString().length===10) && (obj<=2147483647)) {
+                        $(this).text((new Date(obj*1000)).toISOString()).data('format','hex');
                     } else {
-                        $(this).text("0x"+(obj).toString(16)).data('format','hex');
+                        $(this).text("0x"+(obj).toString(16)).data('format','dec');
                     }
                     evt.preventDefault();
                 });
