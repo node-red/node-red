@@ -361,13 +361,19 @@ var localfilesystem = {
 				return dirs.concat(files);
 			});
 		}).otherwise(function(err) {
-			// if it was a folder, and we could not stat, return empty
-			// this could happen if the folder did not exist.
+			// if path is empty, then assume it was a folder, return empty
+			if (path === ""){
+				return [];
+			}
+
+			// if path ends with slash, it was a folder
+			// so return empty
 			if (path.substr(-1) == '/') {
 				return [];
 			}
 
-			// check for .json as an alternative
+			// else path was specified, but did not exist,
+			// check for path.json as an alternative if flows
 			if (type === "flows" && !/\.json$/.test(path)) {
 				return localfilesystem.getLibraryEntry(type,path+".json")
 					.otherwise(function(e) {
