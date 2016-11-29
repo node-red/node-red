@@ -332,44 +332,51 @@ var localfilesystem = {
     getLibraryEntry: function(type,path) {
         var root = fspath.join(libDir,type);
         var rootPath = fspath.join(libDir,type,path);
-        return promiseDir(root).then(function () {
-            return nodeFn.call(fs.lstat, rootPath).then(function(stats) {
-                if (stats.isFile()) {
-                    return getFileBody(root,path);
-                }
-                if (path.substr(-1) == '/') {
-                    path = path.substr(0,path.length-1);
-                }
-                return nodeFn.call(fs.readdir, rootPath).then(function(fns) {
-                    var dirs = [];
-                    var files = [];
-                    fns.sort().filter(function(fn) {
-                        var fullPath = fspath.join(path,fn);
-                        var absoluteFullPath = fspath.join(root,fullPath);
-                        if (fn[0] != ".") {
-                            var stats = fs.lstatSync(absoluteFullPath);
-                            if (stats.isDirectory()) {
-                                dirs.push(fn);
-                            } else {
-                                var meta = getFileMeta(root,fullPath);
-                                meta.fn = fn;
-                                files.push(meta);
-                            }
-                        }
-                    });
-                    return dirs.concat(files);
-                });
-            }).otherwise(function(err) {
-                if (type === "flows" && !/\.json$/.test(path)) {
-                    return localfilesystem.getLibraryEntry(type,path+".json")
-                        .otherwise(function(e) {
-                            throw err;
-                        });
-                } else {
-                    throw err;
-                }
-            });
-        });
+
+		// don't create the folder if it does not exist - we are only reading....
+		return nodeFn.call(fs.lstat, rootPath).then(function(stats) {
+			if (stats.isFile()) {
+				return getFileBody(root,path);
+			}
+			if (path.substr(-1) == '/') {
+				path = path.substr(0,path.length-1);
+			}
+			return nodeFn.call(fs.readdir, rootPath).then(function(fns) {
+				var dirs = [];
+				var files = [];
+				fns.sort().filter(function(fn) {
+					var fullPath = fspath.join(path,fn);
+					var absoluteFullPath = fspath.join(root,fullPath);
+					if (fn[0] != ".") {
+						var stats = fs.lstatSync(absoluteFullPath);
+						if (stats.isDirectory()) {
+							dirs.push(fn);
+						} else {
+							var meta = getFileMeta(root,fullPath);
+							meta.fn = fn;
+							files.push(meta);
+						}
+					}
+				});
+				return dirs.concat(files);
+			});
+		}).otherwise(function(err) {
+			// if it was a folder, and we could not stat, return empty
+			// this could happen if the folder did not exist.
+			if (path.substr(-1) == '/') {
+				return [];
+			}
+
+			// check for .json as an alternative
+			if (type === "flows" && !/\.json$/.test(path)) {
+				return localfilesystem.getLibraryEntry(type,path+".json")
+					.otherwise(function(e) {
+						throw err;
+					});
+			} else {
+				throw err;
+			}
+		});
     },
 
     saveLibraryEntry: function(type,path,meta,body) {
