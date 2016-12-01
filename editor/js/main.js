@@ -98,11 +98,9 @@
                     var i,m;
                     var typeList;
                     var info;
-
                     if (topic == "node/added") {
                         var addedTypes = [];
-                        for (i=0;i<msg.length;i++) {
-                            m = msg[i];
+                        msg.forEach(function(m) {
                             var id = m.id;
                             RED.nodes.addNodeSet(m);
                             addedTypes = addedTypes.concat(m.types);
@@ -111,7 +109,7 @@
                                     $("body").append(data);
                                 });
                             });
-                        }
+                        });
                         if (addedTypes.length) {
                             typeList = "<ul><li>"+addedTypes.join("</li><li>")+"</li></ul>";
                             RED.notify(RED._("palette.event.nodeAdded", {count:addedTypes.length})+typeList,"success");
