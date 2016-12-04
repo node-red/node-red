@@ -1532,14 +1532,13 @@ RED.editor = (function() {
     return {
         init: function() {
             RED.tray.init();
-            $(window).on('keydown', function(evt) {
-                if (evt.keyCode === $.ui.keyCode.ESCAPE && (evt.metaKey || evt.ctrlKey)) {
-                    $("#node-dialog-cancel").click();
-                    $("#node-config-dialog-cancel").click();
-                } else if (evt.keyCode === $.ui.keyCode.ENTER && (evt.metaKey || evt.ctrlKey)) {
-                    $("#node-dialog-ok").click();
-                    $("#node-config-dialog-ok").click();
-                }
+            RED.actions.add("core:confirm-edit-tray", function() {
+                $("#node-dialog-ok").click();
+                $("#node-config-dialog-ok").click();
+            });
+            RED.actions.add("core:cancel-edit-tray", function() {
+                $("#node-dialog-cancel").click();
+                $("#node-config-dialog-cancel").click();
             });
         },
         edit: showEditDialog,

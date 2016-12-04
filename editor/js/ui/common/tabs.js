@@ -126,6 +126,18 @@ RED.tabs = (function() {
                 },100);
             }
         }
+        function activatePreviousTab() {
+            var previous = ul.find("li.active").prev();
+            if (previous.length > 0) {
+                activateTab(previous.find("a"));
+            }
+        }
+        function activateNextTab() {
+            var next = ul.find("li.active").next();
+            if (next.length > 0) {
+                activateTab(next.find("a"));
+            }
+        }
 
         function updateTabWidths() {
             var tabs = ul.find("li.red-ui-tab");
@@ -303,6 +315,8 @@ RED.tabs = (function() {
             },
             removeTab: removeTab,
             activateTab: activateTab,
+            nextTab: activateNextTab,
+            previousTab: activatePreviousTab,
             resize: updateTabWidths,
             count: function() {
                 return ul.find("li.red-ui-tab").size();

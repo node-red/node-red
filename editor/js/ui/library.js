@@ -410,6 +410,9 @@ RED.library = (function() {
 
     return {
         init: function() {
+
+            RED.actions.add("core:library-export",exportFlow);
+
             RED.events.on("view:selection-changed",function(selection) {
                 if (!selection.nodes) {
                     RED.menu.setDisabled("menu-item-export",true);

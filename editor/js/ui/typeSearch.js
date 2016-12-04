@@ -168,7 +168,7 @@ RED.typeSearch = (function() {
     }
     function show(opts) {
         if (!visible) {
-            RED.keyboard.add("*",/* ESCAPE */ 27,function(){hide();d3.event.preventDefault();});
+            RED.keyboard.add("*","escape",function(){hide()});
             if (dialog === null) {
                 createDialog();
             }
@@ -195,7 +195,7 @@ RED.typeSearch = (function() {
     }
     function hide(fast) {
         if (visible) {
-            RED.keyboard.remove(/* ESCAPE */ 27);
+            RED.keyboard.remove("escape");
             visible = false;
             if (dialog !== null) {
                 searchResultsDiv.slideUp(fast?50:200,function() {

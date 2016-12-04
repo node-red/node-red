@@ -257,7 +257,7 @@ RED.clipboard = (function() {
 
     function hideDropTarget() {
         $("#dropTarget").hide();
-        RED.keyboard.remove(/* ESCAPE */ 27);
+        RED.keyboard.remove("escape");
     }
 
     return {
@@ -274,13 +274,15 @@ RED.clipboard = (function() {
                     RED.menu.setDisabled("menu-item-export-library",false);
                 }
             });
-            RED.keyboard.add("workspace", /* e */ 69,{ctrl:true},function(){exportNodes();d3.event.preventDefault();});
-            RED.keyboard.add("workspace", /* i */ 73,{ctrl:true},function(){importNodes();d3.event.preventDefault();});
+
+            RED.actions.add("core:export",exportNodes);
+            RED.actions.add("core:import",importNodes);
+
 
             $('#chart').on("dragenter",function(event) {
                 if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
                     $("#dropTarget").css({display:'table'});
-                    RED.keyboard.add("*", /* ESCAPE */ 27,hideDropTarget);
+                    RED.keyboard.add("*", "escape" ,hideDropTarget);
                 }
             });
 

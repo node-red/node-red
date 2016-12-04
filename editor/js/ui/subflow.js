@@ -380,6 +380,8 @@ RED.subflow = (function() {
             }
         });
 
+        RED.actions.add("core:create-subflow",createSubflow);
+        RED.actions.add("core:convert-to-subflow",convertToSubflow);
     }
 
     function createSubflow() {

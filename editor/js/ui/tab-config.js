@@ -236,10 +236,7 @@ RED.sidebar.config = (function() {
             visible: false,
             onchange: function() { refreshConfigNodeList(); }
         });
-
-        RED.menu.setAction('menu-item-config-nodes',function() {
-            RED.sidebar.show('config');
-        })
+        RED.actions.add("core:show-config-tab",function() {RED.sidebar.show('config')});
 
         $("#workspace-config-node-collapse-all").on("click", function(e) {
             e.preventDefault();

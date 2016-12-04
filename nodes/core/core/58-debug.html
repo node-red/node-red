@@ -144,8 +144,7 @@
                 toolbar: uiComponents.footer,
                 enableOnEdit: true
             });
-
-
+            RED.actions.add("core:show-debug-tab",function() { RED.sidebar.show('debug')});
 
             var that = this;
             RED._debug = function(msg) {
@@ -222,6 +221,8 @@
             RED.sidebar.removeTab("debug");
             RED.events.off("workspace:change", this.refreshMessageList);
             window.removeEventListener("message",this.handleWindowMessage);
+            RED.actions.remove("core:show-debug");
+
             delete RED._debug;
         },
         oneditprepare: function() {
