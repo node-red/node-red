@@ -38,3 +38,15 @@
     box-shadow: #999 1px 1px 1px;
 }
 
+#keyboard-help-dialog-div1,
+#keyboard-help-dialog-div2 {
+    vertical-align: top;
+    display: inline-block;
+    box-sizing: border-box; 
+    width:50%; 
+    padding: 10px;
+}
+
+[dir="rtl"] #keyboard-help-dialog-div2 {
+    padding: 50px;
+}

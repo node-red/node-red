@@ -51,6 +51,13 @@ div.node-info {
 .node-info-property-header {
     color: #666;
 }
+
+[dir="rtl"] .node-info-property-header {
+    i{
+        transform: rotate(180deg);
+     }
+}
+
 .node-info-property-header:hover,
 .node-info-property-header:focus {
     color: #666;

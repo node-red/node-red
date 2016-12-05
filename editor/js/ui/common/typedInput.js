@@ -198,12 +198,12 @@
                 if (opt.label) {
                     op.text(opt.label);
                 }
+                // reverse property direction in case of right directionality
                 if (opt.icon) {
-                    $('<img>',{src:opt.icon,style:"margin-right: 4px; height: 18px;"}).prependTo(op);
+                    $('<img>',{src:opt.icon,style:"margin-"+RED.bidi.componentPos.right+": 4px; height: 18px;"}).prependTo(op);
                 } else {
-                    op.css({paddingLeft: "18px"});
+                	op.css("padding-"+RED.bidi.componentPos.left, "18px");
                 }
-
                 op.click(function(event) {
                     event.preventDefault();
                     callback(opt.value);
@@ -225,15 +225,19 @@
             var that = this;
             var pos = relativeTo.offset();
             var height = relativeTo.height();
+            var width = relativeTo.outerWidth();
             var menuHeight = menu.height();
             var top = (height+pos.top-3);
             if (top+menuHeight > $(window).height()) {
                 top -= (top+menuHeight)-$(window).height()+5;
             }
+            
+            var menuPos = ((RED.bidi.isMirroringEnabled()) ? ((pos.left + width) - (menu.offset().left + menu.outerWidth())) : (2+pos.left));
             menu.css({
                 top: top+"px",
-                left: (2+pos.left)+"px",
+                left: menuPos+"px",
             });
+            
             menu.slideDown(100);
             this._delay(function() {
                 that.uiSelect.addClass('red-ui-typedInput-focus');
@@ -271,9 +275,10 @@
             } else {
                 this.selectTrigger.width('auto');
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
-                this.elementDiv.css('left',labelWidth+"px");
+                // reverse property direction in case of right directionality
+                this.elementDiv.css(RED.bidi.componentPos.left,labelWidth+"px");
                 if (this.optionSelectTrigger) {
-                    this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
+                    this.optionSelectTrigger.css(RED.bidi.componentPos.left,(labelWidth+5)+"px");
                 }
             }
         },
@@ -336,7 +341,7 @@
                         image = new Image();
                         image.name = opt.icon;
                         image.src = opt.icon;
-                        $('<img>',{src:opt.icon,style:"margin-right: 4px;height: 18px;"}).prependTo(this.selectLabel);
+                        $('<img>',{src:opt.icon,style:"margin-"+RED.bidi.componentPos.right+": 4px;height: 18px;"}).prependTo(this.selectLabel);
                     } else {
                         this.selectLabel.text(opt.label);
                     }

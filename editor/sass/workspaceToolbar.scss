@@ -74,3 +74,35 @@
     }
 
 }
+
+[dir="rtl"] #workspace-toolbar {
+    .button {
+        margin-right: 0px;
+    }
+    .button-group {
+        &:not(.spinner-group) {
+            .button:not(:first-child) {
+                border-right: none;
+                border-left: solid 0.25px;
+            }
+        }
+    }
+}
+
+.workspace-subflow-label {
+     margin-left: 5px;
+ }
+ 
+ [dir="rtl"] .workspace-subflow-label {
+     margin-right: 15px;
+     margin-top: 3px;
+     float: right;
+ }
+
+[dir="rtl"] .subflow-toolbar {
+    float: right;
+}
+
+[dir="rtl"] #workspace-subflow-delete {
+    margin-right: 15px !important;
+}

@@ -26,6 +26,11 @@
     @include component-border;
 }
 
+[dir="rtl"] #sidebar {
+    right: auto;
+    left: 0px;
+}
+
 #sidebar.closing {
     background: #eee;
     border-color: #900;
@@ -52,9 +57,26 @@
     cursor: col-resize;
 }
 
+[dir="rtl"] #sidebar-separator {
+    left: 315px;
+    right: auto;
+}
+
 .sidebar-closed > #sidebar { display: none; }
 .sidebar-closed > #sidebar-separator { right: 0px !important; }
+
+[dir="rtl"] .sidebar-closed > #sidebar-separator { 
+    left: 0px !important; 
+    right: auto !important; 
+}
+
 .sidebar-closed > #workspace { right: 7px !important; }
+
+[dir="rtl"] .sidebar-closed > #workspace { 
+    left: 7px !important;
+    right: 179px !important;
+}
+
 .sidebar-closed > #editor-stack { right: 8px !important; }
 
 #sidebar .button {
@@ -71,6 +93,10 @@
     padding: 8px 10px;
     background: #f3f3f3;
     border-bottom: 1px solid $secondary-border-color;
+}
+
+[dir="rtl"] .sidebar-header {
+    text-align: left;
 }
 
 #sidebar-footer {
@@ -94,6 +120,11 @@
 }
 .sidebar-header-button:not(:first-child) {
     border-left: none;
+}
+
+[dir="rtl"] .button-group .sidebar-header-button:not(:first-child) {
+    border-left: solid 1px;
+    border-right: none;
 }
 
 .sidebar-shade {
