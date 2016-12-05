@@ -289,6 +289,8 @@ function start(type,diff,muteLog) {
         }
     }
     events.emit("nodes-started");
+    events.emit("runtime-event",{id:"runtime-state"});
+
     if (!muteLog) {
         if (diff) {
             log.info(log._("nodes.flows.started-modified-"+type));
