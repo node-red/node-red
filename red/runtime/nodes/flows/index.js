@@ -58,6 +58,7 @@ function init(runtime) {
                     log.info(log._("nodes.flows.registered-missing", {type:type}));
                     activeFlowConfig.missingTypes.splice(i,1);
                     if (activeFlowConfig.missingTypes.length === 0 && started) {
+                        events.emit("runtime-event",{id:"runtime-state"});
                         start();
                     }
                 }
@@ -238,6 +239,7 @@ function start(type,diff,muteLog) {
             log.info(log._("nodes.flows.missing-type-install-2"));
             log.info("  "+settings.userDir);
         }
+        events.emit("runtime-event",{id:"runtime-state",type:"warning",text:"notification.warnings.missing-types"});
         return when.resolve();
     }
     if (!muteLog) {

@@ -32,7 +32,9 @@ var lastSentTime;
 function handleStatus(event) {
     publish("status/"+event.id,event.status,true);
 }
-
+function handleRuntimeEvent(event) {
+    publish("notification/"+event.id,event,event.hasOwnProperty('text'));
+}
 function init(_server,runtime) {
     server = _server;
     settings = runtime.settings;
@@ -40,6 +42,9 @@ function init(_server,runtime) {
 
     runtime.events.removeListener("node-status",handleStatus);
     runtime.events.on("node-status",handleStatus);
+
+    runtime.events.removeListener("runtime-event",handleRuntimeEvent);
+    runtime.events.on("runtime-event",handleRuntimeEvent);
 }
 
 function start() {

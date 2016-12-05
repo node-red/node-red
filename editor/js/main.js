@@ -79,6 +79,23 @@
                 if (/^#flow\/.+$/.test(currentHash)) {
                     RED.workspaces.show(currentHash.substring(6));
                 }
+
+                var persistentNotifications = {};
+                RED.comms.subscribe("notification/#",function(topic,msg) {
+                    var parts = topic.split("/");
+                    var notificationId = parts[1];
+                    if (msg.text) {
+                        var text = RED._(msg.text,{default:msg.text});
+                        if (!persistentNotifications.hasOwnProperty(notificationId)) {
+                            persistentNotifications[notificationId] = RED.notify(text,msg.type,msg.timeout === undefined,msg.timeout);
+                        } else {
+                            persistentNotifications[notificationId].update(text,msg.timeout);
+                        }
+                    } else if (persistentNotifications.hasOwnProperty(notificationId)) {
+                        persistentNotifications[notificationId].close();
+                        delete persistentNotifications[notificationId];
+                    }
+                });
                 RED.comms.subscribe("status/#",function(topic,msg) {
                     var parts = topic.split("/");
                     var node = RED.nodes.node(parts[1]);
