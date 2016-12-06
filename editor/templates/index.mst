@@ -97,9 +97,6 @@
         </div>
     </form>
 </div>
-<div id="node-dialog-view-diff" class="hide">
-    <ol id="node-dialog-view-diff-diff"></ol>
-</div>
 
 <div id="node-dialog-library-save-confirm" class="hide">
     <form class="form-horizontal">

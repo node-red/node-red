@@ -119,6 +119,7 @@ module.exports = function(grunt) {
                     "editor/js/ui/utils.js",
                     "editor/js/ui/actions.js",
                     "editor/js/ui/deploy.js",
+                    "editor/js/ui/diff.js",
                     "editor/js/ui/keyboard.js",
                     "editor/js/ui/workspaces.js",
                     "editor/js/ui/view.js",

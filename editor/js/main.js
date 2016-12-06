@@ -249,9 +249,9 @@
         RED.view.init();
         RED.editor.init();
         RED.keyboard.init();
+        RED.diff.init();
 
         RED.menu.init({id:"btn-sidemenu",options: menuOptions});
-
 
         RED.deploy.init(RED.settings.theme("deployButton",null));
 

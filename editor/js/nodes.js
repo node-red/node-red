@@ -29,6 +29,8 @@ RED.nodes = (function() {
         added: {}
     };
 
+    var initialLoad;
+
     var dirty = false;
 
     function setDirty(d) {
@@ -697,6 +699,9 @@ RED.nodes = (function() {
         if (!$.isArray(newNodes)) {
             newNodes = [newNodes];
         }
+        if (!initialLoad) {
+            initialLoad = JSON.parse(JSON.stringify(newNodes));
+        }
         var unknownTypes = [];
         for (i=0;i<newNodes.length;i++) {
             n = newNodes[i];
@@ -1228,6 +1233,13 @@ RED.nodes = (function() {
         node: getNode,
 
         version: flowVersion,
+        originalFlow: function(flow) {
+            if (flow === undefined) {
+                return initialLoad;
+            } else {
+                initialLoad = flow;
+            }
+        },
 
         filterNodes: filterNodes,
         filterLinks: filterLinks,

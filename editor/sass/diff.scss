@@ -22,26 +22,40 @@
         border-radius:1px;
         padding:0;
     }
-    ol {
+    #node-dialog-view-diff-diff {
         position: absolute;
-        top:10px;
+        top:50px;
         bottom:10px;
         left:10px;
         right:10px;
         li {
             padding: 0px;
             border: none;
+            min-height: 0;
         }
 
     }
     .red-ui-editableList-item-content {
         padding: 5px;
+        padding-bottom: 0;
     }
-
+}
+.node-diff-toolbar {
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    color: #666;
+    text-align: right;
+    padding: 8px 10px;
+    background: #f3f3f3;
+    border-bottom: 1px solid $secondary-border-color;
+    white-space: nowrap;
 }
 .node-diff-tab {
     border: 1px solid $secondary-border-color;
     border-radius: 3px;
+    overflow: hidden;
 
     &.collapsed {
         .node-diff-tab-title > .node-diff-chevron {
@@ -55,9 +69,11 @@
 .node-diff-tab-stats {
     position: absolute;
     left: 50%;
+    top: 13px;
 }
 
 .node-diff-chevron {
+    display: inline-block;
     width: 15px;
     text-align: center;
     margin: 3px 5px 3px 5px;
@@ -65,10 +81,7 @@
 
 }
 .node-diff-node-entry {
-    padding: 0 0 0 5px;
-    &:not(:last-child) {
-        border-bottom: 1px solid $secondary-border-color;
-    }
+    border-top: 1px solid $secondary-border-color;
 
     &.collapsed {
         .node-diff-chevron {
@@ -88,13 +101,16 @@
         border: 1px solid $secondary-border-color;
         padding: 3px 5px;
         text-align: left;
+        overflow-x: auto;
     }
-
+    tr {
+        vertical-align: top;
+    }
     td:nth-child(1) {
-        width: 150px;
+        width: 100px;
     }
     td:not(:first-child) {
-        width: calc(50% - 150px);
+        width: calc(50% - 100px);
     }
 }
 .node-diff-column {
@@ -108,6 +124,7 @@
         border-right: 1px solid $secondary-border-color
     }
 }
+
 .node-diff-tab-title {
     padding: 3px 3px 3px 0;
     background: #f6f6f6;
@@ -135,15 +152,60 @@
         width: 24px;
     }
 }
+.node-diff-tab-empty {
+    .node-diff-chevron i {
+        display: none;
+    }
+    .node-diff-tab-title {
+        cursor: default;
+    }
+}
+.node-diff-node-deleted {
+    //background: #fadddd;
+    cursor: default !important;
+    .node-diff-status {
+        color: #f80000;
+    }
+    .node-diff-node-entry-node {
+        opacity: 0.5;
+    }
+    .node-diff-node-description {
+        opacity: 0.5;
+        text-decoration: line-through;
+    }
+}
+.node-diff-node-added {
+    //background: #eefaee;
+    cursor: default !important;
+    .node-diff-status {
+        color: #009900;
+    }
+}
+.node-diff-node-changed {
+    //background: #fff2ca;
+    .node-diff-status {
+        color: #f89406;
+    }
+}
 .node-diff-node-entry-title {
     cursor: pointer;
+    .node-diff-status {
+        margin-left: 15px;
+    }
 }
 .node-diff-node-entry-properties {
-    margin-left: 30px;
-    margin-right: 8px;
-    margin-bottom:8px;
+    margin: 6px 8px 6px 30px;
     color: #666;
 }
+.node-diff-status {
+    display: inline-block;
+    width: 15px;
+    height: 20px;
+    margin-left: 5px;
+    vertical-align: middle;
+    text-align: center;
+}
+
 .node-diff-node-description {
     color: $form-text-color;
     margin-left: 5px;
@@ -156,7 +218,13 @@
         clear: both;
     }
 }
-
+.node-diff-node-meta {
+    float: right;
+    font-size: 0.9em;
+    color: #999;
+    margin-top: 7px;
+    margin-right: 10px;
+}
 
 .node-diff-count { color: #999}
 .node-diff-added { color: #009900}
