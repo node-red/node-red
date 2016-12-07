@@ -35,8 +35,6 @@ RED.deploy = (function() {
         $("#btn-deploy-icon").attr("src",deploymentTypes[type].img);
     }
 
-    var currentDiff = null;
-
     /**
      * options:
      *   type: "default" - Button with drop-down options - no further customisation available
