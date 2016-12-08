@@ -92,7 +92,7 @@ function start() {
                     reportMetrics();
                 }, settings.runtimeMetricInterval||15000);
             }
-            console.log("\n\n"+log._("runtime.welcome")+"\n===================\n");
+            log.info("\n\n"+log._("runtime.welcome")+"\n===================\n");
             if (settings.version) {
                 log.info(log._("runtime.version",{component:"Node-RED",version:"v"+settings.version}));
             }
