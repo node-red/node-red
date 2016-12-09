@@ -1,0 +1,320 @@
+﻿{
+    "common": {
+        "label": {
+            "name": "名前",
+            "ok": "Ok",
+            "done":"完了",
+            "cancel": "中止",
+            "delete": "削除",
+            "close": "閉じる",
+            "load": "読み込み",
+            "save": "保存",
+            "import": "読み込み",
+            "export": "書き出し"
+        }
+    },
+    "workspace": {
+        "defaultName": "フロー __number__",
+        "editFlow": "フローを編集: __name__",
+        "confirmDelete": "削除の確認",
+        "delete": "本当に '__label__' を削除しますか？",
+        "dropFlowHere": "ここにフローをドロップしてください"
+    },
+    "menu": {
+        "label": {
+            "view": {
+                "view": "表示",
+                "showGrid": "グリッド表示",
+                "snapGrid": "処理ノードの配置を補助",
+                "textDir": "テキストの方向",
+                "defaultDir": "標準",
+                "ltr": "左から右",
+                "rtl": "右から左",
+                "auto": "文脈"
+            },
+            "sidebar": {
+                "show": "右側のサイドバーを表示"
+            },
+            "displayStatus": "処理ノードの状態を表示",
+            "displayConfig": "処理ノードの設定",
+            "import": "読み込み",
+            "export": "書き出し",
+            "search": "処理ノードを検索",
+            "clipboard": "クリップボード",
+            "library": "ライブラリ",
+            "examples": "サンプル",
+            "subflows": "サブフロー",
+            "createSubflow": "サブフローを作成",
+            "selectionToSubflow": "サブフローの選択",
+            "flows": "フロー",
+            "add": "フローを新規追加",
+            "rename": "フロー名を変更",
+            "delete": "フローを削除",
+            "keyboardShortcuts": "ショートカットキーの説明",
+            "login": "ログイン",
+            "logout": "ログアウト",
+            "editPalette":"処理ノードの追加削除"
+        }
+    },
+    "user": {
+        "loggedInAs": "__name__ としてログインしました",
+        "login": "ログイン",
+        "loginFailed": "ログインに失敗しました",
+        "notAuthorized": "権限がありません"
+    },
+    "notification": {
+        "warning": "<strong>警告</strong>: __message__",
+        "warnings": {
+            "undeployedChanges": "処理ノードの変更をデプロイしていません",
+            "nodeActionDisabled": "処理ノードのアクションは、サブフロー内で無効になっています"
+        },
+
+        "error": "<strong>エラー</strong>: __message__",
+        "errors": {
+            "lostConnection": "サーバとの接続が切断されました: 再接続しています",
+            "lostConnectionReconnect": "サーバとの接続が切断されました:  __time__ 秒以内に再接続します",
+            "lostConnectionTry": "すぐに再接続",
+            "cannotAddSubflowToItself": "サブフロー自身を追加できません",
+            "cannotAddCircularReference": "循環参照を検出したため、サブフローを追加できません"
+        }
+    },
+    "clipboard": {
+        "nodes": "処理ノード",
+        "selectNodes": "上のテキストを選択し、クリップボードへコピーしてください",
+        "pasteNodes": "JSON形式のフローデータを貼り付けてください",
+        "importNodes": "フローの読み込み",
+        "exportNodes": "フローをクリップボードへ書き出し",
+        "importUnrecognised": "認識できない型が読み込まれました:",
+        "importUnrecognised_plural": "認識できない型が読み込まれました:",
+        "nodesExported": "処理ノードがクリップボードへ書き出されました",
+        "nodeCopied": "__count__ 個の処理ノードがコピーされました",
+        "nodeCopied_plural": "__count__ 個の処理ノードがコピーされました",
+        "invalidFlow": "無効なフロー: __message__",
+        "export": {
+            "selected":"選択した処理ノード",
+            "current":"現在のフロー",
+            "all":"全フロー",
+            "compact":"インデントのないJSONフォーマット",
+            "formatted":"インデント付きのJSONフォーマット",
+            "copy": "クリップボードへ書き出し"
+        },
+        "import": {
+            "import": "読み込み先",
+            "newFlow": "新規フロー"
+        }
+    },
+    "deploy": {
+        "deploy": "デプロイ",
+        "full": "全て",
+        "fullDesc": "ワークスペースを全てデプロイ",
+        "modifiedFlows": "変更したフロー",
+        "modifiedFlowsDesc": "変更した処理ノードを含むフローのみデプロイ",
+        "modifiedNodes": "変更した処理ノード",
+        "modifiedNodesDesc": "変更した処理ノードのみデプロイ",
+        "successfulDeploy": "デプロイが成功しました",
+        "deployFailed": "デプロイが失敗しました: __message__",
+        "unusedConfigNodes":"使われていない処理ノードの設定があります",
+        "unusedConfigNodesLink":"これらを参照するため、ここをクリックしてください",
+        "errors": {
+            "noResponse": "サーバからの応答がありません"
+        },
+        "confirm": {
+            "button": {
+                "confirm": "デプロイの確認",
+                "review": "差分を確認",
+                "cancel": "中止",
+                "merge": "変更をマージ"
+            },
+            "undeployedChanges": "デプロイしていない変更があります このページを抜けると、これらの変更が消えます",
+            "improperlyConfigured": "以下の処理ノードは、正しくプロパティが設定されていません:",
+            "unknown": "ワークスペースに未知の型の処理ノードがあります",
+            "confirm": "このままデプロイしても良いですか？",
+            "conflict": "フローを編集している間に、他のブラウザが他のフローをデプロイしました。<br>デプロイを継続すると、他のフローが削除されます。<br><br>"
+        }
+    },
+    "subflow": {
+        "editSubflow": "フローのテンプレートを編集: __name__",
+        "edit": "フローのテンプレートを編集",
+        "subflowInstances": "このサブフローのテンプレートのインスタンスが __count__ 個存在します",
+        "subflowInstances_plural": "このサブフローのテンプレートのインスタンスが __count__ 個存在します",
+        "editSubflowProperties": "プロパティを編集",
+        "input": "入力:",
+        "output": "出力:",
+        "deleteSubflow": "サブフローを削除",
+        "info": "詳細",
+        "format":"マークダウン形式",
+        "errors": {
+            "noNodesSelected": "<strong>サブフローを作成できません</strong>: 処理ノードが選択されていません",
+            "multipleInputsToSelection": "<strong>サブフローを作成できません</strong>: 複数の入力が選択されています"
+        }
+    },
+    "editor": {
+        "configEdit": "編集",
+        "configAdd": "追加",
+        "configUpdate": "更新",
+        "configDelete": "削除",
+        "nodesUse": "__count__ 個の処理ノードが、この設定を使用しています",
+        "nodesUse_plural": "__count__ 個の処理ノードが、この設定を使用しています",
+        "addNewConfig": "新規に __type__ 処理ノードの設定を追加",
+        "editNode": "__type__ 処理ノードを編集",
+        "editConfig": "__type__ 処理ノードの設定を編集",
+        "addNewType": "新規に __type__ を追加。。。",
+        "errors": {
+            "scopeChange": "スコープの変更は、他のフローで使われている処理ノードを無効にします"
+        }
+    },
+    "keyboard": {
+        "selectAll": "全ての処理ノードを選択",
+        "selectAllConnected": "接続された全ての処理ノードを選択",
+        "addRemoveNode": "処理ノードの選択、選択解除",
+        "deleteSelected": "選択した処理ノードや接続を削除",
+        "importNode": "フローの読み込み",
+        "exportNode": "フローの書き出し",
+        "nudgeNode": "選択した処理ノードを移動(移動量小)",
+        "moveNode": "選択した処理ノードを移動(移動量大)",
+        "toggleSidebar": "右側のサイドバーの表示・非表示",
+        "deleteNode": "選択した処理ノードや接続を削除",
+        "copyNode": "選択した処理ノードをコピー",
+        "cutNode": "選択した処理ノードを切り取り",
+        "pasteNode": "処理ノードを貼り付け",
+        "undoChange": "変更操作を戻す",
+        "searchBox": "処理ノードを検索",
+        "managePalette": "処理ノードの追加・削除"
+    },
+    "library": {
+        "openLibrary": "ライブラリを開く",
+        "saveToLibrary": "ライブラリへ保存",
+        "typeLibrary": "__type__ ライブラリ",
+        "unnamedType": "名前なし __type__",
+        "exportToLibrary": "ライブラリへフローを書き出す",
+        "dialogSaveOverwrite": "__libraryName__ という __libraryType__ は既に存在しています 上書きしますか？",
+        "invalidFilename": "無効なファイル名",
+        "savedNodes": "保存された処理ノード",
+        "savedType": "保存された __type__",
+        "saveFailed": "保存に失敗しました: __message__",
+
+        "filename": "ファイル名",
+        "folder": "フォルダ",
+        "filenamePlaceholder": "ファイル",
+        "fullFilenamePlaceholder": "a/b/file",
+        "folderPlaceholder": "a/b",
+
+        "breadcrumb": "ライブラリ"
+    },
+    "palette": {
+        "noInfo": "情報がありません",
+        "filter": "処理ノードを検索",
+        "search": "処理ノードを検索",
+        "label": {
+            "subflows": "サブフロー",
+            "input": "入力",
+            "output": "出力",
+            "function": "機能",
+            "social": "ソーシャル",
+            "storage": "ストレージ",
+            "analysis": "分析",
+            "advanced": "その他"
+        },
+        "event": {
+            "nodeAdded": "処理ノードがパレットへ追加されました:",
+            "nodeAdded_plural": "処理ノードがパレットへ追加されました",
+            "nodeRemoved": "処理ノードがパレットから削除されました:",
+            "nodeRemoved_plural": "処理ノードがパレットから削除されました:",
+            "nodeEnabled": "処理ノードを有効化しました:",
+            "nodeEnabled_plural": "処理ノードを有効化しました:",
+            "nodeDisabled": "処理ノードを無効化しました:",
+            "nodeDisabled_plural": "処理ノードを無効化しました:"
+        },
+        "editor": {
+            "title": "処理ノードの追加削除",
+            "times": {
+                "seconds": "秒前",
+                "minutes": "分前",
+                "minutesV": "__count__ 分前",
+                "hoursV": "__count__ 時間前",
+                "hoursV_plural": "__count__ 時間前",
+                "daysV": "__count__ 日前",
+                "daysV_plural": "__count__ 日前",
+                "weeksV": "__count__ 週間前",
+                "weeksV_plural": "__count__ 週間前",
+                "monthsV": "__count__ ヵ月前",
+                "monthsV_plural": "__count__ ヵ月前",
+                "yearsV": "__count__ 年前",
+                "yearsV_plural": "__count__ 年前",
+
+                "yearMonthsV": "__y__ 年 __count__ ヵ月前",
+                "yearMonthsV_plural": "__y__ 年 __count__ ヵ月前",
+                "yearsMonthsV": "__y__ 年 __count__ ヵ月前",
+                "yearsMonthsV_plural": "__y__ 年 __count__ ヵ月前"
+            },
+            "nodeCount": "__label__ 個の処理ノード",
+            "nodeCount_plural": "__label__ 個の処理ノード",
+            "inuse": "使用中",
+            "enableall": "全て有効化",
+            "disableall": "全て無効化",
+            "enable": "有効化",
+            "disable": "無効化",
+            "remove": "削除",
+            "update": "__version__ へ更新",
+            "install": "処理ノードを追加",
+            "installed": "追加しました",
+            "loading": "カタログを読み込み中",
+            "tab-nodes": "現在の処理ノード",
+            "tab-install": "処理ノードを追加",
+            "sort": "並べ替え:",
+            "sortAZ": "辞書順",
+            "sortRecent": "日付順",
+            "more": "+ さらに __count__ 個",
+            "errors": {
+                "installFailed": "追加処理が失敗しました: __module__<br>__message__<br>詳細な情報はログを確認してください"
+            }
+
+        }
+    },
+    "sidebar": {
+        "info": {
+            "name": "処理ノードの仕様を表示",
+            "label": "処理ノードの仕様",
+            "node": "処理ノード",
+            "type": "型",
+            "id": "ID",
+            "subflow": "サブフロー",
+            "instances": "インスタンス",
+            "properties": "プロパティ",
+            "blank": "ブランク",
+            "null": "ヌル",
+            "arrayItems": "__count__ 要素"
+        },
+        "config": {
+            "name": "処理ノードの設定を表示",
+            "label": "処理ノードの設定",
+            "global": "全てのフロー上",
+            "none": "なし",
+            "subflows": "サブフロー",
+            "flows": "フロー",
+            "filterUnused":"未使用",
+            "filterAll":"全て",
+            "filtered": "__count__ 個が無効化"
+        },
+        "palette": {
+            "name": "処理ノードの追加削除",
+            "label": "パレット"
+        }
+    },
+    "typedInput": {
+        "type": {
+            "str": "string",
+            "num": "number",
+            "re": "regular expression",
+            "bool": "boolean",
+            "json": "JSON",
+            "date": "timestamp"
+        }
+    },
+    "editableList": {
+        "add": "追加"
+    },
+    "search": {
+        "empty": "一致したものが見つかりませんでした"
+    }
+}
