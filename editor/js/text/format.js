@@ -758,7 +758,7 @@ RED.text.format = (function() {
                 {
                         guiDir: isRtl ? "rtl" : "ltr",
                         dir: "ltr",
-                        points: "/\\:."
+                        points: "/\\:.<>&"
                 };
                 if (!parseOnly) {
                     return stext.parseAndDisplayStructure(text, fArgs, !!isHtml, locale);
@@ -876,7 +876,7 @@ RED.text.format = (function() {
                 {
                         guiDir: isRtl ? "rtl" : "ltr",
                         dir: "ltr",
-                        points: ":?#/@.[]="
+                        points: ":?#/@.[]=&<>"
                 };
                 if (!parseOnly) {
                     return stext.parseAndDisplayStructure(text, fArgs, !!isHtml, locale);
