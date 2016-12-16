@@ -54,7 +54,7 @@
         "sentiment":"1.0.6",
         "uglify-js":"2.7.3",
         "when": "3.7.7",
-        "ws": "0.8.1",
+        "ws": "1.1.1",
         "xml2js":"0.4.17",
         "node-red-node-feedparser":"0.1.*",
         "node-red-node-email":"0.1.*",
