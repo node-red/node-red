@@ -21,6 +21,7 @@ RED.bidi = (function() {
     /**
      * Indicates the type of bidi-support
      * BTD : Base text direction
+     * BTD_UCC : enforce BTD by adding UCC characters 
      * NS : Numeric Shaping
      * CALENDAR : National Calendar
      * STT_ATTACH : Structure Text Support, it is using to call attach function located at format.js
@@ -28,10 +29,11 @@ RED.bidi = (function() {
      */
     var _flags = {
         BTD: 1,
-        NS: 2,
-        CALENDAR: 4,
-        STT_ATTACH: 8,
-        STT_GETHTML: 16
+        BTD_UCC : 2,
+        NS: 4,
+        CALENDAR: 8,
+        STT_ATTACH: 16,
+        STT_GETHTML: 32,
     };
     
    /**
@@ -91,38 +93,9 @@ RED.bidi = (function() {
      * @param dir - the text direction preference
      */
     function _setTextDirection(dir) {
-        textDir = dir;
+    	textDir = dir;
+        RED.bidi.baseTextDir.enforceTextDirectionOnPage(textDir);
         _refreshView();
-        _enforceTextDirectionOnPage();
-    }
-    
-    /**
-     * Enforces the text direction for all the spans with style bidiAware under
-     * workspace or sidebar div
-     */
-    function _enforceTextDirectionOnPage() {
-        $("#workspace").find('span.bidiAware').each(function() {
-            $(this).attr("dir", _resolveBaseTextDir($(this).html()));
-        });
-        $("#sidebar").find('span.bidiAware').each(function() {
-            $(this).attr("dir", _resolveBaseTextDir($(this).text()));
-        });
-    }
-    
-    /**
-     * Determines the text direction of a given string.
-     * @param value - the string
-     */
-    function _resolveBaseTextDir(value) {
-        if (textDir == "auto") {
-            if (RED.bidi.baseTextDir.isRTLValue(value)) {
-                return "rtl";
-            } else {
-                return "ltr";
-            }
-        } else {
-            return textDir;
-        }
     }
     
     /**
@@ -137,7 +110,7 @@ RED.bidi = (function() {
     }
     
     function _onInputChange() {
-        $(this).attr("dir", _resolveBaseTextDir($(this).val()));
+    	$(this).attr("dir", RED.bidi.baseTextDir.resolveBaseTextDir($(this).val(), textDir));
     }
     
     /**
@@ -157,23 +130,29 @@ RED.bidi = (function() {
      * @param args - pass additional arguments to the handler. generally null.
      */
     function _applyBidiSupport(value, flag, type, args) {
-        switch (flag) {
-        case 0:
-            value = RED.bidi.baseTextDir.enforceTextDirectionWithUCC(value);
-            return RED.bidi.numericShaping.shape(value, shaperType, textDir);
-        case 1:
-            return RED.bidi.baseTextDir.enforceTextDirectionWithUCC(value);
-        case 2:
-            return RED.bidi.numericShaping.shape(value, shaperType, textDir);
-        case 4:
-            return _getGlobalizedDate(value);
-        case 8:
-            return RED.bidi.format.attach(value, type, args, _isMirroringEnabled(), navigator.language);
-        case 16:
-            return RED.bidi.format.getHtml(value, type, args, _isMirroringEnabled(), navigator.language);
-        default:
-            return value;
-        }
+        var resolvedDir = RED.bidi.baseTextDir.resolveBaseTextDir(value, textDir);
+    	
+    	if((flag & _flags.BTD_UCC) == _flags.BTD_UCC) {
+    		value = RED.bidi.baseTextDir.enforceTextDirectionWithUCC(value, resolvedDir);
+    	}
+    	if((flag & _flags.NS) == _flags.NS) {
+    		value = RED.bidi.numericShaping.shape(value, shaperType, resolvedDir);
+    	}
+    	if((flag & _flags.CALENDAR) == _flags.CALENDAR) {
+    		value = _getGlobalizedDate(value);
+    	}
+    	if((flag & _flags.BTD) == _flags.BTD) {
+    		value = '<span class="bidiAware" dir="'+ resolvedDir +'">'+ value + '</span>';
+    	}
+    	if((flag & _flags.STT_ATTACH) == _flags.STT_ATTACH) {
+    		value = RED.bidi.format.attach(value, type, args, _isMirroringEnabled(), navigator.language);
+    	}
+    	if((flag & _flags.STT_GETHTML) == _flags.STT_GETHTML) {
+    		console.log("hii STT_GETHTML");
+    		value = RED.bidi.format.getHtml(value, type, args, _isMirroringEnabled(), navigator.language);
+    	}
+    	
+    	return value;
     }
     return {
         isMirroringEnabled: _isMirroringEnabled,
@@ -181,7 +160,6 @@ RED.bidi = (function() {
         setCalendarType: _setCalendarType,
         setTextDirection : _setTextDirection,
         applyBidiSupport : _applyBidiSupport,
-        resolveBaseTextDir : _resolveBaseTextDir,
         prepareInput: _prepareInput,
         flags: _flags,
         componentPos: _componentPos

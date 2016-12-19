@@ -22,9 +22,6 @@ RED.bidi.numericShaping = (function(){
      */
     function _shape(text, shaperType, textDir) {
         text = text.toString();
-        if(textDir === "auto"){
-        	textDir = RED.bidi.resolveBaseTextDir(text);
-        }
         if (!text) { 
             return text;
         }

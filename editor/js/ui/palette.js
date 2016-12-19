@@ -93,15 +93,15 @@ RED.palette = (function() {
         el.css({height:multiLineNodeHeight+"px"});
 
         var labelElement = el.find(".palette_label");
-        labelElement.html(lines).attr('dir', RED.bidi.resolveBaseTextDir(lines));
+        labelElement.html(RED.bidi.applyBidiSupport(lines, RED.bidi.flags.BTD | RED.bidi.flags.NS));
 
         el.find(".palette_port").css({top:(multiLineNodeHeight/2-5)+"px"});
 
         var popOverContent;
         try {
-            var l = "<p><b>"+RED.bidi.applyBidiSupport(label,RED.bidi.flags.BTD & RED.bidi.flags.NS)+"</b></p>";
+            var l = "<p><b>"+RED.bidi.applyBidiSupport(label,RED.bidi.flags.BTD | RED.bidi.flags.NS)+"</b></p>";
             if (label != type) {
-                l = "<p><b>"+RED.bidi.applyBidiSupport(label,RED.bidi.flags.BTD & RED.bidi.flags.NS)+"</b><br/><i>"+type+"</i></p>";
+                l = "<p><b>"+RED.bidi.applyBidiSupport(label,RED.bidi.flags.BTD_UCC)+"</b><br/><i>"+type+"</i></p>";
             }
             popOverContent = $(l+(info?info:$("script[data-help-name$='"+type+"']").html()||"<p>"+RED._("palette.noInfo")+"</p>").trim())
                                 .filter(function(n) {
@@ -112,7 +112,7 @@ RED.palette = (function() {
             // NON-NLS: internal debug
             console.log("Error generating pop-over label for ",type);
             console.log(err.toString());
-            popOverContent = "<p><b>"+label+"</b></p><p>"+RED._("palette.noInfo")+"</p>";
+            popOverContent = "<p><b>"+RED.bidi.applyBidiSupport(label, RED.bidi.flags.BTD | RED.bidi.flags.NS)+"</b></p><p>"+RED._("palette.noInfo")+"</p>";
         }
 
         el.data('popover').setContent(popOverContent);
@@ -214,7 +214,7 @@ RED.palette = (function() {
                 } else {
                     helpText = $("script[data-help-name$='"+d.type+"']").html()||"";
                 }
-                var help = '<div class="node-help">'+helpText+"</div>";
+                var help = '<div class="node-help">'+RED.bidi.applyBidiSupport(helpText, RED.bidi.flags.BTD | RED.bidi.flags.NS)+"</div>";
                 RED.sidebar.info.set(help);
             });
             var chart = $("#chart");

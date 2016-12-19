@@ -570,7 +570,7 @@ RED.deploy = (function() {
                     $( "#node-dialog-confirm-deploy-config" ).show();
                     invalidNodes.sort(sortNodeInfo);
                     $( "#node-dialog-confirm-deploy-invalid-list" )
-                        .html("<li>"+invalidNodes.map(function(A) { return (A.tab?"["+RED.bidi.applyBidiSupport(A.tab, RED.bidi.flags.NS)+"] ":"")+RED.bidi.applyBidiSupport(A.label, RED.bidi.flags.NS)+" ("+A.type+")"}).join("</li><li>")+"</li>");
+                        .html("<li>"+invalidNodes.map(function(A) { return (A.tab?"["+RED.bidi.applyBidiSupport(A.tab, RED.bidi.flags.NS)+"] ":"")+A.label+" ("+A.type+")"}).join("</li><li>")+"</li>");
 
                 } else if (hasUnusedConfig && !ignoreDeployWarnings.unusedConfig) {
                     // showWarning = true;
