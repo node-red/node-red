@@ -118,6 +118,7 @@ module.exports = function(RED) {
                         }
                         if (util.isArray(value) && value.length > debuglength) {
                             value = {
+                                __encoded__: true,
                                 type: "array",
                                 data: value.slice(0,debuglength),
                                 length: value.length
