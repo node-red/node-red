@@ -214,7 +214,7 @@ describe('debug node', function() {
                     topic:"debug",
                     data:{
                         id:"n1",
-                        msg:'{\n "name": "bar",\n "o": "[circular]"\n}',
+                        msg:'{\n "name": "bar",\n "o": "[Circular ~]"\n}',
                         property:"payload",format:"Object"
                     }
                 });
