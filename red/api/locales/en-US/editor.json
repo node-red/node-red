@@ -130,8 +130,15 @@
             "improperlyConfigured": "The workspace contains some nodes that are not properly configured:",
             "unknown": "The workspace contains some unknown node types:",
             "confirm": "Are you sure you want to deploy?",
-            "conflict": "The server is running a more recent set of flows."
+            "conflict": "The server is running a more recent set of flows.",
+            "conflictChecking": "Checking to see if the changes can be merged automatically",
+            "conflictAutoMerge": "The changes include no conflicts and can be merged automatically.",
+            "conflictManualMerge": "The changes include conflicts that must be resolved before they can be deployed."
         }
+    },
+    "diff": {
+        "unresolvedCount": "__count__ unresolved conflict",
+        "unresolvedCount_plural": "__count__ unresolved conflicts"
     },
     "subflow": {
         "editSubflow": "Edit flow template: __name__",

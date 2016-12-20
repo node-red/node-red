@@ -1,5 +1,7 @@
 RED.diff = (function() {
 
+    var currentDiff = {};
+
     function init() {
 
         RED.actions.add("core:show-current-diff",showLocalDiff);
@@ -12,44 +14,50 @@ RED.diff = (function() {
         var dialog = $('<div id="node-dialog-view-diff" class="hide"><div id="node-dialog-view-diff-headers"></div><ol id="node-dialog-view-diff-diff"></ol></div>').appendTo(document.body);
 
         var toolbar = $('<div class="node-diff-toolbar">'+
-            '<span class="button-group">'+
-                '<a class="sidebar-header-button-toggle node-diff-filter" id="node-diff-filter-all" href="#"><span data-i18n="">all nodes</span></a>'+
-                '<a class="sidebar-header-button-toggle node-diff-filter selected" id="node-diff-filter-changed" href="#"><span data-i18n="">changed nodes</span></a>'+
-            '</span>'+
+            '<span><span id="node-diff-toolbar-resolved-conflicts"></span></span> '+
+            // '<span class="button-group">'+
+            //     '<a class="sidebar-header-button" href="#"><span data-i18n="">previous</span></a>'+
+            //     '<a class="sidebar-header-button" href="#"><span data-i18n="">next</span></a>'+
+            // '</span>'+
             '</div>').prependTo(dialog);
-
-        toolbar.find(".node-diff-filter").click(function(evt) {
-            evt.preventDefault();
-            if (!$(this).hasClass('selected')) {
-                $(this).siblings().removeClass('selected');
-                $(this).addClass('selected');
-            }
-            if ($(this).attr('id') === 'node-diff-filter-all') {
-                diffList.find('.node-diff-node-unchanged').parent().removeClass('hide');
-                diffList.find('.node-diff-tab-unchanged').parent().removeClass('hide');
-            } else {
-                diffList.find('.node-diff-node-unchanged').parent().addClass('hide');
-                diffList.find('.node-diff-tab-unchanged').parent().addClass('hide');
-                $(".node-diff-tab.node-diff-tab-unchanged").addClass("collapsed");
-            }
-        })
+        //
+        // toolbar.find(".node-diff-filter").click(function(evt) {
+        //     evt.preventDefault();
+        //     if (!$(this).hasClass('selected')) {
+        //         $(this).siblings().removeClass('selected');
+        //         $(this).addClass('selected');
+        //     }
+        //     if ($(this).attr('id') === 'node-diff-filter-all') {
+        //         diffList.find('.node-diff-node-unchanged').parent().removeClass('hide');
+        //         diffList.find('.node-diff-tab-unchanged').parent().removeClass('hide');
+        //     } else {
+        //         diffList.find('.node-diff-node-unchanged').parent().addClass('hide');
+        //         diffList.find('.node-diff-tab-unchanged').parent().addClass('hide');
+        //         $(".node-diff-tab.node-diff-tab-unchanged").addClass("collapsed");
+        //     }
+        // })
 
         $("#node-dialog-view-diff").dialog({
             title: RED._('deploy.confirm.button.review'),
             modal: true,
             autoOpen: false,
             buttons: [
-                // {
-                //     text: RED._("deploy.confirm.button.cancel"),
-                //     click: function() {
-                //         $( this ).dialog( "close" );
-                //     }
-                // },
                 {
-                    text: RED._("common.label.close"),
-                    class: "primary",
+                    text: RED._("common.label.cancel"),
                     click: function() {
                         $( this ).dialog( "close" );
+                    }
+                },
+                {
+                    id: "node-diff-view-diff-merge",
+                    text: RED._("deploy.confirm.button.merge"),
+                    class: "primary disabled",
+                    click: function() {
+                        if (!$("#node-diff-view-diff-merge").hasClass('disabled')) {
+                            refreshConflictHeader();
+                            mergeDiff(currentDiff);
+                            $( this ).dialog( "close" );
+                        }
                     }
                 }
             ],
@@ -67,27 +75,17 @@ RED.diff = (function() {
                 var tab = object.tab.n;
                 var def = object.def;
                 var tabDiv = $('<div>',{class:"node-diff-tab"}).appendTo(container);
+                tabDiv.addClass('collapsed');
                 var titleRow = $('<div>',{class:"node-diff-tab-title"}).appendTo(tabDiv);
                 var nodesDiv = $('<div>').appendTo(tabDiv);
                 var originalCell = $('<div>',{class:"node-diff-node-entry-cell"}).appendTo(titleRow);
-                var localCell = $('<div>',{class:"node-diff-node-entry-cell"}).appendTo(titleRow);
+                var localCell = $('<div>',{class:"node-diff-node-entry-cell node-diff-node-local"}).appendTo(titleRow);
                 var remoteCell;
-                if (remoteDiff) {
-                    remoteCell = $('<div>',{class:"node-diff-node-entry-cell"}).appendTo(titleRow);
-                }
-                // if (localDiff.added[tab.id]) {
-                //     titleRow.addClass("node-diff-node-added");
-                // } else if (localDiff.deleted[tab.id]) {
-                //     titleRow.addClass("node-diff-node-deleted");
-                // }
-                // var status = $('<span class="node-diff-status"></span>').appendTo(originalCell);
+                var selectState;
 
-                // if (!object.newTab && object.remoteTab) {
-                //     $('<span class="node-diff-node-added"><span class="node-diff-status"><i class="fa fa-plus-square"></i></span></span>').appendTo(remoteCell);
-                // //} else if (object.newTab && (remoteDiff && !object.remoteTab)) {
-                // } else if (localDiff.added[tab.id]) {
-                //     $('<span class="node-diff-node-added"><span class="node-diff-status"><i class="fa fa-plus-square"></i></span></span>').appendTo(localCell);
-                // }
+                if (remoteDiff) {
+                    remoteCell = $('<div>',{class:"node-diff-node-entry-cell node-diff-node-remote"}).appendTo(titleRow);
+                }
                 $('<span class="node-diff-chevron"><i class="fa fa-angle-down"></i></span>').appendTo(originalCell);
                 createNodeIcon(tab,def).appendTo(originalCell);
                 var tabForLabel = (object.newTab || object.tab).n;
@@ -97,7 +95,7 @@ RED.diff = (function() {
                 } else if (tab.type === 'subflow') {
                     titleSpan.html((tabForLabel.name||tabForLabel.id));
                 } else {
-                    titleSpan.html("Global configuration nodes");
+                    titleSpan.html("Global nodes");
                 }
                 var flowStats = {
                     local: {
@@ -132,27 +130,27 @@ RED.diff = (function() {
                         var div = $("<div>",{class:"node-diff-node-entry node-diff-node-props collapsed"}).appendTo(nodesDiv);
                         var row = $("<div>",{class:"node-diff-node-entry-header"}).appendTo(div);
                         var originalNodeDiv = $("<div>",{class:"node-diff-node-entry-cell"}).appendTo(row);
-                        var localNodeDiv = $("<div>",{class:"node-diff-node-entry-cell"}).appendTo(row);
+                        var localNodeDiv = $("<div>",{class:"node-diff-node-entry-cell node-diff-node-local"}).appendTo(row);
                         var localChanged = false;
-                        var remoteChanged = false;
 
                         if (!localDiff.newConfig.all[tab.id]) {
                             localNodeDiv.addClass("node-diff-empty");
                         } else if (localDiff.added[tab.id]) {
                             localNodeDiv.addClass("node-diff-node-added");
+                            localChanged = true;
                             $('<span class="node-diff-status"><i class="fa fa-plus-square"></i> added</span>').appendTo(localNodeDiv);
                         } else if (localDiff.changed[tab.id]) {
                             localNodeDiv.addClass("node-diff-node-changed");
-                            $('<span class="node-diff-status"><i class="fa fa-dot-circle-o"></i> changed</span>').appendTo(localNodeDiv);
+                            localChanged = true;
+                            $('<span class="node-diff-status"><i class="fa fa-square"></i> changed</span>').appendTo(localNodeDiv);
                         } else {
                             localNodeDiv.addClass("node-diff-node-unchanged");
-                            $('<span class="node-diff-status"><i class="fa fa-circle-o"></i> unchanged</span>').appendTo(localNodeDiv);
+                            $('<span class="node-diff-status"><i class="fa fa-square-o"></i> unchanged</span>').appendTo(localNodeDiv);
                         }
-
 
                         var remoteNodeDiv;
                         if (remoteDiff) {
-                            remoteNodeDiv = $("<div>",{class:"node-diff-node-entry-cell"}).appendTo(row);
+                            remoteNodeDiv = $("<div>",{class:"node-diff-node-entry-cell node-diff-node-remote"}).appendTo(row);
                             if (!remoteDiff.newConfig.all[tab.id]) {
                                 remoteNodeDiv.addClass("node-diff-empty");
                             } else if (remoteDiff.added[tab.id]) {
@@ -160,48 +158,69 @@ RED.diff = (function() {
                                 $('<span class="node-diff-status"><i class="fa fa-plus-square"></i> added</span>').appendTo(remoteNodeDiv);
                             } else if (remoteDiff.changed[tab.id]) {
                                 remoteNodeDiv.addClass("node-diff-node-changed");
-                                $('<span class="node-diff-status"><i class="fa fa-dot-circle-o"></i> changed</span>').appendTo(remoteNodeDiv);
+                                $('<span class="node-diff-status"><i class="fa fa-square"></i> changed</span>').appendTo(remoteNodeDiv);
                             } else {
                                 remoteNodeDiv.addClass("node-diff-node-unchanged");
-                                $('<span class="node-diff-status"><i class="fa fa-circle-o"></i> unchanged</span>').appendTo(remoteNodeDiv);
+                                $('<span class="node-diff-status"><i class="fa fa-square-o"></i> unchanged</span>').appendTo(remoteNodeDiv);
                             }
                         }
                         $('<span class="node-diff-chevron"><i class="fa fa-angle-down"></i></span>').appendTo(originalNodeDiv);
                         $('<span>').html("Flow Properties").appendTo(originalNodeDiv);
+
                         row.click(function(evt) {
                             evt.preventDefault();
                             $(this).parent().toggleClass('collapsed');
                         });
-                        createNodePropertiesTable(def,tab,localTabNode,remoteTabNode,flowStats).appendTo(div);
+
+                        createNodePropertiesTable(def,tab,localTabNode,remoteTabNode,object.conflicts).appendTo(div);
+                        selectState = "";
+                        if (object.conflicts[tab.id]) {
+                            flowStats.conflicts++;
+
+                            if (!localNodeDiv.hasClass("node-diff-empty")) {
+                                $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i></span></span>').prependTo(localNodeDiv);
+                            }
+                            if (!remoteNodeDiv.hasClass("node-diff-empty")) {
+                                $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i></span></span>').prependTo(remoteNodeDiv);
+                            }
+                            div.addClass("node-diff-node-entry-conflict");
+                        } else {
+                            if (!localChanged) {
+                                selectState = "remote";
+                            } else {
+                                selectState = "local";
+                            }
+                        }
+
+                        createNodeConflictRadioBoxes(tab,div,localNodeDiv,remoteNodeDiv,true,!object.conflicts[tab.id],selectState);
                     }
                 }
-
                 // var stats = $('<span>',{class:"node-diff-tab-stats"}).appendTo(titleRow);
-
-
+                var localNodeCount = 0;
+                var remoteNodeCount = 0;
                 var seen = {};
                 object.tab.nodes.forEach(function(node) {
                     seen[node.id] = true;
-                    createNodeDiffRow(node,flowStats,localDiff,remoteDiff).appendTo(nodesDiv)
+                    createNodeDiffRow(node,flowStats,localDiff,remoteDiff,object.conflicts[node.id]).appendTo(nodesDiv)
                 });
                 if (object.newTab) {
+                    localNodeCount = object.newTab.nodes.length;
                     object.newTab.nodes.forEach(function(node) {
                         if (!seen[node.id]) {
                             seen[node.id] = true;
-                            createNodeDiffRow(node,flowStats,localDiff,remoteDiff).appendTo(nodesDiv)
+                            createNodeDiffRow(node,flowStats,localDiff,remoteDiff,object.conflicts[node.id]).appendTo(nodesDiv)
                         }
                     });
                 }
                 if (object.remoteTab) {
+                    remoteNodeCount = object.remoteTab.nodes.length;
                     object.remoteTab.nodes.forEach(function(node) {
                         if (!seen[node.id]) {
-                            createNodeDiffRow(node,flowStats,localDiff,remoteDiff).appendTo(nodesDiv)
+                            createNodeDiffRow(node,flowStats,localDiff,remoteDiff,object.conflicts[node.id]).appendTo(nodesDiv)
                         }
                     });
                 }
                 titleRow.click(function(evt) {
-                    evt.preventDefault();
-
                     // if (titleRow.parent().find(".node-diff-node-entry:not(.hide)").length > 0) {
                     titleRow.parent().toggleClass('collapsed');
                     if ($(this).parent().hasClass('collapsed')) {
@@ -211,9 +230,6 @@ RED.diff = (function() {
                     // }
                 })
 
-                var localChangesCount = flowStats.local.addedCount+flowStats.local.deletedCount+flowStats.local.changedCount;
-                var remoteChangesCount = flowStats.remote.addedCount+flowStats.remote.deletedCount+flowStats.remote.changedCount;
-
                 if (localDiff.deleted[tab.id]) {
                     $('<span class="node-diff-node-deleted"><span class="node-diff-status"><i class="fa fa-minus-square"></i> flow deleted</span></span>').appendTo(localCell);
                 } else if (object.newTab) {
@@ -222,28 +238,31 @@ RED.diff = (function() {
                     } else {
                         if (tab.id) {
                             if (localDiff.changed[tab.id]) {
-                                localChangesCount++;
                                 flowStats.local.changedCount++;
                             } else {
                                 flowStats.local.unchangedCount++;
                             }
                         }
                         var localStats = $('<span>',{class:"node-diff-tab-stats"}).appendTo(localCell);
-                        if (flowStats.conflicts > 0) {
-                            $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i> '+flowStats.conflicts+'</span></span>').appendTo(localStats);
+                        $('<span class="node-diff-status">'+localNodeCount+' nodes</span>').appendTo(localStats);
+
+                        if (flowStats.conflicts + flowStats.local.addedCount + flowStats.local.changedCount + flowStats.local.deletedCount > 0) {
+                            $('<span class="node-diff-status"> [ </span>').appendTo(localStats);
+                            if (flowStats.conflicts > 0) {
+                                $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i> '+flowStats.conflicts+'</span></span>').appendTo(localStats);
+                            }
+                            if (flowStats.local.addedCount > 0) {
+                                $('<span class="node-diff-node-added"><span class="node-diff-status"><i class="fa fa-plus-square"></i> '+flowStats.local.addedCount+'</span></span>').appendTo(localStats);
+                            }
+                            if (flowStats.local.changedCount > 0) {
+                                $('<span class="node-diff-node-changed"><span class="node-diff-status"><i class="fa fa-square"></i> '+flowStats.local.changedCount+'</span></span>').appendTo(localStats);
+                            }
+                            if (flowStats.local.deletedCount > 0) {
+                                $('<span class="node-diff-node-deleted"><span class="node-diff-status"><i class="fa fa-minus-square"></i> '+flowStats.local.deletedCount+'</span></span>').appendTo(localStats);
+                            }
+                            $('<span class="node-diff-status"> ] </span>').appendTo(localStats);
                         }
-                        if (flowStats.local.unchangedCount > 0) {
-                            $('<span class="node-diff-node-unchanged"><span class="node-diff-status"><i class="fa fa-circle-o"></i> '+flowStats.local.unchangedCount+'</span></span>').appendTo(localStats);
-                        }
-                        if (flowStats.local.addedCount > 0) {
-                            $('<span class="node-diff-node-added"><span class="node-diff-status"><i class="fa fa-plus-square"></i> '+flowStats.local.addedCount+'</span></span>').appendTo(localStats);
-                        }
-                        if (flowStats.local.changedCount > 0) {
-                            $('<span class="node-diff-node-changed"><span class="node-diff-status"><i class="fa fa-dot-circle-o"></i> '+flowStats.local.changedCount+'</span></span>').appendTo(localStats);
-                        }
-                        if (flowStats.local.deletedCount > 0) {
-                            $('<span class="node-diff-node-deleted"><span class="node-diff-status"><i class="fa fa-minus-square"></i> '+flowStats.local.deletedCount+'</span></span>').appendTo(localStats);
-                        }
+
                     }
                 } else {
                     localCell.addClass("node-diff-empty");
@@ -258,33 +277,42 @@ RED.diff = (function() {
                         } else {
                             if (tab.id) {
                                 if (remoteDiff.changed[tab.id]) {
-                                    remoteChangesCount++;
                                     flowStats.remote.changedCount++;
                                 } else {
                                     flowStats.remote.unchangedCount++;
                                 }
                             }
                             var remoteStats = $('<span>',{class:"node-diff-tab-stats"}).appendTo(remoteCell);
-                            if (flowStats.conflicts > 0) {
-                                $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i> '+flowStats.conflicts+'</span></span>').appendTo(remoteStats);
-                            }
-                            if (flowStats.remote.unchangedCount > 0) {
-                                $('<span class="node-diff-node-unchanged"><span class="node-diff-status"><i class="fa fa-circle-o"></i> '+flowStats.remote.unchangedCount+'</span></span>').appendTo(remoteStats);
-                            }
-                            if (flowStats.remote.addedCount > 0) {
-                                $('<span class="node-diff-node-added"><span class="node-diff-status"><i class="fa fa-plus-square"></i> '+flowStats.remote.addedCount+'</span></span>').appendTo(remoteStats);
-                            }
-                            if (flowStats.remote.changedCount > 0) {
-                                $('<span class="node-diff-node-changed"><span class="node-diff-status"><i class="fa fa-dot-circle-o"></i> '+flowStats.remote.changedCount+'</span></span>').appendTo(remoteStats);
-                            }
-                            if (flowStats.remote.deletedCount > 0) {
-                                $('<span class="node-diff-node-deleted"><span class="node-diff-status"><i class="fa fa-minus-square"></i> '+flowStats.remote.deletedCount+'</span></span>').appendTo(remoteStats);
+                            $('<span class="node-diff-status">'+remoteNodeCount+' nodes</span>').appendTo(remoteStats);
+                            if (flowStats.conflicts + flowStats.remote.addedCount + flowStats.remote.changedCount + flowStats.remote.deletedCount > 0) {
+                                $('<span class="node-diff-status"> [ </span>').appendTo(remoteStats);
+                                if (flowStats.conflicts > 0) {
+                                    $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i> '+flowStats.conflicts+'</span></span>').appendTo(remoteStats);
+                                }
+                                if (flowStats.remote.addedCount > 0) {
+                                    $('<span class="node-diff-node-added"><span class="node-diff-status"><i class="fa fa-plus-square"></i> '+flowStats.remote.addedCount+'</span></span>').appendTo(remoteStats);
+                                }
+                                if (flowStats.remote.changedCount > 0) {
+                                    $('<span class="node-diff-node-changed"><span class="node-diff-status"><i class="fa fa-square"></i> '+flowStats.remote.changedCount+'</span></span>').appendTo(remoteStats);
+                                }
+                                if (flowStats.remote.deletedCount > 0) {
+                                    $('<span class="node-diff-node-deleted"><span class="node-diff-status"><i class="fa fa-minus-square"></i> '+flowStats.remote.deletedCount+'</span></span>').appendTo(remoteStats);
+                                }
+                                $('<span class="node-diff-status"> ] </span>').appendTo(remoteStats);
                             }
                         }
                     } else {
                         remoteCell.addClass("node-diff-empty");
                     }
+                    if (flowStats.conflicts > 0) {
+                        titleRow.addClass("node-diff-node-entry-conflict");
+                    }
+                    if (tab.id) {
+                        selectState = "";
+                        createNodeConflictRadioBoxes(tab,titleRow,localCell,remoteCell, false, !(flowStats.conflicts > 0 &&(localDiff.deleted[tab.id] || remoteDiff.deleted[tab.id])),selectState);
+                    }
                 }
+
                 if (tabDiv.find(".node-diff-node-entry").length === 0) {
                     tabDiv.addClass("node-diff-tab-empty");
                 }
@@ -295,7 +323,6 @@ RED.diff = (function() {
             }
         });
     }
-
     function formatWireProperty(wires,allNodes) {
         var result = $("<div>",{class:"node-diff-property-wires"})
         var list = $("<ol></ol>");
@@ -356,10 +383,10 @@ RED.diff = (function() {
         $('<span>',{class:"node-diff-node-label"}).html(nodeLabel).appendTo(contentDiv);
         return nodeTitleDiv;
     }
-    function createNodeDiffRow(node,stats,localDiff,remoteDiff) {
+    function createNodeDiffRow(node,stats,localDiff,remoteDiff,conflicted) {
         var hasChanges = false; // exists in original and local/remote but with changes
         var unChanged = true; // existing in original,local,remote unchanged
-        var conflicted = false;
+        var localChanged = false;
 
         if (localDiff.added[node.id]) {
             stats.local.addedCount++;
@@ -387,7 +414,7 @@ RED.diff = (function() {
             hasChanges = true;
             unChanged = false;
         }
-
+        // console.log(node.id,localDiff.added[node.id],remoteDiff.added[node.id],localDiff.deleted[node.id],remoteDiff.deleted[node.id],localDiff.changed[node.id],remoteDiff.changed[node.id])
         var def = RED.nodes.getType(node.type);
         if (def === undefined) {
             if (/^subflow:/.test(node.type)) {
@@ -402,38 +429,28 @@ RED.diff = (function() {
             }
         }
         var div = $("<div>",{class:"node-diff-node-entry collapsed"});
-        var row = $("<div>").appendTo(div);
+        var row = $("<div>",{class:"node-diff-node-entry-header"}).appendTo(div);
 
         var originalNodeDiv = $("<div>",{class:"node-diff-node-entry-cell"}).appendTo(row);
-        var localNodeDiv = $("<div>",{class:"node-diff-node-entry-cell"}).appendTo(row);
+        var localNodeDiv = $("<div>",{class:"node-diff-node-entry-cell node-diff-node-local"}).appendTo(row);
         var remoteNodeDiv;
         var chevron;
         if (remoteDiff) {
-            remoteNodeDiv = $("<div>",{class:"node-diff-node-entry-cell"}).appendTo(row);
+            remoteNodeDiv = $("<div>",{class:"node-diff-node-entry-cell node-diff-node-remote"}).appendTo(row);
         }
         $('<span class="node-diff-chevron"><i class="fa fa-angle-down"></i></span>').appendTo(originalNodeDiv);
 
         if (unChanged) {
             stats.local.unchangedCount++;
-            // $('<span class="node-diff-chevron">').appendTo(originalNodeDiv);
-            //$('<span class="node-diff-status"></span>').appendTo(originalNodeDiv);
             createNode(node,def).appendTo(originalNodeDiv);
             localNodeDiv.addClass("node-diff-node-unchanged");
-            $('<span class="node-diff-status"><i class="fa fa-circle-o"></i> unchanged</span>').appendTo(localNodeDiv);
+            $('<span class="node-diff-status"><i class="fa fa-square-o"></i> unchanged</span>').appendTo(localNodeDiv);
             if (remoteDiff) {
                 stats.remote.unchangedCount++;
                 remoteNodeDiv.addClass("node-diff-node-unchanged");
-                $('<span class="node-diff-status"><i class="fa fa-circle-o"></i> unchanged</span>').appendTo(remoteNodeDiv);
+                $('<span class="node-diff-status"><i class="fa fa-square-o"></i> unchanged</span>').appendTo(remoteNodeDiv);
             }
-
-            //$('<span class="node-diff-status"></span>').appendTo(localNodeDiv);
-            // createNode(node,def).appendTo(localNodeDiv);
-            // if (remoteDiff) {
-            //     //$('<span class="node-diff-status"></span>').appendTo(remoteNodeDiv);
-            //     createNode(node,def).appendTo(remoteNodeDiv);
-            // }
         } else if (localDiff.added[node.id]) {
-            // $('<span class="node-diff-chevron">').appendTo(originalNodeDiv);
             localNodeDiv.addClass("node-diff-node-added");
             if (remoteNodeDiv) {
                 remoteNodeDiv.addClass("node-diff-empty");
@@ -441,32 +458,28 @@ RED.diff = (function() {
             $('<span class="node-diff-status"><i class="fa fa-plus-square"></i> added</span>').appendTo(localNodeDiv);
             createNode(node,def).appendTo(originalNodeDiv);
         } else if (remoteDiff && remoteDiff.added[node.id]) {
-            // $('<span class="node-diff-chevron">').appendTo(originalNodeDiv);
             localNodeDiv.addClass("node-diff-empty");
             remoteNodeDiv.addClass("node-diff-node-added");
             $('<span class="node-diff-status"><i class="fa fa-plus-square"></i> added</span>').appendTo(remoteNodeDiv);
             createNode(node,def).appendTo(originalNodeDiv);
         } else {
-            // chevron = $('<span class="node-diff-chevron">').appendTo(originalNodeDiv);
-            // if (localDiff.changed[node.id] || (remoteDiff && remoteDiff.changed[node.id])) {
-            //     $('<i class="fa fa-angle-down"></i>').appendTo(chevron);
-            // }
-            //$('<span class="node-diff-status"></span>').appendTo(originalNodeDiv);
             createNode(node,def).appendTo(originalNodeDiv);
             if (localDiff.deleted[node.z]) {
                 localNodeDiv.addClass("node-diff-empty");
+                localChanged = true;
             } else if (localDiff.deleted[node.id]) {
                 localNodeDiv.addClass("node-diff-node-deleted");
                 $('<span class="node-diff-status"><i class="fa fa-minus-square"></i> deleted</span>').appendTo(localNodeDiv);
+                localChanged = true;
             } else if (localDiff.changed[node.id]) {
                 localNodeDiv.addClass("node-diff-node-changed");
-                $('<span class="node-diff-status"><i class="fa fa-dot-circle-o"></i> changed</span>').appendTo(localNodeDiv);
+                $('<span class="node-diff-status"><i class="fa fa-square"></i> changed</span>').appendTo(localNodeDiv);
+                localChanged = true;
             } else {
                 stats.local.unchangedCount++;
                 localNodeDiv.addClass("node-diff-node-unchanged");
-                $('<span class="node-diff-status"><i class="fa fa-circle-o"></i> unchanged</span>').appendTo(localNodeDiv);
+                $('<span class="node-diff-status"><i class="fa fa-square-o"></i> unchanged</span>').appendTo(localNodeDiv);
             }
-            // createNode(node,def).appendTo(localNodeDiv);
 
             if (remoteDiff) {
                 if (remoteDiff.deleted[node.z]) {
@@ -476,13 +489,12 @@ RED.diff = (function() {
                     $('<span class="node-diff-status"><i class="fa fa-minus-square"></i> deleted</span>').appendTo(remoteNodeDiv);
                 } else if (remoteDiff.changed[node.id]) {
                     remoteNodeDiv.addClass("node-diff-node-changed");
-                    $('<span class="node-diff-status"><i class="fa fa-dot-circle-o"></i> changed</span>').appendTo(remoteNodeDiv);
+                    $('<span class="node-diff-status"><i class="fa fa-square"></i> changed</span>').appendTo(remoteNodeDiv);
                 } else {
                     stats.remote.unchangedCount++;
                     remoteNodeDiv.addClass("node-diff-node-unchanged");
-                    $('<span class="node-diff-status"><i class="fa fa-circle-o"></i> unchanged</span>').appendTo(remoteNodeDiv);
+                    $('<span class="node-diff-status"><i class="fa fa-square-o"></i> unchanged</span>').appendTo(remoteNodeDiv);
                 }
-                //createNode(node,def).appendTo(remoteNodeDiv);
             }
         }
         var localNode = {
@@ -498,20 +510,34 @@ RED.diff = (function() {
                 diff: remoteDiff
             }
         }
-        var currentConflictCount = stats.conflicts;
-        createNodePropertiesTable(def,node,localNode,remoteNode,stats).appendTo(div);
-        if (currentConflictCount !== stats.conflicts) {
-            $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i></span></span>').prependTo(localNodeDiv);
-            $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i></span></span>').prependTo(remoteNodeDiv);
+        createNodePropertiesTable(def,node,localNode,remoteNode).appendTo(div);
+
+        var selectState = "";
+
+        if (conflicted) {
+            stats.conflicts++;
+            if (!localNodeDiv.hasClass("node-diff-empty")) {
+                $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i></span></span>').prependTo(localNodeDiv);
+            }
+            if (!remoteNodeDiv.hasClass("node-diff-empty")) {
+                $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i></span></span>').prependTo(remoteNodeDiv);
+            }
+            div.addClass("node-diff-node-entry-conflict");
+        } else {
+            if (!localChanged) {
+                selectState = "remote";
+            } else {
+                selectState = "local";
+            }
         }
+        createNodeConflictRadioBoxes(node,div,localNodeDiv,remoteNodeDiv,false,!conflicted,selectState);
         row.click(function(evt) {
-            evt.preventDefault();
             $(this).parent().toggleClass('collapsed');
         });
 
         return div;
     }
-    function createNodePropertiesTable(def,node,localNodeObj,remoteNodeObj,stats) {
+    function createNodePropertiesTable(def,node,localNodeObj,remoteNodeObj) {
         var localNode = localNodeObj.node;
         var remoteNode;
         if (remoteNodeObj) {
@@ -519,9 +545,7 @@ RED.diff = (function() {
         }
 
         var nodePropertiesDiv = $("<div>",{class:"node-diff-node-entry-properties"});
-
         var nodePropertiesTable = $("<table>").appendTo(nodePropertiesDiv);
-        //var nodePropertiesTable = $("<div>").appendTo(nodePropertiesDiv);
         var row;
         var localCell, remoteCell;
         var currentValue, localValue, remoteValue;
@@ -530,16 +554,8 @@ RED.diff = (function() {
         var localChanges = 0;
         var remoteChanges = 0;
         var conflict = false;
-        var conflicted = false;
         var status;
 
-        if (remoteNodeObj) {
-            if ( (remoteNodeObj.diff.changed[node.id] && localNodeObj.diff.deleted[node.id]) ||
-                 (remoteNodeObj.diff.deleted[node.id] && localNodeObj.diff.changed[node.id])
-             ) {
-                 conflicted = true;
-             }
-        }
         if (node.hasOwnProperty('x')) {
             if (localNode) {
                 if (localNode.x !== node.x || localNode.y !== node.y) {
@@ -553,29 +569,28 @@ RED.diff = (function() {
                     remoteChanges++;
                 }
             }
-            if ( (remoteChanged && localChanged && (localNode.x !== remoteNode.y || localNode.y !== remoteNode.x)) ||
+            if ( (remoteChanged && localChanged && (localNode.x !== remoteNode.x || localNode.y !== remoteNode.y)) ||
                 (!localChanged && remoteChanged && localNodeObj.diff.deleted[node.id]) ||
                 (localChanged && !remoteChanged && remoteNodeObj.diff.deleted[node.id])
             ) {
-                conflicted = true;
                 conflict = true;
             }
             row = $("<tr>").appendTo(nodePropertiesTable);
             $("<td>",{class:"node-diff-property-cell-label"}).html("position").appendTo(row);
-            localCell = $("<td>",{class:"node-diff-property-cell"}).appendTo(row);
+            localCell = $("<td>",{class:"node-diff-property-cell node-diff-node-local"}).appendTo(row);
             if (localNode) {
                 localCell.addClass("node-diff-node-"+(localChanged?"changed":"unchanged"));
-                $('<span class="node-diff-status">'+(localChanged?'<i class="fa fa-dot-circle-o"></i>':'')+'</span>').appendTo(localCell);
+                $('<span class="node-diff-status">'+(localChanged?'<i class="fa fa-square"></i>':'')+'</span>').appendTo(localCell);
                 RED.utils.createObjectElement({x:localNode.x,y:localNode.y}).appendTo(localCell);
             } else {
                 localCell.addClass("node-diff-empty");
             }
 
             if (remoteNode !== undefined) {
-                remoteCell = $("<td>",{class:"node-diff-property-cell"}).appendTo(row);
+                remoteCell = $("<td>",{class:"node-diff-property-cell node-diff-node-remote"}).appendTo(row);
                 remoteCell.addClass("node-diff-node-"+(remoteChanged?"changed":"unchanged"));
                 if (remoteNode) {
-                    $('<span class="node-diff-status">'+(remoteChanged?'<i class="fa fa-dot-circle-o"></i>':'')+'</span>').appendTo(remoteCell);
+                    $('<span class="node-diff-status">'+(remoteChanged?'<i class="fa fa-square"></i>':'')+'</span>').appendTo(remoteCell);
                     RED.utils.createObjectElement({x:remoteNode.x,y:remoteNode.y}).appendTo(remoteCell);
                 } else {
                     remoteCell.addClass("node-diff-empty");
@@ -604,16 +619,15 @@ RED.diff = (function() {
                 (!localChanged && remoteChanged && localNodeObj.diff.deleted[node.id]) ||
                 (localChanged && !remoteChanged && remoteNodeObj.diff.deleted[node.id])
             ){
-                conflicted = true;
                 conflict = true;
             }
             row = $("<tr>").appendTo(nodePropertiesTable);
             $("<td>",{class:"node-diff-property-cell-label"}).html("wires").appendTo(row);
-            localCell = $("<td>",{class:"node-diff-property-cell"}).appendTo(row);
+            localCell = $("<td>",{class:"node-diff-property-cell node-diff-node-local"}).appendTo(row);
             if (localNode) {
                 if (!conflict) {
                     localCell.addClass("node-diff-node-"+(localChanged?"changed":"unchanged"));
-                    $('<span class="node-diff-status">'+(localChanged?'<i class="fa fa-dot-circle-o"></i>':'')+'</span>').appendTo(localCell);
+                    $('<span class="node-diff-status">'+(localChanged?'<i class="fa fa-square"></i>':'')+'</span>').appendTo(localCell);
                 } else {
                     localCell.addClass("node-diff-node-conflict");
                     $('<span class="node-diff-status"><i class="fa fa-exclamation"></i></span>').appendTo(localCell);
@@ -624,11 +638,11 @@ RED.diff = (function() {
             }
 
             if (remoteNode !== undefined) {
-                remoteCell = $("<td>",{class:"node-diff-property-cell"}).appendTo(row);
+                remoteCell = $("<td>",{class:"node-diff-property-cell node-diff-node-remote"}).appendTo(row);
                 if (remoteNode) {
                     if (!conflict) {
                         remoteCell.addClass("node-diff-node-"+(remoteChanged?"changed":"unchanged"));
-                        $('<span class="node-diff-status">'+(remoteChanged?'<i class="fa fa-dot-circle-o"></i>':'')+'</span>').appendTo(remoteCell);
+                        $('<span class="node-diff-status">'+(remoteChanged?'<i class="fa fa-square"></i>':'')+'</span>').appendTo(remoteCell);
                     } else {
                         remoteCell.addClass("node-diff-node-conflict");
                         $('<span class="node-diff-status"><i class="fa fa-exclamation"></i></span>').appendTo(remoteCell);
@@ -667,17 +681,16 @@ RED.diff = (function() {
                 (!localChanged &&  remoteChanged && localNodeObj.diff.deleted[node.id]) ||
                 (localChanged && !remoteChanged && remoteNodeObj.diff.deleted[node.id])
             ){
-                conflicted = true;
                 conflict = true;
             }
 
             row = $("<tr>").appendTo(nodePropertiesTable);
             $("<td>",{class:"node-diff-property-cell-label"}).html(d).appendTo(row);
-            localCell = $("<td>",{class:"node-diff-property-cell"}).appendTo(row);
+            localCell = $("<td>",{class:"node-diff-property-cell node-diff-node-local"}).appendTo(row);
             if (localNode) {
                 if (!conflict) {
                     localCell.addClass("node-diff-node-"+(localChanged?"changed":"unchanged"));
-                    $('<span class="node-diff-status">'+(localChanged?'<i class="fa fa-dot-circle-o"></i>':'')+'</span>').appendTo(localCell);
+                    $('<span class="node-diff-status">'+(localChanged?'<i class="fa fa-square"></i>':'')+'</span>').appendTo(localCell);
                 } else {
                     localCell.addClass("node-diff-node-conflict");
                     $('<span class="node-diff-status"><i class="fa fa-exclamation"></i></span>').appendTo(localCell);
@@ -687,11 +700,11 @@ RED.diff = (function() {
                 localCell.addClass("node-diff-empty");
             }
             if (remoteNode !== undefined) {
-                remoteCell = $("<td>",{class:"node-diff-property-cell"}).appendTo(row);
+                remoteCell = $("<td>",{class:"node-diff-property-cell node-diff-node-remote"}).appendTo(row);
                 if (remoteNode) {
                     if (!conflict) {
                         remoteCell.addClass("node-diff-node-"+(remoteChanged?"changed":"unchanged"));
-                        $('<span class="node-diff-status">'+(remoteChanged?'<i class="fa fa-dot-circle-o"></i>':'')+'</span>').appendTo(remoteCell);
+                        $('<span class="node-diff-status">'+(remoteChanged?'<i class="fa fa-square"></i>':'')+'</span>').appendTo(remoteCell);
                     } else {
                         remoteCell.addClass("node-diff-node-conflict");
                         $('<span class="node-diff-status"><i class="fa fa-exclamation"></i></span>').appendTo(remoteCell);
@@ -702,64 +715,85 @@ RED.diff = (function() {
                 }
             }
         });
-
-        // row = $("<tr>",{class:"node-diff-property-header"}).prependTo(nodePropertiesTable);
-        // $("<td>").appendTo(row);
-        // var cell;
-        // if (localNode) {
-        //     if (localNodeObj.diff.added[node.id]) {
-        //         $('<td class="node-diff-node-added"><span class="node-diff-status"><i class="fa fa-plus-square"></i> added</span></td>').appendTo(row);
-        //     } else if (localChanges > 0) {
-        //         cell = $('<td></td>').appendTo(row);
-        //         if (conflicted) {
-        //             $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i> conflict</span> </span>').appendTo(cell);
-        //         }
-        //         $('<span class="node-diff-node-changed"><span class="node-diff-status"><i class="fa fa-dot-circle-o"></i> changed</span></span>').appendTo(cell);
-        //     } else {
-        //         $('<td class="node-diff-node-unchanged"><span class="node-diff-status"><i class="fa fa-circle-o"></i> unchanged</span></td>').appendTo(row);
-        //     }
-        // } else if (localNodeObj.diff.deleted[node.id]) {
-        //     cell = $('<td></td>').appendTo(row);
-        //     if (conflicted) {
-        //         $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i> conflict</span> </span>').appendTo(cell);
-        //     }
-        //     $('<span class="node-diff-node-deleted"><span class="node-diff-status"><i class="fa fa-minus-square"></i> deleted</span></span>').appendTo(cell);
-        // } else {
-        //     $('<td class="node-diff-empty"></td>').appendTo(row);
-        // }
-        // if (remoteNode) {
-        //     if (remoteNodeObj.diff.added[node.id]) {
-        //         $('<td class="node-diff-node-added"><span class="node-diff-status"><i class="fa fa-plus-square"></i> added</span></td>').appendTo(row);
-        //     } else if (remoteChanges > 0) {
-        //         cell = $('<td></td>').appendTo(row);
-        //         if (conflicted) {
-        //             $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i> conflict</span> </span>').appendTo(cell);
-        //         }
-        //         $('<span class="node-diff-node-changed"><span class="node-diff-status"><i class="fa fa-dot-circle-o"></i> changed</span></span>').appendTo(cell);
-        //     } else {
-        //         $('<td class="node-diff-node-unchanged"><span class="node-diff-status"><i class="fa fa-circle-o"></i> unchanged</span></td>').appendTo(row);
-        //     }
-        // } else if (remoteNodeObj.diff.deleted[node.id]) {
-        //     cell = $('<td></td>').appendTo(row);
-        //     if (conflicted) {
-        //         $('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i> conflict</span> </span>').appendTo(cell);
-        //     }
-        //     $('<span class="node-diff-node-deleted"><span class="node-diff-status"><i class="fa fa-minus-square"></i> deleted</span></span>').appendTo(cell);
-        // } else {
-        //     $('<td class="node-diff-empty"></td>').appendTo(row);
-        // }
-        if (conflicted) {
-            stats.conflicts++;
-        }
         return nodePropertiesDiv;
     }
-    function showLocalDiff() {
-        var nns = RED.nodes.createCompleteNodeSet();
-        var originalFlow = RED.nodes.originalFlow();
-        var diff = generateDiff(originalFlow,nns);
-        showDiff(diff);
+    function createNodeConflictRadioBoxes(node,row,localDiv,remoteDiv,propertiesTable,hide,state) {
+        var safeNodeId = "node-diff-selectbox-"+node.id.replace(/\./g,'-')+(propertiesTable?"-props":"");
+        var className = "";
+        if (node.z||propertiesTable) {
+            className = "node-diff-selectbox-tab-"+(propertiesTable?node.id:node.z).replace(/\./g,'-');
+        }
+        var titleRow = !propertiesTable && (node.type === 'tab' || node.type === 'subflow');
+        var changeHandler = function(evt) {
+            var className;
+            if (node.type === undefined) {
+                // TODO: handle globals
+            } else if (titleRow) {
+                className = "node-diff-selectbox-tab-"+node.id.replace(/\./g,'-');
+                $("."+className+"-"+this.value).prop('checked',true);
+                if (this.value === 'local') {
+                    $("."+className+"-"+this.value).closest(".node-diff-node-entry").addClass("node-diff-select-local");
+                    $("."+className+"-"+this.value).closest(".node-diff-node-entry").removeClass("node-diff-select-remote");
+                } else {
+                    $("."+className+"-"+this.value).closest(".node-diff-node-entry").removeClass("node-diff-select-local");
+                    $("."+className+"-"+this.value).closest(".node-diff-node-entry").addClass("node-diff-select-remote");
+                }
+            } else {
+                // Individual node or properties table
+                var parentId = "node-diff-selectbox-"+(propertiesTable?node.id:node.z).replace(/\./g,'-');
+                $('#'+parentId+"-local").prop('checked',false);
+                $('#'+parentId+"-remote").prop('checked',false);
+                var titleRowDiv = $('#'+parentId+"-local").closest(".node-diff-tab").find(".node-diff-tab-title");
+                titleRowDiv.removeClass("node-diff-select-local");
+                titleRowDiv.removeClass("node-diff-select-remote");
+            }
+            if (this.value === 'local') {
+                row.removeClass("node-diff-select-remote");
+                row.addClass("node-diff-select-local");
+            } else if (this.value === 'remote') {
+                row.addClass("node-diff-select-remote");
+                row.removeClass("node-diff-select-local");
+            }
+            refreshConflictHeader();
+        }
+
+        var localSelectDiv = $('<label>',{class:"node-diff-selectbox",for:safeNodeId+"-local"}).click(function(e) { e.stopPropagation();}).appendTo(localDiv);
+        var localRadio = $('<input>',{id:safeNodeId+"-local",type:'radio',value:"local",name:safeNodeId,class:className+"-local"+(titleRow?"":" node-diff-select-node")}).data('node-id',node.id).change(changeHandler).appendTo(localSelectDiv);
+        var remoteSelectDiv = $('<label>',{class:"node-diff-selectbox",for:safeNodeId+"-remote"}).click(function(e) { e.stopPropagation();}).appendTo(remoteDiv);
+        var remoteRadio = $('<input>',{id:safeNodeId+"-remote",type:'radio',value:"remote",name:safeNodeId,class:className+"-remote"+(titleRow?"":" node-diff-select-node")}).data('node-id',node.id).change(changeHandler).appendTo(remoteSelectDiv);
+        if (state === 'local') {
+            localRadio.prop('checked',true);
+        } else if (state === 'remote') {
+            remoteRadio.prop('checked',true);
+        }
+        if (hide||localDiv.hasClass("node-diff-empty") || remoteDiv.hasClass("node-diff-empty")) {
+            localSelectDiv.hide();
+            remoteSelectDiv.hide();
+        }
+
     }
-    function showRemoteDiff() {
+    function refreshConflictHeader() {
+        currentDiff.resolutions = {};
+        var resolutionCount = 0;
+        $(".node-diff-selectbox>input:checked").each(function() {
+            if (currentDiff.conflicts[$(this).data('node-id')]) {
+                resolutionCount++;
+            }
+            currentDiff.resolutions[$(this).data('node-id')] = $(this).val();
+            // console.log($(this).data('node-id'),$(this).val())
+        })
+        var conflictCount = Object.keys(currentDiff.conflicts).length;
+        // console.log(resolutionCount,"of",conflictCount,"conflicts resolve");
+        if (conflictCount - resolutionCount === 0) {
+            $("#node-diff-toolbar-resolved-conflicts").html('<span class="node-diff-node-added"><span class="node-diff-status"><i class="fa fa-check"></i></span></span> '+RED._("diff.unresolvedCount",{count:conflictCount - resolutionCount}));
+        } else {
+            $("#node-diff-toolbar-resolved-conflicts").html('<span class="node-diff-node-conflict"><span class="node-diff-status"><i class="fa fa-exclamation"></i></span></span> '+RED._("diff.unresolvedCount",{count:conflictCount - resolutionCount}));
+        }
+        if (conflictCount === resolutionCount) {
+            $("#node-diff-view-diff-merge").removeClass('disabled');
+        }
+    }
+    function getRemoteDiff(callback) {
         $.ajax({
             headers: {
                 "Accept":"application/json",
@@ -772,9 +806,29 @@ RED.diff = (function() {
                 var remoteFlow = nodes.flows;
                 var localDiff = generateDiff(originalFlow,localFlow);
                 var remoteDiff = generateDiff(originalFlow,remoteFlow);
-                showDiff(localDiff,remoteDiff);
+                var conflicts = identifyConflicts(localDiff,remoteDiff);
+                console.log(conflicts);
+                callback({
+                    localDiff:localDiff,
+                    remoteDiff:remoteDiff,
+                    conflicts: conflicts
+                });
             }
         });
+
+    }
+    function showLocalDiff() {
+        var nns = RED.nodes.createCompleteNodeSet();
+        var originalFlow = RED.nodes.originalFlow();
+        var diff = generateDiff(originalFlow,nns);
+        showDiff(diff);
+    }
+    function showRemoteDiff(diff) {
+        if (diff === undefined) {
+            getRemoteDiff(showRemoteDiff);
+        } else {
+            showDiff(diff.localDiff,diff.remoteDiff,diff.conflicts);
+        }
     }
     function parseNodes(nodeList) {
         var tabOrder = [];
@@ -816,7 +870,6 @@ RED.diff = (function() {
     function generateDiff(currentNodes,newNodes) {
         var currentConfig = parseNodes(currentNodes);
         var newConfig = parseNodes(newNodes);
-        var pending = RED.nodes.pending();
         var added = {};
         var deleted = {};
         var changed = {};
@@ -824,15 +877,13 @@ RED.diff = (function() {
         Object.keys(currentConfig.all).forEach(function(id) {
             var node = RED.nodes.workspace(id)||RED.nodes.subflow(id)||RED.nodes.node(id);
             if (!newConfig.all.hasOwnProperty(id)) {
-                if (!pending.added.hasOwnProperty(id)) {
-                    deleted[id] = true;
-                }
+                deleted[id] = true;
             } else if (JSON.stringify(currentConfig.all[id]) !== JSON.stringify(newConfig.all[id])) {
                 changed[id] = true;
             }
         });
         Object.keys(newConfig.all).forEach(function(id) {
-            if (!currentConfig.all.hasOwnProperty(id) && !pending.deleted.hasOwnProperty(id)) {
+            if (!currentConfig.all.hasOwnProperty(id)) {
                 added[id] = true;
             }
         });
@@ -845,28 +896,80 @@ RED.diff = (function() {
             changed: changed,
         }
     }
-    function formatNodeProperty(prop) {
-        var formattedProperty = prop;
-        if (formattedProperty === null) {
-            formattedProperty = 'null';
-        } else if (formattedProperty === undefined) {
-            formattedProperty = 'undefined';
-        } else if (typeof formattedProperty === 'object') {
-            formattedProperty = JSON.stringify(formattedProperty);
+    function identifyConflicts(localDiff,remoteDiff) {
+        var seen = {};
+        var conflicted = {};
+        var id,node;
+
+        for (id in localDiff.currentConfig.all) {
+            if (localDiff.currentConfig.all.hasOwnProperty(id)) {
+                seen[id] = true;
+                var localNode = localDiff.newConfig.all[id];
+                if (localDiff.changed[id] && remoteDiff.deleted[id]) {
+                    conflicted[id] = true;
+                } else if (localDiff.deleted[id] && remoteDiff.changed[id]) {
+                    conflicted[id] = true;
+                } else if (localDiff.changed[id] && remoteDiff.changed[id]) {
+                    var remoteNode = remoteDiff.newConfig.all[id];
+                    if (JSON.stringify(localNode) !== JSON.stringify(remoteNode)) {
+                        conflicted[id] = true;
+                    }
+                }
+            }
         }
-        if (/\n/.test(formattedProperty)) {
-            formattedProperty = "<pre>"+formattedProperty+"</pre>"
+        for (id in localDiff.added) {
+            if (localDiff.added.hasOwnProperty(id)) {
+                node = localDiff.newConfig.all[id];
+                if (remoteDiff.deleted[node.z]) {
+                    conflicted[id] = true;
+                    // conflicted[node.z] = true;
+                }
+            }
         }
-        return formattedProperty;
+        for (id in remoteDiff.added) {
+            if (remoteDiff.added.hasOwnProperty(id)) {
+                node = remoteDiff.newConfig.all[id];
+                if (localDiff.deleted[node.z]) {
+                    conflicted[id] = true;
+                    // conflicted[node.z] = true;
+                }
+            }
+        }
+        // console.log(conflicted);
+        return conflicted;
     }
-    function showDiff(localDiff,remoteDiff) {
+    function showDiff(localDiff,remoteDiff,conflicts) {
         var list = $("#node-dialog-view-diff-diff");
         list.editableList('empty');
-        $("#node-dialog-view-diff-headers").empty();
 
+        if (remoteDiff) {
+            $("#node-diff-view-diff-merge").show();
+            if (Object.keys(conflicts).length === 0) {
+                $("#node-diff-view-diff-merge").removeClass('disabled');
+            } else {
+                $("#node-diff-view-diff-merge").addClass('disabled');
+            }
+        } else {
+            $("#node-diff-view-diff-merge").hide();
+        }
+        currentDiff = {
+            localDiff: localDiff,
+            remoteDiff: remoteDiff,
+            conflicts: conflicts,
+            resolutions: {}
+        }
+        refreshConflictHeader();
+
+        $("#node-dialog-view-diff-headers").empty();
+        // console.log("--------------");
+        // console.log(localDiff);
+        // console.log(remoteDiff);
         var currentConfig = localDiff.currentConfig;
         var newConfig = localDiff.newConfig;
+        conflicts = conflicts || {};
+
         var el = {
+            conflicts: conflicts,
             diff: localDiff,
             def: {
                 category: 'config',
@@ -902,6 +1005,7 @@ RED.diff = (function() {
         currentConfig.tabOrder.forEach(function(tabId) {
             var tab = currentConfig.tabs[tabId];
             var el = {
+                conflicts: conflicts,
                 diff: localDiff,
                 def: {},
                 tab:tab
@@ -921,6 +1025,7 @@ RED.diff = (function() {
                 seenTabs[tabId] = true;
                 var tab = newConfig.tabs[tabId];
                 var el = {
+                    conflicts: conflicts,
                     diff: localDiff,
                     def: {},
                     tab:tab,
@@ -938,6 +1043,7 @@ RED.diff = (function() {
                     var tab = remoteDiff.newConfig.tabs[tabId];
                     // TODO how to recognise this is a remotely added flow
                     var el = {
+                        conflicts: conflicts,
                         diff: localDiff,
                         remoteDiff: remoteDiff,
                         def: {},
@@ -953,6 +1059,7 @@ RED.diff = (function() {
             if (currentConfig.subflows.hasOwnProperty(subflowId)) {
                 seenTabs[subflowId] = true;
                 el = {
+                    conflicts: conflicts,
                     diff: localDiff,
                     def: {
                         defaults:{},
@@ -975,6 +1082,7 @@ RED.diff = (function() {
         for (subflowId in newConfig.subflows) {
             if (newConfig.subflows.hasOwnProperty(subflowId) && !seenTabs[subflowId]) {
                 el = {
+                    conflicts: conflicts,
                     diff: localDiff,
                     def: {
                         defaults:{},
@@ -996,6 +1104,7 @@ RED.diff = (function() {
                 if (remoteDiff.newConfig.subflows.hasOwnProperty(subflowId) && !seenTabs[subflowId]) {
                     // TODO how to recognise this is a remotely added flow
                     el = {
+                        conflicts: conflicts,
                         diff: localDiff,
                         remoteDiff: remoteDiff,
                         def: {
@@ -1018,7 +1127,89 @@ RED.diff = (function() {
 
         $("#node-dialog-view-diff").dialog("open");
     }
+    function mergeDiff(diff) {
+        var currentConfig = diff.localDiff.currentConfig;
+
+        var localDiff = diff.localDiff;
+        var remoteDiff = diff.remoteDiff;
+        var conflicts = diff.conflicts;
+        var resolutions = diff.resolutions;
+
+        var toAdd = [];
+        var toRemove = [];
+        var toMerge = [];
+
+        var id;
+        for (id in remoteDiff.added) {
+            if (remoteDiff.added.hasOwnProperty(id) && !localDiff.added.hasOwnProperty(id)) {
+                toAdd.push(remoteDiff.newConfig.all[id]);
+            }
+        }
+        for (id in currentConfig.all) {
+            if (currentConfig.all.hasOwnProperty(id)) {
+                var node = currentConfig.all[id];
+                if (resolutions[id] === 'local') {
+                    // use local - nothing to change then
+                } else {
+                    if (remoteDiff.deleted[id]) {
+                        toRemove.push(id);
+                    } else if (remoteDiff.changed[id]) {
+                        if (localDiff.deleted[id]) {
+                            toAdd.push(remoteDiff.newConfig.all[id]);
+                        } else {
+                            toMerge.push(remoteDiff.newConfig.all[id]);
+                        }
+                    }
+                }
+            }
+        }
+        console.log("adding",toAdd);
+        console.log("deleting",toRemove);
+        console.log("replacing",toMerge);
+
+        var imported = RED.nodes.import(toAdd);
+        var removed = [];
+        toRemove.forEach(function(id) {
+            var node = currentConfig.all[id];
+            if (node.type === 'tab') {
+                console.log("removing tab",id);
+                RED.workspaces.remove(node);
+                removed.push(RED.nodes.removeWorkspace(id));
+            } else if (node.type === 'subflow') {
+                console.log("removing subflow",id);
+                removed.push(RED.subflow.removeSubflow(id));
+            } else {
+                console.log("removing node",id);
+                var r = RED.nodes.remove(id);
+                if (r.links.length > 0 || r.nodes.length > 0) {
+                    removed.push(r);
+                }
+            }
+        });
+        toMerge.forEach(function(newNode) {
+            console.log("merging node",newNode.id);
+            if (newNode.type !== 'tab' && newNode.type !== 'subflow') {
+                var currentNode = RED.nodes.node(newNode.id);
+                var def = RED.nodes.getType(currentNode.type);
+                currentNode.x = newNode.x;
+                currentNode.y = newNode.y;
+                for (var d in def.defaults) {
+                    if (def.defaults.hasOwnProperty(d)) {
+                        currentNode[d] = newNode[d];
+                    }
+                }
+            }
+
+
+        })
+
+
+        RED.view.redraw(true);
+
+    }
     return {
-        init: init
+        init: init,
+        getRemoteDiff: getRemoteDiff,
+        showRemoteDiff: showRemoteDiff
     }
 })();

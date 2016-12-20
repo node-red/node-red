@@ -30,6 +30,8 @@ RED.deploy = (function() {
 
     var deploymentType = "full";
 
+    var currentDiff = null;
+
     function changeDeploymentType(type) {
         deploymentType = type;
         $("#btn-deploy-icon").attr("src",deploymentTypes[type].img);
@@ -96,21 +98,31 @@ RED.deploy = (function() {
                 height: "auto",
                 buttons: [
                     {
-                        text: RED._("deploy.confirm.button.cancel"),
+                        text: RED._("common.label.cancel"),
                         click: function() {
                             $( this ).dialog( "close" );
                         }
                     },
-                    // {
-                    //     id: "node-dialog-confirm-deploy-review",
-                    //     text: RED._("deploy.confirm.button.review"),
-                    //     class: "primary",
-                    //     click: function() {
-                    //         showDiff();
-                    //         $( this ).dialog( "close" );
-                    //     }
-                    // },
                     {
+                        id: "node-dialog-confirm-deploy-review",
+                        text: RED._("deploy.confirm.button.review"),
+                        class: "primary disabled",
+                        click: function() {
+                            if (!$("#node-dialog-confirm-deploy-review").hasClass('disabled')) {
+                                RED.diff.showRemoteDiff();
+                                $( this ).dialog( "close" );
+                            }
+                        }
+                    },
+                    {
+                        id: "node-dialog-confirm-deploy-merge",
+                        text: RED._("deploy.confirm.button.merge"),
+                        class: "primary disabled",
+                        click: function() {
+                        }
+                    },
+                    {
+                        id: "node-dialog-confirm-deploy-deploy",
                         text: RED._("deploy.confirm.button.confirm"),
                         class: "primary",
                         click: function() {
@@ -134,10 +146,37 @@ RED.deploy = (function() {
                 },
                 open: function() {
                     if ($( "#node-dialog-confirm-deploy-type" ).val() === "conflict") {
-                        // $("#node-dialog-confirm-deploy-review").show();
+                        $("#node-dialog-confirm-deploy-deploy").hide();
+                        $("#node-dialog-confirm-deploy-review").addClass('disabled').show();
+                        $("#node-dialog-confirm-deploy-merge").addClass('disabled').show();
+                        currentDiff = null;
+                        $("#node-dialog-confirm-deploy-conflict-checking").show();
+                        $("#node-dialog-confirm-deploy-conflict-auto-merge").hide();
+                        $("#node-dialog-confirm-deploy-conflict-manual-merge").hide();
+
+                        var now = Date.now();
+                        RED.diff.getRemoteDiff(function(diff) {
+                            var ellapsed = Math.max(2000 - (Date.now()-now), 0);
+                            currentDiff = diff;
+                            setTimeout(function() {
+                                $("#node-dialog-confirm-deploy-conflict-checking").hide();
+                                var d = Object.keys(diff.conflicts);
+                                if (d.length === 0) {
+                                    $("#node-dialog-confirm-deploy-conflict-auto-merge").show();
+                                    $("#node-dialog-confirm-deploy-merge").removeClass('disabled')
+                                } else {
+                                    $("#node-dialog-confirm-deploy-conflict-manual-merge").show();
+                                }
+                                $("#node-dialog-confirm-deploy-review").removeClass('disabled')
+                            },ellapsed);
+                        })
+
+
                         $("#node-dialog-confirm-deploy-hide").parent().hide();
                     } else {
-                        // $("#node-dialog-confirm-deploy-review").hide();
+                        $("#node-dialog-confirm-deploy-deploy").show();
+                        $("#node-dialog-confirm-deploy-review").hide();
+                        $("#node-dialog-confirm-deploy-merge").hide();
                         $("#node-dialog-confirm-deploy-hide").parent().show();
                     }
                 }

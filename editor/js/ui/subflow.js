@@ -306,50 +306,13 @@ RED.subflow = (function() {
 
         $("#workspace-subflow-delete").click(function(event) {
             event.preventDefault();
-            var removedNodes = [];
-            var removedLinks = [];
             var startDirty = RED.nodes.dirty();
+            var historyEvent = removeSubflow(RED.workspaces.active());
+            historyEvent.t = 'delete';
+            historyEvent.dirty = startDirty;
 
-            var activeSubflow = getSubflow();
+            RED.history.push(historyEvent);
 
-            RED.nodes.eachNode(function(n) {
-                if (n.type == "subflow:"+activeSubflow.id) {
-                    removedNodes.push(n);
-                }
-                if (n.z == activeSubflow.id) {
-                    removedNodes.push(n);
-                }
-            });
-            RED.nodes.eachConfig(function(n) {
-                if (n.z == activeSubflow.id) {
-                    removedNodes.push(n);
-                }
-            });
-
-            var removedConfigNodes = [];
-            for (var i=0;i<removedNodes.length;i++) {
-                var removedEntities = RED.nodes.remove(removedNodes[i].id);
-                removedLinks = removedLinks.concat(removedEntities.links);
-                removedConfigNodes = removedConfigNodes.concat(removedEntities.nodes);
-            }
-            // TODO: this whole delete logic should be in RED.nodes.removeSubflow..
-            removedNodes = removedNodes.concat(removedConfigNodes);
-
-            RED.nodes.removeSubflow(activeSubflow);
-
-            RED.history.push({
-                    t:'delete',
-                    nodes:removedNodes,
-                    links:removedLinks,
-                    subflow: {
-                        subflow: activeSubflow
-                    },
-                    dirty:startDirty
-            });
-
-            RED.workspaces.remove(activeSubflow);
-            RED.nodes.dirty(true);
-            RED.view.redraw();
         });
 
         refreshToolbar(activeSubflow);
@@ -362,7 +325,48 @@ RED.subflow = (function() {
         $("#chart").css({"margin-top": "0"});
     }
 
+    function removeSubflow(id) {
+        var removedNodes = [];
+        var removedLinks = [];
 
+        var activeSubflow = RED.nodes.subflow(id);
+
+        RED.nodes.eachNode(function(n) {
+            if (n.type == "subflow:"+activeSubflow.id) {
+                removedNodes.push(n);
+            }
+            if (n.z == activeSubflow.id) {
+                removedNodes.push(n);
+            }
+        });
+        RED.nodes.eachConfig(function(n) {
+            if (n.z == activeSubflow.id) {
+                removedNodes.push(n);
+            }
+        });
+
+        var removedConfigNodes = [];
+        for (var i=0;i<removedNodes.length;i++) {
+            var removedEntities = RED.nodes.remove(removedNodes[i].id);
+            removedLinks = removedLinks.concat(removedEntities.links);
+            removedConfigNodes = removedConfigNodes.concat(removedEntities.nodes);
+        }
+        // TODO: this whole delete logic should be in RED.nodes.removeSubflow..
+        removedNodes = removedNodes.concat(removedConfigNodes);
+
+        RED.nodes.removeSubflow(activeSubflow);
+        RED.workspaces.remove(activeSubflow);
+        RED.nodes.dirty(true);
+        RED.view.redraw();
+
+        return {
+            nodes:removedNodes,
+            links:removedLinks,
+            subflow: {
+                subflow: activeSubflow
+            }
+        }
+    }
     function init() {
         RED.events.on("workspace:change",function(event) {
             var activeSubflow = RED.nodes.subflow(event.workspace);
@@ -619,6 +623,7 @@ RED.subflow = (function() {
         init: init,
         createSubflow: createSubflow,
         convertToSubflow: convertToSubflow,
+        removeSubflow: removeSubflow,
         refresh: refresh,
         removeInput: removeSubflowInput,
         removeOutput: removeSubflowOutput
