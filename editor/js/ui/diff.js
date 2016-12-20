@@ -1187,24 +1187,35 @@ RED.diff = (function() {
             }
         });
         toMerge.forEach(function(newNode) {
+            var currentNode;
             console.log("merging node",newNode.id);
             if (newNode.type !== 'tab' && newNode.type !== 'subflow') {
-                var currentNode = RED.nodes.node(newNode.id);
+                currentNode = RED.nodes.node(newNode.id);
                 var def = RED.nodes.getType(currentNode.type);
-                currentNode.x = newNode.x;
-                currentNode.y = newNode.y;
+                if (currentNode.hasOwnProperty('x')) {
+                    currentNode.x = newNode.x;
+                    currentNode.y = newNode.y;
+                }
                 for (var d in def.defaults) {
                     if (def.defaults.hasOwnProperty(d)) {
                         currentNode[d] = newNode[d];
                     }
                 }
+                var removedLinks = RED.editor.updateNodeProperties(currentNode);
+                if (removedLinks.length > 0) {
+                    removed.push({links:removedLinks});
+                }
+            } else if (newNode.type === 'tab') {
+                currentNode = RED.nodes.workspace(newNode.id);
+                currentNode.label = newNode.label;
             }
-
-
         })
 
 
         RED.view.redraw(true);
+        RED.palette.refresh();
+        RED.workspaces.refresh();
+        RED.sidebar.config.refresh();
 
     }
     return {
