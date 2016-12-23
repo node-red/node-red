@@ -266,6 +266,13 @@
         color: #009900;
     }
 }
+.node-diff-node-moved {
+    //background: #eefaee;
+    .node-diff-status {
+        color: #3f81b3;
+    }
+}
+
 .node-diff-node-changed {
     //background: #fff2ca;
     .node-diff-status {
