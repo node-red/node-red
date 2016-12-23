@@ -43,10 +43,11 @@ function init(_server,runtime) {
 }
 
 function start() {
-    var Tokens = require("./auth/tokens");
-    var Users = require("./auth/users");
-    var Permissions = require("./auth/permissions");
-    if (!settings.disableEditor) {
+    // note - if we did not get 'init' then settings will be undefined
+    if (settings && !settings.disableEditor) {
+        var Tokens = require("./auth/tokens");
+        var Users = require("./auth/users");
+        var Permissions = require("./auth/permissions");
         Users.default().then(function(anonymousUser) {
             var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
             var path = settings.httpAdminRoot || "/";
