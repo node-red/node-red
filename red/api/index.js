@@ -162,6 +162,13 @@ function init(_server,_runtime) {
 
         // Error Handler
         //adminApp.use(errorHandler);
+    } else {
+        adminApp = {};
+        adminApp.put = function(){};
+        adminApp.post = function(){};
+        adminApp.get = function(){};
+        adminApp.delete = function(){};
+        adminApp.use = function(){};
     }
 }
 function start() {
