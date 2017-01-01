@@ -95,7 +95,7 @@ RED.typeSearch = (function() {
                 if (activeFilter === "" ) {
                     return true;
                 }
-                if (data.recent) {
+                if (data.recent || data.common) {
                     return false;
                 }
                 return (activeFilter==="")||(data.index.indexOf(activeFilter) > -1);
@@ -266,6 +266,7 @@ RED.typeSearch = (function() {
         for(i=0;i<common.length;i++) {
             item = {
                 type: common[i],
+                common: true,
                 def: RED.nodes.getType(common[i])
             };
             item.label = getTypeLabel(item.type,item.def);
