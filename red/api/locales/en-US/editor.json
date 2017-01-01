@@ -325,7 +325,8 @@
         "add": "add"
     },
     "search": {
-        "empty": "No matches found"
+        "empty": "No matches found",
+        "addNode": "add a node..."
     },
     "expressionEditor": {
         "functions": "Functions",

@@ -46,7 +46,7 @@ RED.typeSearch = (function() {
         //shade = $('<div>',{class:"red-ui-type-search-shade"}).appendTo("#main-container");
         dialog = $("<div>",{id:"red-ui-type-search",class:"red-ui-search red-ui-type-search"}).appendTo("#main-container");
         var searchDiv = $("<div>",{class:"red-ui-search-container"}).appendTo(dialog);
-        searchInput = $('<input type="text" placeholder="add a node...">').appendTo(searchDiv).searchBox({
+        searchInput = $('<input type="text">').attr("placeholder",RED._("search.addNode")).appendTo(searchDiv).searchBox({
             delay: 50,
             change: function() {
                 search($(this).val());
