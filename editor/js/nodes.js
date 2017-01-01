@@ -701,17 +701,19 @@ RED.nodes = (function() {
         }
 
         var activeWorkspace = RED.workspaces.active();
+        //TODO: check the z of the subflow instance and check _that_ if it exists
         var activeSubflow = getSubflow(activeWorkspace);
-        if (activeSubflow) {
-            for (i=0;i<newNodes.length;i++) {
-                var m = /^subflow:(.+)$/.exec(newNodes[i].type);
-                if (m) {
-                    var subflowId = m[1];
+        for (i=0;i<newNodes.length;i++) {
+            var m = /^subflow:(.+)$/.exec(newNodes[i].type);
+            if (m) {
+                var subflowId = m[1];
+                var parent = getSubflow(newNodes[i].z || activeWorkspace);
+                if (parent) {
                     var err;
-                    if (subflowId === activeSubflow.id) {
+                    if (subflowId === parent.id) {
                         err = new Error(RED._("notification.errors.cannotAddSubflowToItself"));
                     }
-                    if (subflowContains(m[1],activeSubflow.id)) {
+                    if (subflowContains(subflowId,parent.id)) {
                         err = new Error(RED._("notification.errors.cannotAddCircularReference"));
                     }
                     if (err) {
@@ -1144,6 +1146,38 @@ RED.nodes = (function() {
         }
     }
 
+    function clear() {
+        nodes = [];
+        links = [];
+        configNodes = {};
+        workspacesOrder = [];
+        var subflowIds = Object.keys(subflows);
+        subflowIds.forEach(function(id) {
+            RED.subflow.removeSubflow(id)
+        });
+        var workspaceIds = Object.keys(workspaces);
+        workspaceIds.forEach(function(id) {
+            RED.workspaces.remove(workspaces[id]);
+        });
+        defaultWorkspace = null;
+
+        RED.nodes.dirty(true);
+        RED.view.redraw(true);
+        RED.palette.refresh();
+        RED.workspaces.refresh();
+        RED.sidebar.config.refresh();
+
+        // var node_defs = {};
+        // var nodes = [];
+        // var configNodes = {};
+        // var links = [];
+        // var defaultWorkspace;
+        // var workspaces = {};
+        // var workspacesOrder =[];
+        // var subflows = {};
+        // var loadedFlowVersion = null;
+    }
+
     return {
         registry:registry,
         setNodeList: registry.setNodeList,
@@ -1160,6 +1194,7 @@ RED.nodes = (function() {
 
         add: addNode,
         remove: removeNode,
+        clear: clear,
 
         addLink: addLink,
         removeLink: removeLink,

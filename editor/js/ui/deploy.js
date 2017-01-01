@@ -119,6 +119,8 @@ RED.deploy = (function() {
                         text: RED._("deploy.confirm.button.merge"),
                         class: "primary disabled",
                         click: function() {
+                            RED.diff.mergeDiff(currentDiff);
+                            $( this ).dialog( "close" );
                         }
                     },
                     {
@@ -156,7 +158,7 @@ RED.deploy = (function() {
 
                         var now = Date.now();
                         RED.diff.getRemoteDiff(function(diff) {
-                            var ellapsed = Math.max(2000 - (Date.now()-now), 0);
+                            var ellapsed = Math.max(1000 - (Date.now()-now), 0);
                             currentDiff = diff;
                             setTimeout(function() {
                                 $("#node-dialog-confirm-deploy-conflict-checking").hide();
@@ -239,25 +241,6 @@ RED.deploy = (function() {
         $( "#node-dialog-confirm-deploy-conflict" ).show();
         $( "#node-dialog-confirm-deploy-type" ).val("conflict");
         $( "#node-dialog-confirm-deploy" ).dialog( "open" );
-
-        // $("#node-dialog-confirm-deploy-review").append($('<img src="red/images/spin.svg" style="background: rgba(255,255,255,0.8); margin-top: -16px; margin-left: -8px; height:16px; position: absolute; "/>'));
-        // $("#node-dialog-confirm-deploy-review .ui-button-text").css("opacity",0.4);
-        // $("#node-dialog-confirm-deploy-review").attr("disabled",true).addClass("disabled");
-        // $.ajax({
-        //     headers: {
-        //         "Accept":"application/json",
-        //     },
-        //     cache: false,
-        //     url: 'flows',
-        //     success: function(nodes) {
-        //         var newNodes = nodes.flows;
-        //         var newRevision = nodes.rev;
-        //         generateDiff(currentNodes,newNodes);
-        //         $("#node-dialog-confirm-deploy-review").attr("disabled",false).removeClass("disabled");
-        //         $("#node-dialog-confirm-deploy-review img").remove();
-        //         $("#node-dialog-confirm-deploy-review .ui-button-text").css("opacity",1);
-        //     }
-        // });
     }
 
     function save(skipValidation,force) {

@@ -105,6 +105,9 @@ RED.tabs = (function() {
             if (typeof link === "string") {
                 link = ul.find("a[href='#"+link+"']");
             }
+            if (link.length === 0) {
+                return;
+            }
             if (!link.parent().hasClass("active")) {
                 ul.children().removeClass("active");
                 ul.children().css({"transition": "width 100ms"});
