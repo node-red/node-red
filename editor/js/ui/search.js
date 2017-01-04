@@ -45,6 +45,9 @@ RED.search = (function() {
 
 
         var properties = ['id','type','name','label','info'];
+        if (n._def && n._def.defaults) {
+            properties = properties.concat(Object.keys(n._def.defaults));
+        }
         for (var i=0;i<properties.length;i++) {
             if (n.hasOwnProperty(properties[i])) {
                 var v = n[properties[i]];
