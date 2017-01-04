@@ -130,9 +130,13 @@
     }
 
     table {
-         border-collapse: collapse;
-         width: 100%;
-         table-layout:fixed;
+        border-collapse: collapse;
+        table-layout:fixed;
+        
+        // Fix for table-layout: fixed on safari:
+        max-width: none;
+        width: auto;
+        min-width: 100%;
     }
     td, th {
         border: 1px solid $secondary-border-color;
