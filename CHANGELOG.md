@@ -1,3 +1,38 @@
+#### 0.15.3: Maintenance Release
+
+ - Tcpgetfix: Another small check (#1070)
+ - TCPGet: Ensure done() is called only once (#1068)
+ - Allow $ and _ at start of property identifiers Fixes #1063
+ - TCPGet: Separated the node.connected property for each instance (#1062)
+ - Corrected 'overide' typo in XML node help (#1061)
+ - TCPGet: Last property check (hopefully) (#1059)
+ - Add additional safety checks to avoid acting on non-existent objects (#1057)
+ - add --title for process name to command line options
+ - add indicator for fire once on inject node
+ - reimplement $(env var) replace to share common code.
+ - Fix error message for missing node html file, and add test.
+ - Let credentials also use $(...) substitutions from ENV
+ - Rename insecureRedirect to requireHttps
+ - Add setting to cause insecure redirect (#1054)
+ - Palette editor fixes (#1033)
+ - Close comms on stopServer in test helper (#1020)
+ - Tcpgetfix (#1050)
+ - TCPget: Store incoming messages alongside the client object to keep reference
+ - Merge remote-tracking branch 'upstream/master' into tcpgetfix
+ - TCPget can now handle concurrent sessions (#1042)
+ - Better scope handling
+ - Add security checks
+ - small change to udp httpadmin
+ - Fix comparison to "" in tcpin
+ - Change scope of clients object
+ - Works when connection is left open
+ - First release of multi connection tcpget
+ - Fix node.error() not printing when passed false (#1037)
+ - fix test for CSV array input
+ - different test for Pi (rather than use serial port name)
+ - Fix missing 0 handling for css node with array input
+
+
 #### 0.15.2: Maintenance Release
 
  - Revert bidi changes to nodes and hide menu option until fixed Fixes #1024
