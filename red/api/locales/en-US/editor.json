@@ -138,7 +138,22 @@
     },
     "diff": {
         "unresolvedCount": "__count__ unresolved conflict",
-        "unresolvedCount_plural": "__count__ unresolved conflicts"
+        "unresolvedCount_plural": "__count__ unresolved conflicts",
+        "type": {
+            "added": "added",
+            "changed": "changed",
+            "unchanged": "unchanged",
+            "deleted": "deleted",
+            "flowDeleted": "flow deleted",
+            "flowAdded": "flow added",
+            "movedTo": "moved to __id__",
+            "movedFrom": "moved from __id__"
+        },
+        "nodeCount": "__count__ node",
+        "nodeCount_plural": "__count__ nodes",
+        "local":"Local",
+        "remote":"Remote"
+
     },
     "subflow": {
         "editSubflow": "Edit flow template: __name__",
