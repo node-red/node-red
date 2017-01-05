@@ -67,6 +67,7 @@ RED.sidebar.info = (function() {
     }
 
     function refresh(node) {
+        tips.stop();
         $(content).empty();
         var table = $('<table class="node-info"></table>');
         var tableBody = $('<tbody>').appendTo(table);
@@ -145,19 +146,75 @@ RED.sidebar.info = (function() {
         });
     }
 
-    var infotimeout;
-    function clear() {
-        //$(content).html("");
-        if (!infotimeout) {
-            var r = parseInt(Math.random() * RED._("infotips:infoLength"));
-            $(content).html('<div class="node-info-tip">'+RED._("infotips:info.tip"+r)+'</div>');
-            infotimeout = setTimeout(function() { infotimeout=null; }, 20000);
+
+    var tips = (function() {
+        var startDelay = 2000;
+        var cycleDelay = 10000;
+        var startTimeout;
+        var refreshTimeout;
+        var tipCount = -1;
+
+
+        function setTip() {
+
+            var r = Math.floor(Math.random() * tipCount);
+            var tip = RED._("infotips:info.tip"+r);
+
+            var m;
+            while ((m=/({{(.*?)}})/.exec(tip))) {
+                var shortcut = RED.keyboard.getShortcut(m[2]);
+                if (shortcut) {
+                    tip = tip.replace(m[1],RED.keyboard.formatKey(shortcut.key));
+                } else {
+                    return;
+                }
+            }
+            while ((m=/(\[(.*?)\])/.exec(tip))) {
+                tip = tip.replace(m[1],RED.keyboard.formatKey(m[2]));
+            }
+            $('<div class="node-info-tip hide">'+tip+'</div>').appendTo(content).fadeIn(200);
+            if (startTimeout) {
+                startTimeout = null;
+                refreshTimeout = setInterval(cycleTips,cycleDelay);
+            }
         }
+        function cycleTips() {
+            $(".node-info-tip").fadeOut(300,function() {
+                $(this).remove();
+                setTip();
+            })
+        }
+        return {
+            start: function() {
+                if (!startTimeout && !refreshTimeout) {
+                    $(content).html("");
+                    if (tipCount === -1) {
+                        do {
+                            tipCount++;
+                        } while(RED._("infotips:info.tip"+tipCount)!=="infotips:info.tip"+tipCount);
+                    }
+                    startTimeout = setTimeout(setTip,startDelay);
+                }
+            },
+            stop: function() {
+                clearInterval(refreshTimeout);
+                clearTimeout(startTimeout);
+                refreshTimeout = null;
+                startTimeout = null;
+            }
+        }
+    })();
+
+    function clear() {
+        tips.start();
     }
 
     function set(html) {
+        tips.stop();
         $(content).html(html);
     }
+
+
 
     RED.events.on("view:selection-changed",function(selection) {
         if (selection.nodes) {

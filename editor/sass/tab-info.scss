@@ -82,20 +82,17 @@ div.node-info {
     }
 }
 .node-info-tip {
-    margin: 10px;
-    margin-top: 30px;
-    border-radius: 6px;
-    padding: 12px;
-    font-size: 18px;
+    position: absolute;
+    top: 40%;
+    left:0;
+    right:0;
+    padding: 20px;
+    font-size: 16px;
     text-align: center;
-    color : #aaa;
+    line-height: 1.9em;
+    color : #bbb;
     background-color: #fff;
-    code {
-        font-size: 16px;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: 700;
-        padding: 3px 8px 3px 8px;
-        border-radius: 4px;
-        color: #aaa;
-    }
+    @include disable-selection;
+    cursor: default;
+
 }

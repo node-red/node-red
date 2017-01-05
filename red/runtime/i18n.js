@@ -24,6 +24,13 @@ var defaultLang = "en-US";
 var resourceMap = {};
 var resourceCache = {};
 
+function registerMessageCatalogs(catalogs) {
+    var promises = catalogs.map(function(catalog) {
+        return registerMessageCatalog(catalog.namespace,catalog.dir,catalog.file);
+    });
+    return when.settle(promises);
+}
+
 function registerMessageCatalog(namespace,dir,file) {
     return when.promise(function(resolve,reject) {
         resourceMap[namespace] = { basedir:dir, file:file};
@@ -109,6 +116,7 @@ function getCatalog(namespace,lang) {
 var obj = module.exports = {
     init: init,
     registerMessageCatalog: registerMessageCatalog,
+    registerMessageCatalogs: registerMessageCatalogs,
     catalog: getCatalog,
     i: i18n,
     defaultLang: defaultLang

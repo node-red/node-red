@@ -15,6 +15,8 @@
  **/
 RED.keyboard = (function() {
 
+    var isMac = /Mac/i.test(window.navigator.platform);
+
     var handlers = {};
     var partialState;
 
@@ -253,7 +255,6 @@ RED.keyboard = (function() {
 
     var dialog = null;
 
-    var isMac = /Mac/i.test(window.navigator.platform);
     var cmdCtrlKey = '<span class="help-key">'+(isMac?'&#8984;':'Ctrl')+'</span>';
 
     function showKeyboardHelp() {
@@ -281,7 +282,7 @@ RED.keyboard = (function() {
                         '<tr><td>'+cmdCtrlKey+' + <span class="help-key">f</span></td><td>'+RED._("keyboard.searchBox")+'</td></tr>'+
                         '<tr><td>'+cmdCtrlKey+' + <span class="help-key">Shift</span> + <span class="help-key">p</span></td><td>'+RED._("keyboard.managePalette")+'</td></tr>'+
                         '<tr><td>&nbsp;</td><td></td></tr>'+
-                        '<tr><td><span class="help-key">&#x2190;</span> <span class="help-key">&#x2191;</span> <span class="help-key">&#x2192;</span> <span class="help-key">&#x2193;</span></td><td>'+RED._("keyboard.nudgeNode")+'</td></tr>'+
+                        '<tr><td><span class="help-key">&#x2190</span> <span class="help-key">&#x2191;</span> <span class="help-key">&#x2192;</span> <span class="help-key">&#x2193;</span></td><td>'+RED._("keyboard.nudgeNode")+'</td></tr>'+
                         '<tr><td><span class="help-key">Shift</span> + <span class="help-key">&#x2190;</span> <span class="help-key">&#x2191;</span> <span class="help-key">&#x2192;</span> <span class="help-key">&#x2193;</span></td><td>'+RED._("keyboard.moveNode")+'</td></tr>'+
                         '<tr><td>&nbsp;</td><td></td></tr>'+
                         '<tr><td>'+cmdCtrlKey+' + <span class="help-key">c</span></td><td>'+RED._("keyboard.copyNode")+'</td></tr>'+
@@ -303,6 +304,15 @@ RED.keyboard = (function() {
 
         dialog.dialog("open");
     }
+    function formatKey(key) {
+        var formattedKey = isMac?key.replace(/ctrl-?/,"&#8984;"):key;
+        formattedKey = formattedKey.replace(/shift-?/,"&#8679;")
+        formattedKey = formattedKey.replace(/left/,"&#x2190;")
+        formattedKey = formattedKey.replace(/up/,"&#x2191;")
+        formattedKey = formattedKey.replace(/right/,"&#x2192;")
+        formattedKey = formattedKey.replace(/down/,"&#x2193;")
+        return '<span class="help-key-block"><span class="help-key">'+formattedKey.split(" ").join('</span> <span class="help-key">')+'</span></span>';
+    }
 
     return {
         init: init,
@@ -310,7 +320,8 @@ RED.keyboard = (function() {
         remove: removeHandler,
         getShortcut: function(actionName) {
             return actionToKeyMap[actionName];
-        }
+        },
+        formatKey: formatKey
     }
 
 })();
