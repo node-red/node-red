@@ -51,24 +51,21 @@
     border-right: 8px solid #eee;
     padding: 2px;
 }
-.debug-message-date {
+.debug-message-meta {
     background: #fff;
-    font-size: 9px;
-    color: #aaa;
+    font-size: 10px;
+    color: #777;
+}
+.debug-message-date {
     padding: 1px 5px 1px 1px;
 }
 .debug-message-topic {
     display: block;
-    background: #fff;
-    padding: 1px;
-    font-size: 10px;
     color: #a66;
 }
 .debug-message-name {
-    background: #fff;
     padding: 1px 5px;
-    font-size: 9px;
-    color: #aac;
+    color: #777;
 }
 .debug-message-payload {
     display: block;
@@ -153,7 +150,8 @@
 .debug-message-type-string { color: #b72828; }
 .debug-message-type-null { color: #666; font-style: italic;}
 .debug-message-type-meta { color: #666; font-style: italic;}
-.debug-message-type-number { color: #2033d6;cursor: pointer;}
+.debug-message-type-number { color: #2033d6; };
+.debug-message-type-number-toggle { cursor: pointer;}
 
 .debug-message-expandable {
     cursor: pointer;

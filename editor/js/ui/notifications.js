@@ -51,11 +51,17 @@ RED.notify = (function() {
 
         n.update = (function() {
             var nn = n;
-            return function(msg) {
+            return function(msg,timeout) {
                 nn.innerHTML = msg;
+                if (timeout !== undefined && timeout > 0) {
+                    window.clearTimeout(nn.timeoutid);
+                    nn.timeoutid = window.setTimeout(nn.close,timeout);
+                } else {
+                    window.clearTimeout(nn.timeoutid);
+                }
             }
         })();
-        
+
         if (!fixed) {
             $(n).click((function() {
                 var nn = n;

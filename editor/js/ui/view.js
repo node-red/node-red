@@ -267,6 +267,7 @@ RED.view = (function() {
     }
 
     function init() {
+
         RED.events.on("workspace:change",function(event) {
             var chart = $("#chart");
             if (event.old !== 0) {
@@ -384,28 +385,47 @@ RED.view = (function() {
             }
         });
 
-        RED.keyboard.add("workspace",/* backspace */ 8,function(){deleteSelection();d3.event.preventDefault();});
-        RED.keyboard.add("workspace",/* delete */ 46,function(){deleteSelection();d3.event.preventDefault();});
-        RED.keyboard.add("workspace",/* enter */ 13, function() { editSelection(); d3.event.preventDefault();});
+        RED.actions.add("core:copy",copySelection);
+        RED.actions.add("core:cut",function(){copySelection();deleteSelection();});
+        RED.actions.add("core:paste",function(){importNodes(clipboard);});
+        RED.actions.add("core:delete",deleteSelection);
+        RED.actions.add("core:edit",editSelection);
+        RED.actions.add("core:undo",RED.history.pop);
+        RED.actions.add("core:select-all",selectAll);
+        RED.actions.add("core:zoom-in",zoomIn);
+        RED.actions.add("core:zoom-out",zoomOut);
+        RED.actions.add("core:zoom-reset",zoomZero);
 
-        RED.keyboard.add("workspace",/* c */ 67,{ctrl:true},function(){copySelection();d3.event.preventDefault();});
-        RED.keyboard.add("workspace",/* x */ 88,{ctrl:true},function(){copySelection();deleteSelection();d3.event.preventDefault();});
+        RED.actions.add("core:toggle-show-grid",function(state) {
+            if (state === undefined) {
+                RED.menu.toggleSelected("menu-item-view-show-grid");
+            } else {
+                toggleShowGrid(state);
+            }
+        });
+        RED.actions.add("core:toggle-snap-grid",function(state) {
+            if (state === undefined) {
+                RED.menu.toggleSelected("menu-item-view-snap-grid");
+            } else {
+                toggleSnapGrid(state);
+            }
+        });
+        RED.actions.add("core:toggle-status",function(state) {
+            if (state === undefined) {
+                RED.menu.toggleSelected("menu-item-status");
+            } else {
+                toggleStatus(state);
+            }
+        });
 
-        RED.keyboard.add("workspace",/* z */ 90,{ctrl:true},function(){RED.history.pop();});
-        RED.keyboard.add("workspace",/* a */ 65,{ctrl:true},function(){selectAll();d3.event.preventDefault();});
-        RED.keyboard.add("*",/* = */ 187,{ctrl:true},function(){zoomIn();d3.event.preventDefault();});
-        RED.keyboard.add("*",/* - */ 189,{ctrl:true},function(){zoomOut();d3.event.preventDefault();});
-        RED.keyboard.add("*",/* 0 */ 48,{ctrl:true},function(){zoomZero();d3.event.preventDefault();});
-        RED.keyboard.add("workspace",/* v */ 86,{ctrl:true},function(){importNodes(clipboard);d3.event.preventDefault();});
-
-        RED.keyboard.add("workspace",/* up    */ 38, function() { moveSelection(0,-1);d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* up    */ 38, {shift:true}, function() { moveSelection(0,-20); d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* down  */ 40, function() { moveSelection(0,1);d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* down  */ 40, {shift:true}, function() { moveSelection(0,20); d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* left  */ 37, function() { moveSelection(-1,0);d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* left  */ 37, {shift:true}, function() { moveSelection(-20,0); d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* right */ 39, function() { moveSelection(1,0);d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* right */ 39, {shift:true}, function() { moveSelection(20,0); d3.event.preventDefault();},endKeyboardMove);
+        RED.actions.add("core:move-selection-up", function() { moveSelection(0,-1);});
+        RED.actions.add("core:step-selection-up", function() { moveSelection(0,-20);});
+        RED.actions.add("core:move-selection-right", function() { moveSelection(1,0);});
+        RED.actions.add("core:step-selection-right", function() { moveSelection(20,0);});
+        RED.actions.add("core:move-selection-down", function() { moveSelection(0,1);});
+        RED.actions.add("core:step-selection-down", function() { moveSelection(0,20);});
+        RED.actions.add("core:move-selection-left", function() { moveSelection(-1,0);});
+        RED.actions.add("core:step-selection-left", function() { moveSelection(-20,0);});
     }
 
 
@@ -959,7 +979,7 @@ RED.view = (function() {
             }
         }
         if (mouse_mode == RED.state.IMPORT_DRAGGING) {
-            RED.keyboard.remove(/* ESCAPE */ 27);
+            RED.keyboard.remove("escape");
             updateActiveNodes();
             RED.nodes.dirty(true);
         }
@@ -1103,6 +1123,7 @@ RED.view = (function() {
     }
 
     function endKeyboardMove() {
+        endMoveSet = false;
         if (moving_set.length > 0) {
             var ns = [];
             for (var i=0;i<moving_set.length;i++) {
@@ -1117,14 +1138,21 @@ RED.view = (function() {
             RED.nodes.dirty(true);
         }
     }
+    var endMoveSet = false;
     function moveSelection(dx,dy) {
         if (moving_set.length > 0) {
+            if (!endMoveSet) {
+                $(document).one('keyup',endKeyboardMove);
+                endMoveSet = true;
+            }
             var minX = 0;
             var minY = 0;
             var node;
 
             for (var i=0;i<moving_set.length;i++) {
                 node = moving_set[i];
+                node.n.changed = true;
+                node.n.dirty = true;
                 if (node.ox == null && node.oy == null) {
                     node.ox = node.n.x;
                     node.oy = node.n.y;
@@ -1440,7 +1468,7 @@ RED.view = (function() {
         //var pos = [touch0.pageX,touch0.pageY];
         //RED.touch.radialMenu.show(d3.select(this),pos);
         if (mouse_mode == RED.state.IMPORT_DRAGGING) {
-            RED.keyboard.remove(/* ESCAPE */ 27);
+            RED.keyboard.remove("escape");
 
             if (activeSpliceLink) {
                 // TODO: DRY - droppable/nodeMouseDown/canvasMouseUp
@@ -2437,8 +2465,8 @@ RED.view = (function() {
                                            node.n._def.outputs > 0;
                         }
                     }
-                    RED.keyboard.add("*",/* ESCAPE */ 27,function(){
-                            RED.keyboard.remove(/* ESCAPE */ 27);
+                    RED.keyboard.add("*","escape",function(){
+                            RED.keyboard.remove("escape");
                             clearSelection();
                             RED.history.pop();
                             mouse_mode = 0;
@@ -2483,6 +2511,24 @@ RED.view = (function() {
         }
     }
 
+    function toggleShowGrid(state) {
+        if (state) {
+            grid.style("visibility","visible");
+        } else {
+            grid.style("visibility","hidden");
+        }
+    }
+    function toggleSnapGrid(state) {
+        snapGrid = state;
+        redraw();
+    }
+    function toggleStatus(s) {
+        showStatus = s;
+        RED.nodes.eachNode(function(n) { n.dirty = true;});
+        //TODO: subscribe/unsubscribe here
+        redraw();
+    }
+
     return {
         init: init,
         state:function(state) {
@@ -2502,16 +2548,6 @@ RED.view = (function() {
         },
         focus: focusView,
         importNodes: importNodes,
-        status: function(s) {
-            if (s == null) {
-                return showStatus;
-            } else {
-                showStatus = s;
-                RED.nodes.eachNode(function(n) { n.dirty = true;});
-                //TODO: subscribe/unsubscribe here
-                redraw();
-            }
-        },
         calculateTextWidth: calculateTextWidth,
         select: function(selection) {
             if (typeof selection !== "undefined") {
@@ -2537,17 +2573,6 @@ RED.view = (function() {
                 selection.link = selected_link;
             }
             return selection;
-        },
-        toggleShowGrid: function(state) {
-            if (state) {
-                grid.style("visibility","visible");
-            } else {
-                grid.style("visibility","hidden");
-            }
-        },
-        toggleSnapGrid: function(state) {
-            snapGrid = state;
-            redraw();
         },
         scale: function() {
             return scaleFactor;

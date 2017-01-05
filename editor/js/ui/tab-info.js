@@ -42,7 +42,7 @@ RED.sidebar.info = (function() {
             content: content,
             enableOnEdit: true
         });
-
+        RED.actions.add("core:show-info-tab",show);
     }
 
     function show() {

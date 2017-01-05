@@ -105,6 +105,9 @@ RED.tabs = (function() {
             if (typeof link === "string") {
                 link = ul.find("a[href='#"+link+"']");
             }
+            if (link.length === 0) {
+                return;
+            }
             if (!link.parent().hasClass("active")) {
                 ul.children().removeClass("active");
                 ul.children().css({"transition": "width 100ms"});
@@ -124,6 +127,18 @@ RED.tabs = (function() {
                 setTimeout(function() {
                     ul.children().css({"transition": ""});
                 },100);
+            }
+        }
+        function activatePreviousTab() {
+            var previous = ul.find("li.active").prev();
+            if (previous.length > 0) {
+                activateTab(previous.find("a"));
+            }
+        }
+        function activateNextTab() {
+            var next = ul.find("li.active").next();
+            if (next.length > 0) {
+                activateTab(next.find("a"));
             }
         }
 
@@ -303,6 +318,8 @@ RED.tabs = (function() {
             },
             removeTab: removeTab,
             activateTab: activateTab,
+            nextTab: activateNextTab,
+            previousTab: activatePreviousTab,
             resize: updateTabWidths,
             count: function() {
                 return ul.find("li.red-ui-tab").size();

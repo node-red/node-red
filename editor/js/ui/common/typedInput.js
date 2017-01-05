@@ -85,6 +85,7 @@
         }
         return true;
     }
+
     var allOptions = {
         msg: {value:"msg",label:"msg.",validate:validateExpression},
         flow: {value:"flow",label:"flow.",validate:validateExpression},
@@ -94,7 +95,22 @@
         bool: {value:"bool",label:"boolean",icon:"red/images/typedInput/bool.png",options:["true","false"]},
         json: {value:"json",label:"JSON",icon:"red/images/typedInput/json.png", validate: function(v) { try{JSON.parse(v);return true;}catch(e){return false;}}},
         re: {value:"re",label:"regular expression",icon:"red/images/typedInput/re.png"},
-        date: {value:"date",label:"timestamp",hasValue:false}
+        date: {value:"date",label:"timestamp",hasValue:false},
+        jsonata: {
+            value: "jsonata",
+            label: "expression",
+            icon: "red/images/typedInput/expr.png",
+            validate: function(v) { try{jsonata(v);return true;}catch(e){return false;}},
+            expand:function() {
+                var that = this;
+                RED.editor.editExpression({
+                    value: this.value().replace(/\t/g,"\n"),
+                    complete: function(v) {
+                        that.value(v.replace(/\n/g,"\t"));
+                    }
+                })
+            }
+        }
     };
     var nlsd = false;
 
@@ -188,7 +204,7 @@
                 that.uiSelect.addClass('red-ui-typedInput-focus');
             });
 
-
+            this.optionExpandButton = $('<button tabindex="0" class="red-ui-typedInput-option-expand" style="display:inline-block"><i class="fa fa-ellipsis-h"></i></button>').appendTo(this.uiSelect);
 
 
             this.type(this.options.default||this.typeList[0].value);
@@ -322,11 +338,16 @@
                 this.uiSelect.width(this.uiWidth);
             }
             if (this.typeMap[this.propertyType] && this.typeMap[this.propertyType].hasValue === false) {
-                this.selectTrigger.css('width',"100%");
+                this.selectTrigger.addClass("red-ui-typedInput-full-width");
             } else {
-                this.selectTrigger.width('auto');
+                this.selectTrigger.removeClass("red-ui-typedInput-full-width");
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
                 this.elementDiv.css('left',labelWidth+"px");
+                if (this.optionExpandButton.is(":visible")) {
+                    this.elementDiv.css('right',"22px");
+                } else {
+                    this.elementDiv.css('right','0');
+                }
                 if (this.optionSelectTrigger) {
                     this.optionSelectTrigger.css({'left':(labelWidth)+"px",'width':'calc( 100% - '+labelWidth+'px )'});
                 }
@@ -396,6 +417,9 @@
                         this.selectLabel.text(opt.label);
                     }
                     if (opt.options) {
+                        if (this.optionExpandButton) {
+                            this.optionExpandButton.hide();
+                        }
                         if (this.optionSelectTrigger) {
                             this.optionSelectTrigger.show();
                             this.elementDiv.hide();
@@ -428,6 +452,16 @@
                                 delete this.oldValue;
                             }
                             this.elementDiv.show();
+                        }
+                        if (opt.expand && typeof opt.expand === 'function') {
+                            this.optionExpandButton.show();
+                            this.optionExpandButton.off('click');
+                            this.optionExpandButton.on('click',function(evt) {
+                                evt.preventDefault();
+                                opt.expand.call(that);
+                            })
+                        } else {
+                            this.optionExpandButton.hide();
                         }
                         this.element.trigger('change',this.propertyType,this.value());
                     }

@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-
-
-
 RED.menu = (function() {
 
     var menuItems = {};
@@ -34,17 +31,17 @@ RED.menu = (function() {
             var savedStateActive = isSavedStateActive(opt.id);
             if (savedStateActive) {
                 link.addClass("active");
-                opt.onselect.call(opt, true);
+                triggerAction(opt.id,true);
             } else if (savedStateActive === false) {
                 link.removeClass("active");
-                opt.onselect.call(opt, false);
+                triggerAction(opt.id,false);
             } else if (opt.hasOwnProperty("selected")) {
                 if (opt.selected) {
                     link.addClass("active");
                 } else {
                     link.removeClass("active");
                 }
-                opt.onselect.call(opt, opt.selected);
+                triggerAction(opt.id,opt.selected);
             }
         }
 
@@ -107,10 +104,12 @@ RED.menu = (function() {
                             setSelected(opt.id, !selected);
                         }
                     } else {
-                        opt.onselect.call(opt);
+                        triggerAction(opt.id);
                     }
                 });
-                setInitialState();
+                if (opt.toggle) {
+                    setInitialState();
+                }
             } else if (opt.href) {
                 link.attr("target","_blank").attr("href",opt.href);
             } else if (!opt.options) {
@@ -164,6 +163,19 @@ RED.menu = (function() {
         }
     }
 
+    function triggerAction(id, args) {
+        var opt = menuItems[id];
+        var callback = opt.onselect;
+        if (typeof opt.onselect === 'string') {
+            callback = RED.actions.get(opt.onselect);
+        }
+        if (callback) {
+            callback.call(opt,args);
+        } else {
+            console.log("No callback for",id,opt.onselect);
+        }
+    }
+
     function isSavedStateActive(id) {
         return RED.settings.get("menu-" + id);
     }
@@ -187,9 +199,13 @@ RED.menu = (function() {
             $("#"+id).removeClass("active");
         }
         if (opt && opt.onselect) {
-            opt.onselect.call(opt,state);
+            triggerAction(opt.id,state);
         }
         setSavedState(id, state);
+    }
+
+    function toggleSelected(id) {
+        setSelected(id,!isSelected(id));
     }
 
     function setDisabled(id,state) {
@@ -231,16 +247,6 @@ RED.menu = (function() {
         var opt = menuItems[id];
         if (opt) {
             opt.onselect = action;
-            // $("#"+id).click(function() {
-            //     if ($(this).parent().hasClass("disabled")) {
-            //         return;
-            //     }
-            //     if (menuItems[id].toggle) {
-            //         setSelected(id,!isSelected(id));
-            //     } else {
-            //         menuItems[id].onselect.call(menuItems[id]);
-            //     }
-            // });
         }
     }
 
@@ -248,6 +254,7 @@ RED.menu = (function() {
         init: createMenu,
         setSelected: setSelected,
         isSelected: isSelected,
+        toggleSelected: toggleSelected,
         setDisabled: setDisabled,
         addItem: addItem,
         removeItem: removeItem,

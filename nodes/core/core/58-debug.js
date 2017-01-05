@@ -19,6 +19,7 @@ module.exports = function(RED) {
     var util = require("util");
     var events = require("events");
     var path = require("path");
+    var safeJSONStringify = require("json-stringify-safe");
     var debuglength = RED.settings.debugMaxLength||1000;
     var useColors = false;
     // util.inspect.styles.boolean = "red";
@@ -87,6 +88,7 @@ module.exports = function(RED) {
             }
         } else if (msg.msg && typeof msg.msg === 'object') {
             var seen = [];
+            var seenAts = [];
             try {
                 msg.format = msg.msg.constructor.name || "Object";
             } catch(err) {
@@ -106,7 +108,7 @@ module.exports = function(RED) {
                     }
                 }
                 if (isArray || (msg.format === "Object")) {
-                    msg.msg = JSON.stringify(msg.msg, function(key, value) {
+                    msg.msg = safeJSONStringify(msg.msg, function(key, value) {
                         if (key[0] === '_' && key !== "_msgid") {
                             return undefined;
                         }
@@ -118,14 +120,11 @@ module.exports = function(RED) {
                         }
                         if (util.isArray(value) && value.length > debuglength) {
                             value = {
+                                __encoded__: true,
                                 type: "array",
                                 data: value.slice(0,debuglength),
                                 length: value.length
                             }
-                        }
-                        if (typeof value === 'object' && value !== null) {
-                            if (seen.indexOf(value) !== -1) { return "[circular]"; }
-                            seen.push(value);
                         }
                         if (typeof value === 'string') {
                             if (value.length > debuglength) {

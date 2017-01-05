@@ -15,6 +15,7 @@
  **/
 
 var clone = require("clone");
+var jsonata = require("jsonata");
 
 function generateId() {
     return (1+Math.random()*4294967295).toString(16);
@@ -310,6 +311,8 @@ function evaluateNodeProperty(value, type, node, msg) {
         return node.context().global.get(value);
     } else if (type === 'bool') {
         return /^true$/i.test(value);
+    } else if (type === 'jsonata') {
+        return jsonata(value).evaluate({msg:msg});
     }
     return value;
 }

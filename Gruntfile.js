@@ -117,7 +117,9 @@ module.exports = function(grunt) {
                     "editor/js/ui/common/tabs.js",
                     "editor/js/ui/common/typedInput.js",
                     "editor/js/ui/utils.js",
+                    "editor/js/ui/actions.js",
                     "editor/js/ui/deploy.js",
+                    "editor/js/ui/diff.js",
                     "editor/js/ui/keyboard.js",
                     "editor/js/ui/workspaces.js",
                     "editor/js/ui/view.js",
@@ -152,6 +154,10 @@ module.exports = function(grunt) {
                     "public/vendor/vendor.css": [
                         // TODO: resolve relative resource paths in
                         //       bootstrap/FA/jquery
+                    ],
+                    "public/vendor/jsonata/jsonata.js": [
+                        "node_modules/jsonata/jsonata.js",
+                        "editor/vendor/jsonata/formatter.js"
                     ]
                 }
             }
@@ -160,7 +166,11 @@ module.exports = function(grunt) {
             build: {
                 files: {
                     'public/red/red.min.js': 'public/red/red.js',
-                    'public/red/main.min.js': 'public/red/main.js'
+                    'public/red/main.min.js': 'public/red/main.js',
+                    'public/vendor/jsonata/jsonata.min.js': 'public/vendor/jsonata/jsonata.js',
+                    'public/vendor/ace/mode-jsonata.js': 'editor/vendor/jsonata/mode-jsonata.js',
+                    'public/vendor/ace/worker-jsonata.js': 'editor/vendor/jsonata/worker-jsonata.js',
+                    'public/vendor/ace/snippets/jsonata.js': 'editor/vendor/jsonata/snippets-jsonata.js'
                 }
             }
         },
@@ -185,6 +195,11 @@ module.exports = function(grunt) {
                     'nodes/core/locales/en-US/messages.json',
                     'red/api/locales/en-US/editor.json',
                     'red/runtime/locales/en-US/runtime.json'
+                ]
+            },
+            keymaps: {
+                src: [
+                    'editor/js/keymap.json'
                 ]
             }
         },
@@ -222,7 +237,7 @@ module.exports = function(grunt) {
                 files: [
                     'editor/js/**/*.js'
                 ],
-                tasks: ['concat','uglify','attachCopyright:js']
+                tasks: ['copy:build','concat','uglify','attachCopyright:js']
             },
             sass: {
                 files: [
@@ -237,6 +252,12 @@ module.exports = function(grunt) {
                     'red/runtime/locales/en-US/runtime.json'
                 ],
                 tasks: ['jsonlint:messages']
+            },
+            keymaps: {
+                files: [
+                    'editor/js/keymap.json'
+                ],
+                tasks: ['jsonlint:keymaps','copy:build']
             },
             misc: {
                 files: [
@@ -275,6 +296,10 @@ module.exports = function(grunt) {
                     {
                         src: 'editor/js/main.js',
                         dest: 'public/red/main.js'
+                    },
+                    {
+                        src: 'editor/js/keymap.json',
+                        dest: 'public/red/keymap.json'
                     },
                     {
                         cwd: 'editor/images',
@@ -435,7 +460,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('build',
         'Builds editor content',
-        ['clean:build','concat:build','concat:vendor','copy:build','uglify:build','sass:build','jsonlint:messages','attachCopyright']);
+        ['clean:build','jsonlint','concat:build','concat:vendor','copy:build','uglify:build','sass:build','attachCopyright']);
 
     grunt.registerTask('dev',
         'Developer mode: run node-red, watch for source changes and build/restart',

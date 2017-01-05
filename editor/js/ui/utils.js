@@ -19,6 +19,9 @@ RED.utils = (function() {
     function formatString(str) {
         return str.replace(/\r?\n/g,"&crarr;").replace(/\t/g,"&rarr;");
     }
+    function sanitize(m) {
+        return m.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
 
     function buildMessageSummaryValue(value) {
         var result;
@@ -35,9 +38,11 @@ RED.utils = (function() {
                 result = $('<span class="debug-message-object-value debug-message-type-meta">object</span>');
             }
         } else if (typeof value === 'string') {
-            subvalue = value;
-            if (subvalue.length > 30) {
-                subvalue = subvalue.substring(0,30)+"&hellip;";
+            var subvalue;
+            if (value.length > 30) {
+                subvalue = sanitize(value.substring(0,30))+"&hellip;";
+            } else {
+                subvalue = sanitize(value);
             }
             result = $('<span class="debug-message-object-value debug-message-type-string"></span>').html('"'+formatString(subvalue)+'"');
         } else {
@@ -68,7 +73,7 @@ RED.utils = (function() {
         var entryObj;
         var header;
         var headerHead;
-        var value,subvalue;
+        var value;
         var element = $('<span class="debug-message-element"></span>');
         if (!key) {
             element.addClass("debug-message-top-level");
@@ -84,7 +89,7 @@ RED.utils = (function() {
 
         var isArray = Array.isArray(obj);
         var isArrayObject = false;
-        if (obj && typeof obj === 'object' && obj.hasOwnProperty('type') && obj.hasOwnProperty('data')) {
+        if (obj && typeof obj === 'object' && obj.hasOwnProperty('type') && obj.hasOwnProperty('data') && ((obj.__encoded__ && obj.type === 'array') || obj.type === 'Buffer')) {
             isArray = true;
             isArrayObject = true;
         }
@@ -98,23 +103,30 @@ RED.utils = (function() {
                 makeExpandable(header, function() {
                     $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||'string').appendTo(header);
                     var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
-                    $('<pre class="debug-message-type-string"></pre>').html(obj).appendTo(row);
+                    $('<pre class="debug-message-type-string"></pre>').text(obj).appendTo(row);
                 });
             }
-            $('<span class="debug-message-type-string debug-message-object-header"></span>').html('"'+formatString(obj)+'"').appendTo(entryObj);
+            $('<span class="debug-message-type-string debug-message-object-header"></span>').html('"'+formatString(sanitize(obj))+'"').appendTo(entryObj);
 
 
         } else if (typeof obj === 'number') {
             e = $('<span class="debug-message-type-number"></span>').text(""+obj).appendTo(entryObj);
-            e.click(function(evt) {
-                var format = $(this).data('format');
-                if (format === 'hex') {
-                    $(this).text(""+obj).data('format','dec');
-                } else {
-                    $(this).text("0x"+(obj).toString(16)).data('format','hex');
-                }
-                evt.preventDefault();
-            });
+            if (Number.isInteger(obj) && (obj >= 0)) { // if it's a +ve integer
+                e.addClass("debug-message-type-number-toggle");
+                e.click(function(evt) {
+                    var format = $(this).data('format') || "date";
+                    if (format === 'dec') {
+                        $(this).text(""+obj).data('format','date');
+                    } else if ((format === 'date') && (obj.toString().length===13) && (obj<=2147483647000)) {
+                        $(this).text((new Date(obj)).toISOString()).data('format','hex');
+                    } else if ((format === 'date') && (obj.toString().length===10) && (obj<=2147483647)) {
+                        $(this).text((new Date(obj*1000)).toISOString()).data('format','hex');
+                    } else {
+                        $(this).text("0x"+(obj).toString(16)).data('format','dec');
+                    }
+                    evt.preventDefault();
+                });
+            }
         } else if (isArray) {
             element.addClass('collapsed');
 
@@ -155,7 +167,7 @@ RED.utils = (function() {
                         } catch(err) {
                             console.log(err);
                         }
-                        $('<pre class="debug-message-type-string"></pre>').html(stringEncoding).appendTo(sr);
+                        $('<pre class="debug-message-type-string"></pre>').text(stringEncoding).appendTo(sr);
                         var bufferOpts = $('<span class="debug-message-buffer-opts"></span>').appendTo(headerHead);
                         $('<a href="#"></a>').addClass('selected').html('raw').appendTo(bufferOpts).click(function(e) {
                             if ($(this).text() === 'raw') {

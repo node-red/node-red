@@ -41,7 +41,7 @@
     <p>The button to the right of the node will toggle its output on and off so you can de-clutter the debug window.</p>
     <p>If the payload is an object or buffer it will be stringified first for display and indicate that by saying "(Object)" or "(Buffer)".</p>
     <p>Selecting any particular message will highlight (in red) the debug node that reported it. This is useful if you wire up multiple debug nodes.</p>
-    <p>Optionally can show the complete <code>msg</code> object, and send messages to the console log.</p>
+    <p>Optionally can show the complete <code>msg</code> object, and send messages to the console log (⇶).</p>
     <p>In addition any calls to node.warn or node.error will appear here.</p>
 </script>
 <script src="debug/view/debug-utils.js"></script>
@@ -58,10 +58,12 @@
             complete: {value:"false", required:true}
         },
         label: function() {
+            var suffix = "";
+            if (this.console === true || this.console === "true") { suffix = " ⇶"; }
             if (this.complete === true || this.complete === "true") {
-                return this.name||"msg";
+                return (this.name||"msg") + suffix;
             } else {
-                return this.name || "msg." + ((!this.complete || this.complete === "false") ? "payload" : this.complete);
+                return (this.name || "msg." + ((!this.complete || this.complete === "false") ? "payload" : this.complete)) + suffix;
             }
         },
         labelStyle: function() {
@@ -144,8 +146,7 @@
                 toolbar: uiComponents.footer,
                 enableOnEdit: true
             });
-
-
+            RED.actions.add("core:show-debug-tab",function() { RED.sidebar.show('debug')});
 
             var that = this;
             RED._debug = function(msg) {
@@ -184,9 +185,10 @@
             RED.comms.subscribe("debug",this.handleDebugMessage);
 
             RED.events.on("workspace:change", this.refreshMessageList);
+
             $("#debug-tab-open").click(function(e) {
                 e.preventDefault();
-                subWindow = window.open(document.location.toString().replace(/#.*$/,"")+"debug/view/view.html","nodeREDDebugView","menubar=no,location=no,toolbar=no,chrome,height=500,width=600");
+                subWindow = window.open(document.location.toString().replace(/[?#].*$/,"")+"debug/view/view.html"+document.location.search,"nodeREDDebugView","menubar=no,location=no,toolbar=no,chrome,height=500,width=600");
                 subWindow.onload = function() {
                     subWindow.postMessage({event:"workspaceChange",activeWorkspace:RED.workspaces.active()},"*");
                 }
@@ -221,6 +223,8 @@
             RED.sidebar.removeTab("debug");
             RED.events.off("workspace:change", this.refreshMessageList);
             window.removeEventListener("message",this.handleWindowMessage);
+            RED.actions.remove("core:show-debug");
+
             delete RED._debug;
         },
         oneditprepare: function() {

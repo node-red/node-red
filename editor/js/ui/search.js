@@ -45,6 +45,9 @@ RED.search = (function() {
 
 
         var properties = ['id','type','name','label','info'];
+        if (n._def && n._def.defaults) {
+            properties = properties.concat(Object.keys(n._def.defaults));
+        }
         for (var i=0;i<properties.length;i++) {
             if (n.hasOwnProperty(properties[i])) {
                 var v = n[properties[i]];
@@ -238,8 +241,11 @@ RED.search = (function() {
     }
 
     function show() {
+        if (disabled) {
+            return;
+        }
         if (!visible) {
-            RED.keyboard.add("*",/* ESCAPE */ 27,function(){hide();d3.event.preventDefault();});
+            RED.keyboard.add("*","escape",function(){hide()});
             $("#header-shade").show();
             $("#editor-shade").show();
             $("#palette-shade").show();
@@ -257,7 +263,7 @@ RED.search = (function() {
     }
     function hide() {
         if (visible) {
-            RED.keyboard.remove(/* ESCAPE */ 27);
+            RED.keyboard.remove("escape");
             visible = false;
             $("#header-shade").hide();
             $("#editor-shade").hide();
@@ -274,7 +280,8 @@ RED.search = (function() {
     }
 
     function init() {
-        RED.keyboard.add("*",/* . */ 190,{ctrl:true},function(){if (!disabled) { show(); } d3.event.preventDefault();});
+        RED.actions.add("core:search",show);
+
         RED.events.on("editor:open",function() { disabled = true; });
         RED.events.on("editor:close",function() { disabled = false; });
         RED.events.on("palette-editor:open",function() { disabled = true; });

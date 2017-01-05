@@ -159,6 +159,7 @@ module.exports = function(RED) {
                 (node.ret === "bin") ? res.setEncoding('binary') : res.setEncoding('utf8');
                 msg.statusCode = res.statusCode;
                 msg.headers = res.headers;
+                msg.responseUrl = res.responseUrl;
                 msg.payload = "";
                 // msg.url = url;   // revert when warning above finally removed
                 res.on('data',function(chunk) {
