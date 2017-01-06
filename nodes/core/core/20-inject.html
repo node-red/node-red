@@ -175,22 +175,7 @@
         defaults: {
             name: {value:""},
             topic: {value:""},
-            payload: {value:"", validate:function(v) {
-                var ptype = $("#node-input-payloadType").val() || this.payloadType;
-                if (ptype === 'json') {
-                    try {
-                        JSON.parse(v);
-                        return true;
-                    } catch(err) {
-                        return false;
-                    }
-                } else if (ptype === 'flow' || ptype === 'global' ) {
-                    return RED.utils.validatePropertyExpression(v);
-                } else if (ptype === 'num') {
-                    return /^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/.test(v);
-                }
-                return true;
-            }},
+            payload: {value:"", validate: RED.validators.typedInput("payloadType")},
             payloadType: {value:"date"},
             repeat: {value:""},
             crontab: {value:""},
