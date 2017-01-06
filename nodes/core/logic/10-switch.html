@@ -48,7 +48,7 @@
         category: 'function',
         defaults: {
             name: {value:""},
-            property: {value:"payload", required:true},
+            property: {value:"payload", required:true, validate: RED.validators.typedInput("propertyType")},
             propertyType: { value:"msg" },
             rules: {value:[{t:"eq", v:""}]},
             checkall: {value:"true", required:true},

@@ -85,8 +85,8 @@
         category: 'function',
         color:"#E6E0F8",
         defaults: {
-            op1: {value:"1"},
-            op2: {value:"0"},
+            op1: {value:"1", validate: RED.validators.typedInput("op1type")},
+            op2: {value:"0", validate: RED.validators.typedInput("op2type")},
             op1type: {value:"val"},
             op2type: {value:"val"},
             duration: {value:"250",required:true,validate:RED.validators.number()},

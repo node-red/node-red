@@ -162,7 +162,7 @@
             name: {value:""},
             mode: {value:"auto"},
             build: { value:"string"},
-            property: { value: "payload"},
+            property: { value: "payload", validate: RED.validators.typedInput("propertyType")},
             propertyType: { value:"msg"},
             key: {value:"topic"},
             joiner: { value:"\\n"},

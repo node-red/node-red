@@ -78,7 +78,7 @@
         category: 'function',
         defaults: {
             name: {value:""},
-            field: {value:"payload"},
+            field: {value:"payload", validate: RED.validators.typedInput("fieldType")},
             fieldType: {value:"msg"},
             format: {value:"handlebars"},
             syntax: {value:"mustache"},

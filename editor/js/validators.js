@@ -16,8 +16,8 @@
 RED.validators = {
     number: function(){return function(v) { return v!=='' && !isNaN(v);}},
     regex: function(re){return function(v) { return re.test(v);}},
-    typedInput: function(ptypeName) { return function(v) {
-        var ptype = $("#node-input-"+ptypeName).val() || this[ptypeName];
+    typedInput: function(ptypeName,isConfig) { return function(v) {
+        var ptype = $("#node-"+(isConfig?"config-":"")+"input-"+ptypeName).val() || this[ptypeName];
         if (ptype === 'json') {
             try {
                 JSON.parse(v);
@@ -25,7 +25,7 @@ RED.validators = {
             } catch(err) {
                 return false;
             }
-        } else if (ptype === 'flow' || ptype === 'global' ) {
+        } else if (ptype === 'msg' || ptype === 'flow' || ptype === 'global' ) {
             return RED.utils.validatePropertyExpression(v);
         } else if (ptype === 'num') {
             return /^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/.test(v);
