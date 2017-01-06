@@ -165,6 +165,7 @@ RED.nodes = (function() {
             configNodes[n.id] = n;
         } else {
             n.ports = [];
+            if (n.wires && (n.wires.length > n.outputs)) { n.outputs = n.wires.length; }
             if (n.outputs) {
                 for (var i=0;i<n.outputs;i++) {
                     n.ports.push(i);
