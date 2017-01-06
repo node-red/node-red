@@ -304,10 +304,10 @@ RED.palette.editor = (function() {
             filterInput.focus();
         },250);
         RED.events.emit("palette-editor:open");
-        RED.keyboard.add("*",/* ESCAPE */ 27,function(){hidePaletteEditor();d3.event.preventDefault();});
+        RED.keyboard.add("*","escape",function(){hidePaletteEditor()});
     }
     function hidePaletteEditor() {
-        RED.keyboard.remove("*");
+        RED.keyboard.remove("escape");
         $("#main-container").removeClass("palette-expanded");
         $("#header-shade").hide();
         $("#editor-shade").hide();
@@ -424,8 +424,10 @@ RED.palette.editor = (function() {
         RED.events.on("editor:close",function() { disabled = false; });
         RED.events.on("search:open",function() { disabled = true; });
         RED.events.on("search:close",function() { disabled = false; });
+        RED.events.on("type-search:open",function() { disabled = true; });
+        RED.events.on("type-search:close",function() { disabled = false; });
 
-        RED.keyboard.add("*", /* p */ 80,{shift:true,ctrl:true},function() {RED.palette.editor.show();d3.event.preventDefault();});
+        RED.actions.add("core:manage-palette",RED.palette.editor.show);
 
         editorTabs = RED.tabs.create({
             id:"palette-editor-tabs",
@@ -631,7 +633,7 @@ RED.palette.editor = (function() {
 
 
         $('<span>').html(RED._("palette.editor.sort")+' ').appendTo(toolBar);
-        var sortGroup = $('<span class="button-group"></span> ').appendTo(toolBar);
+        var sortGroup = $('<span class="button-group"></span>').appendTo(toolBar);
         var sortAZ = $('<a href="#" class="sidebar-header-button-toggle selected" data-i18n="palette.editor.sortAZ"></a>').appendTo(sortGroup);
         var sortRecent = $('<a href="#" class="sidebar-header-button-toggle" data-i18n="palette.editor.sortRecent"></a>').appendTo(sortGroup);
 
@@ -754,7 +756,9 @@ RED.palette.editor = (function() {
             refreshNodeModule(ns.module);
             for (var i=0;i<filteredList.length;i++) {
                 if (filteredList[i].info.id === ns.module) {
-                    filteredList[i].elements.installButton.hide();
+                    var installButton = filteredList[i].elements.installButton;
+                    installButton.addClass('disabled');
+                    installButton.html(RED._('palette.editor.installed'));
                     break;
                 }
             }
@@ -768,7 +772,9 @@ RED.palette.editor = (function() {
                     delete nodeEntries[ns.module];
                     for (var i=0;i<filteredList.length;i++) {
                         if (filteredList[i].info.id === ns.module) {
-                            filteredList[i].elements.installButton.show();
+                            var installButton = filteredList[i].elements.installButton;
+                            installButton.removeClass('disabled');
+                            installButton.html(RED._('palette.editor.install'));
                             break;
                         }
                     }

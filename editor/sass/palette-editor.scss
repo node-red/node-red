@@ -72,10 +72,6 @@
         padding: 8px 10px;
         border-bottom: 1px solid $primary-border-color;
         text-align: right;
-
-        .button-group {
-            margin-right: 10px;
-        }
     }
     .palette-module-button-group {
         position: absolute;
@@ -86,12 +82,7 @@
         }
     }
     .palette-module-shade {
-        position: absolute;
-        top: 0;
-        bottom:0;
-        left:0;
-        right:0;
-        background: $shade-color;
+        @include shade;
         text-align: center;
         padding-top: 20px;
     }

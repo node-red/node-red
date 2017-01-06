@@ -14,87 +14,31 @@
  * limitations under the License.
  **/
 (function($) {
-    function validateExpression(str) {
-        var length = str.length;
-        var start = 0;
-        var inString = false;
-        var inBox = false;
-        var quoteChar;
-        var v;
-        for (var i=0;i<length;i++) {
-            var c = str[i];
-            if (!inString) {
-                if (c === "'" || c === '"') {
-                    if (!inBox) {
-                        return false;
-                    }
-                    inString = true;
-                    quoteChar = c;
-                    start = i+1;
-                } else if (c === '.') {
-                    if (i===0 || i===length-1) {
-                        return false;
-                    }
-                    // Next char is a-z
-                    if (!/[a-z0-9\$\_]/i.test(str[i+1])) {
-                        return false;
-                    }
-                    start = i+1;
-                } else if (c === '[') {
-                    if (i === 0) {
-                        return false;
-                    }
-                    if (i===length-1) {
-                        return false;
-                    }
-                    // Next char is either a quote or a number
-                    if (!/["'\d]/.test(str[i+1])) {
-                        return false;
-                    }
-                    start = i+1;
-                    inBox = true;
-                } else if (c === ']') {
-                    if (!inBox) {
-                        return false;
-                    }
-                    if (start != i) {
-                        v = str.substring(start,i);
-                        if (!/^\d+$/.test(v)) {
-                            return false;
-                        }
-                    }
-                    start = i+1;
-                    inBox = false;
-                } else if (c === ' ') {
-                    return false;
-                }
-            } else {
-                if (c === quoteChar) {
-                    // Next char must be a ]
-                    if (!/\]/.test(str[i+1])) {
-                        return false;
-                    }
-                    start = i+1;
-                    inString = false;
-                }
-            }
-
-        }
-        if (inBox || inString) {
-            return false;
-        }
-        return true;
-    }
     var allOptions = {
-        msg: {value:"msg",label:"msg.",validate:validateExpression},
-        flow: {value:"flow",label:"flow.",validate:validateExpression},
-        global: {value:"global",label:"global.",validate:validateExpression},
+        msg: {value:"msg",label:"msg.",validate:RED.utils.validatePropertyExpression},
+        flow: {value:"flow",label:"flow.",validate:RED.utils.validatePropertyExpression},
+        global: {value:"global",label:"global.",validate:RED.utils.validatePropertyExpression},
         str: {value:"str",label:"string",icon:"red/images/typedInput/az.png"},
         num: {value:"num",label:"number",icon:"red/images/typedInput/09.png",validate:/^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/},
         bool: {value:"bool",label:"boolean",icon:"red/images/typedInput/bool.png",options:["true","false"]},
         json: {value:"json",label:"JSON",icon:"red/images/typedInput/json.png", validate: function(v) { try{JSON.parse(v);return true;}catch(e){return false;}}},
         re: {value:"re",label:"regular expression",icon:"red/images/typedInput/re.png"},
-        date: {value:"date",label:"timestamp",hasValue:false}
+        date: {value:"date",label:"timestamp",hasValue:false},
+        jsonata: {
+            value: "jsonata",
+            label: "expression",
+            icon: "red/images/typedInput/expr.png",
+            validate: function(v) { try{jsonata(v);return true;}catch(e){return false;}},
+            expand:function() {
+                var that = this;
+                RED.editor.editExpression({
+                    value: this.value().replace(/\t/g,"\n"),
+                    complete: function(v) {
+                        that.value(v.replace(/\n/g,"\t"));
+                    }
+                })
+            }
+        }
     };
     var nlsd = false;
 
@@ -117,7 +61,7 @@
             this.uiSelect = this.elementDiv.wrap( "<div>" ).parent();
             var attrStyle = this.element.attr('style');
             var m;
-            if ((m = /width\s*:\s*(\d+%)/i.exec(attrStyle)) !== null) {
+            if ((m = /width\s*:\s*(\d+(%|px))/i.exec(attrStyle)) !== null) {
                 this.element.css('width','100%');
                 this.uiSelect.width(m[1]);
                 this.uiWidth = null;
@@ -133,7 +77,7 @@
 
             this.options.types = this.options.types||Object.keys(allOptions);
 
-            this.selectTrigger = $('<a href="#"></a>').prependTo(this.uiSelect);
+            this.selectTrigger = $('<button tabindex="0"></button>').prependTo(this.uiSelect);
             $('<i class="fa fa-sort-desc"></i>').appendTo(this.selectTrigger);
             this.selectLabel = $('<span></span>').appendTo(this.selectTrigger);
 
@@ -160,32 +104,72 @@
             })
             this.selectTrigger.click(function(event) {
                 event.preventDefault();
-                if (that.typeList.length > 1) {
-                    that._showMenu(that.menu,that.selectTrigger);
-                } else {
-                    that.element.focus();
-                }
+                that._showTypeMenu();
             });
+            this.selectTrigger.on('keydown',function(evt) {
+                if (evt.keyCode === 40) {
+                    // Down
+                    that._showTypeMenu();
+                }
+            }).on('focus', function() {
+                that.uiSelect.addClass('red-ui-typedInput-focus');
+            })
 
             // explicitly set optionSelectTrigger display to inline-block otherwise jQ sets it to 'inline'
-            this.optionSelectTrigger = $('<a href="#" class="red-ui-typedInput-option-trigger" style="display:inline-block"><i class="fa fa-sort-desc"></i></a>').appendTo(this.uiSelect);
-            this.optionSelectLabel = $('<span></span>').prependTo(this.optionSelectTrigger);
+            this.optionSelectTrigger = $('<button tabindex="0" class="red-ui-typedInput-option-trigger" style="display:inline-block"><span class="red-ui-typedInput-option-caret"><i class="fa fa-sort-desc"></i></span></button>').appendTo(this.uiSelect);
+            this.optionSelectLabel = $('<span class="red-ui-typedInput-option-label"></span>').prependTo(this.optionSelectTrigger);
             this.optionSelectTrigger.click(function(event) {
                 event.preventDefault();
-                if (that.optionMenu) {
-                    that.optionMenu.css({
-                        minWidth:that.optionSelectLabel.width()
-                    });
-
-                    that._showMenu(that.optionMenu,that.optionSelectLabel)
+                that._showOptionSelectMenu();
+            }).on('keydown', function(evt) {
+                if (evt.keyCode === 40) {
+                    // Down
+                    that._showOptionSelectMenu();
                 }
+            }).on('blur', function() {
+                that.uiSelect.removeClass('red-ui-typedInput-focus');
+            }).on('focus', function() {
+                that.uiSelect.addClass('red-ui-typedInput-focus');
             });
+
+            this.optionExpandButton = $('<button tabindex="0" class="red-ui-typedInput-option-expand" style="display:inline-block"><i class="fa fa-ellipsis-h"></i></button>').appendTo(this.uiSelect);
+
+
             this.type(this.options.default||this.typeList[0].value);
+        },
+        _showTypeMenu: function() {
+            if (this.typeList.length > 1) {
+                this._showMenu(this.menu,this.selectTrigger);
+                this.menu.find("[value='"+this.propertyType+"']").focus();
+            } else {
+                this.element.focus();
+            }
+        },
+        _showOptionSelectMenu: function() {
+            if (this.optionMenu) {
+                this.optionMenu.css({
+                    minWidth:this.optionSelectLabel.width()
+                });
+
+                this._showMenu(this.optionMenu,this.optionSelectLabel);
+                var selectedOption = this.optionMenu.find("[value='"+this.value()+"']");
+                if (selectedOption.length === 0) {
+                    selectedOption = this.optionMenu.children(":first");
+                }
+                selectedOption.focus();
+
+            }
         },
         _hideMenu: function(menu) {
             $(document).off("mousedown.close-property-select");
             menu.hide();
-            this.element.focus();
+            if (this.elementDiv.is(":visible")) {
+                this.element.focus();
+            } else if (this.optionSelectTrigger.is(":visible")){
+                this.optionSelectTrigger.focus();
+            } else {
+                this.selectTrigger.focus();
+            }
         },
         _createMenu: function(opts,callback) {
             var that = this;
@@ -194,7 +178,7 @@
                 if (typeof opt === 'string') {
                     opt = {value:opt,label:opt};
                 }
-                var op = $('<a href="#">').attr("value",opt.value).appendTo(menu);
+                var op = $('<a href="#"></a>').attr("value",opt.value).appendTo(menu);
                 if (opt.label) {
                     op.text(opt.label);
                 }
@@ -214,6 +198,21 @@
                 display: "none",
             });
             menu.appendTo(document.body);
+
+            menu.on('keydown', function(evt) {
+                if (evt.keyCode === 40) {
+                    // DOWN
+                    $(this).children(":focus").next().focus();
+                } else if (evt.keyCode === 38) {
+                    // UP
+                    $(this).children(":focus").prev().focus();
+                } else if (evt.keyCode === 27) {
+                    that._hideMenu(menu);
+                }
+            })
+
+
+
             return menu;
 
         },
@@ -267,13 +266,18 @@
                 this.uiSelect.width(this.uiWidth);
             }
             if (this.typeMap[this.propertyType] && this.typeMap[this.propertyType].hasValue === false) {
-                this.selectTrigger.css('width',"100%");
+                this.selectTrigger.addClass("red-ui-typedInput-full-width");
             } else {
-                this.selectTrigger.width('auto');
+                this.selectTrigger.removeClass("red-ui-typedInput-full-width");
                 var labelWidth = this._getLabelWidth(this.selectTrigger);
                 this.elementDiv.css('left',labelWidth+"px");
+                if (this.optionExpandButton.is(":visible")) {
+                    this.elementDiv.css('right',"22px");
+                } else {
+                    this.elementDiv.css('right','0');
+                }
                 if (this.optionSelectTrigger) {
-                    this.optionSelectTrigger.css('left',(labelWidth+5)+"px");
+                    this.optionSelectTrigger.css({'left':(labelWidth)+"px",'width':'calc( 100% - '+labelWidth+'px )'});
                 }
             }
         },
@@ -341,6 +345,9 @@
                         this.selectLabel.text(opt.label);
                     }
                     if (opt.options) {
+                        if (this.optionExpandButton) {
+                            this.optionExpandButton.hide();
+                        }
                         if (this.optionSelectTrigger) {
                             this.optionSelectTrigger.show();
                             this.elementDiv.hide();
@@ -373,6 +380,16 @@
                                 delete this.oldValue;
                             }
                             this.elementDiv.show();
+                        }
+                        if (opt.expand && typeof opt.expand === 'function') {
+                            this.optionExpandButton.show();
+                            this.optionExpandButton.off('click');
+                            this.optionExpandButton.on('click',function(evt) {
+                                evt.preventDefault();
+                                opt.expand.call(that);
+                            })
+                        } else {
+                            this.optionExpandButton.hide();
                         }
                         this.element.trigger('change',this.propertyType,this.value());
                     }

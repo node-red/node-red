@@ -53,7 +53,8 @@
             "keyboardShortcuts": "Keyboard shortcuts",
             "login": "Login",
             "logout": "Logout",
-            "editPalette":"Manage palette"
+            "editPalette":"Manage palette",
+            "showTips": "Show tips"
         }
     },
     "user": {
@@ -66,7 +67,8 @@
         "warning": "<strong>Warning</strong>: __message__",
         "warnings": {
             "undeployedChanges": "node has undeployed changes",
-            "nodeActionDisabled": "node actions disabled within subflow"
+            "nodeActionDisabled": "node actions disabled within subflow",
+            "missing-types": "Flows stopped due to missing node types. Check logs for details."
         },
 
         "error": "<strong>Error</strong>: __message__",
@@ -129,8 +131,30 @@
             "improperlyConfigured": "The workspace contains some nodes that are not properly configured:",
             "unknown": "The workspace contains some unknown node types:",
             "confirm": "Are you sure you want to deploy?",
-            "conflict": "The server is running a more recent set of flows."
+            "conflict": "The server is running a more recent set of flows.",
+            "conflictChecking": "Checking to see if the changes can be merged automatically",
+            "conflictAutoMerge": "The changes include no conflicts and can be merged automatically.",
+            "conflictManualMerge": "The changes include conflicts that must be resolved before they can be deployed."
         }
+    },
+    "diff": {
+        "unresolvedCount": "__count__ unresolved conflict",
+        "unresolvedCount_plural": "__count__ unresolved conflicts",
+        "type": {
+            "added": "added",
+            "changed": "changed",
+            "unchanged": "unchanged",
+            "deleted": "deleted",
+            "flowDeleted": "flow deleted",
+            "flowAdded": "flow added",
+            "movedTo": "moved to __id__",
+            "movedFrom": "moved from __id__"
+        },
+        "nodeCount": "__count__ node",
+        "nodeCount_plural": "__count__ nodes",
+        "local":"Local",
+        "remote":"Remote"
+
     },
     "subflow": {
         "editSubflow": "Edit flow template: __name__",
@@ -167,11 +191,12 @@
         "selectAll": "Select all nodes",
         "selectAllConnected": "Select all connected nodes",
         "addRemoveNode": "Add/remove node from selection",
+        "editSelected": "Edit selected node",
         "deleteSelected": "Delete selected nodes or link",
         "importNode": "Import nodes",
         "exportNode": "Export nodes",
-        "nudgeNode": "Move selected node(s) by a small amount",
-        "moveNode": "Move selected node(s) by a large amount",
+        "nudgeNode": "Move selected nodes (1px)",
+        "moveNode": "Move selected nodes (20px)",
         "toggleSidebar": "Toggle sidebar",
         "deleteNode": "Delete selected nodes or link",
         "copyNode": "Copy selected nodes",
@@ -316,6 +341,11 @@
         "add": "add"
     },
     "search": {
-        "empty": "No matches found"
+        "empty": "No matches found",
+        "addNode": "add a node..."
+    },
+    "expressionEditor": {
+        "functions": "Functions",
+        "insert": "Insert"
     }
 }

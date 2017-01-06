@@ -49,6 +49,7 @@ module.exports = function(RED) {
                 // slice whole line by spaces (trying to honour quotes);
                 arg = arg.match(/(?:[^\s"]+|"[^"]*")+/g);
                 var cmd = arg.shift();
+                if (/^".*"$/.test(cmd)) { cmd = cmd.slice(1,-1); }
                 /* istanbul ignore else  */
                 if (RED.settings.verbose) { node.log(cmd+" ["+arg+"]"); }
                 child = spawn(cmd,arg);

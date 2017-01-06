@@ -165,7 +165,12 @@ function init(_server,_runtime) {
     }
 }
 function start() {
-    return i18n.registerMessageCatalog("editor",path.resolve(path.join(__dirname,"locales")),"editor.json").then(function(){
+    var catalogPath = path.resolve(path.join(__dirname,"locales"));
+    return i18n.registerMessageCatalogs([
+        {namespace: "editor",   dir: catalogPath, file:"editor.json"},
+        {namespace: "jsonata",  dir: catalogPath, file:"jsonata.json"},
+        {namespace: "infotips", dir: catalogPath, file:"infotips.json"}
+    ]).then(function(){
         comms.start();
     });
 }

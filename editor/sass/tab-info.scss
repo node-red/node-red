@@ -35,7 +35,7 @@ table.node-info tr.blank td {
     padding-left: 0px;
 }
 table.node-info td:first-child{
-    color: #000;
+    color: #666;
     vertical-align: top;
     width: 90px;
     padding: 3px;
@@ -80,4 +80,19 @@ div.node-info {
         font-size: 14px;
         margin: 8px auto;
     }
+}
+.node-info-tip {
+    position: absolute;
+    top: 40%;
+    left:0;
+    right:0;
+    padding: 20px;
+    font-size: 16px;
+    text-align: center;
+    line-height: 1.9em;
+    color : #bbb;
+    background-color: #fff;
+    @include disable-selection;
+    cursor: default;
+
 }

@@ -244,10 +244,14 @@ RED.view = (function() {
             node.el = dragGroup.append("svg:path").attr("class", "drag_line");
             drag_lines.push(node);
         }
+
     }
     function hideDragLines() {
         while(drag_lines.length) {
-            (drag_lines.pop()).el.remove();
+            var line = drag_lines.pop();
+            if (line.el) {
+                line.el.remove();
+            }
         }
     }
 
@@ -263,6 +267,7 @@ RED.view = (function() {
     }
 
     function init() {
+
         RED.events.on("workspace:change",function(event) {
             var chart = $("#chart");
             if (event.old !== 0) {
@@ -320,70 +325,12 @@ RED.view = (function() {
             drop: function( event, ui ) {
                 d3.event = event;
                 var selected_tool = ui.draggable[0].type;
-                var m = /^subflow:(.+)$/.exec(selected_tool);
-
-                if (activeSubflow && m) {
-                    var subflowId = m[1];
-                    if (subflowId === activeSubflow.id) {
-                        RED.notify(RED._("notification.error",{message: RED._("notification.errors.cannotAddSubflowToItself")}),"error");
-                        return;
-                    }
-                    if (RED.nodes.subflowContains(m[1],activeSubflow.id)) {
-                        RED.notify(RED._("notification.error",{message: RED._("notification.errors.cannotAddCircularReference")}),"error");
-                        return;
-                    }
+                var result = addNode(selected_tool);
+                if (!result) {
+                    return;
                 }
-
-                var nn = { id:RED.nodes.id(),z:RED.workspaces.active()};
-
-                nn.type = selected_tool;
-                nn._def = RED.nodes.getType(nn.type);
-
-                if (!m) {
-                    nn.inputs = nn._def.inputs || 0;
-                    nn.outputs = nn._def.outputs;
-
-                    for (var d in nn._def.defaults) {
-                        if (nn._def.defaults.hasOwnProperty(d)) {
-                            if (nn._def.defaults[d].value !== undefined) {
-                                nn[d] = JSON.parse(JSON.stringify(nn._def.defaults[d].value));
-                            }
-                        }
-                    }
-
-                    if (nn._def.onadd) {
-                        try {
-                            nn._def.onadd.call(nn);
-                        } catch(err) {
-                            console.log("onadd:",err);
-                        }
-                    }
-                } else {
-                    var subflow = RED.nodes.subflow(m[1]);
-                    nn.inputs = subflow.in.length;
-                    nn.outputs = subflow.out.length;
-                }
-
-                nn.changed = true;
-
-                nn.w = node_width;
-                nn.h = Math.max(node_height,(nn.outputs||0) * 15);
-
-                var historyEvent = {
-                    t:"add",
-                    nodes:[nn.id],
-                    dirty:RED.nodes.dirty()
-                }
-                if (activeSubflow) {
-                    var subflowRefresh = RED.subflow.refresh(true);
-                    if (subflowRefresh) {
-                        historyEvent.subflow = {
-                            id:activeSubflow.id,
-                            changed: activeSubflow.changed,
-                            instances: subflowRefresh.instances
-                        }
-                    }
-                }
+                var historyEvent = result.historyEvent;
+                var nn = result.node;
 
                 var helperOffset = d3.touches(ui.helper.get(0))[0]||d3.mouse(ui.helper.get(0));
                 var mousePos = d3.touches(this)[0]||d3.mouse(this);
@@ -438,29 +385,125 @@ RED.view = (function() {
             }
         });
 
-        RED.keyboard.add("workspace",/* backspace */ 8,function(){deleteSelection();d3.event.preventDefault();});
-        RED.keyboard.add("workspace",/* delete */ 46,function(){deleteSelection();d3.event.preventDefault();});
-        RED.keyboard.add("workspace",/* c */ 67,{ctrl:true},function(){copySelection();d3.event.preventDefault();});
-        RED.keyboard.add("workspace",/* x */ 88,{ctrl:true},function(){copySelection();deleteSelection();d3.event.preventDefault();});
+        RED.actions.add("core:copy",copySelection);
+        RED.actions.add("core:cut",function(){copySelection();deleteSelection();});
+        RED.actions.add("core:paste",function(){importNodes(clipboard);});
+        RED.actions.add("core:delete",deleteSelection);
+        RED.actions.add("core:edit",editSelection);
+        RED.actions.add("core:undo",RED.history.pop);
+        RED.actions.add("core:select-all",selectAll);
+        RED.actions.add("core:zoom-in",zoomIn);
+        RED.actions.add("core:zoom-out",zoomOut);
+        RED.actions.add("core:zoom-reset",zoomZero);
 
-        RED.keyboard.add("workspace",/* z */ 90,{ctrl:true},function(){RED.history.pop();});
-        RED.keyboard.add("workspace",/* a */ 65,{ctrl:true},function(){selectAll();d3.event.preventDefault();});
-        RED.keyboard.add("*",/* = */ 187,{ctrl:true},function(){zoomIn();d3.event.preventDefault();});
-        RED.keyboard.add("*",/* - */ 189,{ctrl:true},function(){zoomOut();d3.event.preventDefault();});
-        RED.keyboard.add("*",/* 0 */ 48,{ctrl:true},function(){zoomZero();d3.event.preventDefault();});
-        RED.keyboard.add("workspace",/* v */ 86,{ctrl:true},function(){importNodes(clipboard);d3.event.preventDefault();});
+        RED.actions.add("core:toggle-show-grid",function(state) {
+            if (state === undefined) {
+                RED.menu.toggleSelected("menu-item-view-show-grid");
+            } else {
+                toggleShowGrid(state);
+            }
+        });
+        RED.actions.add("core:toggle-snap-grid",function(state) {
+            if (state === undefined) {
+                RED.menu.toggleSelected("menu-item-view-snap-grid");
+            } else {
+                toggleSnapGrid(state);
+            }
+        });
+        RED.actions.add("core:toggle-status",function(state) {
+            if (state === undefined) {
+                RED.menu.toggleSelected("menu-item-status");
+            } else {
+                toggleStatus(state);
+            }
+        });
 
-        RED.keyboard.add("workspace",/* up    */ 38, function() { moveSelection(0,-1);d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* up    */ 38, {shift:true}, function() { moveSelection(0,-20); d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* down  */ 40, function() { moveSelection(0,1);d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* down  */ 40, {shift:true}, function() { moveSelection(0,20); d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* left  */ 37, function() { moveSelection(-1,0);d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* left  */ 37, {shift:true}, function() { moveSelection(-20,0); d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* right */ 39, function() { moveSelection(1,0);d3.event.preventDefault();},endKeyboardMove);
-        RED.keyboard.add("workspace",/* right */ 39, {shift:true}, function() { moveSelection(20,0); d3.event.preventDefault();},endKeyboardMove);
+        RED.actions.add("core:move-selection-up", function() { moveSelection(0,-1);});
+        RED.actions.add("core:step-selection-up", function() { moveSelection(0,-20);});
+        RED.actions.add("core:move-selection-right", function() { moveSelection(1,0);});
+        RED.actions.add("core:step-selection-right", function() { moveSelection(20,0);});
+        RED.actions.add("core:move-selection-down", function() { moveSelection(0,1);});
+        RED.actions.add("core:step-selection-down", function() { moveSelection(0,20);});
+        RED.actions.add("core:move-selection-left", function() { moveSelection(-1,0);});
+        RED.actions.add("core:step-selection-left", function() { moveSelection(-20,0);});
+    }
+
+
+    function addNode(type,x,y) {
+        var m = /^subflow:(.+)$/.exec(type);
+
+        if (activeSubflow && m) {
+            var subflowId = m[1];
+            if (subflowId === activeSubflow.id) {
+                RED.notify(RED._("notification.error",{message: RED._("notification.errors.cannotAddSubflowToItself")}),"error");
+                return;
+            }
+            if (RED.nodes.subflowContains(m[1],activeSubflow.id)) {
+                RED.notify(RED._("notification.error",{message: RED._("notification.errors.cannotAddCircularReference")}),"error");
+                return;
+            }
+        }
+
+        var nn = { id:RED.nodes.id(),z:RED.workspaces.active()};
+
+        nn.type = type;
+        nn._def = RED.nodes.getType(nn.type);
+
+        if (!m) {
+            nn.inputs = nn._def.inputs || 0;
+            nn.outputs = nn._def.outputs;
+
+            for (var d in nn._def.defaults) {
+                if (nn._def.defaults.hasOwnProperty(d)) {
+                    if (nn._def.defaults[d].value !== undefined) {
+                        nn[d] = JSON.parse(JSON.stringify(nn._def.defaults[d].value));
+                    }
+                }
+            }
+
+            if (nn._def.onadd) {
+                try {
+                    nn._def.onadd.call(nn);
+                } catch(err) {
+                    console.log("onadd:",err);
+                }
+            }
+        } else {
+            var subflow = RED.nodes.subflow(m[1]);
+            nn.inputs = subflow.in.length;
+            nn.outputs = subflow.out.length;
+        }
+
+        nn.changed = true;
+
+        nn.w = node_width;
+        nn.h = Math.max(node_height,(nn.outputs||0) * 15);
+
+        var historyEvent = {
+            t:"add",
+            nodes:[nn.id],
+            dirty:RED.nodes.dirty()
+        }
+        if (activeSubflow) {
+            var subflowRefresh = RED.subflow.refresh(true);
+            if (subflowRefresh) {
+                historyEvent.subflow = {
+                    id:activeSubflow.id,
+                    changed: activeSubflow.changed,
+                    instances: subflowRefresh.instances
+                }
+            }
+        }
+        return {
+            node: nn,
+            historyEvent: historyEvent
+        }
+
     }
 
     function canvasMouseDown() {
+        var point;
+
         if (!mousedown_node && !mousedown_link) {
             selected_link = null;
             updateSelection();
@@ -470,19 +513,104 @@ RED.view = (function() {
                 lasso.remove();
                 lasso = null;
             }
+        }
+        if (mouse_mode === 0 || mouse_mode === RED.state.QUICK_JOINING) {
+            if (d3.event.metaKey || d3.event.ctrlKey) {
+                point = d3.mouse(this);
+                d3.event.stopPropagation();
+                var mainPos = $("#main-container").position();
 
+                if (mouse_mode !== RED.state.QUICK_JOINING) {
+                    mouse_mode = RED.state.QUICK_JOINING;
+                    $(window).on('keyup',disableQuickJoinEventHandler);
+                }
+
+                RED.typeSearch.show({
+                    x:d3.event.clientX-mainPos.left-node_width/2,
+                    y:d3.event.clientY-mainPos.top-node_height/2,
+                    add: function(type) {
+                        var result = addNode(type);
+                        if (!result) {
+                            return;
+                        }
+                        var nn = result.node;
+                        var historyEvent = result.historyEvent;
+                        nn.x = point[0];
+                        nn.y = point[1];
+                        if (mouse_mode === RED.state.QUICK_JOINING) {
+                            if (drag_lines.length > 0) {
+                                var drag_line = drag_lines[0];
+                                var src = null,dst,src_port;
+
+                                if (drag_line.portType === 0 && nn.inputs > 0) {
+                                    src = drag_line.node;
+                                    src_port = drag_line.port;
+                                    dst = nn;
+                                } else if (drag_line.portType === 1 && nn.outputs > 0) {
+                                    src = nn;
+                                    dst = drag_line.node;
+                                    src_port = 0;
+                                }
+                                if (src !== null) {
+                                    var link = {source: src, sourcePort:src_port, target: dst};
+                                    RED.nodes.addLink(link);
+                                    historyEvent.links = [link];
+                                    hideDragLines();
+                                    if (drag_line.portType === 0 && nn.outputs > 0) {
+                                        showDragLines([{node:nn,port:0,portType:0}]);
+                                    } else if (drag_line.portType === 1 && nn.inputs > 0) {
+                                        showDragLines([{node:nn,port:0,portType:1}]);
+                                    } else {
+                                        resetMouseVars();
+                                    }
+                                } else {
+                                    hideDragLines();
+                                    resetMouseVars();
+                                }
+                            } else {
+                                if (nn.outputs > 0) {
+                                    showDragLines([{node:nn,port:0,portType:0}]);
+                                } else if (nn.inputs > 0) {
+                                    showDragLines([{node:nn,port:0,portType:1}]);
+                                } else {
+                                    resetMouseVars();
+                                }
+                            }
+                        }
+
+
+                        RED.history.push(historyEvent);
+                        RED.nodes.add(nn);
+                        RED.editor.validateNode(nn);
+                        RED.nodes.dirty(true);
+                        // auto select dropped node - so info shows (if visible)
+                        clearSelection();
+                        nn.selected = true;
+                        moving_set.push({n:nn});
+                        updateActiveNodes();
+                        updateSelection();
+                        redraw();
+                    }
+                });
+
+                updateActiveNodes();
+                updateSelection();
+                redraw();
+            }
+        }
+        if (mouse_mode === 0 && !(d3.event.metaKey || d3.event.ctrlKey)) {
             if (!touchStartTime) {
-                var point = d3.mouse(this);
+                point = d3.mouse(this);
                 lasso = vis.append("rect")
-                    .attr("ox",point[0])
-                    .attr("oy",point[1])
-                    .attr("rx",1)
-                    .attr("ry",1)
-                    .attr("x",point[0])
-                    .attr("y",point[1])
-                    .attr("width",0)
-                    .attr("height",0)
-                    .attr("class","lasso");
+                .attr("ox",point[0])
+                .attr("oy",point[1])
+                .attr("rx",1)
+                .attr("ry",1)
+                .attr("x",point[0])
+                .attr("y",point[1])
+                .attr("width",0)
+                .attr("height",0)
+                .attr("class","lasso");
                 d3.event.preventDefault();
             }
         }
@@ -530,12 +658,12 @@ RED.view = (function() {
             return;
         }
 
-        if (mouse_mode != RED.state.IMPORT_DRAGGING && !mousedown_node && selected_link == null) {
+        if (mouse_mode != RED.state.QUICK_JOINING && mouse_mode != RED.state.IMPORT_DRAGGING && !mousedown_node && selected_link == null) {
             return;
         }
 
         var mousePos;
-        if (mouse_mode == RED.state.JOINING) {
+        if (mouse_mode == RED.state.JOINING || mouse_mode === RED.state.QUICK_JOINING) {
             // update drag line
             if (drag_lines.length === 0) {
                 if (d3.event.shiftKey) {
@@ -576,12 +704,17 @@ RED.view = (function() {
                             portType: (mousedown_port_type===0)?1:0
                         })
                     }
-                    showDragLines(links);
-                    mouse_mode = 0;
-                    updateActiveNodes();
-                    redraw();
-                    mouse_mode = RED.state.JOINING;
-                } else {
+                    if (links.length === 0) {
+                        resetMouseVars();
+                        redraw();
+                    } else {
+                        showDragLines(links);
+                        mouse_mode = 0;
+                        updateActiveNodes();
+                        redraw();
+                        mouse_mode = RED.state.JOINING;
+                    }
+                } else if (mousedown_node) {
                     showDragLines([{node:mousedown_node,port:mousedown_port_index,portType:mousedown_port_type}]);
                 }
                 selected_link = null;
@@ -748,6 +881,9 @@ RED.view = (function() {
     function canvasMouseUp() {
         var i;
         var historyEvent;
+        if (mouse_mode === RED.state.QUICK_JOINING) {
+            return;
+        }
         if (mousedown_node && mouse_mode == RED.state.JOINING) {
             var removedLinks = [];
             for (i=0;i<drag_lines.length;i++) {
@@ -843,7 +979,7 @@ RED.view = (function() {
             }
         }
         if (mouse_mode == RED.state.IMPORT_DRAGGING) {
-            RED.keyboard.remove(/* ESCAPE */ 27);
+            RED.keyboard.remove("escape");
             updateActiveNodes();
             RED.nodes.dirty(true);
         }
@@ -987,6 +1123,7 @@ RED.view = (function() {
     }
 
     function endKeyboardMove() {
+        endMoveSet = false;
         if (moving_set.length > 0) {
             var ns = [];
             for (var i=0;i<moving_set.length;i++) {
@@ -1001,14 +1138,21 @@ RED.view = (function() {
             RED.nodes.dirty(true);
         }
     }
+    var endMoveSet = false;
     function moveSelection(dx,dy) {
         if (moving_set.length > 0) {
+            if (!endMoveSet) {
+                $(document).one('keyup',endKeyboardMove);
+                endMoveSet = true;
+            }
             var minX = 0;
             var minY = 0;
             var node;
 
             for (var i=0;i<moving_set.length;i++) {
                 node = moving_set[i];
+                node.n.changed = true;
+                node.n.dirty = true;
                 if (node.ox == null && node.oy == null) {
                     node.ox = node.n.x;
                     node.oy = node.n.y;
@@ -1029,6 +1173,16 @@ RED.view = (function() {
             }
 
             redraw();
+        }
+    }
+    function editSelection() {
+        if (moving_set.length > 0) {
+            var node = moving_set[0].n;
+            if (node.type === "subflow") {
+                RED.editor.editSubflow(activeSubflow);
+            } else {
+                RED.editor.edit(node);
+            }
         }
     }
     function deleteSelection() {
@@ -1165,22 +1319,45 @@ RED.view = (function() {
         }
     }
 
+    function disableQuickJoinEventHandler(evt) {
+        // Check for ctrl (all browsers), "Meta" (Chrome/FF), keyCode 91 (Safari)
+        if (evt.keyCode === 17 || evt.key === "Meta" || evt.keyCode === 91) {
+            resetMouseVars();
+            hideDragLines();
+            redraw();
+            $(window).off('keyup',disableQuickJoinEventHandler);
+        }
+    }
+
     function portMouseDown(d,portType,portIndex) {
         //console.log(d,portType,portIndex);
         // disable zoom
         //vis.call(d3.behavior.zoom().on("zoom"), null);
         mousedown_node = d;
-        mouse_mode = RED.state.JOINING;
         mousedown_port_type = portType;
         mousedown_port_index = portIndex || 0;
-        document.body.style.cursor = "crosshair";
+        if (mouse_mode !== RED.state.QUICK_JOINING) {
+            mouse_mode = RED.state.JOINING;
+            document.body.style.cursor = "crosshair";
+            if (d3.event.ctrlKey || d3.event.metaKey) {
+                mouse_mode = RED.state.QUICK_JOINING;
+                showDragLines([{node:mousedown_node,port:mousedown_port_index,portType:mousedown_port_type}]);
+                $(window).on('keyup',disableQuickJoinEventHandler);
+            }
+        }
+        d3.event.stopPropagation();
         d3.event.preventDefault();
     }
 
     function portMouseUp(d,portType,portIndex) {
         var i;
+        if (mouse_mode === RED.state.QUICK_JOINING) {
+            if (drag_lines[0].node===d) {
+                return
+            }
+        }
         document.body.style.cursor = "";
-        if (mouse_mode == RED.state.JOINING && drag_lines.length > 0) {
+        if (mouse_mode == RED.state.JOINING || mouse_mode == RED.state.QUICK_JOINING) {
             if (typeof TouchEvent != "undefined" && d3.event instanceof TouchEvent) {
                 RED.nodes.eachNode(function(n) {
                     if (n.z == RED.workspaces.active()) {
@@ -1247,6 +1424,21 @@ RED.view = (function() {
                 updateActiveNodes();
                 RED.nodes.dirty(true);
             }
+            if (mouse_mode === RED.state.QUICK_JOINING) {
+                if (addedLinks.length > 0) {
+                    hideDragLines();
+                    if (portType === 1 && d.outputs > 0) {
+                        showDragLines([{node:d,port:0,portType:0}]);
+                    } else if (portType === 0 && d.inputs > 0) {
+                        showDragLines([{node:d,port:0,portType:1}]);
+                    } else {
+                        resetMouseVars();
+                    }
+                }
+                redraw();
+                return;
+            }
+
             resetMouseVars();
             hideDragLines();
             selected_link = null;
@@ -1276,7 +1468,7 @@ RED.view = (function() {
         //var pos = [touch0.pageX,touch0.pageY];
         //RED.touch.radialMenu.show(d3.select(this),pos);
         if (mouse_mode == RED.state.IMPORT_DRAGGING) {
-            RED.keyboard.remove(/* ESCAPE */ 27);
+            RED.keyboard.remove("escape");
 
             if (activeSpliceLink) {
                 // TODO: DRY - droppable/nodeMouseDown/canvasMouseUp
@@ -1304,6 +1496,9 @@ RED.view = (function() {
             RED.nodes.dirty(true);
             redraw();
             resetMouseVars();
+            d3.event.stopPropagation();
+            return;
+        } else if (mouse_mode == RED.state.QUICK_JOINING) {
             d3.event.stopPropagation();
             return;
         }
@@ -1623,14 +1818,14 @@ RED.view = (function() {
                             nodeMouseUp.call(this,d);
                         })
                         .on("mouseover",function(d) {
-                                if (mouse_mode === 0) {
-                                    var node = d3.select(this);
-                                    node.classed("node_hovered",true);
-                                }
+                            if (mouse_mode === 0) {
+                                var node = d3.select(this);
+                                node.classed("node_hovered",true);
+                            }
                         })
                         .on("mouseout",function(d) {
-                                var node = d3.select(this);
-                                node.classed("node_hovered",false);
+                            var node = d3.select(this);
+                            node.classed("node_hovered",false);
                         });
 
                    //node.append("rect").attr("class", "node-gradient-top").attr("rx", 6).attr("ry", 6).attr("height",30).attr("stroke","none").attr("fill","url(#gradient-top)").style("pointer-events","none");
@@ -2270,8 +2465,8 @@ RED.view = (function() {
                                            node.n._def.outputs > 0;
                         }
                     }
-                    RED.keyboard.add("*",/* ESCAPE */ 27,function(){
-                            RED.keyboard.remove(/* ESCAPE */ 27);
+                    RED.keyboard.add("*","escape",function(){
+                            RED.keyboard.remove("escape");
                             clearSelection();
                             RED.history.pop();
                             mouse_mode = 0;
@@ -2316,6 +2511,24 @@ RED.view = (function() {
         }
     }
 
+    function toggleShowGrid(state) {
+        if (state) {
+            grid.style("visibility","visible");
+        } else {
+            grid.style("visibility","hidden");
+        }
+    }
+    function toggleSnapGrid(state) {
+        snapGrid = state;
+        redraw();
+    }
+    function toggleStatus(s) {
+        showStatus = s;
+        RED.nodes.eachNode(function(n) { n.dirty = true;});
+        //TODO: subscribe/unsubscribe here
+        redraw();
+    }
+
     return {
         init: init,
         state:function(state) {
@@ -2335,16 +2548,6 @@ RED.view = (function() {
         },
         focus: focusView,
         importNodes: importNodes,
-        status: function(s) {
-            if (s == null) {
-                return showStatus;
-            } else {
-                showStatus = s;
-                RED.nodes.eachNode(function(n) { n.dirty = true;});
-                //TODO: subscribe/unsubscribe here
-                redraw();
-            }
-        },
         calculateTextWidth: calculateTextWidth,
         select: function(selection) {
             if (typeof selection !== "undefined") {
@@ -2371,17 +2574,6 @@ RED.view = (function() {
             }
             return selection;
         },
-        toggleShowGrid: function(state) {
-            if (state) {
-                grid.style("visibility","visible");
-            } else {
-                grid.style("visibility","hidden");
-            }
-        },
-        toggleSnapGrid: function(state) {
-            snapGrid = state;
-            redraw();
-        },
         scale: function() {
             return scaleFactor;
         },
@@ -2405,7 +2597,6 @@ RED.view = (function() {
                     node.highlighted = true;
                     node.dirty = true;
                     RED.workspaces.show(node.z);
-                    RED.view.redraw();
 
                     var screenSize = [$("#chart").width(),$("#chart").height()];
                     var scrollPos = [$("#chart").scrollLeft(),$("#chart").scrollTop()];
@@ -2419,17 +2610,23 @@ RED.view = (function() {
                         },200);
                     }
 
-                    var flash = 22;
-                    var flashFunc = function() {
-                        flash--;
-                        node.highlighted = !node.highlighted;
-                        node.dirty = true;
-                        RED.view.redraw();
-                        if (flash >= 0) {
-                            setTimeout(flashFunc,100);
+                    if (!node._flashing) {
+                        node._flashing = true;
+                        var flash = 22;
+                        var flashFunc = function() {
+                            flash--;
+                            node.dirty = true;
+                            if (flash >= 0) {
+                                node.highlighted = !node.highlighted;
+                                setTimeout(flashFunc,100);
+                            } else {
+                                node.highlighted = false;
+                                delete node._flashing;
+                            }
+                            RED.view.redraw();
                         }
+                        flashFunc();
                     }
-                    flashFunc();
                 } else if (node._def.category === 'config') {
                     RED.sidebar.config.show(id);
                 }

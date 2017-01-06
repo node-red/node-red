@@ -502,6 +502,9 @@
             "null":"is null",
             "nnull":"is not null",
             "else":"otherwise"
+        },
+        "errors": {
+            "invalid-expr": "Invalid expression: __error__"
         }
     },
     "change": {
@@ -608,6 +611,13 @@
         "tip": "Tip: The <b>Select</b> value is a <a href=\"https://github.com/fb55/CSSselect#user-content-supported-selectors\" target=\"_blank\"><i><u>CSS Selector</u></i></a>, similar to a jQuery selector."
     },
     "json": {
+        "errors": {
+            "dropped-object": "Ignored non-object payload",
+            "dropped": "Ignored unsupported payload type",
+            "dropped-error": "Failed to convert payload"
+        }
+    },
+    "yaml": {
         "errors": {
             "dropped-object": "Ignored non-object payload",
             "dropped": "Ignored unsupported payload type",

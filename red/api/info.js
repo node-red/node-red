@@ -42,12 +42,12 @@ module.exports = {
         if (settings.flowFilePretty) {
             safeSettings.flowFilePretty = settings.flowFilePretty;
         }
+
         if (!runtime.nodes.paletteEditorEnabled()) {
             safeSettings.editorTheme = safeSettings.editorTheme || {};
             safeSettings.editorTheme.palette = safeSettings.editorTheme.palette || {};
             safeSettings.editorTheme.palette.editable = false;
         }
-
 
         res.json(safeSettings);
     }

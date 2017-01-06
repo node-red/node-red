@@ -15,6 +15,7 @@
  **/
 
 var clone = require("clone");
+var jsonata = require("jsonata");
 
 function generateId() {
     return (1+Math.random()*4294967295).toString(16);
@@ -128,6 +129,9 @@ function compareObjects(obj1,obj2) {
 }
 
 function normalisePropertyExpression(str) {
+    // This must be kept in sync with validatePropertyExpression
+    // in editor/js/ui/utils.js
+
     var length = str.length;
     var parts = [];
     var start = 0;
@@ -139,7 +143,7 @@ function normalisePropertyExpression(str) {
         var c = str[i];
         if (!inString) {
             if (c === "'" || c === '"') {
-                if (!inBox) {
+                if (i != start) {
                     throw new Error("Invalid property expression: unexpected "+c+" at position "+i);
                 }
                 inString = true;
@@ -200,10 +204,15 @@ function normalisePropertyExpression(str) {
             }
         } else {
             if (c === quoteChar) {
+                if (i-start === 0) {
+                    throw new Error("Invalid property expression: zero-length string at position "+start);
+                }
                 parts.push(str.substring(start,i));
-                // Next char must be a ]
-                if (!/\]/.test(str[i+1])) {
+                // If inBox, next char must be a ]. Otherwise it may be [ or .
+                if (inBox && !/\]/.test(str[i+1])) {
                     throw new Error("Invalid property expression: unexpected array expression at position "+start);
+                } else if (!inBox && i+1!==length && !/[\[\.]/.test(str[i+1])) {
+                    throw new Error("Invalid property expression: unexpected "+str[i+1]+" expression at position "+(i+1));
                 }
                 start = i+1;
                 inString = false;
@@ -310,6 +319,8 @@ function evaluateNodeProperty(value, type, node, msg) {
         return node.context().global.get(value);
     } else if (type === 'bool') {
         return /^true$/i.test(value);
+    } else if (type === 'jsonata') {
+        return jsonata(value).evaluate({msg:msg});
     }
     return value;
 }

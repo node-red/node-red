@@ -18,6 +18,39 @@ module.exports = function(RED) {
     "use strict";
     var mustache = require("mustache");
 
+    /**
+     * Custom Mustache Context capable to resolve message property and node 
+     * flow and global context 
+     */
+    function NodeContext(msg, nodeContext) {
+        this.msgContext = new mustache.Context(msg);
+        this.nodeContext = nodeContext;
+    }
+
+    NodeContext.prototype = new mustache.Context();
+
+    NodeContext.prototype.lookup = function (name) {
+        // try message first:
+        var value = this.msgContext.lookup(name);
+        if (value !== undefined) {
+            return value;
+        }
+
+        // try node context:
+        var dot = name.indexOf(".");
+        if (dot > 0) {
+            var contextName = name.substr(0, dot);
+            var variableName = name.substr(dot + 1);
+
+            if (contextName === "flow" && this.nodeContext.flow) {
+                return this.nodeContext.flow.get(variableName);
+            }
+            else if (contextName === "global" && this.nodeContext.global) {
+                return this.nodeContext.global.get(variableName);
+            }
+        }
+    }
+
     function TemplateNode(n) {
         RED.nodes.createNode(this,n);
         this.name = n.name;
@@ -31,7 +64,7 @@ module.exports = function(RED) {
             try {
                 var value;
                 if (node.syntax === "mustache") {
-                    value = mustache.render(node.template,msg);
+                    value = mustache.render(node.template, new NodeContext(msg, node.context()));
                 } else {
                     value = node.template;
                 }

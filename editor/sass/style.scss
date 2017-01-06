@@ -21,6 +21,7 @@
 
 @import "jquery";
 @import "bootstrap";
+@import "ace";
 
 @import "dropdownMenu";
 
@@ -53,6 +54,7 @@
 
 @import "keyboard";
 
+@import "debug";
 
 body {
     font-size: 14px;
@@ -118,4 +120,8 @@ pre code {
   white-space: pre-wrap;
   background-color: transparent;
   border: 0;
+}
+
+.hide {
+    display: none;
 }

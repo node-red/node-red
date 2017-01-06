@@ -41,12 +41,14 @@
     <p>The button to the right of the node will toggle its output on and off so you can de-clutter the debug window.</p>
     <p>If the payload is an object or buffer it will be stringified first for display and indicate that by saying "(Object)" or "(Buffer)".</p>
     <p>Selecting any particular message will highlight (in red) the debug node that reported it. This is useful if you wire up multiple debug nodes.</p>
-    <p>Optionally can show the complete <code>msg</code> object, and send messages to the console log.</p>
+    <p>Optionally can show the complete <code>msg</code> object, and send messages to the console log (⇶).</p>
     <p>In addition any calls to node.warn or node.error will appear here.</p>
 </script>
+<script src="debug/view/debug-utils.js"></script>
 
 <script type="text/javascript">
-
+(function() {
+    var subWindow = null;
     RED.nodes.registerType('debug',{
         category: 'output',
         defaults: {
@@ -56,10 +58,12 @@
             complete: {value:"false", required:true}
         },
         label: function() {
+            var suffix = "";
+            if (this.console === true || this.console === "true") { suffix = " ⇶"; }
             if (this.complete === true || this.complete === "true") {
-                return this.name||"msg";
+                return (this.name||"msg") + suffix;
             } else {
-                return this.name || "msg." + ((!this.complete || this.complete === "false") ? "payload" : this.complete);
+                return (this.name || "msg." + ((!this.complete || this.complete === "false") ? "payload" : this.complete)) + suffix;
             }
         },
         labelStyle: function() {
@@ -98,33 +102,52 @@
             }
         },
         onpaletteadd: function() {
-            var content = $("<div>").css({"position":"relative","height":"100%"});
-            var toolbar = $('<div class="sidebar-header">'+
-                '<span class="button-group">'+
-                    '<a class="sidebar-header-button-toggle selected" id="debug-tab-filter-all" href="#"><span data-i18n="node-red:debug.sidebar.filterAll"></span></a>'+
-                    '<a class="sidebar-header-button-toggle" id="debug-tab-filter-current" href="#"><span data-i18n="node-red:debug.sidebar.filterCurrent"></span></a> '+
-                '</span>'+
-                '<span><a id="debug-tab-clear" title="clear log" class="sidebar-header-button" href="#"><i class="fa fa-trash"></i></a></span></div>').appendTo(content);
 
-            var messages = $('<div id="debug-content"/>').appendTo(content);
-            content.i18n();
+            var options = {
+                messageMouseEnter: function(sourceId) {
+                    if (sourceId) {
+                        var n = RED.nodes.node(sourceId);
+                        if (n) {
+                            n.highlighted = true;
+                            n.dirty = true;
+                        }
+                        RED.view.redraw();
+                    }
+                },
+                messageMouseLeave: function(sourceId) {
+                    if (sourceId) {
+                        var n = RED.nodes.node(sourceId);
+                        if (n) {
+                            n.highlighted = false;
+                            n.dirty = true;
+                        }
+                        RED.view.redraw();
+                    }
+                },
+                messageSourceClick: function(sourceId) {
+                    RED.view.reveal(sourceId);
+                },
+                clear: function() {
+                    RED.nodes.eachNode(function(node) {
+                        node.highlighted = false;
+                        node.dirty = true;
+                    });
+                    RED.view.redraw();
+                }
+            }
+
+            var uiComponents = RED.debug.init(options);
 
             RED.sidebar.addTab({
                 id: "debug",
                 label: this._("debug.sidebar.label"),
                 name: this._("debug.sidebar.name"),
-                content: content,
+                content: uiComponents.content,
+                toolbar: uiComponents.footer,
                 enableOnEdit: true
             });
+            RED.actions.add("core:show-debug-tab",function() { RED.sidebar.show('debug')});
 
-            function getTimestamp() {
-                var d = new Date();
-                return d.toLocaleString();
-            }
-
-            var sbc = document.getElementById("debug-content");
-            var filter = false;
-            var messageCount = 0;
             var that = this;
             RED._debug = function(msg) {
                 that.handleDebugMessage("",{
@@ -132,125 +155,76 @@
                     msg:msg
                 });
             }
-            function sanitize(m) {
-                return m.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-            }
 
-            var refreshMessageList = function() {
-                $(".debug-message").each(function() {
-                    $(this).toggleClass('hide',filter&&!$(this).hasClass('debug-message-flow-'+RED.workspaces.active()));
-                });
+            this.refreshMessageList = function() {
+                RED.debug.refreshMessageList(RED.workspaces.active());
+                if (subWindow) {
+                    try {
+                        subWindow.postMessage({event:"workspaceChange",activeWorkspace:RED.workspaces.active()},"*")
+                    } catch(err) {
+                        console.log(err);
+                    }
+                }
             }
 
             this.handleDebugMessage = function(t,o) {
-                var msg = document.createElement("div");
-
                 var sourceNode = RED.nodes.node(o.id) || RED.nodes.node(o.z);
+                if (sourceNode) {
+                    o._source = {id:sourceNode.id,z:sourceNode.z};
 
-                msg.onmouseover = function() {
-                    msg.style.borderRightColor = "#999";
-                    var n = RED.nodes.node(o.id) || RED.nodes.node(o.z);
-                    if (n) {
-                        n.highlighted = true;
-                        n.dirty = true;
-                    }
-                    RED.view.redraw();
-                };
-                msg.onmouseout = function() {
-                    msg.style.borderRightColor = "";
-                    var n = RED.nodes.node(o.id) || RED.nodes.node(o.z);
-                    if (n) {
-                        n.highlighted = false;
-                        n.dirty = true;
-                    }
-                    RED.view.redraw();
-                };
-                msg.onclick = function() {
-                    var node = RED.nodes.node(o.id) || RED.nodes.node(o.z);
-                    if (node) {
-                        RED.view.reveal(node.id);
-                    }
-
-                };
-                //console.log(o);
-                var name = sanitize(((o.name?o.name:o.id)||"").toString());
-                var topic = sanitize((o.topic||"").toString());
-                var property = sanitize(o.property?o.property:'');
-                var payload = sanitize((o.msg||"").toString());
-                var format = sanitize((o.format||"").toString());
-
-                msg.className = 'debug-message'+(o.level?(' debug-message-level-'+o.level):'') +
-                                ((sourceNode&&sourceNode.z)?((" debug-message-flow-"+sourceNode.z+((filter&&(RED.workspaces.active()!==sourceNode.z))?" hide":""))):"");
-                msg.innerHTML = '<span class="debug-message-date">'+
-                                getTimestamp()+'</span>'+
-                                (name?'<span class="debug-message-name">'+name:'')+
-                                '</span>';
-                // NOTE: relying on function error to have a "type" that all other msgs don't
-                if (o.hasOwnProperty("type") && (o.type === "function")) {
-                    var errorLvlType = 'error';
-                    var errorLvl = 20;
-                    if (o.hasOwnProperty("level") && o.level === 30) {
-                        errorLvl = 30;
-                        errorLvlType = 'warn';
-                    }
-                    msg.className = 'debug-message debug-message-level-' + errorLvl;
-                    msg.innerHTML += '<span class="debug-message-topic">function : (' + errorLvlType + ')</span>';
-                } else {
-                    msg.innerHTML += '<span class="debug-message-topic">'+
-                                    (o.topic?topic+' : ':'')+
-                                    (o.property?'msg.'+property:'msg')+" : "+format+
-
-                                    '</span>';
                 }
-                msg.innerHTML += '<span class="debug-message-payload">'+ payload+ '</span>';
-                var atBottom = (sbc.scrollHeight-messages.height()-sbc.scrollTop) < 5;
-                messageCount++;
-                messages.append(msg);
-
-                if (messageCount > 200) {
-                    $("#debug-content .debug-message:first").remove();
-                    messageCount--;
-                }
-                if (atBottom) {
-                    $(sbc).scrollTop(sbc.scrollHeight);
+                RED.debug.handleDebugMessage(o);
+                if (subWindow) {
+                    try {
+                        subWindow.postMessage({event:"message",msg:o},"*")
+                    } catch(err) {
+                        console.log(err);
+                    }
                 }
             };
             RED.comms.subscribe("debug",this.handleDebugMessage);
 
-            $("#debug-tab-clear").click(function() {
-                $(".debug-message").remove();
-                messageCount = 0;
-                RED.nodes.eachNode(function(node) {
-                    node.highlighted = false;
-                    node.dirty = true;
-                });
-                RED.view.redraw();
-            });
-            $('#debug-tab-filter-all').on("click",function(e) {
-                e.preventDefault();
-                if (filter) {
-                    $(this).addClass('selected');
-                    $('#debug-tab-filter-current').removeClass('selected');
-                    filter = !filter;
-                    refreshMessageList();
-                }
-            });
-            $('#debug-tab-filter-current').on("click",function(e) {
-                e.preventDefault();
-                if (!filter) {
-                    $(this).addClass('selected');
-                    $('#debug-tab-filter-all').removeClass('selected');
-                    filter = !filter;
-                    refreshMessageList();
-                }
-            });
-            RED.events.on("workspace:change", refreshMessageList);
+            RED.events.on("workspace:change", this.refreshMessageList);
 
+            $("#debug-tab-open").click(function(e) {
+                e.preventDefault();
+                subWindow = window.open(document.location.toString().replace(/[?#].*$/,"")+"debug/view/view.html"+document.location.search,"nodeREDDebugView","menubar=no,location=no,toolbar=no,chrome,height=500,width=600");
+                subWindow.onload = function() {
+                    subWindow.postMessage({event:"workspaceChange",activeWorkspace:RED.workspaces.active()},"*");
+                }
+            });
+
+            $(window).unload(function() {
+                if (subWindow) {
+                    try {
+                        subWindow.close()
+                    } catch(err) {
+                        console.log(err);
+                    }
+                }
+            });
+
+            this.handleWindowMessage = function(evt) {
+                var msg = evt.data;
+                if (msg.event === "mouseEnter") {
+                    options.messageMouseEnter(msg.id);
+                } else if (msg.event === "mouseLeave") {
+                    options.messageMouseLeave(msg.id);
+                } else if (msg.event === "mouseClick") {
+                    options.messageSourceClick(msg.id);
+                } else if (msg.event === "clear") {
+                    options.clear();
+                }
+            }
+            window.addEventListener('message',this.handleWindowMessage);
         },
         onpaletteremove: function() {
             RED.comms.unsubscribe("debug",this.handleDebugMessage);
             RED.sidebar.removeTab("debug");
-            RED.events.off("workspace:change", refreshMessageList);
+            RED.events.off("workspace:change", this.refreshMessageList);
+            window.removeEventListener("message",this.handleWindowMessage);
+            RED.actions.remove("core:show-debug");
+
             delete RED._debug;
         },
         oneditprepare: function() {
@@ -282,58 +256,5 @@
         }
 
     });
+})();
 </script>
-
-<style>
-    #debug-content {
-        position: absolute;
-        top: 43px;
-        bottom: 0px;
-        left:0px;
-        right: 0px;
-        overflow-y: scroll;
-    }
-    .debug-message {
-        cursor: pointer;
-        border-bottom: 1px solid #eee;
-        border-left: 8px solid #eee;
-        border-right: 8px solid #eee;
-        padding: 2px;
-    }
-    .debug-message-date {
-        background: #fff;
-        font-size: 9px;
-        color: #aaa;
-        padding: 1px 5px 1px 1px;
-    }
-    .debug-message-topic {
-        display: block;
-        background: #fff;
-        padding: 1px;
-        font-size: 10px;
-        color: #a66;
-    }
-    .debug-message-name {
-        background: #fff;
-        padding: 1px 5px;
-        font-size: 9px;
-        color: #aac;
-    }
-    .debug-message-payload {
-        display: block;
-        padding: 2px;
-        background: #fff;
-    }
-    .debug-message-level-log {
-        border-left-color: #eee;
-        border-right-color: #eee;
-    }
-    .debug-message-level-30 {
-        border-left-color: #ffdf9d;
-        border-right-color: #ffdf9d;
-    }
-    .debug-message-level-20 {
-        border-left-color: #f99;
-        border-right-color: #f99;
-    }
-</style>

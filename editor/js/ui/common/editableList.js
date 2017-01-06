@@ -27,6 +27,9 @@
  *   - removable : boolean - whether to display delete button on items
  *   - addItem : function(row,index,itemData) - when an item is added
  *   - removeItem : function(itemData) - called when an item is removed
+ *   - filter : function(itemData) - called for each item to determine if it should be shown
+ *   - sort : function(itemDataA,itemDataB) - called to sort items
+ *   - scrollOnAdd : boolean - whether to scroll to newly added items
  * methods:
  *   - addItem(itemData)
  *   - removeItem(itemData)
@@ -34,6 +37,9 @@
  *   - height(height)
  *   - items()
  *   - empty()
+ *   - filter(filter)
+ *   - sort(sort)
+ *   - length()
  */
     $.widget( "nodered.editableList", {
         _create: function() {
@@ -234,7 +240,8 @@
                 var deleteButton = $('<a/>',{href:"#",class:"red-ui-editableList-item-remove editor-button editor-button-small"}).appendTo(li);
                 $('<i/>',{class:"fa fa-remove"}).appendTo(deleteButton);
                 li.addClass("red-ui-editableList-item-removable");
-                deleteButton.click(function() {
+                deleteButton.click(function(evt) {
+                    evt.preventDefault();
                     var data = row.data('data');
                     li.addClass("red-ui-editableList-item-deleting")
                     li.fadeOut(300, function() {

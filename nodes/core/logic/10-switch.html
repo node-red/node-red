@@ -64,7 +64,7 @@
             var node = this;
             var previousValueType = {value:"prev",label:this._("inject.previous"),hasValue:false};
 
-            $("#node-input-property").typedInput({default:this.propertyType||'msg',types:['msg','flow','global']});
+            $("#node-input-property").typedInput({default:this.propertyType||'msg',types:['msg','flow','global','jsonata']});
             var operators = [
                 {v:"eq",t:"=="},
                 {v:"neq",t:"!="},
@@ -115,7 +115,10 @@
 
             $("#node-input-rule-container").css('min-height','250px').css('min-width','450px').editableList({
                 addItem: function(container,i,opt) {
-                    var rule = opt;
+                    if (!opt.hasOwnProperty('r')) {
+                        opt.r = {};
+                    }
+                    var rule = opt.r;
                     if (!rule.hasOwnProperty('t')) {
                         rule.t = 'eq';
                     }
@@ -126,10 +129,10 @@
                     for (var d in operators) {
                         selectField.append($("<option></option>").val(operators[d].v).text(operators[d].t));
                     }
-                    var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num',previousValueType]});
-                    var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num',previousValueType]});
+                    var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num','jsonata',previousValueType]});
+                    var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
                     var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
-                    var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num',previousValueType]});
+                    var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
                     var finalspan = $('<span/>',{style:"float: right;margin-top: 6px;"}).appendTo(row);
                     finalspan.append(' &#8594; <span class="node-input-rule-index">'+(i+1)+'</span> ');
                     var caseSensitive = $('<input/>',{id:"node-input-rule-case-"+i,class:"node-input-rule-case",type:"checkbox",style:"width:auto;vertical-align:top"}).appendTo(row2);
@@ -177,6 +180,12 @@
                     selectField.change();
                 },
                 removeItem: function(opt) {
+                    if (opt.hasOwnProperty('i')) {
+                        var removedList = $("#node-input-rule-container").data('removedList')||[];
+                        removedList.push(opt.i);
+                        $("#node-input-rule-container").data('removedList',removedList);
+                    }
+
                     var rules = $("#node-input-rule-container").editableList('items');
                     rules.each(function(i) { $(this).find(".node-input-rule-index").html(i+1); });
                 },
@@ -191,15 +200,21 @@
 
             for (var i=0;i<this.rules.length;i++) {
                 var rule = this.rules[i];
-                $("#node-input-rule-container").editableList('addItem',rule);
+                $("#node-input-rule-container").editableList('addItem',{r:rule,i:i});
             }
         },
         oneditsave: function() {
             var rules = $("#node-input-rule-container").editableList('items');
             var ruleset;
             var node = this;
-            node.rules= [];
+            node.rules = [];
+            var changedOutputs = {};
+            var removedList = $("#node-input-rule-container").data('removedList')||[];
+            removedList.forEach(function(i) {
+                changedOutputs[i] = -1;
+            });
             rules.each(function(i) {
+                var ruleData = $(this).data('data');
                 var rule = $(this);
                 var type = rule.find("select").val();
                 var r = {t:type};
@@ -217,8 +232,14 @@
                         r.case = rule.find(".node-input-rule-case").prop("checked");
                     }
                 }
+                if (ruleData.hasOwnProperty('i')) {
+                    if (ruleData.i !== i) {
+                        changedOutputs[ruleData.i] = i;
+                    }
+                }
                 node.rules.push(r);
             });
+            this._outputs = changedOutputs;
             this.outputs = node.rules.length;
             this.propertyType = $("#node-input-property").typedInput('type');
         },

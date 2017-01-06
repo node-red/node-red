@@ -49,7 +49,7 @@ describe('debug node', function() {
             }, function(msg) {
                 JSON.parse(msg).should.eql({
                     topic:"debug",data:{id:"n1",name:"Debug",msg:"test",
-                    format:"string [4]",property:"payload"}
+                    format:"string[4]",property:"payload"}
                 });
             }, done);
         });
@@ -64,7 +64,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload:"test"});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"test",property:"payload",format:"string [4]"}
+                    topic:"debug",data:{id:"n1",msg:"test",property:"payload",format:"string[4]"}
                 });
                 count++;
             }, function() {
@@ -108,7 +108,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload:"test", foo:"bar"});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"bar",property:"foo",format:"string [3]"}
+                    topic:"debug",data:{id:"n1",msg:"bar",property:"foo",format:"string[3]"}
                 });
             }, done);
         });
@@ -122,7 +122,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload:"test", foo: {bar: "bar"}});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"bar",property:"foo.bar",format:"string [3]"}
+                    topic:"debug",data:{id:"n1",msg:"bar",property:"foo.bar",format:"string[3]"}
                 });
             }, done);
         });
@@ -194,7 +194,7 @@ describe('debug node', function() {
             }, function(msg) {
                 JSON.parse(msg).should.eql({
                     topic:"debug",
-                    data:{id:"n1",msg: '[\n 0,\n 1,\n 2,\n 3\n]',format:"array [4]",
+                    data:{id:"n1",msg: '[\n 0,\n 1,\n 2,\n 3\n]',format:"array[4]",
                     property:"payload"}
                 });
             }, done);
@@ -214,7 +214,7 @@ describe('debug node', function() {
                     topic:"debug",
                     data:{
                         id:"n1",
-                        msg:'{\n "name": "bar",\n "o": "[circular]"\n}',
+                        msg:'{\n "name": "bar",\n "o": "[Circular ~]"\n}',
                         property:"payload",format:"Object"
                     }
                 });
@@ -222,7 +222,7 @@ describe('debug node', function() {
         });
     });
 
-    it('should truncated a long message', function(done) {
+    it('should truncate a long message', function(done) {
         var flow = [{id:"n1", type:"debug" }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -234,9 +234,9 @@ describe('debug node', function() {
                     topic:"debug",
                     data:{
                         id:"n1",
-                        msg: Array(1001).join("X")+' ....',
+                        msg: Array(1001).join("X")+'...',
                         property:"payload",
-                        format:"string [1001]"
+                        format:"string[1001]"
                     }
                 });
             }, done);
@@ -256,7 +256,7 @@ describe('debug node', function() {
                         id:"n1",
                         msg: '48454c4c4f',
                         property:"payload",
-                        format: "buffer [5]"
+                        format: "buffer[5]"
                     }
                 });
             }, done);
@@ -277,7 +277,7 @@ describe('debug node', function() {
                     });
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"message 2",property:"payload",format:"string [9]"}
+                    topic:"debug",data:{id:"n1",msg:"message 2",property:"payload",format:"string[9]"}
                 });
             }, done);
         });

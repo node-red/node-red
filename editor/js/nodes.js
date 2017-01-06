@@ -24,21 +24,13 @@ RED.nodes = (function() {
     var workspacesOrder =[];
     var subflows = {};
     var loadedFlowVersion = null;
-    var pending = {
-        deleted: {},
-        added: {}
-    };
+
+    var initialLoad;
 
     var dirty = false;
 
     function setDirty(d) {
         dirty = d;
-        if (!d) {
-            pending = {
-                deleted: {},
-                added: {}
-            };
-        }
         RED.events.emit("nodes:change",{dirty:dirty});
     }
 
@@ -61,6 +53,9 @@ RED.nodes = (function() {
             },
             getNodeList: function() {
                 return nodeList;
+            },
+            getNodeTypes: function() {
+                return Object.keys(nodeDefinitions);
             },
             setNodeList: function(list) {
                 nodeList = [];
@@ -170,6 +165,7 @@ RED.nodes = (function() {
             configNodes[n.id] = n;
         } else {
             n.ports = [];
+            if (n.wires && (n.wires.length > n.outputs)) { n.outputs = n.wires.length; }
             if (n.outputs) {
                 for (var i=0;i<n.outputs;i++) {
                     n.ports.push(i);
@@ -186,8 +182,6 @@ RED.nodes = (function() {
             }
             nodes.push(n);
         }
-        delete pending.deleted[n.id];
-        pending.added[n.id] = true;
         RED.events.emit('nodes:add',n);
     }
     function addLink(l) {
@@ -253,12 +247,6 @@ RED.nodes = (function() {
         if (node && node._def.onremove) {
             node._def.onremove.call(n);
         }
-        delete pending.added[id];
-        pending.deleted[id] = true;
-        removedNodes.forEach(function(node) {
-            delete pending.added[node.id];
-            pending.deleted[node.id] = true;
-        });
         return {links:removedLinks,nodes:removedNodes};
     }
 
@@ -271,8 +259,6 @@ RED.nodes = (function() {
 
     function addWorkspace(ws) {
         workspaces[ws.id] = ws;
-        pending.added[ws.id] = true;
-        delete pending.deleted[ws.id];
         ws._def = {
             defaults: {
                 label: {value:""}
@@ -310,8 +296,6 @@ RED.nodes = (function() {
             var result = removeNode(removedNodes[n].id);
             removedLinks = removedLinks.concat(result.links);
         }
-        pending.deleted[id] = true;
-        delete pending.added[id]
         return {nodes:removedNodes,links:removedLinks};
     }
 
@@ -341,8 +325,6 @@ RED.nodes = (function() {
             outputs: sf.out.length
         }
         subflows[sf.id] = sf;
-        delete pending.deleted[sf.id];
-        pending.added[sf.id] = true;
         RED.nodes.registerType("subflow:"+sf.id, {
             defaults:{name:{value:""}},
             info: sf.info,
@@ -366,8 +348,6 @@ RED.nodes = (function() {
     }
     function removeSubflow(sf) {
         delete subflows[sf.id];
-        delete pending.added[sf.id];
-        pending.deleted[sf.id] = true;
         registry.removeNodeType("subflow:"+sf.id);
     }
 
@@ -694,6 +674,9 @@ RED.nodes = (function() {
         if (!$.isArray(newNodes)) {
             newNodes = [newNodes];
         }
+        if (!initialLoad) {
+            initialLoad = JSON.parse(JSON.stringify(newNodes));
+        }
         var unknownTypes = [];
         for (i=0;i<newNodes.length;i++) {
             n = newNodes[i];
@@ -719,17 +702,19 @@ RED.nodes = (function() {
         }
 
         var activeWorkspace = RED.workspaces.active();
+        //TODO: check the z of the subflow instance and check _that_ if it exists
         var activeSubflow = getSubflow(activeWorkspace);
-        if (activeSubflow) {
-            for (i=0;i<newNodes.length;i++) {
-                var m = /^subflow:(.+)$/.exec(newNodes[i].type);
-                if (m) {
-                    var subflowId = m[1];
+        for (i=0;i<newNodes.length;i++) {
+            var m = /^subflow:(.+)$/.exec(newNodes[i].type);
+            if (m) {
+                var subflowId = m[1];
+                var parent = getSubflow(newNodes[i].z || activeWorkspace);
+                if (parent) {
                     var err;
-                    if (subflowId === activeSubflow.id) {
+                    if (subflowId === parent.id) {
                         err = new Error(RED._("notification.errors.cannotAddSubflowToItself"));
                     }
-                    if (subflowContains(m[1],activeSubflow.id)) {
+                    if (subflowContains(subflowId,parent.id)) {
                         err = new Error(RED._("notification.errors.cannotAddCircularReference"));
                     }
                     if (err) {
@@ -1019,8 +1004,9 @@ RED.nodes = (function() {
                 for (var w1=0;w1<n.wires.length;w1++) {
                     var wires = (n.wires[w1] instanceof Array)?n.wires[w1]:[n.wires[w1]];
                     for (var w2=0;w2<wires.length;w2++) {
-                        if (wires[w2] in node_map) {
-                            var link = {source:n,sourcePort:w1,target:node_map[wires[w2]]};
+                        var existingNode = node_map[wires[w2]] || getNode(wires[w2]);
+                        if (existingNode) {
+                            var link = {source:n,sourcePort:w1,target:existingNode};
                             addLink(link);
                             new_links.push(link);
                         }
@@ -1161,6 +1147,38 @@ RED.nodes = (function() {
         }
     }
 
+    function clear() {
+        nodes = [];
+        links = [];
+        configNodes = {};
+        workspacesOrder = [];
+        var subflowIds = Object.keys(subflows);
+        subflowIds.forEach(function(id) {
+            RED.subflow.removeSubflow(id)
+        });
+        var workspaceIds = Object.keys(workspaces);
+        workspaceIds.forEach(function(id) {
+            RED.workspaces.remove(workspaces[id]);
+        });
+        defaultWorkspace = null;
+
+        RED.nodes.dirty(true);
+        RED.view.redraw(true);
+        RED.palette.refresh();
+        RED.workspaces.refresh();
+        RED.sidebar.config.refresh();
+
+        // var node_defs = {};
+        // var nodes = [];
+        // var configNodes = {};
+        // var links = [];
+        // var defaultWorkspace;
+        // var workspaces = {};
+        // var workspacesOrder =[];
+        // var subflows = {};
+        // var loadedFlowVersion = null;
+    }
+
     return {
         registry:registry,
         setNodeList: registry.setNodeList,
@@ -1177,6 +1195,7 @@ RED.nodes = (function() {
 
         add: addNode,
         remove: removeNode,
+        clear: clear,
 
         addLink: addLink,
         removeLink: removeLink,
@@ -1225,13 +1244,18 @@ RED.nodes = (function() {
         node: getNode,
 
         version: flowVersion,
+        originalFlow: function(flow) {
+            if (flow === undefined) {
+                return initialLoad;
+            } else {
+                initialLoad = flow;
+            }
+        },
 
         filterNodes: filterNodes,
         filterLinks: filterLinks,
 
         import: importNodes,
-
-        pending: function() { return pending },
 
         getAllFlowNodes: getAllFlowNodes,
         createExportableNodeSet: createExportableNodeSet,

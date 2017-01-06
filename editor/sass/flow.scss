@@ -170,6 +170,11 @@
     stroke-dasharray:8, 3;
 }
 
+
+.node_quickadd * {
+    stroke-dasharray: 12,3;
+}
+
 .node_status_label {
     @include disable-selection;
     stroke-width: 0;
@@ -183,6 +188,13 @@
     stroke: $port-selected-color;
     fill:  $port-selected-color;
 }
+
+.port_quick_link {
+    stroke: $port-selected-color;
+    fill:  $port-selected-color;
+}
+
+
 .subflowport {
     stroke-dasharray: 5,5;
     fill: #eee;
