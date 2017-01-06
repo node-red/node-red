@@ -231,6 +231,7 @@
         }
 
         menuOptions.push({id:"menu-item-keyboard-shortcuts",label:RED._("menu.label.keyboardShortcuts"),onselect:"core:show-help"});
+        menuOptions.push({id:"menu-item-show-tips",label:RED._("menu.label.showTips"),toggle:true,selected:true,onselect:"core:toggle-show-tips"});
         menuOptions.push({id:"menu-item-help",
             label: RED.settings.theme("menu.menu-item-help.label","Node-RED website"),
             href: RED.settings.theme("menu.menu-item-help.url","http://nodered.org/docs")

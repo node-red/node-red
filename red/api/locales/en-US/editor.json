@@ -53,7 +53,8 @@
             "keyboardShortcuts": "Keyboard shortcuts",
             "login": "Login",
             "logout": "Logout",
-            "editPalette":"Manage palette"
+            "editPalette":"Manage palette",
+            "showTips": "Show tips"
         }
     },
     "user": {

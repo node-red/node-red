@@ -148,15 +148,30 @@ RED.sidebar.info = (function() {
 
 
     var tips = (function() {
-        var startDelay = 2000;
+        var started = false;
+        var enabled = true;
+        var startDelay = 1000;
         var cycleDelay = 10000;
         var startTimeout;
         var refreshTimeout;
         var tipCount = -1;
 
+        RED.actions.add("core:toggle-show-tips",function(state) {
+            if (state === undefined) {
+                RED.menu.toggleSelected("menu-item-show-tips");
+            } else {
+                enabled = state;
+                if (enabled) {
+                    if (started) {
+                        startTips();
+                    }
+                } else {
+                    stopTips();
+                }
+            }
+        });
 
         function setTip() {
-
             var r = Math.floor(Math.random() * tipCount);
             var tip = RED._("infotips:info.tip"+r);
 
@@ -184,8 +199,9 @@ RED.sidebar.info = (function() {
                 setTip();
             })
         }
-        return {
-            start: function() {
+        function startTips() {
+            started = true;
+            if (enabled) {
                 if (!startTimeout && !refreshTimeout) {
                     $(content).html("");
                     if (tipCount === -1) {
@@ -195,13 +211,19 @@ RED.sidebar.info = (function() {
                     }
                     startTimeout = setTimeout(setTip,startDelay);
                 }
-            },
-            stop: function() {
-                clearInterval(refreshTimeout);
-                clearTimeout(startTimeout);
-                refreshTimeout = null;
-                startTimeout = null;
             }
+        }
+        function stopTips() {
+            started = false;
+            clearInterval(refreshTimeout);
+            clearTimeout(startTimeout);
+            refreshTimeout = null;
+            startTimeout = null;
+            $(".node-info-tip").remove();
+        }
+        return {
+            start: startTips,
+            stop: stopTips
         }
     })();
 
