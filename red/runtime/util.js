@@ -164,7 +164,7 @@ function normalisePropertyExpression(str) {
                 if (i===length-1) {
                     throw new Error("Invalid property expression: unterminated expression");
                 }
-                // Next char is a-z
+                // Next char is first char of an identifier: a-z 0-9 $ _
                 if (!/[a-z0-9\$\_]/i.test(str[i+1])) {
                     throw new Error("Invalid property expression: unexpected "+str[i+1]+" at position "+(i+1));
                 }

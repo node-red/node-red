@@ -303,8 +303,8 @@ RED.utils = (function() {
                     if (i===0 || i===length-1) {
                         return false;
                     }
-                    // Next char is a-z
-                    if (!/[a-z0-9]/i.test(str[i+1])) {
+                    // Next char is first char of an identifier: a-z 0-9 $ _
+                    if (!/[a-z0-9\$\_]/i.test(str[i+1])) {
                         return false;
                     }
                     start = i+1;
