@@ -292,7 +292,8 @@
             "sortRecent": "recent",
             "more": "+ __count__ more",
             "errors": {
-                "installFailed": "Failed to install: __module__<br>__message__<br>Check the log for more information"
+                "installFailed": "Failed to install: __module__<br>__message__<br>Check the log for more information",
+                "removeFailed": "Failed to remove: __module__<br>__message__<br>Check the log for more information"
             }
 
         }

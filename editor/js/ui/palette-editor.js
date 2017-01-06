@@ -520,7 +520,12 @@ RED.palette.editor = (function() {
                         evt.preventDefault();
                         shade.show();
                         removeNodeModule(entry.name, function(xhr) {
-                            console.log(xhr);
+                            shade.hide();
+                            if (xhr) {
+                                if (xhr.responseJSON) {
+                                    RED.notify(RED._('palette.editor.errors.removeFailed',{module: entry.name,message:xhr.responseJSON.message}));
+                                }
+                            }
                         })
                     })
                     if (!entry.local) {
