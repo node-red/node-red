@@ -279,7 +279,88 @@ RED.utils = (function() {
         return element;
     }
 
+    function validatePropertyExpression(str) {
+        // This must be kept in sync with normalisePropertyExpression
+        // in red/runtime/util.js
+
+        var length = str.length;
+        var start = 0;
+        var inString = false;
+        var inBox = false;
+        var quoteChar;
+        var v;
+        for (var i=0;i<length;i++) {
+            var c = str[i];
+            if (!inString) {
+                if (c === "'" || c === '"') {
+                    if (i != start) {
+                        return false;
+                    }
+                    inString = true;
+                    quoteChar = c;
+                    start = i+1;
+                } else if (c === '.') {
+                    if (i===0 || i===length-1) {
+                        return false;
+                    }
+                    // Next char is a-z
+                    if (!/[a-z0-9]/i.test(str[i+1])) {
+                        return false;
+                    }
+                    start = i+1;
+                } else if (c === '[') {
+                    if (i === 0) {
+                        return false;
+                    }
+                    if (i===length-1) {
+                        return false;
+                    }
+                    // Next char is either a quote or a number
+                    if (!/["'\d]/.test(str[i+1])) {
+                        return false;
+                    }
+                    start = i+1;
+                    inBox = true;
+                } else if (c === ']') {
+                    if (!inBox) {
+                        return false;
+                    }
+                    if (start != i) {
+                        v = str.substring(start,i);
+                        if (!/^\d+$/.test(v)) {
+                            return false;
+                        }
+                    }
+                    start = i+1;
+                    inBox = false;
+                } else if (c === ' ') {
+                    return false;
+                }
+            } else {
+                if (c === quoteChar) {
+                    if (i-start === 0) {
+                        return false;
+                    }
+                    // Next char must be a ]
+                    if (inBox && !/\]/.test(str[i+1])) {
+                        return false;
+                    } else if (!inBox && i+1!==length && !/[\[\.]/.test(str[i+1])) {
+                        return false;
+                    }
+                    start = i+1;
+                    inString = false;
+                }
+            }
+
+        }
+        if (inBox || inString) {
+            return false;
+        }
+        return true;
+    }
+
     return {
         createObjectElement: buildMessageElement,
+        validatePropertyExpression: validatePropertyExpression
     }
 })();
