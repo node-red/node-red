@@ -284,6 +284,9 @@ RED.utils = (function() {
         // in red/runtime/util.js
 
         var length = str.length;
+        if (length === 0) {
+            return false;
+        }
         var start = 0;
         var inString = false;
         var inBox = false;

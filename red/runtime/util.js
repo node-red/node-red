@@ -133,6 +133,9 @@ function normalisePropertyExpression(str) {
     // in editor/js/ui/utils.js
 
     var length = str.length;
+    if (length === 0) {
+        throw new Error("Invalid property expression: zero-length");
+    }
     var parts = [];
     var start = 0;
     var inString = false;

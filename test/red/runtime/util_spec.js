@@ -361,6 +361,7 @@ describe("red/util", function() {
         it("fail a[0].[1]",function() { testInvalid("a[0].[1]"); })
         it("fail a['']",function() { testInvalid("a['']"); })
         it("fail 'a.b'c",function() { testInvalid("'a.b'c"); })
+        it("fail <blank>",function() { testInvalid("");})
 
     });
 });
