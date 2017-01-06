@@ -149,6 +149,9 @@ module.exports = {
     stopServer: function(done) {
         if (server) {
             try {
+                server.on('close', function() {
+                    comms.stop();
+                });
                 server.close(done);
             } catch(e) {
                 done();

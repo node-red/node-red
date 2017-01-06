@@ -255,7 +255,9 @@ RED.palette.editor = (function() {
                     nodeEntry.removeButton.hide();
                 } else {
                     nodeEntry.enableButton.removeClass('disabled');
-                    nodeEntry.removeButton.show();
+                    if (moduleInfo.local) {
+                        nodeEntry.removeButton.show();
+                    }
                     if (activeTypeCount === 0) {
                         nodeEntry.enableButton.html(RED._('palette.editor.enableall'));
                     } else {

@@ -87,10 +87,10 @@ function createNodeApi(node) {
         red.server = runtime.adminApi.server;
     } else {
         red.comms = {
-            publish: function(){}
+            publish: function() {}
         };
         red.library = {
-            register: function(){}
+            register: function() {}
         };
         red.auth = {
             needsPermission: function() {}
@@ -203,7 +203,7 @@ function loadNodeConfig(fileInfo) {
                     if (!node.types) {
                         node.types = [];
                     }
-                    node.err = "Error: "+file+" does not exist";
+                    node.err = "Error: "+node.template+" does not exist";
                 } else {
                     node.types = [];
                     node.err = err.toString();
@@ -215,7 +215,7 @@ function loadNodeConfig(fileInfo) {
                 var regExp = /<script ([^>]*)data-template-name=['"]([^'"]*)['"]/gi;
                 var match = null;
 
-                while((match = regExp.exec(content)) !== null) {
+                while ((match = regExp.exec(content)) !== null) {
                     types.push(match[2]);
                 }
                 node.types = types;
@@ -226,7 +226,7 @@ function loadNodeConfig(fileInfo) {
                 var mainContent = "";
                 var helpContent = {};
                 var index = 0;
-                while((match = regExp.exec(content)) !== null) {
+                while ((match = regExp.exec(content)) !== null) {
                     mainContent += content.substring(index,regExp.lastIndex-match[1].length);
                     index = regExp.lastIndex;
                     var help = content.substring(regExp.lastIndex-match[1].length,regExp.lastIndex);
@@ -382,7 +382,6 @@ function getNodeHelp(node,lang) {
         } else {
             node.help[lang] = node.help[runtime.i18n.defaultLang];
         }
-
     }
     return node.help[lang];
 }

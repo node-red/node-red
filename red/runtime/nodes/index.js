@@ -21,6 +21,7 @@ var fs = require("fs");
 var registry = require("./registry");
 var credentials = require("./credentials");
 var flows = require("./flows");
+var flowUtil = require("./flows/util")
 var context = require("./context");
 var Node = require("./Node");
 var log = require("../log");
@@ -69,6 +70,12 @@ function createNode(node,def) {
     var creds = credentials.get(id);
     if (creds) {
         //console.log("Attaching credentials to ",node.id);
+        // allow $(foo) syntax to substitute env variables for credentials also...
+        for (var p in creds) {
+            if (creds.hasOwnProperty(p)) {
+                flowUtil.mapEnvVarProperties(creds,p);
+            }
+        }
         node.credentials = creds;
     } else if (credentials.getDefinition(node.type)) {
         node.credentials = {};
@@ -145,7 +152,6 @@ module.exports = {
     removeFlow:  flows.removeFlow,
     // disableFlow: flows.disableFlow,
     // enableFlow:  flows.enableFlow,
-
 
     // Credentials
     addCredentials: credentials.add,

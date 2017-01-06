@@ -317,6 +317,53 @@ describe("red/nodes/registry/loader",function() {
                 done(err);
             });
         });
+
+        it("load core node files scanned by lfs - missing html file", function(done) {
+            stubs.push(sinon.stub(localfilesystem,"getNodeFiles", function(){
+                var result = {};
+                result["node-red"] = {
+                    "name": "node-red",
+                    "nodes": {
+                        "DuffNode": {
+                            "file": path.join(resourcesDir,"DuffNode","DuffNode.js"),
+                            "module": "node-red",
+                            "name": "DuffNode"
+                        }
+                    }
+                };
+                return result;
+            }));
+
+            stubs.push(sinon.stub(registry,"saveNodeList", function(){ return }));
+            stubs.push(sinon.stub(registry,"addNodeSet", function(){ return }));
+            // This module isn't already loaded
+            stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
+
+            stubs.push(sinon.stub(nodes,"registerType"));
+            loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
+            loader.load().then(function(result) {
+                registry.addNodeSet.called.should.be.true();
+                registry.addNodeSet.lastCall.args[0].should.eql("node-red/DuffNode");
+                registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"node-red/DuffNode");
+                registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"node-red");
+                registry.addNodeSet.lastCall.args[1].should.have.a.property('enabled',true);
+                registry.addNodeSet.lastCall.args[1].should.have.a.property('loaded',false);
+                registry.addNodeSet.lastCall.args[1].should.have.a.property('version',undefined);
+                registry.addNodeSet.lastCall.args[1].should.have.a.property('types');
+                registry.addNodeSet.lastCall.args[1].types.should.have.a.length(0);
+                registry.addNodeSet.lastCall.args[1].should.not.have.a.property('config');
+                registry.addNodeSet.lastCall.args[1].should.not.have.a.property('help');
+                registry.addNodeSet.lastCall.args[1].should.not.have.a.property('namespace','node-red');
+                registry.addNodeSet.lastCall.args[1].should.have.a.property('err');
+                registry.addNodeSet.lastCall.args[1].err.should.endWith("DuffNode.html does not exist");
+
+                nodes.registerType.calledOnce.should.be.false();
+
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+        });
     });
 
     describe("#addModule",function() {

@@ -129,6 +129,10 @@ module.exports = {
     //    cert: fs.readFileSync('certificate.pem')
     //},
 
+    // The following property can be used to cause insecure HTTP connections to
+    // be redirected to HTTPS.
+    //requireHttps: true
+
     // The following property can be used to disable the editor. The admin API
     // is not affected by this option. To disable both the editor and the admin
     // API, use either the httpRoot or httpAdminRoot properties

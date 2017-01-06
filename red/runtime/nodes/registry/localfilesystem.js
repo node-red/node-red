@@ -281,6 +281,7 @@ function getModuleFiles(module) {
         }
         nodeModuleFiles.forEach(function(node) {
             nodeList[moduleFile.package.name].nodes[node.name] = node;
+            nodeList[moduleFile.package.name].nodes[node.name].local = moduleFile.local || false;
         });
     });
     return nodeList;

@@ -227,12 +227,12 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload', '1,2,3,4\n');
+                        msg.should.have.property('payload', '0,1,2,3,4\n');
                         done();
                     }
                     catch(e) { done(e); }
                 });
-                var testJson = [1,2,3,4];
+                var testJson = [0,1,2,3,4];
                 n1.emit("input", {payload:testJson});
             });
         });
@@ -245,12 +245,12 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload', '1,2,3,4\n4,3,2,1\n');
+                        msg.should.have.property('payload', '0,1,2,3,4\n4,3,2,1,0\n');
                         done();
                     }
                     catch(e) { done(e); }
                 });
-                var testJson = [[1,2,3,4],[4,3,2,1]];
+                var testJson = [[0,1,2,3,4],[4,3,2,1,0]];
                 n1.emit("input", {payload:testJson});
             });
         });

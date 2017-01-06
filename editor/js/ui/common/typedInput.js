@@ -14,9 +14,6 @@
  * limitations under the License.
  **/
 (function($) {
-
-
-
     var allOptions = {
         msg: {value:"msg",label:"msg.",validate:RED.utils.validatePropertyExpression},
         flow: {value:"flow",label:"flow.",validate:RED.utils.validatePropertyExpression},

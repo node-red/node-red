@@ -87,6 +87,16 @@ function init(_server,_runtime) {
         if (!settings.disableEditor) {
             ui.init(runtime);
             var editorApp = express();
+            if (settings.requireHttps === true) {
+                editorApp.enable('trust proxy');
+                editorApp.use(function (req, res, next) {
+                    if (req.secure) {
+                        next();
+                    } else {
+                        res.redirect('https://' + req.headers.host + req.originalUrl);
+                    }
+                });
+            }
             editorApp.get("/",ensureRuntimeStarted,ui.ensureSlash,ui.editor);
             editorApp.get("/icons/:icon",ui.icon);
             theme.init(runtime);

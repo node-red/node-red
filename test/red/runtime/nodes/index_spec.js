@@ -38,8 +38,9 @@ describe("red/nodes/index", function() {
         index.clearRegistry();
     });
 
+    process.env.foo="bar";
     var testFlows = [{"type":"test","id":"tab1","label":"Sheet 1"}];
-    var testCredentials = {"tab1":{"b":1,"c":2}};
+    var testCredentials = {"tab1":{"b":1, "c":"2", "d":"$(foo)"}};
     var storage = {
         getFlows: function() {
             return when({red:123,flows:testFlows,credentials:testCredentials});
@@ -58,7 +59,7 @@ describe("red/nodes/index", function() {
     var runtime = {
         settings: settings,
         storage: storage,
-        log: {debug:function(){},warn:function(){}}
+        log: {debug:function() {}, warn:function() {}}
     };
 
     function TestNode(n) {
@@ -75,7 +76,8 @@ describe("red/nodes/index", function() {
         index.loadFlows().then(function() {
             var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});
             testnode.credentials.should.have.property('b',1);
-            testnode.credentials.should.have.property('c',2);
+            testnode.credentials.should.have.property('c',"2");
+            testnode.credentials.should.have.property('d',"bar");
             done();
         }).otherwise(function(err) {
             done(err);
