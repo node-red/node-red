@@ -248,6 +248,9 @@ function getNodeFiles(disableNodePathScan) {
                 nodeList[moduleFile.package.name].redVersion = moduleFile.package['node-red'].version;
             }
             nodeModuleFiles.forEach(function(node) {
+                if (isExcluded(path.basename(node.file))) {
+                    return;
+                }
                 node.local = moduleFile.local||false;
                 nodeList[moduleFile.package.name].nodes[node.name] = node;
             });
