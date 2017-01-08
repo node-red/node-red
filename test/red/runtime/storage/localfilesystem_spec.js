@@ -489,6 +489,19 @@ describe('LocalFileSystem', function() {
         });
     });
 
+    it('should return an empty list of library objects (path=/)',function(done) {
+        localfilesystem.init({userDir:userDir}).then(function() {
+            localfilesystem.getLibraryEntry('object','/').then(function(flows) {
+                flows.should.eql([]);
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+
     it('should return an error for a non-existent library object',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
             localfilesystem.getLibraryEntry('object','A/B').then(function(flows) {
