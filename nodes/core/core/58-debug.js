@@ -21,8 +21,8 @@ module.exports = function(RED) {
     var path = require("path");
     var safeJSONStringify = require("json-stringify-safe");
     var debuglength = RED.settings.debugMaxLength||1000;
-    var useColors = false;
-    // util.inspect.styles.boolean = "red";
+    var useColors = RED.settings.debugUseColors || false;
+    util.inspect.styles.boolean = "red";
 
     function DebugNode(n) {
         RED.nodes.createNode(this,n);

@@ -47,6 +47,9 @@ module.exports = {
     // The maximum length, in characters, of any message sent to the debug sidebar tab
     debugMaxLength: 1000,
 
+    // Colourise the console output of the debug node
+    //debugUseColors: true,
+
     // The file containing the flows. If not set, it defaults to flows_<hostname>.json
     //flowFile: 'flows.json',
 
