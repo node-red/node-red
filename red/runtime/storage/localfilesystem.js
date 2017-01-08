@@ -302,11 +302,11 @@ var localfilesystem = {
             })
         })
     },
-    saveSettings: function(settings) {
+    saveSettings: function(newsettings) {
         if (settings.readOnly) {
             return when.resolve();
         }
-        return writeFile(globalSettingsFile,JSON.stringify(settings,null,1));
+        return writeFile(globalSettingsFile,JSON.stringify(newsettings,null,1));
     },
     getSessions: function() {
         return when.promise(function(resolve,reject) {
