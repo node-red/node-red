@@ -338,36 +338,45 @@ RED.palette.editor = (function() {
     var catalogueCount;
     var catalogueLoadStatus = [];
     var catalogueLoadStart;
+    var catalogueLoadErrors = false;
 
     var activeSort = sortModulesAZ;
 
-    function handleCatalogResponse(catalog,index,v) {
-        catalogueLoadStatus.push(v);
-        if (v.modules) {
-            v.modules.forEach(function(m) {
-                loadedIndex[m.id] = m;
-                m.index = [m.id];
-                if (m.keywords) {
-                    m.index = m.index.concat(m.keywords);
-                }
-                if (m.updated_at) {
-                    m.timestamp = new Date(m.updated_at).getTime();
-                } else {
-                    m.timestamp = 0;
-                }
-                m.index = m.index.join(",").toLowerCase();
-            })
-            loadedList = loadedList.concat(v.modules);
+    function handleCatalogResponse(err,catalog,index,v) {
+        catalogueLoadStatus.push(err||v);
+        if (!err) {
+            if (v.modules) {
+                v.modules.forEach(function(m) {
+                    loadedIndex[m.id] = m;
+                    m.index = [m.id];
+                    if (m.keywords) {
+                        m.index = m.index.concat(m.keywords);
+                    }
+                    if (m.updated_at) {
+                        m.timestamp = new Date(m.updated_at).getTime();
+                    } else {
+                        m.timestamp = 0;
+                    }
+                    m.index = m.index.join(",").toLowerCase();
+                })
+                loadedList = loadedList.concat(v.modules);
+            }
+            searchInput.searchBox('count',loadedList.length);
+        } else {
+            catalogueLoadErrors = true;
         }
-        searchInput.searchBox('count',loadedList.length);
         if (catalogueCount > 1) {
             $(".palette-module-shade-status").html(RED._('palette.editor.loading')+"<br>"+catalogueLoadStatus.length+"/"+catalogueCount);
         }
         if (catalogueLoadStatus.length === catalogueCount) {
+            if (catalogueLoadErrors) {
+                RED.notify(RED._('palette.editor.errors.catalogLoadFailed',{url: catalog}),"error",false,8000);
+            }
             var delta = 250-(Date.now() - catalogueLoadStart);
             setTimeout(function() {
                 $("#palette-module-install-shade").hide();
             },Math.max(delta,0));
+
         }
     }
 
@@ -379,6 +388,7 @@ RED.palette.editor = (function() {
             $(".palette-module-shade-status").html(RED._('palette.editor.loading'));
             var catalogues = RED.settings.theme('palette.catalogues')||['https://catalogue.nodered.org/catalogue.json'];
             catalogueLoadStatus = [];
+            catalogueLoadErrors = false;
             catalogueCount = catalogues.length;
             if (catalogues.length > 1) {
                 $(".palette-module-shade-status").html(RED._('palette.editor.loading')+"<br>0/"+catalogues.length);
@@ -387,8 +397,10 @@ RED.palette.editor = (function() {
             catalogueLoadStart = Date.now();
             catalogues.forEach(function(catalog,index) {
                 $.getJSON(catalog, {_: new Date().getTime()},function(v) {
-                    handleCatalogResponse(catalog,index,v);
+                    handleCatalogResponse(null,catalog,index,v);
                     refreshNodeModuleList();
+                }).fail(function(jqxhr, textStatus, error) {
+                    handleCatalogResponse(jqxhr,catalog,index);
                 })
             });
         }
