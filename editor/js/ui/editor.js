@@ -529,7 +529,7 @@ RED.editor = (function() {
 
     function buildEditForm(tray,formId,type,ns) {
         var trayBody = tray.find('.editor-tray-body');
-        var dialogForm = $('<form id="'+formId+'" class="form-horizontal"></form>').appendTo(trayBody);
+        var dialogForm = $('<form id="'+formId+'" class="form-horizontal" autocomplete="off"></form>').appendTo(trayBody);
         dialogForm.html($("script[data-template-name='"+type+"']").html());
         ns = ns||"node-red";
         dialogForm.find('[data-i18n]').each(function() {
@@ -549,6 +549,10 @@ RED.editor = (function() {
             }
             $(this).attr("data-i18n",keys.join(";"));
         });
+        // Add dummy fields to prevent 'Enter' submitting the form in some
+        // cases, and also prevent browser auto-fill of password
+        // Add in reverse order as they are prepended...
+        $('<input type="password" style="display: none;" />').prependTo(dialogForm);
         $('<input type="text" style="display: none;" />').prependTo(dialogForm);
         dialogForm.submit(function(e) { e.preventDefault();});
         return dialogForm;
