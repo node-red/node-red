@@ -104,10 +104,8 @@
                             msg.text = node._(msg.text.toString(),{defaultValue:msg.text.toString()});
                         }
                         node.status = msg;
-                        if (statusEnabled) {
-                            node.dirty = true;
-                            RED.view.redraw();
-                        }
+                        node.dirty = true;
+                        RED.view.redraw();
                     }
                 });
                 RED.comms.subscribe("node/#",function(topic,msg) {
@@ -177,12 +175,6 @@
             RED.sidebar.info.set(aboutHeader+marked(data));
             RED.sidebar.info.show();
         });
-    }
-
-    var statusEnabled = false;
-    function toggleStatus(state) {
-        statusEnabled = state;
-        RED.view.status(statusEnabled);
     }
 
     function loadEditor() {
