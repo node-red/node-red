@@ -22,6 +22,8 @@ var log = require("./log");
 var i18n = require("./i18n");
 var events = require("./events");
 var settings = require("./settings");
+
+var express = require("express");
 var path = require('path');
 var fs = require("fs");
 var os = require("os");
@@ -47,19 +49,22 @@ var adminApi = {
         publish: function() {}
     },
     adminApp: stubbedExpressApp,
-    nodeApp: stubbedExpressApp,
     server: {}
 }
+
+var nodeApp;
 
 function init(userSettings,_adminApi) {
     userSettings.version = getVersion();
     log.init(userSettings);
     settings.init(userSettings);
+
+    nodeApp = express();
+
     if (_adminApi) {
         adminApi = _adminApi;
     }
     redNodes.init(runtime);
-
 }
 
 var version;
@@ -189,6 +194,7 @@ var runtime = module.exports = {
     nodes: redNodes,
     util: require("./util"),
     get adminApi() { return adminApi },
+    get nodeApp() { return nodeApp },
     isStarted: function() {
         return started;
     }

@@ -83,9 +83,11 @@ function createNodeApi(node) {
         red.library = runtime.adminApi.library;
         red.auth = runtime.adminApi.auth;
         red.httpAdmin = runtime.adminApi.adminApp;
-        red.httpNode = runtime.adminApi.nodeApp;
+        red.httpNode = runtime.nodeApp;
         red.server = runtime.adminApi.server;
     } else {
+        //TODO: runtime.adminApi is always stubbed if not enabled, so this block
+        // is unused - but may be needed for the unit tests
         red.comms = {
             publish: function() {}
         };

@@ -39,7 +39,6 @@ var needsPermission = auth.needsPermission;
 var i18n;
 var log;
 var adminApp;
-var nodeApp;
 var server;
 var runtime;
 
@@ -68,9 +67,6 @@ function init(_server,_runtime) {
     var settings = runtime.settings;
     i18n = runtime.i18n;
     log = runtime.log;
-    if (settings.httpNodeRoot !== false) {
-        nodeApp = express();
-    }
     if (settings.httpAdminRoot !== false) {
         comms.init(server,runtime);
         adminApp = express();
@@ -192,6 +188,5 @@ module.exports = {
         publish: comms.publish
     },
     get adminApp() { return adminApp; },
-    get nodeApp() { return nodeApp; },
     get server() { return server; }
 };

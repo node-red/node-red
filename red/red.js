@@ -53,7 +53,7 @@ module.exports = {
             userSettings.coreNodesDir = path.resolve(path.join(__dirname,"..","nodes"));
         }
 
-        if (userSettings.httpAdminRoot !== false || userSettings.httpNodeRoot !== false) {
+        if (userSettings.httpAdminRoot !== false) {
             runtime.init(userSettings,api);
             api.init(httpServer,runtime);
             apiEnabled = true;
@@ -62,7 +62,7 @@ module.exports = {
             apiEnabled = false;
         }
         adminApp = runtime.adminApi.adminApp;
-        nodeApp = runtime.adminApi.nodeApp;
+        nodeApp = runtime.nodeApp;
         server = runtime.adminApi.server;
         return;
     },
