@@ -231,7 +231,7 @@ RED.typeSearch = (function() {
         searchInput.searchBox('value','');
         selected = -1;
         var common = [
-            'debug','inject','function','change','switch'
+            'inject','debug','function','change','switch'
         ];
 
         var recentlyUsed = Object.keys(typesUsed);
