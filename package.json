@@ -44,7 +44,7 @@
         "json-stringify-safe":"5.0.1",
         "jsonata":"1.0.10",
         "media-typer": "0.3.0",
-        "mqtt": "1.*",
+        "mqtt": "2.2.1",
         "mustache": "2.3.0",
         "nopt": "3.0.6",
         "oauth2orize":"1.6.0",
