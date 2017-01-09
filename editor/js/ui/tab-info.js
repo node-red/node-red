@@ -151,7 +151,7 @@ RED.sidebar.info = (function() {
         var started = false;
         var enabled = true;
         var startDelay = 1000;
-        var cycleDelay = 10000;
+        var cycleDelay = 15000;
         var startTimeout;
         var refreshTimeout;
         var tipCount = -1;
