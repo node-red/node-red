@@ -187,7 +187,7 @@ RED.typeSearch = (function() {
         RED.events.emit("type-search:open");
         //shade.show();
         dialog.css({left:opts.x+"px",top:opts.y+"px"}).show();
-        searchResultsDiv.slideDown();
+        searchResultsDiv.slideDown(300);
         setTimeout(function() {
             searchResultsDiv.find(".red-ui-editableList-container").scrollTop(0);
             searchInput.focus();

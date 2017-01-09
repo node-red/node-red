@@ -255,7 +255,7 @@ RED.search = (function() {
             if (dialog === null) {
                 createDialog();
             }
-            dialog.slideDown();
+            dialog.slideDown(300);
             RED.events.emit("search:open");
             visible = true;
         }
