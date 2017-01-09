@@ -169,9 +169,9 @@ function getFlows() {
 function delegateError(node,logMessage,msg) {
     if (activeFlows[node.z]) {
         activeFlows[node.z].handleError(node,logMessage,msg);
-    } else if (activeNodesToFlow[node.z]) {
+    } else if (activeNodesToFlow[node.z] && activeFlows[activeNodesToFlow[node.z]]) {
         activeFlows[activeNodesToFlow[node.z]].handleError(node,logMessage,msg);
-    } else if (activeFlowConfig.subflows[node.z]) {
+    } else if (activeFlowConfig.subflows[node.z] && subflowInstanceNodeMap[node.id]) {
         subflowInstanceNodeMap[node.id].forEach(function(n) {
             delegateError(getNode(n),logMessage,msg);
         });
@@ -193,7 +193,7 @@ function handleError(node,logMessage,msg) {
 function delegateStatus(node,statusMessage) {
     if (activeFlows[node.z]) {
         activeFlows[node.z].handleStatus(node,statusMessage);
-    } else if (activeNodesToFlow[node.z]) {
+    } else if (activeNodesToFlow[node.z] && activeFlows[activeNodesToFlow[node.z]]) {
         activeFlows[activeNodesToFlow[node.z]].handleStatus(node,statusMessage);
     }
 }
