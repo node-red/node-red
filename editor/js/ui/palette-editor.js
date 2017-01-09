@@ -530,15 +530,15 @@ RED.palette.editor = (function() {
                     var removeButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.remove')).appendTo(buttonGroup);
                     removeButton.click(function(evt) {
                         evt.preventDefault();
-                        shade.show();
-                        removeNodeModule(entry.name, function(xhr) {
-                            shade.hide();
-                            if (xhr) {
-                                if (xhr.responseJSON) {
-                                    RED.notify(RED._('palette.editor.errors.removeFailed',{module: entry.name,message:xhr.responseJSON.message}));
-                                }
-                            }
-                        })
+
+                        $("#palette-module-install-confirm").data('module',entry.name);
+                        $("#palette-module-install-confirm").data('shade',shade);
+                        $("#palette-module-install-confirm-body").html(RED._("palette.editor.confirm.remove.body"));
+                        $(".palette-module-install-confirm-button-install").hide();
+                        $(".palette-module-install-confirm-button-remove").show();
+                        $("#palette-module-install-confirm")
+                            .dialog('option', 'title', RED._("palette.editor.confirm.remove.title"))
+                            .dialog('open');
                     })
                     if (!entry.local) {
                         removeButton.hide();
@@ -687,69 +687,131 @@ RED.palette.editor = (function() {
         })
 
         packageList = $('<ol>',{style:"position: absolute;top: 78px;bottom: 0;left: 0;right: 0px;"}).appendTo(installTab).editableList({
-           addButton: false,
-           scrollOnAdd: false,
-           addItem: function(container,i,object) {
+            addButton: false,
+            scrollOnAdd: false,
+            addItem: function(container,i,object) {
 
-               if (object.more) {
-                   container.addClass('palette-module-more');
-                   var moreRow = $('<div>',{class:"palette-module-header palette-module"}).appendTo(container);
-                   var moreLink = $('<a href="#"></a>').html(RED._('palette.editor.more',{count:object.more})).appendTo(moreRow);
-                   moreLink.click(function(e) {
-                       e.preventDefault();
-                       packageList.editableList('removeItem',object);
-                       for (var i=object.start;i<Math.min(object.start+10,object.start+object.more);i++) {
-                           packageList.editableList('addItem',filteredList[i]);
-                       }
-                       if (object.more > 10) {
-                           packageList.editableList('addItem',{start:object.start+10, more:object.more-10})
-                       }
-                   })
-                   return;
-               }
-               if (object.info) {
-                   var entry = object.info;
-                   var headerRow = $('<div>',{class:"palette-module-header"}).appendTo(container);
-                   var titleRow = $('<div class="palette-module-meta"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
-                   $('<span>',{class:"palette-module-name"}).html(entry.name||entry.id).appendTo(titleRow);
-                   $('<a target="_blank" class="palette-module-link"><i class="fa fa-external-link"></i></a>').attr('href',entry.url).appendTo(titleRow);
-                   var descRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
-                   $('<div>',{class:"palette-module-description"}).html(entry.description).appendTo(descRow);
+                if (object.more) {
+                    container.addClass('palette-module-more');
+                    var moreRow = $('<div>',{class:"palette-module-header palette-module"}).appendTo(container);
+                    var moreLink = $('<a href="#"></a>').html(RED._('palette.editor.more',{count:object.more})).appendTo(moreRow);
+                    moreLink.click(function(e) {
+                        e.preventDefault();
+                        packageList.editableList('removeItem',object);
+                        for (var i=object.start;i<Math.min(object.start+10,object.start+object.more);i++) {
+                            packageList.editableList('addItem',filteredList[i]);
+                        }
+                        if (object.more > 10) {
+                            packageList.editableList('addItem',{start:object.start+10, more:object.more-10})
+                        }
+                    })
+                    return;
+                }
+                if (object.info) {
+                    var entry = object.info;
+                    var headerRow = $('<div>',{class:"palette-module-header"}).appendTo(container);
+                    var titleRow = $('<div class="palette-module-meta"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
+                    $('<span>',{class:"palette-module-name"}).html(entry.name||entry.id).appendTo(titleRow);
+                    $('<a target="_blank" class="palette-module-link"><i class="fa fa-external-link"></i></a>').attr('href',entry.url).appendTo(titleRow);
+                    var descRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
+                    $('<div>',{class:"palette-module-description"}).html(entry.description).appendTo(descRow);
 
-                   var metaRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
-                   $('<span class="palette-module-version"><i class="fa fa-tag"></i> '+entry.version+'</span>').appendTo(metaRow);
-                   $('<span class="palette-module-updated"><i class="fa fa-calendar"></i> '+formatUpdatedAt(entry.updated_at)+'</span>').appendTo(metaRow);
-                   var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
-                   var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
-                   var shade = $('<div class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(container);
-                   var installButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.install')).appendTo(buttonGroup);
-                   installButton.click(function(e) {
-                       e.preventDefault();
-                       if (!$(this).hasClass('disabled')) {
-                           installNodeModule(entry.id,shade,function(xhr) {
-                               if (xhr) {
-                                   if (xhr.responseJSON) {
-                                       RED.notify(RED._('palette.editor.errors.installFailed',{module: entry.id,message:xhr.responseJSON.message}));
-                                   }
-                               }
-                           })
-                       }
-                   })
-                   if (nodeEntries.hasOwnProperty(entry.id)) {
-                       installButton.addClass('disabled');
-                       installButton.html(RED._('palette.editor.installed'));
-                   }
+                    var metaRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
+                    $('<span class="palette-module-version"><i class="fa fa-tag"></i> '+entry.version+'</span>').appendTo(metaRow);
+                    $('<span class="palette-module-updated"><i class="fa fa-calendar"></i> '+formatUpdatedAt(entry.updated_at)+'</span>').appendTo(metaRow);
+                    var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
+                    var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
+                    var shade = $('<div class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(container);
+                    var installButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.install')).appendTo(buttonGroup);
+                    installButton.click(function(e) {
+                        e.preventDefault();
+                        if (!$(this).hasClass('disabled')) {
+                            $("#palette-module-install-confirm").data('module',entry.id);
+                            $("#palette-module-install-confirm").data('url',entry.url);
+                            $("#palette-module-install-confirm").data('shade',shade);
+                            $("#palette-module-install-confirm-body").html(RED._("palette.editor.confirm.install.body"));
+                            $(".palette-module-install-confirm-button-install").show();
+                            $(".palette-module-install-confirm-button-remove").hide();
+                            $("#palette-module-install-confirm")
+                                .dialog('option', 'title', RED._("palette.editor.confirm.install.title"))
+                                .dialog('open');
+                        }
+                    })
+                    if (nodeEntries.hasOwnProperty(entry.id)) {
+                        installButton.addClass('disabled');
+                        installButton.html(RED._('palette.editor.installed'));
+                    }
 
-                   object.elements = {
-                       installButton:installButton
-                   }
-               } else {
-                   $('<div>',{class:"red-ui-search-empty"}).html(RED._('search.empty')).appendTo(container);
-               }
-           }
-       });
+                    object.elements = {
+                        installButton:installButton
+                    }
+                } else {
+                    $('<div>',{class:"red-ui-search-empty"}).html(RED._('search.empty')).appendTo(container);
+                }
+            }
+        });
 
-       $('<div id="palette-module-install-shade" class="palette-module-shade hide"><div class="palette-module-shade-status"></div><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(installTab);
+        $('<div id="palette-module-install-shade" class="palette-module-shade hide"><div class="palette-module-shade-status"></div><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(installTab);
+
+        $('<div id="palette-module-install-confirm" class="hide"><form class="form-horizontal"><div id="palette-module-install-confirm-body" class="node-dialog-confirm-row"></div></form></div>').appendTo(document.body);
+        $("#palette-module-install-confirm").dialog({
+            title: RED._('palette.editor.confirm.title'),
+            modal: true,
+            autoOpen: false,
+            width: 550,
+            height: "auto",
+            buttons: [
+                {
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        $( this ).dialog( "close" );
+                    }
+                },
+                {
+                    text: RED._("palette.editor.confirm.button.review"),
+                    class: "primary palette-module-install-confirm-button-install",
+                    click: function() {
+                        var url = $(this).data('url');
+                        window.open(url);
+                    }
+                },
+                {
+                    text: RED._("palette.editor.confirm.button.install"),
+                    class: "primary palette-module-install-confirm-button-install",
+                    click: function() {
+                        var id = $(this).data('module');
+                        var shade = $(this).data('shade');
+                        installNodeModule(id,shade,function(xhr) {
+                             if (xhr) {
+                                 if (xhr.responseJSON) {
+                                     RED.notify(RED._('palette.editor.errors.installFailed',{module: id,message:xhr.responseJSON.message}));
+                                 }
+                             }
+                        });
+                        $( this ).dialog( "close" );
+                    }
+                },
+                {
+                    text: RED._("palette.editor.confirm.button.remove"),
+                    class: "primary palette-module-install-confirm-button-remove",
+                    click: function() {
+                        var id = $(this).data('module');
+                        var shade = $(this).data('shade');
+                        shade.show();
+                        removeNodeModule(id, function(xhr) {
+                            shade.hide();
+                            if (xhr) {
+                                if (xhr.responseJSON) {
+                                    RED.notify(RED._('palette.editor.errors.removeFailed',{module: id,message:xhr.responseJSON.message}));
+                                }
+                            }
+                        })
+
+                        $( this ).dialog( "close" );
+                    }
+                }
+            ]
+        })
 
         RED.events.on('registry:node-set-enabled', function(ns) {
             refreshNodeModule(ns.module);

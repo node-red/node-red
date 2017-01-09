@@ -293,6 +293,21 @@
                 "catalogLoadFailed": "Failed to load node catalogue.<br>Check the browser console for more information",
                 "installFailed": "Failed to install: __module__<br>__message__<br>Check the log for more information",
                 "removeFailed": "Failed to remove: __module__<br>__message__<br>Check the log for more information"
+            },
+            "confirm": {
+                "install": {
+                    "body":"Before installing, please read the node's documentation. Some nodes have dependencies that cannot be automatically resolved and can require a restart of Node-RED. ",
+                    "title": "Install nodes"
+                },
+                "remove": {
+                    "body":"Removing the node will uninstall it from Node-RED. The node may continue to use resources until Node-RED is restarted.",
+                    "title": "Remove nodes"
+                },
+                "button": {
+                    "review": "Open node information",
+                    "install": "Install",
+                    "remove": "Remove"
+                }
             }
 
         }
