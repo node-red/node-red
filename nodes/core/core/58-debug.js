@@ -189,7 +189,9 @@ module.exports = function(RED) {
         }
     });
 
-    RED.httpAdmin.get("/debug/view/*",RED.auth.needsPermission("debug.read"),function(req,res) {
+    // As debug/view/debug-utils.js is loaded via <script> tag, it won't get
+    // the auth header attached. So do not use RED.auth.needsPermission here.
+    RED.httpAdmin.get("/debug/view/*",function(req,res) {
         var options = {
             root: __dirname + '/lib/debug/',
             dotfiles: 'deny'
