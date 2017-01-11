@@ -281,11 +281,11 @@ RED.keyboard = (function() {
                         key.html(RED._('keyboard.unassigned'));
                     }
 
-                    var text = object.id.replace(/(^.+:([a-z]))|(-([a-z]))/g,function(_,_,A,_,B,pos) {
-                        if (pos === 0) {
-                            return A.toUpperCase();
+                    var text = object.id.replace(/(^.+:([a-z]))|(-([a-z]))/g,function() {
+                        if (arguments[5] === 0) {
+                            return arguments[2].toUpperCase();
                         } else {
-                            return " "+B.toUpperCase();
+                            return " "+arguments[4].toUpperCase();
                         }
                     });
                     var label = $('<div>').html(text).appendTo(item);
