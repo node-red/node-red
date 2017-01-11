@@ -70,6 +70,7 @@ if (parsedArgs.help) {
     console.log("Documentation can be found at http://nodered.org");
     process.exit();
 }
+
 if (parsedArgs.argv.remain.length > 0) {
     flowFile = parsedArgs.argv.remain[0];
 }
@@ -93,7 +94,7 @@ if (parsedArgs.settings) {
         } else {
             var defaultSettings = path.join(__dirname,"settings.js");
             var settingsStat = fs.statSync(defaultSettings);
-            if (settingsStat.mtime.getTime() < settingsStat.ctime.getTime()) {
+            if (settingsStat.mtime.getTime() <= settingsStat.ctime.getTime()) {
                 // Default settings file has not been modified - safe to copy
                 fs.copySync(defaultSettings,userSettingsFile);
                 settingsFile = userSettingsFile;
