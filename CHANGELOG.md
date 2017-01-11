@@ -1,3 +1,70 @@
+#### 0.16.0: Milestone Release
+
+Nodes
+
+ - Add option to colourise debug console output Closes #1103
+ - Add property validation to nodes using typedInput
+ - Add common validator for typedInput fields Closes #1104
+ - Update debug node console logging indicator icon Closes #1094
+ - Let exec node (spawn) handle commands with spaces in path
+ - Add symbol to debug node to indicate debugging also to console.log
+ - Change file node to use node 4 syntax (drops support for 0.8)
+ - add info for httprequest responseUrl property
+ - Add res.responseUrl to httprequest node response
+ - Add support for flow and global context in Template node (#1048)
+ - Added YAML parser node (#1034)
+ - node-red-node-serialport removed as a default node
+
+Editor
+
+ - Add install/remove dialog to increase friction Closes #1109
+ - Report node catalogue load errors Closes #1009
+ - Properly report module remove errors in palette editor Fixes #1043
+ - Update rather than hide install button after success install
+ - Tweak search box styling
+ - Display info tips slightly longer
+ - Allow tips to be enabled/disabled via menu option
+ - Info-tips update
+ - Make typedInput keyboard navigable
+ - update Font Awesome to 4.7.0
+ - Add expression editor for jsonata
+ - Overhaul keyboard handling and introduce editor actions
+ - Add Japanese translation file(editor.json) (#1084)
+ - Add quick-add node mode with cmd/ctrl-click
+ - Add cmd/ctrl-click to quick add wires
+ - Use json-stringify-safe to detect circular references in debug msgs
+ - debug - format if time if correct length/range
+ - Make Debug object explorable
+ - Initial debug pop-out window
+ - Add proper three-way diff view
+ - Focus tray body when edit dialog opened
+ - Hit enter to edit first node in selection
+ - Add node delete button to edit dialog
+ - Add notification when runtime stopped due to missing types Part of #832
+
+Fixes
+
+ - Do not tie debug src loading to needsPermission Fixes #1111
+ - Initialise nodeApp regardless of httpAdmin setting Closes #1096 #1095
+ - Speed up reveal of search dialogs
+ - Ensure flows exist before delegating status/error events Fixes #1069
+ - Update package dependencies
+ - Update MQTT to latest 2.2.1
+ - Node status not being refreshed properly in the editor
+ - Try to prevent auto-fill of password fields in node edit tray Fixes #1081
+ - Fix whitespace in localfilesystem
+ - fix bug where savesettings did not honor local settings variables (#1073)
+ - Tidy up unused/duplicate editor messages Closes #922
+ - Property expressions must not be blank
+ - Tidy up merge commit of validatePropertyExpression
+ - add port if wires array > number of ports declared.
+ - Allow quoted property expressions Fixes #1101
+ - Index all node properties for node search
+ - Remove node 0.10 from travis config
+ - update welcome message to use logger so it can be turned off/on if required (#1083)
+ - Fix dynamically loading multiple node-sets from palette editor
+ - Allow a node to reorder its outputs and maintain links Fixes #1031
+
 #### 0.15.3: Maintenance Release
 
  - Tcpgetfix: Another small check (#1070)
