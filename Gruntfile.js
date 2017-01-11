@@ -1,5 +1,5 @@
 /**
- * Copyright 2013, 2016 IBM Corp.
+ * Copyright JS Foundation and other contributors, http://js.foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -399,7 +399,7 @@ module.exports = function(grunt) {
     grunt.registerMultiTask('attachCopyright', function() {
         var files = this.data.src;
         var copyright = "/**\n"+
-            " * Copyright 2013, 2015 IBM Corp.\n"+
+            " * Copyright JS Foundation and other contributors, http://js.foundation\n"+
             " *\n"+
             " * Licensed under the Apache License, Version 2.0 (the \"License\");\n"+
             " * you may not use this file except in compliance with the License.\n"+

@@ -60,13 +60,15 @@ This project adheres to the [Contributor Covenant 1.4](http://contributor-covena
 
 ## Authors
 
-Node-RED is a creation of [IBM Emerging Technology](https://www.ibm.com/blogs/emerging-technology/).
+Node-RED is a project of the [JS Foundation](http://js.foundation).
+
+It was created by [IBM Emerging Technology](https://www.ibm.com/blogs/emerging-technology/).
 
 * Nick O'Leary [@knolleary](http://twitter.com/knolleary)
 * Dave Conway-Jones [@ceejay](http://twitter.com/ceejay)
 
-For more open-source projects from IBM, head over [here](http://ibm.github.io).
+
 
 ## Copyright and license
 
-Copyright 2013, 2016 IBM Corp. under [the Apache 2.0 license](LICENSE).
+Copyright JS Foundation and other contributors, http://js.foundation under [the Apache 2.0 license](LICENSE).
