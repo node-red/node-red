@@ -90,6 +90,8 @@ RED.deploy = (function() {
 
         $('#btn-deploy').click(function() { save(); });
 
+        RED.actions.add("core:deploy-flows",save);
+
         $( "#node-dialog-confirm-deploy" ).dialog({
                 title: RED._('deploy.confirm.button.confirm'),
                 modal: true,
