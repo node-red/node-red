@@ -17,18 +17,27 @@
 #keyboard-help-dialog {
     font-size: 0.9em;
 }
-.keyboard-shortcuts {
-    padding: 10px;
+#keyboard-shortcut-list {
+    position: absolute;
+    top:10px;
+    left:10px;
+    right:10px;
+    bottom:10px;
 }
-.keyboard-shortcuts td  {
-    padding: 7px 5px;
-    margin-bottom: 10px;
-    white-space: pre;
+.keyboard-shortcut-entry {
+    padding: 0px 20px 0 10px;
+    div {
+        display: inline-block;
+    }
 }
-.keyboard-shortcuts td:first-child {
-    text-align: right;
-    padding-right: 10px;
+.keyboard-shortcut-entry-key {
+    width:150px;
 }
+.keyboard-shortcut-entry-scope {
+    float: right;
+    color: #999;
+}
+
 .help-key {
     border: 1px solid #ddd;
     padding: 4px;

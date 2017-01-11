@@ -275,8 +275,8 @@ RED.clipboard = (function() {
                 }
             });
 
-            RED.actions.add("core:export",exportNodes);
-            RED.actions.add("core:import",importNodes);
+            RED.actions.add("core:show-export-dialog",exportNodes);
+            RED.actions.add("core:show-import-dialog",importNodes);
 
 
             $('#chart').on("dragenter",function(event) {

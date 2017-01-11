@@ -385,13 +385,13 @@ RED.view = (function() {
             }
         });
 
-        RED.actions.add("core:copy",copySelection);
-        RED.actions.add("core:cut",function(){copySelection();deleteSelection();});
-        RED.actions.add("core:paste",function(){importNodes(clipboard);});
-        RED.actions.add("core:delete",deleteSelection);
-        RED.actions.add("core:edit",editSelection);
+        RED.actions.add("core:copy-selection-to-internal-clipboard",copySelection);
+        RED.actions.add("core:cut-selection-to-internal-clipboard",function(){copySelection();deleteSelection();});
+        RED.actions.add("core:paste-from-internal-clipboard",function(){importNodes(clipboard);});
+        RED.actions.add("core:delete-selection",deleteSelection);
+        RED.actions.add("core:edit-selected-node",editSelection);
         RED.actions.add("core:undo",RED.history.pop);
-        RED.actions.add("core:select-all",selectAll);
+        RED.actions.add("core:select-all-nodes",selectAll);
         RED.actions.add("core:zoom-in",zoomIn);
         RED.actions.add("core:zoom-out",zoomOut);
         RED.actions.add("core:zoom-reset",zoomZero);
