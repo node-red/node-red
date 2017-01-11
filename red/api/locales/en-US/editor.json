@@ -189,6 +189,7 @@
     },
     "keyboard": {
         "title": "Keyboard Shortcuts",
+        "unassigned": "Unassigned",
         "selectAll": "Select all nodes",
         "selectAllConnected": "Select all connected nodes",
         "addRemoveNode": "Add/remove node from selection",

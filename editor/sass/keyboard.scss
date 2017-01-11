@@ -37,6 +37,12 @@
     float: right;
     color: #999;
 }
+.keyboard-shortcut-entry-unassigned {
+    color: #999;
+    .keyboard-shortcut-entry-key {
+        font-style: italic;
+    }
+}
 
 .help-key {
     border: 1px solid #ddd;

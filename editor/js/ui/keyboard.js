@@ -272,9 +272,14 @@ RED.keyboard = (function() {
                 scrollOnAdd: false,
                 addItem: function(container,i,object) {
                     var item = $('<div class="keyboard-shortcut-entry">').appendTo(container);
-                    
+
                     var key = $('<div class="keyboard-shortcut-entry-key">').appendTo(item);
-                    key.append(formatKey(object.key));
+                    if (object.key) {
+                        key.append(formatKey(object.key));
+                    } else {
+                        item.addClass("keyboard-shortcut-entry-unassigned");
+                        key.html(RED._('keyboard.unassigned'));
+                    }
 
                     var text = object.id.replace(/(^.+:([a-z]))|(-([a-z]))/g,function(_,_,A,_,B,pos) {
                         if (pos === 0) {
@@ -284,8 +289,9 @@ RED.keyboard = (function() {
                         }
                     });
                     var label = $('<div>').html(text).appendTo(item);
-
-                    var scope = $('<div class="keyboard-shortcut-entry-scope">').html(object.scope).appendTo(item);
+                    if (object.scope) {
+                        $('<div class="keyboard-shortcut-entry-scope">').html(object.scope).appendTo(item);
+                    }
 
 
                 },
@@ -295,9 +301,7 @@ RED.keyboard = (function() {
                 return A.id.localeCompare(B.id);
             });
             shortcuts.forEach(function(s) {
-                if (s.key) {
-                    shortcutList.editableList('addItem',s);
-                }
+                shortcutList.editableList('addItem',s);
             })
 
             shortcutDialog.dialog({
