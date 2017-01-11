@@ -9,11 +9,12 @@
         "ctrl-escape": "core:cancel-edit-tray",
         "ctrl-g i": "core:show-info-tab",
         "ctrl-g d": "core:show-debug-tab",
-        "ctrl-g c": "core:show-config-tab"
-    },
-    "workspace": {
+        "ctrl-g c": "core:show-config-tab",
         "ctrl-e": "core:show-export-dialog",
         "ctrl-i": "core:show-import-dialog",
+        "ctrl-space": "core:toggle-sidebar"
+    },
+    "workspace": {
         "backspace": "core:delete-selection",
         "delete": "core:delete-selection",
         "enter": "core:edit-selected-node",
@@ -23,7 +24,6 @@
         "ctrl-z": "core:undo",
         "ctrl-a": "core:select-all-nodes",
         "shift-?": "core:show-help",
-        "ctrl-space": "core:toggle-sidebar",
         "up": "core:move-selection-up",
         "right": "core:move-selection-right",
         "down": "core:move-selection-down",
