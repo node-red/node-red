@@ -16,10 +16,18 @@
 
 #keyboard-help-dialog {
     font-size: 0.9em;
+    padding-top: 10px;
+
+}
+.keyboard-shortcut-entry.keyboard-shortcut-list-header {
+    padding:0 30px 0 5px;
+    div {
+        color: #666 !important;
+    }
 }
 #keyboard-shortcut-list {
     position: absolute;
-    top:10px;
+    top:30px;
     left:10px;
     right:10px;
     bottom:10px;

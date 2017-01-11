@@ -263,6 +263,11 @@ RED.keyboard = (function() {
         }
         if (!shortcutDialog) {
             shortcutDialog = $('<div id="keyboard-help-dialog" class="hide">'+
+                '<div class="keyboard-shortcut-entry keyboard-shortcut-list-header">'+
+                    '<div class="keyboard-shortcut-entry-key">shortcut</div>'+
+                    '<div class="keyboard-shortcut-entry-key">action</div>'+
+                    '<div class="keyboard-shortcut-entry-scope">scope</div>'+
+                '</div>'+
                 '<ol id="keyboard-shortcut-list"></ol>'+
                 '</div>')
             .appendTo("body");
