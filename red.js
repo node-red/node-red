@@ -175,7 +175,10 @@ if (parsedArgs.userDir) {
 try {
     RED.init(server,settings);
 } catch(err) {
-    if (err.code == "not_built") {
+    if (err.code == "unsupported_version") {
+        console.log("Unsupported version of node.js:",process.version);
+        console.log("Node-RED requires node.js v4 or later");
+    } else if  (err.code == "not_built") {
         console.log("Node-RED has not been built. See README.md for details");
     } else {
         console.log("Failed to start server:");

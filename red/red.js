@@ -27,6 +27,15 @@ var adminApp = null;
 var server = null;
 var apiEnabled = false;
 
+function checkVersion() {
+    var semver = require('semver');
+    if (!semver.satisfies(process.version,">=4.0.0")) {
+        var e = new Error("Unsupported version of node.js");
+        e.code = "unsupported_version";
+        throw e;
+    }
+}
+
 function checkBuild() {
     var editorFile = path.resolve(path.join(__dirname,"..","public","red","red.min.js"));
     try {
@@ -46,6 +55,7 @@ module.exports = {
         }
 
         if (!userSettings.SKIP_BUILD_CHECK) {
+            checkVersion();
             checkBuild();
         }
 
