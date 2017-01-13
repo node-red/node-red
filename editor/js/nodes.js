@@ -996,7 +996,6 @@ RED.nodes = (function() {
             "link out":"links"
         }
 
-
         // Remap all wires and config node references
         for (i=0;i<new_nodes.length;i++) {
             n = new_nodes[i];
@@ -1004,9 +1003,8 @@ RED.nodes = (function() {
                 for (var w1=0;w1<n.wires.length;w1++) {
                     var wires = (n.wires[w1] instanceof Array)?n.wires[w1]:[n.wires[w1]];
                     for (var w2=0;w2<wires.length;w2++) {
-                        var existingNode = node_map[wires[w2]] || getNode(wires[w2]);
-                        if (existingNode) {
-                            var link = {source:n,sourcePort:w1,target:existingNode};
+                        if (node_map.hasOwnProperty(wires[w2])) {
+                            var link = {source:n,sourcePort:w1,target:node_map[wires[w2]]};
                             addLink(link);
                             new_links.push(link);
                         }
