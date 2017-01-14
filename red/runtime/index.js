@@ -102,6 +102,12 @@ function start() {
                 log.info(log._("runtime.version",{component:"Node-RED",version:"v"+settings.version}));
             }
             log.info(log._("runtime.version",{component:"Node.js ",version:process.version}));
+            if (settings.UNSUPPORTED_VERSION) {
+                log.error("*****************************************************************");
+                log.error("* "+log._("runtime.unsupported_version",{component:"Node.js",version:process.version,requires: ">=4"})+" *");
+                log.error("*****************************************************************");
+                events.emit("runtime-event",{id:"runtime-unsupported-version",type:"error",text:"notification.errors.unsupportedVersion"});
+            }
             log.info(os.type()+" "+os.release()+" "+os.arch()+" "+os.endianness());
             return redNodes.load().then(function() {
 

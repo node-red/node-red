@@ -27,12 +27,14 @@ var adminApp = null;
 var server = null;
 var apiEnabled = false;
 
-function checkVersion() {
+function checkVersion(userSettings) {
     var semver = require('semver');
     if (!semver.satisfies(process.version,">=4.0.0")) {
-        var e = new Error("Unsupported version of node.js");
-        e.code = "unsupported_version";
-        throw e;
+        // TODO: in the future, make this a hard error.
+        // var e = new Error("Unsupported version of node.js");
+        // e.code = "unsupported_version";
+        // throw e;
+        userSettings.UNSUPPORTED_VERSION = process.version;
     }
 }
 
@@ -55,7 +57,7 @@ module.exports = {
         }
 
         if (!userSettings.SKIP_BUILD_CHECK) {
-            checkVersion();
+            checkVersion(userSettings);
             checkBuild();
         }
 

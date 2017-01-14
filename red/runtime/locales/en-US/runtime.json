@@ -2,6 +2,7 @@
     "runtime": {
         "welcome": "Welcome to Node-RED",
         "version": "__component__ version: __version__",
+        "unsupported_version": "Unsupported version of __component__. Requires: __requires__ Found: __version__",
         "paths": {
             "settings": "Settings file  : __path__"
         }
