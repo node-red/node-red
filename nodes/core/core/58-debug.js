@@ -79,7 +79,16 @@ module.exports = function(RED) {
     function sendDebug(msg) {
         if (msg.msg instanceof Error) {
             msg.format = "error";
-            msg.msg = msg.msg.toString();
+            var errorMsg = {};
+            if (msg.msg.name) {
+                errorMsg.name = msg.msg.name;
+            }
+            if (msg.msg.hasOwnProperty('message')) {
+                errorMsg.message = msg.msg.message;
+            } else {
+                errorMsg.message = msg.msg.toString();
+            }
+            msg.msg = JSON.stringify(errorMsg);
         } else if (msg.msg instanceof Buffer) {
             msg.format = "buffer["+msg.msg.length+"]";
             msg.msg = msg.msg.toString('hex');

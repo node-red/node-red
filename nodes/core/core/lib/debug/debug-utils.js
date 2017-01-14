@@ -230,8 +230,11 @@ RED.debug = (function() {
                 (o.property?'msg.'+property:'msg')+" : "+format+
                 '</span>').appendTo(metaRow);
         }
-        if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number'||/error/i.test(format) ) {
+        if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
             payload = JSON.parse(payload);
+        } else if (/error/i.test(format)) {
+            payload = JSON.parse(payload);
+            payload = (payload.name?payload.name+": ":"")+payload.message;
         } else if (format === 'null') {
             payload = null;
         } else if (format === 'undefined') {
