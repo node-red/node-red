@@ -136,7 +136,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload: new Error("oops")});
             }, function(msg) {
                 JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg:"Error: oops",property:"payload",format:"error"}
+                    topic:"debug",data:{id:"n1",msg:'{"name":"Error","message":"oops"}',property:"payload",format:"error"}
                 });
             }, done);
         });
