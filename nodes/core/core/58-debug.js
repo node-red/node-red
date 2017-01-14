@@ -118,9 +118,6 @@ module.exports = function(RED) {
                 }
                 if (isArray || (msg.format === "Object")) {
                     msg.msg = safeJSONStringify(msg.msg, function(key, value) {
-                        if (key[0] === '_' && key !== "_msgid") {
-                            return undefined;
-                        }
                         if (key === '_req' || key === '_res') {
                             return "[internal]"
                         }
