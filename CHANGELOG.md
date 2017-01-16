@@ -1,4 +1,18 @@
+#### 0.16.1: Maintenance Release
+
+ - Add colour swatches to debug when hex colour matched
+ - Nodes with hasUsers set to false should not appear unused
+ - Change hard error to verbose warning if using old node.js level
+ - Don't filter debug properties starting with _ Fixes #1117
+ - Node logged errors not displayed properly in debug pane Fixes #1116
+ - Do not look for existing nodes when checking for wires on paste Fixes #1114
+ - -v option not enabling verbose mode properly
+ - Add node.js version check on startup
+
 #### 0.16.0: Milestone Release
+
+Runtime
+ - Drop support for node 0.10 and 0.12
 
 Nodes
 
