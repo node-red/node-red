@@ -146,6 +146,9 @@ RED.utils = (function() {
                 if (originalLength === undefined) {
                     originalLength = data.length;
                 }
+                if (data.__encoded__) {
+                    data = data.data;
+                }
                 type = obj.type.toLowerCase();
             } else if (/buffer/.test(typeHint)) {
                 type = 'buffer';
