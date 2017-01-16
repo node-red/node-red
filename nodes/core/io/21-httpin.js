@@ -17,6 +17,7 @@
 module.exports = function(RED) {
     "use strict";
     var bodyParser = require("body-parser");
+    var multer = require("multer");
     var cookieParser = require("cookie-parser");
     var getBody = require('raw-body');
     var cors = require('cors');
@@ -177,6 +178,7 @@ module.exports = function(RED) {
             }
             this.url = n.url;
             this.method = n.method;
+            this.upload = n.upload;
             this.swaggerDoc = n.swaggerDoc;
 
             var node = this;
@@ -225,10 +227,21 @@ module.exports = function(RED) {
                 };
             }
 
+            var multipartParser = function(req,res,next) { next(); }
+            if (this.upload) {
+                var mp = multer({ storage: multer.memoryStorage() }).any();
+                multipartParser = function(req,res,next) {
+                    mp(req,res,function(err) {
+                        req._body = true;
+                        next(err);
+                    })
+                };
+            }
+
             if (this.method == "get") {
                 RED.httpNode.get(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,this.callback,this.errorHandler);
             } else if (this.method == "post") {
-                RED.httpNode.post(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+                RED.httpNode.post(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,multipartParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "put") {
                 RED.httpNode.put(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "patch") {

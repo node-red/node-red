@@ -25,6 +25,11 @@
         <option value="patch">PATCH</option>
         </select>
     </div>
+    <div class="form-row form-row-http-in-upload hide">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-upload" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-upload" style="width: 70%;" data-i18n="httpin.label.upload"></label>
+    </div>
     <div class="form-row">
         <label for="node-input-url"><i class="fa fa-globe"></i> <span data-i18n="httpin.label.url"></span></label>
         <input id="node-input-url" type="text" placeholder="/url">
@@ -59,6 +64,9 @@
        To send JSON encoded data to the node, the content-type header of the request must be set to
        <code>application/json</code>.
     </p>
+    <p>
+       If file uploads are enabled for POST requests, the files will be available under
+       <code>msg.req.files</code>.
     <p>
        <b>Note: </b>This node does not send any response to the http request.
        This should be done with a subsequent HTTP Response node.
@@ -119,6 +127,7 @@ msg.cookies = {
             name: {value:""},
             url: {value:"",required:true},
             method: {value:"get",required:true},
+            upload: {value:false},
             swaggerDoc: {type:"swagger-doc", required:false}
         },
         inputs:0,
@@ -159,6 +168,15 @@ msg.cookies = {
             if(!RED.nodes.getType("swagger-doc")){
                 $('.row-swagger-doc').hide();
             }
+            $("#node-input-method").change(function() {
+                if ($(this).val() === "post") {
+                    $(".form-row-http-in-upload").show();
+                } else {
+                    $(".form-row-http-in-upload").hide();
+                }
+            }).change();
+
+
         }
 
     });
