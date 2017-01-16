@@ -183,3 +183,11 @@
 .debug-message-buffer-string > .debug-message-array-rows {
     display: none;
 }
+.debug-message-type-string-swatch {
+    display: inline-block;
+    width: 1.1em;
+    height: 0.9em;
+    vertical-align: middle;
+    border-radius: 3px;
+    margin: 0 4px;
+}

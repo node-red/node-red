@@ -106,8 +106,10 @@ RED.utils = (function() {
                     $('<pre class="debug-message-type-string"></pre>').text(obj).appendTo(row);
                 });
             }
-            $('<span class="debug-message-type-string debug-message-object-header"></span>').html('"'+formatString(sanitize(obj))+'"').appendTo(entryObj);
-
+            e = $('<span class="debug-message-type-string debug-message-object-header"></span>').html('"'+formatString(sanitize(obj))+'"').appendTo(entryObj);
+            if (/^#[0-9a-f]{6}$/i.test(obj)) {
+                $('<span class="debug-message-type-string-swatch"></span>').css('backgroundColor',obj).appendTo(e);
+            }
 
         } else if (typeof obj === 'number') {
             e = $('<span class="debug-message-type-number"></span>').text(""+obj).appendTo(entryObj);
