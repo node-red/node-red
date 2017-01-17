@@ -1,0 +1,131 @@
+{
+    "api": {
+        "flows": {
+            "error-reload": "フローリロードエラー：__message__",
+            "error-save": "フロー保存エラー：__message__"
+        },
+        "library": {
+            "error-load-entry": "ライブラリ '__path__'の読み込み中にエラーが発生しました：__message__",
+            "error-load-flow": "フロー「__path__」の読み込み中にエラーが発生しました：__message__",
+            "error-save-entry": "ライブラリ '__path__'の保存中にエラーが発生しました：__message__",
+            "error-save-flow": "フロー '__path__'の保存中にエラーが発生しました：__message__"
+        },
+        "nodes": {
+            "disabled": "無効なノードタイプ：",
+            "enabled": "有効なノードタイプ：",
+            "error-enable": "ノードを有効にできませんでした："
+        }
+    },
+    "comms": {
+        "error": "通信チャネルエラー：__message__",
+        "error-send": "通信エラー：__message__",
+        "error-server": "通信サーバーエラー：__message__"
+    },
+    "nodes": {
+        "credentials": {
+            "error": "資格情報の読み込み中にエラーが発生しました：__message__",
+            "error-saving": "資格情報の保存中にエラーが発生しました：__message__",
+            "not-registered": "資格情報タイプ '__type__'は登録されていません"
+        },
+        "flow": {
+            "error-loop": "メッセージが最大捕捉数を超えました",
+            "missing-types": "存在しないタイプ",
+            "unknown-type": "不明なタイプ：__type__"
+        },
+        "flows": {
+            "added-flow": "フロー追加：__label__",
+            "error": "フローの読み込みエラー：__message__",
+            "missing-type-install-1": "これらの不足しているモジュールをインストールするには、次のコマンドを実行します。",
+            "missing-type-install-2": "ディレクトリの中で：",
+            "missing-type-provided": " -  __type__（npmモジュール__module__によって提供）",
+            "missing-types": "未登録のタイプが登録されるのを待っています：",
+            "registered-missing": "登録されていないタイプ：__type__",
+            "removed-flow": "削除されたフロー：__label__",
+            "started-flows": "開始フロー",
+            "started-modified-flows": "変更されたフローを開始しました",
+            "started-modified-nodes": "変更されたノードの開始",
+            "starting-flows": "フローの開始",
+            "starting-modified-flows": "変更されたフローの開始",
+            "starting-modified-nodes": "変更されたノードの起動",
+            "stopped": "停止",
+            "stopped-flows": "停止したフロー",
+            "stopped-modified-flows": "停止した変更フロー",
+            "stopped-modified-nodes": "停止した変更ノード",
+            "stopping-flows": "フローを停止する",
+            "stopping-modified-flows": "変更されたフローの停止",
+            "stopping-modified-nodes": "変更されたノードの停止",
+            "updated-flow": "更新されたフロー：__label__"
+        },
+        "index": {
+            "type-in-use": "タイプ：__msg__",
+            "unrecognised-id": "認識されないID：__id__",
+            "unrecognised-module": "認識されないモジュール：__module__"
+        },
+        "registry": {
+            "localfilesystem": {
+                "module-not-found": "モジュール '__module__'が見つかりません"
+            }
+        }
+    },
+    "runtime": {
+        "paths": {
+            "settings": "設定ファイル：__path__"
+        },
+        "unsupported_version": "サポートされていないバージョンの__component__です。必要なバージョン：__requires__　検出したバージョン：__version__",
+        "version": "__component__バージョン：__version__",
+        "welcome": "Node-REDへようこそ"
+    },
+    "server": {
+        "added-types": "追加されたノードタイプ：",
+        "admin-ui-disabled": "管理UIは無効です",
+        "errors": "__count__ノードタイプの登録に失敗しました",
+        "errors-help": "詳細は-vを指定して実行してください",
+        "errors_plural": "__count__ノードタイプの登録に失敗しました",
+        "failed-to-start": "サーバーの起動に失敗しました：",
+        "headless-mode": "ヘッドレスモードで実行しています",
+        "httpadminauth-deprecated": "httpAdminAuthの使用は推奨されていません。代わりにadminAuthを使用してください。",
+        "install": {
+            "install-failed": "インストールに失敗しました",
+            "install-failed-long": "モジュール__name__のインストールに失敗しました：",
+            "install-failed-not-found": "モジュール__name__が見つかりません",
+            "installed": "インストールされたモジュール：__name__",
+            "installing": "モジュールのインストール：__name__",
+            "invalid": "無効なモジュール名",
+            "uninstall-failed": "アンインストールに失敗しました",
+            "uninstall-failed-long": "モジュール__name__のアンインストールに失敗しました：",
+            "uninstalled": "アンインストールされたモジュール：__name__",
+            "uninstalling": "アンインストールモジュール：__name__"
+        },
+        "loading": "パレットノードのロード中",
+        "missing-modules": "未登録のノードモジュール：",
+        "node-version-mismatch": "ノードモジュールをこのバージョンにロードすることはできません。必要なバージョン：__version__",
+        "now-running": "サーバーは現在__listenpath__で動作しています",
+        "palette-editor": {
+            "disabled": "パレットエディタを無効にする：ユーザー設定",
+            "npm-not-found": "パレットエディタが無効です：npmコマンドが見つかりません"
+        },
+        "port-in-use": "エラー：使用中のポート",
+        "removed-types": "削除されたノードタイプ：",
+        "removing-modules": "configからモジュールを削除する",
+        "unable-to-listen": "__listenpath__を聞くことができません",
+        "uncaught-exception": "捕捉されなかった例外："
+    },
+    "settings": {
+        "not-available": "設定できません",
+        "property-read-only": "プロパティ '__prop__'は読み取り専用です"
+    },
+    "storage": {
+        "index": {
+            "forbidden-flow-name": "禁止されたフロー名"
+        },
+        "localfilesystem": {
+            "create": "新しい__type__ファイルの作成",
+            "empty": "既存の__type__ファイルが空です",
+            "flows-file": "フローファイル：__path__",
+            "invalid": "既存の__type__ファイルは有効なJSON形式ではありません",
+            "restore": "__type__ファイルバックアップの復元：__path__",
+            "restore-fail": "__type__ファイルのバックアップを復元できませんでした：__message__",
+            "user-dir": "ユーザーディレクトリ：__path__"
+        }
+    }
+}
