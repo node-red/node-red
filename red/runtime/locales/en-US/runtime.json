@@ -28,7 +28,7 @@
             "installed": "Installed module: __name__",
             "install-failed": "Install failed",
             "install-failed-long": "Installation of module __name__ failed:",
-            "install-failed-not-found": "$t(install-failed-long) module not found",
+            "install-failed-not-found": "$t(server.install.install-failed-long) module not found",
 
             "uninstalling": "Uninstalling module: __name__",
             "uninstall-failed": "Uninstall failed",
