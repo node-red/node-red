@@ -36,6 +36,7 @@ module.exports = function(RED) {
         node.closing = false;
 
         function startconn() {    // Connect to remote endpoint
+            node.tout = null;
             var socket = new ws(node.path);
             socket.setMaxListeners(0);
             node.server = socket; // keep for closing
@@ -52,6 +53,7 @@ module.exports = function(RED) {
                 if (node.isServer) { delete node._clients[id]; node.emit('closed',Object.keys(node._clients).length); }
                 else { node.emit('closed'); }
                 if (!node.closing && !node.isServer) {
+                    clearTimeout(node.tout);
                     node.tout = setTimeout(function() { startconn(); }, 3000); // try to reconnect every 3 secs... bit fast ?
                 }
             });
@@ -61,6 +63,7 @@ module.exports = function(RED) {
             socket.on('error', function(err) {
                 node.emit('erro');
                 if (!node.closing && !node.isServer) {
+                    clearTimeout(node.tout);
                     node.tout = setTimeout(function() { startconn(); }, 3000); // try to reconnect every 3 secs... bit fast ?
                 }
             });
@@ -124,7 +127,10 @@ module.exports = function(RED) {
             else {
                 node.closing = true;
                 node.server.close();
-                if (node.tout) { clearTimeout(node.tout); }
+                if (node.tout) {
+                    clearTimeout(node.tout);
+                    node.tout = null;
+                }
             }
         });
     }
