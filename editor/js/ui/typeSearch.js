@@ -110,20 +110,11 @@ RED.typeSearch = (function() {
 
                 var nodeDiv = $('<div>',{class:"red-ui-search-result-node"}).appendTo(div);
                 var colour = def.color;
-                var icon_url = "arrow-in.png";
-                if (def.category === 'config') {
-                    icon_url = "cog.png";
-                } else {
-                    try {
-                        icon_url = (typeof def.icon === "function" ? def.icon.call({}) : def.icon);
-                    } catch(err) {
-                        console.log("Definition error: "+object.type+".icon",err);
-                    }
-                }
+                var icon_url = RED.utils.getNodeIcon(def);
                 nodeDiv.css('backgroundColor',colour);
 
                 var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(nodeDiv);
-                $('<div/>',{class:"palette_icon",style:"background-image: url(icons/"+icon_url+")"}).appendTo(iconContainer);
+                $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
 
                 if (def.inputs > 0) {
                     $('<div/>',{class:"red-ui-search-result-node-port"}).appendTo(nodeDiv);

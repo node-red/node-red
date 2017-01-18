@@ -367,8 +367,31 @@ RED.utils = (function() {
         return true;
     }
 
+    function getNodeIcon(def,node) {
+        if (def.category === 'config') {
+            return "icons/node-red/cog.png"
+        } else if (node && node.type === 'tab') {
+            return "icons/node-red/subflow.png"
+        } else if (node && node.type === 'unknown') {
+            return "icons/node-red/alert.png"
+        }
+        var icon_url;
+        if (typeof def.icon === "function") {
+            try {
+                icon_url = def.icon.call(node);
+            } catch(err) {
+                console.log("Definition error: "+def.type+".icon",err);
+                icon_url = "arrow-in.png";
+            }
+        } else {
+            icon_url = def.icon;
+        }
+        return "icons/"+def.set.module+"/"+icon_url;
+    }
+
     return {
         createObjectElement: buildMessageElement,
-        validatePropertyExpression: validatePropertyExpression
+        validatePropertyExpression: validatePropertyExpression,
+        getNodeIcon: getNodeIcon
     }
 })();

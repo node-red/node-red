@@ -89,7 +89,7 @@ function getLocalNodeFiles(dir) {
             if (!/^(\..*|lib|icons|node_modules|test|locales)$/.test(fn)) {
                 result = result.concat(getLocalNodeFiles(path.join(dir,fn)));
             } else if (fn === "icons") {
-                events.emit("node-icon-dir",path.join(dir,fn));
+                events.emit("node-icon-dir",{name:'node-red',path:path.join(dir,fn)});
             }
         }
     });
@@ -182,7 +182,7 @@ function getModuleNodeFiles(module) {
             if (iconDirs.indexOf(iconDir) == -1) {
                 try {
                     fs.statSync(iconDir);
-                    events.emit("node-icon-dir",iconDir);
+                    events.emit("node-icon-dir",{name:pkg.name,path:iconDir});
                     iconDirs.push(iconDir);
                 } catch(err) {
                 }

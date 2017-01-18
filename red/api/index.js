@@ -94,7 +94,7 @@ function init(_server,_runtime) {
                 });
             }
             editorApp.get("/",ensureRuntimeStarted,ui.ensureSlash,ui.editor);
-            editorApp.get("/icons/:icon",ui.icon);
+            editorApp.get("/icons/:module/:icon",ui.icon);
             theme.init(runtime);
             if (settings.editorTheme) {
                 editorApp.use("/theme",theme.app());

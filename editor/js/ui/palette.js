@@ -149,14 +149,9 @@ RED.palette = (function() {
 
 
             if (def.icon) {
-                var icon_url = "arrow-in.png";
-                try {
-                    icon_url = (typeof def.icon === "function" ? def.icon.call({}) : def.icon);
-                } catch(err) {
-                    console.log("Definition error: "+nt+".icon",err);
-                }
+                var icon_url = RED.utils.getNodeIcon(def);
                 var iconContainer = $('<div/>',{class:"palette_icon_container"+(def.align=="right"?" palette_icon_container_right":"")}).appendTo(d);
-                $('<div/>',{class:"palette_icon",style:"background-image: url(icons/"+icon_url+")"}).appendTo(iconContainer);
+                $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
             }
 
             d.style.backgroundColor = def.color;
@@ -236,7 +231,7 @@ RED.palette = (function() {
                     // it here makes me sad
                     //console.log(ui.helper.position());
                     ui.position.left += 17.5;
-                    
+
                     if (def.inputs > 0 && def.outputs > 0) {
                         mouseX = ui.position.left+(ui.helper.width()/2) - chartOffset.left + chart.scrollLeft();
                         mouseY = ui.position.top+(ui.helper.height()/2) - chartOffset.top + chart.scrollTop();

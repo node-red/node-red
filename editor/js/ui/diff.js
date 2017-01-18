@@ -342,21 +342,14 @@ RED.diff = (function() {
     function createNodeIcon(node,def) {
         var nodeDiv = $("<div>",{class:"node-diff-node-entry-node"});
         var colour = def.color;
-        var icon_url = "arrow-in.png";
+        var icon_url = RED.utils.getNodeIcon(def,node);
         if (node.type === 'tab') {
             colour = "#C0DEED";
-            icon_url = "subflow.png";
-        } else if (def.category === 'config') {
-            icon_url = "cog.png";
-        } else if (node.type === 'unknown') {
-            icon_url = "alert.png";
-        } else {
-            icon_url = def.icon;
         }
         nodeDiv.css('backgroundColor',colour);
 
         var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(nodeDiv);
-        $('<div/>',{class:"palette_icon",style:"background-image: url(icons/"+icon_url+")"}).appendTo(iconContainer);
+        $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
 
         return nodeDiv;
     }

@@ -115,6 +115,7 @@ RED.nodes = (function() {
             },
             registerNodeType: function(nt,def) {
                 nodeDefinitions[nt] = def;
+                def.type = nt;
                 if (def.category != "subflows") {
                     def.set = nodeSets[typeToId[nt]];
                     nodeSets[typeToId[nt]].added = true;
