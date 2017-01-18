@@ -87,7 +87,7 @@
         "install": {
             "install-failed": "インストールに失敗しました",
             "install-failed-long": "モジュール__name__のインストールに失敗しました：",
-            "install-failed-not-found": "${server.install.install-failed-long} モジュールが見つかりません",
+            "install-failed-not-found": "$(server.install.install-failed-long) モジュールが見つかりません",
             "installed": "インストールされたモジュール：__name__",
             "installing": "モジュールのインストール：__name__",
             "invalid": "無効なモジュール名",
