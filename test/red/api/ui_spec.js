@@ -64,7 +64,7 @@ describe("ui api", function() {
     describe("icon handler", function() {
         before(function() {
             app = express();
-            app.get("/icons/:icon",ui.icon);
+            app.get("/icons/:module/:icon",ui.icon);
         });
 
         function binaryParser(res, callback) {
@@ -87,7 +87,7 @@ describe("ui api", function() {
         it('returns the default icon when getting an unknown icon', function(done) {
             var defaultIcon = fs.readFileSync(path.resolve(__dirname+'/../../../public/icons/arrow-in.png'));
             request(app)
-                .get("/icons/youwonthaveme.png")
+                .get("/icons/random-module/youwonthaveme.png")
                 .expect("Content-Type", /image\/png/)
                 .expect(200)
                 .parse(binaryParser)
@@ -104,7 +104,7 @@ describe("ui api", function() {
         it('returns a known icon', function(done) {
             var injectIcon = fs.readFileSync(path.resolve(__dirname+'/../../../public/icons/inject.png'));
             request(app)
-                .get("/icons/inject.png")
+                .get("/icons/node-red/inject.png")
                 .expect("Content-Type", /image\/png/)
                 .expect(200)
                 .parse(binaryParser)
@@ -120,9 +120,9 @@ describe("ui api", function() {
 
         it('returns a registered icon' , function(done) {
             var testIcon = fs.readFileSync(path.resolve(__dirname+'/../../resources/icons/test_icon.png'));
-            events.emit("node-icon-dir", path.resolve(__dirname+'/../../resources/icons'));
+            events.emit("node-icon-dir",{name:"test-module", path: path.resolve(__dirname+'/../../resources/icons')});
             request(app)
-                .get("/icons/test_icon.png")
+                .get("/icons/test-module/test_icon.png")
                 .expect("Content-Type", /image\/png/)
                 .expect(200)
                 .parse(binaryParser)
