@@ -124,7 +124,8 @@ RED.sidebar.info = (function() {
         } else if (node._def && node._def.info) {
             var info = node._def.info;
             var textInfo = (typeof info === "function" ? info.call(node) : info);
-            $('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(textInfo)+'">'+marked(textInfo)+'</span></div>').appendTo(content);
+            var ma = marked(textInfo).replace(/href=/g, 'target="_blank" href=');
+            $('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(textInfo)+'">'+ma+'</span></div>').appendTo(content);
             //$('<div class="node-help">'+(typeof info === "function" ? info.call(node) : info)+'</div>';
         }
 
