@@ -298,14 +298,16 @@ RED.clipboard = (function() {
 
 
             $('#chart').on("dragenter",function(event) {
-                if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
+                if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1 ||
+                     $.inArray("Files",event.originalEvent.dataTransfer.types) != -1) {
                     $("#dropTarget").css({display:'table'});
                     RED.keyboard.add("*", "escape" ,hideDropTarget);
                 }
             });
 
             $('#dropTarget').on("dragover",function(event) {
-                if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
+                if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1 ||
+                     $.inArray("Files",event.originalEvent.dataTransfer.types) != -1) {
                     event.preventDefault();
                 }
             })
@@ -313,10 +315,24 @@ RED.clipboard = (function() {
                 hideDropTarget();
             })
             .on("drop",function(event) {
-                var data = event.originalEvent.dataTransfer.getData("text/plain");
+                if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
+                    var data = event.originalEvent.dataTransfer.getData("text/plain");
+                    data = data.substring(data.indexOf('['),data.lastIndexOf(']')+1);
+                    RED.view.importNodes(data);
+                } else if ($.inArray("Files",event.originalEvent.dataTransfer.types) != -1) {
+                    var files = event.originalEvent.dataTransfer.files;
+                    if (files.length === 1) {
+                        var file = files[0];
+                        var reader = new FileReader();
+                        reader.onload = (function(theFile) {
+                            return function(e) {
+                                RED.view.importNodes(e.target.result);
+                            };
+                        })(file);
+                        reader.readAsText(file);
+                    }
+                }
                 hideDropTarget();
-                data = data.substring(data.indexOf('['),data.lastIndexOf(']')+1);
-                RED.view.importNodes(data);
                 event.preventDefault();
             });
 
