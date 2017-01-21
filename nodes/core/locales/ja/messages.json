@@ -1,14 +1,14 @@
 {
     "catch": {
-        "catch": "すべてを捕捉",
-        "catchNodes": "捕捉（__number__）",
+        "catch": "すべてをキャッチ",
+        "catchNodes": "キャッチ（__number__）",
         "label": {
             "node": "ノード",
             "selectAll": "すべて選択",
             "sortByLabel": "ラベルで並べ替える",
             "sortByType": "タイプで並べ替える",
-            "source": "次のエラーを捕捉",
-            "type": "タイプ"
+            "source": "次のエラーをキャッチ",
+            "type": "型"
         },
         "scope": {
             "all": "すべてのノード",
@@ -22,8 +22,8 @@
             "move": "移動",
             "replace": "置換",
             "search": "検索",
-            "set": "設定",
-            "to": "に"
+            "set": "セット",
+            "to": "を右の値に"
         },
         "errors": {
             "invalid-from": "無効な 'from'プロパティ：__error__",
@@ -37,7 +37,7 @@
             "regex": "正規表現を使用",
             "rule": "ルール",
             "rules": "ルール",
-            "set": "__property__を設定"
+            "set": "__property__をセット"
         }
     },
     "comment": {
@@ -128,8 +128,8 @@
             "label": "デバッグ",
             "name": "デバッグメッセージ"
         },
-        "tabcon": "デバッグタブとコンソール",
-        "to": "に"
+        "tabcon": "デバッグタブとコンソール両方",
+        "to": "出力先"
     },
     "delay": {
         "action": "アクション",
@@ -255,7 +255,7 @@
         "tip": "ヒント：<b>選択</b>値は、<a href=\"https://github.com/fb55/CSSselect#user-content-supported-selectors\" target=\"_blank\"> <i> <u > CSSセレクタ</u> </i> </a>の形式で指定します。jQueryセレクタとも似ている形式です。"
     },
     "httpin": {
-        "basicauth": "基本認証を使用する",
+        "basicauth": "Basic認証を使用する",
         "binary": "バイナリバッファー",
         "errors": {
             "deprecated-call": "__method__への非推奨の呼び出しがあります",
@@ -287,9 +287,9 @@
         "utf8": "UTF-8文字列"
     },
     "inject": {
-        "and": "かつ",
+        "and": "から",
         "at": "で",
-        "between": "の間に",
+        "between": "の",
         "crontab": "crontab = __crontab__",
         "days": {
             "0": "月曜日",
@@ -307,8 +307,8 @@
         "failed": "インジェクトに失敗しました：__error__",
         "hours": "時間",
         "inject": "インジェクト",
-        "interval": "時間間隔",
-        "interval-time": "時間間隔",
+        "interval": "一定間隔",
+        "interval-time": "範囲指定一定間隔",
         "label": {
             "repeat": "繰り返す"
         },
@@ -323,7 +323,7 @@
         "success": "正常にインジェクトしました：__label__",
         "time": "定時実行",
         "timestamp": "タイムスタンプ",
-        "tip": "<b>注：</b>「時間間隔実行」と「定時実行」はcronを使用します。<br/>詳細については、説明タブを参照してください。"
+        "tip": "<b>注：</b>「範囲指定一定間隔」と「定時実行」はcronを使用します。<br/>詳細については、情報タブを参照してください。"
     },
     "json": {
         "errors": {
@@ -360,7 +360,7 @@
             "verify-server-cert": "サーバー証明書を検証する"
         },
         "placeholder": {
-            "birth-topic": "空白のままにして誕生メッセージを無効にする",
+            "birth-topic": "空白のままにしてBirthメッセージを無効にする",
             "clientid": "空白のままにすると自動生成されます",
             "clientid-nonclean": "クリーンでないセッションに設定する必要があります",
             "will-topic": "空白のままにしてメッセージを無効にする"
@@ -372,13 +372,13 @@
             "disconnected": "ブローカーから切断: __broker__"
         },
         "tabs-label": {
-            "birth": "誕生メッセージ",
+            "birth": "Birthメッセージ",
             "connection": "接続",
             "security": "セキュリティ",
-            "will": "ウィルメッセージ"
+            "will": "Willメッセージ"
         },
         "tip": "ヒント：msgプロパティで設定する場合は、トピック、qos、または空白のままにしておきます。",
-        "true": "真実"
+        "true": "真"
     },
     "range": {
         "errors": {
@@ -386,16 +386,16 @@
         },
         "label": {
             "action": "アクション",
-            "from": "から",
+            "from": "開始位置",
             "inputrange": "入力範囲をマップする",
             "resultrange": "結果の範囲に",
             "roundresult": "結果を最も近い整数に丸めますか？",
-            "to": "に"
+            "to": "終了位置"
         },
         "placeholder": {
-            "maxin": "例えば99",
-            "maxout": "例えば255",
-            "min": "例えば0"
+            "maxin": "例:99",
+            "maxout": "例:255",
+            "min": "例:0"
         },
         "scale": {
             "limit": "ターゲット範囲の拡大縮小",
@@ -405,13 +405,13 @@
         "tip": "ヒント：このノードは数値のみで動作します。"
     },
     "rpi-gpio": {
-        "alreadyset": "すでに設定されています",
+        "alreadyset": "すでにセットされています",
         "alreadyuse": "すでに使用されています",
         "any": "指定なし",
         "digout": "デジタル出力",
         "errors": {
-            "alreadyset": "GPIOピン__pin__はすでにタイプとして設定されています：__type__",
-            "commandnotexecutable": "nrgpioコマンドは実行できません",
+            "alreadyset": "GPIOピン__pin__はすでにタイプがセットされています：__type__",
+            "commandnotexecutable": "nrgpioコマンドが実行できません",
             "commandnotfound": "nrgpioコマンドが見つかりません",
             "error": "エラー：__error__",
             "ignorenode": "ラズベリーPi固有のノードを無視する",
@@ -436,17 +436,17 @@
             "pikeyboard": "Piキーボード",
             "pimouse": "Piマウス",
             "readinitial": "デプロイ/再起動時のピンの初期状態を読み込みますか？",
-            "resistor": "抵抗？",
+            "resistor": "ピンの抵抗",
             "right": "右",
             "selectpin": "ピンを選択",
             "type": "タイプ"
         },
         "left": "左",
-        "middle": "中間",
+        "middle": "中央",
         "pinname": "ピン",
         "pwmout": "PWM出力",
         "resistor": {
-            "none": "プルなし",
+            "none": "抵抗なし",
             "pulldown": "プルダウン",
             "pullup": "プルアップ"
         },
@@ -457,10 +457,10 @@
             "stopped": "停止"
         },
         "tip": {
-            "dig": "ヒント：デジタル出力の場合、入力は0または1でなければなりません。",
+            "dig": "ヒント：デジタル出力の場合、ノードの入力は0または1でなければなりません。",
             "in": "ヒント：デジタル入力のみがサポートされています - 入力は0または1でなければなりません。",
             "pin": "<b>使用中のピン</b>：",
-            "pwm": "ヒント：PWM出力の場合、入力は0〜100でなければなりません。"
+            "pwm": "ヒント：PWM出力の場合、ノードの入力は0〜100でなければなりません。"
         },
         "types": {
             "digout": "デジタル出力",
@@ -477,7 +477,7 @@
             "sortByLabel": "ラベルで並べ替える",
             "sortByType": "タイプで並べ替える",
             "source": "からのステータスを報告",
-            "type": "タイプ"
+            "type": "型"
         },
         "scope": {
             "all": "すべてのノード",
@@ -487,7 +487,7 @@
         "statusNodes": "ステータス（__number__）"
     },
     "switch": {
-        "and": "そして",
+        "and": "と",
         "checkall": "すべてのルールをチェックする",
         "errors": {
             "invalid-expr": "無効な式：__error__"
@@ -511,7 +511,7 @@
     },
     "tail": {
         "action": {
-            "binary": "バイナリ - バッファーを返す",
+            "binary": "バイナリ - バイナリーバッファーを返す",
             "text": "テキスト - 文字列を返す"
         },
         "errors": {
@@ -548,9 +548,9 @@
         },
         "output": {
             "base64": "Base64文字列",
-            "buffer": "バッファー",
+            "buffer": "バイナリーバッファー",
             "single": "シングル",
-            "stream": "の流れ",
+            "stream": "ストリーム",
             "string": "文字列"
         },
         "return": {
@@ -588,7 +588,7 @@
     },
     "tls": {
         "error": {
-            "missing-file": "証明書/キーファイルは提供されていません"
+            "missing-file": "証明書/キーファイルが提供されていません"
         },
         "label": {
             "ca": "CA証明書",
@@ -643,7 +643,7 @@
         "errors": {
             "access-error": "UDPアクセスエラー。1024未満のポートにはrootアクセスが必要な場合があります",
             "alreadyused": "udp：既に使用中のポート",
-            "bad-mcaddress": "不良マルチキャストアドレス",
+            "bad-mcaddress": "間違ったマルチキャストアドレス",
             "error": "エラー：__error__",
             "interface": "必要なインターフェイスのIPアドレスでなければなりません",
             "ip-notset": "udp：IPアドレスが設定されていません",
