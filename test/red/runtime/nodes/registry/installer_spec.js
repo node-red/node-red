@@ -46,6 +46,9 @@ describe('nodes/registry/installer', function() {
         if (registry.getModuleInfo.restore) {
             registry.getModuleInfo.restore();
         }
+        if (typeRegistry.getModuleInfo.restore) {
+            typeRegistry.getModuleInfo.restore();
+        }
 
         if (require('fs').statSync.restore) {
             require('fs').statSync.restore();
@@ -61,6 +64,32 @@ describe('nodes/registry/installer', function() {
 
             installer.installModule("this_wont_exist").otherwise(function(err) {
                 err.code.should.be.eql(404);
+                done();
+            });
+        });
+        it("rejects when npm does not find specified version", function(done) {
+            sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
+                cb(new Error(),""," version not found: this_wont_exist@0.1.2");
+            });
+            sinon.stub(typeRegistry,"getModuleInfo", function() {
+                return {
+                    version: "0.1.1"
+                }
+            });
+
+            installer.installModule("this_wont_exist","0.1.2").otherwise(function(err) {
+                err.code.should.be.eql(404);
+                done();
+            });
+        });
+        it("rejects when update requested to existing version", function(done) {
+            sinon.stub(typeRegistry,"getModuleInfo", function() {
+                return {
+                    version: "0.1.1"
+                }
+            });
+            installer.installModule("this_wont_exist","0.1.1").otherwise(function(err) {
+                err.code.should.be.eql('module_already_loaded');
                 done();
             });
         });

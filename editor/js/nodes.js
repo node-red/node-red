@@ -42,6 +42,10 @@ RED.nodes = (function() {
         var nodeDefinitions = {};
 
         var exports = {
+            setModulePendingUpdated: function(module,version) {
+                moduleList[module].pending_version = version;
+                RED.events.emit("registry:module-updated",{module:module,version:version});
+            },
             getModule: function(module) {
                 return moduleList[module];
             },
@@ -78,6 +82,9 @@ RED.nodes = (function() {
                     local:ns.local,
                     sets:{}
                 };
+                if (ns.pending_version) {
+                    moduleList[ns.module].pending_version = ns.pending_version;
+                }
                 moduleList[ns.module].sets[ns.name] = ns;
                 RED.events.emit("registry:node-set-added",ns);
             },

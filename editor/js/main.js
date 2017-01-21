@@ -24,7 +24,6 @@
             url: 'nodes',
             success: function(data) {
                 RED.nodes.setNodeList(data);
-
                 var nsCount = 0;
                 for (var i=0;i<data.length;i++) {
                     var ns = data[i];
@@ -158,6 +157,9 @@
                             typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
                             RED.notify(RED._("palette.event.nodeDisabled", {count:msg.types.length})+typeList,"success");
                         }
+                    } else if (topic == "node/upgraded") {
+                        RED.notify(RED._("palette.event.nodeUpgraded", {module:msg.module,version:msg.version}),"success");
+                        RED.nodes.registry.setModulePendingUpdated(msg.module,msg.version);
                     }
                     // Refresh flow library to ensure any examples are updated
                     RED.library.loadFlowLibrary();

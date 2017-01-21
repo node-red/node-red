@@ -31,6 +31,17 @@ RED.palette.editor = (function() {
     var eventTimers = {};
     var activeFilter = "";
 
+    function semVerCompare(A,B) {
+        var aParts = A.split(".").map(function(m) { return parseInt(m);});
+        var bParts = B.split(".").map(function(m) { return parseInt(m);});
+        for (var i=0;i<3;i++) {
+            var j = aParts[i]-bParts[i];
+            if (j<0) { return -1 }
+            if (j>0) { return 1 }
+        }
+        return 0;
+    }
+
     function delayCallback(start,callback) {
         var delta = Date.now() - start;
         if (delta < 300) {
@@ -64,14 +75,21 @@ RED.palette.editor = (function() {
             });
         })
     }
-    function installNodeModule(id,shade,callback) {
+    function installNodeModule(id,version,shade,callback) {
+        var requestBody = {
+            module: id
+        };
+        if (callback === undefined) {
+            callback = shade;
+            shade = version;
+        } else {
+            requestBody.version = version;
+        }
         shade.show();
         $.ajax({
             url:"nodes",
             type: "POST",
-            data: JSON.stringify({
-                module: id
-            }),
+            data: JSON.stringify(requestBody),
             contentType: "application/json; charset=utf-8"
         }).done(function(data,textStatus,xhr) {
             shade.hide();
@@ -266,19 +284,19 @@ RED.palette.editor = (function() {
                     nodeEntry.container.toggleClass("disabled",(activeTypeCount === 0));
                 }
             }
-
-            nodeEntry.updateButton.hide();
-            // if (loadedIndex.hasOwnProperty(module)) {
-            //     if (moduleInfo.version !== loadedIndex[module].version) {
-            //         nodeEntry.updateButton.show();
-            //         nodeEntry.updateButton.html(RED._('palette.editor.update',{version:loadedIndex[module].version}));
-            //     } else {
-            //         nodeEntry.updateButton.hide();
-            //     }
-            //
-            // } else {
-            //     nodeEntry.updateButton.hide();
-            // }
+            if (moduleInfo.pending_version) {
+                nodeEntry.versionSpan.html(moduleInfo.version+' <i class="fa fa-long-arrow-right"></i> '+moduleInfo.pending_version).appendTo(nodeEntry.metaRow)
+                nodeEntry.updateButton.html(RED._('palette.editor.updated')).addClass('disabled').show();
+            } else if (loadedIndex.hasOwnProperty(module)) {
+                if (semVerCompare(loadedIndex[module].version,moduleInfo.version) === 1) {
+                    nodeEntry.updateButton.show();
+                    nodeEntry.updateButton.html(RED._('palette.editor.update',{version:loadedIndex[module].version}));
+                } else {
+                    nodeEntry.updateButton.hide();
+                }
+            } else {
+                nodeEntry.updateButton.hide();
+            }
         }
 
     }
@@ -515,7 +533,7 @@ RED.palette.editor = (function() {
                     var titleRow = $('<div class="palette-module-meta palette-module-name"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
                     $('<span>').html(entry.name).appendTo(titleRow);
                     var metaRow = $('<div class="palette-module-meta palette-module-version"><i class="fa fa-tag"></i></div>').appendTo(headerRow);
-                    $('<span>').html(entry.version).appendTo(metaRow);
+                    var versionSpan = $('<span>').html(entry.version).appendTo(metaRow);
                     var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
                     var setButton = $('<a href="#" class="editor-button editor-button-small palette-module-set-button"><i class="fa fa-angle-right palette-module-node-chevron"></i> </a>').appendTo(buttonRow);
                     var setCount = $('<span>').appendTo(setButton);
@@ -524,6 +542,19 @@ RED.palette.editor = (function() {
                     var updateButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.update')).appendTo(buttonGroup);
                     updateButton.click(function(evt) {
                         evt.preventDefault();
+                        if ($(this).hasClass('disabled')) {
+                            return;
+                        }
+                        $("#palette-module-install-confirm").data('module',entry.name);
+                        $("#palette-module-install-confirm").data('version',loadedIndex[entry.name].version);
+                        $("#palette-module-install-confirm").data('shade',shade);
+                        $("#palette-module-install-confirm-body").html(RED._("palette.editor.confirm.update.body"));
+                        $(".palette-module-install-confirm-button-install").hide();
+                        $(".palette-module-install-confirm-button-remove").hide();
+                        $(".palette-module-install-confirm-button-update").show();
+                        $("#palette-module-install-confirm")
+                            .dialog('option', 'title', RED._("palette.editor.confirm.update.title"))
+                            .dialog('open');
                     })
 
 
@@ -536,6 +567,7 @@ RED.palette.editor = (function() {
                         $("#palette-module-install-confirm-body").html(RED._("palette.editor.confirm.remove.body"));
                         $(".palette-module-install-confirm-button-install").hide();
                         $(".palette-module-install-confirm-button-remove").show();
+                        $(".palette-module-install-confirm-button-update").hide();
                         $("#palette-module-install-confirm")
                             .dialog('option', 'title', RED._("palette.editor.confirm.remove.title"))
                             .dialog('open');
@@ -555,6 +587,7 @@ RED.palette.editor = (function() {
                         setCount: setCount,
                         container: container,
                         shade: shade,
+                        versionSpan: versionSpan,
                         sets: {}
                     }
                     setButton.click(function(evt) {
@@ -732,6 +765,7 @@ RED.palette.editor = (function() {
                             $("#palette-module-install-confirm-body").html(RED._("palette.editor.confirm.install.body"));
                             $(".palette-module-install-confirm-button-install").show();
                             $(".palette-module-install-confirm-button-remove").hide();
+                            $(".palette-module-install-confirm-button-update").hide();
                             $("#palette-module-install-confirm")
                                 .dialog('option', 'title', RED._("palette.editor.confirm.install.title"))
                                 .dialog('open');
@@ -809,10 +843,32 @@ RED.palette.editor = (function() {
 
                         $( this ).dialog( "close" );
                     }
+                },
+                {
+                    text: RED._("palette.editor.confirm.button.update"),
+                    class: "primary palette-module-install-confirm-button-update",
+                    click: function() {
+                        var id = $(this).data('module');
+                        var version = $(this).data('version');
+                        var shade = $(this).data('shade');
+                        shade.show();
+                        installNodeModule(id,version,shade,function(xhr) {
+                             if (xhr) {
+                                 if (xhr.responseJSON) {
+                                     RED.notify(RED._('palette.editor.errors.updateFailed',{module: id,message:xhr.responseJSON.message}));
+                                 }
+                             }
+                        });
+                        $( this ).dialog( "close" );
+                    }
                 }
             ]
         })
 
+
+        RED.events.on('registry:module-updated', function(ns) {
+            refreshNodeModule(ns.module);
+        });
         RED.events.on('registry:node-set-enabled', function(ns) {
             refreshNodeModule(ns.module);
         });

@@ -76,7 +76,7 @@ module.exports = {
 
     addModule: addModule,
     removeModule: registry.removeModule,
-
+    
     installModule: installer.installModule,
     uninstallModule: installer.uninstallModule,
 

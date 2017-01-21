@@ -68,7 +68,8 @@
         "warnings": {
             "undeployedChanges": "node has undeployed changes",
             "nodeActionDisabled": "node actions disabled within subflow",
-            "missing-types": "Flows stopped due to missing node types. Check logs for details."
+            "missing-types": "Flows stopped due to missing node types. Check logs for details.",
+            "restartRequired": "Node-RED must be restarted to enable upgraded modules"
         },
 
         "error": "<strong>Error</strong>: __message__",
@@ -250,7 +251,8 @@
             "nodeEnabled": "Node enabled:",
             "nodeEnabled_plural": "Nodes enabled:",
             "nodeDisabled": "Node disabled:",
-            "nodeDisabled_plural": "Nodes disabled:"
+            "nodeDisabled_plural": "Nodes disabled:",
+            "nodeUpgraded": "Node module __module__ upgraded to version __version__"
         },
         "editor": {
             "title": "Manage palette",
@@ -283,6 +285,7 @@
             "disable": "disable",
             "remove": "remove",
             "update": "update to __version__",
+            "updated": "updated",
             "install": "install",
             "installed": "installed",
             "loading": "Loading catalogues...",
@@ -295,7 +298,8 @@
             "errors": {
                 "catalogLoadFailed": "Failed to load node catalogue.<br>Check the browser console for more information",
                 "installFailed": "Failed to install: __module__<br>__message__<br>Check the log for more information",
-                "removeFailed": "Failed to remove: __module__<br>__message__<br>Check the log for more information"
+                "removeFailed": "Failed to remove: __module__<br>__message__<br>Check the log for more information",
+                "updateFailed": "Failed to update: __module__<br>__message__<br>Check the log for more information"
             },
             "confirm": {
                 "install": {
@@ -306,10 +310,15 @@
                     "body":"Removing the node will uninstall it from Node-RED. The node may continue to use resources until Node-RED is restarted.",
                     "title": "Remove nodes"
                 },
+                "update": {
+                    "body":"Updating the node will require a restart of Node-RED to complete the update. This must be done manually.",
+                    "title": "Update nodes"
+                },
                 "button": {
                     "review": "Open node information",
                     "install": "Install",
-                    "remove": "Remove"
+                    "remove": "Remove",
+                    "update": "Update"
                 }
             }
 

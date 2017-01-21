@@ -82,7 +82,8 @@ function getNode(id) {
 
 function saveNodeList() {
     var moduleList = {};
-
+    var hadPending = false;
+    var hasPending = false;
     for (var module in moduleConfigs) {
         /* istanbul ignore else */
         if (moduleConfigs.hasOwnProperty(module)) {
@@ -94,6 +95,15 @@ function saveNodeList() {
                         local: moduleConfigs[module].local||false,
                         nodes: {}
                     };
+                    if (moduleConfigs[module].hasOwnProperty('pending_version')) {
+                        hadPending = true;
+                        if (moduleConfigs[module].pending_version !== moduleConfigs[module].version) {
+                            moduleList[module].pending_version = moduleConfigs[module].pending_version;
+                            hasPending = true;
+                        } else {
+                            delete moduleConfigs[module].pending_version;
+                        }
+                    }
                 }
                 var nodes = moduleConfigs[module].nodes;
                 for(var node in nodes) {
@@ -110,6 +120,9 @@ function saveNodeList() {
                 }
             }
         }
+    }
+    if (hadPending && !hasPending) {
+        events.emit("runtime-event",{id:"restart-required"});
     }
     if (settings.available()) {
         return settings.set("nodes",moduleList);
@@ -280,6 +293,9 @@ function getNodeList(filter) {
                 if (nodes.hasOwnProperty(node)) {
                     var nodeInfo = filterNodeInfo(nodes[node]);
                     nodeInfo.version = moduleConfigs[module].version;
+                    if (moduleConfigs[module].pending_version) {
+                        nodeInfo.pending_version = moduleConfigs[module].pending_version;
+                    }
                     if (!filter || filter(nodes[node])) {
                         list.push(nodeInfo);
                     }
@@ -539,6 +555,12 @@ function cleanModuleList() {
         saveNodeList();
     }
 }
+function setModulePendingUpdated(module,version) {
+    moduleConfigs[module].pending_version = version;
+    return saveNodeList().then(function() {
+        return getModuleInfo(module);
+    });
+}
 
 var registry = module.exports = {
     init: init,
@@ -552,6 +574,7 @@ var registry = module.exports = {
     enableNodeSet: enableNodeSet,
     disableNodeSet: disableNodeSet,
 
+    setModulePendingUpdated: setModulePendingUpdated,
     removeModule: removeModule,
 
     getNodeInfo: getNodeInfo,
