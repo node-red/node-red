@@ -1,3 +1,14 @@
+#### 0.16.2: Maintenance Release
+
+ - Ensure custom mustache context parent set in Template node fixes #1126
+ - Display debug node name in debug panel if its known
+ - Ensure auth-tokens are removed when no user is specified in settings
+ - Ensure all a tags have blank target in info sidebar
+ - Ensure links do not span tabs in the editor
+ - Avoid creating multiple reconnect timers in websocket node
+ - Fix inner reference in install fail message catalog entry Fixes #1120
+ - Display buffer data properly for truncated buffers under Object property
+
 #### 0.16.1: Maintenance Release
 
  - Add colour swatches to debug when hex colour matched
