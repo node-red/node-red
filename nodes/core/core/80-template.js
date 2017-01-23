@@ -19,11 +19,11 @@ module.exports = function(RED) {
     var mustache = require("mustache");
 
     /**
-     * Custom Mustache Context capable to resolve message property and node 
-     * flow and global context 
+     * Custom Mustache Context capable to resolve message property and node
+     * flow and global context
      */
-    function NodeContext(msg, nodeContext) {
-        this.msgContext = new mustache.Context(msg);
+    function NodeContext(msg, nodeContext,parent) {
+        this.msgContext = new mustache.Context(msg,parent);
         this.nodeContext = nodeContext;
     }
 
@@ -31,25 +31,33 @@ module.exports = function(RED) {
 
     NodeContext.prototype.lookup = function (name) {
         // try message first:
-        var value = this.msgContext.lookup(name);
-        if (value !== undefined) {
-            return value;
-        }
-
-        // try node context:
-        var dot = name.indexOf(".");
-        if (dot > 0) {
-            var contextName = name.substr(0, dot);
-            var variableName = name.substr(dot + 1);
-
-            if (contextName === "flow" && this.nodeContext.flow) {
-                return this.nodeContext.flow.get(variableName);
+        try {
+            var value = this.msgContext.lookup(name);
+            if (value !== undefined) {
+                return value;
             }
-            else if (contextName === "global" && this.nodeContext.global) {
-                return this.nodeContext.global.get(variableName);
+
+            // try node context:
+            var dot = name.indexOf(".");
+            if (dot > 0) {
+                var contextName = name.substr(0, dot);
+                var variableName = name.substr(dot + 1);
+
+                if (contextName === "flow" && this.nodeContext.flow) {
+                    return this.nodeContext.flow.get(variableName);
+                }
+                else if (contextName === "global" && this.nodeContext.global) {
+                    return this.nodeContext.global.get(variableName);
+                }
             }
+        }catch(err) {
+            throw err;
         }
     }
+
+    NodeContext.prototype.push = function push (view) {
+        return new NodeContext(view, this.nodeContext,this.msgContext);
+    };
 
     function TemplateNode(n) {
         RED.nodes.createNode(this,n);
@@ -64,7 +72,7 @@ module.exports = function(RED) {
             try {
                 var value;
                 if (node.syntax === "mustache") {
-                    value = mustache.render(node.template, new NodeContext(msg, node.context()));
+                    value = mustache.render(node.template,new NodeContext(msg, node.context()));
                 } else {
                     value = node.template;
                 }
