@@ -79,6 +79,16 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
+    <div class="form-row">
+        <label for="node-input-statusCode"><i class="fa fa-long-arrow-left"></i> <span data-i18n="httpin.label.status"></span></label>
+        <input type="text" id="node-input-statusCode" placeholder="msg.statusCode">
+    </div>
+    <div class="form-row" style="margin-bottom:0;">
+        <label><i class="fa fa-list"></i> <span data-i18n="httpin.label.headers"></span></label>
+    </div>
+    <div class="form-row node-input-headers-container-row">
+        <ol id="node-input-headers-container"></ol>
+    </div>
     <div class="form-tips"><span data-i18n="[html]httpin.tip.res"></span></div>
 </script>
 
@@ -92,6 +102,9 @@
         pairs to be added as response headers.</li>
         <li><code>cookies</code>, if set, can be used to set or delete cookies.
     </ul>
+    <p>The <code>statusCode</code> and <code>headers</code> can also be set within
+    the node itself. If a property is set within the node, it cannot be overridden
+    by the corresponding message property.</p>
     <h3>Cookie handling</h3>
     <p>The <code>cookies</code> property must be an object of name/value pairs.
     The value can be either a string to set the value of the cookie with default
@@ -120,6 +133,7 @@ msg.cookies = {
 </script>
 
 <script type="text/javascript">
+(function() {
     RED.nodes.registerType('http in',{
         category: 'input',
         color:"rgb(231, 231, 174)",
@@ -180,22 +194,153 @@ msg.cookies = {
         }
 
     });
+    var headerTypes = [
+        {value:"content-type",label:"Content-Type",hasValue: false},
+        {value:"location",label:"Location",hasValue: false},
+        {value:"other",label:"other",icon:"red/images/typedInput/az.png"}
+       ]
+    var contentTypes = [
+        {value:"application/json",label:"application/json",hasValue: false},
+        {value:"application/xml",label:"application/xml",hasValue: false},
+        {value:"text/css",label:"text/css",hasValue: false},
+        {value:"text/html",label:"text/html",hasValue: false},
+        {value:"text/plain",label:"text/plain",hasValue: false},
+        {value:"image/gif",label:"image/gif",hasValue: false},
+        {value:"image/png",label:"image/png",hasValue: false},
+        {value:"other",label:"other",icon:"red/images/typedInput/az.png"}
+    ];
 
     RED.nodes.registerType('http response',{
         category: 'output',
         color:"rgb(231, 231, 174)",
         defaults: {
-            name: {value:""}
+            name: {value:""},
+            statusCode: {value:"",validate: RED.validators.number(true)},
+            headers: {value:{}}
         },
         inputs:1,
         outputs:0,
         align: "right",
         icon: "white-globe.png",
         label: function() {
-            return this.name||"http";
+            return this.name||("http"+(this.statusCode?" ("+this.statusCode+")":""));
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            function resizeRule(rule) {
+                var newWidth = rule.width();
+                rule.find('.red-ui-typedInput').typedInput("width",(newWidth-15)/2);
+
+            }
+            var headerList = $("#node-input-headers-container").css('min-height','150px').css('min-width','450px').editableList({
+                addItem: function(container,i,header) {
+                    var row = $('<div/>').appendTo(container);
+                    var propertyName = $('<input/>',{class:"node-input-header-name",type:"text"})
+                        .appendTo(row)
+                        .typedInput({types:headerTypes});
+
+                    var propertyValue = $('<input/>',{class:"node-input-header-value",type:"text",style:"margin-left: 10px"})
+                        .appendTo(row)
+                        .typedInput({types:
+                            header.h === 'content-type'?contentTypes:[{value:"other",label:"other",icon:"red/images/typedInput/az.png"}]
+                        });
+
+                    var matchedType = headerTypes.filter(function(ht) {
+                        return ht.value === header.h
+                    });
+                    if (matchedType.length === 0) {
+                        propertyName.typedInput('type','other');
+                        propertyName.typedInput('value',header.h);
+                        propertyValue.typedInput('value',header.v);
+                    } else {
+                        propertyName.typedInput('type',header.h);
+
+                        if (header.h === "content-type") {
+                            matchedType = contentTypes.filter(function(ct) {
+                                return ct.value === header.v;
+                            });
+                            if (matchedType.length === 0) {
+                                propertyValue.typedInput('type','other');
+                                propertyValue.typedInput('value',header.v);
+                            } else {
+                                propertyValue.typedInput('type',header.v);
+                            }
+                        } else {
+                            propertyValue.typedInput('value',header.v);
+                        }
+                    }
+
+                    matchedType = headerTypes.filter(function(ht) {
+                        return ht.value === header.h
+                    });
+                    if (matchedType.length === 0) {
+                        propertyName.typedInput('type','other');
+                        propertyName.typedInput('value',header.h);
+                    } else {
+                        propertyName.typedInput('type',header.h);
+                    }
+
+                    propertyName.on('change',function(event) {
+                        var type = propertyName.typedInput('type');
+                        if (type === 'content-type') {
+                            propertyValue.typedInput('types',contentTypes);
+                        } else {
+                            propertyValue.typedInput('types',[{value:"other",label:"other",icon:"red/images/typedInput/az.png"}]);
+                        }
+                    });
+
+
+
+                    resizeRule(container);
+                },
+                resizeItem: resizeRule,
+                removable: true
+            });
+
+            if (this.headers) {
+                for (var key in this.headers) {
+                    if (this.headers.hasOwnProperty(key)) {
+                        headerList.editableList('addItem',{h:key,v:this.headers[key]});
+                    }
+                }
+            }
+        },
+        oneditsave: function() {
+            var headers = $("#node-input-headers-container").editableList('items');
+            var node = this;
+            node.headers = {};
+            headers.each(function(i) {
+                var header = $(this);
+                var keyType = header.find(".node-input-header-name").typedInput('type');
+                var keyValue = header.find(".node-input-header-name").typedInput('value');
+                var valueType = header.find(".node-input-header-value").typedInput('type');
+                var valueValue = header.find(".node-input-header-value").typedInput('value');
+                var key = keyType;
+                var value = valueType;
+                if (keyType === 'other') {
+                    key = keyValue;
+                }
+                if (valueType === 'other') {
+                    value = valueValue;
+                }
+                if (key !== '') {
+                    node.headers[key] = value;
+                }
+            });
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-input-headers-container-row)");
+            var height = size.height;
+            for (var i=0; i<rows.size(); i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-input-headers-container-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+
+            $("#node-input-headers-container").editableList('height',height);
         }
     });
+})();
 </script>

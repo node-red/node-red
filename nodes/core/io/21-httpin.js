@@ -268,10 +268,20 @@ module.exports = function(RED) {
     function HTTPOut(n) {
         RED.nodes.createNode(this,n);
         var node = this;
+        this.headers = n.headers||{};
+        this.statusCode = n.statusCode;
         this.on("input",function(msg) {
             if (msg.res) {
+                var headers = RED.util.cloneMessage(node.headers);
                 if (msg.headers) {
-                    msg.res._res.set(msg.headers);
+                    for (var h in msg.headers) {
+                        if (msg.headers.hasOwnProperty(h) && !headers.hasOwnProperty(h)) {
+                            headers[h] = msg.headers[h];
+                        }
+                    }
+                }
+                if (Object.keys(headers).length > 0) {
+                    msg.res._res.set(headers);
                 }
                 if (msg.cookies) {
                     for (var name in msg.cookies) {
@@ -290,7 +300,7 @@ module.exports = function(RED) {
                         }
                     }
                 }
-                var statusCode = msg.statusCode || 200;
+                var statusCode = node.statusCode || msg.statusCode || 200;
                 if (typeof msg.payload == "object" && !Buffer.isBuffer(msg.payload)) {
                     msg.res._res.status(statusCode).jsonp(msg.payload);
                 } else {

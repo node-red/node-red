@@ -314,7 +314,9 @@
             "url": "URL",
             "doc": "Docs",
             "return": "Return",
-            "upload": "Accept file uploads?"
+            "upload": "Accept file uploads?",
+            "status": "Status code",
+            "headers": "Headers"
         },
         "setby": "- set by msg.method -",
         "basicauth": "Use basic authentication",
