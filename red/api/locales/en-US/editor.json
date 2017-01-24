@@ -314,6 +314,9 @@
                     "body":"Updating the node will require a restart of Node-RED to complete the update. This must be done manually.",
                     "title": "Update nodes"
                 },
+                "cannotUpdate": {
+                    "body":"An update for this node is available, but it is not installed in a location that the palette manager can update.<br/><br/>Please refer to the documentation for how to update this node."
+                },
                 "button": {
                     "review": "Open node information",
                     "install": "Install",

@@ -548,12 +548,20 @@ RED.palette.editor = (function() {
                         $("#palette-module-install-confirm").data('module',entry.name);
                         $("#palette-module-install-confirm").data('version',loadedIndex[entry.name].version);
                         $("#palette-module-install-confirm").data('shade',shade);
-                        $("#palette-module-install-confirm-body").html(RED._("palette.editor.confirm.update.body"));
+
+                        $("#palette-module-install-confirm-body").html(entry.local?
+                            RED._("palette.editor.confirm.update.body"):
+                            RED._("palette.editor.confirm.cannotUpdate.body")
+                        );
                         $(".palette-module-install-confirm-button-install").hide();
                         $(".palette-module-install-confirm-button-remove").hide();
-                        $(".palette-module-install-confirm-button-update").show();
+                        if (entry.local) {
+                            $(".palette-module-install-confirm-button-update").show();
+                        } else {
+                            $(".palette-module-install-confirm-button-update").hide();
+                        }
                         $("#palette-module-install-confirm")
-                            .dialog('option', 'title', RED._("palette.editor.confirm.update.title"))
+                            .dialog('option', 'title',RED._("palette.editor.confirm.update.title"))
                             .dialog('open');
                     })
 

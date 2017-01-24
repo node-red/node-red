@@ -57,6 +57,11 @@ module.exports = {
                     res.status(400).json({error:"module_already_loaded", message:"Module already loaded"});
                     return;
                 }
+                if (!module.local) {
+                    log.audit({event: "nodes.install",module:node.module, version:node.version, error:"module_not_local"},req);
+                    res.status(400).json({error:"module_not_local", message:"Module not locally installed"});
+                    return;
+                }
                 isUpgrade = true;
             }
             promise = redNodes.installModule(node.module,node.version);
