@@ -167,6 +167,25 @@ module.exports = {
     //    next();
     //},
 
+    // The following property can be used to verify websocket connection attempts.
+    // This allows, for example, the HTTP request headers to be checked to ensure
+    // they include valid authentication information.
+    //webSocketVerifyClient: function(info) {
+    //    // 'info' has three properties:
+    //    //   - origin : the value in the Origin header
+    //    //   - req : the HTTP request
+    //    //   - secure : true if req.connection.authorized or req.connection.encrypted is set
+    //    //
+    //    // The function should return true if the connection should be accepted, false otherwise.
+    //    //
+    //    // Alternatively, if this function is defined to accept a second argument, callback,
+    //    // it can be used to verify the client asynchronously.
+    //    // The callback takes three arguments:
+    //    //   - result : boolean, whether to accept the connection or not
+    //    //   - code : if result is false, the HTTP error status to return
+    //    //   - reason: if result is false, the HTTP reason string to return
+    //},
+
     // Anything in this hash is globally available to all functions.
     // It is accessed as context.global.
     // eg:
