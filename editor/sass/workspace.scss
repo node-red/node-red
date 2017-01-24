@@ -51,3 +51,10 @@
 #workspace-footer {
     @include component-footer;
 }
+
+#workspace-tabs:not(.workspace-focussed) {
+    opacity:0.8;
+    li.red-ui-tab.active a {
+        color:#666;
+    }
+}

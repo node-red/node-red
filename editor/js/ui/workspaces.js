@@ -39,6 +39,7 @@ RED.workspaces = (function() {
                 RED.nodes.dirty(true);
             }
         }
+        RED.view.focus();
         return ws;
     }
     function deleteWorkspace(ws) {
@@ -139,6 +140,10 @@ RED.workspaces = (function() {
                 RED.events.emit("workspace:change",event);
                 window.location.hash = 'flow/'+tab.id;
                 RED.sidebar.config.refresh();
+                RED.view.focus();
+            },
+            onclick: function(tab) {
+                RED.view.focus();
             },
             ondblclick: function(tab) {
                 if (tab.type != "subflow") {

@@ -384,6 +384,12 @@ RED.view = (function() {
                 }
             }
         });
+        $("#chart").focus(function() {
+            $("#workspace-tabs").addClass("workspace-focussed")
+        });
+        $("#chart").blur(function() {
+            $("#workspace-tabs").removeClass("workspace-focussed")
+        });
 
         RED.actions.add("core:copy-selection-to-internal-clipboard",copySelection);
         RED.actions.add("core:cut-selection-to-internal-clipboard",function(){copySelection();deleteSelection();});

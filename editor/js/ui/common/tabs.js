@@ -73,6 +73,9 @@ RED.tabs = (function() {
         ul.children().addClass("red-ui-tab");
 
         function onTabClick() {
+            if (options.onclick) {
+                options.onclick(tabs[$(this).attr('href').slice(1)]);
+            }
             activateTab($(this));
             return false;
         }
