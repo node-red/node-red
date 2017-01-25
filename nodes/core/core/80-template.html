@@ -24,6 +24,14 @@
         <input type="text" id="node-input-field" placeholder="payload" style="width:250px;">
         <input type="hidden" id="node-input-fieldType">
     </div>
+    <div class="form-row">
+        <label for="node-input-syntax"><i class="fa fa-code"></i> <span data-i18n="template.label.syntax"></span></label>
+        <select id="node-input-syntax" style="width:180px;">
+            <option value="mustache" data-i18n="template.label.mustache"></option>
+            <option value="plain" data-i18n="template.label.plain"></option>
+        </select>
+    </div>
+
     <div class="form-row" style="position: relative; margin-bottom: 0px;">
         <label for="node-input-template"><i class="fa fa-file-code-o"></i> <span data-i18n="template.label.template"></span></label>
         <input type="hidden" id="node-input-template" autofocus="autofocus">
@@ -45,12 +53,13 @@
         <div style="height: 250px; min-height:150px;" class="node-text-editor" id="node-input-template-editor" ></div>
     </div>
     <div class="form-row">
-        <label for="node-input-syntax"><i class="fa fa-code"></i> <span data-i18n="template.label.syntax"></span></label>
-        <select id="node-input-syntax" style="width:180px;">
-            <option value="mustache" data-i18n="template.label.mustache"></option>
-            <option value="plain" data-i18n="template.label.plain"></option>
+        <label for="node-input-output"><i class="fa fa-long-arrow-right"></i> <span data-i18n="template.label.output"></span></label>
+        <select id="node-input-output" style="width:180px;">
+            <option value="str" data-i18n="template.label.plain"></option>
+            <option value="json" data-i18n="template.label.json"></option>
         </select>
     </div>
+
 </script>
 
 <script type="text/x-red" data-help-name="template">
@@ -83,6 +92,7 @@
             format: {value:"handlebars"},
             syntax: {value:"mustache"},
             template: {value:"This is the payload: {{payload}} !"},
+            output: {value:"str"}
         },
         inputs:1,
         outputs:1,

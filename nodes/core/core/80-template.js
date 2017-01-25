@@ -19,8 +19,8 @@ module.exports = function(RED) {
     var mustache = require("mustache");
 
     /**
-     * Custom Mustache Context capable to resolve message property and node 
-     * flow and global context 
+     * Custom Mustache Context capable to resolve message property and node
+     * flow and global context
      */
     function NodeContext(msg, nodeContext) {
         this.msgContext = new mustache.Context(msg);
@@ -58,6 +58,7 @@ module.exports = function(RED) {
         this.template = n.template;
         this.syntax = n.syntax || "mustache";
         this.fieldType = n.fieldType || "msg";
+        this.outputFormat = n.output || "str";
 
         var node = this;
         node.on("input", function(msg) {
@@ -68,6 +69,10 @@ module.exports = function(RED) {
                 } else {
                     value = node.template;
                 }
+                if (node.outputFormat === "json") {
+                    value = JSON.parse(value);
+                }
+
                 if (node.fieldType === 'msg') {
                     RED.util.setMessageProperty(msg,node.field,value);
                 } else if (node.fieldType === 'flow') {
