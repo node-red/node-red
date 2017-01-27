@@ -87,6 +87,7 @@ RED.view = (function() {
         .append("svg:g")
         .on("dblclick.zoom", null)
         .append("svg:g")
+        .attr('class','innerCanvas')
         .on("mousemove", canvasMouseMove)
         .on("mousedown", canvasMouseDown)
         .on("mouseup", canvasMouseUp)
@@ -1302,6 +1303,10 @@ RED.view = (function() {
 
 
     function calculateTextWidth(str, className, offset) {
+        return calculateTextDimensions(str,className,offset,0)[0];
+    }
+
+    function calculateTextDimensions(str,className,offsetW,offsetH) {
         var sp = document.createElement("span");
         sp.className = className;
         sp.style.position = "absolute";
@@ -1309,8 +1314,9 @@ RED.view = (function() {
         sp.innerHTML = (str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
         document.body.appendChild(sp);
         var w = sp.offsetWidth;
+        var h = sp.offsetHeight;
         document.body.removeChild(sp);
-        return offset+w;
+        return [offsetW+w,offsetH+h];
     }
 
     function resetMouseVars() {
@@ -1458,24 +1464,69 @@ RED.view = (function() {
     var portLabelHoverTimeout = null;
     var portLabelHover = null;
 
+
+    function getElementPosition(node) {
+        var d3Node = d3.select(node);
+        if (d3Node.attr('class') === 'innerCanvas') {
+            return [0,0];
+        }
+        var result = [];
+        var localPos = [0,0];
+        if (node.nodeName.toLowerCase() === 'g') {
+            var transform = d3Node.attr("transform");
+            if (transform) {
+                localPos = d3.transform(transform).translate;
+            }
+        } else {
+            localPos = [d3Node.attr("x")||0,d3Node.attr("y")||0];
+        }
+        var parentPos = getElementPosition(node.parentNode);
+        return [localPos[0]+parentPos[0],localPos[1]+parentPos[1]]
+
+    }
+
     function portMouseOver(port,d,portType,portIndex) {
         clearTimeout(portLabelHoverTimeout);
         var active = (mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== portType));
         if (active) {
             portLabelHoverTimeout = setTimeout(function() {
+                var pos = getElementPosition(port.node());
                 portLabelHoverTimeout = null;
-                portLabelHover = d3.select(port.node().parentNode)
-                    .append("g")
-                    .attr("transform","translate("+(portType===PORT_TYPE_INPUT?"-2":"12")+",5)");
+                portLabelHover = vis.append("g")
+                    .attr("transform","translate("+(pos[0]+(portType===PORT_TYPE_INPUT?-2:12))+","+(pos[1]+5)+")")
+                    .attr("class","port_tooltip");
 
+
+                var tooltip = ["You can have a label","and you can have a label","you can alllll\nhave a label"][portIndex];
+                var lines = tooltip.split("\n");
+                var labelWidth = 0;
+                var labelHeight = 4;
+                var labelHeights = [];
+                lines.forEach(function(l) {
+                    var labelDimensions = calculateTextDimensions(l, "port_tooltip_label", 8,0);
+                    labelWidth = Math.max(labelWidth,labelDimensions[0]);
+                    labelHeights.push(0.8*labelDimensions[1]);
+                    labelHeight += 0.8*labelDimensions[1];
+                });
+
+                var labelHeight1 = (labelHeight/2)-5-2;
+                var labelHeight2 = labelHeight - 4;
                 portLabelHover.append("path").attr("d",
                     portType===PORT_TYPE_INPUT?
-                        "M0 0 l -5 -5 v -3 q 0 -2 -2 -2 h -50 q -2 0 -2 2 v 16 q 0 2 2 2 h 50 q 2 0 2 -2 v -3 l 5 -5"
+                        "M0 0 l -5 -5 v -"+(labelHeight1)+" q 0 -2 -2 -2 h -"+labelWidth+" q -2 0 -2 2 v "+(labelHeight2)+" q 0 2 2 2 h "+labelWidth+" q 2 0 2 -2 v -"+(labelHeight1)+" l 5 -5"
                         :
-                        "M0 0 l 5 -5 v -3 q 0 -2 2 -2 h 50 q 2 0 2 2 v 16 q 0 2 -2 2 h -50 q -2 0 -2 -2 v -3 l -5 -5"
-                    )
+                        "M0 0 l 5 -5 v -"+(labelHeight1)+" q 0 -2 2 -2 h "+labelWidth+" q 2 0 2 2 v "+(labelHeight2)+" q 0 2 -2 2 h -"+labelWidth+" q -2 0 -2 -2 v -"+(labelHeight1)+" l -5 -5"
+                    );
+                var y = -labelHeight/2-2;
+                lines.forEach(function(l,i) {
+                    y += labelHeights[i];
+                    portLabelHover.append("svg:text").attr("class","port_tooltip_label")
+                        .attr("x", portType===PORT_TYPE_INPUT?-10:10)
+                        .attr("y", y)
+                        .attr("text-anchor",portType===PORT_TYPE_INPUT?"end":"start")
+                        .text(l)
+                });
 
-                    .attr("class","port_label_fadeIn")
                 // console.log(port,d,portType,portIndex);
             },500);
         }
@@ -2019,8 +2070,8 @@ RED.view = (function() {
                                 .on("touchstart",(function(){var node = d; return function(d,i){portMouseDown(node,PORT_TYPE_OUTPUT,i);}})() )
                                 .on("mouseup",(function(){var node = d; return function(d,i){portMouseUp(node,PORT_TYPE_OUTPUT,i);}})() )
                                 .on("touchend",(function(){var node = d; return function(d,i){portMouseUp(node,PORT_TYPE_OUTPUT,i);}})() )
-                                .on("mouseover",(function(){var node = d; return function(d){portMouseOver(d3.select(this),d,PORT_TYPE_OUTPUT,0);}})())
-                                .on("mouseout",(function(){var node = d; return function(d) {portMouseOut(d3.select(this),d,PORT_TYPE_OUTPUT,0);}})());
+                                .on("mouseover",(function(){var node = d; return function(d,i){portMouseOver(d3.select(this),node,PORT_TYPE_OUTPUT,i);}})())
+                                .on("mouseout",(function(){var node = d; return function(d,i) {portMouseOut(d3.select(this),node,PORT_TYPE_OUTPUT,i);}})());
 
                             d._ports.exit().remove();
                             if (d._ports) {
