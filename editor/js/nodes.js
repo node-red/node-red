@@ -136,10 +136,15 @@ RED.nodes = (function() {
                     }
                     def["_"] = function() {
                         var args = Array.prototype.slice.call(arguments, 0);
+                        var original = args[0];
                         if (args[0].indexOf(":") === -1) {
                             args[0] = ns+":"+args[0];
                         }
-                        return RED._.apply(null,args);
+                        var result = RED._.apply(null,args);
+                        if (result === args[0]) {
+                            result = original;
+                        }
+                        return result;
                     }
 
                     // TODO: too tightly coupled into palette UI

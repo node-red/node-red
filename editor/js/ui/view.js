@@ -1500,6 +1500,9 @@ RED.view = (function() {
         } else if ($.isArray(portLabels)) {
             result = portLabels[portIndex];
         }
+        if (result) {
+            result = node._(result);
+        }
         return result;
     }
     function portMouseOver(port,d,portType,portIndex) {
