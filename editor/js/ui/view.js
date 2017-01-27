@@ -1485,19 +1485,37 @@ RED.view = (function() {
 
     }
 
+    function getPortLabel(node,portType,portIndex) {
+        var result;
+        var portLabels = (portType === PORT_TYPE_INPUT)?node._def.inputLabels:node._def.outputLabels;
+        if (typeof portLabels === 'string') {
+            result = portLabels;
+        } else if (typeof portLabels === 'function') {
+            try {
+                result = portLabels.call(node,portIndex);
+            } catch(err) {
+                console.log("Definition error: "+node.type+"."+((portType === PORT_TYPE_INPUT)?"inputLabels":"outputLabels"),err);
+                result = null;
+            }
+        } else if ($.isArray(portLabels)) {
+            result = portLabels[portIndex];
+        }
+        return result;
+    }
     function portMouseOver(port,d,portType,portIndex) {
         clearTimeout(portLabelHoverTimeout);
         var active = (mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== portType));
-        if (active) {
+        if (active && ((portType === PORT_TYPE_INPUT && d._def.inputLabels) || (portType === PORT_TYPE_OUTPUT && d._def.outputLabels))) {
             portLabelHoverTimeout = setTimeout(function() {
+                var tooltip = getPortLabel(d,portType,portIndex);
+                if (!tooltip) {
+                    return;
+                }
                 var pos = getElementPosition(port.node());
                 portLabelHoverTimeout = null;
                 portLabelHover = vis.append("g")
                     .attr("transform","translate("+(pos[0]+(portType===PORT_TYPE_INPUT?-2:12))+","+(pos[1]+5)+")")
                     .attr("class","port_tooltip");
-
-
-                var tooltip = ["You can have a label","and you can have a label","you can alllll\nhave a label"][portIndex];
                 var lines = tooltip.split("\n");
                 var labelWidth = 0;
                 var labelHeight = 4;
@@ -1526,8 +1544,6 @@ RED.view = (function() {
                         .attr("text-anchor",portType===PORT_TYPE_INPUT?"end":"start")
                         .text(l)
                 });
-
-                // console.log(port,d,portType,portIndex);
             },500);
         }
         port.classed("port_hovered",active);

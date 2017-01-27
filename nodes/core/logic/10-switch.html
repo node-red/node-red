@@ -43,6 +43,38 @@
 </script>
 
 <script type="text/javascript">
+(function() {
+    var operators = [
+        {v:"eq",t:"=="},
+        {v:"neq",t:"!="},
+        {v:"lt",t:"<"},
+        {v:"lte",t:"<="},
+        {v:"gt",t:">"},
+        {v:"gte",t:">="},
+        {v:"btwn",t:"switch.rules.btwn"},
+        {v:"cont",t:"switch.rules.cont"},
+        {v:"regex",t:"switch.rules.regex"},
+        {v:"true",t:"switch.rules.true"},
+        {v:"false",t:"switch.rules.false"},
+        {v:"null",t:"switch.rules.null"},
+        {v:"nnull",t:"switch.rules.nnull"},
+        {v:"else",t:"switch.rules.else"}
+    ];
+
+    function clipValueLength(v) {
+        if (v.length > 15) {
+            return v.substring(0,15)+"...";
+        }
+        return v;
+    }
+    function getValueLabel(t,v) {
+        if (t === 'str') {
+            return '"'+clipValueLength(v)+'"';
+        } else if (t === 'msg' || t==='flow' || t==='global') {
+            return t+"."+clipValueLength(v);
+        }
+        return clipValueLength(v);
+    }
     RED.nodes.registerType('switch', {
         color: "#E2D96E",
         category: 'function',
@@ -56,6 +88,24 @@
         },
         inputs: 1,
         outputs: 1,
+        outputLabels: function(index) {
+            var rule = this.rules[index];
+            var label = "";
+            if (rule) {
+                for (var i=0;i<operators.length;i++) {
+                    if (operators[i].v === rule.t) {
+                        label = /^switch/.test(operators[i].t)?this._(operators[i].t):operators[i].t
+                        break;
+                    }
+                }
+                if (rule.t === 'btwn') {
+                    label += " "+getValueLabel(rule.vt,rule.v)+" & "+getValueLabel(rule.v2t,rule.v2);
+                } else if (rule.t !== 'true' && rule.t !== 'false' && rule.t !== 'null' && rule.t !== 'nnull' && rule.t !== 'else' ) {
+                    label += " "+getValueLabel(rule.vt,rule.v);
+                }
+                return label;
+            }
+        },
         icon: "switch.png",
         label: function() {
             return this.name||"switch";
@@ -65,22 +115,7 @@
             var previousValueType = {value:"prev",label:this._("inject.previous"),hasValue:false};
 
             $("#node-input-property").typedInput({default:this.propertyType||'msg',types:['msg','flow','global','jsonata']});
-            var operators = [
-                {v:"eq",t:"=="},
-                {v:"neq",t:"!="},
-                {v:"lt",t:"<"},
-                {v:"lte",t:"<="},
-                {v:"gt",t:">"},
-                {v:"gte",t:">="},
-                {v:"btwn",t:this._("switch.rules.btwn")},
-                {v:"cont",t:this._("switch.rules.cont")},
-                {v:"regex",t:this._("switch.rules.regex")},
-                {v:"true",t:this._("switch.rules.true")},
-                {v:"false",t:this._("switch.rules.false")},
-                {v:"null",t:this._("switch.rules.null")},
-                {v:"nnull",t:this._("switch.rules.nnull")},
-                {v:"else",t:this._("switch.rules.else")}
-            ];
+
 
             var andLabel = this._("switch.and");
             var caseLabel = this._("switch.ignorecase");
@@ -127,7 +162,7 @@
                     var row3 = $('<div/>',{style:"padding-top: 5px; padding-left: 102px;"}).appendTo(container);
                     var selectField = $('<select/>',{style:"width:120px; margin-left: 5px; text-align: center;"}).appendTo(row);
                     for (var d in operators) {
-                        selectField.append($("<option></option>").val(operators[d].v).text(operators[d].t));
+                        selectField.append($("<option></option>").val(operators[d].v).text(/^switch/.test(operators[d].t)?node._(operators[d].t):operators[d].t));
                     }
                     var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num','jsonata',previousValueType]});
                     var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
@@ -254,4 +289,5 @@
             $("#node-input-rule-container").editableList('height',height);
         }
     });
+})();
 </script>
