@@ -768,6 +768,7 @@ RED.palette.editor = (function() {
                         e.preventDefault();
                         if (!$(this).hasClass('disabled')) {
                             $("#palette-module-install-confirm").data('module',entry.id);
+                            $("#palette-module-install-confirm").data('version',entry.version);
                             $("#palette-module-install-confirm").data('url',entry.url);
                             $("#palette-module-install-confirm").data('shade',shade);
                             $("#palette-module-install-confirm-body").html(RED._("palette.editor.confirm.install.body"));
@@ -822,8 +823,9 @@ RED.palette.editor = (function() {
                     class: "primary palette-module-install-confirm-button-install",
                     click: function() {
                         var id = $(this).data('module');
+                        var version = $(this).data('version');
                         var shade = $(this).data('shade');
-                        installNodeModule(id,shade,function(xhr) {
+                        installNodeModule(id,version,shade,function(xhr) {
                              if (xhr) {
                                  if (xhr.responseJSON) {
                                      RED.notify(RED._('palette.editor.errors.installFailed',{module: id,message:xhr.responseJSON.message}));

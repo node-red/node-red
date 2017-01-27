@@ -230,8 +230,20 @@ var localfilesystem = {
 
         globalSettingsFile = fspath.join(settings.userDir,".config.json");
 
+        var packageFile = fspath.join(settings.userDir,"package.json");
+
         if (!settings.readOnly) {
             promises.push(promiseDir(libFlowsDir));
+            try {
+                fs.statSync(packageFile);
+            } catch(err) {
+                var defaultPackage = {
+                    "name": "node-red-project",
+                    "description": "A Node-RED Project",
+                    "version": "0.0.1"
+                };
+                promises.push(writeFile(packageFile,JSON.stringify(defaultPackage,"",4)));
+            }
         }
 
         return when.all(promises);

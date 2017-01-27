@@ -99,7 +99,7 @@ function installModule(module,version) {
         }
 
         var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
-        var child = child_process.execFile(npmCommand,['install','--production',installName],
+        var child = child_process.execFile(npmCommand,['install','--save','--save-exact','--production',installName],
             {
                 cwd: installDir
             },
@@ -186,7 +186,7 @@ function uninstallModule(module) {
 
         var list = registry.removeModule(module);
         log.info(log._("server.install.uninstalling",{name:module}));
-        var child = child_process.execFile(npmCommand,['remove',module],
+        var child = child_process.execFile(npmCommand,['remove','--save',module],
             {
                 cwd: installDir
             },
