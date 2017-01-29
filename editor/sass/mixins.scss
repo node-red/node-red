@@ -108,7 +108,51 @@
         color: $workspace-button-toggle-color-disabled !important;
     }
 }
+@mixin editor-button {
+    @include workspace-button;
+    font-size: 14px;
+    padding: 6px 14px;
+    margin-right: 8px;
+    color: $editor-button-color !important;
+    background: $editor-button-background;
 
+    &.primary {
+        border-color: $editor-button-background-primary;
+        color: $editor-button-color-primary !important;
+        background: $editor-button-background-primary;
+        &.disabled, &.ui-state-disabled {
+            background: none;
+            color: $editor-button-color !important;
+            border-color: $form-input-border-color;
+        }
+        &:not(.disabled):not(.ui-button-disabled):hover {
+            border-color: $editor-button-background-primary-hover;
+            background: $editor-button-background-primary-hover;
+            color: $editor-button-color-primary !important;
+        }
+    }
+    &:not(.disabled):hover {
+        //color: $editor-button-color;
+    }
+    &.disabled {
+        background: none;
+    }
+    &.disabled:focus {
+        outline: none;
+    }
+
+
+    &.leftButton {
+        float: left;
+        margin-top: 1px;
+    }
+    &:not(.leftButton):not(:last-child) {
+        margin-right: 16px;
+    }
+    &.ui-state-disabled {
+        opacity: 1;
+    }
+}
 
 @mixin component-footer {
     border-top: 1px solid $primary-border-color;

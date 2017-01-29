@@ -46,7 +46,12 @@
     overflow: auto;
 }
 .editor-tray-body {
-    margin: 20px;
+    form {
+        margin: 20px;
+    }
+}
+.editor-tray-content {
+    overflow: auto;
 }
 .editor-tray-header {
     @include disable-selection;
@@ -65,6 +70,13 @@
 .editor-tray-footer {
     @include component-footer;
     height: 35px;
+
+    button {
+        @include editor-button;
+        padding: 3px 7px;
+        font-size: 11px;
+    }
+
 }
 
 .editor-tray-toolbar {
@@ -72,48 +84,9 @@
     padding: 6px;
 
     button {
-        @include workspace-button;
-        font-size: 14px;
-        padding: 6px 14px;
-        margin-right: 8px;
-        color: $editor-button-color !important;
-        background: $editor-button-background;
-
-        &.primary {
-            border-color: $editor-button-background-primary;
-            color: $editor-button-color-primary !important;
-            background: $editor-button-background-primary;
-            &.disabled, &.ui-state-disabled {
-                background: none;
-                color: $editor-button-color !important;
-                border-color: $form-input-border-color;
-            }
-            &:not(.disabled):not(.ui-button-disabled):hover {
-                border-color: $editor-button-background-primary-hover;
-                background: $editor-button-background-primary-hover;
-                color: $editor-button-color-primary !important;
-            }
-        }
-        &:not(.disabled):hover {
-            //color: $editor-button-color;
-        }
-        &.disabled {
-            background: none;
-        }
-        &.disabled:focus {
-            outline: none;
-        }
-
-
-        &.leftButton {
-            float: left;
-            margin-top: 1px;
-        }
-        &:not(.leftButton):not(:last-child) {
-            margin-right: 16px;
-        }
-        &.ui-state-disabled {
-            opacity: 1;
+        @include editor-button;
+        &.toggle {
+            @include workspace-button-toggle;
         }
     }
 }
@@ -179,7 +152,6 @@
 
 
 .dialog-form,#dialog-form, #dialog-config-form {
-    margin: 0;
     height: 100%;
 }
 

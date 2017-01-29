@@ -189,7 +189,7 @@ RED.tray = (function() {
         if (stack.length > 0) {
             var tray = stack[stack.length-1];
             var trayHeight = tray.tray.height()-tray.header.outerHeight()-tray.footer.outerHeight();
-            tray.body.height(trayHeight-40);
+            tray.body.height(trayHeight);
             if (tray.width > $("#editor-stack").position().left-8) {
                 tray.width = $("#editor-stack").position().left-8;
                 tray.tray.width(tray.width);
@@ -200,7 +200,7 @@ RED.tray = (function() {
                 // tray.body.parent().width(tray.width);
             }
             if (tray.options.resize) {
-                tray.options.resize({width:tray.width});
+                tray.options.resize({width:tray.width, height:trayHeight});
             }
         }
     }

@@ -518,9 +518,8 @@ RED.editor = (function() {
         return title;
     }
 
-    function buildEditForm(tray,formId,type,ns) {
-        var trayBody = tray.find('.editor-tray-body');
-        var dialogForm = $('<form id="'+formId+'" class="form-horizontal" autocomplete="off"></form>').appendTo(trayBody);
+    function buildEditForm(container,formId,type,ns) {
+        var dialogForm = $('<form id="'+formId+'" class="form-horizontal" autocomplete="off"></form>').appendTo(container);
         dialogForm.html($("script[data-template-name='"+type+"']").html());
         ns = ns||"node-red";
         dialogForm.find('[data-i18n]').each(function() {
@@ -773,6 +772,7 @@ RED.editor = (function() {
             ],
             resize: function(dimensions) {
                 editTrayWidthCache[type] = dimensions.width;
+                $(".editor-tray-content").height(dimensions.height - 78);
                 if (editing_node && editing_node._def.oneditresize) {
                     var form = $("#dialog-form");
                     try {
@@ -783,6 +783,64 @@ RED.editor = (function() {
                 }
             },
             open: function(tray) {
+                var trayFooter = tray.find(".editor-tray-footer");
+                var trayBody = tray.find('.editor-tray-body');
+                var editFormBody = tray.find('.editor-tray-body');
+
+                var buildThing = function(el) {
+                    var icon = el.find(".palette-header > i");
+                    var body = el.find(".editor-tray-content");
+                    var result = {
+                        el:el,
+                        body:body,
+                        expand: function() {
+                            icon.addClass("expanded");
+                            body.slideDown();
+                        },
+                        collapse: function() {
+                            icon.removeClass("expanded");
+                            body.slideUp();
+                        },
+                        toggle: function() {
+                            if (icon.hasClass("expanded")) {
+                                result.collapse();
+                                return false;
+                            } else {
+                                result.expand();
+                                return true;
+                            }
+                        }
+                    }
+                    return result;
+                }
+
+                var nodePropertiesSection = buildThing($('<div class="palette-category">'+
+                    '<div class="palette-header"><i class="fa fa-angle-down expanded"></i><span>node properties</span></div>'+
+                    '<div class="editor-tray-content"></div>'+
+                    '</div>').appendTo(trayBody));
+
+                var portLabelsSection = buildThing($('<div class="palette-category">'+
+                    '<div class="palette-header"><i class="fa fa-angle-down"></i><span>port labels</span></div>'+
+                    '<div class="editor-tray-content hide"></div>'+
+                    '</div>').appendTo(trayBody));
+
+                portLabelsSection.el.find(".palette-header").click(function(el) {
+                    var res = portLabelsSection.toggle();
+                    if (res) {
+                        nodePropertiesSection.collapse();
+                    } else {
+                        nodePropertiesSection.expand();
+                    }
+                });
+                nodePropertiesSection.el.find(".palette-header").click(function(el) {
+                    var res = nodePropertiesSection.toggle();
+                    if (res) {
+                        portLabelsSection.collapse();
+                    } else {
+                        portLabelsSection.expand();
+                    }
+                });
+
                 if (editing_node) {
                     RED.sidebar.info.refresh(editing_node);
                 }
@@ -792,7 +850,7 @@ RED.editor = (function() {
                 } else {
                     ns = node._def.set.id;
                 }
-                var dialogForm = buildEditForm(tray,"dialog-form",type,ns);
+                var dialogForm = buildEditForm(nodePropertiesSection.body,"dialog-form",type,ns);
                 prepareEditDialog(node,node._def,"node-input");
                 dialogForm.i18n();
             },
@@ -892,7 +950,7 @@ RED.editor = (function() {
                 }
                 trayFooter.append('<span id="node-config-dialog-scope-container"><span id="node-config-dialog-scope-warning" data-i18n="[title]editor.errors.scopeChange"><i class="fa fa-warning"></i></span><select id="node-config-dialog-scope"></select></span>');
 
-                var dialogForm = buildEditForm(tray,"node-config-dialog-edit-form",type,ns);
+                var dialogForm = buildEditForm(tray.find('.editor-tray-body'),"node-config-dialog-edit-form",type,ns);
 
                 prepareEditDialog(editing_config_node,node_def,"node-config-input");
                 if (editing_config_node._def.exclusive) {
@@ -1317,7 +1375,7 @@ RED.editor = (function() {
                 if (editing_node) {
                     RED.sidebar.info.refresh(editing_node);
                 }
-                var dialogForm = buildEditForm(tray,"dialog-form","subflow-template");
+                var dialogForm = buildEditForm(tray.find('.editor-tray-body'),"dialog-form","subflow-template");
                 subflowEditor = RED.editor.createEditor({
                     id: 'subflow-input-info-editor',
                     mode: 'ace/mode/markdown',
@@ -1398,7 +1456,7 @@ RED.editor = (function() {
             },
             open: function(tray) {
                 var trayBody = tray.find('.editor-tray-body');
-                var dialogForm = buildEditForm(tray,'dialog-form','_expression','editor');
+                var dialogForm = buildEditForm(tray.find('.editor-tray-body'),'dialog-form','_expression','editor');
                 var funcSelect = $("#node-input-expression-func");
                 Object.keys(jsonata.functions).forEach(function(f) {
                     funcSelect.append($("<option></option>").val(f).text(f));
