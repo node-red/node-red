@@ -116,6 +116,7 @@ module.exports = function(grunt) {
                     "editor/js/ui/common/popover.js",
                     "editor/js/ui/common/searchBox.js",
                     "editor/js/ui/common/tabs.js",
+                    "editor/js/ui/common/stack.js",
                     "editor/js/ui/common/typedInput.js",
                     "editor/js/ui/actions.js",
                     "editor/js/ui/deploy.js",

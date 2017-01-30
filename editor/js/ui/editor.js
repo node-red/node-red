@@ -773,8 +773,8 @@ RED.editor = (function() {
             resize: function(dimensions) {
                 editTrayWidthCache[type] = dimensions.width;
                 $(".editor-tray-content").height(dimensions.height - 78);
+                var form = $("#dialog-form").height(dimensions.height - 78 - 40);
                 if (editing_node && editing_node._def.oneditresize) {
-                    var form = $("#dialog-form");
                     try {
                         editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
                     } catch(err) {
@@ -785,60 +785,18 @@ RED.editor = (function() {
             open: function(tray) {
                 var trayFooter = tray.find(".editor-tray-footer");
                 var trayBody = tray.find('.editor-tray-body');
-                var editFormBody = tray.find('.editor-tray-body');
+                trayBody.parent().css('overflow','hidden');
 
-                var buildThing = function(el) {
-                    var icon = el.find(".palette-header > i");
-                    var body = el.find(".editor-tray-content");
-                    var result = {
-                        el:el,
-                        body:body,
-                        expand: function() {
-                            icon.addClass("expanded");
-                            body.slideDown();
-                        },
-                        collapse: function() {
-                            icon.removeClass("expanded");
-                            body.slideUp();
-                        },
-                        toggle: function() {
-                            if (icon.hasClass("expanded")) {
-                                result.collapse();
-                                return false;
-                            } else {
-                                result.expand();
-                                return true;
-                            }
-                        }
-                    }
-                    return result;
-                }
-
-                var nodePropertiesSection = buildThing($('<div class="palette-category">'+
-                    '<div class="palette-header"><i class="fa fa-angle-down expanded"></i><span>node properties</span></div>'+
-                    '<div class="editor-tray-content"></div>'+
-                    '</div>').appendTo(trayBody));
-
-                var portLabelsSection = buildThing($('<div class="palette-category">'+
-                    '<div class="palette-header"><i class="fa fa-angle-down"></i><span>port labels</span></div>'+
-                    '<div class="editor-tray-content hide"></div>'+
-                    '</div>').appendTo(trayBody));
-
-                portLabelsSection.el.find(".palette-header").click(function(el) {
-                    var res = portLabelsSection.toggle();
-                    if (res) {
-                        nodePropertiesSection.collapse();
-                    } else {
-                        nodePropertiesSection.expand();
-                    }
+                var stack = RED.stack.create({
+                    container: trayBody,
+                    singleExpanded: true
                 });
-                nodePropertiesSection.el.find(".palette-header").click(function(el) {
-                    var res = nodePropertiesSection.toggle();
-                    if (res) {
-                        portLabelsSection.collapse();
-                    } else {
-                        portLabelsSection.expand();
-                    }
+                var nodeProperties = stack.add({
+                    title: "node properties",
+                    expanded: true,
+                });
+                var portLabels = stack.add({
+                    title: "port labels"
                 });
 
                 if (editing_node) {
@@ -850,9 +808,9 @@ RED.editor = (function() {
                 } else {
                     ns = node._def.set.id;
                 }
-                var dialogForm = buildEditForm(nodePropertiesSection.body,"dialog-form",type,ns);
+                var dialogForm = buildEditForm(nodeProperties.content,"dialog-form",type,ns);
                 prepareEditDialog(node,node._def,"node-input");
-                dialogForm.i18n();
+                trayBody.i18n();
             },
             close: function() {
                 if (RED.view.state() != RED.state.IMPORT_DRAGGING) {
