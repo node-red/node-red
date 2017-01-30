@@ -514,7 +514,7 @@ describe("red/nodes/registry/loader",function() {
                 node.enabled.should.be.true();
                 nodes.registerType.called.should.be.false();
                 node.should.have.property('err');
-                node.err.message.should.eql("fail to require");
+                node.err.toString().should.eql("Error: fail to require (line:1)");
 
                 done();
             }).otherwise(function(err) {
