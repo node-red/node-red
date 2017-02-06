@@ -548,6 +548,79 @@ RED.editor = (function() {
         return dialogForm;
     }
 
+    function refreshLabelForm(container,node) {
+        var inputCount = node.inputs || node._def.inputs || 0;
+        var outputCount;
+        var i;
+        var formOutputs = parseInt($("#node-input-outputs").val());
+        if (isNaN(formOutputs)) {
+            outputCount = node.outputs || node._def.outputs || 0;
+        } else {
+            outputCount = Math.max(0,formOutputs);
+        }
+        var inputsDiv = $("#node-label-form-inputs");
+        var outputsDiv = $("#node-label-form-outputs");
+        var children = inputsDiv.children();
+        if (children.length < inputCount) {
+            for (i = children.length;i<inputCount;i++) {
+                buildLabelRow("input",i,"").appendTo(inputsDiv);
+            }
+        } else if (children.length > inputCount) {
+            for (i=inputCount;i<children.length;i++) {
+                $(children[i]).remove();
+            }
+        }
+
+        var children = outputsDiv.children();
+        if (children.length < outputCount) {
+            for (i = children.length;i<outputCount;i++) {
+                buildLabelRow("output",i,"").appendTo(inputsDiv);
+            }
+        } else if (children.length > outputCount) {
+            for (i=outputCount;i<children.length;i++) {
+                $(children[i]).remove();
+            }
+        }
+
+
+    }
+    function buildLabelRow(type, index, value) {
+        var result = $('<div>');
+        var id = "node-label-form-"+type+"-"+index;
+        $('<label>',{for:id}).html(index+1).appendTo(result);
+        $('<input>',{type:"text",id:id}).val(value).appendTo(result);
+        return result;
+        //' id="node-label-form-input-'+i+'">)
+    }
+    function buildLabelForm(container,node) {
+        var dialogForm = $('<form class="dialog-form form-horizontal" autocomplete="off"></form>').appendTo(container);
+
+        var inputCount = node.inputs || node._def.inputs || 0;
+        var outputCount = node.outputs || node._def.outputs || 0;
+
+        var inputLabels = node.inputLabels || [];
+        var outputLabels = node.outputLabels || [];
+
+
+        var i,row;
+        var inputsDiv = $('<div class="form-row" id="node-label-form-inputs">Inputs</div>').appendTo(dialogForm);
+        if (inputCount > 0) {
+            for (i=0;i<inputCount;i++) {
+                buildLabelRow("input",i,inputLabels[i]).appendTo(inputsDiv);
+            }
+        } else {
+
+        }
+        var outputsDiv = $('<div class="form-row" id="node-label-form-outputs">Outputs</div>').appendTo(dialogForm);
+        if (outputCount > 0) {
+            for (i=0;i<outputCount;i++) {
+                buildLabelRow("output",i,outputLabels[i]).appendTo(outputsDiv);
+            }
+        } else {
+
+        }
+    }
+
     function showEditDialog(node) {
         var editing_node = node;
         editStack.push(node);
@@ -724,6 +797,13 @@ RED.editor = (function() {
                             }
                         }
                         var removedLinks = updateNodeProperties(editing_node,outputMap);
+
+                        var inputLabels = $("#node-label-form-inputs").children().find("input");
+                        var outputLabels = $("#node-label-form-outputs").children().find("input");
+
+                        editing_node.inputLabels = inputLabels.map(function() { return $(this).val();}).toArray();
+                        editing_node.outputLabels = outputLabels.map(function() { return $(this).val();}).toArray();
+
                         if (changed) {
                             var wasChanged = editing_node.changed;
                             editing_node.changed = true;
@@ -773,7 +853,7 @@ RED.editor = (function() {
             resize: function(dimensions) {
                 editTrayWidthCache[type] = dimensions.width;
                 $(".editor-tray-content").height(dimensions.height - 78);
-                var form = $("#dialog-form").height(dimensions.height - 78 - 40);
+                var form = $(".editor-tray-content form").height(dimensions.height - 78 - 40);
                 if (editing_node && editing_node._def.oneditresize) {
                     try {
                         editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
@@ -793,10 +873,13 @@ RED.editor = (function() {
                 });
                 var nodeProperties = stack.add({
                     title: "node properties",
-                    expanded: true,
+                    expanded: true
                 });
                 var portLabels = stack.add({
-                    title: "port labels"
+                    title: "port labels",
+                    onexpand: function() {
+                        refreshLabelForm(this.content,node);
+                    }
                 });
 
                 if (editing_node) {
@@ -808,7 +891,9 @@ RED.editor = (function() {
                 } else {
                     ns = node._def.set.id;
                 }
-                var dialogForm = buildEditForm(nodeProperties.content,"dialog-form",type,ns);
+                buildEditForm(nodeProperties.content,"dialog-form",type,ns);
+                buildLabelForm(portLabels.content,node);
+
                 prepareEditDialog(node,node._def,"node-input");
                 trayBody.i18n();
             },

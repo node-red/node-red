@@ -431,6 +431,7 @@ RED.nodes = (function() {
         node.id = n.id;
         node.type = n.type;
         node.z = n.z;
+
         if (node.type == "unknown") {
             for (var p in n._orig) {
                 if (n._orig.hasOwnProperty(p)) {
@@ -477,6 +478,14 @@ RED.nodes = (function() {
                 if (w.target.type != "subflow") {
                     node.wires[w.sourcePort].push(w.target.id);
                 }
+            }
+
+            var labelCount;
+            if (n.inputs > 0 && n.inputLabels && !/^\s*$/.test(n.inputLabels.join("")))  {
+                node.inputLabels = n.inputLabels.slice();
+            }
+            if (n.outputs > 0 && n.outputLabels && !/^\s*$/.test(n.outputLabels.join(""))) {
+                node.outputLabels = n.outputLabels.slice();
             }
         }
         return node;
@@ -893,7 +902,17 @@ RED.nodes = (function() {
             if (n.type !== "workspace" && n.type !== "tab" && n.type !== "subflow") {
                 def = registry.getNodeType(n.type);
                 if (!def || def.category != "config") {
-                    var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires,changed:false,_config:{}};
+                    var node = {
+                        x:n.x,
+                        y:n.y,
+                        z:n.z,
+                        type:0,
+                        wires:n.wires,
+                        inputLabels: n.inputLabels,
+                        outputLabels: n.outputLabels,
+                        changed:false,
+                        _config:{}
+                    };
                     if (createNewIds) {
                         if (subflow_blacklist[n.z]) {
                             continue;

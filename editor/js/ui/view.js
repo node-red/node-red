@@ -1487,6 +1487,10 @@ RED.view = (function() {
 
     function getPortLabel(node,portType,portIndex) {
         var result;
+        var nodePortLabels = (portType === PORT_TYPE_INPUT)?node.inputLabels:node.outputLabels;
+        if (nodePortLabels && nodePortLabels[portIndex]) {
+            return nodePortLabels[portIndex];
+        }
         var portLabels = (portType === PORT_TYPE_INPUT)?node._def.inputLabels:node._def.outputLabels;
         if (typeof portLabels === 'string') {
             result = portLabels;

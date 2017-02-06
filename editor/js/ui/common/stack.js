@@ -62,6 +62,9 @@ RED.stack = (function() {
                 };
                 entry.expand = function() {
                     if (!entry.isExpanded()) {
+                        if (entry.onexpand) {
+                            entry.onexpand.call(entry);
+                        }
                         icon.addClass("expanded");
                         entry.content.slideDown(200);
                         return true;
