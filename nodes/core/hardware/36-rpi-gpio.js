@@ -37,8 +37,13 @@ module.exports = function(RED) {
             fs.statSync("/usr/lib/python2.7/site-packages/RPi/GPIO"); // test on Arch
         }
         catch(err) {
-            RED.log.warn(RED._("rpi-gpio.errors.libnotfound"));
-            throw "Warning : "+RED._("rpi-gpio.errors.libnotfound");
+            try {
+                fs.statSync("/usr/lib/python2.7/dist-packages/RPi/GPIO"); // test on Hypriot
+            }
+            catch(err) {
+                RED.log.warn(RED._("rpi-gpio.errors.libnotfound"));
+                throw "Warning : "+RED._("rpi-gpio.errors.libnotfound");
+            }
         }
     }
 
