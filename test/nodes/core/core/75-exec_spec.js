@@ -58,42 +58,42 @@ describe('exec node', function() {
                     arg3(null,arg1,arg1.toUpperCase());
                 });
 
-                helper.load(execNode, flow, function() {
-                    var n1 = helper.getNode("n1");
-                    var n2 = helper.getNode("n2");
-                    var n3 = helper.getNode("n3");
-                    var n4 = helper.getNode("n4");
-                    var received = 0;
-                    var messages = [null,null];
-                    var completeTest = function() {
-                        received++;
-                        if (received < 2) {
-                            return;
-                        }
-                        try{
-                            var msg = messages[0];
-                            msg.should.have.property("payload");
-                            msg.payload.should.be.a.String();
-                            msg.payload.should.equal("echo");
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                var received = 0;
+                var messages = [null,null];
+                var completeTest = function() {
+                    received++;
+                    if (received < 2) {
+                        return;
+                    }
+                    try {
+                        var msg = messages[0];
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.equal("echo");
 
-                            msg = messages[1];
-                            msg.should.have.property("payload");
-                            msg.payload.should.be.a.String,
-                            msg.payload.should.equal("ECHO");
-                            child_process.exec.restore();
-                            done();
-                        } catch(err) {
-                            child_process.exec.restore();
-                            done(err);
-                        }
-                    };
-                    n2.on("input", function(msg) {
-                        messages[0] = msg;
-                        completeTest();
-                    });
-                    n3.on("input", function(msg) {
-                        messages[1] = msg;
-                        completeTest();
+                        msg = messages[1];
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.a.String;
+                        msg.payload.should.equal("ECHO");
+                        child_process.exec.restore();
+                        done();
+                    } catch(err) {
+                        child_process.exec.restore();
+                        done(err);
+                    }
+                };
+                n2.on("input", function(msg) {
+                    messages[0] = msg;
+                    completeTest();
+                });
+                n3.on("input", function(msg) {
+                    messages[1] = msg;
+                    completeTest();
                 });
                 n1.receive({payload:"and"});
             });
@@ -121,7 +121,7 @@ describe('exec node', function() {
                     if (received < 2) {
                         return;
                     }
-                    try{
+                    try {
                         var msg = messages[0];
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
@@ -207,6 +207,27 @@ describe('exec node', function() {
                     logEvents[i][0].msg.toString().should.startWith("Exec node timeout");
                     done();
                 },400);
+                n1.receive({});
+            });
+        });
+
+        it('should be able to kill a long running command', function(done) {
+            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2"},
+                        {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                n4.on("input", function(msg) {
+                    msg.should.have.property("payload");
+                    msg.payload.should.have.property("killed",true);
+                    msg.payload.should.have.property("signal","SIGTERM");
+                    done();
+                });
+                setTimeout(function() {
+                    n1.receive({kill:true});
+                },150);
                 n1.receive({});
             });
         });
@@ -297,7 +318,7 @@ describe('exec node', function() {
                     if (received < 2) {
                         return;
                     }
-                    try{
+                    try {
                         var msg = messages[0];
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
@@ -397,6 +418,27 @@ describe('exec node', function() {
                     logEvents[i][0].msg.toString().should.startWith("Exec node timeout");
                     done();
                 },400);
+                n1.receive({});
+            });
+        });
+
+        it('should be able to kill a long running command', function(done) {
+            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2"},
+                        {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                n4.on("input", function(msg) {
+                    msg.should.have.property("payload");
+                    msg.payload.should.have.property("killed",true);
+                    msg.payload.should.have.property("signal","SIGTERM");
+                    done();
+                });
+                setTimeout(function() {
+                    n1.receive({kill:true});
+                },150);
                 n1.receive({});
             });
         });

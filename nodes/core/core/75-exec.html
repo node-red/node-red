@@ -55,8 +55,10 @@
     things like pipe the result to another command.</p>
     <p>Commands or parameters with spaces should be enclosed in quotes - <i>"This is a single parameter"</i></p>
     <p>If stdout is binary a <i>buffer</i> is returned - otherwise returns a <i>string</i>.</p>
-    <p>The blue status icon will be visible while the node is active.</p>
-    <p>If running a Python app you may need to use the <code>-u</code> parameter to stop the output being buffered.</p>
+    <p>The blue status icon and PID will be visible while the node is active.</p>
+    <p>Sending <code>msg.kill</code> will kill a single active process. If there is more than one process running then
+    <code>msg.kill</code> must be set with the value of the PID to be killed.</p>
+    <p>Tip: If running a Python app you may need to use the <code>-u</code> parameter to stop the output being buffered.</p>
 </script>
 
 <script type="text/javascript">
@@ -73,6 +75,7 @@
         },
         inputs:1,
         outputs:3,
+        outputLabels: ["stdout","stderr","rc"],
         icon: "arrow-in.png",
         align: "right",
         label: function() {
