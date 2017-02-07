@@ -179,6 +179,21 @@ describe('CSV node', function() {
                 n1.emit("input", {payload:testString});
             });
         });
+
+        it('should handle numbers in strings but not IP addresses', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e", wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload', { a: "a", b: "127.0.0.1", c: 56.7, d: -32.8, e: "+76.22C" });
+                    done();
+                });
+                var testString = "a,127.0.0.1,56.7,-32.8,+76.22C";
+                n1.emit("input", {payload:testString});
+            });
+        });
     });
 
     describe('json object to csv', function() {

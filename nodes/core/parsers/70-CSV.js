@@ -28,6 +28,7 @@ module.exports = function(RED) {
         this.hdrin = n.hdrin || false;
         this.hdrout = n.hdrout || false;
         this.goodtmpl = true;
+        var tmpwarn = true;
         var node = this;
 
         // pass in an array of column names to be trimed, de-quoted and retrimed
@@ -71,7 +72,19 @@ module.exports = function(RED) {
                             }
                             else {
                                 if ((node.template.length === 1) && (node.template[0] === '')) {
-                                    node.warn(RED._("csv.errors.obj_csv"));
+                                    if (tmpwarn === true) { // just warn about missing template once
+                                        node.warn(RED._("csv.errors.obj_csv"));
+                                        tmpwarn = false;
+                                    }
+                                    ou = "";
+                                    for (var p in msg.payload[0]) {
+                                        if (msg.payload[0].hasOwnProperty(p)) {
+                                            if (typeof msg.payload[0][p] !== "object") {
+                                                ou += msg.payload[0][p] + ",";
+                                            }
+                                        }
+                                    }
+                                    ou = ou.slice(0,-1) + node.ret;
                                 }
                                 else {
                                     for (var t=0; t < node.template.length; t++) {
@@ -112,7 +125,7 @@ module.exports = function(RED) {
                         var first = true; // is this the first line
                         var line = msg.payload;
                         var tmp = "";
-                        var reg = new RegExp("^[-]?[0-9.]*[\.]?[0-9]*$");
+                        var reg = /^[-]?[0-9]*\.?[0-9]+$/;
 
                         // For now we are just going to assume that any \r or \n means an end of line...
                         //   got to be a weird csv that has singleton \r \n in it for another reason...
