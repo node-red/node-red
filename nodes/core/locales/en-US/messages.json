@@ -233,13 +233,14 @@
         "output": {
             "string": "the string",
             "number": "the number",
-            "existing": "the existing msg.payload",
-            "original": "the original msg.payload",
-            "latest": "the latest msg.payload",
+            "existing": "the existing msg object",
+            "original": "the original msg object",
+            "latest": "the latest msg object",
             "nothing": "nothing"
         },
         "wait-reset": "wait to be reset",
         "wait-for": "wait for",
+        "wait-loop": "resend it every",
         "duration": {
             "ms": "Milliseconds",
             "s": "Seconds",
@@ -250,6 +251,7 @@
         "label": {
             "trigger": "trigger",
             "trigger-block": "trigger & block",
+            "trigger-loop": "resend every",
             "reset": "Reset the trigger if:",
             "resetMessage":"msg.reset is set",
             "resetPayload":"msg.payload equals",
@@ -369,7 +371,8 @@
     },
     "watch": {
         "label": {
-            "files": "File(s)"
+            "files": "File(s)",
+            "recursive": "Watch sub-directories recursively"
         },
         "placeholder": {
             "files": "Comma-separated list of files and/or directories"

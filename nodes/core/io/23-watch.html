@@ -20,6 +20,11 @@
          <input id="node-input-files" type="text" tabindex="1" data-i18n="[placeholder]watch.placeholder.files">
     </div>
     <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-recursive" style="display:inline-block; width:auto; vertical-align:top;">
+        <label for="node-input-recursive" style="width:70%;"> <span data-i18n="watch.label.recursive"></span></label>
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
@@ -46,7 +51,8 @@
         category: 'advanced-input',
         defaults: {
             name: {value:""},
-            files: {value:"",required:true}
+            files: {value:"",required:true},
+            recursive: {value:""}
         },
         color:"BurlyWood",
         inputs:0,
