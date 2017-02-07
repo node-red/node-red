@@ -356,7 +356,7 @@ describe('trigger node', function() {
     });
 
     it('should be able to set infinite timeout, and clear timeout', function(done) {
-        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", duration:-5, wires:[["n2"]] },
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", duration:0, wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
         helper.load(triggerNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -378,7 +378,7 @@ describe('trigger node', function() {
     });
 
     it('should be able to set infinite timeout, and clear timeout by message', function(done) {
-        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", reset:"boo", duration:-5, wires:[["n2"]] },
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", reset:"boo", duration:0, wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
         helper.load(triggerNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -396,6 +396,28 @@ describe('trigger node', function() {
             n1.emit("input", {payload:null});   // blocked
             n1.emit("input", {payload:"boo"});  // clear the blockage
             n1.emit("input", {payload:null});   // trigger
+        });
+    });
+
+    it('should be able to set a repeat, and clear loop by reset', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", reset:"boo", duration:-25, wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                c += 1;
+                msg.should.have.a.property("payload", "foo");
+            });
+            n1.emit("input", {payload:"foo"});   // trigger
+            setTimeout( function() {
+                n1.emit("input", {reset:true});   // reset
+            },90);
+            setTimeout( function() {
+                c.should.equal(4);  // should send foo 4 times.
+                done();
+            },150);
         });
     });
 

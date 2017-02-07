@@ -25,9 +25,10 @@
         <select id="node-then-type" style="width:70%;">
             <option value="block" data-i18n="trigger.wait-reset"></option>
             <option value="wait" data-i18n="trigger.wait-for"></option>
+            <option value="loop" data-i18n="trigger.wait-loop"></option>
         </select>
     </div>
-    <div class="form-row node-type-wait">
+    <div class="form-row node-type-duration">
         <label></label>
         <input type="text" id="node-input-duration" style="text-align:end; width:70px !important">
         <select id="node-input-units" style="width:140px !important">
@@ -67,16 +68,17 @@
     <p>The two output states can be specified as can the duration of the timer.
     Either output can be set to a value, or templated from the inbound
     <code>msg</code> using mustache syntax. <pre>The payload is {{payload}}</pre></p>
-    <p>If the <code>msg.payload</code> is an object then setting the output to
-    <i>existing payload</i> will pass the complete payload object through.</p>
+    <p>Or you can pass through either the <i>original msg</i> or the <i>latest msg</i> to arrive.</p>
     <p>Optionally the timer can be extended by being retriggered... or not.</p>
     <p>By setting the first output to <i>nothing</i>, and selecting extend timer - a watchdog timer can be created.
     No output will happen as long as repeated inputs occur within the timeout period.</p>
     <p>Setting the timer to 0 creates an "infinite" timeout - the first output will happen but the second
     never will, and neither can the first be retriggered - so a true one shot.</p>
     <p>If a <code>msg.reset</code> property is present, or the <code>msg.payload</code>
-    matches the optional reset value, any timeout currently in progress
+    matches the optional reset value, any timeout or repeat currently in progress
     will be cleared and the second output will not happen.</p>
+    <p>The node can be set to repeat the input <code>msg</code> at regular intervals until the input changes,
+    or the node is reset.</p>
     <p>The blue status icon will be visible while the node is active.</p>
 </script>
 
@@ -102,6 +104,9 @@
             if (this.duration > 0) {
                 return this.name|| this._("trigger.label.trigger")+" "+this.duration+this.units;
             }
+            if (this.duration < 0) {
+                return this.name|| this._("trigger.label.trigger-loop")+" "+(this.duration * -1)+this.units;
+            }
             else {
                 return this.name|| this._("trigger.label.trigger-block");
             }
@@ -113,8 +118,14 @@
             $("#node-then-type").change(function() {
                 if ($(this).val() == "block") {
                     $(".node-type-wait").hide();
+                    $(".node-type-duration").hide();
+                }
+                else if ($(this).val() == "loop") {
+                    $(".node-type-wait").hide();
+                    $(".node-type-duration").show();
                 } else {
                     $(".node-type-wait").show();
+                    $(".node-type-duration").show();
                 }
             });
 
@@ -127,7 +138,6 @@
 
             var optionNothing = {value:"nul",label:this._("trigger.output.nothing"),hasValue:false};
             var optionPayload = {value:"pay",label:this._("trigger.output.existing"),hasValue:false}
-
             var optionOriginalPayload = {value:"pay",label:this._("trigger.output.original"),hasValue:false}
             var optionLatestPayload = {value:"payl",label:this._("trigger.output.latest"),hasValue:false}
 
@@ -151,6 +161,11 @@
 
             if (this.duration == "0") {
                 $("#node-then-type").val("block");
+            }
+            else if ((this.duration * 1) < 0) {
+                $("#node-then-type").val("loop");
+                this.duration = this.duration * -1;
+                $("#node-input-duration").val(this.duration);
             } else {
                 $("#node-then-type").val("wait");
             }
@@ -166,6 +181,9 @@
         oneditsave: function() {
             if ($("#node-then-type").val() == "block") {
                 $("#node-input-duration").val("0");
+            }
+            if ($("#node-then-type").val() == "loop") {
+                $("#node-input-duration").val($("#node-input-duration").val() * -1);
             }
 
         }
