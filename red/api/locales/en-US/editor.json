@@ -185,6 +185,11 @@
         "editNode": "Edit __type__ node",
         "editConfig": "Edit __type__ config node",
         "addNewType": "Add new __type__...",
+        "nodeProperties": "node properties",
+        "portLabels": "port labels",
+        "labelInputs": "Inputs",
+        "labelOutputs": "Outputs",
+
         "errors": {
             "scopeChange": "Changing the scope will make it unavailable to nodes in other flows that use it"
         }

@@ -22,6 +22,7 @@
     <div class="form-row">
         <label data-i18n="switch.label.property"></label>
         <input type="text" id="node-input-property" style="width: 70%"/>
+        <input type="hidden" id="node-input-outputs"/>
     </div>
     <div class="form-row node-input-rule-container-row">
         <ol id="node-input-rule-container"></ol>
@@ -115,7 +116,7 @@
             var previousValueType = {value:"prev",label:this._("inject.previous"),hasValue:false};
 
             $("#node-input-property").typedInput({default:this.propertyType||'msg',types:['msg','flow','global','jsonata']});
-
+            var outputCount = $("#node-input-outputs").val("{}");
 
             var andLabel = this._("switch.and");
             var caseLabel = this._("switch.ignorecase");
@@ -156,6 +157,9 @@
                     var rule = opt.r;
                     if (!rule.hasOwnProperty('t')) {
                         rule.t = 'eq';
+                    }
+                    if (!opt.hasOwnProperty('i')) {
+                        opt._i = Math.floor((0x99999-0x10000)*Math.random()).toString(16)
                     }
                     var row = $('<div/>').appendTo(container);
                     var row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
@@ -213,21 +217,36 @@
                         caseSensitive.prop('checked',false);
                     }
                     selectField.change();
+
+                    var currentOutputs = JSON.parse(outputCount.val()||"{}");
+                    currentOutputs[opt.hasOwnProperty('i')?opt.i:opt._i] = i;
+                    outputCount.val(JSON.stringify(currentOutputs));
                 },
                 removeItem: function(opt) {
+                    var currentOutputs = JSON.parse(outputCount.val()||"{}");
                     if (opt.hasOwnProperty('i')) {
-                        var removedList = $("#node-input-rule-container").data('removedList')||[];
-                        removedList.push(opt.i);
-                        $("#node-input-rule-container").data('removedList',removedList);
+                        currentOutputs[opt.i] = -1;
+                    } else {
+                        delete currentOutputs[opt._i];
                     }
-
                     var rules = $("#node-input-rule-container").editableList('items');
-                    rules.each(function(i) { $(this).find(".node-input-rule-index").html(i+1); });
+                    rules.each(function(i) {
+                        $(this).find(".node-input-rule-index").html(i+1);
+                        var data = $(this).data('data');
+                        currentOutputs[data.hasOwnProperty('i')?data.i:data._i] = i;
+                    });
+                    outputCount.val(JSON.stringify(currentOutputs));
                 },
                 resizeItem: resizeRule,
                 sortItems: function(rules) {
+                    var currentOutputs = JSON.parse(outputCount.val()||"{}");
                     var rules = $("#node-input-rule-container").editableList('items');
-                    rules.each(function(i) { $(this).find(".node-input-rule-index").html(i+1); });
+                    rules.each(function(i) {
+                        $(this).find(".node-input-rule-index").html(i+1);
+                        var data = $(this).data('data');
+                        currentOutputs[data.hasOwnProperty('i')?data.i:data._i] = i;
+                    });
+                    outputCount.val(JSON.stringify(currentOutputs));
                 },
                 sortable: true,
                 removable: true
@@ -243,11 +262,6 @@
             var ruleset;
             var node = this;
             node.rules = [];
-            var changedOutputs = {};
-            var removedList = $("#node-input-rule-container").data('removedList')||[];
-            removedList.forEach(function(i) {
-                changedOutputs[i] = -1;
-            });
             rules.each(function(i) {
                 var ruleData = $(this).data('data');
                 var rule = $(this);
@@ -267,16 +281,10 @@
                         r.case = rule.find(".node-input-rule-case").prop("checked");
                     }
                 }
-                if (ruleData.hasOwnProperty('i')) {
-                    if (ruleData.i !== i) {
-                        changedOutputs[ruleData.i] = i;
-                    }
-                }
                 node.rules.push(r);
             });
-            this._outputs = changedOutputs;
-            this.outputs = node.rules.length;
             this.propertyType = $("#node-input-property").typedInput('type');
+            console.log(JSON.parse($("#node-input-outputs").val()||"{}"));
         },
         oneditresize: function(size) {
             var rows = $("#dialog-form>div:not(.node-input-rule-container-row)");

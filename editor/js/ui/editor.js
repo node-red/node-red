@@ -191,7 +191,7 @@ RED.editor = (function() {
             if (outputMap) {
                 RED.nodes.eachLink(function(l) {
                     if (l.source === node && outputMap.hasOwnProperty(l.sourcePort)) {
-                        if (outputMap[l.sourcePort] === -1) {
+                        if (outputMap[l.sourcePort] === "-1") {
                             removedLinks.push(l);
                         } else {
                             l.sourcePort = outputMap[l.sourcePort];
@@ -549,17 +549,10 @@ RED.editor = (function() {
     }
 
     function refreshLabelForm(container,node) {
-        var inputCount = node.inputs || node._def.inputs || 0;
-        var outputCount;
-        var i;
-        var formOutputs = parseInt($("#node-input-outputs").val());
-        if (isNaN(formOutputs)) {
-            outputCount = node.outputs || node._def.outputs || 0;
-        } else {
-            outputCount = Math.max(0,formOutputs);
-        }
         var inputsDiv = $("#node-label-form-inputs");
         var outputsDiv = $("#node-label-form-outputs");
+
+        var inputCount = node.inputs || node._def.inputs || 0;
         var children = inputsDiv.children();
         if (children.length < inputCount) {
             for (i = children.length;i<inputCount;i++) {
@@ -571,23 +564,53 @@ RED.editor = (function() {
             }
         }
 
-        var children = outputsDiv.children();
+        var outputCount;
+        var i;
+        var formOutputs = $("#node-input-outputs").val();
+
+        if (formOutputs === undefined) {
+            outputCount = node.outputs || node._def.outputs || 0;
+        } else if (isNaN(formOutputs)) {
+            var outputMap = JSON.parse(formOutputs);
+            var keys = Object.keys(outputMap);
+            outputCount = 0;
+            var rows = [];
+            keys.forEach(function(p) {
+                var row = $("#node-label-form-output-"+p).parent();
+                if (row.length === 0 && outputMap[p] !== -1) {
+                    row = buildLabelRow("output",p,"");
+                }
+                if (outputMap[p] !== -1) {
+                    outputCount++;
+                    rows.push({i:parseInt(outputMap[p]),r:row});
+                }
+            });
+            rows.sort(function(A,B) {
+                return A.i-B.i;
+            })
+            outputsDiv.empty();
+            rows.forEach(function(r,i) {
+                r.r.find("label").html((i+1)+".");
+                r.r.appendTo(outputsDiv);
+            })
+        } else {
+            outputCount = Math.max(0,parseInt(formOutputs));
+        }
+        children = outputsDiv.children();
         if (children.length < outputCount) {
             for (i = children.length;i<outputCount;i++) {
-                buildLabelRow("output",i,"").appendTo(inputsDiv);
+                buildLabelRow("output",i,"").appendTo(outputsDiv);
             }
         } else if (children.length > outputCount) {
             for (i=outputCount;i<children.length;i++) {
                 $(children[i]).remove();
             }
         }
-
-
     }
     function buildLabelRow(type, index, value) {
-        var result = $('<div>');
+        var result = $('<div>',{style:"margin: 5px 0px"});
         var id = "node-label-form-"+type+"-"+index;
-        $('<label>',{for:id}).html(index+1).appendTo(result);
+        $('<label>',{for:id,style:"margin-right: 20px; text-align: right; width: 30px;"}).html((index+1)+".").appendTo(result);
         $('<input>',{type:"text",id:id}).val(value).appendTo(result);
         return result;
         //' id="node-label-form-input-'+i+'">)
@@ -603,7 +626,8 @@ RED.editor = (function() {
 
 
         var i,row;
-        var inputsDiv = $('<div class="form-row" id="node-label-form-inputs">Inputs</div>').appendTo(dialogForm);
+        $('<div class="form-row"><i class="fa fa-tag"></i> <span data-i18n="editor.labelInputs"></span><div id="node-label-form-inputs"></div></div>').appendTo(dialogForm);
+        var inputsDiv = $("#node-label-form-inputs");
         if (inputCount > 0) {
             for (i=0;i<inputCount;i++) {
                 buildLabelRow("input",i,inputLabels[i]).appendTo(inputsDiv);
@@ -611,7 +635,8 @@ RED.editor = (function() {
         } else {
 
         }
-        var outputsDiv = $('<div class="form-row" id="node-label-form-outputs">Outputs</div>').appendTo(dialogForm);
+        $('<div class="form-row"><i class="fa fa-tag"></i> <span data-i18n="editor.labelOutputs"></span><div id="node-label-form-outputs"></div></div>').appendTo(dialogForm);
+        var outputsDiv = $("#node-label-form-outputs");
         if (outputCount > 0) {
             for (i=0;i<outputCount;i++) {
                 buildLabelRow("output",i,outputLabels[i]).appendTo(outputsDiv);
@@ -743,11 +768,11 @@ RED.editor = (function() {
                             }
                         }
 
+                        var newValue;
                         if (editing_node._def.defaults) {
                             for (d in editing_node._def.defaults) {
                                 if (editing_node._def.defaults.hasOwnProperty(d)) {
                                     var input = $("#node-input-"+d);
-                                    var newValue;
                                     if (input.attr('type') === "checkbox") {
                                         newValue = input.prop('checked');
                                     } else if ("format" in editing_node._def.defaults[d] && editing_node._def.defaults[d].format !== "" && input[0].nodeName === "DIV") {
@@ -756,8 +781,42 @@ RED.editor = (function() {
                                         newValue = input.val();
                                     }
                                     if (newValue != null) {
-                                        if (d === "outputs" && (newValue.trim() === "" || isNaN(newValue))) {
-                                            continue;
+                                        if (d === "outputs") {
+                                            if  (newValue.trim() === "") {
+                                                continue;
+                                            }
+                                            if (isNaN(newValue)) {
+                                                outputMap = JSON.parse(newValue);
+                                                var outputCount = 0;
+                                                var outputsChanged = false;
+                                                var keys = Object.keys(outputMap);
+                                                keys.forEach(function(p) {
+                                                    if (isNaN(p)) {
+                                                        // New output;
+                                                        outputCount ++;
+                                                        delete outputMap[p];
+                                                    } else {
+                                                        outputMap[p] = outputMap[p]+"";
+                                                        if (outputMap[p] !== "-1") {
+                                                            outputCount++;
+                                                            if (outputMap[p] !== p) {
+                                                                // Output moved
+                                                                outputsChanged = true;
+                                                            } else {
+                                                                delete outputMap[p];
+                                                            }
+                                                        } else {
+                                                            // Output removed
+                                                            outputsChanged = true;
+                                                        }
+                                                    }
+                                                });
+
+                                                newValue = outputCount;
+                                                if (outputsChanged) {
+                                                    changed = true;
+                                                }
+                                            }
                                         }
                                         if (editing_node[d] != newValue) {
                                             if (editing_node._def.defaults[d].type) {
@@ -789,20 +848,30 @@ RED.editor = (function() {
                             var credsChanged = updateNodeCredentials(editing_node,credDefinition,prefix);
                             changed = changed || credsChanged;
                         }
-                        if (editing_node.hasOwnProperty("_outputs")) {
-                            outputMap = editing_node._outputs;
-                            delete editing_node._outputs;
-                            if (Object.keys(outputMap).length > 0) {
-                                changed = true;
-                            }
-                        }
+                        // if (editing_node.hasOwnProperty("_outputs")) {
+                        //     outputMap = editing_node._outputs;
+                        //     delete editing_node._outputs;
+                        //     if (Object.keys(outputMap).length > 0) {
+                        //         changed = true;
+                        //     }
+                        // }
                         var removedLinks = updateNodeProperties(editing_node,outputMap);
 
                         var inputLabels = $("#node-label-form-inputs").children().find("input");
                         var outputLabels = $("#node-label-form-outputs").children().find("input");
 
-                        editing_node.inputLabels = inputLabels.map(function() { return $(this).val();}).toArray();
-                        editing_node.outputLabels = outputLabels.map(function() { return $(this).val();}).toArray();
+                        newValue = inputLabels.map(function() { return $(this).val();}).toArray().slice(0,editing_node.inputs);
+                        if (JSON.stringify(newValue) !== JSON.stringify(editing_node.inputLabels)) {
+                            changes.inputLabels = editing_node.inputLabels;
+                            editing_node.inputLabels = newValue;
+                            changed = true;
+                        }
+                        newValue = outputLabels.map(function() { return $(this).val();}).toArray().slice(0,editing_node.outputs);
+                        if (JSON.stringify(newValue) !== JSON.stringify(editing_node.outputLabels)) {
+                            changes.outputLabels = editing_node.outputLabels;
+                            editing_node.outputLabels = newValue;
+                            changed = true;
+                        }
 
                         if (changed) {
                             var wasChanged = editing_node.changed;
@@ -872,11 +941,11 @@ RED.editor = (function() {
                     singleExpanded: true
                 });
                 var nodeProperties = stack.add({
-                    title: "node properties",
+                    title: RED._("editor.nodeProperties"),
                     expanded: true
                 });
                 var portLabels = stack.add({
-                    title: "port labels",
+                    title: RED._("editor.portLabels"),
                     onexpand: function() {
                         refreshLabelForm(this.content,node);
                     }
