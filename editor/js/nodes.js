@@ -173,6 +173,8 @@ RED.nodes = (function() {
     function addNode(n) {
         if (n.type.indexOf("subflow") !== 0) {
             n["_"] = n._def._;
+        } else {
+            n["_"] = RED._;
         }
         if (n._def.category == "config") {
             configNodes[n.id] = n;
@@ -329,14 +331,6 @@ RED.nodes = (function() {
             });
             sf.name = subflowName;
         }
-        sf._def = {
-            defaults:{},
-            icon:"subflow.png",
-            category: "subflows",
-            color: "#da9",
-            inputs: sf.in.length,
-            outputs: sf.out.length
-        }
         subflows[sf.id] = sf;
         RED.nodes.registerType("subflow:"+sf.id, {
             defaults:{name:{value:""}},
@@ -349,12 +343,13 @@ RED.nodes = (function() {
             label: function() { return this.name||RED.nodes.subflow(sf.id).name },
             labelStyle: function() { return this.name?"node_label_italic":""; },
             paletteLabel: function() { return RED.nodes.subflow(sf.id).name },
+            inputLabels: function(i) { return sf.inputLabels?sf.inputLabels[i]:null },
+            outputLabels: function(i) { return sf.outputLabels?sf.outputLabels[i]:null },
             set:{
                 module: "node-red"
             }
         });
-
-
+        sf._def = RED.nodes.getType("subflow:"+sf.id);
     }
     function getSubflow(id) {
         return subflows[id];
@@ -480,7 +475,6 @@ RED.nodes = (function() {
                 }
             }
 
-            var labelCount;
             if (n.inputs > 0 && n.inputLabels && !/^\s*$/.test(n.inputLabels.join("")))  {
                 node.inputLabels = n.inputLabels.slice();
             }
@@ -523,6 +517,13 @@ RED.nodes = (function() {
             }
             node.out.push(nOut);
         });
+
+        if (node.in.length > 0 && n.inputLabels && !/^\s*$/.test(n.inputLabels.join("")))  {
+            node.inputLabels = n.inputLabels.slice();
+        }
+        if (node.out.length > 0 && n.outputLabels && !/^\s*$/.test(n.outputLabels.join(""))) {
+            node.outputLabels = n.outputLabels.slice();
+        }
 
 
         return node;

@@ -620,6 +620,10 @@ RED.editor = (function() {
 
         var inputCount = node.inputs || node._def.inputs || 0;
         var outputCount = node.outputs || node._def.outputs || 0;
+        if (node.type === 'subflow') {
+            inputCount = node.in.length;
+            outputCount = node.out.length;
+        }
 
         var inputLabels = node.inputLabels || [];
         var outputLabels = node.outputLabels || [];
@@ -1435,6 +1439,21 @@ RED.editor = (function() {
                             editing_node.info = newDescription;
                             changed = true;
                         }
+                        var inputLabels = $("#node-label-form-inputs").children().find("input");
+                        var outputLabels = $("#node-label-form-outputs").children().find("input");
+
+                        var newValue = inputLabels.map(function() { return $(this).val();}).toArray().slice(0,editing_node.inputs);
+                        if (JSON.stringify(newValue) !== JSON.stringify(editing_node.inputLabels)) {
+                            changes.inputLabels = editing_node.inputLabels;
+                            editing_node.inputLabels = newValue;
+                            changed = true;
+                        }
+                        newValue = outputLabels.map(function() { return $(this).val();}).toArray().slice(0,editing_node.outputs);
+                        if (JSON.stringify(newValue) !== JSON.stringify(editing_node.outputLabels)) {
+                            changes.outputLabels = editing_node.outputLabels;
+                            editing_node.outputLabels = newValue;
+                            changed = true;
+                        }
 
                         RED.palette.refresh();
 
@@ -1472,7 +1491,10 @@ RED.editor = (function() {
                     }
                 }
             ],
-            resize: function() {
+            resize: function(dimensions) {
+                $(".editor-tray-content").height(dimensions.height - 78);
+                var form = $(".editor-tray-content form").height(dimensions.height - 78 - 40);
+
                 var rows = $("#dialog-form>div:not(.node-text-editor-row)");
                 var editorRow = $("#dialog-form>div.node-text-editor-row");
                 var height = $("#dialog-form").height();
@@ -1484,10 +1506,28 @@ RED.editor = (function() {
                 subflowEditor.resize();
             },
             open: function(tray) {
+                var trayFooter = tray.find(".editor-tray-footer");
+                var trayBody = tray.find('.editor-tray-body');
+                trayBody.parent().css('overflow','hidden');
+
+                var stack = RED.stack.create({
+                    container: trayBody,
+                    singleExpanded: true
+                });
+                var nodeProperties = stack.add({
+                    title: RED._("editor.nodeProperties"),
+                    expanded: true
+                });
+                var portLabels = stack.add({
+                    title: RED._("editor.portLabels")
+                });
+
+
+
                 if (editing_node) {
                     RED.sidebar.info.refresh(editing_node);
                 }
-                var dialogForm = buildEditForm(tray.find('.editor-tray-body'),"dialog-form","subflow-template");
+                var dialogForm = buildEditForm(nodeProperties.content,"dialog-form","subflow-template");
                 subflowEditor = RED.editor.createEditor({
                     id: 'subflow-input-info-editor',
                     mode: 'ace/mode/markdown',
@@ -1506,7 +1546,9 @@ RED.editor = (function() {
                     }
                 });
                 $("#subflow-dialog-user-count").html(RED._("subflow.subflowInstances", {count:userCount})).show();
-                dialogForm.i18n();
+
+                buildLabelForm(portLabels.content,subflow);
+                trayBody.i18n();
             },
             close: function() {
                 if (RED.view.state() != RED.state.IMPORT_DRAGGING) {
