@@ -549,6 +549,10 @@ RED.editor = (function() {
     }
 
     function refreshLabelForm(container,node) {
+
+        var inputPlaceholder = node._def.inputLabels?RED._("editor.defaultLabel"):RED._("editor.noDefaultLabel");
+        var outputPlaceholder = node._def.outputLabels?RED._("editor.defaultLabel"):RED._("editor.noDefaultLabel");
+
         var inputsDiv = $("#node-label-form-inputs");
         var outputsDiv = $("#node-label-form-outputs");
 
@@ -556,7 +560,7 @@ RED.editor = (function() {
         var children = inputsDiv.children();
         if (children.length < inputCount) {
             for (i = children.length;i<inputCount;i++) {
-                buildLabelRow("input",i,"").appendTo(inputsDiv);
+                buildLabelRow("input",i,"",inputPlaceholder).appendTo(inputsDiv);
             }
         } else if (children.length > inputCount) {
             for (i=inputCount;i<children.length;i++) {
@@ -578,7 +582,7 @@ RED.editor = (function() {
             keys.forEach(function(p) {
                 var row = $("#node-label-form-output-"+p).parent();
                 if (row.length === 0 && outputMap[p] !== -1) {
-                    row = buildLabelRow("output",p,"");
+                    row = buildLabelRow("output",p,"",outputPlaceholder);
                 }
                 if (outputMap[p] !== -1) {
                     outputCount++;
@@ -588,7 +592,7 @@ RED.editor = (function() {
             rows.sort(function(A,B) {
                 return A.i-B.i;
             })
-            outputsDiv.empty();
+            outputsDiv.children().detach();
             rows.forEach(function(r,i) {
                 r.r.find("label").html((i+1)+".");
                 r.r.appendTo(outputsDiv);
@@ -607,13 +611,17 @@ RED.editor = (function() {
             }
         }
     }
-    function buildLabelRow(type, index, value) {
+    function buildLabelRow(type, index, value, placeHolder) {
         var result = $('<div>',{style:"margin: 5px 0px"});
         var id = "node-label-form-"+type+"-"+index;
         $('<label>',{for:id,style:"margin-right: 20px; text-align: right; width: 30px;"}).html((index+1)+".").appendTo(result);
-        $('<input>',{type:"text",id:id}).val(value).appendTo(result);
+        var input = $('<input>',{type:"text",id:id, placeholder: placeHolder}).val(value).appendTo(result);
+        var clear = $('<button class="editor-button editor-button-small" style="margin-left: 10px"><i class="fa fa-times"></i></button>').appendTo(result);
+        clear.click(function(evt) {
+            evt.preventDefault();
+            input.val("");
+        })
         return result;
-        //' id="node-label-form-input-'+i+'">)
     }
     function buildLabelForm(container,node) {
         var dialogForm = $('<form class="dialog-form form-horizontal" autocomplete="off"></form>').appendTo(container);
@@ -628,13 +636,15 @@ RED.editor = (function() {
         var inputLabels = node.inputLabels || [];
         var outputLabels = node.outputLabels || [];
 
+        var inputPlaceholder = node._def.inputLabels?RED._("editor.defaultLabel"):RED._("editor.noDefaultLabel");
+        var outputPlaceholder = node._def.outputLabels?RED._("editor.defaultLabel"):RED._("editor.noDefaultLabel");
 
         var i,row;
         $('<div class="form-row"><i class="fa fa-tag"></i> <span data-i18n="editor.labelInputs"></span><div id="node-label-form-inputs"></div></div>').appendTo(dialogForm);
         var inputsDiv = $("#node-label-form-inputs");
         if (inputCount > 0) {
             for (i=0;i<inputCount;i++) {
-                buildLabelRow("input",i,inputLabels[i]).appendTo(inputsDiv);
+                buildLabelRow("input",i,inputLabels[i],inputPlaceholder).appendTo(inputsDiv);
             }
         } else {
 
@@ -643,7 +653,7 @@ RED.editor = (function() {
         var outputsDiv = $("#node-label-form-outputs");
         if (outputCount > 0) {
             for (i=0;i<outputCount;i++) {
-                buildLabelRow("output",i,outputLabels[i]).appendTo(outputsDiv);
+                buildLabelRow("output",i,outputLabels[i],outputPlaceholder).appendTo(outputsDiv);
             }
         } else {
 

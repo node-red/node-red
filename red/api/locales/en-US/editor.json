@@ -189,7 +189,8 @@
         "portLabels": "port labels",
         "labelInputs": "Inputs",
         "labelOutputs": "Outputs",
-
+        "noDefaultLabel": "none",
+        "defaultLabel": "use default label",
         "errors": {
             "scopeChange": "Changing the scope will make it unavailable to nodes in other flows that use it"
         }
