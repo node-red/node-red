@@ -1512,7 +1512,7 @@ RED.view = (function() {
     function portMouseOver(port,d,portType,portIndex) {
         clearTimeout(portLabelHoverTimeout);
         var active = (mouse_mode!=RED.state.JOINING || (drag_lines.length > 0 && drag_lines[0].portType !== portType));
-        if (active && ((portType === PORT_TYPE_INPUT && d._def.inputLabels) || (portType === PORT_TYPE_OUTPUT && d._def.outputLabels))) {
+        if (active && ((portType === PORT_TYPE_INPUT && (d._def.inputLabels||d.inputLabels)) || (portType === PORT_TYPE_OUTPUT && (d._def.outputLabels||d.outputLabels)))) {
             portLabelHoverTimeout = setTimeout(function() {
                 var tooltip = getPortLabel(d,portType,portIndex);
                 if (!tooltip) {
