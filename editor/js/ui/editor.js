@@ -878,7 +878,7 @@ RED.editor = (function() {
                     if (nodeUserFlows[ws.id]) {
                         workspaceLabel = "* "+workspaceLabel;
                     }
-                    tabSelect.append('<option value="'+ws.id+'"'+(ws.id==editing_config_node.z?" selected":"")+'>'+workspaceLabel+'</option>');
+                    tabSelect.append('<option value="'+ws.id+'"'+(ws.id==editing_config_node.z?" selected":"")+'>'+RED.bidi.applyBidiSupport(workspaceLabel,RED.bidi.flags.NS)+'</option>');
                 });
                 tabSelect.append('<option disabled data-i18n="sidebar.config.subflows"></option>');
                 RED.nodes.eachSubflow(function(ws) {
@@ -886,7 +886,7 @@ RED.editor = (function() {
                     if (nodeUserFlows[ws.id]) {
                         workspaceLabel = "* "+workspaceLabel;
                     }
-                    tabSelect.append('<option value="'+ws.id+'"'+(ws.id==editing_config_node.z?" selected":"")+'>'+workspaceLabel+'</option>');
+                    tabSelect.append('<option value="'+ws.id+'"'+(ws.id==editing_config_node.z?" selected":"")+'>'+RED.bidi.applyBidiSupport(workspaceLabel,RED.bidi.flags.NS)+'</option>');
                 });
                 if (flowCount > 0) {
                     tabSelect.on('change',function() {
@@ -1186,7 +1186,7 @@ RED.editor = (function() {
                 }
 
                 configNodes.forEach(function(cn) {
-                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+RED.bidi.applyBidiSupport(cn.__label__,RED.bidi.flags.BTD & RED.bidi.flags.NS)+'</option>');
+                    select.append('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'>'+RED.bidi.applyBidiSupport(cn.__label__, RED.bidi.flags.BTD | RED.bidi.flags.NS)+'</option>');
                     delete cn.__label__;
                 });
 

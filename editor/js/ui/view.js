@@ -1809,7 +1809,7 @@ RED.view = (function() {
                                         l = d._def.label;
                                         try {
                                             l = (typeof l === "function" ? l.call(d) : l)||"";
-                                            l = RED.bidi.applyBidiSupport(l,RED.bidi.flags.BTD & RED.bidi.flags.NS);
+                                            l = RED.bidi.applyBidiSupport(l,RED.bidi.flags.BTD_UCC | RED.bidi.flags.NS);
                                         } catch(err) {
                                             console.log("Definition error: "+d.type+".label",err);
                                             l = d.type;

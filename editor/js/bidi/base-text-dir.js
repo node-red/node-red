@@ -42,18 +42,47 @@ RED.bidi.baseTextDir = (function() {
     function _isLatinChar(c) {
         return (c > 64 && c < 91) || (c > 96 && c < 123);
     }
-
+    
+    /**
+     * Determines the text direction of a given string.
+     * @param value - the string
+     * @param textDir - text direction
+     */
+    function _resolveBaseTextDir(value, textDir) {
+        if (textDir == "auto") {
+        	if (_isRTLValue(value)) {
+                return "rtl";
+            } else {
+                return "ltr";
+            }
+        } else {
+            return textDir;
+        }
+    }
+    
+    /**
+     * Enforces the text direction for all the spans with style bidiAware under
+     * workspace or sidebar div
+     */
+    function _enforceTextDirectionOnPage(textDir) {
+        $("#workspace").find('span.bidiAware').each(function() {
+            $(this).attr("dir", _resolveBaseTextDir($(this).html(),textDir));
+        });
+        $("#sidebar").find('span.bidiAware').each(function() {
+            $(this).attr("dir", _resolveBaseTextDir($(this).text(),textDir));
+        });
+    }
+    
     /**
      * Enforces the text direction of a given string by adding
      * UCC (Unicode Control Characters)
      * @param value - the string
      */
-    function _enforceTextDirectionWithUCC(value) {
+    function _enforceTextDirectionWithUCC(value, textDir) {
         if (value) {
-            var dir = RED.bidi.resolveBaseTextDir(value);
-            if (dir == "ltr") {
+            if (textDir == "ltr") {
                return LRE + value + PDF;
-            } else if (dir == "rtl") {
+            } else if (textDir == "rtl") {
                return RLE + value + PDF;
             }
         }
@@ -61,6 +90,8 @@ RED.bidi.baseTextDir = (function() {
     }
 
     return {
+    	resolveBaseTextDir: _resolveBaseTextDir,
+    	enforceTextDirectionOnPage: _enforceTextDirectionOnPage,
         enforceTextDirectionWithUCC: _enforceTextDirectionWithUCC,
         isRTLValue : _isRTLValue
     }
