@@ -212,7 +212,9 @@ module.exports = function(RED) {
             this.error(RED._("websocket.errors.missing-conf"));
         }
         this.on('close', function() {
-            node.serverConfig.removeInputNode(node);
+            if (node.serverConfig) {
+                node.serverConfig.removeInputNode(node);
+            }
             node.status({});
         });
     }
@@ -224,7 +226,7 @@ module.exports = function(RED) {
         this.server = (n.client)?n.client:n.server;
         this.serverConfig = RED.nodes.getNode(this.server);
         if (!this.serverConfig) {
-            this.error(RED._("websocket.errors.missing-conf"));
+            return this.error(RED._("websocket.errors.missing-conf"));
         }
         else {
             // TODO: nls
