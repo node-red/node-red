@@ -17,6 +17,9 @@
  //var UglifyJS = require("uglify-js");
 var util = require("util");
 var when = require("when");
+var path = require("path");
+var fs = require("fs");
+
 var events = require("../../events");
 
 var settings;
@@ -41,6 +44,9 @@ function init(_settings,_loader) {
     nodeList = [];
     nodeConfigCache = null;
     Node = require("../Node");
+    events.removeListener("node-icon-dir",nodeIconDir);
+    events.on("node-icon-dir",nodeIconDir);
+
 }
 
 function load() {
@@ -562,6 +568,40 @@ function setModulePendingUpdated(module,version) {
     });
 }
 
+var icon_paths = {
+    "node-red":[path.resolve(__dirname + '/../../../../public/icons')]
+};
+var iconCache = {};
+var defaultIcon = path.resolve(__dirname + '/../../../../public/icons/arrow-in.png');
+
+function nodeIconDir(dir) {
+    icon_paths[dir.name] = icon_paths[dir.name] || [];
+    icon_paths[dir.name].push(path.resolve(dir.path));
+}
+
+function getNodeIconPath(module,icon) {
+    var iconName = module+"/"+icon;
+    if (iconCache[iconName]) {
+        return iconCache[iconName];
+    } else {
+        var paths = icon_paths[module];
+        if (paths) {
+            for (var p=0;p<paths.length;p++) {
+                var iconPath = path.join(paths[p],icon);
+                try {
+                    fs.statSync(iconPath);
+                    iconCache[iconName] = iconPath;
+                    return iconPath;
+                } catch(err) {
+                    // iconPath doesn't exist
+                }
+            }
+        }
+
+        return defaultIcon;
+    }
+}
+
 var registry = module.exports = {
     init: init,
     load: load,
@@ -583,6 +623,7 @@ var registry = module.exports = {
     getModuleList: getModuleList,
     getModuleInfo: getModuleInfo,
 
+    getNodeIconPath: getNodeIconPath,
     /**
      * Gets all of the node template configs
      * @return all of the node templates in a single string

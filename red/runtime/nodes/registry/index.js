@@ -70,13 +70,14 @@ module.exports = {
 
     getNodeConfigs: registry.getAllNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
+    getNodeIconPath: registry.getNodeIconPath,
 
     enableNode: enableNodeSet,
     disableNode: registry.disableNodeSet,
 
     addModule: addModule,
     removeModule: registry.removeModule,
-    
+
     installModule: installer.installModule,
     uninstallModule: installer.uninstallModule,
 

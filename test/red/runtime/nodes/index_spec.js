@@ -56,10 +56,12 @@ describe("red/nodes/index", function() {
         get: function() { return false }
     };
 
+    var EventEmitter = require('events').EventEmitter;
     var runtime = {
         settings: settings,
         storage: storage,
-        log: {debug:function() {}, warn:function() {}}
+        log: {debug:function() {}, warn:function() {}},
+        events: new EventEmitter()
     };
 
     function TestNode(n) {

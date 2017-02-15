@@ -25,6 +25,7 @@ var flowUtil = require("./flows/util")
 var context = require("./context");
 var Node = require("./Node");
 var log = require("../log");
+var library = require("./library");
 
 var events = require("../events");
 
@@ -88,6 +89,7 @@ function init(runtime) {
     flows.init(runtime);
     registry.init(runtime);
     context.init(runtime.settings);
+    library.init(runtime);
 }
 
 function disableNode(id) {
@@ -135,6 +137,9 @@ module.exports = {
 
     getNodeConfigs: registry.getNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
+    getNodeIconPath: registry.getNodeIconPath,
+    getNodeExampleFlows: library.getExampleFlows,
+    getNodeExampleFlowPath: library.getExampleFlowPath,
 
     clearRegistry: registry.clear,
     cleanModuleList: registry.cleanModuleList,

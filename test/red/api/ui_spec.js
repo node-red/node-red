@@ -29,7 +29,14 @@ describe("ui api", function() {
     var app;
 
     before(function() {
-        ui.init({events:events});
+        ui.init({
+            events:events,
+            nodes: {
+                getNodeIconPath: function(module,icon) {
+                    return path.resolve(__dirname+'/../../../public/icons/arrow-in.png');
+                }
+            }
+        });
     });
     describe("slash handler", function() {
         before(function() {
@@ -71,10 +78,10 @@ describe("ui api", function() {
             res.setEncoding('binary');
             res.data = '';
             res.on('data', function (chunk) {
-                    res.data += chunk;
+                res.data += chunk;
             });
             res.on('end', function () {
-                    callback(null, new Buffer(res.data, 'binary'));
+                callback(null, new Buffer(res.data, 'binary'));
             });
         }
         function compareBuffers(b1,b2) {
@@ -83,11 +90,10 @@ describe("ui api", function() {
                 b1[i].should.equal(b2[i]);
             }
         }
-
-        it('returns the default icon when getting an unknown icon', function(done) {
+        it('returns the requested icon', function(done) {
             var defaultIcon = fs.readFileSync(path.resolve(__dirname+'/../../../public/icons/arrow-in.png'));
             request(app)
-                .get("/icons/random-module/youwonthaveme.png")
+                .get("/icons/module/icon.png")
                 .expect("Content-Type", /image\/png/)
                 .expect(200)
                 .parse(binaryParser)
@@ -100,40 +106,6 @@ describe("ui api", function() {
                     done();
                 });
 
-        });
-        it('returns a known icon', function(done) {
-            var injectIcon = fs.readFileSync(path.resolve(__dirname+'/../../../public/icons/inject.png'));
-            request(app)
-                .get("/icons/node-red/inject.png")
-                .expect("Content-Type", /image\/png/)
-                .expect(200)
-                .parse(binaryParser)
-                .end(function(err, res){
-                    if (err){
-                        return done(err);
-                    }
-                    Buffer.isBuffer(res.body).should.be.true();
-                    compareBuffers(res.body,injectIcon);
-                    done();
-                });
-        });
-
-        it('returns a registered icon' , function(done) {
-            var testIcon = fs.readFileSync(path.resolve(__dirname+'/../../resources/icons/test_icon.png'));
-            events.emit("node-icon-dir",{name:"test-module", path: path.resolve(__dirname+'/../../resources/icons')});
-            request(app)
-                .get("/icons/test-module/test_icon.png")
-                .expect("Content-Type", /image\/png/)
-                .expect(200)
-                .parse(binaryParser)
-                .end(function(err, res){
-                    if (err){
-                        return done(err);
-                    }
-                    Buffer.isBuffer(res.body).should.be.true();
-                    compareBuffers(res.body,testIcon);
-                    done();
-                });
         });
     });
 
@@ -174,8 +146,4 @@ describe("ui api", function() {
                 });
         });
     });
-
-
-
-
 });
