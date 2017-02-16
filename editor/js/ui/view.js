@@ -1297,7 +1297,7 @@ RED.view = (function() {
         sp.className = className;
         sp.style.position = "absolute";
         sp.style.top = "-1000px";
-        sp.innerHTML = (str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        sp.textContent = (str||"");
         document.body.appendChild(sp);
         var w = sp.offsetWidth;
         document.body.removeChild(sp);
