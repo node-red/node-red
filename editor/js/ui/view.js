@@ -2227,10 +2227,10 @@ RED.view = (function() {
                         d.x2 = d.target.x-d.target.w/2;
                         d.y2 = d.target.y;
 
-                        return "M "+(d.source.x+d.source.w/2)+" "+(d.source.y+y)+
-                            " C "+(d.source.x+d.source.w/2+scale*node_width)+" "+(d.source.y+y+scaleY*node_height)+" "+
-                            (d.target.x-d.target.w/2-scale*node_width)+" "+(d.target.y-scaleY*node_height)+" "+
-                            (d.target.x-d.target.w/2)+" "+d.target.y;
+                        return "M "+d.x1+" "+d.y1+
+                            " C "+(d.x1+scale*node_width)+" "+(d.y1+scaleY*node_height)+" "+
+                            (d.x2-scale*node_width)+" "+(d.y2-scaleY*node_height)+" "+
+                            d.x2+" "+d.y2;
                     });
                 }
             })
