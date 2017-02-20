@@ -119,7 +119,7 @@ describe('CSV node', function() {
                     msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: 4, e: -5, f: 'ab"cd', g: 'with,a,comma' });
                     done();
                 });
-                var testString = '"1","-2","+3","04","-05",ab""cd,"with,a,comma"'+String.fromCharCode(10);
+                var testString = '"1","-2","+3","04","-05","ab""cd","with,a,comma"'+String.fromCharCode(10);
                 n1.emit("input", {payload:testString});
             });
         });
@@ -132,12 +132,11 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     //console.log(msg);
-                    msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: 4, e: -5, f: 'ab"cd', g: 'with,a,comma' });
+                    msg.should.have.property('payload', { a: "with,an", b: "odd,number", c: "ofquotes" });
+                    //msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: 4, e: -5, f: 'ab"cd', g: 'with,a,comma' });
                     done();
                 });
-                var testString = '"with,a"n,odd",num"ber,of"quotes'+String.fromCharCode(10);
-                n1.emit("input", {payload:testString});
-                testString = '"1","-2","+3","04","-05",ab""cd,"with,a,comma"'+String.fromCharCode(10);
+                var testString = '"with,a"n,odd","num"ber","of"qu"ot"es"'+String.fromCharCode(10);
                 n1.emit("input", {payload:testString});
             });
         });

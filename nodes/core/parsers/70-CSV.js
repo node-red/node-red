@@ -80,7 +80,15 @@ module.exports = function(RED) {
                                     for (var p in msg.payload[0]) {
                                         if (msg.payload[0].hasOwnProperty(p)) {
                                             if (typeof msg.payload[0][p] !== "object") {
-                                                ou += msg.payload[0][p] + ",";
+                                                var q = msg.payload[0][p];
+                                                if (q.indexOf(node.quo) !== -1) { // add double quotes if any quotes
+                                                    q = q.replace(/"/g, '""');
+                                                    ou += node.quo + q + node.quo + node.sep;
+                                                }
+                                                else if (q.indexOf(node.sep) !== -1) { // add quotes if any "commas"
+                                                    ou += node.quo + q + node.quo + node.sep;
+                                                }
+                                                else { ou += q + node.sep; } // otherwise just add
                                             }
                                         }
                                     }
@@ -142,7 +150,9 @@ module.exports = function(RED) {
                             else {
                                 if (line[i] === node.quo) { // if it's a quote toggle inside or outside
                                     f = !f;
-                                    if (line[i-1] === node.quo) { k[j] += '\"'; } // if it's a quotequote then it's actually a quote
+                                    if (line[i-1] === node.quo) {
+                                        if (f === false) { k[j] += '\"'; }
+                                    } // if it's a quotequote then it's actually a quote
                                     //if ((line[i-1] !== node.sep) && (line[i+1] !== node.sep)) { k[j] += line[i]; }
                                 }
                                 else if ((line[i] === node.sep) && f) { // if it is the end of the line then finish
