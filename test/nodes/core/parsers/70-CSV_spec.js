@@ -119,7 +119,7 @@ describe('CSV node', function() {
                     msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: 4, e: -5, f: 'ab"cd', g: 'with,a,comma' });
                     done();
                 });
-                var testString = '"1","-2","+3","04","-05",ab""cd,"with,a,comma"'+String.fromCharCode(10);
+                var testString = '"1","-2","+3","04","-05","ab""cd","with,a,comma"'+String.fromCharCode(10);
                 n1.emit("input", {payload:testString});
             });
         });
@@ -132,12 +132,11 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     //console.log(msg);
-                    msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: 4, e: -5, f: 'ab"cd', g: 'with,a,comma' });
+                    msg.should.have.property('payload', { a: "with,an", b: "odd,number", c: "ofquotes" });
+                    //msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: 4, e: -5, f: 'ab"cd', g: 'with,a,comma' });
                     done();
                 });
-                var testString = '"with,a"n,odd",num"ber,of"quotes'+String.fromCharCode(10);
-                n1.emit("input", {payload:testString});
-                testString = '"1","-2","+3","04","-05",ab""cd,"with,a,comma"'+String.fromCharCode(10);
+                var testString = '"with,a"n,odd","num"ber","of"qu"ot"es"'+String.fromCharCode(10);
                 n1.emit("input", {payload:testString});
             });
         });
@@ -176,6 +175,21 @@ describe('CSV node', function() {
                     done();
                 });
                 var testString = "1,2,3,4\n5,-6,07,+8\n9,0,a,b\nc,d,e,f";
+                n1.emit("input", {payload:testString});
+            });
+        });
+
+        it('should handle numbers in strings but not IP addresses', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e", wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload', { a: "a", b: "127.0.0.1", c: 56.7, d: -32.8, e: "+76.22C" });
+                    done();
+                });
+                var testString = "a,127.0.0.1,56.7,-32.8,+76.22C";
                 n1.emit("input", {payload:testString});
             });
         });

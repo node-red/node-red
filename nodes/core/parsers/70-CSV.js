@@ -28,6 +28,7 @@ module.exports = function(RED) {
         this.hdrin = n.hdrin || false;
         this.hdrout = n.hdrout || false;
         this.goodtmpl = true;
+        var tmpwarn = true;
         var node = this;
 
         // pass in an array of column names to be trimed, de-quoted and retrimed
@@ -71,7 +72,27 @@ module.exports = function(RED) {
                             }
                             else {
                                 if ((node.template.length === 1) && (node.template[0] === '')) {
-                                    node.warn(RED._("csv.errors.obj_csv"));
+                                    if (tmpwarn === true) { // just warn about missing template once
+                                        node.warn(RED._("csv.errors.obj_csv"));
+                                        tmpwarn = false;
+                                    }
+                                    ou = "";
+                                    for (var p in msg.payload[0]) {
+                                        if (msg.payload[0].hasOwnProperty(p)) {
+                                            if (typeof msg.payload[0][p] !== "object") {
+                                                var q = msg.payload[0][p];
+                                                if (q.indexOf(node.quo) !== -1) { // add double quotes if any quotes
+                                                    q = q.replace(/"/g, '""');
+                                                    ou += node.quo + q + node.quo + node.sep;
+                                                }
+                                                else if (q.indexOf(node.sep) !== -1) { // add quotes if any "commas"
+                                                    ou += node.quo + q + node.quo + node.sep;
+                                                }
+                                                else { ou += q + node.sep; } // otherwise just add
+                                            }
+                                        }
+                                    }
+                                    ou = ou.slice(0,-1) + node.ret;
                                 }
                                 else {
                                     for (var t=0; t < node.template.length; t++) {
@@ -112,7 +133,7 @@ module.exports = function(RED) {
                         var first = true; // is this the first line
                         var line = msg.payload;
                         var tmp = "";
-                        var reg = new RegExp("^[-]?[0-9.]*[\.]?[0-9]*$");
+                        var reg = /^[-]?[0-9]*\.?[0-9]+$/;
 
                         // For now we are just going to assume that any \r or \n means an end of line...
                         //   got to be a weird csv that has singleton \r \n in it for another reason...
@@ -129,7 +150,9 @@ module.exports = function(RED) {
                             else {
                                 if (line[i] === node.quo) { // if it's a quote toggle inside or outside
                                     f = !f;
-                                    if (line[i-1] === node.quo) { k[j] += '\"'; } // if it's a quotequote then it's actually a quote
+                                    if (line[i-1] === node.quo) {
+                                        if (f === false) { k[j] += '\"'; }
+                                    } // if it's a quotequote then it's actually a quote
                                     //if ((line[i-1] !== node.sep) && (line[i+1] !== node.sep)) { k[j] += line[i]; }
                                 }
                                 else if ((line[i] === node.sep) && f) { // if it is the end of the line then finish
