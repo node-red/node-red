@@ -103,10 +103,8 @@ module.exports = function(RED) {
                     msg.payload = new Buffer(stdout,"binary");
                     if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
                     var msg2 = null;
-                    var stdErrBuffer = new Buffer(stderr,"binary");
-                    if(stdErrBuffer.byteLength > 0) {
-                        msg2 = {payload: stdErrBuffer};
-                        if (isUtf8(msg2.payload)) { msg2.payload = msg2.payload.toString(); }
+                    if(stderr) {
+                        msg2 = {payload: stderr};
                     }
                     var msg3 = {payload:0};
                     node.status({});
