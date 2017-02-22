@@ -102,7 +102,10 @@ module.exports = function(RED) {
                 child = exec(cl, {encoding: 'binary', maxBuffer:10000000}, function (error, stdout, stderr) {
                     msg.payload = new Buffer(stdout,"binary");
                     if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
-                    var msg2 = {payload:stderr};
+                    var msg2 = null;
+                    if(stderr.length > 0) {
+                        msg2 = {payload:stderr};
+                    }
                     var msg3 = {payload:0};
                     node.status({});
                     //console.log('[exec] stdout: ' + stdout);
