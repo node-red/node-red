@@ -37,8 +37,13 @@ module.exports = function(RED) {
             fs.statSync("/usr/lib/python2.7/site-packages/RPi/GPIO"); // test on Arch
         }
         catch(err) {
-            RED.log.warn(RED._("rpi-gpio.errors.libnotfound"));
-            throw "Warning : "+RED._("rpi-gpio.errors.libnotfound");
+            try {
+                fs.statSync("/usr/lib/python2.7/dist-packages/RPi/GPIO"); // test on Hypriot
+            }
+            catch(err) {
+                RED.log.warn(RED._("rpi-gpio.errors.libnotfound"));
+                throw "Warning : "+RED._("rpi-gpio.errors.libnotfound");
+            }
         }
     }
 
@@ -79,7 +84,7 @@ module.exports = function(RED) {
             node.child.stdout.on('data', function (data) {
                 var d = data.toString().trim().split("\n");
                 for (var i = 0; i < d.length; i++) {
-                    if (node.running && node.buttonState !== -1 && !isNaN(Number(d[i]))) {
+                    if (node.running && node.buttonState !== -1 && !isNaN(Number(d[i])) && node.buttonState !== d[i]) {
                         node.send({ topic:"pi/"+node.pin, payload:Number(d[i]) });
                     }
                     node.buttonState = d[i];
