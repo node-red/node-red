@@ -169,6 +169,7 @@ RED.clipboard = (function() {
         $("#export-format-group > a").click(function(evt) {
             evt.preventDefault();
             if ($(this).hasClass('disabled') || $(this).hasClass('selected')) {
+                $("#clipboard-export").focus();
                 return;
             }
             $(this).parent().children().removeClass('selected');
@@ -192,6 +193,7 @@ RED.clipboard = (function() {
         $("#export-range-group > a").click(function(evt) {
             evt.preventDefault();
             if ($(this).hasClass('disabled') || $(this).hasClass('selected')) {
+                $("#clipboard-export").focus();
                 return;
             }
             $(this).parent().children().removeClass('selected');
