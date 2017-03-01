@@ -166,6 +166,18 @@ describe('template node', function() {
         });
     });
 
+    it('should handle block contexts objects', function(done) {
+        var flow = [{id:"n1", type:"template", template: "A{{#payload.A}}{{payload.A}}{{.}}{{/payload.A}}B",wires:[["n2"]]},{id:"n2",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('payload','AabcabcB');
+                done();
+            });
+            n1.receive({payload:{A:"abc"}});
+        });
+    });
     it('should raise error if passed bad template', function(done) {
         var flow = [{id:"n1", type:"template", field: "payload", template: "payload={{payload",wires:[["n2"]]},{id:"n2",type:"helper"}];
         helper.load(templateNode, flow, function() {

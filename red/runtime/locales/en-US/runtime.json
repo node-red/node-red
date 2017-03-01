@@ -32,6 +32,7 @@
             "upgrading": "Upgrading module: __name__ to version: __version__",
             "upgraded": "Upgraded module: __name__. Restart Node-RED to use the new version",
             "upgrade-failed-not-found": "$t(server.install.install-failed-long) version not found",
+            "install-failed-not-found": "$t(server.install.install-failed-long) module not found",
             "uninstalling": "Uninstalling module: __name__",
             "uninstall-failed": "Uninstall failed",
             "uninstall-failed-long": "Uninstall of module __name__ failed:",

@@ -47,10 +47,13 @@
     <p>Calls out to a system command.<br/></p>
     <p>Provides 3 outputs: stdout, stderr, and return code.</p>
     <p>By default uses the <code>exec</code> system call which calls the command, then gets a callback
-    on completion, returning the complete result in one message, along with any errors.</p>
+    on completion, returning stdout as the payload to the first, the error code as the third
+    and, if available, stderr to the second output. If no error occurred, a zero is returned on the third output.</p>
     <p>Optionally can use <code>spawn</code> instead, which returns the output from stdout and stderr
     as the command runs (usually one line at a time). On completion it then returns a return code
     (on the 3rd output).</p>
+    <p>The <code>exec</code> method spawns a subshell and therefore can be used for more complicated
+    commands involving pipes. However, it waits for completion of the whole command before returing anything.</p> 
     <p>The optional append gets added to the command after <code>msg.payload</code> - so you can do
     things like pipe the result to another command.</p>
     <p>Commands or parameters with spaces should be enclosed in quotes - <i>"This is a single parameter"</i></p>

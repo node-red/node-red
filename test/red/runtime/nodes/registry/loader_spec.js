@@ -514,7 +514,7 @@ describe("red/nodes/registry/loader",function() {
                 node.enabled.should.be.true();
                 nodes.registerType.called.should.be.false();
                 node.should.have.property('err');
-                node.err.message.should.eql("fail to require");
+                node.err.toString().should.eql("Error: fail to require (line:1)");
 
                 done();
             }).otherwise(function(err) {
@@ -563,6 +563,45 @@ describe("red/nodes/registry/loader",function() {
             fs.readFileSync.lastCall.args[0].should.eql(path.normalize("/tmp/node/directory/locales/fr/file.html"));
             loader.getNodeHelp(node,"fr").should.eql("foo");
             fs.readFileSync.calledOnce.should.be.true();
+        });
+        it("loads help, defaulting to en-US content for extra nodes", function() {
+            stubs.push(sinon.stub(fs,"readFileSync", function(path) {
+                if (path.indexOf("en-US") >= 0) {
+                    return 'bar';
+                }
+                throw new Error("not found");
+            }));
+            var node = {
+                template: "/tmp/node/directory/file.html",
+                help:{}
+            };
+            delete node.help['en-US'];
+
+            loader.getNodeHelp(node,"fr").should.eql("bar");
+            node.help['fr'].should.eql("bar");
+            fs.readFileSync.calledTwice.should.be.true();
+            fs.readFileSync.firstCall.args[0].should.eql(path.normalize("/tmp/node/directory/locales/fr/file.html"));
+            fs.readFileSync.lastCall.args[0].should.eql(path.normalize("/tmp/node/directory/locales/en-US/file.html"));
+            loader.getNodeHelp(node,"fr").should.eql("bar");
+            fs.readFileSync.calledTwice.should.be.true();
+        });
+        it("fails to load en-US help content", function() {
+            stubs.push(sinon.stub(fs,"readFileSync", function(path) {
+                throw new Error("not found");
+            }));
+            var node = {
+                template: "/tmp/node/directory/file.html",
+                help:{}
+            };
+            delete node.help['en-US'];
+
+            should.not.exist(loader.getNodeHelp(node,"en-US"));
+            should.not.exist(node.help['en-US']);
+            fs.readFileSync.calledTwice.should.be.true();
+            fs.readFileSync.firstCall.args[0].should.eql(path.normalize("/tmp/node/directory/locales/en-US/file.html"));
+            fs.readFileSync.lastCall.args[0].should.eql(path.normalize("/tmp/node/directory/locales/en/file.html"));
+            should.not.exist(loader.getNodeHelp(node,"en-US"));
+            fs.readFileSync.callCount.should.eql(4);
         });
 
     });

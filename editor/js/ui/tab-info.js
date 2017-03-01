@@ -66,6 +66,15 @@ RED.sidebar.info = (function() {
         return value;
     }
 
+    function addTargetToExternalLinks(el) {
+        $(el).find("a").each(function(el) {
+            var href = $(this).attr('href');
+            if (/^https?:/.test(href)) {
+                $(this).attr('target','_blank');
+            }
+        });
+        return el;
+    }
     function refresh(node) {
         tips.stop();
         $(content).empty();
@@ -117,14 +126,14 @@ RED.sidebar.info = (function() {
         $("<hr/>").appendTo(content);
         if (!subflowNode && node.type != "comment") {
             var helpText = $("script[data-help-name$='"+node.type+"']").html()||"";
-            $('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(helpText)+'">'+helpText+'</span></div>').appendTo(content);
+            addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(helpText)+'">'+helpText+'</span></div>').appendTo(content));
         }
         if (subflowNode) {
-            $('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(subflowNode.info||"")+'">'+marked(subflowNode.info||"")+'</span></div>').appendTo(content);
+            addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(subflowNode.info||"")+'">'+marked(subflowNode.info||"")+'</span></div>').appendTo(content));
         } else if (node._def && node._def.info) {
             var info = node._def.info;
             var textInfo = (typeof info === "function" ? info.call(node) : info);
-            $('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(textInfo)+'">'+marked(textInfo)+'</span></div>').appendTo(content);
+            addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(textInfo)+'">'+marked(textInfo)+'</span></div>').appendTo(content));
             //$('<div class="node-help">'+(typeof info === "function" ? info.call(node) : info)+'</div>';
         }
 

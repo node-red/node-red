@@ -1037,9 +1037,13 @@ RED.nodes = (function() {
                     var wires = (n.wires[w1] instanceof Array)?n.wires[w1]:[n.wires[w1]];
                     for (var w2=0;w2<wires.length;w2++) {
                         if (node_map.hasOwnProperty(wires[w2])) {
-                            var link = {source:n,sourcePort:w1,target:node_map[wires[w2]]};
-                            addLink(link);
-                            new_links.push(link);
+                            if (n.z === node_map[wires[w2]].z) {
+                                var link = {source:n,sourcePort:w1,target:node_map[wires[w2]]};
+                                addLink(link);
+                                new_links.push(link);
+                            } else {
+                                console.log("Warning: dropping link that crosses tabs:",n.id,"->",node_map[wires[w2]].id);
+                            }
                         }
                     }
                 }

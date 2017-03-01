@@ -205,7 +205,7 @@ RED.debug = (function() {
         var metaRow = $('<div class="debug-message-meta"></div>').appendTo(msg);
         $('<span class="debug-message-date">'+ getTimestamp()+'</span>').appendTo(metaRow);
         if (sourceNode) {
-            $('<a>',{href:"#",class:"debug-message-name"}).html('node: '+sourceNode.id)
+            $('<a>',{href:"#",class:"debug-message-name"}).html('node: '+(sourceNode.name||sourceNode.id))
             .appendTo(metaRow)
             .click(function(evt) {
                 evt.preventDefault();

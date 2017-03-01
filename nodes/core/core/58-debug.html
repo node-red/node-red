@@ -170,7 +170,7 @@
             this.handleDebugMessage = function(t,o) {
                 var sourceNode = RED.nodes.node(o.id) || RED.nodes.node(o.z);
                 if (sourceNode) {
-                    o._source = {id:sourceNode.id,z:sourceNode.z};
+                    o._source = {id:sourceNode.id,z:sourceNode.z,name:sourceNode.name};
 
                 }
                 RED.debug.handleDebugMessage(o);

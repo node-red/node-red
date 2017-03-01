@@ -102,7 +102,7 @@ RED.settings = (function () {
             url: 'settings',
             success: function (data) {
                 setProperties(data);
-                if (RED.settings.user && RED.settings.user.anonymous) {
+                if (!RED.settings.user || RED.settings.user.anonymous) {
                     RED.settings.remove("auth-tokens");
                 }
                 console.log("Node-RED: " + data.version);

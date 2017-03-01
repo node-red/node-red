@@ -315,6 +315,18 @@ function loadNodeSet(node) {
         return loadPromise;
     } catch(err) {
         node.err = err;
+        var stack = err.stack;
+        var message;
+        if (stack) {
+            var i = stack.indexOf(node.file);
+            if (i > -1) {
+                var excerpt = stack.substring(i+node.file.length+1,i+node.file.length+20);
+                var m = /^(\d+):(\d+)/.exec(excerpt);
+                if (m) {
+                    node.err = err+" (line:"+m[1]+")";
+                }
+            }
+        }
         return when.resolve(node);
     }
 }
@@ -381,8 +393,10 @@ function getNodeHelp(node,lang) {
         }
         if (help) {
             node.help[lang] = help;
+        } else if (lang === runtime.i18n.defaultLang) {
+            return null;
         } else {
-            node.help[lang] = node.help[runtime.i18n.defaultLang];
+            node.help[lang] = getNodeHelp(node, runtime.i18n.defaultLang);
         }
     }
     return node.help[lang];

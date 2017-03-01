@@ -164,10 +164,12 @@ RED.clipboard = (function() {
         dialogContainer.empty();
         dialogContainer.append($(exportNodesDialog));
         dialogContainer.i18n();
+        var format = RED.settings.flowFilePretty ? "export-format-full" : "export-format-mini";
 
         $("#export-format-group > a").click(function(evt) {
             evt.preventDefault();
             if ($(this).hasClass('disabled') || $(this).hasClass('selected')) {
+                $("#clipboard-export").focus();
                 return;
             }
             $(this).parent().children().removeClass('selected');
@@ -177,18 +179,21 @@ RED.clipboard = (function() {
             if (flow.length > 0) {
                 var nodes = JSON.parse(flow);
 
-                var format = $(this).attr('id');
+                format = $(this).attr('id');
                 if (format === 'export-format-full') {
                     flow = JSON.stringify(nodes,null,4);
                 } else {
                     flow = JSON.stringify(nodes);
                 }
                 $("#clipboard-export").val(flow);
+                $("#clipboard-export").focus();
             }
         });
+
         $("#export-range-group > a").click(function(evt) {
             evt.preventDefault();
             if ($(this).hasClass('disabled') || $(this).hasClass('selected')) {
+                $("#clipboard-export").focus();
                 return;
             }
             $(this).parent().children().removeClass('selected');
@@ -209,7 +214,7 @@ RED.clipboard = (function() {
                 nodes = RED.nodes.createCompleteNodeSet(false);
             }
             if (nodes !== null) {
-                if (RED.settings.flowFilePretty) {
+                if (format === "export-format-full") {
                     flow = JSON.stringify(nodes,null,4);
                 } else {
                     flow = JSON.stringify(nodes);
@@ -221,6 +226,7 @@ RED.clipboard = (function() {
                 $("#export-copy").addClass('disabled');
             }
             $("#clipboard-export").val(flow);
+            $("#clipboard-export").focus();
         })
 
         $("#clipboard-dialog-ok").hide();
@@ -234,7 +240,7 @@ RED.clipboard = (function() {
             $("#export-range-selected").addClass('disabled').removeClass('selected');
             $("#export-range-flow").click();
         }
-        if (RED.settings.flowFilePretty) {
+        if (format === "export-format-full") {
             $("#export-format-full").click();
         } else {
             $("#export-format-mini").click();

@@ -444,7 +444,7 @@ module.exports = function(RED) {
                         //node.log(RED._("tcpin.errors.client-connected"));
                         node.status({fill:"green",shape:"dot",text:"common.status.connected"});
                         if (clients[connection_id] && clients[connection_id].client) {
-                            clients[connection_id].connected  = true;
+                            clients[connection_id].connected = true;
                             clients[connection_id].client.write(clients[connection_id].msg.payload);
                         }
                     });
@@ -454,10 +454,10 @@ module.exports = function(RED) {
                 }
 
                 clients[connection_id].client.on('data', function(data) {
-                    if (node.out == "sit") { // if we are staying connected just send the buffer
+                    if (node.out === "sit") { // if we are staying connected just send the buffer
                         if (clients[connection_id]) {
                             clients[connection_id].msg.payload = data;
-                            node.send(clients[connection_id].msg);
+                            node.send(RED.util.cloneMessage(clients[connection_id].msg));
                         }
                     }
                     else if (node.splitc === 0) {
@@ -533,7 +533,7 @@ module.exports = function(RED) {
                     //console.log("END");
                     node.status({fill:"grey",shape:"ring",text:"common.status.disconnected"});
                     if (clients[connection_id] && clients[connection_id].client) {
-                        clients[connection_id].connected  = false;
+                        clients[connection_id].connected = false;
                         clients[connection_id].client = null;
                     }
                 });
@@ -541,7 +541,7 @@ module.exports = function(RED) {
                 clients[connection_id].client.on('close', function() {
                     //console.log("CLOSE");
                     if (clients[connection_id]) {
-                        clients[connection_id].connected  = false;
+                        clients[connection_id].connected = false;
                     }
 
                     var anyConnected = false;

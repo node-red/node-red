@@ -196,6 +196,7 @@ try {
 function basicAuthMiddleware(user,pass) {
     var basicAuth = require('basic-auth');
     var checkPassword;
+    var localCachedPassword;
     if (pass.length == "32") {
         // Assume its a legacy md5 password
         checkPassword = function(p) {
@@ -207,12 +208,26 @@ function basicAuthMiddleware(user,pass) {
         }
     }
 
+    var checkPasswordAndCache = function(p) {
+        // For BasicAuth routes we know the password cannot change without
+        // a restart of Node-RED. This means we can cache the provided crypted
+        // version to save recalculating each time.
+        if (localCachedPassword === p) {
+            return true;
+        }
+        var result = checkPassword(p);
+        if (result) {
+            localCachedPassword = p;
+        }
+        return result;
+    }
+
     return function(req,res,next) {
         if (req.method === 'OPTIONS') {
             return next();
         }
         var requestUser = basicAuth(req);
-        if (!requestUser || requestUser.name !== user || !checkPassword(requestUser.pass)) {
+        if (!requestUser || requestUser.name !== user || !checkPasswordAndCache(requestUser.pass)) {
             res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
             return res.sendStatus(401);
         }
