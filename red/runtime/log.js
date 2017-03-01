@@ -44,6 +44,8 @@ var levelNames = {
 
 var logHandlers = [];
 
+var verbose;
+
 var metricsEnabled = false;
 
 var LogHandler = function(settings) {
@@ -72,11 +74,15 @@ var consoleLogger = function(msg) {
     if (msg.level == log.METRIC || msg.level == log.AUDIT) {
         util.log("["+levelNames[msg.level]+"] "+JSON.stringify(msg));
     } else {
-        var message = msg.msg;
-        if (typeof message === 'object' && message.toString() === '[object Object]' && message.message) {
-            message = message.message;
+        if (verbose && msg.msg.stack) {
+            util.log("["+levelNames[msg.level]+"] "+(msg.type?"["+msg.type+":"+(msg.name||msg.id)+"] ":"")+msg.msg.stack);
+        } else {
+            var message = msg.msg;
+            if (typeof message === 'object' && message.toString() === '[object Object]' && message.message) {
+                message = message.message;
+            }
+            util.log("["+levelNames[msg.level]+"] "+(msg.type?"["+msg.type+":"+(msg.name||msg.id)+"] ":"")+message);
         }
-        util.log("["+levelNames[msg.level]+"] "+(msg.type?"["+msg.type+":"+(msg.name||msg.id)+"] ":"")+message);
     }
 }
 
@@ -94,6 +100,7 @@ var log = module.exports = {
         metricsEnabled = false;
         logHandlers = [];
         var loggerSettings = {};
+        verbose = settings.verbose;
         if (settings.logging) {
             var keys = Object.keys(settings.logging);
             if (keys.length === 0) {
