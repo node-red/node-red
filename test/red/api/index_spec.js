@@ -29,7 +29,7 @@ describe("api index", function() {
     describe("disables editor", function() {
         before(function() {
             api.init({},{
-                settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:true},
+                settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:true, exportNodeSettings: function() {}},
                 events: {on:function(){},removeListener: function(){}},
                 log: {info:function(){},_:function(){}},
                 nodes: {paletteEditorEnabled: function(){return true}}

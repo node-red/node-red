@@ -48,6 +48,8 @@ module.exports = {
             safeSettings.editorTheme.palette = safeSettings.editorTheme.palette || {};
             safeSettings.editorTheme.palette.editable = false;
         }
+        
+        settings.exportNodeSettings(safeSettings);
 
         res.json(safeSettings);
     }

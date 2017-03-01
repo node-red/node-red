@@ -21,6 +21,7 @@ var log = require("./log");
 
 var userSettings = null;
 var globalSettings = null;
+var nodeSettings = null;
 var storage = null;
 
 var persistentSettings = {
@@ -38,6 +39,7 @@ var persistentSettings = {
             }
         }
         globalSettings = null;
+        nodeSettings = {};
     },
     load: function(_storage) {
         storage = _storage;
@@ -99,6 +101,26 @@ var persistentSettings = {
         userSettings = null;
         globalSettings = null;
         storage = null;
+    },
+    registerNodeSettings: function(type, opts) {
+        //console.log(type,opts);
+        // 1. TODO: validate the option names are allowed for the node type
+
+        // 2. store this information against the node type
+        nodeSettings[type] = opts;
+
+
+        // TODO: remove the node settings if the node is disabled/removed from runtime
+    },
+    exportNodeSettings: function(safeSettings) {
+        // 1. forEach type in nodeSettings...
+        //  2. forEach setting for that type...
+        //   3. if globalSettings has a property with the required name...
+        //    4. set safeSettings.property to that value
+        //   5. else if the setting has a default 'value' provided
+        //    6. set safeSettings.property to that value
+
+        return safeSettings;
     }
 }
 
