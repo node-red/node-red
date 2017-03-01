@@ -393,8 +393,10 @@ function getNodeHelp(node,lang) {
         }
         if (help) {
             node.help[lang] = help;
+        } else if (lang === runtime.i18n.defaultLang) {
+            return null;
         } else {
-            node.help[lang] = node.help[runtime.i18n.defaultLang];
+            node.help[lang] = getNodeHelp(node, runtime.i18n.defaultLang);
         }
     }
     return node.help[lang];
