@@ -347,6 +347,32 @@ describe('switch Node', function() {
             switchNode1.receive({payload:undefined});
         });
     });
+    it('should treat non-existant msg property conditional as undefined', function(done) {
+        var flow = [{"id":"switchNode1","type":"switch","z":"feee1df.c3263e","name":"","property":"payload","propertyType":"msg","rules":[{"t":"eq","v":"this.does.not.exist","vt":"msg"}],"checkall":"true","outputs":1,"x":190,"y":440,"wires":[["helperNode1"]]},
+            {id:"helperNode1", type:"helper", wires:[]}];
+
+        helper.load(switchNode, flow, function() {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var received = [];
+            helperNode1.on("input", function(msg) {
+                received.push(msg);
+            });
+            // First message should be dropped as payload is not undefined
+            switchNode1.receive({topic:"messageOne",payload:""});
+            // Second message should pass through as payload is undefined
+            switchNode1.receive({topic:"messageTwo",payload:undefined});
+            setTimeout(function() {
+                try {
+                    received.should.have.lengthOf(1);
+                    received[0].should.have.a.property("topic","messageTwo");
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            },100)
+        });
+    });
 
     it('should check if input is indeed not null', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"nnull"}],checkall:false,outputs:1,wires:[["helperNode1"]]},
