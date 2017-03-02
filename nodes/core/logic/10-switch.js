@@ -125,7 +125,11 @@ module.exports = function(RED) {
                             return;
                         }
                     } else {
-                        v1 = RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg);
+                        try {
+                            v1 = RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg);
+                        } catch(err) {
+                            v1 = undefined;
+                        }
                     }
                     v2 = rule.v2;
                     if (rule.v2t === 'prev') {
@@ -138,7 +142,11 @@ module.exports = function(RED) {
                             return;
                         }
                     } else if (typeof v2 !== 'undefined') {
-                        v2 = RED.util.evaluateNodeProperty(rule.v2,rule.v2t,node,msg);
+                        try {
+                            v2 = RED.util.evaluateNodeProperty(rule.v2,rule.v2t,node,msg);
+                        } catch(err) {
+                            v2 = undefined;
+                        }
                     }
                     if (rule.t == "else") { test = elseflag; elseflag = true; }
                     if (operators[rule.t](test,v1,v2,rule.case)) {
