@@ -52,11 +52,11 @@ describe('exec node', function() {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:false, append:""},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             var spy = sinon.stub(child_process, 'exec',
-                function(arg1,arg2,arg3,arg4) {
-                    //console.log(arg1);
-                    // arg3(error,stdout,stderr);
-                    arg3(null,arg1,arg1.toUpperCase());
-                });
+            function(arg1,arg2,arg3,arg4) {
+                //console.log(arg1);
+                // arg3(error,stdout,stderr);
+                arg3(null,arg1,arg1.toUpperCase());
+            });
 
             helper.load(execNode, flow, function() {
                 var n1 = helper.getNode("n1");
@@ -64,13 +64,13 @@ describe('exec node', function() {
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
                 var received = 0;
-                var messages = [null,null];
+                var messages = [null,null,null];
                 var completeTest = function() {
                     received++;
-                    if (received < 2) {
+                    if (received < 3) {
                         return;
                     }
-                    try {
+                    try{
                         var msg = messages[0];
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
@@ -78,8 +78,13 @@ describe('exec node', function() {
 
                         msg = messages[1];
                         msg.should.have.property("payload");
-                        msg.payload.should.be.a.String;
+                        msg.payload.should.be.a.String,
                         msg.payload.should.equal("ECHO");
+
+                        msg = messages[2];
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("code",0);
+
                         child_process.exec.restore();
                         done();
                     } catch(err) {
@@ -93,6 +98,10 @@ describe('exec node', function() {
                 });
                 n3.on("input", function(msg) {
                     messages[1] = msg;
+                    completeTest();
+                });
+                n4.on("input", function(msg) {
+                    messages[2] = msg;
                     completeTest();
                 });
                 n1.receive({payload:"and"});
@@ -220,10 +229,14 @@ describe('exec node', function() {
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
                 n4.on("input", function(msg) {
-                    msg.should.have.property("payload");
-                    msg.payload.should.have.property("killed",true);
-                    msg.payload.should.have.property("signal","SIGTERM");
-                    done();
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("killed",true);
+                        msg.payload.should.have.property("signal","SIGTERM");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
                 });
                 setTimeout(function() {
                     n1.receive({kill:true});
@@ -231,6 +244,67 @@ describe('exec node', function() {
                 n1.receive({});
             });
         });
+
+
+        it('should return the rc for a failing command', function(done) {
+            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"error", addpay:false, append:""},
+                        {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+            var spy = sinon.stub(child_process, 'exec',
+            function(arg1,arg2,arg3,arg4) {
+                //console.log(arg1);
+                // arg3(error,stdout,stderr);
+                arg3({code: 1},arg1,arg1.toUpperCase());
+            });
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                var received = 0;
+                var messages = [null,null,null];
+                var completeTest = function() {
+                    received++;
+                    if (received < 3) {
+                        return;
+                    }
+                    try{
+                        var msg = messages[0];
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.equal("error");
+
+                        msg = messages[1];
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.a.String,
+                        msg.payload.should.equal("ERROR");
+
+                        msg = messages[2];
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("code",1);
+
+                        child_process.exec.restore();
+                        done();
+                    } catch(err) {
+                        child_process.exec.restore();
+                        done(err);
+                    }
+                };
+                n2.on("input", function(msg) {
+                    messages[0] = msg;
+                    completeTest();
+                });
+                n3.on("input", function(msg) {
+                    messages[1] = msg;
+                    completeTest();
+                });
+                n4.on("input", function(msg) {
+                    messages[2] = msg;
+                    completeTest();
+                });
+                n1.receive({payload:"and"});
+            });
+        });
+
     });
 
     describe('calling spawn', function() {
@@ -388,9 +462,7 @@ describe('exec node', function() {
                     msg.payload.should.equal("mkdir: /foo/bar/doo: No such file or directory\n");
                 });
                 n4.on("input", function(msg) {
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.a.Number();
-                    msg.payload.should.equal(1);
+                    msg.should.have.property("payload",1);
                     done();
                 });
                 n1.receive({payload:null});
