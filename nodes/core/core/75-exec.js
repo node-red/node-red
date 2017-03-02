@@ -106,14 +106,16 @@ module.exports = function(RED) {
                     if(stderr) {
                         msg2 = {payload: stderr};
                     }
-                    var msg3 = {payload:0};
+                    var msg3 = null;
                     node.status({});
                     //console.log('[exec] stdout: ' + stdout);
                     //console.log('[exec] stderr: ' + stderr);
                     if (error !== null) {
-                        msg3 = {payload:error.code};
+                        msg3 = {payload:error};
                         node.status({fill:"red",shape:"dot",text:"error: "+error.code});
                         //console.log('[exec] error: ' + error);
+                    } else {
+                        msg3 = {payload: { code: 0 }}
                     }
                     node.send([msg,msg2,msg3]);
                     if (child.tout) { clearTimeout(child.tout); }
