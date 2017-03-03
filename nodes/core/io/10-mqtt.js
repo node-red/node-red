@@ -160,7 +160,6 @@ module.exports = function(RED) {
                     return done();
                 }
             }
-            done();
         };
 
         this.connect = function () {
