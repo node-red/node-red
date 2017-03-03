@@ -1,0 +1,750 @@
+{
+    "catch": {
+        "catch": "すべてをキャッチ",
+        "catchNodes": "キャッチ（__number__）",
+        "label": {
+            "node": "ノード",
+            "selectAll": "すべて選択",
+            "sortByLabel": "ラベルで並べ替える",
+            "sortByType": "タイプで並べ替える",
+            "source": "次のエラーをキャッチ",
+            "type": "型"
+        },
+        "scope": {
+            "all": "すべてのノード",
+            "selected": "選択されたノード"
+        }
+    },
+    "change": {
+        "action": {
+            "change": "変更",
+            "delete": "削除",
+            "move": "移動",
+            "replace": "置換",
+            "search": "検索",
+            "set": "セット",
+            "to": "を右の値に"
+        },
+        "errors": {
+            "invalid-from": "無効な 'from'プロパティ：__error__",
+            "invalid-json": "'to' JSONプロパティが無効です"
+        },
+        "label": {
+            "change": "__property__を変更",
+            "changeCount": "変更：__count__ルール",
+            "delete": "__property__を削除",
+            "move": "__property__を移動",
+            "regex": "正規表現を使用",
+            "rule": "ルール",
+            "rules": "ルール",
+            "set": "__property__をセット"
+        }
+    },
+    "comment": {
+        "label": {
+            "body": "本文",
+            "title": "タイトル"
+        },
+        "tip": "ヒント：テキストのスタイルは、<a href=\"https://help.github.com/articles/markdown-basics/\" target=\"_blank\"> Github風のMarkdown </a>とすることができます。"
+    },
+    "common": {
+        "errors": {
+            "nooverride": "警告：msgプロパティは、設定されたノードのプロパティを上書きすることはできません。 bit.ly/nr-override-msg-propsを参照してください。"
+        },
+        "label": {
+            "name": "名前",
+            "password": "パスワード",
+            "payload": "ペイロード",
+            "topic": "トピック",
+            "username": "ユーザー名"
+        },
+        "notification": {
+            "error": "<strong>エラー</strong>：__message__",
+            "errors": {
+                "no-response": "サーバーからの応答がありません",
+                "not-deployed": "ノードがデプロイされていません",
+                "unexpected": "予期しないエラー（__status__）__message__"
+            }
+        },
+        "status": {
+            "connected": "接続中",
+            "connecting": "接続確立中",
+            "disconnected": "切断",
+            "error": "エラー",
+            "not-connected": "未接続",
+            "ok": "[OK]"
+        }
+    },
+    "csv": {
+        "errors": {
+            "csv_js": "このノードは、csv文字列またはjsオブジェクトのみを処理します。",
+            "obj_csv": "オブジェクト -> csvに指定された列テンプレートがありません。"
+        },
+        "label": {
+            "c2o": "CSVからオブジェクトへのオプション",
+            "columns": "列",
+            "firstrow": "最初の行に列名を含む",
+            "includerow": "列名の行を含む",
+            "input": "入力",
+            "newline": "改行",
+            "o2c": "オブジェクトからCSVへのオプション",
+            "output": "出力",
+            "separator": "区切り文字"
+        },
+        "newline": {
+            "linux": "Linux（\\n）",
+            "mac": "Mac（\\r）",
+            "windows": "Windows（\\r\\n）"
+        },
+        "output": {
+            "array": "単一のメッセージ[配列]",
+            "row": "行ごとのメッセージ"
+        },
+        "placeholder": {
+            "columns": "カンマ区切りの列名"
+        },
+        "separator": {
+            "colon": "コロン",
+            "comma": "カンマ",
+            "hashtag": "ハッシュタグ",
+            "other": "その他...",
+            "semicolon": "セミコロン",
+            "space": "スペース",
+            "tab": "タブ"
+        }
+    },
+    "debug": {
+        "debtab": "デバッグタブ",
+        "msgobj": "完全なmsgオブジェクト",
+        "msgprop": "メッセージプロパティ",
+        "notification": {
+            "activated": "正常に起動しました：__label__",
+            "deactivated": "正常に無効化されました：__label__"
+        },
+        "output": "出力",
+        "sidebar": {
+            "filterAll": "すべてのフロー",
+            "filterCurrent": "現在のフロー",
+            "label": "デバッグ",
+            "name": "デバッグメッセージ"
+        },
+        "tabcon": "デバッグタブとコンソール両方",
+        "to": "出力先"
+    },
+    "delay": {
+        "action": "アクション",
+        "between": "の間に",
+        "day": "日",
+        "days": "日",
+        "delaymsg": "遅延メッセージ",
+        "dropmsg": "中間メッセージをドロップする",
+        "error": {
+            "buffer": "バッファーが1,000メッセージを超えました",
+            "buffer1": "バッファーが10,000メッセージを超えました"
+        },
+        "fairqueue": "トピックベースの公正なキュー",
+        "for": "間",
+        "hour": "時間",
+        "hours": "時間",
+        "label": {
+            "delay": "遅延",
+            "limit": "限界値",
+            "queue": "キュー",
+            "random": "ランダム",
+            "timed": "リリースごと",
+            "units": {
+                "day": {
+                    "plural": "日",
+                    "singular": "日"
+                },
+                "hour": {
+                    "plural": "時間",
+                    "singular": "時間"
+                },
+                "minute": {
+                    "plural": "分",
+                    "singular": "分"
+                },
+                "second": {
+                    "plural": "秒",
+                    "singular": "秒"
+                }
+            }
+        },
+        "limitrate": "上限レート",
+        "milisecs": "ミリ秒",
+        "min": "分",
+        "mins": "分",
+        "msgper": "msgあたりの",
+        "randomdelay": "ランダム遅延",
+        "rate": "レート",
+        "sec": "秒",
+        "secs": "秒",
+        "timedqueue": "タイムアウトリリースキュー"
+    },
+    "exec": {
+        "label": {
+            "append": "追加",
+            "command": "コマンド",
+            "timeout": "タイムアウト",
+            "timeoutplace": "任意"
+        },
+        "placeholder": {
+            "extraparams": "追加の入力パラメータ"
+        },
+        "spawn": "exec()ではなくspawn()を使用しますか？"
+    },
+    "file": {
+        "action": {
+            "append": "ファイルに追加",
+            "delete": "ファイルを削除する",
+            "overwrite": "ファイルを上書きする"
+        },
+        "errors": {
+            "appendfail": "ファイルに追加できませんでした：__error__",
+            "createfail": "ファイルの作成に失敗しました：__error__",
+            "deletefail": "ファイルの削除に失敗しました：__error__",
+            "invaliddelete": "警告：無効な削除です。設定ダイアログでは、特定の削除オプションを使用してください。",
+            "nofilename": "ファイル名が指定されていません",
+            "writefail": "ファイルへの書き込みに失敗しました：__error__"
+        },
+        "label": {
+            "action": "アクション",
+            "addnewline": "各ペイロードに改行（\\n）を追加しますか？",
+            "createdir": "ディレクトリが存在しない場合は作成しますか？",
+            "deletelabel": "__file__を削除",
+            "filelabel": "ファイル",
+            "filename": "ファイル名",
+            "outputas": "次のように出力します。"
+        },
+        "output": {
+            "buffer": "バッファー",
+            "utf8": "utf8文字列"
+        },
+        "status": {
+            "appendedfile": "ファイルに追加：__file__",
+            "deletedfile": "削除されたファイル：__file__",
+            "wrotefile": "書いたファイル：__file__"
+        },
+        "tip": "ヒント：ファイル名は絶対パスで指定してください。"
+    },
+    "function": {
+        "error": {
+            "inputListener": "関数ノードの 'input'イベントにリスナーを追加できません"
+        },
+        "label": {
+            "function": "関数",
+            "outputs": "出力"
+        },
+        "tip": "ノードの説明については、「説明」タブを参照してください。"
+    },
+    "html": {
+        "format": {
+            "multi": "複数のメッセージとして、各要素に1つ",
+            "single": "配列を含む単一のメッセージとして"
+        },
+        "label": {
+            "output": "出力",
+            "select": "選択"
+        },
+        "output": {
+            "attr": "要素の任意の属性のオブジェクト",
+            "html": "要素のhtmlコンテンツ",
+            "text": "要素のテキスト内容のみ"
+        },
+        "tip": "ヒント：<b>選択</b>値は、<a href=\"https://github.com/fb55/CSSselect#user-content-supported-selectors\" target=\"_blank\"> <i> <u > CSSセレクタ</u> </i> </a>の形式で指定します。jQueryセレクタとも似ている形式です。"
+    },
+    "httpin": {
+        "basicauth": "Basic認証を使用する",
+        "binary": "バイナリバッファー",
+        "errors": {
+            "deprecated-call": "__method__への非推奨の呼び出しがあります",
+            "json-error": "JSON解析エラー",
+            "missing-path": "パスが見つかりません",
+            "no-response": "レスポンスオブジェクトなし",
+            "no-url": "指定されたURLがありません",
+            "not-created": "httpNodeRootがfalseに設定されている場合、http-inノードを作成できません"
+        },
+        "httpreq": "httpリクエスト",
+        "json": "解析されたJSONオブジェクト",
+        "label": {
+            "doc": "ドキュメント",
+            "method": "方法",
+            "return": "戻る",
+            "url": "URL"
+        },
+        "setby": "- msg.methodによって設定されます。-",
+        "status": {
+            "requesting": "リクエスト送信中"
+        },
+        "tip": {
+            "in": "URLは、次のアドレスの相対アドレスとなります：",
+            "req": "ヒント：JSON解析が失敗した場合、フェッチされた文字列はそのまま返されます。",
+            "res": "このノードに送信されたメッセージは、<i> http in</i>ノードから発信されたメッセージでなければ<b>なりません</b>"
+        },
+        "tls-config": "TLS設定",
+        "use-tls": "セキュア（SSL/TLS）接続を有効にする",
+        "utf8": "UTF-8文字列"
+    },
+    "inject": {
+        "and": "から",
+        "at": "で",
+        "between": "の",
+        "crontab": "crontab = __crontab__",
+        "days": {
+            "0": "月曜日",
+            "1": "火曜日",
+            "2": "水曜日",
+            "3": "木曜日",
+            "4": "金曜日",
+            "5": "土曜日",
+            "6": "日曜日"
+        },
+        "errors": {
+            "failed": "インジェクトに失敗しました。詳細はログを参照してください"
+        },
+        "every": "毎",
+        "failed": "インジェクトに失敗しました：__error__",
+        "hours": "時間",
+        "inject": "インジェクト",
+        "interval": "一定間隔",
+        "interval-time": "範囲指定一定間隔",
+        "label": {
+            "repeat": "繰り返す"
+        },
+        "minutes": "分",
+        "none": "なし",
+        "on": "に",
+        "onstart": "開始時に一度だけインジェクトを実施しますか？",
+        "previous": "前の値",
+        "repeat": "繰り返し= __repeat__",
+        "seconds": "秒",
+        "stopped": "停止",
+        "success": "正常にインジェクトしました：__label__",
+        "time": "定時実行",
+        "timestamp": "タイムスタンプ",
+        "tip": "<b>注：</b>「範囲指定一定間隔」と「定時実行」はcronを使用します。<br/>詳細については、情報タブを参照してください。"
+    },
+    "json": {
+        "errors": {
+            "dropped": "無視されたサポートされていないペイロードタイプ",
+            "dropped-error": "ペイロードの変換に失敗しました",
+            "dropped-object": "無視された非オブジェクトペイロード"
+        }
+    },
+    "link": {
+        "label": {
+            "event": "イベント名"
+        },
+        "linkIn": "リンク 入力",
+        "linkOut": "リンク　出力"
+    },
+    "mqtt": {
+        "errors": {
+            "invalid-topic": "無効なトピックが指定されました",
+            "missing-config": "ブローカーの設定がありません",
+            "nonclean-missingclientid": "クリーンセッションを使用するクライアントIDが設定されていません",
+            "not-defined": "トピックが定義されていません"
+        },
+        "false": "偽",
+        "label": {
+            "broker": "サーバ",
+            "cleansession": "クリーンセッションを使用する",
+            "clientid": "クライアントID",
+            "compatmode": "従来のMQTT 3.1サポートを使用する",
+            "keepalive": "キープアライブ",
+            "port": "ポート",
+            "qos": "QoS",
+            "tls-config": "TLS設定",
+            "use-tls": "セキュア（SSL/TLS）接続を有効にする",
+            "verify-server-cert": "サーバー証明書を検証する"
+        },
+        "placeholder": {
+            "birth-topic": "空白のままにしてBirthメッセージを無効にする",
+            "clientid": "空白のままにすると自動生成されます",
+            "clientid-nonclean": "クリーンでないセッションに設定する必要があります",
+            "will-topic": "空白のままにしてメッセージを無効にする"
+        },
+        "retain": "保持する",
+        "state": {
+            "connect-failed": "ブローカーへの接続に失敗：__broker__",
+            "connected": "ブローカーへ接続：__broker__",
+            "disconnected": "ブローカーから切断: __broker__"
+        },
+        "tabs-label": {
+            "birth": "Birthメッセージ",
+            "connection": "接続",
+            "security": "セキュリティ",
+            "will": "Willメッセージ"
+        },
+        "tip": "ヒント：msgプロパティで設定する場合は、トピック、qos、または空白のままにしておきます。",
+        "true": "真"
+    },
+    "range": {
+        "errors": {
+            "notnumber": "数値ではない"
+        },
+        "label": {
+            "action": "アクション",
+            "from": "開始位置",
+            "inputrange": "入力範囲をマップする",
+            "resultrange": "結果の範囲に",
+            "roundresult": "結果を最も近い整数に丸めますか？",
+            "to": "終了位置"
+        },
+        "placeholder": {
+            "maxin": "例:99",
+            "maxout": "例:255",
+            "min": "例:0"
+        },
+        "scale": {
+            "limit": "ターゲット範囲の拡大縮小",
+            "payload": "msg.payloadをスケール",
+            "wrap": "ターゲット範囲内でスケールおよびラップ"
+        },
+        "tip": "ヒント：このノードは数値のみで動作します。"
+    },
+    "rpi-gpio": {
+        "alreadyset": "すでにセットされています",
+        "alreadyuse": "すでに使用されています",
+        "any": "指定なし",
+        "digout": "デジタル出力",
+        "errors": {
+            "alreadyset": "GPIOピン__pin__はすでにタイプがセットされています：__type__",
+            "commandnotexecutable": "nrgpioコマンドが実行できません",
+            "commandnotfound": "nrgpioコマンドが見つかりません",
+            "error": "エラー：__error__",
+            "ignorenode": "ラズベリーPi固有のノードを無視する",
+            "invalidinput": "無効な入力",
+            "invalidpin": "無効なGPIOピン",
+            "libnotfound": "Pi RPi.GPIOのpythonライブラリが見つかりません",
+            "mustbeexecutable": "nrgpioコマンドには実行可能属性が必要です",
+            "needtobeexecutable": "__command__は実行可能である必要があります",
+            "pythoncommandnotfound": "nrpgio pythonコマンドが実行されていません",
+            "sawpitype": "Saw Piタイプ",
+            "version": "バージョンコマンドが失敗しました"
+        },
+        "initpin0": "ピンの初期レベル - ロー（0）",
+        "initpin1": "ピンの初期レベル - ハイ（1）",
+        "label": {
+            "button": "ボタン",
+            "debounce": "デバウンス",
+            "gpiopin": "GPIO",
+            "initpin": "ピンの状態を初期化しますか？",
+            "left": "左",
+            "middle": "中間",
+            "pikeyboard": "Piキーボード",
+            "pimouse": "Piマウス",
+            "readinitial": "デプロイ/再起動時のピンの初期状態を読み込みますか？",
+            "resistor": "ピンの抵抗",
+            "right": "右",
+            "selectpin": "ピンを選択",
+            "type": "タイプ"
+        },
+        "left": "左",
+        "middle": "中央",
+        "pinname": "ピン",
+        "pwmout": "PWM出力",
+        "resistor": {
+            "none": "抵抗なし",
+            "pulldown": "プルダウン",
+            "pullup": "プルアップ"
+        },
+        "right": "右",
+        "status": {
+            "closed": "終了",
+            "not-running": "実行不可",
+            "stopped": "停止"
+        },
+        "tip": {
+            "dig": "ヒント：デジタル出力の場合、ノードの入力は0または1でなければなりません。",
+            "in": "ヒント：デジタル入力のみがサポートされています - 入力は0または1でなければなりません。",
+            "pin": "<b>使用中のピン</b>：",
+            "pwm": "ヒント：PWM出力の場合、ノードの入力は0〜100でなければなりません。"
+        },
+        "types": {
+            "digout": "デジタル出力",
+            "input": "入力",
+            "pulldown": "プルダウンで入力",
+            "pullup": "プルアップで入力",
+            "pwmout": "PWM出力"
+        }
+    },
+    "status": {
+        "label": {
+            "node": "ノード",
+            "selectAll": "すべて選択",
+            "sortByLabel": "ラベルで並べ替える",
+            "sortByType": "タイプで並べ替える",
+            "source": "からのステータスを報告",
+            "type": "型"
+        },
+        "scope": {
+            "all": "すべてのノード",
+            "selected": "選択されたノード"
+        },
+        "status": "ステータス（すべて）",
+        "statusNodes": "ステータス（__number__）"
+    },
+    "switch": {
+        "and": "と",
+        "checkall": "すべてのルールをチェックする",
+        "errors": {
+            "invalid-expr": "無効な式：__error__"
+        },
+        "ignorecase": "大文字小文字を無視する",
+        "label": {
+            "property": "プロパティ",
+            "rule": "ルール"
+        },
+        "rules": {
+            "btwn": "間にある",
+            "cont": "含む",
+            "else": "あるいは",
+            "false": "偽",
+            "nnull": "nullではない",
+            "null": "null",
+            "regex": "正規表現にマッチする",
+            "true": "真"
+        },
+        "stopfirst": "最初にルールが合致した後にチェックを止める"
+    },
+    "tail": {
+        "action": {
+            "binary": "バイナリ - バイナリーバッファーを返す",
+            "text": "テキスト - 文字列を返す"
+        },
+        "errors": {
+            "windowsnotsupport": "Windowsでは現在サポートされていません。"
+        },
+        "label": {
+            "filename": "ファイル名",
+            "splitlines": "\\nの分割線？",
+            "type": "ファイルの種類"
+        }
+    },
+    "tcpin": {
+        "errors": {
+            "cannot-listen": "ポート__port__で待ち受けできません。エラー：__error__",
+            "connect-fail": "接続に失敗しました",
+            "connect-timeout": "接続タイムアウト",
+            "connection-lost": "__host__：__port__への接続が切断されました",
+            "error": "エラー：__error__",
+            "no-host": "ホストおよび/またはポートが設定されていません",
+            "socket-error": "__host__からのソケットエラー：__port__",
+            "timeout": "タイムアウトしました。閉じたソケットポート：__port__"
+        },
+        "label": {
+            "close-connection": "各メッセージの送信後に接続を閉じますか？",
+            "decode-base64": "Base64メッセージをデコードしますか？",
+            "delimited": "区切られた",
+            "host": "ホストで",
+            "output": "出力",
+            "payload": "ペイロード",
+            "port": "ポート",
+            "return": "戻る",
+            "server": "サーバ",
+            "type": "タイプ"
+        },
+        "output": {
+            "base64": "Base64文字列",
+            "buffer": "バイナリーバッファー",
+            "single": "シングル",
+            "stream": "ストリーム",
+            "string": "文字列"
+        },
+        "return": {
+            "character": "受け取った文字が",
+            "never": "決して - 接続を開いたままにする",
+            "number": "固定数の文字",
+            "timeout": "一定のタイムアウト後"
+        },
+        "status": {
+            "connected": "__host__に接続：__port__",
+            "connecting": "__host__：__port__に接続する",
+            "connection-closed": "接続は__host__：__port__",
+            "connection-from": "__host__からの接続：__port__",
+            "connections": "__count__接続",
+            "connections_plural": "__count__接続",
+            "listening-port": "待ち受けポート__port__",
+            "stopped-listening": "ポートでの待ち受けを停止しました"
+        },
+        "type": {
+            "connect": "に接続します",
+            "listen": "聞く",
+            "reply": "TCPに返信する"
+        }
+    },
+    "template": {
+        "label": {
+            "format": "構文ハイライト",
+            "mustache": "mustacheテンプレート",
+            "plain": "プレーンテキスト",
+            "property": "プロパティを設定する",
+            "syntax": "フォーマット",
+            "template": "テンプレート"
+        },
+        "templatevalue": "これはペイロードです：{{payload}}！"
+    },
+    "tls": {
+        "error": {
+            "missing-file": "証明書/キーファイルが提供されていません"
+        },
+        "label": {
+            "ca": "CA証明書",
+            "cert": "証明書",
+            "key": "秘密鍵",
+            "verify-server-cert": "サーバー証明書を検証する"
+        },
+        "placeholder": {
+            "ca": "CA証明書へのパス（PEM形式）",
+            "cert": "証明書へのパス（PEM形式）",
+            "key": "秘密鍵へのパス（PEM形式）"
+        },
+        "tls": "TLS設定"
+    },
+    "trigger": {
+        "duration": {
+            "h": "時間",
+            "m": "分",
+            "ms": "ミリ秒",
+            "s": "秒"
+        },
+        "extend": "新しいメッセージが到着した場合に遅延時間を延長する",
+        "label": {
+            "reset": "次の場合にトリガーをリセットします。",
+            "resetMessage": "msg.reset が設定された",
+            "resetPayload": "msg.payload が次の値と等しい",
+            "resetprompt": "任意",
+            "trigger": "トリガー",
+            "trigger-block": "トリガー＆ブロック"
+        },
+        "output": {
+            "existing": "既存のmsg.payload",
+            "latest": "最新のmsg.payload",
+            "nothing": "なし",
+            "number": "数値",
+            "original": "元のmsg.payload",
+            "string": "文字列"
+        },
+        "send": "送信",
+        "then": "次に",
+        "then-send": "送信して",
+        "wait-for": "待機",
+        "wait-reset": "リセット待ち"
+    },
+    "udp": {
+        "bcmsg": "ブロードキャストメッセージ",
+        "bind": {
+            "local": "ローカルポートにバインドする",
+            "random": "ランダムなローカルポートにバインドする",
+            "target": "ターゲットポートにバインドする"
+        },
+        "errors": {
+            "access-error": "UDPアクセスエラー。1024未満のポートにはrootアクセスが必要な場合があります",
+            "alreadyused": "udp：既に使用中のポート",
+            "bad-mcaddress": "間違ったマルチキャストアドレス",
+            "error": "エラー：__error__",
+            "interface": "必要なインターフェイスのIPアドレスでなければなりません",
+            "ip-notset": "udp：IPアドレスが設定されていません",
+            "port-invalid": "udp：ポート番号が無効です",
+            "port-notset": "udp：ポートが設定されていません"
+        },
+        "label": {
+            "address": "アドレス",
+            "decode-base64": "Base64でエンコードされたペイロードをデコードしますか？",
+            "group": "グループ",
+            "interface": "ローカルIP",
+            "interfaceprompt": "（オプション）バインドするローカルIPアドレス",
+            "listen": "待ち受け",
+            "onport": "送信元ポート",
+            "output": "出力",
+            "send": "送信",
+            "toport": "送信先ポート",
+            "using": "を使用して"
+        },
+        "mcmsg": "マルチキャストメッセージ",
+        "mcmsgs": "マルチキャストメッセージ",
+        "output": {
+            "base64": "Base64でエンコードされた文字列",
+            "buffer": "バッファー",
+            "string": "文字列"
+        },
+        "placeholder": {
+            "address": "宛先IP",
+            "interface": "（オプション）eth0のIPアドレス"
+        },
+        "status": {
+            "bc-ready": "udpブロードキャスト準備完了：__outport__  - > __host__：__port__",
+            "listener-at": "udpリスナー__host__：__port__",
+            "listener-stopped": "udpリスナーが停止しました",
+            "mc-group": "udpマルチキャストグループ__group__",
+            "mc-ready": "udpマルチキャスト対応：__outport__  - > __host__：__port__",
+            "output-stopped": "udp出力が停止しました",
+            "ready": "udp 準備完了：__outport__  - > __host__：__port__",
+            "ready-nolocal": "udp準備完了：__host__：__port__"
+        },
+        "tip": {
+            "in": "ヒント：ファイアウォールでポートが許可されていることを確認してください。",
+            "out": "ヒント：<code> msg.ip </code>と<code> msg.port </code>を使用して設定する場合は、アドレスとポートを空白のままにします。",
+            "port": "すでに使用されているポート："
+        },
+        "udpmsg": "udpメッセージ",
+        "udpmsgs": "udpメッセージ"
+    },
+    "unknown": {
+        "label": {
+            "unknown": "不明"
+        },
+        "tip": "<p>このノードは、Node-REDのインストールで不明なタイプです。</p> <p> <i>ノードをこの状態にして展開すると、その設定は保存されますが、 </p> <p>詳細については、情報のサイドバーを参照してください。</p>"
+    },
+    "watch": {
+        "label": {
+            "files": "ファイル"
+        },
+        "placeholder": {
+            "files": "カンマ区切りのファイルおよび/またはディレクトリのリスト"
+        },
+        "tip": "Windowsでは、任意のディレクトリ名に二重バックスラッシュ\\\\を使用する必要があります。"
+    },
+    "websocket": {
+        "connectto": "に接続します",
+        "errors": {
+            "connect-error": "websocket接続でエラーが発生しました：",
+            "missing-conf": "サーバー構成がありません",
+            "send-error": "送信中にエラーが発生しました："
+        },
+        "label": {
+            "path": "パス",
+            "type": "タイプ",
+            "url": "URL"
+        },
+        "listenon": "聞く",
+        "message": "メッセージ全体を送信/受信する",
+        "payload": "送受信ペイロード",
+        "tip": {
+            "path1": "デフォルトでは、<code> payload </code>には、送信されるデータまたはwebsocketから受信されるデータが格納されます。リスナーは、メッセージオブジェクト全体をJSON形式の文字列として送受信するように設定できます。",
+            "path2": "このパスは、次のパスの相対パスとなります：",
+            "url1": "URLは<code>ws://</code>または<code>wss://</code>スキームを使用し、既存のWebSocketリスナを指す必要があります。",
+            "url2": "デフォルトでは、<code> payload </code>には、送信されるデータまたはwebsocketから受信されるデータが格納されます。クライアントは、メッセージオブジェクト全体をJSON形式の文字列として送受信するように設定できます。"
+        }
+    },
+    "xml": {
+        "errors": {
+            "xml_js": "このノードは、XML文字列またはjsオブジェクトのみを処理します。"
+        },
+        "label": {
+            "advanced": "高度なオプション",
+            "prefix": "文字コンテンツにアクセスするためのプレフィックス",
+            "represent": "XMLタグ属性を名前付きプロパティとして表す"
+        },
+        "tip": "XML属性をJSONに変換する簡単な方法はありません。このノードではXML属性に当たるプロパティには、デフォルトで$をプロパティの名前の前に追加しています。"
+    },
+    "yaml": {
+        "errors": {
+            "dropped": "無視されたサポートされていないペイロードタイプ",
+            "dropped-error": "ペイロードの変換に失敗しました",
+            "dropped-object": "無視された非オブジェクトペイロード"
+        }
+    }
+}

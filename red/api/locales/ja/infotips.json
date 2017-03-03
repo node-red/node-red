@@ -1,0 +1,33 @@
+{
+    "info": {
+        "tip0": "{{core:delete-selection}}を使用して、選択したノードまたはリンクを削除できます",
+        "tip1": "{{core:search}}を押すとノードを検索することができます",
+        "tip10": "[shift] [click]してノードポートをドラッグすると、接続されているすべてのワイヤまたは選択したワイヤだけが移動します",
+        "tip11": "{{core:show-info-tab}}で情報タブを、{{core:show-debug-tab}}でのデバッグタブを表示することができます",
+        "tip12": "ワークスペースで[ctrl]を押しながら[quick-add]ダイアログを開きます",
+        "tip13": "クイック配線を有効にするには、ノードポートで[click]してから[ctrl]キーを押し続けます",
+        "tip14": "[shift]キーを押しながらノード上でクリックを、接続されているすべてのノードも選択します",
+        "tip15": "[ctrl]キーを押しながらノード上でクリックをすると現在の選択範囲に追加したり、外したりすることができます",
+        "tip16": "フロータブを{{core:show-previous-tab}}と{{core:show-next-tab}}に切り替えられます",
+        "tip17": "{{core:confirm-edit-tray}}を使用してノード編集トレイで変更を確認するか、{{core:cancel-edit-tray}}でキャンセルすることができます",
+        "tip18": "{{core:edit-selected-node}}を押すと、現在選択中の最初のノードが編集されます",
+        "tip2": "{{core:toggle-sidebar}}を押すと、このサイドバーの表示を切り替えることができます",
+        "tip3": "ノードのパレットを{{core:manage-palette}}で管理することができます",
+        "tip4": "フロー設定ノードは、サイドバーパネルに表示されます。メニューまたは{{core:show-config-tab}}でアクセスできます",
+        "tip5": "メニューのオプションからこれらのヒントを有効または無効にすることができます",
+        "tip6": "[left] [up] [down]および[right]キーを使用して、選択したノードを移動します。 少しずつ動かすには、[シフト]を押し​​たまま移動させてください。",
+        "tip7": "ノードをワイヤにドラッグすると、そのノードをワイヤの間に割り込ませることができます",
+        "tip8": "選択したノードまたは現在のタブを{{core:show-export-dialog}}でエクスポートします",
+        "tip9": "JSONをエディタにドラッグするか、{{core:show-import-dialog}}をドラッグしてフローをインポートします。"
+    },
+    "info-tbd": {
+        "tip1": "上記の<code> デプロイ </ code>ボタンを押してフローの実行を開始します。フロー全体または変更だけをデプロイすることができます。",
+        "tip10": "<a href='https://node-red.slack.com/' target='_blank'>スラック</a> <br/>または<br/> <a href='https://groups.google.com/forum/#!forum/node-red' target='_blank'>Node-RED Googleグループ</a> <br/>に参加してください",
+        "tip2": "<i class = 'fa fa-bars'> </i> <i class = 'fa fa-caret-right'> </i> <b>表示</b>メニューアイコンの下に<b>グリッドを表示</b>や<b>グリッドに合わせる</b>などのオプションがあります。",
+        "tip4": "<i class = 'fa fa-bar'> </i> <i class = 'fa fa-caret-right'> </i> <b>パレットの管理</b>を使用するとノードの検索、追加や削除をすることができます。",
+        "tip5": "ノードをインストールすると、<i class = 'fa fa-bars'> </i> <i class = 'fa fa-caret-right'> </i> <b>インポート</b> i class = 'fa fa-caret-right'> </i> <b>サンプルフロー</b>でノードの使用例をインポートできる場合があります。",
+        "tip6": "<a href='http://flows.nodered.org'target='_blank'> flows.nodered.org </a>で多くのサンプルフローを見つけることができます。ワークスペースにドラッグ＆ドロップしてインポートすることができます。",
+        "tip7": "接続されたすべてのワイヤを一度に移動するには、<b> Shiftキーを押しながらクリックしてドラッグ</b>します。",
+        "tip8": "<b> Node-RED ダッシュボード</b>パッケージを使用すると、簡単なユーザーインターフェイスを作成できます。"
+    }
+}

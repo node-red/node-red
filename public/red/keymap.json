@@ -1,0 +1,38 @@
+{
+    "*": {
+        "ctrl-shift-p":"core:manage-palette",
+        "ctrl-f": "core:search",
+        "ctrl-=": "core:zoom-in",
+        "ctrl--": "core:zoom-out",
+        "ctrl-0": "core:zoom-reset",
+        "ctrl-enter": "core:confirm-edit-tray",
+        "ctrl-escape": "core:cancel-edit-tray",
+        "ctrl-g i": "core:show-info-tab",
+        "ctrl-g d": "core:show-debug-tab",
+        "ctrl-g c": "core:show-config-tab",
+        "ctrl-e": "core:show-export-dialog",
+        "ctrl-i": "core:show-import-dialog",
+        "ctrl-space": "core:toggle-sidebar"
+    },
+    "workspace": {
+        "backspace": "core:delete-selection",
+        "delete": "core:delete-selection",
+        "enter": "core:edit-selected-node",
+        "ctrl-c": "core:copy-selection-to-internal-clipboard",
+        "ctrl-x": "core:cut-selection-to-internal-clipboard",
+        "ctrl-v": "core:paste-from-internal-clipboard",
+        "ctrl-z": "core:undo",
+        "ctrl-a": "core:select-all-nodes",
+        "shift-?": "core:show-help",
+        "up": "core:move-selection-up",
+        "right": "core:move-selection-right",
+        "down": "core:move-selection-down",
+        "left": "core:move-selection-left",
+        "shift-up": "core:step-selection-up",
+        "shift-right": "core:step-selection-right",
+        "shift-down": "core:step-selection-down",
+        "shift-left": "core:step-selection-left",
+        "ctrl-shift-j": "core:show-previous-tab",
+        "ctrl-shift-k": "core:show-next-tab"
+     }
+}
