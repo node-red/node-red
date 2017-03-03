@@ -156,10 +156,11 @@
 
 <script type="text/x-red" data-template-name="subflow-template">
     <div class="form-row">
+        <i class="fa fa-tag"></i>
         <label for="subflow-input-name" data-i18n="common.label.name"></label><input type="text" id="subflow-input-name">
     </div>
     <div class="form-row" style="margin-bottom: 0px;">
-        <label for="subflow-input-info" data-i18n="subflow.info"></label>
+        <label for="subflow-input-info" data-i18n="editor:subflow.info"></label>
         <a href="https://help.github.com/articles/markdown-basics/" style="font-size: 0.8em; float: right;" data-i18n="[html]subflow.format"></a>
     </div>
     <div class="form-row node-text-editor-row">
