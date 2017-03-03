@@ -181,9 +181,21 @@
             crontab: {value:""},
             once: {value:false}
         },
+        icon: "inject.png",
         inputs:0,
         outputs:1,
-        icon: "inject.png",
+        outputLabels: function(index) {
+            var labels = { str:"string", num:"number", bool:"boolean", json:"object", flow:"flow context", global:"global context" };
+            var lab = labels[this.payloadType] || this.payloadType;
+            if (lab === "object") {
+                try {
+                    lab = typeof JSON.parse(this.payload);
+                    if (lab === "object") {
+                        if (Array.isArray(JSON.parse(this.payload))) { lab = "Array"; }
+                    }
+                } catch(e) { lab = "Invalid JSON Object"; }
+            }
+            return lab; },
         label: function() {
             var suffix = "";
             // if fire once then add small indication
