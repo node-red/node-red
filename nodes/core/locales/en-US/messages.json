@@ -335,9 +335,6 @@
             "json-error": "JSON parse error",
             "no-url": "No url specified",
             "deprecated-call":"Deprecated call to __method__",
-            "no-boundary": "No multipart boundary specified",
-            "no-separator": "No multipart header body separtor detected",
-            "invalid-length": "Invalid content lenght"
         },
         "status": {
             "requesting": "requesting"
