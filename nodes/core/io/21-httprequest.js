@@ -161,30 +161,19 @@ module.exports = function(RED) {
                 tlsNode.addTLSOptions(opts);
             }
             var req = ((/^https/.test(urltotest))?https:http).request(opts,function(res) {
-                //(node.ret === "bin") ? res.setEncoding('binary') : res.setEncoding('utf8');
-                if (node.ret === "bin") {
-                    // Force NodeJs to return a Buffer instead of a string
-                    // See https://github.com/nodejs/node/issues/6038
-                    res.setEncoding(null);
-                    delete res._readableState.decoder;
-                }
+                // Force NodeJs to return a Buffer (instead of a string)
+                // See https://github.com/nodejs/node/issues/6038
+                res.setEncoding(null);
+                delete res._readableState.decoder;
+              
                 msg.statusCode = res.statusCode;
                 msg.headers = res.headers;
                 msg.responseUrl = res.responseUrl;
-                if (node.ret === "bin") {
-                    msg.payload = [];
-                }
-                else {
-                    msg.payload = "";
-                }
+                msg.payload = [];
+ 
                 // msg.url = url;   // revert when warning above finally removed
                 res.on('data',function(chunk) {
-                    if (node.ret === "bin") {
-                        msg.payload.push(chunk);
-                    }
-                    else {
-                        msg.payload += chunk;
-                    }
+                    msg.payload.push(chunk);
                 });
                 res.on('end',function() {
                     if (node.metric()) {
@@ -197,13 +186,18 @@ module.exports = function(RED) {
                             node.metric("size.bytes", msg, res.client.bytesRead);
                         }
                     }
-                    if (node.ret === "bin") {
-                        msg.payload = Buffer.concat(msg.payload);
+                    
+                    // Convert the payload to the required return type
+                    msg.payload = Buffer.concat(msg.payload); // bin
+                    if (node.ret !== "bin") {
+                        msg.payload = msg.payload.toString('utf8'); // txt
+                        
+                        if (node.ret === "obj") {
+                            try { msg.payload = JSON.parse(msg.payload); } // obj
+                            catch(e) { node.warn(RED._("httpin.errors.json-error")); }
+                        }
                     }
-                    else if (node.ret === "obj") {
-                        try { msg.payload = JSON.parse(msg.payload); }
-                        catch(e) { node.warn(RED._("httpin.errors.json-error")); }
-                    }
+
                     node.send(msg);
                     node.status({});
                 });
