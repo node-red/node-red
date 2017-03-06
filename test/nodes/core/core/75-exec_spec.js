@@ -540,7 +540,7 @@ describe('exec node', function() {
             });
         });
 
-        it('should be able to kill a long running command - SIGQUIT', function(done) {
+        it('should be able to kill a long running command - SIGINT', function(done) {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             helper.load(execNode, flow, function() {
@@ -551,11 +551,11 @@ describe('exec node', function() {
                 n4.on("input", function(msg) {
                     msg.should.have.property("payload");
                     msg.payload.should.have.property("killed",true);
-                    //msg.payload.should.have.property("signal","SIGQUIT");
+                    //msg.payload.should.have.property("signal","SIGINT");
                     done();
                 });
                 setTimeout(function() {
-                    n1.receive({kill:"SIGQUIT"});
+                    n1.receive({kill:"SIGINT"});
                 },150);
                 n1.receive({});
             });
