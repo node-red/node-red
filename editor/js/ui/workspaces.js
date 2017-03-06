@@ -126,8 +126,8 @@ RED.workspaces = (function() {
                 '</div>').appendTo(dialogForm);
 
                 $('<div class="form-row">'+
-                    '<label for="node-input-disabled-btn">Status</label>'+
-                    '<button id="node-input-disabled-btn" class="editor-button"><i class="fa fa-toggle-on"></i> <span id="node-input-disabled-label">Enabled</span></button> '+
+                    '<label for="node-input-disabled-btn" data-i18n="editor:workspace.status"></label>'+
+                    '<button id="node-input-disabled-btn" class="editor-button"><i class="fa fa-toggle-on"></i> <span id="node-input-disabled-label"></span></button> '+
                     '<input type="checkbox" id="node-input-disabled" style="display: none;"/>'+
                 '</div>').appendTo(dialogForm);
 
@@ -137,12 +137,12 @@ RED.workspaces = (function() {
                         i.addClass('fa-toggle-on');
                         i.removeClass('fa-toggle-off');
                         $("#node-input-disabled").prop("checked",false);
-                        $("#node-input-disabled-label").html("Enabled");
+                        $("#node-input-disabled-label").html(RED._("editor:workspace.enabled"));
                     } else {
                         i.addClass('fa-toggle-off');
                         i.removeClass('fa-toggle-on');
                         $("#node-input-disabled").prop("checked",true);
-                        $("#node-input-disabled-label").html("Disabled");
+                        $("#node-input-disabled-label").html(RED._("editor:workspace.disabled"));
                     }
                 })
 
@@ -150,10 +150,13 @@ RED.workspaces = (function() {
                     $("#node-input-disabled").prop("checked",workspace.disabled);
                     if (workspace.disabled) {
                         dialogForm.find("#node-input-disabled-btn i").removeClass('fa-toggle-on').addClass('fa-toggle-off');
-                        $("#node-input-disabled-label").html("Disabled");
+                        $("#node-input-disabled-label").html(RED._("editor:workspace.disabled"));
+                    } else {
+                        $("#node-input-disabled-label").html(RED._("editor:workspace.enabled"));
                     }
                 } else {
                     workspace.disabled = false;
+                    $("#node-input-disabled-label").html(RED._("editor:workspace.enabled"));
                 }
 
                 $('<input type="text" style="display: none;" />').prependTo(dialogForm);
