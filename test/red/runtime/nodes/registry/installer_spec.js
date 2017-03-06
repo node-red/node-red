@@ -128,8 +128,14 @@ describe('nodes/registry/installer', function() {
             installer.installModule(resourcesDir).then(function() {
                 done(new Error("Unexpected success"));
             }).otherwise(function(err) {
-                err.code.should.eql(404);
-                done();
+                if (err.hasOwnProperty("code")) {
+                    err.code.should.eql(404);
+                    done();
+                }
+                else {
+                    err.message.should.eql("Install failed");
+                    done();
+                }
             });
         });
         it("succeeds when path is valid node-red module", function(done) {

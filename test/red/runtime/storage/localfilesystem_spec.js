@@ -587,10 +587,11 @@ describe('LocalFileSystem', function() {
             createObjectLibrary();
             localfilesystem.getLibraryEntry('object','B').then(function(flows) {
                 flows.should.eql([ 'C', { ghi: 'jkl', fn: 'file2.js' }, {fn:'flow.json'} ]);
-                localfilesystem.saveLibraryEntry('object','B/D/file3.js',{mno:'pqr'},"// another non meta line\n\n Hi There").then(function() {
-                    localfilesystem.getLibraryEntry('object','B/D').then(function(flows) {
+                var ft = path.join("B","D","file3.js");
+                localfilesystem.saveLibraryEntry('object',ft,{mno:'pqr'},"// another non meta line\n\n Hi There").then(function() {
+                    localfilesystem.getLibraryEntry('object',path.join("B","D")).then(function(flows) {
                         flows.should.eql([ { mno: 'pqr', fn: 'file3.js' } ]);
-                        localfilesystem.getLibraryEntry('object','B/D/file3.js').then(function(body) {
+                        localfilesystem.getLibraryEntry('object',ft).then(function(body) {
                             body.should.eql("// another non meta line\n\n Hi There");
                             done();
                         }).otherwise(function(err) {
