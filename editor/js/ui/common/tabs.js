@@ -231,6 +231,7 @@ RED.tabs = (function() {
                     closeLink.append('<i class="fa fa-times" />');
 
                     closeLink.on("click",function(event) {
+                        event.preventDefault();
                         removeTab(tab.id);
                     });
                 }

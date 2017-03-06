@@ -88,7 +88,10 @@ RED.deploy = (function() {
               '</span></li>').prependTo(".header-toolbar");
         }
 
-        $('#btn-deploy').click(function() { save(); });
+        $('#btn-deploy').click(function(event) {
+            event.preventDefault();
+            save();
+        });
 
         RED.actions.add("core:deploy-flows",save);
 
