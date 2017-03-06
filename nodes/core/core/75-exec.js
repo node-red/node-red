@@ -39,13 +39,16 @@ module.exports = function(RED) {
 
         this.on("input", function(msg) {
             if (msg.hasOwnProperty("kill")) {
-                if (node.activeProcesses.hasOwnProperty(msg.kill) ) {
-                    node.activeProcesses[msg.kill].kill();
-                    node.status({fill:"red",shape:"dot",text:"killed"});
+                if (typeof msg.kill !== "string" || msg.kill.length === 0 || !msg.kill.toUpperCase().startsWith("SIG") ) { msg.kill = ""; }
+                if (msg.hasOwnProperty("pid")) {
+                    if (node.activeProcesses.hasOwnProperty(msg.pid) ) {
+                        node.activeProcesses[msg.pid].kill(msg.kill.toUpperCase());
+                        node.status({fill:"red",shape:"dot",text:"killed"});
+                    }
                 }
                 else {
                     if (Object.keys(node.activeProcesses).length === 1) {
-                        node.activeProcesses[Object.keys(node.activeProcesses)[0]].kill();
+                        node.activeProcesses[Object.keys(node.activeProcesses)[0]].kill(msg.kill.toUpperCase());
                         node.status({fill:"red",shape:"dot",text:"killed"});
                     }
                 }
@@ -149,7 +152,7 @@ module.exports = function(RED) {
                 /* istanbul ignore else  */
                 if (node.activeProcesses.hasOwnProperty(pid)) {
                     if (node.activeProcesses[pid].tout) { clearTimeout(node.activeProcesses[pid].tout); }
-                    // console.log("KILLLING",pid);
+                    // console.log("KILLING",pid);
                     var process = node.activeProcesses[pid];
                     node.activeProcesses[pid] = null;
                     process.kill();

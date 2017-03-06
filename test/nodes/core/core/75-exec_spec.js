@@ -239,7 +239,32 @@ describe('exec node', function() {
                     }
                 });
                 setTimeout(function() {
-                    n1.receive({kill:true});
+                    n1.receive({kill:""});
+                },150);
+                n1.receive({});
+            });
+        });
+
+        it('should be able to kill a long running command - SIGINT', function(done) {
+            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2"},
+                        {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                n4.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("killed",true);
+                        msg.payload.should.have.property("signal","SIGINT");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                setTimeout(function() {
+                    n1.receive({kill:"sigint"});
                 },150);
                 n1.receive({});
             });
@@ -509,7 +534,28 @@ describe('exec node', function() {
                     done();
                 });
                 setTimeout(function() {
-                    n1.receive({kill:true});
+                    n1.receive({kill:""});
+                },150);
+                n1.receive({});
+            });
+        });
+
+        it('should be able to kill a long running command - SIGQUIT', function(done) {
+            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2"},
+                        {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                n4.on("input", function(msg) {
+                    msg.should.have.property("payload");
+                    msg.payload.should.have.property("killed",true);
+                    msg.payload.should.have.property("signal","SIGQUIT");
+                    done();
+                });
+                setTimeout(function() {
+                    n1.receive({kill:"sigquit"});
                 },150);
                 n1.receive({});
             });
