@@ -276,7 +276,8 @@ RED.nodes = (function() {
         workspaces[ws.id] = ws;
         ws._def = {
             defaults: {
-                label: {value:""}
+                label: {value:""},
+                disabled: {value: false}
             }
         };
 

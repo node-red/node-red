@@ -84,10 +84,24 @@ RED.workspaces = (function() {
                     text: RED._("common.label.done"),
                     click: function() {
                         var label = $( "#node-input-name" ).val();
+                        var changed = false;
+                        var changes = {};
                         if (workspace.label != label) {
-                            var changes = {
-                                label:workspace.label
-                            }
+                            changes.label = workspace.label;
+                            changed = true;
+                            workspace.label = label;
+                            workspace_tabs.renameTab(workspace.id,label);
+                        }
+                        var disabled = $("#node-input-disabled").prop("checked");
+                        if (workspace.disabled !== disabled) {
+                            changes.disabled = workspace.disabled;
+                            changed = true;
+                            workspace.disabled = disabled;
+                        }
+                        $("#red-ui-tab-"+(workspace.id.replace(".","-"))).toggleClass('workspace-disabled',workspace.disabled);
+                        // $("#workspace").toggleClass("workspace-disabled",workspace.disabled);
+
+                        if (changed) {
                             var historyEvent = {
                                 t: "edit",
                                 changes:changes,
@@ -96,7 +110,6 @@ RED.workspaces = (function() {
                             }
                             workspace.changed = true;
                             RED.history.push(historyEvent);
-                            workspace_tabs.renameTab(workspace.id,label);
                             RED.nodes.dirty(true);
                             RED.sidebar.config.refresh();
                         }
@@ -111,6 +124,38 @@ RED.workspaces = (function() {
                     '<label for="node-input-name" data-i18n="[append]editor:common.label.name"><i class="fa fa-tag"></i> </label>'+
                     '<input type="text" id="node-input-name">'+
                 '</div>').appendTo(dialogForm);
+
+                $('<div class="form-row">'+
+                    '<label for="node-input-disabled-btn">Status</label>'+
+                    '<button id="node-input-disabled-btn" class="editor-button"><i class="fa fa-toggle-on"></i> <span id="node-input-disabled-label">Enabled</span></button> '+
+                    '<input type="checkbox" id="node-input-disabled" style="display: none;"/>'+
+                '</div>').appendTo(dialogForm);
+
+                dialogForm.find('#node-input-disabled-btn').on("click",function(e) {
+                    var i = $(this).find("i");
+                    if (i.hasClass('fa-toggle-off')) {
+                        i.addClass('fa-toggle-on');
+                        i.removeClass('fa-toggle-off');
+                        $("#node-input-disabled").prop("checked",false);
+                        $("#node-input-disabled-label").html("Enabled");
+                    } else {
+                        i.addClass('fa-toggle-off');
+                        i.removeClass('fa-toggle-on');
+                        $("#node-input-disabled").prop("checked",true);
+                        $("#node-input-disabled-label").html("Disabled");
+                    }
+                })
+
+                if (workspace.hasOwnProperty("disabled")) {
+                    $("#node-input-disabled").prop("checked",workspace.disabled);
+                    if (workspace.disabled) {
+                        dialogForm.find("#node-input-disabled-btn i").removeClass('fa-toggle-on').addClass('fa-toggle-off');
+                        $("#node-input-disabled-label").html("Disabled");
+                    }
+                } else {
+                    workspace.disabled = false;
+                }
+
                 $('<input type="text" style="display: none;" />').prependTo(dialogForm);
                 dialogForm.submit(function(e) { e.preventDefault();});
                 $("#node-input-name").val(workspace.label);
@@ -137,6 +182,7 @@ RED.workspaces = (function() {
                 }
                 activeWorkspace = tab.id;
                 event.workspace = activeWorkspace;
+                // $("#workspace").toggleClass("workspace-disabled",tab.disabled);
                 RED.events.emit("workspace:change",event);
                 window.location.hash = 'flow/'+tab.id;
                 RED.sidebar.config.refresh();
@@ -153,6 +199,10 @@ RED.workspaces = (function() {
                 }
             },
             onadd: function(tab) {
+                $('<span class="workspace-disabled-icon"><i class="fa fa-ban"></i> </span>').prependTo("#red-ui-tab-"+(tab.id.replace(".","-"))+" .red-ui-tab-label");
+                if (tab.disabled) {
+                    $("#red-ui-tab-"+(tab.id.replace(".","-"))).addClass('workspace-disabled');
+                }
                 RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() == 1);
             },
             onremove: function(tab) {
