@@ -45,7 +45,7 @@
             "examples": "サンプル",
             "subflows": "サブフロー",
             "createSubflow": "サブフローを作成",
-            "selectionToSubflow": "サブフローの選択",
+            "selectionToSubflow": "選択部分をサブフロー化",
             "flows": "フロー",
             "add": "フローを新規追加",
             "rename": "フロー名を変更",
