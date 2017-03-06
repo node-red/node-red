@@ -446,6 +446,11 @@ module.exports = function(RED) {
                         if (clients[connection_id] && clients[connection_id].client) {
                             clients[connection_id].connected = true;
                             clients[connection_id].client.write(clients[connection_id].msg.payload);
+                            if (node.out === "time" && node.splitc === 0) {
+                                clients[connection_id].client.destroy();
+                                clients[connection_id].connected = false;
+                                node.status({});
+                            }
                         }
                     });
                 }
@@ -481,7 +486,8 @@ module.exports = function(RED) {
                                                 buf.copy(clients[connection_id].msg.payload,0,0,i+1);
                                                 node.send(clients[connection_id].msg);
                                                 if (clients[connection_id].client) {
-                                                    node.status({}); clients[connection_id].client.destroy();
+                                                    node.status({}); 
+                                                    clients[connection_id].client.destroy();
                                                     delete clients[connection_id];
                                                 }
                                             }
@@ -501,7 +507,8 @@ module.exports = function(RED) {
                                         buf.copy(clients[connection_id].msg.payload,0,0,i);
                                         node.send(clients[connection_id].msg);
                                         if (clients[connection_id].client) {
-                                            node.status({}); clients[connection_id].client.destroy();
+                                            node.status({}); 
+                                            clients[connection_id].client.destroy();
                                             delete clients[connection_id];
                                         }
                                         i = 0;
@@ -518,7 +525,8 @@ module.exports = function(RED) {
                                         buf.copy(clients[connection_id].msg.payload,0,0,i);
                                         node.send(clients[connection_id].msg);
                                         if (clients[connection_id].client) {
-                                            node.status({}); clients[connection_id].client.destroy();
+                                            node.status({});
+                                            clients[connection_id].client.destroy();
                                             delete clients[connection_id];
                                         }
                                         i = 0;
