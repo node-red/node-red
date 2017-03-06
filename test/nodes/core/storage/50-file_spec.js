@@ -17,6 +17,7 @@
 var should = require("should");
 var path = require('path');
 var fs = require('fs-extra');
+var os = require('os');
 var sinon = require("sinon");
 var fileNode = require("../../../../nodes/core/storage/50-file.js");
 var helper = require("../../helper.js");
@@ -80,8 +81,14 @@ describe('file Nodes', function() {
                 },90);
                 setTimeout(function() {
                     var f = fs.readFileSync(fileToTest).toString();
-                    f.should.have.length(19);
-                    f.should.equal("test2\ntrue\n999\n[2]\n");
+                    if (os.type() !== "Windows_NT") {
+                        f.should.have.length(19);
+                        f.should.equal("test2\ntrue\n999\n[2]\n");
+                    }
+                    else {
+                        f.should.have.length(23);
+                        f.should.equal("test2\r\ntrue\r\n999\r\n[2]\r\n");
+                    }
                     done();
                 },wait);
             });
@@ -94,8 +101,14 @@ describe('file Nodes', function() {
                 n1.emit("input", {payload:"fine", filename:fileToTest});
                 setTimeout(function() {
                     var f = fs.readFileSync(fileToTest).toString();
-                    f.should.have.length(5);
-                    f.should.equal("fine\n");
+                    if (os.type() !== "Windows_NT") {
+                        f.should.have.length(5);
+                        f.should.equal("fine\n");
+                    }
+                    else {
+                        f.should.have.length(6);
+                        f.should.equal("fine\r\n");
+                    }
                     done();
                 },wait);
             });
@@ -197,7 +210,7 @@ describe('file Nodes', function() {
 
         it('should fail to append to a ro file', function(done) {
             // Stub file write so we can make writes fail
-            var spy = sinon.stub(fs, 'appendFile', function(arg,arg2,arg3,arg4){ arg4(new Error("Stub error message")); });
+            var spy = sinon.stub(fs, 'appendFile', function(arg,arg2,arg3,arg4) { arg4(new Error("Stub error message")); });
 
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":true, "overwriteFile":false}];
             helper.load(fileNode, flow, function() {
@@ -222,7 +235,7 @@ describe('file Nodes', function() {
 
         it('should cope with failing to delete a file', function(done) {
             // Stub file write so we can make writes fail
-            var spy = sinon.stub(fs, 'unlink', function(arg,arg2){ arg2(new Error("Stub error message")); });
+            var spy = sinon.stub(fs, 'unlink', function(arg,arg2) { arg2(new Error("Stub error message")); });
 
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":true, "overwriteFile":"delete"}];
             helper.load(fileNode, flow, function() {
@@ -325,7 +338,7 @@ describe('file Nodes', function() {
         it('should try to create a new directory if asked to do so (overwrite)', function(done) {
             // Stub file write so we can make writes fail
             var fileToTest2 = path.join(resourcesDir,"a","50-file-test-file.txt");
-            var spy = sinon.stub(fs, "ensureFile", function(arg1,arg2,arg3,arg4){ arg2(null); });
+            var spy = sinon.stub(fs, "ensureFile", function(arg1,arg2,arg3,arg4) { arg2(null); });
 
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":true, "overwriteFile":true, "createDir":true}];
             helper.load(fileNode, flow, function() {

@@ -133,7 +133,8 @@ describe('nodes/registry/installer', function() {
                     done();
                 }
                 else {
-                    err.message.should.eql("Install failed");
+                    console.log("ERRROR::"+err.toString()+"::");
+                    err.toString().should.eql("Error: Install failed");
                     done();
                 }
             });

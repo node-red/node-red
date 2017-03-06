@@ -413,7 +413,7 @@ describe('trigger node', function() {
             n1.emit("input", {payload:"foo"});   // trigger
             setTimeout( function() {
                 n1.emit("input", {reset:true});   // reset
-            },90);
+            },95);
             setTimeout( function() {
                 c.should.equal(4);  // should send foo 4 times.
                 done();
