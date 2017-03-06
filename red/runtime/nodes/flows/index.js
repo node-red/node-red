@@ -257,12 +257,16 @@ function start(type,diff,muteLog) {
     var id;
     if (!diff) {
         if (!activeFlows['global']) {
+            log.debug("red/nodes/flows.start : starting flow : global");
             activeFlows['global'] = Flow.create(activeFlowConfig);
         }
         for (id in activeFlowConfig.flows) {
             if (activeFlowConfig.flows.hasOwnProperty(id)) {
-                if (!activeFlows[id]) {
+                if (!activeFlowConfig.flows[id].disabled && !activeFlows[id]) {
                     activeFlows[id] = Flow.create(activeFlowConfig,activeFlowConfig.flows[id]);
+                    log.debug("red/nodes/flows.start : starting flow : "+id);
+                } else {
+                    log.debug("red/nodes/flows.start : not starting disabled flow : "+id);
                 }
             }
         }
@@ -270,10 +274,15 @@ function start(type,diff,muteLog) {
         activeFlows['global'].update(activeFlowConfig,activeFlowConfig);
         for (id in activeFlowConfig.flows) {
             if (activeFlowConfig.flows.hasOwnProperty(id)) {
-                if (activeFlows[id]) {
-                    activeFlows[id].update(activeFlowConfig,activeFlowConfig.flows[id]);
+                if (!activeFlowConfig.flows[id].disabled) {
+                    if (activeFlows[id]) {
+                        activeFlows[id].update(activeFlowConfig,activeFlowConfig.flows[id]);
+                    } else {
+                        activeFlows[id] = Flow.create(activeFlowConfig,activeFlowConfig.flows[id]);
+                        log.debug("red/nodes/flows.start : starting flow : "+id);
+                    }
                 } else {
-                    activeFlows[id] = Flow.create(activeFlowConfig,activeFlowConfig.flows[id]);
+                    log.debug("red/nodes/flows.start : not starting disabled flow : "+id);
                 }
             }
         }
@@ -325,8 +334,9 @@ function stop(type,diff,muteLog) {
     }
     for (var id in activeFlows) {
         if (activeFlows.hasOwnProperty(id)) {
-            promises = promises.concat(activeFlows[id].stop(stopList));
-            if (!diff || diff.removed.indexOf(id)!==-1) {
+            var flowStateChanged = diff && (diff.added.indexOf(id) !== -1 || diff.removed.indexOf(id) !== -1);
+            promises = promises.concat(activeFlows[id].stop(flowStateChanged?null:stopList));
+            if (!diff || flowStateChanged || diff.removed.indexOf(id)!==-1) {
                 delete activeFlows[id];
             }
         }
