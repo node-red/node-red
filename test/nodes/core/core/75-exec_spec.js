@@ -264,7 +264,7 @@ describe('exec node', function() {
                     }
                 });
                 setTimeout(function() {
-                    n1.receive({kill:"sigint"});
+                    n1.receive({kill:"SIGINT"});
                 },150);
                 n1.receive({});
             });
@@ -555,7 +555,7 @@ describe('exec node', function() {
                     done();
                 });
                 setTimeout(function() {
-                    n1.receive({kill:"sigquit"});
+                    n1.receive({kill:"SIGQUIT"});
                 },150);
                 n1.receive({});
             });
