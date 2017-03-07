@@ -34,7 +34,7 @@ module.exports = {
         var namespace = req.params[0];
         namespace = namespace.replace(/\.json$/,"");
         var lang = determineLangFromHeaders(req.acceptsLanguages() || []);
-        var prevLang = i18n.i.lng();    
+        var prevLang = i18n.i.lng();
         i18n.i.setLng(lang, function(){
             var catalog = i18n.catalog(namespace,lang);
             res.json(catalog||{});
