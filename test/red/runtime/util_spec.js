@@ -364,4 +364,17 @@ describe("red/util", function() {
         it("fail <blank>",function() { testInvalid("");})
 
     });
+
+    describe('normaliseRegisterTypeName', function() {
+        function normalise(input, expected) {
+            var result = util.normaliseRegisterTypeName(input);
+            result.should.eql(expected);
+        }
+
+        it('pass blank',function() { normalise("", "") });
+        it('pass ab1',function() { normalise("ab1", "ab1") });
+        it('pass a b 1',function() { normalise("a b 1", "ab1") });
+        it('pass a-b-1',function() { normalise("a-b-1", "ab1") });
+        it('pass a_b_1',function() { normalise("a_b_1", "ab1") });
+      });
 });

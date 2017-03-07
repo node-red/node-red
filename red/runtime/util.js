@@ -328,6 +328,11 @@ function evaluateNodeProperty(value, type, node, msg) {
     return value;
 }
 
+function normaliseRegisterTypeName(name) {
+    var normalisedName = name.replace(/[^a-zA-Z0-9]/g, '');
+
+    return normalisedName;
+}
 
 module.exports = {
     ensureString: ensureString,
@@ -338,5 +343,6 @@ module.exports = {
     getMessageProperty: getMessageProperty,
     setMessageProperty: setMessageProperty,
     evaluateNodeProperty: evaluateNodeProperty,
-    normalisePropertyExpression: normalisePropertyExpression
+    normalisePropertyExpression: normalisePropertyExpression,
+    normaliseRegisterTypeName: normaliseRegisterTypeName
 };

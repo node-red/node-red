@@ -216,14 +216,6 @@ module.exports = function(RED) {
         credentials: {
             user: {type:"text"},
             password: {type: "password"}
-        },
-        settings: {
-            httpRequestColour: {
-                value: "red",
-                // validate: function(v) { return IT MUST BE A NUMBER },
-                // required: false,
-                exportable: true
-            }
         }
     });
 }
