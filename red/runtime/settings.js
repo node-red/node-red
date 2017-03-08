@@ -109,9 +109,9 @@ var persistentSettings = {
         try {
             for (var property in opts) {
                 if (opts.hasOwnProperty(property)) {
-                    var normalisedType = util.normaliseRegisterTypeName(type);
-                    if (!property.toLowerCase().startsWith(normalisedType.toLowerCase())) {
-                        throw new Error("The name of node setting property " + property + " must start with \"" + normalisedType + "\" (case insensitive).");
+                    var normalisedType = util.normaliseNodeTypeName(type);
+                    if (!property.startsWith(normalisedType)) {
+                        throw new Error("The name of node setting property " + property + " must start with \"" + normalisedType + "\" (case sensitive).");
                     }
                 }
             }

@@ -328,10 +328,17 @@ function evaluateNodeProperty(value, type, node, msg) {
     return value;
 }
 
-function normaliseRegisterTypeName(name) {
-    var normalisedName = name.replace(/[^a-zA-Z0-9]/g, '');
-
-    return normalisedName;
+function normaliseNodeTypeName(name) {
+    var result = name.replace(/[^a-zA-Z0-9]/g, " ");
+    result = result.trim();
+    result = result.replace(/ +/g, " ");
+    result = result.replace(/ ./g,
+        function(s) {
+            return s.charAt(1).toUpperCase();
+        }
+    );
+    result = result.charAt(0).toLowerCase() + result.slice(1);
+    return result;
 }
 
 module.exports = {
@@ -344,5 +351,5 @@ module.exports = {
     setMessageProperty: setMessageProperty,
     evaluateNodeProperty: evaluateNodeProperty,
     normalisePropertyExpression: normalisePropertyExpression,
-    normaliseRegisterTypeName: normaliseRegisterTypeName
+    normaliseNodeTypeName: normaliseNodeTypeName
 };
