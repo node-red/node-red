@@ -55,6 +55,16 @@ describe("red/nodes/registry/localfilesystem",function() {
             checkNodes(nm.nodes,['TestNode1','MultipleNodes1','NestedNode','TestNode2','TestNode3','TestNode4'],['TestNodeModule']);
             done();
         });
+        it("Includes node files from settings",function(done) {
+            localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{nodesIncludes:['TestNode1.js'],coreNodesDir:resourcesDir}});
+            var nodeList = localfilesystem.getNodeFiles(true);
+            nodeList.should.have.a.property("node-red");
+            var nm = nodeList['node-red'];
+            nm.should.have.a.property('name','node-red');
+            nm.should.have.a.property("nodes");
+            checkNodes(nm.nodes,['TestNode1'],['MultipleNodes1','NestedNode','TestNode2','TestNode3','TestNode4','TestNodeModule']);
+            done();
+        });
         it("Excludes node files from settings",function(done) {
             localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{nodesExcludes:['TestNode1.js'],coreNodesDir:resourcesDir}});
             var nodeList = localfilesystem.getNodeFiles(true);
