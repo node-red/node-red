@@ -18,10 +18,12 @@ var when = require("when");
 var clone = require("clone");
 var assert = require("assert");
 var log = require("./log");
+var util = require("./util");
 
 var userSettings = null;
 var globalSettings = null;
 var nodeSettings = null;
+var disableNodeSettings = null;
 var storage = null;
 
 var persistentSettings = {
@@ -40,6 +42,7 @@ var persistentSettings = {
         }
         globalSettings = null;
         nodeSettings = {};
+        disableNodeSettings = {};
     },
     load: function(_storage) {
         storage = _storage;
@@ -103,24 +106,49 @@ var persistentSettings = {
         storage = null;
     },
     registerNodeSettings: function(type, opts) {
-        //console.log(type,opts);
-        // 1. TODO: validate the option names are allowed for the node type
-
-        // 2. store this information against the node type
-        nodeSettings[type] = opts;
-
-
-        // TODO: remove the node settings if the node is disabled/removed from runtime
+        try {
+            for (var property in opts) {
+                if (opts.hasOwnProperty(property)) {
+                    var normalisedType = util.normaliseNodeTypeName(type);
+                    if (!property.startsWith(normalisedType)) {
+                        throw new Error("The name of node setting property " + property + " must start with \"" + normalisedType + "\" (case sensitive).");
+                    }
+                }
+            }
+            nodeSettings[type] = opts;
+        } catch (err) {
+            console.log(err.toString());
+        }
     },
     exportNodeSettings: function(safeSettings) {
-        // 1. forEach type in nodeSettings...
-        //  2. forEach setting for that type...
-        //   3. if globalSettings has a property with the required name...
-        //    4. set safeSettings.property to that value
-        //   5. else if the setting has a default 'value' provided
-        //    6. set safeSettings.property to that value
+        safeSettings["nodeSettings"] = {};
+        for (var type in nodeSettings) {
+            if (nodeSettings.hasOwnProperty(type) && !disableNodeSettings[type]) {
+                var nodeTypeSettings = nodeSettings[type];
+                for (var property in nodeTypeSettings) {
+                    if (nodeTypeSettings.hasOwnProperty(property)) {
+                        var setting = nodeTypeSettings[property];
+                        if (userSettings.hasOwnProperty(property)) {
+                            safeSettings["nodeSettings"][property] = userSettings[property];
+                        } else if (setting.exportable) {
+                            safeSettings["nodeSettings"][property] = setting.value;
+                        }
+                    }
+                }
+            }
+        }
 
         return safeSettings;
+    },
+    enableNodeSettings: function(types) {
+        types.forEach(function(type) {
+            disableNodeSettings[type] = false;
+        });
+    },
+    disableNodeSettings: function(types) {
+        types.forEach(function(type) {
+            disableNodeSettings[type] = true;
+        });
     }
 }
 

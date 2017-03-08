@@ -142,4 +142,85 @@ describe("red/settings", function() {
         settings.should.not.have.property("c");
 
     });
+
+    it('registers node settings and exports them', function() {
+        var userSettings = {};
+        settings.init(userSettings);
+        settings.registerNodeSettings("inject", {injectColor:{value:"red", exportable:true}, injectSize:{value:"100", exportable:true}} );
+        settings.registerNodeSettings("mqtt", {mqttColor:{value:"purple", exportable:false}, mqttSize:{value:"50", exportable:true}} );
+        settings.registerNodeSettings("http request", {httpRequest1:{value:"a1", exportable:true}} );
+        settings.registerNodeSettings("  http--request<> ", {httpRequest2:{value:"a2", exportable:true}} );
+        settings.registerNodeSettings("_http_request_", {httpRequest3:{value:"a3", exportable:true}} );
+        settings.registerNodeSettings("mQtT", {mQtTColor:{value:"purple", exportable:true}} );
+        settings.registerNodeSettings("abc123", {abc123:{value:"def456", exportable:true}} );
+        var safeSettings = {};
+        settings.exportNodeSettings(safeSettings);
+        safeSettings["nodeSettings"].should.have.property("injectColor", "red");
+        safeSettings["nodeSettings"].should.have.property("injectSize", "100");
+        safeSettings["nodeSettings"].should.not.have.property("mqttColor");
+        safeSettings["nodeSettings"].should.have.property("mqttSize", "50");
+        safeSettings["nodeSettings"].should.have.property("httpRequest1", "a1");
+        safeSettings["nodeSettings"].should.have.property("httpRequest2", "a2");
+        safeSettings["nodeSettings"].should.have.property("httpRequest3", "a3");
+        safeSettings["nodeSettings"].should.have.property("mQtTColor", "purple");
+        safeSettings["nodeSettings"].should.have.property("abc123", "def456");
+    });
+
+    it('prohibits registering the property whose name do not start with type name', function() {
+        var userSettings = {};
+        settings.init(userSettings);
+        settings.registerNodeSettings("inject", {color:{value:"red", exportable:true}} );
+        settings.registerNodeSettings("_a_b_1_", {ab1Color:{value:"red", exportable:true}} );
+        settings.registerNodeSettings("AB2", {AB2Color:{value:"red", exportable:true}} );
+        settings.registerNodeSettings("abcDef", {abcColor:{value:"red", exportable:true}} );
+        var safeSettings = {};
+        settings.exportNodeSettings(safeSettings);
+        safeSettings["nodeSettings"].should.not.have.property("color");
+        safeSettings["nodeSettings"].should.not.have.property("ab1Color", "blue");
+        safeSettings["nodeSettings"].should.not.have.property("AB2Color");
+        safeSettings["nodeSettings"].should.not.have.property("abcColor");
+    });
+
+    it('overwrites node settings with user settings', function() {
+        var userSettings = {
+            injectColor: "green",
+            mqttColor: "yellow",
+            c: [1,2,3]
+        }
+        settings.init(userSettings);
+        settings.registerNodeSettings("inject", {injectColor:{value:"red", exportable:true}} );
+        var safeSettings = {};
+        settings.exportNodeSettings(safeSettings);
+        safeSettings["nodeSettings"].should.have.property("injectColor", "green");
+        safeSettings["nodeSettings"].should.not.have.property("mqttColor");
+    });
+
+    it('disables/enables node settings', function() {
+        var userSettings = {};
+        settings.init(userSettings);
+
+        var safeSettings = {};
+        settings.registerNodeSettings("inject", {injectColor:{value:"red", exportable:true}} );
+        settings.registerNodeSettings("mqtt", {mqttColor:{value:"purple", exportable:true}} );
+        settings.registerNodeSettings("http request", {httpRequestColor:{value:"yellow", exportable:true}} );
+        settings.exportNodeSettings(safeSettings);
+        safeSettings["nodeSettings"].should.have.property("injectColor", "red");
+        safeSettings["nodeSettings"].should.have.property("mqttColor", "purple");
+        safeSettings["nodeSettings"].should.have.property("httpRequestColor", "yellow");
+
+        var types = ["inject", "mqtt"];
+        settings.disableNodeSettings(types);
+        settings.exportNodeSettings(safeSettings);
+        safeSettings["nodeSettings"].should.not.have.property("injectColor");
+        safeSettings["nodeSettings"].should.not.have.property("mqttColor");
+        safeSettings["nodeSettings"].should.have.property("httpRequestColor", "yellow");
+
+        types = ["inject"];
+        settings.enableNodeSettings(types);
+        settings.exportNodeSettings(safeSettings);
+        safeSettings["nodeSettings"].should.have.property("injectColor", "red");
+        safeSettings["nodeSettings"].should.not.have.property("mqttColor");
+        safeSettings["nodeSettings"].should.have.property("httpRequestColor", "yellow");
+    });
+
 });
