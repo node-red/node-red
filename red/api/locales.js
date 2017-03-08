@@ -16,30 +16,12 @@
 var fs = require('fs');
 var path = require('path');
 var i18n;
-var supportedLangs = [];
-
-var apiLocalDir = path.resolve(path.join(__dirname,"locales"));
-
-var initSupportedLangs = function() {
-    fs.readdir(apiLocalDir, function(err,files) {
-        if(!err) {
-            supportedLangs = files;
-        }
-    });
-}
 
 function determineLangFromHeaders(acceptedLanguages){
     var lang = i18n.defaultLang;
     acceptedLanguages = acceptedLanguages || [];
-    for (var i=0;i<acceptedLanguages.length;i++){
-        if (supportedLangs.indexOf(acceptedLanguages[i]) !== -1){
-            lang = acceptedLanguages[i];
-            break;
-        // check the language without the country code
-        } else if (supportedLangs.indexOf(acceptedLanguages[i].split("-")[0]) !== -1) {
-            lang = acceptedLanguages[i].split("-")[0];
-            break;
-        }
+    if (acceptedLanguages.length >= 1) {
+        lang = acceptedLanguages[0];
     }
     return lang;
 }
@@ -47,7 +29,6 @@ function determineLangFromHeaders(acceptedLanguages){
 module.exports = {
     init: function(runtime) {
         i18n = runtime.i18n;
-        initSupportedLangs();
     },
     get: function(req,res) {
         var namespace = req.params[0];
