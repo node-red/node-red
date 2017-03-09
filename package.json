@@ -35,7 +35,7 @@
         "cors":"2.8.1",
         "cron":"1.2.1",
         "express": "4.14.0",
-        "follow-redirects":"1.2.1",
+        "follow-redirects":"1.2.2",
         "fs-extra": "1.0.0",
         "fs.notify":"0.0.4",
         "i18next":"1.10.6",
