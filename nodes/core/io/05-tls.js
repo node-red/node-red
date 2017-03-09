@@ -48,7 +48,14 @@ module.exports = function(RED) {
             return;
         }
     }
-    RED.nodes.registerType("tls-config",TLSConfig);
+    RED.nodes.registerType("tls-config",TLSConfig,{
+        settings: {
+            tlsConfigDisableLocalFiles: {
+                value: true,
+                exportable: false
+            }
+        }
+    });
 
     TLSConfig.prototype.addTLSOptions = function(opts) {
         if (this.valid) {
