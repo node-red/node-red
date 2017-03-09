@@ -128,10 +128,12 @@ var persistentSettings = {
                 for (var property in nodeTypeSettings) {
                     if (nodeTypeSettings.hasOwnProperty(property)) {
                         var setting = nodeTypeSettings[property];
-                        if (userSettings.hasOwnProperty(property)) {
-                            safeSettings["nodeSettings"][property] = userSettings[property];
-                        } else if (setting.exportable) {
-                            safeSettings["nodeSettings"][property] = setting.value;
+                        if (setting.exportable) {
+                            if (userSettings.hasOwnProperty(property)) {
+                                safeSettings["nodeSettings"][property] = userSettings[property];
+                            } else {
+                                safeSettings["nodeSettings"][property] = setting.value;
+                            }
                         }
                     }
                 }

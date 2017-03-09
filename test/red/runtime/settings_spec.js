@@ -185,14 +185,16 @@ describe("red/settings", function() {
         var userSettings = {
             injectColor: "green",
             mqttColor: "yellow",
-            c: [1,2,3]
+            abColor: [1,2,3]
         }
         settings.init(userSettings);
         settings.registerNodeSettings("inject", {injectColor:{value:"red", exportable:true}} );
+        settings.registerNodeSettings("ab", {abColor:{value:"red", exportable:false}} );
         var safeSettings = {};
         settings.exportNodeSettings(safeSettings);
         safeSettings["nodeSettings"].should.have.property("injectColor", "green");
         safeSettings["nodeSettings"].should.not.have.property("mqttColor");
+        safeSettings["nodeSettings"].should.not.have.property("abColor");
     });
 
     it('disables/enables node settings', function() {
