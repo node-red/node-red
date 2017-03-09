@@ -156,7 +156,7 @@
                 clearNameData("ca");
             });
 
-            if (RED.settings.tlsDisableLocalFiles) {
+            if (RED.settings.tlsConfigDisableLocalFiles) {
                 $("#node-config-row-uselocalfiles").hide();
             } else {
                 $("#node-config-row-uselocalfiles").show();
@@ -178,7 +178,7 @@
             } else {
                 $("#node-config-input-ca").val("");
                 $("#node-config-input-cert").val("");
-                $("#node-config-input-key").val("");            
+                $("#node-config-input-key").val("");
             }
         }
     });

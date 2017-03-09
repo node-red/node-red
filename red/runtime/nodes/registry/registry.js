@@ -493,6 +493,7 @@ function enableNodeSet(typeOrId) {
         delete config.err;
         config.enabled = true;
         nodeConfigCache = null;
+        settings.enableNodeSettings(config.types);
         return saveNodeList().then(function() {
             return filterNodeInfo(config);
         });
@@ -515,6 +516,7 @@ function disableNodeSet(typeOrId) {
         // TODO: persist setting
         config.enabled = false;
         nodeConfigCache = null;
+        settings.disableNodeSettings(config.types);
         return saveNodeList().then(function() {
             return filterNodeInfo(config);
         });

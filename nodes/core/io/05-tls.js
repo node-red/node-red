@@ -48,13 +48,13 @@ module.exports = function(RED) {
                 this.valid = false;
                 this.error(err.toString());
                 return;
-            }  
+            }
         } else {
             if (this.credentials) {
                 var certData = this.credentials.certdata || "";
                 var keyData = this.credentials.keydata || "";
                 var caData = this.credentials.cadata || "";
-                
+
                 if ((certData.length > 0) !== (keyData.length > 0)) {
                     this.valid = false;
                     this.error(RED._("tls.error.missing-file"));
@@ -78,6 +78,12 @@ module.exports = function(RED) {
             certdata: {type:"text"},
             keydata: {type:"text"},
             cadata: {type:"text"}
+        },
+        settings: {
+            tlsConfigDisableLocalFiles: {
+                value: true,
+                exportable: false
+            }
         }
     });
 

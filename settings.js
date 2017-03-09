@@ -49,7 +49,7 @@ module.exports = {
 
     // To disable the option for using local files for storing keys and certificates in the TLS configuration
     //  node, set this to true
-    //tlsDisableLocalFiles:true,
+    //tlsConfigDisableLocalFiles: true,
 
     // Colourise the console output of the debug node
     //debugUseColors: true,

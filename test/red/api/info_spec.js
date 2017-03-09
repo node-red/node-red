@@ -42,7 +42,10 @@ describe("info api", function() {
                     foo: 123,
                     httpNodeRoot: "testHttpNodeRoot",
                     version: "testVersion",
-                    paletteCategories :["red","blue","green"]
+                    paletteCategories :["red","blue","green"],
+                    exportNodeSettings: function(obj) {
+                        obj.testNodeSetting = "helloWorld";
+                    }
                 },
                 nodes: {
                     paletteEditorEnabled: function() { return true; }
@@ -59,7 +62,9 @@ describe("info api", function() {
                     res.body.should.have.property("version","testVersion");
                     res.body.should.have.property("paletteCategories",["red","blue","green"]);
                     res.body.should.have.property("editorTheme",{test:456});
+                    res.body.should.have.property("testNodeSetting","helloWorld");
                     res.body.should.not.have.property("foo",123);
+
                     done();
                 });
         });
@@ -68,8 +73,8 @@ describe("info api", function() {
                 settings: {
                     httpNodeRoot: "testHttpNodeRoot",
                     version: "testVersion",
-                    paletteCategories :["red","blue","green"]
-
+                    paletteCategories :["red","blue","green"],
+                    exportNodeSettings: function() {}
                 },
                 nodes: {
                     paletteEditorEnabled: function() { return false; }

@@ -50,8 +50,13 @@ function registerType(nodeSet,type,constructor,opts) {
         type = nodeSet;
         nodeSet = "";
     }
-    if (opts && opts.credentials) {
-        credentials.register(type,opts.credentials);
+    if (opts) {
+        if (opts.credentials) {
+            credentials.register(type,opts.credentials);
+        }
+        if (opts.settings) {
+            settings.registerNodeSettings(type,opts.settings);
+        }
     }
     registry.registerType(nodeSet,type,constructor);
 }
