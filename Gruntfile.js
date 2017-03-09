@@ -41,6 +41,16 @@ module.exports = function(grunt) {
             core: { src: ["test/_spec.js","test/red/**/*_spec.js"]},
             nodes: { src: ["test/nodes/**/*_spec.js"]}
         },
+        mocha_istanbul: {
+            options: {
+                globals: ['expect'],
+                timeout: 3000,
+                ignoreLeaks: false,
+                ui: 'bdd',
+                reporter: 'spec'
+            },
+            coverage: { src: ['test/**/*_spec.js'] }
+        },
         jshint: {
             options: {
                 jshintrc:true
@@ -396,6 +406,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-chmod');
     grunt.loadNpmTasks('grunt-jsonlint');
+    grunt.loadNpmTasks('grunt-mocha-istanbul');
 
     grunt.registerMultiTask('attachCopyright', function() {
         var files = this.data.src;
