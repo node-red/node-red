@@ -153,6 +153,8 @@ describe("red/settings", function() {
         settings.registerNodeSettings("_http_request_", {httpRequest3:{value:"a3", exportable:true}} );
         settings.registerNodeSettings("mQtT", {mQtTColor:{value:"purple", exportable:true}} );
         settings.registerNodeSettings("abc123", {abc123:{value:"def456", exportable:true}} );
+        settings.registerNodeSettings("noValue", {noValueHasValue:{value:"123", exportable:true}, noValueNoValue:{exportable:true}} );
+
         var safeSettings = {};
         settings.exportNodeSettings(safeSettings);
         safeSettings["nodeSettings"].should.have.property("injectColor", "red");
@@ -164,15 +166,26 @@ describe("red/settings", function() {
         safeSettings["nodeSettings"].should.have.property("httpRequest3", "a3");
         safeSettings["nodeSettings"].should.have.property("mQtTColor", "purple");
         safeSettings["nodeSettings"].should.have.property("abc123", "def456");
+
+        safeSettings["nodeSettings"].should.have.property("noValueHasValue", "123");
+        safeSettings["nodeSettings"].should.not.have.property("noValueNoValue");
     });
 
     it('prohibits registering the property whose name do not start with type name', function() {
         var userSettings = {};
         settings.init(userSettings);
-        settings.registerNodeSettings("inject", {color:{value:"red", exportable:true}} );
-        settings.registerNodeSettings("_a_b_1_", {ab1Color:{value:"red", exportable:true}} );
-        settings.registerNodeSettings("AB2", {AB2Color:{value:"red", exportable:true}} );
-        settings.registerNodeSettings("abcDef", {abcColor:{value:"red", exportable:true}} );
+        (function() {
+            settings.registerNodeSettings("inject", {color:{value:"red", exportable:true}} );
+        }).should.throw();
+        (function() {
+            settings.registerNodeSettings("_a_b_1_", {ab1Color:{value:"red", exportable:true}} );
+        }).should.throw();
+        (function() {
+            settings.registerNodeSettings("AB2", {AB2Color:{value:"red", exportable:true}} );
+        }).should.throw();
+        (function() {
+            settings.registerNodeSettings("abcDef", {abcColor:{value:"red", exportable:true}} );
+        }).should.throw();
         var safeSettings = {};
         settings.exportNodeSettings(safeSettings);
         safeSettings["nodeSettings"].should.not.have.property("color");

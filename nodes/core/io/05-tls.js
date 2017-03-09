@@ -82,7 +82,7 @@ module.exports = function(RED) {
         settings: {
             tlsConfigDisableLocalFiles: {
                 value: false,
-                exportable: false
+                exportable: true
             }
         }
     });

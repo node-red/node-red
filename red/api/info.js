@@ -43,16 +43,12 @@ module.exports = {
             safeSettings.flowFilePretty = settings.flowFilePretty;
         }
 
-        if (settings.tlsDisableLocalFiles) {
-            safeSettings.tlsDisableLocalFiles = settings.tlsDisableLocalFiles;
-        }
-
         if (!runtime.nodes.paletteEditorEnabled()) {
             safeSettings.editorTheme = safeSettings.editorTheme || {};
             safeSettings.editorTheme.palette = safeSettings.editorTheme.palette || {};
             safeSettings.editorTheme.palette.editable = false;
         }
-        
+
         settings.exportNodeSettings(safeSettings);
 
         res.json(safeSettings);

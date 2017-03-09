@@ -24,7 +24,7 @@ var flows = require("./flows");
 var flowUtil = require("./flows/util")
 var context = require("./context");
 var Node = require("./Node");
-var log = require("../log");
+var log = null;
 var library = require("./library");
 
 var events = require("../events");
@@ -55,7 +55,11 @@ function registerType(nodeSet,type,constructor,opts) {
             credentials.register(type,opts.credentials);
         }
         if (opts.settings) {
-            settings.registerNodeSettings(type,opts.settings);
+            try {
+                settings.registerNodeSettings(type,opts.settings);
+            } catch(err) {
+                log.warn("["+type+"] "+err.message);
+            }
         }
     }
     registry.registerType(nodeSet,type,constructor);
@@ -90,6 +94,7 @@ function createNode(node,def) {
 
 function init(runtime) {
     settings = runtime.settings;
+    log = runtime.log;
     credentials.init(runtime);
     flows.init(runtime);
     registry.init(runtime);

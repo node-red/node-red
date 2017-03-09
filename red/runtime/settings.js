@@ -106,19 +106,15 @@ var persistentSettings = {
         storage = null;
     },
     registerNodeSettings: function(type, opts) {
-        try {
-            for (var property in opts) {
-                if (opts.hasOwnProperty(property)) {
-                    var normalisedType = util.normaliseNodeTypeName(type);
-                    if (!property.startsWith(normalisedType)) {
-                        throw new Error("The name of node setting property " + property + " must start with \"" + normalisedType + "\" (case sensitive).");
-                    }
+        var normalisedType = util.normaliseNodeTypeName(type);
+        for (var property in opts) {
+            if (opts.hasOwnProperty(property)) {
+                if (!property.startsWith(normalisedType)) {
+                    throw new Error("Registered invalid property name '"+property+"'. Properties for this node must start with '"+normalisedType+"'");
                 }
             }
-            nodeSettings[type] = opts;
-        } catch (err) {
-            console.log(err.toString());
         }
+        nodeSettings[type] = opts;
     },
     exportNodeSettings: function(safeSettings) {
         safeSettings["nodeSettings"] = {};
@@ -131,7 +127,7 @@ var persistentSettings = {
                         if (setting.exportable) {
                             if (userSettings.hasOwnProperty(property)) {
                                 safeSettings["nodeSettings"][property] = userSettings[property];
-                            } else {
+                            } else if (setting.hasOwnProperty('value')) {
                                 safeSettings["nodeSettings"][property] = setting.value;
                             }
                         }
