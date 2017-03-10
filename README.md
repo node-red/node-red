@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/node-red/node-red.png?label=ready)](https://waffle.io/node-red/node-red)  
 # Node-RED
 
 http://nodered.org
