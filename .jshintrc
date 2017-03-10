@@ -2,6 +2,9 @@
     "asi": true,        // allow missing semicolons
     "curly": true,      // require braces
     "eqnull": true,     // ignore ==null
+    //"eqeqeq": true,   // enforce ===
+    "freeze": true,     // don't allow override
+    "indent": 4,        // default indent of 4
     "forin": true,      // require property filtering in "for in" loops
     "immed": true,      // require immediate functions to be wrapped in ( )
     "nonbsp": true,     // warn on unexpected whitespace breaking chars

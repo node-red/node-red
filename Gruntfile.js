@@ -47,7 +47,8 @@ module.exports = function(grunt) {
                 timeout: 3000,
                 ignoreLeaks: false,
                 ui: 'bdd',
-                reporter: 'spec'
+                reportFormats: ['lcov'],
+                print: 'both'
             },
             coverage: { src: ['test/**/*_spec.js'] }
         },
@@ -427,7 +428,7 @@ module.exports = function(grunt) {
             " **/\n";
 
         if (files) {
-            for (var i=0;i<files.length;i++) {
+            for (var i=0; i<files.length; i++) {
                 var file = files[i];
                 if (!grunt.file.exists(file)) {
                     grunt.log.warn('File '+ file + ' not found');
@@ -482,4 +483,7 @@ module.exports = function(grunt) {
         'Create distribution zip file',
         ['build','clean:release','copy:release','chmod:release','compress:release']);
 
+    grunt.registerTask('coverage',
+        'Run Istanbul code test coverage task',
+        ['build','mocha_istanbul']);
 };
