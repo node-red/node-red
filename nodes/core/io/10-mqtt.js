@@ -66,16 +66,16 @@ module.exports = function(RED) {
 
         // If the config node is missing certain options (it was probably deployed prior to an update to the node code),
         // select/generate sensible options for the new fields
-        if (typeof this.usetls === 'undefined'){
+        if (typeof this.usetls === 'undefined') {
             this.usetls = false;
         }
-        if (typeof this.compatmode === 'undefined'){
+        if (typeof this.compatmode === 'undefined') {
             this.compatmode = true;
         }
-        if (typeof this.verifyservercert === 'undefined'){
+        if (typeof this.verifyservercert === 'undefined') {
             this.verifyservercert = false;
         }
-        if (typeof this.keepalive === 'undefined'){
+        if (typeof this.keepalive === 'undefined') {
             this.keepalive = 60;
         } else if (typeof this.keepalive === 'string') {
             this.keepalive = Number(this.keepalive);
@@ -110,7 +110,7 @@ module.exports = function(RED) {
         this.options.keepalive = this.keepalive;
         this.options.clean = this.cleansession;
         this.options.reconnectPeriod = RED.settings.mqttReconnectTime||5000;
-        if (this.compatmode == "true" || this.compatmode === true){
+        if (this.compatmode == "true" || this.compatmode === true) {
             this.options.protocolId = 'MQIsdp';
             this.options.protocolVersion = 3;
         }
@@ -140,14 +140,14 @@ module.exports = function(RED) {
         var node = this;
         this.users = {};
 
-        this.register = function(mqttNode){
+        this.register = function(mqttNode) {
             node.users[mqttNode.id] = mqttNode;
             if (Object.keys(node.users).length === 1) {
                 node.connect();
             }
         };
 
-        this.deregister = function(mqttNode,done){
+        this.deregister = function(mqttNode,done) {
             delete node.users[mqttNode.id];
             if (node.closing) {
                 return done();
@@ -266,7 +266,7 @@ module.exports = function(RED) {
                 }
                 if (Object.keys(sub).length === 0) {
                     delete node.subscriptions[topic];
-                    if (node.connected){
+                    if (node.connected) {
                         node.client.unsubscribe(topic);
                     }
                 }
@@ -287,7 +287,7 @@ module.exports = function(RED) {
                     qos: msg.qos || 0,
                     retain: msg.retain || false
                 };
-                node.client.publish(msg.topic, msg.payload, options, function (err){return});
+                node.client.publish(msg.topic, msg.payload, options, function(err) {return});
             }
         };
 
@@ -298,7 +298,7 @@ module.exports = function(RED) {
                     done();
                 });
                 this.client.end();
-            } else if (this.connecting) {
+            } else if (this.connecting || node.client.reconnecting) {
                 node.client.end();
                 done();
             } else {

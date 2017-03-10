@@ -35,7 +35,7 @@
 </script>
 
 <script type="text/x-red" data-help-name="mqtt in">
-    <p>Connects to a broker and subscribes to the specified topic.</p>
+    <p>Connects to a MQTT broker and subscribes to the specified topic.</p>
     <p>Outputs a message with the properties:</p>
     <ul>
        <li><code>msg.topic</code></li>
@@ -107,6 +107,7 @@
     <p>Connects to a MQTT broker and publishes messages.</p>
     <p><code>msg.payload</code> is used as the payload of the published message.
     If it contains an Object it will be converted to JSON before being sent.
+    If it contains a binary Buffer the message will be published as-is.
     </p>
     <p>The topic used can be configured in the node or, if left blank, can be set
        by <code>msg.topic</code>.</p>
@@ -299,7 +300,7 @@
                 id: "mqtt-broker-tab-will",
                 label: this._("mqtt.tabs-label.will")
             });
-            setTimeout(function() { tabs.resize()},0);
+            setTimeout(function() { tabs.resize(); },0);
             if (typeof this.cleansession === 'undefined') {
                 this.cleansession = true;
                 $("#node-config-input-cleansession").prop("checked",true);
