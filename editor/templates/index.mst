@@ -170,6 +170,9 @@
 </script>
 
 <script type="text/x-red" data-template-name="_expression">
+    <div class="form-row" style="margin-bottom: 3px; text-align: right;">
+        <button id="node-input-expression-reformat" class="editor-button editor-button-small">format</button>
+    </div>
     <div class="form-row node-text-editor-row">
         <div style="height: 200px;min-height: 150px;" class="node-text-editor" id="node-input-expression"></div>
     </div>
@@ -178,6 +181,14 @@
         <select id="node-input-expression-func"></select>
         <button id="node-input-expression-func-insert" class="editor-button" data-i18n="expressionEditor.insert"></button>
         <div style="min-height: 200px;" id="node-input-expression-help"></div>
+    </div>
+</script>
+<script type="text/x-red" data-template-name="_json">
+    <div class="form-row" style="margin-bottom: 3px; text-align: right;">
+        <button id="node-input-expression-reformat" class="editor-button editor-button-small">format</button>
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height: 200px;min-height: 150px;" class="node-text-editor" id="node-input-json"></div>
     </div>
 </script>
 

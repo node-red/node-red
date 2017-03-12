@@ -493,7 +493,9 @@ RED.editor = (function() {
             var node = editStack[i];
             var label = node.type;
             if (node.type === '_expression') {
-                label = "Expression editor";
+                label = "Expression editor"; // TODO: nls
+            } else if (node.type === '_json') {
+                label = "JSON editor"; // TODO: nls
             } else if (node.type === 'subflow') {
                 label = RED._("subflow.editSubflow",{name:node.name})
             } else if (node.type.indexOf("subflow:")===0) {
@@ -1730,7 +1732,91 @@ RED.editor = (function() {
                     var snippet = jsonata.getFunctionSnippet(f);
                     expressionEditor.insertSnippet(snippet);
                     expressionEditor.focus();
-                })
+                });
+                $("#node-input-expression-reformat").click(function(evt) {
+                    evt.preventDefault();
+                    var v = expressionEditor.getValue()||"";
+                    try {
+                        v = jsonata.format(v);
+                    } catch(err) {
+                        // TODO: do an optimistic auto-format
+                    }
+                    expressionEditor.getSession().setValue(v||"",-1);
+                });
+            },
+            close: function() {
+                editStack.pop();
+            },
+            show: function() {}
+        }
+        if (editTrayWidthCache.hasOwnProperty(type)) {
+            trayOptions.width = editTrayWidthCache[type];
+        }
+        RED.tray.show(trayOptions);
+    }
+
+
+    function editJSON(options) {
+        var value = options.value;
+        var onComplete = options.complete;
+        var type = "_json"
+        editStack.push({type:type});
+        RED.view.state(RED.state.EDITING);
+        var expressionEditor;
+
+        var trayOptions = {
+            title: getEditStackTitle(),
+            buttons: [
+                {
+                    id: "node-dialog-cancel",
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        RED.tray.close();
+                    }
+                },
+                {
+                    id: "node-dialog-ok",
+                    text: RED._("common.label.done"),
+                    class: "primary",
+                    click: function() {
+                        onComplete(expressionEditor.getValue());
+                        RED.tray.close();
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                editTrayWidthCache[type] = dimensions.width;
+
+                var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+                var editorRow = $("#dialog-form>div.node-text-editor-row");
+                var height = $("#dialog-form").height();
+                for (var i=0;i<rows.size();i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                height -= (parseInt($("#dialog-form").css("marginTop"))+parseInt($("#dialog-form").css("marginBottom")));
+                $(".node-text-editor").css("height",height+"px");
+                expressionEditor.resize();
+            },
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var dialogForm = buildEditForm(tray.find('.editor-tray-body'),'dialog-form',type,'editor');
+                expressionEditor = RED.editor.createEditor({
+                    id: 'node-input-json',
+                    value: "",
+                    mode:"ace/mode/json"
+                });
+                expressionEditor.getSession().setValue(value||"",-1);
+                $("#node-input-expression-reformat").click(function(evt) {
+                    evt.preventDefault();
+                    var v = expressionEditor.getValue()||"";
+                    try {
+                        v = JSON.stringify(JSON.parse(v),null,4);
+                    } catch(err) {
+                        // TODO: do an optimistic auto-format
+                    }
+                    expressionEditor.getSession().setValue(v||"",-1);
+                });
+                dialogForm.i18n();
             },
             close: function() {
                 editStack.pop();
@@ -1759,6 +1845,7 @@ RED.editor = (function() {
         editConfig: showEditConfigNodeDialog,
         editSubflow: showEditSubflowDialog,
         editExpression: editExpression,
+        editJSON: editJSON,
         validateNode: validateNode,
         updateNodeProperties: updateNodeProperties, // TODO: only exposed for edit-undo
 
