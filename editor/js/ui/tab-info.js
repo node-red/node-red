@@ -128,7 +128,6 @@ RED.sidebar.info = (function() {
             var helpText = $("script[data-help-name$='"+node.type+"']").html()||"";
             addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(helpText)+'">'+helpText+'</span></div>').appendTo(content));
         }
-
         if (subflowNode) {
             addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(subflowNode.info||"")+'">'+marked(subflowNode.info||"")+'</span></div>').appendTo(content));
         } else if (node.type == "tab") {
