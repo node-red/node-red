@@ -135,10 +135,14 @@ function setFlows(_config,type,muteLog) {
             if (started) {
                 return stop(type,diff,muteLog).then(function() {
                     context.clean(activeFlowConfig);
-                    start(type,diff,muteLog);
+                    start(type,diff,muteLog).then(function() {
+                        events.emit("runtime-event",{id:"runtime-deploy",revision:flowRevision});
+                    });
                     return flowRevision;
                 }).otherwise(function(err) {
                 })
+            } else {
+                events.emit("runtime-event",{id:"runtime-deploy",revision:flowRevision});
             }
         });
 }

@@ -83,6 +83,10 @@
                 RED.comms.subscribe("notification/#",function(topic,msg) {
                     var parts = topic.split("/");
                     var notificationId = parts[1];
+                    if (notificationId === "runtime-deploy") {
+                        // handled in ui/deploy.js
+                        return;
+                    }
                     if (msg.text) {
                         var text = RED._(msg.text,{default:msg.text});
                         if (!persistentNotifications.hasOwnProperty(notificationId)) {
