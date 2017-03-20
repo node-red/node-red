@@ -48,6 +48,7 @@ describe('exec node', function() {
     });
 
     describe('calling exec', function() {
+
         it('should exec a simple command', function(done) {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:false, append:""},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
