@@ -61,6 +61,7 @@ module.exports = function(RED) {
                 node.handleEvent(id,socket,'message',data,flags);
             });
             socket.on('error', function(err) {
+                node.warn(RED._("websocket.errors.socket-error")+inspect(err));
                 node.emit('erro');
                 if (!node.closing && !node.isServer) {
                     clearTimeout(node.tout);
