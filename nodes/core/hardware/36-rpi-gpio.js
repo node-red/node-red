@@ -137,6 +137,7 @@ module.exports = function(RED) {
         this.pin = n.pin;
         this.set = n.set || false;
         this.level = n.level || 0;
+        this.freq = n.freq || 100;
         this.out = n.out || "out";
         var node = this;
         if (!pinsInUse.hasOwnProperty(this.pin)) {
@@ -173,7 +174,7 @@ module.exports = function(RED) {
                 node.child = spawn(gpioCommand, [node.out,node.pin,node.level]);
                 node.status({fill:"green",shape:"dot",text:node.level});
             } else {
-                node.child = spawn(gpioCommand, [node.out,node.pin]);
+                node.child = spawn(gpioCommand, [node.out,node.pin,node.freq]);
                 node.status({fill:"green",shape:"dot",text:"common.status.ok"});
             }
             node.running = true;
