@@ -154,6 +154,10 @@ module.exports = function(RED) {
             }
             if (tlsNode) {
                 tlsNode.addTLSOptions(opts);
+            } else {
+                if (msg.hasOwnProperty('rejectUnauthorized')) {
+                    opts.rejectUnauthorized = msg.rejectUnauthorized;
+                }
             }
             var req = ((/^https/.test(urltotest))?https:http).request(opts,function(res) {
                 (node.ret === "bin") ? res.setEncoding('binary') : res.setEncoding('utf8');
