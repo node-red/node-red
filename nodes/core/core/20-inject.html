@@ -203,7 +203,7 @@
                 suffix = " ¹";
             }
             // but replace with repeat one if set to repeat
-            if (this.repeat || this.crontab) {
+            if ((this.repeat && this.repeat != 0) || this.crontab) {
                 suffix = " ↻";
             }
             if (this.name) {
@@ -270,7 +270,7 @@
             });
 
             $(".inject-time-times").each(function() {
-                for (var i=0;i<24;i++) {
+                for (var i=0; i<24; i++) {
                     var l = (i<10?"0":"")+i+":00";
                     $(this).append($("<option></option>").val(i).text(l));
                 }
@@ -280,7 +280,7 @@
                 var start = Number($("#inject-time-interval-time-start").val());
                 var end = Number($("#inject-time-interval-time-end").val());
                 $("#inject-time-interval-time-end option").remove();
-                for (var i=start+1;i<25;i++) {
+                for (var i=start+1; i<25; i++) {
                     var l = (i<10?"0":"")+i+":00";
                     if (i==24) {
                         l = "00:00";
