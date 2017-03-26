@@ -34,6 +34,7 @@ module.exports = function(RED) {
         // match absolute url
         node.isServer = !/^ws{1,2}:\/\//i.test(node.path);
         node.closing = false;
+        node.lastError = null;
 
         function startconn() {    // Connect to remote endpoint
             node.tout = null;
@@ -47,7 +48,11 @@ module.exports = function(RED) {
             var id = (1+Math.random()*4294967295).toString(16);
             if (node.isServer) { node._clients[id] = socket; node.emit('opened',Object.keys(node._clients).length); }
             socket.on('open',function() {
-                if (!node.isServer) { node.emit('opened',''); }
+                if (node.isServer) {
+                    return;
+                }
+                node.lastError = null;
+                node.emit('opened','');
             });
             socket.on('close',function() {
                 if (node.isServer) { delete node._clients[id]; node.emit('closed',Object.keys(node._clients).length); }
@@ -61,7 +66,11 @@ module.exports = function(RED) {
                 node.handleEvent(id,socket,'message',data,flags);
             });
             socket.on('error', function(err) {
-                node.warn({message: RED._("websocket.errors.socket-error", {error: err.message}), stack: err.stack});
+                // Don't flood with same logs on reconnect attempt
+                if (!node.lastError || node.lastError != err.message) {
+                    node.warn({message: RED._("websocket.errors.ws-error", {error: err.message}), stack: err.stack});
+                }
+                node.lastError = err.message;
                 node.emit('erro');
                 if (!node.closing && !node.isServer) {
                     clearTimeout(node.tout);
