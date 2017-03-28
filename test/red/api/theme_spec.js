@@ -68,6 +68,10 @@ describe("theme handler", function() {
                     icon: "/absolute/path/to/deploy/button/image" // or null to remove image
                 },
 
+                customScripts: [
+                    "/absolute/path/to/script.js"
+                ],
+
                 menu: { // Hide unwanted menu items by id. see editor/js/main.js:loadEditor for complete list
                     "menu-item-import-library": false,
                     "menu-item-export-library": false,
@@ -93,6 +97,8 @@ describe("theme handler", function() {
         context.page.should.have.a.property("title","Test Page Title");
         context.should.have.a.property("header");
         context.header.should.have.a.property("title","Test Header Title");
+        context.should.have.a.property("customScripts");
+        context.customScripts[0].should.have.a.property("url","theme/scripts/script.js");
 
         var settings = theme.settings();
         settings.should.have.a.property("deployButton");
