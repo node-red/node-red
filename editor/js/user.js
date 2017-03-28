@@ -128,9 +128,13 @@ RED.user = (function() {
             url: "auth/revoke",
             type: "POST",
             data: {token:RED.settings.get("auth-tokens").access_token},
-            success: function() {
+            success: function(url) {
                 RED.settings.remove("auth-tokens");
-                document.location.reload(true);
+                if(!url) {
+                    document.location.reload(true);
+                } else {
+                    document.location.href=url;
+                }
             }
         })
     }
