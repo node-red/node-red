@@ -277,7 +277,8 @@ RED.nodes = (function() {
         ws._def = {
             defaults: {
                 label: {value:""},
-                disabled: {value: false}
+                disabled: {value: false},
+                info: {value: ""}
             }
         };
 

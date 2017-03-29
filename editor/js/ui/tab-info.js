@@ -109,7 +109,7 @@ RED.sidebar.info = (function() {
             $("<tr><td>"+RED._("sidebar.info.instances")+"</td><td>"+userCount+"</td></tr>").appendTo(tableBody);
         }
 
-        if (!m && node.type != "subflow" && node.type != "comment") {
+        if (!m && node.type != "subflow" && node.type != "comment" && node.type != "tab") {
             $('<tr class="blank"><td colspan="2"><a href="#" class="node-info-property-header"><i style="width: 10px; text-align: center;" class="fa fa-caret-'+(propertiesExpanded?"down":"right")+'"></i> '+RED._("sidebar.info.properties")+'</a></td></tr>').appendTo(tableBody);
             if (node._def) {
                 for (var n in node._def.defaults) {
@@ -124,12 +124,14 @@ RED.sidebar.info = (function() {
         }
         $(table).appendTo(content);
         $("<hr/>").appendTo(content);
-        if (!subflowNode && node.type != "comment") {
+        if (!subflowNode && node.type != "comment" && node.type != "tab") {
             var helpText = $("script[data-help-name$='"+node.type+"']").html()||"";
             addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(helpText)+'">'+helpText+'</span></div>').appendTo(content));
         }
         if (subflowNode) {
             addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(subflowNode.info||"")+'">'+marked(subflowNode.info||"")+'</span></div>').appendTo(content));
+        } else if (node.type == "tab") {
+            addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(node.info||"")+'">'+marked(node.info||"")+'</span></div>').appendTo(content));
         } else if (node._def && node._def.info) {
             var info = node._def.info;
             var textInfo = (typeof info === "function" ? info.call(node) : info);
@@ -262,7 +264,12 @@ RED.sidebar.info = (function() {
             if (subflow) {
                 refresh(subflow);
             } else {
-                clear();
+                var workspace = RED.nodes.workspace(RED.workspaces.active());
+                if (workspace.info) {
+                    refresh(workspace);
+                } else {
+                    clear();
+                }
             }
         }
     });
