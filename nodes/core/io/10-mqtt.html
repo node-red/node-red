@@ -35,15 +35,19 @@
 </script>
 
 <script type="text/x-red" data-help-name="mqtt in">
-    <p>Connects to a MQTT broker and subscribes to the specified topic.</p>
-    <p>Outputs a message with the properties:</p>
+    <p>Connects to a MQTT broker and subscribes to messages from the specified topic.</p>
+    <p><b>Outputs</b>
     <ul>
-       <li><code>msg.topic</code></li>
-       <li><code>msg.payload</code></li>
-       <li><code>msg.qos</code></li>
-       <li><code>msg.retain</code></li>
+       <li><code>msg.payload</code> - <i>string | buffer</i> - a string unless detected as a binary buffer.</li>
+       <li><code>msg.topic</code> - <i>string</i> - the MQTT topic, uses / as a heirarchy separator.</li>
+       <li><code>msg.qos</code> - <i>number</i> - 0, fire and forget - 1, at least once - 2, once and once only.</li>
+       <li><code>msg.retain</code> - <i>boolean</i> - true indicates the message was retained and may be old.</li>
     </ul>
-    <p><code>msg.payload</code> will be a String, unless it is detected as a binary buffer.</p>
+    <p><b>Details</b><br/>
+    The subscription topic can include MQTT wildcards, + for one level, # for multiple levels.</p>
+    <p>This node requires a connection to a MQTT broker to be configured. This is configured by clicking
+    the pencil icon.</p>
+    <p>Several MQTT nodes (in or out) can share the same broker connection if required.</p>
 </script>
 
 <script type="text/javascript">
@@ -105,15 +109,23 @@
 
 <script type="text/x-red" data-help-name="mqtt out">
     <p>Connects to a MQTT broker and publishes messages.</p>
-    <p><code>msg.payload</code> is used as the payload of the published message.
-    If it contains an Object it will be converted to JSON before being sent.
-    If it contains a binary Buffer the message will be published as-is.
-    </p>
-    <p>The topic used can be configured in the node or, if left blank, can be set
-       by <code>msg.topic</code>.</p>
+    <p><b>Inputs</b>
+    <ul>
+        <li><code>msg.payload</code> - <i>string | buffer</i> - most users prefer simple text payloads, but binary buffers can also be published.</li>
+        <li><code><i>msg.topic</i></code> - <i>string</i> - the MQTT topic, uses / as a hierarchy separator.</li>
+        <li><code><i>msg.qos</i></code> - <i>number</i> - 0, fire and forget - 1, at least once - 2, once and once only. Default 0.</li>
+        <li><code><i>msg.retain</i></code> - <i>boolean</i> - set to true to retain the message on the broker. Default false.</li>
+    </ul>
+    <p><b>Details</b><br/>
+    <code>msg.payload</code> is used as the payload of the published message.
+    If it contains an Object it will be converted to a JSON string before being sent.
+    If it contains a binary Buffer the message will be published as-is.</p>
+    <p>The topic used can be configured in the node or, if left blank, can be set by <code>msg.topic</code>.</p>
     <p>Likewise the QoS and retain values can be configured in the node or, if left
-       blank, set by <code>msg.qos</code> and <code>msg.retain</code> respectively.
-       By default, messages are published at QoS 0 with the retain flag set to false.</p>
+    blank, set by <code>msg.qos</code> and <code>msg.retain</code> respectively.</p>
+    <p>This node requires a connection to a MQTT broker to be configured. This is configured by clicking
+    the pencil icon.</p>
+    <p>Several MQTT nodes (in or out) can share the same broker connection if required.</p>
 </script>
 
 <script type="text/javascript">
