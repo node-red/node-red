@@ -52,7 +52,7 @@ describe('exec node', function() {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:false, append:""},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             var spy = sinon.stub(child_process, 'exec',
-            function(arg1,arg2,arg3,arg4) {
+            function(arg1, arg2, arg3, arg4) {
                 //console.log(arg1);
                 // arg3(error,stdout,stderr);
                 arg3(null,arg1,arg1.toUpperCase());
@@ -70,7 +70,7 @@ describe('exec node', function() {
                     if (received < 3) {
                         return;
                     }
-                    try{
+                    try {
                         var msg = messages[0];
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
@@ -78,7 +78,7 @@ describe('exec node', function() {
 
                         msg = messages[1];
                         msg.should.have.property("payload");
-                        msg.payload.should.be.a.String,
+                        msg.payload.should.be.a.String;
                         msg.payload.should.equal("ECHO");
 
                         msg = messages[2];
@@ -112,7 +112,7 @@ describe('exec node', function() {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"more"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             var spy = sinon.stub(child_process, 'exec',
-                function(arg1,arg2,arg3,arg4) {
+                function(arg1, arg2, arg3, arg4) {
                     //console.log(arg1);
                     // arg3(error,stdout,stderr);
                     arg3(null,arg1,arg1.toUpperCase());
@@ -165,7 +165,7 @@ describe('exec node', function() {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"more"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             var spy = sinon.stub(child_process, 'exec',
-                function(arg1,arg2,arg3,arg4) {
+                function(arg1, arg2, arg3, arg4) {
                     //console.log(arg1);
                     // arg3(error,stdout,stderr);
                     arg3("error",new Buffer([0x01,0x02,0x03,0x88]));
@@ -275,7 +275,7 @@ describe('exec node', function() {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"error", addpay:false, append:""},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             var spy = sinon.stub(child_process, 'exec',
-            function(arg1,arg2,arg3,arg4) {
+            function(arg1, arg2, arg3, arg4) {
                 //console.log(arg1);
                 // arg3(error,stdout,stderr);
                 arg3({code: 1},arg1,arg1.toUpperCase());
@@ -292,7 +292,7 @@ describe('exec node', function() {
                     if (received < 3) {
                         return;
                     }
-                    try{
+                    try {
                         var msg = messages[0];
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
@@ -300,7 +300,7 @@ describe('exec node', function() {
 
                         msg = messages[1];
                         msg.should.have.property("payload");
-                        msg.payload.should.be.a.String,
+                        msg.payload.should.be.a.String;
                         msg.payload.should.equal("ERROR");
 
                         msg = messages[2];

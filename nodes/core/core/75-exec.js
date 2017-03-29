@@ -119,7 +119,7 @@ module.exports = function(RED) {
                         msg.payload = new Buffer(stdout,"binary");
                         if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
                         var msg2 = null;
-                        if(stderr) {
+                        if (stderr) {
                             msg2 = {payload: stderr};
                         }
                         var msg3 = null;
@@ -147,6 +147,7 @@ module.exports = function(RED) {
                 }
             }
         });
+        
         this.on('close',function() {
             for (var pid in node.activeProcesses) {
                 /* istanbul ignore else  */
