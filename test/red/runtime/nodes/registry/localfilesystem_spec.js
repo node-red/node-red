@@ -36,6 +36,7 @@ describe("red/nodes/registry/localfilesystem",function() {
         for (var i=0;i<shouldHaveNodes.length;i++) {
             nodes.should.have.a.property(shouldHaveNodes[i]);
             nodes[shouldHaveNodes[i]].should.have.a.property('file');
+	        nodes[shouldHaveNodes[i]].file.should.equal(path.resolve(nodes[shouldHaveNodes[i]].file));
             nodes[shouldHaveNodes[i]].should.have.a.property('module',module||'node-red');
             nodes[shouldHaveNodes[i]].should.have.a.property('name',shouldHaveNodes[i]);
         }
@@ -86,7 +87,18 @@ describe("red/nodes/registry/localfilesystem",function() {
             checkNodes(nm.nodes,['TestNode5'],['TestNode1']);
             done();
         });
-        it("Finds nodes in settings.nodesDir (array)",function(done) {
+	    it("Finds nodes in settings.nodesDir (string,relative path)",function(done) {
+		    var relativeUserDir = path.join("test","red","runtime","nodes","resources","userDir");
+		    localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{nodesDir:relativeUserDir,coreNodesDir:__dirname}});
+		    var nodeList = localfilesystem.getNodeFiles(true);
+		    nodeList.should.have.a.property("node-red");
+		    var nm = nodeList['node-red'];
+		    nm.should.have.a.property('name','node-red');
+		    nm.should.have.a.property("nodes");
+		    checkNodes(nm.nodes,['TestNode5'],['TestNode1']);
+		    done();
+	    });
+	    it("Finds nodes in settings.nodesDir (array)",function(done) {
             localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{nodesDir:[userDir],coreNodesDir:__dirname}});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
