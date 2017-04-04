@@ -27,13 +27,29 @@
         "args": "str",
         "desc": "Returns a string with all the characters of `str` converted to lowercase."
     },
+    "$trim": {
+        "args": "str",
+        "desc": "Normalizes and trims all whitespace characters in str by applying the following steps:\n\n - All tabs, carriage returns, and line feeds are replaced with spaces.\n- Contiguous sequences of spaces are reduced to a single space.\n- Trailing and leading spaces are removed.\n\n If `str` is not specified (i.e. this function is invoked with no arguments), then the context value is used as the value of `str`. An error is thrown if `str` is not a string."
+    },
+    "$contains": {
+        "args": "str, pattern",
+        "desc": "Returns `true` if `str` is matched by `pattern`, otherwise it returns `false`. If `str` is not specified (i.e. this function is invoked with one argument), then the context value is used as the value of `str`. The `pattern` parameter can either be a string or a regular expression."
+    },
     "$split": {
         "args": "str[, separator][, limit]",
-        "desc": "Splits the `str` parameter into an array of substrings. It is an error if `str` is not a string. The optional `separator` parameter specifies the characters within the `str` about which it should be split. If `separator` is not specified, then the empty string is assumed, and `str` will be split into an array of single characters. It is an error if `separator` is not a string. The optional `limit` parameter is a number that specifies the maximum number of substrings to include in the resultant array. Any additional substrings are discarded. If `limit` is not specified, then `str` is fully split with no limit to the size of the resultant array. It is an error if `limit` is not a non-negative number."
+        "desc": "Splits the `str` parameter into an array of substrings. It is an error if `str` is not a string. The optional `separator` parameter specifies the characters within the `str` about which it should be split as either a string or regular expression. If `separator` is not specified, then the empty string is assumed, and `str` will be split into an array of single characters. It is an error if `separator` is not a string. The optional `limit` parameter is a number that specifies the maximum number of substrings to include in the resultant array. Any additional substrings are discarded. If `limit` is not specified, then `str` is fully split with no limit to the size of the resultant array. It is an error if `limit` is not a non-negative number."
     },
     "$join": {
         "args": "array[, separator]",
         "desc": "Joins an array of component strings into a single concatenated string with each component string separated by the optional `separator` parameter. It is an error if the input `array` contains an item which isn't a string. If `separator` is not specified, then it is assumed to be the empty string, i.e. no `separator` between the component strings. It is an error if `separator` is not a string."
+    },
+    "$match": {
+        "args": "str, pattern [, limit]",
+        "desc": "Applies the `str` string to the `pattern` regular expression and returns an array of objects, with each object containing information about each occurrence of a match withing `str`."
+    },
+    "$replace": {
+        "args": "str, pattern, replacement [, limit]",
+        "desc": "Finds occurrences of `pattern` within `str` and replaces them with `replacement`. "
     },
 
 
@@ -57,11 +73,11 @@
         "args": "array",
         "desc": "Returns the mean value of an `array` of numbers. It is an error if the input `array` contains an item which isn't a number."
     },
+
     "$boolean": {
         "args": "arg",
         "desc": "Casts the argument to a Boolean using the following rules:\n\n - `Boolean` : unchanged\n - `string`: empty : `false`\n - `string`: non-empty : `true`\n - `number`: `0` : `false`\n - `number`: non-zero : `true`\n - `null` : `false`\n - `array`: empty : `false`\n - `array`: contains a member that casts to `true` : `true`\n - `array`: all members cast to `false` : `false`\n - `object`: empty : `false`\n - `object`: non-empty : `true`\n - `function` : `false`"
     },
-
     "$not": {
         "args": "arg",
         "desc": "Returns Boolean NOT on the argument. `arg` is first cast to a boolean"
@@ -70,6 +86,7 @@
         "args": "arg",
         "desc": "Returns Boolean `true` if the `arg` expression evaluates to a value, or `false` if the expression does not match anything (e.g. a path to a non-existent field reference)."
     },
+
     "$count": {
         "args": "array",
         "desc": "Returns the number of items in the array"

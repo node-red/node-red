@@ -18,13 +18,13 @@ define("ace/mode/jsonata",["require","exports","module","ace/lib/oop","ace/mode/
 
         var keywordMapper = this.createKeywordMapper({
             "keyword.operator":
-                "and|or|in",
+            "and|or|in",
             "constant.language":
-                "null|Infinity|NaN|undefined",
+            "null|Infinity|NaN|undefined",
             "constant.language.boolean":
-                "true|false",
+            "true|false",
             "storage.type":
-                "function"
+            "function"
         }, "identifier");
         this.$rules = {
             "start" : [
@@ -47,33 +47,33 @@ define("ace/mode/jsonata",["require","exports","module","ace/lib/oop","ace/mode/
                     regex : /[+-]?\d[\d_]*(?:(?:\.\d*)?(?:[eE][+-]?\d+)?)?\b/
                 },
                 {   token: "keyword",
-                    regex: /λ/
-                },
-                {
-                    token: "keyword",
-                    regex: jsonataFunctions
-                },
-                {
-                    token : keywordMapper,
-                    regex : "[a-zA-Z\\$_\u00a1-\uffff][a-zA-Z\\d\\$_\u00a1-\uffff]*"
-                },
-                {
-                    token : "punctuation.operator",
-                    regex : /[.](?![.])/
-                },
-                {
-                    token : "keyword.operator",
-                    regex : /\|\||<=|>=|\.\.|\*\*|!=|:=|[=<>`!$%&*+\-~\/^]/,
-                    next  : "start"
-                },
-                {
-                    token : "punctuation.operator",
-                    regex : /[?:,;.]/,
-                    next  : "start"
-                },
-                {
-                    token : "paren.lparen",
-                    regex : /[\[({]/,
+                regex: /λ/
+            },
+            {
+                token: "keyword",
+                regex: jsonataFunctions
+            },
+            {
+                token : keywordMapper,
+                regex : "[a-zA-Z\\$_\u00a1-\uffff][a-zA-Z\\d\\$_\u00a1-\uffff]*"
+            },
+            {
+                token : "punctuation.operator",
+                regex : /[.](?![.])/
+            },
+            {
+                token : "keyword.operator",
+                regex : /\|\||<=|>=|\.\.|\*\*|!=|:=|[=<>`!$%&*+\-~\/^]/,
+                next  : "start"
+            },
+            {
+                token : "punctuation.operator",
+                regex : /[?:,;.]/,
+                next  : "start"
+            },
+            {
+                token : "paren.lparen",
+                regex : /[\[({]/,
                     next  : "start"
                 },
                 {

@@ -193,6 +193,10 @@
         </select>
     </div>
     <br/>
+    <div class="form-row" id="node-set-freq">
+        <label for="node-input-freq"> <span data-i18n="rpi-gpio.label.freq"></span></label>
+        <input type="text" id="node-input-freq" placeholder="100">
+    </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
@@ -210,6 +214,7 @@
     <p>When using PWM mode - expects an input value of a number 0 - 100. It can be floating point.</p>
     <p>PWM mode can be used to drive a servo using input values between 10 and 20 only.
     The GPIO2 pin is best for this as it uses hardware to do the PWM.</p>
+    <p>Setting high PWM frequency might occupy more CPU than expected (default is 100Hz)</p>
     <p>Requires the RPi.GPIO python library version 0.5.10 (or better) in order to work.</p>
     <p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
 </script>
@@ -224,6 +229,7 @@
             pin: { value:"",required:true,validate:RED.validators.number() },
             set: { value:"" },
             level: { value:"0" },
+            freq: {value:""},
             out: { value:"out" }
         },
         inputs:1,
@@ -297,11 +303,13 @@
                     $('#node-input-set').prop('checked', false);
                     $("#dig-tip").hide();
                     $("#pwm-tip").show();
+                    $('#node-set-freq').show();
                 }
                 else {
                     $('#node-set-tick').show();
                     $("#dig-tip").show();
                     $("#pwm-tip").hide();
+                    $('#node-set-freq').hide();
                 }
             };
             $("#node-input-out").change(function () { hidestate(); });
