@@ -35,15 +35,19 @@
 </script>
 
 <script type="text/x-red" data-help-name="mqtt in">
-    <p>Connects to a MQTT broker and subscribes to messages from the specified topic.</p>
-    <p><b>Outputs</b>
-    <ul>
-       <li><code>msg.payload</code> - <i>string | buffer</i> - a string unless detected as a binary buffer.</li>
-       <li><code>msg.topic</code> - <i>string</i> - the MQTT topic, uses / as a heirarchy separator.</li>
-       <li><code>msg.qos</code> - <i>number</i> - 0, fire and forget - 1, at least once - 2, once and once only.</li>
-       <li><code>msg.retain</code> - <i>boolean</i> - true indicates the message was retained and may be old.</li>
-    </ul>
-    <p><b>Details</b><br/>
+<p>Connects to a MQTT broker and subscribes to messages from the specified topic.</p>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+       <dt>msg.payload <span class="property-type">string | buffer</span></dt>
+       <dd>a string unless detected as a binary buffer.</dd>
+       <dt>msg.topic <span class="property-type">string</span></dt>
+       <dd>the MQTT topic, uses / as a heirarchy separator.</dd>
+       <dt>msg.qos <span class="property-type">number</span> </dt>
+       <dd>0, fire and forget - 1, at least once - 2, once and once only.</dd>
+       <dt>msg.retain <span class="property-type">boolean</span></dt>
+       <dd>true indicates the message was retained and may be old.</dd>
+    </dl>
+    <h3>Details</h3>
     The subscription topic can include MQTT wildcards, + for one level, # for multiple levels.</p>
     <p>This node requires a connection to a MQTT broker to be configured. This is configured by clicking
     the pencil icon.</p>
@@ -109,14 +113,21 @@
 
 <script type="text/x-red" data-help-name="mqtt out">
     <p>Connects to a MQTT broker and publishes messages.</p>
-    <p><b>Inputs</b>
-    <ul>
-        <li><code>msg.payload</code> - <i>string | buffer</i> - most users prefer simple text payloads, but binary buffers can also be published.</li>
-        <li><code><i>msg.topic</i></code> - <i>string</i> - the MQTT topic, uses / as a hierarchy separator.</li>
-        <li><code><i>msg.qos</i></code> - <i>number</i> - 0, fire and forget - 1, at least once - 2, once and once only. Default 0.</li>
-        <li><code><i>msg.retain</i></code> - <i>boolean</i> - set to true to retain the message on the broker. Default false.</li>
-    </ul>
-    <p><b>Details</b><br/>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+       <dt>msg.payload <span class="property-type">string | buffer</span></dt>
+       <dd> most users prefer simple text payloads, but binary buffers can also be published.</dd>
+
+       <dt class="optional">msg.topic <span class="property-type">string</span></dt>
+       <dd> the MQTT topic to publish to.</dd>
+
+       <dt class="optional">msg.qos <span class="property-type">number</span></dt>
+       <dd>0, fire and forget - 1, at least once - 2, once and once only. Default 0.</dd>
+
+       <dt class="optional">msg.retain <span class="property-type">boolean</span></dt>
+       <dd>set to true to retain the message on the broker. Default false.</dd>
+    </dl>
+    <h3>Details</h3>
     <code>msg.payload</code> is used as the payload of the published message.
     If it contains an Object it will be converted to a JSON string before being sent.
     If it contains a binary Buffer the message will be published as-is.</p>

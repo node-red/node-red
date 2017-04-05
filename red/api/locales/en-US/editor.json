@@ -348,6 +348,7 @@
             "subflow": "Subflow",
             "instances": "Instances",
             "properties": "Properties",
+            "info": "Information",
             "blank": "blank",
             "null": "null",
             "arrayItems": "__count__ items"

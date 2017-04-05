@@ -44,33 +44,55 @@
 </script>
 
 <script type="text/x-red" data-help-name="exec">
-    <p>Calls out to a system command.<br/></p>
-    <p><b>Inputs</b></p>
-    <ul><li><code>msg.payload</code> - optionally appended to the configured command.</li></ul>
-    <ul><li><code><i>msg.kill</i></code> - can be used to kill a running command, see below.</li></ul>
-    <ul><li><code><i>msg.pid</i></code> - can be used to kill a specific running command, see below.</li></ul>
-    <p><b>Outputs</b></p>
-    <ol>
-        <li>stdout, <code>msg.payload</code> containing the returned output from the command.</li>
-        <li>stderr, <code>msg.payload</code> containing any error output from the command.</li>
-        <li>return code, <code>msg.payload</code> containing the return (see below).</li>
+    <p>Calls out to a system command.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">msg.payload <span class="property-type">string</span></dt>
+        <dd>if configured to do so, will be appended to the executed command.</dd>
+        <dt class="optional">msg.kill <span class="property-type">string</span></dt>
+        <dd>the type of kill signal to send an existing exec node process.</dd>
+        <dt class="optional">msg.pid <span class="property-type">number|string</span></dt>
+        <dd>the process ID of an existing exec node process to kill.</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <ol class="node-ports">
+        <li>Standard output
+            <dl class="message-properties">
+                <dt>msg.payload <span class="property-type">string</span></dt>
+                <dd>the standard output of the command.</dd>
+            </dl>
+        </li>
+        <li>Standard error
+            <dl class="message-properties">
+                <dt>msg.payload <span class="property-type">string</span></dt>
+                <dd>the standard error of the command.</dd>
+            </dl>
+        </li>
+
+        <li>Return code
+            <dl class="message-properties">
+                <dt>msg.payload <span class="property-type">number</span></dt>
+                <dd>the return code of the command.</dd>
+            </dl>
+        </li>
     </ol>
-    <p><b>Details</b></p>
+    <h3>Details</h3>
     <p>By default uses the <code>exec</code> system call which calls the command, waits for it to complete, and then
-    returns the output. For example a succesful command should have a return code of <code>{ code: 0 }</code>.</p>
+    returns the output. For example a successful command should have a return code of <code>{ code: 0 }</code>.</p>
     <p>Optionally can use <code>spawn</code> instead, which returns the output from stdout and stderr
     as the command runs, usually one line at a time. On completion it then returns a numeric return code
-    on the 3rd port. For example a successful command should return <code>0</code>.</p>
-    <p>The optional <b>append</b> gets added to the command after <code>msg.payload</code> - so you can do
-    things like pipe the result to another command.</p>
-    <p>Commands or parameters with spaces should be enclosed in quotes - <i>"This is a single parameter"</i></p>
+    on the 3rd port. For example, a successful command should return <code>0</code>.</p>
+    <p>The command that is run is defined within the node, with an option to append <code>msg.payload</code> and a further set of parameters.</p>
+    <p>Commands or parameters with spaces should be enclosed in quotes - <code>"This is a single parameter"</code></p>
     <p>The returned <code>payload</code> is usually a <i>string</i>, unless non-UTF8 characters are detected, in which
-    case it contains a <i>buffer</i>.</p>
-    <p>The blue status icon and PID will be visible while the node is active. This can be read by a <code>status</code> node.</p>
+    case it is a <i>buffer</i>.</p>
+    <p>The node&apos;s status icon and PID will be visible while the node is active. Changes to this can be read by the <code>Status</code> node.</p>
+    <h4>Killing processes</h4>
     <p>Sending <code>msg.kill</code> will kill a single active process. <code>msg.kill</code> should be a string containing
-    the type of signal to be sent, e.g. "SIGINT", "SIGQUIT", "SIGHUP", etc. Defaults to "SIGTERM" if blank ("").
-    If there is more than one process running then <code>msg.pid</code> must also be set with the value of the PID to be killed.</p>
-    <p><b>Tip</b>: If running a Python app you may need to use the <code>-u</code> parameter to stop the output being buffered.</p>
+    the type of signal to be sent, for example, <code>SIGINT</code>, <code>SIGQUIT</code> or <code>SIGHUP</code>. Defaults to <code>SIGTERM</code> if set to an empty string.</p>
+    <p>If the node has more than one process running then <code>msg.pid</code> must also be set with the value of the PID to be killed.</p>
+    <p>Tip: if running a Python app you may need to use the <code>-u</code> parameter to stop the output being buffered.</p>
 </script>
 
 <script type="text/javascript">
