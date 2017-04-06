@@ -963,12 +963,16 @@ RED.editor = (function() {
                     title: RED._("editor.nodeProperties"),
                     expanded: true
                 });
+                nodeProperties.content.addClass("editor-tray-content");
+
                 var portLabels = stack.add({
                     title: RED._("editor.portLabels"),
                     onexpand: function() {
                         refreshLabelForm(this.content,node);
                     }
                 });
+                portLabels.content.addClass("editor-tray-content");
+
 
                 if (editing_node) {
                     RED.sidebar.info.refresh(editing_node);
@@ -1537,9 +1541,11 @@ RED.editor = (function() {
                     title: RED._("editor.nodeProperties"),
                     expanded: true
                 });
+                nodeProperties.content.addClass("editor-tray-content");
                 var portLabels = stack.add({
                     title: RED._("editor.portLabels")
                 });
+                portLabels.content.addClass("editor-tray-content");
 
 
 

@@ -20,37 +20,46 @@ RED.stack = (function() {
 
         var entries = [];
 
+        var visible = true;
+
         return {
             add: function(entry) {
-
                 entries.push(entry);
-                var entryContainer = $('<div class="palette-category">').appendTo(container);
-
-                var header = $('<div class="palette-header"></div>').appendTo(entryContainer);
-                var icon = $('<i class="fa fa-angle-down"></i>').appendTo(header);
-                $('<span></span>').html(entry.title).appendTo(header);
-                entry.content = $('<div class="editor-tray-content"></div>').appendTo(entryContainer);
-
-                if (entry.expanded) {
-                    icon.addClass("expanded");
-                } else {
-                    entry.content.hide();
+                entry.container = $('<div class="palette-category">').appendTo(container);
+                if (!visible) {
+                    entry.container.hide();
                 }
-
-                header.click(function() {
-                    if (options.singleExpanded) {
-                        if (!entry.isExpanded()) {
-                            for (var i=0;i<entries.length;i++) {
-                                if (entries[i].isExpanded()) {
-                                    entries[i].collapse();
+                var header = $('<div class="palette-header"></div>').appendTo(entry.container);
+                entry.content = $('<div></div>').appendTo(entry.container);
+                if (entry.collapsible !== false) {
+                    header.click(function() {
+                        if (options.singleExpanded) {
+                            if (!entry.isExpanded()) {
+                                for (var i=0;i<entries.length;i++) {
+                                    if (entries[i].isExpanded()) {
+                                        entries[i].collapse();
+                                    }
                                 }
+                                entry.expand();
                             }
-                            entry.expand();
+                        } else {
+                            entry.toggle();
                         }
+                    });
+                    var icon = $('<i class="fa fa-angle-down"></i>').appendTo(header);
+
+                    if (entry.expanded) {
+                        icon.addClass("expanded");
                     } else {
-                        entry.toggle();
+                        entry.content.hide();
                     }
-                });
+                } else {
+                    header.css("cursor","default");
+                }
+                entry.title = $('<span></span>').html(entry.title).appendTo(header);
+
+
+
                 entry.toggle = function() {
                     if (entry.isExpanded()) {
                         entry.collapse();
@@ -85,6 +94,21 @@ RED.stack = (function() {
 
             },
 
+            hide: function() {
+                visible = false;
+                entries.forEach(function(entry) {
+                    entry.container.hide();
+                });
+                return this;
+            },
+
+            show: function() {
+                visible = true;
+                entries.forEach(function(entry) {
+                    entry.container.show();
+                });
+                return this;
+            }
         }
 
     }

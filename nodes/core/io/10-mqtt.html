@@ -38,13 +38,13 @@
 <p>Connects to a MQTT broker and subscribes to messages from the specified topic.</p>
     <h3>Outputs</h3>
     <dl class="message-properties">
-       <dt>msg.payload <span class="property-type">string | buffer</span></dt>
+       <dt>payload <span class="property-type">string | buffer</span></dt>
        <dd>a string unless detected as a binary buffer.</dd>
-       <dt>msg.topic <span class="property-type">string</span></dt>
+       <dt>topic <span class="property-type">string</span></dt>
        <dd>the MQTT topic, uses / as a heirarchy separator.</dd>
-       <dt>msg.qos <span class="property-type">number</span> </dt>
+       <dt>qos <span class="property-type">number</span> </dt>
        <dd>0, fire and forget - 1, at least once - 2, once and once only.</dd>
-       <dt>msg.retain <span class="property-type">boolean</span></dt>
+       <dt>retain <span class="property-type">boolean</span></dt>
        <dd>true indicates the message was retained and may be old.</dd>
     </dl>
     <h3>Details</h3>
@@ -115,16 +115,16 @@
     <p>Connects to a MQTT broker and publishes messages.</p>
     <h3>Inputs</h3>
     <dl class="message-properties">
-       <dt>msg.payload <span class="property-type">string | buffer</span></dt>
+       <dt>payload <span class="property-type">string | buffer</span></dt>
        <dd> most users prefer simple text payloads, but binary buffers can also be published.</dd>
 
-       <dt class="optional">msg.topic <span class="property-type">string</span></dt>
+       <dt class="optional">topic <span class="property-type">string</span></dt>
        <dd> the MQTT topic to publish to.</dd>
 
-       <dt class="optional">msg.qos <span class="property-type">number</span></dt>
+       <dt class="optional">qos <span class="property-type">number</span></dt>
        <dd>0, fire and forget - 1, at least once - 2, once and once only. Default 0.</dd>
 
-       <dt class="optional">msg.retain <span class="property-type">boolean</span></dt>
+       <dt class="optional">retain <span class="property-type">boolean</span></dt>
        <dd>set to true to retain the message on the broker. Default false.</dd>
     </dl>
     <h3>Details</h3>

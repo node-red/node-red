@@ -44,14 +44,19 @@
 </script>
 
 <script type="text/x-red" data-help-name="exec">
-    <p>Calls out to a system command.</p>
+    <p>Runs a system command and returns its output.</p>
+    <p>The node can be configured to either wait until the command completes, or to
+    send its output as the command generates it.</p>
+    <p>The command that is run can be configured in the node or provided by the received
+    message.</p>
+
     <h3>Inputs</h3>
     <dl class="message-properties">
-        <dt class="optional">msg.payload <span class="property-type">string</span></dt>
+        <dt class="optional">payload <span class="property-type">string</span></dt>
         <dd>if configured to do so, will be appended to the executed command.</dd>
-        <dt class="optional">msg.kill <span class="property-type">string</span></dt>
+        <dt class="optional">kill <span class="property-type">string</span></dt>
         <dd>the type of kill signal to send an existing exec node process.</dd>
-        <dt class="optional">msg.pid <span class="property-type">number|string</span></dt>
+        <dt class="optional">pid <span class="property-type">number|string</span></dt>
         <dd>the process ID of an existing exec node process to kill.</dd>
     </dl>
 
@@ -59,20 +64,20 @@
     <ol class="node-ports">
         <li>Standard output
             <dl class="message-properties">
-                <dt>msg.payload <span class="property-type">string</span></dt>
+                <dt>payload <span class="property-type">string</span></dt>
                 <dd>the standard output of the command.</dd>
             </dl>
         </li>
         <li>Standard error
             <dl class="message-properties">
-                <dt>msg.payload <span class="property-type">string</span></dt>
+                <dt>payload <span class="property-type">string</span></dt>
                 <dd>the standard error of the command.</dd>
             </dl>
         </li>
 
         <li>Return code
             <dl class="message-properties">
-                <dt>msg.payload <span class="property-type">number</span></dt>
+                <dt>payload <span class="property-type">number</span></dt>
                 <dd>the return code of the command.</dd>
             </dl>
         </li>

@@ -19,18 +19,29 @@
 }
 table.node-info {
     font-size: 14px;
-    margin: 0px;
-    width: 97%;
+    margin: 0 0 10px;
+    width: 100%;
 }
 table.node-info tr:not(.blank) {
-    border: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+}
+.node-info-property-expand  {
+    font-size: 0.8em;
+    text-align: right;
+    line-height: 0.9em;
+    a {
+        padding-bottom: 5px;
+    }
+
 }
 table.node-info tr.blank {
     border: none;
     th {
         text-align: left;
-        font-weight: bold;
+        font-weight: 500;
         color: #444;
+        padding: 6px 3px 3px;
     }
     >* {
         padding-top: 8px;
@@ -38,20 +49,38 @@ table.node-info tr.blank {
         padding-left: 0px;
     }
 
+
     a {
         display: block;
-        color: #444;
+        color: #666;
         &:hover,&:focus {
-            color: #444;
+            color: #666;
             text-decoration: none;
+        }
+        &:not(.expanded) {
+            .node-info-property-show-more {
+                display: inline;
+            }
+            .node-info-property-show-less {
+                display: none;
+            }
         }
         i {
             width: 10px;
             text-align: center;
             transition: transform 0.2s ease-in-out;
         }
-        &.expanded i {
-            transform: rotate(90deg);
+
+        &.expanded {
+            .node-info-property-show-more {
+                display: none;
+            }
+            .node-info-property-show-less {
+                display: inline;
+            }
+            i {
+                transform: rotate(180deg);
+            }
         }
     }
     &.node-info-info-row > td {
@@ -63,11 +92,11 @@ table.node-info tr:not(.blank) td:first-child{
     color: #666;
     vertical-align: top;
     width: 90px;
-    padding: 3px;
+    padding: 3px 3px 3px 6px;
     border-right: 1px solid #ddd;
 }
 table.node-info tr:not(.blank) td:last-child{
-    padding-left: 5px;
+    padding: 3px 3px 3px 6px;
     color: #666;
 }
 div.node-info {
@@ -78,33 +107,33 @@ div.node-info {
     line-height: 1.5em;
     h1 {
         font-weight: 500;
-        font-size: 23px;
+        font-size: 1.296em;
         line-height: 1.3em;
         margin: 8px auto;
     }
     h2 {
         font-weight: 500;
-        font-size: 18px;
+        font-size: 1.215em;
         margin: 8px auto;
         line-height: 1.3em;
     }
     h3 {
         font-weight: 500;
-        font-size: 16px;
+        font-size: 1.138em;
         margin: 7px auto 5px;
         line-height: 1.3em;
     }
     h4,
     h5 {
         font-weight: 500;
-        font-size: 14px;
+        font-size: 1.067em;
         line-height: 1.3em;
         margin: 8px auto 5px;
     }
     & > span > p:first-child {
     }
     dl.message-properties {
-        border: 1px solid #eee;
+        border: 1px solid #ddd;
         border-radius: 2px;
 
         margin: 5px auto 10px;
@@ -115,9 +144,6 @@ div.node-info {
             margin: 5px 3px 1px;
             color: #AD1625;
             white-space: nowrap;
-            background-color: #f7f7f9;
-            border: 1px solid #e1e1e8;
-            border-radius: 2px;
             &.optional {
                 font-style: italic;
 
@@ -136,17 +162,21 @@ div.node-info {
             }
         }
         &>dd {
-            margin: 1px 8px 10px 10px;
+            margin: 0px 8px 2px 13px;
+            vertical-align: top;
         }
     }
     ol.node-ports {
         margin: 0;
         li {
-            border: 1px solid #eee;
+            border: 1px solid #ddd;
             border-radius: 2px;
             list-style-position: inside;
             padding: 3px;
             margin-bottom: 5px;
+            dl.message-properties {
+                border: none;
+            }
         }
     }
 
@@ -164,5 +194,13 @@ div.node-info {
     background-color: #fff;
     @include disable-selection;
     cursor: default;
+    box-sizing: border-box;
+
+    &.collapsed {
+        top: auto;
+        bottom: 0;
+        height: 150px;
+        border-top: 1px solid $secondary-border-color;
+    }
 
 }

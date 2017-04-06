@@ -101,7 +101,7 @@ RED.palette = (function() {
             if (label != type) {
                 l = "<p><b>"+RED.text.bidi.enforceTextDirectionWithUCC(label)+"</b><br/><i>"+type+"</i></p>";
             }
-            popOverContent = $(l+(info?info:$("script[data-help-name$='"+type+"']").html()||"<p>"+RED._("palette.noInfo")+"</p>").trim())
+            popOverContent = $(l+(info?info:$("script[data-help-name='"+type+"']").html()||"<p>"+RED._("palette.noInfo")+"</p>").trim())
                                 .filter(function(n) {
                                     return (this.nodeType == 1 && this.nodeName == "P") || (this.nodeType == 3 && this.textContent.trim().length > 0)
                                 }).slice(0,2);
@@ -205,7 +205,7 @@ RED.palette = (function() {
                 if (nt.indexOf("subflow:") === 0) {
                     helpText = marked(RED.nodes.subflow(nt.substring(8)).info||"");
                 } else {
-                    helpText = $("script[data-help-name$='"+d.type+"']").html()||"";
+                    helpText = $("script[data-help-name='"+d.type+"']").html()||"";
                 }
                 var help = '<div class="node-help">'+helpText+"</div>";
                 RED.sidebar.info.set(help);
