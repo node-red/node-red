@@ -12,6 +12,7 @@
     //"unused": true,   // Check for unused functions and variables
     "loopfunc": true,   // allow functions to be defined in loops
     //"expr": true,     // allow ternery operator syntax...
+    "shadow": true,     // allow variable shadowing (re-use of names...)
     "sub": true,        // don't warn that foo['bar'] should be written as foo.bar
     "proto": true       // allow setting of __proto__ in node < v0.12
 }
