@@ -179,6 +179,23 @@ div.node-info {
             }
         }
     }
+    .node-info-header {
+        i {
+            width: 10px;
+            text-align: center;
+            transition: transform 0.2s ease-in-out;
+            margin-right: 4px;
+        }
+        color: #333;
+        &:hover, &:focus {
+            text-decoration: none;
+        }
+        &.expanded {
+            i {
+                transform: rotate(90deg);
+            }
+        }
+    }
 
 }
 .sidebar-node-info-stack {
