@@ -63,6 +63,20 @@ RED.sidebar.info = (function() {
 
         tipContainer = $('<div class="node-info-tips"></div>').appendTo(content);
         tipBox = $('<div class="node-info-tip"></div>').appendTo(tipContainer);
+        var tipButtons = $('<div class="node-info-tips-buttons"></div>').appendTo(tipContainer);
+
+        var tipRefresh = $('<a href="#" class="workspace-footer-button"><i class="fa fa-refresh"></a>').appendTo(tipButtons);
+        tipRefresh.click(function(e) {
+            e.preventDefault();
+            tips.next();
+        })
+
+        var tipClose = $('<a href="#" class="workspace-footer-button"><i class="fa fa-times"></a>').appendTo(tipButtons);
+        tipClose.click(function(e) {
+            e.preventDefault();
+            RED.actions.invoke("core:toggle-show-tips");
+            RED.notify("You can re-open the tips from the side menu");
+        });
 
         RED.sidebar.addTab({
             id: "info",
@@ -272,9 +286,15 @@ RED.sidebar.info = (function() {
             refreshTimeout = null;
             startTimeout = null;
         }
+        function nextTip() {
+            clearInterval(refreshTimeout);
+            startTimeout = true;
+            setTip();
+        }
         return {
             start: startTips,
-            stop: stopTips
+            stop: stopTips,
+            next: nextTip
         }
     })();
 

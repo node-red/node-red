@@ -200,6 +200,8 @@ div.node-info {
     border-top: 1px solid $secondary-border-color;
     background-color: #fff;
     padding: 20px;
+    box-shadow: 0 5px 20px 0px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
 }
 .sidebar-node-info.show-tips {
     .sidebar-node-info-stack {
@@ -221,11 +223,21 @@ div.node-info {
 .node-info-tip {
     display: inline-block;
     vertical-align: middle;
-    width: calc(100% - 30px);
+    width: 100%;
     font-size: 16px;
     text-align: center;
     line-height: 1.9em;
     color : #bbb;
     @include disable-selection;
     cursor: default;
+}
+.node-info-tips-buttons {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    a {
+        color: #ddd !important;
+        border-color: #d9d9d9 !important;
+        margin-left: 4px;
+    }
 }
