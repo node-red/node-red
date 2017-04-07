@@ -31,6 +31,7 @@ RED.sidebar.info = (function() {
     var nodeSection;
     var infoSection;
     var tipBox;
+    var tipContainer;
 
     var expandedSections = {
         "property": false
@@ -41,13 +42,12 @@ RED.sidebar.info = (function() {
         content = document.createElement("div");
         content.className = "sidebar-node-info"
 
-        tipBox = $('<div class="node-info-tip collapsed hide"></div>').appendTo(content);
-
-
         RED.actions.add("core:show-info-tab",show);
 
+        var stackContainer = $("<div>",{class:"sidebar-node-info-stack"}).appendTo(content);
+
         sections = RED.stack.create({
-            container: content
+            container: stackContainer
         }).hide();
 
         nodeSection = sections.add({
@@ -60,6 +60,10 @@ RED.sidebar.info = (function() {
         });
         infoSection.content.css("padding","6px");
         infoSection.container.css("border-bottom","none");
+
+        tipContainer = $('<div class="node-info-tips"></div>').appendTo(content);
+        tipBox = $('<div class="node-info-tip"></div>').appendTo(tipContainer);
+
         RED.sidebar.addTab({
             id: "info",
             label: RED._("sidebar.info.label"),
@@ -67,6 +71,9 @@ RED.sidebar.info = (function() {
             content: content,
             enableOnEdit: true
         });
+
+        tips.start();
+
     }
 
     function show() {
@@ -100,7 +107,6 @@ RED.sidebar.info = (function() {
         return el;
     }
     function refresh(node) {
-        tips.stop();
         sections.show();
         $(nodeSection.content).empty();
         $(infoSection.content).empty();
@@ -108,6 +114,7 @@ RED.sidebar.info = (function() {
         var table = $('<table class="node-info"></table>');
         var tableBody = $('<tbody>').appendTo(table);
         var propRow;
+        var subflowNode;
         if (node.type === "tab") {
             nodeSection.title.html("Flow");
             propRow = $('<tr class="node-info-node-row"><td>Name</td><td></td></tr>').appendTo(tableBody);
@@ -127,7 +134,6 @@ RED.sidebar.info = (function() {
             RED.utils.createObjectElement(node.id).appendTo(propRow.children()[1]);
 
             var m = /^subflow(:(.+))?$/.exec(node.type);
-            var subflowNode;
 
             if (!m && node.type != "subflow" && node.type != "comment") {
                 if (node._def) {
@@ -199,7 +205,6 @@ RED.sidebar.info = (function() {
 
 
     var tips = (function() {
-        var started = false;
         var enabled = true;
         var startDelay = 1000;
         var cycleDelay = 15000;
@@ -213,9 +218,7 @@ RED.sidebar.info = (function() {
             } else {
                 enabled = state;
                 if (enabled) {
-                    if (started) {
-                        startTips();
-                    }
+                    startTips();
                 } else {
                     stopTips();
                 }
@@ -250,7 +253,7 @@ RED.sidebar.info = (function() {
             })
         }
         function startTips() {
-            started = true;
+            $(".sidebar-node-info").addClass('show-tips');
             if (enabled) {
                 if (!startTimeout && !refreshTimeout) {
                     if (tipCount === -1) {
@@ -263,12 +266,11 @@ RED.sidebar.info = (function() {
             }
         }
         function stopTips() {
-            started = false;
+            $(".sidebar-node-info").removeClass('show-tips');
             clearInterval(refreshTimeout);
             clearTimeout(startTimeout);
             refreshTimeout = null;
             startTimeout = null;
-            tipBox.hide();
         }
         return {
             start: startTips,
@@ -277,13 +279,12 @@ RED.sidebar.info = (function() {
     })();
 
     function clear() {
-        console.log("clear');");
         sections.hide();
-        tips.start();
+        //
     }
 
     function set(html) {
-        tips.stop();
+        // tips.stop();
         sections.show();
         $(infoSection.content).html(html);
     }
