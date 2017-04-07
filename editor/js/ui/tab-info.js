@@ -31,7 +31,6 @@ RED.sidebar.info = (function() {
     var nodeSection;
     var infoSection;
     var tipBox;
-    var tipContainer;
 
     var expandedSections = {
         "property": false
@@ -61,7 +60,7 @@ RED.sidebar.info = (function() {
         infoSection.content.css("padding","6px");
         infoSection.container.css("border-bottom","none");
 
-        tipContainer = $('<div class="node-info-tips"></div>').appendTo(content);
+        var tipContainer = $('<div class="node-info-tips"></div>').appendTo(content);
         tipBox = $('<div class="node-info-tip"></div>').appendTo(tipContainer);
         var tipButtons = $('<div class="node-info-tips-buttons"></div>').appendTo(tipContainer);
 
@@ -306,6 +305,7 @@ RED.sidebar.info = (function() {
     function set(html) {
         // tips.stop();
         sections.show();
+        nodeSection.container.hide();
         $(infoSection.content).html(html);
     }
 
