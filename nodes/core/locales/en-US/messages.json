@@ -317,8 +317,6 @@
         },
         "setby": "- set by msg.method -",
         "basicauth": "Use basic authentication",
-        "throttling": "Limit (multipart) stream rate",
-        "interval": "Interval",
         "use-tls": "Enable secure (SSL/TLS) connection",
         "tls-config":"TLS Configuration",
         "utf8": "a UTF-8 string",
@@ -336,14 +334,10 @@
             "no-response": "No response object",
             "json-error": "JSON parse error",
             "no-url": "No url specified",
-            "deprecated-call":"Deprecated call to __method__",
-            "no-multipart": "No multipart content-type header found",
-            "no-boundary": "No multipart boundary found",
-            "no-separator": "No multipart EOL separator could be determined"
+            "deprecated-call":"Deprecated call to __method__"
         },
         "status": {
-            "requesting": "requesting",
-            "streaming": "streaming"
+            "requesting": "requesting"
         }
     },
     "websocket": {
