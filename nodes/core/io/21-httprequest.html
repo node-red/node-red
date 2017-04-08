@@ -62,18 +62,6 @@
         <option value="obj" data-i18n="httpin.json"></option>
         </select>
     </div>
-    
-    <div class="form-row">
-        <input type="checkbox" id="node-input-throttling" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-throttling" style="width: 70%;"><span data-i18n="httpin.throttling"></span></label>
-        <div style="margin-left: 20px" class="node-input-throttling-row hide">
-            <div class="form-row">
-                <label for="node-input-interval"><i class="fa fa-clock-o"></i> <span data-i18n="httpin.interval"></span></label>
-                <input type="text" id="node-input-interval">
-            </div>
-        </div>
-    </div>
-    
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
@@ -104,7 +92,6 @@
         <li><code>headers</code> is an object containing the response headers</li>
         <li><code>responseUrl</code> is the url of the server that responds</li>
     </ul>
-    <p>The <b>interval</b> can be specified for (multipart) streams, to limit the number parts received: this is the number of milliseconds between parts in the stream.</p>
     <p><b>Note</b>: If you need to configure a proxy please add <b>http_proxy=...</b> to your environment variables and restart Node-RED.</p>
 </script>
 
@@ -118,7 +105,6 @@
             ret: {value:"txt"},
             url:{value:"",validate:function(v) { return (v.trim().length === 0) || (v.indexOf("://") === -1) || (v.trim().indexOf("http") === 0)} },
             tls: {type:"tls-config",required: false}
-            throttling: {value:0}
         },
         credentials: {
             user: {type:"text"},
@@ -152,21 +138,6 @@
                 $('#node-input-useAuth').prop('checked', false);
             }
             $("#node-input-useAuth").change();
-            
-            $("#node-input-throttling").change(function() {
-                if ($(this).is(":checked")) {
-                    $(".node-input-throttling-row").show();
-                } else {
-                    $(".node-input-throttling-row").hide();
-                    $('#node-input-interval').val('0');
-                }
-            });
-            if (this.interval) {
-                $('#node-input-throttling').prop('checked', true);
-            } else {
-                $('#node-input-throttling').prop('checked', false);
-            }
-            $("#node-input-throttling").change();
 
             function updateTLSOptions() {
                 if ($("#node-input-usetls").is(':checked')) {
