@@ -134,9 +134,8 @@ RED.sidebar.info = (function() {
             $(propRow.children()[1]).html('&nbsp;'+(node.label||""))
             propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.id")+"</td><td></td></tr>").appendTo(tableBody);
             RED.utils.createObjectElement(node.id).appendTo(propRow.children()[1]);
-            propRow = $('<tr class="node-info-node-row"><td>Enabled</td><td></td></tr>').appendTo(tableBody);
-            RED.utils.createObjectElement((!!!node.disabled)).appendTo(propRow.children()[1]);
-
+            propRow = $('<tr class="node-info-node-row"><td>State</td><td></td></tr>').appendTo(tableBody);
+            $(propRow.children()[1]).html((!!!node.disabled)?"Enabled":"Disabled")
         } else {
             nodeSection.title.html("Node");
             if (node.type !== "subflow" && node.name) {

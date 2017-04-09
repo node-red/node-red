@@ -112,6 +112,10 @@ RED.workspaces = (function() {
                             RED.history.push(historyEvent);
                             RED.nodes.dirty(true);
                             RED.sidebar.config.refresh();
+                            var selection = RED.view.selection();
+                            if (!selection.nodes && !selection.links) {
+                                RED.sidebar.info.refresh(workspace);
+                            }
                         }
                         RED.tray.close();
                     }

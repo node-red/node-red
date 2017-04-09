@@ -1056,6 +1056,7 @@ RED.view = (function() {
         selected_link = null;
     }
 
+    var lastSelection = null;
     function updateSelection() {
         var selection = {};
 
@@ -1128,8 +1129,11 @@ RED.view = (function() {
             }
         }
 
-
-        RED.events.emit("view:selection-changed",selection);
+        var selectionJSON = JSON.stringify(selection);
+        if (selectionJSON !== lastSelection) {
+            lastSelection = selectionJSON;
+            RED.events.emit("view:selection-changed",selection);
+        }
     }
 
     function endKeyboardMove() {
