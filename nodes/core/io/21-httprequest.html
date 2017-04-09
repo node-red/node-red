@@ -64,12 +64,12 @@
     </div>
     
     <div class="form-row">
-        <input type="checkbox" id="node-input-throttling" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-throttling" style="width: 70%;"><span data-i18n="httpin.throttling"></span></label>
-        <div style="margin-left: 20px" class="node-input-throttling-row hide">
+        <input type="checkbox" id="node-input-streaming" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-streaming" style="width: 70%;"><span data-i18n="httpin.streaming"></span></label>
+        <div style="margin-left: 20px" class="node-input-streaming-row hide">
             <div class="form-row">
-                <label for="node-input-interval"><i class="fa fa-clock-o"></i> <span data-i18n="httpin.interval"></span></label>
-                <input type="text" id="node-input-interval">
+                <label for="node-input-delay"><i class="fa fa-clock-o"></i> <span data-i18n="httpin.delay"></span></label>
+                <input type="text" id="node-input-delay">
             </div>
         </div>
     </div>
@@ -104,7 +104,8 @@
         <li><code>headers</code> is an object containing the response headers</li>
         <li><code>responseUrl</code> is the url of the server that responds</li>
     </ul>
-    <p>The <b>interval</b> can be specified for (multipart) streams, to limit the number parts received: this is the number of milliseconds between parts in the stream.</p>
+    <p>Streaming options will only be relevant when a (multipart) stream is detected:
+    The <b>delay</b> is the minimum number of milliseconds between parts in a (multipart) stream.</p>
     <p><b>Note</b>: If you need to configure a proxy please add <b>http_proxy=...</b> to your environment variables and restart Node-RED.</p>
 </script>
 
@@ -150,20 +151,20 @@
             }
             $("#node-input-useAuth").change();
             
-            $("#node-input-throttling").change(function() {
+            $("#node-input-streaming").change(function() {
                 if ($(this).is(":checked")) {
-                    $(".node-input-throttling-row").show();
+                    $(".node-input-streaming-row").show();
                 } else {
-                    $(".node-input-throttling-row").hide();
-                    $('#node-input-interval').val('0');
+                    $(".node-input-streaming-row").hide();
+                    $('#node-input-delay').val('0');
                 }
             });
-            if (this.interval) {
-                $('#node-input-throttling').prop('checked', true);
+            if (this.delay) {
+                $('#node-input-streaming').prop('checked', true);
             } else {
-                $('#node-input-throttling').prop('checked', false);
+                $('#node-input-streaming').prop('checked', false);
             }
-            $("#node-input-throttling").change();
+            $("#node-input-streaming").change();
 
             function updateTLSOptions() {
                 if ($("#node-input-usetls").is(':checked')) {

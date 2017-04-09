@@ -33,8 +33,8 @@ module.exports = function(RED) {
         }
         this.ret = n.ret || "txt";
         this.prevReq = null;
-        this.throttling = n.throttling;
-        this.throttleInterval = n.interval;
+        this.streaming = n.streaming;
+        this.throttleDelay = n.delay;
         if (RED.settings.httpRequestTimeout) { this.reqTimeout = parseInt(RED.settings.httpRequestTimeout) || 120000; }
         else { this.reqTimeout = 120000; }
 
@@ -123,7 +123,7 @@ module.exports = function(RED) {
             var currentStatus = {timestamp:0, value:'{}'}; 
             var preRequestTimestamp = process.hrtime();
             node.status({fill:"blue",shape:"dot",text:"httpin.status.requesting"});
-            var url = msg.url || nodeUrl;
+            var url = nodeUrl || msg.url;
             if (msg.url && nodeUrl && (nodeUrl !== msg.url)) {  // revert change below when warning is finally removed
                 node.warn(RED._("common.errors.nooverride"));
             }
@@ -264,53 +264,50 @@ module.exports = function(RED) {
                         // -----------------------------------------------------------------------------------------
                         var contentType = this.headers['content-type'];
                         
-                        if (!/multipart/.test(contentType)) {
-                            node.error(RED._("httpin.errors.no-multipart"),msg);
-                            return;
-                        }
-                        
-                        // Automatically detect the required boundary (that will be used between parts of the stream)
-                        boundary = (contentType.match(/.*;\sboundary=(.*)/) || [null, null])[1];
+                        if (/multipart/.test(contentType)) {
+                            // Automatically detect the required boundary (that will be used between parts of the stream)
+                            boundary = (contentType.match(/.*;\sboundary=(.*)/) || [null, null])[1];
 
-                        if(!boundary) {
-                            node.error(RED._("httpin.errors.no-boundary"),msg);
-                            return;
-                        }
+                            if(!boundary) {
+                                node.error(RED._("httpin.errors.no-boundary"),msg);
+                                return;
+                            }
 
-                        // A boundary needs to start with -- (even if -- is absent in the http header)
-                        if (!boundary.startsWith('--')) {
-                            boundary = '--' + boundary;
-                        }
+                            // A boundary needs to start with -- (even if -- is absent in the http header)
+                            if (!boundary.startsWith('--')) {
+                                boundary = '--' + boundary;
+                            }
 
-                        // Every part contains one or more headers and one body (content). 
-                        // Headers and body are separated by two EOL (end of line) symbols.
-                        // Those EOL symbols can be LF (linefeed \n) or CR (carriage return \r) or CRLF (carriage return linefeed \r\n).
-                        // Determine the EOL symbols at the start of the stream.
-                        var eolSymbols = (chunk.toString().match(/(?:\r\r|\n\n|\r\n\r\n)/g) || []);
-                        
-                        if (eolSymbols.indexOf('\r\n\r\n') >= 0) {
-                            headerBodySeparator = '\r\n\r\n';
-                        }
-                        else if (eolSymbols.indexOf('\r\r') >= 0) {
-                            headerBodySeparator = '\r\r';
-                        }
-                        else if (eolSymbols.indexOf('\n\n') >= 0) {
-                            headerBodySeparator = '\n\n';
-                        }
+                            // Every part contains one or more headers and one body (content). 
+                            // Headers and body are separated by two EOL (end of line) symbols.
+                            // Those EOL symbols can be LF (linefeed \n) or CR (carriage return \r) or CRLF (carriage return linefeed \r\n).
+                            // Determine the EOL symbols at the start of the stream.
+                            var eolSymbols = (chunk.toString().match(/(?:\r\r|\n\n|\r\n\r\n)/g) || []);
+                            
+                            if (eolSymbols.indexOf('\r\n\r\n') >= 0) {
+                                headerBodySeparator = '\r\n\r\n';
+                            }
+                            else if (eolSymbols.indexOf('\r\r') >= 0) {
+                                headerBodySeparator = '\r\r';
+                            }
+                            else if (eolSymbols.indexOf('\n\n') >= 0) {
+                                headerBodySeparator = '\n\n';
+                            }
 
-                        if(!headerBodySeparator) {
-                            node.error(RED._("httpin.errors.no-separator"),msg);
-                            return;
-                        }
-                        
-                        // The header separator is only one half of the header body separator;
-                        headerSeparator = headerBodySeparator.slice(0, headerBodySeparator.length/2);
-                        
-                        // Store the current request only in case streaming is detected, so it could be aborted afterwards
-                        node.prevReq = req; 
-                        
-                        // The boundary should arrive at the start of the stream, so let's start searching for it
-                        searchString = boundary;                      
+                            if(!headerBodySeparator) {
+                                node.error(RED._("httpin.errors.no-separator"),msg);
+                                return;
+                            }
+                            
+                            // The header separator is only one half of the header body separator;
+                            headerSeparator = headerBodySeparator.slice(0, headerBodySeparator.length/2);
+                            
+                            // Store the current request only in case streaming is detected, so it could be aborted afterwards
+                            node.prevReq = req; 
+                            
+                            // The boundary should arrive at the start of the stream, so let's start searching for it
+                            searchString = boundary;  
+                        }                            
                     }
                     
                     if (!boundary) {
@@ -400,14 +397,14 @@ module.exports = function(RED) {
                                     partHeader = [];
                                     partBody = [];
                                     
-                                    // If a (non-zero) throttling interval is specified, the upload should be pauzed during that interval.
-                                    // If the message contains a throttling interval, it will override the node's throttling interval.
-                                    var throttleInterval = msg.throttle || node.throttleInterval;
-                                    if (throttleInterval && throttleInterval !== 0) {
+                                    // If a (non-zero) throttling delay is specified, the upload should be pauzed during that delay period.
+                                    // If the message contains a throttling delay, it will override the node's throttling delay.
+                                    var throttleDelay = msg.throttle || node.throttleDelay;
+                                    if (throttleDelay && throttleDelay !== 0) {
                                         res.pause();
                                         setTimeout(function () {
                                             res.resume();
-                                        }, throttleInterval);
+                                        }, throttleDelay);
                                     }
                                     
                                     // Boundary found, so from here on we will try to find a headerbodyseparator
