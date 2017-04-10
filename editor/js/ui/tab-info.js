@@ -163,17 +163,21 @@ RED.sidebar.info = (function() {
                                     RED.utils.createObjectElement(undefined).appendTo(propRow.children()[1]);
                                 } else {
                                     var configLabel = RED.utils.getNodeLabel(configNode,val);
-                                    var nodeContainer = $('<span></span>').appendTo(propRow.children()[1]);
-                                    var entry = $('<span class="palette_node config_node"></span>')
-                                        .css({marginLeft:"5px",width:"calc(100% - 20px)"}).appendTo(nodeContainer);
-                                    $('<div class="palette_label"></div>').text(configLabel).appendTo(entry);
-                                    var icon_url = RED.utils.getNodeIcon(node._def);
-                                    var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(entry);
-                                    $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
+                                    var container = propRow.children()[1];
 
-                                    entry.dblclick(function(e) {
+                                    var div = $('<span>',{class:""}).appendTo(container);
+                                    var nodeDiv = $('<div>',{class:"palette_node palette_node_small"}).appendTo(div);
+                                    var colour = configNode._def.color;
+                                    var icon_url = RED.utils.getNodeIcon(configNode._def);
+                                    nodeDiv.css({'backgroundColor':colour, "cursor":"pointer"});
+                                    var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(nodeDiv);
+                                    $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
+                                    var nodeContainer = $('<span></span>').css({"verticalAlign":"top","marginLeft":"6px"}).html(configLabel).appendTo(container);
+
+                                    nodeDiv.on('dblclick',function() {
                                         RED.editor.editConfig("", configNode.type, configNode.id);
                                     })
+
                                 }
                             } else {
                                 RED.utils.createObjectElement(val).appendTo(propRow.children()[1]);
