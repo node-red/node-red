@@ -67,6 +67,8 @@ function getLocalFile(file) {
  * @return an array of fully-qualified paths to .js files
  */
 function getLocalNodeFiles(dir) {
+    dir = path.resolve(dir);
+
     var result = [];
     var files = [];
     try {
@@ -205,7 +207,7 @@ function getNodeFiles(disableNodePathScan) {
 
     if (settings.coreNodesDir) {
         nodeFiles = getLocalNodeFiles(path.resolve(settings.coreNodesDir));
-        var defaultLocalesPath = path.resolve(path.join(settings.coreNodesDir,"core","locales"));
+        var defaultLocalesPath = path.join(settings.coreNodesDir,"core","locales");
         i18n.registerMessageCatalog("node-red",defaultLocalesPath,"messages.json");
     }
 
