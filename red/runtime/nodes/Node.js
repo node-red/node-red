@@ -246,6 +246,14 @@ Node.prototype.error = function(logMessage,msg) {
     }
 };
 
+Node.prototype.debug = function(msg) {
+    log_helper(this, Log.DEBUG, msg);
+}
+
+Node.prototype.trace = function(msg) {
+    log_helper(this, Log.TRACE, msg);
+}
+
 /**
  * If called with no args, returns whether metric collection is enabled
  */
