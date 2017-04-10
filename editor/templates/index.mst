@@ -199,6 +199,9 @@
 <script src="vendor/ace/ext-language_tools.js"></script>
 <script src="{{ asset.red }}"></script>
 <script src="{{ asset.main }}"></script>
+{{# page.scripts }}
+<script src="{{.}}"></script>
+{{/ page.scripts }}
 
 </body>
 </html>

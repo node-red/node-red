@@ -57,6 +57,24 @@ function serveFile(app,baseUrl,file) {
     }
 }
 
+function serveFilesFromTheme(themeValue, themeApp, directory) {
+    var result = [];
+    if (themeValue) {
+        var array = themeValue;
+        if (!util.isArray(array)) {
+            array = [array];
+        }
+
+        for (i=0;i<array.length;i++) {
+            url = serveFile(themeApp,directory,array[i]);
+            if (url) {
+                result.push(url);
+            }
+        }
+    }
+    return result
+}
+
 module.exports = {
     init: function(runtime) {
         var settings = runtime.settings;
@@ -76,20 +94,15 @@ module.exports = {
         var themeApp = express();
 
         if (theme.page) {
-            if (theme.page.css) {
-                var styles = theme.page.css;
-                if (!util.isArray(styles)) {
-                    styles = [styles];
-                }
-                themeContext.page.css = [];
 
-                for (i=0;i<styles.length;i++) {
-                    url = serveFile(themeApp,"/css/",styles[i]);
-                    if (url) {
-                        themeContext.page.css.push(url);
-                    }
-                }
-            }
+            themeContext.page.css = serveFilesFromTheme(
+                themeContext.page.css, 
+                themeApp, 
+                "/css/")
+            themeContext.page.scripts = serveFilesFromTheme(
+                themeContext.page.scripts, 
+                themeApp, 
+                "/scripts/")
 
             if (theme.page.favicon) {
                 url = serveFile(themeApp,"/favicon/",theme.page.favicon)
