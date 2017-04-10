@@ -114,16 +114,18 @@
 }
 .palette_label {
     font-size: 13px;
-    margin: 4px 0 4px 28px;
+    margin: 4px 0 4px 32px;
     line-height: 20px;
     overflow: hidden;
     text-align: center;
+    @include disable-selection;
 }
 .palette_label_right {
-    margin: 4px 28px 4px 0;
+    margin: 4px 32px 4px 0;
 }
 
 .palette_node {
+    display: block;
     cursor:move;
     background: #ddd;
     margin: 10px auto;

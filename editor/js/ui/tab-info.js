@@ -134,7 +134,7 @@ RED.sidebar.info = (function() {
             $(propRow.children()[1]).html('&nbsp;'+(node.label||""))
             propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.id")+"</td><td></td></tr>").appendTo(tableBody);
             RED.utils.createObjectElement(node.id).appendTo(propRow.children()[1]);
-            propRow = $('<tr class="node-info-node-row"><td>State</td><td></td></tr>').appendTo(tableBody);
+            propRow = $('<tr class="node-info-node-row"><td>Status</td><td></td></tr>').appendTo(tableBody);
             $(propRow.children()[1]).html((!!!node.disabled)?"Enabled":"Disabled")
         } else {
             nodeSection.title.html("Node");
@@ -150,13 +150,34 @@ RED.sidebar.info = (function() {
             if (!m && node.type != "subflow" && node.type != "comment") {
                 if (node._def) {
                     var count = 0;
-                    for (var n in node._def.defaults) {
-                        if (n != "name" && node._def.defaults.hasOwnProperty(n)) {
+                    var defaults = node._def.defaults;
+                    for (var n in defaults) {
+                        if (n != "name" && defaults.hasOwnProperty(n)) {
                             var val = node[n];
                             var type = typeof val;
                             count++;
                             propRow = $('<tr class="node-info-property-row'+(expandedSections.property?"":" hide")+'"><td>'+n+"</td><td></td></tr>").appendTo(tableBody);
-                            RED.utils.createObjectElement(val).appendTo(propRow.children()[1]);
+                            if (defaults[n].type) {
+                                var configNode = RED.nodes.node(val);
+                                if (!configNode) {
+                                    RED.utils.createObjectElement(undefined).appendTo(propRow.children()[1]);
+                                } else {
+                                    var configLabel = RED.utils.getNodeLabel(configNode,val);
+                                    var nodeContainer = $('<span></span>').appendTo(propRow.children()[1]);
+                                    var entry = $('<span class="palette_node config_node"></span>')
+                                        .css({marginLeft:"5px",width:"calc(100% - 20px)"}).appendTo(nodeContainer);
+                                    $('<div class="palette_label"></div>').text(configLabel).appendTo(entry);
+                                    var icon_url = RED.utils.getNodeIcon(node._def);
+                                    var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(entry);
+                                    $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
+
+                                    entry.dblclick(function(e) {
+                                        RED.editor.editConfig("", configNode.type, configNode.id);
+                                    })
+                                }
+                            } else {
+                                RED.utils.createObjectElement(val).appendTo(propRow.children()[1]);
+                            }
                         }
                     }
                     if (count > 0) {
@@ -172,7 +193,7 @@ RED.sidebar.info = (function() {
                     subflowNode = node;
                 }
 
-                $('<tr class="blank"><th colspan="2"><a href="#" class="node-info-subflow-header">'+RED._("sidebar.info.subflow")+'</a></th></tr>').appendTo(tableBody);
+                $('<tr class="blank"><th colspan="2">'+RED._("sidebar.info.subflow")+'</th></tr>').appendTo(tableBody);
 
                 var userCount = 0;
                 var subflowType = "subflow:"+subflowNode.id;
