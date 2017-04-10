@@ -659,7 +659,8 @@
             "pikeyboard": "Pi Keyboard",
             "left": "Left",
             "right": "Right",
-            "middle": "Middle"
+            "middle": "Middle",
+            "freq": "Frequency (Hz)"
         },
         "resistor": {
             "none": "none",
@@ -681,7 +682,7 @@
             "pin": "<b>Pins in Use</b>: ",
             "in": "Tip: Only Digital Input is supported - input must be 0 or 1.",
             "dig": "Tip: For digital output - input must be 0 or 1.",
-            "pwm": "Tip: For PWM output - input must be between 0 to 100."
+            "pwm": "Tip: For PWM output - input must be between 0 to 100; setting high frequency might occupy more CPU than expected."
         },
         "types": {
             "digout": "digital output",
