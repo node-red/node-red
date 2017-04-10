@@ -59,6 +59,7 @@ RED.workspaces = (function() {
     function showRenameWorkspaceDialog(id) {
         var workspace = RED.nodes.workspace(id);
         RED.view.state(RED.state.EDITING);
+        var tabflowEditor;
         var trayOptions = {
             title: RED._("workspace.editFlow",{name:workspace.label}),
             buttons: [
@@ -98,6 +99,12 @@ RED.workspaces = (function() {
                             changed = true;
                             workspace.disabled = disabled;
                         }
+                        var info = tabflowEditor.getValue();
+                        if (workspace.info !== info) {
+                            changes.info = workspace.info;
+                            changed = true;
+                            workspace.info = info;
+                        }
                         $("#red-ui-tab-"+(workspace.id.replace(".","-"))).toggleClass('workspace-disabled',workspace.disabled);
                         // $("#workspace").toggleClass("workspace-disabled",workspace.disabled);
 
@@ -121,6 +128,9 @@ RED.workspaces = (function() {
                     }
                 }
             ],
+            resize: function(dimensions) {
+                tabflowEditor.resize();
+            },
             open: function(tray) {
                 var trayBody = tray.find('.editor-tray-body');
                 var dialogForm = $('<form id="dialog-form" class="form-horizontal"></form>').appendTo(trayBody);
@@ -134,6 +144,16 @@ RED.workspaces = (function() {
                     '<button id="node-input-disabled-btn" class="editor-button"><i class="fa fa-toggle-on"></i> <span id="node-input-disabled-label"></span></button> '+
                     '<input type="checkbox" id="node-input-disabled" style="display: none;"/>'+
                 '</div>').appendTo(dialogForm);
+
+                $('<div class="form-row node-text-editor-row">'+
+                    '<label for="node-input-info" data-i18n="editor:workspace.info"></label>'+
+                    '<div style="height: 250px;" class="node-text-editor" id="node-input-info"></div>'+
+                '</div>').appendTo(dialogForm);
+                tabflowEditor = RED.editor.createEditor({
+                    id: 'node-input-info',
+                    mode: 'ace/mode/markdown',
+                    value: ""
+                });
 
                 dialogForm.find('#node-input-disabled-btn').on("click",function(e) {
                     var i = $(this).find("i");
@@ -166,13 +186,15 @@ RED.workspaces = (function() {
                 $('<input type="text" style="display: none;" />').prependTo(dialogForm);
                 dialogForm.submit(function(e) { e.preventDefault();});
                 $("#node-input-name").val(workspace.label);
-                RED.text.bidi.prepareInput($("#node-input-name"))
+                RED.text.bidi.prepareInput($("#node-input-name"));
+                tabflowEditor.getSession().setValue(workspace.info || "", -1);
                 dialogForm.i18n();
             },
             close: function() {
                 if (RED.view.state() != RED.state.IMPORT_DRAGGING) {
                     RED.view.state(RED.state.DEFAULT);
                 }
+                RED.sidebar.info.refresh(workspace);
             }
         }
         RED.tray.show(trayOptions);

@@ -215,10 +215,13 @@ RED.sidebar.info = (function() {
 
         var infoText = "";
 
-        if (!subflowNode && node.type != "comment") {
+        if (!subflowNode && node.type !== "comment" && node.type !== "tab") {
             var helpText = $("script[data-help-name='"+node.type+"']").html()||"";
             infoText = helpText;
+        } else if (node.type === "tab") {
+            infoText = marked(node.info||"");
         }
+
         if (subflowNode) {
             infoText = infoText + marked(subflowNode.info||"");
         } else if (node._def && node._def.info) {
@@ -365,7 +368,12 @@ RED.sidebar.info = (function() {
             if (flow) {
                 refresh(flow);
             } else {
-                clear();
+                var workspace = RED.nodes.workspace(RED.workspaces.active());
+                if (workspace.info) {
+                    refresh(workspace);
+                } else {
+                    clear();
+                }
             }
         }
     });

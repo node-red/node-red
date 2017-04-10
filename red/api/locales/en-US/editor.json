@@ -21,7 +21,8 @@
         "dropFlowHere": "Drop the flow here",
         "status": "Status",
         "enabled": "Enabled",
-        "disabled":"Disabled"
+        "disabled":"Disabled",
+        "info": "Description"
     },
     "menu": {
         "label": {
