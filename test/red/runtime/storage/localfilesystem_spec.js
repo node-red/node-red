@@ -134,12 +134,14 @@ describe('LocalFileSystem', function() {
             fs.existsSync(flowFileBackupPath).should.be.false();
             fs.writeFileSync(flowFileBackupPath,JSON.stringify(testFlow));
             fs.existsSync(flowFileBackupPath).should.be.true();
-            localfilesystem.getFlows().then(function(flows) {
-                flows.should.eql(testFlow);
-                done();
-            }).otherwise(function(err) {
-                done(err);
-            });
+            setTimeout(function() {
+                localfilesystem.getFlows().then(function(flows) {
+                    flows.should.eql(testFlow);
+                    done();
+                }).otherwise(function(err) {
+                    done(err);
+                });
+            },50);
         }).otherwise(function(err) {
             done(err);
         });

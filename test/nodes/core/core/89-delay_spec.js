@@ -463,16 +463,16 @@ describe('delay Node', function() {
                 try {
                     if (msg.topic === "_none_") {
                         msg.payload.should.equal(2);
-                        (Date.now() - t).should.be.approximately(500,50);
+                        (Date.now() - t).should.be.approximately(500,200);
                     }
                     else if (msg.topic === "A") {
                         msg.payload.should.equal(4);
-                        (Date.now() - t).should.be.approximately(750,50);
+                        (Date.now() - t).should.be.approximately(750,200);
                     }
                     else {
                         msg.topic.should.equal("B");
                         msg.payload.should.equal(1);
-                        (Date.now() - t).should.be.approximately(1000,50);
+                        (Date.now() - t).should.be.approximately(1000,200);
                         done();
                     }
                 } catch(e) {
@@ -506,16 +506,16 @@ describe('delay Node', function() {
                 try {
                     if (msg.topic === "_none_") {
                         msg.payload.should.equal(2);
-                        (Date.now() - t).should.be.approximately(500,50);
+                        (Date.now() - t).should.be.approximately(500,200);
                     }
                     else if (msg.topic === "A") {
                         msg.payload.should.equal(4);
-                        (Date.now() - t).should.be.approximately(500,50);
+                        (Date.now() - t).should.be.approximately(500,200);
                     }
                     else {
                         msg.topic.should.equal("B");
                         msg.payload.should.equal(1);
-                        (Date.now() - t).should.be.approximately(500,50);
+                        (Date.now() - t).should.be.approximately(500,200);
                         done();
                     }
                 } catch(e) {
