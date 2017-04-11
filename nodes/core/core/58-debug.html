@@ -83,6 +83,19 @@
                     url: "debug/"+this.id+"/"+(this.active?"enable":"disable"),
                     type: "POST",
                     success: function(resp, textStatus, xhr) {
+                        var historyEvent = {
+                            t:'edit',
+                            node:node,
+                            changes:{
+                                active: !node.active
+                            },
+                            dirty:node.dirty,
+                            changed:node.changed
+                        };
+                        node.changed = true;
+                        RED.nodes.dirty(true);
+                        RED.history.push(historyEvent);
+
                         if (xhr.status == 200) {
                             RED.notify(node._("debug.notification.activated",{label:label}),"success");
                         } else if (xhr.status == 201) {

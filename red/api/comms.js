@@ -132,13 +132,13 @@ function start() {
                             if (anonymousUser) {
                                 log.audit({event: "comms.auth",user:anonymousUser});
                                 completeConnection(anonymousUser.permissions,false);
+                                //TODO: duplicated code - pull non-auth message handling out
+                                if (msg.subscribe) {
+                                    handleRemoteSubscription(ws,msg.subscribe);
+                                }
                             } else {
                                 log.audit({event: "comms.auth.fail"});
                                 completeConnection(null,false);
-                            }
-                            //TODO: duplicated code - pull non-auth message handling out
-                            if (msg.subscribe) {
-                                handleRemoteSubscription(ws,msg.subscribe);
                             }
                         }
                     }
