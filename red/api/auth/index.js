@@ -81,9 +81,22 @@ function getToken(req,res,next) {
 function login(req,res) {
     var response = {};
     if (settings.adminAuth) {
-        response = {
-            "type":"credentials",
-            "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"}]
+        if (settings.adminAuth.type === "credentials") {
+            response = {
+                "type":"credentials",
+                "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"}]
+            }
+        } else if (settings.adminAuth.type === "oauth") {
+            response = {
+                "type":"oauth",
+                "prompts":[{type:"button",label:settings.adminAuth.strategy.label, url:"/auth/oauth"}]
+            }
+            if (settings.adminAuth.strategy.icon) {
+                response.prompts[0].icon = settings.adminAuth.strategy.icon;
+            }
+            if (settings.adminAuth.strategy.image) {
+                response.prompts[0].image = theme.serveFile('/login/',settings.adminAuth.strategy.image);
+            }
         }
         if (theme.context().login && theme.context().login.image) {
             response.image = theme.context().login.image;
@@ -114,5 +127,46 @@ module.exports = {
         return server.errorHandler()(err,req,res,next);
     },
     login: login,
-    revoke: revoke
+    revoke: revoke,
+    oauthStrategy: function(adminApp,strategy) {
+        var session = require('express-session');
+        adminApp.use(session({
+            secret: 'keyboard cat', // TODO: pull this out
+            resave: false,
+            saveUninitialized:false
+        }));
+        //TODO: all passport references ought to be in ./auth
+        adminApp.use(passport.initialize());
+        adminApp.use(passport.session());
+
+        var options = strategy.options;
+        passport.use(new strategy.strategy(options,
+            function(token, tokenSecret, profile, done) {
+                Users.authenticate(profile).then(function(user) {
+                    if (user) {
+                        Tokens.create(user.username,"node-red-editor",user.permissions).then(function(tokens) {
+                            log.audit({event: "auth.login",username:user.username,scope:user.permissions});
+                            user.tokens = tokens;
+                            done(null,user);
+                        });
+                    } else {
+                        log.audit({event: "auth.login.fail.oauth",username:profile.id});
+                        done(null,false);
+                    }
+                });
+            }
+        ));
+
+        adminApp.get('/auth/oauth', passport.authenticate(strategy.name));
+        adminApp.get('/auth/oauth/callback',
+            passport.authenticate(strategy.name, {session:false, failureRedirect: '/' }),
+            function(req, res) {
+                var tokens = req.user.tokens;
+                delete req.user.tokens;
+                // Successful authentication, redirect home.
+                res.redirect('/?access_token='+tokens.accessToken);
+            }
+        );
+
+    }
 }

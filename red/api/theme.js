@@ -42,6 +42,8 @@ var themeContext = clone(defaultContext);
 var themeSettings = null;
 var runtime = null;
 
+var themeApp;
+
 function serveFile(app,baseUrl,file) {
     try {
         var stats = fs.statSync(file);
@@ -83,7 +85,7 @@ module.exports = {
             themeContext.version = runtime.version();
         }
         themeSettings = null;
-        theme = settings.editorTheme;
+        theme = settings.editorTheme || {};
     },
 
     app: function() {
@@ -91,17 +93,17 @@ module.exports = {
         var url;
         themeSettings = {};
 
-        var themeApp = express();
+        themeApp = express();
 
         if (theme.page) {
 
             themeContext.page.css = serveFilesFromTheme(
-                themeContext.page.css, 
-                themeApp, 
+                themeContext.page.css,
+                themeApp,
                 "/css/")
             themeContext.page.scripts = serveFilesFromTheme(
-                themeContext.page.scripts, 
-                themeApp, 
+                themeContext.page.scripts,
+                themeApp,
                 "/scripts/")
 
             if (theme.page.favicon) {
@@ -187,5 +189,8 @@ module.exports = {
     },
     settings: function() {
         return themeSettings;
+    },
+    serveFile: function(baseUrl,file) {
+        return serveFile(themeApp,baseUrl,file);
     }
 }

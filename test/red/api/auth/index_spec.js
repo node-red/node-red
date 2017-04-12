@@ -85,7 +85,7 @@ describe("api auth middleware",function() {
             Users.init.restore();
         });
         it("returns login details - credentials", function(done) {
-            auth.init({settings:{adminAuth:{}},log:{audit:function(){}}})
+            auth.init({settings:{adminAuth:{type:"credentials"}},log:{audit:function(){}}})
             auth.login(null,{json: function(resp) {
                 resp.should.have.a.property("type","credentials");
                 resp.should.have.a.property("prompts");
@@ -97,6 +97,19 @@ describe("api auth middleware",function() {
             auth.init({settings:{},log:{audit:function(){}}})
             auth.login(null,{json: function(resp) {
                 resp.should.eql({});
+                done();
+            }});
+        });
+        it("returns login details - oauth", function(done) {
+            auth.init({settings:{adminAuth:{type:"oauth",strategy:{label:"test-oauth",icon:"test-icon"}}},log:{audit:function(){}}})
+            auth.login(null,{json: function(resp) {
+                resp.should.have.a.property("type","oauth");
+                resp.should.have.a.property("prompts");
+                resp.prompts.should.have.a.lengthOf(1);
+                resp.prompts[0].should.have.a.property("type","button");
+                resp.prompts[0].should.have.a.property("label","test-oauth");
+                resp.prompts[0].should.have.a.property("icon","test-icon");
+
                 done();
             }});
         });

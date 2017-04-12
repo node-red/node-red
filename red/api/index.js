@@ -96,9 +96,7 @@ function init(_server,_runtime) {
             editorApp.get("/",ensureRuntimeStarted,ui.ensureSlash,ui.editor);
             editorApp.get("/icons/:module/:icon",ui.icon);
             theme.init(runtime);
-            if (settings.editorTheme) {
-                editorApp.use("/theme",theme.app());
-            }
+            editorApp.use("/theme",theme.app());
             editorApp.use("/",ui.editorResources);
             adminApp.use(editorApp);
         }
@@ -109,14 +107,17 @@ function init(_server,_runtime) {
         adminApp.get("/auth/login",auth.login,errorHandler);
 
         if (settings.adminAuth) {
-            //TODO: all passport references ought to be in ./auth
-            adminApp.use(passport.initialize());
-            adminApp.post("/auth/token",
-                auth.ensureClientSecret,
-                auth.authenticateClient,
-                auth.getToken,
-                auth.errorHandler
-            );
+            if (settings.adminAuth.type === "oauth") {
+                auth.oauthStrategy(adminApp,settings.adminAuth.strategy);
+            } else if (settings.adminAuth.type === "credentials") {
+                adminApp.use(passport.initialize());
+                adminApp.post("/auth/token",
+                    auth.ensureClientSecret,
+                    auth.authenticateClient,
+                    auth.getToken,
+                    auth.errorHandler
+                );
+            }
             adminApp.post("/auth/revoke",needsPermission(""),auth.revoke,errorHandler);
         }
         if (settings.httpAdminCors) {

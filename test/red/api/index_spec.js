@@ -56,7 +56,7 @@ describe("api index", function() {
 
     describe("can serve auth", function() {
         var mockList = [
-            'ui','nodes','flows','library','info','theme','locales','credentials'
+            'ui','nodes','flows','library','info','locales','credentials'
         ]
         before(function() {
             mockList.forEach(function(m) {
