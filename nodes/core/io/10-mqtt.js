@@ -86,6 +86,9 @@ module.exports = function(RED) {
 
         // Create the URL to pass in to the MQTT.js library
         if (this.brokerurl === "") {
+            if (this.broker.indexOf("//") > -1) {
+                this.brokerurl = this.broker;
+            } else {
             if (this.usetls) {
                 this.brokerurl="mqtts://";
             } else {
@@ -96,6 +99,7 @@ module.exports = function(RED) {
             } else {
                 this.brokerurl = this.brokerurl+"localhost:1883";
             }
+        }
         }
 
         if (!this.cleansession && !this.clientid) {
