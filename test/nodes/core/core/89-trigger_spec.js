@@ -415,7 +415,7 @@ describe('trigger node', function() {
                 n1.emit("input", {reset:true});   // reset
             },90);
             setTimeout( function() {
-                c.should.equalOneOf(3,4);  // should send foo 3 or 4 times.
+                c.should.within(2,5);  // should send foo between 2 and 5 times.
                 done();
             },180);
         });
