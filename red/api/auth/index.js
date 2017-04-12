@@ -110,7 +110,11 @@ function revoke(req,res) {
     // TODO: audit log
     Tokens.revoke(token).then(function() {
         log.audit({event: "auth.login.revoke"},req);
-        res.status(200).end();
+        if (settings.editorTheme && settings.editorTheme.logout && settings.editorTheme.logout.redirect) {
+            res.json({redirect:settings.editorTheme.logout.redirect});
+        } else {
+            res.status(200).end();
+        }
     });
 }
 
