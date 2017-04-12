@@ -65,7 +65,7 @@ Node.prototype.updateWires = function(wires) {
 }
 Node.prototype.context = function() {
     if (!this._context) {
-         this._context = context.get(this._alias||this.id,this.z);
+        this._context = context.get(this._alias||this.id,this.z);
     }
     return this._context;
 }
