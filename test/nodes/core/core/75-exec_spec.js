@@ -211,18 +211,8 @@ describe('exec node', function() {
                 n4.on("input", function(msg) {
                     msg.should.have.property("payload");
                     msg.payload.should.have.property("signal","SIGTERM");
-                    //done();
-                });
-                setTimeout(function() {
-                    var logEvents = helper.log().args.filter(function(evt) {
-                        return evt[0].type == "exec";
-                    });
-                    var i = logEvents.length - 2;
-                    //logEvents.should.have.length(1);
-                    logEvents[0][0].should.have.a.property('msg');
-                    logEvents[0][0].msg.toString().should.startWith("error:Error: Command");
                     done();
-                },400);
+                });
                 n1.receive({});
             });
         });
