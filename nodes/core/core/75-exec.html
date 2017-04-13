@@ -21,7 +21,7 @@
     </div>
     <div class="form-row">
         <label><i class="fa fa-plus"></i> <span data-i18n="exec.label.append"></span></label>
-        <input type="checkbox" id="node-input-addpay" style="display: inline-block; width: auto; vertical-align: top;">
+        <input type="checkbox" id="node-input-addpay" style="display:inline-block; width:auto; vertical-align:top;">
         &nbsp;msg.payload
     </div>
     <div class="form-row">
@@ -29,9 +29,16 @@
         <input type="text" id="node-input-append" data-i18n="[placeholder]exec.placeholder.extraparams">
     </div>
     <div class="form-row">
+        <label><i class="fa fa-sign-out"></i> <span data-i18n="exec.label.return"></span></label>
+        <select type="text" id="node-input-useSpawn" style="width:70%">
+            <option value="false" data-i18n="exec.opt.exec"></option>
+            <option value="true" data-i18n="exec.opt.spawn"></option>
+        </select>
+    </div>
+    <div class="form-row">
         <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-useSpawn" placeholder="spawn" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-useSpawn" style="width:70%;"><span data-i18n="exec.spawn"></span></label>
+        <input type="checkbox" id="node-input-oldrc" style="display:inline-block; width:auto; vertical-align:top;">
+        <label for="node-input-oldrc" style="width:70%;"><span data-i18n="exec.oldrc"></span></label>
     </div>
     <div class="form-row">
         <label for="node-input-timer"><i class="fa fa-clock-o"></i> <span data-i18n="exec.label.timeout"></span></label>
@@ -74,11 +81,10 @@
                 <dd>the standard error of the command.</dd>
             </dl>
         </li>
-
         <li>Return code
             <dl class="message-properties">
-                <dt>payload <span class="property-type">number</span></dt>
-                <dd>the return code of the command.</dd>
+                <dt>payload <span class="property-type">object</span></dt>
+                <dd>an object containing the return code, and possibly <code>message</code>, <code>signal</code> properties.</dd>
             </dl>
         </li>
     </ol>
@@ -86,8 +92,10 @@
     <p>By default uses the <code>exec</code> system call which calls the command, waits for it to complete, and then
     returns the output. For example a successful command should have a return code of <code>{ code: 0 }</code>.</p>
     <p>Optionally can use <code>spawn</code> instead, which returns the output from stdout and stderr
-    as the command runs, usually one line at a time. On completion it then returns a numeric return code
-    on the 3rd port. For example, a successful command should return <code>0</code>.</p>
+    as the command runs, usually one line at a time. On completion it then returns an object
+    on the 3rd port. For example, a successful command should return <code>{ code: 0 }</code>.</p>
+    <p>Errors may return extra information on the 3rd port <code>msg.payload</code>, such as a <code>message</code> string,
+    <code>signal</code> string.</p>
     <p>The command that is run is defined within the node, with an option to append <code>msg.payload</code> and a further set of parameters.</p>
     <p>Commands or parameters with spaces should be enclosed in quotes - <code>"This is a single parameter"</code></p>
     <p>The returned <code>payload</code> is usually a <i>string</i>, unless non-UTF8 characters are detected, in which
@@ -95,7 +103,8 @@
     <p>The node&apos;s status icon and PID will be visible while the node is active. Changes to this can be read by the <code>Status</code> node.</p>
     <h4>Killing processes</h4>
     <p>Sending <code>msg.kill</code> will kill a single active process. <code>msg.kill</code> should be a string containing
-    the type of signal to be sent, for example, <code>SIGINT</code>, <code>SIGQUIT</code> or <code>SIGHUP</code>. Defaults to <code>SIGTERM</code> if set to an empty string.</p>
+    the type of signal to be sent, for example, <code>SIGINT</code>, <code>SIGQUIT</code> or <code>SIGHUP</code>.
+    Defaults to <code>SIGTERM</code> if set to an empty string.</p>
     <p>If the node has more than one process running then <code>msg.pid</code> must also be set with the value of the PID to be killed.</p>
     <p>Tip: if running a Python app you may need to use the <code>-u</code> parameter to stop the output being buffered.</p>
 </script>
@@ -108,8 +117,9 @@
             command: {value:""},
             addpay: {value:true},
             append: {value:""},
-            useSpawn: {value:""},
+            useSpawn: {value:"false"},
             timer: {value:""},
+            oldrc: {value:false},
             name: {value:""}
         },
         inputs:1,
@@ -122,6 +132,11 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            if ($("#node-input-useSpawn").val() === null) {
+                $("#node-input-useSpawn").val(this.useSpawn.toString());
+            }
         }
     });
 </script>

@@ -43,6 +43,7 @@ describe('exec node', function() {
             n1.should.have.property("append", "");
             n1.should.have.property("addpay",true);
             n1.should.have.property("timer",0);
+            n1.should.have.property("oldrc","false");
             done();
         });
     });
@@ -50,11 +51,10 @@ describe('exec node', function() {
     describe('calling exec', function() {
 
         it('should exec a simple command', function(done) {
-            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:false, append:""},
+            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:false, append:"", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             var spy = sinon.stub(child_process, 'exec',
             function(arg1, arg2, arg3, arg4) {
-                //console.log(arg1);
                 // arg3(error,stdout,stderr);
                 arg3(null,arg1,arg1.toUpperCase());
             });
@@ -67,7 +67,7 @@ describe('exec node', function() {
                 var received = 0;
                 var messages = [null,null,null];
                 var completeTest = function() {
-                    received++;
+                    received = received + 1;
                     if (received < 3) {
                         return;
                     }
@@ -79,7 +79,7 @@ describe('exec node', function() {
 
                         msg = messages[1];
                         msg.should.have.property("payload");
-                        msg.payload.should.be.a.String;
+                        msg.payload.should.be.a.String();
                         msg.payload.should.equal("ECHO");
 
                         msg = messages[2];
@@ -110,7 +110,7 @@ describe('exec node', function() {
         });
 
         it('should exec a simple command with extra parameters', function(done) {
-            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"more"},
+            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"more", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             var spy = sinon.stub(child_process, 'exec',
                 function(arg1, arg2, arg3, arg4) {
@@ -163,7 +163,7 @@ describe('exec node', function() {
         });
 
         it('should be able to return a binary buffer', function(done) {
-            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"more"},
+            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"more", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             var spy = sinon.stub(child_process, 'exec',
                 function(arg1, arg2, arg3, arg4) {
@@ -197,10 +197,10 @@ describe('exec node', function() {
             var flow;
             if (osType === "Windows_NT") {
                 // Although Windows timeout command is equivalent to sleep, this cannot be used because it promptly outputs a message.
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"0.3"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"0.3", oldrc:"false"},
                             {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"0.3"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"0.3", oldrc:"false"},
                             {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             }
             helper.load(execNode, flow, function() {
@@ -210,17 +210,17 @@ describe('exec node', function() {
                 var n4 = helper.getNode("n4");
                 n4.on("input", function(msg) {
                     msg.should.have.property("payload");
-                    msg.payload.should.have.property("killed",true);
+                    msg.payload.should.have.property("signal","SIGTERM");
                     //done();
                 });
                 setTimeout(function() {
                     var logEvents = helper.log().args.filter(function(evt) {
                         return evt[0].type == "exec";
                     });
-                    var i = logEvents.length - 1;
+                    var i = logEvents.length - 2;
                     //logEvents.should.have.length(1);
-                    logEvents[i][0].should.have.a.property('msg');
-                    logEvents[i][0].msg.toString().should.startWith("Exec node timeout");
+                    logEvents[0][0].should.have.a.property('msg');
+                    logEvents[0][0].msg.toString().should.startWith("error:Error: Command");
                     done();
                 },400);
                 n1.receive({});
@@ -230,10 +230,10 @@ describe('exec node', function() {
         it('should be able to kill a long running command', function(done) {
             var flow;
             if (osType === "Windows_NT") {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"2"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"2", oldrc:"false"},
                             {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             }
             helper.load(execNode, flow, function() {
@@ -244,7 +244,6 @@ describe('exec node', function() {
                 n4.on("input", function(msg) {
                     try {
                         msg.should.have.property("payload");
-                        msg.payload.should.have.property("killed",true);
                         msg.payload.should.have.property("signal","SIGTERM");
                         done();
                     } catch(err) {
@@ -260,11 +259,12 @@ describe('exec node', function() {
 
         it('should be able to kill a long running command - SIGINT', function(done) {
             var flow;
+            var sig = "SIGINT";
             if (osType === "Windows_NT") {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"2"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"2", oldrc:"false"},
                             {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             }
             helper.load(execNode, flow, function() {
@@ -275,8 +275,7 @@ describe('exec node', function() {
                 n4.on("input", function(msg) {
                     try {
                         msg.should.have.property("payload");
-                        msg.payload.should.have.property("killed",true);
-                        //msg.payload.should.have.property("signal","SIGINT");
+                        msg.payload.should.have.property("signal",sig);
                         done();
                     } catch(err) {
                         done(err);
@@ -291,7 +290,7 @@ describe('exec node', function() {
 
 
         it('should return the rc for a failing command', function(done) {
-            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"error", addpay:false, append:""},
+            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"error", addpay:false, append:"", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             var spy = sinon.stub(child_process, 'exec',
             function(arg1, arg2, arg3, arg4) {
@@ -319,7 +318,7 @@ describe('exec node', function() {
 
                         msg = messages[1];
                         msg.should.have.property("payload");
-                        msg.payload.should.be.a.String;
+                        msg.payload.should.be.a.String();
                         msg.payload.should.equal("ERROR");
 
                         msg = messages[2];
@@ -358,11 +357,11 @@ describe('exec node', function() {
             var expected;
             if (osType === "Windows_NT") {
                 // Need to use cmd to spawn a process because Windows echo command is a built-in command and cannot be spawned.
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo", addpay:true, append:"", useSpawn:true},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo", addpay:true, append:"", useSpawn:true, oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "hello world\r\n";
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"", useSpawn:true},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"", useSpawn:true, oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "hello world\n";
             }
@@ -392,11 +391,11 @@ describe('exec node', function() {
             var flow;
             var expected;
             if (osType === "Windows_NT") {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo", addpay:true, append:" deg C", useSpawn:true},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo", addpay:true, append:" deg C", useSpawn:true, oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "12345 deg C\r\n";
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:" deg C", useSpawn:true},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:" deg C", useSpawn:true, oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "12345 deg C\n";
             }
@@ -421,11 +420,11 @@ describe('exec node', function() {
             var flow;
             var expected;
             if (osType === "Windows_NT") {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo", addpay:true, append:"", useSpawn:true},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo", addpay:true, append:"", useSpawn:true, oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-                expected = 8;
+                expected = 6;
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"", useSpawn:true},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"", useSpawn:true, oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = 7;
             }
@@ -453,11 +452,11 @@ describe('exec node', function() {
             var flow;
             var expected;
             if (osType === "Windows_NT") {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo this now works", addpay:false, append:"", useSpawn:true},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo this now works", addpay:false, append:"", useSpawn:true, oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "this now works\r\n";
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo this now works", addpay:false, append:"", useSpawn:true},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo this now works", addpay:false, append:"", useSpawn:true, oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "this now works\n";
             }
@@ -482,8 +481,7 @@ describe('exec node', function() {
                         msg = messages[1];
                         msg.should.have.property("payload");
                         should.exist(msg.payload);
-                        msg.payload.should.be.a.Number();
-                        msg.payload.should.equal(0);
+                        msg.payload.should.have.property("code",0);
                         done();
                     } catch(err) {
                         done(err);
@@ -503,42 +501,33 @@ describe('exec node', function() {
             });
         });
 
-        if (!/^v0.10/.test(process.version)) {
-            it('should return an error for a bad command', function(done) {
-                var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"madeupcommandshouldfail", addpay:false, append:"", useSpawn:true},
-                {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-                helper.load(execNode, flow, function() {
-                    var n1 = helper.getNode("n1");
-                    var n2 = helper.getNode("n2");
-                    var n3 = helper.getNode("n3");
-                    var n4 = helper.getNode("n4");
-                    n4.on("input", function(msg) {
-                        if (/^v0.10/.test(process.version)) {
-                            msg.should.have.property("payload");
-                            msg.payload.should.be.a.Number();
-                            msg.payload.should.be.below(0);
-                        } else {
-                            msg.should.have.property("payload");
-                            msg.payload.should.be.a.Number();
-                            msg.payload.should.be.below(0);
-                        }
-                        done();
-                    });
-                    n1.receive({payload:null});
+        it('should return an error for a bad command', function(done) {
+            var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"madeupcommandshouldfail", addpay:false, append:"", useSpawn:"true", oldrc:"false"},
+            {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                n4.on("input", function(msg) {
+                    msg.should.have.property("payload");
+                    msg.payload.should.have.property("code",-2);
+                    done();
                 });
+                n1.receive({payload:null});
             });
-        }
+        });
 
         it('should return an error for a failing command', function(done) {
             var flow;
             var expected;
             if (osType === "Windows_NT") {
                 // Cannot use mkdir because Windows mkdir command automatically creates non-existent directories.
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping /foo/bar/doo/dah", addpay:false, append:"", useSpawn:true},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping /foo/bar/doo/dah", addpay:false, append:"", useSpawn:"true", oldrc:"false"},
                             {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "IP address must be specified.";
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"mkdir /foo/bar/doo/dah", addpay:false, append:"", useSpawn:true},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"mkdir /foo/bar/doo/dah", addpay:false, append:"", useSpawn:"true", oldrc:"false"},
                             {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "mkdir: /foo/bar/doo: No such file or directory\n";
             }
@@ -553,7 +542,8 @@ describe('exec node', function() {
                     msg.payload.should.equal(expected);
                 });
                 n4.on("input", function(msg) {
-                    msg.should.have.property("payload",1);
+                    msg.should.have.property("payload");
+                    msg.payload.should.have.property("code",1);
                     done();
                 });
                 n1.receive({payload:null});
@@ -563,41 +553,10 @@ describe('exec node', function() {
         it('should be able to timeout a long running command', function(done) {
             var flow;
             if (osType === "Windows_NT") {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"0.3"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"0.3", useSpawn:"true", oldrc:"false"},
                             {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"0.3", useSpawn:true},
-                        {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-            }
-            helper.load(execNode, flow, function() {
-                var n1 = helper.getNode("n1");
-                var n2 = helper.getNode("n2");
-                var n3 = helper.getNode("n3");
-                var n4 = helper.getNode("n4");
-                n4.on("input", function(msg) {
-                    msg.should.have.property("payload",null);
-                    //done();
-                });
-                setTimeout(function() {
-                    var logEvents = helper.log().args.filter(function(evt) {
-                        return evt[0].type == "exec";
-                    });
-                    var i = logEvents.length - 1;
-                    logEvents[i][0].should.have.a.property('msg');
-                    logEvents[i][0].msg.toString().should.startWith("Exec node timeout");
-                    done();
-                },400);
-                n1.receive({});
-            });
-        });
-
-        it('should be able to kill a long running command', function(done) {
-            var flow;
-            if (osType === "Windows_NT") {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"2"},
-                            {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-            } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"0.3", useSpawn:"true", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             }
             helper.load(execNode, flow, function() {
@@ -607,7 +566,30 @@ describe('exec node', function() {
                 var n4 = helper.getNode("n4");
                 n4.on("input", function(msg) {
                     msg.should.have.property("payload");
-                    msg.payload.should.have.property("killed",true);
+                    msg.payload.should.have.property("code",null);
+                    msg.payload.should.have.property("signal","SIGTERM");
+                    done();
+                });
+                n1.receive({});
+            });
+        });
+
+        it('should be able to kill a long running command', function(done) {
+            var flow;
+            if (osType === "Windows_NT") {
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"2", oldrc:"false"},
+                            {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+            } else {
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2", oldrc:"false"},
+                        {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+            }
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                n4.on("input", function(msg) {
+                    msg.should.have.property("payload");
                     msg.payload.should.have.property("signal","SIGTERM");
                     done();
                 });
@@ -620,11 +602,13 @@ describe('exec node', function() {
 
         it('should be able to kill a long running command - SIGINT', function(done) {
             var flow;
+            var sig = "SIGINT";
             if (osType === "Windows_NT") {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"2"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"2", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+                sig = "SIGTERM";
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             }
             helper.load(execNode, flow, function() {
@@ -634,8 +618,7 @@ describe('exec node', function() {
                 var n4 = helper.getNode("n4");
                 n4.on("input", function(msg) {
                     msg.should.have.property("payload");
-                    msg.payload.should.have.property("killed",true);
-                    //msg.payload.should.have.property("signal","SIGINT");
+                    msg.payload.should.have.property("signal",sig);
                     done();
                 });
                 setTimeout(function() {

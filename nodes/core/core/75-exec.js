@@ -26,15 +26,16 @@ module.exports = function(RED) {
         if (n.addpay === undefined) { n.addpay = true; }
         this.addpay = n.addpay;
         this.append = (n.append || "").trim();
-        this.useSpawn = n.useSpawn;
+        this.useSpawn = (n.useSpawn == "true");
         this.timer = Number(n.timer || 0)*1000;
         this.activeProcesses = {};
+        this.oldrc = (n.oldrc || false).toString();
         var node = this;
 
         var cleanup = function(p) {
             node.activeProcesses[p].kill();
-            node.status({fill:"red",shape:"dot",text:"timeout"});
-            node.error("Exec node timeout");
+            //node.status({fill:"red",shape:"dot",text:"timeout"});
+            //node.error("Exec node timeout");
         }
 
         this.on("input", function(msg) {
@@ -89,13 +90,17 @@ module.exports = function(RED) {
                             node.send([null,RED.util.cloneMessage(msg),null]);
                         }
                     });
-                    child.on('close', function (code) {
+                    child.on('close', function (code,signal) {
                         if (unknownCommand || (node.activeProcesses.hasOwnProperty(child.pid) && node.activeProcesses[child.pid] !== null)) {
                             delete node.activeProcesses[child.pid];
                             if (child.tout) { clearTimeout(child.tout); }
                             msg.payload = code;
+                            if (node.oldrc === "false") {
+                                msg.payload = {code:code};
+                                if (signal) { msg.payload.signal = signal; }
+                            }
                             if (code === 0) { node.status({}); }
-                            if (code === null) { node.status({fill:"red",shape:"dot",text:"timeout"}); }
+                            if (code === null) { node.status({fill:"red",shape:"dot",text:"killed"}); }
                             else if (code < 0) { node.status({fill:"red",shape:"dot",text:"rc:"+code}); }
                             else { node.status({fill:"yellow",shape:"dot",text:"rc:"+code}); }
                             node.send([null,null,RED.util.cloneMessage(msg)]);
@@ -127,10 +132,12 @@ module.exports = function(RED) {
                         //console.log('[exec] stdout: ' + stdout);
                         //console.log('[exec] stderr: ' + stderr);
                         if (error !== null) {
-                            msg3 = {payload:error};
-                            node.status({fill:"red",shape:"dot",text:"error: "+error.code});
-                            //console.log('[exec] error: ' + error);
-                        } else {
+                            msg3 = {payload:{code:error.code, message:error.message}};
+                            if (error.signal) { msg3.payload.signal = error.signal; }
+                            if (error.code === null) { node.status({fill:"red",shape:"dot",text:"killed"}); }
+                            else { node.status({fill:"red",shape:"dot",text:"error:"+error.code}); }
+                            node.log('error:' + error);
+                        } else if (node.oldrc === "false") {
                             msg3 = {payload:{code:0}};
                         }
                         if (!msg3) { node.status({}); }
@@ -147,7 +154,7 @@ module.exports = function(RED) {
                 }
             }
         });
-        
+
         this.on('close',function() {
             for (var pid in node.activeProcesses) {
                 /* istanbul ignore else  */
