@@ -347,11 +347,11 @@ describe('exec node', function() {
             var expected;
             if (osType === "Windows_NT") {
                 // Need to use cmd to spawn a process because Windows echo command is a built-in command and cannot be spawned.
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo", addpay:true, append:"", useSpawn:true, oldrc:"false"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo", addpay:true, append:"", useSpawn:"true", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "hello world\r\n";
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"", useSpawn:true, oldrc:"false"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"", useSpawn:"true", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "hello world\n";
             }
@@ -381,11 +381,11 @@ describe('exec node', function() {
             var flow;
             var expected;
             if (osType === "Windows_NT") {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo", addpay:true, append:" deg C", useSpawn:true, oldrc:"false"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo", addpay:true, append:" deg C", useSpawn:"true", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "12345 deg C\r\n";
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:" deg C", useSpawn:true, oldrc:"false"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:" deg C", useSpawn:"true", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "12345 deg C\n";
             }
@@ -408,15 +408,12 @@ describe('exec node', function() {
 
         it('should spawn a simple command and return binary buffer', function(done) {
             var flow;
-            var expected;
             if (osType === "Windows_NT") {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo", addpay:true, append:"", useSpawn:true, oldrc:"false"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo", addpay:true, append:"", useSpawn:"true", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-                expected = 6;
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"", useSpawn:true, oldrc:"false"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"", useSpawn:"true", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-                expected = 7;
             }
 
             helper.load(execNode, flow, function() {
@@ -428,7 +425,11 @@ describe('exec node', function() {
                     try {
                         msg.should.have.property("payload");
                         Buffer.isBuffer(msg.payload).should.be.true();
-                        msg.payload.length.should.equal(expected);
+                        if (osType === "Windows_NT") {
+                            msg.payload.length.should.equalOneOf(6,8);
+                        } else {
+                            msg.payload.length.should.equal(7);
+                        }
                         done();
                     } catch(err) {
                         done(err);
@@ -442,11 +443,11 @@ describe('exec node', function() {
             var flow;
             var expected;
             if (osType === "Windows_NT") {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo this now works", addpay:false, append:"", useSpawn:true, oldrc:"false"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"cmd /C echo this now works", addpay:false, append:"", useSpawn:"true", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "this now works\r\n";
             } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo this now works", addpay:false, append:"", useSpawn:true, oldrc:"false"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo this now works", addpay:false, append:"", useSpawn:"true", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "this now works\n";
             }
@@ -501,7 +502,8 @@ describe('exec node', function() {
                 var n4 = helper.getNode("n4");
                 n4.on("input", function(msg) {
                     msg.should.have.property("payload");
-                    msg.payload.should.have.property("code",-2);
+                    msg.payload.should.have.property("code");
+                    msg.payload.code.should.be.below(0);
                     done();
                 });
                 n1.receive({payload:null});
@@ -543,7 +545,7 @@ describe('exec node', function() {
         it('should be able to timeout a long running command', function(done) {
             var flow;
             if (osType === "Windows_NT") {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"0.3", useSpawn:"true", oldrc:"false"},
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000", timer:"0.3", useSpawn:"true", oldrc:"false"},
                             {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             } else {
                 flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"0.3", useSpawn:"true", oldrc:"false"},
@@ -596,7 +598,6 @@ describe('exec node', function() {
             if (osType === "Windows_NT") {
                 flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"2", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-                sig = "SIGTERM";
             } else {
                 flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
