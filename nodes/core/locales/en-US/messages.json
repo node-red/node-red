@@ -147,12 +147,17 @@
             "command": "Command",
             "append": "Append",
             "timeout": "Timeout",
-            "timeoutplace": "optional"
+            "timeoutplace": "optional",
+            "return": "Output"
         },
         "placeholder": {
             "extraparams": "extra input parameters"
         },
-        "spawn": "Use spawn() instead of exec()?"
+        "opt": {
+            "exec": "when the command is complete - exec mode",
+            "spawn": "while the command is running - spawn mode"
+        },
+        "oldrc": "Use old style output (compatibility mode)"
     },
     "function": {
         "label": {
