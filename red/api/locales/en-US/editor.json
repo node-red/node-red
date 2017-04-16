@@ -22,7 +22,7 @@
         "status": "Status",
         "enabled": "Enabled",
         "disabled":"Disabled",
-        "info": "Description"
+        "info": "Information, in markdown format"
     },
     "menu": {
         "label": {

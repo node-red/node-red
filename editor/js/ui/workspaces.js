@@ -28,7 +28,7 @@ RED.workspaces = (function() {
             var tabId = RED.nodes.id();
             do {
                 workspaceIndex += 1;
-            } while($("#workspace-tabs a[title='"+RED._('workspace.defaultName',{number:workspaceIndex})+"']").size() !== 0);
+            } while ($("#workspace-tabs a[title='"+RED._('workspace.defaultName',{number:workspaceIndex})+"']").size() !== 0);
 
             ws = {type:"tab",id:tabId,label:RED._('workspace.defaultName',{number:workspaceIndex})};
             RED.nodes.addWorkspace(ws);
@@ -129,6 +129,15 @@ RED.workspaces = (function() {
                 }
             ],
             resize: function(dimensions) {
+                var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+                var editorRow = $("#dialog-form>div.node-text-editor-row");
+                var height = $("#dialog-form").height();
+                for (var i=0; i<rows.size(); i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                height -= (parseInt($("#dialog-form").css("marginTop"))+parseInt($("#dialog-form").css("marginBottom")));
+                height -= 20;
+                $(".node-text-editor").css("height",height+"px");
                 tabflowEditor.resize();
             },
             open: function(tray) {
@@ -140,14 +149,14 @@ RED.workspaces = (function() {
                 '</div>').appendTo(dialogForm);
 
                 $('<div class="form-row">'+
-                    '<label for="node-input-disabled-btn" data-i18n="editor:workspace.status"></label>'+
+                    '<label for="node-input-disabled-btn" data-i18n="[append]editor:workspace.status"><i class="fa fa-toggle-on"></i> </label>'+
                     '<button id="node-input-disabled-btn" class="editor-button"><i class="fa fa-toggle-on"></i> <span id="node-input-disabled-label"></span></button> '+
                     '<input type="checkbox" id="node-input-disabled" style="display: none;"/>'+
                 '</div>').appendTo(dialogForm);
 
                 $('<div class="form-row node-text-editor-row">'+
-                    '<label for="node-input-info" data-i18n="editor:workspace.info"></label>'+
-                    '<div style="height: 250px;" class="node-text-editor" id="node-input-info"></div>'+
+                    '<label for="node-input-info" data-i18n="[append]editor:workspace.info" style="width:300px;"><i class="fa fa-info-circle"></i> </label>'+
+                    '<div style="height:250px;" class="node-text-editor" id="node-input-info"></div>'+
                 '</div>').appendTo(dialogForm);
                 tabflowEditor = RED.editor.createEditor({
                     id: 'node-input-info',
@@ -202,7 +211,7 @@ RED.workspaces = (function() {
 
 
     var workspace_tabs;
-    function createWorkspaceTabs(){
+    function createWorkspaceTabs() {
         workspace_tabs = RED.tabs.create({
             id: "workspace-tabs",
             onchange: function(tab) {
