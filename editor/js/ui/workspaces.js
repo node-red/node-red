@@ -136,7 +136,7 @@ RED.workspaces = (function() {
                     height -= $(rows[i]).outerHeight(true);
                 }
                 height -= (parseInt($("#dialog-form").css("marginTop"))+parseInt($("#dialog-form").css("marginBottom")));
-                height -= 20;
+                height -= 28;
                 $(".node-text-editor").css("height",height+"px");
                 tabflowEditor.resize();
             },
@@ -149,13 +149,13 @@ RED.workspaces = (function() {
                 '</div>').appendTo(dialogForm);
 
                 $('<div class="form-row">'+
-                    '<label for="node-input-disabled-btn" data-i18n="[append]editor:workspace.status"><i class="fa fa-toggle-on"></i> </label>'+
+                    '<label for="node-input-disabled-btn" data-i18n="editor:workspace.status"></label>'+
                     '<button id="node-input-disabled-btn" class="editor-button"><i class="fa fa-toggle-on"></i> <span id="node-input-disabled-label"></span></button> '+
                     '<input type="checkbox" id="node-input-disabled" style="display: none;"/>'+
                 '</div>').appendTo(dialogForm);
 
                 $('<div class="form-row node-text-editor-row">'+
-                    '<label for="node-input-info" data-i18n="[append]editor:workspace.info" style="width:300px;"><i class="fa fa-info-circle"></i> </label>'+
+                    '<label for="node-input-info" data-i18n="editor:workspace.info" style="width:300px;"></label>'+
                     '<div style="height:250px;" class="node-text-editor" id="node-input-info"></div>'+
                 '</div>').appendTo(dialogForm);
                 tabflowEditor = RED.editor.createEditor({
@@ -163,6 +163,8 @@ RED.workspaces = (function() {
                     mode: 'ace/mode/markdown',
                     value: ""
                 });
+
+                $('<div class="form-tips" data-i18n="editor:workspace.tip"></div>').appendTo(dialogForm);
 
                 dialogForm.find('#node-input-disabled-btn').on("click",function(e) {
                     var i = $(this).find("i");

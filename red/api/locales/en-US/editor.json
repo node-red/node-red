@@ -22,7 +22,8 @@
         "status": "Status",
         "enabled": "Enabled",
         "disabled":"Disabled",
-        "info": "Information, in markdown format"
+        "info": "Description",
+        "tip": "Description will accept Markdown and will appear in the Info tab."
     },
     "menu": {
         "label": {
