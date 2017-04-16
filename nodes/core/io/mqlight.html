@@ -1,0 +1,143 @@
+<!--
+  Copyright 2013,2014 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="mqlight in">
+    <div class="form-row">
+        <label for="node-input-service"><i class="fa fa-globe"></i> Service</label>
+        <input type="text" id="node-input-service">
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
+        <input type="text" id="node-input-topic" placeholder="nodered/news">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="mqlight in">
+    <p>Provides an MQ Light receive client.</p>
+    <p>Subscribes the client to a destination based on a topic. A topic can contain any character in the Unicode character set, with # representing a multilevel wildcard and + a single level wildcard as described <a href="https://developer.ibm.com/messaging/mq-light/wildcard-topicpatterns/">here</a>.
+    <p>Received messages will be sent on in <b>msg.payload</b> and their topic will be sent in <b>msg.topic</b>.</p>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('mqlight in', {
+            category: 'input',
+            defaults: {
+                name: {value: ""},
+                topic: {value: ""},
+                service: {type: "mqlight service", required: true}
+            },
+            color: "#6da7d1",
+            inputs: 0,
+            outputs: 1,
+            icon: "mqlightin.png",
+            label: function() {
+                return this.name || "mqlight";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            }
+        });
+    })();
+</script>
+
+<script type="text/x-red" data-template-name="mqlight out">
+    <div class="form-row">
+        <label for="node-input-service"><i class="fa fa-globe"></i> Service</label>
+        <input type="text" id="node-input-service">
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
+        <input type="text" id="node-input-topic" placeholder="nodered/news">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="mqlight out">
+    <p>Provides an MQ Light send client.</p>
+    <p>Sends the value passed in on <b>msg.payload</b> to the specified topic.</p>
+    <p>The topic can be passed in on <b>msg.topic</b>, however the topic in the node must be blank for this to take effect. If the topic is set in the node <b>msg.topic</b> will be overridden.</p>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('mqlight out', {
+            category: 'output',
+            defaults: {
+                name: {value: ""},
+                topic: {value: ""},
+                service: {type: "mqlight service", required: true}
+            },
+            color: "#6da7d1",
+            inputs: 1,
+            outputs: 0,
+            align: "right",
+            icon: "mqlightin.png",
+            label: function() {
+                return this.name || "mqlight";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            }
+        });
+    })();
+</script>
+
+<script type="text/x-red" data-template-name="mqlight service">
+    <div class="form-row node-input-service">
+        <label for="node-config-input-service"><i class="fa fa-globe"></i> Service</label>
+        <input type="text" id="node-config-input-service" placeholder="amqp://localhost">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-clientid"><i class="fa fa-tag"></i> ID</label>
+        <input type="text" id="node-config-input-clientid" placeholder="Leave blank for auto generated">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-user"><i class="fa fa-user"></i> Username</label>
+        <input type="text" id="node-config-input-user">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-password"><i class="fa fa-lock"></i> Password</label>
+        <input type="password" id="node-config-input-password">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('mqlight service',{
+        category: 'config',
+        defaults: {
+            service: {value: "amqp://localhost", required: true},
+            clientid: {value: ""}
+        },
+        credentials: {
+            user: {type: "text"},
+            password: {type: "password"}
+        },
+        label: function() {
+            if (this.service == "") {
+                this.service = "localhost";
+            }
+            return (this.clientid ? this.clientid + "@" : "") + this.service;
+        }
+    });
+</script>
