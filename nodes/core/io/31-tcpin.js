@@ -461,8 +461,10 @@ module.exports = function(RED) {
                         }
                     }
                     else if (node.splitc === 0) {
-                        clients[connection_id].msg.payload = data;
-                        node.send(clients[connection_id].msg);
+                        if (clients[connection_id]) {
+                            clients[connection_id].msg.payload = data;
+                            node.send(clients[connection_id].msg);
+                        }
                     }
                     else {
                         for (var j = 0; j < data.length; j++ ) {
