@@ -119,7 +119,7 @@
             ret: {value:"txt"},
             url:{value:""},
             tls: {type:"tls-config",required: false},
-            throttling: {value:0}
+            delay: {value:0, required: false, validate:function(value) { return !value || !isNaN(value); }},
         },
         credentials: {
             user: {type:"text"},
@@ -156,7 +156,7 @@
                     $(".node-input-streaming-row").show();
                 } else {
                     $(".node-input-streaming-row").hide();
-                    $('#node-input-delay').val('0');
+                    $('#node-input-delay').val("0");
                 }
             });
             if (this.delay) {

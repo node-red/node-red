@@ -33,7 +33,6 @@ module.exports = function(RED) {
         }
         this.ret = n.ret || "txt";
         this.prevReq = null;
-        this.streaming = n.streaming;
         this.throttleDelay = n.delay;
         if (RED.settings.httpRequestTimeout) { this.reqTimeout = parseInt(RED.settings.httpRequestTimeout) || 120000; }
         else { this.reqTimeout = 120000; }
@@ -318,7 +317,7 @@ module.exports = function(RED) {
                         // -----------------------------------------------------------------------------------------
                         // Stream the data in the new chunk
                         // -----------------------------------------------------------------------------------------
-                        var checkOverlap = partBody.length > 0;
+                        var checkOverlap = (searchString == boundary && partBody.length > 0) || (searchString != boundary && partHeader.length > 0);
                         
                         while (true) {   
                             if (searchString == boundary) {
@@ -398,8 +397,8 @@ module.exports = function(RED) {
                                     partBody = [];
                                     
                                     // If a (non-zero) throttling delay is specified, the upload should be pauzed during that delay period.
-                                    // If the message contains a throttling delay, it will override the node's throttling delay.
-                                    var throttleDelay = msg.throttle || node.throttleDelay;
+                                    // If the message contains a throttling delay, it will be used if the node has no throttling delay.
+                                    var throttleDelay = (node.throttleDelay && node.throttleDelay > 0) ? node.throttleDelay : msg.throttle;
                                     if (throttleDelay && throttleDelay !== 0) {
                                         res.pause();
                                         setTimeout(function () {
@@ -465,4 +464,3 @@ module.exports = function(RED) {
         }
     });
 }
-
