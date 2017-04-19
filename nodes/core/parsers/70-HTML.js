@@ -25,6 +25,9 @@ module.exports = function(RED) {
         this.as = n.as || "single";
         var node = this;
         this.on("input", function(msg) {
+            if (msg.hasOwnProperty("select")) {
+                this.tag = msg.select;
+            }
             if (msg.hasOwnProperty("payload")) {
                 var tag = node.tag;
                 if (msg.hasOwnProperty("select")) { tag = node.tag || msg.select; }
