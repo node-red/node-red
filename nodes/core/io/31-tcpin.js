@@ -63,7 +63,7 @@ module.exports = function(RED) {
                         if ((node.datatype) === "utf8" && node.newline !== "") {
                             buffer = buffer+data;
                             var parts = buffer.split(node.newline);
-                            for (var i = 0;i<parts.length-1;i+=1) {
+                            for (var i = 0; i<parts.length-1; i+=1) {
                                 msg = {topic:node.topic, payload:parts[i]};
                                 msg._session = {type:"tcp",id:id};
                                 node.send(msg);
@@ -143,13 +143,13 @@ module.exports = function(RED) {
                             buffer = buffer+data;
                             var parts = buffer.split(node.newline);
                             for (var i = 0; i<parts.length-1; i+=1) {
-                                msg = {topic:node.topic, payload:parts[i],ip:socket.remoteAddress,port:socket.remotePort};
+                                msg = {topic:node.topic, payload:parts[i], ip:socket.remoteAddress, port:socket.remotePort};
                                 msg._session = {type:"tcp",id:id};
                                 node.send(msg);
                             }
                             buffer = parts[parts.length-1];
                         } else {
-                            msg = {topic:node.topic, payload:data};
+                            msg = {topic:node.topic, payload:data, ip:socket.remoteAddress, port:socket.remotePort};
                             msg._session = {type:"tcp",id:id};
                             node.send(msg);
                         }
@@ -164,7 +164,7 @@ module.exports = function(RED) {
                 socket.on('end', function() {
                     if (!node.stream || (node.datatype === "utf8" && node.newline !== "")) {
                         if (buffer.length > 0) {
-                            var msg = {topic:node.topic, payload:buffer};
+                            var msg = {topic:node.topic, payload:buffer, ip:socket.remoteAddress, port:socket.remotePort};
                             msg._session = {type:"tcp",id:id};
                             node.send(msg);
                         }
@@ -209,7 +209,6 @@ module.exports = function(RED) {
                 }
             });
         }
-
     }
     RED.nodes.registerType("tcp in",TcpIn);
 
@@ -456,15 +455,14 @@ module.exports = function(RED) {
                 clients[connection_id].client.on('data', function(data) {
                     if (node.out === "sit") { // if we are staying connected just send the buffer
                         if (clients[connection_id]) {
+                            if (!clients[connection_id].hasOwnProperty("msg")) { clients[connection_id].msg = {}; }
                             clients[connection_id].msg.payload = data;
                             node.send(RED.util.cloneMessage(clients[connection_id].msg));
                         }
                     }
                     else if (node.splitc === 0) {
-                        if (clients[connection_id]) {
-                            clients[connection_id].msg.payload = data;
-                            node.send(clients[connection_id].msg);
-                        }
+                        clients[connection_id].msg.payload = data;
+                        node.send(clients[connection_id].msg);
                     }
                     else {
                         for (var j = 0; j < data.length; j++ ) {
@@ -483,7 +481,8 @@ module.exports = function(RED) {
                                                 buf.copy(clients[connection_id].msg.payload,0,0,i+1);
                                                 node.send(clients[connection_id].msg);
                                                 if (clients[connection_id].client) {
-                                                    node.status({}); clients[connection_id].client.destroy();
+                                                    node.status({});
+                                                    clients[connection_id].client.destroy();
                                                     delete clients[connection_id];
                                                 }
                                             }
@@ -503,7 +502,8 @@ module.exports = function(RED) {
                                         buf.copy(clients[connection_id].msg.payload,0,0,i);
                                         node.send(clients[connection_id].msg);
                                         if (clients[connection_id].client) {
-                                            node.status({}); clients[connection_id].client.destroy();
+                                            node.status({});
+                                            clients[connection_id].client.destroy();
                                             delete clients[connection_id];
                                         }
                                         i = 0;
@@ -520,7 +520,8 @@ module.exports = function(RED) {
                                         buf.copy(clients[connection_id].msg.payload,0,0,i);
                                         node.send(clients[connection_id].msg);
                                         if (clients[connection_id].client) {
-                                            node.status({}); clients[connection_id].client.destroy();
+                                            node.status({});
+                                            clients[connection_id].client.destroy();
                                             delete clients[connection_id];
                                         }
                                         i = 0;
@@ -594,7 +595,9 @@ module.exports = function(RED) {
         this.on("close", function(done) {
             node.done = done;
             for (var client in clients) {
-                clients[client].client.destroy();
+                if (clients.hasOwnProperty("client")) {
+                    clients[client].client.destroy();
+                }
             }
             node.status({});
 
