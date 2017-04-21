@@ -100,14 +100,14 @@ describe("api auth middleware",function() {
                 done();
             }});
         });
-        it("returns login details - oauth", function(done) {
-            auth.init({settings:{adminAuth:{type:"oauth",strategy:{label:"test-oauth",icon:"test-icon"}}},log:{audit:function(){}}})
+        it("returns login details - strategy", function(done) {
+            auth.init({settings:{adminAuth:{type:"strategy",strategy:{label:"test-strategy",icon:"test-icon"}}},log:{audit:function(){}}})
             auth.login(null,{json: function(resp) {
-                resp.should.have.a.property("type","oauth");
+                resp.should.have.a.property("type","strategy");
                 resp.should.have.a.property("prompts");
                 resp.prompts.should.have.a.lengthOf(1);
                 resp.prompts[0].should.have.a.property("type","button");
-                resp.prompts[0].should.have.a.property("label","test-oauth");
+                resp.prompts[0].should.have.a.property("label","test-strategy");
                 resp.prompts[0].should.have.a.property("icon","test-icon");
 
                 done();
