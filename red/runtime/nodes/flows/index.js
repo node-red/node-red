@@ -107,9 +107,7 @@ function setFlows(_config,type,muteLog) {
     } else {
         config = clone(_config);
         newFlowConfig = flowUtil.parseConfig(clone(config));
-        if (type !== 'full') {
-            diff = flowUtil.diffConfigs(activeFlowConfig,newFlowConfig);
-        }
+        diff = flowUtil.diffConfigs(activeFlowConfig,newFlowConfig);
         credentials.clean(config);
         var credsDirty = credentials.dirty();
         configSavePromise = credentials.export().then(function(creds) {
@@ -252,14 +250,14 @@ function start(type,diff,muteLog) {
         return when.resolve();
     }
     if (!muteLog) {
-        if (diff) {
+        if (type !== "full") {
             log.info(log._("nodes.flows.starting-modified-"+type));
         } else {
             log.info(log._("nodes.flows.starting-flows"));
         }
     }
     var id;
-    if (!diff) {
+    if (type === "full") {
         if (!activeFlows['global']) {
             log.debug("red/nodes/flows.start : starting flow : global");
             activeFlows['global'] = Flow.create(activeFlowConfig);
@@ -310,7 +308,7 @@ function start(type,diff,muteLog) {
     events.emit("runtime-event",{id:"runtime-state"});
 
     if (!muteLog) {
-        if (diff) {
+        if (type !== "full") {
             log.info(log._("nodes.flows.started-modified-"+type));
         } else {
             log.info(log._("nodes.flows.started-flows"));
@@ -321,8 +319,15 @@ function start(type,diff,muteLog) {
 
 function stop(type,diff,muteLog) {
     type = type||"full";
+    diff = diff||{
+        added:[],
+        changed:[],
+        removed:[],
+        rewired:[],
+        linked:[]
+    };
     if (!muteLog) {
-        if (diff) {
+        if (type !== "full") {
             log.info(log._("nodes.flows.stopping-modified-"+type));
         } else {
             log.info(log._("nodes.flows.stopping-flows"));
@@ -331,16 +336,18 @@ function stop(type,diff,muteLog) {
     started = false;
     var promises = [];
     var stopList;
+    var removedList = diff.removed;
     if (type === 'nodes') {
         stopList = diff.changed.concat(diff.removed);
     } else if (type === 'flows') {
         stopList = diff.changed.concat(diff.removed).concat(diff.linked);
     }
+
     for (var id in activeFlows) {
         if (activeFlows.hasOwnProperty(id)) {
             var flowStateChanged = diff && (diff.added.indexOf(id) !== -1 || diff.removed.indexOf(id) !== -1);
-            promises = promises.concat(activeFlows[id].stop(flowStateChanged?null:stopList));
-            if (!diff || flowStateChanged || diff.removed.indexOf(id)!==-1) {
+            promises = promises.concat(activeFlows[id].stop(flowStateChanged?null:stopList,removedList));
+            if (type === "full" || flowStateChanged || diff.removed.indexOf(id)!==-1) {
                 delete activeFlows[id];
             }
         }
@@ -366,7 +373,7 @@ function stop(type,diff,muteLog) {
             // in start()
             subflowInstanceNodeMap = {};
             if (!muteLog) {
-                if (diff) {
+                if (type !== "full") {
                     log.info(log._("nodes.flows.stopped-modified-"+type));
                 } else {
                     log.info(log._("nodes.flows.stopped-flows"));

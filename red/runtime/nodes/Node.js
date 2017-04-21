@@ -81,17 +81,21 @@ Node.prototype.on = function(event, callback) {
     }
 };
 
-Node.prototype.close = function() {
+Node.prototype.close = function(removed) {
+    //console.log(this.type,this.id,removed);
     var promises = [];
     var node = this;
     for (var i=0;i<this._closeCallbacks.length;i++) {
         var callback = this._closeCallbacks[i];
-        if (callback.length == 1) {
+        if (callback.length > 0) {
             promises.push(
                 when.promise(function(resolve) {
-                    callback.call(node, function() {
-                        resolve();
-                    });
+                    var args = [];
+                    if (callback.length === 2) {
+                        args.push(!!removed);
+                    }
+                    args.push(resolve);
+                    callback.apply(node, args);
                 })
             );
         } else {

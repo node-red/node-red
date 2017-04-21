@@ -187,6 +187,12 @@ module.exports = {
         var wires;
         var j,k;
 
+        if (!oldConfig) {
+            oldConfig = {
+                flows:{},
+                allNodes:{}
+            }
+        }
         var changedSubflows = {};
 
         var added = {};

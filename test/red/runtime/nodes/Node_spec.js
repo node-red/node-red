@@ -63,7 +63,7 @@ describe('Node', function() {
             n.on('close',function(done) {
                 setTimeout(function() {
                     done();
-                },200);
+                },50);
             });
             var p = n.close();
             should.exist(p);
@@ -71,7 +71,22 @@ describe('Node', function() {
                 testdone();
             });
         });
-
+        it('accepts a callback with "removed" and "done" parameters', function(testdone) {
+            var n = new RedNode({id:'123',type:'abc'});
+            var receivedRemoved;
+            n.on('close',function(removed,done) {
+                receivedRemoved = removed;
+                setTimeout(function() {
+                    done();
+                },50);
+            });
+            var p = n.close(true);
+            should.exist(p);
+            (receivedRemoved).should.be.true();
+            p.then(function() {
+                testdone();
+            });
+        })
         it('allows multiple close handlers to be registered',function(testdone) {
             var n = new RedNode({id:'123',type:'abc'});
             var callbacksClosed = 0;
@@ -79,13 +94,13 @@ describe('Node', function() {
                 setTimeout(function() {
                     callbacksClosed++;
                     done();
-                },200);
+                },50);
             });
             n.on('close',function(done) {
                 setTimeout(function() {
                     callbacksClosed++;
                     done();
-                },200);
+                },75);
             });
             n.on('close',function() {
                 callbacksClosed++;

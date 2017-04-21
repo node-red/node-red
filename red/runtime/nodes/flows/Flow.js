@@ -121,7 +121,7 @@ function Flow(global,flow) {
         }
     }
 
-    this.stop = function(stopList) {
+    this.stop = function(stopList, removedList) {
         return when.promise(function(resolve) {
             var i;
             if (stopList) {
@@ -135,6 +135,13 @@ function Flow(global,flow) {
             } else {
                 stopList = Object.keys(activeNodes);
             }
+            // Convert the list to a map to avoid multiple scans of the list
+            var removedMap = {};
+            removedList = removedList || [];
+            removedList.forEach(function(id) {
+                removedMap[id] = true;
+            });
+
             var promises = [];
             for (i=0;i<stopList.length;i++) {
                 var node = activeNodes[stopList[i]];
@@ -144,7 +151,7 @@ function Flow(global,flow) {
                         delete subflowInstanceNodes[stopList[i]];
                     }
                     try {
-                        var p = node.close();
+                        var p = node.close(removedMap[stopList[i]]);
                         if (p) {
                             promises.push(p);
                         }
