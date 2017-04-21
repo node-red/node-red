@@ -118,6 +118,21 @@ function revoke(req,res) {
     });
 }
 
+function completeVerify(profile,done) {
+    Users.authenticate(profile).then(function(user) {
+        if (user) {
+            Tokens.create(user.username,"node-red-editor",user.permissions).then(function(tokens) {
+                log.audit({event: "auth.login",username:user.username,scope:user.permissions});
+                user.tokens = tokens;
+                done(null,user);
+            });
+        } else {
+            log.audit({event: "auth.login.fail.oauth",username:profile.id});
+            done(null,false);
+        }
+    });
+}
+
 module.exports = {
     init: init,
     needsPermission: needsPermission,
@@ -134,8 +149,11 @@ module.exports = {
     revoke: revoke,
     oauthStrategy: function(adminApp,strategy) {
         var session = require('express-session');
+        var crypto = require("crypto");
         adminApp.use(session({
-            secret: 'keyboard cat', // TODO: pull this out
+            // As the session is only used across the life-span of an oauth
+            // hand-shake, we can use a instance specific random string
+            secret: crypto.randomBytes(20).toString('hex'),
             resave: false,
             saveUninitialized:false
         }));
@@ -144,20 +162,25 @@ module.exports = {
         adminApp.use(passport.session());
 
         var options = strategy.options;
+
         passport.use(new strategy.strategy(options,
-            function(token, tokenSecret, profile, done) {
-                Users.authenticate(profile).then(function(user) {
-                    if (user) {
-                        Tokens.create(user.username,"node-red-editor",user.permissions).then(function(tokens) {
-                            log.audit({event: "auth.login",username:user.username,scope:user.permissions});
-                            user.tokens = tokens;
-                            done(null,user);
-                        });
-                    } else {
-                        log.audit({event: "auth.login.fail.oauth",username:profile.id});
-                        done(null,false);
-                    }
-                });
+            function() {
+                var originalDone = arguments[arguments.length-1];
+                if (options.verify) {
+                    var args = Array.prototype.slice.call(arguments);
+                    args[args.length-1] = function(err,profile) {
+                        if (err) {
+                            return originalDone(err);
+                        } else {
+                            return completeVerify(profile,originalDone);
+                        }
+                    };
+                    options.verify.apply(null,args);
+                } else {
+                    var profile = arguments[arguments.length - 2];
+                    return completeVerify(profile,originalDone);
+                }
+
             }
         ));
 
