@@ -98,15 +98,13 @@ function init() {
 
 function getCatalog(namespace,lang) {
     var result = null;
+    lang = lang || defaultLang;
     if (resourceCache.hasOwnProperty(namespace)) {
         result = resourceCache[namespace][lang];
         if (!result) {
             var langParts = lang.split("-");
             if (langParts.length == 2) {
                 result = resourceCache[namespace][langParts[0]];
-            }
-            if (!result) {
-                return resourceCache[namespace][defaultLang];
             }
         }
     }

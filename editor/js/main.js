@@ -24,22 +24,7 @@
             url: 'nodes',
             success: function(data) {
                 RED.nodes.setNodeList(data);
-                var nsCount = 0;
-                for (var i=0;i<data.length;i++) {
-                    var ns = data[i];
-                    if (ns.module != "node-red") {
-                        nsCount++;
-                        RED.i18n.loadCatalog(ns.id, function() {
-                            nsCount--;
-                            if (nsCount === 0) {
-                                loadNodes();
-                            }
-                        });
-                    }
-                }
-                if (nsCount === 0) {
-                    loadNodes();
-                }
+                RED.i18n.loadNodeCatalogs(loadNodes);
             }
         });
     }

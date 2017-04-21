@@ -147,6 +147,7 @@ function init(_server,_runtime) {
 
         adminApp.get('/credentials/:type/:id', needsPermission("credentials.read"),credentials.get,errorHandler);
 
+        adminApp.get('/locales/nodes',locales.getAllNodes,errorHandler);
         adminApp.get(/locales\/(.+)\/?$/,locales.get,errorHandler);
 
         // Library
