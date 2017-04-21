@@ -131,6 +131,9 @@
             $("#node-input-func").val(this.editor.getValue());
             delete this.editor;
         },
+        oneditcancel: function() {
+            delete this.editor;
+        },
         oneditresize: function(size) {
             var rows = $("#dialog-form>div:not(.node-text-editor-row)");
             var height = $("#dialog-form").height();
