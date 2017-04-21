@@ -107,8 +107,8 @@ function init(_server,_runtime) {
         adminApp.get("/auth/login",auth.login,errorHandler);
 
         if (settings.adminAuth) {
-            if (settings.adminAuth.type === "oauth") {
-                auth.oauthStrategy(adminApp,settings.adminAuth.strategy);
+            if (settings.adminAuth.type === "strategy") {
+                auth.genericStrategy(adminApp,settings.adminAuth.strategy);
             } else if (settings.adminAuth.type === "credentials") {
                 adminApp.use(passport.initialize());
                 adminApp.post("/auth/token",

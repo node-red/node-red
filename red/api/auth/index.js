@@ -86,10 +86,10 @@ function login(req,res) {
                 "type":"credentials",
                 "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"}]
             }
-        } else if (settings.adminAuth.type === "oauth") {
+        } else if (settings.adminAuth.type === "strategy") {
             response = {
-                "type":"oauth",
-                "prompts":[{type:"button",label:settings.adminAuth.strategy.label, url:"/auth/oauth"}]
+                "type":"strategy",
+                "prompts":[{type:"button",label:settings.adminAuth.strategy.label, url:"/auth/strategy"}]
             }
             if (settings.adminAuth.strategy.icon) {
                 response.prompts[0].icon = settings.adminAuth.strategy.icon;
@@ -120,6 +120,7 @@ function revoke(req,res) {
 
 function completeVerify(profile,done) {
     Users.authenticate(profile).then(function(user) {
+        console.log(user);
         if (user) {
             Tokens.create(user.username,"node-red-editor",user.permissions).then(function(tokens) {
                 log.audit({event: "auth.login",username:user.username,scope:user.permissions});
@@ -127,7 +128,7 @@ function completeVerify(profile,done) {
                 done(null,user);
             });
         } else {
-            log.audit({event: "auth.login.fail.oauth",username:profile.id});
+            log.audit({event: "auth.login.fail.oauth",username:typeof profile === "string"?profile:profile.username});
             done(null,false);
         }
     });
@@ -147,11 +148,11 @@ module.exports = {
     },
     login: login,
     revoke: revoke,
-    oauthStrategy: function(adminApp,strategy) {
+    genericStrategy: function(adminApp,strategy) {
         var session = require('express-session');
         var crypto = require("crypto");
         adminApp.use(session({
-            // As the session is only used across the life-span of an oauth
+            // As the session is only used across the life-span of an auth
             // hand-shake, we can use a instance specific random string
             secret: crypto.randomBytes(20).toString('hex'),
             resave: false,
@@ -184,8 +185,8 @@ module.exports = {
             }
         ));
 
-        adminApp.get('/auth/oauth', passport.authenticate(strategy.name));
-        adminApp.get('/auth/oauth/callback',
+        adminApp.get('/auth/strategy', passport.authenticate(strategy.name));
+        adminApp.get('/auth/strategy/callback',
             passport.authenticate(strategy.name, {session:false, failureRedirect: '/' }),
             function(req, res) {
                 var tokens = req.user.tokens;

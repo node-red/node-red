@@ -109,7 +109,7 @@ RED.user = (function() {
                         event.preventDefault();
                     });
 
-                } else if (data.type == "oauth") {
+                } else if (data.type == "strategy") {
                     i = 0;
                     for (;i<data.prompts.length;i++) {
                         var field = data.prompts[i];

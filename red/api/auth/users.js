@@ -24,15 +24,14 @@ var passwords = {};
 var defaultUser = null;
 
 function authenticate() {
-    var username;
-    if (arguments.length === 2) {
-        username = arguments[0];
-    } else {
-        username = arguments[0].username;
+    var username = arguments[0];
+    if (typeof username !== 'string') {
+        username = username.username;
     }
     var user = users[username];
     if (user) {
         if (arguments.length === 2) {
+            // Username/password authentication
             var password = arguments[1];
             return when.promise(function(resolve,reject) {
                 bcrypt.compare(password, passwords[username], function(err, res) {
@@ -66,7 +65,7 @@ function init(config) {
     users = {};
     passwords = {};
     defaultUser = null;
-    if (config.type == "credentials" || config.type == "oauth") {
+    if (config.type == "credentials" || config.type == "strategy") {
         if (config.users) {
             if (typeof config.users === "function") {
                 api.get = config.users;
