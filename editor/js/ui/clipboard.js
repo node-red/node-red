@@ -256,17 +256,14 @@ RED.clipboard = (function() {
             });
         dialog.dialog("option","title",RED._("clipboard.exportNodes")).dialog( "open" );
 
-        setTimeout(function() {
-            $("#clipboard-export").focus();
-            if (!document.queryCommandEnabled("copy")) {
-                $("#clipboard-dialog-cancel").hide();
-                $("#clipboard-dialog-close").show();
-            } else {
-                $("#clipboard-dialog-cancel").show();
-                $("#clipboard-dialog-copy").show();
-            }
-
-        },0);
+        $("#clipboard-export").focus();
+        if (!document.queryCommandSupported("copy")) {
+            $("#clipboard-dialog-cancel").hide();
+            $("#clipboard-dialog-close").show();
+        } else {
+            $("#clipboard-dialog-cancel").show();
+            $("#clipboard-dialog-copy").show();
+        }
     }
 
     function hideDropTarget() {
