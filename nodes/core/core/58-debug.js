@@ -74,7 +74,16 @@ module.exports = function(RED) {
         });
     }
 
-    RED.nodes.registerType("debug",DebugNode);
+    RED.nodes.registerType("debug",DebugNode, {
+        settings: {
+            debugUseColors: {
+                value: false,
+            },
+            debugMaxLength: {
+                value: 1000,
+            }
+        }
+    });
 
     function sendDebug(msg) {
         if (msg.msg instanceof Error) {
