@@ -1680,8 +1680,20 @@ RED.view = (function() {
         d3.event.stopPropagation();
     }
 
+    function isButtonEnabled(d) {
+        var buttonEnabled = true;
+        if (d._def.button.hasOwnProperty('enabled')) {
+            if (typeof d._def.button.enabled === "function") {
+                buttonEnabled = d._def.button.enabled.call(d);
+            } else {
+                buttonEnabled = d._def.button.enabled;
+            }
+        }
+        return buttonEnabled;
+    }
+
     function nodeButtonClicked(d) {
-        if (!activeSubflow && !d.changed) {
+        if (!activeSubflow) {
             if (d._def.button.toggle) {
                 d[d._def.button.toggle] = !d[d._def.button.toggle];
                 d.dirty = true;
@@ -1696,8 +1708,6 @@ RED.view = (function() {
             if (d.dirty) {
                 redraw();
             }
-        } else if (d.changed) {
-            RED.notify(RED._("notification.warning", {message:RED._("notification.warnings.undeployedChanges")}),"warning");
         } else {
             RED.notify(RED._("notification.warning", {message:RED._("notification.warnings.nodeActionDisabled")}),"warning");
         }
@@ -1890,10 +1900,10 @@ RED.view = (function() {
                             .attr("height",node_height-12)
                             .attr("fill",function(d) { return d._def.color;})
                             .attr("cursor","pointer")
-                            .on("mousedown",function(d) {if (!lasso && !d.changed) {focusView();d3.select(this).attr("fill-opacity",0.2);d3.event.preventDefault(); d3.event.stopPropagation();}})
-                            .on("mouseup",function(d) {if (!lasso && !d.changed) { d3.select(this).attr("fill-opacity",0.4);d3.event.preventDefault();d3.event.stopPropagation();}})
-                            .on("mouseover",function(d) {if (!lasso && !d.changed) { d3.select(this).attr("fill-opacity",0.4);}})
-                            .on("mouseout",function(d) {if (!lasso  && !d.changed) {
+                            .on("mousedown",function(d) {if (!lasso && isButtonEnabled(d)) {focusView();d3.select(this).attr("fill-opacity",0.2);d3.event.preventDefault(); d3.event.stopPropagation();}})
+                            .on("mouseup",function(d) {if (!lasso && isButtonEnabled(d)) { d3.select(this).attr("fill-opacity",0.4);d3.event.preventDefault();d3.event.stopPropagation();}})
+                            .on("mouseover",function(d) {if (!lasso && isButtonEnabled(d)) { d3.select(this).attr("fill-opacity",0.4);}})
+                            .on("mouseout",function(d) {if (!lasso && isButtonEnabled(d)) {
                                 var op = 1;
                                 if (d._def.button.toggle) {
                                     op = d[d._def.button.toggle]?1:0.2;
@@ -2177,10 +2187,10 @@ RED.view = (function() {
                             thisNode.selectAll(".node_icon_shade_border").attr("d",function(d){ return "M "+(("right" == d._def.align) ?0:30)+" 1 l 0 "+(d.h-2)});
 
                             thisNode.selectAll(".node_button").attr("opacity",function(d) {
-                                return (activeSubflow||d.changed)?0.4:1
+                                return (activeSubflow||!isButtonEnabled(d))?0.4:1
                             });
                             thisNode.selectAll(".node_button_button").attr("cursor",function(d) {
-                                return (activeSubflow||d.changed)?"":"pointer";
+                                return (activeSubflow||!isButtonEnabled(d))?"":"pointer";
                             });
                             thisNode.selectAll(".node_right_button").attr("transform",function(d){
                                     var x = d.w-6;

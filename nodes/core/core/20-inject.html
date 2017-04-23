@@ -510,8 +510,19 @@ If you want every 20 minutes from now - use the "interval" option.</p>
             $("#node-input-crontab").val(crontab);
         },
         button: {
+            enabled: function() {
+                return !this.changed
+            },
             onclick: function() {
-                var label = (this.name||this.payload).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                if (this.changed) {
+                    return RED.notify(RED._("notification.warning", {message:RED._("notification.warnings.undeployedChanges")}),"warning");
+                }
+                var label = (this.name||this.payload);
+                if (label.length > 30) {
+                    label = label.substring(0,50)+"...";
+                }
+                label = label.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
                 if (this.payloadType === "date") { label = this._("inject.timestamp"); }
                 if (this.payloadType === "none") { label = this._("inject.blank"); }
                 var node = this;
