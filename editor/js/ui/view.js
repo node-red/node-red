@@ -485,6 +485,7 @@ RED.view = (function() {
         }
 
         nn.changed = true;
+        nn.moved = true;
 
         nn.w = node_width;
         nn.h = Math.max(node_height,(nn.outputs||0) * 15);
@@ -953,9 +954,9 @@ RED.view = (function() {
             if (moving_set.length > 0) {
                 var ns = [];
                 for (var j=0;j<moving_set.length;j++) {
-                    ns.push({n:moving_set[j].n,ox:moving_set[j].ox,oy:moving_set[j].oy,changed:moving_set[j].n.changed});
+                    ns.push({n:moving_set[j].n,ox:moving_set[j].ox,oy:moving_set[j].oy,moved:moving_set[j].n.moved});
                     moving_set[j].n.dirty = true;
-                    moving_set[j].n.changed = true;
+                    moving_set[j].n.moved = true;
                 }
                 historyEvent = {t:"move",nodes:ns,dirty:RED.nodes.dirty()};
                 if (activeSpliceLink) {
@@ -1141,8 +1142,8 @@ RED.view = (function() {
         if (moving_set.length > 0) {
             var ns = [];
             for (var i=0;i<moving_set.length;i++) {
-                ns.push({n:moving_set[i].n,ox:moving_set[i].ox,oy:moving_set[i].oy,changed:moving_set[i].n.changed});
-                moving_set[i].n.changed = true;
+                ns.push({n:moving_set[i].n,ox:moving_set[i].ox,oy:moving_set[i].oy,moved:moving_set[i].n.moved});
+                moving_set[i].n.moved = true;
                 moving_set[i].n.dirty = true;
                 delete moving_set[i].ox;
                 delete moving_set[i].oy;
@@ -1165,7 +1166,7 @@ RED.view = (function() {
 
             for (var i=0;i<moving_set.length;i++) {
                 node = moving_set[i];
-                node.n.changed = true;
+                node.n.moved = true;
                 node.n.dirty = true;
                 if (node.ox == null && node.oy == null) {
                     node.ox = node.n.x;
@@ -2533,6 +2534,7 @@ RED.view = (function() {
                         node = new_ms[i];
                         node.n.selected = true;
                         node.n.changed = true;
+                        node.n.moved = true;
                         node.n.x -= dx - mouse_position[0];
                         node.n.y -= dy - mouse_position[1];
                         node.dx = node.n.x - mouse_position[0];
