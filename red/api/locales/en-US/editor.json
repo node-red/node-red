@@ -23,7 +23,7 @@
         "enabled": "Enabled",
         "disabled":"Disabled",
         "info": "Description",
-        "tip": "Description will accept Markdown and will appear in the Info tab."
+        "tip": "Description accepts Markdown and will appear in the Info tab."
     },
     "menu": {
         "label": {

@@ -1,18 +1,3 @@
-/**
- * Copyright JS Foundation and other contributors, http://js.foundation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- **/
 
 module.exports = function(RED) {
     "use strict";
@@ -86,6 +71,8 @@ module.exports = function(RED) {
     });
 
     function sendDebug(msg) {
+        // don't put blank errors in sidebar (but do add to logs)
+        //if ((msg.msg === "") && (msg.hasOwnProperty("level")) && (msg.level === 20)) { return; }
         if (msg.msg instanceof Error) {
             msg.format = "error";
             var errorMsg = {};
@@ -129,7 +116,7 @@ module.exports = function(RED) {
                         msg.msg = msg.msg.slice(0,debuglength);
                     }
                 }
-                if (isArray || msg.format === "Object") {
+                if (isArray || (msg.format === "Object")) {
                     msg.msg = safeJSONStringify(msg.msg, function(key, value) {
                         if (key === '_req' || key === '_res') {
                             return "[internal]"
