@@ -148,6 +148,7 @@ module.exports = function(grunt) {
                     "editor/js/ui/search.js",
                     "editor/js/ui/typeSearch.js",
                     "editor/js/ui/subflow.js",
+                    "editor/js/ui/userSettings.js",
                     "editor/js/ui/touch/radialMenu.js"
                 ],
                 dest: "public/red/red.js"

@@ -40,6 +40,7 @@
             "sidebar": {
                 "show": "Show sidebar"
             },
+            "userSettings": "Settings",
             "displayStatus": "Show node status",
             "displayConfig": "Configuration nodes",
             "import": "Import",

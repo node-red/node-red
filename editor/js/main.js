@@ -213,6 +213,9 @@
             menuOptions.push(null);
         }
 
+        menuOptions.push({id:"menu-item-user-settings",label:RED._("menu.label.userSettings"),onselect:"core:show-user-settings"});
+        menuOptions.push(null);
+
         menuOptions.push({id:"menu-item-keyboard-shortcuts",label:RED._("menu.label.keyboardShortcuts"),onselect:"core:show-help"});
         menuOptions.push({id:"menu-item-show-tips",label:RED._("menu.label.showTips"),toggle:true,selected:true,onselect:"core:toggle-show-tips"});
         menuOptions.push({id:"menu-item-help",
@@ -234,6 +237,7 @@
         RED.editor.init();
         RED.keyboard.init();
         RED.diff.init();
+        RED.userSettings.init();
 
         RED.menu.init({id:"btn-sidemenu",options: menuOptions});
 
