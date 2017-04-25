@@ -1,20 +1,4 @@
 
-<!--
-  Copyright JS Foundation and other contributors, http://js.foundation
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
-
 <script type="text/x-red" data-template-name="csv">
     <div class="form-row">
         <label for="node-input-temp"><i class="fa fa-list"></i> <span data-i18n="csv.label.columns"></span></label>
@@ -68,12 +52,16 @@
 </script>
 
 <script type="text/x-red" data-help-name="csv">
-    <p>A function that parses the <code>msg.payload</code> to convert CSV to/from a javascript object.
+    <p>A function that parses the <code>msg.payload</code> to convert CSV to or from a javascript object.
     Places the result in the payload.</p>
-    <p>If the input is a string it tries to parse it as CSV and creates a javascript object.</p>
-    <p>If the input is a javascript object it tries to build a CSV string.</p>
-    <p>If the input is a simple array the output is just a CSV generated from that array.</p>
-    <p>If the input is an array of arrays, or an array of objects, a multiple-line CSV is created.</p>
+    <h3>Inputs</h3>
+    <ul>
+        <li>If the input is a string it tries to parse it as CSV and creates a javascript object.</li>
+        <li>If the input is a javascript object it tries to build a CSV string.</li>
+        <li>If the input is a simple array the output is just a CSV generated from that array.</li>
+        <li>If the input is an array of arrays, or an array of objects, a multiple-line CSV is created.</li>
+    </ul>
+    <h3>Details</h3>
     <p>The columns template should contain an ordered list of column headers. For CSV input these become the property names.
     For CSV output these specify the properties to extract from the object and the order for the CSV.</p>
     <p>If the input is an array then the columns template does not matter, but can be used to generate a row of column titles.</p>
