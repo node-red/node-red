@@ -270,7 +270,7 @@
             "title": "Title",
             "body": "Body"
         },
-        "tip": "Tip: The text can be styled as <a href=\"https://help.github.com/articles/markdown-basics/\" target=\"_blank\">Github flavoured Markdown</a>"
+        "tip": "Tip: The body text can be styled as <a href=\"https://help.github.com/articles/markdown-basics/\" target=\"_blank\">Github flavoured Markdown</a>"
     },
     "unknown": {
         "label": {
@@ -664,8 +664,7 @@
             "pikeyboard": "Pi Keyboard",
             "left": "Left",
             "right": "Right",
-            "middle": "Middle",
-            "freq": "Frequency (Hz)"
+            "middle": "Middle"
         },
         "resistor": {
             "none": "none",
@@ -674,6 +673,7 @@
         },
         "digout": "Digital output",
         "pwmout": "PWM output",
+        "servo": "Servo output",
         "initpin0": "initial level of pin - low (0)",
         "initpin1": "initial level of pin - high (1)",
         "left": "left",
@@ -687,14 +687,16 @@
             "pin": "<b>Pins in Use</b>: ",
             "in": "Tip: Only Digital Input is supported - input must be 0 or 1.",
             "dig": "Tip: For digital output - input must be 0 or 1.",
-            "pwm": "Tip: For PWM output - input must be between 0 to 100; setting high frequency might occupy more CPU than expected."
+            "pwm": "Tip: For PWM output - input must be between 0 to 100; setting high frequency might occupy more CPU than expected.",
+            "ser": "<b>Tip</b>: For Servo output - input must be between 0 to 100. 50 is centre."
         },
         "types": {
             "digout": "digital output",
             "input": "input",
             "pullup": "input with pull up",
             "pulldown": "input with pull down",
-            "pwmout": "PWM output"
+            "pwmout": "PWM output",
+            "servo": "Servo output"
         },
         "status": {
             "stopped": "stopped",

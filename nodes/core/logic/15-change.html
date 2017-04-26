@@ -1,18 +1,3 @@
-<!--
-  Copyright JS Foundation and other contributors, http://js.foundation
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
 
 <script type="text/x-red" data-template-name="change">
     <div class="form-row">
@@ -30,17 +15,26 @@
 <script type="text/x-red" data-help-name="change">
     <p>Set, change, delete or move properties of a message, flow context or global context.</p>
     <p>The node can specify multiple rules that will be applied in turn.</p>
+    <h3>Options</h3>
     <p>The available operations are:</p>
-    <ul>
-        <li><b>Set</b> - set a property. The value can be a variety of different types, or
-            can be taken from an existing message or context property.</li>
-        <li><b>Change</b> - search &amp; replace parts of the property. If regular expressions
-            are enabled, the <b>replace with</b> property can include capture groups, for
-            example <code>$1</code>. Replace will only change the <b>type</b> if there
-            is a complete match.</li>
-        <li><b>Delete</b> - delete a property.</li>
-        <li><b>Move</b> - move or rename a property.</li>
-    </ul>
+    <dl class="message-properties">
+    <dt>Set</dt>
+    <dd>set a property. The value can be a variety of different types, or
+            can be taken from an existing message or context property.</dd>
+    <dt>Change</dt>
+    <dd>search &amp; replace parts of the property. If regular expressions
+        are enabled, the "replace with" property can include capture groups, for
+        example <code>$1</code>. Replace will only change the type if there
+        is a complete match.</dd>
+    <dt>Delete</dt>
+    <dd>delete a property.</dd>
+    <dt>Move</dt>
+    <dd>move or rename a property.</dt>
+    </dl>
+    <h3>Details</h3>
+    <p>The "expression" option uses the <a href="http://jsonata.org/" target="_new">JSONata</a>
+    query and expression language. You can paste your data into <a href="http://try.jsonata.org/" target="_new">this site it</a>
+    to experiment and then use the expression back here.</p>
 </script>
 
 <script type="text/javascript">
@@ -224,7 +218,7 @@
                     t:(this.action=="replace"?"set":this.action),
                     p:this.property,
                     pt:"msg"
-                }
+                };
 
                 if ((rule.t === "set")||(rule.t === "move")) {
                     rule.to = this.to;

@@ -1,18 +1,3 @@
-<!--
-  Copyright JS Foundation and other contributors, http://js.foundation
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
 
 <script type="text/x-red" data-template-name="rpi-gpio in">
     <div class="form-row">
@@ -66,11 +51,17 @@
 <script type="text/x-red" data-help-name="rpi-gpio in">
     <p>Raspberry Pi input node. Generates a <code>msg.payload</code> with either a
     0 or 1 depending on the state of the input pin.</p>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">number</span></dt>
+        <dd>the payload will be a 1 or a 0.</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>the topic will be set to `pi/{the pin number}`.</dd>
+    </dl>
+    <h3>Details</h3>
     <p>You may also enable the input pullup resistor or the pulldown resistor.</p>
-    <p>The <code>msg.topic</code> is set to <i>pi/{the pin number}</i></p>
     <p>Requires the RPi.GPIO python library version 0.5.10 (or better) in order to work.</p>
-    <p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
-    </script>
+</script>
 
 <script type="text/javascript">
     var pinsInUse = {};
@@ -208,15 +199,19 @@
 
 <script type="text/x-red" data-help-name="rpi-gpio out">
     <p>Raspberry Pi output node. Can be used in Digital, PWM or Servo modes.
-    <p>Digital mode expects a <code>msg.payload</code> with either a 0 or 1 (or true or false),
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">number | string | boolean</span></dt>
+    </dl>
+    <h3>Details</h3>
+    <p>Digital mode - expects a <code>msg.payload</code> with either a 0 or 1 (or true or false),
     and will set the selected physical pin high or low depending on the value passed in.</p>
     <p>The initial value of the pin at deploy time can also be set to 0 or 1.</p>
-    <p>When using PWM mode - expects an input value of a number 0 - 100. It can be floating point.</p>
+    <p>PWM mode - expects an input value of a number 0 - 100. It can be floating point.</p>
     <p>PWM mode can be used to drive a servo using input values between 10 and 20 only.
-    The GPIO2 pin is best for this as it uses hardware to do the PWM.</p>
-    <p>Setting high PWM frequency might occupy more CPU than expected (default is 100Hz)</p>
+    The GPIO2 pin is best for this as it uses hardware to do the PWM. For better servo support
+    consider the alternative node-red-node-pigpio node.</p>
     <p>Requires the RPi.GPIO python library version 0.5.10 (or better) in order to work.</p>
-    <p><b>Note:</b> we are using the actual physical pin numbers on connector P1 as they are easier to locate.</p>
 </script>
 
 <script type="text/javascript">
@@ -347,12 +342,16 @@
 
 <script type="text/x-red" data-help-name="rpi-mouse">
     <p>Raspberry Pi mouse button node. Requires a USB mouse.</p>
-    <p>Generates a <code>msg.payload</code> with
-    either a 1 or 0 when the selected mouse button is pressed and released</p>
-    <p>Also sets <code>msg.button</code> to the code value
-    <ul><li>1 = left</li><li>2 = right</li><li>4 = middle</li></ul>
-    so you can work out which button or combination was pressed.</p>
-    <p>And sets <code>msg.topic</code> to <i>pi/mouse</i>.</p>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">number</span></dt>
+        <dd>1 or 0 when the selected mouse button is pressed and released.</dd>
+        <dt>button <span class="property-type">number</span></dt>
+        <dd>1, 2, 4 corresponding to left, right and middle buttons, so you
+        can work out which button or combination was pressed.</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>set to <code>pi/mouse</code></dd>
+    </dl>
 </script>
 
 <script type="text/javascript">
@@ -388,9 +387,15 @@
 
 <script type="text/x-red" data-help-name="rpi-keyboard">
     <p>Raspberry Pi keyboard handling node. Requires a USB keyboard.</p>
-    <p>Generates a <code>msg.payload</code> with a keycode, and <code>msg.action</code> set to
-    <i>up, down</i> or <i>repeat</i> whenever a key is pressed or released.</p>
-    <p>It also sets <code>msg.topic</code> to <i>pi/key</i>.</p>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">number</span></dt>
+        <dd>contains the keycode value</dd>
+        <dt>action <span class="property-type">string</span></dt>
+        <dd>set to "up", "down", or "repeat"</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>set to <code>pi/key</code></dd>
+    </dl>
 </script>
 
 <script type="text/javascript">
