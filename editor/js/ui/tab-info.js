@@ -74,7 +74,7 @@ RED.sidebar.info = (function() {
         tipClose.click(function(e) {
             e.preventDefault();
             RED.actions.invoke("core:toggle-show-tips");
-            RED.notify("You can re-open the tips from the side menu");
+            RED.notify(RED._("sidebar.info.showTips"));
         });
 
         RED.sidebar.addTab({
@@ -267,7 +267,7 @@ RED.sidebar.info = (function() {
 
         RED.actions.add("core:toggle-show-tips",function(state) {
             if (state === undefined) {
-                RED.menu.toggleSelected("menu-item-show-tips");
+                RED.userSettings.toggle("view-show-tips");
             } else {
                 enabled = state;
                 if (enabled) {

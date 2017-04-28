@@ -1,0 +1,59 @@
+/**
+ * Copyright JS Foundation and other contributors, http://js.foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+#user-settings-tabs-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 120px;
+    background: #f3f3f3;
+}
+#user-settings-tabs-content {
+    position: absolute;
+    top: 0;
+    left: 120px;
+    right: 0;
+    bottom: 0;
+    padding: 0;
+    h3:not(:first-child) {
+        border-top: 1px solid $secondary-border-color;
+        margin-top: 15px;
+        margin-bottom: 10px;
+        padding-top: 20px;
+    }
+    label {
+        display: inline-block;
+        min-width: 100px;
+        input {
+            vertical-align: top;
+            padding-bottom: 0;
+        }
+    }
+    input {
+        margin-bottom: 0;
+    }
+    input[type='number'] {
+        width: 60px;
+    }
+}
+
+#user-settings-tab-view {
+    padding: 8px 20px 20px;
+}
+.user-settings-row {
+    padding: 5px 10px 2px;
+}

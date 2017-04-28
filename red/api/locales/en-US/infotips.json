@@ -5,7 +5,7 @@
         "tip2" : "{{core:toggle-sidebar}} will toggle the view of this sidebar",
         "tip3" : "You can manage your palette of nodes with {{core:manage-palette}}",
         "tip4" : "Your flow configuration nodes are listed in the sidebar panel. It can been accessed from the menu or with {{core:show-config-tab}}",
-        "tip5" : "Enable or disable these tips from the option in the menu",
+        "tip5" : "Enable or disable these tips from the option in the settings",
         "tip6" : "Move the selected nodes using the [left] [up] [down] and [right] keys. Hold [shift] to nudge them further",
         "tip7" : "Dragging a node onto a wire will splice it into the link",
         "tip8" : "Export the selected nodes, or the current tab with {{core:show-export-dialog}}",
@@ -19,15 +19,5 @@
         "tip16" : "Switch flow tabs with {{core:show-previous-tab}} and {{core:show-next-tab}}",
         "tip17" : "You can confirm your changes in the node edit tray with {{core:confirm-edit-tray}} or cancel them with {{core:cancel-edit-tray}}",
         "tip18" : "Pressing {{core:edit-selected-node}} will edit the first node in the current selection"
-    },
-    "info-tbd": {
-        "tip1" : "Press the <code>Deploy</code> button above to start the flow running. You can choose to deploy the whole flow or just the changes.",
-        "tip2" : "Options like <b>Show grid</b> and <b>Snap to grid</b> are under the menu icon<br/><i class='fa fa-bars'></i> <i class='fa fa-caret-right'></i> <b>View</b>",
-        "tip4" : "<i class='fa fa-bars'></i> <i class='fa fa-caret-right'></i> <b>Manage palette</b> can be used to find, add and remove extra nodes.",
-        "tip5" : "Nodes may install examples under<br/><i class='fa fa-bars'></i> <i class='fa fa-caret-right'></i> <b>Import</b> <i class='fa fa-caret-right'></i> <b>Examples</b>",
-        "tip6" : "Lots of example flows can be found on <a href='http://flows.nodered.org' target='_blank'>flows.nodered.org</a><br/>They can then be imported by drag and drop to the workspace.",
-        "tip7" : "<b>Shift-click and drag</b> on a connector to move all the attached wires in one go.",
-        "tip8" : "The <b>Node-RED Dashboard</b> package can be used to create simple User Interfaces.",
-        "tip10": "Got a question?<br/>Join us on <a href='https://node-red.slack.com/' target='_blank'>Slack</a><br/>or the<br/><a href='https://groups.google.com/forum/#!forum/node-red' target='_blank'>Node-RED Google group</a>"
     }
 }

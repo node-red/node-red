@@ -113,6 +113,50 @@
     &.red-ui-tabs-add.red-ui-tabs-scrollable {
         padding-right: 59px;
     }
+
+    &.red-ui-tabs-vertical {
+        box-sizing: border-box;
+        height: 100%;
+        border-right: 1px solid $primary-border-color;
+        margin: 0;
+        background: #f3f3f3;
+        overflow: visible;
+
+        .red-ui-tabs-scroll-container {
+            height: auto;
+            overflow-x:visible;
+            overflow-y: scroll;
+        }
+
+        & ul {
+            padding: 0;
+            height: auto;
+            border: none;
+            width: calc(100% + 1px);
+            li {
+                width: 100%;
+                display: block;
+                margin: 0;
+                border: none;
+                border-right: 1px solid $primary-border-color;
+                height: auto;
+                &:not(:first-child) {
+                    border-top: 1px solid  $secondary-border-color;
+                }
+                &:last-child {
+                    border-bottom: 1px solid  $secondary-border-color;
+                }
+
+                a.red-ui-tab-label {
+                    padding: 9px;
+                }
+
+                &.active {
+                    border-right: 1px solid #fff;
+                }
+            }
+        }
+    }
 }
 .red-ui-tab-button {
     position: absolute;

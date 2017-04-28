@@ -239,6 +239,41 @@ RED.view = (function() {
            });
     grid.style("visibility","hidden");
 
+    updateGrid();
+
+    function updateGrid() {
+        grid.selectAll("line.horizontal").remove();
+        grid.selectAll("line.horizontal").data(gridScale.ticks(space_width/gridSize)).enter()
+            .append("line")
+            .attr(
+                {
+                    "class":"horizontal",
+                    "x1" : 0,
+                    "x2" : space_width,
+                    "y1" : function(d){ return gridScale(d);},
+                    "y2" : function(d){ return gridScale(d);},
+                    "fill" : "none",
+                    "shape-rendering" : "crispEdges",
+                    "stroke" : "#eee",
+                    "stroke-width" : "1px"
+                });
+        grid.selectAll("line.vertical").remove();
+        grid.selectAll("line.vertical").data(gridScale.ticks(space_width/gridSize)).enter()
+            .append("line")
+            .attr(
+                {
+                    "class":"vertical",
+                    "y1" : 0,
+                    "y2" : space_width,
+                    "x1" : function(d){ return gridScale(d);},
+                    "x2" : function(d){ return gridScale(d);},
+                    "fill" : "none",
+                    "shape-rendering" : "crispEdges",
+                    "stroke" : "#eee",
+                    "stroke-width" : "1px"
+                });
+    }
+
     var dragGroup = vis.append("g");
     var drag_lines = [];
 
@@ -408,21 +443,21 @@ RED.view = (function() {
 
         RED.actions.add("core:toggle-show-grid",function(state) {
             if (state === undefined) {
-                RED.menu.toggleSelected("menu-item-view-show-grid");
+                RED.userSettings.toggle("view-show-grid");
             } else {
                 toggleShowGrid(state);
             }
         });
         RED.actions.add("core:toggle-snap-grid",function(state) {
             if (state === undefined) {
-                RED.menu.toggleSelected("menu-item-view-snap-grid");
+                RED.userSettings.toggle("view-snap-grid");
             } else {
                 toggleSnapGrid(state);
             }
         });
         RED.actions.add("core:toggle-status",function(state) {
             if (state === undefined) {
-                RED.menu.toggleSelected("menu-item-status");
+                RED.userSettings.toggle("view-node-status");
             } else {
                 toggleStatus(state);
             }
@@ -2742,6 +2777,14 @@ RED.view = (function() {
                 } else if (node._def.category === 'config') {
                     RED.sidebar.config.show(id);
                 }
+            }
+        },
+        gridSize: function(v) {
+            if (v === undefined) {
+                return gridSize;
+            } else {
+                gridSize = v;
+                updateGrid();
             }
         }
 

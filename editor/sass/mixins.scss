@@ -80,12 +80,28 @@
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
     }
+    .button-group-vertical & {
+        display: block;
+        min-width: 22px;
+    }
+    .button-group-vertical &:not(:first-child) {
+        border-top: none;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+    .button-group-vertical &:not(:last-child) {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
 
     &:focus {
         outline: 1px solid $workspace-button-color-focus-outline;
     }
 }
-
+.button-group-vertical {
+    display: inline-block;
+    vertical-align: middle;
+}
 .button-group:not(:last-child) {
     margin-right: 10px;
 }

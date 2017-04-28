@@ -28,7 +28,17 @@ RED.menu = (function() {
         }
 
         function setInitialState() {
-            var savedStateActive = isSavedStateActive(opt.id);
+            var savedStateActive = RED.settings.get("menu-" + opt.id);
+            if (opt.setting) {
+                // May need to migrate pre-0.17 setting
+
+                if (savedStateActive !== null) {
+                    RED.settings.set(opt.setting,savedStateActive);
+                    RED.settings.remove("menu-" + opt.id);
+                } else {
+                    savedStateActive = RED.settings.get(opt.setting);
+                }
+            }
             if (savedStateActive) {
                 link.addClass("active");
                 triggerAction(opt.id,true);
@@ -176,16 +186,8 @@ RED.menu = (function() {
         }
     }
 
-    function isSavedStateActive(id) {
-        return RED.settings.get("menu-" + id);
-    }
-
     function isSelected(id) {
         return $("#" + id).hasClass("active");
-    }
-
-    function setSavedState(id, state) {
-        RED.settings.set("menu-" + id, state);
     }
 
     function setSelected(id,state) {
@@ -201,7 +203,7 @@ RED.menu = (function() {
         if (opt && opt.onselect) {
             triggerAction(opt.id,state);
         }
-        setSavedState(id, state);
+        RED.settings.set(opt.setting||("menu-"+opt.id), state);
     }
 
     function toggleSelected(id) {

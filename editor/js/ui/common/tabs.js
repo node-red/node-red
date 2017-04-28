@@ -26,6 +26,9 @@ RED.tabs = (function() {
         var wrapper = ul.wrap( "<div>" ).parent();
         var scrollContainer = ul.wrap( "<div>" ).parent();
         wrapper.addClass("red-ui-tabs");
+        if (options.vertical) {
+            wrapper.addClass("red-ui-tabs-vertical");
+        }
         if (options.addButton && typeof options.addButton === 'function') {
             wrapper.addClass("red-ui-tabs-add");
             var addButton = $('<div class="red-ui-tab-button"><a href="#"><i class="fa fa-plus"></i></a></div>').appendTo(wrapper);
@@ -146,6 +149,9 @@ RED.tabs = (function() {
         }
 
         function updateTabWidths() {
+            if (options.vertical) {
+                return;
+            }
             var tabs = ul.find("li.red-ui-tab");
             var width = wrapper.width();
             var tabCount = tabs.size();

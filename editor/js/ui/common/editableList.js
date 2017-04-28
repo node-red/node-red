@@ -170,7 +170,7 @@
             var that = this;
             var count = 0;
             if (!this.activeFilter) {
-                this.element.children().show();
+                return this.element.children().show();
             }
             var items = this.items();
             items.each(function (i,el) {

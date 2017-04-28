@@ -31,6 +31,7 @@
                 "view": "View",
                 "showGrid": "Show grid",
                 "snapGrid": "Snap to grid",
+                "gridSize": "Grid size",
                 "textDir": "Text Direction",
                 "defaultDir": "Default",
                 "ltr": "Left-to-right",
@@ -354,7 +355,8 @@
             "info": "Information",
             "blank": "blank",
             "null": "null",
-            "arrayItems": "__count__ items"
+            "arrayItems": "__count__ items",
+            "showTips":"You can open the tips from the settings panel"
         },
         "config": {
             "name": "Configuration nodes",

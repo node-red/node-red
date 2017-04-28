@@ -171,10 +171,10 @@
     function loadEditor() {
         var menuOptions = [];
         menuOptions.push({id:"menu-item-view-menu",label:RED._("menu.label.view.view"),options:[
-            {id:"menu-item-view-show-grid",label:RED._("menu.label.view.showGrid"),toggle:true,onselect:"core:toggle-show-grid"},
-            {id:"menu-item-view-snap-grid",label:RED._("menu.label.view.snapGrid"),toggle:true,onselect:"core:toggle-snap-grid"},
-            {id:"menu-item-status",label:RED._("menu.label.displayStatus"),toggle:true,onselect:"core:toggle-status", selected: true},
-            null,
+            // {id:"menu-item-view-show-grid",setting:"view-show-grid",label:RED._("menu.label.view.showGrid"),toggle:true,onselect:"core:toggle-show-grid"},
+            // {id:"menu-item-view-snap-grid",setting:"view-snap-grid",label:RED._("menu.label.view.snapGrid"),toggle:true,onselect:"core:toggle-snap-grid"},
+            // {id:"menu-item-status",setting:"node-show-status",label:RED._("menu.label.displayStatus"),toggle:true,onselect:"core:toggle-status", selected: true},
+            //null,
             // {id:"menu-item-bidi",label:RED._("menu.label.view.textDir"),options:[
             //     {id:"menu-item-bidi-default",toggle:"text-direction",label:RED._("menu.label.view.defaultDir"),selected: true, onselect:function(s) { if(s){RED.text.bidi.setTextDirection("")}}},
             //     {id:"menu-item-bidi-ltr",toggle:"text-direction",label:RED._("menu.label.view.ltr"), onselect:function(s) { if(s){RED.text.bidi.setTextDirection("ltr")}}},
@@ -182,7 +182,8 @@
             //     {id:"menu-item-bidi-auto",toggle:"text-direction",label:RED._("menu.label.view.auto"), onselect:function(s) { if(s){RED.text.bidi.setTextDirection("auto")}}}
             // ]},
             // null,
-            {id:"menu-item-sidebar",label:RED._("menu.label.sidebar.show"),toggle:true,onselect:"core:toggle-sidebar", selected: true}
+            {id:"menu-item-sidebar",label:RED._("menu.label.sidebar.show"),toggle:true,onselect:"core:toggle-sidebar", selected: true},
+            null
         ]});
         menuOptions.push(null);
         menuOptions.push({id:"menu-item-import",label:RED._("menu.label.import"),options:[
@@ -217,7 +218,6 @@
         menuOptions.push(null);
 
         menuOptions.push({id:"menu-item-keyboard-shortcuts",label:RED._("menu.label.keyboardShortcuts"),onselect:"core:show-help"});
-        menuOptions.push({id:"menu-item-show-tips",label:RED._("menu.label.showTips"),toggle:true,selected:true,onselect:"core:toggle-show-tips"});
         menuOptions.push({id:"menu-item-help",
             label: RED.settings.theme("menu.menu-item-help.label","Node-RED website"),
             href: RED.settings.theme("menu.menu-item-help.url","http://nodered.org/docs")
