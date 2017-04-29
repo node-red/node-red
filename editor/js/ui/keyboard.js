@@ -85,6 +85,12 @@ RED.keyboard = (function() {
                     }
                 }
             }
+        });
+
+        RED.userSettings.add({
+            id:'keyboard',
+            title: 'Keyboard',
+            get: getSettingsPane
         })
     }
 
@@ -512,8 +518,7 @@ RED.keyboard = (function() {
         },
         revertToDefault: revertToDefault,
         formatKey: formatKey,
-        validateKey: validateKey,
-        getSettingsPane: getSettingsPane
+        validateKey: validateKey
     }
 
 })();

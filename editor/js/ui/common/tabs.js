@@ -22,7 +22,7 @@ RED.tabs = (function() {
         var currentTabWidth;
         var currentActiveTabWidth = 0;
 
-        var ul = $("#"+options.id);
+        var ul = options.element || $("#"+options.id);
         var wrapper = ul.wrap( "<div>" ).parent();
         var scrollContainer = ul.wrap( "<div>" ).parent();
         wrapper.addClass("red-ui-tabs");

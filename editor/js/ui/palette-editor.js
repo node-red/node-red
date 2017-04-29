@@ -309,20 +309,23 @@ RED.palette.editor = (function() {
         }
 
         initInstallTab();
-        $("#header-shade").show();
-        $("#editor-shade").show();
-        $("#sidebar-shade").show();
-        $("#sidebar-separator").hide();
+        // $("#header-shade").show();
+        // $("#editor-shade").show();
+        // $("#sidebar-shade").show();
+        // $("#sidebar-separator").hide();
 
         editorTabs.activateTab('nodes');
 
-        $("#main-container").addClass("palette-expanded");
+        // $("#main-container").addClass("palette-expanded");
         setTimeout(function() {
             editorTabs.resize();
             filterInput.focus();
         },250);
-        RED.events.emit("palette-editor:open");
-        RED.keyboard.add("*","escape",function(){hidePaletteEditor()});
+        // RED.events.emit("palette-editor:open");
+        // RED.keyboard.add("*","escape",function(){hidePaletteEditor()});
+
+        RED.userSettings.show('palette');
+
     }
     function hidePaletteEditor() {
         RED.keyboard.remove("escape");
@@ -445,22 +448,114 @@ RED.palette.editor = (function() {
         return -1 * (A.info.timestamp-B.info.timestamp);
     }
 
+
     function init() {
         if (RED.settings.theme('palette.editable') === false) {
             return;
         }
+        createSettingsPane();
 
-        RED.events.on("editor:open",function() { disabled = true; });
-        RED.events.on("editor:close",function() { disabled = false; });
-        RED.events.on("search:open",function() { disabled = true; });
-        RED.events.on("search:close",function() { disabled = false; });
-        RED.events.on("type-search:open",function() { disabled = true; });
-        RED.events.on("type-search:close",function() { disabled = false; });
+        RED.userSettings.add({
+            id:'palette',
+            title: 'Palette',
+            get: getSettingsPane,
+            close: function() {
+                settingsPane.detach();
+            }
+        })
+
+        // RED.events.on("editor:open",function() { disabled = true; });
+        // RED.events.on("editor:close",function() { disabled = false; });
+        // RED.events.on("search:open",function() { disabled = true; });
+        // RED.events.on("search:close",function() { disabled = false; });
+        // RED.events.on("type-search:open",function() { disabled = true; });
+        // RED.events.on("type-search:close",function() { disabled = false; });
 
         RED.actions.add("core:manage-palette",RED.palette.editor.show);
 
+        RED.events.on('registry:module-updated', function(ns) {
+            refreshNodeModule(ns.module);
+        });
+        RED.events.on('registry:node-set-enabled', function(ns) {
+            refreshNodeModule(ns.module);
+        });
+        RED.events.on('registry:node-set-disabled', function(ns) {
+            refreshNodeModule(ns.module);
+        });
+        RED.events.on('registry:node-type-added', function(nodeType) {
+            if (!/^subflow:/.test(nodeType)) {
+                var ns = RED.nodes.registry.getNodeSetForType(nodeType);
+                refreshNodeModule(ns.module);
+            }
+        });
+        RED.events.on('registry:node-type-removed', function(nodeType) {
+            if (!/^subflow:/.test(nodeType)) {
+                var ns = RED.nodes.registry.getNodeSetForType(nodeType);
+                refreshNodeModule(ns.module);
+            }
+        });
+        RED.events.on('registry:node-set-added', function(ns) {
+            refreshNodeModule(ns.module);
+            for (var i=0;i<filteredList.length;i++) {
+                if (filteredList[i].info.id === ns.module) {
+                    var installButton = filteredList[i].elements.installButton;
+                    installButton.addClass('disabled');
+                    installButton.html(RED._('palette.editor.installed'));
+                    break;
+                }
+            }
+        });
+        RED.events.on('registry:node-set-removed', function(ns) {
+            var module = RED.nodes.registry.getModule(ns.module);
+            if (!module) {
+                var entry = nodeEntries[ns.module];
+                if (entry) {
+                    nodeList.editableList('removeItem', entry);
+                    delete nodeEntries[ns.module];
+                    for (var i=0;i<filteredList.length;i++) {
+                        if (filteredList[i].info.id === ns.module) {
+                            var installButton = filteredList[i].elements.installButton;
+                            installButton.removeClass('disabled');
+                            installButton.html(RED._('palette.editor.install'));
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+        RED.events.on('nodes:add', function(n) {
+            if (!/^subflow:/.test(n.type)) {
+                typesInUse[n.type] = (typesInUse[n.type]||0)+1;
+                if (typesInUse[n.type] === 1) {
+                    var ns = RED.nodes.registry.getNodeSetForType(n.type);
+                    refreshNodeModule(ns.module);
+                }
+            }
+        })
+        RED.events.on('nodes:remove', function(n) {
+            if (typesInUse.hasOwnProperty(n.type)) {
+                typesInUse[n.type]--;
+                if (typesInUse[n.type] === 0) {
+                    delete typesInUse[n.type];
+                    var ns = RED.nodes.registry.getNodeSetForType(n.type);
+                    refreshNodeModule(ns.module);
+                }
+            }
+        })
+    }
+
+    var settingsPane;
+    function getSettingsPane() {
+        return settingsPane;
+    }
+    function createSettingsPane() {
+        settingsPane = $('<div id="user-settings-tab-palette"></div>');
+        var content = $('<div id="palette-editor">'+
+            '<ul id="palette-editor-tabs"></ul>'+
+        '</div>').appendTo(settingsPane);
+
         editorTabs = RED.tabs.create({
-            id:"palette-editor-tabs",
+            element: settingsPane.find('#palette-editor-tabs'),
             onchange:function(tab) {
                 $("#palette-editor .palette-editor-tab").hide();
                 tab.content.show();
@@ -484,17 +579,7 @@ RED.palette.editor = (function() {
         });
 
 
-        $("#editor-shade").click(function() {
-            if ($("#main-container").hasClass("palette-expanded")) {
-                hidePaletteEditor();
-            }
-        });
-
-        $("#palette-editor-close").on("click", function(e) {
-            hidePaletteEditor();
-        })
-
-        var modulesTab = $('<div>',{class:"palette-editor-tab"}).appendTo("#palette-editor");
+        var modulesTab = $('<div>',{class:"palette-editor-tab"}).appendTo(content);
 
         editorTabs.addTab({
             id: 'nodes',
@@ -659,7 +744,7 @@ RED.palette.editor = (function() {
 
 
 
-        var installTab = $('<div>',{class:"palette-editor-tab hide"}).appendTo("#palette-editor");
+        var installTab = $('<div>',{class:"palette-editor-tab hide"}).appendTo(content);
 
         editorTabs.addTab({
             id: 'install',
@@ -874,79 +959,6 @@ RED.palette.editor = (function() {
                 }
             ]
         })
-
-
-        RED.events.on('registry:module-updated', function(ns) {
-            refreshNodeModule(ns.module);
-        });
-        RED.events.on('registry:node-set-enabled', function(ns) {
-            refreshNodeModule(ns.module);
-        });
-        RED.events.on('registry:node-set-disabled', function(ns) {
-            refreshNodeModule(ns.module);
-        });
-        RED.events.on('registry:node-type-added', function(nodeType) {
-            if (!/^subflow:/.test(nodeType)) {
-                var ns = RED.nodes.registry.getNodeSetForType(nodeType);
-                refreshNodeModule(ns.module);
-            }
-        });
-        RED.events.on('registry:node-type-removed', function(nodeType) {
-            if (!/^subflow:/.test(nodeType)) {
-                var ns = RED.nodes.registry.getNodeSetForType(nodeType);
-                refreshNodeModule(ns.module);
-            }
-        });
-        RED.events.on('registry:node-set-added', function(ns) {
-            refreshNodeModule(ns.module);
-            for (var i=0;i<filteredList.length;i++) {
-                if (filteredList[i].info.id === ns.module) {
-                    var installButton = filteredList[i].elements.installButton;
-                    installButton.addClass('disabled');
-                    installButton.html(RED._('palette.editor.installed'));
-                    break;
-                }
-            }
-        });
-        RED.events.on('registry:node-set-removed', function(ns) {
-            var module = RED.nodes.registry.getModule(ns.module);
-            if (!module) {
-                var entry = nodeEntries[ns.module];
-                if (entry) {
-                    nodeList.editableList('removeItem', entry);
-                    delete nodeEntries[ns.module];
-                    for (var i=0;i<filteredList.length;i++) {
-                        if (filteredList[i].info.id === ns.module) {
-                            var installButton = filteredList[i].elements.installButton;
-                            installButton.removeClass('disabled');
-                            installButton.html(RED._('palette.editor.install'));
-                            break;
-                        }
-                    }
-                }
-            }
-        });
-        RED.events.on('nodes:add', function(n) {
-            if (!/^subflow:/.test(n.type)) {
-                typesInUse[n.type] = (typesInUse[n.type]||0)+1;
-                if (typesInUse[n.type] === 1) {
-                    var ns = RED.nodes.registry.getNodeSetForType(n.type);
-                    refreshNodeModule(ns.module);
-                }
-            }
-        })
-        RED.events.on('nodes:remove', function(n) {
-            if (typesInUse.hasOwnProperty(n.type)) {
-                typesInUse[n.type]--;
-                if (typesInUse[n.type] === 0) {
-                    delete typesInUse[n.type];
-                    var ns = RED.nodes.registry.getNodeSetForType(n.type);
-                    refreshNodeModule(ns.module);
-                }
-            }
-        })
-
-
     }
 
     return {

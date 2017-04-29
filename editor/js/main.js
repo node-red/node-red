@@ -209,7 +209,6 @@
         ]});
         menuOptions.push(null);
         if (RED.settings.theme('palette.editable') !== false) {
-            RED.palette.editor.init();
             menuOptions.push({id:"menu-item-edit-palette",label:RED._("menu.label.editPalette"),onselect:"core:manage-palette"});
             menuOptions.push(null);
         }
@@ -225,19 +224,23 @@
         menuOptions.push({id:"menu-item-node-red-version", label:"v"+RED.settings.version, onselect: "core:show-about" });
 
 
+        RED.view.init();
+        RED.userSettings.init();
         RED.user.init();
         RED.library.init();
+        RED.keyboard.init();
         RED.palette.init();
+        if (RED.settings.theme('palette.editable') !== false) {
+            RED.palette.editor.init();
+        }
+
         RED.sidebar.init();
         RED.subflow.init();
         RED.workspaces.init();
         RED.clipboard.init();
         RED.search.init();
-        RED.view.init();
         RED.editor.init();
-        RED.keyboard.init();
         RED.diff.init();
-        RED.userSettings.init();
 
         RED.menu.init({id:"btn-sidemenu",options: menuOptions});
 

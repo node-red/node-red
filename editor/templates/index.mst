@@ -60,10 +60,6 @@
         <div id="palette-search" class="palette-search hide">
             <input type="text" data-i18n="[placeholder]palette.filter"></input>
         </div>
-        <div id="palette-editor">
-            <div class="editor-tray-header"><div class="editor-tray-titlebar"><ul class="editor-tray-breadcrumbs"><li data-i18n="palette.editor.title"></li></ul></div><div class="editor-tray-toolbar"><button id="palette-editor-close" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only primary" role="button" aria-disabled="false" data-i18n="common.label.done"></button></div></div>
-            <ul id="palette-editor-tabs"></ul>
-        </div>
         <div id="palette-container" class="palette-scroll hide"></div>
         <div id="palette-footer">
             <a class="palette-button" id="palette-collapse-all" href="#"><i class="fa fa-angle-double-up"></i></a>

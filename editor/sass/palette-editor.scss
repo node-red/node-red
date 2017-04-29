@@ -14,13 +14,16 @@
  * limitations under the License.
  **/
 
+#user-settings-tab-palette {
+    height: 100%;
+}
+
 #palette-editor {
     text-align: left;
-    display: none;
     position: absolute;
     top: 0px;
     right: 0;
-    bottom: 25px;
+    bottom: 0;
     left:0;
     padding: 0;
     box-sizing:border-box;
@@ -51,7 +54,7 @@
 
             }
             .red-ui-editableList-item-content {
-                padding: 12px 8px;
+                padding: 12px 16px;
             }
             &:last-child {
                 // border-bottom: 1px solid $primary-border-color;
@@ -61,7 +64,7 @@
     }
     .palette-editor-tab {
         position:absolute;
-        top:115px;
+        top:35px;
         left:0;
         right:0;
         bottom:0

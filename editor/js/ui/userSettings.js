@@ -19,6 +19,12 @@ RED.userSettings = (function() {
     var trayWidth = 700;
     var settingsVisible = false;
 
+    var panes = [];
+
+    function addPane(options) {
+        panes.push(options);
+    }
+
     function show(initialTab) {
         if (settingsVisible) {
             return;
@@ -43,56 +49,39 @@ RED.userSettings = (function() {
             },
             open: function(tray) {
                 var trayBody = tray.find('.editor-tray-body');
-                var tabContainer = $('<div></div>',{id:"user-settings-tabs-container"}).appendTo(trayBody);
+                var settingsContent = $('<div></div>').appendTo(trayBody);
+                var tabContainer = $('<div></div>',{id:"user-settings-tabs-container"}).appendTo(settingsContent);
 
                 $('<ul></ul>',{id:"user-settings-tabs"}).appendTo(tabContainer);
-                var tabContents = $('<div></div>',{id:"user-settings-tabs-content"}).appendTo(trayBody);
-
-                createViewPane().hide().appendTo(tabContents);
-                RED.keyboard.getSettingsPane().hide().appendTo(tabContents);
-
-                $('<div id="user-settings-tab-palette"></div>').appendTo(tabContents);
-
-
-                var tabs = RED.tabs.create({
+                var settingsTabs = RED.tabs.create({
                     id: "user-settings-tabs",
                     vertical: true,
                     onchange: function(tab) {
-                        $("#user-settings-tabs-content").children().hide();
-                        $("#" + tab.id).show();
+                        setTimeout(function() {
+                            $("#user-settings-tabs-content").children().hide();
+                            $("#" + tab.id).show();
+                        },50);
                     }
                 });
-                tabs.addTab({
-                    id: "user-settings-tab-view",
-                    label: "View"
+                var tabContents = $('<div></div>',{id:"user-settings-tabs-content"}).appendTo(settingsContent);
+
+                panes.forEach(function(pane) {
+                    settingsTabs.addTab({
+                        id: "user-settings-tab-"+pane.id,
+                        label: pane.title
+                    });
+                    pane.get().hide().appendTo(tabContents);
                 });
-                tabs.addTab({
-                    id: "user-settings-tab-keyboard",
-                    label: "Keyboard"
-                });
-                tabs.addTab({
-                    id: "user-settings-tab-palette",
-                    label: "Palette"
-                });
-                if (initialTab) {
-                    tabs.activateTab("user-settings-tab-"+initialTab)
-                }
+                settingsContent.i18n();
+                settingsTabs.activateTab("user-settings-tab-"+(initialTab||'view'))
             },
             close: function() {
                 settingsVisible = false;
-
-                viewSettings.forEach(function(section) {
-                    section.options.forEach(function(opt) {
-                        var input = $("#user-settings-"+opt.setting);
-                        if (opt.toggle) {
-                            setSelected(opt.setting,input.prop('checked'));
-                        } else {
-                            setSelected(opt.setting,input.val());
-                        }
-                    });
-                })
-
-
+                panes.forEach(function(pane) {
+                    if (pane.close) {
+                        pane.close();
+                    }
+                });
             },
             show: function() {}
         }
@@ -171,6 +160,24 @@ RED.userSettings = (function() {
         RED.actions.add("core:show-user-settings",show);
         RED.actions.add("core:show-help", function() { show('keyboard')});
 
+        addPane({
+            id:'view',
+            title: 'View',
+            get: createViewPane,
+            close: function() {
+                viewSettings.forEach(function(section) {
+                    section.options.forEach(function(opt) {
+                        var input = $("#user-settings-"+opt.setting);
+                        if (opt.toggle) {
+                            setSelected(opt.setting,input.prop('checked'));
+                        } else {
+                            setSelected(opt.setting,input.val());
+                        }
+                    });
+                })
+            }
+        })
+
         viewSettings.forEach(function(section) {
             section.options.forEach(function(opt) {
                 allSettings[opt.setting] = opt;
@@ -195,6 +202,8 @@ RED.userSettings = (function() {
     }
     return {
         init: init,
-        toggle: toggle
+        toggle: toggle,
+        show: show,
+        add: addPane
     };
 })();
