@@ -316,7 +316,9 @@
                 "catalogLoadFailed": "Failed to load node catalogue.<br>Check the browser console for more information",
                 "installFailed": "Failed to install: __module__<br>__message__<br>Check the log for more information",
                 "removeFailed": "Failed to remove: __module__<br>__message__<br>Check the log for more information",
-                "updateFailed": "Failed to update: __module__<br>__message__<br>Check the log for more information"
+                "updateFailed": "Failed to update: __module__<br>__message__<br>Check the log for more information",
+                "enableFailed": "Failed to enable: __module__<br>__message__<br>Check the log for more information",
+                "disableFailed": "Failed to disable: __module__<br>__message__<br>Check the log for more information"
             },
             "confirm": {
                 "install": {

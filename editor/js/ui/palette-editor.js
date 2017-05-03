@@ -690,8 +690,13 @@ RED.palette.editor = (function() {
                             if (object.setUseCount[setName] === 0) {
                                 var currentSet = RED.nodes.registry.getNodeSet(set.id);
                                 shade.show();
-                                changeNodeState(set.id,!currentSet.enabled,shade,function(xhr){
-                                    console.log(xhr)
+                                var newState = !currentSet.enabled
+                                changeNodeState(set.id,newState,shade,function(xhr){
+                                    if (xhr) {
+                                        if (xhr.responseJSON) {
+                                            RED.notify(RED._('palette.editor.errors.'+(newState?'enable':'disable')+'Failed',{module: id,message:xhr.responseJSON.message}));
+                                        }
+                                    }
                                 });
                             }
                         })
@@ -706,7 +711,11 @@ RED.palette.editor = (function() {
                         evt.preventDefault();
                         if (object.totalUseCount === 0) {
                             changeNodeState(entry.name,(container.hasClass('disabled')),shade,function(xhr){
-                                console.log(xhr)
+                                if (xhr) {
+                                    if (xhr.responseJSON) {
+                                        RED.notify(RED._('palette.editor.errors.installFailed',{module: id,message:xhr.responseJSON.message}));
+                                    }
+                                }
                             });
                         }
                     })
