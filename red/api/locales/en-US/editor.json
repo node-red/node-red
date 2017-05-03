@@ -397,6 +397,10 @@
     },
     "expressionEditor": {
         "functions": "Functions",
-        "insert": "Insert"
+        "insert": "Insert",
+        "title": "JSONata Expression editor"
+    },
+    "jsonEditor": {
+        "title": "JSON editor"
     }
 }

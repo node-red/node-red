@@ -47,6 +47,7 @@
 }
 .editor-tray-body {
     position: relative;
+    box-sizing: border-box;
     form {
         margin: 20px;
     }
@@ -153,7 +154,7 @@
 
 
 .dialog-form,#dialog-form, #dialog-config-form {
-    height: 100%;
+    height: calc(100% - 20px);
 }
 
 .input-error {

@@ -493,9 +493,9 @@ RED.editor = (function() {
             var node = editStack[i];
             var label = node.type;
             if (node.type === '_expression') {
-                label = "Expression editor"; // TODO: nls
+                label = RED._("expressionEditor.title");
             } else if (node.type === '_json') {
-                label = "JSON editor"; // TODO: nls
+                label = RED._("jsonEditor.title");
             } else if (node.type === 'subflow') {
                 label = RED._("subflow.editSubflow",{name:node.name})
             } else if (node.type.indexOf("subflow:")===0) {
