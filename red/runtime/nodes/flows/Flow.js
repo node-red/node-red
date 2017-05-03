@@ -221,7 +221,7 @@ function Flow(global,flow) {
                     count = msg.error.source.count+1;
                     if (count === 10) {
                         node.warn(Log._("nodes.flow.error-loop"));
-                        return;
+                        return false;
                     }
                 }
             }
@@ -265,6 +265,7 @@ function Flow(global,flow) {
                 throwingNode = activeNodes[throwingNode.z];
             }
         }
+        return handled;
     }
 }
 

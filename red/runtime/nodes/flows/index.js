@@ -174,27 +174,31 @@ function getFlows() {
 }
 
 function delegateError(node,logMessage,msg) {
+    var handled = false;
     if (activeFlows[node.z]) {
-        activeFlows[node.z].handleError(node,logMessage,msg);
+        handled = activeFlows[node.z].handleError(node,logMessage,msg);
     } else if (activeNodesToFlow[node.z] && activeFlows[activeNodesToFlow[node.z]]) {
-        activeFlows[activeNodesToFlow[node.z]].handleError(node,logMessage,msg);
+        handled = activeFlows[activeNodesToFlow[node.z]].handleError(node,logMessage,msg);
     } else if (activeFlowConfig.subflows[node.z] && subflowInstanceNodeMap[node.id]) {
         subflowInstanceNodeMap[node.id].forEach(function(n) {
-            delegateError(getNode(n),logMessage,msg);
+            handled = handled || delegateError(getNode(n),logMessage,msg);
         });
     }
+    return handled;
 }
 function handleError(node,logMessage,msg) {
+    var handled = false;
     if (node.z) {
-        delegateError(node,logMessage,msg);
+        handled = delegateError(node,logMessage,msg);
     } else {
         if (activeFlowConfig.configs[node.id]) {
             activeFlowConfig.configs[node.id]._users.forEach(function(id) {
                 var userNode = activeFlowConfig.allNodes[id];
-                delegateError(userNode,logMessage,msg);
+                handled = handled || delegateError(userNode,logMessage,msg);
             })
         }
     }
+    return handled;
 }
 
 function delegateStatus(node,statusMessage) {

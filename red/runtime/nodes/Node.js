@@ -243,10 +243,12 @@ Node.prototype.error = function(logMessage,msg) {
     if (typeof logMessage != 'boolean') {
         logMessage = logMessage || "";
     }
-    log_helper(this, Log.ERROR, logMessage);
-    /* istanbul ignore else */
+    var handled = false;
     if (msg) {
-        flows.handleError(this,logMessage,msg);
+        handled = flows.handleError(this,logMessage,msg);
+    }
+    if (!handled) {
+        log_helper(this, Log.ERROR, logMessage);
     }
 };
 
