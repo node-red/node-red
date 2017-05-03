@@ -16,7 +16,6 @@
 
 module.exports = function(RED) {
     "use strict";
-    var jsonata = require("jsonata");
 
     function ChangeNode(n) {
         RED.nodes.createNode(this, n);
@@ -88,7 +87,7 @@ module.exports = function(RED) {
                 rule.to = /^true$/i.test(rule.to);
             } else if (rule.tot === 'jsonata') {
                 try {
-                    rule.to = jsonata(rule.to);
+                    rule.to = RED.util.prepareJSONataExpression(rule.to,this);
                 } catch(e) {
                     valid = false;
                     this.error(RED._("change.errors.invalid-from",{error:e.message}));

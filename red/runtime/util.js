@@ -323,9 +323,23 @@ function evaluateNodeProperty(value, type, node, msg) {
     } else if (type === 'bool') {
         return /^true$/i.test(value);
     } else if (type === 'jsonata') {
-        return jsonata(value).evaluate({msg:msg});
+        return prepareJSONataExpression(value,node).evaluate({msg:msg});
     }
     return value;
+}
+
+function prepareJSONataExpression(value,node) {
+    var expr = jsonata(value);
+    expr.assign('context',function(val) {
+        return node.context().get(val);
+    });
+    expr.assign('flow',function(val) {
+        return node.context().flow.get(val);
+    });
+    expr.assign('global',function(val) {
+        return node.context().global(val);
+    });
+    return expr;
 }
 
 function normaliseNodeTypeName(name) {
@@ -351,5 +365,6 @@ module.exports = {
     setMessageProperty: setMessageProperty,
     evaluateNodeProperty: evaluateNodeProperty,
     normalisePropertyExpression: normalisePropertyExpression,
-    normaliseNodeTypeName: normaliseNodeTypeName
+    normaliseNodeTypeName: normaliseNodeTypeName,
+    prepareJSONataExpression: prepareJSONataExpression
 };
