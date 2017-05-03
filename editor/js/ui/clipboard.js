@@ -296,8 +296,6 @@ RED.clipboard = (function() {
             RED.events.on("search:close",function() { disabled = false; });
             RED.events.on("type-search:open",function() { disabled = true; });
             RED.events.on("type-search:close",function() { disabled = false; });
-            RED.events.on("palette-editor:open",function() { disabled = true; });
-            RED.events.on("palette-editor:close",function() { disabled = false; });
 
 
             $('#chart').on("dragenter",function(event) {

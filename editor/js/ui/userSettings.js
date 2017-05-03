@@ -60,6 +60,9 @@ RED.userSettings = (function() {
                         setTimeout(function() {
                             $("#user-settings-tabs-content").children().hide();
                             $("#" + tab.id).show();
+                            if (tab.pane.focus) {
+                                tab.pane.focus();
+                            }
                         },50);
                     }
                 });
@@ -68,12 +71,14 @@ RED.userSettings = (function() {
                 panes.forEach(function(pane) {
                     settingsTabs.addTab({
                         id: "user-settings-tab-"+pane.id,
-                        label: pane.title
+                        label: pane.title,
+                        pane: pane
                     });
                     pane.get().hide().appendTo(tabContents);
                 });
                 settingsContent.i18n();
                 settingsTabs.activateTab("user-settings-tab-"+(initialTab||'view'))
+                $("#sidebar-shade").show();
             },
             close: function() {
                 settingsVisible = false;
@@ -82,6 +87,8 @@ RED.userSettings = (function() {
                         pane.close();
                     }
                 });
+                $("#sidebar-shade").hide();
+
             },
             show: function() {}
         }

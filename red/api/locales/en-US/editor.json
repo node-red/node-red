@@ -293,6 +293,8 @@
             },
             "nodeCount": "__label__ node",
             "nodeCount_plural": "__label__ nodes",
+            "moduleCount": "__count__ module available",
+            "moduleCount_plural": "__count__ modules available",
             "inuse": "in use",
             "enableall": "enable all",
             "disableall": "disable all",

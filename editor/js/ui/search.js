@@ -265,8 +265,6 @@ RED.search = (function() {
 
         RED.events.on("editor:open",function() { disabled = true; });
         RED.events.on("editor:close",function() { disabled = false; });
-        RED.events.on("palette-editor:open",function() { disabled = true; });
-        RED.events.on("palette-editor:close",function() { disabled = false; });
         RED.events.on("type-search:open",function() { disabled = true; });
         RED.events.on("type-search:close",function() { disabled = false; });
 

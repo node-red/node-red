@@ -90,7 +90,12 @@ RED.keyboard = (function() {
         RED.userSettings.add({
             id:'keyboard',
             title: 'Keyboard',
-            get: getSettingsPane
+            get: getSettingsPane,
+            focus: function() {
+                setTimeout(function() {
+                    $("#user-settings-tab-keyboard-filter").focus();
+                },200);
+            }
         })
     }
 
@@ -463,7 +468,7 @@ RED.keyboard = (function() {
         var pane = $('<div id="user-settings-tab-keyboard"></div>');
 
         $('<div class="keyboard-shortcut-entry keyboard-shortcut-list-header">'+
-        '<div class="keyboard-shortcut-entry-key keyboard-shortcut-entry-text"><input type="text" placeholder="filter actions"></div>'+
+        '<div class="keyboard-shortcut-entry-key keyboard-shortcut-entry-text"><input id="user-settings-tab-keyboard-filter" type="text" placeholder="filter actions"></div>'+
         '<div class="keyboard-shortcut-entry-key">shortcut</div>'+
         '<div class="keyboard-shortcut-entry-scope">scope</div>'+
         '</div>').appendTo(pane);
