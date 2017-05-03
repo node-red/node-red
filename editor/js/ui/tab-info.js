@@ -84,8 +84,11 @@ RED.sidebar.info = (function() {
             content: content,
             enableOnEdit: true
         });
-
-        tips.start();
+        if (tips.enabled()) {
+            tips.start();
+        } else {
+            tips.stop();
+        }
 
     }
 
@@ -333,7 +336,8 @@ RED.sidebar.info = (function() {
         return {
             start: startTips,
             stop: stopTips,
-            next: nextTip
+            next: nextTip,
+            enabled: function() { return enabled; }
         }
     })();
 
