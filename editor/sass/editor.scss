@@ -49,7 +49,7 @@
     position: relative;
     box-sizing: border-box;
     padding: 0.1px; // prevent margin collapsing
-    .dialog-form,#dialog-form, #dialog-config-form {
+    .dialog-form,#dialog-form, #node-config-dialog-edit-form {
         margin: 20px;
         height: calc(100% - 40px);
     }
@@ -155,7 +155,7 @@
 }
 
 
-.dialog-form,#dialog-form, #dialog-config-form {
+.dialog-form,#dialog-form, #node-config-dialog-edit-form {
     height: 100%;
 }
 
