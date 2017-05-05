@@ -48,8 +48,10 @@
 .editor-tray-body {
     position: relative;
     box-sizing: border-box;
-    form {
+    padding: 0.1px; // prevent margin collapsing
+    .dialog-form,#dialog-form, #dialog-config-form {
         margin: 20px;
+        height: calc(100% - 40px);
     }
 }
 .editor-tray-content {
@@ -154,7 +156,7 @@
 
 
 .dialog-form,#dialog-form, #dialog-config-form {
-    height: calc(100% - 20px);
+    height: 100%;
 }
 
 .input-error {
@@ -244,4 +246,49 @@
     float:left;
     font-size: 12px;
     line-height: 35px;
+}
+.node-input-expression-editor #dialog-form {
+    margin: 0;
+    height: 100%;
+    .red-ui-panel {
+        &:first-child {
+            padding: 20px 20px 0;
+        }
+        &:last-child {
+            padding-bottom: 20px;
+        }
+    }
+}
+.node-input-expression-tab-content {
+    position: relative;
+    padding: 0 20px;
+}
+
+#node-input-expression-help {
+    position: absolute;
+    top: 35px;
+    left:0;
+    right: 0;
+    bottom:0;
+    padding: 0 20px;
+    overflow: auto;
+    box-sizing: border-box;
+}
+#node-input-expression-panel-info {
+    & > .form-row {
+        margin: 0;
+        & > div:first-child {
+            margin-top: 10px;
+        }
+    }
+}
+.node-input-expression-legacy {
+    float: left;
+    cursor: pointer;
+    border: 1px solid white;
+    padding: 0 5px;
+    border-radius: 2px;
+    &:hover {
+        border-color: $primary-border-color;
+    }
 }

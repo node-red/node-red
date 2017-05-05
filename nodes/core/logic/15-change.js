@@ -19,6 +19,7 @@ module.exports = function(RED) {
 
     function ChangeNode(n) {
         RED.nodes.createNode(this, n);
+        var node = this;
 
         this.rules = n.rules;
         var rule;
@@ -90,7 +91,7 @@ module.exports = function(RED) {
                     rule.to = RED.util.prepareJSONataExpression(rule.to,this);
                 } catch(e) {
                     valid = false;
-                    this.error(RED._("change.errors.invalid-from",{error:e.message}));
+                    this.error(RED._("change.errors.invalid-expr",{error:e.message}));
                 }
             }
         }
@@ -115,7 +116,12 @@ module.exports = function(RED) {
                 } else if (rule.tot === 'date') {
                     value = Date.now();
                 } else if (rule.tot === 'jsonata') {
-                    value = rule.to.evaluate({msg:msg});
+                    try{
+                        value = RED.util.evaluateJSONataExpression(rule.to,msg);
+                    } catch(err) {
+                        node.error(RED._("change.errors.invalid-expr",{error:err.message}));
+                        return;
+                    }
                 }
                 if (rule.t === 'change') {
                     if (rule.fromt === 'msg' || rule.fromt === 'flow' || rule.fromt === 'global') {
@@ -219,7 +225,6 @@ module.exports = function(RED) {
             return msg;
         }
         if (valid) {
-            var node = this;
             this.on('input', function(msg) {
                 for (var i=0; i<this.rules.length; i++) {
                     if (this.rules[i].t === "move") {

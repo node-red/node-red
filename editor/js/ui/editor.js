@@ -1598,6 +1598,9 @@ RED.editor = (function() {
         editStack.push({type:type});
         RED.view.state(RED.state.EDITING);
         var expressionEditor;
+        var testDataEditor;
+        var testResultEditor
+        var panels;
 
         var trayOptions = {
             title: getEditStackTitle(),
@@ -1621,20 +1624,18 @@ RED.editor = (function() {
                 }
             ],
             resize: function(dimensions) {
-                editTrayWidthCache[type] = dimensions.width;
-
-                var rows = $("#dialog-form>div:not(.node-text-editor-row)");
-                var editorRow = $("#dialog-form>div.node-text-editor-row");
-                var height = $("#dialog-form").height();
-                for (var i=0;i<rows.size();i++) {
-                    height -= $(rows[i]).outerHeight(true);
+                if (dimensions) {
+                    editTrayWidthCache[type] = dimensions.width;
                 }
-                height -= (parseInt($("#dialog-form").css("marginTop"))+parseInt($("#dialog-form").css("marginBottom")));
-                $(".node-text-editor").css("height",height+"px");
-                expressionEditor.resize();
+                var height = $("#dialog-form").height();
+                if (panels) {
+                    panels.resize(height);
+                }
+
             },
             open: function(tray) {
                 var trayBody = tray.find('.editor-tray-body');
+                trayBody.addClass("node-input-expression-editor")
                 var dialogForm = buildEditForm(tray.find('.editor-tray-body'),'dialog-form','_expression','editor');
                 var funcSelect = $("#node-input-expression-func");
                 Object.keys(jsonata.functions).forEach(function(f) {
@@ -1749,6 +1750,118 @@ RED.editor = (function() {
                     }
                     expressionEditor.getSession().setValue(v||"",-1);
                 });
+
+                var tabs = RED.tabs.create({
+                    element: $("#node-input-expression-tabs"),
+                    onchange:function(tab) {
+                        $(".node-input-expression-tab-content").hide();
+                        tab.content.show();
+                        trayOptions.resize();
+                    }
+                })
+
+                tabs.addTab({
+                    id: 'expression-help',
+                    label: 'Function reference',
+                    content: $("#node-input-expression-tab-help")
+                });
+                tabs.addTab({
+                    id: 'expression-tests',
+                    label: 'Test',
+                    content: $("#node-input-expression-tab-test")
+                });
+                testDataEditor = RED.editor.createEditor({
+                    id: 'node-input-expression-test-data',
+                    value: '{\n    "payload": "hello world"\n}',
+                    mode:"ace/mode/json",
+                    lineNumbers: false
+                });
+                var changeTimer;
+                $(".node-input-expression-legacy").click(function(e) {
+                    e.preventDefault();
+                    RED.sidebar.info.set(RED._("expressionEditor.compatModeDesc"));
+                    RED.sidebar.info.show();
+                })
+                var testExpression = function() {
+                    var value = testDataEditor.getValue();
+                    var parsedData;
+                    var currentExpression = expressionEditor.getValue();
+                    var expr;
+                    var usesContext = false;
+                    var legacyMode = false;
+                    try {
+                        expr = jsonata(currentExpression);
+                        expr.assign('flow',function(val) {
+                            usesContext = true;
+                            return null;
+                        });
+                        expr.assign('global',function(val) {
+                            usesContext = true;
+                            return null;
+                        });
+                        legacyMode = /(^|[^a-zA-Z0-9_'"])msg([^a-zA-Z0-9_'"]|$)/.test(currentExpression);
+                    } catch(err) {
+                        testResultEditor.setValue("Invalid jsonata expression:\n  "+err.message);
+                        return;
+                    }
+                    $(".node-input-expression-legacy").toggle(legacyMode);
+                    try {
+                        parsedData = JSON.parse(value);
+                    } catch(err) {
+                        testResultEditor.setValue("Invalid example message:\n  "+err.toString())
+                        return;
+                    }
+
+                    try {
+                        var result = expr.evaluate(legacyMode?{msg:parsedData}:parsedData);
+                        if (usesContext) {
+                            testResultEditor.setValue("Cannot test a function that uses context values");
+                            return;
+                        }
+                        var formattedResult = JSON.stringify(result,null,4);
+                        testResultEditor.setValue(formattedResult || "No match");
+                    } catch(err) {
+                        testResultEditor.setValue("Error evaluating expression:\n  "+err.message);
+                    }
+                }
+
+                testDataEditor.getSession().on('change', function() {
+                    clearTimeout(changeTimer);
+                    changeTimer = setTimeout(testExpression,200);
+                });
+                expressionEditor.getSession().on('change', function() {
+                    clearTimeout(changeTimer);
+                    changeTimer = setTimeout(testExpression,200);
+                });
+
+                testResultEditor = RED.editor.createEditor({
+                    id: 'node-input-expression-test-result',
+                    value: "",
+                    mode:"ace/mode/json",
+                    lineNumbers: false,
+                    readOnly: true
+                });
+                panels = RED.panels.create({
+                    id:"node-input-expression-panels",
+                    resize: function(p1Height,p2Height) {
+                        var p1 = $("#node-input-expression-panel-expr");
+                        p1Height -= $(p1.children()[0]).outerHeight(true);
+                        var editorRow = $(p1.children()[1]);
+                        p1Height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+                        $("#node-input-expression").css("height",(p1Height-5)+"px");
+                        expressionEditor.resize();
+
+                        var p2 = $("#node-input-expression-panel-info > .form-row > div:first-child");
+                        p2Height -= p2.outerHeight(true) + 20;
+                        $(".node-input-expression-tab-content").height(p2Height);
+                        $("#node-input-expression-test-data").css("height",(p2Height-5)+"px");
+                        testDataEditor.resize();
+                        $("#node-input-expression-test-result").css("height",(p2Height-5)+"px");
+                        testResultEditor.resize();
+                    }
+                });
+
+                testExpression();
             },
             close: function() {
                 editStack.pop();
@@ -1855,6 +1968,7 @@ RED.editor = (function() {
         validateNode: validateNode,
         updateNodeProperties: updateNodeProperties, // TODO: only exposed for edit-undo
 
+
         createEditor: function(options) {
             var editor = ace.edit(options.id);
             editor.setTheme("ace/theme/tomorrow");
@@ -1874,6 +1988,12 @@ RED.editor = (function() {
                     enableBasicAutocompletion:true,
                     enableSnippets:true
                 });
+            }
+            if (options.readOnly) {
+                editor.setOption('readOnly',options.readOnly);
+            }
+            if (options.hasOwnProperty('lineNumbers')) {
+                editor.renderer.setOption('showGutter',options.lineNumbers);
             }
             editor.$blockScrolling = Infinity;
             if (options.value) {

@@ -323,24 +323,32 @@ function evaluateNodeProperty(value, type, node, msg) {
     } else if (type === 'bool') {
         return /^true$/i.test(value);
     } else if (type === 'jsonata') {
-        return prepareJSONataExpression(value,node).evaluate({msg:msg});
+        var expr = prepareJSONataExpression(value,node);
+        return evaluateJSONataExpression(expr,msg);
     }
     return value;
 }
 
 function prepareJSONataExpression(value,node) {
     var expr = jsonata(value);
-    expr.assign('context',function(val) {
-        return node.context().get(val);
-    });
-    expr.assign('flow',function(val) {
+    expr.assign('flowContext',function(val) {
         return node.context().flow.get(val);
     });
-    expr.assign('global',function(val) {
+    expr.assign('globalContext',function(val) {
         return node.context().global(val);
     });
+    expr._legacyMode = /(^|[^a-zA-Z0-9_'"])msg([^a-zA-Z0-9_'"]|$)/.test(value);
     return expr;
 }
+
+function evaluateJSONataExpression(expr,msg) {
+    var context = msg;
+    if (expr._legacyMode) {
+        context = {msg:msg};
+    }
+    return expr.evaluate(context);
+}
+
 
 function normaliseNodeTypeName(name) {
     var result = name.replace(/[^a-zA-Z0-9]/g, " ");
@@ -366,5 +374,6 @@ module.exports = {
     evaluateNodeProperty: evaluateNodeProperty,
     normalisePropertyExpression: normalisePropertyExpression,
     normaliseNodeTypeName: normaliseNodeTypeName,
-    prepareJSONataExpression: prepareJSONataExpression
+    prepareJSONataExpression: prepareJSONataExpression,
+    evaluateJSONataExpression: evaluateJSONataExpression
 };

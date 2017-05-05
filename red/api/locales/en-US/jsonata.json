@@ -110,16 +110,11 @@
         "args": "object",
         "desc": "Splits an object containing key/value pairs into an array of objects, each of which has a single key/value pair from the input object. If the parameter is an array of objects, then the resultant array contains an object for every key/value pair in every object in the supplied array."
     },
-
-    "$context": {
-        "args": "string",
-        "desc": "Retrieves a node context property."
-    },
-    "$flow": {
+    "$flowContext": {
         "args": "string",
         "desc": "Retrieves a flow context property."
     },
-    "$global": {
+    "$globalContext": {
         "args": "string",
         "desc": "Retrieves a global context property."
     }

@@ -350,7 +350,8 @@ RED.sidebar.info = (function() {
         // tips.stop();
         sections.show();
         nodeSection.container.hide();
-        $(infoSection.content).html(html);
+        var wrapped = $('<div class="node-help"></div>').html(html);
+        $(infoSection.content).empty().append(wrapped);
     }
 
 

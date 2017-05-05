@@ -519,7 +519,7 @@
             "else":"otherwise"
         },
         "errors": {
-            "invalid-expr": "Invalid expression: __error__"
+            "invalid-expr": "Invalid JSONata expression: __error__"
         }
     },
     "change": {
@@ -544,7 +544,8 @@
         },
         "errors": {
             "invalid-from": "Invalid 'from' property: __error__",
-            "invalid-json": "Invalid 'to' JSON property"
+            "invalid-json": "Invalid 'to' JSON property",
+            "invalid-expr": "Invalid JSONata expression: __error__"
         }
     },
     "range": {
