@@ -1791,37 +1791,43 @@ RED.editor = (function() {
                     var legacyMode = false;
                     try {
                         expr = jsonata(currentExpression);
-                        expr.assign('flow',function(val) {
+                        expr.assign('flowContext',function(val) {
                             usesContext = true;
                             return null;
                         });
-                        expr.assign('global',function(val) {
+                        expr.assign('globalContext',function(val) {
                             usesContext = true;
                             return null;
                         });
                         legacyMode = /(^|[^a-zA-Z0-9_'"])msg([^a-zA-Z0-9_'"]|$)/.test(currentExpression);
                     } catch(err) {
-                        testResultEditor.setValue("Invalid jsonata expression:\n  "+err.message);
+                        testResultEditor.setValue(RED._("expressionEditor.errors.invalid-expr",{message:err.message}));
                         return;
                     }
                     $(".node-input-expression-legacy").toggle(legacyMode);
                     try {
                         parsedData = JSON.parse(value);
                     } catch(err) {
-                        testResultEditor.setValue("Invalid example message:\n  "+err.toString())
+                        testResultEditor.setValue(RED._("expressionEditor.errors.invalid-msg",{message:err.toString()}))
                         return;
                     }
 
                     try {
                         var result = expr.evaluate(legacyMode?{msg:parsedData}:parsedData);
                         if (usesContext) {
-                            testResultEditor.setValue("Cannot test a function that uses context values");
+                            testResultEditor.setValue(RED._("expressionEditor.errors.context-unsupported"));
                             return;
                         }
-                        var formattedResult = JSON.stringify(result,null,4);
-                        testResultEditor.setValue(formattedResult || "No match");
+
+                        var formattedResult;
+                        if (result !== undefined) {
+                            formattedResult = JSON.stringify(result,null,4);
+                        } else {
+                            formattedResult = RED._("expressionEditor.noMatch");
+                        }
+                        testResultEditor.setValue(formattedResult);
                     } catch(err) {
-                        testResultEditor.setValue("Error evaluating expression:\n  "+err.message);
+                        testResultEditor.setValue(RED._("expressionEditor.errors.eval",{message:err.message}));
                     }
                 }
 
