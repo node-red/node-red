@@ -140,7 +140,16 @@ RED.deploy = (function() {
                             if (ignoreChecked) {
                                 ignoreDeployWarnings[$( "#node-dialog-confirm-deploy-type" ).val()] = true;
                             }
-                            save(true,$( "#node-dialog-confirm-deploy-type" ).val() === "conflict");
+                            save(true,/conflict/.test($("#node-dialog-confirm-deploy-type" ).val()));
+                            $( this ).dialog( "close" );
+                        }
+                    },
+                    {
+                        id: "node-dialog-confirm-deploy-overwrite",
+                        text: RED._("deploy.confirm.button.overwrite"),
+                        class: "primary",
+                        click: function() {
+                            save(true,/conflict/.test($("#node-dialog-confirm-deploy-type" ).val()));
                             $( this ).dialog( "close" );
                         }
                     }
@@ -154,11 +163,13 @@ RED.deploy = (function() {
                                    '</div>');
                 },
                 open: function() {
-                    if ($( "#node-dialog-confirm-deploy-type" ).val() === "conflict") {
+                    var deployType = $("#node-dialog-confirm-deploy-type" ).val();
+                    if (/conflict/.test(deployType)) {
                         $( "#node-dialog-confirm-deploy" ).dialog('option','title', RED._('deploy.confirm.button.review'));
                         $("#node-dialog-confirm-deploy-deploy").hide();
                         $("#node-dialog-confirm-deploy-review").addClass('disabled').show();
                         $("#node-dialog-confirm-deploy-merge").addClass('disabled').show();
+                        $("#node-dialog-confirm-deploy-overwrite").toggle(deployType === "deploy-conflict");
                         currentDiff = null;
                         $("#node-dialog-confirm-deploy-conflict-checking").show();
                         $("#node-dialog-confirm-deploy-conflict-auto-merge").hide();
@@ -186,6 +197,7 @@ RED.deploy = (function() {
                     } else {
                         $( "#node-dialog-confirm-deploy" ).dialog('option','title', RED._('deploy.confirm.button.confirm'));
                         $("#node-dialog-confirm-deploy-deploy").show();
+                        $("#node-dialog-confirm-deploy-overwrite").hide();
                         $("#node-dialog-confirm-deploy-review").hide();
                         $("#node-dialog-confirm-deploy-merge").hide();
                         $("#node-dialog-confirm-deploy-hide").parent().show();
@@ -226,7 +238,7 @@ RED.deploy = (function() {
                     evt.preventDefault();
                     activeNotifyMessage.close();
                     var nns = RED.nodes.createCompleteNodeSet();
-                    resolveConflict(nns);
+                    resolveConflict(nns,false);
                     activeNotifyMessage = null;
                 })
                 activeNotifyMessage = RED.notify(message,null,true);
@@ -258,12 +270,12 @@ RED.deploy = (function() {
         return 0;
     }
 
-    function resolveConflict(currentNodes) {
+    function resolveConflict(currentNodes, activeDeploy) {
         $( "#node-dialog-confirm-deploy-config" ).hide();
         $( "#node-dialog-confirm-deploy-unknown" ).hide();
         $( "#node-dialog-confirm-deploy-unused" ).hide();
         $( "#node-dialog-confirm-deploy-conflict" ).show();
-        $( "#node-dialog-confirm-deploy-type" ).val("conflict");
+        $( "#node-dialog-confirm-deploy-type" ).val(activeDeploy?"deploy-conflict":"background-conflict");
         $( "#node-dialog-confirm-deploy" ).dialog( "open" );
     }
 
@@ -396,7 +408,7 @@ RED.deploy = (function() {
                 if (xhr.status === 401) {
                     RED.notify(RED._("deploy.deployFailed",{message:RED._("user.notAuthorized")}),"error");
                 } else if (xhr.status === 409) {
-                    resolveConflict(nns);
+                    resolveConflict(nns, true);
                 } else if (xhr.responseText) {
                     RED.notify(RED._("deploy.deployFailed",{message:xhr.responseText}),"error");
                 } else {

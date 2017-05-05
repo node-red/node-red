@@ -133,9 +133,10 @@
             "button": {
                 "ignore": "Ignore",
                 "confirm": "Confirm deploy",
-                "review": "Review differences",
+                "review": "Review changes",
                 "cancel": "Cancel",
-                "merge": "Merge changes"
+                "merge": "Merge",
+                "overwrite": "Ignore & deploy"
             },
             "undeployedChanges": "You have undeployed changes.\n\nLeaving this page will lose these changes.",
             "improperlyConfigured": "The workspace contains some nodes that are not properly configured:",
