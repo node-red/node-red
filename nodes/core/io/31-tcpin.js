@@ -574,14 +574,16 @@ module.exports = function(RED) {
 
                 clients[connection_id].client.on('timeout',function() {
                     //console.log("TIMEOUT");
-                    clients[connection_id].connected = false;
-                    node.status({fill:"grey",shape:"dot",text:"tcpin.errors.connect-timeout"});
-                    //node.warn(RED._("tcpin.errors.connect-timeout"));
-                    if (clients[connection_id] && clients[connection_id].client) {
-                        clients[connection_id].client.connect(port, host, function() {
-                            clients[connection_id].connected = true;
-                            node.status({fill:"green",shape:"dot",text:"common.status.connected"});
-                        });
+                    if (clients[connection_id]) {
+                        clients[connection_id].connected = false;
+                        node.status({fill:"grey",shape:"dot",text:"tcpin.errors.connect-timeout"});
+                        //node.warn(RED._("tcpin.errors.connect-timeout"));
+                        if (clients[connection_id].client) {
+                            clients[connection_id].client.connect(port, host, function() {
+                                clients[connection_id].connected = true;
+                                node.status({fill:"green",shape:"dot",text:"common.status.connected"});
+                            });
+                        }
                     }
                 });
             }
