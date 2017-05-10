@@ -265,7 +265,7 @@ RED.utils = (function() {
                     for (i=0;i<keys.length;i++) {
                         var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
                         var newPath = path;
-                        if (/^[a-zA-Z_$][0-9a-zA-Z_$]+$/.test(keys[i])) {
+                        if (/^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(keys[i])) {
                             newPath += "."+keys[i];
                         } else {
                             newPath += "[\""+keys[i].replace(/"/,"\\\"")+"\"]"
