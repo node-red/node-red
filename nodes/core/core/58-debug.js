@@ -90,7 +90,6 @@ module.exports = function(RED) {
             msg.msg = msg.msg.toString('hex');
             if (msg.msg.length > debuglength) {
                 msg.msg = msg.msg.substring(0,debuglength);
-                msg.modified = true;
             }
         } else if (msg.msg && typeof msg.msg === 'object') {
             try {
@@ -119,11 +118,9 @@ module.exports = function(RED) {
                             data: msg.msg.slice(0,debuglength),
                             length: msg.msg.length
                         }
-                        msg.modified = true;
                     }
                 }
                 if (isArray || (msg.format === "Object")) {
-                    var modified = false;
                     msg.msg = safeJSONStringify(msg.msg, function(key, value) {
                         if (key === '_req' || key === '_res') {
                             value = "[internal]"
@@ -136,10 +133,8 @@ module.exports = function(RED) {
                                 data: value.slice(0,debuglength),
                                 length: value.length
                             }
-                            modified = true;
                         } else if (typeof value === 'string') {
                             if (value.length > debuglength) {
-                                modified = true;
                                 value = value.substring(0,debuglength)+"...";
                             }
                         } else if (value !== null && typeof value === 'object' && value.type === "Buffer") {
@@ -147,14 +142,10 @@ module.exports = function(RED) {
                             value.length = value.data.length;
                             if (value.length > debuglength) {
                                 value.data = value.data.slice(0,debuglength);
-                                modified = true;
                             }
                         }
                         return value;
                     }," ");
-                    if (modified) {
-                        msg.modified = modified;
-                    }
                 } else {
                     try { msg.msg = msg.msg.toString(); }
                     catch(e) { msg.msg = "[Type not printable]"; }
@@ -176,7 +167,6 @@ module.exports = function(RED) {
             msg.format = "string["+msg.msg.length+"]";
             if (msg.msg.length > debuglength) {
                 msg.msg = msg.msg.substring(0,debuglength)+"...";
-                msg.modified = true;
             }
         }
         // if (msg.msg.length > debuglength) {
