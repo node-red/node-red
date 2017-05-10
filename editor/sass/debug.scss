@@ -46,11 +46,31 @@
 }
 
 .debug-message {
+    position: relative;
     border-bottom: 1px solid #eee;
     border-left: 8px solid #eee;
     border-right: 8px solid #eee;
     padding: 2px;
+    &.debug-message-hover {
+        border-right-color: #999;
+        &>.debug-message-meta .debug-message-tools {
+            display: inline-block;
+        }
+    }
 }
+.debug-message-row .debug-message-tools .editor-button-small {
+    height: 16px;
+    line-height: 14px;
+    font-size: 8px;
+    border-radius: 1px;
+    padding: 0 3px;
+}
+.debug-message-row:hover {
+    &>.debug-message-tools {
+        display: inline-block;
+    }
+}
+
 .debug-message-meta {
     background: #fff;
     font-size: 10px;
@@ -66,6 +86,12 @@
 .debug-message-name {
     padding: 1px 5px;
     color: #777;
+}
+.debug-message-tools {
+    position: absolute;
+    top: 3px;
+    right: 1px;
+    display: none;
 }
 .debug-message-payload {
     display: block;
@@ -85,9 +111,8 @@
     border-right-color: #f99;
 }
 .debug-message-object-entry {
+    position: relative;
     padding-left: 15px;
-    padding-bottom: 3px;
-    padding-top: 3px;
 }
 .debug-message-element {
     color: #333;
@@ -153,11 +178,16 @@
 .debug-message-type-number { color: #2033d6; };
 .debug-message-type-number-toggle { cursor: pointer;}
 
+.debug-message-row {
+    display: block;
+    padding: 4px 2px 2px;
+    position: relative;
+    &:hover {
+        background: #f3f3f3;
+    }
+}
 .debug-message-expandable {
     cursor: pointer;
-}
-.debug-message-expandable:hover {
-    background: #fefefe;
 }
 .debug-message-expandable:hover .debug-message-object-handle {
     color: #b72828 !important;

@@ -184,13 +184,13 @@ RED.debug = (function() {
         var sourceNode = o._source;
 
         msg.onmouseenter = function() {
-            msg.style.borderRightColor = "#999";
+            $(msg).addClass('debug-message-hover');
             if (o._source) {
                 config.messageMouseEnter(o._source.id);
             }
         };
         msg.onmouseleave = function() {
-            msg.style.borderRightColor = "";
+            $(msg).removeClass('debug-message-hover');
             if (o._source) {
                 config.messageMouseLeave(o._source.id);
             }
@@ -225,6 +225,9 @@ RED.debug = (function() {
             $(msg).addClass('debug-message-level-' + errorLvl);
             $('<span class="debug-message-topic">function : (' + errorLvlType + ')</span>').appendTo(metaRow);
         } else {
+            // var tools = $('<span class="debug-message-tools button-group"></span>').appendTo(metaRow);
+            // var filterMessage = $('<button class="editor-button editor-button-small"><i class="fa fa-filter"></i></button>').appendTo(tools);
+
             $('<span class="debug-message-topic">'+
                 (o.topic?topic+' : ':'')+
                 (o.property?'msg.'+property:'msg')+" : "+format+
@@ -247,7 +250,8 @@ RED.debug = (function() {
             }
         }
         var el = $('<span class="debug-message-payload"></span>').appendTo(msg);
-        RED.utils.createObjectElement(payload,/*true*/null,format).appendTo(el);
+        var path = (o.property?'msg.'+property:'msg');
+        RED.utils.createObjectElement(payload,/*true*/null,format,false,path).appendTo(el);
         var atBottom = (sbc.scrollHeight-messageList.height()-sbc.scrollTop) < 5;
         var m = {
             el: msg

@@ -292,3 +292,8 @@
         border-color: $primary-border-color;
     }
 }
+
+#clipboard-hidden {
+    position: absolute;
+    top: -3000px;
+}

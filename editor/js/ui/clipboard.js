@@ -270,10 +270,44 @@ RED.clipboard = (function() {
         $("#dropTarget").hide();
         RED.keyboard.remove("escape");
     }
-
+    function copyText(value,element,msg) {
+        var truncated = false;
+        if (typeof value !== "string" ) {
+            value = JSON.stringify(value, function(key,value) {
+                if (value !== null && typeof value === 'object') {
+                    if (value.__encoded__ && value.hasOwnProperty('data') && value.hasOwnProperty('length')) {
+                        truncated = value.data.length !== value.length;
+                        return value.data;
+                    }
+                }
+                return value;
+            });
+        }
+        if (truncated) {
+            msg += "_truncated";
+        }
+        $("#clipboard-hidden").val(value).select();
+        var result =  document.execCommand("copy");
+        if (result && element) {
+            var popover = RED.popover.create({
+                target: element,
+                direction: 'left',
+                size: 'small',
+                content: RED._(msg)
+            });
+            setTimeout(function() {
+                popover.close();
+            },1000);
+            popover.open();
+        }
+        return result;
+    }
     return {
         init: function() {
             setupDialogs();
+
+            $('<input type="text" id="clipboard-hidden">').appendTo("body");
+
             RED.events.on("view:selection-changed",function(selection) {
                 if (!selection.nodes) {
                     RED.menu.setDisabled("menu-item-export",true);
@@ -339,6 +373,7 @@ RED.clipboard = (function() {
 
         },
         import: importNodes,
-        export: exportNodes
+        export: exportNodes,
+        copyText: copyText
     }
 })();

@@ -31,7 +31,7 @@ RED.utils = (function() {
             result = $('<span class="debug-message-object-value debug-message-type-null">null</span>');
         } else if (typeof value === 'object') {
             if (value.hasOwnProperty('type') && value.type === 'Buffer' && value.hasOwnProperty('data')) {
-                result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').html('buffer['+value.data.length+']');
+                result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').html('buffer['+value.length+']');
             } else if (value.hasOwnProperty('type') && value.type === 'array' && value.hasOwnProperty('data')) {
                 result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').html('array['+value.length+']');
             } else {
@@ -66,8 +66,22 @@ RED.utils = (function() {
             e.preventDefault();
         });
     }
+    function addMessageControls(obj,key,msg) {
+        var tools = $('<span class="debug-message-tools button-group"></span>').appendTo(obj);
+        var copyPath = $('<button class="editor-button editor-button-small"><i class="fa fa-terminal"></i></button>').appendTo(tools).click(function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            RED.clipboard.copyText(key,copyPath,"clipboard.copyMessagePath");
+        })
+        var copyPayload = $('<button class="editor-button editor-button-small"><i class="fa fa-clipboard"></i></button>').appendTo(tools).click(function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            RED.clipboard.copyText(msg,copyPayload,"clipboard.copyMessageValue");
+        })
 
-    function buildMessageElement(obj,key,typeHint,hideKey) {
+    }
+
+    function buildMessageElement(obj,key,typeHint,hideKey,path) {
         var i;
         var e;
         var entryObj;
@@ -75,15 +89,15 @@ RED.utils = (function() {
         var headerHead;
         var value;
         var element = $('<span class="debug-message-element"></span>');
+        header = $('<span class="debug-message-row"></span>').appendTo(element);
+        addMessageControls(header,path,obj);
         if (!key) {
             element.addClass("debug-message-top-level");
-        }
-
-        header = $('<span></span>').appendTo(element);
-
-        if (key && !hideKey) {
-            $('<span class="debug-message-object-key"></span>').text(key).appendTo(header);
-            $('<span>: </span>').appendTo(header);
+        } else {
+            if (!hideKey) {
+                $('<span class="debug-message-object-key"></span>').text(key).appendTo(header);
+                $('<span>: </span>').appendTo(header);
+            }
         }
         entryObj = $('<span class="debug-message-object-value"></span>').appendTo(header);
 
@@ -166,6 +180,7 @@ RED.utils = (function() {
                     if (type === 'buffer') {
                         var stringRow = $('<div class="debug-message-string-rows"></div>').appendTo(element);
                         var sr = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(stringRow);
+
                         var stringEncoding = "";
                         try {
                             stringEncoding = String.fromCharCode.apply(null, new Uint16Array(data))
@@ -190,7 +205,7 @@ RED.utils = (function() {
                     if (fullLength <= 10) {
                         for (i=0;i<fullLength;i++) {
                             row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(arrayRows);
-                            buildMessageElement(data[i],""+i,false).appendTo(row);
+                            buildMessageElement(data[i],""+i,false,false,path+"["+i+"]").appendTo(row);
                         }
                     } else {
                         for (i=0;i<fullLength;i+=10) {
@@ -205,7 +220,7 @@ RED.utils = (function() {
                                 return function() {
                                     for (var i=min;i<=max;i++) {
                                         var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(parent);
-                                        buildMessageElement(data[i],""+i,false).appendTo(row);
+                                        buildMessageElement(data[i],""+i,false,false,path+"["+i+"]").appendTo(row);
                                     }
                                 }
                             })());
@@ -249,7 +264,13 @@ RED.utils = (function() {
                     }
                     for (i=0;i<keys.length;i++) {
                         var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
-                        buildMessageElement(obj[keys[i]],keys[i],false).appendTo(row);
+                        var newPath = path;
+                        if (/^[a-zA-Z_$][0-9a-zA-Z_$]+$/.test(keys[i])) {
+                            newPath += "."+keys[i];
+                        } else {
+                            newPath += "[\""+keys[i].replace(/"/,"\\\"")+"\"]"
+                        }
+                        buildMessageElement(obj[keys[i]],keys[i],false,false,newPath).appendTo(row);
                     }
                     if (keys.length === 0) {
                         $('<div class="debug-message-object-entry debug-message-type-meta collapsed"></div>').text("empty").appendTo(element);
@@ -405,6 +426,6 @@ RED.utils = (function() {
         createObjectElement: buildMessageElement,
         validatePropertyExpression: validatePropertyExpression,
         getNodeIcon: getNodeIcon,
-        getNodeLabel: getNodeLabel
+        getNodeLabel: getNodeLabel,
     }
 })();

@@ -112,7 +112,10 @@
         "import": {
             "import": "Import to",
             "newFlow": "new flow"
-        }
+        },
+        "copyMessagePath": "Path copied",
+        "copyMessageValue": "Value copied",
+        "copyMessageValue_truncated": "Truncated value copied"
     },
     "deploy": {
         "deploy": "Deploy",

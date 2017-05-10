@@ -90,10 +90,9 @@ module.exports = function(RED) {
             msg.msg = msg.msg.toString('hex');
             if (msg.msg.length > debuglength) {
                 msg.msg = msg.msg.substring(0,debuglength);
+                msg.modified = true;
             }
         } else if (msg.msg && typeof msg.msg === 'object') {
-            var seen = [];
-            var seenAts = [];
             try {
                 msg.format = msg.msg.constructor.name || "Object";
                 // Handle special case of msg.req/res objects from HTTP In node
@@ -113,38 +112,54 @@ module.exports = function(RED) {
                 if (isArray) {
                     msg.format = "array["+msg.msg.length+"]";
                     if (msg.msg.length > debuglength) {
-                        msg.msg = msg.msg.slice(0,debuglength);
+                        // msg.msg = msg.msg.slice(0,debuglength);
+                        msg.msg = {
+                            __encoded__: true,
+                            type: "array",
+                            data: msg.msg.slice(0,debuglength),
+                            length: msg.msg.length
+                        }
+                        msg.modified = true;
                     }
                 }
                 if (isArray || (msg.format === "Object")) {
+                    var modified = false;
                     msg.msg = safeJSONStringify(msg.msg, function(key, value) {
                         if (key === '_req' || key === '_res') {
-                            return "[internal]"
-                        }
-                        if (value instanceof Error) {
-                            return value.toString()
-                        }
-                        if (util.isArray(value) && value.length > debuglength) {
+                            value = "[internal]"
+                        } else if (value instanceof Error) {
+                            value = value.toString()
+                        } else if (util.isArray(value) && value.length > debuglength) {
                             value = {
                                 __encoded__: true,
                                 type: "array",
                                 data: value.slice(0,debuglength),
                                 length: value.length
                             }
-                        }
-                        if (typeof value === 'string') {
+                            modified = true;
+                        } else if (typeof value === 'string') {
                             if (value.length > debuglength) {
-                                return value.substring(0,debuglength)+"...";
+                                modified = true;
+                                value = value.substring(0,debuglength)+"...";
+                            }
+                        } else if (value !== null && typeof value === 'object' && value.type === "Buffer") {
+                            value.__encoded__ = true;
+                            value.length = value.data.length;
+                            if (value.length > debuglength) {
+                                value.data = value.data.slice(0,debuglength);
+                                modified = true;
                             }
                         }
                         return value;
                     }," ");
+                    if (modified) {
+                        msg.modified = modified;
+                    }
                 } else {
                     try { msg.msg = msg.msg.toString(); }
                     catch(e) { msg.msg = "[Type not printable]"; }
                 }
             }
-            seen = null;
         } else if (typeof msg.msg === "boolean") {
             msg.format = "boolean";
             msg.msg = msg.msg.toString();
@@ -161,6 +176,7 @@ module.exports = function(RED) {
             msg.format = "string["+msg.msg.length+"]";
             if (msg.msg.length > debuglength) {
                 msg.msg = msg.msg.substring(0,debuglength)+"...";
+                msg.modified = true;
             }
         }
         // if (msg.msg.length > debuglength) {

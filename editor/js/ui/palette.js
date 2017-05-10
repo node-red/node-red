@@ -185,11 +185,14 @@ RED.palette = (function() {
             $("#palette-"+category).append(d);
             d.onmousedown = function(e) { e.preventDefault(); };
 
-            RED.popover.create({
+            var popover = RED.popover.create({
                 target:$(d),
+                trigger: "hover",
+                width: "300px",
                 content: "hi",
                 delay: { show: 750, hide: 50 }
             });
+            $(d).data('popover',popover);
 
             // $(d).popover({
             //     title:d.type,
