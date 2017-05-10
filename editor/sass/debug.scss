@@ -57,6 +57,12 @@
             display: inline-block;
         }
     }
+    .debug-message-row:hover {
+        background: #f3f3f3;
+        &>.debug-message-tools {
+            display: inline-block;
+        }
+    }
 }
 .debug-message-row .debug-message-tools .editor-button-small {
     height: 16px;
@@ -64,11 +70,6 @@
     font-size: 8px;
     border-radius: 1px;
     padding: 0 3px;
-}
-.debug-message-row:hover {
-    &>.debug-message-tools {
-        display: inline-block;
-    }
 }
 
 .debug-message-meta {
@@ -182,9 +183,6 @@
     display: block;
     padding: 4px 2px 2px;
     position: relative;
-    &:hover {
-        background: #f3f3f3;
-    }
 }
 .debug-message-expandable {
     cursor: pointer;
