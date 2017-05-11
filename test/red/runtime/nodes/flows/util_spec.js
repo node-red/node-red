@@ -661,6 +661,26 @@ describe('flows/util', function() {
             diffResult.removed.should.have.length(0);
             diffResult.rewired.should.have.length(0);
         });
+
+
+        it('marks a deleted tab as removed', function() {
+            var config = [{id:"f1",type:"tab",label:"fred"},{id:"n1",type:"test",bar:"b",wires:[["1"]],z:"f1"},
+                          {id:"f2",type:"tab",label:"fred"},{id:"n2",type:"test",bar:"b",wires:[["1"]],z:"f2"}];
+            var newConfig = clone(config);
+            newConfig = newConfig.slice(0,2);
+
+            var originalConfig = flowUtil.parseConfig(config);
+            var changedConfig = flowUtil.parseConfig(newConfig);
+
+            originalConfig.missingTypes.should.have.length(0);
+
+            var diffResult = flowUtil.diffConfigs(originalConfig,changedConfig);
+            diffResult.added.should.have.length(0);
+            diffResult.changed.should.have.length(0);
+            diffResult.removed.sort().should.eql(['f2', 'n2']);
+            diffResult.rewired.should.have.length(0);
+        });
+
         it('marks all nodes as added when tab state changes disabled to enabled', function() {
             var config = [{id:"1",type:"tab",disabled:true,label:"fred"},{id:"2",type:"test",bar:"b",wires:[["1"]],z:"1"},{id:"3",type:"test"}];
             var newConfig = clone(config);
