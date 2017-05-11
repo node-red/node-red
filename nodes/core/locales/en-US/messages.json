@@ -186,6 +186,7 @@
         "action": "Action",
         "for": "For",
         "delaymsg": "Delay message",
+        "delayvarmsg": "Set delay with msg.delay",
         "randomdelay": "Random delay",
         "limitrate": "Limit rate to",
         "fairqueue": "Topic based fair queue",
@@ -205,6 +206,7 @@
         "dropmsg": "drop intermediate messages",
         "label": {
             "delay": "delay",
+            "variable": "variable",
             "limit": "limit",
             "random": "random",
             "queue": "queue",
@@ -415,7 +417,8 @@
             "timeout": "after a fixed timeout of",
             "character": "when character received is",
             "number": "a fixed number of chars",
-            "never": "never - keep connection open"
+            "never": "never - keep connection open",
+            "immed": "immediately - don't wait for reply"
         },
         "status": {
             "connecting": "connecting to __host__:__port__",

@@ -80,10 +80,17 @@ module.exports = function(RED) {
         this.drop = n.drop;
         var node = this;
 
+        var clearDelayList = function() {
+            for (var i=0; i<node.idList.length; i++ ) {
+                clearTimeout(node.idList[i]);
+            }
+            node.idList = [];
+            node.status({text:"reset"});
+        }
+
         if (node.pauseType === "delay") {
             node.on("input", function(msg) {
-                var id;
-                id = setTimeout(function() {
+                var id = setTimeout(function() {
                     node.idList.splice(node.idList.indexOf(id),1);
                     if (node.idList.length === 0) { node.status({}); }
                     node.send(msg);
@@ -92,17 +99,28 @@ module.exports = function(RED) {
                 if ((node.timeout > 1000) && (node.idList.length !== 0)) {
                     node.status({fill:"blue",shape:"dot",text:" "});
                 }
+                if (msg.hasOwnProperty("reset")) { clearDelayList(); }
             });
-
-            node.on("close", function() {
-                for (var i=0; i<node.idList.length; i++ ) {
-                    clearTimeout(node.idList[i]);
+            node.on("close", function() { clearDelayList(); });
+        }
+        else if (node.pauseType === "delayv") {
+            node.on("input", function(msg) {
+                var delayvar = Number(msg.delay || 0);
+                if (delayvar < 0) { delayvar = 0; }
+                var id = setTimeout(function() {
+                    node.idList.splice(node.idList.indexOf(id),1);
+                    if (node.idList.length === 0) { node.status({}); }
+                    node.send(msg);
+                }, delayvar);
+                node.idList.push(id);
+                if ((delayvar >= 1) && (node.idList.length !== 0)) {
+                    node.status({fill:"blue",shape:"dot",text:delayvar/1000+"s"});
                 }
-                node.idList = [];
-                node.status({});
+                if (msg.hasOwnProperty("reset")) { clearDelayList(); }
             });
-
-        } else if (node.pauseType === "rate") {
+            node.on("close", function() { clearDelayList(); });
+        }
+        else if (node.pauseType === "rate") {
             var olddepth = 0;
             node.on("input", function(msg) {
                 if (!node.drop) {
@@ -119,7 +137,8 @@ module.exports = function(RED) {
                             olddepth = 10000;
                             node.warn(node.name + " " + RED._("delay.error.buffer1"));
                         }
-                    } else {
+                    }
+                    else {
                         node.send(msg);
                         node.intervalID = setInterval(function() {
                             if (node.buffer.length === 0) {
@@ -134,7 +153,8 @@ module.exports = function(RED) {
                             }
                         },node.rate);
                     }
-                } else {
+                }
+                else {
                     var timeSinceLast;
                     if (node.lastSent) {
                         timeSinceLast = process.hrtime(node.lastSent);
@@ -142,20 +162,25 @@ module.exports = function(RED) {
                     if (!node.lastSent) { // ensuring that we always send the first message
                         node.lastSent = process.hrtime();
                         node.send(msg);
-                    } else if ( ( (timeSinceLast[0] * SECONDS_TO_NANOS) + timeSinceLast[1] ) > (node.rate * MILLIS_TO_NANOS) ) {
+                    }
+                    else if ( ( (timeSinceLast[0] * SECONDS_TO_NANOS) + timeSinceLast[1] ) > (node.rate * MILLIS_TO_NANOS) ) {
                         node.lastSent = process.hrtime();
                         node.send(msg);
                     }
                 }
+                if (msg.hasOwnProperty("reset")) {
+                    clearInterval(node.intervalID);
+                    node.buffer = [];
+                    node.status({text:"reset"});
+                }
             });
-
             node.on("close", function() {
                 clearInterval(node.intervalID);
                 node.buffer = [];
                 node.status({});
             });
-
-        } else if ((node.pauseType === "queue") || (node.pauseType === "timed")) {
+        }
+        else if ((node.pauseType === "queue") || (node.pauseType === "timed")) {
             node.intervalID = setInterval(function() {
                 if (node.pauseType === "queue") {
                     if (node.buffer.length > 0) {
@@ -181,30 +206,32 @@ module.exports = function(RED) {
                 }
                 if (!hit) { node.buffer.push(msg); } // if not add to end of queue
                 node.status({text:node.buffer.length});
+                if (msg.hasOwnProperty("reset")) {
+                    node.buffer = [];
+                    node.status({text:"reset"});
+                }
             });
-
             node.on("close", function() {
                 clearInterval(node.intervalID);
                 node.buffer = [];
                 node.status({});
             });
-
-        } else if (node.pauseType === "random") {
+        }
+        else if (node.pauseType === "random") {
             node.on("input", function(msg) {
                 var wait = node.randomFirst + (node.diff * Math.random());
                 var id = setTimeout(function() {
                     node.idList.splice(node.idList.indexOf(id),1);
                     node.send(msg);
+                    node.status({});
                 }, wait);
                 node.idList.push(id);
-            });
-            
-            node.on("close", function() {
-                for (var i=0; i<node.idList.length; i++ ) {
-                    clearTimeout(node.idList[i]);
+                if ((node.timeout >= 1000) && (node.idList.length !== 0)) {
+                    node.status({fill:"blue",shape:"dot",text:parseInt(wait/10)/100+"s"});
                 }
-                node.idList = [];
+                if (msg.hasOwnProperty("reset")) { clearDelayList(); }
             });
+            node.on("close", function() { clearDelayList(); });
         }
     }
     RED.nodes.registerType("delay",DelayNode);
