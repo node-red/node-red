@@ -50,7 +50,7 @@ RED.utils = (function() {
         }
         return result;
     }
-    function makeExpandable(el,onexpand) {
+    function makeExpandable(el,onexpand,expand) {
         el.addClass("debug-message-expandable");
         el.click(function(e) {
             var parent = $(this).parent();
@@ -65,34 +65,111 @@ RED.utils = (function() {
             }
             e.preventDefault();
         });
+        if (expand) {
+            el.click();
+        }
     }
-    function addMessageControls(obj,key,msg) {
-        var tools = $('<span class="debug-message-tools button-group"></span>').appendTo(obj);
-        var copyPath = $('<button class="editor-button editor-button-small"><i class="fa fa-terminal"></i></button>').appendTo(tools).click(function(e) {
+
+    var pinnedPaths = {};
+
+
+    function addMessageControls(obj,sourceId,key,msg,rootPath,strippedKey) {
+        if (!pinnedPaths.hasOwnProperty(sourceId)) {
+            pinnedPaths[sourceId] = {}
+        }
+        var tools = $('<span class="debug-message-tools"></span>').appendTo(obj);
+        var copyTools = $('<span class="debug-message-tools-copy button-group"></span>').appendTo(tools);
+        var copyPath = $('<button class="editor-button editor-button-small"><i class="fa fa-terminal"></i></button>').appendTo(copyTools).click(function(e) {
             e.preventDefault();
             e.stopPropagation();
             RED.clipboard.copyText(key,copyPath,"clipboard.copyMessagePath");
         })
-        var copyPayload = $('<button class="editor-button editor-button-small"><i class="fa fa-clipboard"></i></button>').appendTo(tools).click(function(e) {
+        var copyPayload = $('<button class="editor-button editor-button-small"><i class="fa fa-clipboard"></i></button>').appendTo(copyTools).click(function(e) {
             e.preventDefault();
             e.stopPropagation();
             RED.clipboard.copyText(msg,copyPayload,"clipboard.copyMessageValue");
         })
+        if (strippedKey !== '') {
+            var isPinned = pinnedPaths[sourceId].hasOwnProperty(strippedKey);
 
+            var pinPath = $('<button class="editor-button editor-button-small debug-message-tools-pin"><i class="fa fa-map-pin"></i></button>').appendTo(tools).click(function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (pinnedPaths[sourceId].hasOwnProperty(strippedKey)) {
+                    delete pinnedPaths[sourceId][strippedKey];
+                    $(this).removeClass("selected");
+                    obj.removeClass("debug-message-row-pinned");
+                } else {
+                    var rootedPath = "$"+(strippedKey[0] === '['?"":".")+strippedKey;
+                    pinnedPaths[sourceId][strippedKey] = normalisePropertyExpression(rootedPath);
+                    $(this).addClass("selected");
+                    obj.addClass("debug-message-row-pinned");
+                }
+            }).toggleClass("selected",isPinned);
+            obj.toggleClass("debug-message-row-pinned",isPinned);
+        }
+    }
+    function checkExpanded(strippedKey,expandPaths,minRange,maxRange) {
+        if (expandPaths && expandPaths.length > 0) {
+            if (strippedKey === '' && minRange === undefined) {
+                return true;
+            }
+            for (var i=0;i<expandPaths.length;i++) {
+                var p = expandPaths[i];
+                if (p.indexOf(strippedKey) === 0 && (p[strippedKey.length] === "." ||  p[strippedKey.length] === "[") ) {
+
+                    if (minRange !== undefined && p[strippedKey.length] === "[") {
+                        var subkey = p.substring(strippedKey.length);
+                        var m = (/\[(\d+)\]/.exec(subkey));
+                        if (m) {
+                            var index = parseInt(m[1]);
+                            return minRange<=index && index<=maxRange;
+                        }
+                    } else {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
-    function buildMessageElement(obj,key,typeHint,hideKey,path) {
+    function buildMessageElement(obj,key,typeHint,hideKey,path,sourceId,rootPath,expandPaths) {
         var i;
         var e;
         var entryObj;
         var header;
         var headerHead;
         var value;
+        var strippedKey;
+        if (path && rootPath) {
+             strippedKey = path.substring(rootPath.length+(path[rootPath.length]==="."?1:0));
+        }
         var element = $('<span class="debug-message-element"></span>');
         header = $('<span class="debug-message-row"></span>').appendTo(element);
-        addMessageControls(header,path,obj);
+        if (sourceId) {
+            addMessageControls(header,sourceId,path,obj,rootPath,strippedKey);
+        }
         if (!key) {
             element.addClass("debug-message-top-level");
+            if (sourceId) {
+                var pinned = pinnedPaths[sourceId];
+                expandPaths = [];
+                if (pinned) {
+                    for (var pinnedPath in pinned) {
+                        if (pinned.hasOwnProperty(pinnedPath)) {
+                            try {
+                                var res = getMessageProperty({$:obj},pinned[pinnedPath]);
+                                if (res !== undefined) {
+                                    expandPaths.push(pinnedPath);
+                                }
+                            } catch(err) {
+                            }
+                        }
+                    }
+                    expandPaths.sort();
+                }
+            }
         } else {
             if (!hideKey) {
                 $('<span class="debug-message-object-key"></span>').text(key).appendTo(header);
@@ -118,7 +195,7 @@ RED.utils = (function() {
                     $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||'string').appendTo(header);
                     var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
                     $('<pre class="debug-message-type-string"></pre>').text(obj).appendTo(row);
-                });
+                },checkExpanded(strippedKey,expandPaths));
             }
             e = $('<span class="debug-message-type-string debug-message-object-header"></span>').html('"'+formatString(sanitize(obj))+'"').appendTo(entryObj);
             if (/^#[0-9a-f]{6}$/i.test(obj)) {
@@ -205,7 +282,7 @@ RED.utils = (function() {
                     if (fullLength <= 10) {
                         for (i=0;i<fullLength;i++) {
                             row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(arrayRows);
-                            buildMessageElement(data[i],""+i,false,false,path+"["+i+"]").appendTo(row);
+                            buildMessageElement(data[i],""+i,false,false,path+"["+i+"]",sourceId,rootPath,expandPaths).appendTo(row);
                         }
                     } else {
                         for (i=0;i<fullLength;i+=10) {
@@ -220,17 +297,17 @@ RED.utils = (function() {
                                 return function() {
                                     for (var i=min;i<=max;i++) {
                                         var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(parent);
-                                        buildMessageElement(data[i],""+i,false,false,path+"["+i+"]").appendTo(row);
+                                        buildMessageElement(data[i],""+i,false,false,path+"["+i+"]",sourceId,rootPath,expandPaths).appendTo(row);
                                     }
                                 }
-                            })());
+                            })(),checkExpanded(strippedKey,expandPaths,minRange,Math.min(fullLength-1,(minRange+9))));
                             $('<span class="debug-message-object-key"></span>').html("["+minRange+" &hellip; "+Math.min(fullLength-1,(minRange+9))+"]").appendTo(header);
                         }
                         if (fullLength < originalLength) {
                              $('<div class="debug-message-object-entry collapsed"><span class="debug-message-object-key">['+fullLength+' &hellip; '+originalLength+']</span></div>').appendTo(arrayRows);
                         }
                     }
-                });
+                },checkExpanded(strippedKey,expandPaths));
             }
             if (key) {
                 headerHead = $('<span class="debug-message-type-meta f"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(entryObj);
@@ -270,12 +347,12 @@ RED.utils = (function() {
                         } else {
                             newPath += "[\""+keys[i].replace(/"/,"\\\"")+"\"]"
                         }
-                        buildMessageElement(obj[keys[i]],keys[i],false,false,newPath).appendTo(row);
+                        buildMessageElement(obj[keys[i]],keys[i],false,false,newPath,sourceId,rootPath,expandPaths).appendTo(row);
                     }
                     if (keys.length === 0) {
                         $('<div class="debug-message-object-entry debug-message-type-meta collapsed"></div>').text("empty").appendTo(element);
                     }
-                });
+                },checkExpanded(strippedKey,expandPaths));
             }
             if (key) {
                 $('<span class="debug-message-type-meta"></span>').html('object').appendTo(entryObj);
@@ -305,14 +382,15 @@ RED.utils = (function() {
         return element;
     }
 
-    function validatePropertyExpression(str) {
-        // This must be kept in sync with normalisePropertyExpression
-        // in red/runtime/util.js
+    function normalisePropertyExpression(str) {
+        // This must be kept in sync with validatePropertyExpression
+        // in editor/js/ui/utils.js
 
         var length = str.length;
         if (length === 0) {
-            return false;
+            throw new Error("Invalid property expression: zero-length");
         }
+        var parts = [];
         var start = 0;
         var inString = false;
         var inBox = false;
@@ -323,58 +401,75 @@ RED.utils = (function() {
             if (!inString) {
                 if (c === "'" || c === '"') {
                     if (i != start) {
-                        return false;
+                        throw new Error("Invalid property expression: unexpected "+c+" at position "+i);
                     }
                     inString = true;
                     quoteChar = c;
                     start = i+1;
                 } else if (c === '.') {
-                    if (i===0 || i===length-1) {
-                        return false;
+                    if (i===0) {
+                        throw new Error("Invalid property expression: unexpected . at position 0");
+                    }
+                    if (start != i) {
+                        v = str.substring(start,i);
+                        if (/^\d+$/.test(v)) {
+                            parts.push(parseInt(v));
+                        } else {
+                            parts.push(v);
+                        }
+                    }
+                    if (i===length-1) {
+                        throw new Error("Invalid property expression: unterminated expression");
                     }
                     // Next char is first char of an identifier: a-z 0-9 $ _
                     if (!/[a-z0-9\$\_]/i.test(str[i+1])) {
-                        return false;
+                        throw new Error("Invalid property expression: unexpected "+str[i+1]+" at position "+(i+1));
                     }
                     start = i+1;
                 } else if (c === '[') {
                     if (i === 0) {
-                        return false;
+                        throw new Error("Invalid property expression: unexpected "+c+" at position "+i);
+                    }
+                    if (start != i) {
+                        parts.push(str.substring(start,i));
                     }
                     if (i===length-1) {
-                        return false;
+                        throw new Error("Invalid property expression: unterminated expression");
                     }
                     // Next char is either a quote or a number
                     if (!/["'\d]/.test(str[i+1])) {
-                        return false;
+                        throw new Error("Invalid property expression: unexpected "+str[i+1]+" at position "+(i+1));
                     }
                     start = i+1;
                     inBox = true;
                 } else if (c === ']') {
                     if (!inBox) {
-                        return false;
+                        throw new Error("Invalid property expression: unexpected "+c+" at position "+i);
                     }
                     if (start != i) {
                         v = str.substring(start,i);
-                        if (!/^\d+$/.test(v)) {
-                            return false;
+                        if (/^\d+$/.test(v)) {
+                            parts.push(parseInt(v));
+                        } else {
+                            throw new Error("Invalid property expression: unexpected array expression at position "+start);
                         }
                     }
                     start = i+1;
                     inBox = false;
                 } else if (c === ' ') {
-                    return false;
+                    throw new Error("Invalid property expression: unexpected ' ' at position "+i);
                 }
             } else {
                 if (c === quoteChar) {
                     if (i-start === 0) {
-                        return false;
+                        throw new Error("Invalid property expression: zero-length string at position "+start);
                     }
-                    // Next char must be a ]
+                    parts.push(str.substring(start,i));
+                    // If inBox, next char must be a ]. Otherwise it may be [ or .
                     if (inBox && !/\]/.test(str[i+1])) {
-                        return false;
+                        throw new Error("Invalid property expression: unexpected array expression at position "+start);
                     } else if (!inBox && i+1!==length && !/[\[\.]/.test(str[i+1])) {
-                        return false;
+                        throw new Error("Invalid property expression: unexpected "+str[i+1]+" expression at position "+(i+1));
                     }
                     start = i+1;
                     inString = false;
@@ -383,9 +478,44 @@ RED.utils = (function() {
 
         }
         if (inBox || inString) {
+            throw new Error("Invalid property expression: unterminated expression");
+        }
+        if (start < length) {
+            parts.push(str.substring(start));
+        }
+        return parts;
+    }
+
+    function validatePropertyExpression(str) {
+        try {
+            var parts = normalisePropertyExpression(str);
+            return true;
+        } catch(err) {
             return false;
         }
-        return true;
+    }
+
+    function getMessageProperty(msg,expr) {
+        var result = null;
+        var msgPropParts;
+
+        if (typeof expr === 'string') {
+            if (expr.indexOf('msg.')===0) {
+                expr = expr.substring(4);
+            }
+            msgPropParts = normalisePropertyExpression(expr);
+        } else {
+            msgPropParts = expr;
+        }
+        var m;
+        msgPropParts.reduce(function(obj, key) {
+            result = (typeof obj[key] !== "undefined" ? obj[key] : undefined);
+            if (result === undefined && obj.hasOwnProperty('type') && obj.hasOwnProperty('data')&& obj.hasOwnProperty('length')) {
+                result = (typeof obj.data[key] !== "undefined" ? obj.data[key] : undefined);
+            }
+            return result;
+        }, msg);
+        return result;
     }
 
     function getNodeIcon(def,node) {
@@ -424,6 +554,8 @@ RED.utils = (function() {
 
     return {
         createObjectElement: buildMessageElement,
+        getMessageProperty: getMessageProperty,
+        normalisePropertyExpression: normalisePropertyExpression,
         validatePropertyExpression: validatePropertyExpression,
         getNodeIcon: getNodeIcon,
         getNodeLabel: getNodeLabel,

@@ -251,7 +251,7 @@ RED.debug = (function() {
         }
         var el = $('<span class="debug-message-payload"></span>').appendTo(msg);
         var path = (o.property?'msg.'+property:'msg');
-        RED.utils.createObjectElement(payload,/*true*/null,format,false,path).appendTo(el);
+        RED.utils.createObjectElement(payload,/*true*/null,format,false,path,sourceNode&&sourceNode.id,path).appendTo(el);
         var atBottom = (sbc.scrollHeight-messageList.height()-sbc.scrollTop) < 5;
         var m = {
             el: msg
