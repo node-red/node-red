@@ -47,9 +47,9 @@ function getContext(localId,flowId) {
     var newContext = createContext(contextId);
     if (flowId) {
         newContext.flow = getContext(flowId);
-        if (globalContext) {
-            newContext.global = globalContext;
-        }
+    }
+    if (globalContext) {
+        newContext.global = globalContext;
     }
     contexts[contextId] = newContext;
     return newContext;

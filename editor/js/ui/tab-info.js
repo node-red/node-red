@@ -213,7 +213,6 @@ RED.sidebar.info = (function() {
                 $('<tr class="node-info-subflow-row"><td>'+RED._("sidebar.info.instances")+"</td><td>"+userCount+'</td></tr>').appendTo(tableBody);
             }
         }
-
         $(table).appendTo(nodeSection.content);
 
         var infoText = "";
