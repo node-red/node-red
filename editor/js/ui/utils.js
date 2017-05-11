@@ -71,7 +71,7 @@ RED.utils = (function() {
     }
 
     var pinnedPaths = {};
-
+    var formattedPaths = {};
 
     function addMessageControls(obj,sourceId,key,msg,rootPath,strippedKey) {
         if (!pinnedPaths.hasOwnProperty(sourceId)) {
@@ -132,6 +132,56 @@ RED.utils = (function() {
             }
         }
         return false;
+    }
+
+    function formatNumber(element,obj,sourceId,path,cycle) {
+        var format = (formattedPaths[sourceId] && formattedPaths[sourceId][path]) || "dec";
+        if (cycle) {
+            if (format === 'dec') {
+                if ((obj.toString().length===13) && (obj<=2147483647000)) {
+                    format = 'dateMS';
+                } else if ((obj.toString().length===10) && (obj<=2147483647)) {
+                    format = 'dateS';
+                } else {
+                    format = 'hex'
+                }
+            } else if (format === 'dateMS' || format == 'dateS') {
+                format = 'hex';
+            } else {
+                format = 'dec';
+            }
+            formattedPaths[sourceId] = formattedPaths[sourceId]||{};
+            formattedPaths[sourceId][path] = format;
+        }
+        if (format === 'dec') {
+            element.text(""+obj);
+        } else if (format === 'dateMS') {
+            element.text((new Date(obj)).toISOString());
+        } else if (format === 'dateS') {
+            element.text((new Date(obj*1000)).toISOString());
+        } else if (format === 'hex') {
+            element.text("0x"+(obj).toString(16));
+        }
+    }
+
+    function formatBuffer(element,button,sourceId,path,cycle) {
+        var format = (formattedPaths[sourceId] && formattedPaths[sourceId][path]) || "raw";
+        if (cycle) {
+            if (format === 'raw') {
+                format = 'string';
+            } else {
+                format = 'raw';
+            }
+            formattedPaths[sourceId] = formattedPaths[sourceId]||{};
+            formattedPaths[sourceId][path] = format;
+        }
+        if (format === 'raw') {
+            button.text('raw');
+            element.removeClass('debug-message-buffer-string').addClass('debug-message-buffer-raw');
+        } else if (format === 'string') {
+            button.text('string');
+            element.addClass('debug-message-buffer-string').removeClass('debug-message-buffer-raw');
+        }
     }
 
     function buildMessageElement(obj,key,typeHint,hideKey,path,sourceId,rootPath,expandPaths) {
@@ -203,23 +253,17 @@ RED.utils = (function() {
             }
 
         } else if (typeof obj === 'number') {
-            e = $('<span class="debug-message-type-number"></span>').text(""+obj).appendTo(entryObj);
+            e = $('<span class="debug-message-type-number"></span>').appendTo(entryObj);
+
             if (Number.isInteger(obj) && (obj >= 0)) { // if it's a +ve integer
                 e.addClass("debug-message-type-number-toggle");
                 e.click(function(evt) {
-                    var format = $(this).data('format') || "date";
-                    if (format === 'dec') {
-                        $(this).text(""+obj).data('format','date');
-                    } else if ((format === 'date') && (obj.toString().length===13) && (obj<=2147483647000)) {
-                        $(this).text((new Date(obj)).toISOString()).data('format','hex');
-                    } else if ((format === 'date') && (obj.toString().length===10) && (obj<=2147483647)) {
-                        $(this).text((new Date(obj*1000)).toISOString()).data('format','hex');
-                    } else {
-                        $(this).text("0x"+(obj).toString(16)).data('format','dec');
-                    }
                     evt.preventDefault();
+                    formatNumber($(this), obj, sourceId, path, true);
                 });
             }
+            formatNumber(e,obj,sourceId,path,false);
+
         } else if (isArray) {
             element.addClass('collapsed');
 
@@ -250,6 +294,28 @@ RED.utils = (function() {
                 $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
                 var arrayRows = $('<div class="debug-message-array-rows"></div>').appendTo(element);
                 element.addClass('debug-message-buffer-raw');
+
+                if (key) {
+                    headerHead = $('<span class="debug-message-type-meta f"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(entryObj);
+                } else {
+                    headerHead = $('<span class="debug-message-object-header"></span>').appendTo(entryObj);
+                    $('<span>[ </span>').appendTo(headerHead);
+                    var arrayLength = Math.min(originalLength,10);
+                    for (i=0;i<arrayLength;i++) {
+                        buildMessageSummaryValue(data[i]).appendTo(headerHead);
+                        if (i < arrayLength-1) {
+                            $('<span>, </span>').appendTo(headerHead);
+                        }
+                    }
+                    if (originalLength > arrayLength) {
+                        $('<span> &hellip;</span>').appendTo(headerHead);
+                    }
+                    if (arrayLength === 0) {
+                        $('<span class="debug-message-type-meta">empty</span>').appendTo(headerHead);
+                    }
+                    $('<span> ]</span>').appendTo(headerHead);
+                }
+
                 makeExpandable(header,function() {
                     if (!key) {
                         headerHead = $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(header);
@@ -257,7 +323,6 @@ RED.utils = (function() {
                     if (type === 'buffer') {
                         var stringRow = $('<div class="debug-message-string-rows"></div>').appendTo(element);
                         var sr = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(stringRow);
-
                         var stringEncoding = "";
                         try {
                             stringEncoding = String.fromCharCode.apply(null, new Uint16Array(data))
@@ -266,17 +331,13 @@ RED.utils = (function() {
                         }
                         $('<pre class="debug-message-type-string"></pre>').text(stringEncoding).appendTo(sr);
                         var bufferOpts = $('<span class="debug-message-buffer-opts"></span>').appendTo(headerHead);
-                        $('<a href="#"></a>').addClass('selected').html('raw').appendTo(bufferOpts).click(function(e) {
-                            if ($(this).text() === 'raw') {
-                                $(this).text('string');
-                                element.addClass('debug-message-buffer-string').removeClass('debug-message-buffer-raw');
-                            } else {
-                                $(this).text('raw');
-                                element.removeClass('debug-message-buffer-string').addClass('debug-message-buffer-raw');
-                            }
+                        var switchFormat = $('<a href="#"></a>').addClass('selected').html('raw').appendTo(bufferOpts).click(function(e) {
                             e.preventDefault();
                             e.stopPropagation();
-                        })
+                            formatBuffer(element,$(this),sourceId,path,true);
+                        });
+                        formatBuffer(element,switchFormat,sourceId,path,false);
+
                     }
                     var row;
                     if (fullLength <= 10) {
@@ -309,27 +370,6 @@ RED.utils = (function() {
                     }
                 },checkExpanded(strippedKey,expandPaths));
             }
-            if (key) {
-                headerHead = $('<span class="debug-message-type-meta f"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(entryObj);
-            } else {
-                headerHead = $('<span class="debug-message-object-header"></span>').appendTo(entryObj);
-                $('<span>[ </span>').appendTo(headerHead);
-                var arrayLength = Math.min(originalLength,10);
-                for (i=0;i<arrayLength;i++) {
-                    buildMessageSummaryValue(data[i]).appendTo(headerHead);
-                    if (i < arrayLength-1) {
-                        $('<span>, </span>').appendTo(headerHead);
-                    }
-                }
-                if (originalLength > arrayLength) {
-                    $('<span> &hellip;</span>').appendTo(headerHead);
-                }
-                if (arrayLength === 0) {
-                    $('<span class="debug-message-type-meta">empty</span>').appendTo(headerHead);
-                }
-                $('<span> ]</span>').appendTo(headerHead);
-            }
-
         } else if (typeof obj === 'object') {
             element.addClass('collapsed');
             var keys = Object.keys(obj);
