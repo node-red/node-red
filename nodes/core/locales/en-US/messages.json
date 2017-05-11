@@ -186,6 +186,7 @@
         "action": "Action",
         "for": "For",
         "delaymsg": "Delay message",
+        "delayvarmsg": "Set delay with msg.delay",
         "randomdelay": "Random delay",
         "limitrate": "Limit rate to",
         "fairqueue": "Topic based fair queue",
@@ -205,6 +206,7 @@
         "dropmsg": "drop intermediate messages",
         "label": {
             "delay": "delay",
+            "variable": "variable",
             "limit": "limit",
             "random": "random",
             "queue": "queue",

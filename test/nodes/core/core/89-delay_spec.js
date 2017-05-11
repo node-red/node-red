@@ -340,6 +340,75 @@ describe('delay Node', function() {
     }
 
     /**
+     * Runs a VARIABLE DELAY test, checks if the delay is in between the given timeout values
+     * @param aTimeoutFrom - the timeout quantity which is the minimal acceptable wait period
+     * @param aTimeoutTo - the timeout quantity which is the maximum acceptable wait period
+     * @param aTimeoutUnit - the unit of the timeout: milliseconds, seconds, minutes, hours, days
+     * @param delay - the variable delay: milliseconds
+     */
+    function variableDelayTest(aTimeoutFrom, aTimeoutTo, aTimeoutUnit, delay, done) {
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delayv","timeout":5,"timeoutUnits":"seconds","rate":"1","rateUnits":"second","randomFirst":aTimeoutFrom,"randomLast":aTimeoutTo,"randomUnits":aTimeoutUnit,"drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            helperNode1.on("input", function(msg) {
+                try {
+                    var endTime = process.hrtime(startTime);
+                    var runtimeNanos = ( (endTime[0] * nanosToSeconds) + endTime[1] );
+                    var runtimeSeconds = runtimeNanos / nanosToSeconds;
+                    var aTimeoutFromUnifiedToSeconds;
+                    var aTimeoutToUnifiedToSeconds;
+
+                    // calculating the timeout in seconds
+                    if (aTimeoutUnit == TimeUnitEnum.MILLIS) {
+                        aTimeoutFromUnifiedToSeconds = aTimeoutFrom / millisToSeconds;
+                        aTimeoutToUnifiedToSeconds = aTimeoutTo / millisToSeconds;
+                    } else if (aTimeoutUnit == TimeUnitEnum.SECONDS) {
+                        aTimeoutFromUnifiedToSeconds = aTimeoutFrom;
+                        aTimeoutToUnifiedToSeconds = aTimeoutTo;
+                    } else if (aTimeoutUnit == TimeUnitEnum.MINUTES) {
+                        aTimeoutFromUnifiedToSeconds = aTimeoutFrom * secondsToMinutes;
+                        aTimeoutToUnifiedToSeconds = aTimeoutTo * secondsToMinutes;
+                    } else if (aTimeoutUnit == TimeUnitEnum.HOURS) {
+                        aTimeoutFromUnifiedToSeconds = aTimeoutFrom * secondsToHours;
+                        aTimeoutToUnifiedToSeconds = aTimeoutTo * secondsToHours;
+                    } else if (aTimeoutUnit == TimeUnitEnum.DAYS) {
+                        aTimeoutFromUnifiedToSeconds = aTimeoutFrom * secondsToDays;
+                        aTimeoutToUnifiedToSeconds = aTimeoutTo * secondsToDays;
+                    }
+
+                    if (inBetweenDelays(aTimeoutFromUnifiedToSeconds, aTimeoutToUnifiedToSeconds, runtimeSeconds, GRACE_PERCENTAGE)) {
+                        done();
+                    } else {
+                        try {
+                            should.fail(null, null, "Delayed runtime seconds " + runtimeSeconds + " was not \"in between enough\" enough to expected values of: " + aTimeoutFromUnifiedToSeconds + " and " + aTimeoutToUnifiedToSeconds);
+                        } catch (err) {
+                            done(err);
+                        }
+                    }
+                } catch(err) {
+                    done(err);
+                }
+            });
+            var startTime = process.hrtime();
+            delayNode1.receive({payload:"delayMe", delay:delay});
+        });
+    }
+
+    it('variable delay set by msg.delay the message in milliseconds', function(done) {
+        variableDelayTest("200", "300", "milliseconds", 250, done);
+    });
+
+    it('variable delay is zero if msg.delay not specified', function(done) {
+        variableDelayTest("0", "50", "milliseconds", null, done);
+    });
+
+    it('variable delay is zero if msg.delay is negative', function(done) {
+        variableDelayTest("0", "50", "milliseconds", -250, done);
+    });
+
+    /**
      * Runs a RANDOM DELAY test, checks if the delay is in between the given timeout values
      * @param aTimeoutFrom - the timeout quantity which is the minimal acceptable wait period
      * @param aTimeoutTo - the timeout quantity which is the maximum acceptable wait period
