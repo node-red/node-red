@@ -391,7 +391,8 @@ module.exports = function(RED) {
         this.out = n.out;
         this.splitc = n.splitc;
 
-        if (this.out != "char") { this.splitc = Number(this.splitc); }
+        if (this.out === "immed") { this.splitc = -1; this.out = "time"; }
+        if (this.out !== "char") { this.splitc = Number(this.splitc); }
         else {
             if (this.splitc[0] == '\\') {
                 this.splitc = parseInt(this.splitc.replace("\\n",0x0A).replace("\\r",0x0D).replace("\\t",0x09).replace("\\e",0x1B).replace("\\f",0x0C).replace("\\0",0x00));
@@ -445,9 +446,10 @@ module.exports = function(RED) {
                         if (clients[connection_id] && clients[connection_id].client) {
                             clients[connection_id].connected = true;
                             clients[connection_id].client.write(clients[connection_id].msg.payload);
-                            if (node.out === "time" && node.splitc === 0) {
-                                clients[connection_id].client.destroy();
+                            if (node.out === "time" && node.splitc < 0) {
                                 clients[connection_id].connected = false;
+                                clients[connection_id].client.end();
+                                delete clients[connection_id];
                                 node.status({});
                             }
                         }
@@ -571,7 +573,6 @@ module.exports = function(RED) {
                     node.status({fill:"red",shape:"ring",text:"common.status.error"});
                     node.error(RED._("tcpin.errors.connect-fail") + " " + connection_id, msg);
                     if (clients[connection_id] && clients[connection_id].client) {
-                        clients[connection_id].connected = false;
                         clients[connection_id].client.destroy();
                         delete clients[connection_id];
                     }
@@ -601,13 +602,14 @@ module.exports = function(RED) {
 
         this.on("close", function(done) {
             node.done = done;
-            for (var client in clients) {
-                if (clients.hasOwnProperty("client")) {
-                    clients[client].client.destroy();
+            for (var cl in clients) {
+                if (clients[cl].hasOwnProperty("client")) {
+                    clients[cl].client.destroy();
                 }
             }
             node.status({});
 
+            // this is probably not necessary and may be removed
             var anyConnected = false;
             for (var c in clients) {
                 if (clients[c].connected) {
@@ -618,8 +620,8 @@ module.exports = function(RED) {
 
             if (!anyConnected) {
                 clients = {};
-                done();
             }
+            done();
         });
 
     }

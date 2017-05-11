@@ -417,7 +417,8 @@
             "timeout": "after a fixed timeout of",
             "character": "when character received is",
             "number": "a fixed number of chars",
-            "never": "never - keep connection open"
+            "never": "never - keep connection open",
+            "immed": "immediately - don't wait for reply"
         },
         "status": {
             "connecting": "connecting to __host__:__port__",

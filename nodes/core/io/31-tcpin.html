@@ -167,7 +167,7 @@
         color:"Silver",
         defaults: {
             host: {value:"",validate:function(v) { return (this.beserver != "client")||v.length > 0;} },
-            port: {value:"",validate:function(v) { return (this.beserver == "reply")||RED.validators.number()(v) } },
+            port: {value:"",validate:function(v) { return (this.beserver == "reply")||RED.validators.number()(v); } },
             beserver: {value:"client",required:true},
             base64: {value:false,required:true},
             end: {value:false,required:true},
@@ -221,8 +221,9 @@
             <option value="char" data-i18n="tcpin.return.character"></option>
             <option value="count" data-i18n="tcpin.return.number"></option>
             <option value="sit" data-i18n="tcpin.return.never"></option>
+            <option value="immed" data-i18n="tcpin.return.immed"></option>
         </select>
-        <input type="text" id="node-input-splitc"  style="width:50px;">
+        <input type="text" id="node-input-splitc" style="width:50px;">
         <span id="node-units"></span>
     </div>
     <div class="form-row">
@@ -235,7 +236,8 @@
     <p>A simple TCP request node - sends the <code>msg.payload</code> to a server tcp port and expects a response.</p>
     <p>Connects, sends the "request", and reads the "response". It can either count a number of
     returned characters into a fixed buffer, match a specified character before returning,
-    wait a fixed timeout from first reply and then return, or just sit and wait for data.</p>
+    wait a fixed timeout from first reply and then return, sit and wait for data, or send then close the connection
+    immediately, without waiting for a reply.</p>
     <p>The response will be output in <code>msg.payload</code> as a buffer, so you may want to .toString() it.</p>
     <p>If you leave tcp host or port blank they must be set by using the <code>msg.host</code> and <code>msg.port</code> properties.</p>
     <p><b>Note: </b>Setting a timeout of 0 mS will return immediately and close the connection, without waiting for any reply.</p>
@@ -247,7 +249,7 @@
         color:"Silver",
         defaults: {
             server: {value:""},
-            port: {value:"",validate:RED.validators.regex(/^(\d*|)$/)},
+            port: {value:"",validate:RED.validators.regex(/^( \d*|)$/)},
             out: {value:"time",required:true},
             splitc: {value:"0",required:true},
             name: {value:""}
@@ -264,21 +266,25 @@
         oneditprepare: function() {
             var previous = null;
             $("#node-input-out").on('focus', function () { previous = this.value; }).change(function() {
-                if (previous == null) { previous = $("#node-input-out").val(); }
+                if (previous === null) { previous = $("#node-input-out").val(); }
                 if ($("#node-input-out").val() == "char") {
-                    if (previous != "char") $("#node-input-splitc").val("\\n");
+                    if (previous != "char") { $("#node-input-splitc").val("\\n"); }
                     $("#node-units").text("");
                 }
                 else if ($("#node-input-out").val() == "time") {
-                    if (previous != "time") $("#node-input-splitc").val("0");
+                    if (previous != "time") { $("#node-input-splitc").val("0"); }
                     $("#node-units").text("ms");
                 }
+                else if ($("#node-input-out").val() == "immed") {
+                    if (previous != "immed") { $("#node-input-splitc").val(" "); }
+                    $("#node-units").text("");
+                }
                 else if ($("#node-input-out").val() == "count") {
-                    if (previous != "count") $("#node-input-splitc").val("12");
+                    if (previous != "count") { $("#node-input-splitc").val("12"); }
                     $("#node-units").text("chars");
                 }
                 else {
-                    if (previous != "sit") $("#node-input-splitc").val("0");
+                    if (previous != "sit") { $("#node-input-splitc").val("0"); }
                     $("#node-units").text("");
                 }
             });
