@@ -134,8 +134,8 @@ RED.utils = (function() {
         return false;
     }
 
-    function formatNumber(element,obj,sourceId,path,cycle) {
-        var format = (formattedPaths[sourceId] && formattedPaths[sourceId][path]) || "dec";
+    function formatNumber(element,obj,sourceId,path,cycle,initialFormat) {
+        var format = (formattedPaths[sourceId] && formattedPaths[sourceId][path]) || initialFormat || "dec";
         if (cycle) {
             if (format === 'dec') {
                 if ((obj.toString().length===13) && (obj<=2147483647000)) {
@@ -150,6 +150,9 @@ RED.utils = (function() {
             } else {
                 format = 'dec';
             }
+            formattedPaths[sourceId] = formattedPaths[sourceId]||{};
+            formattedPaths[sourceId][path] = format;
+        } else if (initialFormat !== undefined){
             formattedPaths[sourceId] = formattedPaths[sourceId]||{};
             formattedPaths[sourceId][path] = format;
         }
@@ -262,7 +265,7 @@ RED.utils = (function() {
                     formatNumber($(this), obj, sourceId, path, true);
                 });
             }
-            formatNumber(e,obj,sourceId,path,false);
+            formatNumber(e,obj,sourceId,path,false,typeHint==='hex'?'hex':undefined);
 
         } else if (isArray) {
             element.addClass('collapsed');
@@ -343,7 +346,7 @@ RED.utils = (function() {
                     if (fullLength <= 10) {
                         for (i=0;i<fullLength;i++) {
                             row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(arrayRows);
-                            buildMessageElement(data[i],""+i,false,false,path+"["+i+"]",sourceId,rootPath,expandPaths).appendTo(row);
+                            buildMessageElement(data[i],""+i,type==='buffer'?'hex':false,false,path+"["+i+"]",sourceId,rootPath,expandPaths).appendTo(row);
                         }
                     } else {
                         for (i=0;i<fullLength;i+=10) {
@@ -358,7 +361,7 @@ RED.utils = (function() {
                                 return function() {
                                     for (var i=min;i<=max;i++) {
                                         var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(parent);
-                                        buildMessageElement(data[i],""+i,false,false,path+"["+i+"]",sourceId,rootPath,expandPaths).appendTo(row);
+                                        buildMessageElement(data[i],""+i,type==='buffer'?'hex':false,false,path+"["+i+"]",sourceId,rootPath,expandPaths).appendTo(row);
                                     }
                                 }
                             })(),checkExpanded(strippedKey,expandPaths,minRange,Math.min(fullLength-1,(minRange+9))));
