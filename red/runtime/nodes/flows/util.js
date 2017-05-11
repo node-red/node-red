@@ -203,6 +203,13 @@ module.exports = {
         var linkMap = {};
 
         var changedTabs = {};
+        
+        // Look for tabs that have been removed
+        for (id in oldConfig.flows) {
+            if (oldConfig.flows.hasOwnProperty(id) && (!newConfig.flows.hasOwnProperty(id))) {
+                removed[id] = oldConfig.allNodes[id];
+            }
+        }
 
         // Look for tabs that have been disabled
         for (id in oldConfig.flows) {
