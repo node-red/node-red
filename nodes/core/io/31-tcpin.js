@@ -467,10 +467,10 @@ module.exports = function(RED) {
                             node.send(RED.util.cloneMessage(clients[connection_id].msg));
                         }
                     }
-                    else if (node.splitc === 0) {
-                        clients[connection_id].msg.payload = data;
-                        node.send(clients[connection_id].msg);
-                    }
+                    // else if (node.splitc === 0) {
+                    //     clients[connection_id].msg.payload = data;
+                    //     node.send(clients[connection_id].msg);
+                    // }
                     else {
                         for (var j = 0; j < data.length; j++ ) {
                             if (node.out === "time") {
@@ -617,10 +617,7 @@ module.exports = function(RED) {
                     break;
                 }
             }
-
-            if (!anyConnected) {
-                clients = {};
-            }
+            if (!anyConnected) { clients = {}; }
             done();
         });
 

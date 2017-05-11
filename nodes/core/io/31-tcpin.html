@@ -21,7 +21,7 @@
             <option value="server" data-i18n="tcpin.type.listen"></option>
             <option value="client" data-i18n="tcpin.type.connect"></option>
         </select>
-        <span data-i18n="tcpin.label.port"></span> <input type="text" id="node-input-port" style="width: 65px">
+        <span data-i18n="tcpin.label.port"></span> <input type="text" id="node-input-port" style="width:65px">
     </div>
     <div class="form-row hidden" id="node-input-host-row" style="padding-left: 110px;">
         <span data-i18n="tcpin.label.host"></span> <input type="text" id="node-input-host" placeholder="localhost" style="width: 60%;">
@@ -41,8 +41,8 @@
         <span data-i18n="tcpin.label.payload"></span>
     </div>
 
-    <div id="node-row-newline" class="form-row hidden" style="padding-left: 110px;">
-        <span data-i18n="tcpin.label.delimited"></span> <input type="text" id="node-input-newline" style="width: 110px;">
+    <div id="node-row-newline" class="form-row hidden" style="padding-left:110px;">
+        <span data-i18n="tcpin.label.delimited"></span> <input type="text" id="node-input-newline" style="width:110px;">
     </div>
 
     <div class="form-row">
@@ -249,7 +249,7 @@
         color:"Silver",
         defaults: {
             server: {value:""},
-            port: {value:"",validate:RED.validators.regex(/^( \d*|)$/)},
+            port: {value:"",validate:RED.validators.regex(/^(\d*|)$/)},
             out: {value:"time",required:true},
             splitc: {value:"0",required:true},
             name: {value:""}
@@ -284,7 +284,7 @@
                     $("#node-units").text("chars");
                 }
                 else {
-                    if (previous != "sit") { $("#node-input-splitc").val("0"); }
+                    if (previous != "sit") { $("#node-input-splitc").val(" "); }
                     $("#node-units").text("");
                 }
             });
