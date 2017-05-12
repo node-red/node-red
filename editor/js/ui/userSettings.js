@@ -110,7 +110,7 @@ RED.userSettings = (function() {
         {
             title: "Nodes",
             options: [
-                {setting:"view-node-status",label:"menu.label.displayStatus",toggle:true,onchange:"core:toggle-status", selected: true}
+                {setting:"view-node-status",label:"menu.label.displayStatus",default: true, toggle:true,onchange:"core:toggle-status"}
             ]
         },
         {
