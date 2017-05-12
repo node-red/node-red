@@ -92,7 +92,8 @@ RED.menu = (function() {
             menuItems[opt.id] = opt;
 
             if (opt.onselect) {
-                link.click(function() {
+                link.click(function(e) {
+                    e.preventDefault();
                     if ($(this).parent().hasClass("disabled")) {
                         return;
                     }
@@ -150,15 +151,13 @@ RED.menu = (function() {
     }
     function createMenu(options) {
 
-        var button = $("#"+options.id);
+        var menuParent = $("#"+options.id);
 
-        //button.click(function(event) {
-        //    $("#"+options.id+"-submenu").show();
-        //    event.preventDefault();
-        //});
+        var topMenu = $("<ul/>",{id:options.id+"-submenu", class:"dropdown-menu pull-right"});
 
-
-        var topMenu = $("<ul/>",{id:options.id+"-submenu", class:"dropdown-menu pull-right"}).insertAfter(button);
+        if (menuParent.length === 1) {
+            topMenu.insertAfter(menuParent);
+        }
 
         var lastAddedSeparator = false;
         for (var i=0;i<options.options.length;i++) {
@@ -171,6 +170,8 @@ RED.menu = (function() {
                 }
             }
         }
+
+        return topMenu;
     }
 
     function triggerAction(id, args) {

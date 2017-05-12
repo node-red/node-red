@@ -178,6 +178,36 @@ RED.debug = (function() {
         return str.replace(/\n/g,"&crarr;").replace(/\t/g,"&rarr;");
     }
 
+
+    var menuOptionMenu;
+    var activeMenuMessage;
+    function showMessageMenu(button,dbgMessage,sourceId) {
+        activeMenuMessage = dbgMessage;
+        if (!menuOptionMenu) {
+            menuOptionMenu = RED.menu.init({id:"debug-message-option-menu",
+                options: [
+                    {id:"debug-message-menu-item-collapse",label:RED._("node-red:debug.messageMenu.collapseAll"),onselect:function(){
+                        activeMenuMessage.collapse();
+                    }},
+                    {id:"debug-message-menu-item-clear-pins",label:RED._("node-red:debug.messageMenu.clearPinned"),onselect:function(){
+                        activeMenuMessage.clearPinned();
+                    }}
+                ]
+            });
+            menuOptionMenu.css({
+                position: "absolute"
+            })
+            menuOptionMenu.on('mouseleave', function(){ $(this).hide() });
+            menuOptionMenu.on('mouseup', function() { $(this).hide() });
+            menuOptionMenu.appendTo("body");
+        }
+        var elementPos = button.offset();
+        menuOptionMenu.css({
+            top: elementPos.top+"px",
+            left: (elementPos.left - menuOptionMenu.width() + 20)+"px"
+        })
+        menuOptionMenu.show();
+    }
     function handleDebugMessage(o) {
         var msg = document.createElement("div");
 
@@ -214,25 +244,7 @@ RED.debug = (function() {
         } else if (name) {
             $('<span class="debug-message-name">'+name+'</span>').appendTo(metaRow);
         }
-        // NOTE: relying on function error to have a "type" that all other msgs don't
-        if (o.hasOwnProperty("type") && (o.type === "function")) {
-            var errorLvlType = 'error';
-            var errorLvl = 20;
-            if (o.hasOwnProperty("level") && o.level === 30) {
-                errorLvl = 30;
-                errorLvlType = 'warn';
-            }
-            $(msg).addClass('debug-message-level-' + errorLvl);
-            $('<span class="debug-message-topic">function : (' + errorLvlType + ')</span>').appendTo(metaRow);
-        } else {
-            // var tools = $('<span class="debug-message-tools button-group"></span>').appendTo(metaRow);
-            // var filterMessage = $('<button class="editor-button editor-button-small"><i class="fa fa-filter"></i></button>').appendTo(tools);
 
-            $('<span class="debug-message-topic">'+
-                (o.topic?topic+' : ':'')+
-                (o.property?'msg.'+property:'msg')+" : "+format+
-                '</span>').appendTo(metaRow);
-        }
         if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
             payload = JSON.parse(payload);
         } else if (/error/i.test(format)) {
@@ -251,7 +263,33 @@ RED.debug = (function() {
         }
         var el = $('<span class="debug-message-payload"></span>').appendTo(msg);
         var path = o.property||'';
-        RED.utils.createObjectElement(payload,/*true*/null,format,false,path,sourceNode&&sourceNode.id,path).appendTo(el);
+        var debugMessage = RED.utils.createObjectElement(payload,/*true*/null,format,false,path,sourceNode&&sourceNode.id,path);
+        // Do this in a separate step so the element functions aren't stripped
+        debugMessage.appendTo(el);
+        // NOTE: relying on function error to have a "type" that all other msgs don't
+        if (o.hasOwnProperty("type") && (o.type === "function")) {
+            var errorLvlType = 'error';
+            var errorLvl = 20;
+            if (o.hasOwnProperty("level") && o.level === 30) {
+                errorLvl = 30;
+                errorLvlType = 'warn';
+            }
+            $(msg).addClass('debug-message-level-' + errorLvl);
+            $('<span class="debug-message-topic">function : (' + errorLvlType + ')</span>').appendTo(metaRow);
+        } else {
+            var tools = $('<span class="debug-message-tools button-group"></span>').appendTo(metaRow);
+            var filterMessage = $('<button class="editor-button editor-button-small"><i class="fa fa-ellipsis-h"></i></button>').appendTo(tools);
+            filterMessage.click(function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                showMessageMenu(filterMessage,debugMessage,sourceNode&&sourceNode.id);
+            });
+            $('<span class="debug-message-topic">'+
+                (o.topic?topic+' : ':'')+
+                (o.property?'msg.'+property:'msg')+" : "+format+
+                '</span>').appendTo(metaRow);
+        }
+
         var atBottom = (sbc.scrollHeight-messageList.height()-sbc.scrollTop) < 5;
         var m = {
             el: msg

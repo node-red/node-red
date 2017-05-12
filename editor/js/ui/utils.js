@@ -201,6 +201,9 @@ RED.utils = (function() {
              strippedKey = path.substring(rootPath.length+(path[rootPath.length]==="."?1:0));
         }
         var element = $('<span class="debug-message-element"></span>');
+        element.collapse = function() {
+            element.find(".debug-message-expandable").parent().addClass("collapsed");
+        }
         header = $('<span class="debug-message-row"></span>').appendTo(element);
         if (sourceId) {
             addMessageControls(header,sourceId,path,obj,rootPath,strippedKey);
@@ -223,6 +226,10 @@ RED.utils = (function() {
                         }
                     }
                     expandPaths.sort();
+                }
+                element.clearPinned = function() {
+                    element.find(".debug-message-row-pinned").removeClass("debug-message-row-pinned");
+                    pinnedPaths[sourceId] = {};
                 }
             }
         } else {

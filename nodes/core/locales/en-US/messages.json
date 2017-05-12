@@ -114,6 +114,10 @@
             "name": "Debug messages",
             "filterAll": "all flows",
             "filterCurrent": "current flow"
+        },
+        "messageMenu": {
+            "collapseAll": "Collapse all paths",
+            "clearPinned": "Clear pinned paths"
         }
     },
     "link": {
