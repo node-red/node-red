@@ -879,14 +879,26 @@ RED.editor = (function() {
                         var inputLabels = $("#node-label-form-inputs").children().find("input");
                         var outputLabels = $("#node-label-form-outputs").children().find("input");
 
-                        newValue = inputLabels.map(function() { return $(this).val();}).toArray().slice(0,editing_node.inputs);
-                        if (JSON.stringify(newValue) !== JSON.stringify(editing_node.inputLabels)) {
+                        var hasNonBlankLabel = false;
+                        newValue = inputLabels.map(function() {
+                            var v = $(this).val();
+                            hasNonBlankLabel = hasNonBlankLabel || v!== "";
+                            return v;
+                        }).toArray().slice(0,editing_node.inputs);
+                        if ((editing_node.inputLabels === undefined && hasNonBlankLabel) ||
+                            (editing_node.inputLabels !== undefined && JSON.stringify(newValue) !== JSON.stringify(editing_node.inputLabels))) {
                             changes.inputLabels = editing_node.inputLabels;
                             editing_node.inputLabels = newValue;
                             changed = true;
                         }
-                        newValue = outputLabels.map(function() { return $(this).val();}).toArray().slice(0,editing_node.outputs);
-                        if (JSON.stringify(newValue) !== JSON.stringify(editing_node.outputLabels)) {
+                        hasNonBlankLabel = false;
+                        newValue = outputLabels.map(function() {
+                            var v = $(this).val();
+                            hasNonBlankLabel = hasNonBlankLabel || v!== "";
+                            return v;
+                        }).toArray().slice(0,editing_node.outputs);
+                        if ((editing_node.outputLabels === undefined && hasNonBlankLabel) ||
+                            (editing_node.outputLabels !== undefined && JSON.stringify(newValue) !== JSON.stringify(editing_node.outputLabels))) {
                             changes.outputLabels = editing_node.outputLabels;
                             editing_node.outputLabels = newValue;
                             changed = true;
