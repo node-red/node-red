@@ -79,11 +79,13 @@ RED.utils = (function() {
         }
         var tools = $('<span class="debug-message-tools"></span>').appendTo(obj);
         var copyTools = $('<span class="debug-message-tools-copy button-group"></span>').appendTo(tools);
-        var copyPath = $('<button class="editor-button editor-button-small"><i class="fa fa-terminal"></i></button>').appendTo(copyTools).click(function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            RED.clipboard.copyText(key,copyPath,"clipboard.copyMessagePath");
-        })
+        if (!!key) {
+            var copyPath = $('<button class="editor-button editor-button-small"><i class="fa fa-terminal"></i></button>').appendTo(copyTools).click(function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                RED.clipboard.copyText(key,copyPath,"clipboard.copyMessagePath");
+            })
+        }
         var copyPayload = $('<button class="editor-button editor-button-small"><i class="fa fa-clipboard"></i></button>').appendTo(copyTools).click(function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -195,7 +197,7 @@ RED.utils = (function() {
         var headerHead;
         var value;
         var strippedKey;
-        if (path && rootPath) {
+        if (path !== undefined && rootPath !== undefined) {
              strippedKey = path.substring(rootPath.length+(path[rootPath.length]==="."?1:0));
         }
         var element = $('<span class="debug-message-element"></span>');
@@ -386,7 +388,7 @@ RED.utils = (function() {
                         var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
                         var newPath = path;
                         if (/^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(keys[i])) {
-                            newPath += "."+keys[i];
+                            newPath += (newPath.length > 0?".":"")+keys[i];
                         } else {
                             newPath += "[\""+keys[i].replace(/"/,"\\\"")+"\"]"
                         }
