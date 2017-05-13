@@ -138,14 +138,14 @@
 
         var nodeList = $("#node-input-link-container");
         var candidateNodes = RED.nodes.filterNodes({type:targetType});
-        var inSubflow = (RED.nodes.subflow(node.z) !== null);
+        var inSubflow = !!RED.nodes.subflow(node.z);
         candidateNodes.forEach(function(n) {
             if (inSubflow) {
                 if (n.z !== node.z) {
                     return;
                 }
             } else {
-                if (RED.nodes.subflow(n.z) !== null) {
+                if (!!RED.nodes.subflow(n.z)) {
                     return;
                 }
             }
