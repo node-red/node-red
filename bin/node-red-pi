@@ -22,7 +22,7 @@ ARGS=""
 for arg in "$@"
 do
    case $arg in
-      --userDir|--settings|--help) ARGS="$ARGS $arg";;
+      --userDir|--credDir|--settings|--help) ARGS="$ARGS $arg";;
             --*) OPTIONS="$OPTIONS $arg";;
               *) ARGS="$ARGS $arg";;
    esac

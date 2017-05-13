@@ -32,7 +32,6 @@ var flowsFullPath;
 var flowsFileBackup;
 var credentialsFile;
 var credentialsFileBackup;
-var oldCredentialsFile;
 var sessionsFile;
 var libDir;
 var libFlowsDir;
@@ -215,11 +214,10 @@ var localfilesystem = {
         var ffName = fspath.basename(flowsFullPath);
         var ffBase = fspath.basename(flowsFullPath,ffExt);
         var ffDir = fspath.dirname(flowsFullPath);
-
-        credentialsFile = fspath.join(settings.userDir,ffBase+"_cred"+ffExt);
-        credentialsFileBackup = fspath.join(settings.userDir,"."+ffBase+"_cred"+ffExt+".backup");
-
-        oldCredentialsFile = fspath.join(settings.userDir,"credentials.json");
+        
+        var credDir = settings.credDir || settings.userDir;
+        credentialsFile = fspath.join(credDir,ffBase+"_cred"+ffExt);
+        credentialsFileBackup = fspath.join(credDir,"."+ffBase+"_cred"+ffExt+".backup");
 
         flowsFileBackup = fspath.join(ffDir,"."+ffName+".backup");
 

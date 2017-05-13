@@ -38,6 +38,7 @@ var knownOpts = {
     "settings": [path],
     "title": String,
     "userDir": [path],
+    "credDir": [path],
     "verbose": Boolean
 };
 var shortHands = {
@@ -48,6 +49,7 @@ var shortHands = {
     // doesn't get treated as --title
     "t":["--help"],
     "u":["--userDir"],
+    "c":["--credDir"],
     "v":["--verbose"]
 };
 nopt.invalidHandler = function(k,v,t) {
@@ -66,6 +68,7 @@ if (parsedArgs.help) {
     console.log("  -s, --settings FILE  use specified settings file");
     console.log("      --title    TITLE process window title");
     console.log("  -u, --userDir  DIR   use specified user directory");
+    console.log("  -c  --credDir  DIR   use specified credentials directory");
     console.log("  -v, --verbose        enable verbose output");
     console.log("  -?, --help           show this help");
     console.log("");
@@ -172,6 +175,9 @@ if (flowFile) {
 }
 if (parsedArgs.userDir) {
     settings.userDir = parsedArgs.userDir;
+}
+if (parsedArgs.credDir) {
+    settings.credDir = parsedArgs.credDir;
 }
 
 try {
