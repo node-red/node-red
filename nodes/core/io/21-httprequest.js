@@ -41,6 +41,10 @@ module.exports = function(RED) {
         if (process.env.no_proxy != null) { noprox = process.env.no_proxy.split(","); }
         if (process.env.NO_PROXY != null) { noprox = process.env.NO_PROXY.split(","); }
 
+       this.on('uncaughtException', function (err) {
+          node.error('http-request error' + err.name +  ':' + err.message);
+        });
+
         this.on("input",function(msg) {
             var preRequestTimestamp = process.hrtime();
             node.status({fill:"blue",shape:"dot",text:"httpin.status.requesting"});
