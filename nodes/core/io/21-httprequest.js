@@ -53,9 +53,13 @@ module.exports = function(RED) {
             }
             if (!url) {
                 node.error(RED._("httpin.errors.no-url"),msg);
-                return;
             }
             // url must start http:// or https:// so assume http:// if not set
+            if (url.indexOf("://") !== -1 && url.indexOf("http") !== 0) {
+                node.warn(RED._("httpin.errors.invalid-transport"));
+                node.status({fill:"red",shape:"ring",text:"httpin.errors.invalid-transport"});
+                return;
+            }
             if (!((url.indexOf("http://") === 0) || (url.indexOf("https://") === 0))) {
                 if (tlsNode) {
                     url = "https://"+url;

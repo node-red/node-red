@@ -355,7 +355,8 @@
             "no-response": "No response object",
             "json-error": "JSON parse error",
             "no-url": "No url specified",
-            "deprecated-call":"Deprecated call to __method__"
+            "deprecated-call":"Deprecated call to __method__",
+            "invalid-transport":"non-http transport requested"
         },
         "status": {
             "requesting": "requesting"
