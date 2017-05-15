@@ -177,6 +177,9 @@ module.exports = function(RED) {
                 return;
             }
             this.url = n.url;
+            if (this.url[0] !== '/') {
+                this.url = '/'+this.url;
+            }
             this.method = n.method;
             this.upload = n.upload;
             this.swaggerDoc = n.swaggerDoc;
