@@ -297,3 +297,24 @@
     position: absolute;
     top: -3000px;
 }
+.node-label-form-row {
+    margin: 5px 0;
+    label {
+        margin-right: 20px;
+        text-align: right;
+        width: 30px;
+    }
+    button {
+        margin-left: 10px;
+    }
+    input {
+        width: calc(100% - 100px);
+    }
+}
+.node-label-form-none {
+    span {
+        padding-left: 50px;
+        width: 100px;
+        color: #999;
+    }
+}

@@ -563,13 +563,25 @@ RED.editor = (function() {
 
         var inputCount = node.inputs || node._def.inputs || 0;
         var children = inputsDiv.children();
-        if (children.length < inputCount) {
-            for (i = children.length;i<inputCount;i++) {
+        var childCount = children.length;
+        if (childCount === 1 && $(children[0]).hasClass('node-label-form-none')) {
+            childCount--;
+        }
+
+        if (childCount < inputCount) {
+            if (childCount === 0) {
+                // remove the 'none' placeholder
+                $(children[0]).remove();
+            }
+            for (i = childCount;i<inputCount;i++) {
                 buildLabelRow("input",i,"",inputPlaceholder).appendTo(inputsDiv);
             }
-        } else if (children.length > inputCount) {
-            for (i=inputCount;i<children.length;i++) {
+        } else if (childCount > inputCount) {
+            for (i=inputCount;i<childCount;i++) {
                 $(children[i]).remove();
+            }
+            if (outputCount === 0) {
+                buildLabelRow().appendTo(inputsDiv);
             }
         }
 
@@ -582,12 +594,24 @@ RED.editor = (function() {
         } else if (isNaN(formOutputs)) {
             var outputMap = JSON.parse(formOutputs);
             var keys = Object.keys(outputMap);
+            children = outputsDiv.children();
+            childCount = children.length;
+            if (childCount === 1 && $(children[0]).hasClass('node-label-form-none')) {
+                childCount--;
+            }
+
             outputCount = 0;
             var rows = [];
             keys.forEach(function(p) {
                 var row = $("#node-label-form-output-"+p).parent();
                 if (row.length === 0 && outputMap[p] !== -1) {
+                    if (childCount === 0) {
+                        $(children[0]).remove();
+                        childCount = -1;
+                    }
                     row = buildLabelRow("output",p,"",outputPlaceholder);
+                } else {
+                    row.detach();
                 }
                 if (outputMap[p] !== -1) {
                     outputCount++;
@@ -597,35 +621,56 @@ RED.editor = (function() {
             rows.sort(function(A,B) {
                 return A.i-B.i;
             })
-            outputsDiv.children().detach();
             rows.forEach(function(r,i) {
                 r.r.find("label").html((i+1)+".");
                 r.r.appendTo(outputsDiv);
             })
+            if (rows.length === 0) {
+                buildLabelRow("output",i,"").appendTo(outputsDiv);
+            } else {
+
+            }
         } else {
             outputCount = Math.max(0,parseInt(formOutputs));
         }
         children = outputsDiv.children();
-        if (children.length < outputCount) {
-            for (i = children.length;i<outputCount;i++) {
+        childCount = children.length;
+        if (childCount === 1 && $(children[0]).hasClass('node-label-form-none')) {
+            childCount--;
+        }
+        if (childCount < outputCount) {
+            if (childCount === 0) {
+                // remove the 'none' placeholder
+                $(children[0]).remove();
+            }
+            for (i = childCount;i<outputCount;i++) {
                 buildLabelRow("output",i,"").appendTo(outputsDiv);
             }
-        } else if (children.length > outputCount) {
-            for (i=outputCount;i<children.length;i++) {
+        } else if (childCount > outputCount) {
+            for (i=outputCount;i<childCount;i++) {
                 $(children[i]).remove();
+            }
+            if (outputCount === 0) {
+                buildLabelRow().appendTo(outputsDiv);
             }
         }
     }
     function buildLabelRow(type, index, value, placeHolder) {
-        var result = $('<div>',{style:"margin: 5px 0px"});
-        var id = "node-label-form-"+type+"-"+index;
-        $('<label>',{for:id,style:"margin-right: 20px; text-align: right; width: 30px;"}).html((index+1)+".").appendTo(result);
-        var input = $('<input>',{type:"text",id:id, placeholder: placeHolder}).val(value).appendTo(result);
-        var clear = $('<button class="editor-button editor-button-small" style="margin-left: 10px"><i class="fa fa-times"></i></button>').appendTo(result);
-        clear.click(function(evt) {
-            evt.preventDefault();
-            input.val("");
-        })
+        var result = $('<div>',{class:"node-label-form-row"});
+        if (type === undefined) {
+            $('<span>').html("none").appendTo(result);
+            result.addClass("node-label-form-none");
+        } else {
+            result.addClass("");
+            var id = "node-label-form-"+type+"-"+index;
+            $('<label>',{for:id}).html((index+1)+".").appendTo(result);
+            var input = $('<input>',{type:"text",id:id, placeholder: placeHolder}).val(value).appendTo(result);
+            var clear = $('<button class="editor-button editor-button-small"><i class="fa fa-times"></i></button>').appendTo(result);
+            clear.click(function(evt) {
+                evt.preventDefault();
+                input.val("");
+            })
+        }
         return result;
     }
     function buildLabelForm(container,node) {
@@ -645,23 +690,23 @@ RED.editor = (function() {
         var outputPlaceholder = node._def.outputLabels?RED._("editor.defaultLabel"):RED._("editor.noDefaultLabel");
 
         var i,row;
-        $('<div class="form-row"><i class="fa fa-tag"></i> <span data-i18n="editor.labelInputs"></span><div id="node-label-form-inputs"></div></div>').appendTo(dialogForm);
+        $('<div class="form-row"><span data-i18n="editor.labelInputs"></span><div id="node-label-form-inputs"></div></div>').appendTo(dialogForm);
         var inputsDiv = $("#node-label-form-inputs");
         if (inputCount > 0) {
             for (i=0;i<inputCount;i++) {
                 buildLabelRow("input",i,inputLabels[i],inputPlaceholder).appendTo(inputsDiv);
             }
         } else {
-
+            buildLabelRow().appendTo(inputsDiv);
         }
-        $('<div class="form-row"><i class="fa fa-tag"></i> <span data-i18n="editor.labelOutputs"></span><div id="node-label-form-outputs"></div></div>').appendTo(dialogForm);
+        $('<div class="form-row"><span data-i18n="editor.labelOutputs"></span><div id="node-label-form-outputs"></div></div>').appendTo(dialogForm);
         var outputsDiv = $("#node-label-form-outputs");
         if (outputCount > 0) {
             for (i=0;i<outputCount;i++) {
                 buildLabelRow("output",i,outputLabels[i],outputPlaceholder).appendTo(outputsDiv);
             }
         } else {
-
+            buildLabelRow().appendTo(outputsDiv);
         }
     }
 
