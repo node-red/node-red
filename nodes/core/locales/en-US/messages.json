@@ -169,7 +169,8 @@
             "outputs": "Outputs"
         },
         "error": {
-            "inputListener":"Cannot add listener to 'input' event within Function"
+            "inputListener":"Cannot add listener to 'input' event within Function",
+            "non-message-returned":"Function tried to send a message of type __type__"
         },
         "tip": "See the Info tab for help writing functions."
     },

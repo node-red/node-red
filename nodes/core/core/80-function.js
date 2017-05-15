@@ -28,17 +28,22 @@ module.exports = function(RED) {
         var msgCount = 0;
         for (var m=0;m<msgs.length;m++) {
             if (msgs[m]) {
-                if (util.isArray(msgs[m])) {
-                    for (var n=0; n < msgs[m].length; n++) {
-                        if (msgs[m][n] !== null && msgs[m][n] !== undefined) {
-                            msgs[m][n]._msgid = _msgid;
+                if (!util.isArray(msgs[m])) {
+                    msgs[m] = [msgs[m]];
+                }
+                for (var n=0; n < msgs[m].length; n++) {
+                    var msg = msgs[m][n];
+                    if (msg !== null && msg !== undefined) {
+                        if (typeof msg === 'object' && !Buffer.isBuffer(msg) && !util.isArray(msg)) {
+                            msg._msgid = _msgid;
                             msgCount++;
+                        } else {
+                            var type = typeof msg;
+                            if (type === 'object') {
+                                type = Buffer.isBuffer(msg)?'Buffer':(util.isArray(msg)?'Array':'Date');
+                            }
+                            node.error(RED._("function.error.non-message-returned",{ type: type }))
                         }
-                    }
-                } else {
-                    if (msgs[m] !== null && msgs[m] !== undefined) {
-                        msgs[m]._msgid = _msgid;
-                        msgCount++;
                     }
                 }
             }
