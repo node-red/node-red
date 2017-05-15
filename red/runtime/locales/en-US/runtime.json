@@ -99,6 +99,7 @@
             "stopped-modified-flows": "Stopped modified flows",
             "stopped-flows": "Stopped flows",
             "stopped": "Stopped",
+            "stopping-error": "Error stopping node: __message__",
             "added-flow": "Adding flow: __label__",
             "updated-flow": "Updated flow: __label__",
             "removed-flow": "Removed flow: __label__",

@@ -21,6 +21,8 @@ var Log = require("../../log");
 var redUtil = require("../../util");
 var flowUtil = require("./util");
 
+var nodeCloseTimeout = 15000;
+
 function Flow(global,flow) {
     if (typeof flow === 'undefined') {
         flow = global;
@@ -151,16 +153,35 @@ function Flow(global,flow) {
                         delete subflowInstanceNodes[stopList[i]];
                     }
                     try {
-                        var p = node.close(removedMap[stopList[i]]);
-                        if (p) {
-                            promises.push(p);
-                        }
+                        var removed = removedMap[stopList[i]];
+                        promises.push(
+                            when.promise(function(resolve, reject) {
+                                var start;
+                                var nt = node.type;
+                                var nid = node.id;
+                                var n = node;
+                                when.promise(function(resolve) {
+                                    Log.trace("Stopping node "+nt+":"+nid+(removed?" removed":""));
+                                    start = Date.now();
+                                    resolve(n.close(removed));
+                                }).timeout(nodeCloseTimeout).then(function(){
+                                    var delta = Date.now() - start;
+                                    Log.trace("Stopped node "+nt+":"+nid+" ("+delta+"ms)" );
+                                    resolve(delta);
+                                },function(err) {
+                                    var delta = Date.now() - start;
+                                    n.error(Log._("nodes.flows.stopping-error",{message:err}));
+                                    Log.debug(err.stack);
+                                    reject(err);
+                                });
+                            })
+                        );
                     } catch(err) {
                         node.error(err);
                     }
                 }
             }
-            when.settle(promises).then(function() {
+            when.settle(promises).then(function(results) {
                 resolve();
             });
         });
@@ -472,7 +493,11 @@ function createSubflow(sf,sfn,subflows,globalSubflows,activeNodes) {
     return nodes;
 }
 
+
 module.exports = {
+    init: function(settings) {
+        nodeCloseTimeout = settings.nodeCloseTimeout || 15000;
+    },
     create: function(global,conf) {
         return new Flow(global,conf);
     }

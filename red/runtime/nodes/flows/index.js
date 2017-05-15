@@ -66,6 +66,7 @@ function init(runtime) {
         });
         typeEventRegistered = true;
     }
+    Flow.init(settings);
 }
 
 function loadFlows() {

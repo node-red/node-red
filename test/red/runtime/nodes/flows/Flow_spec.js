@@ -41,6 +41,7 @@ describe('Flow', function() {
         stoppedNodes = {};
         rewiredNodes = {};
         createCount = 0;
+        Flow.init({});
     });
 
     var TestNode = function(n) {
@@ -65,7 +66,7 @@ describe('Flow', function() {
         this.updateWires = function(newWires) {
             rewiredNodes[node.id] = node;
             node.newWires = newWires;
-            node.__updateWires[newWires];
+            node.__updateWires(newWires);
         };
     }
     util.inherits(TestNode,Node);
@@ -78,6 +79,7 @@ describe('Flow', function() {
         this.handled = 0;
         this.messages = [];
         this.stopped = false;
+        this.closeDelay = n.closeDelay || 50;
         currentNodes[node.id] = node;
         this.on('input',function(msg) {
             node.handled++;
@@ -90,7 +92,7 @@ describe('Flow', function() {
                 stoppedNodes[node.id] = node;
                 delete currentNodes[node.id];
                 done();
-            },50);
+            },node.closeDelay);
         });
     }
     util.inherits(TestAsyncNode,Node);
@@ -549,6 +551,38 @@ describe('Flow', function() {
             });
         });
 
+        it("Times out a node that fails to close", function(done) {
+
+            Flow.init({nodeCloseTimeout:50});
+
+
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"testAsync",closeDelay: 80, foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create(config,config.flows["t1"]);
+            flow.start();
+
+            currentNodes.should.have.a.property("1");
+            currentNodes.should.have.a.property("2");
+            currentNodes.should.have.a.property("3");
+
+            flow.stop().then(function() {
+                currentNodes.should.have.a.property("1");
+                currentNodes.should.not.have.a.property("2");
+                currentNodes.should.not.have.a.property("3");
+                stoppedNodes.should.not.have.a.property("1");
+                stoppedNodes.should.have.a.property("2");
+                stoppedNodes.should.have.a.property("3");
+                setTimeout(function() {
+                    currentNodes.should.not.have.a.property("1");
+                    stoppedNodes.should.have.a.property("1");
+                    done();
+                },40)
+            });
+        });
 
     });
 
