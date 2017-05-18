@@ -269,7 +269,7 @@
     },
     "mqtt": {
         "label": {
-            "broker": "Server",
+            "broker": "Server/URL",
             "qos": "QoS",
             "clientid": "Client ID",
             "port": "Port",
