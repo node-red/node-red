@@ -97,7 +97,11 @@ function revoke(req,res) {
     // TODO: audit log
     Tokens.revoke(token).then(function() {
         log.audit({event: "auth.login.revoke"},req);
-        res.status(200).end();
+	if (settings && settings.editorTheme && settings.editorTheme.logout && settings.editorTheme.logout.url) {
+            res.status(200).end(settings.editorTheme.logout.url);
+	}else{
+            res.status(200).end();
+	}
     });
 }
 
