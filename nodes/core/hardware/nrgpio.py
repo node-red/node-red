@@ -35,8 +35,13 @@ if len(sys.argv) > 2:
 
     if cmd == "pwm":
         #print "Initialised pin "+str(pin)+" to PWM"
+        try: 
+            freq = int(sys.argv[3])
+        except:
+            freq = 100
+
         GPIO.setup(pin,GPIO.OUT)
-        p = GPIO.PWM(pin, 100)
+        p = GPIO.PWM(pin, freq)
         p.start(0)
 
         while True:

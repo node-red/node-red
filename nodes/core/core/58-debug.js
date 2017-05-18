@@ -100,6 +100,10 @@ module.exports = function(RED) {
             var seenAts = [];
             try {
                 msg.format = msg.msg.constructor.name || "Object";
+                // Handle special case of msg.req/res objects from HTTP In node
+                if (msg.format === "IncomingMessage" || msg.format === "ServerResponse") {
+                    msg.format = "Object";
+                }
             } catch(err) {
                 msg.format = "Object";
             }
@@ -116,7 +120,7 @@ module.exports = function(RED) {
                         msg.msg = msg.msg.slice(0,debuglength);
                     }
                 }
-                if (isArray || (msg.format === "Object")) {
+                if (isArray || msg.format === "Object") {
                     msg.msg = safeJSONStringify(msg.msg, function(key, value) {
                         if (key === '_req' || key === '_res') {
                             return "[internal]"

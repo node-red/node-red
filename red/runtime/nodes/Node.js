@@ -65,7 +65,7 @@ Node.prototype.updateWires = function(wires) {
 }
 Node.prototype.context = function() {
     if (!this._context) {
-         this._context = context.get(this._alias||this.id,this.z);
+        this._context = context.get(this._alias||this.id,this.z);
     }
     return this._context;
 }
@@ -245,6 +245,14 @@ Node.prototype.error = function(logMessage,msg) {
         flows.handleError(this,logMessage,msg);
     }
 };
+
+Node.prototype.debug = function(msg) {
+    log_helper(this, Log.DEBUG, msg);
+}
+
+Node.prototype.trace = function(msg) {
+    log_helper(this, Log.TRACE, msg);
+}
 
 /**
  * If called with no args, returns whether metric collection is enabled

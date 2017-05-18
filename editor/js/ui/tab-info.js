@@ -125,7 +125,7 @@ RED.sidebar.info = (function() {
         $(table).appendTo(content);
         $("<hr/>").appendTo(content);
         if (!subflowNode && node.type != "comment") {
-            var helpText = $("script[data-help-name$='"+node.type+"']").html()||"";
+            var helpText = $("script[data-help-name='"+node.type+"']").html()||"";
             addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(helpText)+'">'+helpText+'</span></div>').appendTo(content));
         }
         if (subflowNode) {
