@@ -43,7 +43,7 @@ module.exports = function(RED) {
             if (this.useSpawn === true) {
                 // make the extra args into an array
                 // then prepend with the msg.payload
-                var arg = node.cmd;
+                var arg = node.cmd || msg.cmd;
                 if ((node.addpay === true) && msg.hasOwnProperty("payload")) { arg += " "+msg.payload; }
                 if (node.append.trim() !== "") { arg += " "+node.append; }
                 // slice whole line by spaces (trying to honour quotes);
@@ -94,7 +94,7 @@ module.exports = function(RED) {
                 });
             }
             else {
-                var cl = node.cmd;
+                var cl = node.cmd || msg.cmd;
                 if ((node.addpay === true) && msg.hasOwnProperty("payload")) { cl += " "+msg.payload; }
                 if (node.append.trim() !== "") { cl += " "+node.append; }
                 /* istanbul ignore else  */

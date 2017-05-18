@@ -45,6 +45,8 @@
 
 <script type="text/x-red" data-help-name="exec">
     <p>Calls out to a system command.<br/></p>
+    <p>The command can be configured in the node, if it is left blank it should be set in an incoming message on
+    <code>msg.cmd</code>.</p>
     <p>Provides 3 outputs: stdout, stderr, and return code.</p>
     <p>By default uses the <code>exec</code> system call which calls the command, then gets a callback
     on completion, returning stdout as the payload to the first, the error code as the third
@@ -53,10 +55,11 @@
     as the command runs (usually one line at a time). On completion it then returns a return code
     (on the 3rd output).</p>
     <p>The <code>exec</code> method spawns a subshell and therefore can be used for more complicated
-    commands involving pipes. However, it waits for completion of the whole command before returing anything.</p> 
+    commands involving pipes. However, it waits for completion of the whole command before returing anything.</p>
     <p>The optional append gets added to the command after <code>msg.payload</code> - so you can do
     things like pipe the result to another command.</p>
-    <p>Commands or parameters with spaces should be enclosed in quotes - <i>"This is a single parameter"</i></p>
+    <p>Commands or parameters with spaces should be enclosed in quotes - <i>"This is a single parameter"</i>.
+    If set on <code>msg.cmd</code> it should be enclosed in backquotes - <code>msg.cmd = `echo "This is a single parameter"`</code></p>
     <p>If stdout is binary a <i>buffer</i> is returned - otherwise returns a <i>string</i>.</p>
     <p>The blue status icon will be visible while the node is active.</p>
     <p>If running a Python app you may need to use the <code>-u</code> parameter to stop the output being buffered.</p>
@@ -67,7 +70,7 @@
         category: 'advanced-function',
         color:"darksalmon",
         defaults: {
-            command: {value:"",required:true},
+            command: {value:"",required:false},
             addpay: {value:true},
             append: {value:""},
             useSpawn: {value:""},
