@@ -1165,7 +1165,14 @@ RED.view = (function() {
             }
         }
 
-        var selectionJSON = JSON.stringify(selection);
+        var selectionJSON = JSON.stringify(selection,function(key,value) {
+            if (key === 'nodes') {
+                return value.map(function(n) { return n.id })
+            } else if (key === 'link') {
+                return value.source.id+":"+value.sourcePort+":"+value.target.id;
+            }
+            return value;
+        });
         if (selectionJSON !== lastSelection) {
             lastSelection = selectionJSON;
             RED.events.emit("view:selection-changed",selection);
