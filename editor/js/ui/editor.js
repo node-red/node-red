@@ -937,11 +937,20 @@ RED.editor = (function() {
                             changed = true;
                         }
                         hasNonBlankLabel = false;
-                        newValue = outputLabels.map(function() {
+                        newValue = new Array(editing_node.outputs);
+                        outputLabels.each(function() {
+                            var index = $(this).attr('id').substring(23); // node-label-form-output-<index>
+                            if (outputMap.hasOwnProperty(index)) {
+                                index = parseInt(outputMap[index]);
+                                if (index === -1) {
+                                    return;
+                                }
+                            }
                             var v = $(this).val();
                             hasNonBlankLabel = hasNonBlankLabel || v!== "";
-                            return v;
-                        }).toArray().slice(0,editing_node.outputs);
+                            newValue[index] = v;
+                        })
+
                         if ((editing_node.outputLabels === undefined && hasNonBlankLabel) ||
                             (editing_node.outputLabels !== undefined && JSON.stringify(newValue) !== JSON.stringify(editing_node.outputLabels))) {
                             changes.outputLabels = editing_node.outputLabels;
