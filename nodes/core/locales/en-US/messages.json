@@ -126,6 +126,8 @@
     "tls": {
         "tls": "TLS configuration",
         "label": {
+            "use-local-files": "Use key and certificates from local files",
+            "upload": "Upload",
             "cert": "Certificate",
             "key": "Private Key",
             "ca": "CA Certificate",
