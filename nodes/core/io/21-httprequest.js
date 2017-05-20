@@ -53,6 +53,7 @@ module.exports = function(RED) {
             }
             if (!url) {
                 node.error(RED._("httpin.errors.no-url"),msg);
+                return;
             }
             // url must start http:// or https:// so assume http:// if not set
             if (url.indexOf("://") !== -1 && url.indexOf("http") !== 0) {
