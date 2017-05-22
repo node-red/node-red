@@ -302,31 +302,32 @@ RED.utils = (function() {
             }
             var fullLength = data.length;
 
-            if (originalLength > 0) {
+                if (originalLength > 0) {
                 $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
                 var arrayRows = $('<div class="debug-message-array-rows"></div>').appendTo(element);
                 element.addClass('debug-message-buffer-raw');
-
-                if (key) {
-                    headerHead = $('<span class="debug-message-type-meta f"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(entryObj);
-                } else {
-                    headerHead = $('<span class="debug-message-object-header"></span>').appendTo(entryObj);
-                    $('<span>[ </span>').appendTo(headerHead);
-                    var arrayLength = Math.min(originalLength,10);
-                    for (i=0;i<arrayLength;i++) {
-                        buildMessageSummaryValue(data[i]).appendTo(headerHead);
-                        if (i < arrayLength-1) {
-                            $('<span>, </span>').appendTo(headerHead);
-                        }
+            }
+            if (key) {
+                headerHead = $('<span class="debug-message-type-meta"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(entryObj);
+            } else {
+                headerHead = $('<span class="debug-message-object-header"></span>').appendTo(entryObj);
+                $('<span>[ </span>').appendTo(headerHead);
+                var arrayLength = Math.min(originalLength,10);
+                for (i=0;i<arrayLength;i++) {
+                    buildMessageSummaryValue(data[i]).appendTo(headerHead);
+                    if (i < arrayLength-1) {
+                        $('<span>, </span>').appendTo(headerHead);
                     }
-                    if (originalLength > arrayLength) {
-                        $('<span> &hellip;</span>').appendTo(headerHead);
-                    }
-                    if (arrayLength === 0) {
-                        $('<span class="debug-message-type-meta">empty</span>').appendTo(headerHead);
-                    }
-                    $('<span> ]</span>').appendTo(headerHead);
                 }
+                if (originalLength > arrayLength) {
+                    $('<span> &hellip;</span>').appendTo(headerHead);
+                }
+                if (arrayLength === 0) {
+                    $('<span class="debug-message-type-meta">empty</span>').appendTo(headerHead);
+                }
+                $('<span> ]</span>').appendTo(headerHead);
+            }
+            if (originalLength > 0) {
 
                 makeExpandable(header,function() {
                     if (!key) {
