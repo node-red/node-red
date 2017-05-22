@@ -84,7 +84,12 @@
         }
     }
 }
-.debug-message-row .debug-message-tools {
+.debug-message-meta .debug-message-tools {
+    .editor-button-small {
+        font-size: 11px;
+    }
+}
+.debug-message-tools {
     .button-group:not(:last-child) {
         margin-right: 3px;
     }

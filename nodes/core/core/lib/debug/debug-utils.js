@@ -456,7 +456,7 @@ RED.debug = (function() {
             $('<span class="debug-message-topic">function : (' + errorLvlType + ')</span>').appendTo(metaRow);
         } else {
             var tools = $('<span class="debug-message-tools button-group"></span>').appendTo(metaRow);
-            var filterMessage = $('<button class="editor-button editor-button-small"><i class="fa fa-ellipsis-h"></i></button>').appendTo(tools);
+            var filterMessage = $('<button class="editor-button editor-button-small"><i class="fa fa-caret-down"></i></button>').appendTo(tools);
             filterMessage.click(function(e) {
                 e.preventDefault();
                 e.stopPropagation();
