@@ -940,7 +940,7 @@ RED.editor = (function() {
                         newValue = new Array(editing_node.outputs);
                         outputLabels.each(function() {
                             var index = $(this).attr('id').substring(23); // node-label-form-output-<index>
-                            if (outputMap.hasOwnProperty(index)) {
+                            if (outputMap && outputMap.hasOwnProperty(index)) {
                                 index = parseInt(outputMap[index]);
                                 if (index === -1) {
                                     return;
