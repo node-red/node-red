@@ -112,12 +112,15 @@
         "sidebar": {
             "label": "debug",
             "name": "Debug messages",
-            "filterAll": "all flows",
+            "filterAll": "all nodes",
+            "filterSelected": "selected nodes",
             "filterCurrent": "current flow"
         },
         "messageMenu": {
             "collapseAll": "Collapse all paths",
-            "clearPinned": "Clear pinned paths"
+            "clearPinned": "Clear pinned paths",
+            "filterNode": "Filter this node",
+            "clearFilter": "Clear filter"
         }
     },
     "link": {

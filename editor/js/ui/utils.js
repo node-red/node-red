@@ -594,12 +594,17 @@ RED.utils = (function() {
 
     function getNodeLabel(node,defaultLabel) {
         defaultLabel = defaultLabel||"";
-        var l = node._def.label;
-        try {
-            l = (typeof l === "function" ? l.call(node) : l)||defaultLabel;
-        } catch(err) {
-            console.log("Definition error: "+node.type+".label",err);
-            l = defaultLabel;
+        var l;
+        if (node.type === 'tab') {
+            l = node.label || defaultLabel
+        } else {
+            l = node._def.label;
+            try {
+                l = (typeof l === "function" ? l.call(node) : l)||defaultLabel;
+            } catch(err) {
+                console.log("Definition error: "+node.type+".label",err);
+                l = defaultLabel;
+            }
         }
         return RED.text.bidi.enforceTextDirectionWithUCC(l);
     }
