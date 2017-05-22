@@ -1,0 +1,27 @@
+<script type="text/javascript">
+    RED.nodes.registerType('Csharpweibullalg',{
+        category: 'BIBA',
+        color: '#FFAAAA',
+        defaults: {
+            name: {value:""},
+            version:{value:"0.0.1"}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "inject.png",
+        label: function() {
+            return this.name||"Csharpweibullalg";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="Csharpweibullalg">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Csharpweibullalg">
+    <p>The function of this node is to compute the weibull distribution parameters for the matrix of input type double from Json2doublematrix .</p>
+</script>
