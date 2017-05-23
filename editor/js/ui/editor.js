@@ -1657,7 +1657,14 @@ RED.editor = (function() {
     }
 
 
+    var expressionTestCache = {};
+
     function editExpression(options) {
+        var expressionTestCacheId = "_";
+        if (editStack.length > 0) {
+            expressionTestCacheId = editStack[editStack.length-1].id;
+        }
+
         var value = options.value;
         var onComplete = options.complete;
         var type = "_expression"
@@ -1838,7 +1845,7 @@ RED.editor = (function() {
                 });
                 testDataEditor = RED.editor.createEditor({
                     id: 'node-input-expression-test-data',
-                    value: '{\n    "payload": "hello world"\n}',
+                    value: expressionTestCache[expressionTestCacheId] || '{\n    "payload": "hello world"\n}',
                     mode:"ace/mode/json",
                     lineNumbers: false
                 });
@@ -1900,6 +1907,7 @@ RED.editor = (function() {
                 testDataEditor.getSession().on('change', function() {
                     clearTimeout(changeTimer);
                     changeTimer = setTimeout(testExpression,200);
+                    expressionTestCache[expressionTestCacheId] = testDataEditor.getValue();
                 });
                 expressionEditor.getSession().on('change', function() {
                     clearTimeout(changeTimer);
