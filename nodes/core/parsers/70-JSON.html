@@ -6,20 +6,30 @@
     </div>
     <hr align="middle"/>
     <div class="form-row">
-        <label style="width:100%;"><i class="fa fa-gears"></i> <span data-i18n="json.label.o2j"></span></label>
-        <input style="margin-left:16px; width:20px; vertical-align:top;" type="checkbox" id="node-input-pretty"><span data-i18n="json.label.pretty"></span>
+        <label style="width:100%; border-bottom: 1px solid #eee;"><span data-i18n="json.label.o2j"></span></label>
+    </div>
+    <div class="form-row" style="padding-left: 20px;">
+        <input style="width:20px; vertical-align:top; margin-right: 5px;" type="checkbox" id="node-input-pretty"><label style="width: auto;" for="node-input-pretty" data-i18n="json.label.pretty"></span>
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="json">
-    <p>A function that parses the <code>msg.payload</code> to convert a JSON string
-    to or from a javascript object. Places the result back into the payload.</p>
+    <p>Converts between a JSON string and its JavaScript object representation, in either direction.</p>
     <h3>Inputs</h3>
-    <ul>
-        <li>If the input is a JSON string it tries to parse it to a javascript object.</li>
-        <li>If the input is a javascript object it creates a JSON string.</li>
-    </ul>
-    <p>When converting a JSON object to a string the output may optionally be pretty printed.</p>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | string</span></dt>
+        <dd>A JavaScript object or JSON string.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | string</span></dt>
+        <dd>
+            <ul>
+                <li>If the input is a JSON string it tries to parse it to a JavaScript object.</li>
+                <li>If the input is a JavaScript object it creates a JSON string. The string can optionally be well-formatted.</li>
+            </ul>
+        </dd>
+    </dl>
 </script>
 
 <script type="text/javascript">
