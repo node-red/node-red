@@ -643,6 +643,10 @@
             "dropped-object": "Ignored non-object payload",
             "dropped": "Ignored unsupported payload type",
             "dropped-error": "Failed to convert payload"
+        },
+        "label": {
+            "o2j": "Object-to-String options",
+            "pretty": "Pretty print JSON string"
         }
     },
     "yaml": {
@@ -656,7 +660,8 @@
         "label": {
             "represent": "Represent XML tag attributes as a property named",
             "prefix": "Prefix to access character content",
-            "advanced": "Advanced options"
+            "advanced": "Advanced options",
+            "x2o": "XML-to-Object options"
         },
         "tip": "There is no simple way to convert XML attributes to JSON so the approach taken here is to add a property, named $ by default, to the JSON structure.",
         "errors": {
@@ -672,6 +677,7 @@
             "type": "Type",
             "initpin": "Initialise pin state?",
             "debounce": "Debounce",
+            "freq": "Frequency",
             "button": "Button",
             "pimouse": "Pi Mouse",
             "pikeyboard": "Pi Keyboard",

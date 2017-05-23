@@ -4,6 +4,11 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
+    <hr align="middle"/>
+    <div class="form-row">
+        <label style="width:100%;"><i class="fa fa-gears"></i> <span data-i18n="json.label.o2j"></span></label>
+        <input style="margin-left:16px; width:20px; vertical-align:top;" type="checkbox" id="node-input-pretty"><span data-i18n="json.label.pretty"></span>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="json">
@@ -13,7 +18,8 @@
     <ul>
         <li>If the input is a JSON string it tries to parse it to a javascript object.</li>
         <li>If the input is a javascript object it creates a JSON string.</li>
-    <ul>
+    </ul>
+    <p>When converting a JSON object to a string the output may optionally be pretty printed.</p>
 </script>
 
 <script type="text/javascript">
@@ -21,7 +27,8 @@
         category: 'function',
         color:"#DEBD5C",
         defaults: {
-            name: {value:""}
+            name: {value:""},
+            pretty: {value:"false"}
         },
         inputs:1,
         outputs:1,
