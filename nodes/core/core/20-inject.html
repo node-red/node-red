@@ -150,28 +150,26 @@
     }
 </style>
 <script type="text/x-red" data-help-name="inject">
-<p>Injects a message with an optional topic into a flow by pressing the button on the left side of the node.
-Several payload javascript types can be injected at various intervals into the flow.</p>
-<p><b>Outputs</b></p>
-<ul>
-    <li><code>msg.payload</code> - <i>timestamp | string | number | boolean | JSON | flow | global</i></li>
-    <li><code><i>msg.topic</i></code> - <i>string</i> - optional meta-data</li>
-</ul>
-<p><b>Details</b></p>
+<p>Injects a message into a flow either manually or at regular intervals. The message
+payload can be a variety of types, including strings, JavaScript objects or the current time.</p>
+<h3>Outputs</h3>
+<dl class="message-properties">
+    <dt>payload<span class="property-type">various</span></dt>
+    <dd>The configured payload of the message.</dd>
+    <dt class="optional">topic <span class="property-type">string</span></dt>
+    <dd>An optional property</dd>
+</dl>
+<h3>Details</h3>
 <p>The Inject node can initiate a flow with a specific payload value.
-The default payload is a timestamp of the current time in millisecs since 1970.
-Strings, numbers, JSON objects, and booleans types can be injected.
-The <i>Flow</i> and <i>Global</i> options allow the user to inject a flow or global context value.</p>
-<p>The repeat function allows the payload to be sent on the required schedule - <i>Once</i>, at a <i>set interval</i>,
-between certain times (local time where the Node-RED process is running), or at a <i>specific interval</i>.</p>
-
-<p>The <i>Inject once at start</i> option actually waits a short interval before firing to give other nodes a chance to instantiate properly.</p>
-
-<p><b>Note</b>: <i>"Interval between times"</i> and <i>"at a specific time"</i> uses cron.
+The default payload is a timestamp of the current time in millisecs since January 1st, 1970.</p>
+<p>The node also supports injecting strings, numbers, booleans, JavaScript objects, or flow/global context values.</p>
+<p>By default, the node is triggered manually by clicking on its button within the editor. It can also be set to
+inject at regular intervals or according to a schedule.</p>
+<p>It can also be configured to inject once each time the flows are started.</p>
+<p><b>Note</b>: The <i>"Interval between times"</i> and <i>"at a specific time"</i> options use the standard cron system.
 This means that 20 minutes will be at the next hour, 20 minutes past and 40 minutes past - not in 20 minutes time.
-If you want every 20 minutes from now - use the "interval" option.</p>
-
-<p><b>Note</b>: all string input is escaped. To add a carriage return to a string you should use a following function.</p>
+If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
+<p><b>Note</b>: To include a newline in a string you must use a Function node to create the payload.</p>
 </script>
 
 <script type="text/javascript">
