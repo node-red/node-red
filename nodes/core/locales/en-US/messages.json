@@ -782,6 +782,6 @@
             "appendfail": "failed to append to file: __error__",
             "createfail": "failed to create file: __error__"
         },
-        "tip": "Tip: You should fully path the Filename."
+        "tip": "Tip: The filename should be an absolute path, otherwise it will be relative to the working directory of the Node-RED process."
     }
 }
