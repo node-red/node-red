@@ -89,7 +89,9 @@
                     var node = RED.nodes.node(parts[1]);
                     if (node) {
                         if (msg.hasOwnProperty("text")) {
-                            msg.text = node._(msg.text.toString(),{defaultValue:msg.text.toString()});
+                            if (msg.text[0] !== ".") {
+                                msg.text = node._(msg.text.toString(),{defaultValue:msg.text.toString()});
+                            }
                         }
                         node.status = msg;
                         node.dirty = true;
