@@ -352,6 +352,7 @@ RED.sidebar.info = (function() {
         nodeSection.container.hide();
         $(infoSection.content).empty();
         setInfoText(html);
+        $(".sidebar-node-info-stack").scrollTop(0);
     }
 
 
