@@ -1,0 +1,28 @@
+
+<script type="text/javascript">
+    RED.nodes.registerType('csharp-lib',{
+        category: 'BIBA',
+        color: '#FFCC66',
+        defaults: {
+            name: {value:""},
+            version:{value:"0.0.1"}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "debug.png",
+        label: function() {
+              return this.name||"Csharplib";;
+          }
+      });
+</script>
+
+<script type="text/x-red" data-template-name="csharp-lib">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="csharp-lib">
+    <p>This node is used to capture the data using the Input url and create a json string as its output</p>
+</script>

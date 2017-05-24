@@ -1,0 +1,26 @@
+<script type="text/javascript">
+    RED.nodes.registerType('JSON2doublematrix',{
+        category: 'BIBA',
+        color: '#FFAAAA',
+        defaults: {
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "inject.png",
+        label: function() {
+            return this.name||"JSON2doublematrix";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="JSON2doublematrix">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="JSON2doublematrix">
+    <p>The function of this node is to convert the JSON to a matrix of data type double.</p>
+</script>
