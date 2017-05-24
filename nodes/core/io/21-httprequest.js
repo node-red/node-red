@@ -165,14 +165,20 @@ module.exports = function(RED) {
                 // See https://github.com/nodejs/node/issues/6038
                 res.setEncoding(null);
                 delete res._readableState.decoder;
-              
+
                 msg.statusCode = res.statusCode;
                 msg.headers = res.headers;
                 msg.responseUrl = res.responseUrl;
                 msg.payload = [];
- 
+
                 // msg.url = url;   // revert when warning above finally removed
                 res.on('data',function(chunk) {
+                    if (!Buffer.isBuffer(chunk)) {
+                        // if the 'setEncoding(null)' fix above stops working in
+                        // a new Node.js release, throw a noisy error so we know
+                        // about it.
+                        throw new Error("HTTP Request data chunk not a Buffer");
+                    }
                     msg.payload.push(chunk);
                 });
                 res.on('end',function() {
@@ -186,12 +192,12 @@ module.exports = function(RED) {
                             node.metric("size.bytes", msg, res.client.bytesRead);
                         }
                     }
-                    
+
                     // Convert the payload to the required return type
                     msg.payload = Buffer.concat(msg.payload); // bin
                     if (node.ret !== "bin") {
                         msg.payload = msg.payload.toString('utf8'); // txt
-                        
+
                         if (node.ret === "obj") {
                             try { msg.payload = JSON.parse(msg.payload); } // obj
                             catch(e) { node.warn(RED._("httpin.errors.json-error")); }
@@ -234,4 +240,3 @@ module.exports = function(RED) {
         }
     });
 }
-
