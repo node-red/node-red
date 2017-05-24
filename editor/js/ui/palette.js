@@ -210,8 +210,7 @@ RED.palette = (function() {
                 } else {
                     helpText = $("script[data-help-name='"+d.type+"']").html()||"";
                 }
-                var help = '<div class="node-help">'+helpText+"</div>";
-                RED.sidebar.info.set(help);
+                RED.sidebar.info.set(helpText);
             });
             var chart = $("#chart");
             var chartOffset = chart.offset();

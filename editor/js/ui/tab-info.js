@@ -233,20 +233,7 @@ RED.sidebar.info = (function() {
             infoText = infoText + marked(textInfo);
         }
         if (infoText) {
-            var info = addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(infoText)+'">'+infoText+'</span></div>')).appendTo(infoSection.content);
-            info.find(".bidiAware").contents().filter(function() { return this.nodeType === 3 && this.textContent.trim() !== "" }).wrap( "<span></span>" );
-            var foldingHeader = "H3";
-            info.find(foldingHeader).wrapInner('<a class="node-info-header expanded" href="#"></a>')
-                .find("a").prepend('<i class="fa fa-angle-right">').click(function(e) {
-                    e.preventDefault();
-                    var isExpanded = $(this).hasClass('expanded');
-                    var el = $(this).parent().next();
-                    while(el.length === 1 && el[0].nodeName !== foldingHeader) {
-                        el.toggle(!isExpanded);
-                        el = el.next();
-                    }
-                    $(this).toggleClass('expanded',!isExpanded);
-                })
+            setInfoText(infoText);
         }
 
 
@@ -257,8 +244,22 @@ RED.sidebar.info = (function() {
             $(".node-info-property-row").toggle(expandedSections["property"]);
         });
     }
-
-
+    function setInfoText(infoText) {
+        var info = addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(infoText)+'">'+infoText+'</span></div>')).appendTo(infoSection.content);
+        info.find(".bidiAware").contents().filter(function() { return this.nodeType === 3 && this.textContent.trim() !== "" }).wrap( "<span></span>" );
+        var foldingHeader = "H3";
+        info.find(foldingHeader).wrapInner('<a class="node-info-header expanded" href="#"></a>')
+            .find("a").prepend('<i class="fa fa-angle-right">').click(function(e) {
+                e.preventDefault();
+                var isExpanded = $(this).hasClass('expanded');
+                var el = $(this).parent().next();
+                while(el.length === 1 && el[0].nodeName !== foldingHeader) {
+                    el.toggle(!isExpanded);
+                    el = el.next();
+                }
+                $(this).toggleClass('expanded',!isExpanded);
+            })
+    }
     var tips = (function() {
         var enabled = true;
         var startDelay = 1000;
@@ -349,8 +350,8 @@ RED.sidebar.info = (function() {
         // tips.stop();
         sections.show();
         nodeSection.container.hide();
-        var wrapped = $('<div class="node-help"></div>').html(html);
-        $(infoSection.content).empty().append(wrapped);
+        $(infoSection.content).empty();
+        setInfoText(html);
     }
 
 
