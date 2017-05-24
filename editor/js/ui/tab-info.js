@@ -373,7 +373,7 @@ RED.sidebar.info = (function() {
                 refresh(flow);
             } else {
                 var workspace = RED.nodes.workspace(RED.workspaces.active());
-                if (workspace.info) {
+                if (workspace && workspace.info) {
                     refresh(workspace);
                 } else {
                     clear();
