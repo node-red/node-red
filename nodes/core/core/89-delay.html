@@ -106,6 +106,9 @@
         <dd>Sets the delay, in milliseconds, to be applied to the message. This
             option only applies if the node is configured to allow the message to
             provide the delay interval.</dd>
+        <dt class="optional">reset</dt>
+        <dd>If the received message has this property set to any value, all
+            outstanding messages held by the node are cleared without being sent.</dd>
     </dl>
     <h3>Details</h3>
     <p>When configured to delay messages, the delay interval can be a fixed value
