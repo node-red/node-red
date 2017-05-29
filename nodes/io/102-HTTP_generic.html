@@ -1,0 +1,95 @@
+<!--
+  Copyright 2013 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="HTTP_generic">
+  <div class="form-row">
+     <label for="node-input-topic"><i class="icon-tasks"></i> Host</label>
+    <input type="text" id="node-input-host" placeholder="127.0.0.1">
+  </div>
+
+  <div class="form-row">
+     <label for="node-input-topic"><i class="icon-tasks"></i> Port</label>
+    <input type="text" id="node-input-port" placeholder="80">
+  </div>
+
+  <div class="form-row">
+     <label for="node-input-topic"><i class="icon-tasks"></i> Path</label>
+    <input type="text" id="node-input-path" placeholder="">
+  </div>
+
+   <div class="form-row">
+     <label for="node-input-topic"><i class="icon-tasks"></i> Method</label>
+    <select id="node-input-method">
+	<option value="GET" selected="selected">GET</option>
+	<option value="POST">POST</option>
+	<option value="PUT">PUT</option>
+	<option value="DELETE">DELETE</option>
+     </select>
+  </div>
+
+   <div class="form-row">
+     <label for="node-input-topic"><i class="icon-tasks"></i> Content-Type</label>
+    <input type="text" id="node-input-contenttype" placeholder="">
+  </div>
+
+  <div class="form-row">
+     <label for="node-input-topic"><i class="icon-tasks"></i> Header</label>
+    <input type="textarea" id="node-input-header" placeholder="">
+  </div>
+
+  <div class="form-row">
+     <label for="node-input-topic"><i class="icon-tasks"></i> Data</label>
+    <input type="textarea" id="node-input-data" placeholder="">
+  </div>
+ 
+  <div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+ 
+<!-- Next, some simple help text is provided for the node.                   -->
+<script type="text/x-red" data-help-name="HTTP_generic">
+    <p>Makes a generic HTTP Request</p>
+    <p>You can define host, port, path, header, method and data</p>
+</script>
+ 
+<!-- Finally, the node type is registered along with all of its properties   -->
+<script type="text/javascript">
+    RED.nodes.registerType('HTTP_generic',{
+        category: 'advanced-function',      // the palette category
+        color:"#66bc46",
+        defaults: {             // defines the editable properties of the node
+            name: {value:""},   //  along with default values.
+            host: {value:"", required:true},
+	    port: {value: "", required:true},
+	    path: {value:""},
+	    method: {value:"", required:true},
+	    header: {value:""},
+	    data: {value:""},
+	    contenttype: {value:""}
+        },
+        inputs:1,                // set the number of inputs - only 0 or 1
+        outputs:1,               // set the number of outputs - 0 to n
+        icon: "arrow-in.png",    // set the icon (held in public/icons)
+        label: function() {      // sets the default label contents
+            return this.name||this.topic||"HTTP_generic";
+        },
+        labelStyle: function() { // sets the class to apply to the label
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
