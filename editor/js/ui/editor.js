@@ -1,3 +1,5 @@
+/** This file was modified by Sathya Laufer */
+
 /**
  * Copyright JS Foundation and other contributors, http://js.foundation
  *
@@ -187,7 +189,23 @@ RED.editor = (function() {
         node.resize = true;
         node.dirty = true;
         var removedLinks = [];
-        if (node.ports) {
+        if (node.inputPorts) {
+            if (node.inputs < node.inputPorts.length) {
+                while (node.inputs < node.inputPorts.length) {
+                    node.inputPorts.pop();
+                }
+                RED.nodes.eachLink(function(l) {
+                    if (l.target === node && l.targetPort >= node.inputs && removedLinks.indexOf(l) === -1) {
+                        removedLinks.push(l);
+                    }
+                });
+            } else if (node.inputs > node.inputPorts.length) {
+                while (node.inputs > node.inputPorts.length) {
+                    node.inputPorts.push(node.inputPorts.length);
+                }
+            }
+        }
+        if (node.outputPorts) {
             if (outputMap) {
                 RED.nodes.eachLink(function(l) {
                     if (l.source === node && outputMap.hasOwnProperty(l.sourcePort)) {
@@ -199,23 +217,20 @@ RED.editor = (function() {
                     }
                 });
             }
-            if (node.outputs < node.ports.length) {
-                while (node.outputs < node.ports.length) {
-                    node.ports.pop();
+            if (node.outputs < node.outputPorts.length) {
+                while (node.outputs < node.outputPorts.length) {
+                    node.outputPorts.pop();
                 }
                 RED.nodes.eachLink(function(l) {
                     if (l.source === node && l.sourcePort >= node.outputs && removedLinks.indexOf(l) === -1) {
                         removedLinks.push(l);
                     }
                 });
-            } else if (node.outputs > node.ports.length) {
-                while (node.outputs > node.ports.length) {
-                    node.ports.push(node.ports.length);
+            } else if (node.outputs > node.outputPorts.length) {
+                while (node.outputs > node.outputPorts.length) {
+                    node.outputPorts.push(node.outputPorts.length);
                 }
             }
-        }
-        if (node.inputs === 0) {
-            removedLinks.concat(RED.nodes.filterLinks({target:node}));
         }
         for (var l=0;l<removedLinks.length;l++) {
             RED.nodes.removeLink(removedLinks[l]);
@@ -1031,13 +1046,13 @@ RED.editor = (function() {
                 });
                 nodeProperties.content.addClass("editor-tray-content");
 
-                var portLabels = stack.add({
+                /*var portLabels = stack.add({
                     title: RED._("editor.portLabels"),
                     onexpand: function() {
                         refreshLabelForm(this.content,node);
                     }
                 });
-                portLabels.content.addClass("editor-tray-content");
+                portLabels.content.addClass("editor-tray-content");*/
 
 
                 if (editing_node) {
@@ -1050,7 +1065,7 @@ RED.editor = (function() {
                     ns = node._def.set.id;
                 }
                 buildEditForm(nodeProperties.content,"dialog-form",type,ns);
-                buildLabelForm(portLabels.content,node);
+                //buildLabelForm(portLabels.content,node);
 
                 prepareEditDialog(node,node._def,"node-input", function() {
                     trayBody.i18n();
@@ -1608,10 +1623,10 @@ RED.editor = (function() {
                     expanded: true
                 });
                 nodeProperties.content.addClass("editor-tray-content");
-                var portLabels = stack.add({
+                /*var portLabels = stack.add({
                     title: RED._("editor.portLabels")
                 });
-                portLabels.content.addClass("editor-tray-content");
+                portLabels.content.addClass("editor-tray-content");*/
 
 
 
@@ -1638,7 +1653,7 @@ RED.editor = (function() {
                 });
                 $("#subflow-dialog-user-count").html(RED._("subflow.subflowInstances", {count:userCount})).show();
 
-                buildLabelForm(portLabels.content,subflow);
+                //buildLabelForm(portLabels.content,subflow);
                 trayBody.i18n();
             },
             close: function() {

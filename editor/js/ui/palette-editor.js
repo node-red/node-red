@@ -362,7 +362,7 @@ RED.palette.editor = (function() {
             packageList.editableList('empty');
 
             $(".palette-module-shade-status").html(RED._('palette.editor.loading'));
-            var catalogues = RED.settings.theme('palette.catalogues')||['https://catalogue.nodered.org/catalogue.json'];
+            var catalogues = RED.settings.theme('palette.catalogues')||['http://homegear.eu/node-blue/catalog.json'];
             catalogueLoadStatus = [];
             catalogueLoadErrors = false;
             catalogueCount = catalogues.length;

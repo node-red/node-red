@@ -218,7 +218,7 @@ RED.sidebar.info = (function() {
         var infoText = "";
 
         if (!subflowNode && node.type !== "comment" && node.type !== "tab") {
-            var helpText = $("script[data-help-name='"+node.type+"']").html()||"";
+            var helpText = i18n.t((node._def.namespace ? node._def.namespace : node.type) + "/" + node.type + ".hni:" + node.type + ".help");
             infoText = helpText;
         } else if (node.type === "tab") {
             infoText = marked(node.info||"");

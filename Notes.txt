@@ -1,0 +1,9 @@
+editor/js/* => public/red/red.js
+editor/vendor/* => public/vendor/vendor.js
+
+
+Start:
+
+RED.i18n.init()
+RED.settings.init()
+loadEditor()

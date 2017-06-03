@@ -1,3 +1,5 @@
+/** This file was modified by Sathya Laufer */
+
 /**
  * Copyright JS Foundation and other contributors, http://js.foundation
  *
@@ -134,9 +136,12 @@ RED.history = (function() {
                 if (subflow) {
                     RED.nodes.filterNodes({type:"subflow:"+subflow.id}).forEach(function(n) {
                         n.inputs = subflow.in.length;
+                        while (n.inputs > n.inputPorts.length) {
+                            n.inputPorts.push(n.inputPorts.length);
+                        }
                         n.outputs = subflow.out.length;
-                        while (n.outputs > n.ports.length) {
-                            n.ports.push(n.ports.length);
+                        while (n.outputs > n.outputPorts.length) {
+                            n.outputPorts.push(n.outputPorts.length);
                         }
                         n.resize = true;
                         n.dirty = true;

@@ -60,7 +60,7 @@ RED.palette = (function() {
         });
     }
 
-    function setLabel(type, el,label, info) {
+    function setLabel(type, el, label, info, namespace) {
         var nodeWidth = 82;
         var nodeHeight = 25;
         var lineHeight = 20;
@@ -101,10 +101,8 @@ RED.palette = (function() {
             if (label != type) {
                 l = "<p><b>"+RED.text.bidi.enforceTextDirectionWithUCC(label)+"</b><br/><i>"+type+"</i></p>";
             }
-            popOverContent = $(l+(info?info:$("script[data-help-name='"+type+"']").html()||"<p>"+RED._("palette.noInfo")+"</p>").trim())
-                                .filter(function(n) {
-                                    return (this.nodeType == 1 && this.nodeName == "P") || (this.nodeType == 3 && this.textContent.trim().length > 0)
-                                }).slice(0,2);
+            var helpContent = i18n.t(namespace + "/" + type + ".hni:" + type + ".paletteHelp");
+            popOverContent = $(l+(info?info:helpContent||"<p>"+RED._("palette.noInfo")+"</p>").trim());
         } catch(err) {
             // Malformed HTML may cause errors. TODO: need to understand what can break
             // NON-NLS: internal debug
@@ -133,6 +131,7 @@ RED.palette = (function() {
             var d = document.createElement("div");
             d.id = "palette_node_"+nodeTypeId;
             d.type = nt;
+            d.namespace = def.namespace ? def.namespace : nt;
 
             var label = /^(.*?)([ -]in|[ -]out)?$/.exec(nt)[1];
             if (typeof def.paletteLabel !== "undefined") {
@@ -208,7 +207,7 @@ RED.palette = (function() {
                 if (nt.indexOf("subflow:") === 0) {
                     helpText = marked(RED.nodes.subflow(nt.substring(8)).info||"");
                 } else {
-                    helpText = $("script[data-help-name='"+d.type+"']").html()||"";
+                    helpText = i18n.t((def.namespace ? def.namespace : nt) + "/" + nt + ".hni:" + nt + ".help");
                 }
                 RED.sidebar.info.set(helpText);
             });
@@ -303,7 +302,7 @@ RED.palette = (function() {
                 });
                 nodeInfo = marked(def.info||"");
             }
-            setLabel(nt,$(d),label,nodeInfo);
+            setLabel(nt,$(d),label,nodeInfo, def.namespace ? def.namespace : nt);
 
             var categoryNode = $("#palette-container-"+category);
             if (categoryNode.find(".palette_node").length === 1) {
@@ -356,7 +355,7 @@ RED.palette = (function() {
             } else if (portOutput.length !== 0 && sf.out.length === 0) {
                 portOutput.remove();
             }
-            setLabel(sf.type+":"+sf.id,paletteNode,sf.name,marked(sf.info||""));
+            setLabel(sf.type+":"+sf.id,paletteNode,sf.name,marked(sf.info||""),sf.type+":"+sf.id);
         });
     }
 

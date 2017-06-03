@@ -16,9 +16,9 @@
 
 $activeButton: #121212;
 
-$deployButton: #8C101C;
-$deployButtonHover: #6E0A1E;
-$deployButtonActive: #4C0A17;
+$deployButton: #3FA9F5;
+$deployButtonHover: #2F99E5;
+$deployButtonActive: #3FA9F5;
 
 $deployDisabledButton: #444;
 $deployDisabledButtonHover: #555;
@@ -34,11 +34,12 @@ $headerMenuItemDivider: #464646;
     left: 0;
     width: 100%;
     height: 40px;
-    background: #000;
+    background: #F0F0F0;
     box-sizing: border-box;
     padding: 0px 0px 0px 20px;
-    color: #C7C7C7;
+    color: #000;
     font-size: 14px;
+    border-bottom: 2px solid #3FA9F5;
 }
 
 span.logo {
@@ -95,8 +96,6 @@ span.logo {
     color: #C7C7C7;
     margin: auto 5px;
     vertical-align: middle;
-    border-left: 2px solid #000;
-    border-right: 2px solid #000;
 
     &:hover {
         border-color: $headerMenuItemHover;

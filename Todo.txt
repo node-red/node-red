@@ -1,0 +1,5 @@
+- Flow option "enabled"
+
+- Link nodes
+- Virtual device nodes
+- Show last input and error information below all nodes (e. g. wrong type)

@@ -590,7 +590,7 @@ RED.utils = (function() {
         } else {
             icon_url = def.icon;
         }
-        return "icons/"+def.set.module+"/"+icon_url;
+        return "icons/"+def.namespace+"/"+icon_url;
     }
 
     function getNodeLabel(node,defaultLabel) {

@@ -1,3 +1,5 @@
+/** This file was modified by Sathya Laufer */
+
 /**
  * Copyright JS Foundation and other contributors, http://js.foundation
  *
@@ -15,121 +17,67 @@
  **/
 
 RED.comms = (function() {
-
+    var homegear = null;
     var errornotification = null;
-    var clearErrorTimer = null;
-    var connectCountdownTimer = null;
-    var connectCountdown = 10;
     var subscriptions = {};
-    var ws;
-    var pendingAuth = false;
-    var reconnectAttempts = 0;
-    var active = false;
 
-    function connectWS() {
-        active = true;
-        var path = location.hostname;
-        var port = location.port;
-        if (port.length !== 0) {
-            path = path+":"+port;
-        }
-        path = path+document.location.pathname;
-        path = path+(path.slice(-1) == "/"?"":"/")+"comms";
-        path = "ws"+(document.location.protocol=="https:"?"s":"")+"://"+path;
+    function getHomegear()
+    {
+        return homegear;
+    }
 
-        var auth_tokens = RED.settings.get("auth-tokens");
-        pendingAuth = (auth_tokens!=null);
+    function readCookie(key) {
+        var result;
+        return (result = new RegExp('(?:^|; )' + encodeURIComponent(key) + '=([^;]*)').exec(document.cookie)) ? (result[1]) : null;
+    }
 
-        function completeConnection() {
+    function homegearEvent(message) {
+        if(message.method == "nodeEvent") {
+            if(message.params[2].format && !message.params[2].format.match(/string/g)) message.params[2].msg = JSON.stringify(message.params[2].msg);
             for (var t in subscriptions) {
                 if (subscriptions.hasOwnProperty(t)) {
-                    ws.send(JSON.stringify({subscribe:t}));
-                }
-            }
-        }
-
-        ws = new WebSocket(path);
-        ws.onopen = function() {
-            reconnectAttempts = 0;
-            if (errornotification) {
-                clearErrorTimer = setTimeout(function() {
-                    errornotification.close();
-                    errornotification = null;
-                },1000);
-            }
-            if (pendingAuth) {
-                ws.send(JSON.stringify({auth:auth_tokens.access_token}));
-            } else {
-                completeConnection();
-            }
-        }
-        ws.onmessage = function(event) {
-            var msg = JSON.parse(event.data);
-            if (pendingAuth && msg.auth) {
-                if (msg.auth === "ok") {
-                    pendingAuth = false;
-                    completeConnection();
-                } else if (msg.auth === "fail") {
-                    // anything else is an error...
-                    active = false;
-                    RED.user.login({updateMenu:true},function() {
-                        connectWS();
-                    })
-                }
-            } else if (msg.topic) {
-                for (var t in subscriptions) {
-                    if (subscriptions.hasOwnProperty(t)) {
-                        var re = new RegExp("^"+t.replace(/([\[\]\?\(\)\\\\$\^\*\.|])/g,"\\$1").replace(/\+/g,"[^/]+").replace(/\/#$/,"(\/.*)?")+"$");
-                        if (re.test(msg.topic)) {
-                            var subscribers = subscriptions[t];
-                            if (subscribers) {
-                                for (var i=0;i<subscribers.length;i++) {
-                                    subscribers[i](msg.topic,msg.data);
-                                }
+                    var re = new RegExp("^"+t.replace(/([\[\]\?\(\)\\\\$\^\*\.|])/g,"\\$1").replace(/\+/g,"[^/]+").replace(/\/#$/,"(\/.*)?")+"$");
+                    if (re.test(message.params[1])) {
+                        var subscribers = subscriptions[t];
+                        if (subscribers) {
+                            for (var i=0;i<subscribers.length;i++) {
+                                subscribers[i](message.params[1], message.params[2]);
                             }
                         }
                     }
                 }
             }
-        };
-        ws.onclose = function() {
-            if (!active) {
-                return;
-            }
-            if (clearErrorTimer) {
-                clearTimeout(clearErrorTimer);
-                clearErrorTimer = null;
-            }
-            reconnectAttempts++;
-            if (reconnectAttempts < 10) {
-                setTimeout(connectWS,1000);
-                if (reconnectAttempts > 5 && errornotification == null) {
-                    errornotification = RED.notify(RED._("notification.errors.lostConnection"),"error",true);
-                }
-            } else if (reconnectAttempts < 20) {
-                setTimeout(connectWS,2000);
-            } else {
-                connectCountdown = 60;
-                connectCountdownTimer = setInterval(function() {
-                    connectCountdown--;
-                    if (connectCountdown === 0) {
-                        errornotification.update(RED._("notification.errors.lostConnection"));
-                        clearInterval(connectCountdownTimer);
-                        connectWS();
-                    } else {
-                        var msg = RED._("notification.errors.lostConnectionReconnect",{time: connectCountdown})+' <a href="#">'+ RED._("notification.errors.lostConnectionTry")+'</a>';
-                        errornotification.update(msg);
-                        $(errornotification).find("a").click(function(e) {
-                            e.preventDefault();
-                            errornotification.update(RED._("notification.errors.lostConnection"));
-                            clearInterval(connectCountdownTimer);
-                            connectWS();
-                        })
-                    }
-                },1000);
-            }
-
         }
+    }
+
+    function connectWS() {
+        var ssl = window.location.protocol == "https:" ? true : false;
+        var server = '';
+        var port = ssl ? '443' : '80';
+        var ipEndIndex = window.location.host.indexOf(']');
+        if(ipEndIndex > -1) { //IPv6
+            part2 = window.location.host.substring(ipEndIndex);
+            if(part2.length > 2 && part2.charAt(1) == ':') port = part2.substring(2);
+            server = window.location.host.substring(0, ipEndIndex + 1);
+        } else {
+            var hostArray = window.location.host.split(':');
+            server = hostArray[0];
+            if(hostArray.length > 1) port = hostArray[1];
+        }
+        var sessionId = readCookie('PHPSESSID');
+        homegear = new HomegearWS(server, port, 'hgflows', ssl, sessionId);
+        homegear.ready(function() {
+            if(errornotification) {
+                errornotification.close();
+                errornotification = null;
+            }
+        });
+        homegear.error(function(message) {
+            if(errornotification) errornotification.close();
+            errornotification = RED.notify(RED._("notification.error",{message:RED._("notification.errors.lostConnection")}),"error",true);
+        });
+        homegear.event(homegearEvent);
+        homegear.connect();        
     }
 
     function subscribe(topic,callback) {
@@ -137,9 +85,6 @@ RED.comms = (function() {
             subscriptions[topic] = [];
         }
         subscriptions[topic].push(callback);
-        if (ws && ws.readyState == 1) {
-            ws.send(JSON.stringify({subscribe:topic}));
-        }
     }
 
     function unsubscribe(topic,callback) {
@@ -156,9 +101,40 @@ RED.comms = (function() {
         }
     }
 
+    function getEvents() {
+        homegear.invoke("getNodeEvents", function(message) {
+            for(var nodeKey in message.result) {
+                if (message.result.hasOwnProperty(nodeKey)) {
+                    var node = message.result[nodeKey];
+                    for(var topicKey in node) {
+                        if (node.hasOwnProperty(topicKey)) {
+                            var value = node[topicKey];
+                            if(value.format && !value.format.match(/string/g)) value.msg = JSON.stringify(value.msg);
+                            for (var t in subscriptions) {
+                                if (subscriptions.hasOwnProperty(t)) {
+                                    var re = new RegExp("^"+t.replace(/([\[\]\?\(\)\\\\$\^\*\.|])/g,"\\$1").replace(/\+/g,"[^/]+").replace(/\/#$/,"(\/.*)?")+"$");
+                                    if (re.test(topicKey)) {
+                                        var subscribers = subscriptions[t];
+                                        if (subscribers) {
+                                            for (var i=0;i<subscribers.length;i++) {
+                                                subscribers[i](topicKey, value);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     return {
+        homegear: getHomegear,
         connect: connectWS,
         subscribe: subscribe,
-        unsubscribe:unsubscribe
+        unsubscribe: unsubscribe,
+        getEvents: getEvents
     }
 })();
