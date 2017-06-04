@@ -15,16 +15,14 @@
  **/
 (function($) {
     var allOptions = {
-        msg: {value:"msg",label:"msg.",validate:RED.utils.validatePropertyExpression},
-        flow: {value:"flow",label:"flow.",validate:RED.utils.validatePropertyExpression},
-        global: {value:"global",label:"global.",validate:RED.utils.validatePropertyExpression},
-        str: {value:"str",label:"string",icon:"red/images/typedInput/az.png"},
-        num: {value:"num",label:"number",icon:"red/images/typedInput/09.png",validate:/^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/},
-        bool: {value:"bool",label:"boolean",icon:"red/images/typedInput/bool.png",options:["true","false"]},
-        json: {
-            value:"json",
-            label:"JSON",
-            icon:"red/images/typedInput/json.png",
+        bool: {value:"bool",label:"bool",icon:"red/images/typedInput/bool.png",options:["true","false"]},
+        string: {value:"string",label:"string",icon:"red/images/typedInput/az.png"},
+        int: {value:"int",label:"int",icon:"red/images/typedInput/09.png",validate:/^[+-]?[0-9]*$/},
+        float: {value:"float",label:"float",icon:"red/images/typedInput/09.png",validate:/^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/},
+        array: {
+            value:"array",
+            label:"array",
+            icon:"red/images/typedInput/array.png",
             validate: function(v) { try{JSON.parse(v);return true;}catch(e){return false;}},
             expand: function() {
                 var that = this;
@@ -46,19 +44,27 @@
                 })
             }
         },
-        re: {value:"re",label:"regular expression",icon:"red/images/typedInput/re.png"},
-        date: {value:"date",label:"timestamp",hasValue:false},
-        jsonata: {
-            value: "jsonata",
-            label: "expression",
-            icon: "red/images/typedInput/expr.png",
-            validate: function(v) { try{jsonata(v);return true;}catch(e){return false;}},
-            expand:function() {
+        struct: {
+            value:"struct",
+            label:"struct",
+            icon:"red/images/typedInput/json.png",
+            validate: function(v) { try{JSON.parse(v);return true;}catch(e){return false;}},
+            expand: function() {
                 var that = this;
-                RED.editor.editExpression({
-                    value: this.value().replace(/\t/g,"\n"),
+                var value = this.value();
+                try {
+                    value = JSON.stringify(JSON.parse(value),null,4);
+                } catch(err) {
+                }
+                RED.editor.editJSON({
+                    value: value,
                     complete: function(v) {
-                        that.value(v.replace(/\n/g,"\t"));
+                        var value = v;
+                        try {
+                            value = JSON.stringify(JSON.parse(v));
+                        } catch(err) {
+                        }
+                        that.value(value);
                     }
                 })
             }

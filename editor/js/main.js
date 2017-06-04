@@ -138,7 +138,7 @@
                             }
                             node.dirty = true;
                             RED.view.redraw();
-                        }, 500, activeLinks);
+                        }, 300, activeLinks);
                         node.dirty = true;
                         RED.view.redraw();
                     }

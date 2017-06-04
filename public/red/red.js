@@ -6023,16 +6023,14 @@ RED.stack = (function() {
  **/
 (function($) {
     var allOptions = {
-        msg: {value:"msg",label:"msg.",validate:RED.utils.validatePropertyExpression},
-        flow: {value:"flow",label:"flow.",validate:RED.utils.validatePropertyExpression},
-        global: {value:"global",label:"global.",validate:RED.utils.validatePropertyExpression},
-        str: {value:"str",label:"string",icon:"red/images/typedInput/az.png"},
-        num: {value:"num",label:"number",icon:"red/images/typedInput/09.png",validate:/^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/},
-        bool: {value:"bool",label:"boolean",icon:"red/images/typedInput/bool.png",options:["true","false"]},
-        json: {
-            value:"json",
-            label:"JSON",
-            icon:"red/images/typedInput/json.png",
+        bool: {value:"bool",label:"bool",icon:"red/images/typedInput/bool.png",options:["true","false"]},
+        string: {value:"string",label:"string",icon:"red/images/typedInput/az.png"},
+        int: {value:"int",label:"int",icon:"red/images/typedInput/09.png",validate:/^[+-]?[0-9]*$/},
+        float: {value:"float",label:"float",icon:"red/images/typedInput/09.png",validate:/^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/},
+        array: {
+            value:"array",
+            label:"array",
+            icon:"red/images/typedInput/array.png",
             validate: function(v) { try{JSON.parse(v);return true;}catch(e){return false;}},
             expand: function() {
                 var that = this;
@@ -6054,19 +6052,27 @@ RED.stack = (function() {
                 })
             }
         },
-        re: {value:"re",label:"regular expression",icon:"red/images/typedInput/re.png"},
-        date: {value:"date",label:"timestamp",hasValue:false},
-        jsonata: {
-            value: "jsonata",
-            label: "expression",
-            icon: "red/images/typedInput/expr.png",
-            validate: function(v) { try{jsonata(v);return true;}catch(e){return false;}},
-            expand:function() {
+        struct: {
+            value:"struct",
+            label:"struct",
+            icon:"red/images/typedInput/json.png",
+            validate: function(v) { try{JSON.parse(v);return true;}catch(e){return false;}},
+            expand: function() {
                 var that = this;
-                RED.editor.editExpression({
-                    value: this.value().replace(/\t/g,"\n"),
+                var value = this.value();
+                try {
+                    value = JSON.stringify(JSON.parse(value),null,4);
+                } catch(err) {
+                }
+                RED.editor.editJSON({
+                    value: value,
                     complete: function(v) {
-                        that.value(v.replace(/\n/g,"\t"));
+                        var value = v;
+                        try {
+                            value = JSON.stringify(JSON.parse(v));
+                        } catch(err) {
+                        }
+                        that.value(value);
                     }
                 })
             }
@@ -10703,7 +10709,9 @@ RED.view = (function() {
         if (dblClickPrimed && mousedown_node == d && clickElapsed > 0 && clickElapsed < 750) {
             mouse_mode = RED.state.DEFAULT;
             if (d.type != "subflow") {
+                alert('Moin');
                 RED.editor.edit(d);
+                alert('Moin2');
             } else {
                 RED.editor.editSubflow(activeSubflow);
             }
@@ -12464,8 +12472,7 @@ RED.palette = (function() {
                 } else {
                     helpText = i18n.t((def.namespace ? def.namespace : nt) + "/" + nt + ".hni:" + nt + ".help");
                 }
-                var help = '<div class="node-help">'+helpText+"</div>";
-                RED.sidebar.info.set(help);
+                RED.sidebar.info.set(helpText);
             });
             var chart = $("#chart");
             var chartOffset = chart.offset();
@@ -12967,20 +12974,7 @@ RED.sidebar.info = (function() {
             infoText = infoText + marked(textInfo);
         }
         if (infoText) {
-            var info = addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(infoText)+'">'+infoText+'</span></div>')).appendTo(infoSection.content);
-            info.find(".bidiAware").contents().filter(function() { return this.nodeType === 3 && this.textContent.trim() !== "" }).wrap( "<span></span>" );
-            var foldingHeader = "H3";
-            info.find(foldingHeader).wrapInner('<a class="node-info-header expanded" href="#"></a>')
-                .find("a").prepend('<i class="fa fa-angle-right">').click(function(e) {
-                    e.preventDefault();
-                    var isExpanded = $(this).hasClass('expanded');
-                    var el = $(this).parent().next();
-                    while(el.length === 1 && el[0].nodeName !== foldingHeader) {
-                        el.toggle(!isExpanded);
-                        el = el.next();
-                    }
-                    $(this).toggleClass('expanded',!isExpanded);
-                })
+            setInfoText(infoText);
         }
 
 
@@ -12991,8 +12985,22 @@ RED.sidebar.info = (function() {
             $(".node-info-property-row").toggle(expandedSections["property"]);
         });
     }
-
-
+    function setInfoText(infoText) {
+        var info = addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(infoText)+'">'+infoText+'</span></div>')).appendTo(infoSection.content);
+        info.find(".bidiAware").contents().filter(function() { return this.nodeType === 3 && this.textContent.trim() !== "" }).wrap( "<span></span>" );
+        var foldingHeader = "H3";
+        info.find(foldingHeader).wrapInner('<a class="node-info-header expanded" href="#"></a>')
+            .find("a").prepend('<i class="fa fa-angle-right">').click(function(e) {
+                e.preventDefault();
+                var isExpanded = $(this).hasClass('expanded');
+                var el = $(this).parent().next();
+                while(el.length === 1 && el[0].nodeName !== foldingHeader) {
+                    el.toggle(!isExpanded);
+                    el = el.next();
+                }
+                $(this).toggleClass('expanded',!isExpanded);
+            })
+    }
     var tips = (function() {
         var enabled = true;
         var startDelay = 1000;
@@ -13083,8 +13091,9 @@ RED.sidebar.info = (function() {
         // tips.stop();
         sections.show();
         nodeSection.container.hide();
-        var wrapped = $('<div class="node-help"></div>').html(html);
-        $(infoSection.content).empty().append(wrapped);
+        $(infoSection.content).empty();
+        setInfoText(html);
+        $(".sidebar-node-info-stack").scrollTop(0);
     }
 
 
@@ -13107,7 +13116,7 @@ RED.sidebar.info = (function() {
                 refresh(flow);
             } else {
                 var workspace = RED.nodes.workspace(RED.workspaces.active());
-                if (workspace.info) {
+                if (workspace && workspace.info) {
                     refresh(workspace);
                 } else {
                     clear();
@@ -13303,9 +13312,10 @@ RED.sidebar.config = (function() {
     }
 
     function refreshConfigNodeList() {
-        var validList = {"global":true};
+        var validList = {"global":true,"devices":true};
 
         getOrCreateCategory("global",globalCategories);
+        getOrCreateCategory("devices",globalCategories);
 
         RED.nodes.eachWorkspace(function(ws) {
             validList[ws.id.replace(/\./g,"-")] = true;
