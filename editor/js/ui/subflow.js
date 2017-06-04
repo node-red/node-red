@@ -1,3 +1,5 @@
+/** This file was modified by Sathya Laufer */
+
 /**
  * Copyright JS Foundation and other contributors, http://js.foundation
  *
@@ -43,10 +45,8 @@ RED.subflow = (function() {
 
     function addSubflowInput() {
         var subflow = RED.nodes.subflow(RED.workspaces.active());
-        if (subflow.in.length === 1) {
-            return;
-        }
         var position = findAvailableSubflowIOPosition(subflow,true);
+
         var newInput = {
             type:"subflow",
             direction:"in",
@@ -77,8 +77,7 @@ RED.subflow = (function() {
         RED.view.select();
         RED.nodes.dirty(true);
         RED.view.redraw();
-        $("#workspace-subflow-input-add").addClass("active");
-        $("#workspace-subflow-input-remove").removeClass("active");
+        $("#workspace-subflow-input .spinner-value").html(subflow.in.length);
     }
 
     function removeSubflowInput() {
@@ -86,21 +85,40 @@ RED.subflow = (function() {
         if (activeSubflow.in.length === 0) {
             return;
         }
-        var removedInput = activeSubflow.in[0];
-        var removedInputLinks = [];
-        RED.nodes.eachLink(function(l) {
-            if (l.source.type == "subflow" && l.source.z == activeSubflow.id && l.source.i == removedInput.i) {
-                removedInputLinks.push(l);
-            } else if (l.target.type == "subflow:"+activeSubflow.id) {
-                removedInputLinks.push(l);
+        if (typeof removedSubflowInputs === "undefined") {
+            removedSubflowInputs = [activeSubflow.in[activeSubflow.in.length-1]];
+        }
+        var removedLinks = [];
+        removedSubflowInputs.sort(function(a,b) { return b.i-a.i});
+        for (i=0;i<removedSubflowInputs.length;i++) {
+            var input = removedSubflowInputs[i];
+            activeSubflow.in.splice(input.i,1);
+            var subflowRemovedLinks = [];
+            var subflowMovedLinks = [];
+            RED.nodes.eachLink(function(l) {
+                if (l.source.type == "subflow" && l.source.z == activeSubflow.id && l.source.i == input.i) {
+                    subflowRemovedLinks.push(l);
+                }
+                if (l.source.type == "subflow:"+activeSubflow.id) {
+                    if (l.sourcePort == output.i) {
+                        subflowRemovedLinks.push(l);
+                    } else if (l.targetPort > input.i) {
+                        subflowMovedLinks.push(l);
+                    }
+                }
+            });
+            subflowRemovedLinks.forEach(function(l) { RED.nodes.removeLink(l)});
+            subflowMovedLinks.forEach(function(l) { l.targetPort--; });
+
+            removedLinks = removedLinks.concat(subflowRemovedLinks);
+            for (var j=input.i;j<activeSubflow.in.length;j++) {
+                activeSubflow.in[j].i--;
+                activeSubflow.in[j].dirty = true;
             }
-        });
-        removedInputLinks.forEach(function(l) { RED.nodes.removeLink(l)});
-        activeSubflow.in = [];
-        $("#workspace-subflow-input-add").removeClass("active");
-        $("#workspace-subflow-input-remove").addClass("active");
+        }
         activeSubflow.changed = true;
-        return {subflowInputs: [ removedInput ], links:removedInputLinks};
+
+        return {subflowInputs: removedSubflowInputs, links: removedLinks}
     }
 
     function addSubflowOutput(id) {
@@ -197,9 +215,12 @@ RED.subflow = (function() {
                     n.changed = true;
                 }
                 n.inputs = activeSubflow.in.length;
+                while (n.inputs < n.inputPorts.length) {
+                    n.inputPorts.pop();
+                }
                 n.outputs = activeSubflow.out.length;
-                while (n.outputs < n.ports.length) {
-                    n.ports.pop();
+                while (n.outputs < n.outputPorts.length) {
+                    n.outputPorts.pop();
                 }
                 n.resize = true;
                 n.dirty = true;
@@ -213,9 +234,7 @@ RED.subflow = (function() {
     }
     function refreshToolbar(activeSubflow) {
         if (activeSubflow) {
-            $("#workspace-subflow-input-add").toggleClass("active", activeSubflow.in.length !== 0);
-            $("#workspace-subflow-input-remove").toggleClass("active",activeSubflow.in.length === 0);
-
+            $("#workspace-subflow-input .spinner-value").html(activeSubflow.in.length);
             $("#workspace-subflow-output .spinner-value").html(activeSubflow.out.length);
         }
     }
@@ -225,10 +244,10 @@ RED.subflow = (function() {
         toolbar.empty();
 
         $('<a class="button" id="workspace-subflow-edit" href="#" data-i18n="[append]subflow.editSubflowProperties"><i class="fa fa-pencil"></i> </a>').appendTo(toolbar);
-        $('<span style="margin-left: 5px;" data-i18n="subflow.input"></span> '+
-            '<div style="display: inline-block;" class="button-group">'+
-            '<a id="workspace-subflow-input-remove" class="button active" href="#">0</a>'+
-            '<a id="workspace-subflow-input-add" class="button" href="#">1</a>'+
+        $('<span style="margin-left: 5px;" data-i18n="subflow.input"></span> <div id="workspace-subflow-input" style="display: inline-block;" class="button-group spinner-group">'+
+            '<a id="workspace-subflow-input-remove" class="button" href="#"><i class="fa fa-minus"></i></a>'+
+            '<div class="spinner-value">3</div>'+
+            '<a id="workspace-subflow-input-add" class="button" href="#"><i class="fa fa-plus"></i></a>'+
             '</div>').appendTo(toolbar);
 
         $('<span style="margin-left: 5px;" data-i18n="subflow.output"></span> <div id="workspace-subflow-output" style="display: inline-block;" class="button-group spinner-group">'+
@@ -376,16 +395,16 @@ RED.subflow = (function() {
                 hideWorkspaceToolbar();
             }
         });
-        RED.events.on("view:selection-changed",function(selection) {
+        /*RED.events.on("view:selection-changed",function(selection) {
             if (!selection.nodes) {
                 RED.menu.setDisabled("menu-item-subflow-convert",true);
             } else {
                 RED.menu.setDisabled("menu-item-subflow-convert",false);
             }
-        });
+        });*/
 
         RED.actions.add("core:create-subflow",createSubflow);
-        RED.actions.add("core:convert-to-subflow",convertToSubflow);
+        /*RED.actions.add("core:convert-to-subflow",convertToSubflow);*/
     }
 
     function createSubflow() {
@@ -420,7 +439,7 @@ RED.subflow = (function() {
         RED.nodes.dirty(true);
     }
 
-    function convertToSubflow() {
+    /*function convertToSubflow() {
         var selection = RED.view.selection();
         if (!selection.nodes) {
             RED.notify(RED._("subflow.errors.noNodesSelected"),"error");
@@ -538,7 +557,7 @@ RED.subflow = (function() {
             z: RED.workspaces.active(),
             inputs: subflow.in.length,
             outputs: subflow.out.length,
-            h: Math.max(30/*node_height*/,(subflow.out.length||0) * 15),
+            h: Math.max(30,(subflow.out.length||0) * 15),
             changed:true
         }
         subflowInstance._def = RED.nodes.getType(subflowInstance.type);
@@ -615,14 +634,14 @@ RED.subflow = (function() {
         RED.editor.validateNode(subflow);
         RED.nodes.dirty(true);
         RED.view.redraw(true);
-    }
+    }*/
 
 
 
     return {
         init: init,
         createSubflow: createSubflow,
-        convertToSubflow: convertToSubflow,
+        //convertToSubflow: convertToSubflow,
         removeSubflow: removeSubflow,
         refresh: refresh,
         removeInput: removeSubflowInput,

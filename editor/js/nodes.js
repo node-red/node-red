@@ -1,3 +1,5 @@
+/** This file was modified by Sathya Laufer */
+
 /**
  * Copyright JS Foundation and other contributors, http://js.foundation
  *
@@ -179,11 +181,17 @@ RED.nodes = (function() {
         if (n._def.category == "config") {
             configNodes[n.id] = n;
         } else {
-            n.ports = [];
+            n.inputPorts = [];
+            if (n.inputs) {
+                for (var i=0;i<n.inputs;i++) {
+                    n.inputPorts.push(i);
+                }
+            }
+            n.outputPorts = [];
             if (n.wires && (n.wires.length > n.outputs)) { n.outputs = n.wires.length; }
             if (n.outputs) {
                 for (var i=0;i<n.outputs;i++) {
-                    n.ports.push(i);
+                    n.outputPorts.push(i);
                 }
             }
             n.dirty = true;
@@ -409,6 +417,7 @@ RED.nodes = (function() {
         var node = {};
         node.id = n.id;
         node.type = n.type;
+        node.namespace = n.namespace ? n.namespace : n.type;
         for (var d in n._def.defaults) {
             if (n._def.defaults.hasOwnProperty(d)) {
                 node[d] = n[d];
@@ -427,6 +436,7 @@ RED.nodes = (function() {
         var node = {};
         node.id = n.id;
         node.type = n.type;
+        node.namespace = n._def.namespace ? n._def.namespace : n.type;
         node.z = n.z;
 
         if (node.type == "unknown") {
@@ -473,7 +483,7 @@ RED.nodes = (function() {
             for (var j=0;j<wires.length;j++) {
                 var w = wires[j];
                 if (w.target.type != "subflow") {
-                    node.wires[w.sourcePort].push(w.target.id);
+                    node.wires[w.sourcePort].push({"id":w.target.id,"port":w.targetPort});
                 }
             }
 
@@ -491,6 +501,7 @@ RED.nodes = (function() {
         var node = {};
         node.id = n.id;
         node.type = n.type;
+        node.namespace = n.namespace ? n.namespace : n.type;
         node.name = n.name;
         node.info = n.info;
         node.in = [];
@@ -502,7 +513,7 @@ RED.nodes = (function() {
             for (var i=0;i<wires.length;i++) {
                 var w = wires[i];
                 if (w.target.type != "subflow") {
-                    nIn.wires.push({id:w.target.id})
+                    nIn.wires.push({id:w.target.id,port:wires[i].targetPort})
                 }
             }
             node.in.push(nIn);
@@ -514,7 +525,7 @@ RED.nodes = (function() {
                 if (wires[i].source.type != "subflow") {
                     nOut.wires.push({id:wires[i].source.id,port:wires[i].sourcePort})
                 } else {
-                    nOut.wires.push({id:n.id,port:0})
+                    nOut.wires.push({id:n.id,port:wires[i].sourcePort})
                 }
             }
             node.out.push(nOut);
@@ -871,7 +882,7 @@ RED.nodes = (function() {
                 }
 
                 if (!existingConfigNode) { //} || !compareNodes(existingConfigNode,n,true) || existingConfigNode._def.exclusive || existingConfigNode.z !== n.z) {
-                    configNode = {id:n.id, z:n.z, type:n.type, users:[], _config:{}};
+                    configNode = {id:n.id, z:n.z, type:n.type, namespace:n.namespace, users:[], _config:{}};
                     for (d in def.defaults) {
                         if (def.defaults.hasOwnProperty(d)) {
                             configNode[d] = n[d];
@@ -951,6 +962,7 @@ RED.nodes = (function() {
                         }
                     }
                     node.type = n.type;
+                    node.namespace = n.namespace ? n.namespace : (def.namespace ? def.namespace : n.type);
                     node._def = def;
                     if (n.type.substring(0,7) === "subflow") {
                         var parentId = n.type.split(":")[1];
@@ -958,6 +970,7 @@ RED.nodes = (function() {
                         if (createNewIds) {
                             parentId = subflow.id;
                             node.type = "subflow:"+parentId;
+                            node.namespace = node.type;
                             node._def = registry.getNodeType(node.type);
                             delete node.i;
                         }
@@ -991,6 +1004,7 @@ RED.nodes = (function() {
                             node._orig = orig;
                             node.name = n.type;
                             node.type = "unknown";
+                            node.namespace = "unknown";
                         }
                         if (node._def.category != "config") {
                             node.inputs = n.inputs||node._def.inputs;
@@ -1038,9 +1052,9 @@ RED.nodes = (function() {
                 for (var w1=0;w1<n.wires.length;w1++) {
                     var wires = (n.wires[w1] instanceof Array)?n.wires[w1]:[n.wires[w1]];
                     for (var w2=0;w2<wires.length;w2++) {
-                        if (node_map.hasOwnProperty(wires[w2])) {
-                            if (n.z === node_map[wires[w2]].z) {
-                                var link = {source:n,sourcePort:w1,target:node_map[wires[w2]]};
+                        if (node_map.hasOwnProperty(wires[w2].id) && wires[w2].port < node_map[wires[w2].id].inputs) {
+                            if (n.z === node_map[wires[w2].id].z) {
+                                var link = {source:n,sourcePort:w1,target:node_map[wires[w2].id],targetPort:wires[w2].port};
                                 addLink(link);
                                 new_links.push(link);
                             } else {
@@ -1085,8 +1099,8 @@ RED.nodes = (function() {
         for (i=0;i<new_subflows.length;i++) {
             n = new_subflows[i];
             n.in.forEach(function(input) {
-                input.wires.forEach(function(wire) {
-                    var link = {source:input, sourcePort:0, target:node_map[wire.id]};
+                input.wires.forEach(function(wire, index) {
+                    var link = {source:input, sourcePort: index, target:node_map[wire.id], targetPort: wire.port};
                     addLink(link);
                     new_links.push(link);
                 });
@@ -1149,6 +1163,9 @@ RED.nodes = (function() {
                 }
             }
             if (filter.hasOwnProperty("sourcePort") && link.sourcePort !== filter.sourcePort) {
+                continue;
+            }
+            if (filter.hasOwnProperty("targetPort") && link.targetPort !== filter.targetPort) {
                 continue;
             }
             result.push(link);

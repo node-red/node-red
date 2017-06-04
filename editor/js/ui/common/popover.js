@@ -35,6 +35,8 @@ RED.popover = (function() {
         var delay = options.delay;
         var width = options.width||"auto";
         var size = options.size||"default";
+        var offsetX = options.offsetX||0;
+        var offsetY = options.offsetY||0;
         if (!deltaSizes[size]) {
             throw new Error("Invalid RED.popover size value:",size);
         }
@@ -60,6 +62,8 @@ RED.popover = (function() {
 
 
                 var targetPos = target.offset();
+                targetPos.top += offsetY;
+                targetPos.left += offsetX;
                 var targetWidth = target.width();
                 var targetHeight = target.height();
 

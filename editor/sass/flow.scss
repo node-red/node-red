@@ -62,7 +62,7 @@
 .node_label {
     stroke-width: 0;
     fill: #333;
-    font-size: 14px;
+    font-size: 12px;
     pointer-events: none;
     -webkit-touch-callout: none;
     @include disable-selection;
@@ -79,6 +79,27 @@
     @include disable-selection;
 }
 
+.input_label {
+    stroke-width: 0;
+    fill: #888;
+    font-size: 11px;
+    alignment-baseline: middle;
+    text-anchor: end;
+    pointer-events: none;
+    -webkit-touch-callout: none;
+    @include disable-selection;
+}
+
+.output_label {
+    stroke-width: 0;
+    fill: #888;
+    font-size: 11px;
+    alignment-baseline: middle;
+    text-anchor: start;
+    pointer-events: none;
+    -webkit-touch-callout: none;
+    @include disable-selection;
+}
 
 .function_label {
     font-size: 12px;
@@ -156,6 +177,10 @@
     stroke-width: 2;
     stroke: $node-selected-color !important;
 }
+.node_working {
+    stroke-width: 2;
+    stroke: $node-working-color !important;
+}
 .node_highlighted {
     border-color: #dd1616 !important;
     border-style: dashed !important;
@@ -175,7 +200,16 @@
     stroke-dasharray: 12,3;
 }
 
-.node_status_label {
+.node_status_label_top {
+    @include disable-selection;
+    stroke-width: 0;
+    fill: #888;
+    font-size:8pt;
+    stroke:#000;
+    text-anchor:start;
+}
+
+.node_status_label_bottom {
     @include disable-selection;
     stroke-width: 0;
     fill: #888;
@@ -266,6 +300,9 @@
 
 g.link_selected path.link_line {
     stroke: $node-selected-color;
+}
+g.link_working path.link_line {
+    stroke: $node-working-color;
 }
 g.link_unknown path.link_line {
     stroke: $link-unknown-color;

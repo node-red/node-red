@@ -27,6 +27,7 @@ RED.i18n = (function() {
                     defaultNs: "editor"
                 },
                 fallbackLng: ['en-US'],
+                fallbackNS: ['node-red', 'editor'],
                 useCookie: false
             },function() {
                 done();

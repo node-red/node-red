@@ -59,11 +59,7 @@
         "uglify-js":"2.7.5",
         "when": "3.7.7",
         "ws": "1.1.1",
-        "xml2js":"0.4.17",
-        "node-red-node-feedparser":"0.1.*",
-        "node-red-node-email":"0.1.*",
-        "node-red-node-twitter":"0.1.*",
-        "node-red-node-rbe":"0.1.*"
+        "xml2js":"0.4.17"
     },
     "optionalDependencies": {
         "bcrypt":"~1.0.1"

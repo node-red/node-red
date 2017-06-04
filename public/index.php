@@ -1,0 +1,255 @@
+<?php
+require_once("user.php");
+
+function ipIsV6($ip) : int
+{
+    return strpos($ip, ':') !== false;
+}
+
+function clientInPrivateNet() : bool
+{
+    if(substr($_SERVER['REMOTE_ADDR'], 0, 7) == '::ffff:' && strpos($_SERVER['REMOTE_ADDR'], '.') !== false) $_SERVER['REMOTE_ADDR'] = substr($_SERVER['REMOTE_ADDR'], 7);
+
+    if(ipIsV6($_SERVER['REMOTE_ADDR']))
+    {
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $ip6 = substr($ip, 0, 6);
+        $ip2 = substr($ip6, 0, 2);
+
+        return $ip6 == 'fe80::' || $ip2 == 'fc' || $ip2 == 'fd' || $ip == '::1';
+    }
+    else
+    {
+        $clientIp = ip2long($_SERVER['REMOTE_ADDR']);
+        $bcast10 = ip2long('255.0.0.0');
+        $nmask10 = ip2long('10.0.0.0');
+        $bcast172 = ip2long('255.240.0.0');
+        $nmask172 = ip2long('172.16.0.0');
+        $bcast192 = ip2long('255.255.0.0');
+        $nmask192 = ip2long('192.168.0.0');
+        $bcast127 = ip2long('255.0.0.0');
+        $nmask127 = ip2long('127.0.0.0');
+        return (($clientIp & $bcast10) == $nmask10) || (($clientIp & $bcast172) == $nmask172) || (($clientIp & $bcast192) == $nmask192) || (($clientIp & $bcast127) == $nmask127);
+    }
+}
+
+if((!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on") && !clientInPrivateNet()) die('unauthorized');
+
+$user = new User();
+if(!$user->checkAuth(true)) die();
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<title>Node-BLUE</title>
+<link rel="icon" type="image/png" href="favicon.ico">
+<link rel="mask-icon" href="red&#x2F;images&#x2F;node-red-icon-black.svg" color="#8f0000">
+<link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="vendor/jquery/css/smoothness/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" media="screen">
+<link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="vendor/vendor.css">
+<link rel="stylesheet" href="red/style.min.css">
+</head>
+<body spellcheck="false">
+<div id="header">
+    <span class="logo"><img src="red/images/node-blue.png" title="0.16.2-git"> <span>Node-BLUE</span></span>
+    <ul class="header-toolbar hide">
+        <li><a id="btn-sidemenu" class="button" data-toggle="dropdown" href="#"><i class="fa fa-bars"></i></a></li>
+    </ul>
+    <div id="header-shade" class="hide"></div>
+</div>
+<div id="main-container" class="sidebar-closed hide">
+    <div id="workspace">
+        <ul id="workspace-tabs"></ul>
+        <div id="chart" tabindex="1"></div>
+        <div id="workspace-toolbar"></div>
+        <div id="workspace-footer">
+            <a class="workspace-footer-button" id="btn-zoom-out" href="#"><i class="fa fa-minus"></i></a>
+            <a class="workspace-footer-button" id="btn-zoom-zero" href="#"><i class="fa fa-circle-o"></i></a>
+            <a class="workspace-footer-button" id="btn-zoom-in" href="#"><i class="fa fa-plus"></i></a>
+        </div>
+        <div id="editor-shade" class="hide"></div>
+    </div>
+    <div id="editor-stack"></div>
+    <div id="palette">
+        <img src="red/images/spin.svg" class="palette-spinner hide"/>
+        <div id="palette-search" class="palette-search hide">
+            <input type="text" data-i18n="[placeholder]palette.filter"></input>
+        </div>
+        <div id="palette-container" class="palette-scroll hide"></div>
+        <div id="palette-footer">
+            <a class="palette-button" id="palette-collapse-all" href="#"><i class="fa fa-angle-double-up"></i></a>
+            <a class="palette-button" id="palette-expand-all" href="#"><i class="fa fa-angle-double-down"></i></a>
+        </div>
+        <div id="palette-shade" class="hide"></div>
+    </div><!-- /palette -->
+    <div id="sidebar">
+        <ul id="sidebar-tabs"></ul>
+        <div id="sidebar-content"></div>
+        <div id="sidebar-footer"></div>
+        <div id="sidebar-shade" class="hide"></div>
+    </div>
+
+    <div id="sidebar-separator"></div>
+
+</div>
+
+<div id="notifications"></div>
+<div id="dropTarget"><div data-i18n="[append]workspace.dropFlowHere"><br/><i class="fa fa-download"></i></div></div>
+
+<div id="node-dialog-confirm-deploy" class="hide">
+    <form class="form-horizontal">
+        <div id="node-dialog-confirm-deploy-config" class="node-dialog-confirm-row" data-i18n="[prepend]deploy.confirm.improperlyConfigured;[append]deploy.confirm.confirm">
+            <ul id="node-dialog-confirm-deploy-invalid-list"></ul>
+        </div>
+        <div id="node-dialog-confirm-deploy-unknown" class="node-dialog-confirm-row" data-i18n="[prepend]deploy.confirm.unknown;[append]deploy.confirm.confirm">
+            <ul id="node-dialog-confirm-deploy-unknown-list"></ul>
+        </div>
+        <div id="node-dialog-confirm-deploy-conflict" class="node-dialog-confirm-row">
+            <div style="margin-left: 40px; margin-bottom: 10px;">
+                <span data-i18n="deploy.confirm.conflict"></span>
+            </div>
+            <div id="node-dialog-confirm-deploy-conflict-checking" class="node-dialog-confirm-conflict-row">
+                <img src="red/images/spin.svg"/><div data-i18n="deploy.confirm.conflictChecking"></div>
+            </div>
+            <div id="node-dialog-confirm-deploy-conflict-auto-merge" class="node-dialog-confirm-conflict-row">
+                <i style="color: #3a3;" class="fa fa-check"></i><div data-i18n="deploy.confirm.conflictAutoMerge"></div>
+            </div>
+            <div id="node-dialog-confirm-deploy-conflict-manual-merge" class="node-dialog-confirm-conflict-row">
+                <i style="color: #999;" class="fa fa-exclamation"></i><div data-i18n="deploy.confirm.conflictManualMerge"></div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="node-dialog-library-save-confirm" class="hide">
+    <form class="form-horizontal">
+        <div style="text-align: center; padding-top: 30px;" id="node-dialog-library-save-content">
+        </div>
+    </form>
+</div>
+
+<div id="node-dialog-library-save" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <label for="node-dialog-library-save-folder" data-i18n="[append]library.folder"><i class="fa fa-folder-open"></i> </label>
+            <input type="text" id="node-dialog-library-save-folder" data-i18n="[placeholder]library.folderPlaceholder">
+        </div>
+        <div class="form-row">
+            <label for="node-dialog-library-save-filename" data-i18n="[append]library.filename"><i class="fa fa-file"></i> </label>
+            <input type="text" id="node-dialog-library-save-filename" data-i18n="[placeholder]library.filenamePlaceholder">
+        </div>
+    </form>
+</div>
+
+<div id="node-dialog-library-lookup" class="hide">
+    <form class="form-horizontal">
+        <div class="form-row">
+            <ul id="node-dialog-library-breadcrumbs" class="breadcrumb">
+                <li class="active"><a href="#" data-i18n="[append]library.breadcrumb"></a></li>
+            </ul>
+        </div>
+        <div class="form-row">
+            <div style="vertical-align: top; display: inline-block; height: 100%; width: 30%; padding-right: 20px;">
+                <div id="node-select-library" style="border: 1px solid #999; width: 100%; height: 100%; overflow:scroll;"><ul></ul></div>
+            </div>
+            <div style="vertical-align: top; display: inline-block;width: 65%; height: 100%;">
+                <div style="height: 100%; width: 95%;" class="node-text-editor" id="node-select-library-text" ></div>
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/x-red" data-template-name="subflow">
+    <div class="form-row">
+        <label for="node-input-name" data-i18n="[append]editor:common.label.name"><i class="fa fa-tag"></i> </label>
+        <input type="text" id="node-input-name">
+    </div>
+</script>
+
+<script type="text/x-red" data-template-name="subflow-template">
+    <div class="form-row">
+        <i class="fa fa-tag"></i>
+        <label for="subflow-input-name" data-i18n="common.label.name"></label><input type="text" id="subflow-input-name">
+    </div>
+    <div class="form-row" style="margin-bottom: 0px;">
+        <label for="subflow-input-info" data-i18n="editor:subflow.info"></label>
+        <a href="https://help.github.com/articles/markdown-basics/" style="font-size: 0.8em; float: right;" data-i18n="[html]subflow.format"></a>
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height: 250px;" class="node-text-editor" id="subflow-input-info-editor"></div>
+    </div>
+    <div class="form-row form-tips" id="subflow-dialog-user-count"></div>
+</script>
+
+<script type="text/x-red" data-template-name="_expression">
+    <div id="node-input-expression-panels">
+        <div id="node-input-expression-panel-expr" class="red-ui-panel">
+            <div class="form-row" style="margin-bottom: 3px; text-align: right;">
+                <span class="node-input-expression-legacy"><i class="fa fa-exclamation-circle"></i> <span data-i18n="expressionEditor.compatMode"></span></span>
+                <button id="node-input-expression-reformat" class="editor-button editor-button-small"><span data-i18n="expressionEditor.format"></span></button>
+            </div>
+            <div class="form-row node-text-editor-row">
+                <div class="node-text-editor" id="node-input-expression"></div>
+            </div>
+        </div>
+        <div id="node-input-expression-panel-info" class="red-ui-panel">
+            <div class="form-row">
+                <ul id="node-input-expression-tabs"></ul>
+                <div id="node-input-expression-tab-help" class="node-input-expression-tab-content hide">
+                    <div>
+                        <select id="node-input-expression-func"></select>
+                        <button id="node-input-expression-func-insert" class="editor-button" data-i18n="expressionEditor.insert"></button>
+                    </div>
+                    <div id="node-input-expression-help"></div>
+                </div>
+                <div id="node-input-expression-tab-test" class="node-input-expression-tab-content hide">
+                    <div>
+                        <span style="display: inline-block; width: calc(50% - 5px);" data-i18n="expressionEditor.data"></span>
+                        <span style="display: inline-block; width: calc(50% - 5px);" data-i18n="expressionEditor.result"></span>
+                    </div>
+                    <div style="display: inline-block; width: calc(50% - 5px);" class="node-text-editor" id="node-input-expression-test-data"></div>
+                    <div style="display: inline-block; width: calc(50% - 5px);" class="node-text-editor" id="node-input-expression-test-result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/x-red" data-template-name="_json">
+    <div class="form-row" style="margin-bottom: 3px; text-align: right;">
+        <button id="node-input-expression-reformat" class="editor-button editor-button-small"><span data-i18n="jsonEditor.format"></span></button>
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height: 200px;min-height: 150px;" class="node-text-editor" id="node-input-json"></div>
+    </div>
+</script>
+
+
+<script src="vendor/vendor.js"></script>
+<script src="vendor/jsonata/jsonata.min.js"></script>
+<script src="vendor/ace/ace.js"></script>
+<script src="vendor/ace/ext-language_tools.js"></script>
+<script src="red/red.min.js"></script>
+<script src="red/main.min.js"></script>
+
+</body>
+</html>

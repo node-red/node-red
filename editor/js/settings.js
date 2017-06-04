@@ -105,7 +105,7 @@ RED.settings = (function () {
                 if (!RED.settings.user || RED.settings.user.anonymous) {
                     RED.settings.remove("auth-tokens");
                 }
-                console.log("Node-RED: " + data.version);
+                console.log("Node-BLUE: " + data.version);
                 done();
             },
             error: function(jqXHR,textStatus,errorThrown) {
