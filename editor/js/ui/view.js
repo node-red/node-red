@@ -1880,7 +1880,7 @@ RED.view = (function() {
                     if (isLink) {
                         d.w = node_height;
                     } else {
-                        d.w = Math.max(node_width,gridSize*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/gridSize)) );
+                        d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)) );
                     }
                     d.h = Math.max(node_height,(d.outputs||0) * 15);
 
@@ -2068,7 +2068,7 @@ RED.view = (function() {
                         if (!isLink && d.resize) {
                             var l = RED.utils.getNodeLabel(d);
                             var ow = d.w;
-                            d.w = Math.max(node_width,gridSize*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/gridSize)) );
+                            d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)) );
                             d.h = Math.max(node_height,(d.outputs||0) * 15);
                             d.x += (d.w-ow)/2;
                             d.resize = false;
