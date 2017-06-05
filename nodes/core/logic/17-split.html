@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <!--
   Copyright JS Foundation and other contributors, http://js.foundation
 
@@ -84,7 +83,7 @@
         </div>
         <div class="form-row">
             <label>to create </label>
-            <select id="node-input-build" style="width:200px;">
+            <select id="node-input-build" style="width:70%;">
                 <option id="node-input-build-string" value="string">a String</option>
                 <option value="array">an Array</option>
                 <option value="object">a key/value Object</option>
@@ -92,36 +91,40 @@
             </select>
         </div>
         <div class="form-row node-row-key">
-            <label style="vertical-align: top; margin-top: 7px;">using</label>
+            <label style="vertical-align:top; margin-top:7px;">using</label>
             <div style="display:inline-block">
-                <input type="text" id="node-input-key"  style="width:300px;">
-                <div style="margin-top: 7px;">as the property key</div>
+                <input type="text" id="node-input-key" style="width:252px;"> as the key
             </div>
         </div>
         <div class="form-row node-row-joiner">
             <label for="node-input-joiner">joined using</label>
-            <input type="text" id="node-input-joiner" style="width: 40px">
+            <input type="text" id="node-input-joiner" style="width:40px">
         </div>
-
-        <div class="form-row node-row-trigger">
-            <label style="width: auto;">Send the message:</label>
+        <div class="form-row node-row-trigger" id="trigger-row">
+            <label style="width:auto;">Send the message:</label>
             <ul>
-                <li style="height: 40px;">
-                    <label style="width: 280px;" for="node-input-count">After a fixed number of messages:</label> <input id="node-input-count" placeholder="count" type="text" style="width: 75px;">
+                <li>
+                    <label style="width:280px;" for="node-input-count">After a number of message parts</label> <input id="node-input-count" placeholder="count" type="text" style="width:75px;">
                 </li>
-                <li style="height: 40px;">
-                    <label style="width: 280px;" for="node-input-timeout">After a timeout following the first message:</label> <input id="node-input-timeout" placeholder="seconds" type="text" style="width: 75px;">
+                <li style="list-style-type:none;">
+                    <input type="checkbox" id="node-input-accumulate" style="display:inline-block; width:20px; list-style-type:none; margin-left:20px; vertical-align:top;">  and every subsequent message.
                 </li>
-                <li style="height: 40px;">
-                    <label style="width: auto; padding-top: 6px;">After a message with the <code>msg.complete</code> property set</label>
+                <li>
+                    <label style="width:280px;" for="node-input-timeout">After a timeout following the first message</label> <input id="node-input-timeout" placeholder="seconds" type="text" style="width:75px;">
+                </li>
+                <li>
+                    <label style="width:auto; padding-top:6px;">After a message with the <code>msg.complete</code> property set</label>
                 </li>
             </ul>
         </div>
     </div>
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
     <div class="form-tips form-tips-auto hide">This mode assumes this node is either
     paired with a <i>split</i> node or the received messages will have a properly
     configured <code>msg.parts</code> property.</div>
-
 </script>
 
 <script type="text/x-red" data-help-name="join">
@@ -162,10 +165,12 @@
             name: {value:""},
             mode: {value:"auto"},
             build: { value:"string"},
-            property: { value: "payload", validate: RED.validators.typedInput("propertyType")},
+            property: { value:"payload", validate:RED.validators.typedInput("propertyType")},
             propertyType: { value:"msg"},
             key: {value:"topic"},
             joiner: { value:"\\n"},
+            accumulate: { value:"false" },
+            //topic: { value:""},
             timeout: {value:""},
             count: {value:""}
         },
@@ -187,7 +192,7 @@
 
             $("#node-input-build").change(function(e) {
                 var val = $(this).val();
-                $(".node-row-key").toggle(val==='object');
+                $(".node-row-key").toggle((val==='object')||(val==='accus'));
                 $(".node-row-joiner").toggle(val==='string');
                 $(".node-row-trigger").toggle(val!=='auto');
                 if (val === 'string') {
@@ -195,15 +200,18 @@
                 } else {
                     $("#node-input-property").typedInput('types',['msg', {value:"full",label:"complete message",hasValue:false}]);
                 }
-            })
+                // if (val === "accum") { $("#trigger-row").hide(); }
+                // else { $("#trigger-row").show(); }
+            });
 
             $("#node-input-property").typedInput({
                 typeField: $("#node-input-propertyType"),
-                types:['msg', {value:"full",label:"complete message",hasValue:false}]
-            })
+                types:['msg', {value:"full", label:"complete message", hasValue:false}]
+            });
+
             $("#node-input-key").typedInput({
-                types:['msg', {value:"merge",label:"",hasValue: false}]
-            })
+                types:['msg', {value:"merge", label:"", hasValue:false}]
+            });
 
             $("#node-input-build").change();
             $("#node-input-mode").change();

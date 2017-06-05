@@ -139,7 +139,6 @@ describe('JOIN node', function() {
             joinNode1.should.have.property('name', 'joinNode');
             joinNode1.should.have.property('count', 0);
             joinNode1.should.have.property('timer', 0);
-            joinNode1.should.have.property('timerr', 'send');
             joinNode1.should.have.property('build', 'array');
             done();
         });
@@ -169,7 +168,7 @@ describe('JOIN node', function() {
     });
 
     it('should join things into an object after a count', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:5, build:"object",mode:"custom"},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:5, build:"object", mode:"custom"},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -198,7 +197,7 @@ describe('JOIN node', function() {
     });
 
     it('should merge objects', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:6, build:"merged",mode:"custom"},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:5, build:"merged", mode:"custom"},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -206,7 +205,7 @@ describe('JOIN node', function() {
             n2.on("input", function(msg) {
                 try {
                     msg.should.have.property("payload");
-                    msg.payload.should.have.property("a",6);
+                    msg.payload.should.have.property("a",1);
                     msg.payload.should.have.property("b",2);
                     msg.payload.should.have.property("c",3);
                     msg.payload.should.have.property("d",4);
@@ -215,12 +214,106 @@ describe('JOIN node', function() {
                 }
                 catch(e) { done(e)}
             });
+            n1.receive({payload:{a:9}, topic:"f"});
             n1.receive({payload:{a:1}, topic:"a"});
+            n1.receive({payload:{b:9}, topic:"b"});
             n1.receive({payload:{b:2}, topic:"b"});
             n1.receive({payload:{c:3}, topic:"c"});
             n1.receive({payload:{d:4}, topic:"d"});
             n1.receive({payload:{e:5}, topic:"e"});
-            n1.receive({payload:{a:6}, topic:"f"});
+        });
+    });
+
+    it('should accumulate a merged object', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",mode:"custom",accumulate:true},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                if (c === 5) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("a",3);
+                        msg.payload.should.have.property("b",2);
+                        msg.payload.should.have.property("c",1);
+                        done();
+                    }
+                    catch(e) { done(e) }
+                }
+                c += 1;
+            });
+            n1.receive({payload:{a:1}, topic:"a"});
+            n1.receive({payload:{b:2}, topic:"b"});
+            n1.receive({payload:{c:3}, topic:"c"});
+            n1.receive({payload:{a:3}, topic:"d"});
+            n1.receive({payload:{b:2}, topic:"e"});
+            n1.receive({payload:{c:1}, topic:"f"});
+        });
+    });
+
+    it('should be able to reset an accumulation', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",accumulate:true,mode:"custom"},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                if (c === 3) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("a",1);
+                        msg.payload.should.have.property("b",2);
+                        msg.payload.should.have.property("c",3);
+                        msg.payload.should.have.property("d",4);
+                    }
+                    catch(e) { done(e) }
+                }
+                if (c === 5) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("b",2);
+                        msg.payload.should.have.property("c",1);
+                        done();
+                    }
+                    catch(e) { done(e) }
+                }
+                c += 1;
+            });
+            n1.receive({payload:{a:1}, topic:"a"});
+            n1.receive({payload:{b:2}, topic:"b"});
+            n1.receive({payload:{c:3}, topic:"c"});
+            n1.receive({payload:{d:4}, topic:"d", complete:true});
+            n1.receive({payload:{b:2}, topic:"e"});
+            n1.receive({payload:{c:1}, topic:"f"});
+        });
+    });
+
+    it('should accumulate a key/value object', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"object", accumulate:true, mode:"custom", topic:"bar", key:"foo", count:4},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    //msg.should.have.property("topic","bar");
+                    msg.should.have.property("payload");
+                    msg.payload.should.have.property("a",1);
+                    msg.payload.should.have.property("b",2);
+                    msg.payload.should.have.property("c",3);
+                    msg.payload.should.have.property("d",4);
+                    done();
+                }
+                catch(e) { done(e) }
+            });
+            n1.receive({payload:1, foo:"a"});
+            n1.receive({payload:2, foo:"b"});
+            n1.receive({payload:3, foo:"c"});
+            n1.receive({payload:4, foo:"d"});
         });
     });
 
