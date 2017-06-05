@@ -123,6 +123,7 @@ module.exports = function(grunt) {
                     "editor/js/validators.js",
                     "editor/js/ui/utils.js",
                     "editor/js/ui/common/editableList.js",
+                    "editor/js/ui/common/checkboxSet.js",
                     "editor/js/ui/common/menu.js",
                     "editor/js/ui/common/panels.js",
                     "editor/js/ui/common/popover.js",

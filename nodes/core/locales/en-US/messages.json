@@ -112,12 +112,15 @@
         "sidebar": {
             "label": "debug",
             "name": "Debug messages",
-            "filterAll": "all flows",
+            "filterAll": "all nodes",
+            "filterSelected": "selected nodes",
             "filterCurrent": "current flow"
         },
         "messageMenu": {
             "collapseAll": "Collapse all paths",
-            "clearPinned": "Clear pinned paths"
+            "clearPinned": "Clear pinned paths",
+            "filterNode": "Filter this node",
+            "clearFilter": "Clear filter"
         }
     },
     "link": {
@@ -190,12 +193,15 @@
     "delay": {
         "action": "Action",
         "for": "For",
-        "delaymsg": "Delay message",
+        "delaymsg": "Delay each message",
+        "delayfixed": "Fixed delay",
         "delayvarmsg": "Set delay with msg.delay",
         "randomdelay": "Random delay",
-        "limitrate": "Limit rate to",
-        "fairqueue": "Topic based fair queue",
-        "timedqueue": "Timed release queue",
+        "limitrate": "Rate Limit",
+        "limitall": "All messages",
+        "limittopic": "For each msg.topic",
+        "fairqueue": "Send each topic in turn",
+        "timedqueue": "Send all topics",
         "milisecs": "Miliseconds",
         "secs": "Seconds",
         "sec": "Second",
@@ -213,9 +219,8 @@
             "delay": "delay",
             "variable": "variable",
             "limit": "limit",
+            "limitTopic": "limit topic",
             "random": "random",
-            "queue": "queue",
-            "timed": "releases per",
             "units" : {
                 "second": {
                     "plural" : "Seconds",
@@ -585,8 +590,8 @@
         "label": {
             "columns": "Columns",
             "separator": "Separator",
-            "c2o": "CSV-to-Object options",
-            "o2c": "Object-to-CSV options",
+            "c2o": "CSV to Object options",
+            "o2c": "Object to CSV options",
             "input": "Input",
             "firstrow": "first row contains column names",
             "output": "Output",
@@ -621,7 +626,7 @@
     },
     "html": {
         "label": {
-            "select": "Select",
+            "select": "Selector",
             "output": "Output"
         },
         "output": {
@@ -632,14 +637,17 @@
         "format": {
             "single": "as a single message containing an array",
             "multi": "as multiple messages, one for each element"
-        },
-        "tip": "Tip: The <b>Select</b> value is a <a href=\"https://github.com/fb55/CSSselect#user-content-supported-selectors\" target=\"_blank\"><i><u>CSS Selector</u></i></a>, similar to a jQuery selector."
+        }
     },
     "json": {
         "errors": {
             "dropped-object": "Ignored non-object payload",
             "dropped": "Ignored unsupported payload type",
             "dropped-error": "Failed to convert payload"
+        },
+        "label": {
+            "o2j": "Object to JSON options",
+            "pretty": "Format JSON string"
         }
     },
     "yaml": {
@@ -651,11 +659,11 @@
     },
     "xml": {
         "label": {
-            "represent": "Represent XML tag attributes as a property named",
-            "prefix": "Prefix to access character content",
-            "advanced": "Advanced options"
+            "represent": "Property name for XML tag attributes",
+            "prefix": "Property name for tag text content",
+            "advanced": "Advanced options",
+            "x2o": "XML to Object options"
         },
-        "tip": "There is no simple way to convert XML attributes to JSON so the approach taken here is to add a property, named $ by default, to the JSON structure.",
         "errors": {
             "xml_js": "This node only handles xml strings or js objects."
         }
@@ -669,6 +677,7 @@
             "type": "Type",
             "initpin": "Initialise pin state?",
             "debounce": "Debounce",
+            "freq": "Frequency",
             "button": "Button",
             "pimouse": "Pi Mouse",
             "pikeyboard": "Pi Keyboard",
@@ -775,6 +784,6 @@
             "appendfail": "failed to append to file: __error__",
             "createfail": "failed to create file: __error__"
         },
-        "tip": "Tip: You should fully path the Filename."
+        "tip": "Tip: The filename should be an absolute path, otherwise it will be relative to the working directory of the Node-RED process."
     }
 }

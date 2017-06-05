@@ -13,7 +13,7 @@
     },
     "$substringBefore": {
         "args": "str, chars",
-        "desc": "Returns the substring before the first occurrence of the character sequence chars in `str`. If `str` does not contain `chars`, then it returns `str`."
+        "desc": "Returns the substring before the first occurrence of the character sequence `chars` in `str`. If `str` does not contain `chars`, then it returns `str`."
     },
     "$substringAfter": {
         "args": "str, chars",
@@ -29,7 +29,7 @@
     },
     "$trim": {
         "args": "str",
-        "desc": "Normalizes and trims all whitespace characters in str by applying the following steps:\n\n - All tabs, carriage returns, and line feeds are replaced with spaces.\n- Contiguous sequences of spaces are reduced to a single space.\n- Trailing and leading spaces are removed.\n\n If `str` is not specified (i.e. this function is invoked with no arguments), then the context value is used as the value of `str`. An error is thrown if `str` is not a string."
+        "desc": "Normalizes and trims all whitespace characters in `str` by applying the following steps:\n\n - All tabs, carriage returns, and line feeds are replaced with spaces.\n- Contiguous sequences of spaces are reduced to a single space.\n- Trailing and leading spaces are removed.\n\n If `str` is not specified (i.e. this function is invoked with no arguments), then the context value is used as the value of `str`. An error is thrown if `str` is not a string."
     },
     "$contains": {
         "args": "str, pattern",
@@ -45,7 +45,7 @@
     },
     "$match": {
         "args": "str, pattern [, limit]",
-        "desc": "Applies the `str` string to the `pattern` regular expression and returns an array of objects, with each object containing information about each occurrence of a match withing `str`."
+        "desc": "Applies the `str` string to the `pattern` regular expression and returns an array of objects, with each object containing information about each occurrence of a match within `str`."
     },
     "$replace": {
         "args": "str, pattern, replacement [, limit]",

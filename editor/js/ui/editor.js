@@ -937,11 +937,20 @@ RED.editor = (function() {
                             changed = true;
                         }
                         hasNonBlankLabel = false;
-                        newValue = outputLabels.map(function() {
+                        newValue = new Array(editing_node.outputs);
+                        outputLabels.each(function() {
+                            var index = $(this).attr('id').substring(23); // node-label-form-output-<index>
+                            if (outputMap && outputMap.hasOwnProperty(index)) {
+                                index = parseInt(outputMap[index]);
+                                if (index === -1) {
+                                    return;
+                                }
+                            }
                             var v = $(this).val();
                             hasNonBlankLabel = hasNonBlankLabel || v!== "";
-                            return v;
-                        }).toArray().slice(0,editing_node.outputs);
+                            newValue[index] = v;
+                        })
+
                         if ((editing_node.outputLabels === undefined && hasNonBlankLabel) ||
                             (editing_node.outputLabels !== undefined && JSON.stringify(newValue) !== JSON.stringify(editing_node.outputLabels))) {
                             changes.outputLabels = editing_node.outputLabels;
@@ -1648,7 +1657,14 @@ RED.editor = (function() {
     }
 
 
+    var expressionTestCache = {};
+
     function editExpression(options) {
+        var expressionTestCacheId = "_";
+        if (editStack.length > 0) {
+            expressionTestCacheId = editStack[editStack.length-1].id;
+        }
+
         var value = options.value;
         var onComplete = options.complete;
         var type = "_expression"
@@ -1829,7 +1845,7 @@ RED.editor = (function() {
                 });
                 testDataEditor = RED.editor.createEditor({
                     id: 'node-input-expression-test-data',
-                    value: '{\n    "payload": "hello world"\n}',
+                    value: expressionTestCache[expressionTestCacheId] || '{\n    "payload": "hello world"\n}',
                     mode:"ace/mode/json",
                     lineNumbers: false
                 });
@@ -1891,6 +1907,7 @@ RED.editor = (function() {
                 testDataEditor.getSession().on('change', function() {
                     clearTimeout(changeTimer);
                     changeTimer = setTimeout(testExpression,200);
+                    expressionTestCache[expressionTestCacheId] = testDataEditor.getValue();
                 });
                 expressionEditor.getSession().on('change', function() {
                     clearTimeout(changeTimer);

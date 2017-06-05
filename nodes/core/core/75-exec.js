@@ -40,7 +40,7 @@ module.exports = function(RED) {
 
         this.on("input", function(msg) {
             if (msg.hasOwnProperty("kill")) {
-                if (typeof msg.kill !== "string" || msg.kill.length === 0 || !msg.kill.toUpperCase().startsWith("SIG") ) { msg.kill = ""; }
+                if (typeof msg.kill !== "string" || msg.kill.length === 0 || !msg.kill.toUpperCase().startsWith("SIG") ) { msg.kill = "SIGTERM"; }
                 if (msg.hasOwnProperty("pid")) {
                     if (node.activeProcesses.hasOwnProperty(msg.pid) ) {
                         node.activeProcesses[msg.pid].kill(msg.kill.toUpperCase());

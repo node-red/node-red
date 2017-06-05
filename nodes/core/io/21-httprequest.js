@@ -53,6 +53,7 @@ module.exports = function(RED) {
             }
             if (!url) {
                 node.error(RED._("httpin.errors.no-url"),msg);
+                return;
             }
             // url must start http:// or https:// so assume http:// if not set
             if (url.indexOf("://") !== -1 && url.indexOf("http") !== 0) {
@@ -160,14 +161,25 @@ module.exports = function(RED) {
                 tlsNode.addTLSOptions(opts);
             }
             var req = ((/^https/.test(urltotest))?https:http).request(opts,function(res) {
-                (node.ret === "bin") ? res.setEncoding('binary') : res.setEncoding('utf8');
+                // Force NodeJs to return a Buffer (instead of a string)
+                // See https://github.com/nodejs/node/issues/6038
+                res.setEncoding(null);
+                delete res._readableState.decoder;
+
                 msg.statusCode = res.statusCode;
                 msg.headers = res.headers;
                 msg.responseUrl = res.responseUrl;
-                msg.payload = "";
+                msg.payload = [];
+
                 // msg.url = url;   // revert when warning above finally removed
                 res.on('data',function(chunk) {
-                    msg.payload += chunk;
+                    if (!Buffer.isBuffer(chunk)) {
+                        // if the 'setEncoding(null)' fix above stops working in
+                        // a new Node.js release, throw a noisy error so we know
+                        // about it.
+                        throw new Error("HTTP Request data chunk not a Buffer");
+                    }
+                    msg.payload.push(chunk);
                 });
                 res.on('end',function() {
                     if (node.metric()) {
@@ -180,13 +192,18 @@ module.exports = function(RED) {
                             node.metric("size.bytes", msg, res.client.bytesRead);
                         }
                     }
-                    if (node.ret === "bin") {
-                        msg.payload = new Buffer(msg.payload,"binary");
+
+                    // Convert the payload to the required return type
+                    msg.payload = Buffer.concat(msg.payload); // bin
+                    if (node.ret !== "bin") {
+                        msg.payload = msg.payload.toString('utf8'); // txt
+
+                        if (node.ret === "obj") {
+                            try { msg.payload = JSON.parse(msg.payload); } // obj
+                            catch(e) { node.warn(RED._("httpin.errors.json-error")); }
+                        }
                     }
-                    else if (node.ret === "obj") {
-                        try { msg.payload = JSON.parse(msg.payload); }
-                        catch(e) { node.warn(RED._("httpin.errors.json-error")); }
-                    }
+
                     node.send(msg);
                     node.status({});
                 });

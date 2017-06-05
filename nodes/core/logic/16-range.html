@@ -33,24 +33,25 @@
 </script>
 
 <script type="text/x-red" data-help-name="range">
-    <p>A simple function node to remap numeric input values to another scale.</p>
+    <p>Maps a numeric value to a different range.</p>
     <h3>Inputs</h3>
     <dl class="message-properties">
         <dt>payload <span class="property-type">number</span></dt>
-        <dd>the input payload <i>must</i> be a number. Anything else will try to be
+        <dd>The payload <i>must</i> be a number. Anything else will try to be
         parsed into a number and rejected if that fails.</dd>
     </dl>
     <h3>Outputs</h3>
     <dl class="message-properties">
         <dt>payload <span class="property-type">number</span></dt>
-        <dd>the output payload will always be a numeric type..</dd>
+        <dd>The value mapped to the new range.</dd>
     </dl>
     <h3>Details</h3>
-    <p>Currently only does a linear scaling.</p>
+    <p>This node will linearly scale the received value. By default, the result
+       is not constrained to the range defined in the node.</p>
     <p><i>Scale and limit to target range</i> means that the result will never be outside
     the range specified within the result range.</p>
     <p><i>Scale and wrap within the target range</i> means that the result will
-    be a "modulo-style" wrap-around within the result range.</p>
+    be wrapped within the result range.</p>
 </script>
 
 <script type="text/javascript">

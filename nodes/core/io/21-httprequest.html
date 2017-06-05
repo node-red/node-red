@@ -70,29 +70,40 @@
 </script>
 
 <script type="text/x-red" data-help-name="http request">
-    <p>Provides a node for making http requests.</p>
-    <p>The URL and HTTP method can be configured in the node, if they are left blank they should be set in an incoming message on <code>msg.url</code> and <code>msg.method</code>:</p>
-    <ul>
-        <li><code>url</code>, if set, is used as the url of the request. Must start with http: or https:</li>
-        <li><code>method</code>, if set, is used as the HTTP method of the request.
-        Must be one of <code>GET</code>, <code>PUT</code>, <code>POST</code>, <code>PATCH</code> or <code>DELETE</code> (default: GET)</li>
-        <li><code>headers</code>, if set, should be an object containing field/value
-        pairs to be added as request headers</li>
-        <li><code>payload</code> is sent as the body of the request</li>
-    </ul>
+    <p>Sends HTTP requests and returns the response.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">url <span class="property-type">string</span></dt>
+        <dd>If not configured in the node, this optional property sets the url of the request.</dd>
+        <dt class="optional">method <span class="property-type">string</span></dt>
+        <dd>If not configured in the node, this optional property sets the HTTP method of the request.
+            Must be one of <code>GET</code>, <code>PUT</code>, <code>POST</code>, <code>PATCH</code> or <code>DELETE</code>.</dd>
+        <dt class="optional">headers <span class="property-type">object</span></dt>
+        <dd>Sets the HTTP headers of the request.</dd>
+        <dt class="optional">payload</dt>
+        <dd>Sent as the body of the request.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string | object | buffer</span></dt>
+        <dd>The body of the response. The node can be configured to return the body
+             as a string, attempt to parse it as a JSON string or leave it as a
+             binary buffer.</dd>
+        <dt>statusCode <span class="property-type">number</span></dt>
+        <dd>The status code of the response, or the error code if the request could not be completed.</dd>
+        <dt>headers <span class="property-type">object</span></dt>
+        <dd>An object containing the response headers.</dd>
+        <dt>responseUrl <span class="property-type">string</span></dt>
+        <dd>In case any redirects occurred while processing the request, this property is the final redirected url.
+            Otherwise, the url of the original request.</dd>
+    </dl>
+    <h3>Details</h3>
     <p>When configured within the node, the URL property can contain <a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache-style</a> tags. These allow the
     url to be constructed using values of the incoming message. For example, if the url is set to
     <code>example.com/{{{topic}}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.
     Using {{{...}}} prevents mustache from escaping characters like / & etc.</p>
-    <p>
-    The output message contains the following properties:
-    <ul>
-        <li><code>payload</code> is the body of the response</li>
-        <li><code>statusCode</code> is the status code of the response, or the error code if the request could not be completed</li>
-        <li><code>headers</code> is an object containing the response headers</li>
-        <li><code>responseUrl</code> is the url of the server that responds</li>
-    </ul>
-    <p><b>Note</b>: If you need to configure a proxy please add <b>http_proxy=...</b> to your environment variables and restart Node-RED.</p>
+    <p><b>Note</b>: If running behind a proxy, the standard <code>http_proxy=...</code> environment variable should be set and Node-RED restarted.</p>
 </script>
 
 <script type="text/javascript">

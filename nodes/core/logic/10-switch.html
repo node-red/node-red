@@ -36,11 +36,14 @@
 </script>
 
 <script type="text/x-red" data-help-name="switch">
-    <p>A node to route messages based on property values.</p>
-    <p>When a message arrives, the selected property is evaluated against each
-    of the defined rules. The message is then sent to the output of <i>all</i>
-    rules that pass.</p>
-    <p><b>Note</b>: the <i>otherwise</i> rule applies as a "not any of" the rules preceding it.</p>
+    <p>Route messages based on their property values.</p>
+    <h3>Details</h3>
+    <p>When a message arrives, the node will evaluate each of the defined rules
+    and forward the message to the corresponding outputs of any matching rules.</p>
+    <p>Optionally, the node can be set to stop evaluating rules once it finds one
+    that matches.</p>
+    <p>The rules can be evaluated against an individual message property, a flow or global
+    context property or the result of a JSONata expression.</p>
 </script>
 
 <script type="text/javascript">

@@ -9,8 +9,11 @@ addons:
     packages:
     - g++-4.8
     - gcc-4.8
+matrix:
+  allow_failures:
+  - node_js: "8"
 node_js:
-  - "7"
+  - "8"
   - "6"
   - "4"
 script:

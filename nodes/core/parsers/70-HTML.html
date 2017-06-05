@@ -25,11 +25,10 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" style="width:70%" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-tips"><span data-i18n="[html]html.tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="html">
-    <p>Extracts elements from an html document held in <code>msg.payload</code> using a selector.</p>
+    <p>Extracts elements from an html document held in <code>msg.payload</code> using a CSS selector.</p>
     <h3>Inputs</h3>
     <dl class="message-properties">
     <dt>payload <span class="property-type">string</span></dt>
@@ -39,13 +38,14 @@
 </dl>
     <h3>Output</h3>
     <dl class="message-properties">
-        <dt>payload <span class="property-type">array | strings</span></dt>
+        <dt>payload <span class="property-type">array | string</span></dt>
         <dd>the result can be either a single message with a payload containing an array of the matched elements, or multiple
            messages that each contain a matched element.</dd>
     </dl>
     <h3>Details</h3>
-    <p>The selector uses <a href="https://github.com/cheeriojs/cheerio/blob/master/Readme.md" target="_blank">Cheerio</a>
-     which uses the <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_blank">CSS selector</a> syntax.</p>
+    <p>This node supports a combination of CSS and jQuery selectors. See the
+    <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_blank">css-select documentation</a> for more information
+    on the supported syntax.</p>
 </script>
 
 <script type="text/javascript">
