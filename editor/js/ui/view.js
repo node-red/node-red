@@ -206,67 +206,39 @@ RED.view = (function() {
         .attr("height", space_height)
         .attr("fill","#fff");
 
-    var gridScale = d3.scale.linear().range([0,space_width]).domain([0,space_width]);
     var grid = vis.append("g");
-
-    grid.selectAll("line.horizontal").data(gridScale.ticks(space_width/gridSize)).enter()
-       .append("line")
-           .attr(
-           {
-               "class":"horizontal",
-               "x1" : 0,
-               "x2" : space_width,
-               "y1" : function(d){ return gridScale(d);},
-               "y2" : function(d){ return gridScale(d);},
-               "fill" : "none",
-               "shape-rendering" : "crispEdges",
-               "stroke" : "#eee",
-               "stroke-width" : "1px"
-           });
-    grid.selectAll("line.vertical").data(gridScale.ticks(space_width/gridSize)).enter()
-       .append("line")
-           .attr(
-           {
-               "class":"vertical",
-               "y1" : 0,
-               "y2" : space_width,
-               "x1" : function(d){ return gridScale(d);},
-               "x2" : function(d){ return gridScale(d);},
-               "fill" : "none",
-               "shape-rendering" : "crispEdges",
-               "stroke" : "#eee",
-               "stroke-width" : "1px"
-           });
-    grid.style("visibility","hidden");
-
     updateGrid();
 
     function updateGrid() {
+        var gridTicks = [];
+        for (var i=0;i<space_width;i+=+gridSize) {
+            gridTicks.push(i);
+        }
         grid.selectAll("line.horizontal").remove();
-        grid.selectAll("line.horizontal").data(gridScale.ticks(space_width/gridSize)).enter()
+        grid.selectAll("line.horizontal").data(gridTicks).enter()
             .append("line")
             .attr(
                 {
                     "class":"horizontal",
                     "x1" : 0,
                     "x2" : space_width,
-                    "y1" : function(d){ return gridScale(d);},
-                    "y2" : function(d){ return gridScale(d);},
+                    "y1" : function(d){ return d;},
+                    "y2" : function(d){ return d;},
                     "fill" : "none",
                     "shape-rendering" : "crispEdges",
                     "stroke" : "#eee",
                     "stroke-width" : "1px"
                 });
         grid.selectAll("line.vertical").remove();
-        grid.selectAll("line.vertical").data(gridScale.ticks(space_width/gridSize)).enter()
+        grid.selectAll("line.vertical").data(gridTicks).enter()
             .append("line")
             .attr(
                 {
                     "class":"vertical",
                     "y1" : 0,
                     "y2" : space_width,
-                    "x1" : function(d){ return gridScale(d);},
-                    "x2" : function(d){ return gridScale(d);},
+                    "x1" : function(d){ return d;},
+                    "x2" : function(d){ return d;},
                     "fill" : "none",
                     "shape-rendering" : "crispEdges",
                     "stroke" : "#eee",
