@@ -63,23 +63,31 @@
 </script>
 
 <script type="text/x-red" data-help-name="trigger">
-    <p>Creates two messages on the output separated by a timeout whenever <i>any</i> <code>msg</code> arrives on the input.</p>
-    <p>For example, this can be used to toggle a Raspberry PI GPIO pin on and off.</p>
-    <p>The two output states can be specified as can the duration of the timer.
-    Either output can be set to a value, or templated from the inbound
-    <code>msg</code> using mustache syntax. <pre>The payload is {{payload}}</pre></p>
-    <p>Or you can pass through either the <i>original msg</i> or the <i>latest msg</i> to arrive.</p>
-    <p>Optionally the timer can be extended by being retriggered... or not.</p>
-    <p>By setting the first output to <i>nothing</i>, and selecting extend timer - a watchdog timer can be created.
-    No output will happen as long as repeated inputs occur within the timeout period.</p>
-    <p>Setting the timer to 0 creates an "infinite" timeout - the first output will happen but the second
-    never will, and neither can the first be retriggered - so a true one shot.</p>
-    <p>If a <code>msg.reset</code> property is present, or the <code>msg.payload</code>
-    matches the optional reset value, any timeout or repeat currently in progress
-    will be cleared and the second output will not happen.</p>
-    <p>The node can be set to repeat the input <code>msg</code> at regular intervals until the input changes,
-    or the node is reset.</p>
-    <p>The blue status icon will be visible while the node is active.</p>
+    <p>Sends a message if nothing is received within a set time interval or until reset.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">reset</dt>
+        <dd>If a message is received with this property, any timeout or repeat
+        currently in progress will be cleared and no message triggered.</dd>
+    </dl>
+
+    <h3>Details</h3>
+    <p>This node can be used to create a timeout within a flow. By default, when
+    it receives a message, it sends on a message with a <code>payload</code> of <code>1</code>.
+    It then waits 250ms before sending a second message with a <code>payload</code> of <code>0</code>.
+    This could be used, for example, to blink an LED attached to a Raspberry PI GPIO pin.</p>
+    <p>The payloads of each message sent can be configured to a variety of values, including
+    the option to not send anything. For example, setting the initial message to <i>nothing</i> and
+    selecting the option to extend the timer with each received message, the node will
+    act as a watchdog timer; only sending a message if nothing is received within the
+    set interval.</p>
+    <p>If set to a <i>string</i> type, the node supports the mustache template syntax.</p>
+    <p>If the node receives a message with a <code>reset</code> property, or a <code>payload</code>
+    that matches that configured in the node, any timeout or repeat currently in
+    progress will be cleared and no message triggered.</o>
+    <p>The node can be configured to resend a message at a regular interval until it
+    is reset by a received message.</p>
 </script>
 
 <script type="text/javascript">
