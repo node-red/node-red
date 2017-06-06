@@ -1137,7 +1137,7 @@ RED.view = (function() {
             }
         }
 
-        var selectionJSON = JSON.stringify(selection,function(key,value) {
+        var selectionJSON = activeWorkspace+":"+JSON.stringify(selection,function(key,value) {
             if (key === 'nodes') {
                 return value.map(function(n) { return n.id })
             } else if (key === 'link') {
