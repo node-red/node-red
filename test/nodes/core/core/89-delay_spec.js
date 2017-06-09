@@ -484,40 +484,6 @@ describe('delay Node', function() {
         randomDelayTest(0.0000046296, 0.0000092593, "days", done);
     });
 
-    it('handles bursts using a buffer', function(done) {
-        this.timeout(10000);
-
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":5,"timeoutUnits":"seconds","rate":1000,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
-                    {id:"helperNode1", type:"helper", wires:[]}];
-        helper.load(delayNode, flow, function() {
-            var delayNode1 = helper.getNode("delayNode1");
-            var helperNode1 = helper.getNode("helperNode1");
-            var sinon = require('sinon');
-            var receivedWarning = false;
-            var messageBurstSize = 1200;
-
-            // we ensure that we note that a warning is received for buffer growth
-            sinon.stub(delayNode1, 'warn', function(warning) {
-                receivedWarning = true;
-            });
-            // we ensure that the warning is received for buffer size and that we get the last message
-            helperNode1.on("input", function(msg) {
-                if (msg.payload === (messageBurstSize - 1)) {
-                    try {
-                        receivedWarning.should.be.true();
-                        done();
-                    } catch(err) {
-                        done(err);
-                    }
-                }
-            });
-            // send messages as quickly as possible
-            for (var i = 0; i < messageBurstSize; i++) {
-                delayNode1.receive({payload:i});
-            }
-        });
-    });
-
     it('handles delay queue', function(done) {
         this.timeout(2000);
         var flow = [{id:"delayNode1", type :"delay","name":"delayNode","nbRateUnits":"1","pauseType":"queue","timeout":1,"timeoutUnits":"seconds","rate":4,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
