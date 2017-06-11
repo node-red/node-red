@@ -143,7 +143,7 @@
                         .appendTo(row2);
                     var propertyValue = $('<input/>',{class:"node-input-rule-property-value",type:"text"})
                         .appendTo(row2)
-                        .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json','date','jsonata']});
+                        .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json','bin','date','jsonata']});
 
                     var row3_1 = $('<div/>').appendTo(row3);
                     $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
@@ -159,7 +159,7 @@
                         .appendTo(row3_2);
                     var toValue = $('<input/>',{class:"node-input-rule-property-replace-value",type:"text"})
                         .appendTo(row3_2)
-                        .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json']});
+                        .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json','bin']});
 
                     $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
                         .text(to)

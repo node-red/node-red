@@ -206,7 +206,23 @@
         <div style="height: 200px;min-height: 150px;" class="node-text-editor" id="node-input-json"></div>
     </div>
 </script>
-
+<script type="text/x-red" data-template-name="_buffer">
+    <div id="node-input-buffer-panels">
+        <div id="node-input-buffer-panel-str" class="red-ui-panel">
+            <div class="form-row" style="margin-bottom: 3px; text-align: right;">
+                <span class="node-input-buffer-type"><i class="fa fa-exclamation-circle"></i> <span id="node-input-buffer-type-string" data-i18n="bufferEditor.modeString"></span><span id="node-input-buffer-type-array" data-i18n="bufferEditor.modeArray"></span></span>
+            </div>
+            <div class="form-row node-text-editor-row">
+                <div class="node-text-editor" id="node-input-buffer-str"></div>
+            </div>
+        </div>
+        <div id="node-input-buffer-panel-bin" class="red-ui-panel">
+            <div class="form-row node-text-editor-row" style="margin-top: 10px">
+                <div class="node-text-editor" id="node-input-buffer-bin"></div>
+            </div>
+        </div>
+    </div>
+</script>
 
 <script src="vendor/vendor.js"></script>
 <script src="vendor/jsonata/jsonata.min.js"></script>

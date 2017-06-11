@@ -76,7 +76,7 @@ module.exports = function(RED) {
             }
             if (rule.tot === 'num') {
                 rule.to = Number(rule.to);
-            } else if (rule.tot === 'json') {
+            } else if (rule.tot === 'json' || rule.tot === 'bin') {
                 try {
                     // check this is parsable JSON
                     JSON.parse(rule.to);
@@ -102,6 +102,8 @@ module.exports = function(RED) {
                 var value = rule.to;
                 if (rule.tot === 'json') {
                     value = JSON.parse(rule.to);
+                } else if (rule.tot === 'bin') {
+                    value = Buffer.from(JSON.parse(rule.to))
                 }
                 var current;
                 var fromValue;

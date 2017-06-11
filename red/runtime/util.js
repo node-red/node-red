@@ -314,6 +314,9 @@ function evaluateNodeProperty(value, type, node, msg) {
         return new RegExp(value);
     } else if (type === 'date') {
         return Date.now();
+    } else if (type === 'bin') {
+        var data = JSON.parse(value);
+        return Buffer.from(data);
     } else if (type === 'msg' && msg) {
         return getMessageProperty(msg,value);
     } else if (type === 'flow' && node) {
