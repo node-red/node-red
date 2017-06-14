@@ -122,19 +122,15 @@ module.exports = function(RED) {
         }
         else if (node.pauseType === "rate") {
             var olddepth = 0;
+            node.busy = setInterval(function() {
+                if (node.buffer.length > 0) {
+                    node.status({text:node.buffer.length});
+                }
+            },333);
             node.on("input", function(msg) {
                 if (!node.drop) {
                     if ( node.intervalID !== -1) {
                         node.buffer.push(msg);
-                        if ((node.rate >= 200) && (node.buffer.length > 0)) {
-                            node.status({text:node.buffer.length});
-                        }
-                        else {
-                            if (!olddepth) {
-                                node.status({fill:"blue",shape:"dot"});
-                                olddepth = 1;
-                            }
-                        }
                     }
                     else {
                         node.send(msg);
@@ -173,6 +169,7 @@ module.exports = function(RED) {
             });
             node.on("close", function() {
                 clearInterval(node.intervalID);
+                clearInterval(node.busy);
                 node.buffer = [];
                 node.status({});
             });
