@@ -144,6 +144,27 @@ describe('JOIN node', function() {
         });
     });
 
+    it('should join bits of string back together automatically', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], joiner:",", build:"string", mode:"auto"},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.equal("A,B,C,D");
+                    done();
+                }
+                catch(e) {done(e);}
+            });
+            n1.receive({payload:"A", parts:{id:1, type:"string", ch:",", index:0, count:4}});
+            n1.receive({payload:"B", parts:{id:1, type:"string", ch:",", index:1, count:4}});
+            n1.receive({payload:"C", parts:{id:1, type:"string", ch:",", index:2, count:4}});
+            n1.receive({payload:"D", parts:{id:1, type:"string", ch:",", index:3, count:4}});
+        });
+    });
+
     it('should join things into an array after a count', function(done) {
         var flow = [{id:"n1", type:"join", wires:[["n2"]], count:3, joiner:",",mode:"custom"},
                     {id:"n2", type:"helper"}];

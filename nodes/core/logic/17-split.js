@@ -354,8 +354,11 @@ module.exports = function(RED) {
                             currentCount:0,
                             payload:{},
                             targetCount:targetCount,
-                            type:"object",
+                            type:payloadType,
                             msg:msg
+                        }
+                        if (payloadType === 'string') {
+                            inflight[partId].payload = [];
                         }
                     }
                     else {
@@ -364,7 +367,6 @@ module.exports = function(RED) {
                             payload:[],
                             targetCount:targetCount,
                             type:payloadType,
-                            joinChar: joinChar,
                             msg:msg
                         };
                         if (payloadType === 'string') {
@@ -374,7 +376,6 @@ module.exports = function(RED) {
                         } else if (payloadType === 'buffer') {
                             inflight[partId].bufferLen = 0;
                         }
-
                     }
                     if (node.timer > 0) {
                         inflight[partId].timeout = setTimeout(function() {

@@ -239,6 +239,9 @@
                 var val = $(this).val();
                 $(".node-row-custom").toggle(val==='custom');
                 $(".form-tips-auto").toggle(val==='auto');
+                if (val === "auto") {
+                    $("#node-input-accumulate").attr('checked', false);
+                }
             });
 
             $("#node-input-build").change(function(e) {
