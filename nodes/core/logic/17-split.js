@@ -78,7 +78,7 @@ module.exports = function(RED) {
                         msg.parts.count = count;
                         var pos = 0;
                         var data = msg.payload;
-                        for (var i=0;i<count;i++) {
+                        for (var i=0; i<count; i++) {
                             msg.payload = data.substring(pos,pos+node.splt);
                             msg.parts.index = i;
                             pos += node.splt;
@@ -110,7 +110,7 @@ module.exports = function(RED) {
                     var pos = 0;
                     var data = msg.payload;
                     msg.parts.len = node.arraySplt;
-                    for (var i=0;i<count;i++) {
+                    for (var i=0; i<count; i++) {
                         msg.payload = data.slice(pos,pos+node.arraySplt);
                         if (node.arraySplt === 1) {
                             msg.payload = msg.payload[0];
@@ -147,7 +147,7 @@ module.exports = function(RED) {
                         var pos = 0;
                         var data = msg.payload;
                         msg.parts.len = node.splt;
-                        for (var i=0;i<count;i++) {
+                        for (var i=0; i<count; i++) {
                             msg.payload = data.slice(pos,pos+node.splt);
                             msg.parts.index = i;
                             pos += node.splt;
@@ -162,7 +162,7 @@ module.exports = function(RED) {
                         }
                         var pos = msg.payload.indexOf(node.splt);
                         var end;
-                        while(pos > -1) {
+                        while (pos > -1) {
                             count++;
                             end = pos+node.splt.length;
                             pos = msg.payload.indexOf(node.splt,end);
@@ -175,7 +175,7 @@ module.exports = function(RED) {
                         var i = 0, p = 0;
                         var data = msg.payload;
                         pos = data.indexOf(node.splt);
-                        while(pos > -1) {
+                        while (pos > -1) {
                             msg.payload = data.slice(p,pos);
                             msg.parts.index = i;
                             node.send(RED.util.cloneMessage(msg));
@@ -252,7 +252,7 @@ module.exports = function(RED) {
                 var bufferLen = 0;
                 if (group.joinChar !== undefined) {
                     var joinBuffer = Buffer.from(group.joinChar);
-                    for (var i=0;i<group.payload.length;i++) {
+                    for (var i=0; i<group.payload.length; i++) {
                         if (i > 0) {
                             buffers.push(joinBuffer);
                             bufferLen += joinBuffer.length;
@@ -416,7 +416,9 @@ module.exports = function(RED) {
                 }
                 // TODO: currently reuse the last received - add option to pick first received
                 group.msg = msg;
-                if (group.currentCount >= (group.targetCount || msg.parts.count) || msg.hasOwnProperty('complete')) {
+                var tcnt = group.targetCount;
+                if (msg.hasOwnProperty("parts")) { tcnt = group.targetCount || msg.parts.count; }
+                if (group.currentCount >= tcnt || msg.hasOwnProperty('complete')) {
                     completeSend(partId);
                 }
             } catch(err) {
