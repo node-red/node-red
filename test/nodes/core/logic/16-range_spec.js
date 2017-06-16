@@ -134,7 +134,7 @@ describe('range Node', function() {
 
             var sinon = require('sinon');
             sinon.stub(rangeNode1, 'log', function(log) {
-                if(log.indexOf("notnumber") > -1) {
+                if (log.indexOf("notnumber") > -1) {
                     done();
                 } else {
                     try {
