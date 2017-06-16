@@ -416,7 +416,7 @@ module.exports = function(RED) {
                 }
                 // TODO: currently reuse the last received - add option to pick first received
                 group.msg = msg;
-                if (group.currentCount >= group.targetCount || msg.hasOwnProperty('complete')) {
+                if (group.currentCount >= (group.targetCount || msg.parts.count) || msg.hasOwnProperty('complete')) {
                     completeSend(partId);
                 }
             } catch(err) {
