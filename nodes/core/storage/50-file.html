@@ -55,7 +55,9 @@
         <label for="node-input-format"><i class="fa fa-sign-out"></i> <span data-i18n="file.label.outputas"></span></label>
         <select id="node-input-format">
             <option value="utf8" data-i18n="file.output.utf8"></option>
+            <option value="lines" data-i18n="file.output.lines"></option>
             <option value="" data-i18n="file.output.buffer"></option>
+            <option value="stream" data-i18n="file.output.stream"></option>
         </select>
     </div>
     <div class="form-row">
@@ -83,6 +85,8 @@
     <p>The filename should be an absolute path, otherwise it will be relative to
     the working directory of the Node-RED process.</p>
     <p>On Windows, path separators may need to be escaped, for example: <code>\\Users\\myUser</code>.</p>
+    <p>Optionally, a text file can be split into lines, outputting one message per line, or a binary file
+    file into smaller buffer chunks, the chunk size is operating system dependant, but typically 64k (linux/mac) or 41k (Windows).</p>
 </script>
 
 <script type="text/javascript">
@@ -124,6 +128,7 @@
             name: {value:""},
             filename: {value:""},
             format: {value:"utf8"},
+            chunk: {value:false}
         },
         color:"BurlyWood",
         inputs:1,
@@ -137,7 +142,18 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            $("#node-input-format").on("change",function() {
+                if ($("#node-input-format").val() === "utf8") {
+                    $("#buffer-input-type").hide();
+                    $("#line-input-type").show();
+                }
+                else {
+                    $("#buffer-input-type").show();
+                    $("#line-input-type").hide();
+                }
+            });
         }
     });
-
 </script>
