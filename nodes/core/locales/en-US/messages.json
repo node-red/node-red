@@ -758,7 +758,9 @@
             "action": "Action",
             "addnewline": "Add newline (\\n) to each payload?",
             "createdir": "Create directory if it doesn't exist?",
-            "outputas": "Output as",
+            "outputas": "Output",
+            "breakchunks": "Break into chunks",
+            "breaklines": "Break into lines",
             "filelabel": "file",
             "deletelabel": "delete __file__"
         },
@@ -768,8 +770,10 @@
             "delete": "delete file"
         },
         "output": {
-            "utf8": "a utf8 string",
-            "buffer": "a Buffer"
+            "utf8": "a single utf8 string",
+            "buffer": "a single Buffer object",
+            "lines": "a msg per line",
+            "stream": "a stream of Buffers"
         },
         "status": {
             "wrotefile": "wrote to file: __file__",
@@ -792,9 +796,10 @@
         "objectSend":"Send a message for each key/value pair",
         "strBuff":"<b>String</b> / <b>Buffer</b>",
         "array":"<b>Array</b>",
-        "splitUsing": "Split using",
-        "splitLength": "Fixed length of",
-        "stream":"Handle as a stream of messages"
+        "splitUsing":"Split using",
+        "splitLength":"Fixed length of",
+        "stream":"Handle as a stream of messages",
+        "addname":" Copy key to "
     },
     "join":{
         "mode":{

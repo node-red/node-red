@@ -16,23 +16,28 @@
 
 <script type="text/x-red" data-template-name="split">
     <div class="form-row"><span data-i18n="[html]split.intro"></span></div>
-    <div class="form-row"><span data-i18n="[html]split.object"></span></div>
-    <div class="form-row" style="padding-left: 10px"><span data-i18n="[html]split.objectSend"></span></div>
     <div class="form-row"><span data-i18n="[html]split.strBuff"></span></div>
     <div class="form-row">
-        <label for="node-input-splt" style="padding-left: 10px;margin-right: -10px;" data-i18n="split.splitUsing"></label>
-        <input type="text" id="node-input-splt" style="width: 70%">
+        <label for="node-input-splt" style="padding-left:10px; margin-right:-10px;" data-i18n="split.splitUsing"></label>
+        <input type="text" id="node-input-splt" style="width:70%">
         <input type="hidden" id="node-input-spltType">
     </div>
     <div class="form-row">
-        <input type="checkbox" id="node-input-stream" style="margin-left: 10px; vertical-align:top; width: auto;">
+        <input type="checkbox" id="node-input-stream" style="margin-left:10px; vertical-align:top; width:auto;">
         <label for="node-input-stream" style="width:auto;" data-i18n="split.stream"></label>
     </div>
     <div class="form-row"><span data-i18n="[html]split.array"></span></div>
     <div class="form-row">
-        <label for="node-input-arraySplt" style="padding-left: 10px;margin-right: -10px;" data-i18n="split.splitUsing"></label>
-        <input type="text" id="node-input-arraySplt" style="width: 70%">
+        <label for="node-input-arraySplt" style="padding-left:10px; margin-right:-10px;" data-i18n="split.splitUsing"></label>
+        <input type="text" id="node-input-arraySplt" style="width:70%">
         <input type="hidden" id="node-input-arraySpltType">
+    </div>
+    <div class="form-row"><span data-i18n="[html]split.object"></span></div>
+    <div class="form-row" style="padding-left: 10px"><span data-i18n="[html]split.objectSend"></span></div>
+    <div class="form-row">
+        <input type="checkbox" id="node-input-addname" style="margin-left:10px; vertical-align:baseline; width:auto;">
+        <label for="node-input-addname" style="width:auto;" data-i18n="split.addname"></label>
+        <input type="text" id="node-input-addfname" style="width:70%">
     </div>
     <hr/>
     <div class="form-row">
@@ -73,7 +78,9 @@
             spltType: {value:"str"},
             arraySplt: {value:1},
             arraySpltType: {value:"len"},
-            stream: {value: false}
+            stream: {value:false},
+            addname: {value:false},
+            addfname: {value:"topic"}
         },
         inputs:1,
         outputs:1,
@@ -104,9 +111,14 @@
                     {value:"len", label:RED._("node-red:split.splitLength"),validate:/^\d+$/}
                 ]
             });
+            $("#node-input-addfname").typedInput({
+                typeField: $("#node-input-fnameType"),
+                types:['msg']
+            });
         }
     });
 </script>
+
 
 <script type="text/x-red" data-template-name="join">
     <div class="form-row">

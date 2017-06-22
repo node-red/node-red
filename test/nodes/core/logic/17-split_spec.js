@@ -91,11 +91,34 @@ describe('SPLIT node', function() {
                 msg.parts.should.have.property("key");
                 msg.parts.should.have.property("count");
                 msg.parts.should.have.property("index");
+                msg.topic.should.equal("foo");
                 if (msg.parts.index === 0) { msg.payload.should.equal(1); }
                 if (msg.parts.index === 1) { msg.payload.should.equal("2"); }
                 if (msg.parts.index === 2) { msg.payload.should.equal(true); done(); }
             });
-            sn1.receive({payload:{a:1,b:"2",c:true}});
+            sn1.receive({topic:"foo",payload:{a:1,b:"2",c:true}});
+        });
+    });
+
+    it('should split an object into pieces and overwrite their topics', function(done) {
+        var flow = [{id:"sn1", type:"split", addname:true, addfname:"topic", wires:[["sn2"]]},
+                    {id:"sn2", type:"helper"}];
+        helper.load(splitNode, flow, function() {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            var count = 0;
+            sn2.on("input", function(msg) {
+                msg.should.have.property("payload");
+                msg.should.have.property("parts");
+                msg.parts.should.have.property("type","object");
+                msg.parts.should.have.property("key");
+                msg.parts.should.have.property("count");
+                msg.parts.should.have.property("index");
+                if (msg.parts.index === 0) { msg.payload.should.equal(1); msg.topic.should.equal("a"); }
+                if (msg.parts.index === 1) { msg.payload.should.equal("2"); msg.topic.should.equal("b"); }
+                if (msg.parts.index === 2) { msg.payload.should.equal(true); msg.topic.should.equal("c"); done(); }
+            });
+            sn1.receive({topic:"foo",payload:{a:1,b:"2",c:true}});
         });
     });
 

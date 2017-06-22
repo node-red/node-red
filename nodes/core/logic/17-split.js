@@ -39,6 +39,8 @@ module.exports = function(RED) {
         var node = this;
         node.stream = n.stream;
         node.spltType = n.spltType || "str";
+        node.addname = n.addname || false;
+        node.addfname = n.addfname;
         try {
             if (node.spltType === "str") {
                 this.splt = (n.splt || "\\n").replace(/\\n/,"\n").replace(/\\r/,"\r").replace(/\\t/,"\t").replace(/\\e/,"\e").replace(/\\f/,"\f").replace(/\\0/,"\0");
@@ -147,6 +149,7 @@ module.exports = function(RED) {
                     for (var p in pay) {
                         if (pay.hasOwnProperty(p)) {
                             msg.payload = pay[p];
+                            if (node.addname === true) { msg[node.addfname] = p; }
                             msg.parts.key = p;
                             msg.parts.index = j;
                             msg.parts.count = l;
