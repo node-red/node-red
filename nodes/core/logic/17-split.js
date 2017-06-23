@@ -309,6 +309,7 @@ module.exports = function(RED) {
                     node.warn("Message missing msg.parts property - cannot join in 'auto' mode")
                     return;
                 }
+
                 if (node.propertyType == "full") {
                     property = msg;
                 }
@@ -351,11 +352,18 @@ module.exports = function(RED) {
                         propertyKey = RED.util.getMessageProperty(msg,node.key);
                     }
                 }
+
                 if ((payloadType === 'object') && (propertyKey === null || propertyKey === undefined || propertyKey === "")) {
                     if (node.mode === "auto") {
                         node.warn("Message missing 'msg.parts.key' property - cannot add to object");
-                    } else {
-                        node.warn("Message missing key property 'msg."+node.key+"' - cannot add to object")
+                    }
+                    else {
+                        if (msg.hasOwnProperty('complete')) {
+                            completeSend(partId);
+                        }
+                        else {
+                            node.warn("Message missing key property 'msg."+node.key+"' - cannot add to object")
+                        }
                     }
                     return;
                 }
