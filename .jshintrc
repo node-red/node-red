@@ -14,5 +14,6 @@
     //"expr": true,     // allow ternery operator syntax...
     "shadow": true,     // allow variable shadowing (re-use of names...)
     "sub": true,        // don't warn that foo['bar'] should be written as foo.bar
-    "proto": true       // allow setting of __proto__ in node < v0.12
+    "proto": true,      // allow setting of __proto__ in node < v0.12,
+    "esversion": 6      // allow es6
 }
