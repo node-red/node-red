@@ -133,16 +133,18 @@
             });
         },
         oneditsave: function() {
-            $("#node-input-template").val(this.editor.getValue())
+            $("#node-input-template").val(this.editor.getValue());
+            this.editor.destroy();
             delete this.editor;
         },
         oneditcancel: function() {
+            this.editor.destroy();
             delete this.editor;
         },
         oneditresize: function(size) {
             var rows = $("#dialog-form>div:not(.node-text-editor-row)");
             var height = $("#dialog-form").height();
-            for (var i=0;i<rows.size();i++) {
+            for (var i=0; i<rows.size(); i++) {
                 height -= $(rows[i]).outerHeight(true);
             }
             var editorRow = $("#dialog-form>div.node-text-editor-row");
