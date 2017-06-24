@@ -86,7 +86,7 @@ module.exports = function(RED) {
                     child.stderr.on('data', function (data) {
                         if (node.activeProcesses.hasOwnProperty(child.pid) && node.activeProcesses[child.pid] !== null) {
                             if (isUtf8(data)) { msg.payload = data.toString(); }
-                            else { msg.payload = new Buffer(data); }
+                            else { msg.payload = new Buffer.from(data); }
                             node.send([null,RED.util.cloneMessage(msg),null]);
                         }
                     });
@@ -121,7 +121,7 @@ module.exports = function(RED) {
                     /* istanbul ignore else  */
                     if (RED.settings.verbose) { node.log(cl); }
                     child = exec(cl, {encoding: 'binary', maxBuffer:10000000}, function (error, stdout, stderr) {
-                        msg.payload = new Buffer(stdout,"binary");
+                        msg.payload = new Buffer.from(stdout,"binary");
                         if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
                         var msg2 = null;
                         if (stderr) {

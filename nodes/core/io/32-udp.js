@@ -181,11 +181,11 @@ module.exports = function(RED) {
                 } else {
                     var message;
                     if (node.base64) {
-                        message = new Buffer(msg.payload, 'base64');
+                        message = new Buffer.from(msg.payload, 'base64');
                     } else if (msg.payload instanceof Buffer) {
                         message = msg.payload;
                     } else {
-                        message = new Buffer(""+msg.payload);
+                        message = new Buffer.from(""+msg.payload);
                     }
                     sock.send(message, 0, message.length, por, add, function(err, bytes) {
                         if (err) {
