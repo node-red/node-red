@@ -627,5 +627,4 @@ describe('JOIN node', function() {
         });
     })
 
-
 });
