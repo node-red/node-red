@@ -39,12 +39,21 @@ module.exports = {
     },
     post: function(req,res) {
         var version = req.get("Node-RED-API-Version")||"v1";
+        if (!/^v[12]$/.test(version)) {
+            log.audit({event: "flows.set",version:version,error:"invalid_api_version"},req);
+            res.status(400).json({code:"invalid_api_version", message:"Invalid API Version requested"});
+            return;
+        }
         var flows = req.body;
         var deploymentType = req.get("Node-RED-Deployment-Type")||"full";
         log.audit({event: "flows.set",type:deploymentType,version:version},req);
         if (deploymentType === 'reload') {
-            redNodes.loadFlows().then(function() {
-                res.status(204).end();
+            redNodes.loadFlows().then(function(flowId) {
+                if (version === "v1") {
+                    res.status(204).end();
+                } else {
+                    res.json({rev:flowId});
+                }
             }).otherwise(function(err) {
                 log.warn(log._("api.flows.error-reload",{message:err.message}));
                 log.warn(err.stack);
@@ -61,17 +70,12 @@ module.exports = {
                         return res.status(409).json({code:"version_mismatch"});
                     }
                 }
-            } else if (version !== 'v1') {
-                log.audit({event: "flows.set",version:version,error:"invalid_api_version"},req);
-                res.status(400).json({code:"invalid_api_version", message:"Invalid API Version requested"});
             }
             redNodes.setFlows(flowConfig,deploymentType).then(function(flowId) {
                 if (version === "v1") {
                     res.status(204).end();
                 } else if (version === "v2") {
                     res.json({rev:flowId});
-                } else {
-                    // TODO: invalid version
                 }
             }).otherwise(function(err) {
                 log.warn(log._("api.flows.error-save",{message:err.message}));

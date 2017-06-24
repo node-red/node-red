@@ -206,67 +206,39 @@ RED.view = (function() {
         .attr("height", space_height)
         .attr("fill","#fff");
 
-    var gridScale = d3.scale.linear().range([0,space_width]).domain([0,space_width]);
     var grid = vis.append("g");
-
-    grid.selectAll("line.horizontal").data(gridScale.ticks(space_width/gridSize)).enter()
-       .append("line")
-           .attr(
-           {
-               "class":"horizontal",
-               "x1" : 0,
-               "x2" : space_width,
-               "y1" : function(d){ return gridScale(d);},
-               "y2" : function(d){ return gridScale(d);},
-               "fill" : "none",
-               "shape-rendering" : "crispEdges",
-               "stroke" : "#eee",
-               "stroke-width" : "1px"
-           });
-    grid.selectAll("line.vertical").data(gridScale.ticks(space_width/gridSize)).enter()
-       .append("line")
-           .attr(
-           {
-               "class":"vertical",
-               "y1" : 0,
-               "y2" : space_width,
-               "x1" : function(d){ return gridScale(d);},
-               "x2" : function(d){ return gridScale(d);},
-               "fill" : "none",
-               "shape-rendering" : "crispEdges",
-               "stroke" : "#eee",
-               "stroke-width" : "1px"
-           });
-    grid.style("visibility","hidden");
-
     updateGrid();
 
     function updateGrid() {
+        var gridTicks = [];
+        for (var i=0;i<space_width;i+=+gridSize) {
+            gridTicks.push(i);
+        }
         grid.selectAll("line.horizontal").remove();
-        grid.selectAll("line.horizontal").data(gridScale.ticks(space_width/gridSize)).enter()
+        grid.selectAll("line.horizontal").data(gridTicks).enter()
             .append("line")
             .attr(
                 {
                     "class":"horizontal",
                     "x1" : 0,
                     "x2" : space_width,
-                    "y1" : function(d){ return gridScale(d);},
-                    "y2" : function(d){ return gridScale(d);},
+                    "y1" : function(d){ return d;},
+                    "y2" : function(d){ return d;},
                     "fill" : "none",
                     "shape-rendering" : "crispEdges",
                     "stroke" : "#eee",
                     "stroke-width" : "1px"
                 });
         grid.selectAll("line.vertical").remove();
-        grid.selectAll("line.vertical").data(gridScale.ticks(space_width/gridSize)).enter()
+        grid.selectAll("line.vertical").data(gridTicks).enter()
             .append("line")
             .attr(
                 {
                     "class":"vertical",
                     "y1" : 0,
                     "y2" : space_width,
-                    "x1" : function(d){ return gridScale(d);},
-                    "x2" : function(d){ return gridScale(d);},
+                    "x1" : function(d){ return d;},
+                    "x2" : function(d){ return d;},
                     "fill" : "none",
                     "shape-rendering" : "crispEdges",
                     "stroke" : "#eee",
@@ -1165,7 +1137,7 @@ RED.view = (function() {
             }
         }
 
-        var selectionJSON = JSON.stringify(selection,function(key,value) {
+        var selectionJSON = activeWorkspace+":"+JSON.stringify(selection,function(key,value) {
             if (key === 'nodes') {
                 return value.map(function(n) { return n.id })
             } else if (key === 'link') {
@@ -1908,7 +1880,7 @@ RED.view = (function() {
                     if (isLink) {
                         d.w = node_height;
                     } else {
-                        d.w = Math.max(node_width,gridSize*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/gridSize)) );
+                        d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)) );
                     }
                     d.h = Math.max(node_height,(d.outputs||0) * 15);
 
@@ -2096,7 +2068,7 @@ RED.view = (function() {
                         if (!isLink && d.resize) {
                             var l = RED.utils.getNodeLabel(d);
                             var ow = d.w;
-                            d.w = Math.max(node_width,gridSize*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/gridSize)) );
+                            d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)) );
                             d.h = Math.max(node_height,(d.outputs||0) * 15);
                             d.x += (d.w-ow)/2;
                             d.resize = false;

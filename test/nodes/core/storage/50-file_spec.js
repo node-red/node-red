@@ -183,8 +183,11 @@ describe('file Nodes', function() {
 
         it('should fail to write to a ro file', function(done) {
             // Stub file write so we can make writes fail
-            var spy = sinon.stub(fs, 'writeFile', function(arg1,arg2,arg3,arg4) {
-                arg4(new Error("Stub error message"));
+            var spy = sinon.stub(fs, 'createWriteStream', function(arg1,arg2) {
+                var ws = {};
+                ws.on = function(e,d) { throw("Stub error message"); }
+                ws.write = function(e,d) { }
+                return ws;
             });
 
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":true}];
@@ -198,11 +201,11 @@ describe('file Nodes', function() {
                         //console.log(logEvents);
                         logEvents.should.have.length(1);
                         logEvents[0][0].should.have.a.property('msg');
-                        logEvents[0][0].msg.toString().should.startWith("file.errors.writefail");
+                        logEvents[0][0].msg.toString().should.startWith("Stub error message");
                         done();
                     }
                     catch(e) { done(e); }
-                    finally { fs.writeFile.restore(); }
+                    finally { fs.createWriteStream.restore(); }
                 },wait);
                 n1.receive({payload:"test"});
             });
@@ -210,7 +213,12 @@ describe('file Nodes', function() {
 
         it('should fail to append to a ro file', function(done) {
             // Stub file write so we can make writes fail
-            var spy = sinon.stub(fs, 'appendFile', function(arg,arg2,arg3,arg4) { arg4(new Error("Stub error message")); });
+            var spy = sinon.stub(fs, 'createWriteStream', function(arg1,arg2) {
+                var ws = {};
+                ws.on = function(e,d) { throw("Stub error message"); }
+                ws.write = function(e,d) { }
+                return ws;
+            });
 
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":true, "overwriteFile":false}];
             helper.load(fileNode, flow, function() {
@@ -223,11 +231,11 @@ describe('file Nodes', function() {
                         //console.log(logEvents);
                         logEvents.should.have.length(1);
                         logEvents[0][0].should.have.a.property('msg');
-                        logEvents[0][0].msg.toString().should.startWith("file.errors.appendfail");
+                        logEvents[0][0].msg.toString().should.startWith("Stub error message");
                         done();
                     }
                     catch(e) { done(e); }
-                    finally { fs.appendFile.restore(); }
+                    finally { fs.createWriteStream.restore(); }
                 },wait);
                 n1.receive({payload:"test2"});
             });
@@ -287,7 +295,7 @@ describe('file Nodes', function() {
         it('should try to create a new directory if asked to do so (append)', function(done) {
             // Stub file write so we can make writes fail
             var fileToTest2 = path.join(resourcesDir,"a","50-file-test-file.txt");
-            var spy = sinon.stub(fs, "ensureFile", function(arg1,arg2,arg3,arg4) { arg2(null); });
+            var spy = sinon.stub(fs, "ensureDir", function(arg1,arg2,arg3,arg4) { arg2(null); });
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":true, "overwriteFile":false, "createDir":true}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
@@ -303,7 +311,7 @@ describe('file Nodes', function() {
                         done();
                     }
                     catch(e) { done(e); }
-                    finally { fs.ensureFile.restore(); }
+                    finally { fs.ensureDir.restore(); }
                 },wait);
                 n1.receive({payload:"test2"});
             });
@@ -338,7 +346,7 @@ describe('file Nodes', function() {
         it('should try to create a new directory if asked to do so (overwrite)', function(done) {
             // Stub file write so we can make writes fail
             var fileToTest2 = path.join(resourcesDir,"a","50-file-test-file.txt");
-            var spy = sinon.stub(fs, "ensureFile", function(arg1,arg2,arg3,arg4) { arg2(null); });
+            var spy = sinon.stub(fs, "ensureDir", function(arg1,arg2,arg3,arg4) { arg2(null); });
 
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":true, "overwriteFile":true, "createDir":true}];
             helper.load(fileNode, flow, function() {
@@ -355,7 +363,7 @@ describe('file Nodes', function() {
                         done();
                     }
                     catch(e) { done(e); }
-                    finally { fs.ensureFile.restore(); }
+                    finally { fs.ensureDir.restore(); }
                 },wait);
                 n1.receive({payload:"test2"});
             });
@@ -371,7 +379,7 @@ describe('file Nodes', function() {
         var wait = 150;
 
         beforeEach(function(done) {
-            fs.writeFileSync(fileToTest, "File message line 1\File message line 2\n");
+            fs.writeFileSync(fileToTest, "File message line 1\nFile message line 2\n");
             helper.startServer(done);
         });
 
@@ -392,60 +400,82 @@ describe('file Nodes', function() {
         });
 
         it('should read in a file and output a buffer', function(done) {
-            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":fileToTest, "format":"", wires:[["n2"]]},
+            var flow = [{id:"fileInNode1", type:"file in", name:"fileInNode", "filename":fileToTest, "format":"", wires:[["n2"]]},
                     {id:"n2", type:"helper"}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileInNode1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload');
-                    msg.payload.should.have.length(39).and.be.a.Buffer;
-                    msg.payload.toString().should.equal("File message line 1\File message line 2\n");
+                    msg.payload.should.have.length(40).and.be.a.Buffer;
+                    msg.payload.toString().should.equal('File message line 1\nFile message line 2\n');
                     done();
                 });
                 n1.receive({payload:""});
             });
         });
 
-// Commented out to make build pass on node v.0.8 - reinstate when we drop 0.8 support...
-        //it('should read in a file and output a utf8 string', function(done) {
-            //var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":fileToTest, "format":"utf8", wires:[["n2"]]},
-                    //{id:"n2", type:"helper"}];
-            //helper.load(fileNode, flow, function() {
-                //var n1 = helper.getNode("fileInNode1");
-                //var n2 = helper.getNode("n2");
-                //n2.on("input", function(msg) {
-                    //msg.should.have.property('payload');
-                    //msg.payload.should.have.length(39).and.be.a.string;
-                    //msg.payload.should.equal("File message line 1\File message line 2\n");
-                    //done();
-                //});
-                //n1.receive({payload:""});
-            //});
-        //});
+        it('should read in a file and output a utf8 string', function(done) {
+            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":fileToTest, "format":"utf8", wires:[["n2"]]},
+                {id:"n2", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload');
+                    msg.payload.should.have.length(40).and.be.a.string;
+                    msg.payload.should.equal("File message line 1\nFile message line 2\n");
+                    done();
+                });
+                n1.receive({payload:""});
+            });
+        });
 
-// Commented out as we no longer need to warn of the very old deprecated behaviour
-        //it('should warn if msg.props try to overide', function(done) {
-            //var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":fileToTest, "format":"", wires:[["n2"]]},
-                    //{id:"n2", type:"helper"}];
-            //helper.load(fileNode, flow, function() {
-                //var n1 = helper.getNode("fileInNode1");
-                //var n2 = helper.getNode("n2");
-                //n2.on("input", function(msg) {
-                    //msg.should.have.property('payload');
-                    //msg.payload.should.have.length(39).and.be.a.Buffer;
-                    //msg.payload.toString().should.equal("File message line 1\File message line 2\n");
-                    //var logEvents = helper.log().args.filter(function(evt) {
-                        //return evt[0].type == "file in";
-                    //});
-                    //logEvents.should.have.length(1);
-                    //logEvents[0][0].should.have.a.property('msg');
-                    //logEvents[0][0].msg.toString().should.startWith("file.errors.nooverride");
-                    //done();
-                //});
-                //n1.receive({payload:"",filename:"foo.txt"});
-            //});
-        //});
+        it('should read in a file and output split lines with parts', function(done) {
+            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", filename:fileToTest, format:"lines", wires:[["n2"]]},
+                {id:"n2", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                var n2 = helper.getNode("n2");
+                var c = 0;
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload');
+                    msg.payload.should.have.length(19).and.be.a.string;
+                    if (c === 0) {
+                        msg.payload.should.equal("File message line 1");
+                        c++;
+                    } else {
+                        msg.payload.should.equal("File message line 2");
+                        msg.should.have.property('parts');
+                        msg.parts.should.have.property('index',1);
+                        msg.parts.should.have.property('count',2);
+                        msg.parts.should.have.property('type','string');
+                        msg.parts.should.have.property('ch','\n');
+                        done();
+                    }
+                });
+                n1.receive({payload:""});
+            });
+        });
+
+        it('should read in a file and output a buffer with parts', function(done) {
+            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", filename:fileToTest, format:"stream", wires:[["n2"]]},
+                {id:"n2", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload');
+                    msg.payload.should.have.length(40).and.be.a.Buffer;
+                    msg.should.have.property('parts');
+                    msg.parts.should.have.property('count',1);
+                    msg.parts.should.have.property('type','buffer');
+                    msg.parts.should.have.property('ch','');
+                    done();
+                });
+                n1.receive({payload:""});
+            });
+        });
 
         it('should warn if no filename set', function(done) {
             var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "format":""}];
@@ -474,8 +504,7 @@ describe('file Nodes', function() {
                     });
                     logEvents.should.have.length(1);
                     logEvents[0][0].should.have.a.property('msg');
-                    //logEvents[0][0].msg.toString().should.equal("Error: ENOENT, open 'badfile'");
-                    logEvents[0][0].msg.toString().should.startWith("Error: ENOENT");
+                    logEvents[0][0].msg.toString().should.startWith("Error");
                     done();
                 },wait);
                 n1.receive({payload:""});
@@ -483,5 +512,4 @@ describe('file Nodes', function() {
         });
 
     });
-
 });

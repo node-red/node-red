@@ -39,7 +39,6 @@ RED.panels = (function() {
                     var height = container.height();
                     startPosition = ui.position.top;
                     panelHeights = [$(children[0]).height(),$(children[1]).height()];
-                    console.log("START",height,panelHeights,panelHeights[0]+panelHeights[1],height-(panelHeights[0]+panelHeights[1]));
                 },
                 drag: function(event,ui) {
                     var height = container.height();
@@ -68,7 +67,6 @@ RED.panels = (function() {
                     panelHeights = [topPanelHeight,bottomPanelHeight];
                     $(children[0]).height(panelHeights[0]);
                     $(children[1]).height(panelHeights[1]);
-                    console.log("SET",height,panelHeights,panelHeights[0]+panelHeights[1],height-(panelHeights[0]+panelHeights[1]));
                 }
                 if (options.resize) {
                     options.resize(panelHeights[0],panelHeights[1]);

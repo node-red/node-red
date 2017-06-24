@@ -282,15 +282,20 @@
         }
     }
 }
-.node-input-expression-legacy {
+.node-input-expression-legacy, .node-input-buffer-type {
+    font-size: 0.8em;
     float: left;
     cursor: pointer;
     border: 1px solid white;
-    padding: 0 5px;
+    padding: 2px 5px;
     border-radius: 2px;
     &:hover {
-        border-color: $primary-border-color;
+        border-color: $form-input-border-color;
     }
+}
+.node-input-buffer-type {
+    float: none;
+    text-align: right;
 }
 
 #clipboard-hidden {
@@ -317,4 +322,12 @@
         width: 100px;
         color: #999;
     }
+}
+
+.ace_read-only {
+    background: #eee !important;
+    .ace_cursor {
+       color: transparent !important;
+    }
+
 }

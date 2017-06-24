@@ -81,6 +81,8 @@
             Must be one of <code>GET</code>, <code>PUT</code>, <code>POST</code>, <code>PATCH</code> or <code>DELETE</code>.</dd>
         <dt class="optional">headers <span class="property-type">object</span></dt>
         <dd>Sets the HTTP headers of the request.</dd>
+        <dt class="optional">cookies <span class="property-type">object</span></dt>
+        <dd>If set, can be used to send cookies with the request.</dd>
         <dt class="optional">payload</dt>
         <dd>Sent as the body of the request.</dd>
     </dl>
@@ -97,6 +99,8 @@
         <dt>responseUrl <span class="property-type">string</span></dt>
         <dd>In case any redirects occurred while processing the request, this property is the final redirected url.
             Otherwise, the url of the original request.</dd>
+        <dt>responseCookies <span class="property-type">object</span></dt>
+        <dd>If the response includes cookies, this propery is an object of name/value pairs for each cookie.</dd>
     </dl>
     <h3>Details</h3>
     <p>When configured within the node, the URL property can contain <a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache-style</a> tags. These allow the
@@ -104,6 +108,11 @@
     <code>example.com/{{{topic}}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.
     Using {{{...}}} prevents mustache from escaping characters like / & etc.</p>
     <p><b>Note</b>: If running behind a proxy, the standard <code>http_proxy=...</code> environment variable should be set and Node-RED restarted.</p>
+    <h4>Cookie handling</h4>
+    <p>The <code>cookies</code> property passed to the node must be an object of name/value pairs.
+    The value can be either a string to set the value of the cookie or it can be an
+    object with a single <code>value</code> property.<p>
+    <p>Any cookies returned by the request are passed back under the <code>responseCookies</code> property.</p>
 </script>
 
 <script type="text/javascript">

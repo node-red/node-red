@@ -31,6 +31,7 @@
         "body-parser": "1.15.2",
         "cheerio":"0.22.0",
         "clone": "2.1.0",
+        "cookie": "0.3.1",
         "cookie-parser": "1.4.3",
         "cors":"2.8.1",
         "cron":"1.2.1",

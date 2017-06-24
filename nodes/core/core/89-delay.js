@@ -122,21 +122,15 @@ module.exports = function(RED) {
         }
         else if (node.pauseType === "rate") {
             var olddepth = 0;
+            node.busy = setInterval(function() {
+                if (node.buffer.length > 0) {
+                    node.status({text:node.buffer.length});
+                }
+            },333);
             node.on("input", function(msg) {
                 if (!node.drop) {
                     if ( node.intervalID !== -1) {
                         node.buffer.push(msg);
-                        if (node.buffer.length > 0) {
-                            node.status({text:node.buffer.length});
-                        }
-                        if ((node.buffer.length > 1000) && (olddepth < 1000)) {
-                            olddepth = 1000;
-                            node.warn(node.name + " " + RED._("delay.error.buffer"));
-                        }
-                        if ((node.buffer.length > 10000) && (olddepth < 10000)) {
-                            olddepth = 10000;
-                            node.warn(node.name + " " + RED._("delay.error.buffer1"));
-                        }
                     }
                     else {
                         node.send(msg);
@@ -145,11 +139,10 @@ module.exports = function(RED) {
                                 clearInterval(node.intervalID);
                                 node.intervalID = -1;
                                 node.status({});
+                                olddepth = 0;
                             }
                             if (node.buffer.length > 0) {
                                 node.send(node.buffer.shift());
-                                if (node.buffer.length < 1000) { olddepth = 0; }
-                                node.status({text:node.buffer.length});
                             }
                         },node.rate);
                     }
@@ -176,6 +169,7 @@ module.exports = function(RED) {
             });
             node.on("close", function() {
                 clearInterval(node.intervalID);
+                clearInterval(node.busy);
                 node.buffer = [];
                 node.status({});
             });

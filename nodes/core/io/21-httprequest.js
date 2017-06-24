@@ -21,6 +21,7 @@ module.exports = function(RED) {
     var urllib = require("url");
     var mustache = require("mustache");
     var querystring = require("querystring");
+    var cookie = require("cookie");
 
     function HTTPRequest(n) {
         RED.nodes.createNode(this,n);
@@ -94,6 +95,28 @@ module.exports = function(RED) {
                         else { clSet = v; }
                         opts.headers[name] = msg.headers[v];
                     }
+                }
+            }
+            if (msg.cookies) {
+                var cookies = [];
+                if (opts.headers.hasOwnProperty('cookie')) {
+                    cookies.push(opts.headers.cookie);
+                }
+
+                for (var name in msg.cookies) {
+                    if (msg.cookies.hasOwnProperty(name)) {
+                        if (msg.cookies[name] === null || msg.cookies[name].value === null) {
+                            // This case clears a cookie for HTTP In/Response nodes.
+                            // Ignore for this node.
+                        } else if (typeof msg.cookies[name] === 'object') {
+                            cookies.push(cookie.serialize(name,msg.cookies[name].value));
+                        } else {
+                            cookies.push(cookie.serialize(name,msg.cookies[name]));
+                        }
+                    }
+                }
+                if (cookies.length > 0) {
+                    opts.headers.cookie = cookies.join("; ");
                 }
             }
             if (this.credentials && this.credentials.user) {
@@ -170,6 +193,20 @@ module.exports = function(RED) {
                 msg.headers = res.headers;
                 msg.responseUrl = res.responseUrl;
                 msg.payload = [];
+
+                if (msg.headers.hasOwnProperty('set-cookie')) {
+                    msg.responseCookies = {};
+                    msg.headers['set-cookie'].forEach(function(c) {
+                        var parsedCookie = cookie.parse(c);
+                        var eq_idx = c.indexOf('=');
+                        var key = c.substr(0, eq_idx).trim()
+                        parsedCookie.value = parsedCookie[key];
+                        delete parsedCookie[key];
+                        msg.responseCookies[key] = parsedCookie;
+
+                    })
+
+                }
 
                 // msg.url = url;   // revert when warning above finally removed
                 res.on('data',function(chunk) {

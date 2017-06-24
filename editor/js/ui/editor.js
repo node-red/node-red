@@ -496,6 +496,8 @@ RED.editor = (function() {
                 label = RED._("expressionEditor.title");
             } else if (node.type === '_json') {
                 label = RED._("jsonEditor.title");
+            } else if (node.type === '_buffer') {
+                label = RED._("bufferEditor.title");
             } else if (node.type === 'subflow') {
                 label = RED._("subflow.editSubflow",{name:node.name})
             } else if (node.type.indexOf("subflow:")===0) {
@@ -1874,7 +1876,7 @@ RED.editor = (function() {
                         });
                         legacyMode = /(^|[^a-zA-Z0-9_'"])msg([^a-zA-Z0-9_'"]|$)/.test(currentExpression);
                     } catch(err) {
-                        testResultEditor.setValue(RED._("expressionEditor.errors.invalid-expr",{message:err.message}));
+                        testResultEditor.setValue(RED._("expressionEditor.errors.invalid-expr",{message:err.message}),-1);
                         return;
                     }
                     $(".node-input-expression-legacy").toggle(legacyMode);
@@ -1888,7 +1890,7 @@ RED.editor = (function() {
                     try {
                         var result = expr.evaluate(legacyMode?{msg:parsedData}:parsedData);
                         if (usesContext) {
-                            testResultEditor.setValue(RED._("expressionEditor.errors.context-unsupported"));
+                            testResultEditor.setValue(RED._("expressionEditor.errors.context-unsupported"),-1);
                             return;
                         }
 
@@ -1898,9 +1900,9 @@ RED.editor = (function() {
                         } else {
                             formattedResult = RED._("expressionEditor.noMatch");
                         }
-                        testResultEditor.setValue(formattedResult);
+                        testResultEditor.setValue(formattedResult,-1);
                     } catch(err) {
-                        testResultEditor.setValue(RED._("expressionEditor.errors.eval",{message:err.message}));
+                        testResultEditor.setValue(RED._("expressionEditor.errors.eval",{message:err.message}),-1);
                     }
                 }
 
@@ -2028,6 +2030,191 @@ RED.editor = (function() {
         RED.tray.show(trayOptions);
     }
 
+    function stringToUTF8Array(str) {
+        var data = [];
+        var i=0, l = str.length;
+        for (i=0; i<l; i++) {
+            var char = str.charCodeAt(i);
+            if (char < 0x80) {
+                data.push(char);
+            } else if (char < 0x800) {
+                data.push(0xc0 | (char >> 6));
+                data.push(0x80 | (char & 0x3f));
+            } else if (char < 0xd800 || char >= 0xe000) {
+                data.push(0xe0 | (char >> 12));
+                data.push(0x80 | ((char>>6) & 0x3f));
+                data.push(0x80 | (char & 0x3f));
+            } else {
+                i++;
+                char = 0x10000 + (((char & 0x3ff)<<10) | (str.charAt(i) & 0x3ff));
+                data.push(0xf0 | (char >>18));
+                data.push(0x80 | ((char>>12) & 0x3f));
+                data.push(0x80 | ((char>>6) & 0x3f));
+                data.push(0x80 | (char & 0x3f));
+            }
+        }
+        return data;
+    }
+
+    function editBuffer(options) {
+        var value = options.value;
+        var onComplete = options.complete;
+        var type = "_buffer"
+        editStack.push({type:type});
+        RED.view.state(RED.state.EDITING);
+        var bufferStringEditor = [];
+        var bufferBinValue;
+
+        var panels;
+
+        var trayOptions = {
+            title: getEditStackTitle(),
+            buttons: [
+                {
+                    id: "node-dialog-cancel",
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        RED.tray.close();
+                    }
+                },
+                {
+                    id: "node-dialog-ok",
+                    text: RED._("common.label.done"),
+                    class: "primary",
+                    click: function() {
+                        onComplete(JSON.stringify(bufferBinValue));
+                        RED.tray.close();
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                if (dimensions) {
+                    editTrayWidthCache[type] = dimensions.width;
+                }
+                var height = $("#dialog-form").height();
+                if (panels) {
+                    panels.resize(height);
+                }
+            },
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var dialogForm = buildEditForm(tray.find('.editor-tray-body'),'dialog-form',type,'editor');
+
+                bufferStringEditor = RED.editor.createEditor({
+                    id: 'node-input-buffer-str',
+                    value: "",
+                    mode:"ace/mode/text"
+                });
+                bufferStringEditor.getSession().setValue(value||"",-1);
+
+                bufferBinEditor = RED.editor.createEditor({
+                    id: 'node-input-buffer-bin',
+                    value: "",
+                    mode:"ace/mode/text",
+                    readOnly: true
+                });
+
+                var changeTimer;
+                var buildBuffer = function(data) {
+                    var valid = true;
+                    var isString = typeof data === 'string';
+                    var binBuffer = [];
+                    if (isString) {
+                        bufferBinValue = stringToUTF8Array(data);
+                    } else {
+                        bufferBinValue = data;
+                    }
+                    var i=0,l=bufferBinValue.length;
+                    var c = 0;
+                    for(i=0;i<l;i++) {
+                        var d = parseInt(bufferBinValue[i]);
+                        if (!isString && (isNaN(d) || d < 0 || d > 255)) {
+                            valid = false;
+                            break;
+                        }
+                        if (i>0) {
+                            if (i%8 === 0) {
+                                if (i%16 === 0) {
+                                    binBuffer.push("\n");
+                                } else {
+                                    binBuffer.push("  ");
+                                }
+                            } else {
+                                binBuffer.push(" ");
+                            }
+                        }
+                        binBuffer.push((d<16?"0":"")+d.toString(16).toUpperCase());
+                    }
+                    if (valid) {
+                        $("#node-input-buffer-type-string").toggle(isString);
+                        $("#node-input-buffer-type-array").toggle(!isString);
+                        bufferBinEditor.setValue(binBuffer.join(""),1);
+                    }
+                    return valid;
+                }
+                var bufferStringUpdate = function() {
+                    var value = bufferStringEditor.getValue();
+                    var isValidArray = false;
+                    if (/^[\s]*\[[\s\S]*\][\s]*$/.test(value)) {
+                        isValidArray = true;
+                        try {
+                            var data = JSON.parse(value);
+                            isValidArray = buildBuffer(data);
+                        } catch(err) {
+                            isValidArray = false;
+                        }
+                    }
+                    if (!isValidArray) {
+                        buildBuffer(value);
+                    }
+
+                }
+                bufferStringEditor.getSession().on('change', function() {
+                    clearTimeout(changeTimer);
+                    changeTimer = setTimeout(bufferStringUpdate,200);
+                });
+
+                bufferStringUpdate();
+
+                dialogForm.i18n();
+
+                panels = RED.panels.create({
+                    id:"node-input-buffer-panels",
+                    resize: function(p1Height,p2Height) {
+                        var p1 = $("#node-input-buffer-panel-str");
+                        p1Height -= $(p1.children()[0]).outerHeight(true);
+                        var editorRow = $(p1.children()[1]);
+                        p1Height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+                        $("#node-input-buffer-str").css("height",(p1Height-5)+"px");
+                        bufferStringEditor.resize();
+
+                        var p2 = $("#node-input-buffer-panel-bin");
+                        editorRow = $(p2.children()[0]);
+                        p2Height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+                        $("#node-input-buffer-bin").css("height",(p2Height-5)+"px");
+                        bufferBinEditor.resize();
+                    }
+                });
+
+                $(".node-input-buffer-type").click(function(e) {
+                    e.preventDefault();
+                    RED.sidebar.info.set(RED._("bufferEditor.modeDesc"));
+                    RED.sidebar.info.show();
+                })
+
+
+            },
+            close: function() {
+                editStack.pop();
+            },
+            show: function() {}
+        }
+        if (editTrayWidthCache.hasOwnProperty(type)) {
+            trayOptions.width = editTrayWidthCache[type];
+        }
+        RED.tray.show(trayOptions);
+    }
+
     return {
         init: function() {
             RED.tray.init();
@@ -2045,6 +2232,7 @@ RED.editor = (function() {
         editSubflow: showEditSubflowDialog,
         editExpression: editExpression,
         editJSON: editJSON,
+        editBuffer: editBuffer,
         validateNode: validateNode,
         updateNodeProperties: updateNodeProperties, // TODO: only exposed for edit-undo
 
@@ -2071,6 +2259,7 @@ RED.editor = (function() {
             }
             if (options.readOnly) {
                 editor.setOption('readOnly',options.readOnly);
+                editor.container.classList.add("ace_read-only");
             }
             if (options.hasOwnProperty('lineNumbers')) {
                 editor.renderer.setOption('showGutter',options.lineNumbers);

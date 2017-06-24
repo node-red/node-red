@@ -59,19 +59,19 @@
     </div>
 
     <div id="rate-details">
-    <div class="form-row">
-        <label></label>
-        <select id="node-input-rate-type" style="width:270px !important">
-            <option value="all" data-i18n="delay.limitall"></option>
-            <option value="topic" data-i18n="delay.limittopic"></option>
-        </select>
-    </div>
+        <div class="form-row">
+            <label></label>
+            <select id="node-input-rate-type" style="width:270px !important">
+                <option value="all" data-i18n="delay.limitall"></option>
+                <option value="topic" data-i18n="delay.limittopic"></option>
+            </select>
+        </div>
         <div class="form-row">
             <label for="node-input-rate"><i class="fa fa-clock-o"></i> <span data-i18n="delay.rate"></span></label>
-            <input type="text" id="node-input-rate" placeholder="1" style="text-align:end; width:30px !important">
+            <input type="text" id="node-input-rate" placeholder="1" style="text-align:end; width:40px !important">
             <label for="node-input-rateUnits"><span data-i18n="delay.msgper"></span></label>
-            <input type="text" id="node-input-nbRateUnits" placeholder="1" style="text-align:end; width:30px !important">
-            <select id="node-input-rateUnits" style="width:110px !important">
+            <input type="text" id="node-input-nbRateUnits" placeholder="1" style="text-align:end; width:40px !important">
+            <select id="node-input-rateUnits" style="width:90px !important">
               <option value="second" data-i18n="delay.label.units.second.singular"></option>
               <option value="minute" data-i18n="delay.label.units.minute.singular"></option>
               <option value="hour" data-i18n="delay.label.units.hour.singular"></option>
@@ -89,9 +89,6 @@
             </select>
         </div>
     </div>
-
-
-
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
@@ -114,7 +111,8 @@
     <p>When configured to delay messages, the delay interval can be a fixed value
        a random value within a range or dynamically set for each message.</p>
     <p>When configured to rate limit messages, their delivery is spread across
-       the configured time period. It can optionally discard intermediate messages as they arrive.</p>
+       the configured time period. The status shows the number of messages currently in the queue.
+       It can optionally discard intermediate messages as they arrive.</p>
     </p>
     <p>The rate limiting can be applied to all messages, or group them according to
        their <code>msg.topic</code> value. When grouping, intermerdiate messages are

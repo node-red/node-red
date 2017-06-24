@@ -758,7 +758,9 @@
             "action": "Action",
             "addnewline": "Add newline (\\n) to each payload?",
             "createdir": "Create directory if it doesn't exist?",
-            "outputas": "Output as",
+            "outputas": "Output",
+            "breakchunks": "Break into chunks",
+            "breaklines": "Break into lines",
             "filelabel": "file",
             "deletelabel": "delete __file__"
         },
@@ -768,8 +770,10 @@
             "delete": "delete file"
         },
         "output": {
-            "utf8": "a utf8 string",
-            "buffer": "a Buffer"
+            "utf8": "a single utf8 string",
+            "buffer": "a single Buffer object",
+            "lines": "a msg per line",
+            "stream": "a stream of Buffers"
         },
         "status": {
             "wrotefile": "wrote to file: __file__",
@@ -785,5 +789,42 @@
             "createfail": "failed to create file: __error__"
         },
         "tip": "Tip: The filename should be an absolute path, otherwise it will be relative to the working directory of the Node-RED process."
+    },
+    "split": {
+        "intro":"Split <code>msg.payload</code> based on type:",
+        "object":"<b>Object</b>",
+        "objectSend":"Send a message for each key/value pair",
+        "strBuff":"<b>String</b> / <b>Buffer</b>",
+        "array":"<b>Array</b>",
+        "splitUsing":"Split using",
+        "splitLength":"Fixed length of",
+        "stream":"Handle as a stream of messages",
+        "addname":" Copy key to "
+    },
+    "join":{
+        "mode":{
+            "mode":"Mode",
+            "auto":"automatic",
+            "custom":"manual"
+        },
+        "combine":"Combine each",
+        "create":"to create",
+        "type":{
+            "string":"a String",
+            "array":"an Array",
+            "object":"a key/value Object",
+            "merged":"a merged Object"
+        },
+        "using":"using",
+        "key":"as the key",
+        "joinedUsing":"joined using",
+        "send":"Send the message:",
+        "afterCount":"After a number of message parts",
+        "count":"count",
+        "subsequent":"and every subsequent message.",
+        "afterTimeout":"After a timeout following the first message",
+        "seconds":"seconds",
+        "complete":"After a message with the <code>msg.complete</code> property set",
+        "tip":"This mode assumes this node is either paired with a <i>split</i> node or the received messages will have a properly configured <code>msg.parts</code> property."
     }
 }

@@ -62,6 +62,20 @@
                     }
                 })
             }
+        },
+        bin: {
+            value: "bin",
+            label: "buffer",
+            icon: "red/images/typedInput/bin.png",
+            expand: function() {
+                var that = this;
+                RED.editor.editBuffer({
+                    value: this.value(),
+                    complete: function(v) {
+                        that.value(v);
+                    }
+                })
+            }
         }
     };
     var nlsd = false;
