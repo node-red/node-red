@@ -22,7 +22,7 @@ RED.palette = (function() {
     var categoryContainers = {};
 
     function createCategoryContainer(category, label){
-        label = label || category.replace("_", " ");
+        label = (label || category).replace(/_/g, " ");
         var catDiv = $('<div id="palette-container-'+category+'" class="palette-category palette-close hide">'+
             '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-angle-down"></i><span>'+label+'</span></div>'+
             '<div class="palette-content" id="palette-base-category-'+category+'">'+
@@ -127,7 +127,7 @@ RED.palette = (function() {
         }
         if (exclusion.indexOf(def.category)===-1) {
 
-            var category = def.category.replace(" ","_");
+            var category = def.category.replace(/ /g,"_");
             var rootCategory = category.split("-")[0];
 
             var d = document.createElement("div");
