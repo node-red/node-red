@@ -297,6 +297,28 @@ describe('JOIN node', function() {
         });
     });
 
+    it('should join bits of buffer back together automatically', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], joiner:",", build:"buffer", mode:"auto"},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.should.be.a.Buffer;
+                    msg.payload.toString().should.equal("A-B-C-D");
+                    done();
+                }
+                catch(e) {done(e);}
+            });
+            n1.receive({payload:Buffer.from("A"), parts:{id:1, type:"buffer", ch:Buffer.from("-"), index:0, count:4}});
+            n1.receive({payload:Buffer.from("B"), parts:{id:1, type:"buffer", ch:Buffer.from("-"), index:1, count:4}});
+            n1.receive({payload:Buffer.from("C"), parts:{id:1, type:"buffer", ch:Buffer.from("-"), index:2, count:4}});
+            n1.receive({payload:Buffer.from("D"), parts:{id:1, type:"buffer", ch:Buffer.from("-"), index:3, count:4}});
+        });
+    });
+
     it('should join things into an array after a count', function(done) {
         var flow = [{id:"n1", type:"join", wires:[["n2"]], count:3, joiner:",",mode:"custom"},
                     {id:"n2", type:"helper"}];

@@ -394,6 +394,7 @@ module.exports = function(RED) {
                             inflight[partId].arrayLen = arrayLen;
                         } else if (payloadType === 'buffer') {
                             inflight[partId].bufferLen = 0;
+                            inflight[partId].joinChar = joinChar;
                         }
                     }
                     if (node.timer > 0) {
