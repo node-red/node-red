@@ -1,0 +1,114 @@
+{
+    "$string": {
+        "args": "arg",
+        "desc": "以下の型変換ルールを用いて、引数 *arg* を文字列へ型変換します。:\n\n - 文字列は変換しません。\n - 関数は空の文字列に変換します。\n - JSONの数値として表現できないため、無限大やNaNはエラーを投げます。\n - 全ての他の値は `JSON.stringify` 関数を用いて、JSONの文字列へ変換します。"
+    },
+    "$length": {
+        "args": "str",
+        "desc": "文字列 `str` の文字数を返します。 `str` が文字列ではない場合、エラーを返します。"
+    },
+    "$substring": {
+        "args": "str, start[, length]",
+        "desc": "位置 `start` (ゼロオフセット)から開始する引数 `str` の文字列を返します。 `length` を指定した場合、部分文字列は最大 `length` 文字を持ちます。 `start` が負の値の場合、その値は `str` の末尾からの文字数を指します。"
+    },
+    "$substringBefore": {
+        "args": "str, chars",
+        "desc": "`str` 内で先頭に存在する文字列 `chars` より前の部分文字列を返します。 `str` が `chars` を持たない場合、 `str` を返します。"
+    },
+    "$substringAfter": {
+        "args": "str, chars",
+        "desc": "`str` 内で先頭に存在する文字列 `chars` より後ろの部分文字列を返します。 `str` が `chars` を持たない場合、 `str` を返します。"
+    },
+    "$uppercase": {
+        "args": "str",
+        "desc": "`str` の全ての文字を大文字にした文字列を返します。"
+    },
+    "$lowercase": {
+        "args": "str",
+        "desc": "`str` の全ての文字を小文字にした文字列を返します。"
+    },
+    "$trim": {
+        "args": "str",
+        "desc": "以下のステップを適用して `str` 内の全ての空白文字を取り除き、正規化します。:\n\n - 全てのタブ、キャリッジリターン、ラインフィードを空白に置き換える。\n- 連続する空白を1つの空白に減らす。\n- 末尾と先頭の空白を削除する。\n\n `str` を指定しない場合(例: 本関数を引数なしで呼び出す)、コンテキスト値を `str` の値として使用します。 `str` が文字列でない場合、エラーを投げます。"
+    },
+    "$contains": {
+        "args": "str, pattern",
+        "desc": "`str` が `pattern` とマッチした場合は `true` 、マッチしない場合は `false` を返します。 `str` を指定しない場合(例: 本関数を1つの引数で呼び出す)、コンテキスト値を `str` の値として使用します。引数 `pattern` は文字列や正規表現とすることができます。"
+    },
+    "$split": {
+        "args": "str[, separator][, limit]",
+        "desc": "引数 `str` を分割し、部分文字列の配列にします。 `str` が文字列でない場合、エラーになります。省略可能な引数 `separator` には `str` を分割する文字を文字列または正規表現で指定します。 `separator` を指定しない場合、空の文字列と見なし、 `str` は1文字ずつから成る配列に分割します。 `separator` が文字列でない場合、エラーになります。省略可能な引数 `limit` には、結果の配列が持つ部分文字列の最大数を指定します。この数を超える部分文字列は破棄されます。 `limit` を指定しない場合、 `str` は結果の配列のサイズに上限なく完全に分割されます。 `limit` が負の値の場合、エラーになります。"
+    },
+    "$join": {
+        "args": "array[, separator]",
+        "desc": "文字列の配列を、省略可能な引数 `separator` で区切った1つの文字列へ連結します。入力 `array` が文字列でない要素を含む場合、エラーになります。 `separator` を指定しない場合、空の文字列と見なします(例: 文字列間の `separator` なし)。 `separator` が文字列でない場合、エラーになります。"
+    },
+    "$match": {
+        "args": "str, pattern [, limit]",
+        "desc": "文字列 `str` に対して正規表現 `pattern` を適用し、オブジェクトの配列を返します。配列要素のオブジェクトは `str` のうちマッチした部分の情報を保持します。"
+    },
+    "$replace": {
+        "args": "str, pattern, replacement [, limit]",
+        "desc": "`str` から `pattern` を探し、`replacement` に置き換えます。"
+    },
+    "$number": {
+        "args": "arg",
+        "desc": "以下の型変換ルールを用いて、引数 `arg` を数値へ変換します。:\n\n - 数値は変換しません。\n - 正しいJSONの数値を表す文字列は、数値に変換します。\n - 全ての他の値は、エラーを投げる要因となります。"
+    },
+    "$sum": {
+        "args": "array",
+        "desc": "数値の配列 `array` の合計値を返します。入力 `array` が数値でない要素を含む場合、エラーになります。"
+    },
+    "$max": {
+        "args": "array",
+        "desc": "数値の配列 `array` 内の最大値を返します。入力 `array` が数値でない要素を含む場合、エラーになります。"
+    },
+    "$min": {
+        "args": "array",
+        "desc": "数値の配列 `array` 内の最小値を返します。入力 `array` が数値でない要素を含む場合、エラーになります。"
+    },
+    "$average": {
+        "args": "array",
+        "desc": "数値の配列 `array` の平均値を返します。入力 `array` が数値でない要素を含む場合、エラーになります。"
+    },
+    "$boolean": {
+        "args": "arg",
+        "desc": "以下のルールを用いて、ブーリアン型へ型変換します。:\n\n - `Boolean` : 変換しない\n - `string`: 空 : `false`\n - `string`: 空でない : `true`\n - `number`: `0` : `false`\n - `number`: 0でない : `true`\n - `null` : `false`\n - `array`: 空 : `false`\n - `array`: `true` に型変換された要素を持つ: `true`\n - `array`: 全ての要素が `false` に型変換: `false`\n - `object`: 空 : `false`\n - `object`: 空でない : `true`\n - `function` : `false`"
+    },
+    "$not": {
+        "args": "arg",
+        "desc": "引数の否定をブーリアン型で返します。 `arg` は最初にブーリアン型に型変換します。"
+    },
+    "$exists": {
+        "args": "arg",
+        "desc": "`arg` の式の評価値が存在する場合は `true` 、式の評価結果が未定義の場合(例: 存在しない参照フィールドへのパス)は `false` を返します。"
+    },
+    "$count": {
+        "args": "array",
+        "desc": "配列の要素数を返します。"
+    },
+    "$append": {
+        "args": "array, array",
+        "desc": "2つの配列を連結します。"
+    },
+    "$keys": {
+        "args": "object",
+        "desc": "オブジェクト内のキーを含む配列を返します。引数がオブジェクトの配列の場合、返す配列は全オブジェクトの全キーの重複の無いリストを含みます。"
+    },
+    "$lookup": {
+        "args": "object, key",
+        "desc": "オブジェクト内のキーが持つ値を返します。最初の引数がオブジェクトの配列の場合、配列内の全てのオブジェクトを検索し、存在する全てのキーが持つ値を返します。"
+    },
+    "$spread": {
+        "args": "object",
+        "desc": "key/valueのペアを持つオブジェクトを、各要素が1つのkey/valueのペアを持つオブジェクトの配列に分割します。引数がオブジェクトの配列の場合、結果の配列は各オブジェクトから得た各key/valueのペアのオブジェクトを持ちます。"
+    },
+    "$flowContext": {
+        "args": "string",
+        "desc": "フローコンテキストのプロパティを取得します。"
+    },
+    "$globalContext": {
+        "args": "string",
+        "desc": "グローバルコンテキストのプロパティを取得します。"
+    }
+}
