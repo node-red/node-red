@@ -1,4 +1,4 @@
-define("ace/mode/jsonata",["require","exports","module","ace/lib/oop","ace/mode/text_highlight_rules","ace/worker/worker_client","ace/mode/text"], function(require, exports, module) {
+ace.define("ace/mode/jsonata",["require","exports","module","ace/lib/oop","ace/mode/text_highlight_rules","ace/worker/worker_client","ace/mode/text"], function(require, exports, module) {
 
     "use strict";
 

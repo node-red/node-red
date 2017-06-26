@@ -1,4 +1,4 @@
-define("ace/snippets/jsonata",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/snippets/jsonata",["require","exports","module"], function(require, exports, module) {
 	"use strict";
 	var snippetText = "";
 	for (var fn in jsonata.functions) {

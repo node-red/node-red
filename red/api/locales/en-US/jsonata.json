@@ -51,11 +51,49 @@
         "args": "str, pattern, replacement [, limit]",
         "desc": "Finds occurrences of `pattern` within `str` and replaces them with `replacement`. "
     },
-
-
+    "$now": {
+        "args":"",
+        "desc":"Generates a timestamp in ISO 8601 compatible format and returns it as a string."
+    },
+    "$base64encode": {
+        "args":"string",
+        "desc":"Converts an ASCII string to a base 64 representation. Each each character in the string is treated as a byte of binary data. This requires that all characters in the string are in the 0x00 to 0xFF range, which includes all characters in URI encoded strings. Unicode characters outside of that range are not supported."
+    },
+    "$base64decode": {
+        "args":"string",
+        "desc":"Converts base 64 encoded bytes to a string, using a UTF-8 Unicode codepage."
+    },
     "$number": {
         "args": "arg",
         "desc": "Casts the `arg` parameter to a number using the following casting rules:\n\n - Numbers are unchanged\n - Strings that contain a sequence of characters that represent a legal JSON number are converted to that number\n - All other values cause an error to be thrown."
+    },
+    "$abs": {
+        "args":"number",
+        "desc":"Returns the absolute value of the `number` parameter."
+    },
+    "$floor": {
+        "args":"number",
+        "desc":"Returns the value of `number` rounded down to the nearest integer that is smaller or equal to `number`."
+    },
+    "$ceil": {
+        "args":"number",
+        "desc":"Returns the value of `number` rounded up to the nearest integer that is greater than or equal to `number`."
+    },
+    "$round": {
+        "args":"number [, precision]",
+        "desc":"Returns the value of the `number` parameter rounded to the number of decimal places specified by the optional `precision` parameter."
+    },
+    "$power": {
+        "args":"base, exponent",
+        "desc":"Returns the value of `base` raised to the power of `exponent`."
+    },
+    "$sqrt": {
+        "args":"number",
+        "desc":"Returns the square root of the value of the `number` parameter."
+    },
+    "$random": {
+        "args":"",
+        "desc":"Returns a pseudo random number greater than or equal to zero and less than one."
     },
     "$sum": {
         "args": "array",
@@ -86,7 +124,6 @@
         "args": "arg",
         "desc": "Returns Boolean `true` if the `arg` expression evaluates to a value, or `false` if the expression does not match anything (e.g. a path to a non-existent field reference)."
     },
-
     "$count": {
         "args": "array",
         "desc": "Returns the number of items in the array"
@@ -95,20 +132,53 @@
         "args": "array, array",
         "desc": "Appends two arrays"
     },
-
+    "$sort": {
+        "args":"array [, function]",
+        "desc":"Returns an array containing all the values in the `array` parameter, but sorted into order.\n\nIf a comparator `function` is supplied, then it must be a function that takes two parameters:\n\n`function(left, right)`\n\nThis function gets invoked by the sorting algorithm to compare two values left and right. If the value of left should be placed after the value of right in the desired sort order, then the function must return Boolean `true` to indicate a swap. Otherwise it must return `false`."
+    },
+    "$reverse": {
+        "args":"array",
+        "desc":"Returns an array containing all the values from the `array` parameter, but in reverse order."
+    },
+    "$shuffle": {
+        "args":"array",
+        "desc":"Returns an array containing all the values from the `array` parameter, but shuffled into random order."
+    },
+    "$zip": {
+        "args":"array, ...",
+        "desc":"Returns a convolved (zipped) array containing grouped arrays of values from the `array1` … `arrayN` arguments from index 0, 1, 2...."
+    },
     "$keys": {
         "args": "object",
         "desc": "Returns an array containing the keys in the object. If the argument is an array of objects, then the array returned contains a de-duplicated list of all the keys in all of the objects."
     },
-
     "$lookup": {
         "args": "object, key",
         "desc": "Returns the value associated with key in object. If the first argument is an array of objects, then all of the objects in the array are searched, and the values associated with all occurrences of key are returned."
     },
-
     "$spread": {
         "args": "object",
         "desc": "Splits an object containing key/value pairs into an array of objects, each of which has a single key/value pair from the input object. If the parameter is an array of objects, then the resultant array contains an object for every key/value pair in every object in the supplied array."
+    },
+    "$sift": {
+        "args":"object, function",
+        "desc":"Returns an object that contains only the key/value pairs from the `object` parameter that satisfy the predicate `function` passed in as the second parameter.\n\nThe function that is supplied as the second parameter must have the following signature:\n\n`function(value [, key [, object]])`"
+    },
+    "$each": {
+        "args":"object, function",
+        "desc":"Returns an array containing the values return by the `function` when applied to each key/value pair in the `object`."
+    },
+    "$map": {
+        "args":"array, function",
+        "desc":"Returns an array containing the results of applying the `function` parameter to each value in the `array` parameter.\n\nThe `function` that is supplied as the second parameter must have the following signature:\n\n`function(value [, index [, array]])`"
+    },
+    "$filter": {
+        "args":"array, function",
+        "desc":"Returns an array containing only the values in the array parameter that satisfy the `function` predicate.\n\nThe function that is supplied as the second parameter must have the following signature:\n\n`function(value [, index [, array]])`"
+    },
+    "$reduce": {
+        "args":"array, function [, init]",
+        "desc":"Returns an aggregated value derived from applying the `function` parameter successively to each value in `array` in combination with the result of the previous application of the function.\n\nThe function must accept two arguments, and behaves like an infix operator between each value within the `array`."
     },
     "$flowContext": {
         "args": "string",
