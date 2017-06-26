@@ -116,7 +116,7 @@ function loadNodeFiles(nodeFiles) {
         /* istanbul ignore else */
         if (nodeFiles.hasOwnProperty(module)) {
             if (nodeFiles[module].redVersion &&
-                !semver.satisfies(runtime.version().replace("-git",""), nodeFiles[module].redVersion)) {
+                !semver.satisfies(runtime.version().replace(/(\-[1-9A-Za-z-][0-9A-Za-z-\.]*)?(\+[0-9A-Za-z-\.]+)?$/,""), nodeFiles[module].redVersion)) {
                 //TODO: log it
                 runtime.log.warn("["+module+"] "+runtime.log._("server.node-version-mismatch",{version:nodeFiles[module].redVersion}));
                 continue;
