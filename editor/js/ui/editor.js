@@ -1649,6 +1649,7 @@ RED.editor = (function() {
                 }
                 RED.sidebar.info.refresh(editing_node);
                 RED.workspaces.refresh();
+                subflowEditor.destroy();
                 editStack.pop();
                 editing_node = null;
             },
@@ -1946,6 +1947,8 @@ RED.editor = (function() {
             },
             close: function() {
                 editStack.pop();
+                expressionEditor.destroy();
+                testDataEditor.destroy();
             },
             show: function() {}
         }
@@ -2020,6 +2023,7 @@ RED.editor = (function() {
             },
             close: function() {
                 editStack.pop();
+                expressionEditor.destroy();
             },
             show: function() {}
         }
@@ -2205,6 +2209,8 @@ RED.editor = (function() {
             },
             close: function() {
                 editStack.pop();
+                bufferStringEditor.destroy();
+                bufferBinEditor.destroy();
             },
             show: function() {}
         }

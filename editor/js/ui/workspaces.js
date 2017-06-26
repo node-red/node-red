@@ -206,6 +206,7 @@ RED.workspaces = (function() {
                     RED.view.state(RED.state.DEFAULT);
                 }
                 RED.sidebar.info.refresh(workspace);
+                tabflowEditor.destroy();
             }
         }
         RED.tray.show(trayOptions);
