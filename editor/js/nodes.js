@@ -508,10 +508,10 @@ RED.nodes = (function() {
     /**
      * Converts the current node selection to an exportable JSON Object
      **/
-    function createExportableNodeSet(set) {
+    function createExportableNodeSet(set, exportedSubflows, exportedConfigNodes) {
         var nns = [];
-        var exportedConfigNodes = {};
-        var exportedSubflows = {};
+        exportedConfigNodes = exportedConfigNodes || {};
+        exportedSubflows = exportedSubflows || {};
         for (var n=0;n<set.length;n++) {
             var node = set[n];
             if (node.type.substring(0,8) == "subflow:") {
@@ -525,7 +525,7 @@ RED.nodes = (function() {
                             subflowSet.push(n);
                         }
                     });
-                    var exportableSubflow = createExportableNodeSet(subflowSet);
+                    var exportableSubflow = createExportableNodeSet(subflowSet, exportedSubflows, exportedConfigNodes);
                     nns = exportableSubflow.concat(nns);
                 }
             }
