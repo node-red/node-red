@@ -62,6 +62,18 @@
         <option value="obj" data-i18n="httpin.json"></option>
         </select>
     </div>
+    
+    <div class="form-row">
+        <input type="checkbox" id="node-input-streaming" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-streaming" style="width: 70%;"><span data-i18n="httpin.streaming"></span></label>
+        <div style="margin-left: 20px" class="node-input-streaming-row hide">
+            <div class="form-row">
+                <label for="node-input-delay"><i class="fa fa-clock-o"></i> <span data-i18n="httpin.delay"></span></label>
+                <input type="text" id="node-input-delay">
+            </div>
+        </div>
+    </div>
+    
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
@@ -92,6 +104,8 @@
         <li><code>headers</code> is an object containing the response headers</li>
         <li><code>responseUrl</code> is the url of the server that responds</li>
     </ul>
+    <p>Streaming options will only be relevant when a (multipart) stream is detected:
+    The <b>delay</b> is the minimum number of milliseconds between parts in a (multipart) stream.</p>
     <p><b>Note</b>: If you need to configure a proxy please add <b>http_proxy=...</b> to your environment variables and restart Node-RED.</p>
 </script>
 
@@ -104,7 +118,8 @@
             method:{value:"GET"},
             ret: {value:"txt"},
             url:{value:""},
-            tls: {type:"tls-config",required: false}
+            tls: {type:"tls-config",required: false},
+            delay: {value:0, required: false, validate:function(value) { return !value || !isNaN(value); }},
         },
         credentials: {
             user: {type:"text"},
@@ -135,6 +150,21 @@
                 $('#node-input-useAuth').prop('checked', false);
             }
             $("#node-input-useAuth").change();
+            
+            $("#node-input-streaming").change(function() {
+                if ($(this).is(":checked")) {
+                    $(".node-input-streaming-row").show();
+                } else {
+                    $(".node-input-streaming-row").hide();
+                    $('#node-input-delay').val("0");
+                }
+            });
+            if (this.delay) {
+                $('#node-input-streaming').prop('checked', true);
+            } else {
+                $('#node-input-streaming').prop('checked', false);
+            }
+            $("#node-input-streaming").change();
 
             function updateTLSOptions() {
                 if ($("#node-input-usetls").is(':checked')) {
