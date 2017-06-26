@@ -72,6 +72,10 @@ module.exports = {
     // By default, all user data is stored in the Node-RED install directory. To
     // use a different location, the following property can be used
     //userDir: '/home/nol/.node-red/',
+    
+    // By default, the library location is based on userDir/lib 
+    // use a different location, the following property can be used
+    //libDir: '/home/nol/.node-red/lib/',
 
     // Node-RED scans the `nodes` directory in the install directory to find nodes.
     // The following property can be used to specify an additional directory to scan.

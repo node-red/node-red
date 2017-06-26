@@ -62,10 +62,15 @@ module.exports = function(RED) {
                     var arg = node.cmd;
                     if ((node.addpay === true) && msg.hasOwnProperty("payload")) { arg += " "+msg.payload; }
                     if (node.append.trim() !== "") { arg += " "+node.append; }
-                    // slice whole line by spaces (trying to honour quotes);
-                    arg = arg.match(/(?:[^\s"]+|"[^"]*")+/g);
+                    // slice whole line by spaces and removes any quotes since spawn can't handle them
+                    arg = arg.match(/(?:[^\s"]+|"[^"]*")+/g).map((a) => {
+                        if (/^".*"$/.test(a)) {
+                            return a.slice(1,-1)
+                        } else {
+                            return a
+                        }
+                    });
                     var cmd = arg.shift();
-                    if (/^".*"$/.test(cmd)) { cmd = cmd.slice(1,-1); }
                     /* istanbul ignore else  */
                     if (RED.settings.verbose) { node.log(cmd+" ["+arg+"]"); }
                     child = spawn(cmd,arg);

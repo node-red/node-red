@@ -231,7 +231,11 @@ var localfilesystem = {
 
         sessionsFile = fspath.join(settings.userDir,".sessions.json");
 
+        if (undefined === settings.libDir){
         libDir = fspath.join(settings.userDir,"lib");
+        } else {
+            libDir = settings.libDir;
+        }
         libFlowsDir = fspath.join(libDir,"flows");
 
         globalSettingsFile = fspath.join(settings.userDir,".config.json");
