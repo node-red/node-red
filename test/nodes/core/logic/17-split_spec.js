@@ -101,7 +101,7 @@ describe('SPLIT node', function() {
     });
 
     it('should split an object into pieces and overwrite their topics', function(done) {
-        var flow = [{id:"sn1", type:"split", addname:true, addfname:"topic", wires:[["sn2"]]},
+        var flow = [{id:"sn1", type:"split", addname:"topic", wires:[["sn2"]]},
                     {id:"sn2", type:"helper"}];
         helper.load(splitNode, flow, function() {
             var sn1 = helper.getNode("sn1");
