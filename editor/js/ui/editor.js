@@ -1863,7 +1863,8 @@ RED.editor = (function() {
                     var currentExpression = expressionEditor.getValue();
                     var expr;
                     var usesContext = false;
-                    var legacyMode = false;
+                    var legacyMode = /(^|[^a-zA-Z0-9_'"])msg([^a-zA-Z0-9_'"]|$)/.test(currentExpression);
+                    $(".node-input-expression-legacy").toggle(legacyMode);
                     try {
                         expr = jsonata(currentExpression);
                         expr.assign('flowContext',function(val) {
@@ -1874,12 +1875,10 @@ RED.editor = (function() {
                             usesContext = true;
                             return null;
                         });
-                        legacyMode = /(^|[^a-zA-Z0-9_'"])msg([^a-zA-Z0-9_'"]|$)/.test(currentExpression);
                     } catch(err) {
                         testResultEditor.setValue(RED._("expressionEditor.errors.invalid-expr",{message:err.message}),-1);
                         return;
                     }
-                    $(".node-input-expression-legacy").toggle(legacyMode);
                     try {
                         parsedData = JSON.parse(value);
                     } catch(err) {
