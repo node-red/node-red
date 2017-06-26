@@ -55,7 +55,7 @@ module.exports = function(RED) {
                 if (typeof data === "boolean") { data = data.toString(); }
                 if (typeof data === "number") { data = data.toString(); }
                 if ((this.appendNewline) && (!Buffer.isBuffer(data))) { data += os.EOL; }
-                node.data.push(new Buffer(data));
+                node.data.push(new Buffer.from(data));
 
                 while (node.data.length > 0) {
                     if (this.overwriteFile === "true") {

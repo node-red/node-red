@@ -80,8 +80,6 @@ module.exports = function(RED) {
                         msg.parts.ch = "";
                         var count = msg.payload.length/node.splt;
                         if (Math.floor(count) !== count) {
-                            // Partial last packet
-                            //TODO stream support
                             count = Math.ceil(count);
                         }
                         if (node.stream !== true) {
@@ -123,8 +121,6 @@ module.exports = function(RED) {
                     msg.parts.type = "array";
                     var count = msg.payload.length/node.arraySplt;
                     if (Math.floor(count) !== count) {
-                        // Partial last packet
-                        //TODO stream support
                         count = Math.ceil(count);
                     }
                     msg.parts.count = count;
@@ -165,8 +161,6 @@ module.exports = function(RED) {
                     if (node.spltType === "len") {
                         var count = buff.length/node.splt;
                         if (Math.floor(count) !== count) {
-                            // Partial last packet
-                            //TODO stream support
                             count = Math.ceil(count);
                         }
                         if (node.stream !== true) {
@@ -203,10 +197,7 @@ module.exports = function(RED) {
                             end = pos+node.splt.length;
                             pos = buff.indexOf(node.splt,end);
                         }
-                        //TODO: stream support
-                        // if (end < msg.payload.length) {
-                            count++;
-                        // }
+                        count++;
                         if (node.stream !== true) {
                             msg.parts.count = count;
                             node.c = 0;
@@ -222,7 +213,6 @@ module.exports = function(RED) {
                             pos = buff.indexOf(node.splt,p);
                         }
                         if ((node.stream !== true) && (p < buff.length)) {
-                            // TODO: stream support;
                             msg.payload = buff.slice(p,buff.length);
                             msg.parts.index = node.c++;
                             msg.parts.count = node.c++;

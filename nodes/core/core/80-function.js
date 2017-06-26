@@ -26,7 +26,7 @@ module.exports = function(RED) {
             msgs = [msgs];
         }
         var msgCount = 0;
-        for (var m=0;m<msgs.length;m++) {
+        for (var m=0; m<msgs.length; m++) {
             if (msgs[m]) {
                 if (!util.isArray(msgs[m])) {
                     msgs[m] = [msgs[m]];
