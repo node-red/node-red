@@ -155,17 +155,24 @@ RED.user = (function() {
     }
 
     function logout() {
+        var tokens = RED.settings.get("auth-tokens");
+        var token = tokens?tokens.access_token:"";
         $.ajax({
             url: "auth/revoke",
             type: "POST",
-            data: {token:RED.settings.get("auth-tokens").access_token},
-            success: function(data) {
-                RED.settings.remove("auth-tokens");
-                if (data && data.redirect) {
-                    document.location.href = data.redirect;
-                } else {
-                    document.location.reload(true);
-                }
+            data: {token:token}
+        }).done(function(data,textStatus,xhr) {
+            RED.settings.remove("auth-tokens");
+            if (data && data.redirect) {
+                document.location.href = data.redirect;
+            } else {
+                document.location.reload(true);
+            }
+        }).fail(function(jqXHR,textStatus,errorThrown) {
+            if (jqXHR.status === 401) {
+                document.location.reload(true);
+            } else {
+                console.log(textStatus);
             }
         })
     }
