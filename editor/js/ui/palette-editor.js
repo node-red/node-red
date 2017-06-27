@@ -530,7 +530,7 @@ RED.palette.editor = (function() {
         editorTabs = RED.tabs.create({
             element: settingsPane.find('#palette-editor-tabs'),
             onchange:function(tab) {
-                $("#palette-editor .palette-editor-tab").hide();
+                content.find(".palette-editor-tab").hide();
                 tab.content.show();
                 if (filterInput) {
                     filterInput.searchBox('value',"");
