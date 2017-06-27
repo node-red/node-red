@@ -112,13 +112,19 @@
     <p>In order to use more than one of these nodes in the same flow, care must be taken with
     the <code>msg.headers</code> property. The first node will set this property with
     the response headers. The next node will then use those headers for its request - this
-    is not usually the right thing to do. The <code>msg.headers</code> property <b>must</b>
-    be deleted with a <b>change</b> node in order for the requests to work as expected.</p>
+    is not usually the right thing to do. If <code>msg.headers</code> property is left unchanged
+    between nodes, it will be ignored by the second node. To set custom headers, <code>msg.headers</code>
+    should first be deleted or reset to an empty object: `{}`.
     <h4>Cookie handling</h4>
     <p>The <code>cookies</code> property passed to the node must be an object of name/value pairs.
     The value can be either a string to set the value of the cookie or it can be an
     object with a single <code>value</code> property.<p>
     <p>Any cookies returned by the request are passed back under the <code>responseCookies</code> property.</p>
+    <h4>Content type handling</h4>
+    <p>If <code>msg.payload</code> is an Object, the node will automatically set the content type
+    of the request to <code>application/json</code> and encode the body as such.</p>
+    <p>To encode the request as form data, <code>msg.headers["content-type"]</code> should be set to <code>application/x-www-form-urlencoded</code>.</p>
+
 </script>
 
 <script type="text/javascript">
