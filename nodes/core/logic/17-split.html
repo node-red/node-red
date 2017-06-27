@@ -181,21 +181,23 @@
         <div class="form-row">
             <label data-i18n="join.create"></label>
             <select id="node-input-build" style="width:70%;">
-                <option id="node-input-build-string" value="string" data-i18n="join.type.string"></option>
+                <option value="string" data-i18n="join.type.string"></option>
+                <option value="buffer" data-i18n="join.type.buffer"></option>
                 <option value="array" data-i18n="join.type.array"></option>
                 <option value="object" data-i18n="join.type.object"></option>
                 <option value="merged" data-i18n="join.type.merged"></option>
             </select>
         </div>
         <div class="form-row node-row-key">
-            <label style="vertical-align:top; margin-top:7px;" data-i18n="join.using"></label>
+            <label style="vertical-align:top; margin-top:7px; width:auto; margin-right: 5px;" data-i18n="join.using"></label>
             <div style="display:inline-block">
-                <input type="text" id="node-input-key" style="width:252px;"> <span data-i18n="join.key"></span>
+                <input type="text" id="node-input-key" style="width:220px;"> <span data-i18n="join.key"></span>
             </div>
         </div>
         <div class="form-row node-row-joiner">
             <label for="node-input-joiner" data-i18n="join.joinedUsing"></label>
-            <input type="text" id="node-input-joiner" style="width:40px">
+            <input type="text" id="node-input-joiner" style="width:70%">
+            <input type="hidden" id="node-input-joinerType">
         </div>
         <div class="form-row node-row-trigger" id="trigger-row">
             <label style="width:auto;" data-i18n="join.send"></label>
@@ -203,8 +205,8 @@
                 <li>
                     <label style="width:280px;" for="node-input-count" data-i18n="join.afterCount"></label> <input id="node-input-count" data-i18n="[placeholder]join.count" type="text" style="width:75px;">
                 </li>
-                <li style="list-style-type:none;">
-                    <input type="checkbox" id="node-input-accumulate" style="display:inline-block; width:20px; list-style-type:none; margin-left:20px; vertical-align:top;">  <span data-i18n="join.subsequent"></span>
+                <li class="node-row-accumulate" style="list-style-type:none;">
+                    <input type="checkbox" id="node-input-accumulate" style="display:inline-block; width:20px; margin-left:20px; vertical-align:top;">  <label style="width: auto" for="node-input-accumulate" data-i18n="join.subsequent"></label>
                 </li>
                 <li>
                     <label style="width:280px;" for="node-input-timeout" data-i18n="join.afterTimeout"></label> <input id="node-input-timeout" data-i18n="[placeholder]join.seconds" type="text" style="width:75px;">
@@ -249,14 +251,16 @@
     <p>When configured to join in manual mode, the node is able to join sequences
      of messages in a variety of ways.</p>
     <ul>
-        <li>a <b>string</b> - created by joining the selected property of each message with the specified join character.</li>
-        <li>an <b>array</b>.</li>
+        <li>a <b>string</b> or <b>buffer</b> - created by joining the selected property of each message with the specified join characters or buffer.</li>
+        <li>an <b>array</b> - created by adding each selected property, or entire message, to the output array.</li>
         <li>a <b>key/value object</b> - created by using a property of each message to determine the key under which
         the required value is stored.</li>
         <li>a <b>merged object</b> - created by merging the property of each message under a single object.</li>
     </ul>
     <p>The other properties of the output message are taken from the last message received before the result is sent.</p>
-    <p>A <i>count</i> can be set for how many messages should be received before generating the output message.</p>
+    <p>A <i>count</i> can be set for how many messages should be received before generating the output message.
+    For object outputs, once this count has been reached, the node can be configured to send a message for each subsequent message
+    received.</p>
     <p>A <i>timeout</i> can be set to trigger sending the new message using whatever has been received so far.</p>
     <p>If a message is received with the <b>msg.complete</b> property set, the output message is sent.</p>
 </script>
@@ -273,8 +277,8 @@
             propertyType: { value:"msg"},
             key: {value:"topic"},
             joiner: { value:"\\n"},
+            joinerType: { value:"str"},
             accumulate: { value:"false" },
-            //topic: { value:""},
             timeout: {value:""},
             count: {value:""}
         },
@@ -300,13 +304,23 @@
             $("#node-input-build").change(function(e) {
                 var val = $(this).val();
                 $(".node-row-key").toggle(val==='object');
-                $(".node-row-joiner").toggle(val==='string');
+                $(".node-row-accumulate").toggle(val==='object' || val==='merged');
+                $(".node-row-joiner").toggle(val==='string' || val==='buffer');
                 $(".node-row-trigger").toggle(val!=='auto');
-                if (val === 'string') {
+                if (val === 'string' || val==='buffer') {
                     $("#node-input-property").typedInput('types',['msg']);
                 } else {
                     $("#node-input-property").typedInput('types',['msg', {value:"full",label:"complete message",hasValue:false}]);
                 }
+            });
+
+            $("#node-input-joiner").typedInput({
+                default: 'str',
+                typeField: $("#node-input-joinerType"),
+                types:[
+                    'str',
+                    'bin'
+                ]
             });
 
             $("#node-input-property").typedInput({
@@ -320,6 +334,12 @@
 
             $("#node-input-build").change();
             $("#node-input-mode").change();
+        },
+        oneditsave: function() {
+            var build = $("#node-input-build").val();
+            if (build !== 'object' && build !== 'merged') {
+                $("#node-input-accumulate").prop("checked",false);
+            }
         }
     });
 </script>

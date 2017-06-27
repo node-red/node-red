@@ -812,10 +812,11 @@
         "type":{
             "string":"a String",
             "array":"an Array",
+            "buffer":"a Buffer",
             "object":"a key/value Object",
             "merged":"a merged Object"
         },
-        "using":"using",
+        "using":"using the value of",
         "key":"as the key",
         "joinedUsing":"joined using",
         "send":"Send the message:",
