@@ -98,7 +98,7 @@
             if (rule) {
                 for (var i=0;i<operators.length;i++) {
                     if (operators[i].v === rule.t) {
-                        label = /^switch/.test(operators[i].t)?this._(operators[i].t):operators[i].t
+                        label = /^switch/.test(operators[i].t)?this._(operators[i].t):operators[i].t;
                         break;
                     }
                 }
@@ -162,7 +162,7 @@
                         rule.t = 'eq';
                     }
                     if (!opt.hasOwnProperty('i')) {
-                        opt._i = Math.floor((0x99999-0x10000)*Math.random()).toString(16)
+                        opt._i = Math.floor((0x99999-0x10000)*Math.random()).toString(16);
                     }
                     var row = $('<div/>').appendTo(container);
                     var row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
@@ -196,7 +196,7 @@
                         if (type === "regex") {
                             row2.show();
                             row3.hide();
-                        } else if (type === "btwn"){
+                        } else if (type === "btwn") {
                             row2.hide();
                             row3.show();
                         } else {
