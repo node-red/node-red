@@ -63,12 +63,13 @@
     <p>By default this uses the <i><a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache</a></i>
     format, but this can be switched off if required.</p>
     <p>For example, when a template of:
-    <pre>Hello {{name}}. Today is {{date}}</pre>
+    <pre>Hello {{payload.name}}. Today is {{date}}</pre>
     <p>receives a message containing:
     <pre>{
-  name: "Fred",
   date: "Monday"
-  payload: ...
+  payload: {
+    name: "Fred",
+  }
 }</pre>
     <p>The resulting property will be:
     <pre>Hello Fred. Today is Monday</pre>
