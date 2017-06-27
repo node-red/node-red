@@ -47,7 +47,7 @@ module.exports = function(RED) {
                 node.status({fill:"grey",shape:"dot",text:"common.status.connecting"});
                 var id = (1+Math.random()*4294967295).toString(16);
                 client = net.connect(node.port, node.host, function() {
-                    buffer = (node.datatype == 'buffer') ? new Buffer.from(0) : "";
+                    buffer = (node.datatype == 'buffer') ? new Buffer.alloc(0) : "";
                     node.connected = true;
                     node.log(RED._("tcpin.status.connected",{host:node.host,port:node.port}));
                     node.status({fill:"green",shape:"dot",text:"common.status.connected"});
@@ -132,7 +132,7 @@ module.exports = function(RED) {
                 count++;
                 node.status({text:RED._("tcpin.status.connections",{count:count})});
 
-                var buffer = (node.datatype == 'buffer') ? new Buffer.from(0) : "";
+                var buffer = (node.datatype == 'buffer') ? new Buffer.alloc(0) : "";
                 socket.on('data', function (data) {
                     if (node.datatype != 'buffer') {
                         data = data.toString(node.datatype);
