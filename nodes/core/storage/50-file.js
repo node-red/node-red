@@ -55,7 +55,7 @@ module.exports = function(RED) {
                 if (typeof data === "boolean") { data = data.toString(); }
                 if (typeof data === "number") { data = data.toString(); }
                 if ((this.appendNewline) && (!Buffer.isBuffer(data))) { data += os.EOL; }
-                node.data.push(new Buffer.from(data));
+                node.data.push(Buffer.from(data));
 
                 while (node.data.length > 0) {
                     if (this.overwriteFile === "true") {
@@ -104,7 +104,7 @@ module.exports = function(RED) {
             }
             else {
                 msg.filename = filename;
-                var lines = new Buffer.from([]);
+                var lines = Buffer.from([]);
                 var spare = "";
                 var count = 0;
                 var type = "buffer";

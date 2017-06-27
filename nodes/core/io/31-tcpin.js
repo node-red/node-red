@@ -47,7 +47,7 @@ module.exports = function(RED) {
                 node.status({fill:"grey",shape:"dot",text:"common.status.connecting"});
                 var id = (1+Math.random()*4294967295).toString(16);
                 client = net.connect(node.port, node.host, function() {
-                    buffer = (node.datatype == 'buffer') ? new Buffer.alloc(0) : "";
+                    buffer = (node.datatype == 'buffer') ? Buffer.alloc(0) : "";
                     node.connected = true;
                     node.log(RED._("tcpin.status.connected",{host:node.host,port:node.port}));
                     node.status({fill:"green",shape:"dot",text:"common.status.connected"});
@@ -132,7 +132,7 @@ module.exports = function(RED) {
                 count++;
                 node.status({text:RED._("tcpin.status.connections",{count:count})});
 
-                var buffer = (node.datatype == 'buffer') ? new Buffer.alloc(0) : "";
+                var buffer = (node.datatype == 'buffer') ? Buffer.alloc(0) : "";
                 socket.on('data', function (data) {
                     if (node.datatype != 'buffer') {
                         data = data.toString(node.datatype);
@@ -269,9 +269,9 @@ module.exports = function(RED) {
                     if (Buffer.isBuffer(msg.payload)) {
                         client.write(msg.payload);
                     } else if (typeof msg.payload === "string" && node.base64) {
-                        client.write(new Buffer.from(msg.payload,'base64'));
+                        client.write(Buffer.from(msg.payload,'base64'));
                     } else {
-                        client.write(new Buffer.from(""+msg.payload));
+                        client.write(Buffer.from(""+msg.payload));
                     }
                     if (node.doend === true) {
                         end = true;
@@ -296,9 +296,9 @@ module.exports = function(RED) {
                         if (Buffer.isBuffer(msg.payload)) {
                             client.write(msg.payload);
                         } else if (typeof msg.payload === "string" && node.base64) {
-                            client.write(new Buffer.from(msg.payload,'base64'));
+                            client.write(Buffer.from(msg.payload,'base64'));
                         } else {
-                            client.write(new Buffer.from(""+msg.payload));
+                            client.write(Buffer.from(""+msg.payload));
                         }
                     }
                 }
@@ -307,9 +307,9 @@ module.exports = function(RED) {
                         if (Buffer.isBuffer(msg.payload)) {
                             connectionPool[i].write(msg.payload);
                         } else if (typeof msg.payload === "string" && node.base64) {
-                            connectionPool[i].write(new Buffer.from(msg.payload,'base64'));
+                            connectionPool[i].write(Buffer.from(msg.payload,'base64'));
                         } else {
-                            connectionPool[i].write(new Buffer.from(""+msg.payload));
+                            connectionPool[i].write(Buffer.from(""+msg.payload));
                         }
                     }
                 }
@@ -346,9 +346,9 @@ module.exports = function(RED) {
                     if (Buffer.isBuffer(msg.payload)) {
                         buffer = msg.payload;
                     } else if (typeof msg.payload === "string" && node.base64) {
-                        buffer = new Buffer.from(msg.payload,'base64');
+                        buffer = Buffer.from(msg.payload,'base64');
                     } else {
-                        buffer = new Buffer.from(""+msg.payload);
+                        buffer = Buffer.from(""+msg.payload);
                     }
                     for (var i = 0; i < connectedSockets.length; i += 1) {
                         if (node.doend === true) { connectedSockets[i].end(buffer); }
@@ -431,10 +431,10 @@ module.exports = function(RED) {
             if (!clients[connection_id].connected) {
                 var buf;
                 if (this.out == "count") {
-                    if (this.splitc === 0) { buf = new Buffer.alloc(1); }
-                    else { buf = new Buffer.alloc(this.splitc); }
+                    if (this.splitc === 0) { buf = Buffer.alloc(1); }
+                    else { buf = Buffer.alloc(this.splitc); }
                 }
-                else { buf = new Buffer.alloc(65536); } // set it to 64k... hopefully big enough for most TCP packets.... but only hopefully
+                else { buf = Buffer.alloc(65536); } // set it to 64k... hopefully big enough for most TCP packets.... but only hopefully
 
                 clients[connection_id].client = net.Socket();
                 if (socketTimeout !== null) { clients[connection_id].client.setTimeout(socketTimeout);}
@@ -484,7 +484,7 @@ module.exports = function(RED) {
                                         clients[connection_id].timeout = setTimeout(function () {
                                             if (clients[connection_id]) {
                                                 clients[connection_id].timeout = null;
-                                                clients[connection_id].msg.payload = new Buffer.alloc(i+1);
+                                                clients[connection_id].msg.payload = Buffer.alloc(i+1);
                                                 buf.copy(clients[connection_id].msg.payload,0,0,i+1);
                                                 node.send(clients[connection_id].msg);
                                                 if (clients[connection_id].client) {
@@ -505,7 +505,7 @@ module.exports = function(RED) {
                                 i += 1;
                                 if ( i >= node.splitc) {
                                     if (clients[connection_id]) {
-                                        clients[connection_id].msg.payload = new Buffer.alloc(i);
+                                        clients[connection_id].msg.payload = Buffer.alloc(i);
                                         buf.copy(clients[connection_id].msg.payload,0,0,i);
                                         node.send(clients[connection_id].msg);
                                         if (clients[connection_id].client) {
@@ -523,7 +523,7 @@ module.exports = function(RED) {
                                 i += 1;
                                 if (data[j] == node.splitc) {
                                     if (clients[connection_id]) {
-                                        clients[connection_id].msg.payload = new Buffer.alloc(i);
+                                        clients[connection_id].msg.payload = Buffer.alloc(i);
                                         buf.copy(clients[connection_id].msg.payload,0,0,i);
                                         node.send(clients[connection_id].msg);
                                         if (clients[connection_id].client) {
