@@ -21,6 +21,7 @@ var express = require("express");
 var bodyParser = require('body-parser');
 var helper = require("../../helper.js");
 var httpRequestNode = require("../../../../nodes/core/io/21-httprequest.js");
+var hashSum = require("hash-sum");
 
 describe('HTTP Request Node', function() {
     var testApp;
@@ -396,6 +397,48 @@ describe('HTTP Request Node', function() {
                 }
             });
             n1.receive({payload:new Buffer('hello'), headers: { 'content-type': 'text/plain'}});
+        });
+    })
+
+    it('ignores unmodified msg.headers property', function(done) {
+        var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
+                    {id:"n2", type:"helper"}];
+        helper.load(httpRequestNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.payload.headers.should.have.property('content-type').which.startWith('application/json');
+                    msg.payload.headers.should.not.have.property('x-node-red-request-node');
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+            // Pass in a headers property with an unmodified x-node-red-request-node hash
+            // This should cause the node to ignore the headers
+            n1.receive({payload:{foo:"bar"}, headers: { 'content-type': 'text/plain', "x-node-red-request-node":"67690139"}});
+        });
+    })
+
+    it('uses modified msg.headers property', function(done) {
+        var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
+                    {id:"n2", type:"helper"}];
+        helper.load(httpRequestNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.payload.headers.should.have.property('content-type').which.startWith('text/plain');
+                    msg.payload.headers.should.not.have.property('x-node-red-request-node');
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+            // Pass in a headers property with a x-node-red-request-node hash that doesn't match the contents
+            // This should cause the node to use the headers
+            n1.receive({payload:{foo:"bar"}, headers: { 'content-type': 'text/plain', "x-node-red-request-node":"INVALID_SUM"}});
         });
     })
 

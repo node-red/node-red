@@ -22,6 +22,7 @@ module.exports = function(RED) {
     var mustache = require("mustache");
     var querystring = require("querystring");
     var cookie = require("cookie");
+    var hashSum = require("hash-sum");
 
     function HTTPRequest(n) {
         RED.nodes.createNode(this,n);
@@ -83,17 +84,27 @@ module.exports = function(RED) {
             var ctSet = "Content-Type"; // set default camel case
             var clSet = "Content-Length";
             if (msg.headers) {
-                for (var v in msg.headers) {
-                    if (msg.headers.hasOwnProperty(v)) {
-                        var name = v.toLowerCase();
-                        if (name !== "content-type" && name !== "content-length") {
-                            // only normalise the known headers used later in this
-                            // function. Otherwise leave them alone.
-                            name = v;
+                if (msg.headers.hasOwnProperty('x-node-red-request-node')) {
+                    var headerHash = msg.headers['x-node-red-request-node'];
+                    delete msg.headers['x-node-red-request-node'];
+                    var hash = hashSum(msg.headers);
+                    if (hash === headerHash) {
+                        delete msg.headers;
+                    }
+                }
+                if (msg.headers) {
+                    for (var v in msg.headers) {
+                        if (msg.headers.hasOwnProperty(v)) {
+                            var name = v.toLowerCase();
+                            if (name !== "content-type" && name !== "content-length") {
+                                // only normalise the known headers used later in this
+                                // function. Otherwise leave them alone.
+                                name = v;
+                            }
+                            else if (name === 'content-type') { ctSet = v; }
+                            else { clSet = v; }
+                            opts.headers[name] = msg.headers[v];
                         }
-                        else if (name === 'content-type') { ctSet = v; }
-                        else { clSet = v; }
-                        opts.headers[name] = msg.headers[v];
                     }
                 }
             }
@@ -207,7 +218,7 @@ module.exports = function(RED) {
                     })
 
                 }
-
+                msg.headers['x-node-red-request-node'] = hashSum(msg.headers);
                 // msg.url = url;   // revert when warning above finally removed
                 res.on('data',function(chunk) {
                     if (!Buffer.isBuffer(chunk)) {

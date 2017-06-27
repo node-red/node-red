@@ -26,6 +26,7 @@ module.exports = function(RED) {
     var onHeaders = require('on-headers');
     var typer = require('media-typer');
     var isUtf8 = require('is-utf8');
+    var hashSum = require("hash-sum");
 
     function rawBodyParser(req, res, next) {
         if (req.skipRawBodyParser) { next(); } // don't parse this if told to skip
@@ -277,9 +278,19 @@ module.exports = function(RED) {
             if (msg.res) {
                 var headers = RED.util.cloneMessage(node.headers);
                 if (msg.headers) {
-                    for (var h in msg.headers) {
-                        if (msg.headers.hasOwnProperty(h) && !headers.hasOwnProperty(h)) {
-                            headers[h] = msg.headers[h];
+                    if (msg.headers.hasOwnProperty('x-node-red-request-node')) {
+                        var headerHash = msg.headers['x-node-red-request-node'];
+                        delete msg.headers['x-node-red-request-node'];
+                        var hash = hashSum(msg.headers);
+                        if (hash === headerHash) {
+                            delete msg.headers;
+                        }
+                    }
+                    if (msg.headers) {
+                        for (var h in msg.headers) {
+                            if (msg.headers.hasOwnProperty(h) && !headers.hasOwnProperty(h)) {
+                                headers[h] = msg.headers[h];
+                            }
                         }
                     }
                 }

@@ -108,6 +108,12 @@
     <code>example.com/{{{topic}}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.
     Using {{{...}}} prevents mustache from escaping characters like / & etc.</p>
     <p><b>Note</b>: If running behind a proxy, the standard <code>http_proxy=...</code> environment variable should be set and Node-RED restarted.</p>
+    <h4>Using multiple HTTP Request nodes</h4>
+    <p>In order to use more than one of these nodes in the same flow, care must be taken with
+    the <code>msg.headers</code> property. The first node will set this property with
+    the response headers. The next node will then use those headers for its request - this
+    is not usually the right thing to do. The <code>msg.headers</code> property <b>must</b>
+    be deleted with a <b>change</b> node in order for the requests to work as expected.</p>
     <h4>Cookie handling</h4>
     <p>The <code>cookies</code> property passed to the node must be an object of name/value pairs.
     The value can be either a string to set the value of the cookie or it can be an
