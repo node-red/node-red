@@ -99,7 +99,7 @@ function installModule(module,version) {
         }
 
         var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
-        var child = child_process.execFile(npmCommand,['install','--save','--save-exact','--production',installName],
+        var child = child_process.execFile(npmCommand,['install','--save','--save-prefix="~"','--production',installName],
             {
                 cwd: installDir
             },
