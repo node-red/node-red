@@ -59,12 +59,10 @@ module.exports = function(RED) {
 
                 while (node.data.length > 0) {
                     if (this.overwriteFile === "true") {
-                        if (!node.wstream) {
-                            node.wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'w' });
-                            node.wstream.on("error", function(err) {
-                                node.error(RED._("file.errors.writefail",{error:err.toString()}),msg);
-                            });
-                        }
+                        node.wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'w' });
+                        node.wstream.on("error", function(err) {
+                            node.error(RED._("file.errors.writefail",{error:err.toString()}),msg);
+                        });
                     }
                     else {
                         if (!node.wstream) {
