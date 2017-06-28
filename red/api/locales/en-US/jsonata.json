@@ -49,7 +49,7 @@
     },
     "$replace": {
         "args": "str, pattern, replacement [, limit]",
-        "desc": "Finds occurrences of `pattern` within `str` and replaces them with `replacement`. "
+        "desc": "Finds occurrences of `pattern` within `str` and replaces them with `replacement`.\n\nThe optional `limit` parameter is the maximum number of replacements."
     },
     "$now": {
         "args":"",
@@ -57,7 +57,7 @@
     },
     "$base64encode": {
         "args":"string",
-        "desc":"Converts an ASCII string to a base 64 representation. Each each character in the string is treated as a byte of binary data. This requires that all characters in the string are in the 0x00 to 0xFF range, which includes all characters in URI encoded strings. Unicode characters outside of that range are not supported."
+        "desc":"Converts an ASCII string to a base 64 representation. Each character in the string is treated as a byte of binary data. This requires that all characters in the string are in the 0x00 to 0xFF range, which includes all characters in URI encoded strings. Unicode characters outside of that range are not supported."
     },
     "$base64decode": {
         "args":"string",
@@ -162,7 +162,7 @@
     },
     "$sift": {
         "args":"object, function",
-        "desc":"Returns an object that contains only the key/value pairs from the `object` parameter that satisfy the predicate `function` passed in as the second parameter.\n\nThe function that is supplied as the second parameter must have the following signature:\n\n`function(value [, key [, object]])`"
+        "desc":"Returns an object that contains only the key/value pairs from the `object` parameter that satisfy the predicate `function` passed in as the second parameter.\n\nThe `function` that is supplied as the second parameter must have the following signature:\n\n`function(value [, key [, object]])`"
     },
     "$each": {
         "args":"object, function",
@@ -174,11 +174,11 @@
     },
     "$filter": {
         "args":"array, function",
-        "desc":"Returns an array containing only the values in the array parameter that satisfy the `function` predicate.\n\nThe function that is supplied as the second parameter must have the following signature:\n\n`function(value [, index [, array]])`"
+        "desc":"Returns an array containing only the values in the `array` parameter that satisfy the `function` predicate.\n\nThe `function` that is supplied as the second parameter must have the following signature:\n\n`function(value [, index [, array]])`"
     },
     "$reduce": {
         "args":"array, function [, init]",
-        "desc":"Returns an aggregated value derived from applying the `function` parameter successively to each value in `array` in combination with the result of the previous application of the function.\n\nThe function must accept two arguments, and behaves like an infix operator between each value within the `array`."
+        "desc":"Returns an aggregated value derived from applying the `function` parameter successively to each value in `array` in combination with the result of the previous application of the function.\n\nThe function must accept two arguments, and behaves like an infix operator between each value within the `array`.\n\nThe optional `init` parameter is used as the initial value in the aggregation."
     },
     "$flowContext": {
         "args": "string",
