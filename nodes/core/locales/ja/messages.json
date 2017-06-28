@@ -757,6 +757,8 @@
             "addnewline": "メッセージの入力のたびに改行を追加",
             "createdir": "ディレクトリが存在しない場合は作成",
             "outputas": "出力形式",
+            "breakchunks": "チャンクへ分割",
+            "breaklines": "行へ分割",
             "filelabel": "file",
             "deletelabel": "delete __file__"
         },
@@ -767,7 +769,9 @@
         },
         "output": {
             "utf8": "文字列",
-            "buffer": "バイナリバッファ"
+            "buffer": "バイナリバッファ",
+            "lines": "行毎のメッセージ",
+            "stream": "バッファのストリーム"
         },
         "status": {
             "wrotefile": "ファイルへ書き込みました: __file__",
@@ -792,7 +796,8 @@
         "array": "<b>配列</b>",
         "splitUsing": "分割",
         "splitLength": "固定長",
-        "stream": "メッセージのストリームとして処理"
+        "stream": "メッセージのストリームとして処理",
+        "addname": " keyのコピー先"
     },
     "join": {
         "mode": {
@@ -805,11 +810,12 @@
         "type": {
             "string": "文字列",
             "array": "配列",
+            "buffer": "バッファ",
             "object": "key/valueオブジェクト",
             "merged": "結合オブジェクト"
         },
-        "using": "使用",
-        "key": "キー",
+        "using": "使用する値",
+        "key": "をキーとして使用",
         "joinedUsing": "連結文字",
         "send": "メッセージ送信:",
         "afterCount": "指定数のメッセージパーツを受信後",
