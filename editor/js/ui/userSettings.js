@@ -102,21 +102,21 @@ RED.userSettings = (function() {
         {
             title: "Grid",
             options: [
-                {setting:"view-show-grid",label:"menu.label.view.showGrid",toggle:true,onchange:"core:toggle-show-grid"},
-                {setting:"view-snap-grid",label:"menu.label.view.snapGrid",toggle:true,onchange:"core:toggle-snap-grid"},
+                {setting:"view-show-grid",oldSetting:"menu-menu-item-view-show-grid",label:"menu.label.view.showGrid",toggle:true,onchange:"core:toggle-show-grid"},
+                {setting:"view-snap-grid",oldSetting:"menu-menu-item-view-snap-grid",label:"menu.label.view.snapGrid",toggle:true,onchange:"core:toggle-snap-grid"},
                 {setting:"view-grid-size",label:"menu.label.view.gridSize",type:"number",default: 20, onchange:RED.view.gridSize}
             ]
         },
         {
             title: "Nodes",
             options: [
-                {setting:"view-node-status",label:"menu.label.displayStatus",default: true, toggle:true,onchange:"core:toggle-status"}
+                {setting:"view-node-status",oldSetting:"menu-menu-item-status",label:"menu.label.displayStatus",default: true, toggle:true,onchange:"core:toggle-status"}
             ]
         },
         {
             title: "Other",
             options: [
-                {setting:"view-show-tips",label:"menu.label.showTips",toggle:true,default:true,onchange:"core:toggle-show-tips"}
+                {setting:"view-show-tips",oldSettings:"menu-menu-item-show-tips",label:"menu.label.showTips",toggle:true,default:true,onchange:"core:toggle-show-tips"}
             ]
         }
     ];
@@ -187,6 +187,13 @@ RED.userSettings = (function() {
 
         viewSettings.forEach(function(section) {
             section.options.forEach(function(opt) {
+                if (opt.oldSetting) {
+                    var oldValue = RED.settings.get(opt.oldSetting);
+                    if (oldValue !== undefined && oldValue !== null) {
+                        RED.settings.set(opt.setting,oldValue);
+                        RED.settings.remove(opt.oldSetting);
+                    }
+                }
                 allSettings[opt.setting] = opt;
                 if (opt.onchange) {
                     var value = RED.settings.get(opt.setting);
