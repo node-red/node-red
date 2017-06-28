@@ -63,7 +63,7 @@ module.exports = function(RED) {
                         node.wstream.on("error", function(err) {
                             node.error(RED._("file.errors.writefail",{error:err.toString()}),msg);
                         });
-                        node.wstream.write(node.data.shift(), function() { node.wstream.end(); });
+                        node.wstream.end(node.data.shift());
                     }
                     else {
                         if ((!node.wstream) || (!node.filename)) {
@@ -73,7 +73,7 @@ module.exports = function(RED) {
                             });
                         }
                         if (node.filename) { node.wstream.write(node.data.shift()); }
-                        else { node.wstream.write(node.data.shift(), function() { node.wstream.end(); }); }
+                        else { node.wstream.end(node.data.shift()); }
                     }
                 }
             }
