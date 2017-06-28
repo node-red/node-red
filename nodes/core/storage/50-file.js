@@ -59,24 +59,27 @@ module.exports = function(RED) {
 
                 while (node.data.length > 0) {
                     if (this.overwriteFile === "true") {
-                        node.wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'w' });
+                        node.wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'w', autoClose:true });
                         node.wstream.on("error", function(err) {
                             node.error(RED._("file.errors.writefail",{error:err.toString()}),msg);
                         });
+                        node.wstream.write(node.data.shift(), function() { node.wstream.end(); });
                     }
                     else {
-                        if (!node.wstream) {
-                            node.wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'a' });
+                        if ((!node.wstream) || (!node.filename)) {
+                            node.wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'a', autoClose:true });
                             node.wstream.on("error", function(err) {
                                 node.error(RED._("file.errors.appendfail",{error:err.toString()}),msg);
                             });
                         }
+                        if (node.filename) { node.wstream.write(node.data.shift()); }
+                        else { node.wstream.write(node.data.shift(), function() { node.wstream.end(); }); }
                     }
-                    node.wstream.write(node.data.shift());
                 }
             }
         });
         this.on('close', function() {
+            if (node.wstream) { node.wstream.end(); }
             node.status({});
         });
     }
