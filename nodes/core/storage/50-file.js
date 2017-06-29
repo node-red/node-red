@@ -32,7 +32,13 @@ module.exports = function(RED) {
 
         this.on("input",function(msg) {
             var filename = node.filename || msg.filename || "";
-            if (!node.filename) { node.status({fill:"grey",shape:"dot",text:filename}); }
+            if ((!node.filename) && (!node.tout)) {
+                node.tout = setTimeout(function() {
+                    node.status({fill:"grey",shape:"dot",text:filename});
+                    clearTimeout(node.tout);
+                    node.tout = null;
+                },333);
+            }
             if (filename === "") { node.warn(RED._("file.errors.nofilename")); }
             else if (node.overwriteFile === "delete") {
                 fs.unlink(filename, function (err) {
@@ -80,6 +86,7 @@ module.exports = function(RED) {
         });
         this.on('close', function() {
             if (node.wstream) { node.wstream.end(); }
+            if (node.tout) { clearTimeout(node.tout); }
             node.status({});
         });
     }

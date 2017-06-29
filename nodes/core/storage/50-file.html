@@ -40,6 +40,8 @@
     <h3>Details</h3>
     <p>Each message payload will be added to the end of the file, optionally appending
     a newline (\n) character between each one.</p>
+    <p>If <code>msg.filename</code> is used the file will be closed after every write. 
+    For best performance use a fixed filename.</p>
     <p>It can be configured to overwrite the entire file rather than append. For example,
     when writing binary data to a file, such as an image, this option should be used
     and the option to append a newline should be disabled.</p>
