@@ -188,6 +188,9 @@ module.exports = function(RED) {
                     opts.headers = heads;
                     opts.method = method;
                     urltotest = match[0];
+                    if (opts.auth) {
+                        opts.headers['Proxy-Authorization'] = "Basic "+new Buffer(opts.auth).toString('Base64')
+                    }
                 }
                 else { node.warn("Bad proxy url: "+process.env.http_proxy); }
             }
