@@ -117,7 +117,6 @@ var persistentSettings = {
         nodeSettings[type] = opts;
     },
     exportNodeSettings: function(safeSettings) {
-        safeSettings["nodeSettings"] = {};
         for (var type in nodeSettings) {
             if (nodeSettings.hasOwnProperty(type) && !disableNodeSettings[type]) {
                 var nodeTypeSettings = nodeSettings[type];
@@ -125,10 +124,12 @@ var persistentSettings = {
                     if (nodeTypeSettings.hasOwnProperty(property)) {
                         var setting = nodeTypeSettings[property];
                         if (setting.exportable) {
-                            if (userSettings.hasOwnProperty(property)) {
-                                safeSettings["nodeSettings"][property] = userSettings[property];
+                            if (safeSettings.hasOwnProperty(property)) {
+                                // Cannot overwrite existing setting
+                            } else if (userSettings.hasOwnProperty(property)) {
+                                safeSettings[property] = userSettings[property];
                             } else if (setting.hasOwnProperty('value')) {
-                                safeSettings["nodeSettings"][property] = setting.value;
+                                safeSettings[property] = setting.value;
                             }
                         }
                     }
