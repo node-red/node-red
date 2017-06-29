@@ -86,7 +86,7 @@
             name: {value:""},
             property: {value:"payload", required:true, validate: RED.validators.typedInput("propertyType")},
             propertyType: { value:"msg" },
-            rules: {value:[{t:"eq", v:""}]},
+            rules: {value:[{t:"eq", v:"", vt:"str"}]},
             checkall: {value:"true", required:true},
             outputs: {value:1}
         },
