@@ -385,6 +385,10 @@ RED.deploy = (function() {
                         node.dirty = true;
                         node.changed = false;
                     }
+                    if (node.moved) {
+                        node.dirty = true;
+                        node.moved = false;
+                    }
                     if(node.credentials) {
                         delete node.credentials;
                     }
