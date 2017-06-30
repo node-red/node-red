@@ -107,7 +107,7 @@
     url to be constructed using values of the incoming message. For example, if the url is set to
     <code>example.com/{{{topic}}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.
     Using {{{...}}} prevents mustache from escaping characters like / & etc.</p>
-    <p><b>Note</b>: If running behind a proxy, the standard <code>http_proxy=...</code> environment variable should be set and Node-RED restarted.</p>
+    <p><b>Note</b>: If running behind a proxy, the standard <code>http_proxy=...</code> environment variable should be set and Node-RED restarted. Node-RED also supports socks proxies via <code>socks_proxy=true</code> (defaults to localhost:1080) or <code>socks_proxy=socks5://your.proxy-address-or-ip.com:55234, the provided protocol is actually ignored but is required because url lib requires it.</code></p>
     <h4>Using multiple HTTP Request nodes</h4>
     <p>In order to use more than one of these nodes in the same flow, care must be taken with
     the <code>msg.headers</code> property. The first node will set this property with
