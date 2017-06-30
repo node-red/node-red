@@ -205,7 +205,7 @@ module.exports = function(RED) {
                 var agentOptions;
                 if (socksProxy != "true") {
                     var socksOpts = urllib.parse(socksProxy)
-                    opts.socksHost = socksOpts.host;
+                    opts.socksHost = socksOpts.hostname;
                     opts.socksPort = socksOpts.port;
                 }
                 opts.agent = new (uses_ssl ? SocksHttpsAgent : SocksHttpAgent)(opts);
