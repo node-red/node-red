@@ -120,7 +120,6 @@ function revoke(req,res) {
 
 function completeVerify(profile,done) {
     Users.authenticate(profile).then(function(user) {
-        console.log(user);
         if (user) {
             Tokens.create(user.username,"node-red-editor",user.permissions).then(function(tokens) {
                 log.audit({event: "auth.login",username:user.username,scope:user.permissions});
