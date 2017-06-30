@@ -44,7 +44,8 @@ module.exports = {
     },
     icon: function(req,res) {
         var icon = req.params.icon;
-        var module = req.params.module;
+        var scope = req.params.scope;
+        var module = scope ? scope + '/' +  req.params.module : req.params.module;
         var iconPath = redNodes.getNodeIconPath(module,icon);
         res.sendFile(iconPath);
     },
