@@ -95,6 +95,7 @@ function init(_server,_runtime) {
             }
             editorApp.get("/",ensureRuntimeStarted,ui.ensureSlash,ui.editor);
             editorApp.get("/icons/:module/:icon",ui.icon);
+            editorApp.get("/icons/:scope/:module/:icon",ui.icon);            
             theme.init(runtime);
             editorApp.use("/theme",theme.app());
             editorApp.use("/",ui.editorResources);
