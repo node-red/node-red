@@ -83,15 +83,15 @@
         "grunt-contrib-uglify": "~3.0.1",
         "grunt-contrib-watch":"~1.0.0",
         "grunt-jsonlint":"~1.1.0",
+        "grunt-mocha-istanbul": "5.0.2",
         "grunt-nodemon":"~0.4.2",
         "grunt-sass":"~1.2.1",
         "grunt-simple-mocha": "~0.4.1",
-        "grunt-mocha-istanbul": "5.0.2",
+        "istanbul": "0.4.5",
         "mocha": "~3.4.2",
         "should": "^8.4.0",
         "sinon": "1.17.7",
-        "supertest": "3.0.0",
-        "istanbul": "0.4.5"
+        "supertest": "3.0.0"
     },
     "engines": {
         "node": ">=4"
