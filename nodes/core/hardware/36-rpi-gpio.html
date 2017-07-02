@@ -207,7 +207,7 @@
             var suf = "";
             if (this.intype === "up") { suf = "↑ "}
             if (this.intype === "down") { suf = "↓ "}
-            return this.name || "PIN: "+suf+bcm2pin[this.pin] ;
+            return this.name || "PIN: "+suf+this.pin ;
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -469,12 +469,12 @@
         },
         align: "right",
         label: function() {
-            if (this.out === "pwm") { return this.name || "PWM: "+bcm2pin[this.pin]; }
-            else if (this.out === "ser") { return this.name || "Servo: "+bcm2pin[this.pin]; }
+            if (this.out === "pwm") { return this.name || "PWM: "+this.pin; }
+            else if (this.out === "ser") { return this.name || "Servo: "+this.pin; }
             else {
                 var suf = "";
                 if (this.set == true) { suf = (this.level === "1") ? " ¹" : " ₀"; }
-                return this.name||"PIN: "+ bcm2pin[this.pin] + suf ;
+                return this.name||"PIN: "+ this.pin + suf ;
             }
         },
         labelStyle: function() {
