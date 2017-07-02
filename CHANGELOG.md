@@ -1,3 +1,7 @@
+#### 0.17.2: Maintenance Release
+
+ - Fix GPIO node labels
+
 #### 0.17.1: Maintenance Release
 
  - Fix PI gpio to use BCM
