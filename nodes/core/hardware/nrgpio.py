@@ -30,7 +30,7 @@ if sys.version_info >= (3,0):
 if len(sys.argv) > 2:
     cmd = sys.argv[1].lower()
     pin = int(sys.argv[2])
-    GPIO.setmode(GPIO.BCM)
+    GPIO.setmode(GPIO.BOARD)
     GPIO.setwarnings(False)
 
     if cmd == "pwm":
@@ -130,7 +130,7 @@ if len(sys.argv) > 2:
 
     elif cmd == "byte":
         #print "Initialised BYTE mode - "+str(pin)+
-        list = [4,17,27,18,22,23,24,25]
+        list = [7,11,13,12,15,16,18,22]
         GPIO.setup(list,GPIO.OUT)
 
         while True:
@@ -153,12 +153,12 @@ if len(sys.argv) > 2:
 
     elif cmd == "borg":
         #print "Initialised BORG mode - "+str(pin)+
-        GPIO.setup(17,GPIO.OUT)
-        GPIO.setup(27,GPIO.OUT)
-        GPIO.setup(22,GPIO.OUT)
-        r = GPIO.PWM(17, 100)
-        g = GPIO.PWM(27, 100)
-        b = GPIO.PWM(22, 100)
+        GPIO.setup(11,GPIO.OUT)
+        GPIO.setup(13,GPIO.OUT)
+        GPIO.setup(15,GPIO.OUT)
+        r = GPIO.PWM(11, 100)
+        g = GPIO.PWM(13, 100)
+        b = GPIO.PWM(15, 100)
         r.start(0)
         g.start(0)
         b.start(0)
