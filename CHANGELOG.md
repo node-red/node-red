@@ -1,3 +1,10 @@
+#### 0.17.1: Maintenance Release
+
+ - Fix PI gpio to use BCM
+ - Prevent event thread contention when sending to Debug node Closes #1311
+ - Fix Bug: Can not display node icon when npm package has scope (#1305) (#1309)
+ - Clear moved flag when nodes are deployed
+
 #### 0.17: Milestone Release
 
 Runtime
