@@ -24,23 +24,7 @@
             url: 'nodes',
             success: function(data) {
                 RED.nodes.setNodeList(data);
-
-                var nsCount = 0;
-                for (var i=0;i<data.length;i++) {
-                    var ns = data[i];
-                    if (ns.module != "node-red") {
-                        nsCount++;
-                        RED.i18n.loadCatalog(ns.id, function() {
-                            nsCount--;
-                            if (nsCount === 0) {
-                                loadNodes();
-                            }
-                        });
-                    }
-                }
-                if (nsCount === 0) {
-                    loadNodes();
-                }
+                RED.i18n.loadNodeCatalogs(loadNodes);
             }
         });
     }
@@ -84,6 +68,10 @@
                 RED.comms.subscribe("notification/#",function(topic,msg) {
                     var parts = topic.split("/");
                     var notificationId = parts[1];
+                    if (notificationId === "runtime-deploy") {
+                        // handled in ui/deploy.js
+                        return;
+                    }
                     if (msg.text) {
                         var text = RED._(msg.text,{default:msg.text});
                         if (!persistentNotifications.hasOwnProperty(notificationId)) {
@@ -101,7 +89,9 @@
                     var node = RED.nodes.node(parts[1]);
                     if (node) {
                         if (msg.hasOwnProperty("text")) {
-                            msg.text = node._(msg.text.toString(),{defaultValue:msg.text.toString()});
+                            if (msg.text[0] !== ".") {
+                                msg.text = node._(msg.text.toString(),{defaultValue:msg.text.toString()});
+                            }
                         }
                         node.status = msg;
                         node.dirty = true;
@@ -158,6 +148,9 @@
                             typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
                             RED.notify(RED._("palette.event.nodeDisabled", {count:msg.types.length})+typeList,"success");
                         }
+                    } else if (topic == "node/upgraded") {
+                        RED.notify(RED._("palette.event.nodeUpgraded", {module:msg.module,version:msg.version}),"success");
+                        RED.nodes.registry.setModulePendingUpdated(msg.module,msg.version);
                     }
                     // Refresh flow library to ensure any examples are updated
                     RED.library.loadFlowLibrary();
@@ -180,10 +173,10 @@
     function loadEditor() {
         var menuOptions = [];
         menuOptions.push({id:"menu-item-view-menu",label:RED._("menu.label.view.view"),options:[
-            {id:"menu-item-view-show-grid",label:RED._("menu.label.view.showGrid"),toggle:true,onselect:"core:toggle-show-grid"},
-            {id:"menu-item-view-snap-grid",label:RED._("menu.label.view.snapGrid"),toggle:true,onselect:"core:toggle-snap-grid"},
-            {id:"menu-item-status",label:RED._("menu.label.displayStatus"),toggle:true,onselect:"core:toggle-status", selected: true},
-            null,
+            // {id:"menu-item-view-show-grid",setting:"view-show-grid",label:RED._("menu.label.view.showGrid"),toggle:true,onselect:"core:toggle-show-grid"},
+            // {id:"menu-item-view-snap-grid",setting:"view-snap-grid",label:RED._("menu.label.view.snapGrid"),toggle:true,onselect:"core:toggle-snap-grid"},
+            // {id:"menu-item-status",setting:"node-show-status",label:RED._("menu.label.displayStatus"),toggle:true,onselect:"core:toggle-status", selected: true},
+            //null,
             // {id:"menu-item-bidi",label:RED._("menu.label.view.textDir"),options:[
             //     {id:"menu-item-bidi-default",toggle:"text-direction",label:RED._("menu.label.view.defaultDir"),selected: true, onselect:function(s) { if(s){RED.text.bidi.setTextDirection("")}}},
             //     {id:"menu-item-bidi-ltr",toggle:"text-direction",label:RED._("menu.label.view.ltr"), onselect:function(s) { if(s){RED.text.bidi.setTextDirection("ltr")}}},
@@ -191,7 +184,8 @@
             //     {id:"menu-item-bidi-auto",toggle:"text-direction",label:RED._("menu.label.view.auto"), onselect:function(s) { if(s){RED.text.bidi.setTextDirection("auto")}}}
             // ]},
             // null,
-            {id:"menu-item-sidebar",label:RED._("menu.label.sidebar.show"),toggle:true,onselect:"core:toggle-sidebar", selected: true}
+            {id:"menu-item-sidebar",label:RED._("menu.label.sidebar.show"),toggle:true,onselect:"core:toggle-sidebar", selected: true},
+            null
         ]});
         menuOptions.push(null);
         menuOptions.push({id:"menu-item-import",label:RED._("menu.label.import"),options:[
@@ -217,13 +211,14 @@
         ]});
         menuOptions.push(null);
         if (RED.settings.theme('palette.editable') !== false) {
-            RED.palette.editor.init();
             menuOptions.push({id:"menu-item-edit-palette",label:RED._("menu.label.editPalette"),onselect:"core:manage-palette"});
             menuOptions.push(null);
         }
 
+        menuOptions.push({id:"menu-item-user-settings",label:RED._("menu.label.userSettings"),onselect:"core:show-user-settings"});
+        menuOptions.push(null);
+
         menuOptions.push({id:"menu-item-keyboard-shortcuts",label:RED._("menu.label.keyboardShortcuts"),onselect:"core:show-help"});
-        menuOptions.push({id:"menu-item-show-tips",label:RED._("menu.label.showTips"),toggle:true,selected:true,onselect:"core:toggle-show-tips"});
         menuOptions.push({id:"menu-item-help",
             label: RED.settings.theme("menu.menu-item-help.label","Node-RED website"),
             href: RED.settings.theme("menu.menu-item-help.url","http://nodered.org/docs")
@@ -231,17 +226,22 @@
         menuOptions.push({id:"menu-item-node-red-version", label:"v"+RED.settings.version, onselect: "core:show-about" });
 
 
+        RED.view.init();
+        RED.userSettings.init();
         RED.user.init();
         RED.library.init();
+        RED.keyboard.init();
         RED.palette.init();
+        if (RED.settings.theme('palette.editable') !== false) {
+            RED.palette.editor.init();
+        }
+
         RED.sidebar.init();
         RED.subflow.init();
         RED.workspaces.init();
         RED.clipboard.init();
         RED.search.init();
-        RED.view.init();
         RED.editor.init();
-        RED.keyboard.init();
         RED.diff.init();
 
         RED.menu.init({id:"btn-sidemenu",options: menuOptions});

@@ -46,6 +46,9 @@ describe('nodes/registry/installer', function() {
         if (registry.getModuleInfo.restore) {
             registry.getModuleInfo.restore();
         }
+        if (typeRegistry.getModuleInfo.restore) {
+            typeRegistry.getModuleInfo.restore();
+        }
 
         if (require('fs').statSync.restore) {
             require('fs').statSync.restore();
@@ -61,6 +64,32 @@ describe('nodes/registry/installer', function() {
 
             installer.installModule("this_wont_exist").otherwise(function(err) {
                 err.code.should.be.eql(404);
+                done();
+            });
+        });
+        it("rejects when npm does not find specified version", function(done) {
+            sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
+                cb(new Error(),""," version not found: this_wont_exist@0.1.2");
+            });
+            sinon.stub(typeRegistry,"getModuleInfo", function() {
+                return {
+                    version: "0.1.1"
+                }
+            });
+
+            installer.installModule("this_wont_exist","0.1.2").otherwise(function(err) {
+                err.code.should.be.eql(404);
+                done();
+            });
+        });
+        it("rejects when update requested to existing version", function(done) {
+            sinon.stub(typeRegistry,"getModuleInfo", function() {
+                return {
+                    version: "0.1.1"
+                }
+            });
+            installer.installModule("this_wont_exist","0.1.1").otherwise(function(err) {
+                err.code.should.be.eql('module_already_loaded');
                 done();
             });
         });
@@ -95,12 +124,20 @@ describe('nodes/registry/installer', function() {
             });
         });
         it("rejects when non-existant path is provided", function(done) {
+            this.timeout(10000);
             var resourcesDir = path.resolve(path.join(__dirname,"..","resources","local","TestNodeModule","node_modules","NonExistant"));
             installer.installModule(resourcesDir).then(function() {
                 done(new Error("Unexpected success"));
             }).otherwise(function(err) {
-                err.code.should.eql(404);
-                done();
+                if (err.hasOwnProperty("code")) {
+                    err.code.should.eql(404);
+                    done();
+                }
+                else {
+                    console.log("ERRROR::"+err.toString()+"::");
+                    err.toString().should.eql("Error: Install failed");
+                    done();
+                }
             });
         });
         it("succeeds when path is valid node-red module", function(done) {

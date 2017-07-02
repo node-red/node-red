@@ -15,17 +15,45 @@
 -->
 
 <script type="text/x-red" data-template-name="tls-config">
+    <div class="form-row" class="hide" id="node-config-row-uselocalfiles">
+        <input type="checkbox" id="node-config-input-uselocalfiles" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-config-input-uselocalfiles" style="width: 70%;"><span data-i18n="tls.label.use-local-files"></label>
+    </div>
     <div class="form-row">
-        <label style="width: 120px;" for="node-config-input-cert"><i class="fa fa-file-text-o"></i> <span data-i18n="tls.label.cert"></span></label>
-        <input style="width: 60%;" type="text" id="node-config-input-cert" data-i18n="[placeholder]tls.placeholder.cert">
+        <label style="width: 120px;"><i class="fa fa-file-text-o"></i> <span data-i18n="tls.label.cert"></span></label>
+        <span class="tls-config-input-data">
+            <label class="editor-button" for="node-config-input-certfile"><i class="fa fa-upload"></i> <span data-i18n="tls.label.upload"></span></label>
+            <input class="hide" type="file" id="node-config-input-certfile">
+            <span id="tls-config-certname" style="width: 180px; overflow: hidden; line-height:34px; height:34px; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle;"> </span>
+            <button class="editor-button editor-button-small" id="tls-config-button-cert-clear" style="margin-left: 10px"><i class="fa fa-times"></i></button>
+        </span>
+        <input type="hidden" id="node-config-input-certname">
+        <input type="hidden" id="node-config-input-certdata">
+        <input class="hide tls-config-input-path" style="width: 60%;" type="text" id="node-config-input-cert" data-i18n="[placeholder]tls.placeholder.cert">
     </div>
     <div class="form-row">
         <label style="width: 120px;" for="node-config-input-key"><i class="fa fa-file-text-o"></i> <span data-i18n="tls.label.key"></span></label>
-        <input style="width: 60%;" type="text" id="node-config-input-key" data-i18n="[placeholder]tls.placeholder.key">
+        <span class="tls-config-input-data">
+            <label class="editor-button" for="node-config-input-keyfile"><i class="fa fa-upload"></i> <span data-i18n="tls.label.upload"></span></label>
+            <input class="hide" type="file" id="node-config-input-keyfile">
+            <span id="tls-config-keyname" style="width: 180px; overflow: hidden; line-height:34px; height:34px; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle;"> </span>
+            <button class="editor-button editor-button-small" id="tls-config-button-key-clear" style="margin-left: 10px"><i class="fa fa-times"></i></button>
+        </span>
+        <input type="hidden" id="node-config-input-keyname">
+        <input type="hidden" id="node-config-input-keydata">
+        <input class="hide tls-config-input-path" style="width: 60%;" type="text" id="node-config-input-key" data-i18n="[placeholder]tls.placeholder.key">
     </div>
     <div class="form-row">
         <label style="width: 120px;" for="node-config-input-ca"><i class="fa fa-file-text-o"></i> <span data-i18n="tls.label.ca"></span></label>
-        <input style="width: 60%;" type="text" id="node-config-input-ca" data-i18n="[placeholder]tls.placeholder.ca">
+        <span class="tls-config-input-data">
+            <label class="editor-button" for="node-config-input-cafile"><i class="fa fa-upload"></i> <span data-i18n="tls.label.upload"></span></label>
+            <input class="hide" type="file" title=" " id="node-config-input-cafile">
+            <span id="tls-config-caname" style="width: 180px; overflow: hidden; line-height:34px; height:34px; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle;"> </span>
+            <button class="editor-button editor-button-small" id="tls-config-button-ca-clear" style="margin-left: 10px"><i class="fa fa-times"></i></button>
+        </span>
+        <input type="hidden" id="node-config-input-caname">
+        <input type="hidden" id="node-config-input-cadata">
+        <input class="hide tls-config-input-path" style="width: 60%;" type="text" id="node-config-input-ca" data-i18n="[placeholder]tls.placeholder.ca">
     </div>
     <div class="form-row">
         <input type="checkbox" id="node-config-input-verifyservercert" style="display: inline-block; width: auto; vertical-align: top;">
@@ -61,13 +89,97 @@
                 return currentCert === '' || v != '';
             }},
             ca: {value:""},
+            certname: {value:""},
+            keyname: {value:""},
+            caname: {value:""},
             verifyservercert: {value: true}
+        },
+        credentials: {
+            certdata: {type:"text"},
+            keydata: {type:"text"},
+            cadata: {type:"text"}
         },
         label: function() {
             return this.name || this._("tls.tls");
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            function updateFileUpload() {
+                if ($("#node-config-input-uselocalfiles").is(':checked')) {
+                    $(".tls-config-input-path").show();
+                    $(".tls-config-input-data").hide();
+                } else {
+                    $(".tls-config-input-data").show();
+                    $(".tls-config-input-path").hide();
+                }
+            }
+            $("#node-config-input-uselocalfiles").on("click",function() {
+                updateFileUpload();
+            });
+
+            function saveFile(property, file) {
+                var dataInputId = "#node-config-input-"+property+"data";
+                var filenameInputId = "#node-config-input-"+property+"name";
+                var filename = file.name;
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    $("#tls-config-"+property+"name").text(filename);
+                    $(filenameInputId).val(filename);
+                    $(dataInputId).val(event.target.result);
+                }
+                reader.readAsText(file,"UTF-8");
+            }
+            $("#node-config-input-certfile" ).change(function() {
+                saveFile("cert", this.files[0]);
+            });
+            $("#node-config-input-keyfile" ).change(function() {
+                saveFile("key", this.files[0]);
+            });
+            $("#node-config-input-cafile" ).change(function() {
+                saveFile("ca", this.files[0]);
+            });
+
+            function clearNameData(prop) {
+                $("#tls-config-"+prop+"name").text("");
+                $("#node-config-input-"+prop+"data").val("");
+                $("#node-config-input-"+prop+"name").val("");
+            }
+            $("#tls-config-button-cert-clear").click(function() {
+                clearNameData("cert");
+            });
+            $("#tls-config-button-key-clear").click(function() {
+                clearNameData("key");
+            });
+            $("#tls-config-button-ca-clear").click(function() {
+                clearNameData("ca");
+            });
+
+            if (RED.settings.tlsConfigDisableLocalFiles) {
+                $("#node-config-row-uselocalfiles").hide();
+            } else {
+                $("#node-config-row-uselocalfiles").show();
+            }
+            // in case paths were set from old TLS config
+            if(this.cert || this.key || this.ca) {
+                $("#node-config-input-uselocalfiles").prop('checked',true);
+            }
+            $("#tls-config-certname").text(this.certname);
+            $("#tls-config-keyname").text(this.keyname);
+            $("#tls-config-caname").text(this.caname);
+            updateFileUpload();
+        },
+        oneditsave: function() {
+            if ($("#node-config-input-uselocalfiles").is(':checked')) {
+                clearNameData("ca");
+                clearNameData("cert");
+                clearNameData("key");
+            } else {
+                $("#node-config-input-ca").val("");
+                $("#node-config-input-cert").val("");
+                $("#node-config-input-key").val("");
+            }
         }
     });
 </script>

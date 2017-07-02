@@ -21,21 +21,27 @@ RED.debug = (function() {
     var config;
     var messageList;
     var messageTable;
-    var filter = false;
+    var filterType = "filterAll";
+    var filteredNodes = {}; // id->true means hide, so default to all visible
+
     var view = 'list';
     var messages = [];
     var messagesByNode = {};
     var sbc;
     var activeWorkspace;
 
+    var filterVisible = false;
+
+    var debugNodeList;
+    var debugNodeListExpandedFlows = {};
+
     function init(_config) {
         config = _config;
 
         var content = $("<div>").css({"position":"relative","height":"100%"});
         var toolbar = $('<div class="sidebar-header">'+
-            '<span class="button-group"><a id="debug-tab-filter" class="sidebar-header-button" href="#"><i class="fa fa-filter"></i></a></span>'+
+            '<span class="button-group"><a id="debug-tab-filter" class="sidebar-header-button" href="#"><i class="fa fa-filter"></i> <span></span></a></span>'+
             '<span class="button-group"><a id="debug-tab-clear" title="clear log" class="sidebar-header-button" href="#"><i class="fa fa-trash"></i></a></span></div>').appendTo(content);
-
 
         var footerToolbar = $('<div>'+
             // '<span class="button-group">'+
@@ -52,11 +58,82 @@ RED.debug = (function() {
         var filterDialog = $('<div class="debug-filter-box hide">'+
             '<div class="debug-filter-row">'+
             '<span class="button-group">'+
-                '<a class="sidebar-header-button-toggle selected" id="debug-tab-filter-all" href="#"><span data-i18n="node-red:debug.sidebar.filterAll">all flows</span></a>'+
-                '<a class="sidebar-header-button-toggle" id="debug-tab-filter-current" href="#"><span data-i18n="node-red:debug.sidebar.filterCurrent">current flow</span></a> '+
+                '<a class="sidebar-header-button-toggle debug-tab-filter-option selected" id="debug-tab-filterAll" href="#"><span data-i18n="node-red:debug.sidebar.filterAll"></span></a>'+
+                '<a class="sidebar-header-button-toggle debug-tab-filter-option" id="debug-tab-filterSelected" href="#"><span data-i18n="node-red:debug.sidebar.filterSelected"></span></a>'+
+                '<a class="sidebar-header-button-toggle debug-tab-filter-option" id="debug-tab-filterCurrent" href="#"><span data-i18n="node-red:debug.sidebar.filterCurrent"></span></a> '+
             '</span>'+
             '</div>'+
-        '</div>').appendTo(content);
+        '</div>').appendTo(toolbar);//content);
+
+        // var filterTypeRow = $('<div class="debug-filter-row"></div>').appendTo(filterDialog);
+        // $('<select><option>Show all debug nodes</option><option>Show selected debug nodes</option><option>Show current flow only</option></select>').appendTo(filterTypeRow);
+
+        var debugNodeListRow = $('<div class="debug-filter-row hide"></div>').appendTo(filterDialog);
+        var flowCheckboxes = {};
+        var debugNodeListHeader = $('<div><span>Debug nodes</span><span></span></div>');
+        var headerCheckbox = $('<input type="checkbox">').appendTo(debugNodeListHeader.find("span")[1]).checkboxSet();
+
+        debugNodeList = $('<ol>',{style:"text-align: left; min-height: 250px; max-height: 250px"}).appendTo(debugNodeListRow).editableList({
+            header: debugNodeListHeader,
+            class: 'red-ui-nodeList',
+            addItem: function(container,i,node) {
+                var row = $("<div>").appendTo(container);
+                row.attr('id','debug-filter-node-list-node-'+node.id.replace(/\./g,"_"));
+                if (node.type === 'tab') {
+                    container.parent().addClass('red-ui-editableList-section-header');
+                    if (!debugNodeListExpandedFlows.hasOwnProperty(node.id)) {
+                        debugNodeListExpandedFlows[node.id] = true;
+                    }
+                    var chevron = $('<i class="fa fa-angle-right"></i>').appendTo(row);
+                    $('<span>').text(RED.utils.getNodeLabel(node,node.id)).appendTo(row);
+                    var muteControl = $('<input type="checkbox">').appendTo($('<span class="meta">').appendTo(row));
+                    muteControl.checkboxSet({
+                        parent: headerCheckbox
+                    });
+                    flowCheckboxes[node.id] = muteControl;
+                    row.click(function(e) {
+                        e.stopPropagation();
+                        debugNodeListExpandedFlows[node.id] = !debugNodeListExpandedFlows[node.id];
+                        row.toggleClass('expanded',debugNodeListExpandedFlows[node.id]);
+                        debugNodeList.editableList('filter');
+                    })
+                    row.addClass("expandable");
+                    if (node.disabled) {
+                        container.addClass('disabled');
+                        muteControl.checkboxSet('disable');
+                        debugNodeListExpandedFlows[node.id] = false;
+                    }
+                    row.toggleClass('expanded',debugNodeListExpandedFlows[node.id]);
+                } else {
+                    $('<span>',{style: "margin-left: 20px"}).text(RED.utils.getNodeLabel(node,node.id)).appendTo(row);
+                    row.on("mouseenter",function() {
+                        config.messageMouseEnter(node.id);
+                    });
+                    row.on("mouseleave",function() {
+                        config.messageMouseLeave(node.id);
+                    });
+                    var muteControl = $('<input type="checkbox">').prop('checked',!filteredNodes[node.id]).appendTo($('<span class="meta">').appendTo(row));
+                    muteControl.checkboxSet({
+                        parent: flowCheckboxes[node.z]
+                    }).change(function(e) {
+                        filteredNodes[node.id] = !$(this).prop('checked');
+                        $(".debug-message-node-"+node.id.replace(/\./g,"_")).toggleClass('hide',filteredNodes[node.id]);
+                    });
+                    if (!node.active || RED.nodes.workspace(node.z).disabled) {
+                        container.addClass('disabled');
+                        muteControl.checkboxSet('disable');
+                    }
+                }
+            },
+            addButton: false,
+            scrollOnAdd: false,
+            filter: function(node) {
+                return (node.type === 'tab' || debugNodeListExpandedFlows[node.z] )
+            },
+            sort: function(A,B) {
+
+            }
+        });
 
         try {
             content.i18n();
@@ -64,25 +141,32 @@ RED.debug = (function() {
             console.log("TODO: i18n library support");
         }
 
+        toolbar.find('#debug-tab-filter span').text(RED._('node-red:debug.sidebar.filterAll'));
 
-        filterDialog.find('#debug-tab-filter-all').on("click",function(e) {
-            e.preventDefault();
-            if (filter) {
-                $(this).addClass('selected');
-                $('#debug-tab-filter-current').removeClass('selected');
-                filter = !filter;
-                refreshMessageList();
+        var filterButtonHandler = function(type) {
+            return function(e) {
+                e.preventDefault();
+                if (filterType !== type) {
+                    $('.debug-tab-filter-option').removeClass('selected');
+                    $(this).addClass('selected');
+                    if (filterType === 'filterSelected') {
+                        debugNodeListRow.slideUp();
+                    }
+                    filterType = type;
+                    if (filterType === 'filterSelected') {
+                        debugNodeListRow.slideDown();
+                    }
+
+                    $('#debug-tab-filter span').text(RED._('node-red:debug.sidebar.'+filterType));
+                    refreshMessageList();
+                }
             }
-        });
-        filterDialog.find('#debug-tab-filter-current').on("click",function(e) {
-            e.preventDefault();
-            if (!filter) {
-                $(this).addClass('selected');
-                $('#debug-tab-filter-all').removeClass('selected');
-                filter = !filter;
-                refreshMessageList();
-            }
-        });
+        }
+        filterDialog.find('#debug-tab-filterAll').on("click",filterButtonHandler('filterAll'));
+        filterDialog.find('#debug-tab-filterSelected').on("click",filterButtonHandler('filterSelected'));
+        filterDialog.find('#debug-tab-filterCurrent').on("click",filterButtonHandler('filterCurrent'));
+
+
         // $('#debug-tab-view-list').on("click",function(e) {
         //     e.preventDefault();
         //     if (!$(this).hasClass('selected')) {
@@ -101,13 +185,33 @@ RED.debug = (function() {
         // });
 
 
+        var hideFilterTimeout;
+        toolbar.on('mouseleave',function() {
+            if ($('#debug-tab-filter').hasClass('selected')) {
+                clearTimeout(hideFilterTimeout);
+                hideFilterTimeout = setTimeout(function() {
+                    filterVisible = false;
+                    $('#debug-tab-filter').removeClass('selected');
+                    filterDialog.slideUp(200);
+                },300);
+            }
+        });
+        toolbar.on('mouseenter',function() {
+            if ($('#debug-tab-filter').hasClass('selected')) {
+                clearTimeout(hideFilterTimeout);
+            }
+        })
         toolbar.find('#debug-tab-filter').on("click",function(e) {
             e.preventDefault();
             if ($(this).hasClass('selected')) {
+                filterVisible = false;
                 $(this).removeClass('selected');
+                clearTimeout(hideFilterTimeout);
                 filterDialog.slideUp(200);
             } else {
                 $(this).addClass('selected');
+                filterVisible = true;
+                refreshDebugNodeList();
                 filterDialog.slideDown(200);
             }
         })
@@ -127,6 +231,38 @@ RED.debug = (function() {
 
     }
 
+    function refreshDebugNodeList() {
+        debugNodeList.editableList('empty');
+        var candidateNodes = RED.nodes.filterNodes({type:'debug'});
+        var workspaceOrder = RED.nodes.getWorkspaceOrder();
+        var workspaceOrderMap = {};
+        workspaceOrder.forEach(function(ws,i) {
+            workspaceOrderMap[ws] = i;
+        });
+        candidateNodes.sort(function(A,B) {
+            var wsA = workspaceOrderMap[A.z];
+            var wsB = workspaceOrderMap[B.z];
+            if (wsA !== wsB) {
+                return wsA-wsB;
+            }
+            var labelA = RED.utils.getNodeLabel(A,A.id);
+            var labelB = RED.utils.getNodeLabel(B,B.id);
+            return labelA.localeCompare(labelB);
+        })
+        var currentWs = null;
+        var nodeList = [];
+        candidateNodes.forEach(function(node) {
+            if (currentWs !== node.z) {
+                currentWs = node.z;
+                nodeList.push(RED.nodes.workspace(node.z));
+            }
+            nodeList.push(node);
+        })
+
+
+        debugNodeList.editableList('addItems',nodeList)
+    }
+
     function getTimestamp() {
         var d = new Date();
         return d.toLocaleString();
@@ -138,11 +274,22 @@ RED.debug = (function() {
 
     function refreshMessageList(_activeWorkspace) {
         if (_activeWorkspace) {
-            activeWorkspace = _activeWorkspace;
+            activeWorkspace = _activeWorkspace.replace(/\./g,"_");
         }
-        $(".debug-message").each(function() {
-            $(this).toggleClass('hide',filter&&!$(this).hasClass('debug-message-flow-'+activeWorkspace));
-        });
+        if (filterType === "filterAll") {
+            $(".debug-message").removeClass("hide");
+        } else {
+            $(".debug-message").each(function() {
+                if (filterType === 'filterCurrent') {
+                    $(this).toggleClass('hide',!$(this).hasClass('debug-message-flow-'+activeWorkspace));
+                } else if (filterType === 'filterSelected') {
+                    var id = $(this).data('source');
+                    if (id) {
+                        $(this).toggleClass('hide',!!filteredNodes[id]);
+                    }
+                }
+            });
+        }
     }
     function refreshMessageTable() {
 
@@ -178,19 +325,63 @@ RED.debug = (function() {
         return str.replace(/\n/g,"&crarr;").replace(/\t/g,"&rarr;");
     }
 
+
+    var menuOptionMenu;
+    var activeMenuMessage;
+    function showMessageMenu(button,dbgMessage,sourceId) {
+        activeMenuMessage = dbgMessage;
+        if (!menuOptionMenu) {
+            menuOptionMenu = RED.menu.init({id:"debug-message-option-menu",
+                options: [
+                    {id:"debug-message-menu-item-collapse",label:RED._("node-red:debug.messageMenu.collapseAll"),onselect:function(){
+                        activeMenuMessage.collapse();
+                    }},
+                    {id:"debug-message-menu-item-clear-pins",label:RED._("node-red:debug.messageMenu.clearPinned"),onselect:function(){
+                        activeMenuMessage.clearPinned();
+                    }},
+                    null,
+                    {id:"debug-message-menu-item-filter",label:RED._("node-red:debug.messageMenu.filterNode"),onselect:function(){
+                        var candidateNodes = RED.nodes.filterNodes({type:'debug'});
+                        candidateNodes.forEach(function(n) {
+                            filteredNodes[n.id] = true;
+                        });
+                        delete filteredNodes[sourceId];
+                        $("#debug-tab-filterSelected").click();
+                        refreshMessageList();
+                    }},
+                    {id:"debug-message-menu-item-clear-filter",label:RED._("node-red:debug.messageMenu.clearFilter"),onselect:function(){
+                        $("#debug-tab-filterAll").click();
+                        refreshMessageList();
+                    }}
+                ]
+            });
+            menuOptionMenu.css({
+                position: "absolute"
+            })
+            menuOptionMenu.on('mouseleave', function(){ $(this).hide() });
+            menuOptionMenu.on('mouseup', function() { $(this).hide() });
+            menuOptionMenu.appendTo("body");
+        }
+        var elementPos = button.offset();
+        menuOptionMenu.css({
+            top: elementPos.top+"px",
+            left: (elementPos.left - menuOptionMenu.width() + 20)+"px"
+        })
+        menuOptionMenu.show();
+    }
     function handleDebugMessage(o) {
         var msg = document.createElement("div");
 
         var sourceNode = o._source;
 
         msg.onmouseenter = function() {
-            msg.style.borderRightColor = "#999";
+            $(msg).addClass('debug-message-hover');
             if (o._source) {
                 config.messageMouseEnter(o._source.id);
             }
         };
         msg.onmouseleave = function() {
-            msg.style.borderRightColor = "";
+            $(msg).removeClass('debug-message-hover');
             if (o._source) {
                 config.messageMouseLeave(o._source.id);
             }
@@ -200,8 +391,25 @@ RED.debug = (function() {
         var property = sanitize(o.property?o.property:'');
         var payload = o.msg;
         var format = sanitize((o.format||"").toString());
-        msg.className = 'debug-message'+(o.level?(' debug-message-level-'+o.level):'') +
-        ((sourceNode&&sourceNode.z)?((" debug-message-flow-"+sourceNode.z+((filter&&(activeWorkspace!==sourceNode.z))?" hide":""))):"");
+        msg.className = 'debug-message'+(o.level?(' debug-message-level-'+o.level):'')+
+            (sourceNode?(
+                " debug-message-node-"+sourceNode.id.replace(/\./g,"_")+
+                (sourceNode.z?" debug-message-flow-"+sourceNode.z.replace(/\./g,"_"):"")
+            ):"");
+
+        if (sourceNode) {
+            $(msg).data('source',sourceNode.id);
+            if (filterType === "filterCurrent" && activeWorkspace) {
+                if (sourceNode.z && sourceNode.z.replace(/\./g,"_") !== activeWorkspace) {
+                    $(msg).addClass('hide');
+                }
+            } else if (filterType === 'filterSelected'){
+                if (!!filteredNodes[sourceNode.id]) {
+                    $(msg).addClass('hide');
+                }
+            }
+        }
+
         var metaRow = $('<div class="debug-message-meta"></div>').appendTo(msg);
         $('<span class="debug-message-date">'+ getTimestamp()+'</span>').appendTo(metaRow);
         if (sourceNode) {
@@ -214,22 +422,7 @@ RED.debug = (function() {
         } else if (name) {
             $('<span class="debug-message-name">'+name+'</span>').appendTo(metaRow);
         }
-        // NOTE: relying on function error to have a "type" that all other msgs don't
-        if (o.hasOwnProperty("type") && (o.type === "function")) {
-            var errorLvlType = 'error';
-            var errorLvl = 20;
-            if (o.hasOwnProperty("level") && o.level === 30) {
-                errorLvl = 30;
-                errorLvlType = 'warn';
-            }
-            $(msg).addClass('debug-message-level-' + errorLvl);
-            $('<span class="debug-message-topic">function : (' + errorLvlType + ')</span>').appendTo(metaRow);
-        } else {
-            $('<span class="debug-message-topic">'+
-                (o.topic?topic+' : ':'')+
-                (o.property?'msg.'+property:'msg')+" : "+format+
-                '</span>').appendTo(metaRow);
-        }
+
         if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
             payload = JSON.parse(payload);
         } else if (/error/i.test(format)) {
@@ -247,7 +440,34 @@ RED.debug = (function() {
             }
         }
         var el = $('<span class="debug-message-payload"></span>').appendTo(msg);
-        RED.utils.createObjectElement(payload,/*true*/null,format).appendTo(el);
+        var path = o.property||'';
+        var debugMessage = RED.utils.createObjectElement(payload,/*true*/null,format,false,path,sourceNode&&sourceNode.id,path);
+        // Do this in a separate step so the element functions aren't stripped
+        debugMessage.appendTo(el);
+        // NOTE: relying on function error to have a "type" that all other msgs don't
+        if (o.hasOwnProperty("type") && (o.type === "function")) {
+            var errorLvlType = 'error';
+            var errorLvl = 20;
+            if (o.hasOwnProperty("level") && o.level === 30) {
+                errorLvl = 30;
+                errorLvlType = 'warn';
+            }
+            $(msg).addClass('debug-message-level-' + errorLvl);
+            $('<span class="debug-message-topic">function : (' + errorLvlType + ')</span>').appendTo(metaRow);
+        } else {
+            var tools = $('<span class="debug-message-tools button-group"></span>').appendTo(metaRow);
+            var filterMessage = $('<button class="editor-button editor-button-small"><i class="fa fa-caret-down"></i></button>').appendTo(tools);
+            filterMessage.click(function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                showMessageMenu(filterMessage,debugMessage,sourceNode&&sourceNode.id);
+            });
+            $('<span class="debug-message-topic">'+
+                (o.topic?topic+' : ':'')+
+                (o.property?'msg.'+property:'msg')+" : "+format+
+                '</span>').appendTo(metaRow);
+        }
+
         var atBottom = (sbc.scrollHeight-messageList.height()-sbc.scrollTop) < 5;
         var m = {
             el: msg
@@ -280,9 +500,11 @@ RED.debug = (function() {
             messageList.scrollTop(sbc.scrollHeight);
         }
     }
+
     return {
         init: init,
         refreshMessageList:refreshMessageList,
-        handleDebugMessage: handleDebugMessage
+        handleDebugMessage: handleDebugMessage,
+
     }
 })();

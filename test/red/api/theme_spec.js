@@ -55,7 +55,8 @@ describe("theme handler", function() {
                 page: {
                     title: "Test Page Title",
                     favicon: "/absolute/path/to/theme/icon",
-                    css: "/absolute/path/to/custom/css/file"
+                    css: "/absolute/path/to/custom/css/file",
+                    scripts: "/absolute/path/to/script.js"
                 },
                 header: {
                     title: "Test Header Title",
@@ -67,6 +68,10 @@ describe("theme handler", function() {
                     label:"Save",
                     icon: "/absolute/path/to/deploy/button/image" // or null to remove image
                 },
+
+                customScripts: [
+                    "/absolute/path/to/script.js"
+                ],
 
                 menu: { // Hide unwanted menu items by id. see editor/js/main.js:loadEditor for complete list
                     "menu-item-import-library": false,
@@ -93,6 +98,8 @@ describe("theme handler", function() {
         context.page.should.have.a.property("title","Test Page Title");
         context.should.have.a.property("header");
         context.header.should.have.a.property("title","Test Header Title");
+        context.page.should.have.a.property("css");
+        context.page.should.have.a.property("scripts");
 
         var settings = theme.settings();
         settings.should.have.a.property("deployButton");

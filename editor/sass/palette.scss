@@ -114,16 +114,18 @@
 }
 .palette_label {
     font-size: 13px;
-    margin: 4px 0 4px 28px;
+    margin: 4px 0 4px 32px;
     line-height: 20px;
     overflow: hidden;
     text-align: center;
+    @include disable-selection;
 }
 .palette_label_right {
-    margin: 4px 28px 4px 0;
+    margin: 4px 32px 4px 0;
 }
 
 .palette_node {
+    display: block;
     cursor:move;
     background: #ddd;
     margin: 10px auto;
@@ -184,4 +186,23 @@
     background-position: 50% 50%;
     background-size: contain;
     background-repeat: no-repeat;
+}
+
+.palette_node_small {
+    display: inline-block;
+    position: relative;
+    width: 18px;
+    height: 15px;
+    margin: 3px 0px;
+    vertical-align: middle;
+    cursor: default;
+
+    .palette_icon_container {
+        width: 18px;
+        border-right: none;
+    }
+    .palette_icon {
+        margin-left: -1px;
+        width: 15px;
+    }
 }

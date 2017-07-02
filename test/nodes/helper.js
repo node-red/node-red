@@ -36,6 +36,7 @@ var credentials = require("../../red/runtime/nodes/credentials");
 var comms = require("../../red/api/comms.js");
 var log = require("../../red/runtime/log.js");
 var context = require("../../red/runtime/nodes/context.js");
+var events = require("../../red/runtime/events.js");
 
 var http = require('http');
 var express = require('express');
@@ -92,7 +93,7 @@ module.exports = {
             return messageId;
         };
 
-        redNodes.init({settings:settings, storage:storage,log:log});
+        redNodes.init({events:events,settings:settings, storage:storage,log:log,});
         RED.nodes.registerType("helper", helperNode);
         if (Array.isArray(testNode)) {
             for (i = 0; i < testNode.length; i++) {

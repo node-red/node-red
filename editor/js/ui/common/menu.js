@@ -28,7 +28,17 @@ RED.menu = (function() {
         }
 
         function setInitialState() {
-            var savedStateActive = isSavedStateActive(opt.id);
+            var savedStateActive = RED.settings.get("menu-" + opt.id);
+            if (opt.setting) {
+                // May need to migrate pre-0.17 setting
+
+                if (savedStateActive !== null) {
+                    RED.settings.set(opt.setting,savedStateActive);
+                    RED.settings.remove("menu-" + opt.id);
+                } else {
+                    savedStateActive = RED.settings.get(opt.setting);
+                }
+            }
             if (savedStateActive) {
                 link.addClass("active");
                 triggerAction(opt.id,true);
@@ -82,7 +92,8 @@ RED.menu = (function() {
             menuItems[opt.id] = opt;
 
             if (opt.onselect) {
-                link.click(function() {
+                link.click(function(e) {
+                    e.preventDefault();
                     if ($(this).parent().hasClass("disabled")) {
                         return;
                     }
@@ -140,15 +151,13 @@ RED.menu = (function() {
     }
     function createMenu(options) {
 
-        var button = $("#"+options.id);
+        var menuParent = $("#"+options.id);
 
-        //button.click(function(event) {
-        //    $("#"+options.id+"-submenu").show();
-        //    event.preventDefault();
-        //});
+        var topMenu = $("<ul/>",{id:options.id+"-submenu", class:"dropdown-menu pull-right"});
 
-
-        var topMenu = $("<ul/>",{id:options.id+"-submenu", class:"dropdown-menu pull-right"}).insertAfter(button);
+        if (menuParent.length === 1) {
+            topMenu.insertAfter(menuParent);
+        }
 
         var lastAddedSeparator = false;
         for (var i=0;i<options.options.length;i++) {
@@ -161,6 +170,8 @@ RED.menu = (function() {
                 }
             }
         }
+
+        return topMenu;
     }
 
     function triggerAction(id, args) {
@@ -176,16 +187,8 @@ RED.menu = (function() {
         }
     }
 
-    function isSavedStateActive(id) {
-        return RED.settings.get("menu-" + id);
-    }
-
     function isSelected(id) {
         return $("#" + id).hasClass("active");
-    }
-
-    function setSavedState(id, state) {
-        RED.settings.set("menu-" + id, state);
     }
 
     function setSelected(id,state) {
@@ -201,7 +204,7 @@ RED.menu = (function() {
         if (opt && opt.onselect) {
             triggerAction(opt.id,state);
         }
-        setSavedState(id, state);
+        RED.settings.set(opt.setting||("menu-"+opt.id), state);
     }
 
     function toggleSelected(id) {

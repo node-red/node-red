@@ -22,10 +22,13 @@ RED.tabs = (function() {
         var currentTabWidth;
         var currentActiveTabWidth = 0;
 
-        var ul = $("#"+options.id);
+        var ul = options.element || $("#"+options.id);
         var wrapper = ul.wrap( "<div>" ).parent();
         var scrollContainer = ul.wrap( "<div>" ).parent();
         wrapper.addClass("red-ui-tabs");
+        if (options.vertical) {
+            wrapper.addClass("red-ui-tabs-vertical");
+        }
         if (options.addButton && typeof options.addButton === 'function') {
             wrapper.addClass("red-ui-tabs-add");
             var addButton = $('<div class="red-ui-tab-button"><a href="#"><i class="fa fa-plus"></i></a></div>').appendTo(wrapper);
@@ -73,6 +76,9 @@ RED.tabs = (function() {
         ul.children().addClass("red-ui-tab");
 
         function onTabClick() {
+            if (options.onclick) {
+                options.onclick(tabs[$(this).attr('href').slice(1)]);
+            }
             activateTab($(this));
             return false;
         }
@@ -143,6 +149,9 @@ RED.tabs = (function() {
         }
 
         function updateTabWidths() {
+            if (options.vertical) {
+                return;
+            }
             var tabs = ul.find("li.red-ui-tab");
             var width = wrapper.width();
             var tabCount = tabs.size();
@@ -212,6 +221,7 @@ RED.tabs = (function() {
             addTab: function(tab) {
                 tabs[tab.id] = tab;
                 var li = $("<li/>",{class:"red-ui-tab"}).appendTo(ul);
+                li.attr('id',"red-ui-tab-"+(tab.id.replace(".","-")));
                 li.data("tabId",tab.id);
                 var link = $("<a/>",{href:"#"+tab.id, class:"red-ui-tab-label"}).appendTo(li);
                 if (tab.icon) {
@@ -227,6 +237,7 @@ RED.tabs = (function() {
                     closeLink.append('<i class="fa fa-times" />');
 
                     closeLink.on("click",function(event) {
+                        event.preventDefault();
                         removeTab(tab.id);
                     });
                 }
@@ -331,7 +342,7 @@ RED.tabs = (function() {
                 tabs[id].label = label;
                 var tab = ul.find("a[href='#"+id+"']");
                 tab.attr("title",label);
-                tab.find("span").text(label).attr('dir', RED.text.bidi.resolveBaseTextDir(label));
+                tab.find("span.bidiAware").text(label).attr('dir', RED.text.bidi.resolveBaseTextDir(label));
                 updateTabWidths();
             },
             order: function(order) {

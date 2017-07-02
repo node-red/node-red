@@ -46,7 +46,16 @@
     overflow: auto;
 }
 .editor-tray-body {
-    margin: 20px;
+    position: relative;
+    box-sizing: border-box;
+    padding: 0.1px; // prevent margin collapsing
+    .dialog-form,#dialog-form, #node-config-dialog-edit-form {
+        margin: 20px;
+        height: calc(100% - 40px);
+    }
+}
+.editor-tray-content {
+    overflow: auto;
 }
 .editor-tray-header {
     @include disable-selection;
@@ -65,6 +74,13 @@
 .editor-tray-footer {
     @include component-footer;
     height: 35px;
+
+    button {
+        @include editor-button;
+        padding: 3px 7px;
+        font-size: 11px;
+    }
+
 }
 
 .editor-tray-toolbar {
@@ -72,48 +88,9 @@
     padding: 6px;
 
     button {
-        @include workspace-button;
-        font-size: 14px;
-        padding: 6px 14px;
-        margin-right: 8px;
-        color: $editor-button-color !important;
-        background: $editor-button-background;
-
-        &.primary {
-            border-color: $editor-button-background-primary;
-            color: $editor-button-color-primary !important;
-            background: $editor-button-background-primary;
-            &.disabled, &.ui-state-disabled {
-                background: none;
-                color: $editor-button-color !important;
-                border-color: $form-input-border-color;
-            }
-            &:not(.disabled):not(.ui-button-disabled):hover {
-                border-color: $editor-button-background-primary-hover;
-                background: $editor-button-background-primary-hover;
-                color: $editor-button-color-primary !important;
-            }
-        }
-        &:not(.disabled):hover {
-            //color: $editor-button-color;
-        }
-        &.disabled {
-            background: none;
-        }
-        &.disabled:focus {
-            outline: none;
-        }
-
-
-        &.leftButton {
-            float: left;
-            margin-top: 1px;
-        }
-        &:not(.leftButton):not(:last-child) {
-            margin-right: 16px;
-        }
-        &.ui-state-disabled {
-            opacity: 1;
+        @include editor-button;
+        &.toggle {
+            @include workspace-button-toggle;
         }
     }
 }
@@ -178,8 +155,7 @@
 }
 
 
-.dialog-form,#dialog-form, #dialog-config-form {
-    margin: 0;
+.dialog-form,#dialog-form, #node-config-dialog-edit-form {
     height: 100%;
 }
 
@@ -244,17 +220,6 @@
     padding: 0 5px;
 }
 
-.dialog-form {
-    .button-group {
-        .editor-button {
-            &:first-child {
-
-            }
-        }
-    }
-
-}
-
 #node-config-dialog-scope-container {
     cursor: auto;
     float: right;
@@ -281,4 +246,88 @@
     float:left;
     font-size: 12px;
     line-height: 35px;
+}
+.node-input-expression-editor #dialog-form {
+    margin: 0;
+    height: 100%;
+    .red-ui-panel {
+        &:first-child {
+            padding: 20px 20px 0;
+        }
+        &:last-child {
+            padding-bottom: 20px;
+        }
+    }
+}
+.node-input-expression-tab-content {
+    position: relative;
+    padding: 0 20px;
+}
+
+#node-input-expression-help {
+    position: absolute;
+    top: 35px;
+    left:0;
+    right: 0;
+    bottom:0;
+    padding: 0 20px;
+    overflow: auto;
+    box-sizing: border-box;
+}
+#node-input-expression-panel-info {
+    & > .form-row {
+        margin: 0;
+        & > div:first-child {
+            margin-top: 10px;
+        }
+    }
+}
+.node-input-expression-legacy, .node-input-buffer-type {
+    font-size: 0.8em;
+    float: left;
+    cursor: pointer;
+    border: 1px solid white;
+    padding: 2px 5px;
+    border-radius: 2px;
+    &:hover {
+        border-color: $form-input-border-color;
+    }
+}
+.node-input-buffer-type {
+    float: none;
+    text-align: right;
+}
+
+#clipboard-hidden {
+    position: absolute;
+    top: -3000px;
+}
+.node-label-form-row {
+    margin: 5px 0;
+    label {
+        margin-right: 20px;
+        text-align: right;
+        width: 30px;
+    }
+    button {
+        margin-left: 10px;
+    }
+    input {
+        width: calc(100% - 100px);
+    }
+}
+.node-label-form-none {
+    span {
+        padding-left: 50px;
+        width: 100px;
+        color: #999;
+    }
+}
+
+.ace_read-only {
+    background: #eee !important;
+    .ace_cursor {
+       color: transparent !important;
+    }
+
 }

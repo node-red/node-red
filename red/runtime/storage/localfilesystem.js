@@ -122,6 +122,12 @@ function writeFile(path,content) {
     });
 }
 
+function parseJSON(data) {
+    if (data.charCodeAt(0) === 0xFEFF) {
+        data = data.slice(1)
+    }
+    return JSON.parse(data);
+}
 
 function readFile(path,backupPath,emptyResponse,type) {
     return when.promise(function(resolve) {
@@ -154,7 +160,7 @@ function readFile(path,backupPath,emptyResponse,type) {
                     }
                 }
                 try {
-                    return resolve(JSON.parse(data));
+                    return resolve(parseJSON(data));
                 } catch(parseErr) {
                     log.warn(log._("storage.localfilesystem.invalid",{type:type}));
                     return resolve(emptyResponse);
@@ -230,11 +236,25 @@ var localfilesystem = {
 
         globalSettingsFile = fspath.join(settings.userDir,".config.json");
 
+        var packageFile = fspath.join(settings.userDir,"package.json");
+        var packagePromise = when.resolve();
         if (!settings.readOnly) {
             promises.push(promiseDir(libFlowsDir));
+            packagePromise = function() {
+                try {
+                    fs.statSync(packageFile);
+                } catch(err) {
+                    var defaultPackage = {
+                        "name": "node-red-project",
+                        "description": "A Node-RED Project",
+                        "version": "0.0.1"
+                    };
+                    return writeFile(packageFile,JSON.stringify(defaultPackage,"",4));
+                }
+                return true;
+            }
         }
-
-        return when.all(promises);
+        return when.all(promises).then(packagePromise);
     },
 
     getFlows: function() {
@@ -293,7 +313,7 @@ var localfilesystem = {
             fs.readFile(globalSettingsFile,'utf8',function(err,data) {
                 if (!err) {
                     try {
-                        return resolve(JSON.parse(data));
+                        return resolve(parseJSON(data));
                     } catch(err2) {
                         log.trace("Corrupted config detected - resetting");
                     }
@@ -313,7 +333,7 @@ var localfilesystem = {
             fs.readFile(sessionsFile,'utf8',function(err,data){
                 if (!err) {
                     try {
-                        return resolve(JSON.parse(data));
+                        return resolve(parseJSON(data));
                     } catch(err2) {
                         log.trace("Corrupted sessions file - resetting");
                     }

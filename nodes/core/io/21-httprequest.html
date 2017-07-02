@@ -70,29 +70,61 @@
 </script>
 
 <script type="text/x-red" data-help-name="http request">
-    <p>Provides a node for making http requests.</p>
-    <p>The URL and HTTP method can be configured in the node, if they are left blank they should be set in an incoming message on <code>msg.url</code> and <code>msg.method</code>:</p>
-    <ul>
-        <li><code>url</code>, if set, is used as the url of the request. Must start with http: or https:</li>
-        <li><code>method</code>, if set, is used as the HTTP method of the request.
-        Must be one of <code>GET</code>, <code>PUT</code>, <code>POST</code>, <code>PATCH</code> or <code>DELETE</code> (default: GET)</li>
-        <li><code>headers</code>, if set, should be an object containing field/value
-        pairs to be added as request headers</li>
-        <li><code>payload</code> is sent as the body of the request</li>
-    </ul>
+    <p>Sends HTTP requests and returns the response.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">url <span class="property-type">string</span></dt>
+        <dd>If not configured in the node, this optional property sets the url of the request.</dd>
+        <dt class="optional">method <span class="property-type">string</span></dt>
+        <dd>If not configured in the node, this optional property sets the HTTP method of the request.
+            Must be one of <code>GET</code>, <code>PUT</code>, <code>POST</code>, <code>PATCH</code> or <code>DELETE</code>.</dd>
+        <dt class="optional">headers <span class="property-type">object</span></dt>
+        <dd>Sets the HTTP headers of the request.</dd>
+        <dt class="optional">cookies <span class="property-type">object</span></dt>
+        <dd>If set, can be used to send cookies with the request.</dd>
+        <dt class="optional">payload</dt>
+        <dd>Sent as the body of the request.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string | object | buffer</span></dt>
+        <dd>The body of the response. The node can be configured to return the body
+             as a string, attempt to parse it as a JSON string or leave it as a
+             binary buffer.</dd>
+        <dt>statusCode <span class="property-type">number</span></dt>
+        <dd>The status code of the response, or the error code if the request could not be completed.</dd>
+        <dt>headers <span class="property-type">object</span></dt>
+        <dd>An object containing the response headers.</dd>
+        <dt>responseUrl <span class="property-type">string</span></dt>
+        <dd>In case any redirects occurred while processing the request, this property is the final redirected url.
+            Otherwise, the url of the original request.</dd>
+        <dt>responseCookies <span class="property-type">object</span></dt>
+        <dd>If the response includes cookies, this propery is an object of name/value pairs for each cookie.</dd>
+    </dl>
+    <h3>Details</h3>
     <p>When configured within the node, the URL property can contain <a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache-style</a> tags. These allow the
     url to be constructed using values of the incoming message. For example, if the url is set to
     <code>example.com/{{{topic}}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.
     Using {{{...}}} prevents mustache from escaping characters like / & etc.</p>
-    <p>
-    The output message contains the following properties:
-    <ul>
-        <li><code>payload</code> is the body of the response</li>
-        <li><code>statusCode</code> is the status code of the response, or the error code if the request could not be completed</li>
-        <li><code>headers</code> is an object containing the response headers</li>
-        <li><code>responseUrl</code> is the url of the server that responds</li>
-    </ul>
-    <p><b>Note</b>: If you need to configure a proxy please add <b>http_proxy=...</b> to your environment variables and restart Node-RED.</p>
+    <p><b>Note</b>: If running behind a proxy, the standard <code>http_proxy=...</code> environment variable should be set and Node-RED restarted.</p>
+    <h4>Using multiple HTTP Request nodes</h4>
+    <p>In order to use more than one of these nodes in the same flow, care must be taken with
+    the <code>msg.headers</code> property. The first node will set this property with
+    the response headers. The next node will then use those headers for its request - this
+    is not usually the right thing to do. If <code>msg.headers</code> property is left unchanged
+    between nodes, it will be ignored by the second node. To set custom headers, <code>msg.headers</code>
+    should first be deleted or reset to an empty object: `{}`.
+    <h4>Cookie handling</h4>
+    <p>The <code>cookies</code> property passed to the node must be an object of name/value pairs.
+    The value can be either a string to set the value of the cookie or it can be an
+    object with a single <code>value</code> property.<p>
+    <p>Any cookies returned by the request are passed back under the <code>responseCookies</code> property.</p>
+    <h4>Content type handling</h4>
+    <p>If <code>msg.payload</code> is an Object, the node will automatically set the content type
+    of the request to <code>application/json</code> and encode the body as such.</p>
+    <p>To encode the request as form data, <code>msg.headers["content-type"]</code> should be set to <code>application/x-www-form-urlencoded</code>.</p>
+
 </script>
 
 <script type="text/javascript">
@@ -103,7 +135,7 @@
             name: {value:""},
             method:{value:"GET"},
             ret: {value:"txt"},
-            url:{value:""},
+            url:{value:"",validate:function(v) { return (v.trim().length === 0) || (v.indexOf("://") === -1) || (v.trim().indexOf("http") === 0)} },
             tls: {type:"tls-config",required: false}
         },
         credentials: {
@@ -112,6 +144,9 @@
         },
         inputs:1,
         outputs:1,
+        outputLabels: function(i) {
+            return ({txt:"UTF8 string", bin:"binary buffer", obj:"parsed JSON object"}[this.ret]);
+        },
         icon: "white-globe.png",
         label: function() {
             return this.name||this._("httpin.httpreq");

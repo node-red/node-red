@@ -17,8 +17,6 @@
 module.exports = function(RED) {
     "use strict";
 
-    var jsonata = require('jsonata');
-
     var operators = {
         'eq': function(a, b) { return a == b; },
         'neq': function(a, b) { return a != b; },
@@ -44,7 +42,7 @@ module.exports = function(RED) {
 
         if (this.propertyType === 'jsonata') {
             try {
-                this.property = jsonata(this.property);
+                this.property = RED.util.prepareJSONataExpression(this.property,this);
             } catch(err) {
                 this.error(RED._("switch.errors.invalid-expr",{error:err.message}));
                 return;
@@ -70,7 +68,7 @@ module.exports = function(RED) {
                 }
             } else if (rule.vt === "jsonata") {
                 try {
-                    rule.v = jsonata(rule.v);
+                    rule.v = RED.util.prepareJSONataExpression(rule.v,node);
                 } catch(err) {
                     this.error(RED._("switch.errors.invalid-expr",{error:err.message}));
                     valid = false;
@@ -88,7 +86,7 @@ module.exports = function(RED) {
                     rule.v2 = Number(rule.v2);
                 } else if (rule.v2t === 'jsonata') {
                     try {
-                        rule.v2 = jsonata(rule.v2);
+                        rule.v2 = RED.util.prepareJSONataExpression(rule.v2,node);
                     } catch(err) {
                         this.error(RED._("switch.errors.invalid-expr",{error:err.message}));
                         valid = false;
@@ -106,7 +104,7 @@ module.exports = function(RED) {
             try {
                 var prop;
                 if (node.propertyType === 'jsonata') {
-                    prop = node.property.evaluate({msg:msg});
+                    prop = RED.util.evaluateJSONataExpression(node.property,msg);
                 } else {
                     prop = RED.util.evaluateNodeProperty(node.property,node.propertyType,node,msg);
                 }
@@ -119,7 +117,7 @@ module.exports = function(RED) {
                         v1 = node.previousValue;
                     } else if (rule.vt === 'jsonata') {
                         try {
-                            v1 = rule.v.evaluate({msg:msg});
+                            v1 = RED.util.evaluateJSONataExpression(rule.v,msg);
                         } catch(err) {
                             node.error(RED._("switch.errors.invalid-expr",{error:err.message}));
                             return;
@@ -136,7 +134,7 @@ module.exports = function(RED) {
                         v2 = node.previousValue;
                     } else if (rule.v2t === 'jsonata') {
                         try {
-                            v2 = rule.v2.evaluate({msg:msg});
+                            v2 = RED.util.evaluateJSONataExpression(rule.v2,msg);
                         } catch(err) {
                             node.error(RED._("switch.errors.invalid-expr",{error:err.message}));
                             return;

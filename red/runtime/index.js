@@ -126,14 +126,19 @@ function start() {
                     var missingModules = {};
                     for (i=0;i<nodeMissing.length;i++) {
                         var missing = nodeMissing[i];
-                        missingModules[missing.module] = (missingModules[missing.module]||[]).concat(missing.types);
+                        missingModules[missing.module] = missingModules[missing.module]||{
+                            module:missing.module,
+                            version:missing.pending_version||missing.version,
+                            types:[]
+                        }
+                        missingModules[missing.module].types = missingModules[missing.module].types.concat(missing.types);
                     }
                     var promises = [];
                     for (i in missingModules) {
                         if (missingModules.hasOwnProperty(i)) {
-                            log.warn(" - "+i+": "+missingModules[i].join(", "));
+                            log.warn(" - "+i+" ("+missingModules[i].version+"): "+missingModules[i].types.join(", "));
                             if (settings.autoInstallModules && i != "node-red") {
-                                redNodes.installModule(i).otherwise(function(err) {
+                                redNodes.installModule(i,missingModules[i].version).otherwise(function(err) {
                                     // Error already reported. Need the otherwise handler
                                     // to stop the error propagating any further
                                 });

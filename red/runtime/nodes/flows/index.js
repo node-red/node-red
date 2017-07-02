@@ -66,6 +66,7 @@ function init(runtime) {
         });
         typeEventRegistered = true;
     }
+    Flow.init(settings);
 }
 
 function loadFlows() {
@@ -107,9 +108,7 @@ function setFlows(_config,type,muteLog) {
     } else {
         config = clone(_config);
         newFlowConfig = flowUtil.parseConfig(clone(config));
-        if (type !== 'full') {
-            diff = flowUtil.diffConfigs(activeFlowConfig,newFlowConfig);
-        }
+        diff = flowUtil.diffConfigs(activeFlowConfig,newFlowConfig);
         credentials.clean(config);
         var credsDirty = credentials.dirty();
         configSavePromise = credentials.export().then(function(creds) {
@@ -135,10 +134,14 @@ function setFlows(_config,type,muteLog) {
             if (started) {
                 return stop(type,diff,muteLog).then(function() {
                     context.clean(activeFlowConfig);
-                    start(type,diff,muteLog);
+                    start(type,diff,muteLog).then(function() {
+                        events.emit("runtime-event",{id:"runtime-deploy",revision:flowRevision});
+                    });
                     return flowRevision;
                 }).otherwise(function(err) {
                 })
+            } else {
+                events.emit("runtime-event",{id:"runtime-deploy",revision:flowRevision});
             }
         });
 }
@@ -172,27 +175,31 @@ function getFlows() {
 }
 
 function delegateError(node,logMessage,msg) {
+    var handled = false;
     if (activeFlows[node.z]) {
-        activeFlows[node.z].handleError(node,logMessage,msg);
+        handled = activeFlows[node.z].handleError(node,logMessage,msg);
     } else if (activeNodesToFlow[node.z] && activeFlows[activeNodesToFlow[node.z]]) {
-        activeFlows[activeNodesToFlow[node.z]].handleError(node,logMessage,msg);
+        handled = activeFlows[activeNodesToFlow[node.z]].handleError(node,logMessage,msg);
     } else if (activeFlowConfig.subflows[node.z] && subflowInstanceNodeMap[node.id]) {
         subflowInstanceNodeMap[node.id].forEach(function(n) {
-            delegateError(getNode(n),logMessage,msg);
+            handled = handled || delegateError(getNode(n),logMessage,msg);
         });
     }
+    return handled;
 }
 function handleError(node,logMessage,msg) {
+    var handled = false;
     if (node.z) {
-        delegateError(node,logMessage,msg);
+        handled = delegateError(node,logMessage,msg);
     } else {
         if (activeFlowConfig.configs[node.id]) {
             activeFlowConfig.configs[node.id]._users.forEach(function(id) {
                 var userNode = activeFlowConfig.allNodes[id];
-                delegateError(userNode,logMessage,msg);
+                handled = handled || delegateError(userNode,logMessage,msg);
             })
         }
     }
+    return handled;
 }
 
 function delegateStatus(node,statusMessage) {
@@ -248,21 +255,25 @@ function start(type,diff,muteLog) {
         return when.resolve();
     }
     if (!muteLog) {
-        if (diff) {
+        if (type !== "full") {
             log.info(log._("nodes.flows.starting-modified-"+type));
         } else {
             log.info(log._("nodes.flows.starting-flows"));
         }
     }
     var id;
-    if (!diff) {
+    if (type === "full") {
         if (!activeFlows['global']) {
+            log.debug("red/nodes/flows.start : starting flow : global");
             activeFlows['global'] = Flow.create(activeFlowConfig);
         }
         for (id in activeFlowConfig.flows) {
             if (activeFlowConfig.flows.hasOwnProperty(id)) {
-                if (!activeFlows[id]) {
+                if (!activeFlowConfig.flows[id].disabled && !activeFlows[id]) {
                     activeFlows[id] = Flow.create(activeFlowConfig,activeFlowConfig.flows[id]);
+                    log.debug("red/nodes/flows.start : starting flow : "+id);
+                } else {
+                    log.debug("red/nodes/flows.start : not starting disabled flow : "+id);
                 }
             }
         }
@@ -270,10 +281,15 @@ function start(type,diff,muteLog) {
         activeFlows['global'].update(activeFlowConfig,activeFlowConfig);
         for (id in activeFlowConfig.flows) {
             if (activeFlowConfig.flows.hasOwnProperty(id)) {
-                if (activeFlows[id]) {
-                    activeFlows[id].update(activeFlowConfig,activeFlowConfig.flows[id]);
+                if (!activeFlowConfig.flows[id].disabled) {
+                    if (activeFlows[id]) {
+                        activeFlows[id].update(activeFlowConfig,activeFlowConfig.flows[id]);
+                    } else {
+                        activeFlows[id] = Flow.create(activeFlowConfig,activeFlowConfig.flows[id]);
+                        log.debug("red/nodes/flows.start : starting flow : "+id);
+                    }
                 } else {
-                    activeFlows[id] = Flow.create(activeFlowConfig,activeFlowConfig.flows[id]);
+                    log.debug("red/nodes/flows.start : not starting disabled flow : "+id);
                 }
             }
         }
@@ -297,7 +313,7 @@ function start(type,diff,muteLog) {
     events.emit("runtime-event",{id:"runtime-state"});
 
     if (!muteLog) {
-        if (diff) {
+        if (type !== "full") {
             log.info(log._("nodes.flows.started-modified-"+type));
         } else {
             log.info(log._("nodes.flows.started-flows"));
@@ -308,8 +324,15 @@ function start(type,diff,muteLog) {
 
 function stop(type,diff,muteLog) {
     type = type||"full";
+    diff = diff||{
+        added:[],
+        changed:[],
+        removed:[],
+        rewired:[],
+        linked:[]
+    };
     if (!muteLog) {
-        if (diff) {
+        if (type !== "full") {
             log.info(log._("nodes.flows.stopping-modified-"+type));
         } else {
             log.info(log._("nodes.flows.stopping-flows"));
@@ -318,15 +341,18 @@ function stop(type,diff,muteLog) {
     started = false;
     var promises = [];
     var stopList;
+    var removedList = diff.removed;
     if (type === 'nodes') {
         stopList = diff.changed.concat(diff.removed);
     } else if (type === 'flows') {
         stopList = diff.changed.concat(diff.removed).concat(diff.linked);
     }
+
     for (var id in activeFlows) {
         if (activeFlows.hasOwnProperty(id)) {
-            promises = promises.concat(activeFlows[id].stop(stopList));
-            if (!diff || diff.removed.indexOf(id)!==-1) {
+            var flowStateChanged = diff && (diff.added.indexOf(id) !== -1 || diff.removed.indexOf(id) !== -1);
+            promises = promises.concat(activeFlows[id].stop(flowStateChanged?null:stopList,removedList));
+            if (type === "full" || flowStateChanged || diff.removed.indexOf(id)!==-1) {
                 delete activeFlows[id];
             }
         }
@@ -352,7 +378,7 @@ function stop(type,diff,muteLog) {
             // in start()
             subflowInstanceNodeMap = {};
             if (!muteLog) {
-                if (diff) {
+                if (type !== "full") {
                     log.info(log._("nodes.flows.stopped-modified-"+type));
                 } else {
                     log.info(log._("nodes.flows.stopped-flows"));

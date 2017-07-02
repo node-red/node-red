@@ -25,6 +25,11 @@
         <option value="patch">PATCH</option>
         </select>
     </div>
+    <div class="form-row form-row-http-in-upload hide">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-upload" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-upload" style="width: 70%;" data-i18n="httpin.label.upload"></label>
+    </div>
     <div class="form-row">
         <label for="node-input-url"><i class="fa fa-globe"></i> <span data-i18n="httpin.label.url"></span></label>
         <input id="node-input-url" type="text" placeholder="/url">
@@ -41,29 +46,43 @@
 </script>
 
 <script type="text/x-red" data-help-name="http in">
-    <p>Provides an input node for http requests, allowing the creation of simple web services.</p>
-    <p>The resulting message has the following properties:
-        <ul>
-            <li>msg.req : <a href="http://expressjs.com/api.html#req">http request</a></li>
-            <li>msg.res : <a href="http://expressjs.com/api.html#res">http response</a></li>
-        </ul>
-    </p>
-    <p>For POST/PUT requests, the body is available under <code>msg.req.body</code>. This
-       uses the <a href="http://expressjs.com/api.html#bodyParser">Express bodyParser middleware</a> to parse the content to a JSON object.
-    </p>
-    <p>
-       By default, this expects the body of the request to be url encoded:
-       <pre>foo=bar&amp;this=that</pre>
-    </p>
-    <p>
-       To send JSON encoded data to the node, the content-type header of the request must be set to
-       <code>application/json</code>.
-    </p>
-    <p>
-       <b>Note: </b>This node does not send any response to the http request.
-       This should be done with a subsequent HTTP Response node.
-    </p>
-
+    <p>Creates an HTTP end-point for creating web services.</p>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload</dt>
+        <dd>For a GET request, contains an object of any query string parameters.
+            Otherwise, contains the body of the HTTP request.</dd>
+        <dt>req<span class="property-type">object</span></dt>
+        <dd>An HTTP request object. This object contains multiple properties that
+            provide information about the request.
+            <ul>
+             <li><code>body</code> - the body of the incoming request. The format
+                 will depend on the request.</li>
+             <li><code>headers</code> - an object containing the HTTP request headers.</li>
+             <li><code>query</code> - an object containing any query string parameters.</li>
+             <li><code>params</code> - an object containing any route parameters.</li>
+             <li><code>cookies</code> - an object containing the cookies for the request.</li>
+             <li><code>files</code> - if enabled within the node, an object containing
+                 any files uploaded as part of a POST request.</li>
+            </ul>
+        </dd>
+        <dt>res<span class="property-type">object</span></dt>
+        <dd>An HTTP response object. This property should not be used directly;
+            the <code>HTTP Response</code> node documents how to respond to a request.
+            This property must remain attached to the message passed to the response node.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>The node will listen on the configured path for requests of a particular type.
+       The path can be fully specified, such as <code>/user</code>, or include
+       named parameters that accept any value, such as <code>/user/:name</code>.
+       When named parameters are used, their actual value in a request can be accessed under `msg.req.params`.</p>
+    <p>For requests that include a body, such as a POST or PUT, the contents of
+       the request is made available as <code>msg.payload</code>.</p>
+    <p>If the content type of the request can be determined, the body will be parsed to
+       any appropriate type. For example, <code>application/json</code> will be parsed to
+       its JavaScript object representation.</p>
+    <p><b>Note:</b> this node does not send any response to the request. The flow
+       must include an HTTP Response node to complete the request.</p>
 </script>
 
 <script type="text/x-red" data-template-name="http response">
@@ -71,20 +90,38 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
+    <div class="form-row">
+        <label for="node-input-statusCode"><i class="fa fa-long-arrow-left"></i> <span data-i18n="httpin.label.status"></span></label>
+        <input type="text" id="node-input-statusCode" placeholder="msg.statusCode">
+    </div>
+    <div class="form-row" style="margin-bottom:0;">
+        <label><i class="fa fa-list"></i> <span data-i18n="httpin.label.headers"></span></label>
+    </div>
+    <div class="form-row node-input-headers-container-row">
+        <ol id="node-input-headers-container"></ol>
+    </div>
     <div class="form-tips"><span data-i18n="[html]httpin.tip.res"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="http response">
-    <p>Sends responses back to http requests received from an HTTP Input node.</p>
-    <p>The response can be customised using the following message properties:</p>
-    <ul>
-        <li><code>payload</code> is sent as the body of the response</li>
-        <li><code>statusCode</code>, if set, is used as the response status code (default: 200)</li>
-        <li><code>headers</code>, if set, should be an object containing field/value
-        pairs to be added as response headers.</li>
-        <li><code>cookies</code>, if set, can be used to set or delete cookies.
-    </ul>
-    <h3>Cookie handling</h3>
+    <p>Sends responses back to requests received from an HTTP Input node.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string</span></dt>
+        <dd>The body of the response.</dd>
+        <dt class="optional">statusCode <span class="property-type">number</span></dt>
+        <dd>If set, this is used as the response status code. Default: 200.</dd>
+        <dt class="optional">headers <span class="property-type">object</span></dt>
+        <dd>If set, provides HTTP headers to include in the response.</dd>
+        <dt class="optional">cookies <span class="property-type">object</span></dt>
+        <dd>If set, can be used to set or delete cookies.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>The <code>statusCode</code> and <code>headers</code> can also be set within
+    the node itself. If a property is set within the node, it cannot be overridden
+    by the corresponding message property.</p>
+    <h4>Cookie handling</h4>
     <p>The <code>cookies</code> property must be an object of name/value pairs.
     The value can be either a string to set the value of the cookie with default
     options, or it can be an object of options.<p>
@@ -112,6 +149,7 @@ msg.cookies = {
 </script>
 
 <script type="text/javascript">
+(function() {
     RED.nodes.registerType('http in',{
         category: 'input',
         color:"rgb(231, 231, 174)",
@@ -119,6 +157,7 @@ msg.cookies = {
             name: {value:""},
             url: {value:"",required:true},
             method: {value:"get",required:true},
+            upload: {value:false},
             swaggerDoc: {type:"swagger-doc", required:false}
         },
         inputs:0,
@@ -159,25 +198,165 @@ msg.cookies = {
             if(!RED.nodes.getType("swagger-doc")){
                 $('.row-swagger-doc').hide();
             }
+            $("#node-input-method").change(function() {
+                if ($(this).val() === "post") {
+                    $(".form-row-http-in-upload").show();
+                } else {
+                    $(".form-row-http-in-upload").hide();
+                }
+            }).change();
+
+
         }
 
     });
+    var headerTypes = [
+        {value:"content-type",label:"Content-Type",hasValue: false},
+        {value:"location",label:"Location",hasValue: false},
+        {value:"other",label:"other",icon:"red/images/typedInput/az.png"}
+       ]
+    var contentTypes = [
+        {value:"application/json",label:"application/json",hasValue: false},
+        {value:"application/xml",label:"application/xml",hasValue: false},
+        {value:"text/css",label:"text/css",hasValue: false},
+        {value:"text/html",label:"text/html",hasValue: false},
+        {value:"text/plain",label:"text/plain",hasValue: false},
+        {value:"image/gif",label:"image/gif",hasValue: false},
+        {value:"image/png",label:"image/png",hasValue: false},
+        {value:"other",label:"other",icon:"red/images/typedInput/az.png"}
+    ];
 
     RED.nodes.registerType('http response',{
         category: 'output',
         color:"rgb(231, 231, 174)",
         defaults: {
-            name: {value:""}
+            name: {value:""},
+            statusCode: {value:"",validate: RED.validators.number(true)},
+            headers: {value:{}}
         },
         inputs:1,
         outputs:0,
         align: "right",
         icon: "white-globe.png",
         label: function() {
-            return this.name||"http";
+            return this.name||("http"+(this.statusCode?" ("+this.statusCode+")":""));
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            function resizeRule(rule) {
+                var newWidth = rule.width();
+                rule.find('.red-ui-typedInput').typedInput("width",(newWidth-15)/2);
+
+            }
+            var headerList = $("#node-input-headers-container").css('min-height','150px').css('min-width','450px').editableList({
+                addItem: function(container,i,header) {
+                    var row = $('<div/>').appendTo(container);
+                    var propertyName = $('<input/>',{class:"node-input-header-name",type:"text"})
+                        .appendTo(row)
+                        .typedInput({types:headerTypes});
+
+                    var propertyValue = $('<input/>',{class:"node-input-header-value",type:"text",style:"margin-left: 10px"})
+                        .appendTo(row)
+                        .typedInput({types:
+                            header.h === 'content-type'?contentTypes:[{value:"other",label:"other",icon:"red/images/typedInput/az.png"}]
+                        });
+
+                    var matchedType = headerTypes.filter(function(ht) {
+                        return ht.value === header.h
+                    });
+                    if (matchedType.length === 0) {
+                        propertyName.typedInput('type','other');
+                        propertyName.typedInput('value',header.h);
+                        propertyValue.typedInput('value',header.v);
+                    } else {
+                        propertyName.typedInput('type',header.h);
+
+                        if (header.h === "content-type") {
+                            matchedType = contentTypes.filter(function(ct) {
+                                return ct.value === header.v;
+                            });
+                            if (matchedType.length === 0) {
+                                propertyValue.typedInput('type','other');
+                                propertyValue.typedInput('value',header.v);
+                            } else {
+                                propertyValue.typedInput('type',header.v);
+                            }
+                        } else {
+                            propertyValue.typedInput('value',header.v);
+                        }
+                    }
+
+                    matchedType = headerTypes.filter(function(ht) {
+                        return ht.value === header.h
+                    });
+                    if (matchedType.length === 0) {
+                        propertyName.typedInput('type','other');
+                        propertyName.typedInput('value',header.h);
+                    } else {
+                        propertyName.typedInput('type',header.h);
+                    }
+
+                    propertyName.on('change',function(event) {
+                        var type = propertyName.typedInput('type');
+                        if (type === 'content-type') {
+                            propertyValue.typedInput('types',contentTypes);
+                        } else {
+                            propertyValue.typedInput('types',[{value:"other",label:"other",icon:"red/images/typedInput/az.png"}]);
+                        }
+                    });
+
+
+
+                    resizeRule(container);
+                },
+                resizeItem: resizeRule,
+                removable: true
+            });
+
+            if (this.headers) {
+                for (var key in this.headers) {
+                    if (this.headers.hasOwnProperty(key)) {
+                        headerList.editableList('addItem',{h:key,v:this.headers[key]});
+                    }
+                }
+            }
+        },
+        oneditsave: function() {
+            var headers = $("#node-input-headers-container").editableList('items');
+            var node = this;
+            node.headers = {};
+            headers.each(function(i) {
+                var header = $(this);
+                var keyType = header.find(".node-input-header-name").typedInput('type');
+                var keyValue = header.find(".node-input-header-name").typedInput('value');
+                var valueType = header.find(".node-input-header-value").typedInput('type');
+                var valueValue = header.find(".node-input-header-value").typedInput('value');
+                var key = keyType;
+                var value = valueType;
+                if (keyType === 'other') {
+                    key = keyValue;
+                }
+                if (valueType === 'other') {
+                    value = valueValue;
+                }
+                if (key !== '') {
+                    node.headers[key] = value;
+                }
+            });
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-input-headers-container-row)");
+            var height = size.height;
+            for (var i=0; i<rows.size(); i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-input-headers-container-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+
+            $("#node-input-headers-container").editableList('height',height);
         }
     });
+})();
 </script>

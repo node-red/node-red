@@ -81,9 +81,22 @@ function getToken(req,res,next) {
 function login(req,res) {
     var response = {};
     if (settings.adminAuth) {
-        response = {
-            "type":"credentials",
-            "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"}]
+        if (settings.adminAuth.type === "credentials") {
+            response = {
+                "type":"credentials",
+                "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"}]
+            }
+        } else if (settings.adminAuth.type === "strategy") {
+            response = {
+                "type":"strategy",
+                "prompts":[{type:"button",label:settings.adminAuth.strategy.label, url:"/auth/strategy"}]
+            }
+            if (settings.adminAuth.strategy.icon) {
+                response.prompts[0].icon = settings.adminAuth.strategy.icon;
+            }
+            if (settings.adminAuth.strategy.image) {
+                response.prompts[0].image = theme.serveFile('/login/',settings.adminAuth.strategy.image);
+            }
         }
         if (theme.context().login && theme.context().login.image) {
             response.image = theme.context().login.image;
@@ -97,7 +110,26 @@ function revoke(req,res) {
     // TODO: audit log
     Tokens.revoke(token).then(function() {
         log.audit({event: "auth.login.revoke"},req);
-        res.status(200).end();
+        if (settings.editorTheme && settings.editorTheme.logout && settings.editorTheme.logout.redirect) {
+            res.json({redirect:settings.editorTheme.logout.redirect});
+        } else {
+            res.status(200).end();
+        }
+    });
+}
+
+function completeVerify(profile,done) {
+    Users.authenticate(profile).then(function(user) {
+        if (user) {
+            Tokens.create(user.username,"node-red-editor",user.permissions).then(function(tokens) {
+                log.audit({event: "auth.login",username:user.username,scope:user.permissions});
+                user.tokens = tokens;
+                done(null,user);
+            });
+        } else {
+            log.audit({event: "auth.login.fail.oauth",username:typeof profile === "string"?profile:profile.username});
+            done(null,false);
+        }
     });
 }
 
@@ -114,5 +146,54 @@ module.exports = {
         return server.errorHandler()(err,req,res,next);
     },
     login: login,
-    revoke: revoke
+    revoke: revoke,
+    genericStrategy: function(adminApp,strategy) {
+        var session = require('express-session');
+        var crypto = require("crypto");
+        adminApp.use(session({
+            // As the session is only used across the life-span of an auth
+            // hand-shake, we can use a instance specific random string
+            secret: crypto.randomBytes(20).toString('hex'),
+            resave: false,
+            saveUninitialized:false
+        }));
+        //TODO: all passport references ought to be in ./auth
+        adminApp.use(passport.initialize());
+        adminApp.use(passport.session());
+
+        var options = strategy.options;
+
+        passport.use(new strategy.strategy(options,
+            function() {
+                var originalDone = arguments[arguments.length-1];
+                if (options.verify) {
+                    var args = Array.prototype.slice.call(arguments);
+                    args[args.length-1] = function(err,profile) {
+                        if (err) {
+                            return originalDone(err);
+                        } else {
+                            return completeVerify(profile,originalDone);
+                        }
+                    };
+                    options.verify.apply(null,args);
+                } else {
+                    var profile = arguments[arguments.length - 2];
+                    return completeVerify(profile,originalDone);
+                }
+
+            }
+        ));
+
+        adminApp.get('/auth/strategy', passport.authenticate(strategy.name));
+        adminApp.get('/auth/strategy/callback',
+            passport.authenticate(strategy.name, {session:false, failureRedirect: '/' }),
+            function(req, res) {
+                var tokens = req.user.tokens;
+                delete req.user.tokens;
+                // Successful authentication, redirect home.
+                res.redirect('/?access_token='+tokens.accessToken);
+            }
+        );
+
+    }
 }

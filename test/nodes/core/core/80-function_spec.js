@@ -127,7 +127,7 @@ describe('function node', function() {
             var n2 = helper.getNode("n2");
             setTimeout(function() {
                 done();
-            }, 200);
+            }, 20);
             n2.on("input", function(msg) {
                 should.fail(null,null,"unexpected message");
             });
@@ -156,9 +156,56 @@ describe('function node', function() {
                 n2MsgCount.should.equal(2);
                 n3MsgCount.should.equal(0);
                 done();
-            },100);
+            },20);
         });
     });
+
+    function testNonObjectMessage(functionText,done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:functionText},
+                {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var n2MsgCount = 0;
+            n2.on("input", function(msg) {
+                n2MsgCount++;
+            });
+            n1.receive({});
+            setTimeout(function() {
+                try {
+                    n2MsgCount.should.equal(0);
+                    var logEvents = helper.log().args.filter(function(evt) {
+                        return evt[0].type == "function";
+                    });
+                    logEvents.should.have.length(1);
+                    var msg = logEvents[0][0];
+                    msg.should.have.property('level', helper.log().ERROR);
+                    msg.should.have.property('id', 'n1');
+                    msg.should.have.property('type', 'function');
+                    msg.should.have.property('msg', 'function.error.non-message-returned');
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            },20);
+        });
+    }
+    it('should drop and log non-object message types - string', function(done) {
+        testNonObjectMessage('return "foo"', done)
+    });
+    it('should drop and log non-object message types - buffer', function(done) {
+        testNonObjectMessage('return new Buffer("hello")', done)
+    });
+    it('should drop and log non-object message types - array', function(done) {
+        testNonObjectMessage('return [[[1,2,3]]]', done)
+    });
+    it('should drop and log non-object message types - boolean', function(done) {
+        testNonObjectMessage('return true', done)
+    });
+    it('should drop and log non-object message types - number', function(done) {
+        testNonObjectMessage('return 123', done)
+    });
+
     it('should handle and log script error', function(done) {
         var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"retunr"}];
         helper.load(functionNode, flow, function() {

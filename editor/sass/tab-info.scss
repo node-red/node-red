@@ -19,80 +19,248 @@
 }
 table.node-info {
     font-size: 14px;
-    margin: 0px;
-    width: 97%;
+    margin: 0 0 10px;
+    width: 100%;
 }
-table.node-info tr {
-    border: 1px solid #ddd;
+table.node-info tr:not(.blank) {
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+}
+.node-info-property-expand  {
+    font-size: 0.8em;
+    text-align: right;
+    line-height: 0.9em;
+    a {
+        padding-bottom: 5px;
+    }
+
 }
 table.node-info tr.blank {
     border: none;
+    th {
+        text-align: left;
+        font-weight: 500;
+        color: #444;
+        padding: 6px 3px 3px;
+    }
+    >* {
+        padding-top: 8px;
+        border: none;
+        padding-left: 0px;
+    }
+
+
+    a {
+        display: block;
+        color: #666;
+        &:hover,&:focus {
+            color: #666;
+            text-decoration: none;
+        }
+        &:not(.expanded) {
+            .node-info-property-show-more {
+                display: inline;
+            }
+            .node-info-property-show-less {
+                display: none;
+            }
+        }
+        i {
+            width: 10px;
+            text-align: center;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        &.expanded {
+            .node-info-property-show-more {
+                display: none;
+            }
+            .node-info-property-show-less {
+                display: inline;
+            }
+            i {
+                transform: rotate(180deg);
+            }
+        }
+    }
+    &.node-info-info-row > td {
+        padding-left: 5px;
+    }
 }
-table.node-info tr.blank td {
-    padding-top: 8px;
-    border: none;
-    font-weight: bold;
-    padding-left: 0px;
-}
-table.node-info td:first-child{
+
+table.node-info tr:not(.blank) td:first-child{
     color: #666;
     vertical-align: top;
     width: 90px;
-    padding: 3px;
+    padding: 3px 3px 3px 6px;
     border-right: 1px solid #ddd;
 }
-table.node-info td:last-child{
-    padding-left: 5px;
+table.node-info tr:not(.blank) td:last-child{
+    padding: 3px 3px 3px 6px;
     color: #666;
 }
 div.node-info {
     margin: 5px;
 }
-.node-info-property-header {
-    color: #666;
-}
-.node-info-property-header:hover,
-.node-info-property-header:focus {
-    color: #666;
-    text-decoration: none;
-}
 .node-help {
     font-size: 14px;
     line-height: 1.5em;
     h1 {
-        font-weight: normal;
-        font-size: 23px;
+        font-weight: 500;
+        font-size: 1.296em;
+        line-height: 1.3em;
         margin: 8px auto;
     }
     h2 {
-        font-weight: normal;
-        font-size: 18px;
+        font-weight: 500;
+        font-size: 1.215em;
         margin: 8px auto;
+        line-height: 1.3em;
     }
     h3 {
-        font-weight: normal;
-        font-size: 16px;
-        margin: 8px auto;
+        font-weight: 500;
+        font-size: 1.138em;
+        margin: 7px auto 5px;
+        line-height: 1.3em;
     }
     h4,
     h5 {
-        font-weight: normal;
-        font-size: 14px;
-        margin: 8px auto;
+        font-weight: 500;
+        font-size: 1.067em;
+        line-height: 1.3em;
+        margin: 8px auto 5px;
     }
+    & > span > p:first-child {
+    }
+    dl.message-properties {
+        border: 1px solid #ddd;
+        border-radius: 2px;
+
+        margin: 5px auto 10px;
+        &>dt {
+            padding: 0px 3px 2px 3px;
+            font-family: monospace;
+            font-weight: normal;
+            margin: 5px 3px 1px;
+            color: #AD1625;
+            white-space: nowrap;
+            &.optional {
+                font-style: italic;
+
+            }
+            .property-type {
+                font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+                color: #666;
+                font-style: italic;
+                font-size: 11px;
+                float: right;
+            }
+            &:after {
+                content: "";
+                display: table;
+                clear: both;
+            }
+        }
+        &>dd {
+            margin: 0px 8px 2px 13px;
+            vertical-align: top;
+        }
+    }
+    ol.node-ports {
+        margin: 0;
+        li {
+            border: 1px solid #ddd;
+            border-radius: 2px;
+            list-style-position: inside;
+            padding: 3px;
+            margin-bottom: 5px;
+            dl.message-properties {
+                border: none;
+            }
+        }
+    }
+    .node-info-header {
+        i {
+            width: 10px;
+            text-align: center;
+            transition: transform 0.2s ease-in-out;
+            margin-right: 4px;
+        }
+        color: #333;
+        &:hover, &:focus {
+            text-decoration: none;
+        }
+        &.expanded {
+            i {
+                transform: rotate(90deg);
+            }
+        }
+    }
+
 }
-.node-info-tip {
+.sidebar-node-info-stack {
     position: absolute;
-    top: 40%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow-y: scroll;
+}
+.node-info-tips {
+    display: none;
+    position: absolute;
     left:0;
     right:0;
+    bottom: 0;
+    height: 150px;
+    box-sizing: border-box;
+    border-top: 1px solid $secondary-border-color;
+    background-color: #fff;
     padding: 20px;
+    box-shadow: 0 5px 20px 0px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+}
+.sidebar-node-info.show-tips {
+    .sidebar-node-info-stack {
+        bottom: 150px;
+    }
+    .node-info-tips {
+        display: block;
+    }
+}
+
+.node-info-tips:before {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+  margin-right: -0.25em; /* Adjusts for spacing */
+}
+
+.node-info-tip {
+    display: inline-block;
+    vertical-align: middle;
+    width: 100%;
     font-size: 16px;
     text-align: center;
     line-height: 1.9em;
     color : #bbb;
-    background-color: #fff;
     @include disable-selection;
     cursor: default;
+}
+.node-info-tips-buttons {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    a {
+        color: #ddd !important;
+        border-color: #d9d9d9 !important;
+        margin-left: 4px;
+    }
+}
 
+.node-info-property-config-node {
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 2px 4px 2px;
 }

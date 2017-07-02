@@ -119,4 +119,26 @@ describe('context', function() {
         should.not.exist(context.get("foo"));
     })
 
+    it('enumerates context keys', function() {
+        var context = Context.get("1","flowA");
+
+        var keys = context.keys();
+        keys.should.be.an.Array();
+        keys.should.be.empty();
+
+        context.set("foo","bar");
+        keys = context.keys();
+        keys.should.have.length(1);
+        keys[0].should.eql("foo");
+
+        context.set("abc.def","bar");
+        keys = context.keys();
+        keys.should.have.length(2);
+        keys[1].should.eql("abc");
+
+
+
+
+    })
+
 });

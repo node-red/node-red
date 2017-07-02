@@ -134,12 +134,14 @@ describe('LocalFileSystem', function() {
             fs.existsSync(flowFileBackupPath).should.be.false();
             fs.writeFileSync(flowFileBackupPath,JSON.stringify(testFlow));
             fs.existsSync(flowFileBackupPath).should.be.true();
-            localfilesystem.getFlows().then(function(flows) {
-                flows.should.eql(testFlow);
-                done();
-            }).otherwise(function(err) {
-                done(err);
-            });
+            setTimeout(function() {
+                localfilesystem.getFlows().then(function(flows) {
+                    flows.should.eql(testFlow);
+                    done();
+                }).otherwise(function(err) {
+                    done(err);
+                });
+            },50);
         }).otherwise(function(err) {
             done(err);
         });
@@ -587,18 +589,21 @@ describe('LocalFileSystem', function() {
             createObjectLibrary();
             localfilesystem.getLibraryEntry('object','B').then(function(flows) {
                 flows.should.eql([ 'C', { ghi: 'jkl', fn: 'file2.js' }, {fn:'flow.json'} ]);
-                localfilesystem.saveLibraryEntry('object','B/D/file3.js',{mno:'pqr'},"// another non meta line\n\n Hi There").then(function() {
-                    localfilesystem.getLibraryEntry('object','B/D').then(function(flows) {
-                        flows.should.eql([ { mno: 'pqr', fn: 'file3.js' } ]);
-                        localfilesystem.getLibraryEntry('object','B/D/file3.js').then(function(body) {
-                            body.should.eql("// another non meta line\n\n Hi There");
-                            done();
+                var ft = path.join("B","D","file3.js");
+                localfilesystem.saveLibraryEntry('object',ft,{mno:'pqr'},"// another non meta line\n\n Hi There").then(function() {
+                    setTimeout(function() {
+                        localfilesystem.getLibraryEntry('object',path.join("B","D")).then(function(flows) {
+                            flows.should.eql([ { mno: 'pqr', fn: 'file3.js' } ]);
+                            localfilesystem.getLibraryEntry('object',ft).then(function(body) {
+                                body.should.eql("// another non meta line\n\n Hi There");
+                                done();
+                            }).otherwise(function(err) {
+                                done(err);
+                            });
                         }).otherwise(function(err) {
                             done(err);
-                        });
-                    }).otherwise(function(err) {
-                        done(err);
-                    });
+                        })}
+                        , 50);
                 }).otherwise(function(err) {
                     done(err);
                 });

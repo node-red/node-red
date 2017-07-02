@@ -56,10 +56,12 @@ describe("red/nodes/index", function() {
         get: function() { return false }
     };
 
+    var EventEmitter = require('events').EventEmitter;
     var runtime = {
         settings: settings,
         storage: storage,
-        log: {debug:function() {}, warn:function() {}}
+        log: {debug:function() {}, warn:function() {}},
+        events: new EventEmitter()
     };
 
     function TestNode(n) {
@@ -70,9 +72,9 @@ describe("red/nodes/index", function() {
         });
     }
 
-   it('nodes are initialised with credentials',function(done) {
+    it('nodes are initialised with credentials',function(done) {
         index.init(runtime);
-        index.registerType('test', TestNode);
+        index.registerType('test-node-set','test', TestNode);
         index.loadFlows().then(function() {
             var testnode = new TestNode({id:'tab1',type:'test',name:'barney'});
             testnode.credentials.should.have.property('b',1);
@@ -84,11 +86,11 @@ describe("red/nodes/index", function() {
         });
     });
 
-   it('flows should be initialised',function(done) {
+    it('flows should be initialised',function(done) {
         index.init(runtime);
         index.loadFlows().then(function() {
-            console.log(testFlows);
-            console.log(index.getFlows());
+            // console.log(testFlows);
+            // console.log(index.getFlows());
             should.deepEqual(testFlows, index.getFlows().flows);
             done();
         }).otherwise(function(err) {
@@ -96,86 +98,159 @@ describe("red/nodes/index", function() {
         });
 
     });
+    describe("registerType", function() {
+        describe("logs deprecated usage", function() {
+            before(function() {
+                sinon.stub(registry,"registerType");
+            });
+            after(function() {
+                registry.registerType.restore();
+            });
+            it("called without node-set name", function() {
+                var runtime = {
+                    settings: settings,
+                    storage: storage,
+                    log: {debug:function() {}, warn:sinon.spy()},
+                    events: new EventEmitter()
+                }
+                index.init(runtime);
 
-   describe("registerType should register credentials definition", function() {
-       var http = require('http');
-       var express = require('express');
-       var app = express();
-       var runtime = require("../../../../red/runtime");
-       var credentials = require("../../../../red/runtime/nodes/credentials");
-       var localfilesystem = require("../../../../red/runtime/storage/localfilesystem");
-       var RED = require("../../../../red/red.js");
+                index.registerType(/*'test-node-set',*/'test', TestNode, {});
+                runtime.log.warn.called.should.be.true();
+                registry.registerType.called.should.be.true();
+                registry.registerType.firstCall.args[0].should.eql('');
+                registry.registerType.firstCall.args[1].should.eql('test');
+                registry.registerType.firstCall.args[2].should.eql(TestNode);
+            });
+        });
 
-       var userDir = path.join(__dirname,".testUserHome");
-       before(function(done) {
-           fs.remove(userDir,function(err) {
-               fs.mkdir(userDir,function() {
-                   sinon.stub(index, 'load', function() {
-                       return when.promise(function(resolve,reject){
-                           resolve([]);
-                       });
-                   });
-                   sinon.stub(localfilesystem, 'getCredentials', function() {
-                        return when.promise(function(resolve,reject) {
-                               resolve({"tab1":{"b":1,"c":2}});
+        describe("register credentials definition", function() {
+            var http = require('http');
+            var express = require('express');
+            var app = express();
+            var runtime = require("../../../../red/runtime");
+            var credentials = require("../../../../red/runtime/nodes/credentials");
+            var localfilesystem = require("../../../../red/runtime/storage/localfilesystem");
+            var log = require("../../../../red/runtime/log");
+            var RED = require("../../../../red/red.js");
+
+            var userDir = path.join(__dirname,".testUserHome");
+            before(function(done) {
+                sinon.stub(log,"log");
+                fs.remove(userDir,function(err) {
+                    fs.mkdir(userDir,function() {
+                        sinon.stub(index, 'load', function() {
+                            return when.promise(function(resolve,reject){
+                                resolve([]);
+                            });
                         });
-                   }) ;
-                   RED.init(http.createServer(function(req,res){app(req,res)}),
-                            {userDir: userDir});
-                   runtime.start().then(function () {
-                       done();
+                        sinon.stub(localfilesystem, 'getCredentials', function() {
+                            return when.promise(function(resolve,reject) {
+                                resolve({"tab1":{"b":1,"c":2}});
+                            });
+                        }) ;
+                        RED.init(http.createServer(function(req,res){app(req,res)}),
+                        {userDir: userDir});
+                        runtime.start().then(function () {
+                            done();
+                        });
                     });
-               });
-           });
-       });
+                });
+            });
 
-       after(function(done) {
-           fs.remove(userDir,function() {;
-               runtime.stop().then(function() {
-                   index.load.restore();
-                   localfilesystem.getCredentials.restore();
-                   done();
-               });
-           });
-       });
+            after(function(done) {
+                fs.remove(userDir,function() {;
+                    runtime.stop().then(function() {
+                        index.load.restore();
+                        localfilesystem.getCredentials.restore();
+                        log.log.restore();
+                        done();
+                    });
+                });
+            });
 
-       it(': definition defined',function() {
-           index.registerType('test', TestNode, {
-               credentials: {
-                   foo: {type:"test"}
-               }
-           });
-           var testnode = new TestNode({id:'tab1',type:'test',name:'barney', '_alias':'tab1'});
-           index.getCredentialDefinition("test").should.have.property('foo');
-       });
+            it('definition defined',function() {
+                index.registerType('test-node-set','test', TestNode, {
+                    credentials: {
+                        foo: {type:"test"}
+                    }
+                });
+                var testnode = new TestNode({id:'tab1',type:'test',name:'barney', '_alias':'tab1'});
+                index.getCredentialDefinition("test").should.have.property('foo');
+            });
+        });
 
-   });
+        describe("register settings definition", function() {
+            beforeEach(function() {
+                sinon.stub(registry,"registerType");
+            })
+            afterEach(function() {
+                registry.registerType.restore();
+            })
+            it('registers valid settings',function() {
+                var runtime = {
+                    settings: settings,
+                    storage: storage,
+                    log: {debug:function() {}, warn:function() {}},
+                    events: new EventEmitter()
+                }
+                runtime.settings.registerNodeSettings = sinon.spy();
+                index.init(runtime);
 
-   describe('allows nodes to be added/removed/enabled/disabled from the registry', function() {
-       var randomNodeInfo = {id:"5678",types:["random"]};
+                index.registerType('test-node-set','test', TestNode, {
+                    settings: {
+                        testOne: {}
+                    }
+                });
+                runtime.settings.registerNodeSettings.called.should.be.true();
+                runtime.settings.registerNodeSettings.firstCall.args[0].should.eql('test');
+                runtime.settings.registerNodeSettings.firstCall.args[1].should.eql({testOne: {}});
+            });
+            it('logs invalid settings',function() {
+                var runtime = {
+                    settings: settings,
+                    storage: storage,
+                    log: {debug:function() {}, warn:sinon.spy()},
+                    events: new EventEmitter()
+                }
+                runtime.settings.registerNodeSettings = function() { throw new Error("pass");}
+                index.init(runtime);
 
-       beforeEach(function() {
-           sinon.stub(registry,"getNodeInfo",function(id) {
-               if (id == "test") {
-                   return {id:"1234",types:["test"]};
-               } else if (id == "doesnotexist") {
-                   return null;
-               } else {
-                   return randomNodeInfo;
-               }
-           });
-           sinon.stub(registry,"disableNode",function(id) {
-               return randomNodeInfo;
-           });
-       });
-       afterEach(function() {
-           registry.getNodeInfo.restore();
-           registry.disableNode.restore();
-       });
+                index.registerType('test-node-set','test', TestNode, {
+                    settings: {
+                        testOne: {}
+                    }
+                });
+                runtime.log.warn.called.should.be.true();
+            });
+        });
+    });
 
-       it(': allows an unused node type to be disabled',function(done) {
+    describe('allows nodes to be added/removed/enabled/disabled from the registry', function() {
+        var randomNodeInfo = {id:"5678",types:["random"]};
+
+        beforeEach(function() {
+            sinon.stub(registry,"getNodeInfo",function(id) {
+                if (id == "test") {
+                    return {id:"1234",types:["test"]};
+                } else if (id == "doesnotexist") {
+                    return null;
+                } else {
+                    return randomNodeInfo;
+                }
+            });
+            sinon.stub(registry,"disableNode",function(id) {
+                return randomNodeInfo;
+            });
+        });
+        afterEach(function() {
+            registry.getNodeInfo.restore();
+            registry.disableNode.restore();
+        });
+
+        it('allows an unused node type to be disabled',function(done) {
             index.init(runtime);
-            index.registerType('test', TestNode);
+            index.registerType('test-node-set','test', TestNode);
             index.loadFlows().then(function() {
                 var info = index.disableNode("5678");
                 registry.disableNode.calledOnce.should.be.true();
@@ -185,11 +260,11 @@ describe("red/nodes/index", function() {
             }).otherwise(function(err) {
                 done(err);
             });
-       });
+        });
 
-       it(': prevents disabling a node type that is in use',function(done) {
+        it('prevents disabling a node type that is in use',function(done) {
             index.init(runtime);
-            index.registerType('test', TestNode);
+            index.registerType('test-node-set','test', TestNode);
             index.loadFlows().then(function() {
                 /*jshint immed: false */
                 (function() {
@@ -200,11 +275,11 @@ describe("red/nodes/index", function() {
             }).otherwise(function(err) {
                 done(err);
             });
-       });
+        });
 
-       it(': prevents disabling a node type that is unknown',function(done) {
+        it('prevents disabling a node type that is unknown',function(done) {
             index.init(runtime);
-            index.registerType('test', TestNode);
+            index.registerType('test-node-set','test', TestNode);
             index.loadFlows().then(function() {
                 /*jshint immed: false */
                 (function() {
@@ -218,46 +293,46 @@ describe("red/nodes/index", function() {
         });
     });
 
-   describe('allows modules to be removed from the registry', function() {
-       var registry = require("../../../../red/runtime/nodes/registry");
-       var randomNodeInfo = {id:"5678",types:["random"]};
-       var randomModuleInfo = {
-          name:"random",
-          nodes: [randomNodeInfo]
+    describe('allows modules to be removed from the registry', function() {
+        var registry = require("../../../../red/runtime/nodes/registry");
+        var randomNodeInfo = {id:"5678",types:["random"]};
+        var randomModuleInfo = {
+            name:"random",
+            nodes: [randomNodeInfo]
         };
 
-       before(function() {
-           sinon.stub(registry,"getNodeInfo",function(id) {
-               if (id == "node-red/foo") {
-                   return {id:"1234",types:["test"]};
-               } else if (id == "doesnotexist") {
-                   return null;
-               } else {
-                   return randomNodeInfo;
-               }
-           });
-           sinon.stub(registry,"getModuleInfo",function(module) {
-               if (module == "node-red") {
-                  return {nodes:[{name:"foo"}]};
-               } else if (module == "doesnotexist") {
-                   return null;
-               } else {
-                  return randomModuleInfo;
-               }
-           });
-           sinon.stub(registry,"removeModule",function(id) {
-               return randomModuleInfo;
-           });
-       });
-       after(function() {
-           registry.getNodeInfo.restore();
-           registry.getModuleInfo.restore();
-           registry.removeModule.restore();
-       });
+        before(function() {
+            sinon.stub(registry,"getNodeInfo",function(id) {
+                if (id == "node-red/foo") {
+                    return {id:"1234",types:["test"]};
+                } else if (id == "doesnotexist") {
+                    return null;
+                } else {
+                    return randomNodeInfo;
+                }
+            });
+            sinon.stub(registry,"getModuleInfo",function(module) {
+                if (module == "node-red") {
+                    return {nodes:[{name:"foo"}]};
+                } else if (module == "doesnotexist") {
+                    return null;
+                } else {
+                    return randomModuleInfo;
+                }
+            });
+            sinon.stub(registry,"removeModule",function(id) {
+                return randomModuleInfo;
+            });
+        });
+        after(function() {
+            registry.getNodeInfo.restore();
+            registry.getModuleInfo.restore();
+            registry.removeModule.restore();
+        });
 
-       it(': prevents removing a module that is in use',function(done) {
+        it('prevents removing a module that is in use',function(done) {
             index.init(runtime);
-            index.registerType('test', TestNode);
+            index.registerType('test-node-set','test', TestNode);
             index.loadFlows().then(function() {
                 /*jshint immed: false */
                 (function() {
@@ -268,11 +343,11 @@ describe("red/nodes/index", function() {
             }).otherwise(function(err) {
                 done(err);
             });
-       });
+        });
 
-       it(': prevents removing a module that is unknown',function(done) {
+        it('prevents removing a module that is unknown',function(done) {
             index.init(runtime);
-            index.registerType('test', TestNode);
+            index.registerType('test-node-set','test', TestNode);
             index.loadFlows().then(function() {
                 /*jshint immed: false */
                 (function() {

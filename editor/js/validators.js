@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 RED.validators = {
-    number: function(){return function(v) { return v!=='' && !isNaN(v);}},
+    number: function(blankAllowed){return function(v) { return (blankAllowed&&(v===''||v===undefined)) || (v!=='' && !isNaN(v));}},
     regex: function(re){return function(v) { return re.test(v);}},
     typedInput: function(ptypeName,isConfig) { return function(v) {
         var ptype = $("#node-"+(isConfig?"config-":"")+"input-"+ptypeName).val() || this[ptypeName];

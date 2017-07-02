@@ -32,7 +32,7 @@ RED.user = (function() {
             autoOpen: false,
             dialogClass: "ui-dialog-no-close",
             modal: true,
-            closeOnEscape: false,
+            closeOnEscape: !!opts.cancelable,
             width: 600,
             resizable: false,
             draggable: false
@@ -43,17 +43,13 @@ RED.user = (function() {
             dataType: "json",
             url: "auth/login",
             success: function(data) {
-                if (data.type == "credentials") {
-                    var i=0;
+                var i=0;
 
-                    if (data.image) {
-                        $("#node-dialog-login-image").attr("src",data.image);
-                    } else {
-                        $("#node-dialog-login-image").attr("src","red/images/node-red-256.png");
-                    }
+                if (data.type == "credentials") {
+
                     for (;i<data.prompts.length;i++) {
                         var field = data.prompts[i];
-                        var row = $("<div/>",{id:"rrr"+i,class:"form-row"});
+                        var row = $("<div/>",{class:"form-row"});
                         $('<label for="node-dialog-login-'+field.id+'">'+field.label+':</label><br/>').appendTo(row);
                         var input = $('<input style="width: 100%" id="node-dialog-login-'+field.id+'" type="'+field.type+'" tabIndex="'+(i+1)+'"/>').appendTo(row);
 
@@ -112,25 +108,71 @@ RED.user = (function() {
                         });
                         event.preventDefault();
                     });
-                    if (opts.cancelable) {
-                        $("#node-dialog-login-cancel").button().click(function( event ) {
-                            $("#node-dialog-login").dialog('destroy').remove();
+
+                } else if (data.type == "strategy") {
+                    i = 0;
+                    for (;i<data.prompts.length;i++) {
+                        var field = data.prompts[i];
+                        var row = $("<div/>",{class:"form-row",style:"text-align: center"}).appendTo("#node-dialog-login-fields");
+
+                        var loginButton = $('<a href="#"></a>',{style: "padding: 10px"}).appendTo(row).click(function() {
+                            document.location = field.url;
                         });
+                        if (field.image) {
+                            $("<img>",{src:field.image}).appendTo(loginButton);
+                        } else if (field.label) {
+                            var label = $('<span></span>').text(field.label);
+                            if (field.icon) {
+                                $('<i></i>',{class: "fa fa-2x "+field.icon, style:"vertical-align: middle"}).appendTo(loginButton);
+                                label.css({
+                                    "verticalAlign":"middle",
+                                    "marginLeft":"8px"
+                                });
+
+                            }
+                            label.appendTo(loginButton);
+                        }
+                        loginButton.button();
                     }
+
+
                 }
-                dialog.dialog("open");
+                if (opts.cancelable) {
+                    $("#node-dialog-login-cancel").button().click(function( event ) {
+                        $("#node-dialog-login").dialog('destroy').remove();
+                    });
+                }
+
+                var loginImageSrc = data.image || "red/images/node-red-256.png";
+
+                $("#node-dialog-login-image").load(function() {
+                    dialog.dialog("open");
+                }).attr("src",loginImageSrc);
+
+
             }
         });
     }
 
     function logout() {
+        var tokens = RED.settings.get("auth-tokens");
+        var token = tokens?tokens.access_token:"";
         $.ajax({
             url: "auth/revoke",
             type: "POST",
-            data: {token:RED.settings.get("auth-tokens").access_token},
-            success: function() {
-                RED.settings.remove("auth-tokens");
+            data: {token:token}
+        }).done(function(data,textStatus,xhr) {
+            RED.settings.remove("auth-tokens");
+            if (data && data.redirect) {
+                document.location.href = data.redirect;
+            } else {
                 document.location.reload(true);
+            }
+        }).fail(function(jqXHR,textStatus,errorThrown) {
+            if (jqXHR.status === 401) {
+                document.location.reload(true);
+            } else {
+                console.log(textStatus);
             }
         })
     }
@@ -170,8 +212,15 @@ RED.user = (function() {
         if (RED.settings.user) {
             if (!RED.settings.editorTheme || !RED.settings.editorTheme.hasOwnProperty("userMenu")) {
 
-                $('<li><a id="btn-usermenu" class="button hide" data-toggle="dropdown" href="#"><i class="fa fa-user"></i></a></li>')
+                var userMenu = $('<li><a id="btn-usermenu" class="button hide" data-toggle="dropdown" href="#"></a></li>')
                     .prependTo(".header-toolbar");
+                if (RED.settings.user.image) {
+                    $('<span class="user-profile"></span>').css({
+                        backgroundImage: "url("+RED.settings.user.image+")",
+                    }).appendTo(userMenu.find("a"));
+                } else {
+                    $('<i class="fa fa-user"></i>').appendTo(userMenu.find("a"));
+                }
 
                 RED.menu.init({id:"btn-usermenu",
                     options: []

@@ -130,15 +130,15 @@ module.exports = function(RED) {
         }
         else {
             sock = dgram.createSocket(opts);  // default to udp4
+            sock.on("error", function(err) {
+                // Any async error will also get reported in the sock.send call.
+                // This handler is needed to ensure the error marked as handled to
+                // prevent it going to the global error handler and shutting node-red
+                // down.
+            });
             udpInputPortsInUse[this.outport] = sock;
         }
 
-        sock.on("error", function(err) {
-            // Any async error will also get reported in the sock.send call.
-            // This handler is needed to ensure the error marked as handled to
-            // prevent it going to the global error handler and shutting node-red
-            // down.
-        });
         if (node.multicast != "false") {
             if (node.outport === "") { node.outport = node.port; }
             sock.bind(node.outport, function() {    // have to bind before you can enable broadcast...
@@ -181,11 +181,11 @@ module.exports = function(RED) {
                 } else {
                     var message;
                     if (node.base64) {
-                        message = new Buffer(msg.payload, 'base64');
+                        message = Buffer.from(msg.payload, 'base64');
                     } else if (msg.payload instanceof Buffer) {
                         message = msg.payload;
                     } else {
-                        message = new Buffer(""+msg.payload);
+                        message = Buffer.from(""+msg.payload);
                     }
                     sock.send(message, 0, message.length, por, add, function(err, bytes) {
                         if (err) {

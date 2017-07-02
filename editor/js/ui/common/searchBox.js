@@ -91,6 +91,9 @@
             } else {
                 this.resultCount.text(val).show();
             }
+        },
+        change: function() {
+            this._trigger("change");
         }
     });
 })(jQuery);

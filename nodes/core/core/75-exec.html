@@ -21,7 +21,7 @@
     </div>
     <div class="form-row">
         <label><i class="fa fa-plus"></i> <span data-i18n="exec.label.append"></span></label>
-        <input type="checkbox" id="node-input-addpay" style="display: inline-block; width: auto; vertical-align: top;">
+        <input type="checkbox" id="node-input-addpay" style="display:inline-block; width:auto; vertical-align:top;">
         &nbsp;msg.payload
     </div>
     <div class="form-row">
@@ -29,9 +29,16 @@
         <input type="text" id="node-input-append" data-i18n="[placeholder]exec.placeholder.extraparams">
     </div>
     <div class="form-row">
+        <label><i class="fa fa-sign-out"></i> <span data-i18n="exec.label.return"></span></label>
+        <select type="text" id="node-input-useSpawn" style="width:70%">
+            <option value="false" data-i18n="exec.opt.exec"></option>
+            <option value="true" data-i18n="exec.opt.spawn"></option>
+        </select>
+    </div>
+    <div class="form-row">
         <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-useSpawn" placeholder="spawn" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-useSpawn" style="width:70%;"><span data-i18n="exec.spawn"></span></label>
+        <input type="checkbox" id="node-input-oldrc" style="display:inline-block; width:auto; vertical-align:top;">
+        <label for="node-input-oldrc" style="width:70%;"><span data-i18n="exec.oldrc"></span></label>
     </div>
     <div class="form-row">
         <label for="node-input-timer"><i class="fa fa-clock-o"></i> <span data-i18n="exec.label.timeout"></span></label>
@@ -44,22 +51,62 @@
 </script>
 
 <script type="text/x-red" data-help-name="exec">
-    <p>Calls out to a system command.<br/></p>
-    <p>Provides 3 outputs: stdout, stderr, and return code.</p>
-    <p>By default uses the <code>exec</code> system call which calls the command, then gets a callback
-    on completion, returning stdout as the payload to the first, the error code as the third
-    and, if available, stderr to the second output. If no error occurred, a zero is returned on the third output.</p>
+    <p>Runs a system command and returns its output.</p>
+    <p>The node can be configured to either wait until the command completes, or to
+    send its output as the command generates it.</p>
+    <p>The command that is run can be configured in the node or provided by the received
+    message.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">payload <span class="property-type">string</span></dt>
+        <dd>if configured to do so, will be appended to the executed command.</dd>
+        <dt class="optional">kill <span class="property-type">string</span></dt>
+        <dd>the type of kill signal to send an existing exec node process.</dd>
+        <dt class="optional">pid <span class="property-type">number|string</span></dt>
+        <dd>the process ID of an existing exec node process to kill.</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <ol class="node-ports">
+        <li>Standard output
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">string</span></dt>
+                <dd>the standard output of the command.</dd>
+            </dl>
+        </li>
+        <li>Standard error
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">string</span></dt>
+                <dd>the standard error of the command.</dd>
+            </dl>
+        </li>
+        <li>Return code
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">object</span></dt>
+                <dd>an object containing the return code, and possibly <code>message</code>, <code>signal</code> properties.</dd>
+            </dl>
+        </li>
+    </ol>
+    <h3>Details</h3>
+    <p>By default uses the <code>exec</code> system call which calls the command, waits for it to complete, and then
+    returns the output. For example a successful command should have a return code of <code>{ code: 0 }</code>.</p>
     <p>Optionally can use <code>spawn</code> instead, which returns the output from stdout and stderr
-    as the command runs (usually one line at a time). On completion it then returns a return code
-    (on the 3rd output).</p>
-    <p>The <code>exec</code> method spawns a subshell and therefore can be used for more complicated
-    commands involving pipes. However, it waits for completion of the whole command before returing anything.</p> 
-    <p>The optional append gets added to the command after <code>msg.payload</code> - so you can do
-    things like pipe the result to another command.</p>
-    <p>Commands or parameters with spaces should be enclosed in quotes - <i>"This is a single parameter"</i></p>
-    <p>If stdout is binary a <i>buffer</i> is returned - otherwise returns a <i>string</i>.</p>
-    <p>The blue status icon will be visible while the node is active.</p>
-    <p>If running a Python app you may need to use the <code>-u</code> parameter to stop the output being buffered.</p>
+    as the command runs, usually one line at a time. On completion it then returns an object
+    on the 3rd port. For example, a successful command should return <code>{ code: 0 }</code>.</p>
+    <p>Errors may return extra information on the 3rd port <code>msg.payload</code>, such as a <code>message</code> string,
+    <code>signal</code> string.</p>
+    <p>The command that is run is defined within the node, with an option to append <code>msg.payload</code> and a further set of parameters.</p>
+    <p>Commands or parameters with spaces should be enclosed in quotes - <code>"This is a single parameter"</code></p>
+    <p>The returned <code>payload</code> is usually a <i>string</i>, unless non-UTF8 characters are detected, in which
+    case it is a <i>buffer</i>.</p>
+    <p>The node&apos;s status icon and PID will be visible while the node is active. Changes to this can be read by the <code>Status</code> node.</p>
+    <h4>Killing processes</h4>
+    <p>Sending <code>msg.kill</code> will kill a single active process. <code>msg.kill</code> should be a string containing
+    the type of signal to be sent, for example, <code>SIGINT</code>, <code>SIGQUIT</code> or <code>SIGHUP</code>.
+    Defaults to <code>SIGTERM</code> if set to an empty string.</p>
+    <p>If the node has more than one process running then <code>msg.pid</code> must also be set with the value of the PID to be killed.</p>
+    <p>Tip: if running a Python app you may need to use the <code>-u</code> parameter to stop the output being buffered.</p>
 </script>
 
 <script type="text/javascript">
@@ -67,15 +114,17 @@
         category: 'advanced-function',
         color:"darksalmon",
         defaults: {
-            command: {value:"",required:true},
+            command: {value:""},
             addpay: {value:true},
             append: {value:""},
-            useSpawn: {value:""},
+            useSpawn: {value:"false"},
             timer: {value:""},
+            oldrc: {value:false},
             name: {value:""}
         },
         inputs:1,
         outputs:3,
+        outputLabels: ["stdout","stderr","return code"],
         icon: "arrow-in.png",
         align: "right",
         label: function() {
@@ -83,6 +132,11 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            if ($("#node-input-useSpawn").val() === null) {
+                $("#node-input-useSpawn").val(this.useSpawn.toString());
+            }
         }
     });
 </script>

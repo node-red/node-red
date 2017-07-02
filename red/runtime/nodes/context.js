@@ -27,6 +27,9 @@ function createContext(id,seed) {
     obj.set = function set(key, value) {
         util.setMessageProperty(data,key,value);
     }
+    obj.keys = function() {
+        return Object.keys(data);
+    }
     return obj;
 }
 

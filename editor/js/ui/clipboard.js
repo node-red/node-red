@@ -256,27 +256,58 @@ RED.clipboard = (function() {
             });
         dialog.dialog("option","title",RED._("clipboard.exportNodes")).dialog( "open" );
 
-        setTimeout(function() {
-            $("#clipboard-export").focus();
-            if (!document.queryCommandEnabled("copy")) {
-                $("#clipboard-dialog-cancel").hide();
-                $("#clipboard-dialog-close").show();
-            } else {
-                $("#clipboard-dialog-cancel").show();
-                $("#clipboard-dialog-copy").show();
-            }
-
-        },0);
+        $("#clipboard-export").focus();
+        if (!document.queryCommandSupported("copy")) {
+            $("#clipboard-dialog-cancel").hide();
+            $("#clipboard-dialog-close").show();
+        } else {
+            $("#clipboard-dialog-cancel").show();
+            $("#clipboard-dialog-copy").show();
+        }
     }
 
     function hideDropTarget() {
         $("#dropTarget").hide();
         RED.keyboard.remove("escape");
     }
-
+    function copyText(value,element,msg) {
+        var truncated = false;
+        if (typeof value !== "string" ) {
+            value = JSON.stringify(value, function(key,value) {
+                if (value !== null && typeof value === 'object') {
+                    if (value.__encoded__ && value.hasOwnProperty('data') && value.hasOwnProperty('length')) {
+                        truncated = value.data.length !== value.length;
+                        return value.data;
+                    }
+                }
+                return value;
+            });
+        }
+        if (truncated) {
+            msg += "_truncated";
+        }
+        $("#clipboard-hidden").val(value).select();
+        var result =  document.execCommand("copy");
+        if (result && element) {
+            var popover = RED.popover.create({
+                target: element,
+                direction: 'left',
+                size: 'small',
+                content: RED._(msg)
+            });
+            setTimeout(function() {
+                popover.close();
+            },1000);
+            popover.open();
+        }
+        return result;
+    }
     return {
         init: function() {
             setupDialogs();
+
+            $('<input type="text" id="clipboard-hidden">').appendTo("body");
+
             RED.events.on("view:selection-changed",function(selection) {
                 if (!selection.nodes) {
                     RED.menu.setDisabled("menu-item-export",true);
@@ -299,19 +330,19 @@ RED.clipboard = (function() {
             RED.events.on("search:close",function() { disabled = false; });
             RED.events.on("type-search:open",function() { disabled = true; });
             RED.events.on("type-search:close",function() { disabled = false; });
-            RED.events.on("palette-editor:open",function() { disabled = true; });
-            RED.events.on("palette-editor:close",function() { disabled = false; });
 
 
             $('#chart').on("dragenter",function(event) {
-                if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
+                if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1 ||
+                     $.inArray("Files",event.originalEvent.dataTransfer.types) != -1) {
                     $("#dropTarget").css({display:'table'});
                     RED.keyboard.add("*", "escape" ,hideDropTarget);
                 }
             });
 
             $('#dropTarget').on("dragover",function(event) {
-                if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
+                if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1 ||
+                     $.inArray("Files",event.originalEvent.dataTransfer.types) != -1) {
                     event.preventDefault();
                 }
             })
@@ -319,15 +350,30 @@ RED.clipboard = (function() {
                 hideDropTarget();
             })
             .on("drop",function(event) {
-                var data = event.originalEvent.dataTransfer.getData("text/plain");
+                if ($.inArray("text/plain",event.originalEvent.dataTransfer.types) != -1) {
+                    var data = event.originalEvent.dataTransfer.getData("text/plain");
+                    data = data.substring(data.indexOf('['),data.lastIndexOf(']')+1);
+                    RED.view.importNodes(data);
+                } else if ($.inArray("Files",event.originalEvent.dataTransfer.types) != -1) {
+                    var files = event.originalEvent.dataTransfer.files;
+                    if (files.length === 1) {
+                        var file = files[0];
+                        var reader = new FileReader();
+                        reader.onload = (function(theFile) {
+                            return function(e) {
+                                RED.view.importNodes(e.target.result);
+                            };
+                        })(file);
+                        reader.readAsText(file);
+                    }
+                }
                 hideDropTarget();
-                data = data.substring(data.indexOf('['),data.lastIndexOf(']')+1);
-                RED.view.importNodes(data);
                 event.preventDefault();
             });
 
         },
         import: importNodes,
-        export: exportNodes
+        export: exportNodes,
+        copyText: copyText
     }
 })();
