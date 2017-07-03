@@ -186,9 +186,19 @@ var localfilesystem = {
                 fs.statSync(fspath.join(process.env.NODE_RED_HOME,".config.json"));
                 settings.userDir = process.env.NODE_RED_HOME;
             } catch(err) {
-                settings.userDir = fspath.join(process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE || process.env.NODE_RED_HOME,".node-red");
-                if (!settings.readOnly) {
-                    promises.push(promiseDir(fspath.join(settings.userDir,"node_modules")));
+                try {
+                    // Consider compatibility for older versions
+                    if (process.env.HOMEPATH) {
+                        fs.statSync(fspath.join(process.env.HOMEPATH,".node-red",".config.json"));
+                        settings.userDir = fspath.join(process.env.HOMEPATH,".node-red");
+                    }
+                } catch(err) {
+                }
+                if (!settings.userDir) {
+                    settings.userDir = fspath.join(process.env.HOME || process.env.USERPROFILE || process.env.HOMEPATH || process.env.NODE_RED_HOME,".node-red");
+                    if (!settings.readOnly) {
+                        promises.push(promiseDir(fspath.join(settings.userDir,"node_modules")));
+                    }
                 }
             }
         }
