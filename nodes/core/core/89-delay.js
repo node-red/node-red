@@ -121,7 +121,6 @@ module.exports = function(RED) {
             node.on("close", function() { clearDelayList(); });
         }
         else if (node.pauseType === "rate") {
-            var olddepth = 0;
             node.reportDepth = function() {
                 if (!node.busy) {
                     node.busy = setTimeout(function() {
@@ -148,7 +147,6 @@ module.exports = function(RED) {
                             if (node.buffer.length === 0) {
                                 clearInterval(node.intervalID);
                                 node.intervalID = -1;
-                                olddepth = 0;
                             }
                             if (node.buffer.length > 0) {
                                 node.send(node.buffer.shift());
