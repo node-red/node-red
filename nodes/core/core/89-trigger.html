@@ -172,8 +172,7 @@
             }
             else if ((this.duration * 1) < 0) {
                 $("#node-then-type").val("loop");
-                this.duration = this.duration * -1;
-                $("#node-input-duration").val(this.duration);
+                $("#node-input-duration").val(this.duration*-1);
             } else {
                 $("#node-then-type").val("wait");
             }
@@ -193,6 +192,7 @@
             if ($("#node-then-type").val() == "loop") {
                 $("#node-input-duration").val($("#node-input-duration").val() * -1);
             }
+
 
         }
     });

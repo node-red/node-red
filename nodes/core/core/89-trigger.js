@@ -47,7 +47,10 @@ module.exports = function(RED) {
         this.extend = n.extend || "false";
         this.units = n.units || "ms";
         this.reset = n.reset || '';
-        this.duration = n.duration || 250;
+        this.duration = parseInt(n.duration);
+        if (isNaN(this.duration)) {
+            this.duration = 250;
+        }
         if (this.duration < 0) {
             this.loop = true;
             this.duration = this.duration * -1;
