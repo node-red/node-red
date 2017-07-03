@@ -43,7 +43,7 @@ describe('LocalFileSystem', function() {
     });
 
 
-    it('should set userDir to NRH is .config.json present',function(done) {
+    it('should set userDir to NRH if .config.json presents',function(done) {
         var oldNRH = process.env.NODE_RED_HOME;
         process.env.NODE_RED_HOME = path.join(userDir,"NRH");
         fs.mkdirSync(process.env.NODE_RED_HOME);
@@ -65,11 +65,39 @@ describe('LocalFileSystem', function() {
         });
     });
 
+    it('should set userDir to HOMEPATH/.node-red if .config.json presents',function(done) {
+        var oldNRH = process.env.NODE_RED_HOME;
+        process.env.NODE_RED_HOME = path.join(userDir,"NRH");
+        var oldHOMEPATH = process.env.HOMEPATH;
+        process.env.HOMEPATH = path.join(userDir,"HOMEPATH");
+        fs.mkdirSync(process.env.HOMEPATH);
+        fs.mkdirSync(path.join(process.env.HOMEPATH,".node-red"));
+        fs.writeFileSync(path.join(process.env.HOMEPATH,".node-red",".config.json"),"{}","utf8");
+        var settings = {};
+        localfilesystem.init(settings).then(function() {
+            try {
+                fs.existsSync(path.join(process.env.HOMEPATH,".node-red","lib")).should.be.true();
+                fs.existsSync(path.join(process.env.HOMEPATH,".node-red","lib",'flows')).should.be.true();
+                settings.userDir.should.equal(path.join(process.env.HOMEPATH,".node-red"));
+                done();
+            } catch(err) {
+                done(err);
+            } finally {
+                process.env.NODE_RED_HOME = oldNRH;
+                process.env.NODE_HOMEPATH = oldHOMEPATH;
+            }
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+
     it('should set userDir to HOME/.node-red',function(done) {
         var oldNRH = process.env.NODE_RED_HOME;
         process.env.NODE_RED_HOME = path.join(userDir,"NRH");
         var oldHOME = process.env.HOME;
         process.env.HOME = path.join(userDir,"HOME");
+        var oldHOMEPATH = process.env.HOMEPATH;
+        process.env.HOMEPATH = path.join(userDir,"HOMEPATH");
 
         fs.mkdirSync(process.env.HOME);
         var settings = {};
@@ -84,6 +112,38 @@ describe('LocalFileSystem', function() {
             } finally {
                 process.env.NODE_RED_HOME = oldNRH;
                 process.env.HOME = oldHOME;
+                process.env.HOMEPATH = oldHOMEPATH;
+            }
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+
+    it('should set userDir to USERPROFILE/.node-red',function(done) {
+        var oldNRH = process.env.NODE_RED_HOME;
+        process.env.NODE_RED_HOME = "";
+        var oldHOME = process.env.HOME;
+        process.env.HOME = "";
+        var oldHOMEPATH = process.env.HOMEPATH;
+        process.env.HOMEPATH = path.join(userDir,"HOMEPATH");
+        var oldUSERPROFILE = process.env.USERPROFILE;
+        process.env.USERPROFILE = path.join(userDir,"USERPROFILE");
+
+        fs.mkdirSync(process.env.USERPROFILE);
+        var settings = {};
+        localfilesystem.init(settings).then(function() {
+            try {
+                fs.existsSync(path.join(process.env.USERPROFILE,".node-red","lib")).should.be.true();
+                fs.existsSync(path.join(process.env.USERPROFILE,".node-red","lib",'flows')).should.be.true();
+                settings.userDir.should.equal(path.join(process.env.USERPROFILE,".node-red"));
+                done();
+            } catch(err) {
+                done(err);
+            } finally {
+                process.env.NODE_RED_HOME = oldNRH;
+                process.env.HOME = oldHOME;
+                process.env.HOMEPATH = oldHOMEPATH;
+                process.env.USERPROFILE = oldUSERPROFILE;
             }
         }).otherwise(function(err) {
             done(err);
