@@ -141,11 +141,17 @@ module.exports = function(RED) {
                             if (value.length > debuglength) {
                                 value = value.substring(0,debuglength)+"...";
                             }
-                        } else if (value !== null && typeof value === 'object' && value.type === "Buffer") {
-                            value.__encoded__ = true;
-                            value.length = value.data.length;
-                            if (value.length > debuglength) {
-                                value.data = value.data.slice(0,debuglength);
+                        } else if (value && value.constructor) {
+                            if (value.constructor.name === "Buffer") {
+                                value.__encoded__ = true;
+                                value.length = value.data.length;
+                                if (value.length > debuglength) {
+                                    value.data = value.data.slice(0,debuglength);
+                                }
+                            } else if (value.constructor.name === "ServerResponse") {
+                                value = "[internal]"
+                            } else if (value.constructor.name === "Socket") {
+                                value = "[internal]"
                             }
                         }
                         return value;
