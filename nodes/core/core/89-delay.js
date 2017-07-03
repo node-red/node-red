@@ -122,28 +122,38 @@ module.exports = function(RED) {
         }
         else if (node.pauseType === "rate") {
             var olddepth = 0;
-            node.busy = setInterval(function() {
-                if (node.buffer.length > 0) {
-                    node.status({text:node.buffer.length});
+            node.reportDepth = function() {
+                if (!node.busy) {
+                    node.busy = setTimeout(function() {
+                        if (node.buffer.length > 0) {
+                            node.status({text:node.buffer.length});
+                        } else {
+                            node.status({});
+                        }
+                        node.busy = null;
+                    },500);
                 }
-            },333);
+            }
             node.on("input", function(msg) {
                 if (!node.drop) {
                     if ( node.intervalID !== -1) {
                         node.buffer.push(msg);
+                        node.reportDepth();
                     }
                     else {
                         node.send(msg);
+                        node.reportDepth();
+
                         node.intervalID = setInterval(function() {
                             if (node.buffer.length === 0) {
                                 clearInterval(node.intervalID);
                                 node.intervalID = -1;
-                                node.status({});
                                 olddepth = 0;
                             }
                             if (node.buffer.length > 0) {
                                 node.send(node.buffer.shift());
                             }
+                            node.reportDepth();
                         },node.rate);
                     }
                 }
@@ -169,7 +179,7 @@ module.exports = function(RED) {
             });
             node.on("close", function() {
                 clearInterval(node.intervalID);
-                clearInterval(node.busy);
+                clearTimeout(node.busy);
                 node.buffer = [];
                 node.status({});
             });
