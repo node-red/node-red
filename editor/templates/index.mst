@@ -188,7 +188,10 @@
                 </div>
                 <div id="node-input-expression-tab-test" class="node-input-expression-tab-content hide">
                     <div>
-                        <span style="display: inline-block; width: calc(50% - 5px);" data-i18n="expressionEditor.data"></span>
+                        <span style="display: inline-block; width: calc(50% - 5px);">
+                            <span data-i18n="expressionEditor.data"></span>
+                            <button style="float: right; margin-right: 5px;" id="node-input-example-reformat" class="editor-button editor-button-small"><span data-i18n="jsonEditor.format"></span></button>
+                        </span>
                         <span style="display: inline-block; width: calc(50% - 5px);" data-i18n="expressionEditor.result"></span>
                     </div>
                     <div style="display: inline-block; width: calc(50% - 5px);" class="node-text-editor" id="node-input-expression-test-data"></div>
@@ -200,7 +203,7 @@
 </script>
 <script type="text/x-red" data-template-name="_json">
     <div class="form-row" style="margin-bottom: 3px; text-align: right;">
-        <button id="node-input-expression-reformat" class="editor-button editor-button-small"><span data-i18n="jsonEditor.format"></span></button>
+        <button id="node-input-json-reformat" class="editor-button editor-button-small"><span data-i18n="jsonEditor.format"></span></button>
     </div>
     <div class="form-row node-text-editor-row">
         <div style="height: 200px;min-height: 150px;" class="node-text-editor" id="node-input-json"></div>

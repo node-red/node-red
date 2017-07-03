@@ -1943,6 +1943,17 @@ RED.editor = (function() {
                     }
                 });
 
+                $("#node-input-example-reformat").click(function(evt) {
+                    evt.preventDefault();
+                    var v = testDataEditor.getValue()||"";
+                    try {
+                        v = JSON.stringify(JSON.parse(v),null,4);
+                    } catch(err) {
+                        // TODO: do an optimistic auto-format
+                    }
+                    testDataEditor.getSession().setValue(v||"",-1);
+                });
+
                 testExpression();
             },
             close: function() {
@@ -2009,7 +2020,7 @@ RED.editor = (function() {
                     mode:"ace/mode/json"
                 });
                 expressionEditor.getSession().setValue(value||"",-1);
-                $("#node-input-expression-reformat").click(function(evt) {
+                $("#node-input-json-reformat").click(function(evt) {
                     evt.preventDefault();
                     var v = expressionEditor.getValue()||"";
                     try {
