@@ -98,11 +98,11 @@ module.exports = {
         if (theme.page) {
 
             themeContext.page.css = serveFilesFromTheme(
-                themeContext.page.css,
+                theme.page.css,
                 themeApp,
                 "/css/")
             themeContext.page.scripts = serveFilesFromTheme(
-                themeContext.page.scripts,
+                theme.page.scripts,
                 themeApp,
                 "/scripts/")
 

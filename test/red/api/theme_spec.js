@@ -55,7 +55,7 @@ describe("theme handler", function() {
                 page: {
                     title: "Test Page Title",
                     favicon: "/absolute/path/to/theme/icon",
-                    css: "/absolute/path/to/custom/css/file",
+                    css: "/absolute/path/to/custom/css/file.css",
                     scripts: "/absolute/path/to/script.js"
                 },
                 header: {
@@ -92,14 +92,19 @@ describe("theme handler", function() {
         }});
 
         theme.app();
-        
+
         var context = theme.context();
         context.should.have.a.property("page");
         context.page.should.have.a.property("title","Test Page Title");
         context.should.have.a.property("header");
         context.header.should.have.a.property("title","Test Header Title");
         context.page.should.have.a.property("css");
+        context.page.css.should.have.lengthOf(1);
+        context.page.css[0].should.eql('theme/css/file.css');
+
         context.page.should.have.a.property("scripts");
+        context.page.scripts.should.have.lengthOf(1);
+        context.page.scripts[0].should.eql('theme/scripts/script.js');
 
         var settings = theme.settings();
         settings.should.have.a.property("deployButton");
