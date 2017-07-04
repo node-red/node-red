@@ -40,7 +40,7 @@
     <h3>Details</h3>
     <p>Each message payload will be added to the end of the file, optionally appending
     a newline (\n) character between each one.</p>
-    <p>If <code>msg.filename</code> is used the file will be closed after every write. 
+    <p>If <code>msg.filename</code> is used the file will be closed after every write.
     For best performance use a fixed filename.</p>
     <p>It can be configured to overwrite the entire file rather than append. For example,
     when writing binary data to a file, such as an image, this option should be used
@@ -63,6 +63,11 @@
         </select>
     </div>
     <div class="form-row">
+        <label></label>
+        <input type="checkbox" id="node-input-sendError" style="width:auto">
+        <label style="width:auto; margin-bottom:0; vertical-align: middle;" for="node-input-sendError" data-i18n="file.label.sendError"></label>
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
@@ -82,6 +87,12 @@
         <dd>The contents of the file as either a string or binary buffer.</dd>
         <dt class="optional">filename <span class="property-type">string</span></dt>
         <dd>If not configured in the node, this optional property sets the name of the file to be read.</dd>
+        <dt class="optional">error <span class="property-type">object</span></dt>
+        <dd><i>deprecated</i>: If enabled in the node, when the node hits an error
+            reading the file, it will send a message with no <code>payload</code>
+            and this <code>error</code> property set to the error details. This
+            mode of behaviour is deprecated and not enabled by default for new
+            instances of the node. See below for more information.</dd>
     </dl>
     <h3>Details</h3>
     <p>The filename should be an absolute path, otherwise it will be relative to
@@ -89,6 +100,13 @@
     <p>On Windows, path separators may need to be escaped, for example: <code>\\Users\\myUser</code>.</p>
     <p>Optionally, a text file can be split into lines, outputting one message per line, or a binary file
     file into smaller buffer chunks, the chunk size is operating system dependant, but typically 64k (linux/mac) or 41k (Windows).</p>
+    <h4>Legacy error handling</h4>
+    <p>Before Node-RED 0.17, if this node hit an error whilst reading the file, it would
+    send a message with no <code>msg.payload</code> and <code>msg.error</code> set to the
+    details of the error. This is a deprecated mode of behaviour for the node that new
+    instances will not do. If required, this mode can be re-enabled within the node
+    configuration.</p>
+    <p>Errors should be caught and handled using a Catch node.</p>
 </script>
 
 <script type="text/javascript">
@@ -130,7 +148,8 @@
             name: {value:""},
             filename: {value:""},
             format: {value:"utf8"},
-            chunk: {value:false}
+            chunk: {value:false},
+            sendError: {value: false}
         },
         color:"BurlyWood",
         inputs:1,
@@ -146,6 +165,9 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+            if (this.sendError === undefined) {
+                $("#node-input-sendError").prop("checked",true);
+            }
             $("#node-input-format").on("change",function() {
                 if ($("#node-input-format").val() === "utf8") {
                     $("#buffer-input-type").hide();

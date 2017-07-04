@@ -762,6 +762,7 @@
             "breakchunks": "Break into chunks",
             "breaklines": "Break into lines",
             "filelabel": "file",
+            "sendError": "Send message on error (legacy mode)",
             "deletelabel": "delete __file__"
         },
         "action": {

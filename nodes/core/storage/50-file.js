@@ -98,6 +98,11 @@ module.exports = function(RED) {
         this.filename = n.filename;
         this.format = n.format;
         this.chunk = false;
+        if (n.sendError === undefined) {
+            this.sendError = true;
+        } else {
+            this.sendError = n.sendError;
+        }
         if (this.format === "lines") { this.chunk = true; }
         if (this.format === "stream") { this.chunk = true; }
         var node = this;
@@ -173,10 +178,12 @@ module.exports = function(RED) {
                     })
                     .on('error', function(err) {
                         node.error(err, msg);
-                        var sendMessage = RED.util.cloneMessage(msg);
-                        delete sendMessage.payload;
-                        sendMessage.error = err;
-                        node.send(sendMessage);
+                        if (node.sendError) {
+                            var sendMessage = RED.util.cloneMessage(msg);
+                            delete sendMessage.payload;
+                            sendMessage.error = err;
+                            node.send(sendMessage);
+                        }
                     })
                     .on('end', function() {
                         if (node.chunk === false) {
