@@ -599,6 +599,9 @@ function getNodeIconPath(module,icon) {
                 }
             }
         }
+        if (module !== "node-red") {
+            return getNodeIconPath("node-red", icon);
+        }
 
         return defaultIcon;
     }

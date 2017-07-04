@@ -497,6 +497,12 @@ describe("red/nodes/registry/registry",function() {
             var iconPath = typeRegistry.getNodeIconPath('test-module','test_icon.png');
             iconPath.should.eql(testIcon);
         });
+
+        it('returns the debug icon when getting an unknown module', function() {
+            var debugIcon = path.resolve(__dirname+'/../../../../../public/icons/debug.png');
+            var iconPath = typeRegistry.getNodeIconPath('unknown-module', 'debug.png');
+            iconPath.should.eql(debugIcon);
+        });
     });
 
 });
