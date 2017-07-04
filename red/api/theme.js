@@ -67,8 +67,8 @@ function serveFilesFromTheme(themeValue, themeApp, directory) {
             array = [array];
         }
 
-        for (i=0;i<array.length;i++) {
-            url = serveFile(themeApp,directory,array[i]);
+        for (var i=0;i<array.length;i++) {
+            var url = serveFile(themeApp,directory,array[i]);
             if (url) {
                 result.push(url);
             }

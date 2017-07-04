@@ -69,10 +69,6 @@ describe("theme handler", function() {
                     icon: "/absolute/path/to/deploy/button/image" // or null to remove image
                 },
 
-                customScripts: [
-                    "/absolute/path/to/script.js"
-                ],
-
                 menu: { // Hide unwanted menu items by id. see editor/js/main.js:loadEditor for complete list
                     "menu-item-import-library": false,
                     "menu-item-export-library": false,
