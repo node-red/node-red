@@ -29,9 +29,7 @@ module.exports = function(RED) {
                     node.log("\n"+util.inspect(msg, {colors:useColors, depth:10}));
                 }
                 if (this.active) {
-                    setTimeout(function() {
-                        sendDebug({id:node.id,name:node.name,topic:msg.topic,msg:msg,_path:msg._path});
-                    },0);
+                    sendDebug({id:node.id,name:node.name,topic:msg.topic,msg:msg,_path:msg._path});
                 }
             } else {
             // debug user defined msg property
@@ -55,9 +53,7 @@ module.exports = function(RED) {
                     }
                 }
                 if (this.active) {
-                    setTimeout(function() {
-                        sendDebug({id:node.id,z:node.z,name:node.name,topic:msg.topic,property:property,msg:output,_path:msg._path});
-                    },0);
+                    sendDebug({id:node.id,z:node.z,name:node.name,topic:msg.topic,property:property,msg:output,_path:msg._path});
                 }
             }
         });
@@ -188,9 +184,7 @@ module.exports = function(RED) {
     DebugNode.logHandler = new events.EventEmitter();
     DebugNode.logHandler.on("log",function(msg) {
         if (msg.level === RED.log.WARN || msg.level === RED.log.ERROR) {
-            setTimeout(function() {
-                sendDebug(msg);
-            },0);
+            sendDebug(msg);
         }
     });
     RED.log.addHandler(DebugNode.logHandler);
