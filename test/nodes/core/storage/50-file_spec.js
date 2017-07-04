@@ -495,21 +495,31 @@ describe('file Nodes', function() {
         });
 
         it('should handle a file read error', function(done) {
-            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":"badfile", "format":""}];
+            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":"badfile", "format":"", wires:[["n2"]]},
+                        {id:"n2", type:"helper"}
+                       ];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileInNode1");
-                setTimeout(function() {
-                    var logEvents = helper.log().args.filter(function(evt) {
-                        return evt[0].type == "file in";
-                    });
-                    logEvents.should.have.length(1);
-                    logEvents[0][0].should.have.a.property('msg');
-                    logEvents[0][0].msg.toString().should.startWith("Error");
-                    done();
-                },wait);
+                var n2 = helper.getNode("n2");
+
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.not.have.property('payload');
+                        msg.should.have.property("error");
+                        msg.error.should.have.property("code","ENOENT");
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == "file in";
+                        });
+                        logEvents.should.have.length(1);
+                        logEvents[0][0].should.have.a.property('msg');
+                        logEvents[0][0].msg.toString().should.startWith("Error");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
                 n1.receive({payload:""});
             });
         });
-
     });
 });

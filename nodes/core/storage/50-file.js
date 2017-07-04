@@ -172,7 +172,11 @@ module.exports = function(RED) {
                         }
                     })
                     .on('error', function(err) {
-                        node.error('Error while reading file.', msg);
+                        node.error(err, msg);
+                        var sendMessage = RED.util.cloneMessage(msg);
+                        delete sendMessage.payload;
+                        sendMessage.error = err;
+                        node.send(sendMessage);
                     })
                     .on('end', function() {
                         if (node.chunk === false) {
