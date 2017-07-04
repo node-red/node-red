@@ -482,7 +482,7 @@ RED.view = (function() {
                 try {
                     nn._def.onadd.call(nn);
                 } catch(err) {
-                    console.log("onadd:",err);
+                    console.log("Definition error: "+nn.type+".onadd:",err);
                 }
             }
         } else {
@@ -2581,7 +2581,7 @@ RED.view = (function() {
                             try {
                                 node.n._def.onadd.call(node.n);
                             } catch(err) {
-                                console.log("onadd:",err);
+                                console.log("Definition error: "+node.n.type+".onadd:",err);
                             }
                         }
 

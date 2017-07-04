@@ -251,7 +251,7 @@
     function onAdd() {
         for (var i=0;i<this.links.length;i++) {
             var n = RED.nodes.node(this.links[i]);
-            if (n.links.indexOf(this.id) === -1) {
+            if (n && n.links.indexOf(this.id) === -1) {
                 n.links.push(this.id);
             }
         }
