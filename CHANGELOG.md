@@ -1,3 +1,15 @@
+#### 0.17.3: Maintenance Release
+
+ - Fix flow library in menu to support period characters as flow name (#1320)
+ - editorTheme not setting custom css/scripts properly
+ - Fix missing icons for some nodes (#1321)
+ - Add reformat button to JSONata test data editor
+ - Update delay node status without spawning unnecessary intervals
+ - Avoid stringify ServerResponse and Socket in Debug node Fixes #1311
+ - Fix creating userDir other than system drive on Windows (#1317)
+ - Trigger node not handling a duration of 0 as block mode Fixes #1316
+ - Unable to config GPIO Pin 13 Fixes #1314
+
 #### 0.17.2: Maintenance Release
 
  - Fix GPIO node labels
