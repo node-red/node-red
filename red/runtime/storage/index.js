@@ -196,7 +196,7 @@ function listFlows(path) {
                     if (r.value.fn) {
                         var name = r.value.name;
                         if (!name) {
-                            name = r.value.fn.split(".")[0];
+                            name = r.value.fn.replace(/\.json$/, "");
                         }
                         result.f = result.f || [];
                         result.f.push(name);
