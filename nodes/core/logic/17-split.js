@@ -457,7 +457,7 @@ module.exports = function(RED) {
                 group.msg = msg;
                 var tcnt = group.targetCount;
                 if (msg.hasOwnProperty("parts")) { tcnt = group.targetCount || msg.parts.count; }
-                if (group.currentCount >= tcnt || msg.hasOwnProperty('complete')) {
+               if ((tcnt > 0 && group.currentCount >= tcnt) || msg.hasOwnProperty('complete')) {
                     completeSend(partId);
                 }
             } catch(err) {

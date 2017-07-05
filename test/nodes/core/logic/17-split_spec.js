@@ -426,7 +426,7 @@ describe('JOIN node', function() {
     });
 
     it('should accumulate a merged object', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",mode:"custom",accumulate:true},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",mode:"custom",accumulate:true, count:1},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -455,7 +455,7 @@ describe('JOIN node', function() {
     });
 
     it('should be able to reset an accumulation', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",accumulate:true,mode:"custom"},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",accumulate:true,mode:"custom", count:1},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -519,7 +519,7 @@ describe('JOIN node', function() {
     });
 
     it('should join strings with a specifed character after a timeout', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"string", timeout:0.05, count:10, joiner:",",mode:"custom"},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"string", timeout:0.05, count:"", joiner:",",mode:"custom"},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -539,7 +539,7 @@ describe('JOIN node', function() {
     });
 
     it('should join strings with a specifed character and complete when told to', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"string", timeout:5, count:100, joiner:"\n",mode:"custom"},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"string", timeout:5, count:0, joiner:"\n",mode:"custom"},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
