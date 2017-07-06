@@ -127,7 +127,9 @@
         "linkIn": "link in",
         "linkOut": "link out",
         "label": {
-            "event": "Event name"
+            "event": "Event name",
+            "sortByFlow":"Sort by flow",
+            "sortByLabel": "Sort by name"
         }
     },
     "tls": {
